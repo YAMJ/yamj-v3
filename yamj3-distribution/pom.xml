@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <prerequisites>
+        <maven>3.0.3</maven>
+    </prerequisites>
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.moviejukebox</groupId>
+        <artifactId>moviejukebox3</artifactId>
+        <version>3.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>yamj3-distribution</artifactId>
+    <name>YAMJ3 Distribution</name>
+    <packaging>pom</packaging>
+    <description>Distribution module for YAMJ3</description>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>create-version-txt</id>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <target>
+                                <property name="version_file" value="${project.build.directory}/version.txt" />
+                                <property name="header_line" value="Yet Another Movie Jukebox${line.separator}" />
+                                <property name="build_date_line" value="Build Date: ${timestamp}${line.separator}" />
+                                <property name="version_line" value="Version: ${project.version}${line.separator}" />
+                                <property name="revision_line" value="Revision: r${buildNumber}${line.separator}" />
+                                <echo>Writing version file: ${version_file}</echo>
+                                <echo file="${version_file}" append="false">${header_line}</echo>
+                                <echo file="${version_file}" append="true">${build_date_line}</echo>
+                                <echo file="${version_file}" append="true">${version_line}</echo>
+                                <echo file="${version_file}" append="true">${revision_line}</echo>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeScope>compile</includeScope>
+                            <outputDirectory>${project.build.directory}/dependencies</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>distro-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/bin.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+        <finalName>yamj3-${project.version}-r${buildNumber}</finalName>
+    </build>
+</project>
