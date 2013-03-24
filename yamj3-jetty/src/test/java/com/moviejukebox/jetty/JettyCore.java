@@ -18,7 +18,7 @@ public class JettyCore {
 
     private static WebAppContext createWebAppContext() {
         final WebAppContext context = new WebAppContext();
-        context.setContextPath("/");
+        context.setContextPath("/yamj3");
         context.setBaseResource(new ResourceCollection(new String[] { "./../yamj3-core/src/main/webapp/" }));
         return context;
     }
