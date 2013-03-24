@@ -27,4 +27,9 @@
         <property name="serviceInterface" value="com.moviejukebox.common.remote.service.PingService"/>
     </bean>
 
+    <bean id="fileImportService" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+        <property name="serviceUrl" value="http://${yamj3.core.host}:${yamj3.core.port}/yamj3/FileImportService"/>
+        <property name="serviceInterface" value="com.moviejukebox.common.remote.service.FileImportService"/>
+    </bean>
+
 </beans>

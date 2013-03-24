@@ -25,11 +25,11 @@ public abstract class AbstractAuditable implements Auditable, Identifiable {
 	private long id;
 
 	@Temporal(value = TemporalType.TIMESTAMP)
-	@Column(name = "createTimestamp", nullable = false, updatable = false)
+	@Column(name = "create_timestamp", nullable = false, updatable = false)
 	private Date createTimestamp;
 
 	@Temporal(value = TemporalType.TIMESTAMP)
-	@Column(name = "updateTimestamp")
+	@Column(name = "update_timestamp")
 	private Date updateTimestamp;
 
     @Override
@@ -46,6 +46,8 @@ public abstract class AbstractAuditable implements Auditable, Identifiable {
 		return (this.id <= 0);
 	}
 
+	// GETTER and SETTER
+	
 	public Date getCreateTimestamp() {
 		return this.createTimestamp;
 	}

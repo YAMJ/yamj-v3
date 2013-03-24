@@ -2,7 +2,6 @@ package com.moviejukebox.core.hibernate;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.type.Type;
 

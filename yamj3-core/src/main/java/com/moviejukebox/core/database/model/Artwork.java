@@ -24,8 +24,8 @@ public class Artwork extends AbstractIdentifiable implements Serializable {
     private static final long serialVersionUID = -981494909436217076L;
 
     @Type(type = "artworkType")
-    @Column(name = "type", nullable = false)
-    private ArtworkType type;
+    @Column(name = "artwork_type", nullable = false)
+    private ArtworkType artworkType;
     
     @Column(name = "filename", nullable = false)
     private String  filename;
@@ -33,15 +33,14 @@ public class Artwork extends AbstractIdentifiable implements Serializable {
     @Column(name = "url")
     private String  url;
 
-    @Column(name = "attachmentId")
-    private short attachmentId = -1;
-
-    public ArtworkType getType() {
-        return type;
+    // GETTER and SETTER
+    
+    public ArtworkType getArtworkType() {
+        return artworkType;
     }
 
-    public void setType(ArtworkType type) {
-        this.type = type;
+    public void setArtworkType(ArtworkType artworkType) {
+        this.artworkType = artworkType;
     }
 
     public String getFilename() {
@@ -58,13 +57,5 @@ public class Artwork extends AbstractIdentifiable implements Serializable {
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public short getAttachmentId() {
-        return attachmentId;
-    }
-
-    public void setAttachmentId(short attachmentId) {
-        this.attachmentId = attachmentId;
     }
 }

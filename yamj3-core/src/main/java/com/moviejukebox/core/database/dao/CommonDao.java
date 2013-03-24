@@ -1,7 +1,11 @@
 package com.moviejukebox.core.database.dao;
 
+import com.moviejukebox.core.database.model.BoxedSet;
+import com.moviejukebox.core.database.model.Certification;
+import com.moviejukebox.core.database.model.Genre;
+import com.moviejukebox.core.database.model.Studio;
+import com.moviejukebox.core.hibernate.ExtendedHibernateDaoSupport;
 import java.sql.SQLException;
-
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -9,11 +13,6 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.stereotype.Service;
-
-import com.moviejukebox.core.database.model.Certification;
-import com.moviejukebox.core.database.model.Genre;
-import com.moviejukebox.core.database.model.SetDescriptor;
-import com.moviejukebox.core.hibernate.ExtendedHibernateDaoSupport;
 
 @Service("commonDao")
 public class CommonDao extends ExtendedHibernateDaoSupport {
@@ -44,15 +43,28 @@ public class CommonDao extends ExtendedHibernateDaoSupport {
         });
     }
 
-    public SetDescriptor getSetDescriptor(final String name) {
-        return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<SetDescriptor>() {
+    public BoxedSet getBoxedSet(final String name) {
+        return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<BoxedSet>() {
             @Override
-            public SetDescriptor doInHibernate(Session session) throws HibernateException, SQLException {
-                Criteria criteria = session.createCriteria(SetDescriptor.class);
+            public BoxedSet doInHibernate(Session session) throws HibernateException, SQLException {
+                Criteria criteria = session.createCriteria(BoxedSet.class);
                 criteria.add(Restrictions.naturalId().set("name", name));
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
-                return (SetDescriptor)criteria.uniqueResult();
+                return (BoxedSet)criteria.uniqueResult();
+            }
+        });
+    }
+
+    public Studio getStudio(final String name) {
+        return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<Studio>() {
+            @Override
+            public Studio doInHibernate(Session session) throws HibernateException, SQLException {
+                Criteria criteria = session.createCriteria(Studio.class);
+                criteria.add(Restrictions.naturalId().set("name", name));
+                criteria.setCacheable(true);
+                criteria.setCacheMode(CacheMode.NORMAL);
+                return (Studio)criteria.uniqueResult();
             }
         });
     }

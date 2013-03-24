@@ -1,8 +1,7 @@
 package com.moviejukebox.core.remote.service;
 
-import org.springframework.stereotype.Service;
-
 import com.moviejukebox.common.remote.service.PingService;
+import org.springframework.stereotype.Service;
 
 @Service("pingService")
 public class PingServiceImpl implements PingService {

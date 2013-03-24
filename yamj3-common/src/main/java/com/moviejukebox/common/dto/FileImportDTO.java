@@ -9,16 +9,17 @@ public class FileImportDTO implements Serializable {
 
     private static final long serialVersionUID = 2515787873612820679L;
 
-    private String playerPath;
+    private String scanPath;
     private String filePath;
-    private long lasModificationTimestamp;
+    private long fileSize;
+    private long fileDate;
 
-    public String getPlayerPath() {
-        return playerPath;
+    public String getScanPath() {
+        return scanPath;
     }
 
-    public void setPlayerPath(String playerPath) {
-        this.playerPath = playerPath;
+    public void setScanPath(String scanPath) {
+        this.scanPath = scanPath;
     }
 
     public String getFilePath() {
@@ -29,11 +30,19 @@ public class FileImportDTO implements Serializable {
         this.filePath = filePath;
     }
 
-    public long getLasModificationTimestamp() {
-        return lasModificationTimestamp;
+    public long getFileSize() {
+        return fileSize;
     }
 
-    public void setLasModificationTimestamp(long lasModificationTimestamp) {
-        this.lasModificationTimestamp = lasModificationTimestamp;
+    public void setFileSize(long fileSize) {
+        this.fileSize = fileSize;
+    }
+
+    public long getFileDate() {
+        return fileDate;
+    }
+
+    public void setFileDate(long fileDate) {
+        this.fileDate = fileDate;
     }
 }

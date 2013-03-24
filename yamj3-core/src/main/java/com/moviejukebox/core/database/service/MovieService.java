@@ -1,20 +1,9 @@
 package com.moviejukebox.core.database.service;
 
-import java.util.HashSet;
-
-import javax.annotation.Resource;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.moviejukebox.core.database.dao.CommonDao;
 import com.moviejukebox.core.database.dao.MovieDao;
-import com.moviejukebox.core.database.model.BoxedSet;
-import com.moviejukebox.core.database.model.Certification;
-import com.moviejukebox.core.database.model.Genre;
-import com.moviejukebox.core.database.model.Movie;
-import com.moviejukebox.core.database.model.SetDescriptor;
+import javax.annotation.Resource;
+import org.springframework.stereotype.Service;
 
 @Service("movieService")
 public class MovieService {
@@ -25,6 +14,7 @@ public class MovieService {
     @Resource(name = "commonDao")
     private CommonDao commonDao;
 
+    /*
     @Transactional(propagation = Propagation.REQUIRED)
     public void storeMovie(Movie movie) {
         
@@ -53,7 +43,7 @@ public class MovieService {
 
         // store set descriptors
         for (BoxedSet boxedSet : movie.getBoxedSets()) {
-            SetDescriptor setDescriptor = commonDao.getSetDescriptor(boxedSet.getSetDescriptor().getName());
+            VideoSet setDescriptor = commonDao.getSetDescriptor(boxedSet.getSetDescriptor().getName());
             if (setDescriptor != null) {
                 boxedSet.setSetDescriptor(setDescriptor);
             } else {
@@ -70,4 +60,5 @@ public class MovieService {
         // delete the movie from the database
         movieDao.deleteEntity(movie);
     }
+    */
 }

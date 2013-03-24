@@ -1,11 +1,9 @@
 package com.moviejukebox.core.database.model;
 
 import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NaturalId;
 
@@ -19,6 +17,8 @@ public class Genre extends AbstractIdentifiable implements Serializable {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
     
+    // GETTER and SETTER
+    
     public String getName() {
         return name;
     }
@@ -26,6 +26,8 @@ public class Genre extends AbstractIdentifiable implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
+
+    // EQUALITY CHECKS
 
     @Override
     public int hashCode() {
