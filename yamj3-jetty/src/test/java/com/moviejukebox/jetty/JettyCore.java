@@ -11,6 +11,7 @@ public class JettyCore {
         BasicConfigurator.configure();
         final Server server = new Server(8888);
         server.setHandler(createWebAppContext());
+        
         server.start();
         server.join();
     }

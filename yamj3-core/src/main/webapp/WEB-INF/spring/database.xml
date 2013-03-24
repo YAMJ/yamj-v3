@@ -8,19 +8,12 @@
      http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
      
     <bean  id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-        <property name="driverClassName" value="org.sqlite.JDBC"/>
-        <property name="url" value="jdbc:sqlite:target/movies.db" />
+        <property name="driverClassName" value="${yamj3.database.driver}"/>
+        <property name="url" value="${yamj3.database.url}" />
         <property name="initialSize" value="2" />
         <property name="maxActive" value="20" />
         <property name="maxIdle" value="5" />
         <property name="poolPreparedStatements" value="true" />
-        <!--
-        <property name = "connectionInitSqls">
-            <list>
-                <value>**PRAGMA foreign_keys = ON**</value>
-            </list>
-        </property>
-        -->
     </bean>
 
     <bean id="auditInterceptor" class="com.moviejukebox.core.hibernate.AuditInterceptor"/>
@@ -31,10 +24,10 @@
         <property name="packagesToScan" value="com.moviejukebox.core.database.model"/>
         <property name="hibernateProperties">
             <props>
-                <prop key="hibernate.dialect">com.moviejukebox.core.hibernate.SQLiteDialect</prop>
+                <prop key="hibernate.dialect">${yamj3.database.dialect}</prop>
                 <prop key="hibernate.show_sql">true</prop>
                 <prop key="hibernate.generate_statistics">false</prop>
-                <prop key="hibernate.hbm2ddl.auto">create</prop>
+                <prop key="hibernate.hbm2ddl.auto">${yamj3.database.auto}</prop>
                 <prop key="hibernate.connection.isolation">4</prop>
                 <prop key="hibernate.use_sql_comments">true</prop>
                 <prop key="hibernate.cache.use_query_cache">false</prop>

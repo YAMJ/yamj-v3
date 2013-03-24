@@ -13,6 +13,16 @@
     <context:annotation-config />
     <context:component-scan base-package="com.moviejukebox"/>
 
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:/yamj3.core.properties</value>
+                <value>file:${yamj3.home}/conf/yamj3.core.properties</value>
+            </list>
+        </property>
+        <property name="ignoreResourceNotFound" value="true"/>
+    </bean>
+
     <import resource="spring/database.xml"/>
     <import resource="spring/remote.xml"/>
     
@@ -28,4 +38,5 @@
         <property name="prefix" value="/WEB-INF/jsp/"/>
         <property name="suffix" value=".jsp"/>
     </bean>
+
 </beans>

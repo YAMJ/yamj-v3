@@ -52,53 +52,6 @@ import com.moviejukebox.core.hibernate.usertypes.EnumStringUserType;
 @SuppressWarnings("deprecation")
 public class Movie extends AbstractAuditable implements Serializable {
 
-    /*
-    private String subtitles = UNKNOWN;
-    private Set<String> directors = new LinkedHashSet<String>();
-    private Map<String, Integer> sets = new HashMap<String, Integer>();
-    private Set<String> cast = new LinkedHashSet<String>();
-    private Set<String> writers = new LinkedHashSet<String>();
-    private Set<Codec> codecs = new LinkedHashSet<Codec>();
-    private String showStatus = UNKNOWN;    // For TV shows a status such as "Continuing" or "Ended"
-    private boolean extra = Boolean.FALSE;  // TODO Move extra flag to movie file
-    private boolean trailerExchange = Boolean.FALSE;    // Trailers
-    private long trailerLastScan = 0;           // Trailers
-    private Collection<AwardEvent> awards = new ArrayList<AwardEvent>();    // Issue 1901: Awards
-    private Collection<Filmography> people = new ArrayList<Filmography>();  // Issue 1897: Cast enhancement
-    private String budget = UNKNOWN;                                        // Issue 2012: Financial information about movie
-    private Map<String, String> openweek = new HashMap<String, String>();
-    private Map<String, String> gross = new HashMap<String, String>();
-    private List<String> didYouKnow = new ArrayList<String>();        // Issue 2013: Add trivia
-    // Graphics URLs & files
-    private Set<Artwork> artwork = new LinkedHashSet<Artwork>();
-    private String posterURL = UNKNOWN; // The original, unaltered, poster
-    private String posterFilename = UNKNOWN; // The poster filename
-    private String detailPosterFilename = UNKNOWN; // The resized poster for skins
-    private String thumbnailFilename = UNKNOWN; // The thumbnail version of the poster for skins
-    private List<String> footerFilename = new ArrayList<String>(); // The footer image for skins
-    private String fanartURL = UNKNOWN; // The fanart URL
-    private String fanartFilename = UNKNOWN; // The resized fanart file
-    private String bannerURL = UNKNOWN; // The TV Show banner URL
-    private String bannerFilename = UNKNOWN; // The resized banner file
-    private String wideBannerFilename = UNKNOWN; // The original banner file
-    private String clearArtURL = UNKNOWN;
-    private String clearArtFilename = UNKNOWN;
-    private String clearLogoURL = UNKNOWN;
-    private String clearLogoFilename = UNKNOWN;
-    private String seasonThumbURL = UNKNOWN;
-    private String seasonThumbFilename = UNKNOWN;
-    private String tvThumbURL = UNKNOWN;
-    private String tvThumbFilename = UNKNOWN;
-    private String movieDiscURL = UNKNOWN;
-    private String movieDiscFilename = UNKNOWN;
-    // File information
-    private boolean watchedFile = Boolean.FALSE;    // Watched / Unwatched - Set from the .watched files
-    private boolean watchedNFO = Boolean.FALSE;     // Watched / Unwatched - Set from the NFO file
-    private Map<String, String> indexes = new HashMap<String, String>();
-    // Media file properties
-    private Collection<ExtraFile> extraFiles = new TreeSet<ExtraFile>();
-    private Set<DirtyFlag> dirtyFlags = EnumSet.noneOf(DirtyFlag.class);    // List of the dirty flags associated with the Movie
-     */
     private static final long serialVersionUID = 5719107822219333629L;
 
     @NaturalId(mutable = true)
