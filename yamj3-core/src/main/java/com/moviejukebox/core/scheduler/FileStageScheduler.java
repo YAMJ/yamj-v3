@@ -1,8 +1,11 @@
 package com.moviejukebox.core.scheduler;
 
+import com.moviejukebox.core.importer.MediaImportService;
+
+import com.moviejukebox.core.importer.MediaImportRunner;
+
 import com.moviejukebox.core.database.dao.FileStageDao;
 import com.moviejukebox.core.database.model.FileStage;
-import com.moviejukebox.core.runner.MediaImportRunner;
 import java.util.List;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
@@ -19,6 +22,8 @@ public class FileStageScheduler {
 
     @Autowired
     private FileStageDao fileStageDao;
+    @Autowired
+    private MediaImportService mediaImportService;
     
     @Resource(name = "stagingTaskExecutor")
     private TaskExecutor taskExecutor;
@@ -36,7 +41,7 @@ public class FileStageScheduler {
 
         // process each staged file with an import runner
         for (FileStage fileStage : fileStages) {
-            MediaImportRunner runner = new MediaImportRunner(fileStage);
+            MediaImportRunner runner = new MediaImportRunner(fileStage, mediaImportService);
             taskExecutor.execute(runner);
         }
     }

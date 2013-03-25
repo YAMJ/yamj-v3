@@ -32,18 +32,25 @@ public class VideoData extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 5719107822219333629L;
 
-    @NaturalId(mutable = true)
-	@Column(name = "title", nullable = false, length = 255)
-	private String title;
+    /**
+     * This is the media file identifier.
+     * This will be generated from a media file "<filetitle>_<fileyear>_<videotype>
+     * This is needed in order to have the possibility to assoziate media files to
+     * video metadata, i.e. if a new episode of a TV show has been scanned.
+     */
+    @NaturalId(mutable = false)
+    @Column(name = "media_file_identifier", unique = true, length = 255)
+    private String mediaFileIdentifier;
 
-    @NaturalId(mutable = true)
-	@Column(name = "pulication_year", length = 10)
-	private String publicationYear;
-
-    @NaturalId(mutable = true)
     @Type(type = "videoType")
     @Column(name = "video_type", nullable = false)
     private VideoType videoType;
+
+	@Column(name = "title", nullable = false, length = 255)
+	private String title;
+
+	@Column(name = "pulication_year", length = 10)
+	private String publicationYear;
 
     @Column(name = "title_original", length = 255)
     private String titleOriginal;

@@ -17,10 +17,16 @@ public class FileStageDao extends ExtendedHibernateDaoSupport {
     }
 
     public void deleteFileStage(final long id) {
-        FileStage fileStage = getFileStage(id);
-        if (fileStage != null) {
-            this.deleteEntity(fileStage);
-        }
+        this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<Void>() {
+            @Override
+            public Void doInHibernate(final Session session) throws HibernateException {
+                final Query query = session.createQuery("delete from FileStage where id = :id");
+                query.setLong("id", id);
+                query.executeUpdate();
+                session.flush();
+                return null;
+            }
+        });
     }
     
     @SuppressWarnings("unchecked")
