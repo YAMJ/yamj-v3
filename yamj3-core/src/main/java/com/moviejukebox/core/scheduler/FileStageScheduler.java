@@ -1,11 +1,10 @@
 package com.moviejukebox.core.scheduler;
 
-import com.moviejukebox.core.importer.MediaImportService;
-
-import com.moviejukebox.core.importer.MediaImportRunner;
-
 import com.moviejukebox.core.database.dao.FileStageDao;
 import com.moviejukebox.core.database.model.FileStage;
+import com.moviejukebox.core.database.model.type.FileStageType;
+import com.moviejukebox.core.importer.MediaImportRunner;
+import com.moviejukebox.core.importer.MediaImportService;
 import java.util.List;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
@@ -29,11 +28,10 @@ public class FileStageScheduler {
     private TaskExecutor taskExecutor;
     
     @Scheduled(initialDelay=10000, fixedDelay=30000)
-    public void checkFileStage() {
-        LOGGER.info("Running file stage scheduler");
+    public void importNewStagedFiles() {
         
-        // find file stags
-        List<FileStage> fileStages = fileStageDao.getFileStages(10);
+        // find new file stages
+        List<FileStage> fileStages = fileStageDao.getFileStages(FileStageType.NEW, 10);
         if (fileStages.isEmpty()) {
             LOGGER.debug("No file stage objects found; nothing to do");
             return;

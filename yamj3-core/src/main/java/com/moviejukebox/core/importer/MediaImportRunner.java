@@ -22,7 +22,9 @@ public class MediaImportRunner implements Runnable {
         try {
             // initiate the media file
             MediaFile mediaFile = mediaImportService.initMediaFile(fileStage);
-            if (mediaFile.isNewlyCreated()) {
+            if (mediaFile == null) {
+                // nothing to do right now cause file has not changed
+            } else if (mediaFile.isNewlyCreated()) {
                 LOGGER.debug("New media file: " + fileStage);
                 processNewVideoMedia(mediaFile);
             } else {

@@ -1,18 +1,19 @@
 package com.moviejukebox.core.database.model;
 
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Date;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import javax.persistence.Column;
-import org.hibernate.annotations.NaturalId;
-
+import com.moviejukebox.core.database.model.type.FileStageType;
+import com.moviejukebox.core.hibernate.usertypes.EnumStringUserType;
 import java.io.Serializable;
+import java.util.Date;
+import javax.persistence.*;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+@TypeDef(name = "fileStageType", 
+    typeClass = EnumStringUserType.class,
+    parameters = {@Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.FileStageType")})
 
 @Entity
 @Table(name = "file_stage")
@@ -35,6 +36,10 @@ public class FileStage extends AbstractIdentifiable implements Serializable {
     @Column(name = "file_size", nullable = false)
     private long fileSize = -1;
     
+    @Type(type = "fileStageType")
+    @Column(name = "stage_type", nullable = false, length = 30)
+    private FileStageType fileStageType;
+
     // GETTER and SETTER
 
     public String getScanPath() {
@@ -69,6 +74,15 @@ public class FileStage extends AbstractIdentifiable implements Serializable {
         this.fileSize = fileSize;
     }
 
+    public FileStageType getFileStageType() {
+        return fileStageType;
+    }
+
+    public void setFileStageType(FileStageType fileStageType) {
+        this.fileStageType = fileStageType;
+    }
+
+    
     // EQUALITY CHECKS
 
     @Override

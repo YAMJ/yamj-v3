@@ -1,6 +1,7 @@
 package com.moviejukebox.core.database.dao;
 
 import com.moviejukebox.core.database.model.FileStage;
+import com.moviejukebox.core.database.model.type.FileStageType;
 import com.moviejukebox.core.hibernate.ExtendedHibernateDaoSupport;
 import java.util.List;
 import org.hibernate.HibernateException;
@@ -28,13 +29,14 @@ public class FileStageDao extends ExtendedHibernateDaoSupport {
             }
         });
     }
-    
+
     @SuppressWarnings("unchecked")
-    public List<FileStage> getFileStages(final int maxResults) {
+    public List<FileStage> getFileStages(final FileStageType fileStageType, final int maxResults) {
         return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<List<FileStage>>() {
             @Override
             public List<FileStage> doInHibernate(final Session session) throws HibernateException {
-                final Query query = session.createQuery("from FileStage order by id");
+                final Query query = session.createQuery("from FileStage where fileStageType =:fileStageType order by id");
+                query.setParameter("fileStageType", fileStageType);
                 query.setMaxResults(maxResults);
                 return query.list();
             }

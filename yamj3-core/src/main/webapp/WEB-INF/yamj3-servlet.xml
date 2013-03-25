@@ -23,7 +23,7 @@
         <property name="locations">
             <list>
                 <value>classpath:/yamj3.core.properties</value>
-                <value>file:${yamj3.home}/conf/yamj3.core.properties</value>
+                <value>file:${yamj3.home}/conf/moviejukebox.properties</value>
             </list>
         </property>
         <property name="ignoreResourceNotFound" value="true"/>
