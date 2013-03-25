@@ -1,17 +1,17 @@
 package com.moviejukebox.core.database.service;
 
 import com.moviejukebox.core.database.dao.CommonDao;
-import com.moviejukebox.core.database.dao.MovieDao;
-import javax.annotation.Resource;
+import com.moviejukebox.core.database.dao.VideoDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service("movieService")
 public class MovieService {
 
-    @Resource(name = "movieDao")
-    private MovieDao movieDao;
+    @Autowired
+    private VideoDao videoDao;
 
-    @Resource(name = "commonDao")
+    @Autowired
     private CommonDao commonDao;
 
     /*
