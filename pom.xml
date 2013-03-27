@@ -41,6 +41,7 @@
         <module>yamj3-distribution</module>
         <module>yamj3-common</module>
         <module>yamj3-batch</module>
+        <module>yamj3-filescanner</module>
     </modules>
 
     <properties>

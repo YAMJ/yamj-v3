@@ -7,7 +7,8 @@
         <artifactId>moviejukebox3</artifactId>
         <version>3.0-SNAPSHOT</version>
     </parent>
-    <artifactId>yamj3-common</artifactId>
+
+    <artifactId>yamj3-filescanner</artifactId>
     <packaging>jar</packaging>
 
     <prerequisites>
@@ -15,8 +16,8 @@
     </prerequisites>
 
     <!-- Project Information -->
-    <name>YAMJ3 Common</name>
-    <description>Common of MovieJukebox project</description>
+    <name>YAMJ3 File Scanner</name>
+    <description>File Scanner client for YAMJ v3</description>
 
     <properties>
         <skipTests>true</skipTests>

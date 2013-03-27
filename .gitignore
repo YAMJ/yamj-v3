@@ -165,3 +165,4 @@ pip-log.txt
 #Project specific
 target/
 /yamj3-common/target/
+nbactions.xml
