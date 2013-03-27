@@ -1,4 +1,4 @@
-package com.moviejukebox.batch.cmdline;
+package com.moviejukebox.common.cmdline;
 
 /**
  * This class defines a command line exception.
@@ -12,7 +12,7 @@ public class CmdLineException extends Exception {
 
 	/**
 	 * Constructor of the exception.
-	 * 
+	 *
 	 * @param message
 	 *        the detail message
 	 */
@@ -22,7 +22,7 @@ public class CmdLineException extends Exception {
 
 	/**
 	 * Constructor of the exception.
-	 * 
+	 *
 	 * @param cause
 	 *        the cause
 	 */
@@ -32,7 +32,7 @@ public class CmdLineException extends Exception {
 
 	/**
 	 * Constructor of the exception.
-	 * 
+	 *
 	 * @param message
 	 *        the detail message
 	 * @param cause

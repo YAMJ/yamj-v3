@@ -1,6 +1,6 @@
 package com.moviejukebox.batch;
 
-import com.moviejukebox.batch.cmdline.CmdLineParser;
+import com.moviejukebox.common.cmdline.CmdLineParser;
 
 public interface BatchManagement {
 

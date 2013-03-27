@@ -1,4 +1,4 @@
-package com.moviejukebox.batch.cmdline;
+package com.moviejukebox.common.cmdline;
 
 /**
  * Class for parsed option which holds the value read from the command line.
@@ -22,7 +22,7 @@ public final class ParsedOption {
 
 	/**
 	 * Create a new parsed option.
-	 * 
+	 *
 	 * @param parent
 	 *        the command line option
 	 * @param value
@@ -38,7 +38,7 @@ public final class ParsedOption {
 
 	/**
 	 * Get the string representation of this object.
-	 * 
+	 *
 	 * @return the string representation
 	 */
 	@Override
@@ -55,7 +55,7 @@ public final class ParsedOption {
 
 	/**
 	 * Get the command line option of this parsed option.
-	 * 
+	 *
 	 * @return the command line option
 	 */
 	public CmdLineOption getParent() {
@@ -64,7 +64,7 @@ public final class ParsedOption {
 
 	/**
 	 * Get the parsed value.
-	 * 
+	 *
 	 * @return the parsed value
 	 */
 	public String getValue() {
@@ -73,7 +73,7 @@ public final class ParsedOption {
 
 	/**
 	 * Indicates if parsed option has a value.
-	 * 
+	 *
 	 * @return the boolean flag
 	 */
 	public boolean hasValue() {

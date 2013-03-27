@@ -1,4 +1,4 @@
-package com.moviejukebox.batch.cmdline;
+package com.moviejukebox.common.cmdline;
 
 /**
  * Validator for long values.
@@ -7,7 +7,7 @@ public class LongValidator extends OptionValidator {
 
 	/**
 	 * Validate a long option.
-	 * 
+	 *
 	 * @see OptionValidator#validate(CmdLineParser, ParsedOption)
 	 */
     @Override

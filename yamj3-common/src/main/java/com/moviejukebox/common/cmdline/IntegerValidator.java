@@ -1,4 +1,4 @@
-package com.moviejukebox.batch.cmdline;
+package com.moviejukebox.common.cmdline;
 
 /**
  * Validator for integer values.
@@ -7,7 +7,7 @@ public class IntegerValidator extends OptionValidator {
 
 	/**
 	 * Validate an integer option.
-	 * 
+	 *
 	 * @see OptionValidator#validate(CmdLineParser, ParsedOption)
 	 */
     @Override

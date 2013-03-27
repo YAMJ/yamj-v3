@@ -1,4 +1,4 @@
-package com.moviejukebox.batch.cmdline;
+package com.moviejukebox.common.cmdline;
 
 /**
  * Validator for float values.
@@ -7,7 +7,7 @@ public class FloatValidator extends OptionValidator {
 
 	/**
 	 * Validate a float option.
-	 * 
+	 *
 	 * @see OptionValidator#validate(CmdLineParser, ParsedOption)
 	 */
     @Override

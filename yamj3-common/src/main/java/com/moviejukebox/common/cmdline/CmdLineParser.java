@@ -1,4 +1,4 @@
-package com.moviejukebox.batch.cmdline;
+package com.moviejukebox.common.cmdline;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -32,7 +32,7 @@ public final class CmdLineParser {
 
 	/**
 	 * Add a command line option to parser.
-	 * 
+	 *
 	 * @param option
 	 *        the command line option to add
 	 */
@@ -42,7 +42,7 @@ public final class CmdLineParser {
 
 	/**
 	 * Add command line options to parser.
-	 * 
+	 *
 	 * @param options
 	 *        the command line options to add
 	 */
@@ -55,7 +55,7 @@ public final class CmdLineParser {
 
 	/**
 	 * Get the parsed option.
-	 * 
+	 *
 	 * @param optionName
 	 *        the option name
 	 * @return the parsed option
@@ -66,7 +66,7 @@ public final class CmdLineParser {
 
 	/**
 	 * Get the parsed option.
-	 * 
+	 *
 	 * @param option
 	 *        the option
 	 * @return the parsed option
@@ -77,7 +77,7 @@ public final class CmdLineParser {
 
 	/**
 	 * Get the parsed option value.
-	 * 
+	 *
 	 * @param optionName
 	 *        the option name
 	 * @return the parsed option value
@@ -89,7 +89,7 @@ public final class CmdLineParser {
 
 	/**
 	 * Get the parsed option value.
-	 * 
+	 *
 	 * @param option
 	 *        the option
 	 * @return the parsed option value
@@ -100,7 +100,7 @@ public final class CmdLineParser {
 
 	/**
 	 * Check if an option is contained in the parsed options.
-	 * 
+	 *
 	 * @param optionName
 	 *        the option name
 	 * @return true if option is contained in parsed options
@@ -111,7 +111,7 @@ public final class CmdLineParser {
 
 	/**
 	 * Check if an option is contained in the parsed options.
-	 * 
+	 *
 	 * @param option
 	 *        the option
 	 * @return true if option is contained in parsed options
@@ -122,7 +122,7 @@ public final class CmdLineParser {
 
 	/**
 	 * Check if user wants help.
-	 * 
+	 *
 	 * @return true if help option contained in parsed options
 	 */
 	public boolean userWantsHelp() {
@@ -131,7 +131,7 @@ public final class CmdLineParser {
 
 	/**
 	 * Parse the input.
-	 * 
+	 *
 	 * @param args
 	 *        the arguments to parse
 	 * @throws CmdLineException
@@ -188,7 +188,7 @@ public final class CmdLineParser {
 
 	/**
 	 * Check if option is excluded.
-	 * 
+	 *
 	 * @param optionName
 	 *        the option name to check
 	 * @return the excluded command line option; may be null
@@ -211,7 +211,7 @@ public final class CmdLineParser {
 
 	/**
 	 * Find an option within the arguments.
-	 * 
+	 *
 	 * @param args
 	 *        the parser arguments
 	 * @param option
@@ -231,7 +231,7 @@ public final class CmdLineParser {
 
 	/**
 	 * Get the option descriptions.
-	 * 
+	 *
 	 * @return the option descriptions
 	 */
 	public String getDescriptions() {

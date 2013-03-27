@@ -1,21 +1,20 @@
 package com.moviejukebox.batch;
 
+import com.moviejukebox.common.cmdline.CmdLineException;
+import com.moviejukebox.common.cmdline.CmdLineOption;
+import com.moviejukebox.common.cmdline.CmdLineParser;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.moviejukebox.batch.cmdline.CmdLineException;
-import com.moviejukebox.batch.cmdline.CmdLineOption;
-import com.moviejukebox.batch.cmdline.CmdLineParser;
-
 public class MovieJukeboxBatch {
-    
+
     public static void main(String[] args) throws Exception {
         CmdLineParser parser = getCmdLineParser();
-        
+
         int status;
         try {
             parser.parse(args);
-            
+
             MovieJukeboxBatch main = new MovieJukeboxBatch();
             status = main.execute(parser);
         } catch (CmdLineException cle) {
@@ -24,7 +23,7 @@ public class MovieJukeboxBatch {
         }
         System.exit(status);
     }
-    
+
     private static CmdLineParser getCmdLineParser() {
         CmdLineParser parser = new CmdLineParser();
         parser.addOption(new CmdLineOption("b", "batch", "The batch parameter", true, true));

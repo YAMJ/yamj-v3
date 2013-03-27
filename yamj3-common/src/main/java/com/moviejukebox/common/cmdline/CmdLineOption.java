@@ -1,4 +1,4 @@
-package com.moviejukebox.batch.cmdline;
+package com.moviejukebox.common.cmdline;
 
 import java.util.LinkedList;
 
@@ -49,7 +49,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Create a new command line option
-	 * 
+	 *
 	 * @param optionName
 	 *        the option name
 	 * @param description
@@ -63,7 +63,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Create a new command line option
-	 * 
+	 *
 	 * @param optionName
 	 *        the option name
 	 * @param optionParameterName
@@ -88,7 +88,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Get the option name.
-	 * 
+	 *
 	 * @return the option name
 	 */
 	public String getName() {
@@ -97,7 +97,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Get the option description.
-	 * 
+	 *
 	 * @return the option description
 	 */
 	public String getDescription() {
@@ -106,7 +106,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Get the flag if option is required.
-	 * 
+	 *
 	 * @return the required flag
 	 */
 	public boolean isRequired() {
@@ -115,7 +115,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Get the flag if value is needed.
-	 * 
+	 *
 	 * @return the needsValue flag
 	 */
 	public boolean needsValue() {
@@ -124,7 +124,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Set the option validator to use for validating the option.
-	 * 
+	 *
 	 * @param validator
 	 *        the option validator
 	 */
@@ -134,7 +134,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Get the option validator.
-	 * 
+	 *
 	 * @return the option validator
 	 */
 	public OptionValidator getValidator() {
@@ -143,7 +143,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Test is object equals another object.
-	 * 
+	 *
 	 * @param object
 	 *        the object to test for equality
 	 * @return true if objects are equal, else false
@@ -158,7 +158,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Add an excluded option.
-	 * 
+	 *
 	 * @param excludedOption
 	 *        the excluded option
 	 */
@@ -171,7 +171,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Add excluded options.
-	 * 
+	 *
 	 * @param excludedOptions
 	 *        the excluded options
 	 */
@@ -183,7 +183,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Get the excluded options.
-	 * 
+	 *
 	 * @return the excluded options
 	 */
 	public LinkedList<CmdLineOption> getExcludedOptions() {
@@ -192,7 +192,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Check if excluded options exist.
-	 * 
+	 *
 	 * @return true if excluded options exist
 	 */
 	public boolean hasExcludedOptions() {
@@ -206,7 +206,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Test if command line option is excluded.
-	 * 
+	 *
 	 * @param cmdLineOption
 	 *        the command line option to check
 	 * @return true if option is excluded, else false
@@ -229,7 +229,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Test if parsed option is excluded.
-	 * 
+	 *
 	 * @param parsedOption
 	 *        the parse option
 	 * @return true if parsed option is excluded, else false
@@ -248,7 +248,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Add a required option.
-	 * 
+	 *
 	 * @param requiredOption
 	 *        the required option
 	 */
@@ -261,7 +261,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Add a required options.
-	 * 
+	 *
 	 * @param requiredOptions
 	 *        the required option
 	 */
@@ -273,7 +273,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Get the required options.
-	 * 
+	 *
 	 * @return the required options
 	 */
 	public LinkedList<CmdLineOption> getRequiredOptions() {
@@ -282,7 +282,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Check if required options exist.
-	 * 
+	 *
 	 * @return true if required options exist
 	 */
 	public boolean hasRequiredOptions() {
@@ -296,7 +296,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Test if command line option is required.
-	 * 
+	 *
 	 * @param cmdLineOption
 	 *        the command line option to check
 	 * @return true if option is required, else false
@@ -319,7 +319,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Get the string representation.
-	 * 
+	 *
 	 * @return the string representation
 	 */
 	@Override
@@ -342,7 +342,7 @@ public final class CmdLineOption {
 
 	/**
 	 * Get the string representation.
-	 * 
+	 *
 	 * @param caller
 	 *        the command line parser calling this option
 	 * @return the string representation

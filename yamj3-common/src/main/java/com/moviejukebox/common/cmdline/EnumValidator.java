@@ -1,4 +1,4 @@
-package com.moviejukebox.batch.cmdline;
+package com.moviejukebox.common.cmdline;
 
 /**
  * Validator which uses allowed values.
@@ -12,7 +12,7 @@ public class EnumValidator extends OptionValidator {
 
 	/**
 	 * Creates a new enumeration validator.
-	 * 
+	 *
 	 * @param allowedValues
 	 *        array of allowed values
 	 */
@@ -22,7 +22,7 @@ public class EnumValidator extends OptionValidator {
 
 	/**
 	 * Validate an option.
-	 * 
+	 *
 	 * @see OptionValidator#validate(CmdLineParser, ParsedOption)
 	 */
     @Override
@@ -48,7 +48,7 @@ public class EnumValidator extends OptionValidator {
 
 	/**
 	 * Get the list of allowed values as string.
-	 * 
+	 *
 	 * @return string representation of allowed values
 	 */
 	public String getAllowedValuesList() {
