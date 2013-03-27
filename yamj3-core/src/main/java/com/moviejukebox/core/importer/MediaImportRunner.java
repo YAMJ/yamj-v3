@@ -41,10 +41,15 @@ public class MediaImportRunner implements Runnable {
     }
     
     private void processNewVideoMedia(MediaFile mediaFile) {
-        
+        // TODO filename scan
+        // TODO media info scan
+        // TODO NFO scan
+        // TODO metadata from internet
+        // TODO poster
+        // TODO fanart
     }
 
     private void processUpdateVideoMedia(MediaFile mediaFile) {
-        
+        // TODO media info scan
     }
 }
