@@ -8,7 +8,6 @@ import java.io.Serializable;
 public class FileDeletionDTO implements Serializable {
 
     private static final long serialVersionUID = 949098336790324913L;
-    
     private String scanPath;
     private String filePath;
 

@@ -8,7 +8,6 @@ import java.io.Serializable;
 public class FileImportDTO implements Serializable {
 
     private static final long serialVersionUID = 2515787873612820679L;
-
     private String scanPath;
     private String filePath;
     private long fileSize;
