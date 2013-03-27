@@ -16,7 +16,7 @@
     </prerequisites>
 
     <!-- Project Information -->
-    <name>YAMJ3 Core</name>
+    <name>YAMJ3 Jetty</name>
     <description>Core of MovieJukebox project</description>
 
     <properties>
