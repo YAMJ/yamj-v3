@@ -1,62 +1,52 @@
 package com.moviejukebox.filescanner;
 
-import com.moviejukebox.filescanner.stats.ScannerStatistics;
-import com.moviejukebox.filescanner.stats.StatType;
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import com.moviejukebox.common.cmdline.CmdLineException;
+import com.moviejukebox.common.cmdline.CmdLineOption;
+import com.moviejukebox.common.cmdline.CmdLineParser;
 import org.apache.log4j.BasicConfigurator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class FileScanner {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FileScanner.class);
-    private static final String LOG_MESSAGE = "FileScanner: ";
-    // DEBUG ONLY - Get it from the command line or properties
-    private static final String DIRECTORY_TO_SCAN = "T:/Films/";
-    // Exit status codes
-    private static final int EXIT_NORMAL = 0;
-    private static final int EXIT_NO_DIRECTORY = 1;
+    private static final int EXIT_CMDLINE_ERROR = 1;
+    private static final int EXIT_CONFIG_ERROR = 2;
 
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure();
-        // Perhaps add some command line options in here using the cmdline parsing.
+        
+        CmdLineParser parser = getCmdLineParser();
 
-        FileScanner main = new FileScanner();
-        int status = main.scan(DIRECTORY_TO_SCAN);
+        int status;
+        try {
+            parser.parse(args);
 
-        LOG.info("{}",ScannerStatistics.generateStats());
-        LOG.info("{}Scanning completed.", LOG_MESSAGE);
-        LOG.info("{}Exiting with status {}", LOG_MESSAGE, status);
+            FileScanner main = new FileScanner();
+            status = main.execute(parser);
+        } catch (CmdLineException cle) {
+            System.err.println(cle.getMessage());
+            status = EXIT_CMDLINE_ERROR;
+        }
         System.exit(status);
     }
 
-    private int scan(String directoryToScan) {
-        File directory = new File(directoryToScan);
-        return scan(directory);
+    private static CmdLineParser getCmdLineParser() {
+        CmdLineParser parser = new CmdLineParser();
+        parser.addOption(new CmdLineOption("d", "direcctory", "The directory to process", true, true));
+        return parser;
     }
 
-    private int scan(File directoryToScan) {
-        int status = EXIT_NORMAL;
-        LOG.info("{}Scanning directory {}...", LOG_MESSAGE,directoryToScan);
-
-        if (directoryToScan == null || !directoryToScan.exists()) {
-            LOG.info("{}Failed to read directory '{}'", LOG_MESSAGE, directoryToScan);
-            return EXIT_NO_DIRECTORY;
-        }
-
-        List<File> fileList = Arrays.asList(directoryToScan.listFiles());
-        Collections.sort(fileList);
-
-        for (File file : fileList) {
-            if (file.isDirectory()) {
-                ScannerStatistics.inc(StatType.DIRECTORY);
-                scan(file);
-            } else {
-                ScannerStatistics.inc(StatType.FILE);
-            }
+    @SuppressWarnings("resource")
+    private int execute(CmdLineParser parser) {
+        int status;
+        try {
+            ApplicationContext applicationContext = new ClassPathXmlApplicationContext("yamj3-filescanner.xml");
+            ScannerManagement batchManagement = (ScannerManagement) applicationContext.getBean("scannerManagement");
+            status = batchManagement.runScanner(parser);
+        } catch (Exception error) {
+            System.err.println("Failed to load scanner configuration");
+            error.printStackTrace(System.err);
+            status = EXIT_CONFIG_ERROR;
         }
         return status;
     }
