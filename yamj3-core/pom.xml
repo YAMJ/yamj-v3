@@ -8,6 +8,7 @@
         <artifactId>moviejukebox3</artifactId>
         <version>3.0-SNAPSHOT</version>
     </parent>
+
     <artifactId>yamj3-core</artifactId>
     <packaging>war</packaging>
 
