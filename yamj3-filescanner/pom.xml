@@ -8,6 +8,9 @@
         <version>3.0-SNAPSHOT</version>
     </parent>
 
+    <!-- Project Information -->
+    <name>YAMJ3 File Scanner</name>
+    <description>File Scanner client for YAMJ v3</description>
     <artifactId>yamj3-filescanner</artifactId>
     <packaging>jar</packaging>
 
@@ -15,11 +18,9 @@
         <maven>3.0.3</maven>
     </prerequisites>
 
-    <!-- Project Information -->
-    <name>YAMJ3 File Scanner</name>
-    <description>File Scanner client for YAMJ v3</description>
-
     <properties>
+        <!--This is used for the assembly plugin-->
+        <distribution.format>dir</distribution.format>
         <skipTests>true</skipTests>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -50,7 +51,10 @@
     </dependencies>
 
     <build>
+        <finalName>filescanner-${project.version}</finalName>
+
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
@@ -72,8 +76,12 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>com.moviejukebox.filescanner.FileScanner</mainClass>
+                        </manifest>
                         <manifestEntries>
-                            <Specification-Title>YAMJ3 - Common</Specification-Title>
+                            <Specification-Title>YAMJ3 - File Scanner</Specification-Title>
                             <Specification-Version>${project.version}</Specification-Version>
                             <Implementation-Version>${buildNumber}</Implementation-Version>
                             <Implementation-Title>${timestamp}</Implementation-Title>
@@ -81,7 +89,46 @@
                     </archive>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeScope>compile</includeScope>
+                            <outputDirectory>${project.build.directory}/dependencies</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>distro-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/bin.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
+
     </build>
 
 </project>
