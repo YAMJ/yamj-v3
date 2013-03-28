@@ -174,19 +174,19 @@
                         <configuration>
                             <target>
                                 <property name="batch_file" value="${project.build.directory}/filescanner.cmd" />
-                                <property name="title_1"    value="rem ${project.name}${line.separator}" />
-                                <property name="title_2"    value="rem ${project.description}${line.separator}" />
-                                <property name="title_3"    value="rem Version: ${project.version}${line.separator}" />
-                                <property name="title_4"    value="rem Git-SHA: ${buildNumber}${line.separator}" />
+                                <property name="title_1"    value="# ${project.name}${line.separator}" />
+                                <property name="title_2"    value="# ${project.description}${line.separator}" />
+                                <property name="title_3"    value="# Version: ${project.version}${line.separator}" />
+                                <property name="title_4"    value="# Git-SHA: ${buildNumber}${line.separator}" />
                                 <property name="line_1"     value="@echo off${line.separator}" />
                                 <property name="line_2"     value="cls${line.separator}" />
                                 <property name="line_3"     value="java -jar lib/${project.artifactId}-${project.version}.jar %*${line.separator}" />
                                 <echo>Writing batch file: ${batch_file}</echo>
-                                <echo file="${batch_file}" append="false">${line_1}</echo>
-                                <echo file="${batch_file}" append="true">${title_1}</echo>
+                                <echo file="${batch_file}" append="false">${title_1}</echo>
                                 <echo file="${batch_file}" append="true">${title_2}</echo>
                                 <echo file="${batch_file}" append="true">${title_3}</echo>
                                 <echo file="${batch_file}" append="true">${title_4}</echo>
+                                <echo file="${batch_file}" append="true">${line_1}</echo>
                                 <echo file="${batch_file}" append="true">${line_2}</echo>
                                 <echo file="${batch_file}" append="true">${line_3}</echo>
                             </target>
