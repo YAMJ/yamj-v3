@@ -21,6 +21,7 @@
     <properties>
         <!--This is used for the assembly plugin-->
         <distribution.format>dir</distribution.format>
+        <!--Skip the tests if not needed-->
         <skipTests>true</skipTests>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -51,7 +52,7 @@
     </dependencies>
 
     <build>
-        <finalName>filescanner-${project.version}</finalName>
+        <!--<finalName>filescanner-${project.version}</finalName>-->
 
         <plugins>
 
@@ -119,10 +120,80 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
+                            <archive>
+                                <manifest>
+                                    <addClasspath>true</addClasspath>
+                                    <mainClass>com.moviejukebox.filescanner.FileScanner</mainClass>
+                                </manifest>
+                                <manifestEntries>
+                                    <Specification-Title>YAMJ3 - File Scanner</Specification-Title>
+                                    <Specification-Version>${project.version}</Specification-Version>
+                                    <Implementation-Version>${buildNumber}</Implementation-Version>
+                                    <Implementation-Title>${timestamp}</Implementation-Title>
+                                </manifestEntries>
+                            </archive>
                             <descriptors>
-                                <descriptor>src/main/assembly/bin.xml</descriptor>
+                                <descriptor>src/main/resources/bin.xml</descriptor>
                             </descriptors>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>create-version-txt</id>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <target>
+                                <property name="version_file"     value="${project.build.directory}/version.txt" />
+                                <property name="header_line"      value="${project.name}${line.separator}" />
+                                <property name="build_date_line"  value="Build Date: ${timestamp}${line.separator}" />
+                                <property name="version_line"     value="Version   : ${project.version}${line.separator}" />
+                                <property name="buildnumber_line" value="Git-SHA   : ${buildNumber}${line.separator}" />
+                                <echo>Writing version file: ${version_file}</echo>
+                                <echo file="${version_file}" append="false">${header_line}</echo>
+                                <echo file="${version_file}" append="true">${build_date_line}</echo>
+                                <echo file="${version_file}" append="true">${version_line}</echo>
+                                <echo file="${version_file}" append="true">${buildnumber_line}</echo>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>create-batch-file</id>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <target>
+                                <property name="batch_file" value="${project.build.directory}/filescanner.cmd" />
+                                <property name="title_1"    value="# ${project.name}${line.separator}" />
+                                <property name="title_2"    value="# ${project.description}${line.separator}" />
+                                <property name="title_3"    value="# Version: ${project.version}${line.separator}" />
+                                <property name="title_4"    value="# Git-SHA: ${buildNumber}${line.separator}" />
+                                <property name="line_1"     value="@echo off${line.separator}" />
+                                <property name="line_2"     value="cls${line.separator}" />
+                                <property name="line_3"     value="java -jar lib/${project.artifactId}-${project.version}.jar %*${line.separator}" />
+                                <echo>Writing batch file: ${batch_file}</echo>
+                                <echo file="${batch_file}" append="false">${title_1}</echo>
+                                <echo file="${batch_file}" append="true">${title_2}</echo>
+                                <echo file="${batch_file}" append="true">${title_3}</echo>
+                                <echo file="${batch_file}" append="true">${title_4}</echo>
+                                <echo file="${batch_file}" append="true">${line_1}</echo>
+                                <echo file="${batch_file}" append="true">${line_2}</echo>
+                                <echo file="${batch_file}" append="true">${line_3}</echo>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
