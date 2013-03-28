@@ -263,8 +263,10 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
                 <configuration>
-                    <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
-                    <revisionOnScmFailure>0000</revisionOnScmFailure>
+                    <shortRevisionLength>10</shortRevisionLength>
+                    <revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
                     <timestampFormat>{0,date,yyyy-MM-dd HH:mm:ss}</timestampFormat>
                 </configuration>
                 <executions>
