@@ -14,6 +14,7 @@ import java.util.List;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 
 public class ScannerManagementImpl implements ScannerManagement {
@@ -87,8 +88,8 @@ public class ScannerManagementImpl implements ScannerManagement {
             return EXIT_CONNECT_FAILURE;
         }
 
+        FileImportDTO dto = null;
         try {
-            FileImportDTO dto;
             for (File file : fileList) {
                 dto = new FileImportDTO();
                 dto.setScanPath(directoryScanned.getAbsolutePath());
@@ -102,7 +103,12 @@ public class ScannerManagementImpl implements ScannerManagement {
                 }
 
                 LOG.info("{}Sending '{}' to the server...", LOG_MESSAGE, file.getName());
-                fileImportService.importFile(dto);
+                try {
+                    fileImportService.importFile(dto);
+                } catch (RemoteAccessException ex) {
+                    LOG.error("{}Failed to send object to the core server: {}", LOG_MESSAGE, ex.getMessage());
+                    LOG.error("{}{}", LOG_MESSAGE, (dto == null ? "No object found" : dto.toString()));
+                }
             }
         } catch (RemoteConnectFailureException ex) {
             LOG.error("{}Failed to connect to the core server: {}", LOG_MESSAGE, ex.getMessage());
