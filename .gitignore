@@ -166,3 +166,4 @@ pip-log.txt
 target/
 /yamj3-common/target/
 nbactions.xml
+/yamj3-filescanner/test.cmd
