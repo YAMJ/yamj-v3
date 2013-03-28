@@ -3,18 +3,25 @@ package com.moviejukebox.filescanner;
 import com.moviejukebox.common.cmdline.CmdLineException;
 import com.moviejukebox.common.cmdline.CmdLineOption;
 import com.moviejukebox.common.cmdline.CmdLineParser;
-import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.PropertyConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class FileScanner {
 
+    private static final Logger LOG = LoggerFactory.getLogger(FileScanner.class);
+    private static final String LOG_MESSAGE = "FileScanner: ";
+
+    private static final String logFilename = "yamj-filescanner";
     private static final int EXIT_CMDLINE_ERROR = 1;
     private static final int EXIT_CONFIG_ERROR = 2;
 
     public static void main(String[] args) throws Exception {
-        BasicConfigurator.configure();
-        
+        System.setProperty("file.name", logFilename);
+        PropertyConfigurator.configure("config/log4j.properties");
+
         CmdLineParser parser = getCmdLineParser();
 
         int status;

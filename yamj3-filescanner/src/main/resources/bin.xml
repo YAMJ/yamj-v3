@@ -34,6 +34,18 @@
             <includes>
                 <include>**/*</include>
             </includes>
+            <excludes>
+                <exclude>log4j.properties</exclude>
+            </excludes>
+        </fileSet>
+
+        <!-- add properties files -->
+        <fileSet>
+            <directory>${basedir}/config</directory>
+            <outputDirectory>config</outputDirectory>
+            <includes>
+                <include>log4j.properties</include>
+            </includes>
         </fileSet>
 
         <!--Add the version -->
