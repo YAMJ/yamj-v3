@@ -1,10 +1,12 @@
-package com.yamj.filescanner.server.model;
+package com.moviejukebox.filescanner.model;
 
-import com.yamj.filescanner.server.model.enumerations.FileInfoType;
-import com.yamj.filescanner.server.model.enumerations.NfoLevel;
+import com.moviejukebox.filescanner.model.enumerations.FileInfoType;
+import com.moviejukebox.filescanner.model.enumerations.NfoLevel;
 
 public class NfoFileInfo extends FileInformation {
 
+    private static final long serialVersionUID = 5196534707268208505L;
+    
     private NfoLevel nfoLevel;
     private String contents;
 

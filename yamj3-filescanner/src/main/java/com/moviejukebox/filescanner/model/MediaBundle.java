@@ -1,4 +1,4 @@
-package com.yamj.filescanner.server.model;
+package com.moviejukebox.filescanner.model;
 
 import java.util.Collections;
 import java.util.Date;
@@ -17,18 +17,18 @@ public class MediaBundle {
         this.bundleName = bundleName;
         this.updated = Boolean.FALSE;
         this.lastUpdateDateTime = new Date();
-        this.mediaFiles = Collections.EMPTY_LIST;
-        this.artworkFiles = Collections.EMPTY_LIST;
-        this.nfoFiles = Collections.EMPTY_LIST;
+        this.mediaFiles = Collections.emptyList();
+        this.artworkFiles = Collections.emptyList();
+        this.nfoFiles = Collections.emptyList();
     }
 
     public MediaBundle(String bundleName, boolean updated, Date lastUpdateDateTime) {
         this.bundleName = bundleName;
         this.updated = updated;
         this.lastUpdateDateTime = lastUpdateDateTime;
-        this.mediaFiles = Collections.EMPTY_LIST;
-        this.artworkFiles = Collections.EMPTY_LIST;
-        this.nfoFiles = Collections.EMPTY_LIST;
+        this.mediaFiles = Collections.emptyList();
+        this.artworkFiles = Collections.emptyList();
+        this.nfoFiles = Collections.emptyList();
     }
 
     public String getBundleName() {

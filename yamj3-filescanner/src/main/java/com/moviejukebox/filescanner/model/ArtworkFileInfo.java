@@ -1,11 +1,13 @@
-package com.yamj.filescanner.server.model;
+package com.moviejukebox.filescanner.model;
 
-import com.yamj.filescanner.server.model.enumerations.ArtworkType;
-import com.yamj.filescanner.server.model.enumerations.FileInfoType;
+import com.moviejukebox.filescanner.model.enumerations.ArtworkType;
+import com.moviejukebox.filescanner.model.enumerations.FileInfoType;
 import java.awt.Dimension;
 
 public class ArtworkFileInfo extends FileInformation {
 
+    private static final long serialVersionUID = 6935956906838369872L;
+    
     private ArtworkType artworkType;
     private Dimension artworkSize;
 

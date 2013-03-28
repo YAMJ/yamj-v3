@@ -1,4 +1,4 @@
-package com.yamj.filescanner.server.model.enumerations;
+package com.moviejukebox.filescanner.model.enumerations;
 
 public enum NfoLevel {
 
