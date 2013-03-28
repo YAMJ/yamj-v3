@@ -44,4 +44,10 @@ public class FileImportDTO implements Serializable {
     public void setFileDate(long fileDate) {
         this.fileDate = fileDate;
     }
+
+    @Override
+    public String toString() {
+        return "FileImportDTO{" + "scanPath=" + scanPath + ", filePath=" + filePath + ", fileSize=" + fileSize + ", fileDate=" + fileDate + '}';
+    }
+
 }
