@@ -1,11 +1,13 @@
-package com.yamj.filescanner.server.model;
+package com.moviejukebox.filescanner.model;
 
-import com.yamj.filescanner.server.model.enumerations.FileInfoType;
+import com.moviejukebox.filescanner.model.enumerations.FileInfoType;
 import java.io.Serializable;
 import java.util.Date;
 
 public abstract class FileInformation implements Serializable {
 
+    private static final long serialVersionUID = -8702575085136475579L;
+    
     private FileInfoType type;
     private String filename;
     private String filePath;

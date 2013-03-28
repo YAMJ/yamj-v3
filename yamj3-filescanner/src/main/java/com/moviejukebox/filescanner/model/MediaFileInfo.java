@@ -1,9 +1,11 @@
-package com.yamj.filescanner.server.model;
+package com.moviejukebox.filescanner.model;
 
-import com.yamj.filescanner.server.model.enumerations.FileInfoType;
+import com.moviejukebox.filescanner.model.enumerations.FileInfoType;
 
 public class MediaFileInfo extends FileInformation {
 
+    private static final long serialVersionUID = 3225616721099784226L;
+    
     private String fileType;
     private String mediainfo;
     private double fileSize = 0;
