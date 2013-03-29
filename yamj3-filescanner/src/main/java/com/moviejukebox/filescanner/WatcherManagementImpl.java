@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,7 @@ public class WatcherManagementImpl implements ScannerManagement {
 
     @Override
     public int runScanner(CmdLineParser parser) {
-        fileList = new ArrayList<>();
+        fileList = new ArrayList<File>();
         String directoryProperty = parser.getParsedOptionValue("d");
         boolean watchEnabled = Boolean.parseBoolean(parser.getParsedOptionValue("w"));
         File directory = new File(directoryProperty);

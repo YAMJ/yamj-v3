@@ -34,7 +34,7 @@ public class ScannerManagementImpl implements ScannerManagement {
 
     @Override
     public int runScanner(CmdLineParser parser) {
-        fileList = new ArrayList<>();
+        fileList = new ArrayList<File>();
         String directoryProperty = parser.getParsedOptionValue("d");
         File directory = new File(directoryProperty);
 
@@ -88,7 +88,7 @@ public class ScannerManagementImpl implements ScannerManagement {
             return EXIT_CONNECT_FAILURE;
         }
 
-        FileImportDTO dto = null;
+        FileImportDTO dto;
         try {
             for (File file : fileList) {
                 dto = new FileImportDTO();
