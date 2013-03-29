@@ -49,6 +49,12 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
         </dependency>
+        <!-- Watched functionality -->
+        <dependency>
+            <groupId>net.sf.jpathwatch</groupId>
+            <artifactId>jpathwatch</artifactId>
+            <version>0.95</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -59,16 +65,15 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                    <failOnError>true</failOnError>
-                    <verbose>true</verbose>
+                    <filesets>
+                        <fileset>
+                            <directory>${basedir}</directory>
+                            <includes>
+                                <include>**/*.log</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
                 </configuration>
             </plugin>
 

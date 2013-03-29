@@ -3,7 +3,6 @@ package com.moviejukebox.filescanner;
 import com.moviejukebox.common.cmdline.CmdLineException;
 import com.moviejukebox.common.cmdline.CmdLineOption;
 import com.moviejukebox.common.cmdline.CmdLineParser;
-import java.io.IOException;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +16,7 @@ public class FileScanner {
     private static final String LOG_MESSAGE = "FileScanner: ";
     private static final String logFilename = "yamj-filescanner";
     // return status codes
+    private static final int EXIT_NORMAL = 0;
     private static final int EXIT_CMDLINE_ERROR = 1;
     private static final int EXIT_CONFIG_ERROR = 2;
 
@@ -30,18 +30,33 @@ public class FileScanner {
         try {
             parser.parse(args);
 
-            FileScanner main = new FileScanner();
-            status = main.execute(parser);
-        } catch (CmdLineException cle) {
-            LOG.error("{}Failed to parse command line options: {}", LOG_MESSAGE, cle.getMessage());
+            if (parser.userWantsHelp()) {
+                help(parser);
+                status = EXIT_NORMAL;
+            } else {
+                FileScanner main = new FileScanner();
+                status = main.execute(parser);
+            }
+        } catch (CmdLineException ex) {
+            LOG.error("{}Failed to parse command line options: {}", LOG_MESSAGE, ex.getMessage());
+            help(parser);
             status = EXIT_CMDLINE_ERROR;
         }
         System.exit(status);
     }
 
+    private static void help(CmdLineParser parser) {
+        LOG.error("YAMJ v3 File Scanner");
+        LOG.error("~~~~ ~~ ~~~~ ~~~~~~~");
+        LOG.error("Scans the specified directory for media files.");
+        LOG.error(parser.getDescriptions());
+    }
+
     private static CmdLineParser getCmdLineParser() {
         CmdLineParser parser = new CmdLineParser();
         parser.addOption(new CmdLineOption("d", "direcctory", "The directory to process", true, true));
+        parser.addOption(new CmdLineOption("w", "watcher", "Keep watching the directories for changes", false, true));
+        // Nothing is done with this at the moment
         parser.addOption(new CmdLineOption("h", "host", "The IP Address of the core server", false, true));
         parser.addOption(new CmdLineOption("p", "port", "The port for the core server", false, true));
         return parser;

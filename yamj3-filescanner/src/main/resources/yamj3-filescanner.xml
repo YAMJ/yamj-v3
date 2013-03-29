@@ -20,7 +20,7 @@
         <property name="ignoreResourceNotFound" value="true"/>
     </bean>
 
-    <bean id="scannerManagement" class="com.moviejukebox.filescanner.ScannerManagementImpl"/>
+    <bean id="scannerManagement" class="com.moviejukebox.filescanner.WatcherManagementImpl"/>
 
     <bean id="fileImportService" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
         <property name="serviceUrl" value="http://${yamj3.core.host}:${yamj3.core.port}/yamj3/FileImportService"/>

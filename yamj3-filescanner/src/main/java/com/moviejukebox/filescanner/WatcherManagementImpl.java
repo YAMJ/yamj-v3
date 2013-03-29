@@ -6,7 +6,9 @@ import com.moviejukebox.common.remote.service.FileImportService;
 import com.moviejukebox.common.remote.service.PingService;
 import com.moviejukebox.filescanner.stats.ScannerStatistics;
 import com.moviejukebox.filescanner.stats.StatType;
+import com.moviejukebox.filescanner.watcher.Watcher;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,14 +19,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 
-public class ScannerManagementImpl implements ScannerManagement {
+public class WatcherManagementImpl implements ScannerManagement {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ScannerManagementImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WatcherManagementImpl.class);
     private static final String LOG_MESSAGE = "FileScanner: ";
     // Exit status codes
     private static final int EXIT_NORMAL = 0;
     private static final int EXIT_NO_DIRECTORY = 1;
     private static final int EXIT_CONNECT_FAILURE = 2;
+    private static final int EXIT_WATCH_FAILURE = 3;
     // List of files
     private static List<File> fileList;
     @Resource(name = "fileImportService")
@@ -36,6 +39,7 @@ public class ScannerManagementImpl implements ScannerManagement {
     public int runScanner(CmdLineParser parser) {
         fileList = new ArrayList<File>();
         String directoryProperty = parser.getParsedOptionValue("d");
+        boolean watchEnabled = Boolean.parseBoolean(parser.getParsedOptionValue("w"));
         File directory = new File(directoryProperty);
 
         int status = scan(directory);
@@ -43,8 +47,20 @@ public class ScannerManagementImpl implements ScannerManagement {
         LOG.info("{}", ScannerStatistics.generateStats());
         LOG.info("{}Scanning completed.", LOG_MESSAGE);
 
-        if (status == 0) {
+        if (status == EXIT_NORMAL) {
             status = send(directory);
+        }
+
+        if (watchEnabled) {
+            LOG.info("{}Watching directory '{}' for changes...", LOG_MESSAGE, directoryProperty);
+            try {
+                Watcher wd = new Watcher(directoryProperty);
+                wd.processEvents();
+            } catch (IOException ex) {
+                LOG.warn("{}Unable to watch directory '{}', error: {}", LOG_MESSAGE, directoryProperty, ex.getMessage());
+                status = EXIT_WATCH_FAILURE;
+            }
+            LOG.info("{}Watching directory '{}' completed", LOG_MESSAGE, directoryProperty);
         }
 
         LOG.info("{}Exiting with status {}", LOG_MESSAGE, status);

@@ -1,12 +1,12 @@
 package com.moviejukebox.filescanner.stats;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 public class ScannerStatistics {
 
-    private static Map<StatType, Integer> statistics = new HashMap<>();
+    private static Map<StatType, Integer> statistics = new EnumMap<StatType, Integer>(StatType.class);
 
     private ScannerStatistics() {
         throw new UnsupportedOperationException("Cannot instantiate this class");
