@@ -49,6 +49,12 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
         </dependency>
+        <!-- Watched functionality -->
+        <dependency>
+            <groupId>net.sf.jpathwatch</groupId>
+            <artifactId>jpathwatch</artifactId>
+            <version>0.95</version>
+        </dependency>
     </dependencies>
 
     <build>

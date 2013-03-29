@@ -32,8 +32,8 @@ public class FileScanner {
 
             FileScanner main = new FileScanner();
             status = main.execute(parser);
-        } catch (CmdLineException cle) {
-            LOG.error("{}Failed to parse command line options: {}", LOG_MESSAGE, cle.getMessage());
+        } catch (CmdLineException ex) {
+            LOG.error("{}Failed to parse command line options: {}", LOG_MESSAGE, ex.getMessage());
             status = EXIT_CMDLINE_ERROR;
         }
         System.exit(status);
@@ -42,6 +42,8 @@ public class FileScanner {
     private static CmdLineParser getCmdLineParser() {
         CmdLineParser parser = new CmdLineParser();
         parser.addOption(new CmdLineOption("d", "direcctory", "The directory to process", true, true));
+        parser.addOption(new CmdLineOption("w", "watcher", "Keep watching the directories for changes", false, true));
+        // Nothing is done with this at the moment
         parser.addOption(new CmdLineOption("h", "host", "The IP Address of the core server", false, true));
         parser.addOption(new CmdLineOption("p", "port", "The port for the core server", false, true));
         return parser;
