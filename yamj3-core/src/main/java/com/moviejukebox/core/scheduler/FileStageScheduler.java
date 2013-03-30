@@ -19,21 +19,34 @@ public class FileStageScheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileStageScheduler.class);
 
+    // trigger for import
+    private boolean trigger = false;
+    
     @Autowired
     private FileStageDao fileStageDao;
     @Autowired
     private MediaImportService mediaImportService;
-    
     @Resource(name = "stagingTaskExecutor")
     private TaskExecutor taskExecutor;
+
+    public synchronized void triggerProcess() {
+        this.trigger = true;
+    }
     
     @Scheduled(initialDelay=10000, fixedDelay=30000)
-    public void importNewStagedFiles() {
+    public void process() {
+        if (trigger == false) {
+            // nothing to process
+            return;
+        }
         
         // find new file stages
         List<FileStage> fileStages = fileStageDao.getFileStages(FileStageType.NEW, 10);
         if (fileStages.isEmpty()) {
             LOGGER.debug("No file stage objects found; nothing to do");
+            // reset the trigger
+            trigger = false;
+            // nothing to do, so leave
             return;
         }
 
@@ -42,5 +55,8 @@ public class FileStageScheduler {
             MediaImportRunner runner = new MediaImportRunner(fileStage, mediaImportService);
             taskExecutor.execute(runner);
         }
+
+        // reset the trigger
+        trigger = false;
     }
 }

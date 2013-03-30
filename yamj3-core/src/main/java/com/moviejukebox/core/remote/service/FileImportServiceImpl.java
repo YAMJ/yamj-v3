@@ -9,6 +9,7 @@ import com.moviejukebox.core.database.model.StageDirectory;
 import com.moviejukebox.core.database.model.StageFile;
 import com.moviejukebox.core.database.model.type.FileStageType;
 import com.moviejukebox.core.database.service.StagingService;
+import com.moviejukebox.core.scheduler.FileStageScheduler;
 import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,8 @@ public class FileImportServiceImpl implements FileImportService {
     private FileStageDao fileStageDao;
     @Autowired
     private StagingService stagingService;
+    @Autowired
+    private FileStageScheduler fileStageScheduler;
     
     @Override
     public void importFile(FileImportDTO fileImportDTO) {
@@ -38,6 +41,9 @@ public class FileImportServiceImpl implements FileImportService {
         fileStageDao.saveEntity(fileStage);
         
         LOGGER.debug("Stored stage file: " + fileStage);
+
+        // triggering process in next run
+        fileStageScheduler.triggerProcess();
     }
 
     @Override
@@ -53,6 +59,9 @@ public class FileImportServiceImpl implements FileImportService {
         fileStageDao.saveEntity(fileStage);
         
         LOGGER.debug("Stored stage file for deletion: " + fileStage);
+
+        // triggering process in next run
+        fileStageScheduler.triggerProcess();
     }
 
     @Override
@@ -65,5 +74,8 @@ public class FileImportServiceImpl implements FileImportService {
                 LOGGER.debug("Stored stage file: " + stageDirectory.getDirectoryPath() + stageFile.getFileName());
             }
         }
+
+        // triggering process in next run
+        fileStageScheduler.triggerProcess();
     }
 }
