@@ -1,18 +1,19 @@
 package com.moviejukebox.core.database.model.type;
 
 public enum ArtworkType {
-    
+
     UNKNOWN,
     POSTER,
     BANNER,
     FANART,
     VIDEOIMAGE,
     PERSON;
-    
+
     public static ArtworkType fromString(String type) {
         try {
             return ArtworkType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ignore) {}
-        return UNKNOWN;
+        } catch (Exception ignore) {
+            return UNKNOWN;
+        }
     }
 }

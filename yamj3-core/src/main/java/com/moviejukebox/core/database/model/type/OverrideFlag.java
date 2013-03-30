@@ -42,7 +42,8 @@ public enum OverrideFlag {
     public static OverrideFlag fromString(String overrideFlag) {
         try {
             return OverrideFlag.valueOf(overrideFlag.trim().toUpperCase());
-        } catch (Exception ignore) {}
-        return UNKNOWN;
+        } catch (Exception ignore) {
+            return UNKNOWN;
+        }
     }
 }
