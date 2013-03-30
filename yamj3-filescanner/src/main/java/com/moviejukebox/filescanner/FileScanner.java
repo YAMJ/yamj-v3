@@ -3,6 +3,7 @@ package com.moviejukebox.filescanner;
 import com.moviejukebox.common.cmdline.CmdLineException;
 import com.moviejukebox.common.cmdline.CmdLineOption;
 import com.moviejukebox.common.cmdline.CmdLineParser;
+import static com.moviejukebox.common.type.ExitType.*;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,10 +16,6 @@ public class FileScanner {
     private static final Logger LOG = LoggerFactory.getLogger(FileScanner.class);
     private static final String LOG_MESSAGE = "FileScanner: ";
     private static final String logFilename = "yamj-filescanner";
-    // return status codes
-    private static final int EXIT_NORMAL = 0;
-    private static final int EXIT_CMDLINE_ERROR = 1;
-    private static final int EXIT_CONFIG_ERROR = 2;
 
     public static void main(String[] args) throws Exception {
         System.setProperty("file.name", logFilename);
@@ -32,7 +29,7 @@ public class FileScanner {
 
             if (parser.userWantsHelp()) {
                 help(parser);
-                status = EXIT_NORMAL;
+                status = SUCCESS.getReturn();
             } else {
                 FileScanner main = new FileScanner();
                 status = main.execute(parser);
@@ -40,7 +37,7 @@ public class FileScanner {
         } catch (CmdLineException ex) {
             LOG.error("{}Failed to parse command line options: {}", LOG_MESSAGE, ex.getMessage());
             help(parser);
-            status = EXIT_CMDLINE_ERROR;
+            status = CMDLINE_ERROR.getReturn();
         }
         System.exit(status);
     }
@@ -72,7 +69,8 @@ public class FileScanner {
         } catch (BeansException ex) {
             LOG.error("{}Failed to load scanner configuration", LOG_MESSAGE);
             ex.printStackTrace(System.err);
-            status = EXIT_CONFIG_ERROR;
+            status = CONFIG_ERROR.getReturn();
+
         }
         return status;
     }

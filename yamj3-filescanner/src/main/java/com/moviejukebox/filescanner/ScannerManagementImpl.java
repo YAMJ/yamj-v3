@@ -16,15 +16,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
+import static com.moviejukebox.common.type.ExitType.*;
 
 public class ScannerManagementImpl implements ScannerManagement {
 
     private static final Logger LOG = LoggerFactory.getLogger(ScannerManagementImpl.class);
     private static final String LOG_MESSAGE = "FileScanner: ";
-    // Exit status codes
-    private static final int EXIT_NORMAL = 0;
-    private static final int EXIT_NO_DIRECTORY = 1;
-    private static final int EXIT_CONNECT_FAILURE = 2;
     // List of files
     private static List<File> fileList;
     @Resource(name = "fileImportService")
@@ -53,12 +50,12 @@ public class ScannerManagementImpl implements ScannerManagement {
     }
 
     private int scan(File directoryToScan) {
-        int status = EXIT_NORMAL;
+        int status = SUCCESS.getReturn();
         LOG.info("{}Scanning directory '{}'...", LOG_MESSAGE, directoryToScan.getName());
 
-        if (directoryToScan == null || !directoryToScan.exists()) {
+        if (!directoryToScan.exists()) {
             LOG.info("{}Failed to read directory '{}'", LOG_MESSAGE, directoryToScan);
-            return EXIT_NO_DIRECTORY;
+            return NO_DIRECTORY.getReturn();
         }
 
         List<File> currentFileList = Arrays.asList(directoryToScan.listFiles());
@@ -77,7 +74,7 @@ public class ScannerManagementImpl implements ScannerManagement {
     }
 
     private int send(File directoryScanned) {
-        int status = EXIT_NORMAL;
+        int status = SUCCESS.getReturn();
         LOG.info("{}Starting to send the files to the core server...", LOG_MESSAGE);
 
         try {
@@ -85,7 +82,7 @@ public class ScannerManagementImpl implements ScannerManagement {
             LOG.info("{}Ping response: {}", LOG_MESSAGE, pingResponse);
         } catch (RemoteConnectFailureException ex) {
             LOG.error("{}Failed to connect to the core server: {}", LOG_MESSAGE, ex.getMessage());
-            return EXIT_CONNECT_FAILURE;
+            return CONNECT_FAILURE.getReturn();
         }
 
         FileImportDTO dto;
@@ -107,12 +104,12 @@ public class ScannerManagementImpl implements ScannerManagement {
                     fileImportService.importFile(dto);
                 } catch (RemoteAccessException ex) {
                     LOG.error("{}Failed to send object to the core server: {}", LOG_MESSAGE, ex.getMessage());
-                    LOG.error("{}{}", LOG_MESSAGE, (dto == null ? "No object found" : dto.toString()));
+                    LOG.error("{}{}", LOG_MESSAGE, dto.toString());
                 }
             }
         } catch (RemoteConnectFailureException ex) {
             LOG.error("{}Failed to connect to the core server: {}", LOG_MESSAGE, ex.getMessage());
-            return EXIT_CONNECT_FAILURE;
+            return CONNECT_FAILURE.getReturn();
         }
 
         LOG.info("{}Completed sending of files to core server...", LOG_MESSAGE);

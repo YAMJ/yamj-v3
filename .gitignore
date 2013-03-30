@@ -168,3 +168,6 @@ target/
 nbactions.xml
 /yamj3-filescanner/test.cmd
 /yamj3-filescanner/*.log
+/yamj3-filescanner/nbproject/
+/yamj3-common/nbproject/
+/nbproject/
