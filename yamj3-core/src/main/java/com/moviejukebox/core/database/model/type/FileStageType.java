@@ -11,7 +11,7 @@ public enum FileStageType {
     public static FileStageType fromString(String type) {
         try {
             return FileStageType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ignore) {
+        } catch (IllegalArgumentException ex) {
             return UNKNOWN;
         }
     }

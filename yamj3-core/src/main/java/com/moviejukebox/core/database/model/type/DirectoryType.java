@@ -9,7 +9,7 @@ public enum DirectoryType {
     public static DirectoryType fromString(String type) {
         try {
             return DirectoryType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ex) {
+        } catch (IllegalArgumentException ex) {
             return STANDARD;
         }
     }

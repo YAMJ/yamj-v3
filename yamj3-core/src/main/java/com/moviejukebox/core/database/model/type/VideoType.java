@@ -12,7 +12,7 @@ public enum VideoType {
     public static VideoType fromString(String type) {
         try {
             return VideoType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ignore) {
+        } catch (IllegalArgumentException ex) {
             return UNKNOWN;
         }
     }

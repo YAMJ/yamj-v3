@@ -11,7 +11,7 @@ public enum StatusType {
     public static StatusType fromString(String type) {
         try {
             return StatusType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ignore) {
+        } catch (IllegalArgumentException ex) {
             return NEW;
         }
     }

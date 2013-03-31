@@ -12,7 +12,7 @@ public enum ArtworkType {
     public static ArtworkType fromString(String type) {
         try {
             return ArtworkType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ignore) {
+        } catch (IllegalArgumentException ex) {
             return UNKNOWN;
         }
     }
