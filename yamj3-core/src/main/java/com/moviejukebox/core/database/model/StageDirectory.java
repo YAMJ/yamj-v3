@@ -56,6 +56,11 @@ public class StageDirectory  extends AbstractAuditable implements Serializable {
     @JoinColumn(name = "library_id", nullable = false)
     private Library library;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_DIRECTORY_PARENT")
+    @JoinColumn(name = "parent_id")
+    private StageDirectory parentDirectory;
+    
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "stageDirectory")
     private Set<StageFile> stageFiles = new HashSet<StageFile>(0);
 
@@ -91,6 +96,14 @@ public class StageDirectory  extends AbstractAuditable implements Serializable {
 
     public void setLibrary(Library library) {
         this.library = library;
+    }
+    
+    public StageDirectory getParentDirectory() {
+        return parentDirectory;
+    }
+
+    public void setParentDirectory(StageDirectory parentDirectory) {
+        this.parentDirectory = parentDirectory;
     }
 
     public Set<StageFile> getStageFiles() {

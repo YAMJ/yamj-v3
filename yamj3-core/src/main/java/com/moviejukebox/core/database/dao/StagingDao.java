@@ -3,8 +3,12 @@ package com.moviejukebox.core.database.dao;
 import com.moviejukebox.core.database.model.Library;
 import com.moviejukebox.core.database.model.StageDirectory;
 import com.moviejukebox.core.database.model.StageFile;
+import com.moviejukebox.core.database.model.type.FileType;
+import com.moviejukebox.core.database.model.type.StatusType;
 import com.moviejukebox.core.hibernate.ExtendedHibernateDaoSupport;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -53,5 +57,20 @@ public class StagingDao extends ExtendedHibernateDaoSupport {
                 return (StageFile)criteria.uniqueResult();
             }
         });
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<StageFile> getStageFiles(final int maxResults, FileType fileType, StatusType... statusTypes) {
+        
+        StringBuilder query = new StringBuilder();
+        query.append("from StageFile f join fetch f.stageDirectory d ");
+        query.append("where f.fileType = :fileType ");
+        query.append("and f.status in (:statusTypes) ");
+
+        HashMap<String,Object> params = new HashMap<String,Object>();
+        params.put("fileType", fileType);
+        params.put("statusTypes", statusTypes);
+        
+        return getExtendedHibernateTemplate().findByNamedParam(query, params, maxResults);
     }
 }

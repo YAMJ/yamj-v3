@@ -9,7 +9,7 @@ import com.moviejukebox.core.database.model.StageDirectory;
 import com.moviejukebox.core.database.model.StageFile;
 import com.moviejukebox.core.database.model.type.FileStageType;
 import com.moviejukebox.core.database.service.StagingService;
-import com.moviejukebox.core.scheduler.FileStageScheduler;
+import com.moviejukebox.core.scheduler.StagingScheduler;
 import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +24,9 @@ public class FileImportServiceImpl implements FileImportService {
     @Autowired
     private FileStageDao fileStageDao;
     @Autowired
-    private StagingService stagingService;
+    private StagingScheduler fileStageScheduler;
     @Autowired
-    private FileStageScheduler fileStageScheduler;
+    private StagingService stagingService;
     
     @Override
     public void importFile(FileImportDTO fileImportDTO) {

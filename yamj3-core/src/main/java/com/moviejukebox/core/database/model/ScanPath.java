@@ -8,6 +8,7 @@ import javax.persistence.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NaturalId;
 
+@Deprecated
 @Entity
 @Table(name = "scan_path")
 public class ScanPath extends AbstractAuditable implements Serializable {

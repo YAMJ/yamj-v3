@@ -9,11 +9,10 @@ import com.moviejukebox.core.database.model.StageDirectory;
 import com.moviejukebox.core.database.model.StageFile;
 import com.moviejukebox.core.database.model.type.FileType;
 import com.moviejukebox.core.database.model.type.StatusType;
-import java.util.Arrays;
+import com.moviejukebox.core.scanner.FilenameDTO;
+import com.moviejukebox.core.scanner.FilenameScanner;
 import java.util.Date;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -22,14 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service("stagingService")
 public class StagingService {
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(StagingService.class);
-
-    private List<String> videoTypes = Arrays.asList("avi,mkv".split(","));
-    private List<String> imageTypes = Arrays.asList("png,jpg,gif".split(","));
-    private List<String> subtitleTypes = Arrays.asList("srt,sub,ass".split(","));
-    
     @Autowired
     private StagingDao stagingDao;
+    @Autowired
+    private FilenameScanner filenameScanner;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Library storeLibrary(LibraryDTO libraryDTO) {
@@ -39,7 +34,7 @@ public class StagingService {
             library.setClient(libraryDTO.getClient());
             library.setPlayerPath(libraryDTO.getPlayerPath());
         } 
-        library.setBaseDirectory(libraryDTO.getBaseDirectory());
+        library.setBaseDirectory(FilenameUtils.normalize(libraryDTO.getBaseDirectory(), true));
         library.setLastScanned(new Date(System.currentTimeMillis()));
         stagingDao.storeEntity(library);
         return library;
@@ -47,13 +42,27 @@ public class StagingService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public StageDirectory storeStageDirectory(StageDirectoryDTO stageDirectoryDTO, Library library) {
-        StageDirectory stageDirectory = stagingDao.getStageDirectory(stageDirectoryDTO.getPath(), library);
+        // normalize the directory path by using URI
+        String normalized = FilenameUtils.normalizeNoEndSeparator(stageDirectoryDTO.getPath(), true);
+        
+        StageDirectory stageDirectory = stagingDao.getStageDirectory(normalized, library);
         if (stageDirectory == null) {
             stageDirectory = new StageDirectory();
-            stageDirectory.setDirectoryPath(stageDirectoryDTO.getPath());
+            stageDirectory.setDirectoryPath(normalized);
             stageDirectory.setLibrary(library);
             stageDirectory.setStatus(StatusType.NEW);
             stageDirectory.setDirectoryDate(new Date(stageDirectoryDTO.getDate()));
+            
+            // get parent stage directory
+            int lastIndex = normalized.lastIndexOf('/');
+            if (lastIndex > 0) {
+                String parentPath = normalized.substring(0, lastIndex);
+                StageDirectory parent = stagingDao.getStageDirectory(parentPath, library);
+                if (parent != null) {
+                    stageDirectory.setParentDirectory(parent);
+                }
+            }
+            
             stagingDao.saveEntity(stageDirectory);
         } else {
             Date newDate = new Date(stageDirectoryDTO.getDate());
@@ -70,15 +79,21 @@ public class StagingService {
     public StageFile storeStageFile(StageFileDTO stageFileDTO, StageDirectory stageDirectory) {
         StageFile stageFile = stagingDao.getStageFile(stageFileDTO.getFileName(), stageDirectory);
         if (stageFile == null) {
-            // TODO file name scanning HERE
             
             stageFile = new StageFile();
             stageFile.setFileName(stageFileDTO.getFileName());
             stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));
             stageFile.setFileSize(stageFileDTO.getFileSize());
             stageFile.setStageDirectory(stageDirectory);
-            stageFile.setFileType(determineFileType(stageFileDTO.getFileName()));
+            stageFile.setFileType(filenameScanner.determineFileType(stageFileDTO.getFileName()));
             stageFile.setStatus(StatusType.NEW);
+            
+            if (FileType.VIDEO.equals(stageFile.getFileType())) {
+                FilenameDTO dto = new FilenameDTO(stageFile);
+                filenameScanner.scan(dto);
+                System.err.println(dto);
+            }
+            
             stagingDao.saveEntity(stageFile);
         } else {
             Date newDate = new Date(stageFileDTO.getFileDate());
@@ -90,50 +105,5 @@ public class StagingService {
             }
         }
         return stageFile;
-    }
-    
-    private FileType determineFileType(String fileName) {
-        try {
-            int index = fileName.lastIndexOf(".");
-            if (index < 0) {
-                return FileType.UNKNOWN;
-            }
-            
-            String extension = fileName.substring(index + 1).toLowerCase();
-            if ("nfo".equals(extension)) {
-                return FileType.NFO;
-            }
-            if (videoTypes.contains(extension)) {
-                // BETTER trailer detection; i.e by file name
-                String lowerFileName = fileName.toLowerCase();
-                if (lowerFileName.equals("trailer."+extension)) {
-                    return FileType.TRAILER;
-                } else if (lowerFileName.endsWith(".trailer."+extension)) {
-                    return FileType.TRAILER;
-                }
-                return FileType.VIDEO;
-            }
-            if (subtitleTypes.contains(extension)) {
-                return FileType.SUBTITLE;
-            }
-            if (imageTypes.contains(extension)) {
-                // determine exact image type
-                String lowerFileName = fileName.toLowerCase();
-                if (lowerFileName.equals("fanart."+extension)) {
-                    return FileType.FANART;
-                } else if (lowerFileName.endsWith(".fanart."+extension)) {
-                    return FileType.FANART;
-                } else if (lowerFileName.endsWith(".videoimage."+extension)) {
-                    // TODO should be a pattern
-                    return FileType.VIDEOIMAGE;
-                }
-                // assume everything else as poster
-                return FileType.POSTER;
-            }
-            
-        } catch (Exception error) {
-            LOGGER.error("Failed to determine file type for: "+fileName, error);
-        }
-        return FileType.UNKNOWN;
     }
 }

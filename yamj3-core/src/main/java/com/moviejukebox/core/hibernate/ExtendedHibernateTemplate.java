@@ -298,6 +298,25 @@ public class ExtendedHibernateTemplate extends HibernateTemplate {
 		});
 	}
 
+	   /**
+     * Find results with query where parameters has to be set.
+     * 
+     * @param query
+     *        the query
+     * @param nameParams
+     *        the named parameters
+     * @param maxResults
+     *        maximal number of results
+     * @return the result list
+     * @throws DataAccessException
+     *         if an error occurred
+     */
+    public final List findByNamedParam(final CharSequence query, final Map<String, Object> namedParams, final Integer maxResults)
+        throws DataAccessException
+    {
+        return findByNamedParam(query, namedParams, -1, maxResults, false, false);
+    }
+
 	/**
 	 * Find results with query where parameters has to be set.
 	 * 

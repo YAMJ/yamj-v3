@@ -19,7 +19,7 @@
     <!-- Activates @Scheduled and @Async annotations for scheduling -->
     <task:annotation-driven />
 
-    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <bean id="propertyConfigurer" class="com.moviejukebox.core.tools.PropertyTools">
         <property name="locations">
             <list>
                 <value>classpath:/yamj3.core.properties</value>
