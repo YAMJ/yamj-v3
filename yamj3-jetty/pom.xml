@@ -72,7 +72,7 @@
                     <artifactId>jstl-api</artifactId>
                     <groupId>javax.servlet.jsp.jstl</groupId>
                 </exclusion>
-           </exclusions>
+            </exclusions>
         </dependency>
     </dependencies>
 
@@ -81,6 +81,23 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${basedir}/database</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </fileset>
+                        <fileset>
+                            <directory>${basedir}</directory>
+                            <includes>
+                                <include>database</include>
+                                <include>logs</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
             </plugin>
 
             <plugin>

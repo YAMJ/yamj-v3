@@ -7,6 +7,10 @@ public enum DirectoryType {
     STANDARD;
 
     public static DirectoryType fromString(String type) {
-        return DirectoryType.valueOf(type.trim().toUpperCase());
+        try {
+            return DirectoryType.valueOf(type.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            return STANDARD;
+        }
     }
 }
