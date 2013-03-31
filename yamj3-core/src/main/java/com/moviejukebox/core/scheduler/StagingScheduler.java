@@ -1,9 +1,9 @@
 package com.moviejukebox.core.scheduler;
 
-import com.moviejukebox.core.database.dao.FileStageDao;
-import com.moviejukebox.core.database.model.FileStage;
-import com.moviejukebox.core.database.model.type.FileStageType;
-import com.moviejukebox.core.importer.MediaImportRunner;
+import com.moviejukebox.core.database.dao.StagingDao;
+import com.moviejukebox.core.database.model.StageFile;
+import com.moviejukebox.core.database.model.type.FileType;
+import com.moviejukebox.core.database.model.type.StatusType;
 import com.moviejukebox.core.importer.MediaImportService;
 import java.util.List;
 import javax.annotation.Resource;
@@ -15,15 +15,15 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
-public class FileStageScheduler {
+public class StagingScheduler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileStageScheduler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StagingScheduler.class);
 
     // trigger for import
     private boolean trigger = false;
     
     @Autowired
-    private FileStageDao fileStageDao;
+    private StagingDao stagingDao;
     @Autowired
     private MediaImportService mediaImportService;
     @Resource(name = "stagingTaskExecutor")
@@ -34,26 +34,26 @@ public class FileStageScheduler {
     }
     
     @Scheduled(initialDelay=10000, fixedDelay=30000)
-    public void process() {
+    public void process() throws Exception {
         if (trigger == false) {
             // nothing to process
             return;
         }
         
-        // find new file stages
-        List<FileStage> fileStages = fileStageDao.getFileStages(FileStageType.NEW, 10);
-        if (fileStages.isEmpty()) {
-            LOGGER.debug("No file stage objects found; nothing to do");
-            // reset the trigger
+        // find new staged videos
+        List<StageFile> stageFiles = stagingDao.getStageFiles(10, FileType.VIDEO, StatusType.NEW, StatusType.UPDATED); 
+        if (stageFiles.isEmpty()) {
+            // nothing to do, so reset trigger and return
             trigger = false;
-            // nothing to do, so leave
             return;
         }
+        LOGGER.debug("Found " + stageFiles.size() + " stage files to process");
 
         // process each staged file with an import runner
-        for (FileStage fileStage : fileStages) {
-            MediaImportRunner runner = new MediaImportRunner(fileStage, mediaImportService);
-            taskExecutor.execute(runner);
+        for (StageFile stageFile : stageFiles) {
+            LOGGER.info(stageFile.getFile().toString());
+//            MediaImportRunner runner = new MediaImportRunner(stageFile, mediaImportService);
+//            taskExecutor.execute(runner);
         }
 
         // reset the trigger

@@ -44,33 +44,38 @@ public class BatchManagementImpl implements BatchManagement {
                 LibraryDTO library = new LibraryDTO();
                 library.setClient("007");
                 library.setPlayerPath("smb://127.0.0.1/test");
-                library.setBaseDirectory("D:/test");
+                library.setBaseDirectory("D:\\test\\");
 
                 StageDirectoryDTO stageDirectory = new StageDirectoryDTO();
                 stageDirectory.setDate(System.currentTimeMillis());
-                stageDirectory.setPath("D:/test/movies");
+                stageDirectory.setPath("D:\\test\\movies\\");
+                library.addStageDirectory(stageDirectory);
+
+                stageDirectory = new StageDirectoryDTO();
+                stageDirectory.setDate(System.currentTimeMillis());
+                stageDirectory.setPath("D:\\test\\movies\\Action");
                 library.addStageDirectory(stageDirectory);
                 
                 StageFileDTO stageFile = new StageFileDTO();
-                stageFile.setFileName("Avatar (2009).mkv");
+                stageFile.setFileName("Avatar (2009).bdrip.mkv");
                 stageFile.setFileDate(System.currentTimeMillis());
                 stageFile.setFileSize(12344165L);
                 stageDirectory.addStageFile(stageFile);
 
                 stageFile = new StageFileDTO();
-                stageFile.setFileName("Avatar (2009).nfo");
+                stageFile.setFileName("Avatar (2009).bdrip.nfo");
                 stageFile.setFileDate(System.currentTimeMillis());
                 stageFile.setFileSize(10L);
                 stageDirectory.addStageFile(stageFile);
 
                 stageFile = new StageFileDTO();
-                stageFile.setFileName("Avatar (2009).jpg");
+                stageFile.setFileName("Avatar (2009).bdrip.jpg");
                 stageFile.setFileDate(System.currentTimeMillis());
                 stageFile.setFileSize(1451257L);
                 stageDirectory.addStageFile(stageFile);
 
                 stageFile = new StageFileDTO();
-                stageFile.setFileName("Avatar (2009).FANART.jpg");
+                stageFile.setFileName("Avatar (2009).bdrip.FANART.jpg");
                 stageFile.setFileDate(System.currentTimeMillis());
                 stageFile.setFileSize(43252L);
                 stageDirectory.addStageFile(stageFile);

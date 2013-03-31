@@ -3,10 +3,7 @@ package com.moviejukebox.core.database.model.type;
 public enum FileType {
 
     VIDEO,
-    TRAILER,
-    POSTER,
-    VIDEOIMAGE,
-    FANART,
+    IMAGE,
     SUBTITLE,
     NFO,
     UNKNOWN;

@@ -15,6 +15,7 @@ import org.hibernate.annotations.TypeDef;
     typeClass = EnumStringUserType.class,
     parameters = {@Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.FileStageType")})
 
+@Deprecated
 @Entity
 @Table(name = "file_stage")
 public class FileStage extends AbstractIdentifiable implements Serializable {

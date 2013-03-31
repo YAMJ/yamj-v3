@@ -6,8 +6,10 @@ import com.moviejukebox.common.dto.LibraryDTO;
 
 public interface FileImportService {
 
+    @Deprecated
     void importFile(FileImportDTO fileImportDTO);
 
+    @Deprecated
     void deleteFile(FileDeletionDTO fileDeletionDTO);
     
     void importLibrary(LibraryDTO libraryDTO);

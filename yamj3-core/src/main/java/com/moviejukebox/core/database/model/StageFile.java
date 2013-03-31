@@ -1,15 +1,11 @@
 package com.moviejukebox.core.database.model;
 
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
-
-import javax.persistence.Column;
-import org.hibernate.annotations.Type;
-
 import com.moviejukebox.core.database.model.type.FileType;
 import com.moviejukebox.core.database.model.type.StatusType;
 import com.moviejukebox.core.hibernate.usertypes.EnumStringUserType;
+import java.io.File;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.Date;
 import javax.persistence.*;
 import javax.persistence.Entity;
@@ -36,9 +32,9 @@ public class StageFile extends AbstractAuditable implements Serializable {
     @NaturalId(mutable = true)
     @Column(name = "file_name", nullable = false, length = 500)
     private String fileName;
-    
+
     @NaturalId(mutable = true)
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @ForeignKey(name = "FK_FILE_DIRECTORY")
     @JoinColumn(name = "directory_id", nullable = false)
     private StageDirectory stageDirectory;
@@ -106,6 +102,16 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     public void setStatus(StatusType status) {
         this.status = status;
+    }
+    
+    // OTHER METHODS
+    
+    /**
+     * Get the file of the staged file for accessing it on the file system.
+     */
+    public File getFile() throws Exception {
+        URI uri = new URI(getStageDirectory().getDirectoryPath());
+        return new File(new File(uri).getAbsolutePath() + "/" + getFileName());
     }
     
     // EQUALITY CHECKS
