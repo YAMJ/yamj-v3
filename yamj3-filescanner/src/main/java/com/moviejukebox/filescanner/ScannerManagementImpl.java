@@ -4,6 +4,7 @@ import com.moviejukebox.common.cmdline.CmdLineParser;
 import com.moviejukebox.common.dto.FileImportDTO;
 import com.moviejukebox.common.remote.service.FileImportService;
 import com.moviejukebox.common.remote.service.PingService;
+import com.moviejukebox.common.type.ExitType;
 import com.moviejukebox.filescanner.stats.ScannerStatistics;
 import com.moviejukebox.filescanner.stats.StatType;
 import java.io.File;
@@ -30,17 +31,17 @@ public class ScannerManagementImpl implements ScannerManagement {
     private PingService pingService;
 
     @Override
-    public int runScanner(CmdLineParser parser) {
+    public ExitType runScanner(CmdLineParser parser) {
         fileList = new ArrayList<File>();
         String directoryProperty = parser.getParsedOptionValue("d");
         File directory = new File(directoryProperty);
 
-        int status = scan(directory);
+        ExitType status = scan(directory);
 
         LOG.info("{}", ScannerStatistics.generateStats());
         LOG.info("{}Scanning completed.", LOG_MESSAGE);
 
-        if (status == 0) {
+        if (status == SUCCESS) {
             status = send(directory);
         }
 
@@ -49,13 +50,12 @@ public class ScannerManagementImpl implements ScannerManagement {
         return status;
     }
 
-    private int scan(File directoryToScan) {
-        int status = SUCCESS.getReturn();
+    private ExitType scan(File directoryToScan) {
         LOG.info("{}Scanning directory '{}'...", LOG_MESSAGE, directoryToScan.getName());
 
         if (!directoryToScan.exists()) {
             LOG.info("{}Failed to read directory '{}'", LOG_MESSAGE, directoryToScan);
-            return NO_DIRECTORY.getReturn();
+            return NO_DIRECTORY;
         }
 
         List<File> currentFileList = Arrays.asList(directoryToScan.listFiles());
@@ -70,11 +70,10 @@ public class ScannerManagementImpl implements ScannerManagement {
                 ScannerStatistics.inc(StatType.FILE);
             }
         }
-        return status;
+        return SUCCESS;
     }
 
-    private int send(File directoryScanned) {
-        int status = SUCCESS.getReturn();
+    private ExitType send(File directoryScanned) {
         LOG.info("{}Starting to send the files to the core server...", LOG_MESSAGE);
 
         try {
@@ -82,7 +81,7 @@ public class ScannerManagementImpl implements ScannerManagement {
             LOG.info("{}Ping response: {}", LOG_MESSAGE, pingResponse);
         } catch (RemoteConnectFailureException ex) {
             LOG.error("{}Failed to connect to the core server: {}", LOG_MESSAGE, ex.getMessage());
-            return CONNECT_FAILURE.getReturn();
+            return CONNECT_FAILURE;
         }
 
         FileImportDTO dto;
@@ -109,11 +108,11 @@ public class ScannerManagementImpl implements ScannerManagement {
             }
         } catch (RemoteConnectFailureException ex) {
             LOG.error("{}Failed to connect to the core server: {}", LOG_MESSAGE, ex.getMessage());
-            return CONNECT_FAILURE.getReturn();
+            return CONNECT_FAILURE;
         }
 
         LOG.info("{}Completed sending of files to core server...", LOG_MESSAGE);
 
-        return status;
+        return SUCCESS;
     }
 }

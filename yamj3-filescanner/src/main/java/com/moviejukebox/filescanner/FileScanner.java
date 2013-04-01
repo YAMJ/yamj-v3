@@ -3,6 +3,7 @@ package com.moviejukebox.filescanner;
 import com.moviejukebox.common.cmdline.CmdLineException;
 import com.moviejukebox.common.cmdline.CmdLineOption;
 import com.moviejukebox.common.cmdline.CmdLineParser;
+import com.moviejukebox.common.type.ExitType;
 import static com.moviejukebox.common.type.ExitType.*;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
@@ -23,13 +24,13 @@ public class FileScanner {
 
         CmdLineParser parser = getCmdLineParser();
 
-        int status;
+        ExitType status;
         try {
             parser.parse(args);
 
             if (parser.userWantsHelp()) {
                 help(parser);
-                status = SUCCESS.getReturn();
+                status = SUCCESS;
             } else {
                 FileScanner main = new FileScanner();
                 status = main.execute(parser);
@@ -37,9 +38,9 @@ public class FileScanner {
         } catch (CmdLineException ex) {
             LOG.error("{}Failed to parse command line options: {}", LOG_MESSAGE, ex.getMessage());
             help(parser);
-            status = CMDLINE_ERROR.getReturn();
+            status = CMDLINE_ERROR;
         }
-        System.exit(status);
+        System.exit(status.getReturn());
     }
 
     private static void help(CmdLineParser parser) {
@@ -53,15 +54,16 @@ public class FileScanner {
         CmdLineParser parser = new CmdLineParser();
         parser.addOption(new CmdLineOption("d", "direcctory", "The directory to process", true, true));
         parser.addOption(new CmdLineOption("w", "watcher", "Keep watching the directories for changes", false, true));
-        // Nothing is done with this at the moment
+        parser.addOption(new CmdLineOption("l", "library", "The library file to read", false, true));
+        // Nothing is done with these at the moment
         parser.addOption(new CmdLineOption("h", "host", "The IP Address of the core server", false, true));
         parser.addOption(new CmdLineOption("p", "port", "The port for the core server", false, true));
         return parser;
     }
 
     @SuppressWarnings("resource")
-    private int execute(CmdLineParser parser) {
-        int status;
+    private ExitType execute(CmdLineParser parser) {
+        ExitType status;
         try {
             ApplicationContext applicationContext = new ClassPathXmlApplicationContext("yamj3-filescanner.xml");
             ScannerManagement batchManagement = (ScannerManagement) applicationContext.getBean("scannerManagement");
@@ -69,7 +71,7 @@ public class FileScanner {
         } catch (BeansException ex) {
             LOG.error("{}Failed to load scanner configuration", LOG_MESSAGE);
             ex.printStackTrace(System.err);
-            status = CONFIG_ERROR.getReturn();
+            status = CONFIG_ERROR;
 
         }
         return status;
