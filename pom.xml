@@ -36,9 +36,9 @@
     </developers>
 
     <modules>
+        <module>yamj3-common</module>
         <module>yamj3-core</module>
         <module>yamj3-jetty</module>
-        <module>yamj3-common</module>
         <module>yamj3-batch</module>
         <module>yamj3-filescanner</module>
         <module>yamj3-distribution</module>
