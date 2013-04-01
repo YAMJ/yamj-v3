@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>yamj3-core</artifactId>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <prerequisites>
         <maven>3.0.3</maven>
