@@ -1,28 +1,26 @@
 package com.moviejukebox.filescanner;
 
+import static com.moviejukebox.common.type.ExitType.CONNECT_FAILURE;
+import static com.moviejukebox.common.type.ExitType.NO_DIRECTORY;
+import static com.moviejukebox.common.type.ExitType.SUCCESS;
+import static com.moviejukebox.common.type.ExitType.WATCH_FAILURE;
+
 import com.moviejukebox.common.cmdline.CmdLineParser;
-import com.moviejukebox.common.dto.FileImportDTO;
 import com.moviejukebox.common.remote.service.FileImportService;
 import com.moviejukebox.common.remote.service.PingService;
 import com.moviejukebox.common.type.ExitType;
+import com.moviejukebox.core.database.model.type.DirectoryType;
 import com.moviejukebox.filescanner.stats.ScannerStatistics;
 import com.moviejukebox.filescanner.stats.StatType;
 import com.moviejukebox.filescanner.watcher.Watcher;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import javax.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
-import static com.moviejukebox.common.type.ExitType.*;
-import com.moviejukebox.core.database.model.type.DirectoryType;
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Performs an initial scan of the library location and then updates when changes occur.
@@ -154,6 +152,7 @@ public class WatcherManagementImpl implements ScannerManagement {
             return CONNECT_FAILURE;
         }
 
+        /* use ImportDTO
         FileImportDTO dto;
         try {
             for (File file : fileList) {
@@ -180,7 +179,8 @@ public class WatcherManagementImpl implements ScannerManagement {
             LOG.error("{}Failed to connect to the core server: {}", LOG_MESSAGE, ex.getMessage());
             return CONNECT_FAILURE;
         }
-
+		*/
+        
         LOG.info("{}Completed sending of files to core server...", LOG_MESSAGE);
 
         return status;

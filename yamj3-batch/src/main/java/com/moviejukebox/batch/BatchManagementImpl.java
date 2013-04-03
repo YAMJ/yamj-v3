@@ -1,11 +1,9 @@
 package com.moviejukebox.batch;
 
-import com.moviejukebox.common.dto.StageFileDTO;
-
 import com.moviejukebox.common.cmdline.CmdLineParser;
-import com.moviejukebox.common.dto.FileImportDTO;
 import com.moviejukebox.common.dto.ImportDTO;
 import com.moviejukebox.common.dto.StageDirectoryDTO;
+import com.moviejukebox.common.dto.StageFileDTO;
 import com.moviejukebox.common.remote.service.FileImportService;
 import com.moviejukebox.common.remote.service.PingService;
 import javax.annotation.Resource;
@@ -32,14 +30,6 @@ public class BatchManagementImpl implements BatchManagement {
 
             // JUST FOR TESTING
             } else if ("filetest".equalsIgnoreCase(batchName)) {
-                // just a test for file staging
-                FileImportDTO dto = new FileImportDTO();
-                dto.setScanPath("smb://127.0.0.1/test");
-                dto.setFilePath("/test/movies/Avatar 2009.mkv");
-                dto.setFileDate(System.currentTimeMillis());
-                dto.setFileSize(2000000l);
-                fileImportService.importFile(dto);
-            } else if ("library".equalsIgnoreCase(batchName)) {
                 // just a test for file staging
                 ImportDTO importDTO = new ImportDTO();
                 importDTO.setClient("007");
