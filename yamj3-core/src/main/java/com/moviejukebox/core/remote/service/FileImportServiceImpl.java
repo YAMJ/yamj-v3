@@ -41,9 +41,6 @@ public class FileImportServiceImpl implements FileImportService {
         fileStageDao.saveEntity(fileStage);
         
         LOGGER.debug("Stored stage file: " + fileStage);
-
-        // triggering process in next run
-        fileStageScheduler.triggerProcess();
     }
 
     @Override
@@ -59,23 +56,11 @@ public class FileImportServiceImpl implements FileImportService {
         fileStageDao.saveEntity(fileStage);
         
         LOGGER.debug("Stored stage file for deletion: " + fileStage);
-
-        // triggering process in next run
-        fileStageScheduler.triggerProcess();
     }
 
     @Override
-    public void importLibrary(LibraryDTO libraryDTO) {
-        Library library = stagingService.storeLibrary(libraryDTO);
-        for (StageDirectoryDTO stageDirectoryDTO : libraryDTO.getStageDirectories()) {
-            StageDirectory stageDirectory = stagingService.storeStageDirectory(stageDirectoryDTO, library);
-            for (StageFileDTO stageFileDTO : stageDirectoryDTO.getStageFiles()) {
-                StageFile stageFile = stagingService.storeStageFile(stageFileDTO, stageDirectory);
-                LOGGER.debug("Stored stage file: " + stageDirectory.getDirectoryPath() + stageFile.getFileName());
-            }
-        }
-
-        // triggering process in next run
-        fileStageScheduler.triggerProcess();
+    public void importScanned(ImportDTO importDTO) {
+        Library library = stagingService.storeLibrary(importDTO);
+        stagingService.storeStageDirectory(importDTO.getStageDirectory(), library);
     }
 }

@@ -4,7 +4,7 @@ import com.moviejukebox.common.dto.StageFileDTO;
 
 import com.moviejukebox.common.cmdline.CmdLineParser;
 import com.moviejukebox.common.dto.FileImportDTO;
-import com.moviejukebox.common.dto.LibraryDTO;
+import com.moviejukebox.common.dto.ImportDTO;
 import com.moviejukebox.common.dto.StageDirectoryDTO;
 import com.moviejukebox.common.remote.service.FileImportService;
 import com.moviejukebox.common.remote.service.PingService;
@@ -41,20 +41,23 @@ public class BatchManagementImpl implements BatchManagement {
                 fileImportService.importFile(dto);
             } else if ("library".equalsIgnoreCase(batchName)) {
                 // just a test for file staging
-                LibraryDTO library = new LibraryDTO();
-                library.setClient("007");
-                library.setPlayerPath("smb://127.0.0.1/test");
-                library.setBaseDirectory("D:\\test\\");
+                ImportDTO importDTO = new ImportDTO();
+                importDTO.setClient("007");
+                importDTO.setPlayerPath("smb://127.0.0.1/test");
+                importDTO.setBaseDirectory("D:\\test\\");
 
                 StageDirectoryDTO stageDirectory = new StageDirectoryDTO();
                 stageDirectory.setDate(System.currentTimeMillis());
                 stageDirectory.setPath("D:\\test\\movies\\");
-                library.addStageDirectory(stageDirectory);
+                importDTO.setStageDirectory(stageDirectory);
+                
+                // import scanned
+                fileImportService.importScanned(importDTO);
 
                 stageDirectory = new StageDirectoryDTO();
                 stageDirectory.setDate(System.currentTimeMillis());
                 stageDirectory.setPath("D:\\test\\movies\\Action");
-                library.addStageDirectory(stageDirectory);
+                importDTO.setStageDirectory(stageDirectory);
                 
                 StageFileDTO stageFile = new StageFileDTO();
                 stageFile.setFileName("Avatar (2009).bdrip.mkv");
@@ -80,7 +83,9 @@ public class BatchManagementImpl implements BatchManagement {
                 stageFile.setFileSize(43252L);
                 stageDirectory.addStageFile(stageFile);
 
-                fileImportService.importLibrary(library);
+                // import scanned
+                fileImportService.importScanned(importDTO);
+
             } else {
                 System.err.println("Invalid batch: " + batchName);
                 status = 3;

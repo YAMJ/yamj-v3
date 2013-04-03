@@ -1,20 +1,18 @@
 package com.moviejukebox.common.dto;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Object for importing library into the core server.
+ * Object for importing a directory of a library into the core server.
  */
-public class LibraryDTO implements Serializable {
+public class ImportDTO implements Serializable {
 
     private static final long serialVersionUID = -4541107145393048608L;
     
     private String client;
     private String playerPath;
     private String baseDirectory;
-    private List<StageDirectoryDTO> stageDirectories = new ArrayList<StageDirectoryDTO>(0);
+    private StageDirectoryDTO stageDirectory;
 
     public String getClient() {
         return client;
@@ -40,20 +38,16 @@ public class LibraryDTO implements Serializable {
         this.baseDirectory = baseDirectory;
     }
 
-    public List<StageDirectoryDTO> getStageDirectories() {
-        return stageDirectories;
-    }
+    public StageDirectoryDTO getStageDirectory() {
+		return stageDirectory;
+	}
 
-    public void setStageDirectories(List<StageDirectoryDTO> stageDirectories) {
-        this.stageDirectories = stageDirectories;
-    }
+	public void setStageDirectory(StageDirectoryDTO stageDirectory) {
+		this.stageDirectory = stageDirectory;
+	}
 
-    public void addStageDirectory(StageDirectoryDTO stageDirectory) {
-        this.stageDirectories.add(stageDirectory);
-    }
-
-    @Override
+	@Override
     public String toString() {
-        return "LibraryDTO{playerPath='" + playerPath + "', baseDirectory='" + baseDirectory + "', directories=" + stageDirectories.size() + "}";
+        return "ImportDTO{playerPath='" + playerPath + "', baseDirectory='" + baseDirectory + "', directory=" + stageDirectory.getPath() + "}";
     }
 }

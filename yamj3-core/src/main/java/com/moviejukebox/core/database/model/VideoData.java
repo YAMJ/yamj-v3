@@ -33,14 +33,14 @@ public class VideoData extends AbstractAuditable implements Serializable {
     private static final long serialVersionUID = 5719107822219333629L;
 
     /**
-     * This is the media file identifier.
-     * This will be generated from a media file "<filetitle>_<fileyear>_<videotype>
+     * This is the video data identifier.
+     * This will be generated from a scanned file name by "<filetitle>_<fileyear>_<season>
      * This is needed in order to have the possibility to assoziate media files to
      * video metadata, i.e. if a new episode of a TV show has been scanned.
      */
-    @NaturalId(mutable = false)
-    @Column(name = "media_file_identifier", unique = true, length = 255)
-    private String mediaFileIdentifier;
+    @NaturalId
+    @Column(name = "base_name", unique = true, length = 200)
+    private String baseName;
 
     @Type(type = "videoType")
     @Column(name = "video_type", nullable = false)
@@ -49,6 +49,9 @@ public class VideoData extends AbstractAuditable implements Serializable {
 	@Column(name = "title", nullable = false, length = 255)
 	private String title;
 
+	@Column(name = "season", nullable=false)
+	private int season;
+	
 	@Column(name = "pulication_year", length = 10)
 	private String publicationYear;
 
@@ -120,11 +123,27 @@ public class VideoData extends AbstractAuditable implements Serializable {
 
     // GETTER and SETTER
     
+    public String getBaseName() {
+		return baseName;
+	}
+
+	public void setBaseName(String baseName) {
+		this.baseName = baseName;
+	}
+
+    public VideoType getVideoType() {
+        return videoType;
+    }
+
+    public void setVideoType(VideoType videoType) {
+        this.videoType = videoType;
+    }
+
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+	public void setTitle(String title) {
         this.title = title;
     }
 
@@ -136,15 +155,15 @@ public class VideoData extends AbstractAuditable implements Serializable {
         this.publicationYear = publicationYear;
     }
 
-    public VideoType getVideoType() {
-        return videoType;
-    }
+    public int getSeason() {
+		return season;
+	}
 
-    public void setVideoType(VideoType videoType) {
-        this.videoType = videoType;
-    }
+	public void setSeason(int season) {
+		this.season = season;
+	}
 
-    public String getTitleOriginal() {
+	public String getTitleOriginal() {
         return titleOriginal;
     }
 

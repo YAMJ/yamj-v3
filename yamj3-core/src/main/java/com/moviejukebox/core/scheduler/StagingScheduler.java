@@ -18,9 +18,6 @@ import org.springframework.stereotype.Service;
 public class StagingScheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StagingScheduler.class);
-
-    // trigger for import
-    private boolean trigger = false;
     
     @Autowired
     private StagingDao stagingDao;
@@ -29,22 +26,12 @@ public class StagingScheduler {
     @Resource(name = "stagingTaskExecutor")
     private TaskExecutor taskExecutor;
 
-    public synchronized void triggerProcess() {
-        this.trigger = true;
-    }
-    
     @Scheduled(initialDelay=10000, fixedDelay=30000)
-    public void process() throws Exception {
-        if (trigger == false) {
-            // nothing to process
-            return;
-        }
-        
+    public void groupVideos() throws Exception {
         // find new staged videos
         List<StageFile> stageFiles = stagingDao.getStageFiles(10, FileType.VIDEO, StatusType.NEW, StatusType.UPDATED); 
         if (stageFiles.isEmpty()) {
-            // nothing to do, so reset trigger and return
-            trigger = false;
+            // nothing to do
             return;
         }
         LOGGER.debug("Found " + stageFiles.size() + " stage files to process");
@@ -55,8 +42,5 @@ public class StagingScheduler {
 //            MediaImportRunner runner = new MediaImportRunner(stageFile, mediaImportService);
 //            taskExecutor.execute(runner);
         }
-
-        // reset the trigger
-        trigger = false;
     }
 }

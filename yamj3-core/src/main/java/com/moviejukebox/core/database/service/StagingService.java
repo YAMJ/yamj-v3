@@ -1,15 +1,13 @@
 package com.moviejukebox.core.database.service;
 
-import com.moviejukebox.common.dto.LibraryDTO;
+import com.moviejukebox.common.dto.ImportDTO;
 import com.moviejukebox.common.dto.StageDirectoryDTO;
 import com.moviejukebox.common.dto.StageFileDTO;
 import com.moviejukebox.core.database.dao.StagingDao;
 import com.moviejukebox.core.database.model.Library;
 import com.moviejukebox.core.database.model.StageDirectory;
 import com.moviejukebox.core.database.model.StageFile;
-import com.moviejukebox.core.database.model.type.FileType;
 import com.moviejukebox.core.database.model.type.StatusType;
-import com.moviejukebox.core.scanner.FilenameDTO;
 import com.moviejukebox.core.scanner.FilenameScanner;
 import java.util.Date;
 import org.apache.commons.io.FilenameUtils;
@@ -27,7 +25,7 @@ public class StagingService {
     private FilenameScanner filenameScanner;
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Library storeLibrary(LibraryDTO libraryDTO) {
+    public Library storeLibrary(ImportDTO libraryDTO) {
         Library library = stagingDao.getLibrary(libraryDTO.getClient(), libraryDTO.getPlayerPath());
         if (library == null) {
             library = new Library();
@@ -41,7 +39,7 @@ public class StagingService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public StageDirectory storeStageDirectory(StageDirectoryDTO stageDirectoryDTO, Library library) {
+    public void storeStageDirectory(StageDirectoryDTO stageDirectoryDTO, Library library) {
         // normalize the directory path by using URI
         String normalized = FilenameUtils.normalizeNoEndSeparator(stageDirectoryDTO.getPath(), true);
         
@@ -72,38 +70,28 @@ public class StagingService {
                 stagingDao.updateEntity(stageDirectory);
             }
         }
-        return stageDirectory;
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    public StageFile storeStageFile(StageFileDTO stageFileDTO, StageDirectory stageDirectory) {
-        StageFile stageFile = stagingDao.getStageFile(stageFileDTO.getFileName(), stageDirectory);
-        if (stageFile == null) {
-            
-            stageFile = new StageFile();
-            stageFile.setFileName(stageFileDTO.getFileName());
-            stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));
-            stageFile.setFileSize(stageFileDTO.getFileSize());
-            stageFile.setStageDirectory(stageDirectory);
-            stageFile.setFileType(filenameScanner.determineFileType(stageFileDTO.getFileName()));
-            stageFile.setStatus(StatusType.NEW);
-            
-            if (FileType.VIDEO.equals(stageFile.getFileType())) {
-                FilenameDTO dto = new FilenameDTO(stageFile);
-                filenameScanner.scan(dto);
-                System.err.println(dto);
-            }
-            
-            stagingDao.saveEntity(stageFile);
-        } else {
-            Date newDate = new Date(stageFileDTO.getFileDate());
-            if ((newDate.compareTo(stageFile.getFileDate()) != 0) || (stageFile.getFileSize() != stageFileDTO.getFileSize())) {
-                stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));
-                stageFile.setFileSize(stageFileDTO.getFileSize());
-                stageFile.setStatus(StatusType.UPDATED);
-                stagingDao.updateEntity(stageFile);
-            }
+        
+        for (StageFileDTO stageFileDTO : stageDirectoryDTO.getStageFiles()) {
+	        StageFile stageFile = stagingDao.getStageFile(stageFileDTO.getFileName(), stageDirectory);
+	        if (stageFile == null) {
+	            
+	            stageFile = new StageFile();
+	            stageFile.setFileName(stageFileDTO.getFileName());
+	            stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));
+	            stageFile.setFileSize(stageFileDTO.getFileSize());
+	            stageFile.setStageDirectory(stageDirectory);
+	            stageFile.setFileType(filenameScanner.determineFileType(stageFileDTO.getFileName()));
+	            stageFile.setStatus(StatusType.NEW);
+	            stagingDao.saveEntity(stageFile);
+	        } else {
+	            Date newDate = new Date(stageFileDTO.getFileDate());
+	            if ((newDate.compareTo(stageFile.getFileDate()) != 0) || (stageFile.getFileSize() != stageFileDTO.getFileSize())) {
+	                stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));
+	                stageFile.setFileSize(stageFileDTO.getFileSize());
+	                stageFile.setStatus(StatusType.UPDATED);
+	                stagingDao.updateEntity(stageFile);
+	            }
+	        }
         }
-        return stageFile;
     }
 }
