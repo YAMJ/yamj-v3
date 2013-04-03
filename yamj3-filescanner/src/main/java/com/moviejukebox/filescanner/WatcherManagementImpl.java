@@ -1,26 +1,31 @@
 package com.moviejukebox.filescanner;
 
-import static com.moviejukebox.common.type.ExitType.CONNECT_FAILURE;
-import static com.moviejukebox.common.type.ExitType.NO_DIRECTORY;
-import static com.moviejukebox.common.type.ExitType.SUCCESS;
-import static com.moviejukebox.common.type.ExitType.WATCH_FAILURE;
 
 import com.moviejukebox.common.cmdline.CmdLineParser;
+import com.moviejukebox.common.dto.ImportDTO;
+import com.moviejukebox.common.dto.StageDirectoryDTO;
+import com.moviejukebox.common.dto.StageFileDTO;
 import com.moviejukebox.common.remote.service.FileImportService;
 import com.moviejukebox.common.remote.service.PingService;
 import com.moviejukebox.common.type.ExitType;
-import com.moviejukebox.core.database.model.type.DirectoryType;
-import com.moviejukebox.filescanner.stats.ScannerStatistics;
-import com.moviejukebox.filescanner.stats.StatType;
 import com.moviejukebox.filescanner.watcher.Watcher;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import javax.annotation.Resource;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.remoting.RemoteConnectFailureException;
+import static com.moviejukebox.common.type.ExitType.*;
+import com.moviejukebox.core.database.model.type.DirectoryType;
+import com.moviejukebox.filescanner.model.Library;
+import com.moviejukebox.filescanner.model.LibraryCollection;
+import com.moviejukebox.filescanner.model.LibraryStatistics;
+import com.moviejukebox.filescanner.model.StatType;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.remoting.RemoteAccessException;
 
 /**
  * Performs an initial scan of the library location and then updates when changes occur.
@@ -40,8 +45,6 @@ public class WatcherManagementImpl implements ScannerManagement {
     private static final String LOG_MESSAGE = "FileScanner: ";
     // List of files
     private static List<File> fileList = new ArrayList<File>();
-    // List of directories to scan and whether to keep watching them
-    private static Map<String, Boolean> directoryList = new HashMap<String, Boolean>();
     // The default watched status
     private static final Boolean DEFAULT_WATCH_STATE = Boolean.FALSE;    // TODO: Should be a property
     // Directory endings for DVD and Blurays
@@ -71,18 +74,28 @@ public class WatcherManagementImpl implements ScannerManagement {
         boolean watchEnabled = parseWatchStatus(parser.getParsedOptionValue("w"));
         String libraryFilename = parser.getParsedOptionValue("l");
 
-        Map<String, Boolean> library = processLibrary(libraryFilename, directoryProperty, watchEnabled);
-        LOG.info("{}Found {} libraries to process.", LOG_MESSAGE, library.size());
+        if (StringUtils.isNotBlank(libraryFilename)) {
+            LibraryCollection.processLibraryFile(libraryFilename, watchEnabled);
+        }
+
+        if (StringUtils.isNotBlank(directoryProperty)) {
+            LibraryCollection.processLibraryFile(directoryProperty, watchEnabled);
+        }
+
+        LOG.info("{}Found {} libraries to process.", LOG_MESSAGE, LibraryCollection.size());
+        if (LibraryCollection.size() == 0) {
+            return NO_DIRECTORY;
+        }
 
         ExitType status = SUCCESS;
-        for (String directoryString : library.keySet()) {
-            File directory = new File(directoryString);
-            status = scan(directory);
-            LOG.info("{}", ScannerStatistics.generateStats());
+        for (Library library : LibraryCollection.getLibraries()) {
+            File libraryDirectory = new File(library.getPath());
+            status = scan(libraryDirectory);
+            LOG.info("{}", library.getStatistics().generateStats());
             LOG.info("{}Scanning completed.", LOG_MESSAGE);
 
             if (status == SUCCESS) {
-                status = send(directory);
+                status = send(libraryDirectory);
             }
         }
 
@@ -103,7 +116,12 @@ public class WatcherManagementImpl implements ScannerManagement {
         return status;
     }
 
+    private void scan(Library library) {
+
+    }
+
     private ExitType scan(File directoryToScan) {
+        LibraryStatistics stats = new LibraryStatistics();
         ExitType status = SUCCESS;
         LOG.info("{}Scanning directory '{}'...", LOG_MESSAGE, directoryToScan.getName());
 
@@ -120,21 +138,21 @@ public class WatcherManagementImpl implements ScannerManagement {
                 DirectoryType dirEnd = checkDirectoryEnding(file);
 
                 if (dirEnd == DirectoryType.BLURAY) {
-                    ScannerStatistics.inc(StatType.BLURAY);
+                    stats.inc(StatType.BLURAY);
                     // Don't scan BLURAY structures
                     LOG.info("{}Skipping {} directory type", LOG_MESSAGE, dirEnd);
                     continue;
                 } else if (dirEnd == DirectoryType.DVD) {
-                    ScannerStatistics.inc(StatType.DVD);
+                    stats.inc(StatType.DVD);
                     // Don't scan DVD structures
                     LOG.info("{}Skipping {} directory type", LOG_MESSAGE, dirEnd);
                     continue;
                 } else {
-                    ScannerStatistics.inc(StatType.DIRECTORY);
+                    stats.inc(StatType.DIRECTORY);
                     scan(file);
                 }
             } else {
-                ScannerStatistics.inc(StatType.FILE);
+                stats.inc(StatType.FILE);
             }
         }
         return status;
@@ -152,93 +170,38 @@ public class WatcherManagementImpl implements ScannerManagement {
             return CONNECT_FAILURE;
         }
 
-        /* use ImportDTO
-        FileImportDTO dto;
+        ImportDTO importDto = new ImportDTO();
+        StageDirectoryDTO dirDto;
+        StageFileDTO fileDto;
+
         try {
             for (File file : fileList) {
-                dto = new FileImportDTO();
-                dto.setScanPath(directoryScanned.getAbsolutePath());
-                dto.setFilePath(file.getAbsolutePath());
+                fileDto = new StageFileDTO();
+                fileDto.setFileName(directoryScanned.getName());
                 if (file.isFile()) {
-                    dto.setFileDate(file.lastModified());
-                    dto.setFileSize(file.length());
+                    fileDto.setFileDate(file.lastModified());
+                    fileDto.setFileSize(file.length());
                 } else {
-                    dto.setFileDate(0);
-                    dto.setFileSize(0);
+                    fileDto.setFileDate(0);
+                    fileDto.setFileSize(0);
                 }
 
                 LOG.info("{}Sending '{}' to the server...", LOG_MESSAGE, file.getName());
                 try {
-                    fileImportService.importFile(dto);
+                    fileImportService.importScanned(importDto);
                 } catch (RemoteAccessException ex) {
                     LOG.error("{}Failed to send object to the core server: {}", LOG_MESSAGE, ex.getMessage());
-                    LOG.error("{}{}", LOG_MESSAGE, dto.toString());
+                    LOG.error("{}{}", LOG_MESSAGE, importDto.toString());
                 }
             }
         } catch (RemoteConnectFailureException ex) {
             LOG.error("{}Failed to connect to the core server: {}", LOG_MESSAGE, ex.getMessage());
             return CONNECT_FAILURE;
         }
-		*/
-        
+
         LOG.info("{}Completed sending of files to core server...", LOG_MESSAGE);
 
         return status;
-    }
-
-    /**
-     * Read the library files (multiple) / command line properties and set up the library
-     *
-     * @param libraryList The name and location of the library files to process
-     * @param directoryProperty A single directory from the command line
-     * @param watchEnabled The default watch status
-     */
-    private Map<String, Boolean> processLibrary(List<String> libraryList, String directoryProperty, boolean watchEnabled) {
-        LOG.info("{}Library file: {}", LOG_MESSAGE, libraryList);
-        LOG.info("{}Directory   : {}", LOG_MESSAGE, directoryProperty);
-        LOG.info("{}Watch status: {}", LOG_MESSAGE, watchEnabled);
-
-        Map<String, Boolean> processedLibrary = new HashMap<String, Boolean>();
-
-        // Process the library files
-        for (String singleLibrary : libraryList) {
-            processedLibrary.putAll(processLibraryFile(singleLibrary, watchEnabled));
-        }
-
-        // Add the single command line library, if specified
-        if (StringUtils.isNotBlank(directoryProperty)) {
-            processedLibrary.put(directoryProperty, watchEnabled);
-        }
-
-        return processedLibrary;
-    }
-
-    /**
-     * Read the library file (single) / command line properties and set up the library
-     *
-     * @param libraryFile
-     * @param directoryProperty
-     * @param watchEnabled
-     * @return
-     */
-    private Map<String, Boolean> processLibrary(String libraryFile, String directoryProperty, boolean watchEnabled) {
-        List<String> libraryList = new ArrayList<String>();
-        libraryList.add(libraryFile);
-        return processLibrary(libraryList, directoryProperty, watchEnabled);
-    }
-
-    /**
-     * Read the library file from disk and return the library object
-     *
-     * @param libraryFile the file to read
-     * @param defaultWatchState the default watched state if not provided in the file
-     * @return
-     */
-    private Map<String, Boolean> processLibraryFile(String libraryFile, boolean defaultWatchState) {
-        LOG.warn("{}processLibraryFile - Not supported yet.", LOG_MESSAGE);
-        LOG.warn("{}Library File: {}", LOG_MESSAGE, libraryFile);
-        LOG.warn("{}Watch state : {}", LOG_MESSAGE, defaultWatchState);
-        return new HashMap<String, Boolean>();
     }
 
     /**

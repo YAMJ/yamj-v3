@@ -1,4 +1,4 @@
-package com.moviejukebox.filescanner.stats;
+package com.moviejukebox.filescanner.model;
 
 public enum StatType {
 

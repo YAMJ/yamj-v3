@@ -1,18 +1,18 @@
-package com.moviejukebox.filescanner.stats;
+package com.moviejukebox.filescanner.model;
 
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class ScannerStatistics {
+public class LibraryStatistics {
 
-    private static Map<StatType, Integer> statistics = new EnumMap<StatType, Integer>(StatType.class);
+    private Map<StatType, Integer> statistics;
 
-    private ScannerStatistics() {
-        throw new UnsupportedOperationException("Cannot instantiate this class");
+    public LibraryStatistics() {
+        statistics = new EnumMap<StatType, Integer>(StatType.class);
     }
 
-    public static int inc(StatType stat) {
+    public int inc(StatType stat) {
         int value = 0;
 
         // Check to see if the value already exists and use that value
@@ -27,7 +27,7 @@ public class ScannerStatistics {
         return value;
     }
 
-    public static int dec(StatType stat) {
+    public int dec(StatType stat) {
         int value = 0;
 
         // Check to see if the value already exists and use that value
@@ -42,12 +42,12 @@ public class ScannerStatistics {
         return value;
     }
 
-    public static int set(StatType stat, int value) {
+    public int set(StatType stat, int value) {
         statistics.put(stat, value);
         return value;
     }
 
-    public static String generateStats() {
+    public String generateStats() {
         StringBuilder stats = new StringBuilder("Statistics: \n");
         for (Entry<StatType, Integer> entry : statistics.entrySet()) {
             stats.append("  ").append(entry.getKey()).append(" = ").append(entry.getValue()).append("\n");

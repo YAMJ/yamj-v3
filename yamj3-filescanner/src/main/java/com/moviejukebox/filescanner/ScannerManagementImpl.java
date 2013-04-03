@@ -8,8 +8,8 @@ import com.moviejukebox.common.cmdline.CmdLineParser;
 import com.moviejukebox.common.remote.service.FileImportService;
 import com.moviejukebox.common.remote.service.PingService;
 import com.moviejukebox.common.type.ExitType;
-import com.moviejukebox.filescanner.stats.ScannerStatistics;
-import com.moviejukebox.filescanner.stats.StatType;
+import com.moviejukebox.filescanner.model.LibraryStatistics;
+import com.moviejukebox.filescanner.model.StatType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +26,8 @@ public class ScannerManagementImpl implements ScannerManagement {
     private static final String LOG_MESSAGE = "FileScanner: ";
     // List of files
     private static List<File> fileList;
+    // Statistics
+    private static LibraryStatistics stats=new LibraryStatistics();
     @Resource(name = "fileImportService")
     private FileImportService fileImportService;
     @Resource(name = "pingService")
@@ -39,7 +41,7 @@ public class ScannerManagementImpl implements ScannerManagement {
 
         ExitType status = scan(directory);
 
-        LOG.info("{}", ScannerStatistics.generateStats());
+        LOG.info("{}", stats.generateStats());
         LOG.info("{}Scanning completed.", LOG_MESSAGE);
 
         if (status == SUCCESS) {
@@ -65,10 +67,10 @@ public class ScannerManagementImpl implements ScannerManagement {
 
         for (File file : currentFileList) {
             if (file.isDirectory()) {
-                ScannerStatistics.inc(StatType.DIRECTORY);
+                stats.inc(StatType.DIRECTORY);
                 scan(file);
             } else {
-                ScannerStatistics.inc(StatType.FILE);
+                stats.inc(StatType.FILE);
             }
         }
         return SUCCESS;
