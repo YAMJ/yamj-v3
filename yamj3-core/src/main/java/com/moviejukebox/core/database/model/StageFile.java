@@ -3,9 +3,7 @@ package com.moviejukebox.core.database.model;
 import com.moviejukebox.core.database.model.type.FileType;
 import com.moviejukebox.core.database.model.type.StatusType;
 import com.moviejukebox.core.hibernate.usertypes.EnumStringUserType;
-import java.io.File;
 import java.io.Serializable;
-import java.net.URI;
 import java.util.Date;
 import javax.persistence.*;
 import javax.persistence.Entity;
@@ -103,17 +101,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
     public void setStatus(StatusType status) {
         this.status = status;
     }
-    
-    // OTHER METHODS
-    
-    /**
-     * Get the file of the staged file for accessing it on the file system.
-     */
-    public File getFile() throws Exception {
-        URI uri = new URI(getStageDirectory().getDirectoryPath());
-        return new File(new File(uri).getAbsolutePath() + "/" + getFileName());
-    }
-    
+
     // EQUALITY CHECKS
 
     @Override

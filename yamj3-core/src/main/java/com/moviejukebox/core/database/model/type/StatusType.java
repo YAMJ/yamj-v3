@@ -5,9 +5,9 @@ public enum StatusType {
     NEW,
     UPDATED,
     DELETED,
-    PENDING,
+    ERROR,
     DONE;
-
+    
     public static StatusType fromString(String type) {
         try {
             return StatusType.valueOf(type.trim().toUpperCase());

@@ -4,13 +4,10 @@ import com.moviejukebox.core.database.dao.StagingDao;
 import com.moviejukebox.core.database.model.StageFile;
 import com.moviejukebox.core.database.model.type.FileType;
 import com.moviejukebox.core.database.model.type.StatusType;
-import com.moviejukebox.core.importer.MediaImportService;
-import java.util.List;
-import javax.annotation.Resource;
+import com.moviejukebox.core.service.MediaImportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -23,24 +20,35 @@ public class StagingScheduler {
     private StagingDao stagingDao;
     @Autowired
     private MediaImportService mediaImportService;
-    @Resource(name = "stagingTaskExecutor")
-    private TaskExecutor taskExecutor;
 
     @Scheduled(initialDelay=10000, fixedDelay=30000)
-    public void groupVideos() throws Exception {
-        // find new staged videos
-        List<StageFile> stageFiles = stagingDao.getStageFiles(10, FileType.VIDEO, StatusType.NEW, StatusType.UPDATED); 
-        if (stageFiles.isEmpty()) {
-            // nothing to do
-            return;
-        }
-        LOGGER.debug("Found " + stageFiles.size() + " stage files to process");
+    public void processStageFiles() throws Exception {
+        StageFile stageFile = null;
+        
+        // PROCESS VIDEOS
+        do {
+            try {
+    	        // find next stage file  to process
+                stageFile =  stagingDao.getNextStageFile(FileType.VIDEO, StatusType.NEW, StatusType.UPDATED); 
+                if (stageFile != null) {
+                    if (StatusType.NEW.equals(stageFile.getStatus())) {
+                        mediaImportService.processNewVideo(stageFile);
+                    } else {
+                        mediaImportService.processUpdatedVideo(stageFile);
+                    }
+    	        } else {
+    	            LOGGER.info("No video found to process");
+    	        }
+            } catch (Exception error) {
+                LOGGER.error("Failed to process stage file", error);
+                mediaImportService.processingError(stageFile);
+            }
+	    } while (stageFile != null);
 
-        // process each staged file with an import runner
-        for (StageFile stageFile : stageFiles) {
-            LOGGER.info(stageFile.getFile().toString());
-//            MediaImportRunner runner = new MediaImportRunner(stageFile, mediaImportService);
-//            taskExecutor.execute(runner);
-        }
+        // PROCESS IMAGES
+
+        // PROCESS NFOS
+        
+        // PROCESS SUBTITLES
     }
 }

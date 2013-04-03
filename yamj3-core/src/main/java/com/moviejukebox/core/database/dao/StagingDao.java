@@ -9,10 +9,7 @@ import com.moviejukebox.core.hibernate.ExtendedHibernateDaoSupport;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
-import org.hibernate.CacheMode;
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
+import org.hibernate.*;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.stereotype.Service;
@@ -72,5 +69,30 @@ public class StagingDao extends ExtendedHibernateDaoSupport {
         params.put("statusTypes", statusTypes);
         
         return getExtendedHibernateTemplate().findByNamedParam(query, params, maxResults);
+    }
+
+    public StageFile getNextStageFile(final FileType fileType, final StatusType... statusTypes) {
+        return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<StageFile>() {
+            @Override
+            public StageFile doInHibernate(Session session) throws HibernateException, SQLException {
+                StringBuilder sb = new StringBuilder();
+                sb.append("from StageFile f join fetch f.stageDirectory d ");
+                sb.append("where f.fileType = :fileType ");
+                sb.append("and f.status in (:statusTypes) ");
+
+                ScrollableResults results = session.createQuery(sb.toString())
+                        .setParameter("fileType", fileType)
+                        .setParameterList("statusTypes", statusTypes)
+                        .setMaxResults(1)
+                        .scroll(ScrollMode.FORWARD_ONLY);
+                
+                // get just the first result
+                if (results.next()) {
+                    return (StageFile)results.get()[0];
+                }
+                
+                return null;
+            }
+        });
     }
 }
