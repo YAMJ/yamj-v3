@@ -17,9 +17,11 @@ public class StageFileDTO implements Serializable {
     }
 
     public StageFileDTO(File stageFile) {
-        this.fileName = stageFile.getName();
-        this.fileSize = stageFile.length();
-        this.fileDate = stageFile.lastModified();
+        if (stageFile.isFile()) {
+            this.fileName = stageFile.getName();
+            this.fileSize = stageFile.length();
+            this.fileDate = stageFile.lastModified();
+        }
     }
 
     public String getFileName() {
