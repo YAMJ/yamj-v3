@@ -1,6 +1,5 @@
 package com.moviejukebox.filescanner;
 
-
 import com.moviejukebox.common.cmdline.CmdLineParser;
 import com.moviejukebox.common.dto.ImportDTO;
 import com.moviejukebox.common.dto.StageDirectoryDTO;
@@ -20,7 +19,6 @@ import static com.moviejukebox.common.type.ExitType.*;
 import com.moviejukebox.core.database.model.type.DirectoryType;
 import com.moviejukebox.filescanner.model.Library;
 import com.moviejukebox.filescanner.model.LibraryCollection;
-import com.moviejukebox.filescanner.model.LibraryStatistics;
 import com.moviejukebox.filescanner.model.StatType;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,8 +41,8 @@ public class WatcherManagementImpl implements ScannerManagement {
      */
     private static final Logger LOG = LoggerFactory.getLogger(WatcherManagementImpl.class);
     private static final String LOG_MESSAGE = "FileScanner: ";
-    // List of files
-    private static List<File> fileList = new ArrayList<File>();
+    // The Collection of libraries
+    LibraryCollection lc;
     // The default watched status
     private static final Boolean DEFAULT_WATCH_STATE = Boolean.FALSE;    // TODO: Should be a property
     // Directory endings for DVD and Blurays
@@ -70,32 +68,34 @@ public class WatcherManagementImpl implements ScannerManagement {
      */
     @Override
     public ExitType runScanner(CmdLineParser parser) {
+        lc = new LibraryCollection();
+
         String directoryProperty = parser.getParsedOptionValue("d");
         boolean watchEnabled = parseWatchStatus(parser.getParsedOptionValue("w"));
         String libraryFilename = parser.getParsedOptionValue("l");
 
         if (StringUtils.isNotBlank(libraryFilename)) {
-            LibraryCollection.processLibraryFile(libraryFilename, watchEnabled);
+            lc.processLibraryFile(libraryFilename, watchEnabled);
         }
 
         if (StringUtils.isNotBlank(directoryProperty)) {
-            LibraryCollection.processLibraryFile(directoryProperty, watchEnabled);
+            LOG.info("{}Adding directory from command line: {}", LOG_MESSAGE, directoryProperty);
+            lc.addLibraryDirectory(directoryProperty, watchEnabled);
         }
 
-        LOG.info("{}Found {} libraries to process.", LOG_MESSAGE, LibraryCollection.size());
-        if (LibraryCollection.size() == 0) {
+        LOG.info("{}Found {} libraries to process.", LOG_MESSAGE, lc.size());
+        if (lc.size() == 0) {
             return NO_DIRECTORY;
         }
 
         ExitType status = SUCCESS;
-        for (Library library : LibraryCollection.getLibraries()) {
-            File libraryDirectory = new File(library.getPath());
-            status = scan(libraryDirectory);
+        for (Library library : lc.getLibraries()) {
+            status = scan(library);
             LOG.info("{}", library.getStatistics().generateStats());
             LOG.info("{}Scanning completed.", LOG_MESSAGE);
 
             if (status == SUCCESS) {
-                status = send(libraryDirectory);
+                status = send(library);
             }
         }
 
@@ -116,49 +116,69 @@ public class WatcherManagementImpl implements ScannerManagement {
         return status;
     }
 
-    private void scan(Library library) {
-
-    }
-
-    private ExitType scan(File directoryToScan) {
-        LibraryStatistics stats = new LibraryStatistics();
+    private ExitType scan(Library library) {
         ExitType status = SUCCESS;
-        LOG.info("{}Scanning directory '{}'...", LOG_MESSAGE, directoryToScan.getName());
+        File baseDirectory = new File(library.getBaseDirectory());
+        LOG.info("{}Scanning directory '{}'...", LOG_MESSAGE, baseDirectory.getName());
 
-        if (!directoryToScan.exists()) {
-            LOG.info("{}Failed to read directory '{}'", LOG_MESSAGE, directoryToScan);
+        if (!baseDirectory.exists()) {
+            LOG.info("{}Failed to read directory '{}'", LOG_MESSAGE, baseDirectory);
             return NO_DIRECTORY;
         }
 
-        List<File> currentFileList = Arrays.asList(directoryToScan.listFiles());
-        fileList.addAll(currentFileList);
+        StageDirectoryDTO sd = new StageDirectoryDTO();
+        sd.setPath(baseDirectory.getAbsolutePath());
+        sd.setDate(baseDirectory.lastModified());
+        library.setStageDirectory(sd);
 
+        List<File> currentFileList = Arrays.asList(baseDirectory.listFiles());
         for (File file : currentFileList) {
             if (file.isDirectory()) {
-                DirectoryType dirEnd = checkDirectoryEnding(file);
-
-                if (dirEnd == DirectoryType.BLURAY) {
-                    stats.inc(StatType.BLURAY);
-                    // Don't scan BLURAY structures
-                    LOG.info("{}Skipping {} directory type", LOG_MESSAGE, dirEnd);
-                    continue;
-                } else if (dirEnd == DirectoryType.DVD) {
-                    stats.inc(StatType.DVD);
-                    // Don't scan DVD structures
-                    LOG.info("{}Skipping {} directory type", LOG_MESSAGE, dirEnd);
-                    continue;
-                } else {
-                    stats.inc(StatType.DIRECTORY);
-                    scan(file);
-                }
+                scanDir(library, sd, file);
             } else {
-                stats.inc(StatType.FILE);
+                scanFile(library, sd, file);
             }
         }
+
         return status;
     }
 
-    private ExitType send(File directoryScanned) {
+    private void scanDir(Library library, StageDirectoryDTO parentDto, File directory) {
+        DirectoryType dirEnd = checkDirectoryEnding(directory);
+
+        if (dirEnd == DirectoryType.BLURAY) {
+            library.getStatistics().inc(StatType.BLURAY);
+            // Don't scan BLURAY structures
+            LOG.info("{}Skipping {} directory type", LOG_MESSAGE, dirEnd);
+        } else if (dirEnd == DirectoryType.DVD) {
+            library.getStatistics().inc(StatType.DVD);
+            // Don't scan DVD structures
+            LOG.info("{}Skipping {} directory type", LOG_MESSAGE, dirEnd);
+        } else {
+            library.getStatistics().inc(StatType.DIRECTORY);
+
+            StageDirectoryDTO sd = new StageDirectoryDTO();
+            parentDto.addStageDir(sd);
+
+            List<File> currentFileList = Arrays.asList(directory.listFiles());
+            for (File file : currentFileList) {
+                if (file.isDirectory()) {
+                    scanDir(library, sd, file);
+                } else {
+                    scanFile(library, sd, file);
+                }
+            }
+
+        }
+    }
+
+    private void scanFile(Library library, StageDirectoryDTO parentDto, File file) {
+        library.getStatistics().inc(StatType.FILE);
+        StageFileDTO sf = new StageFileDTO(file);
+        parentDto.addStageFile(sf);
+    }
+
+    private ExitType send(Library library) {
         ExitType status = SUCCESS;
         LOG.info("{}Starting to send the files to the core server...", LOG_MESSAGE);
 
@@ -170,29 +190,18 @@ public class WatcherManagementImpl implements ScannerManagement {
             return CONNECT_FAILURE;
         }
 
-        ImportDTO importDto = new ImportDTO();
-        StageDirectoryDTO dirDto;
-        StageFileDTO fileDto;
-
         try {
-            for (File file : fileList) {
-                fileDto = new StageFileDTO();
-                fileDto.setFileName(directoryScanned.getName());
-                if (file.isFile()) {
-                    fileDto.setFileDate(file.lastModified());
-                    fileDto.setFileSize(file.length());
-                } else {
-                    fileDto.setFileDate(0);
-                    fileDto.setFileSize(0);
-                }
-
-                LOG.info("{}Sending '{}' to the server...", LOG_MESSAGE, file.getName());
-                try {
-                    fileImportService.importScanned(importDto);
-                } catch (RemoteAccessException ex) {
-                    LOG.error("{}Failed to send object to the core server: {}", LOG_MESSAGE, ex.getMessage());
-                    LOG.error("{}{}", LOG_MESSAGE, importDto.toString());
-                }
+            LOG.info("{}Sending library '{}' to the server...", LOG_MESSAGE, library.getBaseDirectory());
+            try {
+                ImportDTO dto = new ImportDTO();
+                dto.setBaseDirectory(library.getBaseDirectory());
+                dto.setClient("");
+                dto.setPlayerPath("");
+                dto.setStageDirectory(library.getStageDirectory());
+                fileImportService.importScanned(dto);
+            } catch (RemoteAccessException ex) {
+                LOG.error("{}Failed to send object to the core server: {}", LOG_MESSAGE, ex.getMessage());
+                return CONNECT_FAILURE;
             }
         } catch (RemoteConnectFailureException ex) {
             LOG.error("{}Failed to connect to the core server: {}", LOG_MESSAGE, ex.getMessage());

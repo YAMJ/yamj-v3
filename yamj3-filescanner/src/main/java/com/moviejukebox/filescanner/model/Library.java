@@ -1,23 +1,15 @@
 package com.moviejukebox.filescanner.model;
 
-public class Library {
+import com.moviejukebox.common.dto.ImportDTO;
 
-    private String path;
+public class Library extends ImportDTO {
+
     private boolean watch;
     private LibraryStatistics statistics;
 
     public Library() {
-        this.path = "";
         this.watch = Boolean.FALSE;
         this.statistics = new LibraryStatistics();
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public boolean isWatch() {
@@ -36,8 +28,4 @@ public class Library {
         this.statistics = statistics;
     }
 
-    @Override
-    public String toString() {
-        return "Library{" + "path=" + path + ", watch=" + watch + '}';
-    }
 }

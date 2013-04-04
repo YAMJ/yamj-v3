@@ -9,10 +9,10 @@ public class LibraryCollection {
 
     private static final Logger LOG = LoggerFactory.getLogger(LibraryCollection.class);
     private static final String LOG_MESSAGE = "LibraryCollection: ";
-    private static List<Library> libraries = new ArrayList<Library>();
+    private List<Library> libraries;
 
-    private LibraryCollection() {
-        throw new UnsupportedOperationException("Unable to instatiate class");
+    public LibraryCollection() {
+        libraries = new ArrayList<Library>();
     }
 
     /**
@@ -20,7 +20,7 @@ public class LibraryCollection {
      *
      * @param library
      */
-    public static void add(Library library) {
+    public void add(Library library) {
         libraries.add(library);
     }
 
@@ -29,7 +29,7 @@ public class LibraryCollection {
      *
      * @param library
      */
-    public static void remove(Library library) {
+    public void remove(Library library) {
         libraries.remove(library);
     }
 
@@ -38,10 +38,10 @@ public class LibraryCollection {
      *
      * @param path
      */
-    public static void remove(String path) {
+    public void remove(String path) {
         List<Library> toRemove = new ArrayList<Library>();
         for (Library library : libraries) {
-            if (library.getPath().equalsIgnoreCase(path)) {
+            if (library.getBaseDirectory().equalsIgnoreCase(path)) {
                 toRemove.add(library);
             }
         }
@@ -53,14 +53,14 @@ public class LibraryCollection {
      *
      * @return
      */
-    public static List<Library> getLibraries() {
+    public List<Library> getLibraries() {
         return libraries;
     }
 
     /**
      * Clear the list of libraries
      */
-    public static void clear() {
+    public void clear() {
         libraries.clear();
     }
 
@@ -69,7 +69,7 @@ public class LibraryCollection {
      *
      * @return
      */
-    public static int size() {
+    public int size() {
         return libraries.size();
     }
 
@@ -80,7 +80,7 @@ public class LibraryCollection {
      * @param directoryProperty A single directory from the command line
      * @param defaultWatchState The default watch status
      */
-    public static void processLibraryList(List<String> libraryFilenames, boolean defaultWatchState) {
+    public void processLibraryList(List<String> libraryFilenames, boolean defaultWatchState) {
         LOG.info("{}Library files: {}", LOG_MESSAGE, libraryFilenames);
         LOG.info("{}Default watch: {}", LOG_MESSAGE, defaultWatchState);
 
@@ -97,7 +97,7 @@ public class LibraryCollection {
      * @param defaultWatchState the default watched state if not provided in the file
      * @return
      */
-    public static void processLibraryFile(String libraryFilename, boolean defaultWatchState) {
+    public void processLibraryFile(String libraryFilename, boolean defaultWatchState) {
         LOG.warn("{}processLibraryFile - Not supported yet.", LOG_MESSAGE);
         LOG.warn("{}Library Filename    : {}", LOG_MESSAGE, libraryFilename);
         LOG.warn("{}Default watch state : {}", LOG_MESSAGE, defaultWatchState);
@@ -107,5 +107,12 @@ public class LibraryCollection {
 
         // add the library file
 //        add(library);
+    }
+
+    public void addLibraryDirectory(String baseDirectory, boolean defaultWatchState) {
+        Library library = new Library();
+        library.setBaseDirectory(baseDirectory);
+        library.setWatch(defaultWatchState);
+        add(library);
     }
 }
