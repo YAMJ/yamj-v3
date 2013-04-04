@@ -7,9 +7,11 @@ import com.moviejukebox.core.database.model.type.FileType;
 import com.moviejukebox.core.database.model.type.StatusType;
 import com.moviejukebox.core.hibernate.ExtendedHibernateDaoSupport;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import org.hibernate.*;
+import org.hibernate.CacheMode;
+import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.stereotype.Service;
@@ -43,6 +45,10 @@ public class StagingDao extends ExtendedHibernateDaoSupport {
         });
     }
 
+    public StageFile getStageFile(long id) {
+        return this.getHibernateTemplate().get(StageFile.class, id);
+    }
+
     public StageFile getStageFile(final String fileName, final StageDirectory stageDirectory) {
         return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<StageFile>() {
             @Override
@@ -56,42 +62,17 @@ public class StagingDao extends ExtendedHibernateDaoSupport {
         });
     }
 
-    @SuppressWarnings("unchecked")
-    public List<StageFile> getStageFiles(final int maxResults, FileType fileType, StatusType... statusTypes) {
-        
-        StringBuilder query = new StringBuilder();
-        query.append("from StageFile f join fetch f.stageDirectory d ");
-        query.append("where f.fileType = :fileType ");
-        query.append("and f.status in (:statusTypes) ");
-
-        HashMap<String,Object> params = new HashMap<String,Object>();
-        params.put("fileType", fileType);
-        params.put("statusTypes", statusTypes);
-        
-        return getExtendedHibernateTemplate().findByNamedParam(query, params, maxResults);
-    }
-
-    public StageFile getNextStageFile(final FileType fileType, final StatusType... statusTypes) {
-        return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<StageFile>() {
+    public Long getNextStageFileId(final FileType fileType, final StatusType... statusTypes) {
+        return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<Long>() {
             @Override
-            public StageFile doInHibernate(Session session) throws HibernateException, SQLException {
-                StringBuilder sb = new StringBuilder();
-                sb.append("from StageFile f join fetch f.stageDirectory d ");
-                sb.append("where f.fileType = :fileType ");
-                sb.append("and f.status in (:statusTypes) ");
-
-                ScrollableResults results = session.createQuery(sb.toString())
-                        .setParameter("fileType", fileType)
-                        .setParameterList("statusTypes", statusTypes)
-                        .setMaxResults(1)
-                        .scroll(ScrollMode.FORWARD_ONLY);
-                
-                // get just the first result
-                if (results.next()) {
-                    return (StageFile)results.get()[0];
-                }
-                
-                return null;
+            public Long doInHibernate(Session session) throws HibernateException, SQLException {
+                Criteria criteria = session.createCriteria(StageFile.class);
+                criteria.add(Restrictions.eq("fileType", fileType));
+                criteria.add(Restrictions.in("status", statusTypes));
+                criteria.setProjection(Projections.min("id"));
+                criteria.setCacheable(true);
+                criteria.setCacheMode(CacheMode.NORMAL);
+                return (Long)criteria.uniqueResult();
             }
         });
     }

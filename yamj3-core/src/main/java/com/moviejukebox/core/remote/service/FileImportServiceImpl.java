@@ -1,9 +1,10 @@
 package com.moviejukebox.core.remote.service;
 
+import com.moviejukebox.core.service.StagingService;
+
 import com.moviejukebox.common.dto.ImportDTO;
 import com.moviejukebox.common.remote.service.FileImportService;
 import com.moviejukebox.core.database.model.Library;
-import com.moviejukebox.core.database.service.StagingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

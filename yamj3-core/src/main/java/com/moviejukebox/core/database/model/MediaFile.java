@@ -1,13 +1,25 @@
 package com.moviejukebox.core.database.model;
 
+import com.moviejukebox.core.database.model.type.StatusType;
+import javax.persistence.Column;
+import org.hibernate.annotations.Type;
+
+import com.moviejukebox.core.hibernate.usertypes.EnumStringUserType;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.ForeignKey;
-import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.Parameter;
+
+@TypeDef(name = "statusType",
+        typeClass = EnumStringUserType.class,
+        parameters = {@Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.StatusType")})
 
 @Entity
 @Table(name = "media_file")
@@ -16,8 +28,8 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     private static final long serialVersionUID = 8411423609119475972L;
 
     @NaturalId
-    @Column(name = "file_path", nullable = false, length = 500)
-    private String filePath;
+    @Column(name = "base_file_name", nullable = false, length = 500)
+    private String baseFileName;
 
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "file_date")
@@ -56,33 +68,31 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     @Column(name = "video_source", length = 30)
     private String videoSource;
 
-    @Column(name = "staged")
-    private boolean staged;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_MEDIAFILE_SCANPATH")
-    @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "scanpath_id", nullable = false)
-    private ScanPath scanPath;
-
+    @Type(type = "statusType")
+    @Column(name = "status", nullable = false, length = 30)
+    private StatusType status;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_MEDIAFILE_VIDEODATA")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "data_id", nullable = false)
     private VideoData videoData;
 
+    @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "mediaFile")
+    private Set<StageFile> stageFiles = new HashSet<StageFile>(0);
+
     // GETTER and SETTER
     
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
     public Date getFileDate() {
         return fileDate;
+    }
+
+    public String getBaseFileName() {
+        return baseFileName;
+    }
+
+    public void setBaseFileName(String baseFileName) {
+        this.baseFileName = baseFileName;
     }
 
     public void setFileDate(Date fileDate) {
@@ -177,20 +187,12 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         this.videoSource = videoSource;
     }
 
-    public boolean isStaged() {
-        return staged;
+    public StatusType getStatus() {
+        return status;
     }
 
-    public void setStaged(boolean staged) {
-        this.staged = staged;
-    }
-
-    public ScanPath getScanPath() {
-        return scanPath;
-    }
-
-    public void setScanPath(ScanPath scanPath) {
-        this.scanPath = scanPath;
+    public void setStatus(StatusType status) {
+        this.status = status;
     }
 
     public VideoData getVideoData() {
@@ -201,13 +203,25 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         this.videoData = videoData;
     }
 
+    public Set<StageFile> getStageFiles() {
+        return stageFiles;
+    }
+
+    public void setStageFiles(Set<StageFile> stageFiles) {
+        this.stageFiles = stageFiles;
+    }
+
+    public void addStageFile(StageFile stageFile) {
+        this.stageFiles.add(stageFile);
+    }
+    
     // EQUALITY CHECKS
 
     @Override
     public int hashCode() {
         final int PRIME = 17;
         int result = 1;
-        result = PRIME * result + (this.filePath == null?0:this.filePath.hashCode());
+        result = PRIME * result + (this.baseFileName == null?0:this.baseFileName.hashCode());
         return result;
     }
 
@@ -215,8 +229,8 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     public boolean equals(Object other) {
         if ( this == other ) return true;
         if ( other == null ) return false;
-        if ( !(other instanceof ScanPath) ) return false;
+        if ( !(other instanceof MediaFile) ) return false;
         MediaFile castOther = (MediaFile)other;
-        return StringUtils.equals(this.filePath, castOther.filePath);
+        return StringUtils.equals(this.baseFileName, castOther.baseFileName);
     }
 }

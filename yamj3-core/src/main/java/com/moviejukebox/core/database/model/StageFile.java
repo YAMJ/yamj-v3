@@ -1,5 +1,12 @@
 package com.moviejukebox.core.database.model;
 
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.ForeignKey;
+
 import com.moviejukebox.core.database.model.type.FileType;
 import com.moviejukebox.core.database.model.type.StatusType;
 import com.moviejukebox.core.hibernate.usertypes.EnumStringUserType;
@@ -52,6 +59,12 @@ public class StageFile extends AbstractAuditable implements Serializable {
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_FILE_MEDIAFILE")
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "mediafile_id")
+    private MediaFile mediaFile;
+    
     // GETTER and SETTER
 
     public String getFileName() {
@@ -100,6 +113,14 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     public void setStatus(StatusType status) {
         this.status = status;
+    }
+
+    public MediaFile getMediaFile() {
+        return mediaFile;
+    }
+
+    public void setMediaFile(MediaFile mediaFile) {
+        this.mediaFile = mediaFile;
     }
 
     // EQUALITY CHECKS

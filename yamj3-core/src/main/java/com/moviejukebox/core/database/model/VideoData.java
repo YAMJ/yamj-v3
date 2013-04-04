@@ -1,5 +1,13 @@
 package com.moviejukebox.core.database.model;
 
+import com.moviejukebox.core.database.model.type.StatusType;
+import javax.persistence.Column;
+import org.hibernate.annotations.Type;
+
+import org.hibernate.annotations.TypeDef;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.moviejukebox.core.database.model.type.OverrideFlag;
 import com.moviejukebox.core.database.model.type.VideoType;
 import com.moviejukebox.core.hibernate.usertypes.EnumStringUserType;
@@ -22,12 +30,15 @@ import org.hibernate.annotations.Parameter;
         parameters = {@Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.VideoType")}),
     @TypeDef(name = "overrideFlag", 
         typeClass = EnumStringUserType.class,
-        parameters = {@Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.OverrideFlag")})
+        parameters = {@Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.OverrideFlag")}),
+    @TypeDef(name = "statusType",
+        typeClass = EnumStringUserType.class,
+        parameters = {@Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.StatusType")})
 })
 
 @Entity
 @Table(name = "video_data")
-@SuppressWarnings("deprecation")
+@SuppressWarnings({ "unused", "deprecation" })
 public class VideoData extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 5719107822219333629L;
@@ -35,12 +46,12 @@ public class VideoData extends AbstractAuditable implements Serializable {
     /**
      * This is the video data identifier.
      * This will be generated from a scanned file name by "<filetitle>_<fileyear>_<season>
-     * This is needed in order to have the possibility to assoziate media files to
-     * video metadata, i.e. if a new episode of a TV show has been scanned.
+     * This is needed in order to have the possibility to associate media files to
+     * video meta data, i.e. if a new episode of a TV show has been scanned.
      */
     @NaturalId
-    @Column(name = "base_name", unique = true, length = 200)
-    private String baseName;
+    @Column(name = "identifier", unique = true, length = 200)
+    private String identifier;
 
     @Type(type = "videoType")
     @Column(name = "video_type", nullable = false)
@@ -85,6 +96,10 @@ public class VideoData extends AbstractAuditable implements Serializable {
 
     @Column(name = "country", length = 100)
     private String country;
+    
+    @Type(type = "statusType")
+    @Column(name = "status", nullable = false, length = 30)
+    private StatusType status;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "moviedb_ids", joinColumns = @JoinColumn(name = "data_id"))
@@ -123,13 +138,13 @@ public class VideoData extends AbstractAuditable implements Serializable {
 
     // GETTER and SETTER
     
-    public String getBaseName() {
-		return baseName;
-	}
+    public String getIdentifier() {
+        return identifier;
+    }
 
-	public void setBaseName(String baseName) {
-		this.baseName = baseName;
-	}
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
 
     public VideoType getVideoType() {
         return videoType;
@@ -143,16 +158,30 @@ public class VideoData extends AbstractAuditable implements Serializable {
         return title;
     }
 
-	public void setTitle(String title) {
+    private void setTitle(String title) {
         this.title = title;
+    }
+
+	public void setTitle(String title, String source) {
+        if (!StringUtils.isBlank(title)) {
+            setTitle(title);
+            setOverrideFlag(OverrideFlag.TITLE, source);
+        }
     }
 
     public String getPublicationYear() {
         return publicationYear;
     }
 
-    public void setPublicationYear(String publicationYear) {
+    private void setPublicationYear(String publicationYear) {
         this.publicationYear = publicationYear;
+    }
+
+    public void setPublicationYear(String publicationYear, String source) {
+        if (!StringUtils.isBlank(publicationYear)) {
+            setPublicationYear(publicationYear);
+            setOverrideFlag(OverrideFlag.YEAR, source);
+        }
     }
 
     public int getSeason() {
@@ -167,8 +196,15 @@ public class VideoData extends AbstractAuditable implements Serializable {
         return titleOriginal;
     }
 
-    public void setTitleOriginal(String titleOriginal) {
+    private void setTitleOriginal(String titleOriginal) {
         this.titleOriginal = titleOriginal;
+    }
+
+    public void setTitleOriginal(String titleOriginal, String source) {
+        if (!StringUtils.isBlank(titleOriginal)) {
+            setTitleOriginal(titleOriginal);
+            setOverrideFlag(OverrideFlag.ORIGINALTITLE, source);
+        }
     }
 
     public String getTitleIndex() {
@@ -183,8 +219,15 @@ public class VideoData extends AbstractAuditable implements Serializable {
         return releaseDate;
     }
 
-    public void setReleaseDate(String releaseDate) {
+    private void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
+    }
+
+    public void setReleaseDate(String releaseDate, String source) {
+        if (!StringUtils.isBlank(releaseDate)) {
+            this.releaseDate = releaseDate;
+            setOverrideFlag(OverrideFlag.RELEASEDATE, source);
+        }
     }
 
     public int getTopRank() {
@@ -235,12 +278,26 @@ public class VideoData extends AbstractAuditable implements Serializable {
         this.country = country;
     }
 
+    public StatusType getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusType status) {
+        this.status = status;
+    }
+
     public Map<String, String> getMovieIds() {
         return movieIds;
     }
 
     public void setMovieIds(Map<String, String> movieIds) {
         this.movieIds = movieIds;
+    }
+
+    public void setMovieId(String moviedb, String id) {
+        if (!movieIds.containsKey(moviedb)) {
+            movieIds.put(moviedb, id);
+        }
     }
 
     public Map<String, Integer> getMovieRatings() {
@@ -257,6 +314,10 @@ public class VideoData extends AbstractAuditable implements Serializable {
 
     public void setOverrideFlags(Map<OverrideFlag, String> overrideFlags) {
         this.overrideFlags = overrideFlags;
+    }
+
+    public void setOverrideFlag(OverrideFlag overrideFlag, String source) {
+        this.overrideFlags.put(overrideFlag, source);
     }
 
     public Set<Genre> getGenres() {
@@ -279,7 +340,25 @@ public class VideoData extends AbstractAuditable implements Serializable {
         return videoSets;
     }
 
-    public void setBoxedSets(Set<VideoSet> videoSets) {
+    public void setVideoSets(Set<VideoSet> videoSets) {
         this.videoSets = videoSets;
     }
-}
+
+    // EQUALITY CHECKS
+
+    @Override
+    public int hashCode() {
+        final int PRIME = 17;
+        int result = 1;
+        result = PRIME * result + (this.identifier == null?0:this.identifier.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if ( this == other ) return true;
+        if ( other == null ) return false;
+        if ( !(other instanceof VideoData) ) return false;
+        VideoData castOther = (VideoData)other;
+        return StringUtils.equals(this.identifier, castOther.identifier);
+    }}

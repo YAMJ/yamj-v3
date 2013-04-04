@@ -225,6 +225,16 @@ public class FilenameDTO {
         return idMap;
     }
 
+    public String buildVideoDataIdentifier() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getTitle());
+        sb.append("_");
+        sb.append(getYear());
+        sb.append("_");
+        sb.append(getSeason());
+        return sb.toString();
+    }
+    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
