@@ -1,5 +1,6 @@
 package com.moviejukebox.common.dto;
 
+import java.io.File;
 import java.io.Serializable;
 
 /**
@@ -8,10 +9,18 @@ import java.io.Serializable;
 public class StageFileDTO implements Serializable {
 
     private static final long serialVersionUID = -2515870823273796114L;
-    
     private String fileName;
     private long fileSize;
     private long fileDate;
+
+    public StageFileDTO() {
+    }
+
+    public StageFileDTO(File stageFile) {
+        this.fileName = stageFile.getName();
+        this.fileSize = stageFile.length();
+        this.fileDate = stageFile.lastModified();
+    }
 
     public String getFileName() {
         return fileName;
