@@ -1,7 +1,6 @@
 package com.moviejukebox.core.scheduler;
 
 import com.moviejukebox.core.database.dao.StagingDao;
-import com.moviejukebox.core.database.model.StageFile;
 import com.moviejukebox.core.database.model.type.FileType;
 import com.moviejukebox.core.database.model.type.StatusType;
 import com.moviejukebox.core.service.MediaImportService;
@@ -23,27 +22,23 @@ public class StagingScheduler {
 
     @Scheduled(initialDelay=10000, fixedDelay=30000)
     public void processStageFiles() throws Exception {
-        StageFile stageFile = null;
+        Long id = null;
         
         // PROCESS VIDEOS
         do {
             try {
     	        // find next stage file  to process
-                stageFile =  stagingDao.getNextStageFile(FileType.VIDEO, StatusType.NEW, StatusType.UPDATED); 
-                if (stageFile != null) {
-                    if (StatusType.NEW.equals(stageFile.getStatus())) {
-                        mediaImportService.processNewVideo(stageFile);
-                    } else {
-                        mediaImportService.processUpdatedVideo(stageFile);
-                    }
+                id =  stagingDao.getNextStageFileId(FileType.VIDEO, StatusType.NEW, StatusType.UPDATED); 
+                if (id != null) {
+                    this.mediaImportService.processVideo(id);
     	        } else {
     	            LOGGER.info("No video found to process");
     	        }
             } catch (Exception error) {
                 LOGGER.error("Failed to process stage file", error);
-                mediaImportService.processingError(stageFile);
+                mediaImportService.processingError(id);
             }
-	    } while (stageFile != null);
+	    } while (id != null);
 
         // PROCESS IMAGES
 
