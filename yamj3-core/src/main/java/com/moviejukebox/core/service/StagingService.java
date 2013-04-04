@@ -1,4 +1,4 @@
-package com.moviejukebox.core.database.service;
+package com.moviejukebox.core.service;
 
 import com.moviejukebox.common.dto.ImportDTO;
 import com.moviejukebox.common.dto.StageDirectoryDTO;

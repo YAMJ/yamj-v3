@@ -1,4 +1,4 @@
-package com.moviejukebox.core.database.service;
+package com.moviejukebox.core.service;
 
 import com.moviejukebox.core.database.dao.CommonDao;
 import org.springframework.beans.factory.annotation.Autowired;
