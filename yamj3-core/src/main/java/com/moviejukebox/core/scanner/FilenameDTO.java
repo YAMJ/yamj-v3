@@ -1,11 +1,10 @@
 package com.moviejukebox.core.scanner;
 
+import java.text.DecimalFormat;
+
 import com.moviejukebox.core.database.model.StageDirectory;
 import com.moviejukebox.core.database.model.StageFile;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,6 +15,8 @@ import org.apache.commons.lang3.StringUtils;
  * @author Artem.Gratchev
  */
 public class FilenameDTO {
+
+    private static DecimalFormat PADDED_FORMAT = new DecimalFormat("000"); // Issue 190
 
     private final String name;
     private final String parentName;
@@ -225,16 +226,40 @@ public class FilenameDTO {
         return idMap;
     }
 
-    public String buildVideoDataIdentifier() {
+    public boolean isMovie() {
+        return getEpisodes().isEmpty();
+    }
+    
+    public String buildIdentifier() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getTitle());
+        sb.append("_");
+        sb.append(getYear());
+        return sb.toString();
+    }
+
+    public String buildEpisodeIdentifier(int episode) {
         StringBuilder sb = new StringBuilder();
         sb.append(getTitle());
         sb.append("_");
         sb.append(getYear());
         sb.append("_");
-        sb.append(getSeason());
+        sb.append(PADDED_FORMAT.format(getSeason()));
+        sb.append("_");
+        sb.append(PADDED_FORMAT.format(episode));
         return sb.toString();
     }
-    
+
+    public String buildSeasonIdentifier() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getTitle());
+        sb.append("_");
+        sb.append(getYear());
+        sb.append("_");
+        sb.append(PADDED_FORMAT.format(getSeason()));
+        return sb.toString();
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

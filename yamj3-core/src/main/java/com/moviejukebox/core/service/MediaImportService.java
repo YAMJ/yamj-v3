@@ -1,12 +1,11 @@
 package com.moviejukebox.core.service;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.moviejukebox.core.database.dao.MediaDao;
 import com.moviejukebox.core.database.dao.StagingDao;
-import com.moviejukebox.core.database.model.MediaFile;
-import com.moviejukebox.core.database.model.StageFile;
-import com.moviejukebox.core.database.model.VideoData;
+import com.moviejukebox.core.database.model.*;
 import com.moviejukebox.core.database.model.type.StatusType;
-import com.moviejukebox.core.database.model.type.VideoType;
 import com.moviejukebox.core.scanner.FilenameDTO;
 import com.moviejukebox.core.scanner.FilenameScanner;
 import org.apache.commons.io.FilenameUtils;
@@ -49,31 +48,6 @@ public class MediaImportService {
         // scan filename for informations
         FilenameDTO dto = new FilenameDTO(stageFile);
         filenameScanner.scan(dto);
-        
-        // VIDEO DATA
-        String identifier = dto.buildVideoDataIdentifier();
-        VideoData videoData = mediaDao.getVideoData(identifier);
-        if (videoData == null) {
-            // NEW video data
-            videoData = new VideoData();
-            videoData.setIdentifier(identifier);
-            videoData.setSeason(dto.getSeason());
-            videoData.setVideoType(dto.getSeason() > -1 ? VideoType.TVSHOW : VideoType.MOVIE);
-            videoData.setMovieIds(dto.getIdMap());
-            videoData.setTitle(dto.getTitle(), MEDIA_SOURCE);
-            videoData.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
-            if (dto.getYear() > 0) {
-                videoData.setPublicationYear(String.valueOf(dto.getYear()), MEDIA_SOURCE);
-            }
-            videoData.setStatus(StatusType.NEW);
-            mediaDao.saveEntity(videoData);
-
-            // TODO store episodes
-            // TODO store sets
-            
-        } else {
-            // TODO check what must be changed?
-        }
 
         // MEDIA FILE
         String baseFileName = FilenameUtils.removeExtension(stageFile.getFileName());
@@ -91,8 +65,6 @@ public class MediaImportService {
             mediaFile.setCodec(dto.getVideoCodec());
             mediaFile.setVideoSource(dto.getVideoSource());
             mediaFile.setStatus(StatusType.NEW);
-            
-            mediaFile.setVideoData(videoData);
             mediaFile.addStageFile(stageFile);
             stageFile.setMediaFile(mediaFile);
             mediaDao.saveEntity(mediaFile);
@@ -102,10 +74,92 @@ public class MediaImportService {
             // - Extension changed?
             // - Stored in another directory?
         }
+
+        if (dto.isMovie()) {
+            // VIDEO DATA for movies
+            
+            String identifier = dto.buildIdentifier();
+            VideoData videoData = mediaDao.getVideoData(identifier);
+            if (videoData == null) {
+                // NEW video data
+                videoData = new VideoData();
+                videoData.setIdentifier(identifier);
+                videoData.setMoviedbIdMap(dto.getIdMap());
+                videoData.setTitle(dto.getTitle(), MEDIA_SOURCE);
+                videoData.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
+                if (dto.getYear() > 0) {
+                    videoData.setPublicationYear(String.valueOf(dto.getYear()), MEDIA_SOURCE);
+                }
+                videoData.setStatus(StatusType.NEW);
+                mediaFile.addVideoData(videoData);
+                videoData.addMediaFile(mediaFile);
+                mediaDao.saveEntity(videoData);
+            } else {
+                mediaFile.addVideoData(videoData);
+                videoData.addMediaFile(mediaFile);
+                mediaDao.updateEntity(videoData);
+            }
+        } else {
+            // VIDEO DATA for episodes
+            for (Integer episode : dto.getEpisodes()) {
+                String identifier = dto.buildEpisodeIdentifier(episode);
+                VideoData videoData = mediaDao.getVideoData(identifier);
+                if (videoData == null) {
+                    // NEW video data
+
+                    // get or create season
+                    String seasonIdentifier = dto.buildSeasonIdentifier();
+                    Season season = mediaDao.getSeason(seasonIdentifier);
+                    if (season == null) {
+                        
+                        // get or create series
+                        String seriesIdentifier = dto.buildIdentifier();
+                        Series series = mediaDao.getSeries(seriesIdentifier);
+                        if (series == null) {
+                            series = new Series();
+                            series.setIdentifier(seriesIdentifier);
+                            series.setTitle(dto.getTitle(), MEDIA_SOURCE);
+                            series.setMoviedbIdMap(dto.getIdMap());
+                            series.setStatus(StatusType.NEW);
+                            mediaDao.saveEntity(series);
+                        }
+                        
+                        season = new Season();
+                        season.setIdentifier(seasonIdentifier);
+                        season.setSeason(dto.getSeason());
+                        season.setTitle(dto.getTitle(), MEDIA_SOURCE);
+                        season.setSeries(series);
+                        season.setStatus(StatusType.NEW);
+                        mediaDao.saveEntity(season);
+                    }
+                    
+                    videoData = new VideoData();
+                    videoData.setIdentifier(identifier);
+                    if (StringUtils.isNotBlank(dto.getEpisodeTitle())) {
+                        videoData.setTitle(dto.getEpisodeTitle(), MEDIA_SOURCE);
+                        videoData.setTitleOriginal(dto.getEpisodeTitle(), MEDIA_SOURCE);
+                    } else {
+                        videoData.setTitle(dto.getTitle(), MEDIA_SOURCE);
+                        videoData.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
+                    }
+                    videoData.setStatus(StatusType.NEW);
+                    videoData.setSeason(season);
+                    videoData.setEpisode(episode);
+                    mediaFile.addVideoData(videoData);
+                    videoData.addMediaFile(mediaFile);
+                    mediaDao.saveEntity(videoData);
+                } else {
+                    mediaFile.addVideoData(videoData);
+                    videoData.addMediaFile(mediaFile);
+                    mediaDao.updateEntity(videoData);
+                }
+            }
+        }
         
         // TODO
         // - create associations to NFOs
         // - create local artwork entries
+        // - create set entries
      
         finish(stageFile);
     }

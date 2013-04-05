@@ -22,7 +22,7 @@ import org.hibernate.annotations.Parameter;
         parameters = {@Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.StatusType")})
 
 @Entity
-@Table(name = "media_file")
+@Table(name = "mediafile")
 public class MediaFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 8411423609119475972L;
@@ -72,12 +72,12 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_MEDIAFILE_VIDEODATA")
-    @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "data_id", nullable = false)
-    private VideoData videoData;
-
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name="mediafile_videodata",
+        joinColumns={@JoinColumn(name="mediafile_id")},
+        inverseJoinColumns={@JoinColumn(name="videodata_id")})
+    private Set<VideoData> videoDatas = new HashSet<VideoData>(0);
+    
     @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "mediaFile")
     private Set<StageFile> stageFiles = new HashSet<StageFile>(0);
 
@@ -195,12 +195,16 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         this.status = status;
     }
 
-    public VideoData getVideoData() {
-        return videoData;
+    public Set<VideoData> getVideoDatas() {
+        return videoDatas;
     }
 
-    public void setVideoData(VideoData videoData) {
-        this.videoData = videoData;
+    public void setVideoDatas(Set<VideoData> videoDatas) {
+        this.videoDatas = videoDatas;
+    }
+
+    public void addVideoData(VideoData videoData) {
+        this.videoDatas.add(videoData);
     }
 
     public Set<StageFile> getStageFiles() {

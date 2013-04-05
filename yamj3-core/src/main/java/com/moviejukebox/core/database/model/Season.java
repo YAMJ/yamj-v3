@@ -34,17 +34,17 @@ import org.hibernate.annotations.Parameter;
 })
 
 @Entity
-@Table(name = "videodata")
-@SuppressWarnings({ "unused", "deprecation" })
-public class VideoData extends AbstractAuditable implements Serializable {
+@Table(name = "season")
+@SuppressWarnings("deprecation")
+public class Season extends AbstractAuditable implements Serializable {
 
-    private static final long serialVersionUID = 5719107822219333629L;
+    private static final long serialVersionUID = 7589022259013410259L;
 
     /**
-     * This is the video data identifier.
-     * This will be generated from a scanned file name by "<filetitle>_<fileyear>_<season>_<episode>
-     * This is needed in order to have the possibility to associate media files to
-     * video meta data, i.e. if a new episode of a TV show has been scanned.
+     * This is the season identifier.
+     * This will be generated from a scanned file name by "<filetitle>_<fileyear>_<season>"
+     * This is needed in order to have the possibility to associate video data to
+     * seasons, i.e. if a new episode of a TV show has been scanned.
      */
     @NaturalId
     @Column(name = "identifier", unique = true, length = 200)
@@ -53,20 +53,17 @@ public class VideoData extends AbstractAuditable implements Serializable {
 	@Column(name = "title", nullable = false, length = 255)
 	private String title;
 
-	@Column(name = "episode", nullable=false)
-	private int episode = -1;
-	
-	@Column(name = "pulication_year", length = 10)
-	private String publicationYear;
-
     @Column(name = "title_original", length = 255)
     private String titleOriginal;
 
-    @Column(name = "release_date", length = 10)
-    private String releaseDate;
+	@Column(name = "season", nullable=false)
+	private int season;
+	
+	@Column(name = "start_year", length = 10)
+	private String startYear;
 
-    @Column(name = "top_rank")
-    private int topRank = -1;
+    @Column(name = "end_year", length = 10)
+    private String endYear;
 
     @Lob
     @Column(name = "plot")
@@ -76,69 +73,43 @@ public class VideoData extends AbstractAuditable implements Serializable {
     @Column(name = "outline")
     private String outline;
 
-    @Lob
-    @Column(name = "tagline")
-    private String  tagline;
-
-    @Lob
-    @Column(name = "quote")
-    private String  quote;
-
-    @Column(name = "country", length = 100)
-    private String country;
-    
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "videodata_ids", joinColumns = @JoinColumn(name = "videodata_id"))
+    @JoinTable(name = "season_ids", joinColumns = @JoinColumn(name = "season_id"))
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "moviedb", length= 40)
     @Column(name = "moviedb_id", length = 200)
     private Map<String, String> moviedbIdMap = new HashMap<String, String>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "videodata_ratings", joinColumns = @JoinColumn(name = "videodata_id"))
+    @JoinTable(name = "season_ratings", joinColumns = @JoinColumn(name = "season_id"))
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "moviedb", length= 40)
     @Column(name = "rating", length = 30)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "videodata_override", joinColumns = @JoinColumn(name = "videodata_id"))
+    @JoinTable(name = "season_override", joinColumns = @JoinColumn(name = "season_id"))
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length= 30)
     @MapKey(type = @Type(type = "overrideFlag"))    
     @Column(name = "source", length = 30)
     private Map<OverrideFlag, String> overrideFlags = new HashMap<OverrideFlag, String>(0);
 
-    @ManyToMany
-    @ForeignKey(name = "FK_MOVIEGENRES_DATA", inverseName = "FK_MOVIEGENRES_GENRE")
-    @JoinTable(name= "movie_genres",
-            joinColumns={@JoinColumn(name="data_id")},
-            inverseJoinColumns={@JoinColumn(name="genre_id")})
-    private Set<Genre> genres = new HashSet<Genre>(0);
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_VIDEODATA_SEASON")
+    @ForeignKey(name = "FK_SEASON_SERIES")
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "season_id")
-    private Season season;
+    @JoinColumn(name = "series_id", nullable = false)
+    private Series series;
 
-    @ManyToMany(mappedBy="videoDatas")
-    private Set<MediaFile> mediaFiles = new HashSet<MediaFile>(0);
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "season")
+    private Set<VideoData> videoDatas = new HashSet<VideoData>(0);
 
     // GETTER and SETTER
     
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -147,72 +118,51 @@ public class VideoData extends AbstractAuditable implements Serializable {
         this.title = title;
     }
 
-	public void setTitle(String title, String source) {
+    public void setTitle(String title, String source) {
         if (!StringUtils.isBlank(title)) {
             setTitle(title);
             setOverrideFlag(OverrideFlag.TITLE, source);
         }
     }
 
-   public String getTitleOriginal() {
+	public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public String getTitleOriginal() {
         return titleOriginal;
     }
 
-    private void setTitleOriginal(String titleOriginal) {
+    public void setTitleOriginal(String titleOriginal) {
         this.titleOriginal = titleOriginal;
     }
 
-    public void setTitleOriginal(String titleOriginal, String source) {
-        if (!StringUtils.isBlank(titleOriginal)) {
-            setTitleOriginal(titleOriginal);
-            setOverrideFlag(OverrideFlag.ORIGINALTITLE, source);
-        }
+    public int getSeason() {
+        return season;
     }
 
-    public String getPublicationYear() {
-        return publicationYear;
+    public void setSeason(int season) {
+        this.season = season;
     }
 
-    private void setPublicationYear(String publicationYear) {
-        this.publicationYear = publicationYear;
+    public String getStartYear() {
+        return startYear;
     }
 
-    public void setPublicationYear(String publicationYear, String source) {
-        if (!StringUtils.isBlank(publicationYear)) {
-            setPublicationYear(publicationYear);
-            setOverrideFlag(OverrideFlag.YEAR, source);
-        }
+    public void setStartYear(String startYear) {
+        this.startYear = startYear;
     }
 
-    public int getEpisode() {
-        return episode;
+    public String getEndYear() {
+        return endYear;
     }
 
-    public void setEpisode(int episode) {
-        this.episode = episode;
-    }
-
-    public String getReleaseDate() {
-        return releaseDate;
-    }
-
-    private void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
-    }
-
-    public void setReleaseDate(String releaseDate, String source) {
-        if (!StringUtils.isBlank(releaseDate)) {
-            this.releaseDate = releaseDate;
-            setOverrideFlag(OverrideFlag.RELEASEDATE, source);
-        }
-    }
-
-    public int getTopRank() {
-        return topRank;
-    }
-
-    public void setTopRank(int topRank) {
-        this.topRank = topRank;
+    public void setEndYear(String endYear) {
+        this.endYear = endYear;
     }
 
     public String getPlot() {
@@ -231,30 +181,6 @@ public class VideoData extends AbstractAuditable implements Serializable {
         this.outline = outline;
     }
 
-    public String getTagline() {
-        return tagline;
-    }
-
-    public void setTagline(String tagline) {
-        this.tagline = tagline;
-    }
-
-    public String getQuote() {
-        return quote;
-    }
-
-    public void setQuote(String quote) {
-        this.quote = quote;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
     public StatusType getStatus() {
         return status;
     }
@@ -269,12 +195,6 @@ public class VideoData extends AbstractAuditable implements Serializable {
 
     public void setMoviedbIdMap(Map<String, String> moviedbIdMap) {
         this.moviedbIdMap = moviedbIdMap;
-    }
-
-    public void setMoviedbId(String moviedb, String id) {
-        if (!moviedbIdMap.containsKey(moviedb)) {
-            moviedbIdMap.put(moviedb, id);
-        }
     }
 
     public Map<String, Integer> getRatings() {
@@ -297,32 +217,20 @@ public class VideoData extends AbstractAuditable implements Serializable {
         this.overrideFlags.put(overrideFlag, source);
     }
 
-    public Set<Genre> getGenres() {
-        return genres;
+    public Series getSeries() {
+        return series;
     }
 
-    public void setGenres(Set<Genre> genres) {
-        this.genres = genres;
+    public void setSeries(Series series) {
+        this.series = series;
     }
 
-    public Season getSeason() {
-        return season;
+    public Set<VideoData> getVideoDatas() {
+        return videoDatas;
     }
 
-    public void setSeason(Season season) {
-        this.season = season;
-    }
-
-    public Set<MediaFile> getMediaFiles() {
-        return mediaFiles;
-    }
-
-    public void setMediaFiles(Set<MediaFile> mediaFiles) {
-        this.mediaFiles = mediaFiles;
-    }
-
-    public void addMediaFile(MediaFile mediaFile) {
-        this.mediaFiles.add(mediaFile);
+    public void setVideoDatas(Set<VideoData> videoDatas) {
+        this.videoDatas = videoDatas;
     }
 
     // EQUALITY CHECKS
@@ -339,7 +247,7 @@ public class VideoData extends AbstractAuditable implements Serializable {
     public boolean equals(Object other) {
         if ( this == other ) return true;
         if ( other == null ) return false;
-        if ( !(other instanceof VideoData) ) return false;
-        VideoData castOther = (VideoData)other;
+        if ( !(other instanceof Season) ) return false;
+        Season castOther = (Season)other;
         return StringUtils.equals(this.identifier, castOther.identifier);
     }}

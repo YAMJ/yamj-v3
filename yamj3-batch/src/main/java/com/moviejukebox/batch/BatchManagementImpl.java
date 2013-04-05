@@ -73,6 +73,24 @@ public class BatchManagementImpl implements BatchManagement {
                 stageFile.setFileSize(43252L);
                 stageDirectory.addStageFile(stageFile);
 
+                stageFile = new StageFileDTO();
+                stageFile.setFileName("CSI S01E01.avi");
+                stageFile.setFileDate(System.currentTimeMillis());
+                stageFile.setFileSize(1234L);
+                stageDirectory.addStageFile(stageFile);
+
+                stageFile = new StageFileDTO();
+                stageFile.setFileName("CSI S01E02.avi");
+                stageFile.setFileDate(System.currentTimeMillis());
+                stageFile.setFileSize(1235L);
+                stageDirectory.addStageFile(stageFile);
+
+                stageFile = new StageFileDTO();
+                stageFile.setFileName("CSI S01E03E04.avi");
+                stageFile.setFileDate(System.currentTimeMillis());
+                stageFile.setFileSize(5000L);
+                stageDirectory.addStageFile(stageFile);
+
                 // import scanned
                 fileImportService.importScanned(importDTO);
 
