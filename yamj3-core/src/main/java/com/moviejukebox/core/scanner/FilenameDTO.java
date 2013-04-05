@@ -234,7 +234,7 @@ public class FilenameDTO {
         StringBuilder sb = new StringBuilder();
         sb.append(getTitle());
         sb.append("_");
-        sb.append(getYear());
+        sb.append(getYear()>-1?getYear():"0000");
         return sb.toString();
     }
 
@@ -242,7 +242,7 @@ public class FilenameDTO {
         StringBuilder sb = new StringBuilder();
         sb.append(getTitle());
         sb.append("_");
-        sb.append(getYear());
+        sb.append(getYear()>-1?getYear():"0000");
         sb.append("_");
         sb.append(PADDED_FORMAT.format(getSeason()));
         sb.append("_");
@@ -254,7 +254,7 @@ public class FilenameDTO {
         StringBuilder sb = new StringBuilder();
         sb.append(getTitle());
         sb.append("_");
-        sb.append(getYear());
+        sb.append(getYear()>-1?getYear():"0000");
         sb.append("_");
         sb.append(PADDED_FORMAT.format(getSeason()));
         return sb.toString();
