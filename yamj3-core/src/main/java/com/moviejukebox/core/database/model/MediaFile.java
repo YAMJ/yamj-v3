@@ -28,8 +28,8 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     private static final long serialVersionUID = 8411423609119475972L;
 
     @NaturalId
-    @Column(name = "base_file_name", nullable = false, length = 500)
-    private String baseFileName;
+    @Column(name = "fileName", nullable = false, length = 500)
+    private String fileName;
 
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "file_date")
@@ -82,17 +82,17 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     private Set<StageFile> stageFiles = new HashSet<StageFile>(0);
 
     // GETTER and SETTER
-    
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
     public Date getFileDate() {
         return fileDate;
-    }
-
-    public String getBaseFileName() {
-        return baseFileName;
-    }
-
-    public void setBaseFileName(String baseFileName) {
-        this.baseFileName = baseFileName;
     }
 
     public void setFileDate(Date fileDate) {
@@ -225,7 +225,7 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     public int hashCode() {
         final int PRIME = 17;
         int result = 1;
-        result = PRIME * result + (this.baseFileName == null?0:this.baseFileName.hashCode());
+        result = PRIME * result + (this.fileName == null?0:this.fileName.hashCode());
         return result;
     }
 
@@ -235,6 +235,6 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         if ( other == null ) return false;
         if ( !(other instanceof MediaFile) ) return false;
         MediaFile castOther = (MediaFile)other;
-        return StringUtils.equals(this.baseFileName, castOther.baseFileName);
+        return StringUtils.equals(this.fileName, castOther.fileName);
     }
 }

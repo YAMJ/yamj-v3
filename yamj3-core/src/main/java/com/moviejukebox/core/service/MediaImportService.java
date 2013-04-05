@@ -1,14 +1,12 @@
 package com.moviejukebox.core.service;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.moviejukebox.core.database.dao.MediaDao;
 import com.moviejukebox.core.database.dao.StagingDao;
 import com.moviejukebox.core.database.model.*;
 import com.moviejukebox.core.database.model.type.StatusType;
 import com.moviejukebox.core.scanner.FilenameDTO;
 import com.moviejukebox.core.scanner.FilenameScanner;
-import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -50,13 +48,12 @@ public class MediaImportService {
         filenameScanner.scan(dto);
 
         // MEDIA FILE
-        String baseFileName = FilenameUtils.removeExtension(stageFile.getFileName());
-        MediaFile mediaFile = mediaDao.getMediaFile(baseFileName);
+        MediaFile mediaFile = mediaDao.getMediaFile(stageFile.getFileName());
         if (mediaFile == null) {
             // NEW media file
             // fill in scanned values
             mediaFile = new MediaFile();
-            mediaFile.setBaseFileName(baseFileName);
+            mediaFile.setFileName(stageFile.getFileName());
             mediaFile.setFileDate(stageFile.getFileDate());
             mediaFile.setFileSize(stageFile.getFileSize());
             mediaFile.setContainer(dto.getContainer());
