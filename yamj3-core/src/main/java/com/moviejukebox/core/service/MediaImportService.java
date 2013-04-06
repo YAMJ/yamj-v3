@@ -1,11 +1,12 @@
 package com.moviejukebox.core.service;
 
+import com.moviejukebox.core.scanner.file.FilenameDTO;
+import com.moviejukebox.core.scanner.file.FilenameScanner;
+
 import com.moviejukebox.core.database.dao.MediaDao;
 import com.moviejukebox.core.database.dao.StagingDao;
 import com.moviejukebox.core.database.model.*;
 import com.moviejukebox.core.database.model.type.StatusType;
-import com.moviejukebox.core.scanner.FilenameDTO;
-import com.moviejukebox.core.scanner.FilenameScanner;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -84,9 +85,7 @@ public class MediaImportService {
                 videoData.setMoviedbIdMap(dto.getIdMap());
                 videoData.setTitle(dto.getTitle(), MEDIA_SOURCE);
                 videoData.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
-                if (dto.getYear() > 0) {
-                    videoData.setPublicationYear(String.valueOf(dto.getYear()), MEDIA_SOURCE);
-                }
+                videoData.setPublicationYear(dto.getYear(), MEDIA_SOURCE);
                 videoData.setStatus(StatusType.NEW);
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);

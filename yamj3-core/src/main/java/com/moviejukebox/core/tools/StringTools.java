@@ -223,4 +223,21 @@ public class StringTools {
         }
         return keywords;
     }
+    
+    public static int toYear(String string) {
+        if (StringUtils.isBlank(string)) {
+           return -1;
+        }
+        if (!StringUtils.isNumeric(string)) {
+            return -1;
+        }
+        
+        try {
+            int year = Integer.parseInt(string);
+            if (year > 0) return year;
+        } catch (Exception ignore) {
+            // ignore this error
+        }
+        return -1;
+    }
 }

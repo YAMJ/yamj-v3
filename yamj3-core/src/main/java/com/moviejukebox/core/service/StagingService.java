@@ -1,5 +1,7 @@
 package com.moviejukebox.core.service;
 
+import com.moviejukebox.core.scanner.file.FilenameScanner;
+
 import com.moviejukebox.common.dto.ImportDTO;
 import com.moviejukebox.common.dto.StageDirectoryDTO;
 import com.moviejukebox.common.dto.StageFileDTO;
@@ -8,7 +10,6 @@ import com.moviejukebox.core.database.model.Library;
 import com.moviejukebox.core.database.model.StageDirectory;
 import com.moviejukebox.core.database.model.StageFile;
 import com.moviejukebox.core.database.model.type.StatusType;
-import com.moviejukebox.core.scanner.FilenameScanner;
 import java.util.Date;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class StagingService {
             library = new Library();
             library.setClient(libraryDTO.getClient());
             library.setPlayerPath(libraryDTO.getPlayerPath());
-        } 
+        }
         library.setBaseDirectory(FilenameUtils.normalizeNoEndSeparator(libraryDTO.getBaseDirectory(), true));
         library.setLastScanned(new Date(System.currentTimeMillis()));
         stagingDao.storeEntity(library);

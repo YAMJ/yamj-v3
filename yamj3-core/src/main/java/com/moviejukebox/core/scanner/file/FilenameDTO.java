@@ -1,4 +1,4 @@
-package com.moviejukebox.core.scanner;
+package com.moviejukebox.core.scanner.file;
 
 import java.text.DecimalFormat;
 

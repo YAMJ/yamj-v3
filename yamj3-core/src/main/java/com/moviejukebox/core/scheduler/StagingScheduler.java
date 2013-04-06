@@ -3,6 +3,7 @@ package com.moviejukebox.core.scheduler;
 import com.moviejukebox.core.database.dao.StagingDao;
 import com.moviejukebox.core.database.model.type.FileType;
 import com.moviejukebox.core.database.model.type.StatusType;
+import com.moviejukebox.core.scanner.moviedb.MovieDatabaseController;
 import com.moviejukebox.core.service.MediaImportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,8 @@ public class StagingScheduler {
     private StagingDao stagingDao;
     @Autowired
     private MediaImportService mediaImportService;
+    @Autowired
+    private MovieDatabaseController movieDatabaseController;
 
     @Scheduled(initialDelay=10000, fixedDelay=30000)
     public void processStageFiles() throws Exception {
@@ -45,5 +48,11 @@ public class StagingScheduler {
         // PROCESS NFOS
         
         // PROCESS SUBTITLES
+    }
+    
+    
+    @Scheduled(initialDelay=10000, fixedDelay=30000)
+    public void scanMovieMetadata() throws Exception {
+        
     }
 }

@@ -56,8 +56,8 @@ public class VideoData extends AbstractAuditable implements Serializable {
 	@Column(name = "episode", nullable=false)
 	private int episode = -1;
 	
-	@Column(name = "pulication_year", length = 10)
-	private String publicationYear;
+	@Column(name = "publication_year")
+	private int publicationYear = -1;
 
     @Column(name = "title_original", length = 255)
     private String titleOriginal;
@@ -169,16 +169,16 @@ public class VideoData extends AbstractAuditable implements Serializable {
         }
     }
 
-    public String getPublicationYear() {
+    public int getPublicationYear() {
         return publicationYear;
     }
 
-    private void setPublicationYear(String publicationYear) {
+    private void setPublicationYear(int publicationYear) {
         this.publicationYear = publicationYear;
     }
 
-    public void setPublicationYear(String publicationYear, String source) {
-        if (!StringUtils.isBlank(publicationYear)) {
+    public void setPublicationYear(int publicationYear, String source) {
+        if (publicationYear > 0 ) {
             setPublicationYear(publicationYear);
             setOverrideFlag(OverrideFlag.YEAR, source);
         }
@@ -219,16 +219,30 @@ public class VideoData extends AbstractAuditable implements Serializable {
         return plot;
     }
 
-    public void setPlot(String plot) {
+    private void setPlot(String plot) {
         this.plot = plot;
+    }
+
+    public void setPlot(String plot, String source) {
+        if (StringUtils.isNotBlank(plot)) {
+            setPlot(plot);
+            setOverrideFlag(OverrideFlag.PLOT, source);
+        }
     }
 
     public String getOutline() {
         return outline;
     }
 
-    public void setOutline(String outline) {
+    private void setOutline(String outline) {
         this.outline = outline;
+    }
+
+    public void setOutline(String outline, String source) {
+        if (StringUtils.isNotBlank(outline)) {
+            setOutline(outline);
+            setOverrideFlag(OverrideFlag.OUTLINE, source);
+        }
     }
 
     public String getTagline() {
@@ -267,12 +281,16 @@ public class VideoData extends AbstractAuditable implements Serializable {
         return moviedbIdMap;
     }
 
+    public String getMoviedbId(String moviedb) {
+        return moviedbIdMap.get(moviedb);
+    }
+    
     public void setMoviedbIdMap(Map<String, String> moviedbIdMap) {
         this.moviedbIdMap = moviedbIdMap;
     }
 
     public void setMoviedbId(String moviedb, String id) {
-        if (!moviedbIdMap.containsKey(moviedb)) {
+        if (StringUtils.isNotBlank(id)) {
             moviedbIdMap.put(moviedb, id);
         }
     }

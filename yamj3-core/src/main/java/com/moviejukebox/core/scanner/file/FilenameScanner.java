@@ -1,4 +1,4 @@
-package com.moviejukebox.core.scanner;
+package com.moviejukebox.core.scanner.file;
 
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static org.springframework.util.StringUtils.tokenizeToStringArray;
