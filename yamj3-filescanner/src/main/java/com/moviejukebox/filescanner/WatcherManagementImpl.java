@@ -42,7 +42,7 @@ public class WatcherManagementImpl implements ScannerManagement {
     private static final Logger LOG = LoggerFactory.getLogger(WatcherManagementImpl.class);
     private static final String LOG_MESSAGE = "FileScanner: ";
     // The Collection of libraries
-    LibraryCollection lc;
+    private LibraryCollection libraryCollection;
     // The default watched status
     private static final Boolean DEFAULT_WATCH_STATE = Boolean.FALSE;    // TODO: Should be a property
     // Directory endings for DVD and Blurays
@@ -68,28 +68,28 @@ public class WatcherManagementImpl implements ScannerManagement {
      */
     @Override
     public ExitType runScanner(CmdLineParser parser) {
-        lc = new LibraryCollection();
+        libraryCollection = new LibraryCollection();
 
         String directoryProperty = parser.getParsedOptionValue("d");
         boolean watchEnabled = parseWatchStatus(parser.getParsedOptionValue("w"));
         String libraryFilename = parser.getParsedOptionValue("l");
 
         if (StringUtils.isNotBlank(libraryFilename)) {
-            lc.processLibraryFile(libraryFilename, watchEnabled);
+            libraryCollection.processLibraryFile(libraryFilename, watchEnabled);
         }
 
         if (StringUtils.isNotBlank(directoryProperty)) {
             LOG.info("{}Adding directory from command line: {}", LOG_MESSAGE, directoryProperty);
-            lc.addLibraryDirectory(directoryProperty, watchEnabled);
+            libraryCollection.addLibraryDirectory(directoryProperty, watchEnabled);
         }
 
-        LOG.info("{}Found {} libraries to process.", LOG_MESSAGE, lc.size());
-        if (lc.size() == 0) {
+        LOG.info("{}Found {} libraries to process.", LOG_MESSAGE, libraryCollection.size());
+        if (libraryCollection.size() == 0) {
             return NO_DIRECTORY;
         }
 
         ExitType status = SUCCESS;
-        for (Library library : lc.getLibraries()) {
+        for (Library library : libraryCollection.getLibraries()) {
             status = scan(library);
             LOG.info("{}", library.getStatistics().generateStats());
             LOG.info("{}Scanning completed.", LOG_MESSAGE);
@@ -116,6 +116,12 @@ public class WatcherManagementImpl implements ScannerManagement {
         return status;
     }
 
+    /**
+     * Start scanning a library.
+     *
+     * @param library
+     * @return
+     */
     private ExitType scan(Library library) {
         ExitType status = SUCCESS;
         File baseDirectory = new File(library.getBaseDirectory());
@@ -143,17 +149,20 @@ public class WatcherManagementImpl implements ScannerManagement {
         return status;
     }
 
+    /**
+     * Scan a directory (and recursively any other directories contained
+     *
+     * @param library
+     * @param parentDto
+     * @param directory
+     */
     private void scanDir(Library library, StageDirectoryDTO parentDto, File directory) {
         DirectoryType dirEnd = checkDirectoryEnding(directory);
 
-        if (dirEnd == DirectoryType.BLURAY) {
-            library.getStatistics().inc(StatType.BLURAY);
-            // Don't scan BLURAY structures
-            LOG.info("{}Skipping {} directory type", LOG_MESSAGE, dirEnd);
-        } else if (dirEnd == DirectoryType.DVD) {
-            library.getStatistics().inc(StatType.DVD);
-            // Don't scan DVD structures
-            LOG.info("{}Skipping {} directory type", LOG_MESSAGE, dirEnd);
+        if (dirEnd == DirectoryType.BLURAY || dirEnd == DirectoryType.DVD) {
+            // Don't scan BLURAY or DVD structures
+            LOG.info("{}Skipping directory '{}' because its a {} type", LOG_MESSAGE, directory.getAbsolutePath(), dirEnd);
+            library.getStatistics().inc(dirEnd == DirectoryType.BLURAY ? StatType.BLURAY : StatType.DVD);
         } else {
             library.getStatistics().inc(StatType.DIRECTORY);
 
@@ -168,16 +177,28 @@ public class WatcherManagementImpl implements ScannerManagement {
                     scanFile(library, sd, file);
                 }
             }
-
         }
     }
 
+    /**
+     * Scan an individual file
+     *
+     * @param library
+     * @param parentDto
+     * @param file
+     */
     private void scanFile(Library library, StageDirectoryDTO parentDto, File file) {
         library.getStatistics().inc(StatType.FILE);
         StageFileDTO sf = new StageFileDTO(file);
         parentDto.addStageFile(sf);
     }
 
+    /**
+     * Send an entire library to the core
+     *
+     * @param library
+     * @return
+     */
     private ExitType send(Library library) {
         ExitType status = SUCCESS;
         LOG.info("{}Starting to send the files to the core server...", LOG_MESSAGE);
@@ -195,8 +216,8 @@ public class WatcherManagementImpl implements ScannerManagement {
             try {
                 ImportDTO dto = new ImportDTO();
                 dto.setBaseDirectory(library.getBaseDirectory());
-                dto.setClient("");
-                dto.setPlayerPath("");
+                dto.setClient("FileScanner");
+                dto.setPlayerPath(library.getBaseDirectory());
                 dto.setStageDirectory(library.getStageDirectory());
                 fileImportService.importScanned(dto);
             } catch (RemoteAccessException ex) {
