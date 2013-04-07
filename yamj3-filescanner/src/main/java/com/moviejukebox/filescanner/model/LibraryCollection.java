@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 public class LibraryCollection {
 
     private static final Logger LOG = LoggerFactory.getLogger(LibraryCollection.class);
-    private static final String LOG_MESSAGE = "LibraryCollection: ";
     private List<Library> libraries;
 
     public LibraryCollection() {
@@ -81,8 +80,8 @@ public class LibraryCollection {
      * @param defaultWatchState The default watch status
      */
     public void processLibraryList(List<String> libraryFilenames, boolean defaultWatchState) {
-        LOG.info("{}Library files: {}", LOG_MESSAGE, libraryFilenames);
-        LOG.info("{}Default watch: {}", LOG_MESSAGE, defaultWatchState);
+        LOG.info("Library files: {}", libraryFilenames);
+        LOG.info("Default watch: {}", defaultWatchState);
 
         // Process the library files
         for (String singleLibrary : libraryFilenames) {
@@ -98,9 +97,9 @@ public class LibraryCollection {
      * @return
      */
     public void processLibraryFile(String libraryFilename, boolean defaultWatchState) {
-        LOG.warn("{}processLibraryFile - Not supported yet.", LOG_MESSAGE);
-        LOG.warn("{}Library Filename    : {}", LOG_MESSAGE, libraryFilename);
-        LOG.warn("{}Default watch state : {}", LOG_MESSAGE, defaultWatchState);
+        LOG.warn("processLibraryFile - Not supported yet.");
+        LOG.warn("Library Filename    : {}", libraryFilename);
+        LOG.warn("Default watch state : {}", defaultWatchState);
 
         // process the library file
 //        Library library = new Library();

@@ -36,7 +36,6 @@ import org.springframework.remoting.RemoteConnectFailureException;
 public class ScannerManagementImpl implements ScannerManagement {
 
     private static final Logger LOG = LoggerFactory.getLogger(ScannerManagementImpl.class);
-    private static final String LOG_MESSAGE = "FileScanner: ";
     // List of files
     private static List<File> fileList;
     // Statistics
@@ -57,18 +56,18 @@ public class ScannerManagementImpl implements ScannerManagement {
         ExitType status = scan(directory);
 
         LOG.info("{}", stats.generateStats());
-        LOG.info("{}Scanning completed.", LOG_MESSAGE);
+        LOG.info("Scanning completed.");
 
-        LOG.info("{}Exiting with status {}", LOG_MESSAGE, status);
+        LOG.info("Exiting with status {}", status);
 
         return status;
     }
 
     private ExitType scan(File directoryToScan) {
-        LOG.info("{}Scanning directory '{}'...", LOG_MESSAGE, directoryToScan.getName());
+        LOG.info("Scanning directory '{}'...", directoryToScan.getName());
 
         if (!directoryToScan.exists()) {
-            LOG.info("{}Failed to read directory '{}'", LOG_MESSAGE, directoryToScan);
+            LOG.info("Failed to read directory '{}'", directoryToScan);
             return NO_DIRECTORY;
         }
 
@@ -100,29 +99,29 @@ public class ScannerManagementImpl implements ScannerManagement {
     }
 
     private ExitType send(ImportDTO importDto) {
-        LOG.info("{}Sending files to the core server...", LOG_MESSAGE);
+        LOG.info("Sending files to the core server...");
 
         try {
             String pingResponse = pingService.ping();
-            LOG.info("{}Ping response: {}", LOG_MESSAGE, pingResponse);
+            LOG.info("Ping response: {}", pingResponse);
         } catch (RemoteConnectFailureException ex) {
-            LOG.error("{}Failed to connect to the core server: {}", LOG_MESSAGE, ex.getMessage());
+            LOG.error("Failed to connect to the core server: {}", ex.getMessage());
             return CONNECT_FAILURE;
         }
 
         try {
-            LOG.info("{}Sending '{}' to the server...", LOG_MESSAGE, importDto.getBaseDirectory());
+            LOG.info("Sending '{}' to the server...", importDto.getBaseDirectory());
             try {
                 fileImportService.importScanned(importDto);
             } catch (RemoteAccessException ex) {
-                LOG.error("{}Failed to send object to the core server: {}", LOG_MESSAGE, ex.getMessage());
+                LOG.error("Failed to send object to the core server: {}", ex.getMessage());
             }
         } catch (RemoteConnectFailureException ex) {
-            LOG.error("{}Failed to connect to the core server: {}", LOG_MESSAGE, ex.getMessage());
+            LOG.error("Failed to connect to the core server: {}", ex.getMessage());
             return CONNECT_FAILURE;
         }
 
-        LOG.info("{}Completed sending of files to core server...", LOG_MESSAGE);
+        LOG.info("Completed sending of files to core server...");
 
         return SUCCESS;
     }

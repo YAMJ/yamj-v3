@@ -15,7 +15,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class FileScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileScanner.class);
-    private static final String LOG_MESSAGE = "FileScanner: ";
     private static final String logFilename = "yamj-filescanner";
 
     public static void main(String[] args) throws Exception {
@@ -36,7 +35,7 @@ public class FileScanner {
                 status = main.execute(parser);
             }
         } catch (CmdLineException ex) {
-            LOG.error("{}Failed to parse command line options: {}", LOG_MESSAGE, ex.getMessage());
+            LOG.error("Failed to parse command line options: {}",  ex.getMessage());
             help(parser);
             status = CMDLINE_ERROR;
         }
@@ -69,7 +68,7 @@ public class FileScanner {
             ScannerManagement batchManagement = (ScannerManagement) applicationContext.getBean("scannerManagement");
             status = batchManagement.runScanner(parser);
         } catch (BeansException ex) {
-            LOG.error("{}Failed to load scanner configuration", LOG_MESSAGE);
+            LOG.error("Failed to load scanner configuration");
             ex.printStackTrace(System.err);
             status = CONFIG_ERROR;
 
