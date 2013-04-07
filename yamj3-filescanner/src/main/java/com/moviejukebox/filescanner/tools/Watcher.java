@@ -1,4 +1,4 @@
-package com.moviejukebox.filescanner.watcher;
+package com.moviejukebox.filescanner.tools;
 
 import java.io.*;
 import java.util.*;

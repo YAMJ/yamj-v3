@@ -65,13 +65,12 @@ public class FileScanner {
         ExitType status;
         try {
             ApplicationContext applicationContext = new ClassPathXmlApplicationContext("yamj3-filescanner.xml");
-            ScannerManagement batchManagement = (ScannerManagement) applicationContext.getBean("scannerManagement");
-            status = batchManagement.runScanner(parser);
+            ScannerManagement scannerManagement = (ScannerManagement) applicationContext.getBean("scannerManagement");
+            status = scannerManagement.runScanner(parser);
         } catch (BeansException ex) {
             LOG.error("Failed to load scanner configuration");
             ex.printStackTrace(System.err);
             status = CONFIG_ERROR;
-
         }
         return status;
     }

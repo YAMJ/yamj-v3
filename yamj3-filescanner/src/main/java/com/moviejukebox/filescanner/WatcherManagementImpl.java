@@ -7,7 +7,7 @@ import com.moviejukebox.common.dto.StageFileDTO;
 import com.moviejukebox.common.remote.service.FileImportService;
 import com.moviejukebox.common.remote.service.PingService;
 import com.moviejukebox.common.type.ExitType;
-import com.moviejukebox.filescanner.watcher.Watcher;
+import com.moviejukebox.filescanner.tools.Watcher;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -20,8 +20,8 @@ import com.moviejukebox.core.database.model.type.DirectoryType;
 import com.moviejukebox.filescanner.model.Library;
 import com.moviejukebox.filescanner.model.LibraryCollection;
 import com.moviejukebox.filescanner.model.StatType;
-import java.util.HashMap;
-import java.util.Map;
+import com.moviejukebox.filescanner.tools.DirectoryEnding;
+import com.moviejukebox.filescanner.tools.PingCore;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.remoting.RemoteAccessException;
 
@@ -44,20 +44,13 @@ public class WatcherManagementImpl implements ScannerManagement {
     private LibraryCollection libraryCollection;
     // The default watched status
     private static final Boolean DEFAULT_WATCH_STATE = Boolean.FALSE;    // TODO: Should be a property
-    // Directory endings for DVD and Blurays
-    private static final Map<String, DirectoryType> DIR_ENDINGS = new HashMap<String, DirectoryType>(2);
-    // Spring services
+    // Spring service(s)
     @Resource(name = "fileImportService")
     private FileImportService fileImportService;
     @Resource(name = "pingService")
     private PingService pingService;
-
-    static {
-        // The ending of the directory & Type
-        DIR_ENDINGS.put("BDMV", DirectoryType.BLURAY);
-        DIR_ENDINGS.put("AUDIO_TS", DirectoryType.DVD);
-        DIR_ENDINGS.put("VIDEO_TS", DirectoryType.DVD);
-    }
+    // The ping check service
+    private PingCore ping;
 
     /**
      * Start the scanner and process the command line properties.
@@ -68,6 +61,7 @@ public class WatcherManagementImpl implements ScannerManagement {
     @Override
     public ExitType runScanner(CmdLineParser parser) {
         libraryCollection = new LibraryCollection();
+        ping  = new PingCore(pingService, 30);
 
         String directoryProperty = parser.getParsedOptionValue("d");
         boolean watchEnabled = parseWatchStatus(parser.getParsedOptionValue("w"));
@@ -156,7 +150,7 @@ public class WatcherManagementImpl implements ScannerManagement {
      * @param directory
      */
     private void scanDir(Library library, StageDirectoryDTO parentDto, File directory) {
-        DirectoryType dirEnd = checkDirectoryEnding(directory);
+        DirectoryType dirEnd = DirectoryEnding.check(directory);
 
         LOG.info("Scanning directory '{}', detected type - {}", directory.getAbsolutePath(), dirEnd);
 
@@ -205,11 +199,10 @@ public class WatcherManagementImpl implements ScannerManagement {
         ExitType status = SUCCESS;
         LOG.info("Starting to send the files to the core server...");
 
-        try {
-            String pingResponse = pingService.ping();
-            LOG.info("Ping response: {}", pingResponse);
-        } catch (RemoteConnectFailureException ex) {
-            LOG.error("Failed to connect to the core server: {}", ex.getMessage());
+        if(ping.check()) {
+            LOG.info("Connected to core server");
+        }else{
+            LOG.warn("Failed to connect to core server! Aborting!");
             return CONNECT_FAILURE;
         }
 
@@ -247,18 +240,5 @@ public class WatcherManagementImpl implements ScannerManagement {
             return DEFAULT_WATCH_STATE;
         }
         return Boolean.parseBoolean(parsedOptionValue);
-    }
-
-    /**
-     * Return the DirectoryType of the directory
-     *
-     * @param directory
-     * @return
-     */
-    private DirectoryType checkDirectoryEnding(File directory) {
-        if (DIR_ENDINGS.containsKey(directory.getName())) {
-            return DIR_ENDINGS.get(directory.getName());
-        }
-        return DirectoryType.STANDARD;
     }
 }
