@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 public class Watcher {
 
     private static final Logger LOG = LoggerFactory.getLogger(Watcher.class);
-    private static final String LOG_MESSAGE = "Watcher: ";
     private final WatchService watcher = FileSystems.getDefault().newWatchService();
     private final Map<WatchKey, Path> keys = new HashMap<WatchKey, Path>();
     private boolean trace = Boolean.FALSE;
@@ -59,19 +58,19 @@ public class Watcher {
         try {
             key = dir.register(watcher, standardEvents, FILE_TREE);
         } catch (UnsupportedOperationException ex) {
-            LOG.warn("{}File watching not supported: {}", LOG_MESSAGE, ex.getMessage());
+            LOG.warn("File watching not supported: {}", ex.getMessage());
         } catch (IOException ex) {
-            LOG.error("{}IO Error: {}", LOG_MESSAGE, ex.getMessage());
+            LOG.error("IO Error: {}", ex.getMessage());
         }
 
         if (key != null) {
             if (trace) {
                 Path prev = keys.get(key);
                 if (prev == null) {
-                    LOG.info("{}Register: {}", LOG_MESSAGE, dir);
+                    LOG.info("Register: {}", dir);
                 } else {
                     if (!dir.equals(prev)) {
-                        LOG.info("{}Update: {} -> {}", LOG_MESSAGE, prev, dir);
+                        LOG.info("Update: {} -> {}", prev, dir);
                     }
                 }
             }
@@ -92,14 +91,14 @@ public class Watcher {
             } catch (InterruptedException ex) {
                 continue;
             } catch (ClosedWatchServiceException ex) {
-                LOG.info("{}Watch service closed, terminating.", LOG_MESSAGE);
+                LOG.info("Watch service closed, terminating.");
                 watchEnabled = Boolean.FALSE;
                 break;
             }
 
             Path dir = keys.get(key);
             if (dir == null) {
-                LOG.warn("{}WatchKey not recognized!!", LOG_MESSAGE);
+                LOG.warn("WatchKey not recognized!!");
                 continue;
             }
 
@@ -108,7 +107,7 @@ public class Watcher {
 
                 // TBD - provide example of how OVERFLOW event is handled
                 if (kind == StandardWatchEventKind.OVERFLOW) {
-                    LOG.info("{}Too many watched events!", LOG_MESSAGE);
+                    LOG.info("Too many watched events!");
                     continue;
                 }
 
@@ -118,7 +117,7 @@ public class Watcher {
                 Path child = dir.resolve(name);
 
                 // print out event
-                LOG.info("{}{}: {}", LOG_MESSAGE, event.kind().name(), child);
+                LOG.info("{}: {}", event.kind().name(), child);
 
             }
 
@@ -144,7 +143,7 @@ public class Watcher {
     }
 
     public void setWatching(boolean watchFlag) {
-        LOG.info("{}{} the watch process", LOG_MESSAGE, (watchFlag ? "Enabling" : "Disabling"));
+        LOG.info("{} the watch process", (watchFlag ? "Enabling" : "Disabling"));
         this.watchEnabled = watchFlag;
     }
 }

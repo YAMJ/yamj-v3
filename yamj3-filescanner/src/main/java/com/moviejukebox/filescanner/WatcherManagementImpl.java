@@ -40,7 +40,6 @@ public class WatcherManagementImpl implements ScannerManagement {
      *
      */
     private static final Logger LOG = LoggerFactory.getLogger(WatcherManagementImpl.class);
-    private static final String LOG_MESSAGE = "FileScanner: ";
     // The Collection of libraries
     private LibraryCollection libraryCollection;
     // The default watched status
@@ -79,11 +78,11 @@ public class WatcherManagementImpl implements ScannerManagement {
         }
 
         if (StringUtils.isNotBlank(directoryProperty)) {
-            LOG.info("{}Adding directory from command line: {}", LOG_MESSAGE, directoryProperty);
+            LOG.info("Adding directory from command line: {}", directoryProperty);
             libraryCollection.addLibraryDirectory(directoryProperty, watchEnabled);
         }
 
-        LOG.info("{}Found {} libraries to process.", LOG_MESSAGE, libraryCollection.size());
+        LOG.info("Found {} libraries to process.", libraryCollection.size());
         if (libraryCollection.size() == 0) {
             return NO_DIRECTORY;
         }
@@ -92,7 +91,7 @@ public class WatcherManagementImpl implements ScannerManagement {
         for (Library library : libraryCollection.getLibraries()) {
             status = scan(library);
             LOG.info("{}", library.getStatistics().generateStats());
-            LOG.info("{}Scanning completed.", LOG_MESSAGE);
+            LOG.info("Scanning completed.");
 
             if (status == SUCCESS) {
                 status = send(library);
@@ -100,18 +99,18 @@ public class WatcherManagementImpl implements ScannerManagement {
         }
 
         if (watchEnabled) {
-            LOG.info("{}Watching directory '{}' for changes...", LOG_MESSAGE, directoryProperty);
+            LOG.info("Watching directory '{}' for changes...", directoryProperty);
             try {
                 Watcher wd = new Watcher(directoryProperty);
                 wd.processEvents();
             } catch (IOException ex) {
-                LOG.warn("{}Unable to watch directory '{}', error: {}", LOG_MESSAGE, directoryProperty, ex.getMessage());
+                LOG.warn("Unable to watch directory '{}', error: {}", directoryProperty, ex.getMessage());
                 status = WATCH_FAILURE;
             }
-            LOG.info("{}Watching directory '{}' completed", LOG_MESSAGE, directoryProperty);
+            LOG.info("Watching directory '{}' completed", directoryProperty);
         }
 
-        LOG.info("{}Exiting with status {}", LOG_MESSAGE, status);
+        LOG.info("Exiting with status {}", status);
 
         return status;
     }
@@ -125,10 +124,10 @@ public class WatcherManagementImpl implements ScannerManagement {
     private ExitType scan(Library library) {
         ExitType status = SUCCESS;
         File baseDirectory = new File(library.getBaseDirectory());
-        LOG.info("{}Scanning directory '{}'...", LOG_MESSAGE, baseDirectory.getName());
+        LOG.info("Scanning library '{}'...", baseDirectory.getName());
 
         if (!baseDirectory.exists()) {
-            LOG.info("{}Failed to read directory '{}'", LOG_MESSAGE, baseDirectory);
+            LOG.info("Failed to read directory '{}'", baseDirectory);
             return NO_DIRECTORY;
         }
 
@@ -159,9 +158,11 @@ public class WatcherManagementImpl implements ScannerManagement {
     private void scanDir(Library library, StageDirectoryDTO parentDto, File directory) {
         DirectoryType dirEnd = checkDirectoryEnding(directory);
 
+        LOG.info("Scanning directory '{}', detected type - {}", directory.getAbsolutePath(), dirEnd);
+
         if (dirEnd == DirectoryType.BLURAY || dirEnd == DirectoryType.DVD) {
             // Don't scan BLURAY or DVD structures
-            LOG.info("{}Skipping directory '{}' because its a {} type", LOG_MESSAGE, directory.getAbsolutePath(), dirEnd);
+            LOG.info("Skipping directory '{}' because its a {} type", directory.getAbsolutePath(), dirEnd);
             library.getStatistics().inc(dirEnd == DirectoryType.BLURAY ? StatType.BLURAY : StatType.DVD);
         } else {
             library.getStatistics().inc(StatType.DIRECTORY);
@@ -188,6 +189,7 @@ public class WatcherManagementImpl implements ScannerManagement {
      * @param file
      */
     private void scanFile(Library library, StageDirectoryDTO parentDto, File file) {
+        LOG.info("Scanning file '{}'", file.getName());
         library.getStatistics().inc(StatType.FILE);
         StageFileDTO sf = new StageFileDTO(file);
         parentDto.addStageFile(sf);
@@ -201,18 +203,18 @@ public class WatcherManagementImpl implements ScannerManagement {
      */
     private ExitType send(Library library) {
         ExitType status = SUCCESS;
-        LOG.info("{}Starting to send the files to the core server...", LOG_MESSAGE);
+        LOG.info("Starting to send the files to the core server...");
 
         try {
             String pingResponse = pingService.ping();
-            LOG.info("{}Ping response: {}", LOG_MESSAGE, pingResponse);
+            LOG.info("Ping response: {}", pingResponse);
         } catch (RemoteConnectFailureException ex) {
-            LOG.error("{}Failed to connect to the core server: {}", LOG_MESSAGE, ex.getMessage());
+            LOG.error("Failed to connect to the core server: {}", ex.getMessage());
             return CONNECT_FAILURE;
         }
 
         try {
-            LOG.info("{}Sending library '{}' to the server...", LOG_MESSAGE, library.getBaseDirectory());
+            LOG.info("Sending library '{}' to the server...", library.getBaseDirectory());
             try {
                 ImportDTO dto = new ImportDTO();
                 dto.setBaseDirectory(library.getBaseDirectory());
@@ -221,15 +223,15 @@ public class WatcherManagementImpl implements ScannerManagement {
                 dto.setStageDirectory(library.getStageDirectory());
                 fileImportService.importScanned(dto);
             } catch (RemoteAccessException ex) {
-                LOG.error("{}Failed to send object to the core server: {}", LOG_MESSAGE, ex.getMessage());
+                LOG.error("Failed to send object to the core server: {}", ex.getMessage());
                 return CONNECT_FAILURE;
             }
         } catch (RemoteConnectFailureException ex) {
-            LOG.error("{}Failed to connect to the core server: {}", LOG_MESSAGE, ex.getMessage());
+            LOG.error("Failed to connect to the core server: {}", ex.getMessage());
             return CONNECT_FAILURE;
         }
 
-        LOG.info("{}Completed sending of files to core server...", LOG_MESSAGE);
+        LOG.info("Completed sending of files to core server...");
 
         return status;
     }
