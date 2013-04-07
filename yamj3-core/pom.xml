@@ -101,6 +101,11 @@
             <artifactId>commons-codec</artifactId>
             <version>1.7</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.2.3</version>
+        </dependency>
         <!-- JSP and JSTL SUPPORT -->
         <dependency>
             <groupId>javax.servlet</groupId>
