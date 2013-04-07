@@ -5,6 +5,9 @@ import static com.moviejukebox.common.type.ExitType.NO_DIRECTORY;
 import static com.moviejukebox.common.type.ExitType.SUCCESS;
 
 import com.moviejukebox.common.cmdline.CmdLineParser;
+import com.moviejukebox.common.dto.ImportDTO;
+import com.moviejukebox.common.dto.StageDirectoryDTO;
+import com.moviejukebox.common.dto.StageFileDTO;
 import com.moviejukebox.common.remote.service.FileImportService;
 import com.moviejukebox.common.remote.service.PingService;
 import com.moviejukebox.common.type.ExitType;
@@ -18,8 +21,18 @@ import java.util.List;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 
+/**
+ * This is a simple scanner class.
+ *
+ * It does not support any of the more advanced functions (such as watching an rescanning.
+ *
+ * It will simple scan the directory specified, send the file list to the server and quit.
+ *
+ * @author Stuart
+ */
 public class ScannerManagementImpl implements ScannerManagement {
 
     private static final Logger LOG = LoggerFactory.getLogger(ScannerManagementImpl.class);
@@ -27,11 +40,13 @@ public class ScannerManagementImpl implements ScannerManagement {
     // List of files
     private static List<File> fileList;
     // Statistics
-    private static LibraryStatistics stats=new LibraryStatistics();
+    private static LibraryStatistics stats = new LibraryStatistics();
     @Resource(name = "fileImportService")
     private FileImportService fileImportService;
     @Resource(name = "pingService")
     private PingService pingService;
+    // Constants
+    private static final String DEFAULT_CLIENT = "FileScanner";
 
     @Override
     public ExitType runScanner(CmdLineParser parser) {
@@ -43,10 +58,6 @@ public class ScannerManagementImpl implements ScannerManagement {
 
         LOG.info("{}", stats.generateStats());
         LOG.info("{}Scanning completed.", LOG_MESSAGE);
-
-        if (status == SUCCESS) {
-            status = send(directory);
-        }
 
         LOG.info("{}Exiting with status {}", LOG_MESSAGE, status);
 
@@ -61,6 +72,17 @@ public class ScannerManagementImpl implements ScannerManagement {
             return NO_DIRECTORY;
         }
 
+        ImportDTO importDto = new ImportDTO();
+        importDto.setClient(DEFAULT_CLIENT);
+        importDto.setBaseDirectory(directoryToScan.getParent());
+        importDto.setPlayerPath(directoryToScan.getParent());
+
+        StageDirectoryDTO sdDto = new StageDirectoryDTO();
+        sdDto.setDate(directoryToScan.lastModified());
+        sdDto.setPath(directoryToScan.getAbsolutePath());
+
+        importDto.setStageDirectory(sdDto);
+
         List<File> currentFileList = Arrays.asList(directoryToScan.listFiles());
         Collections.sort(currentFileList);
         fileList.addAll(currentFileList);
@@ -71,13 +93,14 @@ public class ScannerManagementImpl implements ScannerManagement {
                 scan(file);
             } else {
                 stats.inc(StatType.FILE);
+                sdDto.addStageFile(new StageFileDTO(file));
             }
         }
-        return SUCCESS;
+        return send(importDto);
     }
 
-    private ExitType send(File directoryScanned) {
-        LOG.info("{}Starting to send the files to the core server...", LOG_MESSAGE);
+    private ExitType send(ImportDTO importDto) {
+        LOG.info("{}Sending files to the core server...", LOG_MESSAGE);
 
         try {
             String pingResponse = pingService.ping();
@@ -87,34 +110,17 @@ public class ScannerManagementImpl implements ScannerManagement {
             return CONNECT_FAILURE;
         }
 
-        /** use ImportDTO
-        FileImportDTO dto;
         try {
-            for (File file : fileList) {
-                dto = new FileImportDTO();
-                dto.setScanPath(directoryScanned.getAbsolutePath());
-                dto.setFilePath(file.getAbsolutePath());
-                if (file.isFile()) {
-                    dto.setFileDate(file.lastModified());
-                    dto.setFileSize(file.length());
-                } else {
-                    dto.setFileDate(0);
-                    dto.setFileSize(0);
-                }
-
-                LOG.info("{}Sending '{}' to the server...", LOG_MESSAGE, file.getName());
-                try {
-                    fileImportService.importFile(dto);
-                } catch (RemoteAccessException ex) {
-                    LOG.error("{}Failed to send object to the core server: {}", LOG_MESSAGE, ex.getMessage());
-                    LOG.error("{}{}", LOG_MESSAGE, dto.toString());
-                }
+            LOG.info("{}Sending '{}' to the server...", LOG_MESSAGE, importDto.getBaseDirectory());
+            try {
+                fileImportService.importScanned(importDto);
+            } catch (RemoteAccessException ex) {
+                LOG.error("{}Failed to send object to the core server: {}", LOG_MESSAGE, ex.getMessage());
             }
         } catch (RemoteConnectFailureException ex) {
             LOG.error("{}Failed to connect to the core server: {}", LOG_MESSAGE, ex.getMessage());
             return CONNECT_FAILURE;
         }
-        */
 
         LOG.info("{}Completed sending of files to core server...", LOG_MESSAGE);
 
