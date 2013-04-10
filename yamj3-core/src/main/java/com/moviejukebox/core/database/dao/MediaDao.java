@@ -17,12 +17,12 @@ import org.springframework.stereotype.Service;
 @Service("mediaDao")
 public class MediaDao extends ExtendedHibernateDaoSupport {
 
-    public MediaFile getMediaFile(final String baseFileName) {
+    public MediaFile getMediaFile(final String fileName) {
         return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<MediaFile>() {
             @Override
             public MediaFile doInHibernate(Session session) throws HibernateException, SQLException {
                 Criteria criteria = session.createCriteria(MediaFile.class);
-                criteria.add(Restrictions.naturalId().set("baseFileName", baseFileName));
+                criteria.add(Restrictions.naturalId().set("fileName", fileName));
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
                 return (MediaFile)criteria.uniqueResult();
