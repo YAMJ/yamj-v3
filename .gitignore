@@ -163,12 +163,10 @@ pip-log.txt
 .DS_Store
 
 #Project specific
+/nbproject/
+nbactions.xml
 target/
 /yamj3-common/target/
-nbactions.xml
-/yamj3-filescanner/test.cmd
 /yamj3-filescanner/*.log
 /yamj3-filescanner/nbproject/
 /yamj3-common/nbproject/
-/nbproject/
-/yamj3-filescanner/TestFileScanner.cmd
