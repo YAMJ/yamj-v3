@@ -2,38 +2,43 @@ package com.moviejukebox.filescanner.tools;
 
 import com.moviejukebox.common.remote.service.PingService;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import javax.annotation.Resource;
 import org.springframework.remoting.RemoteConnectFailureException;
+import org.springframework.stereotype.Service;
 
 /**
  * Wait for the core server to be available or timeout
  *
  * @author Stuart
  */
+@Service("pingCore")
 public class PingCore {
 
     private static Logger LOG = LoggerFactory.getLogger(PingCore.class);
     private long timeoutSeconds;
+    private int numberOfRetries;
     // Spring service(s)
-//    @Resource(name = "pingService")   - Cant work out how to get this to work
+    @Resource(name = "pingService")
     private PingService pingService;
 
-    public PingCore(PingService pingService) {
-        this.pingService = pingService;
-        this.timeoutSeconds = 30;
+    public PingCore() {
     }
 
-    public PingCore(PingService pingService, long timeout) {
-        this.pingService = pingService;
-        this.timeoutSeconds = timeout;
+    public void setTimeoutSeconds(long timeoutSeconds) {
+        this.timeoutSeconds = timeoutSeconds;
+    }
+
+    public void setNumberOfRetries(int numberOfRetries) {
+        this.numberOfRetries = numberOfRetries;
     }
 
     public boolean check() {
         boolean connected = pingCore();
-        if (!connected) {
-            LOG.info("Waiting {} seconds for server to become available.", timeoutSeconds);
+        int retryCount = 1;
+        while (!connected && (retryCount++ <= numberOfRetries)) {
+            LOG.info("Attempt #{}: Waiting {} seconds for server to become available.", retryCount, timeoutSeconds);
             try {
                 TimeUnit.SECONDS.sleep(timeoutSeconds);
                 connected = pingCore();

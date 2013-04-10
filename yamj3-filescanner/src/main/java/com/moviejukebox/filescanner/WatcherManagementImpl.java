@@ -5,7 +5,6 @@ import com.moviejukebox.common.dto.ImportDTO;
 import com.moviejukebox.common.dto.StageDirectoryDTO;
 import com.moviejukebox.common.dto.StageFileDTO;
 import com.moviejukebox.common.remote.service.FileImportService;
-import com.moviejukebox.common.remote.service.PingService;
 import com.moviejukebox.common.type.ExitType;
 import com.moviejukebox.filescanner.tools.Watcher;
 import java.io.File;
@@ -22,7 +21,6 @@ import com.moviejukebox.filescanner.model.LibraryCollection;
 import com.moviejukebox.filescanner.model.StatType;
 import com.moviejukebox.filescanner.tools.DirectoryEnding;
 import com.moviejukebox.filescanner.tools.PingCore;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -51,10 +49,8 @@ public class WatcherManagementImpl implements ScannerManagement {
     // Spring service(s)
     @Resource(name = "fileImportService")
     private FileImportService fileImportService;
-    @Resource(name = "pingService")
-    private PingService pingService;
-    // The ping check service
-    private PingCore ping;
+    @Resource(name = "pingCore")
+    private PingCore pingCore;
     // Thread executers
     private static final int NUM_THREADS = 2;
     ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
@@ -74,8 +70,6 @@ public class WatcherManagementImpl implements ScannerManagement {
         libraryCollection = new LibraryCollection();
         libraryCollection.setDefaultClient(DEFAULT_CLIENT);
         libraryCollection.setDefaultPlayerPath(DEFAULT_PLAYER_PATH);
-
-        ping = new PingCore(pingService, 30);
 
         String directoryProperty = parser.getParsedOptionValue("d");
         boolean watchEnabled = parseWatchStatus(parser.getParsedOptionValue("w"));
@@ -226,7 +220,7 @@ public class WatcherManagementImpl implements ScannerManagement {
         ExitType status = SUCCESS;
         LOG.info("Starting to send the files to the core server...");
 
-        if (ping.check()) {
+        if (pingCore.check()) {
             LOG.info("Sending library '{}' to the server...", library.getImportDTO().getBaseDirectory());
 
 //            Callable<ExitType> worker = new SendToCore(fileImportService, library.getImportDTO());
