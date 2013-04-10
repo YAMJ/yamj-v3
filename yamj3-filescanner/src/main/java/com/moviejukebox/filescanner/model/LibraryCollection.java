@@ -1,5 +1,6 @@
 package com.moviejukebox.filescanner.model;
 
+import com.moviejukebox.common.dto.ImportDTO;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -9,6 +10,8 @@ public class LibraryCollection {
 
     private static final Logger LOG = LoggerFactory.getLogger(LibraryCollection.class);
     private List<Library> libraries;
+    private String defaultPlayerPath = "";
+    private String defaultClient = "";
 
     public LibraryCollection() {
         libraries = new ArrayList<Library>();
@@ -40,7 +43,7 @@ public class LibraryCollection {
     public void remove(String path) {
         List<Library> toRemove = new ArrayList<Library>();
         for (Library library : libraries) {
-            if (library.getBaseDirectory().equalsIgnoreCase(path)) {
+            if (library.getImportDTO().getBaseDirectory().equalsIgnoreCase(path)) {
                 toRemove.add(library);
             }
         }
@@ -109,9 +112,37 @@ public class LibraryCollection {
     }
 
     public void addLibraryDirectory(String baseDirectory, boolean defaultWatchState) {
+        addLibraryDirectory(baseDirectory, defaultWatchState, defaultPlayerPath, defaultClient);
+    }
+
+    public void addLibraryDirectory(String baseDirectory, boolean defaultWatchState, String playerPath, String client) {
         Library library = new Library();
-        library.setBaseDirectory(baseDirectory);
+
+        // Set up the ImportDTO
+        ImportDTO importDto = new ImportDTO();
+        importDto.setBaseDirectory(baseDirectory);
+        importDto.setClient(client);
+        importDto.setPlayerPath(playerPath);
+
+        library.setImportDTO(importDto);
         library.setWatch(defaultWatchState);
         add(library);
     }
+
+    public String getDefaultPlayerPath() {
+        return defaultPlayerPath;
+    }
+
+    public void setDefaultPlayerPath(String defaultPlayerPath) {
+        this.defaultPlayerPath = defaultPlayerPath;
+    }
+
+    public String getDefaultClient() {
+        return defaultClient;
+    }
+
+    public void setDefaultClient(String defaultClient) {
+        this.defaultClient = defaultClient;
+    }
+
 }
