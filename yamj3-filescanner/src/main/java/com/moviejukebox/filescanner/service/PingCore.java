@@ -1,4 +1,4 @@
-package com.moviejukebox.filescanner.tools;
+package com.moviejukebox.filescanner.service;
 
 import com.moviejukebox.common.remote.service.PingService;
 import java.util.concurrent.TimeUnit;

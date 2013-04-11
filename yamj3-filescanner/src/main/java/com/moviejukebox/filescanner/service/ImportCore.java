@@ -1,33 +1,27 @@
-package com.moviejukebox.filescanner;
+package com.moviejukebox.filescanner.service;
 
 import com.moviejukebox.common.dto.ImportDTO;
 import com.moviejukebox.common.remote.service.FileImportService;
 import com.moviejukebox.common.type.ExitType;
 import static com.moviejukebox.common.type.ExitType.CONNECT_FAILURE;
-import com.moviejukebox.filescanner.model.Library;
 import java.util.concurrent.Callable;
+import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
+import org.springframework.stereotype.Service;
 
-public class SendToCore implements Callable<ExitType> {
+@Service("importCore")
+public class ImportCore implements Callable<ExitType> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SendToCore.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImportCore.class);
+    // Spring service(s)
+    @Resource(name = "fileImportService")
     FileImportService fileImportService;
     ImportDTO dto;
 
-    public SendToCore(FileImportService fileImportService, ImportDTO dto) {
-        this.fileImportService = fileImportService;
-        this.dto = dto;
-    }
-
-    public FileImportService getFileImportService() {
-        return fileImportService;
-    }
-
-    public void setFileImportService(FileImportService fileImportService) {
-        this.fileImportService = fileImportService;
+    public ImportCore() {
     }
 
     public ImportDTO getDto() {

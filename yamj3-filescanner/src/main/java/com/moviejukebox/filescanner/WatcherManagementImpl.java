@@ -19,8 +19,9 @@ import com.moviejukebox.core.database.model.type.DirectoryType;
 import com.moviejukebox.filescanner.model.Library;
 import com.moviejukebox.filescanner.model.LibraryCollection;
 import com.moviejukebox.filescanner.model.StatType;
+import com.moviejukebox.filescanner.service.ImportCore;
+import com.moviejukebox.filescanner.service.PingCore;
 import com.moviejukebox.filescanner.tools.DirectoryEnding;
-import com.moviejukebox.filescanner.tools.PingCore;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -51,6 +52,8 @@ public class WatcherManagementImpl implements ScannerManagement {
     private FileImportService fileImportService;
     @Resource(name = "pingCore")
     private PingCore pingCore;
+    @Resource(name="importCore")
+    private ImportCore importCore;
     // Thread executers
     private static final int NUM_THREADS = 2;
     ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
