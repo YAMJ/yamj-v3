@@ -11,10 +11,10 @@ public class SearchEngineTools {
 
     private static final Logger LOGGER = Logger.getLogger(SearchEngineTools.class);
     
-    private WebBrowser webBrowser;
+    private final HttpClient httpClient;
     private LinkedList<String> searchSites;
-    private String searchSuffix = "";
     private String country;
+    private String searchSuffix = "";
     private String language;
     private String googleHost = "www.google.com";
     private String yahooHost = "search.yahoo.com";
@@ -22,14 +22,12 @@ public class SearchEngineTools {
     private String blekkoHost = "www.blekko.com";
     private String lycosHost = "search.lycos.com";
 
-    public SearchEngineTools() {
-        this("us");
+    public SearchEngineTools(HttpClient httpClient) {
+        this(httpClient, "us");
     }
 
-    public SearchEngineTools(String country) {
-        webBrowser = new WebBrowser();
-        // user agent should be an actual FireFox
-        webBrowser.addBrowserProperty("User-Agent", "Mozilla/6.0 (Windows NT 6.2; WOW64; rv:16.0.1) Gecko/20121011 Firefox/16.0.1");
+    public SearchEngineTools(HttpClient httpClient, String country) {
+        this.httpClient = httpClient;
         
         // sites to search for URLs
         searchSites = new LinkedList<String>();
@@ -148,7 +146,7 @@ public class SearchEngineTools {
                 sb.append("+");
                 sb.append(URLEncoder.encode(additional, "UTF-8"));
             }
-            String xml = webBrowser.request(sb.toString());
+            String xml = httpClient.requestContent(sb.toString());
            
             int beginIndex = xml.indexOf("http://" + site + searchSuffix);
             if (beginIndex != -1) {
@@ -185,7 +183,7 @@ public class SearchEngineTools {
                 sb.append(URLEncoder.encode(additional, "UTF-8"));
             }
 
-            String xml = webBrowser.request(sb.toString());
+            String xml = httpClient.requestContent(sb.toString());
            
             int beginIndex = xml.indexOf("//" + site + searchSuffix);
             if (beginIndex != -1) {
@@ -225,7 +223,7 @@ public class SearchEngineTools {
                 sb.append("&filt=rf");
             }
             
-            String xml = webBrowser.request(sb.toString());
+            String xml = httpClient.requestContent(sb.toString());
            
             int beginIndex = xml.indexOf("http://" + site + searchSuffix);
             if (beginIndex != -1) {
@@ -257,7 +255,7 @@ public class SearchEngineTools {
                 sb.append(URLEncoder.encode(additional, "UTF-8"));
             }
             
-            String xml = webBrowser.request(sb.toString());
+            String xml = httpClient.requestContent(sb.toString());
            
             int beginIndex = xml.indexOf("http://" + site + searchSuffix);
             if (beginIndex != -1) {
@@ -297,7 +295,7 @@ public class SearchEngineTools {
                 sb.append(URLEncoder.encode(additional, "UTF-8"));
             }
 
-            String xml = webBrowser.request(sb.toString());
+            String xml = httpClient.requestContent(sb.toString());
            
             int beginIndex = xml.indexOf("http://" + site + searchSuffix);
             if (beginIndex != -1) {

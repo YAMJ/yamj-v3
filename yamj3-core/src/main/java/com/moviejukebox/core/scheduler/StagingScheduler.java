@@ -1,5 +1,6 @@
 package com.moviejukebox.core.scheduler;
 
+import com.moviejukebox.core.database.dao.MediaDao;
 import com.moviejukebox.core.database.dao.StagingDao;
 import com.moviejukebox.core.database.model.type.FileType;
 import com.moviejukebox.core.database.model.type.StatusType;
@@ -18,6 +19,8 @@ public class StagingScheduler {
     
     @Autowired
     private StagingDao stagingDao;
+    @Autowired
+    private MediaDao mediaDao;
     @Autowired
     private MediaImportService mediaImportService;
     @Autowired
@@ -52,7 +55,23 @@ public class StagingScheduler {
     
     
     @Scheduled(initialDelay=10000, fixedDelay=30000)
-    public void scanMovieMetadata() throws Exception {
+    public void scanVideoData() throws Exception {
+        Long id = null;
+        
+        do {
+            try {
+                // find next video data to process
+                id =  mediaDao.getNextVideoDataId(StatusType.NEW, StatusType.UPDATED); 
+                if (id != null) {
+                    this.movieDatabaseController.scanVideoData(id);
+                } else {
+                    LOGGER.info("No video found to process");
+                }
+            } catch (Exception error) {
+                LOGGER.error("Failed to process video data", error);
+                mediaImportService.processingError(id);
+            }
+        } while (id != null);
         
     }
 }

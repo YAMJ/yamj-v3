@@ -1,15 +1,19 @@
 package com.moviejukebox.core.database.dao;
 
+import org.hibernate.Query;
+
 import com.moviejukebox.core.database.model.MediaFile;
 import com.moviejukebox.core.database.model.Season;
 import com.moviejukebox.core.database.model.Series;
 import com.moviejukebox.core.database.model.VideoData;
+import com.moviejukebox.core.database.model.type.StatusType;
 import com.moviejukebox.core.hibernate.ExtendedHibernateDaoSupport;
 import java.sql.SQLException;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.stereotype.Service;
@@ -28,6 +32,33 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
                 return (MediaFile)criteria.uniqueResult();
             }
         });
+    }
+
+    public Long getNextVideoDataId(final StatusType... statusTypes) {
+        return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<Long>() {
+            @Override
+            public Long doInHibernate(Session session) throws HibernateException, SQLException {
+                Criteria criteria = session.createCriteria(VideoData.class);
+                criteria.add(Restrictions.in("status", statusTypes));
+                criteria.setProjection(Projections.min("id"));
+                criteria.setCacheable(true);
+                criteria.setCacheMode(CacheMode.NORMAL);
+                Long id = (Long)criteria.uniqueResult();
+                
+                if (id != null) {
+                    Query query = session.createQuery("update VideoData set status=:status where id=:id");
+                    query.setParameter("status", StatusType.PROCESS);
+                    query.setLong("id", id);
+                    query.executeUpdate();
+                }
+                
+                return id;
+            }
+        });
+    }
+
+    public VideoData getVideoData(Long id) {
+        return this.getHibernateTemplate().get(VideoData.class, id);
     }
 
     public VideoData getVideoData(final String identifier) {

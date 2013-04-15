@@ -1,24 +1,14 @@
 package com.moviejukebox.core.database.model;
 
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.ForeignKey;
-
 import com.moviejukebox.core.database.model.type.OverrideFlag;
 import com.moviejukebox.core.database.model.type.StatusType;
 import com.moviejukebox.core.hibernate.usertypes.EnumStringUserType;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.MapKey;
@@ -69,19 +59,19 @@ public class VideoData extends AbstractAuditable implements Serializable {
     private int topRank = -1;
 
     @Lob
-    @Column(name = "plot")
+    @Column(name = "plot", length = 50000)
     private String plot;
 
     @Lob
-    @Column(name = "outline")
+    @Column(name = "outline", length = 50000)
     private String outline;
 
     @Lob
-    @Column(name = "tagline")
+    @Column(name = "tagline", length = 25000)
     private String  tagline;
 
     @Lob
-    @Column(name = "quote")
+    @Column(name = "quote", length = 25000)
     private String  quote;
 
     @Column(name = "country", length = 100)
@@ -114,8 +104,8 @@ public class VideoData extends AbstractAuditable implements Serializable {
     private Map<OverrideFlag, String> overrideFlags = new HashMap<OverrideFlag, String>(0);
 
     @ManyToMany
-    @ForeignKey(name = "FK_MOVIEGENRES_DATA", inverseName = "FK_MOVIEGENRES_GENRE")
-    @JoinTable(name= "movie_genres",
+    @ForeignKey(name = "FK_DATAGENRES_VIDEODATA", inverseName = "FK_DATAGENRES_GENRE")
+    @JoinTable(name= "videodata_genres",
             joinColumns={@JoinColumn(name="data_id")},
             inverseJoinColumns={@JoinColumn(name="genre_id")})
     private Set<Genre> genres = new HashSet<Genre>(0);
@@ -148,7 +138,7 @@ public class VideoData extends AbstractAuditable implements Serializable {
     }
 
 	public void setTitle(String title, String source) {
-        if (!StringUtils.isBlank(title)) {
+        if (StringUtils.isNotBlank(title)) {
             setTitle(title);
             setOverrideFlag(OverrideFlag.TITLE, source);
         }
@@ -163,7 +153,7 @@ public class VideoData extends AbstractAuditable implements Serializable {
     }
 
     public void setTitleOriginal(String titleOriginal, String source) {
-        if (!StringUtils.isBlank(titleOriginal)) {
+        if (StringUtils.isNotBlank(titleOriginal)) {
             setTitleOriginal(titleOriginal);
             setOverrideFlag(OverrideFlag.ORIGINALTITLE, source);
         }
@@ -201,7 +191,7 @@ public class VideoData extends AbstractAuditable implements Serializable {
     }
 
     public void setReleaseDate(String releaseDate, String source) {
-        if (!StringUtils.isBlank(releaseDate)) {
+        if (StringUtils.isNotBlank(releaseDate)) {
             this.releaseDate = releaseDate;
             setOverrideFlag(OverrideFlag.RELEASEDATE, source);
         }
@@ -265,8 +255,15 @@ public class VideoData extends AbstractAuditable implements Serializable {
         return country;
     }
 
-    public void setCountry(String country) {
+    private void setCountry(String country) {
         this.country = country;
+    }
+
+    public void setCountry(String country, String source) {
+        if (StringUtils.isNotBlank(country)) {
+            setCountry(country);
+            setOverrideFlag(OverrideFlag.COUNTRY, source);
+        }
     }
 
     public StatusType getStatus() {
@@ -323,6 +320,15 @@ public class VideoData extends AbstractAuditable implements Serializable {
         this.genres = genres;
     }
 
+    public void setGenres(Collection<String> genres, String source) {
+        if (CollectionUtils.isNotEmpty(genres)) {
+            this.genres.clear();
+            for (String genre : genres) {
+                this.genres.add(new Genre(genre));
+            }
+        }
+    }
+    
     public Season getSeason() {
         return season;
     }

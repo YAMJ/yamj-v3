@@ -17,8 +17,8 @@ import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 public class PropertyTools extends PropertyPlaceholderConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyTools.class);
-
-    private static Properties properties;
+    private static final Properties properties = new Properties();
+    
     // Default as in PropertyPlaceholderConfigurer
     private int springSystemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
 
@@ -32,7 +32,7 @@ public class PropertyTools extends PropertyPlaceholderConfigurer {
     protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props) throws BeansException {
         super.processProperties(beanFactory, props);
 
-        properties = new Properties();
+        properties.clear();
         for (Object key : props.keySet()) {
             String keyStr = key.toString();
             String valueStr = resolvePlaceholder(keyStr, props, springSystemPropertiesMode);

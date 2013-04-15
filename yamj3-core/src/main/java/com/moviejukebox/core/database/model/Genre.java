@@ -17,6 +17,12 @@ public class Genre extends AbstractIdentifiable implements Serializable {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
     
+    public Genre() {}
+    
+    public Genre(String name) {
+        this.name = name;
+    }
+    
     // GETTER and SETTER
     
     public String getName() {
