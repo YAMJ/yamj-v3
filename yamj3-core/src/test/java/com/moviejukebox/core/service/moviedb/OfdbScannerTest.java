@@ -1,10 +1,8 @@
-package com.moviejukebox.core.scanner.moviedb;
+package com.moviejukebox.core.service.moviedb;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
-import com.moviejukebox.core.service.moviedb.OfdbScanner;
 
 import com.moviejukebox.core.database.model.Genre;
 import com.moviejukebox.core.database.model.VideoData;
