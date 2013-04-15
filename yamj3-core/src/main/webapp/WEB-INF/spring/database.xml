@@ -25,7 +25,7 @@
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">${yamj3.database.dialect}</prop>
-                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.show_sql">${yamj3.database.showSql}</prop>
                 <prop key="hibernate.generate_statistics">false</prop>
                 <prop key="hibernate.hbm2ddl.auto">${yamj3.database.auto}</prop>
                 <prop key="hibernate.connection.isolation">4</prop>

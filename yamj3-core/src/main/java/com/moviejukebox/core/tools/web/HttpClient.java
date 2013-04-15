@@ -53,7 +53,7 @@ public class HttpClient extends AbstractHttpClient implements DisposableBean {
         // First we have to read/create the rules
         // Default, can be overridden
         groupLimits.put(".*", 1);
-        String limitsProperty = PropertyTools.getProperty("mjb.maxDownloadSlots", ".*=1");
+        String limitsProperty = PropertyTools.getProperty("yamj3.http.maxDownloadSlots", ".*=1");
         LOGGER.debug("Using download limits: " + limitsProperty);
 
         Pattern pattern = Pattern.compile(",?\\s*([^=]+)=(\\d+)");
@@ -79,13 +79,13 @@ public class HttpClient extends AbstractHttpClient implements DisposableBean {
         HttpConnectionParams.setSocketBufferSize(params, 8192);
 
         HttpProtocolParams.setUserAgent(params, "Mozilla/6.0 (Windows NT 6.2; WOW64; rv:16.0.1) Gecko/20121011 Firefox/16.0.1");
-        String acceptLanguage = PropertyTools.getProperty("mjb.acceptLanguage");
+        String acceptLanguage = PropertyTools.getProperty("yamj3.http.acceptLanguage");
         if (StringUtils.isNotBlank(acceptLanguage)) {
             params.setParameter("AcceptLanguage", acceptLanguage);
         }
         
-        String proxyHost = PropertyTools.getProperty("mjb.proxyHost");
-        int proxyPort = PropertyTools.getIntProperty("mjb.proxyPort", 0);
+        String proxyHost = PropertyTools.getProperty("yamj3.http.proxyHost");
+        int proxyPort = PropertyTools.getIntProperty("yamj3.http.proxyPort", 0);
         if (StringUtils.isNotBlank(proxyHost) && proxyPort > 0) {
             // set default proxy
             HttpHost proxy = new HttpHost(proxyHost, proxyPort);
@@ -118,8 +118,8 @@ public class HttpClient extends AbstractHttpClient implements DisposableBean {
 
     protected ClientConnectionManager createClientConnectionManager() {
         PoolingClientConnectionManager clientManager = new PoolingClientConnectionManager();
-        clientManager.setDefaultMaxPerRoute(PropertyTools.getIntProperty("mjb.connections.maxPerRoute", 1));
-        clientManager.setMaxTotal(PropertyTools.getIntProperty("mjb.connections.maxTotal", 20));
+        clientManager.setDefaultMaxPerRoute(PropertyTools.getIntProperty("yamj3.http.connections.maxPerRoute", 1));
+        clientManager.setMaxTotal(PropertyTools.getIntProperty("yamj3.http.connections.maxTotal", 20));
         return clientManager;
     }
 

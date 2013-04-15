@@ -1,7 +1,5 @@
-package com.moviejukebox.core.service;
+package com.moviejukebox.core.service.mediaimport;
 
-import com.moviejukebox.core.scanner.file.FilenameDTO;
-import com.moviejukebox.core.scanner.file.FilenameScanner;
 
 import com.moviejukebox.core.database.dao.MediaDao;
 import com.moviejukebox.core.database.dao.StagingDao;
@@ -160,7 +158,6 @@ public class MediaImportService {
         finish(stageFile);
     }
     
-    @Transactional(propagation = Propagation.REQUIRED)
     private void processUpdatedVideo(StageFile stageFile) {
         MediaFile mediaFile = stageFile.getMediaFile();
         mediaFile.setFileDate(stageFile.getFileDate());
@@ -176,6 +173,7 @@ public class MediaImportService {
         stagingDao.updateEntity(stageFile);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public void processingError(Long id) {
         if (id == null) return;
         

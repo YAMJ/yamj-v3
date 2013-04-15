@@ -1,4 +1,4 @@
-package com.moviejukebox.core.scanner.moviedb;
+package com.moviejukebox.core.service.moviedb;
 
 public interface IMovieDatabaseScanner {
 

@@ -1,7 +1,6 @@
-package com.moviejukebox.core.scanner.moviedb;
+package com.moviejukebox.core.service.moviedb;
 
 import com.moviejukebox.core.database.model.VideoData;
-import com.moviejukebox.core.remote.service.FileImportServiceImpl;
 import com.moviejukebox.core.tools.StringTools;
 import com.moviejukebox.core.tools.web.HTMLTools;
 import com.moviejukebox.core.tools.web.HttpClient;
@@ -20,12 +19,12 @@ import org.springframework.stereotype.Service;
 public class OfdbScanner implements IMovieScanner, InitializingBean {
 
     public static final String OFDB_SCANNER_ID = "ofdb";
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileImportServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OfdbScanner.class);
 
     @Autowired
     private HttpClient httpClient;
     @Autowired
-    private MovieDatabaseController movieDatabaseController;
+    private MovieDatabaseService movieDatabaseController;
     
     private SearchEngineTools searchEngineTools;
     

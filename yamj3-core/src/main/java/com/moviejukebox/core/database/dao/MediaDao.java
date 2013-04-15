@@ -1,7 +1,5 @@
 package com.moviejukebox.core.database.dao;
 
-import org.hibernate.Query;
-
 import com.moviejukebox.core.database.model.MediaFile;
 import com.moviejukebox.core.database.model.Season;
 import com.moviejukebox.core.database.model.Series;
@@ -9,10 +7,8 @@ import com.moviejukebox.core.database.model.VideoData;
 import com.moviejukebox.core.database.model.type.StatusType;
 import com.moviejukebox.core.hibernate.ExtendedHibernateDaoSupport;
 import java.sql.SQLException;
-import org.hibernate.CacheMode;
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
+import java.util.List;
+import org.hibernate.*;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.orm.hibernate3.HibernateCallback;
@@ -34,25 +30,17 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
         });
     }
 
-    public Long getNextVideoDataId(final StatusType... statusTypes) {
-        return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<Long>() {
+    public List<Long> getWaitingVideoDataIds(final StatusType... statusTypes) {
+        return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<List<Long>>() {
             @Override
-            public Long doInHibernate(Session session) throws HibernateException, SQLException {
+            @SuppressWarnings("unchecked")
+            public List<Long> doInHibernate(Session session) throws HibernateException, SQLException {
                 Criteria criteria = session.createCriteria(VideoData.class);
                 criteria.add(Restrictions.in("status", statusTypes));
-                criteria.setProjection(Projections.min("id"));
+                criteria.setProjection(Projections.id());
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
-                Long id = (Long)criteria.uniqueResult();
-                
-                if (id != null) {
-                    Query query = session.createQuery("update VideoData set status=:status where id=:id");
-                    query.setParameter("status", StatusType.PROCESS);
-                    query.setLong("id", id);
-                    query.executeUpdate();
-                }
-                
-                return id;
+                return criteria.list();
             }
         });
     }

@@ -1,6 +1,6 @@
 package com.moviejukebox.core.remote.service;
 
-import com.moviejukebox.core.service.StagingService;
+import com.moviejukebox.core.service.staging.StagingService;
 
 import com.moviejukebox.common.dto.ImportDTO;
 import com.moviejukebox.common.remote.service.FileImportService;

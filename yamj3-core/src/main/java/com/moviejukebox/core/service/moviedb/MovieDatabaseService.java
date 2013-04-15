@@ -1,14 +1,12 @@
-package com.moviejukebox.core.scanner.moviedb;
-
-import com.moviejukebox.core.database.model.Genre;
-import java.util.HashSet;
+package com.moviejukebox.core.service.moviedb;
 
 import com.moviejukebox.core.database.dao.CommonDao;
 import com.moviejukebox.core.database.dao.MediaDao;
+import com.moviejukebox.core.database.model.Genre;
 import com.moviejukebox.core.database.model.VideoData;
 import com.moviejukebox.core.database.model.type.StatusType;
-import com.moviejukebox.core.remote.service.FileImportServiceImpl;
 import java.util.HashMap;
+import java.util.HashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service("movieDatabaseController")
-public class MovieDatabaseController {
+@Service("movieDatabaseService")
+public class MovieDatabaseService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileImportServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MovieDatabaseService.class);
 
     @Autowired
     private MediaDao mediaDao;
@@ -38,19 +36,24 @@ public class MovieDatabaseController {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void scanVideoData(Long id) {
+    public void scanMetadata(Long id) {
         if (id == null) {
             // nothing to 
             return;
         }
         
         VideoData videoData = mediaDao.getVideoData(id);
-        LOGGER.debug("Scanning video data for : " + videoData.getTitle());
+        LOGGER.debug("Scanning video data for: " + videoData.getTitle());
 
+        // SCAN
+        
         // TODO use configured scanner only
+        ScanResult scanResult = ScanResult.OK;
         for (IMovieScanner scanner : registeredMovieScanner.values()) {
-            scanner.scan(videoData);
+            scanResult = scanner.scan(videoData);
         }
+        
+        // STORAGE
         
         // update genres
         HashSet<Genre> genres = new HashSet<Genre>(0);
@@ -66,7 +69,20 @@ public class MovieDatabaseController {
         videoData.setGenres(genres);
 
         // update video data and reset status
-        videoData.setStatus(StatusType.DONE);
+        if (ScanResult.OK.equals(scanResult)) {
+            videoData.setStatus(StatusType.DONE);
+        } else {
+            videoData.setStatus(StatusType.ERROR);
+        }
         mediaDao.updateEntity(videoData);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void processingError(Long id) {
+        VideoData videoData = mediaDao.getVideoData(id);
+        if (videoData != null) {
+            videoData.setStatus(StatusType.ERROR);
+            mediaDao.updateEntity(videoData);
+        }
     }
 }
