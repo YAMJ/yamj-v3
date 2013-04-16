@@ -33,14 +33,14 @@ public class MovieDatabaseService {
     private CommonDao commonDao;
     
     private HashMap<String,IMovieScanner> registeredMovieScanner = new HashMap<String,IMovieScanner>();
-    private HashMap<String,ISeasonScanner> registeredSeasonScanner = new HashMap<String,ISeasonScanner>();
+    private HashMap<String,ISeriesScanner> registeredSeriesScanner = new HashMap<String,ISeriesScanner>();
     
     public void registerMovieScanner(IMovieScanner movieScanner) {
         registeredMovieScanner.put(movieScanner.getScannerName().toLowerCase(), movieScanner);
     }
 
-    public void registerSeasonScanner(ISeasonScanner seasonScanner) {
-        registeredSeasonScanner.put(seasonScanner.getScannerName().toLowerCase(), seasonScanner);
+    public void registerSeriesScanner(ISeriesScanner seriesScanner) {
+        registeredSeriesScanner.put(seriesScanner.getScannerName().toLowerCase(), seriesScanner);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

@@ -19,7 +19,7 @@ public class OfdbScannerTest extends AbstractJUnit4SpringContextTests {
     
     @Test
     public void testGetMovieId() {
-        String id = ofdbScanner.getMoviedbId("Avatar", 2009);
+        String id = ofdbScanner.getMovieId("Avatar", 2009);
         assertEquals("http://www.ofdb.de/film/188514,Avatar---Aufbruch-nach-Pandora", id);
     }
 

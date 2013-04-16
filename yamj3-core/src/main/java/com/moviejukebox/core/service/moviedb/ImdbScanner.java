@@ -1,18 +1,17 @@
 package com.moviejukebox.core.service.moviedb;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.moviejukebox.core.database.model.Season;
+import com.moviejukebox.core.database.model.Series;
 import com.moviejukebox.core.database.model.VideoData;
 import com.moviejukebox.core.tools.web.HttpClient;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service("imdbScanner")
-public class ImdbScanner implements IMovieScanner, ISeasonScanner, InitializingBean {
+public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingBean {
 
     public static final String IMDB_SCANNER_ID = "imdb";
     private static final Logger LOGGER = LoggerFactory.getLogger(ImdbScanner.class);
@@ -33,43 +32,43 @@ public class ImdbScanner implements IMovieScanner, ISeasonScanner, InitializingB
     public void afterPropertiesSet() throws Exception {
         // register this scanner
         movieDatabaseService.registerMovieScanner(this);
-        movieDatabaseService.registerSeasonScanner(this);
+        movieDatabaseService.registerSeriesScanner(this);
     }
 
     @Override
-    public String getMoviedbId(VideoData videoData) {
+    public String getMovieId(VideoData videoData) {
         String imdbId = videoData.getMoviedbId(IMDB_SCANNER_ID);
         if (StringUtils.isBlank(imdbId)) {
-            imdbId = getMoviedbId(videoData.getTitle(), videoData.getPublicationYear());
+            imdbId = getMovieId(videoData.getTitle(), videoData.getPublicationYear());
             videoData.setMoviedbId(IMDB_SCANNER_ID, imdbId);
         }
         return imdbId;
     }
 
     @Override
-    public String getMoviedbId(Season season) {
-        String imdbId = season.getMoviedbId(IMDB_SCANNER_ID);
+    public String getSeriesId(Series series) {
+        String imdbId = series.getMoviedbId(IMDB_SCANNER_ID);
         if (StringUtils.isBlank(imdbId)) {
             int year = -1; // TODO: get form firsAired value
-            imdbId = getMoviedbId(season.getTitle(), year, season.getSeason());
-            season.setMoviedbId(IMDB_SCANNER_ID, imdbId);
+            imdbId = getSeriesId(series.getTitle(), year);
+            series.setMoviedbId(IMDB_SCANNER_ID, imdbId);
         }
         return imdbId;
     }
 
     @Override
-    public String getMoviedbId(String title, int year) {
-        return getMoviedbId(title, year, -1);
+    public String getMovieId(String title, int year) {
+        return imdbSearchEngine.getImdbId(title, year, false);
     }
 
     @Override
-    public String getMoviedbId(String title, int year, int season) {
-        return imdbSearchEngine.getImdbId(title, year, (season>-1));
+    public String getSeriesId(String title, int year) {
+        return imdbSearchEngine.getImdbId(title, year, true);
     }
 
     @Override
     public ScanResult scan(VideoData videoData) {
-        String imdbId = getMoviedbId(videoData);
+        String imdbId = getMovieId(videoData);
         if (StringUtils.isBlank(imdbId)) {
             LOGGER.debug("IMDb id not available : " + videoData.getTitle());
             return ScanResult.MISSING_ID;
@@ -80,10 +79,10 @@ public class ImdbScanner implements IMovieScanner, ISeasonScanner, InitializingB
     }
 
     @Override
-    public ScanResult scan(Season season) {
-        String imdbId = getMoviedbId(season);
+    public ScanResult scan(Series series) {
+        String imdbId = getSeriesId(series);
         if (StringUtils.isBlank(imdbId)) {
-            LOGGER.debug("IMDb id not available : " + season.getTitle());
+            LOGGER.debug("IMDb id not available : " + series.getTitle());
             return ScanResult.MISSING_ID;
         }
 
