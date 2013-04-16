@@ -1,11 +1,13 @@
 package com.moviejukebox.core.database.model;
 
+import com.moviejukebox.core.database.model.dto.CreditDTO;
 import com.moviejukebox.core.database.model.type.OverrideFlag;
 import com.moviejukebox.core.database.model.type.StatusType;
 import com.moviejukebox.core.hibernate.usertypes.EnumStringUserType;
 import java.io.Serializable;
 import java.util.*;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
@@ -26,8 +28,9 @@ import org.hibernate.annotations.Parameter;
 @Entity
 @Table(name = "videodata")
 @SuppressWarnings({ "unused", "deprecation" })
-public class VideoData extends AbstractAuditable implements Serializable {
-
+public class VideoData extends AbstractAuditable implements
+    IMoviedbIdentifiable, Serializable
+{
     private static final long serialVersionUID = 5719107822219333629L;
 
     /**
@@ -119,6 +122,14 @@ public class VideoData extends AbstractAuditable implements Serializable {
     @ManyToMany(mappedBy="videoDatas")
     private Set<MediaFile> mediaFiles = new HashSet<MediaFile>(0);
 
+    @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OrderColumn(name = "order_data", nullable = false)
+    @JoinColumn(name="data_id", nullable=false, insertable=false, updatable=false)
+    private List<CastCrew> credits = new ArrayList<CastCrew>(0);
+
+    @Transient
+    private List<CreditDTO> creditDTOS = new ArrayList<CreditDTO>(0);
+    
     // GETTER and SETTER
     
     public String getIdentifier() {
@@ -278,6 +289,7 @@ public class VideoData extends AbstractAuditable implements Serializable {
         return moviedbIdMap;
     }
 
+    @Override
     public String getMoviedbId(String moviedb) {
         return moviedbIdMap.get(moviedb);
     }
@@ -286,6 +298,7 @@ public class VideoData extends AbstractAuditable implements Serializable {
         this.moviedbIdMap = moviedbIdMap;
     }
 
+    @Override
     public void setMoviedbId(String moviedb, String id) {
         if (StringUtils.isNotBlank(id)) {
             moviedbIdMap.put(moviedb, id);
@@ -349,6 +362,26 @@ public class VideoData extends AbstractAuditable implements Serializable {
         this.mediaFiles.add(mediaFile);
     }
 
+    public List<CastCrew> getCredits() {
+        return credits;
+    }
+
+    public void setCredits(List<CastCrew> credits) {
+        this.credits = credits;
+    }
+
+    public void addCredit(CastCrew castCrew) {
+        this.credits.add(castCrew);
+    }
+
+    public List<CreditDTO> getCreditDTOS() {
+        return creditDTOS;
+    }
+
+    public void addCreditDTO(CreditDTO creditDTO) {
+        this.creditDTOS.add(creditDTO);
+    }
+    
     // EQUALITY CHECKS
 
     @Override

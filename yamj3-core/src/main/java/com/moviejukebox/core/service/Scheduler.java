@@ -46,9 +46,8 @@ public class Scheduler {
     	        // find next stage file to process
                 id =  stagingDao.getNextStageFileId(FileType.VIDEO, StatusType.NEW, StatusType.UPDATED); 
                 if (id != null) {
+                    LOGGER.debug("Process stage file: " + id);
                     this.mediaImportService.processVideo(id);
-    	        } else {
-    	            LOGGER.info("No stage files to process");
     	        }
             } catch (Exception error) {
                 LOGGER.error("Failed to process stage file", error);
@@ -68,7 +67,7 @@ public class Scheduler {
     
     @Scheduled(initialDelay=10000, fixedDelay=45000)
     public void processVideoData() throws Exception {
-        List<Long> ids = mediaDao.getWaitingVideoDataIds(StatusType.NEW, StatusType.UPDATED);
+        List<Long> ids = mediaDao.getVideoDataIds(StatusType.NEW, StatusType.UPDATED);
         if (CollectionUtils.isEmpty(ids)) {
             LOGGER.debug("No video data to process");
             return;

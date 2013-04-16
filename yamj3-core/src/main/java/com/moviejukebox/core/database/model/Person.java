@@ -35,7 +35,7 @@ public class Person extends AbstractAuditable implements Serializable {
     private Date deathDay;
 
     @Lob
-    @Column(name = "biography")
+    @Column(name = "biography", length = 50000)
     private String biography;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -103,7 +103,10 @@ public class Person extends AbstractAuditable implements Serializable {
         this.personIds = personIds;
     }
 
-
+    public void setPersonId(String moviedb, String personId) {
+        this.personIds.put(moviedb, personId);
+    }
+    
     // EQUALITY CHECKS
 
     @Override
