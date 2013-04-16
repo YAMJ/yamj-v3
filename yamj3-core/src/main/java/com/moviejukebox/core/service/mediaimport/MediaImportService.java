@@ -1,6 +1,5 @@
 package com.moviejukebox.core.service.mediaimport;
 
-
 import com.moviejukebox.core.database.model.type.ArtworkType;
 
 import com.moviejukebox.core.database.dao.MediaDao;
@@ -69,7 +68,6 @@ public class MediaImportService {
         } else {
             //  Possible reasons for already existing mediaFile:
             // - Other Library?
-            // - Extension changed?
             // - Stored in another directory?
         }
 

@@ -26,7 +26,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     @Autowired
     private HttpClient httpClient;
     @Autowired
-    private MovieDatabaseService movieDatabaseController;
+    private MovieDatabaseService movieDatabaseService;
     
     private SearchEngineTools searchEngineTools;
 
@@ -40,11 +40,11 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
         searchEngineTools = new SearchEngineTools(httpClient, "de");
         
         // register this scanner
-        movieDatabaseController.registerMovieScanner(this);
+        movieDatabaseService.registerMovieScanner(this);
     }
 
     @Override
-    public String getMoviedbId(VideoData videoData) {
+    public String getMovieId(VideoData videoData) {
         String ofdbId = videoData.getMoviedbId(OFDB_SCANNER_ID);
         if (StringUtils.isBlank(ofdbId)) {
             // find by IMDb id
@@ -55,7 +55,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
             }
             if (StringUtils.isBlank(imdbId)) {
                 // try by title and year
-                ofdbId = getMoviedbId(videoData.getTitle(), videoData.getPublicationYear());
+                ofdbId = getMovieId(videoData.getTitle(), videoData.getPublicationYear());
             }
             videoData.setMoviedbId(OFDB_SCANNER_ID, ofdbId);
         }
@@ -63,12 +63,12 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     }
 
     @Override
-    public String getMoviedbId(String title, int year) {
+    public String getMovieId(String title, int year) {
         // try with OFDb search
         String ofdbId = getObdbIdByTitleAndYear(title, year);
         if (StringUtils.isBlank(ofdbId)) {
             // try with search engines
-            ofdbId = searchEngineTools.searchMovieURL(title, year, "www.ofdb.de/film");
+            ofdbId = searchEngineTools.searchURL(title, year, "www.ofdb.de/film");
         }
         return ofdbId;
     }
@@ -136,7 +136,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     
     @Override
     public ScanResult scan(VideoData videoData) {
-        String ofdbUrl = getMoviedbId(videoData);
+        String ofdbUrl = getMovieId(videoData);
         
         if (StringUtils.isBlank(ofdbUrl)) {
             LOGGER.debug("OFDb url not available : " + videoData.getTitle());

@@ -33,14 +33,14 @@ public class MovieDatabaseService {
     private CommonDao commonDao;
     
     private HashMap<String,IMovieScanner> registeredMovieScanner = new HashMap<String,IMovieScanner>();
-    private HashMap<String,ISeasonScanner> registeredTvShowScanner = new HashMap<String,ISeasonScanner>();
+    private HashMap<String,ISeriesScanner> registeredSeriesScanner = new HashMap<String,ISeriesScanner>();
     
     public void registerMovieScanner(IMovieScanner movieScanner) {
         registeredMovieScanner.put(movieScanner.getScannerName().toLowerCase(), movieScanner);
     }
 
-    public void registerTvShowScanner(ISeasonScanner tvShowScanner) {
-        registeredTvShowScanner.put(tvShowScanner.getScannerName().toLowerCase(), tvShowScanner);
+    public void registerSeriesScanner(ISeriesScanner seriesScanner) {
+        registeredSeriesScanner.put(seriesScanner.getScannerName().toLowerCase(), seriesScanner);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -56,8 +56,9 @@ public class MovieDatabaseService {
         // SCAN
         
         // TODO use configured scanner only
-        ScanResult scanResult = ScanResult.OK;
+        ScanResult scanResult = ScanResult.ERROR;
         for (IMovieScanner scanner : registeredMovieScanner.values()) {
+            LOGGER.debug("Scan video data with " + scanner.getScannerName() + ": " + videoData.getTitle());
             scanResult = scanner.scan(videoData);
         }
         

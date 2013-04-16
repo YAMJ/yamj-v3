@@ -65,7 +65,7 @@ public class Scheduler {
     }
     
     
-    @Scheduled(initialDelay=10000, fixedDelay=45000)
+    @Scheduled(initialDelay=15000, fixedDelay=45000)
     public void processVideoData() throws Exception {
         List<Long> ids = mediaDao.getVideoDataIds(StatusType.NEW, StatusType.UPDATED);
         if (CollectionUtils.isEmpty(ids)) {

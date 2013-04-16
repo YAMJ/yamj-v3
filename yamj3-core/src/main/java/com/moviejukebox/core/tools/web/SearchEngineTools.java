@@ -31,7 +31,7 @@ public class SearchEngineTools {
         
         // sites to search for URLs
         searchSites = new LinkedList<String>();
-        searchSites.addAll(Arrays.asList(PropertyTools.getProperty("searchengine.sites", "google,yahoo,bing,blekko,lycos").split(",")));
+        searchSites.addAll(Arrays.asList(PropertyTools.getProperty("yamj3.searchengine.sites", "google,yahoo,bing,blekko,lycos").split(",")));
 
         // country specific presets
         if ("de".equalsIgnoreCase(country)) {
@@ -88,11 +88,11 @@ public class SearchEngineTools {
         this.searchSuffix = searchSuffix;
     }
     
-    public String searchMovieURL(String title, int year, String site) {
-        return searchMovieURL(title, year, site, null);
+    public String searchURL(String title, int year, String site) {
+        return searchURL(title, year, site, null);
     }
     
-    public String searchMovieURL(String title, int year, String site, String additional) {
+    public String searchURL(String title, int year, String site, String additional) {
         String url = null;
 
         String engine = getNextSearchEngine();
