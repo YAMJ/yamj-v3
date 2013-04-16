@@ -66,11 +66,11 @@ public class Season extends AbstractAuditable implements Serializable {
     private String endYear;
 
     @Lob
-    @Column(name = "plot")
+    @Column(name = "plot", length = 50000)
     private String plot;
 
     @Lob
-    @Column(name = "outline")
+    @Column(name = "outline", length = 50000)
     private String outline;
 
     @Type(type = "statusType")

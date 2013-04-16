@@ -1,28 +1,39 @@
-package com.moviejukebox.core.scanner.moviedb;
+package com.moviejukebox.core.service.moviedb;
 
 import com.moviejukebox.core.database.model.VideoData;
-import com.moviejukebox.core.remote.service.FileImportServiceImpl;
 import com.moviejukebox.core.tools.StringTools;
 import com.moviejukebox.core.tools.web.HTMLTools;
+import com.moviejukebox.core.tools.web.HttpClient;
 import com.moviejukebox.core.tools.web.SearchEngineTools;
-import com.moviejukebox.core.tools.web.WebBrowser;
 import java.net.URLEncoder;
+import java.util.HashSet;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-public class OfdbScanner implements IMovieScanner {
+@Service("ofdbScanner")
+public class OfdbScanner implements IMovieScanner, InitializingBean {
 
     public static final String OFDB_SCANNER_ID = "ofdb";
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileImportServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OfdbScanner.class);
+
+    @Autowired
+    private HttpClient httpClient;
+    @Autowired
+    private MovieDatabaseService movieDatabaseController;
     
-    private WebBrowser webBrowser;
     private SearchEngineTools searchEngineTools;
     
-    public OfdbScanner() {
-        webBrowser = new WebBrowser();
-        searchEngineTools = new SearchEngineTools("de");
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        searchEngineTools = new SearchEngineTools(httpClient, "de");
+        
+        // register this scanner
+        movieDatabaseController.registerMovieScanner(this);
     }
 
     @Override
@@ -62,7 +73,8 @@ public class OfdbScanner implements IMovieScanner {
 
     private String getOfdbIdByImdbId(String imdbId) {
         try {
-            String xml = webBrowser.request("http://www.ofdb.de/view.php?page=suchergebnis&SText=" + imdbId + "&Kat=IMDb");
+            //String xml = webBrowser.request("http://www.ofdb.de/view.php?page=suchergebnis&SText=" + imdbId + "&Kat=IMDb");
+            String xml = httpClient.requestContent("http://www.ofdb.de/view.php?page=suchergebnis&SText=" + imdbId + "&Kat=IMDb");
             
             int beginIndex = xml.indexOf("Ergebnis der Suchanfrage");
             if (beginIndex < 0) {
@@ -97,7 +109,7 @@ public class OfdbScanner implements IMovieScanner {
             sb.append(year);
             sb.append("&Wo=-&Land=-&Freigabe=-&Cut=A&Indiziert=A&Submit2=Suche+ausf%C3%BChren");
 
-            String xml = webBrowser.request(sb.toString());
+            String xml = httpClient.requestContent(sb.toString());
 
             int beginIndex = xml.indexOf("Liste der gefundenen Fassungen");
             if (beginIndex < 0) {
@@ -138,7 +150,7 @@ public class OfdbScanner implements IMovieScanner {
         ScanResult scanResult = ScanResult.OK;
         
         try {
-            String xml = webBrowser.request(ofdbUrl);
+            String xml = httpClient.requestContent(ofdbUrl);
 
             String title = HTMLTools.extractTag(xml, "<title>OFDb -", "</title>");
             // check for movie type change
@@ -151,7 +163,7 @@ public class OfdbScanner implements IMovieScanner {
             String imdbId = videoData.getMoviedbId(ImdbScanner.IMDB_SCANNER_ID);
             if (StringUtils.isBlank(imdbId)) {
                 imdbId = HTMLTools.extractTag(xml, "href=\"http://www.imdb.com/Title?", "\"");
-                videoData.setMoviedbId(ImdbScanner.IMDB_SCANNER_ID, imdbId);
+                videoData.setMoviedbId(ImdbScanner.IMDB_SCANNER_ID, "tt"+imdbId);
             }
 
 //            if (OverrideTools.checkOverwriteTitle(videoData, OFDB_SCANNER_ID)) {
@@ -168,7 +180,7 @@ public class OfdbScanner implements IMovieScanner {
             String plotMarker = HTMLTools.extractTag(xml, "<a href=\"plot/", 0, "\"");
             if (StringUtils.isNotBlank(plotMarker) /*&& OverrideTools.checkOneOverwrite(videoData, OFDB_SCANNER_ID, OverrideFlag.PLOT, OverrideFlag.OUTLINE)*/) {
                 try {
-                    String plotXml = webBrowser.request("http://www.ofdb.de/plot/" + plotMarker);
+                    String plotXml = httpClient.requestContent("http://www.ofdb.de/plot/" + plotMarker);
 
                     int firstindex = plotXml.indexOf("gelesen</b></b><br><br>") + 23;
                     int lastindex = plotXml.indexOf("</font>", firstindex);
@@ -182,7 +194,7 @@ public class OfdbScanner implements IMovieScanner {
     
 //                    if (OverrideTools.checkOverwriteOutline(videoData, OFDB_SCANNER_ID)) {
                     {
-                        videoData.setOutline(plot, OFDB_SCANNER_ID);
+                        //videoData.setOutline(plot, OFDB_SCANNER_ID);
                     }
                 } catch (Exception error) {
                     LOGGER.error("Failed retrieving plot : " + ofdbUrl, error);
@@ -194,40 +206,42 @@ public class OfdbScanner implements IMovieScanner {
             int beginIndex = xml.indexOf("view.php?page=film_detail");
             if (beginIndex != -1) {
                 String detailUrl = "http://www.ofdb.de/" + xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
-                String detailXml = webBrowser.request(detailUrl);
+                String detailXml = httpClient.requestContent(detailUrl);
 
                 // resolve for additional informations
                 List<String> tags = HTMLTools.extractHtmlTags(detailXml, "<!-- Rechte Spalte -->", "</table>", "<tr", "</tr>");
 
                 for (String tag : tags)  {
 //                    if (OverrideTools.checkOverwriteOriginalTitle(videoData, OFDB_SCANNER_ID) && tag.contains("Originaltitel")) {
-                    {
+                    if (tag.contains("Originaltitel")) {
                         String scraped = HTMLTools.removeHtmlTags(HTMLTools.extractTag(tag, "class=\"Daten\">", "</font>")).trim();
                         videoData.setTitleOriginal(scraped, OFDB_SCANNER_ID);
                     }
                     
 //                    if (OverrideTools.checkOverwriteYear(videoData, OFDB_SCANNER_ID) && tag.contains("Erscheinungsjahr")) {
-                    {
+                    if (tag.contains("Erscheinungsjahr")) {
                         String scraped = HTMLTools.removeHtmlTags(HTMLTools.extractTag(tag, "class=\"Daten\">", "</font>")).trim();
                         videoData.setPublicationYear(StringTools.toYear(scraped), OFDB_SCANNER_ID);
                     }
                     
 //                    if (OverrideTools.checkOverwriteCountry(videoData, OFDB_SCANNER_ID) && tag.contains("Herstellungsland")) {
-//                        List<String> scraped = HTMLTools.extractHtmlTags(tag, "class=\"Daten\"", "</td>", "<a", "</a>");
-//                        if (scraped.size() > 0) {
-//                            // TODO set more countries in movie
-//                            videoData.setCountry(HTMLTools.removeHtmlTags(scraped.get(0)).trim(), OFDB_SCANNER_ID);
-//                        }
-//                    }
-//
+                    if (tag.contains("Herstellungsland")) {
+                        List<String> scraped = HTMLTools.extractHtmlTags(tag, "class=\"Daten\"", "</td>", "<a", "</a>");
+                        if (scraped.size() > 0) {
+                            // TODO set more countries in movie
+                            videoData.setCountry(HTMLTools.removeHtmlTags(scraped.get(0)).trim(), OFDB_SCANNER_ID);
+                        }
+                    }
+
 //                    if (OverrideTools.checkOverwriteGenres(videoData, OFDB_SCANNER_ID) && tag.contains("Genre(s)")) {
-//                        List<String> scraped = HTMLTools.extractHtmlTags(tag, "class=\"Daten\"", "</td>", "<a", "</a>");
-//                        List<String> genres = new ArrayList<String>();
-//                        for (String genre : scraped) {
-//                            genres.add(HTMLTools.removeHtmlTags(genre).trim());
-//                        }
-//                        videoData.setGenres(genres, OFDB_SCANNER_ID);
-//                    }
+                    if (tag.contains("Genre(s)")) {
+                        List<String> scraped = HTMLTools.extractHtmlTags(tag, "class=\"Daten\"", "</td>", "<a", "</a>");
+                        HashSet<String> genres = new HashSet<String>();
+                        for (String genre : scraped) {
+                            genres.add(HTMLTools.removeHtmlTags(genre).trim());
+                        }
+                        videoData.setGenres(genres, OFDB_SCANNER_ID);
+                    }
                 }
 
 /*                

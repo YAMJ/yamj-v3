@@ -1,7 +1,7 @@
-package com.moviejukebox.core.service;
+package com.moviejukebox.core.service.mediaimport;
 
-import com.moviejukebox.core.scanner.file.FilenameDTO;
-import com.moviejukebox.core.scanner.file.FilenameScanner;
+
+import com.moviejukebox.core.database.model.type.ArtworkType;
 
 import com.moviejukebox.core.database.dao.MediaDao;
 import com.moviejukebox.core.database.dao.StagingDao;
@@ -90,6 +90,19 @@ public class MediaImportService {
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);
                 mediaDao.saveEntity(videoData);
+
+                // create new poster artwork entry
+                Artwork poster = new Artwork();
+                poster.setArtworkType(ArtworkType.POSTER);
+                poster.setVideoData(videoData);
+                mediaDao.saveEntity(poster);
+
+                // create new fanart artwork entry
+                Artwork fanart = new Artwork();
+                fanart.setArtworkType(ArtworkType.FANART);
+                fanart.setVideoData(videoData);
+                mediaDao.saveEntity(fanart);
+
             } else {
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);
@@ -118,6 +131,23 @@ public class MediaImportService {
                             series.setMoviedbIdMap(dto.getIdMap());
                             series.setStatus(StatusType.NEW);
                             mediaDao.saveEntity(series);
+                            
+                            // create new poster artwork entry
+                            Artwork poster = new Artwork();
+                            poster.setArtworkType(ArtworkType.POSTER);
+                            poster.setSeries(series);
+                            mediaDao.saveEntity(poster);
+
+                            // create new fanart artwork entry
+                            Artwork fanart = new Artwork();
+                            fanart.setArtworkType(ArtworkType.FANART);
+                            mediaDao.saveEntity(fanart);
+
+                            // create new banner artwork entry
+                            Artwork banner = new Artwork();
+                            banner.setArtworkType(ArtworkType.BANNER);
+                            banner.setSeries(series);
+                            mediaDao.saveEntity(banner);
                         }
                         
                         season = new Season();
@@ -127,6 +157,18 @@ public class MediaImportService {
                         season.setSeries(series);
                         season.setStatus(StatusType.NEW);
                         mediaDao.saveEntity(season);
+
+                        // create new poster artwork entry
+                        Artwork poster = new Artwork();
+                        poster.setArtworkType(ArtworkType.POSTER);
+                        poster.setSeason(season);
+                        mediaDao.saveEntity(poster);
+
+                        // create new fanart artwork entry
+                        Artwork fanart = new Artwork();
+                        fanart.setArtworkType(ArtworkType.FANART);
+                        fanart.setSeason(season);
+                        mediaDao.saveEntity(fanart);
                     }
                     
                     videoData = new VideoData();
@@ -144,6 +186,13 @@ public class MediaImportService {
                     mediaFile.addVideoData(videoData);
                     videoData.addMediaFile(mediaFile);
                     mediaDao.saveEntity(videoData);
+
+                    // create new videoimage artwork entry
+                    Artwork videoimage = new Artwork();
+                    videoimage.setArtworkType(ArtworkType.VIDEOIMAGE);
+                    videoimage.setVideoData(videoData);
+                    mediaDao.saveEntity(videoimage);
+
                 } else {
                     mediaFile.addVideoData(videoData);
                     videoData.addMediaFile(mediaFile);
@@ -160,7 +209,6 @@ public class MediaImportService {
         finish(stageFile);
     }
     
-    @Transactional(propagation = Propagation.REQUIRED)
     private void processUpdatedVideo(StageFile stageFile) {
         MediaFile mediaFile = stageFile.getMediaFile();
         mediaFile.setFileDate(stageFile.getFileDate());
@@ -176,6 +224,7 @@ public class MediaImportService {
         stagingDao.updateEntity(stageFile);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public void processingError(Long id) {
         if (id == null) return;
         

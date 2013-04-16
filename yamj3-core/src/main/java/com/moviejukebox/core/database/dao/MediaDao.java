@@ -4,12 +4,12 @@ import com.moviejukebox.core.database.model.MediaFile;
 import com.moviejukebox.core.database.model.Season;
 import com.moviejukebox.core.database.model.Series;
 import com.moviejukebox.core.database.model.VideoData;
+import com.moviejukebox.core.database.model.type.StatusType;
 import com.moviejukebox.core.hibernate.ExtendedHibernateDaoSupport;
 import java.sql.SQLException;
-import org.hibernate.CacheMode;
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
+import java.util.List;
+import org.hibernate.*;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.stereotype.Service;
@@ -28,6 +28,25 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
                 return (MediaFile)criteria.uniqueResult();
             }
         });
+    }
+
+    public List<Long> getWaitingVideoDataIds(final StatusType... statusTypes) {
+        return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<List<Long>>() {
+            @Override
+            @SuppressWarnings("unchecked")
+            public List<Long> doInHibernate(Session session) throws HibernateException, SQLException {
+                Criteria criteria = session.createCriteria(VideoData.class);
+                criteria.add(Restrictions.in("status", statusTypes));
+                criteria.setProjection(Projections.id());
+                criteria.setCacheable(true);
+                criteria.setCacheMode(CacheMode.NORMAL);
+                return criteria.list();
+            }
+        });
+    }
+
+    public VideoData getVideoData(Long id) {
+        return this.getHibernateTemplate().get(VideoData.class, id);
     }
 
     public VideoData getVideoData(final String identifier) {

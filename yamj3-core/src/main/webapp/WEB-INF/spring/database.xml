@@ -16,16 +16,16 @@
         <property name="poolPreparedStatements" value="true" />
     </bean>
 
-    <bean id="auditInterceptor" class="com.moviejukebox.core.hibernate.AuditInterceptor"/>
-
     <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
-        <property name="entityInterceptor" ref="auditInterceptor"/>
+        <property name="entityInterceptor">
+            <bean class="com.moviejukebox.core.hibernate.AuditInterceptor"/>
+        </property>
         <property name="packagesToScan" value="com.moviejukebox.core.database.model"/>
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">${yamj3.database.dialect}</prop>
-                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.show_sql">${yamj3.database.showSql}</prop>
                 <prop key="hibernate.generate_statistics">false</prop>
                 <prop key="hibernate.hbm2ddl.auto">${yamj3.database.auto}</prop>
                 <prop key="hibernate.connection.isolation">4</prop>

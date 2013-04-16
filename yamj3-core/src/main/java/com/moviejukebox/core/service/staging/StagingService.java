@@ -1,6 +1,6 @@
-package com.moviejukebox.core.service;
+package com.moviejukebox.core.service.staging;
 
-import com.moviejukebox.core.scanner.file.FilenameScanner;
+import com.moviejukebox.core.service.mediaimport.FilenameScanner;
 
 import com.moviejukebox.common.dto.ImportDTO;
 import com.moviejukebox.common.dto.StageDirectoryDTO;
