@@ -26,7 +26,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     @Autowired
     private HttpClient httpClient;
     @Autowired
-    private MovieDatabaseService movieDatabaseController;
+    private MovieDatabaseService movieDatabaseService;
     
     private SearchEngineTools searchEngineTools;
 
@@ -40,7 +40,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
         searchEngineTools = new SearchEngineTools(httpClient, "de");
         
         // register this scanner
-        movieDatabaseController.registerMovieScanner(this);
+        //movieDatabaseService.registerMovieScanner(this);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
         String ofdbId = getObdbIdByTitleAndYear(title, year);
         if (StringUtils.isBlank(ofdbId)) {
             // try with search engines
-            ofdbId = searchEngineTools.searchMovieURL(title, year, "www.ofdb.de/film");
+            ofdbId = searchEngineTools.searchURL(title, year, "www.ofdb.de/film");
         }
         return ofdbId;
     }
