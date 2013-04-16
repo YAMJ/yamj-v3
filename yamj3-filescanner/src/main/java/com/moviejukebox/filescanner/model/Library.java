@@ -64,4 +64,12 @@ public class Library implements Serializable {
         this.importDTO = importDTO;
     }
 
+    public ImportDTO getImportDTO(StageDirectoryDTO sd) {
+        ImportDTO newImportDto = new ImportDTO();
+        newImportDto.setBaseDirectory(importDTO.getBaseDirectory());
+        newImportDto.setClient(importDTO.getClient());
+        newImportDto.setPlayerPath(importDTO.getPlayerPath());
+        newImportDto.setStageDirectory(sd);
+        return newImportDto;
+    }
 }

@@ -8,12 +8,10 @@ import com.moviejukebox.common.remote.service.FileImportService;
 import com.moviejukebox.common.type.ExitType;
 import com.moviejukebox.filescanner.tools.Watcher;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.remoting.RemoteConnectFailureException;
 import static com.moviejukebox.common.type.ExitType.*;
 import com.moviejukebox.core.database.model.type.DirectoryType;
 import com.moviejukebox.filescanner.model.Library;
@@ -22,11 +20,11 @@ import com.moviejukebox.filescanner.model.StatType;
 import com.moviejukebox.filescanner.service.ImportCore;
 import com.moviejukebox.filescanner.service.PingCore;
 import com.moviejukebox.filescanner.tools.DirectoryEnding;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.remoting.RemoteAccessException;
 
 /**
  * Performs an initial scan of the library location and then updates when changes occur.
@@ -52,8 +50,8 @@ public class WatcherManagementImpl implements ScannerManagement {
     private FileImportService fileImportService;
     @Resource(name = "pingCore")
     private PingCore pingCore;
-    @Resource(name="importCore")
-    private ImportCore importCore;
+//    @Resource(name="importCore")
+//    private ImportCore importCore;
     // Thread executers
     private static final int NUM_THREADS = 2;
     ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
@@ -97,22 +95,29 @@ public class WatcherManagementImpl implements ScannerManagement {
             status = scan(library);
             LOG.info("{}", library.getStatistics().generateStats());
             LOG.info("Scanning completed.");
-
-            if (status == SUCCESS) {
-                status = send(library);
-            }
         }
 
         if (watchEnabled) {
-            LOG.info("Watching directory '{}' for changes...", directoryProperty);
-            try {
-                Watcher wd = new Watcher(directoryProperty);
-                wd.processEvents();
-            } catch (IOException ex) {
-                LOG.warn("Unable to watch directory '{}', error: {}", directoryProperty, ex.getMessage());
-                status = WATCH_FAILURE;
+            Watcher wd = new Watcher();
+            Boolean directoriesToWatch = Boolean.TRUE;
+
+            for (Library library : libraryCollection.getLibraries()) {
+                String dirToWatch = library.getImportDTO().getBaseDirectory();
+                if (library.isWatch()) {
+                    LOG.info("Watching directory '{}' for changes...", dirToWatch);
+                    wd.addDirectory(dirToWatch);
+                    directoriesToWatch = Boolean.TRUE;
+                } else {
+                    LOG.info("Watching skipped for directory '{}'", dirToWatch);
+                }
             }
-            LOG.info("Watching directory '{}' completed", directoryProperty);
+
+            if (directoriesToWatch) {
+                wd.processEvents();
+                LOG.info("Watching directory '{}' completed", directoryProperty);
+            } else {
+                LOG.info("No directories marked for watching.");
+            }
         }
 
         LOG.info("Exiting with status {}", status);
@@ -147,6 +152,7 @@ public class WatcherManagementImpl implements ScannerManagement {
                 StageDirectoryDTO sd = scanDir(library, file);
                 if (sd != null) {
                     library.addDirectory(sd);
+                    send(library.getImportDTO(sd));
                 } else {
                     LOG.info("Not adding directory '{}'", file.getAbsolutePath());
                 }
@@ -189,6 +195,7 @@ public class WatcherManagementImpl implements ScannerManagement {
                     StageDirectoryDTO scanSD = scanDir(library, file);
                     if (scanSD != null) {
                         library.addDirectory(scanSD);
+                        send(library.getImportDTO(scanSD));
                     } else {
                         LOG.info("Not adding directory '{}'", file.getAbsolutePath());
                     }
@@ -214,49 +221,14 @@ public class WatcherManagementImpl implements ScannerManagement {
     }
 
     /**
-     * Send an entire library to the core
+     * Send an ImportDTO to the core
      *
-     * @param library
-     * @return
+     * @param importDto
      */
-    private ExitType send(Library library) {
-        ExitType status = SUCCESS;
-        LOG.info("Starting to send the files to the core server...");
-
-        if (pingCore.check()) {
-            LOG.info("Sending library '{}' to the server...", library.getImportDTO().getBaseDirectory());
-
-//            Callable<ExitType> worker = new SendToCore(fileImportService, library.getImportDTO());
-//            Future<ExitType> submit = executor.submit(worker);
-//            list.add(submit);
-
-            try {
-                ImportDTO importDto = library.getImportDTO();
-
-                for (Map.Entry<String, StageDirectoryDTO> entry : library.getDirectories().entrySet()) {
-                    LOG.info("Sending directory '{}'...", entry.getKey());
-                    LOG.info("Directory: {}", entry.getValue().toString());
-                    for (StageFileDTO sf : entry.getValue().getStageFiles()) {
-                        LOG.info("  - {}", sf.toString());
-                    }
-                    importDto.setStageDirectory(entry.getValue());
-                    fileImportService.importScanned(importDto);
-                }
-
-                LOG.info("Completed sending of library '{}' to core server...", library.getImportDTO().getBaseDirectory());
-            } catch (RemoteConnectFailureException ex) {
-                LOG.error("Failed to connect to the core server: {}", ex.getMessage());
-                status = CONNECT_FAILURE;
-            } catch (RemoteAccessException ex) {
-                LOG.error("Failed to send object to the core server: {}", ex.getMessage());
-                status = CONNECT_FAILURE;
-            }
-        } else {
-            LOG.warn("Failed to connect to core server! Aborting!");
-            status = CONNECT_FAILURE;
-        }
-
-        return status;
+    private void send(ImportDTO importDto) {
+        Callable<ExitType> worker = new ImportCore(importDto);
+        Future<ExitType> submit = executor.submit(worker);
+        list.add(submit);
     }
 
     /**

@@ -22,6 +22,11 @@ public class ImportCore implements Callable<ExitType> {
     ImportDTO dto;
 
     public ImportCore() {
+        this.dto = new ImportDTO();
+    }
+
+    public ImportCore(ImportDTO dto) {
+        this.dto = dto;
     }
 
     public ImportDTO getDto() {

@@ -22,26 +22,45 @@ public class Watcher {
     }
 
     /**
-     * Creates a WatchService and registers the given directory
-     *
-     * @param dir
-     * @throws IOException
+     * Creates a WatchService
      */
-    public Watcher(Path dir) throws IOException {
-        register(dir);
-
-        // enable trace after initial registration
-        this.trace = Boolean.TRUE;
+    public Watcher() {
     }
 
     /**
      * Creates a WatchService and registers the given directory
      *
      * @param dir
-     * @throws IOException
+     */
+    public Watcher(Path dir) throws IOException {
+        addDirectory(dir);
+    }
+
+    /**
+     * Creates a WatchService and registers the given directory
+     *
+     * @param dir
      */
     public Watcher(String dir) throws IOException {
-        register(Paths.get(dir));
+        addDirectory(dir);
+    }
+
+    /**
+     * Add directory to the watch list
+     *
+     * @param dir
+     */
+    public final void addDirectory(String dir) {
+        addDirectory(Paths.get(dir));
+    }
+
+    /**
+     * Add directory to the watch list
+     *
+     * @param dir
+     */
+    public final void addDirectory(Path dir) {
+        register(dir);
 
         // enable trace after initial registration
         this.trace = Boolean.TRUE;
@@ -51,9 +70,8 @@ public class Watcher {
      * Register the given directory with the WatchService
      *
      * @param dir
-     * @throws IOException
      */
-    private void register(Path dir) throws IOException {
+    private void register(Path dir) {
         WatchKey key = null;
         try {
             key = dir.register(watcher, standardEvents, FILE_TREE);

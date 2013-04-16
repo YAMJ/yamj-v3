@@ -22,10 +22,12 @@
 
     <bean id="scannerManagement" class="com.moviejukebox.filescanner.WatcherManagementImpl"/>
 
-    <bean id="pingCore" class="com.moviejukebox.filescanner.tools.PingCore">
+    <bean id="pingCore" class="com.moviejukebox.filescanner.service.PingCore">
         <property name="timeoutSeconds" value="30"/>
         <property name="numberOfRetries" value="3"/>
     </bean>
+
+    <bean id="sendToCore" class="com.moviejukebox.filescanner.service.ImportCore"/>
 
     <bean id="fileImportService" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
         <property name="serviceUrl" value="http://${yamj3.core.host}:${yamj3.core.port}/yamj3/FileImportService"/>
