@@ -30,7 +30,7 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
         });
     }
 
-    public List<Long> getWaitingVideoDataIds(final StatusType... statusTypes) {
+    public List<Long> getVideoDataIds(final StatusType... statusTypes) {
         return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<List<Long>>() {
             @Override
             @SuppressWarnings("unchecked")

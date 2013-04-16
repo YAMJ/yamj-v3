@@ -1,5 +1,7 @@
 package com.moviejukebox.core.database.model;
 
+import javax.persistence.Column;
+
 import com.moviejukebox.core.database.model.type.OverrideFlag;
 import com.moviejukebox.core.database.model.type.StatusType;
 import com.moviejukebox.core.hibernate.usertypes.EnumStringUserType;
@@ -29,8 +31,9 @@ import org.hibernate.annotations.Parameter;
 @Entity
 @Table(name = "series")
 @SuppressWarnings("deprecation")
-public class Series extends AbstractAuditable implements Serializable {
-
+public class Series extends AbstractAuditable implements
+    IMoviedbIdentifiable, Serializable
+{
     private static final long serialVersionUID = -3336182194593898858L;
 
     /**
@@ -47,6 +50,12 @@ public class Series extends AbstractAuditable implements Serializable {
 
     @Column(name = "title_original", length = 255)
     private String titleOriginal;
+
+    @Column(name = "start_year")
+    private int startYear = -1;
+
+    @Column(name = "end_year")
+    private int endYear = -1;
 
     @Lob
     @Column(name = "plot", length = 50000)
@@ -118,6 +127,22 @@ public class Series extends AbstractAuditable implements Serializable {
         this.titleOriginal = titleOriginal;
     }
 
+    public int getStartYear() {
+        return startYear;
+    }
+
+    public void setStartYear(int startYear) {
+        this.startYear = startYear;
+    }
+
+    public int getEndYear() {
+        return endYear;
+    }
+
+    public void setEndYear(int endYear) {
+        this.endYear = endYear;
+    }
+
     public String getPlot() {
         return plot;
     }
@@ -146,8 +171,20 @@ public class Series extends AbstractAuditable implements Serializable {
         return moviedbIdMap;
     }
 
+    @Override
+    public String getMoviedbId(String moviedb) {
+        return moviedbIdMap.get(moviedb);
+    }
+
     public void setMoviedbIdMap(Map<String, String> moviedbIdMap) {
         this.moviedbIdMap = moviedbIdMap;
+    }
+
+    @Override
+    public void setMoviedbId(String moviedb, String id) {
+        if (StringUtils.isNotBlank(id)) {
+            moviedbIdMap.put(moviedb, id);
+        }
     }
 
     public Map<String, Integer> getRatings() {

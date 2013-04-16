@@ -1,6 +1,8 @@
 package com.moviejukebox.core.service.moviedb;
 
 import com.moviejukebox.core.database.model.VideoData;
+import com.moviejukebox.core.database.model.dto.CreditDTO;
+import com.moviejukebox.core.database.model.type.JobType;
 import com.moviejukebox.core.tools.StringTools;
 import com.moviejukebox.core.tools.web.HTMLTools;
 import com.moviejukebox.core.tools.web.HttpClient;
@@ -27,18 +29,18 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     private MovieDatabaseService movieDatabaseController;
     
     private SearchEngineTools searchEngineTools;
-    
+
+    @Override
+    public String getScannerName() {
+        return OFDB_SCANNER_ID;
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
         searchEngineTools = new SearchEngineTools(httpClient, "de");
         
         // register this scanner
         movieDatabaseController.registerMovieScanner(this);
-    }
-
-    @Override
-    public String getScannerName() {
-        return OFDB_SCANNER_ID;
     }
 
     @Override
@@ -127,7 +129,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
             return sb.toString();
             
         } catch (Exception error) {
-            LOGGER.error("Failed retrieving OFDb url for title : " + title, error);
+            LOGGER.error("Failed retrieving OFDb url for title: " + title, error);
         }
         return null;
     }
@@ -143,7 +145,6 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
         
         LOGGER.debug("OFDb url available (" + ofdbUrl + "), updating video data");
         return updateVideoData(videoData, ofdbUrl);
-        
     } 
     
     private ScanResult updateVideoData(VideoData videoData, String ofdbUrl) {
@@ -244,73 +245,51 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                     }
                 }
 
-/*                
-                // flags for overrides
-                boolean overrideNormal;
-                boolean overridePeople;
-
+                // CAST and CREW
+               
                 if (detailXml.contains("<i>Regie</i>")) {
-                    overrideNormal = OverrideTools.checkOverwriteDirectors(videoData, OFDB_SCANNER_ID);
-                    overridePeople = OverrideTools.checkOverwritePeopleDirectors(videoData, OFDB_SCANNER_ID);
-                    if (overrideNormal || overridePeople) {
-                        tags = HTMLTools.extractHtmlTags(detailXml, "<i>Regie</i>", "</table>", "<tr", "</tr>");
-                        List<String> directors = new ArrayList<String>();
-                        for (String tag : tags)  {
-                            directors.add(HTMLTools.removeHtmlTags(HTMLTools.extractTag(tag, "class=\"Daten\">", "</font>")).trim());
-                        }
-                        
-                        if (overrideNormal) {
-                            videoData.setDirectors(directors, OFDB_SCANNER_ID);
-                        }
-                        if (overridePeople) {
-                            videoData.setPeopleDirectors(directors, OFDB_SCANNER_ID);
-                        }
+                    tags = HTMLTools.extractHtmlTags(detailXml, "<i>Regie</i>", "</table>", "<tr", "</tr>");
+                    for (String tag : tags)  {
+                        videoData.addCreditDTO(new CreditDTO(JobType.DIRECTOR, extractName(tag)));
                     }
                 }
 
                 if (detailXml.contains("<i>Drehbuchautor(in)</i>")) {
-                    overrideNormal = OverrideTools.checkOverwriteWriters(videoData, OFDB_SCANNER_ID);
-                    overridePeople = OverrideTools.checkOverwritePeopleWriters(videoData, OFDB_SCANNER_ID);
-                    if (overrideNormal || overridePeople) {
-                        tags = HTMLTools.extractHtmlTags(detailXml, "<i>Drehbuchautor(in)</i>", "</table>", "<tr", "</tr>");
-                        List<String> writers = new ArrayList<String>();
-                        for (String tag : tags)  {
-                            writers.add(HTMLTools.removeHtmlTags(HTMLTools.extractTag(tag, "class=\"Daten\">", "</font>")).trim());
-                        }
-
-                        if (overrideNormal) {
-                            videoData.setWriters(writers, OFDB_SCANNER_ID);
-                        }
-                        if (overridePeople) {
-                            videoData.setPeopleWriters(writers, OFDB_SCANNER_ID);
-                        }
+                    tags = HTMLTools.extractHtmlTags(detailXml, "<i>Drehbuchautor(in)</i>", "</table>", "<tr", "</tr>");
+                    for (String tag : tags)  {
+                        videoData.addCreditDTO(new CreditDTO(JobType.WRITER, extractName(tag)));
                     }
                 }
 
                 if (detailXml.contains("<i>Darsteller</i>")) {
-                    overrideNormal = OverrideTools.checkOverwriteActors(videoData, OFDB_SCANNER_ID);
-                    overridePeople = OverrideTools.checkOverwritePeopleActors(videoData, OFDB_SCANNER_ID);
-                    if (overrideNormal || overridePeople) {
-                        tags = HTMLTools.extractHtmlTags(detailXml, "<i>Darsteller</i>", "</table>", "<tr", "</tr>");
-                        List<String> cast = new ArrayList<String>();
-                        for (String tag : tags)  {
-                            cast.add(HTMLTools.removeHtmlTags(HTMLTools.extractTag(tag, "class=\"Daten\">", "</font>")).trim());
-                        }
-                        
-                        if (overrideNormal) {
-                            videoData.setCast(cast, OFDB_SCANNER_ID);
-                        }
-                        if (overridePeople) {
-                            videoData.setPeopleCast(cast, OFDB_SCANNER_ID);
-                        }
+                    tags = HTMLTools.extractHtmlTags(detailXml, "<i>Darsteller</i>", "</table>", "<tr", "</tr>");
+                    for (String tag : tags)  {
+                        videoData.addCreditDTO(new CreditDTO(JobType.ACTOR, extractName(tag), extractRole(tag)));
                     }
                 }
-            */
             }
         } catch (Exception error) {
             LOGGER.error("Failed retrieving meta data : " + ofdbUrl, error);
             scanResult = ScanResult.ERROR;
         }
         return scanResult;
+    }
+    
+    private String extractName(String tag) {
+        String name = HTMLTools.extractTag(tag, "class=\"Daten\">", "</font>");
+        int akaIndex = name.indexOf("als <i>");
+        if (akaIndex > 0) {
+            name = name.substring(0, akaIndex);
+        }
+        return HTMLTools.removeHtmlTags(name);
+    }
+
+    private String extractRole(String tag) {
+        String role = HTMLTools.extractTag(tag, "class=\"Normal\">", "</font>");
+        role = HTMLTools.removeHtmlTags(role);
+        if (role.startsWith("... ")) {
+            role = role.substring(4);
+        }
+        return role;
     }
 }

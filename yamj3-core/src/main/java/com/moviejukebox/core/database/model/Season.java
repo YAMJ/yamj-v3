@@ -1,12 +1,5 @@
 package com.moviejukebox.core.database.model;
 
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.ForeignKey;
-
 import com.moviejukebox.core.database.model.type.OverrideFlag;
 import com.moviejukebox.core.database.model.type.StatusType;
 import com.moviejukebox.core.hibernate.usertypes.EnumStringUserType;
@@ -36,8 +29,9 @@ import org.hibernate.annotations.Parameter;
 @Entity
 @Table(name = "season")
 @SuppressWarnings("deprecation")
-public class Season extends AbstractAuditable implements Serializable {
-
+public class Season extends AbstractAuditable implements
+    IMoviedbIdentifiable, Serializable 
+{
     private static final long serialVersionUID = 7589022259013410259L;
 
     /**
@@ -59,11 +53,8 @@ public class Season extends AbstractAuditable implements Serializable {
 	@Column(name = "season", nullable=false)
 	private int season;
 	
-	@Column(name = "start_year", length = 10)
-	private String startYear;
-
-    @Column(name = "end_year", length = 10)
-    private String endYear;
+    @Column(name = "first_aired", length = 10)
+    private String firstAired;
 
     @Lob
     @Column(name = "plot", length = 50000)
@@ -95,7 +86,7 @@ public class Season extends AbstractAuditable implements Serializable {
     @JoinTable(name = "season_override", joinColumns = @JoinColumn(name = "season_id"))
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length= 30)
-    @MapKey(type = @Type(type = "overrideFlag"))    
+    @MapKey(type = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30)
     private Map<OverrideFlag, String> overrideFlags = new HashMap<OverrideFlag, String>(0);
 
@@ -149,20 +140,12 @@ public class Season extends AbstractAuditable implements Serializable {
         this.season = season;
     }
 
-    public String getStartYear() {
-        return startYear;
+    public String getFirstAired() {
+        return firstAired;
     }
 
-    public void setStartYear(String startYear) {
-        this.startYear = startYear;
-    }
-
-    public String getEndYear() {
-        return endYear;
-    }
-
-    public void setEndYear(String endYear) {
-        this.endYear = endYear;
+    public void setFirstAired(String firstAired) {
+        this.firstAired = firstAired;
     }
 
     public String getPlot() {
@@ -193,8 +176,20 @@ public class Season extends AbstractAuditable implements Serializable {
         return moviedbIdMap;
     }
 
+    @Override
+    public String getMoviedbId(String moviedb) {
+        return moviedbIdMap.get(moviedb);
+    }
+    
     public void setMoviedbIdMap(Map<String, String> moviedbIdMap) {
         this.moviedbIdMap = moviedbIdMap;
+    }
+
+    @Override
+    public void setMoviedbId(String moviedb, String id) {
+        if (StringUtils.isNotBlank(id)) {
+            moviedbIdMap.put(moviedb, id);
+        }
     }
 
     public Map<String, Integer> getRatings() {
