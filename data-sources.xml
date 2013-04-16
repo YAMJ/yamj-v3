@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <data-sources>
-	<data-source id="derby-1365082299447-167782243" provider="generic" driver="derby" name="Derby - database" create-date="1365082299447" save-password="true" show-system-objects="true" read-only="false">
-		<connection server="" database="/Users/mbader/workspace_yamj/moviejukebox3/yamj3-jetty/database" url="jdbc:derby:/Users/mbader/workspace_yamj/moviejukebox3/yamj3-jetty/database" user="" type="dev"/>
+	<data-source id="derby-1365082299447-167782243" provider="generic" driver="derby" name="Derby - database" create-date="1365082299447" update-date="1366101955008" save-password="true" show-system-objects="true" read-only="false">
+		<connection server="" database="D:\eclipse\workspace_yamj\moviejukebox3\yamj3-jetty\database" url="jdbc:derby:D:\eclipse\workspace_yamj\moviejukebox3\yamj3-jetty\database" user="" type="dev"/>
 	</data-source>
 </data-sources>
