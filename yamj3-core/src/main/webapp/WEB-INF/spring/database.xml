@@ -8,11 +8,14 @@
      http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
      
     <bean  id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-        <property name="driverClassName" value="${yamj3.database.driver}"/>
+        <property name="driverClassName" value="${yamj3.database.driver}" />
         <property name="url" value="${yamj3.database.url}" />
-        <property name="initialSize" value="2" />
-        <property name="maxActive" value="20" />
-        <property name="maxIdle" value="5" />
+        <property name="username" value="${yamj3.database.username}"/>
+        <property name="password" value="${yamj3.database.password}"/>
+        <property name="initialSize" value="${yamj3.database.connections.initialSize}" />
+        <property name="maxActive" value="${yamj3.database.connections.maxActive}"/>
+        <property name="maxIdle" value="${yamj3.database.connections.maxIdle}"/>
+        <property name="maxWait" value="${yamj3.database.connections.maxWait}"/>
         <property name="poolPreparedStatements" value="true" />
     </bean>
 
@@ -26,7 +29,7 @@
             <props>
                 <prop key="hibernate.dialect">${yamj3.database.dialect}</prop>
                 <prop key="hibernate.show_sql">${yamj3.database.showSql}</prop>
-                <prop key="hibernate.generate_statistics">false</prop>
+                <prop key="hibernate.generate_statistics">${yamj3.database.statistics}</prop>
                 <prop key="hibernate.hbm2ddl.auto">${yamj3.database.auto}</prop>
                 <prop key="hibernate.connection.isolation">4</prop>
                 <prop key="hibernate.use_sql_comments">true</prop>

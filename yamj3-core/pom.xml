@@ -128,6 +128,12 @@
             <version>10.9.1.0</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.24</version>
+            <scope>runtime</scope>
+        </dependency> 
         <!-- TEST -->
         <dependency>
             <groupId>junit</groupId>
