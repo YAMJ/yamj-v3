@@ -1,5 +1,6 @@
 package com.moviejukebox.core.service.moviedb;
 
+import com.moviejukebox.core.database.model.dto.QueueDTO;
 import java.util.concurrent.BlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,29 +9,29 @@ public class MovieDatabaseRunner implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MovieDatabaseRunner.class);
 
-    private final BlockingQueue<Long> queue;
+    private final BlockingQueue<QueueDTO> queue;
     private final MovieDatabaseService controller;
 
-    public MovieDatabaseRunner(BlockingQueue<Long> queue, MovieDatabaseService controller) {
+    public MovieDatabaseRunner(BlockingQueue<QueueDTO> queue, MovieDatabaseService controller) {
         this.queue = queue;
         this.controller = controller;
     }
 
     @Override
     public void run() {
-        Long id = queue.poll();
-        while (id != null) {
+        QueueDTO queueElement = queue.poll();
+        while (queueElement != null) {
             try {
-                controller.scanMetadata(id);
+                controller.scanMetadata(queueElement);
             } catch (Exception error) {
-                LOGGER.error("Failed to process video data", error);
+                LOGGER.error("Failed to process media data", error);
                 try {
-                    controller.processingError(id);
+                    controller.processingError(queueElement);
                 } catch (Exception ignore) {
                     // ignore this error;
                 }
             }
-            id = queue.poll();
+            queueElement = queue.poll();
         }
     }
 }

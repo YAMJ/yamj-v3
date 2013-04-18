@@ -2,7 +2,7 @@ package com.moviejukebox.core.service.moviedb;
 
 import com.moviejukebox.core.database.model.Series;
 import com.moviejukebox.core.database.model.VideoData;
-import com.moviejukebox.core.tools.web.HttpClient;
+import com.moviejukebox.core.tools.web.CommonHttpClient;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
     private static final Logger LOGGER = LoggerFactory.getLogger(ImdbScanner.class);
 
     @Autowired
-    private HttpClient httpClient;
+    private CommonHttpClient httpClient;
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
     @Autowired

@@ -1,5 +1,7 @@
 package com.moviejukebox.core.database.model;
 
+import org.hibernate.annotations.Index;
+
 import com.moviejukebox.core.database.model.dto.CreditDTO;
 import com.moviejukebox.core.database.model.type.OverrideFlag;
 import com.moviejukebox.core.database.model.type.StatusType;
@@ -43,12 +45,14 @@ public class VideoData extends AbstractAuditable implements
     @Column(name = "identifier", unique = true, length = 200)
     private String identifier;
 
+    @Index(name = "videodata_title")
 	@Column(name = "title", nullable = false, length = 255)
 	private String title;
 
 	@Column(name = "episode", nullable=false)
 	private int episode = -1;
 	
+    @Index(name = "videodata_publication_year")
 	@Column(name = "publication_year")
 	private int publicationYear = -1;
 

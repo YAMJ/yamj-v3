@@ -14,40 +14,44 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpVersion;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.protocol.*;
 import org.apache.http.client.utils.URIUtils;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnRouteParams;
 import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.impl.client.AbstractHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
-import org.apache.http.params.SyncBasicHttpParams;
-import org.apache.http.protocol.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Service;
 
-@Service("httpClient")
-public class HttpClient extends AbstractHttpClient implements DisposableBean {
+@Service("commonHttpClient")
+public class CommonHttpClient extends DefaultHttpClient implements DisposableBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommonHttpClient.class);
     
     private final Map<String, Integer> groupLimits = new HashMap<String, Integer>();
     private final List<String> routedHosts = new ArrayList<String>();
     
-    public HttpClient() {
+    public CommonHttpClient() {
         this(null, null);
     }
     
-    protected HttpClient(ClientConnectionManager connectionManager, HttpParams httpParams) {
+    public CommonHttpClient(ClientConnectionManager conman) {
+        this(conman, null);
+    }
+
+    public CommonHttpClient(HttpParams params) {
+        this(null, params);
+    }
+
+    protected CommonHttpClient(ClientConnectionManager connectionManager, HttpParams httpParams) {
         super(connectionManager, httpParams);
         
         // First we have to read/create the rules
@@ -67,13 +71,11 @@ public class HttpClient extends AbstractHttpClient implements DisposableBean {
                 LOGGER.debug("Rule \"" + group + "\" is not valid regexp, ignored");
             }
         }
-
     }
 
     @Override
     protected HttpParams createHttpParams() {
-        HttpParams params = new SyncBasicHttpParams();
-        HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+        HttpParams params = super.createHttpParams();
         HttpProtocolParams.setContentCharset(params, Consts.UTF_8.name());
         HttpConnectionParams.setTcpNoDelay(params, true);
         HttpConnectionParams.setSocketBufferSize(params, 8192);
@@ -93,27 +95,6 @@ public class HttpClient extends AbstractHttpClient implements DisposableBean {
         }
         
         return params;
-    }
-
-    @Override
-    protected BasicHttpProcessor createHttpProcessor() {
-        BasicHttpProcessor httpproc = new BasicHttpProcessor();
-        httpproc.addInterceptor(new RequestDefaultHeaders());
-        // Required protocol interceptors
-        httpproc.addInterceptor(new RequestContent());
-        httpproc.addInterceptor(new RequestTargetHost());
-        // Recommended protocol interceptors
-        httpproc.addInterceptor(new RequestClientConnControl());
-        httpproc.addInterceptor(new RequestUserAgent());
-        httpproc.addInterceptor(new RequestExpectContinue());
-        // HTTP state management interceptors
-        httpproc.addInterceptor(new RequestAddCookies());
-        httpproc.addInterceptor(new ResponseProcessCookies());
-        // HTTP authentication interceptors
-        httpproc.addInterceptor(new RequestAuthCache());
-        httpproc.addInterceptor(new RequestTargetAuthentication());
-        httpproc.addInterceptor(new RequestProxyAuthentication());
-        return httpproc;
     }
 
     protected ClientConnectionManager createClientConnectionManager() {

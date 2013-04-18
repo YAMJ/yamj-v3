@@ -1,14 +1,13 @@
 package com.moviejukebox.core.service;
 
-import com.moviejukebox.core.service.mediaimport.MediaImportService;
-
-import com.moviejukebox.core.service.moviedb.MovieDatabaseService;
-import com.moviejukebox.core.service.moviedb.MovieDatabaseRunner;
-
 import com.moviejukebox.core.database.dao.MediaDao;
 import com.moviejukebox.core.database.dao.StagingDao;
+import com.moviejukebox.core.database.model.dto.QueueDTO;
 import com.moviejukebox.core.database.model.type.FileType;
 import com.moviejukebox.core.database.model.type.StatusType;
+import com.moviejukebox.core.service.mediaimport.MediaImportService;
+import com.moviejukebox.core.service.moviedb.MovieDatabaseRunner;
+import com.moviejukebox.core.service.moviedb.MovieDatabaseService;
 import com.moviejukebox.core.tools.PropertyTools;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -66,17 +65,17 @@ public class Scheduler {
     
     
     @Scheduled(initialDelay=15000, fixedDelay=45000)
-    public void processVideoData() throws Exception {
-        List<Long> ids = mediaDao.getVideoDataIds(StatusType.NEW, StatusType.UPDATED);
-        if (CollectionUtils.isEmpty(ids)) {
-            LOGGER.debug("No video data to process");
+    public void scanMediaData() throws Exception {
+        List<QueueDTO> queueElements = mediaDao.getMediaQueueForScanning();
+        if (CollectionUtils.isEmpty(queueElements)) {
+            LOGGER.debug("No media data found to scan");
             return;
         }
         
-        LOGGER.info("Found {} video data objects to process", ids.size());
-        BlockingQueue<Long> queue = new LinkedBlockingQueue<Long>(ids);
+        LOGGER.info("Found {} media data objects to process", queueElements.size());
+        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
 
-        int maxScannerThreads = PropertyTools.getIntProperty("yamj3.scheduler.metadata.maxThreads", 5);
+        int maxScannerThreads = PropertyTools.getIntProperty("yamj3.scheduler.mediascan.maxThreads", 5);
         ExecutorService executor = Executors.newFixedThreadPool(maxScannerThreads);
         for (int i=0; i<maxScannerThreads; i++) {
             MovieDatabaseRunner worker = new MovieDatabaseRunner(queue, movieDatabaseController);
@@ -91,6 +90,6 @@ public class Scheduler {
             } catch (InterruptedException ignore) {}
         }
         
-        LOGGER.debug("Finished video data processing");
+        LOGGER.debug("Finished media data scanning");
     }
 }

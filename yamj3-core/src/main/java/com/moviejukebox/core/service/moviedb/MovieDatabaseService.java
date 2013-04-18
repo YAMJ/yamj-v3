@@ -3,13 +3,12 @@ package com.moviejukebox.core.service.moviedb;
 import com.moviejukebox.core.database.dao.CommonDao;
 import com.moviejukebox.core.database.dao.MediaDao;
 import com.moviejukebox.core.database.dao.PersonDao;
-import com.moviejukebox.core.database.model.CastCrew;
-import com.moviejukebox.core.database.model.Genre;
-import com.moviejukebox.core.database.model.Person;
-import com.moviejukebox.core.database.model.VideoData;
+import com.moviejukebox.core.database.model.*;
 import com.moviejukebox.core.database.model.dto.CreditDTO;
+import com.moviejukebox.core.database.model.dto.QueueDTO;
 import com.moviejukebox.core.database.model.type.JobType;
 import com.moviejukebox.core.database.model.type.StatusType;
+import com.moviejukebox.core.tools.PropertyTools;
 import java.util.HashMap;
 import java.util.HashSet;
 import org.apache.commons.lang3.StringUtils;
@@ -44,22 +43,64 @@ public class MovieDatabaseService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void scanMetadata(Long id) {
-        if (id == null) {
+    public void scanMetadata(QueueDTO queueElement) {
+        if (queueElement == null) {
             // nothing to 
             return;
         }
         
+        if (queueElement.isVideoDataElement()) {
+            this.scanVideoData(queueElement.getId());
+        } else if (queueElement.isSeriesElement()) {
+            this.scanSeries(queueElement.getId());
+        } else {
+            LOGGER.error("No valid element for scanning metadata: " + queueElement);
+        }
+    }
+        
+    private void scanVideoData(Long id) {
         VideoData videoData = mediaDao.getVideoData(id);
         LOGGER.debug("Scanning video data for: " + videoData.getTitle());
 
-        // SCAN
-        
-        // TODO use configured scanner only
+        // SCAN MOVIE
+
+        String scannerName = PropertyTools.getProperty("yamj3.moviedb.scanner.movie", "imdb");
+        IMovieScanner movieScanner = registeredMovieScanner.get(scannerName);
+        if (movieScanner == null) {
+            LOGGER.error("Movie scanner not registered: " + scannerName);
+            videoData.setStatus(StatusType.ERROR);
+            mediaDao.updateEntity(videoData);
+            return;
+        }
+
+        // scan video data
         ScanResult scanResult = ScanResult.ERROR;
-        for (IMovieScanner scanner : registeredMovieScanner.values()) {
-            LOGGER.debug("Scan video data with " + scanner.getScannerName() + ": " + videoData.getTitle());
-            scanResult = scanner.scan(videoData);
+        try {
+            scanResult = movieScanner.scan(videoData);
+        } catch (Exception error) {
+            LOGGER.error("Failed scanning video data with {} scanner", scannerName);
+            LOGGER.warn("Scanning error", error);
+        }
+
+        // SCAN ALTERNATE
+        // TODO alternate scanning
+        
+        if (!ScanResult.OK.equals(scanResult)) {
+            movieScanner = null;
+            
+            scannerName = PropertyTools.getProperty("yamj3.moviedb.scanner.movie.alternate", "");
+            if (StringUtils.isNotBlank(scannerName)) {
+                movieScanner = registeredMovieScanner.get(scannerName);;
+            }
+
+            if (movieScanner != null) {
+                try {
+                    movieScanner.scan(videoData);
+                } catch (Exception error) {
+                    LOGGER.error("Failed scanning video data with {} alternate scanner", scannerName);
+                    LOGGER.warn("Alternate scanning error", error);
+                }
+            }
         }
         
         // STORAGE
@@ -89,13 +130,39 @@ public class MovieDatabaseService {
         mediaDao.updateEntity(videoData);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void processingError(Long id) {
-        VideoData videoData = mediaDao.getVideoData(id);
-        if (videoData != null) {
-            videoData.setStatus(StatusType.ERROR);
-            mediaDao.updateEntity(videoData);
+    private void scanSeries(Long id) {
+        Series series = mediaDao.getSeries(id);
+        LOGGER.debug("Scanning series for: " + series.getTitle());
+
+        // SCAN MOVIE
+
+        String scannerName = PropertyTools.getProperty("yamj3.moviedb.scanner.series", "thetvdb");
+        ISeriesScanner seriesScanner = registeredSeriesScanner.get(scannerName);
+        if (seriesScanner == null) {
+            LOGGER.error("Series scanner not registered: " + scannerName);
+            series.setStatus(StatusType.ERROR);
+            mediaDao.updateEntity(series);
+            return;
         }
+        
+        return;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void processingError(QueueDTO queueElement) {
+        if (queueElement == null) {
+            // nothing to 
+            return;
+        }
+        
+        if (queueElement.isVideoDataElement()) {
+            VideoData videoData = mediaDao.getVideoData(queueElement.getId());
+            if (videoData != null) {
+                videoData.setStatus(StatusType.ERROR);
+                mediaDao.updateEntity(videoData);
+            }
+        }
+        // TODO series and season
     }
     
     private void updateCastCrew(VideoData videoData) {

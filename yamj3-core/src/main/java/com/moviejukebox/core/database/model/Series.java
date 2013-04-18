@@ -45,6 +45,7 @@ public class Series extends AbstractAuditable implements
     @Column(name = "identifier", unique = true, length = 200)
     private String identifier;
 
+    @Index(name = "series_title")
 	@Column(name = "title", nullable = false, length = 255)
 	private String title;
 

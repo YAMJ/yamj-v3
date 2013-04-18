@@ -11,7 +11,7 @@ public class SearchEngineTools {
 
     private static final Logger LOGGER = Logger.getLogger(SearchEngineTools.class);
     
-    private final HttpClient httpClient;
+    private final CommonHttpClient httpClient;
     private LinkedList<String> searchSites;
     private String country;
     private String searchSuffix = "";
@@ -22,11 +22,11 @@ public class SearchEngineTools {
     private String blekkoHost = "www.blekko.com";
     private String lycosHost = "search.lycos.com";
 
-    public SearchEngineTools(HttpClient httpClient) {
+    public SearchEngineTools(CommonHttpClient httpClient) {
         this(httpClient, "us");
     }
 
-    public SearchEngineTools(HttpClient httpClient, String country) {
+    public SearchEngineTools(CommonHttpClient httpClient, String country) {
         this.httpClient = httpClient;
         
         // sites to search for URLs

@@ -1,5 +1,7 @@
 package com.moviejukebox.core.database.model;
 
+import org.hibernate.annotations.Index;
+
 import com.moviejukebox.core.database.model.type.OverrideFlag;
 import com.moviejukebox.core.database.model.type.StatusType;
 import com.moviejukebox.core.hibernate.usertypes.EnumStringUserType;
@@ -44,12 +46,14 @@ public class Season extends AbstractAuditable implements
     @Column(name = "identifier", unique = true, length = 200)
     private String identifier;
 
+    @Index(name = "season_title")
 	@Column(name = "title", nullable = false, length = 255)
 	private String title;
 
     @Column(name = "title_original", length = 255)
     private String titleOriginal;
 
+    @Index(name = "season_season")
 	@Column(name = "season", nullable=false)
 	private int season;
 	

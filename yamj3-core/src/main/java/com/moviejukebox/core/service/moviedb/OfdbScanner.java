@@ -4,8 +4,8 @@ import com.moviejukebox.core.database.model.VideoData;
 import com.moviejukebox.core.database.model.dto.CreditDTO;
 import com.moviejukebox.core.database.model.type.JobType;
 import com.moviejukebox.core.tools.StringTools;
+import com.moviejukebox.core.tools.web.CommonHttpClient;
 import com.moviejukebox.core.tools.web.HTMLTools;
-import com.moviejukebox.core.tools.web.HttpClient;
 import com.moviejukebox.core.tools.web.SearchEngineTools;
 import java.net.URLEncoder;
 import java.util.HashSet;
@@ -24,7 +24,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(OfdbScanner.class);
 
     @Autowired
-    private HttpClient httpClient;
+    private CommonHttpClient httpClient;
     @Autowired
     private MovieDatabaseService movieDatabaseService;
     
