@@ -14,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -29,29 +31,34 @@ import org.apache.http.params.HttpProtocolParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.stereotype.Service;
 
-@Service("commonHttpClient")
-public class CommonHttpClient extends DefaultHttpClient implements DisposableBean {
+public class PoolingHttpClient extends DefaultHttpClient implements DisposableBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommonHttpClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PoolingHttpClient.class);
     
     private final Map<String, Integer> groupLimits = new HashMap<String, Integer>();
     private final List<String> routedHosts = new ArrayList<String>();
+
+    private String proxyHost = null;
+    private int proxyPort = 0;
+    private String proxyUsername = null;
+    private String proxyPassword = null;
+    private int connectionsMaxPerRoute = 1;
+    private int connectionsMaxTotal = 20;
     
-    public CommonHttpClient() {
+    public PoolingHttpClient() {
         this(null, null);
     }
     
-    public CommonHttpClient(ClientConnectionManager conman) {
+    public PoolingHttpClient(ClientConnectionManager conman) {
         this(conman, null);
     }
 
-    public CommonHttpClient(HttpParams params) {
+    public PoolingHttpClient(HttpParams params) {
         this(null, params);
     }
 
-    protected CommonHttpClient(ClientConnectionManager connectionManager, HttpParams httpParams) {
+    public PoolingHttpClient(ClientConnectionManager connectionManager, HttpParams httpParams) {
         super(connectionManager, httpParams);
         
         // First we have to read/create the rules
@@ -73,6 +80,38 @@ public class CommonHttpClient extends DefaultHttpClient implements DisposableBea
         }
     }
 
+    public void setProxyHost(String proxyHost) {
+        this.proxyHost = proxyHost;
+    }
+
+    public void setProxyPort(int proxyPort) {
+        this.proxyPort = proxyPort;
+    }
+
+    public void setProxyUsername(String proxyUsername) {
+        this.proxyUsername = proxyUsername;
+    }
+
+    public void setProxyPassword(String proxyPassword) {
+        this.proxyPassword = proxyPassword;
+    }
+    
+    public int getConnectionsMaxPerRoute() {
+        return connectionsMaxPerRoute;
+    }
+
+    public void setConnectionsMaxPerRoute(int connectionsMaxPerRoute) {
+        this.connectionsMaxPerRoute = connectionsMaxPerRoute;
+    }
+
+    public int getConnectionsMaxTotal() {
+        return connectionsMaxTotal;
+    }
+
+    public void setConnectionsMaxTotal(int connectionsMaxTotal) {
+        this.connectionsMaxTotal = connectionsMaxTotal;
+    }
+
     @Override
     protected HttpParams createHttpParams() {
         HttpParams params = super.createHttpParams();
@@ -80,16 +119,17 @@ public class CommonHttpClient extends DefaultHttpClient implements DisposableBea
         HttpConnectionParams.setTcpNoDelay(params, true);
         HttpConnectionParams.setSocketBufferSize(params, 8192);
 
+        // set user agent
         HttpProtocolParams.setUserAgent(params, "Mozilla/6.0 (Windows NT 6.2; WOW64; rv:16.0.1) Gecko/20121011 Firefox/16.0.1");
-        String acceptLanguage = PropertyTools.getProperty("yamj3.http.acceptLanguage");
-        if (StringUtils.isNotBlank(acceptLanguage)) {
-            params.setParameter("AcceptLanguage", acceptLanguage);
-        }
         
-        String proxyHost = PropertyTools.getProperty("yamj3.http.proxyHost");
-        int proxyPort = PropertyTools.getIntProperty("yamj3.http.proxyPort", 0);
+        // set default proxy
         if (StringUtils.isNotBlank(proxyHost) && proxyPort > 0) {
-            // set default proxy
+            if (StringUtils.isNotBlank(proxyUsername) && StringUtils.isNotBlank(proxyPassword)) {
+                getCredentialsProvider().setCredentials(
+                        new AuthScope(proxyHost, proxyPort),
+                        new UsernamePasswordCredentials(proxyUsername, proxyPassword));
+            }
+
             HttpHost proxy = new HttpHost(proxyHost, proxyPort);
             ConnRouteParams.setDefaultProxy(params, proxy);
         }
@@ -99,8 +139,8 @@ public class CommonHttpClient extends DefaultHttpClient implements DisposableBea
 
     protected ClientConnectionManager createClientConnectionManager() {
         PoolingClientConnectionManager clientManager = new PoolingClientConnectionManager();
-        clientManager.setDefaultMaxPerRoute(PropertyTools.getIntProperty("yamj3.http.connections.maxPerRoute", 1));
-        clientManager.setMaxTotal(PropertyTools.getIntProperty("yamj3.http.connections.maxTotal", 20));
+        clientManager.setDefaultMaxPerRoute(connectionsMaxPerRoute);
+        clientManager.setMaxTotal(connectionsMaxTotal);
         return clientManager;
     }
 

@@ -3,7 +3,7 @@ package com.moviejukebox.core.service.moviedb;
 
 import com.moviejukebox.core.tools.PropertyTools;
 import com.moviejukebox.core.tools.web.HTMLTools;
-import com.moviejukebox.core.tools.web.CommonHttpClient;
+import com.moviejukebox.core.tools.web.PoolingHttpClient;
 import com.moviejukebox.core.tools.web.SearchEngineTools;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -36,7 +36,7 @@ public class ImdbSearchEngine implements InitializingBean {
     private static final Map<String, ImdbSiteDataDefinition> MATCHES_DATA_PER_SITE = new HashMap<String, ImdbSiteDataDefinition>();
 
     @Autowired
-    private CommonHttpClient httpClient;
+    private PoolingHttpClient httpClient;
     
     private String searchMatch;
     private boolean searchVariable;

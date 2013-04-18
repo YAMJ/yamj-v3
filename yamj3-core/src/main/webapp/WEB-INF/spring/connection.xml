@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:tx="http://www.springframework.org/schema/tx"
+   xsi:schemaLocation="http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+     
+    <bean  id="poolingHttpClient" class="com.moviejukebox.core.tools.web.PoolingHttpClient">
+        <property name="proxyHost" value="${yamj3.http.proxyHost}" />
+        <property name="proxyPort" value="${yamj3.http.proxyPort}" />
+        <property name="proxyUsername" value="${yamj3.http.proxyUsername}" />
+        <property name="proxyPassword" value="${yamj3.http.proxyPassword}" />
+        <property name="connectionsMaxPerRoute" value="${yamj3.http.connections.maxPerRoute}" />
+        <property name="connectionsMaxTotal" value="${yamj3.http.connections.maxTotal}" />
+    </bean>
+    
+</beans>
