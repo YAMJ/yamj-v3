@@ -25,6 +25,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.remoting.RemoteAccessException;
+import org.springframework.remoting.RemoteConnectFailureException;
 
 /**
  * Performs an initial scan of the library location and then updates when changes occur.
@@ -48,8 +50,8 @@ public class WatcherManagementImpl implements ScannerManagement {
     // Spring service(s)
     @Resource(name = "fileImportService")
     private FileImportService fileImportService;
-    @Resource(name = "pingCore")
-    private PingCore pingCore;
+//    @Resource(name = "pingCore")
+//    private PingCore pingCore;
 //    @Resource(name="importCore")
 //    private ImportCore importCore;
     // Thread executers
@@ -134,10 +136,10 @@ public class WatcherManagementImpl implements ScannerManagement {
     private ExitType scan(Library library) {
         ExitType status = SUCCESS;
         File baseDirectory = new File(library.getImportDTO().getBaseDirectory());
-        LOG.info("Scanning library '{}'...", baseDirectory.getName());
+        LOG.info("Scanning library '{}'...", baseDirectory.getAbsolutePath());
 
         if (!baseDirectory.exists()) {
-            LOG.info("Failed to read directory '{}'", baseDirectory);
+            LOG.info("Failed to read directory '{}'", baseDirectory.getAbsolutePath());
             return NO_DIRECTORY;
         }
 
@@ -175,7 +177,7 @@ public class WatcherManagementImpl implements ScannerManagement {
         DirectoryType dirEnd = DirectoryEnding.check(directory);
         StageDirectoryDTO stageDir;
 
-        LOG.info("Scanning directory '{}', detected type - {}", directory.getAbsolutePath(), dirEnd);
+        LOG.info("Scanning directory '{}', detected type - {}", library.getRelativeDir(directory), dirEnd);
 
         if (dirEnd == DirectoryType.BLURAY || dirEnd == DirectoryType.DVD) {
             // Don't scan BLURAY or DVD structures
@@ -225,10 +227,20 @@ public class WatcherManagementImpl implements ScannerManagement {
      *
      * @param importDto
      */
-    private void send(ImportDTO importDto) {
-        Callable<ExitType> worker = new ImportCore(importDto);
-        Future<ExitType> submit = executor.submit(worker);
-        list.add(submit);
+    private ExitType send(ImportDTO dto) {
+        ExitType status;
+        try {
+//            LOG.info("Sending: {}", dto.toString());
+            fileImportService.importScanned(dto);
+            status = ExitType.SUCCESS;
+        } catch (RemoteConnectFailureException ex) {
+            LOG.error("Failed to connect to the core server: {}", ex.getMessage());
+            status = CONNECT_FAILURE;
+        } catch (RemoteAccessException ex) {
+            LOG.error("Failed to send object to the core server: {}", ex.getMessage());
+            status = CONNECT_FAILURE;
+        }
+        return status;
     }
 
     /**

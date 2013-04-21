@@ -41,6 +41,7 @@ public class ImportCore implements Callable<ExitType> {
     public ExitType call() {
         ExitType status;
         try {
+            LOG.info("Sending: {}", dto.toString());
             fileImportService.importScanned(dto);
             status = ExitType.SUCCESS;
         } catch (RemoteConnectFailureException ex) {

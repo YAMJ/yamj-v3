@@ -2,6 +2,7 @@ package com.moviejukebox.filescanner.model;
 
 import com.moviejukebox.common.dto.ImportDTO;
 import com.moviejukebox.common.dto.StageDirectoryDTO;
+import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,5 +72,19 @@ public class Library implements Serializable {
         newImportDto.setPlayerPath(importDTO.getPlayerPath());
         newImportDto.setStageDirectory(sd);
         return newImportDto;
+    }
+
+    /**
+     * Calculate the relative directory from the library base directory
+     *
+     * @param directory
+     * @return
+     */
+    public String getRelativeDir(File directory) {
+        if (directory.getAbsolutePath().startsWith(importDTO.getBaseDirectory())) {
+            return directory.getAbsolutePath().substring(importDTO.getBaseDirectory().length() + 1);
+        } else {
+            return directory.getAbsolutePath();
+        }
     }
 }

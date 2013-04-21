@@ -8,7 +8,6 @@ import java.io.Serializable;
 public class ImportDTO implements Serializable {
 
     private static final long serialVersionUID = -4541107145393048608L;
-    
     private String client;
     private String playerPath;
     private String baseDirectory;
@@ -39,14 +38,14 @@ public class ImportDTO implements Serializable {
     }
 
     public StageDirectoryDTO getStageDirectory() {
-		return stageDirectory;
-	}
+        return stageDirectory;
+    }
 
-	public void setStageDirectory(StageDirectoryDTO stageDirectory) {
-		this.stageDirectory = stageDirectory;
-	}
+    public void setStageDirectory(StageDirectoryDTO stageDirectory) {
+        this.stageDirectory = stageDirectory;
+    }
 
-	@Override
+    @Override
     public String toString() {
         return "ImportDTO{playerPath='" + playerPath + "', baseDirectory='" + baseDirectory + "', directory=" + stageDirectory.getPath() + "}";
     }
