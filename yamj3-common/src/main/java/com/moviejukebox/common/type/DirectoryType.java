@@ -1,4 +1,4 @@
-package com.moviejukebox.core.database.model.type;
+package com.moviejukebox.common.type;
 
 public enum DirectoryType {
 
