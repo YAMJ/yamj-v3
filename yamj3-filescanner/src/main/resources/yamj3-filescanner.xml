@@ -54,9 +54,14 @@
 
     <bean id="libraryCollection"
           class="com.moviejukebox.filescanner.model.LibraryCollection">
-        <property name="marshaller" ref="castorMarshaller" />
-        <property name="unmarshaller" ref="castorMarshaller" />
+        <property name="marshaller" ref="xstreamMarshaller" />
+        <property name="unmarshaller" ref="xstreamMarshaller" />
     </bean>
-    <bean id="castorMarshaller" class="org.springframework.oxm.castor.CastorMarshaller"/>
-
+    <bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
+        <property name="aliases">
+            <props>
+                <prop key="Library">com.moviejukebox.filescanner.model.Library</prop>
+            </props>
+        </property>
+    </bean>
 </beans>

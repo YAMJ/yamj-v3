@@ -1,6 +1,6 @@
 package com.moviejukebox.filescanner.tools;
 
-import com.moviejukebox.core.database.model.type.DirectoryType;
+import com.moviejukebox.common.type.DirectoryType;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
