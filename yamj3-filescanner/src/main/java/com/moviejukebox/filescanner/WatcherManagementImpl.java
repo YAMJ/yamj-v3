@@ -17,10 +17,7 @@ import com.moviejukebox.core.database.model.type.DirectoryType;
 import com.moviejukebox.filescanner.model.Library;
 import com.moviejukebox.filescanner.model.LibraryCollection;
 import com.moviejukebox.filescanner.model.StatType;
-import com.moviejukebox.filescanner.service.ImportCore;
-import com.moviejukebox.filescanner.service.PingCore;
 import com.moviejukebox.filescanner.tools.DirectoryEnding;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -43,17 +40,13 @@ public class WatcherManagementImpl implements ScannerManagement {
      *
      */
     private static final Logger LOG = LoggerFactory.getLogger(WatcherManagementImpl.class);
-    // The Collection of libraries
-    private LibraryCollection libraryCollection;
     // The default watched status
     private static final Boolean DEFAULT_WATCH_STATE = Boolean.FALSE;    // TODO: Should be a property
     // Spring service(s)
     @Resource(name = "fileImportService")
     private FileImportService fileImportService;
-//    @Resource(name = "pingCore")
-//    private PingCore pingCore;
-//    @Resource(name="importCore")
-//    private ImportCore importCore;
+    @Resource(name = "libraryCollection")
+    private LibraryCollection libraryCollection;
     // Thread executers
     private static final int NUM_THREADS = 2;
     ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
@@ -70,7 +63,6 @@ public class WatcherManagementImpl implements ScannerManagement {
      */
     @Override
     public ExitType runScanner(CmdLineParser parser) {
-        libraryCollection = new LibraryCollection();
         libraryCollection.setDefaultClient(DEFAULT_CLIENT);
         libraryCollection.setDefaultPlayerPath(DEFAULT_PLAYER_PATH);
 
@@ -93,7 +85,10 @@ public class WatcherManagementImpl implements ScannerManagement {
         }
 
         ExitType status = SUCCESS;
+        int count = 1;
         for (Library library : libraryCollection.getLibraries()) {
+            libraryCollection.saveLibraryToFile("testLibrary_" + count++ + ".xml", library);
+
             status = scan(library);
             LOG.info("{}", library.getStatistics().generateStats());
             LOG.info("Scanning completed.");
@@ -120,6 +115,8 @@ public class WatcherManagementImpl implements ScannerManagement {
             } else {
                 LOG.info("No directories marked for watching.");
             }
+        } else {
+            LOG.info("Watching not enabled.");
         }
 
         LOG.info("Exiting with status {}", status);

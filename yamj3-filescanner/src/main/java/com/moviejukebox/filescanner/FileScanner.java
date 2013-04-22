@@ -15,10 +15,10 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class FileScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileScanner.class);
-    private static final String logFilename = "yamj-filescanner";
+    private static final String LOG_FILENAME = "yamj-filescanner";
 
     public static void main(String[] args) throws Exception {
-        System.setProperty("file.name", logFilename);
+        System.setProperty("file.name", LOG_FILENAME);
         PropertyConfigurator.configure("config/log4j.properties");
 
         CmdLineParser parser = getCmdLineParser();
@@ -60,7 +60,6 @@ public class FileScanner {
         return parser;
     }
 
-    @SuppressWarnings("resource")
     private ExitType execute(CmdLineParser parser) {
         ExitType status;
         try {

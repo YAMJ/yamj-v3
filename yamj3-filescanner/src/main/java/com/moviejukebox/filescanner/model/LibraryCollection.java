@@ -1,20 +1,42 @@
 package com.moviejukebox.filescanner.model;
 
 import com.moviejukebox.common.dto.ImportDTO;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Resource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.oxm.Unmarshaller;
+import org.springframework.oxm.Marshaller;
+import org.springframework.oxm.XmlMappingException;
+import org.springframework.stereotype.Service;
 
+@Service("libraryCollection")
 public class LibraryCollection {
 
     private static final Logger LOG = LoggerFactory.getLogger(LibraryCollection.class);
+    private Marshaller marshaller;
+    private Unmarshaller unmarshaller;
     private List<Library> libraries;
     private String defaultPlayerPath = "";
     private String defaultClient = "";
 
     public LibraryCollection() {
         libraries = new ArrayList<Library>();
+    }
+
+    public void setMarshaller(Marshaller marshaller) {
+        this.marshaller = marshaller;
+    }
+
+    public void setUnmarshaller(Unmarshaller unmarshaller) {
+        this.unmarshaller = unmarshaller;
     }
 
     /**
@@ -104,11 +126,51 @@ public class LibraryCollection {
         LOG.warn("Library Filename    : {}", libraryFilename);
         LOG.warn("Default watch state : {}", defaultWatchState);
 
-        // process the library file
-//        Library library = new Library();
+        // http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/oxm.html
+        FileInputStream is = null;
+        try {
+            is = new FileInputStream(libraryFilename);
+            Library library = (Library) this.unmarshaller.unmarshal(new StreamSource(is));
+            add(library);
+        } catch (FileNotFoundException ex) {
+            LOG.warn("File not found: {}", libraryFilename);
+        } catch (IOException ex) {
+            LOG.warn("IO exception for: {}, Error: {}", libraryFilename, ex.getMessage());
+        } catch (XmlMappingException ex) {
+            LOG.warn("XML Mapping error for: {}, Error: {}", libraryFilename, ex.getMessage());
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException ex) {
+                    LOG.warn("Failed to close library file: {}, Error: {}", libraryFilename, ex.getMessage());
+                }
+            }
+        }
+    }
 
-        // add the library file
-//        add(library);
+    public void saveLibraryToFile(String libraryFilename, Library library) {
+        LOG.info("Attempting to save library to {}", libraryFilename);
+        FileOutputStream os = null;
+        try {
+            os = new FileOutputStream(libraryFilename);
+            this.marshaller.marshal(library, new StreamResult(os));
+        } catch (FileNotFoundException ex) {
+            LOG.warn("File not found: {}", libraryFilename);
+        } catch (IOException ex) {
+            LOG.warn("IO exception for: {}, Error: {}", libraryFilename, ex.getMessage());
+        } catch (XmlMappingException ex) {
+            LOG.warn("XML Mapping error for: {}, Error: {}", libraryFilename, ex.getMessage());
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (IOException ex) {
+                    LOG.warn("Failed to close library file: {}, Error: {}", libraryFilename, ex.getMessage());
+                }
+            }
+        }
+        LOG.info("Saving completed");
     }
 
     public void addLibraryDirectory(String baseDirectory, boolean defaultWatchState) {
@@ -144,5 +206,4 @@ public class LibraryCollection {
     public void setDefaultClient(String defaultClient) {
         this.defaultClient = defaultClient;
     }
-
 }

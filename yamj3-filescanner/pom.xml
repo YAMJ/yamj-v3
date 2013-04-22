@@ -56,15 +56,25 @@
             <artifactId>spring-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjweaver</artifactId>
-            <version>1.7.2</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-oxm</artifactId>
         </dependency>
         <!-- Watched functionality -->
         <dependency>
             <groupId>net.sf.jpathwatch</groupId>
             <artifactId>jpathwatch</artifactId>
             <version>0.95</version>
+        </dependency>
+        <!-- Castor Marshalling / Unmarshalling -->
+        <dependency>
+            <groupId>org.codehaus.castor</groupId>
+            <artifactId>castor-xml</artifactId>
+            <version>1.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.castor</groupId>
+            <artifactId>castor-core</artifactId>
+            <version>1.3.2</version>
         </dependency>
     </dependencies>
 
