@@ -11,7 +11,7 @@ import com.moviejukebox.common.dto.StageFileDTO;
 import com.moviejukebox.common.remote.service.FileImportService;
 import com.moviejukebox.common.remote.service.PingService;
 import com.moviejukebox.common.type.ExitType;
-import com.moviejukebox.filescanner.model.LibraryStatistics;
+import com.moviejukebox.filescanner.model.Statistics;
 import com.moviejukebox.filescanner.model.StatType;
 import java.io.File;
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class ScannerManagementImpl implements ScannerManagement {
     // List of files
     private static List<File> fileList;
     // Statistics
-    private static LibraryStatistics stats = new LibraryStatistics();
+    private static Statistics stats = new Statistics();
     @Resource(name = "fileImportService")
     private FileImportService fileImportService;
     @Resource(name = "pingService")

@@ -37,9 +37,6 @@
         <property name="numberOfRetries" value="3"/>
     </bean>
 
-    <bean id="importCore"
-          class="com.moviejukebox.filescanner.service.ImportCore"/>
-
     <bean id="fileImportService"
           class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
         <property name="serviceUrl" value="http://${yamj3.core.host}:${yamj3.core.port}/yamj3/FileImportService"/>
@@ -52,16 +49,27 @@
         <property name="serviceInterface" value="com.moviejukebox.common.remote.service.PingService"/>
     </bean>
 
-    <bean id="libraryCollection"
-          class="com.moviejukebox.filescanner.model.LibraryCollection">
+    <bean id="xmlTools"
+          class="com.moviejukebox.filescanner.tools.XmlTools">
         <property name="marshaller" ref="xstreamMarshaller" />
         <property name="unmarshaller" ref="xstreamMarshaller" />
     </bean>
+
+    <bean id="libraryCollection"
+          class="com.moviejukebox.filescanner.model.LibraryCollection">
+    </bean>
+
     <bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
         <property name="aliases">
             <props>
-                <prop key="Library">com.moviejukebox.filescanner.model.Library</prop>
+                <prop key="Libraries">com.moviejukebox.filescanner.dto.LibraryDTO</prop>
+                <prop key="Library">com.moviejukebox.filescanner.dto.LibraryFileDTO</prop>
             </props>
+        </property>
+        <property name="implicitCollections">
+            <map>
+                <entry key="com.moviejukebox.filescanner.dto.LibraryDTO" value="libraries" />
+            </map>
         </property>
     </bean>
 </beans>
