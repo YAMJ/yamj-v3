@@ -28,9 +28,16 @@ public class XmlTools {
         this.unmarshaller = unmarshaller;
     }
 
+    /**
+     * Read a file from disk
+     *
+     * @param <T>
+     * @param filename
+     * @param clazz
+     * @return
+     */
     public <T> T read(String filename, Class<T> clazz) {
-        LOG.info("Filename: {}", filename);
-        LOG.info("Class   : {}", clazz.getSimpleName());
+        LOG.debug("Reading filename '{}' of type {}", filename, clazz.getSimpleName());
 
         // http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/oxm.html
         FileInputStream is = null;
@@ -56,6 +63,13 @@ public class XmlTools {
         return null;
     }
 
+    /**
+     * Save a file to disk
+     *
+     * @param <T>
+     * @param filename
+     * @param objectToSave
+     */
     public <T> void save(String filename, T objectToSave) {
         LOG.info("Attempting to save {} to {}", objectToSave.getClass().getSimpleName(), filename);
         FileOutputStream os = null;

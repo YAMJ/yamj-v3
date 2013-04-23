@@ -62,8 +62,8 @@
     <bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
         <property name="aliases">
             <props>
-                <prop key="Libraries">com.moviejukebox.filescanner.dto.LibraryDTO</prop>
-                <prop key="Library">com.moviejukebox.filescanner.dto.LibraryEntryDTO</prop>
+                <prop key="libraries">com.moviejukebox.filescanner.dto.LibraryDTO</prop>
+                <prop key="library">com.moviejukebox.filescanner.dto.LibraryEntryDTO</prop>
             </props>
         </property>
         <property name="implicitCollections">

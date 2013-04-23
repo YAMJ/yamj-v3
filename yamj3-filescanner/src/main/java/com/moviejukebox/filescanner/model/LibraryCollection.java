@@ -114,9 +114,13 @@ public class LibraryCollection implements Serializable {
 
         LibraryDTO lib = xmlTools.read(libraryFilename, LibraryDTO.class);
 
-        for (LibraryEntryDTO single : lib.getLibraries()) {
-            LOG.info("Adding library '{}'", single.getDescription());
-            addLibraryDirectory(single.getPath(), defaultWatchState, single.getPlayerpath(), single.getDescription());
+        if (lib == null) {
+            LOG.warn("Failed to read library file '{}'", libraryFilename);
+        } else {
+            for (LibraryEntryDTO single : lib.getLibraries()) {
+                LOG.info("Adding library '{}'", single.getDescription());
+                addLibraryDirectory(single.getPath(), defaultWatchState, single.getPlayerpath(), single.getDescription());
+            }
         }
     }
 
