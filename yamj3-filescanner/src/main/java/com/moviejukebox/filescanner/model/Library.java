@@ -10,13 +10,13 @@ import java.util.Map;
 public class Library implements Serializable {
 
     private boolean watch;
-    private LibraryStatistics statistics;
+    private Statistics statistics;
     private Map<String, StageDirectoryDTO> directories;
     private ImportDTO importDTO;
 
     public Library() {
         this.watch = Boolean.FALSE;
-        this.statistics = new LibraryStatistics();
+        this.statistics = new Statistics();
         this.directories = new HashMap<String, StageDirectoryDTO>(1);
         importDTO = new ImportDTO();
     }
@@ -29,11 +29,11 @@ public class Library implements Serializable {
         this.watch = watch;
     }
 
-    public LibraryStatistics getStatistics() {
+    public Statistics getStatistics() {
         return statistics;
     }
 
-    public void setStatistics(LibraryStatistics statistics) {
+    public void setStatistics(Statistics statistics) {
         this.statistics = statistics;
     }
 
