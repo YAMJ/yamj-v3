@@ -63,7 +63,7 @@
         <property name="aliases">
             <props>
                 <prop key="Libraries">com.moviejukebox.filescanner.dto.LibraryDTO</prop>
-                <prop key="Library">com.moviejukebox.filescanner.dto.LibraryFileDTO</prop>
+                <prop key="Library">com.moviejukebox.filescanner.dto.LibraryEntryDTO</prop>
             </props>
         </property>
         <property name="implicitCollections">

@@ -85,10 +85,7 @@ public class WatcherManagementImpl implements ScannerManagement {
         }
 
         ExitType status = SUCCESS;
-        int count = 1;
         for (Library library : libraryCollection.getLibraries()) {
-            libraryCollection.saveLibraryToFile("testLibrary_" + count++ + ".xml", library);
-
             status = scan(library);
             LOG.info("{}", library.getStatistics().generateStats());
             LOG.info("Scanning completed.");

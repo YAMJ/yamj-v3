@@ -1,5 +1,6 @@
 package com.moviejukebox.filescanner.dto;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +9,7 @@ import java.util.List;
  *
  * @author stuart.boston
  */
-public class LibraryDTO {
+public class LibraryDTO implements Serializable {
 
     List<LibraryEntryDTO> libraries = new ArrayList<LibraryEntryDTO>();
 

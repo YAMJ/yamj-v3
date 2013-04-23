@@ -1,5 +1,6 @@
 package com.moviejukebox.filescanner.dto;
 
+import java.io.Serializable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Service;
  * @author stuart.boston
  */
 @Service("libraryFile")
-public class LibraryEntryDTO {
+public class LibraryEntryDTO implements Serializable {
 
     // Properties
     private String path;
