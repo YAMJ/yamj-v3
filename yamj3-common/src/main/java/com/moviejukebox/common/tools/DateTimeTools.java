@@ -1,36 +1,21 @@
 package com.moviejukebox.common.tools;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
+import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 public class DateTimeTools {
 
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd";
-    private static final String TIME_STRING = "HH:mm:ss";
-    private static final String DATE_FORMAT_LONG_STRING = DATE_FORMAT_STRING + " " + TIME_STRING;
 
     private DateTimeTools() {
         throw new UnsupportedOperationException("Class cannot be instantiated");
-    }
-
-    public static String getDateFormatString() {
-        return DATE_FORMAT_STRING;
-    }
-
-    public static String getDateFormatLongString() {
-        return DATE_FORMAT_LONG_STRING;
-    }
-
-    public static SimpleDateFormat getDateFormat() {
-        return new SimpleDateFormat(DATE_FORMAT_STRING);
-    }
-
-    public static SimpleDateFormat getDateFormatLong() {
-        return new SimpleDateFormat(DATE_FORMAT_LONG_STRING);
     }
 
     /**
@@ -40,7 +25,7 @@ public class DateTimeTools {
      * @return converted date in the format specified in DATE_FORMAT_STRING
      */
     public static String convertDateToString(Date convertDate) {
-        return convertDateToString(convertDate, getDateFormatString());
+        return convertDateToString(convertDate, DATE_FORMAT_STRING);
     }
 
     /**
@@ -51,7 +36,7 @@ public class DateTimeTools {
      * @return
      */
     public static String convertDateToString(Date convertDate, final String dateFormat) {
-        DateTime dt = new DateTime(convertDate.getTime());
+        DateTime dt = new DateTime(convertDate);
         return convertDateToString(dt, dateFormat);
     }
 
@@ -62,7 +47,7 @@ public class DateTimeTools {
      * @return converted date in the format specified in DATE_FORMAT_STRING
      */
     public static String convertDateToString(DateTime convertDate) {
-        return convertDateToString(convertDate, getDateFormatString());
+        return convertDateToString(convertDate, DATE_FORMAT_STRING);
     }
 
     /**
@@ -73,32 +58,35 @@ public class DateTimeTools {
      * @return
      */
     public static String convertDateToString(DateTime convertDate, final String dateFormat) {
-        return convertDate.toString(dateFormat);
+        DateTimeFormatter fmt = DateTimeFormat.forPattern(dateFormat);
+        return fmt.print(convertDate);
+    }
+
+    public static String getDuration(Date start, Date end) {
+        return getDuration(new DateTime(start), new DateTime(end));
+    }
+
+    public static String getDuration(Long start, Long end) {
+        return getDuration(new DateTime(start), new DateTime(end));
+    }
+
+    public static String getDuration(DateTime start, DateTime end) {
+        Interval interval = new Interval(start, end);
+        Period period = interval.toPeriod();
+        period = period.normalizedStandard();
+        return String.format("%02d:%02d:%02d", period.getHours(), period.getMinutes(), period.getSeconds());
     }
 
     /**
      * Format the duration passed as ?h?m format
      *
-     * @param duration
+     * @param seconds
      * @return
      */
-    public static String formatDuration(int duration) {
-        StringBuilder returnString = new StringBuilder();
-
-        int nbHours = duration / 3600;
-        if (nbHours != 0) {
-            returnString.append(nbHours).append("h");
-        }
-
-        int nbMinutes = (duration - (nbHours * 3600)) / 60;
-        if (nbMinutes != 0) {
-            if (nbHours != 0) {
-                returnString.append(" ");
-            }
-            returnString.append(nbMinutes).append("m");
-        }
-
-        return returnString.toString();
+    public static String formatDuration(int seconds) {
+        Period period = new Period(seconds * 1000);
+        period = period.normalizedStandard();
+        return String.format("%02dh%02dm", period.getHours(), period.getMinutes(), period.getSeconds());
     }
 
     /**
