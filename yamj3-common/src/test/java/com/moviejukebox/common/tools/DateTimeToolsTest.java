@@ -157,11 +157,11 @@ public class DateTimeToolsTest {
     @Test
     public void testFormatDurationText() {
         System.out.println("formatDurationText");
-        String expResult = "1h01m01";
+        String expResult = "1h01m01s";
         String result = DateTimeTools.formatDurationText(EXP_1H_1M_1S);
         assertEquals(expResult, result);
 
-        expResult = "1h01m01.001";
+        expResult = "1h01m01.001s";
         result = DateTimeTools.formatDurationText(EXP_1H_1M_1S + 1);
         assertEquals(expResult, result);
     }

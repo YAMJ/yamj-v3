@@ -16,8 +16,8 @@ import org.joda.time.format.PeriodFormatterBuilder;
 public class DateTimeTools {
 
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd";
-    private static final PeriodFormatter TIME_FORMAT_COLON = createPeriodFormatter(":", ":");
-    private static final PeriodFormatter TIME_FORMAT_TEXT = createPeriodFormatter("h", "m");
+    private static final PeriodFormatter TIME_FORMAT_COLON = createPeriodFormatter(":", ":", "");
+    private static final PeriodFormatter TIME_FORMAT_TEXT = createPeriodFormatter("h", "m", "s");
 
     /**
      * Create a Period Formatter with the given delimiters
@@ -27,7 +27,7 @@ public class DateTimeTools {
      * @param secondText
      * @return
      */
-    private static PeriodFormatter createPeriodFormatter(String hourText, String minuteText) {
+    private static PeriodFormatter createPeriodFormatter(String hourText, String minuteText, String secondText) {
         return new PeriodFormatterBuilder()
                 .appendHours()
                 .appendSeparator(hourText)
@@ -35,6 +35,7 @@ public class DateTimeTools {
                 .appendMinutes()
                 .appendSeparator(minuteText)
                 .appendSecondsWithOptionalMillis()
+                .appendSuffix(secondText)
                 .toFormatter();
     }
 
