@@ -7,12 +7,36 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.joda.time.PeriodType;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 
 public class DateTimeTools {
 
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd";
+    private static final PeriodFormatter TIME_FORMAT_COLON = createPeriodFormatter(":", ":");
+    private static final PeriodFormatter TIME_FORMAT_TEXT = createPeriodFormatter("h", "m");
+
+    /**
+     * Create a Period Formatter with the given delimiters
+     *
+     * @param hourText
+     * @param minuteText
+     * @param secondText
+     * @return
+     */
+    private static PeriodFormatter createPeriodFormatter(String hourText, String minuteText) {
+        return new PeriodFormatterBuilder()
+                .appendHours()
+                .appendSeparator(hourText)
+                .minimumPrintedDigits(2)
+                .appendMinutes()
+                .appendSeparator(minuteText)
+                .appendSecondsWithOptionalMillis()
+                .toFormatter();
+    }
 
     private DateTimeTools() {
         throw new UnsupportedOperationException("Class cannot be instantiated");
@@ -62,31 +86,71 @@ public class DateTimeTools {
         return fmt.print(convertDate);
     }
 
-    public static String getDuration(Date start, Date end) {
+    /**
+     * Get the duration between two Java Dates
+     *
+     * @param start
+     * @param end
+     * @return
+     */
+    public static long getDuration(Date start, Date end) {
         return getDuration(new DateTime(start), new DateTime(end));
-    }
-
-    public static String getDuration(Long start, Long end) {
-        return getDuration(new DateTime(start), new DateTime(end));
-    }
-
-    public static String getDuration(DateTime start, DateTime end) {
-        Interval interval = new Interval(start, end);
-        Period period = interval.toPeriod();
-        period = period.normalizedStandard();
-        return String.format("%02d:%02d:%02d", period.getHours(), period.getMinutes(), period.getSeconds());
     }
 
     /**
-     * Format the duration passed as ?h?m format
+     * Get the duration between two Long Dates
      *
-     * @param seconds
+     * @param start
+     * @param end
      * @return
      */
-    public static String formatDuration(int seconds) {
-        Period period = new Period(seconds * 1000);
+    public static long getDuration(Long start, Long end) {
+        return getDuration(new DateTime(start), new DateTime(end));
+    }
+
+    /**
+     * Get the duration between tow Joda Dates
+     *
+     * @param start
+     * @param end
+     * @return
+     */
+    public static long getDuration(DateTime start, DateTime end) {
+        Interval interval = new Interval(start, end);
+        return interval.toDurationMillis();
+    }
+
+    /**
+     * Format the duration in milliseconds as ?:?:? format
+     *
+     * @param milliseconds
+     * @return
+     */
+    public static String formatDurationColon(long milliseconds) {
+        return formatDuration(milliseconds, TIME_FORMAT_COLON);
+    }
+
+    /**
+     * Format the duration in milliseconds as ?h?m?s format
+     *
+     * @param milliseconds
+     * @return
+     */
+    public static String formatDurationText(long milliseconds) {
+        return formatDuration(milliseconds, TIME_FORMAT_TEXT);
+    }
+
+    /**
+     * Format the duration in milliseconds in the given format
+     *
+     * @param milliseconds
+     * @param format
+     * @return
+     */
+    public static String formatDuration(long milliseconds, PeriodFormatter format) {
+        Period period = new Period(milliseconds, PeriodType.time());
         period = period.normalizedStandard();
-        return String.format("%02dh%02dm", period.getHours(), period.getMinutes(), period.getSeconds());
+        return format.print(period);
     }
 
     /**

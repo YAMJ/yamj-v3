@@ -18,6 +18,7 @@ public class DateTimeToolsTest {
     // Expected results
     private static final String EXP_DD_MM_YYYY = "25-12-2013";
     private static final String EXP_YYYY_MM_DD = "2013-12-25";
+    private static final long EXP_1H_1M_1S = 3661000;
 
     public DateTimeToolsTest() {
         cal.clear();
@@ -90,10 +91,10 @@ public class DateTimeToolsTest {
     @Test
     public void testGetDuration_Date_Date() {
         System.out.println("getDuration");
+        long expResult = EXP_1H_1M_1S * 1000;
         Date start = dateJava;
-        Date end = new Date(dateJava.getTime() + 3661000);
-        String expResult = "01:01:01";
-        String result = DateTimeTools.getDuration(start, end);
+        Date end = new Date(dateJava.getTime() + expResult);
+        long result = DateTimeTools.getDuration(start, end);
         assertEquals(expResult, result);
     }
 
@@ -103,10 +104,10 @@ public class DateTimeToolsTest {
     @Test
     public void testGetDuration_Long_Long() {
         System.out.println("getDuration");
-        Long start = dateTime.getMillis();
-        Long end = dateTime.getMillis() + 3661000;
-        String expResult = "01:01:01";
-        String result = DateTimeTools.getDuration(start, end);
+        long start = dateTime.getMillis();
+        long end = dateTime.getMillis() + 3661000;
+        long expResult = end - start;
+        long result = DateTimeTools.getDuration(start, end);
         assertEquals(expResult, result);
     }
 
@@ -118,20 +119,8 @@ public class DateTimeToolsTest {
         System.out.println("getDuration");
         DateTime start = dateTime;
         DateTime end = dateTime.plusHours(1).plusMinutes(1).plusSeconds(1);
-        String expResult = "01:01:01";
-        String result = DateTimeTools.getDuration(start, end);
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of formatDuration method, of class DateTimeTools.
-     */
-    @Test
-    public void testFormatDuration() {
-        System.out.println("formatDuration");
-        int seconds = 3660;
-        String expResult = "01h01m";
-        String result = DateTimeTools.formatDuration(seconds);
+        long expResult = (3600 + 60 + 1) * 1000;
+        long result = DateTimeTools.getDuration(start, end);
         assertEquals(expResult, result);
     }
 
@@ -144,6 +133,36 @@ public class DateTimeToolsTest {
         String runtime = "1hr30";
         int expResult = 90;
         int result = DateTimeTools.processRuntime(runtime);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of formatDurationColon method, of class DateTimeTools.
+     */
+    @Test
+    public void testFormatDurationColon() {
+        System.out.println("formatDurationColon");
+        String expResult = "1:01:01";
+        String result = DateTimeTools.formatDurationColon(EXP_1H_1M_1S);
+        assertEquals(expResult, result);
+
+        expResult = "1:01:01.001";
+        result = DateTimeTools.formatDurationColon(EXP_1H_1M_1S + 1);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of formatDurationText method, of class DateTimeTools.
+     */
+    @Test
+    public void testFormatDurationText() {
+        System.out.println("formatDurationText");
+        String expResult = "1h01m01";
+        String result = DateTimeTools.formatDurationText(EXP_1H_1M_1S);
+        assertEquals(expResult, result);
+
+        expResult = "1h01m01.001";
+        result = DateTimeTools.formatDurationText(EXP_1H_1M_1S + 1);
         assertEquals(expResult, result);
     }
 }
