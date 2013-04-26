@@ -55,7 +55,7 @@ public class ScannerManagementImpl implements ScannerManagement {
 
         ExitType status = scan(directory);
 
-        LOG.info("{}", stats.generateStats());
+        LOG.info("{}", stats.generateStatistics(Boolean.TRUE));
         LOG.info("Scanning completed.");
 
         LOG.info("Exiting with status {}", status);
@@ -88,10 +88,10 @@ public class ScannerManagementImpl implements ScannerManagement {
 
         for (File file : currentFileList) {
             if (file.isDirectory()) {
-                stats.inc(StatType.DIRECTORY);
+                stats.increment(StatType.DIRECTORY);
                 scan(file);
             } else {
-                stats.inc(StatType.FILE);
+                stats.increment(StatType.FILE);
                 sdDto.addStageFile(new StageFileDTO(file));
             }
         }

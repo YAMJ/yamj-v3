@@ -86,8 +86,10 @@ public class WatcherManagementImpl implements ScannerManagement {
 
         ExitType status = SUCCESS;
         for (Library library : libraryCollection.getLibraries()) {
+            library.getStatistics().setTimeStart(System.currentTimeMillis());
             status = scan(library);
-            LOG.info("{}", library.getStatistics().generateStats());
+            library.getStatistics().setTimeEnd(System.currentTimeMillis());
+            LOG.info("{}", library.getStatistics().generateStatistics(Boolean.TRUE));
             LOG.info("Scanning completed.");
         }
 
@@ -176,14 +178,14 @@ public class WatcherManagementImpl implements ScannerManagement {
         if (dirEnd == DirectoryType.BLURAY || dirEnd == DirectoryType.DVD) {
             // Don't scan BLURAY or DVD structures
             LOG.info("Skipping directory '{}' as its a {} type", directory.getAbsolutePath(), dirEnd);
-            library.getStatistics().inc(dirEnd == DirectoryType.BLURAY ? StatType.BLURAY : StatType.DVD);
+            library.getStatistics().increment(dirEnd == DirectoryType.BLURAY ? StatType.BLURAY : StatType.DVD);
             stageDir = null;
         } else {
             stageDir = new StageDirectoryDTO();
             stageDir.setPath(directory.getAbsolutePath());
             stageDir.setDate(directory.lastModified());
 
-            library.getStatistics().inc(StatType.DIRECTORY);
+            library.getStatistics().increment(StatType.DIRECTORY);
 
             List<File> currentFileList = Arrays.asList(directory.listFiles());
             for (File file : currentFileList) {
@@ -197,7 +199,7 @@ public class WatcherManagementImpl implements ScannerManagement {
                     }
                 } else {
                     stageDir.addStageFile(scanFile(file));
-                    library.getStatistics().inc(StatType.FILE);
+                    library.getStatistics().increment(StatType.FILE);
                 }
             }
         }
