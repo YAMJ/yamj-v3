@@ -4,7 +4,7 @@ import org.hibernate.annotations.Index;
 
 import com.moviejukebox.core.database.model.dto.CreditDTO;
 import com.moviejukebox.core.database.model.type.OverrideFlag;
-import com.moviejukebox.core.database.model.type.StatusType;
+import com.moviejukebox.common.type.StatusType;
 import com.moviejukebox.core.hibernate.usertypes.EnumStringUserType;
 import java.io.Serializable;
 import java.util.*;

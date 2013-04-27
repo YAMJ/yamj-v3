@@ -4,7 +4,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import org.hibernate.annotations.ForeignKey;
 
-import com.moviejukebox.core.database.model.type.StatusType;
+import com.moviejukebox.common.type.StatusType;
 import org.hibernate.annotations.Type;
 
 import java.util.HashSet;

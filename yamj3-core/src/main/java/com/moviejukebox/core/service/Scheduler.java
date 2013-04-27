@@ -4,7 +4,7 @@ import com.moviejukebox.core.database.dao.MediaDao;
 import com.moviejukebox.core.database.dao.StagingDao;
 import com.moviejukebox.core.database.model.dto.QueueDTO;
 import com.moviejukebox.core.database.model.type.FileType;
-import com.moviejukebox.core.database.model.type.StatusType;
+import com.moviejukebox.common.type.StatusType;
 import com.moviejukebox.core.service.mediaimport.MediaImportService;
 import com.moviejukebox.core.service.moviedb.MovieDatabaseRunner;
 import com.moviejukebox.core.service.moviedb.MovieDatabaseService;

@@ -5,7 +5,7 @@ import com.moviejukebox.core.database.model.type.ArtworkType;
 import com.moviejukebox.core.database.dao.MediaDao;
 import com.moviejukebox.core.database.dao.StagingDao;
 import com.moviejukebox.core.database.model.*;
-import com.moviejukebox.core.database.model.type.StatusType;
+import com.moviejukebox.common.type.StatusType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

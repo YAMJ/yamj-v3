@@ -4,7 +4,7 @@ import com.moviejukebox.core.database.model.Library;
 import com.moviejukebox.core.database.model.StageDirectory;
 import com.moviejukebox.core.database.model.StageFile;
 import com.moviejukebox.core.database.model.type.FileType;
-import com.moviejukebox.core.database.model.type.StatusType;
+import com.moviejukebox.common.type.StatusType;
 import com.moviejukebox.core.hibernate.ExtendedHibernateDaoSupport;
 import java.sql.SQLException;
 import org.hibernate.CacheMode;

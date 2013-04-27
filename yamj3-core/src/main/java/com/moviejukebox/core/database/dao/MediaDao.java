@@ -6,7 +6,7 @@ import com.moviejukebox.core.database.model.Series;
 import com.moviejukebox.core.database.model.VideoData;
 import com.moviejukebox.core.database.model.dto.QueueDTO;
 import com.moviejukebox.core.database.model.dto.QueueDTOComparator;
-import com.moviejukebox.core.database.model.type.StatusType;
+import com.moviejukebox.common.type.StatusType;
 import com.moviejukebox.core.hibernate.ExtendedHibernateDaoSupport;
 import java.sql.SQLException;
 import java.util.ArrayList;

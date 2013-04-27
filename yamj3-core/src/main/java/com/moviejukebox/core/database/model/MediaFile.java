@@ -1,6 +1,6 @@
 package com.moviejukebox.core.database.model;
 
-import com.moviejukebox.core.database.model.type.StatusType;
+import com.moviejukebox.common.type.StatusType;
 import javax.persistence.Column;
 import org.hibernate.annotations.Type;
 

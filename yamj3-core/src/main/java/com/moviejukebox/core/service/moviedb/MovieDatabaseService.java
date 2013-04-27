@@ -7,7 +7,7 @@ import com.moviejukebox.core.database.model.*;
 import com.moviejukebox.core.database.model.dto.CreditDTO;
 import com.moviejukebox.core.database.model.dto.QueueDTO;
 import com.moviejukebox.core.database.model.type.JobType;
-import com.moviejukebox.core.database.model.type.StatusType;
+import com.moviejukebox.common.type.StatusType;
 import com.moviejukebox.core.tools.PropertyTools;
 import java.util.HashMap;
 import java.util.HashSet;

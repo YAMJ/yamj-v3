@@ -9,7 +9,7 @@ import com.moviejukebox.core.database.dao.StagingDao;
 import com.moviejukebox.core.database.model.Library;
 import com.moviejukebox.core.database.model.StageDirectory;
 import com.moviejukebox.core.database.model.StageFile;
-import com.moviejukebox.core.database.model.type.StatusType;
+import com.moviejukebox.common.type.StatusType;
 import java.util.Date;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
