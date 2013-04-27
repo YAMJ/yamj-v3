@@ -82,7 +82,11 @@ public class Library implements Serializable {
      */
     public String getRelativeDir(File directory) {
         if (directory.getAbsolutePath().startsWith(importDTO.getBaseDirectory())) {
-            return directory.getAbsolutePath().substring(importDTO.getBaseDirectory().length() + 1);
+            if (directory.getAbsolutePath().length() > importDTO.getBaseDirectory().length()) {
+                return directory.getAbsolutePath().substring(importDTO.getBaseDirectory().length() + 1);
+            } else {
+                return "";
+            }
         } else {
             return directory.getAbsolutePath();
         }
