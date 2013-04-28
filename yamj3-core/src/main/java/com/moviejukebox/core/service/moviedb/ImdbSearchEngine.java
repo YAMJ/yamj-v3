@@ -1,4 +1,3 @@
-
 package com.moviejukebox.core.service.moviedb;
 
 import com.moviejukebox.core.tools.PropertyTools;
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Service;
 public class ImdbSearchEngine implements InitializingBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImdbSearchEngine.class);
-
     private static final String DEFAULT_SITE = "us";
     private static final String OBJECT_MOVIE = "movie";
     private static final String OBJECT_PERSON = "person";
@@ -34,15 +32,13 @@ public class ImdbSearchEngine implements InitializingBean {
     private static final String SEARCH_FIRST = "first";
     private static final String SEARCH_EXACT = "exact";
     private static final Map<String, ImdbSiteDataDefinition> MATCHES_DATA_PER_SITE = new HashMap<String, ImdbSiteDataDefinition>();
-
     @Autowired
     private PoolingHttpClient httpClient;
-    
     private String searchMatch;
     private boolean searchVariable;
     private ImdbSiteDataDefinition imdbSiteDef;
     private SearchEngineTools searchEngineTools;
-    
+
     static {
         MATCHES_DATA_PER_SITE.put("us", new ImdbSiteDataDefinition("http://www.imdb.com/", "UTF-8", "Director|Directed by", "Cast", "Release Date", "Runtime", "Aspect Ratio", "Country",
                 "Company", "Genre", "Quotes", "Plot", "Rated", "Certification", "Original Air Date", "Writer|Writing credits", "Tagline", "original title"));
@@ -72,17 +68,16 @@ public class ImdbSearchEngine implements InitializingBean {
         String site = PropertyTools.getProperty("imdb.site", DEFAULT_SITE);
         imdbSiteDef = MATCHES_DATA_PER_SITE.get(site);
         if (imdbSiteDef == null) {
-            LOGGER.warn("No site definition for " + site  + " using the default instead " + DEFAULT_SITE);
+            LOGGER.warn("No site definition for " + site + " using the default instead " + DEFAULT_SITE);
             site = DEFAULT_SITE;
             imdbSiteDef = MATCHES_DATA_PER_SITE.get(site);
         }
-        
+
         searchEngineTools = new SearchEngineTools(httpClient, site);
     }
 
     /**
-     * Retrieve the IMDb matching the specified movie name and year. This
-     * routine is based on a IMDb request.
+     * Retrieve the IMDb matching the specified movie name and year. This routine is based on a IMDb request.
      *
      * @param title
      * @param year
@@ -90,12 +85,11 @@ public class ImdbSearchEngine implements InitializingBean {
      * @return the IMDb id
      */
     public String getImdbId(String title, int year, boolean isTVShow) {
-        return getImdbId(title, year, (isTVShow?CATEGORY_TV:CATEGORY_MOVIE));
+        return getImdbId(title, year, (isTVShow ? CATEGORY_TV : CATEGORY_MOVIE));
     }
 
     /**
-     * Retrieve the IMDb matching the specified movie name and year. This
-     * routine is based on a IMDb request.
+     * Retrieve the IMDb matching the specified movie name and year. This routine is based on a IMDb request.
      *
      * @param title
      * @param year
@@ -109,7 +103,7 @@ public class ImdbSearchEngine implements InitializingBean {
             String imdbUrl;
             if (CATEGORY_TV.equals(categoryType)) {
                 // leave out the year
-                imdbUrl= searchEngineTools.searchURL(title, -1, "www.imdb.com/title");
+                imdbUrl = searchEngineTools.searchURL(title, -1, "www.imdb.com/title");
             } else {
                 imdbUrl = searchEngineTools.searchURL(title, year, "www.imdb.com/title");
             }
@@ -172,7 +166,7 @@ public class ImdbSearchEngine implements InitializingBean {
         if (StringUtils.isBlank(url)) {
             return null;
         }
-        
+
         String imdbId = StringUtils.EMPTY;
         int beginIndex = url.indexOf(objectType.equals(OBJECT_MOVIE) ? "/title/tt" : "/name/nm");
         if (beginIndex > -1) {
@@ -194,8 +188,7 @@ public class ImdbSearchEngine implements InitializingBean {
     }
 
     /**
-     * Retrieve the IMDb matching the specified movie name and year. This
-     * routine is base on a IMDb request.
+     * Retrieve the IMDb matching the specified movie name and year. This routine is base on a IMDb request.
      */
     private String getImdbIdFromImdb(String title, int year, String objectType, String categoryType) {
         StringBuilder sb = new StringBuilder(imdbSiteDef.getSite());
@@ -236,8 +229,8 @@ public class ImdbSearchEngine implements InitializingBean {
 
         // Check if this is an exact match (we got a movie page instead of a results list)
         Pattern titleregex = imdbSiteDef.getPersonRegex();
-        if (objectType.equals(OBJECT_MOVIE)){
-            titleregex= imdbSiteDef.getTitleRegex();
+        if (objectType.equals(OBJECT_MOVIE)) {
+            titleregex = imdbSiteDef.getTitleRegex();
         }
 
         Matcher titlematch = titleregex.matcher(xml);
@@ -257,7 +250,7 @@ public class ImdbSearchEngine implements InitializingBean {
             formattedYear = null;
             formattedExact = null;
         } else if (StringUtils.isNotBlank(searchName)) {
-            if (year>0 && searchName.endsWith(")") && searchName.contains("(")) {
+            if (year > 0 && searchName.endsWith(")") && searchName.contains("(")) {
                 searchName = searchName.substring(0, searchName.lastIndexOf('(') - 1);
                 formattedName = searchName.toLowerCase();
                 formattedYear = "(" + year + ")";
@@ -276,7 +269,7 @@ public class ImdbSearchEngine implements InitializingBean {
                 sb.append(title);
             }
             formattedName = sb.toString().toLowerCase();
-            if (year > 0 ) {
+            if (year > 0) {
                 formattedYear = "(" + year + ")";
                 formattedExact = formattedName + "</a> " + formattedYear;
             } else {
@@ -299,7 +292,7 @@ public class ImdbSearchEngine implements InitializingBean {
             } else {
                 // regular match: name and year match independent from each other
                 int nameIndex = searchResult.toLowerCase().indexOf(formattedName);
-                if (nameIndex != -1 ) {
+                if (nameIndex != -1) {
                     foundMatch = (searchResult.indexOf(formattedYear) > nameIndex);
                 }
             }
@@ -317,8 +310,8 @@ public class ImdbSearchEngine implements InitializingBean {
             }
         }
 
-       // alternate search for person ID
-       if (objectType.equals(OBJECT_PERSON)) {
+        // alternate search for person ID
+        if (objectType.equals(OBJECT_PERSON)) {
             String firstPersonId = HTMLTools.extractTag(HTMLTools.extractTag(xml, "<table><tr> <td valign=\"top\">", "</td></tr></table>"), "<a href=\"/name/", "/\"");
             if (StringUtils.isBlank(firstPersonId)) {
                 // alternate approach

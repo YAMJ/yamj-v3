@@ -74,8 +74,7 @@ public class StringTools {
     }
 
     /**
-     * Append a string to the end of a path ensuring that there are the correct
-     * number of File.separators
+     * Append a string to the end of a path ensuring that there are the correct number of File.separators
      *
      * @param basePath
      * @param additionalPath
@@ -135,8 +134,7 @@ public class StringTools {
     }
 
     /**
-     * Check that the passed string is not longer than the required length and
-     * trim it if necessary.
+     * Check that the passed string is not longer than the required length and trim it if necessary.
      *
      * @param sourceString
      * @param requiredLength
@@ -147,15 +145,12 @@ public class StringTools {
     }
 
     /**
-     * Check that the passed string is not longer than the required length and
-     * trim it if necessary
+     * Check that the passed string is not longer than the required length and trim it if necessary
      *
      * @param sourceString The string to check
      * @param requiredLength The required length (Maximum)
-     * @param trimToWord Trim the source string to the last space to avoid
-     * partial words
-     * @param endingSuffix The ending to append if the string is longer than the
-     * required length
+     * @param trimToWord Trim the source string to the last space to avoid partial words
+     * @param endingSuffix The ending to append if the string is longer than the required length
      * @return
      */
     public static String trimToLength(String sourceString, int requiredLength, boolean trimToWord, String endingSuffix) {
@@ -177,7 +172,7 @@ public class StringTools {
                 }
             }
         }
-        
+
         return changedString;
     }
 
@@ -223,18 +218,20 @@ public class StringTools {
         }
         return keywords;
     }
-    
+
     public static int toYear(String string) {
         if (StringUtils.isBlank(string)) {
-           return -1;
+            return -1;
         }
         if (!StringUtils.isNumeric(string)) {
             return -1;
         }
-        
+
         try {
             int year = Integer.parseInt(string);
-            if (year > 0) return year;
+            if (year > 0) {
+                return year;
+            }
         } catch (Exception ignore) {
             // ignore this error
         }

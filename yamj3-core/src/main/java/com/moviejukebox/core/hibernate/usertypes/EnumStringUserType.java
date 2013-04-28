@@ -14,7 +14,7 @@ import org.hibernate.usertype.UserType;
  * User type for enumerations.<br>
  * <p>
  * Example Mapping: inline typedef<br>
- * <code> 
+ * <code>
  * &lt;property name=&quot;suit&quot;&gt;
  *   &lt;type name=&quot;EnumStringUserType&quot;&gt;
  *     &lt;param name=&quot;enumClassName&quot;&gt;com.company.project.Suit&lt;/param&gt;
@@ -27,7 +27,7 @@ import org.hibernate.usertype.UserType;
  * &lt;typedef name=&quot;suit&quot; class=&quot;EnumStringUserType&quot;&gt;
  *   &lt;param name=&quot;enumClassName&quot;&gt;com.company.project.Suit&lt;/param&gt;
  * &lt;/typedef&gt;
- * 
+ *
  * &lt;class ...&gt;
  *   &lt;property name='suit' type='suit'/&gt;
  * &lt;/class&gt;
@@ -35,139 +35,135 @@ import org.hibernate.usertype.UserType;
  */
 public class EnumStringUserType<E extends Enum<E>> implements UserType, ParameterizedType {
 
-	/**
-	 * Holds the SQL types
-	 */
-	private static final int[] SQL_TYPES = {Types.VARCHAR};
+    /**
+     * Holds the SQL types
+     */
+    private static final int[] SQL_TYPES = {Types.VARCHAR};
+    /**
+     * Holds the enum class
+     */
+    @SuppressWarnings("rawtypes")
+    private Class<Enum> enumClass;
 
-	/**
-	 * Holds the enum class
-	 */
-	@SuppressWarnings("rawtypes")
-	private Class<Enum> enumClass;
-
-	/**
-	 * @see ParameterizedType#setParameterValues(Properties)
-	 */
+    /**
+     * @see ParameterizedType#setParameterValues(Properties)
+     */
     @Override
-	@SuppressWarnings({"unchecked","rawtypes"})
-	public void setParameterValues(final Properties parameters) {
-		String enumClassName = parameters.getProperty("enumClassName");
-		try {
-			this.enumClass = (Class<Enum>)Class.forName(enumClassName);
-		}
-		catch (ClassNotFoundException cnfe) {
-			throw new HibernateException("Enum class not found", cnfe);
-		}
-	}
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public void setParameterValues(final Properties parameters) {
+        String enumClassName = parameters.getProperty("enumClassName");
+        try {
+            this.enumClass = (Class<Enum>) Class.forName(enumClassName);
+        } catch (ClassNotFoundException cnfe) {
+            throw new HibernateException("Enum class not found", cnfe);
+        }
+    }
 
-	/**
-	 * @see UserType#returnedClass()
-	 */
+    /**
+     * @see UserType#returnedClass()
+     */
     @Override
-	@SuppressWarnings("rawtypes")
-	public Class returnedClass() {
-		return this.enumClass;
-	}
+    @SuppressWarnings("rawtypes")
+    public Class returnedClass() {
+        return this.enumClass;
+    }
 
-	/**
-	 * @see UserType#sqlTypes()
-	 */
+    /**
+     * @see UserType#sqlTypes()
+     */
     @Override
-	public int[] sqlTypes() {
-		return SQL_TYPES;
-	}
+    public int[] sqlTypes() {
+        return SQL_TYPES;
+    }
 
-	/**
-	 * @see UserType#replace(Object, Object, Object)
-	 */
+    /**
+     * @see UserType#replace(Object, Object, Object)
+     */
     @Override
-	public Object replace(final Object original, final Object target, final Object owner) throws HibernateException {
-		return original;
-	}
+    public Object replace(final Object original, final Object target, final Object owner) throws HibernateException {
+        return original;
+    }
 
-	/**
-	 * @see UserType#assemble(Serializable, Object)
-	 */
+    /**
+     * @see UserType#assemble(Serializable, Object)
+     */
     @Override
-	public Object assemble(final Serializable cached, final Object owner) throws HibernateException {
-		return cached;
-	}
+    public Object assemble(final Serializable cached, final Object owner) throws HibernateException {
+        return cached;
+    }
 
-	/**
-	 * @see UserType#disassemble(Object)
-	 */
+    /**
+     * @see UserType#disassemble(Object)
+     */
     @Override
-	public Serializable disassemble(final Object value) throws HibernateException {
-		return (Serializable)value;
-	}
+    public Serializable disassemble(final Object value) throws HibernateException {
+        return (Serializable) value;
+    }
 
-	/**
-	 * @see UserType#deepCopy(Object)
-	 */
+    /**
+     * @see UserType#deepCopy(Object)
+     */
     @Override
-	public Object deepCopy(final Object value) throws HibernateException {
-		return value;
-	}
+    public Object deepCopy(final Object value) throws HibernateException {
+        return value;
+    }
 
-	/**
-	 * @see UserType#equals(Object, Object)
-	 */
+    /**
+     * @see UserType#equals(Object, Object)
+     */
     @Override
-	public boolean equals(final Object x, final Object y) throws HibernateException {
-		if ( x == y ) {
-			return true;
-		}
-		if ( null == x || null == y ) {
-			return false;
-		}
-		return x.equals(y);
-	}
+    public boolean equals(final Object x, final Object y) throws HibernateException {
+        if (x == y) {
+            return true;
+        }
+        if (null == x || null == y) {
+            return false;
+        }
+        return x.equals(y);
+    }
 
-	/**
-	 * @see UserType#hashCode(Object)
-	 */
+    /**
+     * @see UserType#hashCode(Object)
+     */
     @Override
-	public int hashCode(final Object x) throws HibernateException {
-		return x.hashCode();
-	}
+    public int hashCode(final Object x) throws HibernateException {
+        return x.hashCode();
+    }
 
-	/**
-	 * @see UserType#isMutable()
-	 */
+    /**
+     * @see UserType#isMutable()
+     */
     @Override
-	public boolean isMutable() {
-		return false;
-	}
+    public boolean isMutable() {
+        return false;
+    }
 
-	/**
-	 * @see UserType#nullSafeGet(ResultSet, String[], Object)
-	 */
+    /**
+     * @see UserType#nullSafeGet(ResultSet, String[], Object)
+     */
     @Override
-	@SuppressWarnings("unchecked")
-	public Object nullSafeGet(final ResultSet rs, final String[] names, final Object owner) throws HibernateException,
-		SQLException
-	{
-		String name = rs.getString(names[0]);
-		Enum<?> result = null;
-		if ( !rs.wasNull() ) {
-			result = Enum.valueOf(this.enumClass, name);
-		}
-		return result;
-	}
+    @SuppressWarnings("unchecked")
+    public Object nullSafeGet(final ResultSet rs, final String[] names, final Object owner) throws HibernateException,
+            SQLException {
+        String name = rs.getString(names[0]);
+        Enum<?> result = null;
+        if (!rs.wasNull()) {
+            result = Enum.valueOf(this.enumClass, name);
+        }
+        return result;
+    }
 
-	/**
-	 * @see UserType#nullSafeSet(PreparedStatement, Object, int)
-	 */
+    /**
+     * @see UserType#nullSafeSet(PreparedStatement, Object, int)
+     */
     @Override
-	@SuppressWarnings("rawtypes")
-	public void nullSafeSet(final PreparedStatement st, final Object value, final int index) throws HibernateException,
-		SQLException
-	{
-		if ( null == value ) {
-			st.setNull(index, Types.VARCHAR);
-		} else {
-			st.setString(index, ((Enum)value).name());
-		}
-	}
+    @SuppressWarnings("rawtypes")
+    public void nullSafeSet(final PreparedStatement st, final Object value, final int index) throws HibernateException,
+            SQLException {
+        if (null == value) {
+            st.setNull(index, Types.VARCHAR);
+        } else {
+            st.setString(index, ((Enum) value).name());
+        }
+    }
 }

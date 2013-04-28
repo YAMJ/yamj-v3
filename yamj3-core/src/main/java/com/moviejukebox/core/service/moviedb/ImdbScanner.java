@@ -15,7 +15,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
 
     public static final String IMDB_SCANNER_ID = "imdb";
     private static final Logger LOGGER = LoggerFactory.getLogger(ImdbScanner.class);
-
     @Autowired
     private PoolingHttpClient httpClient;
     @Autowired
@@ -73,7 +72,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
             LOGGER.debug("IMDb id not available : " + videoData.getTitle());
             return ScanResult.MISSING_ID;
         }
-        
+
         // TODO Auto-generated method stub
         return ScanResult.ERROR;
     }
@@ -89,5 +88,4 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
         // TODO Auto-generated method stub
         return ScanResult.ERROR;
     }
-
 }

@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 public class MovieDatabaseRunner implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MovieDatabaseRunner.class);
-
     private final BlockingQueue<QueueDTO> queue;
     private final MovieDatabaseService controller;
 

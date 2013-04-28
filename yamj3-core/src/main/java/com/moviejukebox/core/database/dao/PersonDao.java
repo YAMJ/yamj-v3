@@ -22,7 +22,7 @@ public class PersonDao extends ExtendedHibernateDaoSupport {
                 criteria.add(Restrictions.naturalId().set("name", name));
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
-                return (Person)criteria.uniqueResult();
+                return (Person) criteria.uniqueResult();
             }
         });
     }

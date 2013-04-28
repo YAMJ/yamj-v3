@@ -17,116 +17,116 @@ public abstract class ExtendedHibernateDaoSupport extends HibernateDaoSupport im
     public void setExtendedSessionFactory(SessionFactory sessionFactory) {
         super.setSessionFactory(sessionFactory);
     }
-    
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected ExtendedHibernateTemplate createHibernateTemplate(SessionFactory sessionFactory) {
-		return new ExtendedHibernateTemplate(sessionFactory);
-	}
 
-	/**
-	 * Get the extended hibernate template.
-	 * 
-	 * @return the hibernate template
-	 */
-	public final ExtendedHibernateTemplate getExtendedHibernateTemplate() {
-		return (ExtendedHibernateTemplate)this.getHibernateTemplate();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-	public final void storeEntity(final Object entity) {
-		this.getHibernateTemplate().saveOrUpdate(entity);
-	}
+    protected ExtendedHibernateTemplate createHibernateTemplate(SessionFactory sessionFactory) {
+        return new ExtendedHibernateTemplate(sessionFactory);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
+    /**
+     * Get the extended hibernate template.
+     *
+     * @return the hibernate template
+     */
+    public final ExtendedHibernateTemplate getExtendedHibernateTemplate() {
+        return (ExtendedHibernateTemplate) this.getHibernateTemplate();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-	@SuppressWarnings("rawtypes")
-	public void storeAll(final Collection entities) {
-		this.getHibernateTemplate().saveOrUpdateAll(entities);
-	}
+    public final void storeEntity(final Object entity) {
+        this.getHibernateTemplate().saveOrUpdate(entity);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-	public final void saveEntity(final Object object) {
-		this.getHibernateTemplate().save(object);
-	}
+    @SuppressWarnings("rawtypes")
+    public void storeAll(final Collection entities) {
+        this.getHibernateTemplate().saveOrUpdateAll(entities);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-	public final void updateEntity(final Object entity) {
-		this.getHibernateTemplate().update(entity);
-	}
+    public final void saveEntity(final Object object) {
+        this.getHibernateTemplate().save(object);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-	public final void deleteEntity(final Object entity) {
-		this.getHibernateTemplate().delete(entity);
-	}
+    public final void updateEntity(final Object entity) {
+        this.getHibernateTemplate().update(entity);
+    }
 
-	/**
-	 * Convert row object to a string.
-	 * 
-	 * @param rowElement
-	 * @return <code>String</code>
-	 */
-	protected String convertRowElementToString(Object rowElement) {
-		if ( rowElement == null ) {
-			return null;
-		} else if ( rowElement instanceof String ) {
-			return (String)rowElement;
-		} else {
-			return rowElement.toString();
-		}
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final void deleteEntity(final Object entity) {
+        this.getHibernateTemplate().delete(entity);
+    }
 
-	/**
-	 * Convert row object to Integer.
-	 * 
-	 * @param rowElement
-	 * @return <code>Integer</code>
-	 */
-	protected Integer convertRowElementToInteger(Object rowElement) {
-		if ( rowElement == null ) {
-			return Integer.valueOf(0);
-		} else if ( rowElement instanceof BigDecimal ) {
-			return (Integer)rowElement;
-		} else {
-			return new Integer(rowElement.toString());
-		}
-	}
+    /**
+     * Convert row object to a string.
+     *
+     * @param rowElement
+     * @return <code>String</code>
+     */
+    protected String convertRowElementToString(Object rowElement) {
+        if (rowElement == null) {
+            return null;
+        } else if (rowElement instanceof String) {
+            return (String) rowElement;
+        } else {
+            return rowElement.toString();
+        }
+    }
 
-	/**
-	 * Convert row object to Long.
-	 * 
-	 * @param rowElement
-	 * @return <code>Long</code>
-	 */
-	protected Long convertRowElementToLong(Object rowElement) {
-		if ( rowElement == null ) {
-			return Long.valueOf(0);
-		} else if ( rowElement instanceof BigDecimal ) {
-			return (Long)rowElement;
-		} else {
-			return new Long(rowElement.toString());
-		}
-	}
+    /**
+     * Convert row object to Integer.
+     *
+     * @param rowElement
+     * @return <code>Integer</code>
+     */
+    protected Integer convertRowElementToInteger(Object rowElement) {
+        if (rowElement == null) {
+            return Integer.valueOf(0);
+        } else if (rowElement instanceof BigDecimal) {
+            return (Integer) rowElement;
+        } else {
+            return new Integer(rowElement.toString());
+        }
+    }
+
+    /**
+     * Convert row object to Long.
+     *
+     * @param rowElement
+     * @return <code>Long</code>
+     */
+    protected Long convertRowElementToLong(Object rowElement) {
+        if (rowElement == null) {
+            return Long.valueOf(0);
+        } else if (rowElement instanceof BigDecimal) {
+            return (Long) rowElement;
+        } else {
+            return new Long(rowElement.toString());
+        }
+    }
 
     /**
      * Convert row object to date.
-     * 
+     *
      * @param rowElement
      * @return
      */
@@ -134,7 +134,7 @@ public abstract class ExtendedHibernateDaoSupport extends HibernateDaoSupport im
         if (rowElement == null) {
             return null;
         } else if (rowElement instanceof Date) {
-            return (Date)rowElement;
+            return (Date) rowElement;
         } else {
             // TODO invalid date
             return null;
@@ -143,7 +143,7 @@ public abstract class ExtendedHibernateDaoSupport extends HibernateDaoSupport im
 
     /**
      * Convert row object to date.
-     * 
+     *
      * @param rowElement
      * @return
      */
@@ -151,26 +151,26 @@ public abstract class ExtendedHibernateDaoSupport extends HibernateDaoSupport im
         if (rowElement == null) {
             return null;
         } else if (rowElement instanceof Timestamp) {
-            return (Timestamp)rowElement;
+            return (Timestamp) rowElement;
         } else {
             // TODO invalid ttimestamp
             return null;
         }
     }
 
-	/**
-	 * Convert row object to big decimal.
-	 * 
-	 * @param rowElement
-	 * @return <code>BigDecimal</code>
-	 */
-	protected BigDecimal convertRowElementToBigDecimal(Object rowElement) {
-		if ( rowElement == null ) {
-			return BigDecimal.ZERO;
-		} else if ( rowElement instanceof BigDecimal ) {
-			return (BigDecimal)rowElement;
-		} else {
-			return new BigDecimal(rowElement.toString());
-		}
-	}
+    /**
+     * Convert row object to big decimal.
+     *
+     * @param rowElement
+     * @return <code>BigDecimal</code>
+     */
+    protected BigDecimal convertRowElementToBigDecimal(Object rowElement) {
+        if (rowElement == null) {
+            return BigDecimal.ZERO;
+        } else if (rowElement instanceof BigDecimal) {
+            return (BigDecimal) rowElement;
+        } else {
+            return new BigDecimal(rowElement.toString());
+        }
+    }
 }

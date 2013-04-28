@@ -15,38 +15,31 @@ import org.hibernate.annotations.NaturalId;
 public class Person extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 660066902996412843L;
-
     @NaturalId(mutable = true)
     @Column(name = "name", nullable = false, length = 255)
     private String name;
-
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "birth_day")
     private Date birthDay;
-
     @Column(name = "birth_place", length = 255)
     private String birthPlace;
-
     @Column(name = "birth_name", length = 255)
     private String birthName;
-
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "death_day")
     private Date deathDay;
-
     @Lob
     @Column(name = "biography", length = 50000)
     private String biography;
-
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "person_ids", joinColumns = @JoinColumn(name = "person_id"))
+    @JoinTable(name = "person_ids", joinColumns =
+            @JoinColumn(name = "person_id"))
     @Fetch(value = FetchMode.SELECT)
-    @MapKeyColumn(name = "moviedb", length= 40)
+    @MapKeyColumn(name = "moviedb", length = 40)
     @Column(name = "moviedb_id", length = 40)
     private Map<String, String> personIds = new HashMap<String, String>(0);
 
     // GETTER and SETTER
-    
     public String getName() {
         return name;
     }
@@ -106,23 +99,28 @@ public class Person extends AbstractAuditable implements Serializable {
     public void setPersonId(String moviedb, String personId) {
         this.personIds.put(moviedb, personId);
     }
-    
-    // EQUALITY CHECKS
 
+    // EQUALITY CHECKS
     @Override
     public int hashCode() {
         final int PRIME = 17;
         int result = 1;
-        result = PRIME * result + (this.name == null?0:this.name.hashCode());
+        result = PRIME * result + (this.name == null ? 0 : this.name.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object other) {
-        if ( this == other ) return true;
-        if ( other == null ) return false;
-        if ( !(other instanceof Person) ) return false;
-        Person castOther = (Person)other;
+        if (this == other) {
+            return true;
+        }
+        if (other == null) {
+            return false;
+        }
+        if (!(other instanceof Person)) {
+            return false;
+        }
+        Person castOther = (Person) other;
         return StringUtils.equals(this.name, castOther.name);
     }
 }

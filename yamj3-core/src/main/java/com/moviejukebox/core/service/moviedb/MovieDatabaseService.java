@@ -23,17 +23,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class MovieDatabaseService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MovieDatabaseService.class);
-
     @Autowired
     private MediaDao mediaDao;
     @Autowired
     private PersonDao personDao;
     @Autowired
     private CommonDao commonDao;
-    
-    private HashMap<String,IMovieScanner> registeredMovieScanner = new HashMap<String,IMovieScanner>();
-    private HashMap<String,ISeriesScanner> registeredSeriesScanner = new HashMap<String,ISeriesScanner>();
-    
+    private HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<String, IMovieScanner>();
+    private HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<String, ISeriesScanner>();
+
     public void registerMovieScanner(IMovieScanner movieScanner) {
         registeredMovieScanner.put(movieScanner.getScannerName().toLowerCase(), movieScanner);
     }
@@ -45,10 +43,10 @@ public class MovieDatabaseService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void scanMetadata(QueueDTO queueElement) {
         if (queueElement == null) {
-            // nothing to 
+            // nothing to
             return;
         }
-        
+
         if (queueElement.isVideoDataElement()) {
             this.scanVideoData(queueElement.getId());
         } else if (queueElement.isSeriesElement()) {
@@ -57,7 +55,7 @@ public class MovieDatabaseService {
             LOGGER.error("No valid element for scanning metadata: " + queueElement);
         }
     }
-        
+
     private void scanVideoData(Long id) {
         VideoData videoData = mediaDao.getVideoData(id);
         LOGGER.debug("Scanning video data for: " + videoData.getTitle());
@@ -84,10 +82,10 @@ public class MovieDatabaseService {
 
         // SCAN ALTERNATE
         // TODO alternate scanning
-        
+
         if (!ScanResult.OK.equals(scanResult)) {
             movieScanner = null;
-            
+
             scannerName = PropertyTools.getProperty("yamj3.moviedb.scanner.movie.alternate", "");
             if (StringUtils.isNotBlank(scannerName)) {
                 movieScanner = registeredMovieScanner.get(scannerName);;
@@ -102,9 +100,9 @@ public class MovieDatabaseService {
                 }
             }
         }
-        
+
         // STORAGE
-        
+
         // update genres
         HashSet<Genre> genres = new HashSet<Genre>(0);
         for (Genre genre : videoData.getGenres()) {
@@ -120,7 +118,7 @@ public class MovieDatabaseService {
 
         // update cast and crew
         updateCastCrew(videoData);
-        
+
         // update video data and reset status
         if (ScanResult.OK.equals(scanResult)) {
             videoData.setStatus(StatusType.DONE);
@@ -144,17 +142,17 @@ public class MovieDatabaseService {
             mediaDao.updateEntity(series);
             return;
         }
-        
+
         return;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void processingError(QueueDTO queueElement) {
         if (queueElement == null) {
-            // nothing to 
+            // nothing to
             return;
         }
-        
+
         if (queueElement.isVideoDataElement()) {
             VideoData videoData = mediaDao.getVideoData(queueElement.getId());
             if (videoData != null) {
@@ -164,12 +162,12 @@ public class MovieDatabaseService {
         }
         // TODO series and season
     }
-    
+
     private void updateCastCrew(VideoData videoData) {
         for (CreditDTO dto : videoData.getCreditDTOS()) {
             Person person = null;
             CastCrew castCrew = null;
-            
+
             for (CastCrew credit : videoData.getCredits()) {
                 if ((credit.getJobType() == dto.getJobType()) && StringUtils.equalsIgnoreCase(dto.getName(), credit.getPerson().getName())) {
                     castCrew = credit;
@@ -182,7 +180,7 @@ public class MovieDatabaseService {
             if (person == null) {
                 person = personDao.getPerson(dto.getName());
             }
-            
+
             if (person != null) {
                 // update person id
                 if (StringUtils.isNotBlank(dto.getMoviedb()) && StringUtils.isNotBlank(dto.getMoviedbId())) {
@@ -198,13 +196,12 @@ public class MovieDatabaseService {
                 }
                 personDao.saveEntity(person);
             }
-            
+
             if (castCrew != null) {
                 // update role
-                if (StringUtils.isBlank(castCrew.getRole()) 
-                    && JobType.ACTOR.equals(castCrew.getJobType())
-                    && StringUtils.isNotBlank(dto.getRole())) 
-                {
+                if (StringUtils.isBlank(castCrew.getRole())
+                        && JobType.ACTOR.equals(castCrew.getJobType())
+                        && StringUtils.isNotBlank(dto.getRole())) {
                     castCrew.setRole(dto.getRole());
                     personDao.updateEntity(castCrew);
                 }

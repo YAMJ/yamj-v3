@@ -9,16 +9,14 @@ import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "boxed_set")
-public class BoxedSet  extends AbstractIdentifiable implements Serializable {
+public class BoxedSet extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 3074855702659953694L;
-
     @NaturalId(mutable = true)
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
     // GETTER and SETTER
-    
     public String getName() {
         return name;
     }
@@ -28,21 +26,26 @@ public class BoxedSet  extends AbstractIdentifiable implements Serializable {
     }
 
     // EQUALITY CHECKS
-    
     @Override
     public int hashCode() {
         final int PRIME = 17;
         int result = 1;
-        result = PRIME * result + (this.name == null?0:this.name.hashCode());
+        result = PRIME * result + (this.name == null ? 0 : this.name.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object other) {
-        if ( this == other ) return true;
-        if ( other == null ) return false;
-        if ( !(other instanceof BoxedSet) ) return false;
-        BoxedSet castOther = (BoxedSet)other;
+        if (this == other) {
+            return true;
+        }
+        if (other == null) {
+            return false;
+        }
+        if (!(other instanceof BoxedSet)) {
+            return false;
+        }
+        BoxedSet castOther = (BoxedSet) other;
         return StringUtils.equals(this.name, castOther.name);
     }
 }

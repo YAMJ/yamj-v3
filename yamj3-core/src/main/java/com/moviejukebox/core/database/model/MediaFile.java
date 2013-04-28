@@ -19,70 +19,55 @@ import org.hibernate.annotations.Parameter;
 
 @TypeDef(name = "statusType",
         typeClass = EnumStringUserType.class,
-        parameters = {@Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.StatusType")})
-
+        parameters = {
+    @Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.StatusType")})
 @Entity
 @Table(name = "mediafile")
 public class MediaFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 8411423609119475972L;
-
     @NaturalId
     @Column(name = "fileName", nullable = false, length = 500)
     private String fileName;
-
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "file_date")
     private Date fileDate;
-    
     @Column(name = "file_size")
     private long fileSize = -1;
-
     @Column(name = "part")
     private int part;
-
     @Column(name = "container", length = 30)
     private String container;
-    
     @Column(name = "codec", length = 50)
     private String codec;
-
     @Column(name = "bitrate")
     private int bitrate = -1;
-
     @Column(name = "fps")
     private float fps = 60;
-
     @Column(name = "width")
     private int width = -1;
-
     @Column(name = "height")
     private int height = -1;
-
     @Column(name = "aspect", length = 30)
     private String aspect;
-
     @Column(name = "runtime")
     private long runtime;
-
     @Column(name = "video_source", length = 30)
     private String videoSource;
-
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
-    
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinTable(name="mediafile_videodata",
-        joinColumns={@JoinColumn(name="mediafile_id")},
-        inverseJoinColumns={@JoinColumn(name="videodata_id")})
+    @JoinTable(name = "mediafile_videodata",
+            joinColumns = {
+        @JoinColumn(name = "mediafile_id")},
+            inverseJoinColumns = {
+        @JoinColumn(name = "videodata_id")})
     private Set<VideoData> videoDatas = new HashSet<VideoData>(0);
-    
     @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "mediaFile")
     private Set<StageFile> stageFiles = new HashSet<StageFile>(0);
 
     // GETTER and SETTER
-
     public String getFileName() {
         return fileName;
     }
@@ -218,23 +203,28 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     public void addStageFile(StageFile stageFile) {
         this.stageFiles.add(stageFile);
     }
-    
-    // EQUALITY CHECKS
 
+    // EQUALITY CHECKS
     @Override
     public int hashCode() {
         final int PRIME = 17;
         int result = 1;
-        result = PRIME * result + (this.fileName == null?0:this.fileName.hashCode());
+        result = PRIME * result + (this.fileName == null ? 0 : this.fileName.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object other) {
-        if ( this == other ) return true;
-        if ( other == null ) return false;
-        if ( !(other instanceof MediaFile) ) return false;
-        MediaFile castOther = (MediaFile)other;
+        if (this == other) {
+            return true;
+        }
+        if (other == null) {
+            return false;
+        }
+        if (!(other instanceof MediaFile)) {
+            return false;
+        }
+        MediaFile castOther = (MediaFile) other;
         return StringUtils.equals(this.fileName, castOther.fileName);
     }
 }

@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 public class Scheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
-    
     @Autowired
     private StagingDao stagingDao;
     @Autowired
@@ -35,61 +34,62 @@ public class Scheduler {
     @Autowired
     private MovieDatabaseService movieDatabaseController;
 
-    @Scheduled(initialDelay=10000, fixedDelay=30000)
+    @Scheduled(initialDelay = 10000, fixedDelay = 30000)
     public void processStageFiles() throws Exception {
         Long id = null;
-        
+
         // PROCESS VIDEOS
         do {
             try {
-    	        // find next stage file to process
-                id =  stagingDao.getNextStageFileId(FileType.VIDEO, StatusType.NEW, StatusType.UPDATED); 
+                // find next stage file to process
+                id = stagingDao.getNextStageFileId(FileType.VIDEO, StatusType.NEW, StatusType.UPDATED);
                 if (id != null) {
                     LOGGER.debug("Process stage file: " + id);
                     this.mediaImportService.processVideo(id);
-    	        }
+                }
             } catch (Exception error) {
                 LOGGER.error("Failed to process stage file", error);
                 try {
                     mediaImportService.processingError(id);
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
             }
-	    } while (id != null);
+        } while (id != null);
 
         // PROCESS IMAGES
 
         // PROCESS NFOS
-        
+
         // PROCESS SUBTITLES
     }
-    
-    
-    @Scheduled(initialDelay=15000, fixedDelay=45000)
+
+    @Scheduled(initialDelay = 15000, fixedDelay = 45000)
     public void scanMediaData() throws Exception {
         List<QueueDTO> queueElements = mediaDao.getMediaQueueForScanning();
         if (CollectionUtils.isEmpty(queueElements)) {
             LOGGER.debug("No media data found to scan");
             return;
         }
-        
+
         LOGGER.info("Found {} media data objects to process", queueElements.size());
         BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
 
         int maxScannerThreads = PropertyTools.getIntProperty("yamj3.scheduler.mediascan.maxThreads", 5);
         ExecutorService executor = Executors.newFixedThreadPool(maxScannerThreads);
-        for (int i=0; i<maxScannerThreads; i++) {
+        for (int i = 0; i < maxScannerThreads; i++) {
             MovieDatabaseRunner worker = new MovieDatabaseRunner(queue, movieDatabaseController);
             executor.execute(worker);
         }
         executor.shutdown();
-        
+
         // run until all workers have finished
         while (!executor.isTerminated()) {
             try {
                 Thread.sleep(5000);
-            } catch (InterruptedException ignore) {}
+            } catch (InterruptedException ignore) {
+            }
         }
-        
+
         LOGGER.debug("Finished media data scanning");
     }
 }

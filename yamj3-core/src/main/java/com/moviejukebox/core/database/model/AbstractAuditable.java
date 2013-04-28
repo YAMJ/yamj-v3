@@ -19,48 +19,45 @@ import com.moviejukebox.core.hibernate.Identifiable;
 @MappedSuperclass
 public abstract class AbstractAuditable implements Auditable, Identifiable {
 
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
-	private long id;
-
-	@Temporal(value = TemporalType.TIMESTAMP)
-	@Column(name = "create_timestamp", nullable = false, updatable = false)
-	private Date createTimestamp;
-
-	@Temporal(value = TemporalType.TIMESTAMP)
-	@Column(name = "update_timestamp")
-	private Date updateTimestamp;
+    @Column(name = "id")
+    private long id;
+    @Temporal(value = TemporalType.TIMESTAMP)
+    @Column(name = "create_timestamp", nullable = false, updatable = false)
+    private Date createTimestamp;
+    @Temporal(value = TemporalType.TIMESTAMP)
+    @Column(name = "update_timestamp")
+    private Date updateTimestamp;
 
     @Override
-	public long getId() {
-		return this.id;
-	}
+    public long getId() {
+        return this.id;
+    }
 
-	@SuppressWarnings("unused")
-	private void setId(long id) {
-		this.id = id;
-	}
+    @SuppressWarnings("unused")
+    private void setId(long id) {
+        this.id = id;
+    }
 
-	public boolean isNewlyCreated() {
-		return (this.id <= 0);
-	}
+    public boolean isNewlyCreated() {
+        return (this.id <= 0);
+    }
 
-	// GETTER and SETTER
-	
-	public Date getCreateTimestamp() {
-		return this.createTimestamp;
-	}
+    // GETTER and SETTER
+    public Date getCreateTimestamp() {
+        return this.createTimestamp;
+    }
 
-	public void setCreateTimestamp(final Date createTimestamp) {
-		this.createTimestamp = createTimestamp;
-	}
+    public void setCreateTimestamp(final Date createTimestamp) {
+        this.createTimestamp = createTimestamp;
+    }
 
-	public Date getUpdateTimestamp() {
-		return this.updateTimestamp;
-	}
+    public Date getUpdateTimestamp() {
+        return this.updateTimestamp;
+    }
 
-	public void setUpdateTimestamp(final Date updateTimestamp) {
-		this.updateTimestamp = updateTimestamp;
-	}
+    public void setUpdateTimestamp(final Date updateTimestamp) {
+        this.updateTimestamp = updateTimestamp;
+    }
 }

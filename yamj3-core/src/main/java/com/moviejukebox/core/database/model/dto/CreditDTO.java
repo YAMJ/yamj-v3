@@ -8,11 +8,12 @@ public class CreditDTO {
     private JobType jobType;
     private String role;
     private String aka;
-       private String moviedb;
+    private String moviedb;
     private String moviedbId;
 
-    public CreditDTO() {}
-        
+    public CreditDTO() {
+    }
+
     public CreditDTO(JobType jobType, String name) {
         this(jobType, name, null);
     }

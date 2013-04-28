@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 public class FilenameScanner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilenameScanner.class);
-
     // Allow the use of [IMDB tt123456] to define the IMDB reference
     private static final Pattern ID_PATTERN = PatternUtils.patt("\\[ID ([^\\[\\]]*)\\]");
     // Search for tt followed by 6 or 7 digits and then a word boundary
@@ -44,10 +43,9 @@ public class FilenameScanner {
     private static final Pattern TITLE_CLEANUP_CUT_PATTERN = PatternUtils.patt("-$|\\($");
     // All symbols between '-' and '/' but not after '/TVSHOW/' or '/PART/'
     private static final Pattern SECOND_TITLE_PATTERN = PatternUtils.patt("(?<!/TVSHOW/|/PART/)-([^/]+)");
-
     /**
      * Parts/disks markers.
-     * 
+     *
      * CAUTION: Grouping is used for part number detection/parsing.
      */
     private static final List<Pattern> PART_PATTERNS = new ArrayList<Pattern>() {
@@ -60,8 +58,7 @@ public class FilenameScanner {
         }
     };
     /**
-     * Detect if the file/folder name is incomplete and additional info must be
-     * taken from parent folder.
+     * Detect if the file/folder name is incomplete and additional info must be taken from parent folder.
      *
      * CAUTION: Grouping is used for part number detection/parsing.
      */
@@ -111,7 +108,6 @@ public class FilenameScanner {
             }
         }
     };
-
     private TokensPatternMap videoSourceMap = new TokensPatternMap() {
         private static final long serialVersionUID = 4166458100829813911L;
 
@@ -125,7 +121,6 @@ public class FilenameScanner {
             put(key, PatternUtils.iwpatt(patt.toString()));
         }
     };
-
     private Collection<String> videoExtensions = new HashSet<String>();
     private Collection<String> subtitleExtensions = new HashSet<String>();
     private Collection<String> imageExtensions = new HashSet<String>();
@@ -136,10 +131,9 @@ public class FilenameScanner {
     private boolean skipEpisodeTitle;
     private boolean useParentRegex;
     private Pattern useParentPattern;
-
     @Autowired
     private LanguageTools languageTools;
-    
+
     public FilenameScanner() {
         // resolve extensions
         videoExtensions = StringTools.tokenize(PropertyTools.getProperty("filename.scanner.video.extensions", "avi,divx,xvid,mkv,wmv,m2ts,ts,rm,qt,iso,vob,mpg,mov,mp4,m1v,m2v,m4v,m2p,top,trp,m2t,mts,asf,rmp4,img,mk3d,rar,001"), ",;|");
@@ -149,7 +143,7 @@ public class FilenameScanner {
         // other properties
         languageDetection = PropertyTools.getBooleanProperty("filename.scanner.language.detection", Boolean.TRUE);
         skipEpisodeTitle = PropertyTools.getBooleanProperty("filename.scanner.skip.episodeTitle", Boolean.FALSE);
-        
+
         // parent patterns
         useParentRegex = PropertyTools.getBooleanProperty("filename.scanner.useParentRegex", Boolean.FALSE);
         String patternString = PropertyTools.getProperty("filename.scanner.parentRegex", "");
@@ -176,7 +170,7 @@ public class FilenameScanner {
                 skipPatterns.add(PatternUtils.ipatt(token));
             }
         }
-        
+
         // build version keywords pattern
         for (String token : tokenizeToStringArray(PropertyTools.getProperty("filename.scanner.version.keywords", "remastered,directors cut,extended cut,final cut"), ",;| ")) {
             movieVersionPatterns.add(PatternUtils.iwpatt(token.replace(" ", PatternUtils.WORD_DELIMITERS_MATCH_PATTERN.pattern())));
@@ -191,20 +185,20 @@ public class FilenameScanner {
         KeywordMap sourceKeywords = PropertyTools.getKeywordMap("filename.scanner.source.keywords", "HDTV,PDTV,DVDRip,DVDSCR,DSRip,CAM,R5,LINE,HD2DVD,DVD,DVD5,DVD9,HRHDTV,MVCD,VCD,TS,VHSRip,BluRay,HDDVD,D-THEATER,SDTV");
         videoSourceMap.putAll(sourceKeywords.getKeywords(), sourceKeywords);
     }
-    
+
     public FileType determineFileType(String fileName) {
         try {
             int index = fileName.lastIndexOf(".");
             if (index < 0) {
                 return FileType.UNKNOWN;
             }
-            
+
             String extension = fileName.substring(index + 1).toLowerCase();
 
             if ("nfo".equals(extension)) {
                 return FileType.NFO;
             }
-            
+
             if (videoExtensions.contains(extension)) {
                 return FileType.VIDEO;
             }
@@ -217,36 +211,36 @@ public class FilenameScanner {
                 return FileType.IMAGE;
             }
         } catch (Exception error) {
-            LOGGER.error("Failed to determine file type for: "+fileName, error);
+            LOGGER.error("Failed to determine file type for: " + fileName, error);
         }
         return FileType.UNKNOWN;
     }
 
-     public void scan(FilenameDTO dto) {
-         // CHECK FOR USE_PARENT_PATTERN matches
-         if (useParentRegex && useParentPattern.matcher(dto.getName()).find()) {
-             // Just go up one parent
-             dto.setRest(dto.getParentName());
-             LOGGER.debug("UseParentPattern matched for " + dto.getName() + " - Using parent folder name: " + dto.getParentName());
-         } else {
-             dto.setRest(dto.getName());
-         }
+    public void scan(FilenameDTO dto) {
+        // CHECK FOR USE_PARENT_PATTERN matches
+        if (useParentRegex && useParentPattern.matcher(dto.getName()).find()) {
+            // Just go up one parent
+            dto.setRest(dto.getParentName());
+            LOGGER.debug("UseParentPattern matched for " + dto.getName() + " - Using parent folder name: " + dto.getParentName());
+        } else {
+            dto.setRest(dto.getName());
+        }
 
-         // EXTENSION AND CONTAINER
- 
-         if (dto.isDirectory()) {
-             dto.setContainer("DVD");
-             dto.setVideoSource("DVD");
-         } else {
-             // Extract and strip extension
-             String ext = FilenameUtils.getExtension(dto.getRest());
-             if (ext.length() > 0) {
-                 dto.setRest(FilenameUtils.removeExtension(dto.getRest()));
-                 dto.setContainer(ext.toUpperCase());
-             }
-         }
-         
-         dto.setRest(cleanUp(dto.getRest()));
+        // EXTENSION AND CONTAINER
+
+        if (dto.isDirectory()) {
+            dto.setContainer("DVD");
+            dto.setVideoSource("DVD");
+        } else {
+            // Extract and strip extension
+            String ext = FilenameUtils.getExtension(dto.getRest());
+            if (ext.length() > 0) {
+                dto.setRest(FilenameUtils.removeExtension(dto.getRest()));
+                dto.setContainer(ext.toUpperCase());
+            }
+        }
+
+        dto.setRest(cleanUp(dto.getRest()));
 
         // Detect incomplete filenames and add parent folder name to parser
         for (Pattern pattern : PARENT_FOLDER_PART_PATTERNS) {
@@ -260,7 +254,7 @@ public class FilenameScanner {
                 break;
             }
         }
-         
+
         // Remove version info
         for (Pattern pattern : movieVersionPatterns) {
             dto.setRest(pattern.matcher(dto.getRest()).replaceAll("./."));
@@ -482,8 +476,7 @@ public class FilenameScanner {
     }
 
     /**
-     * Replace all dividers with spaces and trim trailing spaces and redundant
-     * braces/minuses at the end.
+     * Replace all dividers with spaces and trim trailing spaces and redundant braces/minuses at the end.
      *
      * @param token String to clean up.
      * @return Prepared title.
@@ -504,7 +497,7 @@ public class FilenameScanner {
         return oldValue;
     }
 
-    private static  <T> T seekPatternAndUpdateRest(Map<T, Pattern> map, T oldValue, FilenameDTO dto, Collection<Pattern> protectPatterns) {
+    private static <T> T seekPatternAndUpdateRest(Map<T, Pattern> map, T oldValue, FilenameDTO dto, Collection<Pattern> protectPatterns) {
         for (Map.Entry<T, Pattern> e : map.entrySet()) {
             Matcher matcher = e.getValue().matcher(dto.getRest());
             if (matcher.find()) {
@@ -528,4 +521,4 @@ public class FilenameScanner {
     private static String cutMatch(String rest, Matcher matcher, String divider) {
         return rest.substring(0, matcher.start()) + divider + rest.substring(matcher.end());
     }
- }
+}

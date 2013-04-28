@@ -25,7 +25,7 @@ public class CommonDao extends ExtendedHibernateDaoSupport {
                 criteria.add(Restrictions.naturalId().set("name", name));
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
-                return (Genre)criteria.uniqueResult();
+                return (Genre) criteria.uniqueResult();
             }
         });
     }
@@ -38,7 +38,7 @@ public class CommonDao extends ExtendedHibernateDaoSupport {
                 criteria.add(Restrictions.naturalId().set("name", name));
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
-                return (Certification)criteria.uniqueResult();
+                return (Certification) criteria.uniqueResult();
             }
         });
     }
@@ -51,7 +51,7 @@ public class CommonDao extends ExtendedHibernateDaoSupport {
                 criteria.add(Restrictions.naturalId().set("name", name));
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
-                return (BoxedSet)criteria.uniqueResult();
+                return (BoxedSet) criteria.uniqueResult();
             }
         });
     }
@@ -64,7 +64,7 @@ public class CommonDao extends ExtendedHibernateDaoSupport {
                 criteria.add(Restrictions.naturalId().set("name", name));
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
-                return (Studio)criteria.uniqueResult();
+                return (Studio) criteria.uniqueResult();
             }
         });
     }

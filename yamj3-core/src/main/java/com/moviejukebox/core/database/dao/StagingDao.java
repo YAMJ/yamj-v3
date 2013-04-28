@@ -27,7 +27,7 @@ public class StagingDao extends ExtendedHibernateDaoSupport {
                 criteria.add(Restrictions.naturalId().set("client", client).set("playerPath", playerPath));
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
-                return (Library)criteria.uniqueResult();
+                return (Library) criteria.uniqueResult();
             }
         });
     }
@@ -40,7 +40,7 @@ public class StagingDao extends ExtendedHibernateDaoSupport {
                 criteria.add(Restrictions.naturalId().set("directoryPath", directoryPath).set("library", library));
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
-                return (StageDirectory)criteria.uniqueResult();
+                return (StageDirectory) criteria.uniqueResult();
             }
         });
     }
@@ -57,7 +57,7 @@ public class StagingDao extends ExtendedHibernateDaoSupport {
                 criteria.add(Restrictions.naturalId().set("fileName", fileName).set("stageDirectory", stageDirectory));
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
-                return (StageFile)criteria.uniqueResult();
+                return (StageFile) criteria.uniqueResult();
             }
         });
     }
@@ -72,7 +72,7 @@ public class StagingDao extends ExtendedHibernateDaoSupport {
                 criteria.setProjection(Projections.min("id"));
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
-                return (Long)criteria.uniqueResult();
+                return (Long) criteria.uniqueResult();
             }
         });
     }

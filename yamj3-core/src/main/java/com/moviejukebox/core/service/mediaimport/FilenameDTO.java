@@ -9,20 +9,17 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * Container of parsed data from movie file name.
- * Contains only information which could be possibly extracted from file name.
+ * Container of parsed data from movie file name. Contains only information which could be possibly extracted from file name.
  *
  * @author Artem.Gratchev
  */
 public class FilenameDTO {
 
     private static DecimalFormat PADDED_FORMAT = new DecimalFormat("000"); // Issue 190
-
     private final String name;
     private final String parentName;
     private final boolean directory;
     private String rest;
-    
     private String title = null;
     private int year = -1;
     private String partTitle = null;
@@ -58,7 +55,7 @@ public class FilenameDTO {
     public String getParentName() {
         return parentName;
     }
-    
+
     public boolean isDirectory() {
         return directory;
     }
@@ -92,7 +89,6 @@ public class FilenameDTO {
             this.index = index;
         }
     }
-    
     private final List<SetDTO> sets = new ArrayList<SetDTO>();
     private final List<String> languages = new ArrayList<String>();
 
@@ -229,12 +225,12 @@ public class FilenameDTO {
     public boolean isMovie() {
         return getEpisodes().isEmpty();
     }
-    
+
     public String buildIdentifier() {
         StringBuilder sb = new StringBuilder();
         sb.append(getTitle());
         sb.append("_");
-        sb.append(getYear()>-1?getYear():"0000");
+        sb.append(getYear() > -1 ? getYear() : "0000");
         return sb.toString();
     }
 
@@ -242,7 +238,7 @@ public class FilenameDTO {
         StringBuilder sb = new StringBuilder();
         sb.append(getTitle());
         sb.append("_");
-        sb.append(getYear()>-1?getYear():"0000");
+        sb.append(getYear() > -1 ? getYear() : "0000");
         sb.append("_");
         sb.append(PADDED_FORMAT.format(getSeason()));
         sb.append("_");
@@ -254,7 +250,7 @@ public class FilenameDTO {
         StringBuilder sb = new StringBuilder();
         sb.append(getTitle());
         sb.append("_");
-        sb.append(getYear()>-1?getYear():"0000");
+        sb.append(getYear() > -1 ? getYear() : "0000");
         sb.append("_");
         sb.append(PADDED_FORMAT.format(getSeason()));
         return sb.toString();

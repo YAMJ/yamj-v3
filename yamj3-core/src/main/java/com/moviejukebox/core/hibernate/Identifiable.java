@@ -5,5 +5,5 @@ package com.moviejukebox.core.hibernate;
  */
 public interface Identifiable {
 
-	long getId();
+    long getId();
 }

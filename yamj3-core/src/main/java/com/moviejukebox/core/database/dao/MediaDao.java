@@ -11,7 +11,6 @@ import com.moviejukebox.core.hibernate.ExtendedHibernateDaoSupport;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import org.hibernate.*;
 import org.hibernate.criterion.Projections;
@@ -34,7 +33,7 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
                 criteria.add(Restrictions.naturalId().set("fileName", fileName));
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
-                return (MediaFile)criteria.uniqueResult();
+                return (MediaFile) criteria.uniqueResult();
             }
         });
     }
@@ -51,7 +50,7 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
                 criteria.add(Restrictions.naturalId().set("identifier", identifier));
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
-                return (VideoData)criteria.uniqueResult();
+                return (VideoData) criteria.uniqueResult();
             }
         });
     }
@@ -68,7 +67,7 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
                 criteria.add(Restrictions.naturalId().set("identifier", identifier));
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
-                return (Season)criteria.uniqueResult();
+                return (Season) criteria.uniqueResult();
             }
         });
     }
@@ -85,7 +84,7 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
                 criteria.add(Restrictions.naturalId().set("identifier", identifier));
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
-                return (Series)criteria.uniqueResult();
+                return (Series) criteria.uniqueResult();
             }
         });
     }
@@ -104,17 +103,17 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
             }
         });
     }
-    
+
     public List<QueueDTO> getMediaQueueForScanning() {
         final StringBuilder sql = new StringBuilder();
         sql.append("select vd.id,'videodata' as mediatype,vd.create_timestamp,vd.update_timestamp ");
         sql.append("from videodata vd ");
-        sql.append("where vd.status in ('NEW','UPDATED') " );
+        sql.append("where vd.status in ('NEW','UPDATED') ");
         sql.append("and vd.episode<0 ");
         sql.append("union ");
         sql.append("select se.id,'series' as mediatype,se.create_timestamp,se.update_timestamp ");
         sql.append("from series se ");
-        sql.append("where se.status in ('NEW','UPDATED') " );
+        sql.append("where se.status in ('NEW','UPDATED') ");
 
         return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<List<QueueDTO>>() {
             @Override
@@ -136,7 +135,7 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
                     }
                     queueElements.add(queueElement);
                 }
-                
+
                 Collections.sort(queueElements, new QueueDTOComparator());
                 return queueElements;
             }

@@ -9,7 +9,6 @@ public class QueueDTO {
     private String type;
 
     // GETTER and SETTER
-    
     public Long getId() {
         return id;
     }

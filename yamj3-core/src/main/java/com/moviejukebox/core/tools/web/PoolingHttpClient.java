@@ -35,21 +35,19 @@ import org.springframework.beans.factory.DisposableBean;
 public class PoolingHttpClient extends DefaultHttpClient implements DisposableBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PoolingHttpClient.class);
-    
     private final Map<String, Integer> groupLimits = new HashMap<String, Integer>();
     private final List<String> routedHosts = new ArrayList<String>();
-
     private String proxyHost = null;
     private int proxyPort = 0;
     private String proxyUsername = null;
     private String proxyPassword = null;
     private int connectionsMaxPerRoute = 1;
     private int connectionsMaxTotal = 20;
-    
+
     public PoolingHttpClient() {
         this(null, null);
     }
-    
+
     public PoolingHttpClient(ClientConnectionManager conman) {
         this(conman, null);
     }
@@ -60,7 +58,7 @@ public class PoolingHttpClient extends DefaultHttpClient implements DisposableBe
 
     public PoolingHttpClient(ClientConnectionManager connectionManager, HttpParams httpParams) {
         super(connectionManager, httpParams);
-        
+
         // First we have to read/create the rules
         // Default, can be overridden
         groupLimits.put(".*", 1);
@@ -95,7 +93,7 @@ public class PoolingHttpClient extends DefaultHttpClient implements DisposableBe
     public void setProxyPassword(String proxyPassword) {
         this.proxyPassword = proxyPassword;
     }
-    
+
     public int getConnectionsMaxPerRoute() {
         return connectionsMaxPerRoute;
     }
@@ -121,7 +119,7 @@ public class PoolingHttpClient extends DefaultHttpClient implements DisposableBe
 
         // set user agent
         HttpProtocolParams.setUserAgent(params, "Mozilla/6.0 (Windows NT 6.2; WOW64; rv:16.0.1) Gecko/20121011 Firefox/16.0.1");
-        
+
         // set default proxy
         if (StringUtils.isNotBlank(proxyHost) && proxyPort > 0) {
             if (StringUtils.isNotBlank(proxyUsername) && StringUtils.isNotBlank(proxyPassword)) {
@@ -133,7 +131,7 @@ public class PoolingHttpClient extends DefaultHttpClient implements DisposableBe
             HttpHost proxy = new HttpHost(proxyHost, proxyPort);
             ConnRouteParams.setDefaultProxy(params, proxy);
         }
-        
+
         return params;
     }
 
@@ -155,30 +153,30 @@ public class PoolingHttpClient extends DefaultHttpClient implements DisposableBe
     public String requestContent(String uri) throws IOException {
         return this.requestContent(uri, null);
     }
-    
+
     public String requestContent(String uri, Charset charset) throws IOException {
         HttpGet httpGet = new HttpGet(uri);
-        
+
         // set route (if not set before)
         setRoute(httpGet);
-        
+
         HttpResponse response = execute(httpGet);
-        
+
         int statusCode = response.getStatusLine().getStatusCode();
         if (statusCode != 200) {
             throw new RuntimeException("Unexpected status " + statusCode + " for uri " + uri);
         }
-        
+
         return readContent(response, charset);
     }
-    
+
     private String readContent(HttpResponse response, Charset charset) throws IOException {
 
         StringWriter content = new StringWriter(10 * 1024);
         InputStream is = response.getEntity().getContent();
         InputStreamReader isr = null;
         BufferedReader br = null;
-        
+
         try {
             if (charset == null) {
                 isr = new InputStreamReader(is, Charset.defaultCharset());
@@ -196,29 +194,33 @@ public class PoolingHttpClient extends DefaultHttpClient implements DisposableBe
             return content.toString();
         } finally {
             if (br != null) {
-                try  {
+                try {
                     br.close();
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
             }
             if (isr != null) {
-                try  {
+                try {
                     isr.close();
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
             }
-            try  {
+            try {
                 content.close();
-            } catch (Exception ignore) {}
-            try  {
+            } catch (Exception ignore) {
+            }
+            try {
                 is.close();
-            } catch (Exception ignore) {}
+            } catch (Exception ignore) {
+            }
         }
     }
-    
+
     private void setRoute(HttpUriRequest request) throws ClientProtocolException {
         HttpHost httpHost = determineTarget(request);
         String key = httpHost.toString();
 
-        synchronized(routedHosts) {
+        synchronized (routedHosts) {
             if (!routedHosts.contains(key)) {
                 String group = ".*";
                 for (String searchGroup : groupLimits.keySet()) {
@@ -229,22 +231,22 @@ public class PoolingHttpClient extends DefaultHttpClient implements DisposableBe
                     }
                 }
                 int maxRequests = groupLimits.get(group);
-    
+
                 LOGGER.debug("IO download host: {}; rule: {}, maxRequests: {}", key, group, maxRequests);
                 routedHosts.add(key);
-                
+
                 HttpRoute httpRoute = new HttpRoute(httpHost);
-                
+
                 ClientConnectionManager conMan = this.getConnectionManager();
                 if (conMan instanceof PoolingClientConnectionManager) {
-                    PoolingClientConnectionManager poolMan = (PoolingClientConnectionManager)conMan;
+                    PoolingClientConnectionManager poolMan = (PoolingClientConnectionManager) conMan;
                     poolMan.setMaxPerRoute(httpRoute, maxRequests);
                 }
-           }
+            }
         }
     }
-    
-    private  static HttpHost determineTarget(HttpUriRequest request) throws ClientProtocolException {
+
+    private static HttpHost determineTarget(HttpUriRequest request) throws ClientProtocolException {
         HttpHost target = null;
         URI requestURI = request.getURI();
         if (requestURI.isAbsolute()) {

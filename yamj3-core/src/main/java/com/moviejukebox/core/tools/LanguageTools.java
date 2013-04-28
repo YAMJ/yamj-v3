@@ -15,22 +15,18 @@ import org.springframework.stereotype.Service;
 public class LanguageTools {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LanguageTools.class);
-
     /**
      * Mapping exact tokens to language.
      *
-     * Strict mapping is case sensitive and must be obvious, it must avoid
-     * confusing movie name words and language markers.
+     * Strict mapping is case sensitive and must be obvious, it must avoid confusing movie name words and language markers.
      *
-     * For example the English word "it" and Italian language marker "it", or
-     * "French" as part of the title and "french" as language marker.
+     * For example the English word "it" and Italian language marker "it", or "French" as part of the title and "french" as language
+     * marker.
      *
-     * However, described above is important only by file naming with token
-     * delimiters (see tokens description constants TOKEN_DELIMITERS*). Language
-     * detection in non-token separated titles will be skipped automatically.
+     * However, described above is important only by file naming with token delimiters (see tokens description constants
+     * TOKEN_DELIMITERS*). Language detection in non-token separated titles will be skipped automatically.
      *
-     * Language markers, found with this pattern are counted as token delimiters
-     * (they will cut movie title)
+     * Language markers, found with this pattern are counted as token delimiters (they will cut movie title)
      */
     private final TokensPatternMap strictLanguageMap = new TokensPatternMap() {
         private static final long serialVersionUID = 3630995345545037071L;
@@ -47,13 +43,11 @@ public class LanguageTools {
             put(key, PatternUtils.tpatt(tokenBuilder.toString()));
         }
     };
-    
     /**
      * Mapping loose language markers.
      *
-     * The second pass of language detection is being started after movie title
-     * detection. Language markers will be scanned with loose pattern in order
-     * to find out more languages without chance to confuse with movie title.
+     * The second pass of language detection is being started after movie title detection. Language markers will be scanned with
+     * loose pattern in order to find out more languages without chance to confuse with movie title.
      *
      * Markers in this map are case insensitive.
      */
@@ -84,14 +78,14 @@ public class LanguageTools {
                 String values = languages.get(lang);
                 if (values != null) {
                     strictLanguageMap.put(lang, values);
-                    looseLanguageMap.put(lang, values);   
+                    looseLanguageMap.put(lang, values);
                 } else {
                     LOGGER.info("No values found for language code: " + lang);
                 }
             }
         }
     }
-    
+
     /**
      * Decode the language tag passed in, into standard YAMJ language code
      */
@@ -116,7 +110,7 @@ public class LanguageTools {
             return "";
         }
     }
-    
+
     public TokensPatternMap getStrictLanguageMap() {
         return this.strictLanguageMap;
     }

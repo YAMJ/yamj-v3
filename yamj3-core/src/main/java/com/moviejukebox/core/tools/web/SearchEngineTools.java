@@ -10,7 +10,6 @@ import org.apache.log4j.Logger;
 public class SearchEngineTools {
 
     private static final Logger LOGGER = Logger.getLogger(SearchEngineTools.class);
-    
     private final PoolingHttpClient httpClient;
     private LinkedList<String> searchSites;
     private String country;
@@ -28,7 +27,7 @@ public class SearchEngineTools {
 
     public SearchEngineTools(PoolingHttpClient httpClient, String country) {
         this.httpClient = httpClient;
-        
+
         // sites to search for URLs
         searchSites = new LinkedList<String>();
         searchSites.addAll(Arrays.asList(PropertyTools.getProperty("yamj3.searchengine.sites", "google,yahoo,bing,blekko,lycos").split(",")));
@@ -87,11 +86,11 @@ public class SearchEngineTools {
     public void setSearchSuffix(String searchSuffix) {
         this.searchSuffix = searchSuffix;
     }
-    
+
     public String searchURL(String title, int year, String site) {
         return searchURL(title, year, site, null);
     }
-    
+
     public String searchURL(String title, int year, String site, String additional) {
         String url = null;
 
@@ -107,7 +106,7 @@ public class SearchEngineTools {
         } else {
             url = searchUrlOnGoogle(title, year, site, additional);
         }
-        
+
         return url;
     }
 
@@ -116,14 +115,14 @@ public class SearchEngineTools {
         searchSites.addLast(engine);
         return engine;
     }
-    
+
     public int countSearchSites() {
         return searchSites.size();
     }
-    
+
     public String searchUrlOnGoogle(String title, int year, String site, String additional) {
-        LOGGER.debug("Searching '" + title + "' on google; site="+site);
-        
+        LOGGER.debug("Searching '" + title + "' on google; site=" + site);
+
         try {
             StringBuilder sb = new StringBuilder("http://");
             sb.append(googleHost);
@@ -147,7 +146,7 @@ public class SearchEngineTools {
                 sb.append(URLEncoder.encode(additional, "UTF-8"));
             }
             String xml = httpClient.requestContent(sb.toString());
-           
+
             int beginIndex = xml.indexOf("http://" + site + searchSuffix);
             if (beginIndex != -1) {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
@@ -159,7 +158,7 @@ public class SearchEngineTools {
     }
 
     public String searchUrlOnYahoo(String title, int year, String site, String additional) {
-        LOGGER.debug("Searching '" + title + "' on yahoo; site="+site);
+        LOGGER.debug("Searching '" + title + "' on yahoo; site=" + site);
 
         try {
             StringBuilder sb = new StringBuilder("http://");
@@ -184,12 +183,12 @@ public class SearchEngineTools {
             }
 
             String xml = httpClient.requestContent(sb.toString());
-           
+
             int beginIndex = xml.indexOf("//" + site + searchSuffix);
             if (beginIndex != -1) {
                 String link = xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
                 if (StringUtils.isNotBlank(link)) {
-                    return "http:"+link;
+                    return "http:" + link;
                 }
             }
         } catch (Exception error) {
@@ -199,8 +198,8 @@ public class SearchEngineTools {
     }
 
     public String searchUrlOnBing(String title, int year, String site, String additional) {
-        LOGGER.debug("Searching '" + title + "' on bing; site="+site);
-        
+        LOGGER.debug("Searching '" + title + "' on bing; site=" + site);
+
         try {
             StringBuilder sb = new StringBuilder("http://");
             sb.append(bingHost);
@@ -222,9 +221,9 @@ public class SearchEngineTools {
                 sb.append(country);
                 sb.append("&filt=rf");
             }
-            
+
             String xml = httpClient.requestContent(sb.toString());
-           
+
             int beginIndex = xml.indexOf("http://" + site + searchSuffix);
             if (beginIndex != -1) {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
@@ -236,8 +235,8 @@ public class SearchEngineTools {
     }
 
     public String searchUrlOnBlekko(String title, int year, String site, String additional) {
-        LOGGER.debug("Searching '" + title + "' on blekko; site="+site);
-        
+        LOGGER.debug("Searching '" + title + "' on blekko; site=" + site);
+
         try {
             StringBuilder sb = new StringBuilder("http://");
             sb.append(blekkoHost);
@@ -254,9 +253,9 @@ public class SearchEngineTools {
                 sb.append("+");
                 sb.append(URLEncoder.encode(additional, "UTF-8"));
             }
-            
+
             String xml = httpClient.requestContent(sb.toString());
-           
+
             int beginIndex = xml.indexOf("http://" + site + searchSuffix);
             if (beginIndex != -1) {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
@@ -265,11 +264,11 @@ public class SearchEngineTools {
             LOGGER.error("Failed retrieving link url by bing search : " + title, error);
         }
         return null;
-    }    
+    }
 
     public String searchUrlOnLycos(String title, int year, String site, String additional) {
-        LOGGER.debug("Searching '" + title + "' on lycos; site="+site);
-        
+        LOGGER.debug("Searching '" + title + "' on lycos; site=" + site);
+
         try {
             StringBuilder sb = new StringBuilder("http://");
             sb.append(lycosHost);
@@ -279,7 +278,7 @@ public class SearchEngineTools {
                 sb.append("/?tab=web&Search=S%C3%B6ka&searchArea=loc&query=");
             } else if ("nl".equalsIgnoreCase(country)) {
                 sb.append("/?tab=web&Search=Zoeken&searchArea=loc&query=");
-            } else  {
+            } else {
                 sb.append("/web/?q=");
             }
             sb.append(URLEncoder.encode(title, "UTF-8"));
@@ -296,7 +295,7 @@ public class SearchEngineTools {
             }
 
             String xml = httpClient.requestContent(sb.toString());
-           
+
             int beginIndex = xml.indexOf("http://" + site + searchSuffix);
             if (beginIndex != -1) {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));

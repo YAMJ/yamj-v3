@@ -20,91 +20,81 @@ import org.hibernate.annotations.MapKey;
 import org.hibernate.annotations.Parameter;
 
 @TypeDefs({
-    @TypeDef(name = "overrideFlag", 
-        typeClass = EnumStringUserType.class,
-        parameters = {@Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.OverrideFlag")}),
+    @TypeDef(name = "overrideFlag",
+            typeClass = EnumStringUserType.class,
+            parameters = {
+        @Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.OverrideFlag")}),
     @TypeDef(name = "statusType",
-        typeClass = EnumStringUserType.class,
-        parameters = {@Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.StatusType")})
+            typeClass = EnumStringUserType.class,
+            parameters = {
+        @Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.StatusType")})
 })
-
 @Entity
 @Table(name = "season")
 @SuppressWarnings("deprecation")
 public class Season extends AbstractAuditable implements
-    IMoviedbIdentifiable, Serializable 
-{
-    private static final long serialVersionUID = 7589022259013410259L;
+        IMoviedbIdentifiable, Serializable {
 
+    private static final long serialVersionUID = 7589022259013410259L;
     /**
-     * This is the season identifier.
-     * This will be generated from a scanned file name by "<filetitle>_<fileyear>_<season>"
-     * This is needed in order to have the possibility to associate video data to
-     * seasons, i.e. if a new episode of a TV show has been scanned.
+     * This is the season identifier. This will be generated from a scanned file name by "<filetitle>_<fileyear>_<season>" This is
+     * needed in order to have the possibility to associate video data to seasons, i.e. if a new episode of a TV show has been
+     * scanned.
      */
     @NaturalId
     @Column(name = "identifier", unique = true, length = 200)
     private String identifier;
-
     @Index(name = "season_title")
-	@Column(name = "title", nullable = false, length = 255)
-	private String title;
-
+    @Column(name = "title", nullable = false, length = 255)
+    private String title;
     @Column(name = "title_original", length = 255)
     private String titleOriginal;
-
     @Index(name = "season_season")
-	@Column(name = "season", nullable=false)
-	private int season;
-	
+    @Column(name = "season", nullable = false)
+    private int season;
     @Column(name = "first_aired", length = 10)
     private String firstAired;
-
     @Lob
     @Column(name = "plot", length = 50000)
     private String plot;
-
     @Lob
     @Column(name = "outline", length = 50000)
     private String outline;
-
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
-
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "season_ids", joinColumns = @JoinColumn(name = "season_id"))
+    @JoinTable(name = "season_ids", joinColumns =
+            @JoinColumn(name = "season_id"))
     @Fetch(value = FetchMode.SELECT)
-    @MapKeyColumn(name = "moviedb", length= 40)
+    @MapKeyColumn(name = "moviedb", length = 40)
     @Column(name = "moviedb_id", length = 200)
     private Map<String, String> moviedbIdMap = new HashMap<String, String>(0);
-
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "season_ratings", joinColumns = @JoinColumn(name = "season_id"))
+    @JoinTable(name = "season_ratings", joinColumns =
+            @JoinColumn(name = "season_id"))
     @Fetch(value = FetchMode.SELECT)
-    @MapKeyColumn(name = "moviedb", length= 40)
+    @MapKeyColumn(name = "moviedb", length = 40)
     @Column(name = "rating", length = 30)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
-
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "season_override", joinColumns = @JoinColumn(name = "season_id"))
+    @JoinTable(name = "season_override", joinColumns =
+            @JoinColumn(name = "season_id"))
     @Fetch(value = FetchMode.SELECT)
-    @MapKeyColumn(name = "flag", length= 30)
-    @MapKey(type = @Type(type = "overrideFlag"))
+    @MapKeyColumn(name = "flag", length = 30)
+    @MapKey(type =
+            @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30)
     private Map<OverrideFlag, String> overrideFlags = new HashMap<OverrideFlag, String>(0);
-
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_SEASON_SERIES")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "series_id", nullable = false)
     private Series series;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "season")
     private Set<VideoData> videoDatas = new HashSet<VideoData>(0);
 
     // GETTER and SETTER
-    
     public String getTitle() {
         return title;
     }
@@ -120,7 +110,7 @@ public class Season extends AbstractAuditable implements
         }
     }
 
-	public String getIdentifier() {
+    public String getIdentifier() {
         return identifier;
     }
 
@@ -184,7 +174,7 @@ public class Season extends AbstractAuditable implements
     public String getMoviedbId(String moviedb) {
         return moviedbIdMap.get(moviedb);
     }
-    
+
     public void setMoviedbIdMap(Map<String, String> moviedbIdMap) {
         this.moviedbIdMap = moviedbIdMap;
     }
@@ -233,20 +223,26 @@ public class Season extends AbstractAuditable implements
     }
 
     // EQUALITY CHECKS
-
     @Override
     public int hashCode() {
         final int PRIME = 17;
         int result = 1;
-        result = PRIME * result + (this.identifier == null?0:this.identifier.hashCode());
+        result = PRIME * result + (this.identifier == null ? 0 : this.identifier.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object other) {
-        if ( this == other ) return true;
-        if ( other == null ) return false;
-        if ( !(other instanceof Season) ) return false;
-        Season castOther = (Season)other;
+        if (this == other) {
+            return true;
+        }
+        if (other == null) {
+            return false;
+        }
+        if (!(other instanceof Season)) {
+            return false;
+        }
+        Season castOther = (Season) other;
         return StringUtils.equals(this.identifier, castOther.identifier);
-    }}
+    }
+}

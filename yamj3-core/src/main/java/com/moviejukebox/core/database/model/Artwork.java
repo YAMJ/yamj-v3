@@ -21,40 +21,34 @@ import com.moviejukebox.core.database.model.type.ArtworkType;
 import com.moviejukebox.core.hibernate.usertypes.EnumStringUserType;
 
 @TypeDef(name = "artworkType",
-    typeClass = EnumStringUserType.class,
-    parameters = {@Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.ArtworkType")})
-
+        typeClass = EnumStringUserType.class,
+        parameters = {
+    @Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.ArtworkType")})
 @Entity
 @Table(name = "artwork")
 public class Artwork extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -981494909436217076L;
-
     @Type(type = "artworkType")
     @Column(name = "artwork_type", nullable = false)
     private ArtworkType artworkType;
-    
     @Column(name = "url")
-    private String  url;
-
+    private String url;
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_STAGEFILE")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "stagefile_id")
     private StageFile stageFile;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_VIDEODATA")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "videodata_id")
     private VideoData videoData;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_SEASON")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "season_id")
     private Season season;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_SERIES")
     @Fetch(FetchMode.SELECT)
@@ -62,7 +56,6 @@ public class Artwork extends AbstractIdentifiable implements Serializable {
     private Series series;
 
     // GETTER and SETTER
-
     public ArtworkType getArtworkType() {
         return artworkType;
     }

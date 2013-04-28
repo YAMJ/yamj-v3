@@ -13,18 +13,14 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The media import service is a spring-managed service.
- * This will be used by the MediaImportRunner only in order
- * to access other spring beans cause the MediaImportRunner
- * itself is no spring-managed bean and dependency injection
- * will fail on that runner.
+ * The media import service is a spring-managed service. This will be used by the MediaImportRunner only in order to access other
+ * spring beans cause the MediaImportRunner itself is no spring-managed bean and dependency injection will fail on that runner.
  *
  */
 @Service("mediaImportService")
 public class MediaImportService {
 
     private static final String MEDIA_SOURCE = "filename";
-    
     @Autowired
     private StagingDao stagingDao;
     @Autowired
@@ -41,7 +37,7 @@ public class MediaImportService {
             processUpdatedVideo(stageFile);
         }
     }
-    
+
     private void processNewVideo(StageFile stageFile) {
         // scan filename for informations
         FilenameDTO dto = new FilenameDTO(stageFile);
@@ -73,7 +69,7 @@ public class MediaImportService {
 
         if (dto.isMovie()) {
             // VIDEO DATA for movies
-            
+
             String identifier = dto.buildIdentifier();
             VideoData videoData = mediaDao.getVideoData(identifier);
             if (videoData == null) {
@@ -118,7 +114,7 @@ public class MediaImportService {
                     String seasonIdentifier = dto.buildSeasonIdentifier();
                     Season season = mediaDao.getSeason(seasonIdentifier);
                     if (season == null) {
-                        
+
                         // get or create series
                         String seriesIdentifier = dto.buildIdentifier();
                         Series series = mediaDao.getSeries(seriesIdentifier);
@@ -129,7 +125,7 @@ public class MediaImportService {
                             series.setMoviedbIdMap(dto.getIdMap());
                             series.setStatus(StatusType.NEW);
                             mediaDao.saveEntity(series);
-                            
+
                             // create new poster artwork entry
                             Artwork poster = new Artwork();
                             poster.setArtworkType(ArtworkType.POSTER);
@@ -147,7 +143,7 @@ public class MediaImportService {
                             banner.setSeries(series);
                             mediaDao.saveEntity(banner);
                         }
-                        
+
                         season = new Season();
                         season.setIdentifier(seasonIdentifier);
                         season.setSeason(dto.getSeason());
@@ -168,7 +164,7 @@ public class MediaImportService {
                         fanart.setSeason(season);
                         mediaDao.saveEntity(fanart);
                     }
-                    
+
                     videoData = new VideoData();
                     videoData.setIdentifier(identifier);
                     if (StringUtils.isNotBlank(dto.getEpisodeTitle())) {
@@ -198,25 +194,25 @@ public class MediaImportService {
                 }
             }
         }
-        
+
         // TODO
         // - create associations to NFOs
         // - create local artwork entries
         // - create set entries
-     
+
         finish(stageFile);
     }
-    
+
     private void processUpdatedVideo(StageFile stageFile) {
         MediaFile mediaFile = stageFile.getMediaFile();
         mediaFile.setFileDate(stageFile.getFileDate());
         mediaFile.setFileSize(stageFile.getFileSize());
         mediaFile.setStatus(StatusType.UPDATED);
         mediaDao.updateEntity(mediaFile);
-        
+
         finish(stageFile);
     }
-    
+
     private void finish(StageFile stageFile) {
         stageFile.setStatus(StatusType.DONE);
         stagingDao.updateEntity(stageFile);
@@ -224,8 +220,10 @@ public class MediaImportService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void processingError(Long id) {
-        if (id == null) return;
-        
+        if (id == null) {
+            return;
+        }
+
         StageFile stageFile = stagingDao.getStageFile(id);
         if (stageFile != null) {
             stageFile.setStatus(StatusType.ERROR);

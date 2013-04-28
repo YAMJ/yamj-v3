@@ -22,51 +22,44 @@ import org.hibernate.annotations.Parameter;
 @TypeDefs({
     @TypeDef(name = "fileType",
             typeClass = EnumStringUserType.class,
-            parameters = {@Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.FileType")}),
+            parameters = {
+        @Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.FileType")}),
     @TypeDef(name = "statusType",
             typeClass = EnumStringUserType.class,
-            parameters = {@Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.StatusType")})
+            parameters = {
+        @Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.StatusType")})
 })
-
 @Entity
 @Table(name = "stage_file")
 public class StageFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -6247352843375054146L;
-
     @NaturalId(mutable = true)
     @Column(name = "file_name", nullable = false, length = 500)
     private String fileName;
-
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.EAGER)
     @ForeignKey(name = "FK_FILE_DIRECTORY")
     @JoinColumn(name = "directory_id", nullable = false)
     private StageDirectory stageDirectory;
-
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "file_date", nullable = false)
     private Date fileDate;
-    
     @Column(name = "file_size", nullable = false)
     private long fileSize = -1;
-
     @Type(type = "fileType")
     @Column(name = "file_type", nullable = false, length = 30)
     private FileType fileType;
-
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_FILE_MEDIAFILE")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "mediafile_id")
     private MediaFile mediaFile;
-    
-    // GETTER and SETTER
 
+    // GETTER and SETTER
     public String getFileName() {
         return fileName;
     }
@@ -124,28 +117,41 @@ public class StageFile extends AbstractAuditable implements Serializable {
     }
 
     // EQUALITY CHECKS
-
     @Override
     public int hashCode() {
         final int PRIME = 17;
         int result = 1;
-        result = PRIME * result + (this.fileName == null?0:this.fileName.hashCode());
-        result = PRIME * result + (this.stageDirectory == null?0:this.stageDirectory.hashCode());
+        result = PRIME * result + (this.fileName == null ? 0 : this.fileName.hashCode());
+        result = PRIME * result + (this.stageDirectory == null ? 0 : this.stageDirectory.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object other) {
-        if ( this == other ) return true;
-        if ( other == null ) return false;
-        if ( !(other instanceof StageFile) ) return false;
-        StageFile castOther = (StageFile)other;
+        if (this == other) {
+            return true;
+        }
+        if (other == null) {
+            return false;
+        }
+        if (!(other instanceof StageFile)) {
+            return false;
+        }
+        StageFile castOther = (StageFile) other;
 
-        if (!StringUtils.equals(this.fileName, castOther.fileName)) return false;
-        
-        if (this.stageDirectory == null && castOther.stageDirectory == null) return true;
-        if (this.stageDirectory == null) return false;  
-        if (castOther.stageDirectory == null) return false;
+        if (!StringUtils.equals(this.fileName, castOther.fileName)) {
+            return false;
+        }
+
+        if (this.stageDirectory == null && castOther.stageDirectory == null) {
+            return true;
+        }
+        if (this.stageDirectory == null) {
+            return false;
+        }
+        if (castOther.stageDirectory == null) {
+            return false;
+        }
         return this.stageDirectory.equals(castOther.stageDirectory);
     }
 

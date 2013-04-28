@@ -18,7 +18,6 @@ public class PropertyTools extends PropertyPlaceholderConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyTools.class);
     private static final Properties properties = new Properties();
-    
     // Default as in PropertyPlaceholderConfigurer
     private int springSystemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
 
@@ -38,7 +37,7 @@ public class PropertyTools extends PropertyPlaceholderConfigurer {
             String valueStr = resolvePlaceholder(keyStr, props, springSystemPropertiesMode);
             properties.put(keyStr, valueStr);
         }
-        
+
         LOGGER.info("Loaded " + properties.size() + " properties into core");
     }
 
@@ -77,7 +76,8 @@ public class PropertyTools extends PropertyPlaceholderConfigurer {
         if (property != null) {
             try {
                 return Integer.parseInt(property.trim());
-            } catch (NumberFormatException nfe) {}
+            } catch (NumberFormatException nfe) {
+            }
         }
         return defaultValue;
     }
@@ -94,7 +94,8 @@ public class PropertyTools extends PropertyPlaceholderConfigurer {
         if (property != null) {
             try {
                 return Long.parseLong(property.trim());
-            } catch (NumberFormatException nfe) {}
+            } catch (NumberFormatException nfe) {
+            }
         }
         return defaultValue;
     }
@@ -111,7 +112,8 @@ public class PropertyTools extends PropertyPlaceholderConfigurer {
         if (property != null) {
             try {
                 return Float.parseFloat(property.trim());
-            } catch (NumberFormatException nfe) {}
+            } catch (NumberFormatException nfe) {
+            }
         }
         return defaultValue;
     }
@@ -149,7 +151,8 @@ public class PropertyTools extends PropertyPlaceholderConfigurer {
         if (property != null) {
             try {
                 return Integer.parseInt(property.trim());
-            } catch (NumberFormatException nfe) {}
+            } catch (NumberFormatException nfe) {
+            }
         }
         return defaultValue;
     }
@@ -164,7 +167,8 @@ public class PropertyTools extends PropertyPlaceholderConfigurer {
         if (property != null) {
             try {
                 return Long.parseLong(property.trim());
-            } catch (NumberFormatException nfe) {}
+            } catch (NumberFormatException nfe) {
+            }
         }
         return defaultValue;
     }
@@ -179,7 +183,8 @@ public class PropertyTools extends PropertyPlaceholderConfigurer {
         if (property != null) {
             try {
                 return Float.parseFloat(property.trim());
-            } catch (NumberFormatException nfe) {}
+            } catch (NumberFormatException nfe) {
+            }
         }
         return defaultValue;
     }
@@ -208,8 +213,8 @@ public class PropertyTools extends PropertyPlaceholderConfigurer {
     }
 
     /**
-     * Collect keywords list and appropriate keyword values. Example:
-     * my.languages = EN,FR my.languages.EN = English my.languages.FR = French
+     * Collect keywords list and appropriate keyword values. Example: my.languages = EN,FR my.languages.EN = English my.languages.FR
+     * = French
      *
      * @param prefix Key for keywords list and prefix for value searching.
      * @return Ordered keyword list and map.

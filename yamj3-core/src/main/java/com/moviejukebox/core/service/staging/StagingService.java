@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service("stagingService")
 public class StagingService {
-    
+
     @Autowired
     private StagingDao stagingDao;
     @Autowired
@@ -43,7 +43,7 @@ public class StagingService {
     public void storeStageDirectory(StageDirectoryDTO stageDirectoryDTO, Library library) {
         // normalize the directory path by using URI
         String normalized = FilenameUtils.normalizeNoEndSeparator(stageDirectoryDTO.getPath(), true);
-        
+
         StageDirectory stageDirectory = stagingDao.getStageDirectory(normalized, library);
         if (stageDirectory == null) {
             stageDirectory = new StageDirectory();
@@ -51,7 +51,7 @@ public class StagingService {
             stageDirectory.setLibrary(library);
             stageDirectory.setStatus(StatusType.NEW);
             stageDirectory.setDirectoryDate(new Date(stageDirectoryDTO.getDate()));
-            
+
             // get parent stage directory
             int lastIndex = normalized.lastIndexOf('/');
             if (lastIndex > 0) {
@@ -61,7 +61,7 @@ public class StagingService {
                     stageDirectory.setParentDirectory(parent);
                 }
             }
-            
+
             stagingDao.saveEntity(stageDirectory);
         } else {
             Date newDate = new Date(stageDirectoryDTO.getDate());
@@ -71,28 +71,28 @@ public class StagingService {
                 stagingDao.updateEntity(stageDirectory);
             }
         }
-        
+
         for (StageFileDTO stageFileDTO : stageDirectoryDTO.getStageFiles()) {
-	        StageFile stageFile = stagingDao.getStageFile(stageFileDTO.getFileName(), stageDirectory);
-	        if (stageFile == null) {
-	            
-	            stageFile = new StageFile();
-	            stageFile.setFileName(stageFileDTO.getFileName());
-	            stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));
-	            stageFile.setFileSize(stageFileDTO.getFileSize());
-	            stageFile.setStageDirectory(stageDirectory);
-	            stageFile.setFileType(filenameScanner.determineFileType(stageFileDTO.getFileName()));
-	            stageFile.setStatus(StatusType.NEW);
-	            stagingDao.saveEntity(stageFile);
-	        } else {
-	            Date newDate = new Date(stageFileDTO.getFileDate());
-	            if ((newDate.compareTo(stageFile.getFileDate()) != 0) || (stageFile.getFileSize() != stageFileDTO.getFileSize())) {
-	                stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));
-	                stageFile.setFileSize(stageFileDTO.getFileSize());
-	                stageFile.setStatus(StatusType.UPDATED);
-	                stagingDao.updateEntity(stageFile);
-	            }
-	        }
+            StageFile stageFile = stagingDao.getStageFile(stageFileDTO.getFileName(), stageDirectory);
+            if (stageFile == null) {
+
+                stageFile = new StageFile();
+                stageFile.setFileName(stageFileDTO.getFileName());
+                stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));
+                stageFile.setFileSize(stageFileDTO.getFileSize());
+                stageFile.setStageDirectory(stageDirectory);
+                stageFile.setFileType(filenameScanner.determineFileType(stageFileDTO.getFileName()));
+                stageFile.setStatus(StatusType.NEW);
+                stagingDao.saveEntity(stageFile);
+            } else {
+                Date newDate = new Date(stageFileDTO.getFileDate());
+                if ((newDate.compareTo(stageFile.getFileDate()) != 0) || (stageFile.getFileSize() != stageFileDTO.getFileSize())) {
+                    stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));
+                    stageFile.setFileSize(stageFileDTO.getFileSize());
+                    stageFile.setStatus(StatusType.UPDATED);
+                    stagingDao.updateEntity(stageFile);
+                }
+            }
         }
     }
 }

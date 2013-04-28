@@ -9,40 +9,36 @@ import javax.persistence.Table;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Parameter;
 
-@TypeDef(name = "jobType", 
-    typeClass = EnumStringUserType.class,
-    parameters = {@Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.JobType")})
-
+@TypeDef(name = "jobType",
+        typeClass = EnumStringUserType.class,
+        parameters = {
+    @Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.JobType")})
 @Entity
 @Table(name = "cast_crew",
-       uniqueConstraints = {@UniqueConstraint(columnNames={"person_id", "data_id", "job"})})
+        uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"person_id", "data_id", "job"})})
 public class CastCrew extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -3941301942248344131L;
-
     @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_CASTCREW_PERSON")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "person_id")
     private Person person;
-
     @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_CASTCREW_VIDEODATA")
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name="data_id", insertable=false, updatable=false, nullable=false)
+    @JoinColumn(name = "data_id", insertable = false, updatable = false, nullable = false)
     private VideoData videoData;
-
     @Type(type = "jobType")
     @Column(name = "job", nullable = false, length = 30)
     private JobType jobType;
-
     @Column(name = "role", length = 255)
     private String role;
 
     // GETTER and SETTER
-
     public Person getPerson() {
         return person;
     }
