@@ -14,13 +14,13 @@ import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static com.moviejukebox.common.type.ExitType.*;
+import com.moviejukebox.common.type.StatusType;
+import com.moviejukebox.filescanner.comparator.FileTypeComparator;
 import com.moviejukebox.filescanner.model.Library;
 import com.moviejukebox.filescanner.model.LibraryCollection;
 import com.moviejukebox.filescanner.model.StatType;
 import com.moviejukebox.filescanner.tools.DirectoryEnding;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
@@ -47,10 +47,6 @@ public class WatcherManagementImpl implements ScannerManagement {
     private FileImportService fileImportService;
     @Resource(name = "libraryCollection")
     private LibraryCollection libraryCollection;
-    // Thread executers
-    private static final int NUM_THREADS = 2;
-    ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
-    List<Future<ExitType>> list = new ArrayList<Future<ExitType>>();
     // ImportDTO constants
     private static final String DEFAULT_CLIENT = "FileScanner";
     private static final String DEFAULT_PLAYER_PATH = "";
@@ -139,25 +135,13 @@ public class WatcherManagementImpl implements ScannerManagement {
             return NO_DIRECTORY;
         }
 
-        StageDirectoryDTO stageDir = new StageDirectoryDTO();
-        stageDir.setPath(baseDirectory.getAbsolutePath());
-        stageDir.setDate(baseDirectory.lastModified());
-        library.addDirectory(stageDir);
+        scanDir(library, baseDirectory);
 
-        List<File> currentFileList = Arrays.asList(baseDirectory.listFiles());
-        for (File file : currentFileList) {
-            if (file.isDirectory()) {
-                StageDirectoryDTO sd = scanDir(library, file);
-                if (sd != null) {
-                    library.addDirectory(sd);
-                    send(library.getImportDTO(sd));
-                } else {
-                    LOG.info("Not adding directory '{}'", file.getAbsolutePath());
-                }
-            } else {
-                stageDir.addStageFile(scanFile(file));
-            }
+        LOG.info("Checking directory status");
+        for (Entry<String, StatusType> entry : library.getDirectoryStatus().entrySet()) {
+            LOG.info("  {} = {}", entry.getKey(), entry.getValue());
         }
+        LOG.info("Completed.");
 
         return status;
     }
@@ -170,15 +154,15 @@ public class WatcherManagementImpl implements ScannerManagement {
      * @param directory
      */
     private StageDirectoryDTO scanDir(Library library, File directory) {
-        DirectoryType dirEnd = DirectoryEnding.check(directory);
+        DirectoryType dirType = DirectoryEnding.check(directory);
         StageDirectoryDTO stageDir;
 
-        LOG.info("Scanning directory '{}', detected type - {}", library.getRelativeDir(directory), dirEnd);
+        LOG.info("Scanning directory '{}', detected type - {}", library.getRelativeDir(directory), dirType);
 
-        if (dirEnd == DirectoryType.BLURAY || dirEnd == DirectoryType.DVD) {
+        if (dirType == DirectoryType.BLURAY || dirType == DirectoryType.DVD) {
             // Don't scan BLURAY or DVD structures
-            LOG.info("Skipping directory '{}' as its a {} type", directory.getAbsolutePath(), dirEnd);
-            library.getStatistics().increment(dirEnd == DirectoryType.BLURAY ? StatType.BLURAY : StatType.DVD);
+            LOG.info("Skipping directory '{}' as its a {} type", directory.getAbsolutePath(), dirType);
+            library.getStatistics().increment(dirType == DirectoryType.BLURAY ? StatType.BLURAY : StatType.DVD);
             stageDir = null;
         } else {
             stageDir = new StageDirectoryDTO();
@@ -188,18 +172,39 @@ public class WatcherManagementImpl implements ScannerManagement {
             library.getStatistics().increment(StatType.DIRECTORY);
 
             List<File> currentFileList = Arrays.asList(directory.listFiles());
+            FileTypeComparator comp = new FileTypeComparator(Boolean.FALSE);
+            Collections.sort(currentFileList, comp);
+
             for (File file : currentFileList) {
-                if (file.isDirectory()) {
-                    StageDirectoryDTO scanSD = scanDir(library, file);
-                    if (scanSD != null) {
-                        library.addDirectory(scanSD);
-                        send(library.getImportDTO(scanSD));
-                    } else {
-                        LOG.info("Not adding directory '{}'", file.getAbsolutePath());
-                    }
-                } else {
+                if (file.isFile()) {
                     stageDir.addStageFile(scanFile(file));
                     library.getStatistics().increment(StatType.FILE);
+                } else {
+                    // First directory we find, we can stop (because we are sorted files first)
+                    break;
+                }
+            }
+
+            library.addDirectory(stageDir);
+            // Now send the directory files before processing the directories
+            ExitType sendStatus = send(library.getImportDTO(stageDir));
+            if (sendStatus == ExitType.SUCCESS) {
+                library.addDirectoryStatus(stageDir.getPath(), StatusType.DONE);
+            }
+
+            // Resort the files with directories first
+            comp.setDirectoriesFirst(Boolean.TRUE);
+            Collections.sort(currentFileList, comp);
+
+            // Now scan the directories
+            for (File scanDir : currentFileList) {
+                if (scanDir.isDirectory()) {
+                    if (scanDir(library, scanDir) == null) {
+                        LOG.info("Not adding directory '{}', no files found", scanDir.getAbsolutePath());
+                    }
+                } else {
+                    // First file we find, we can stop (because we are sorted directories first)
+                    break;
                 }
             }
         }
@@ -226,7 +231,7 @@ public class WatcherManagementImpl implements ScannerManagement {
     private ExitType send(ImportDTO dto) {
         ExitType status;
         try {
-//            LOG.info("Sending: {}", dto.toString());
+            LOG.debug("Sending: {}", dto.toString());
             fileImportService.importScanned(dto);
             status = ExitType.SUCCESS;
         } catch (RemoteConnectFailureException ex) {
