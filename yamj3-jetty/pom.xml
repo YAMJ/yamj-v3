@@ -24,8 +24,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <jetty.version>8.1.10.v20130312</jetty.version>
-        <glassfish.version>2.2.3</glassfish.version>
-        <glassfish.jstl.version>1.2.1</glassfish.jstl.version>
     </properties>
 
     <dependencies>
@@ -56,17 +54,17 @@
         <dependency>
             <groupId>org.glassfish.web</groupId>
             <artifactId>javax.servlet.jsp</artifactId>
-            <version>${glassfish.version}</version>
+            <version>2.3.1</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.web</groupId>
             <artifactId>javax.el</artifactId>
-            <version>${glassfish.version}</version>
+            <version>2.2.5</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.web</groupId>
             <artifactId>javax.servlet.jsp.jstl</artifactId>
-            <version>${glassfish.jstl.version}</version>
+            <version>1.2.2</version>
             <exclusions>
                 <exclusion>
                     <artifactId>jstl-api</artifactId>

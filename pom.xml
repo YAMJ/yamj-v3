@@ -50,6 +50,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <hibernate.version>3.6.10.Final</hibernate.version>
         <spring.version>3.2.2.RELEASE</spring.version>
+        <org.slf4j.version>1.7.5</org.slf4j.version>
     </properties>
 
     <profiles>
@@ -170,12 +171,12 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.4</version>
+                <version>${org.slf4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-log4j12</artifactId>
-                <version>1.7.4</version>
+                <version>${org.slf4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-collections</groupId>
