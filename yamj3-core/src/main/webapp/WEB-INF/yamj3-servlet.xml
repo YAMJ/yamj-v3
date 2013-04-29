@@ -12,14 +12,14 @@
     http://www.springframework.org/schema/context/spring-context-3.0.xsd
     http://www.springframework.org/schema/task
     http://www.springframework.org/schema/task/spring-task-3.0.xsd">
-    
+
     <context:annotation-config />
     <context:component-scan base-package="com.moviejukebox"/>
 
     <!-- Activates @Scheduled and @Async annotations for scheduling -->
     <task:annotation-driven />
 
-    <bean id="propertyConfigurer" class="com.moviejukebox.core.tools.PropertyTools">
+    <bean id="propertyConfigurer" class="com.moviejukebox.common.tools.PropertyTools">
         <property name="locations">
             <list>
                 <value>classpath:/yamj3.core.properties</value>
@@ -37,7 +37,7 @@
     <mvc:annotation-driven/>
 
     <!-- Forwards requests to the "/" resource to the "home" view -->
-    <mvc:view-controller path="/" view-name="index"/>    
+    <mvc:view-controller path="/" view-name="index"/>
 
     <!-- Resolve jsp's -->
     <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
