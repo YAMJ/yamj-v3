@@ -1,6 +1,6 @@
 package com.moviejukebox.core.tools.web;
 
-import com.moviejukebox.core.tools.PropertyTools;
+import com.moviejukebox.common.tools.PropertyTools;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.LinkedList;

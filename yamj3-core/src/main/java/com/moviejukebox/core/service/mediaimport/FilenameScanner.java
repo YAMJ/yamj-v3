@@ -8,7 +8,7 @@ import com.moviejukebox.common.util.PatternUtils;
 import com.moviejukebox.common.util.TokensPatternMap;
 import com.moviejukebox.core.database.model.type.FileType;
 import com.moviejukebox.core.tools.LanguageTools;
-import com.moviejukebox.core.tools.PropertyTools;
+import com.moviejukebox.common.tools.PropertyTools;
 import com.moviejukebox.core.tools.StringTools;
 import java.util.*;
 import java.util.regex.Matcher;

@@ -1,5 +1,6 @@
 package com.moviejukebox.core.tools;
 
+import com.moviejukebox.common.tools.PropertyTools;
 import java.io.File;
 import java.text.BreakIterator;
 import java.text.DecimalFormat;

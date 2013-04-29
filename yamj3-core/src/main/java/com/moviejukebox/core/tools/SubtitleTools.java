@@ -22,6 +22,7 @@
  */
 package com.moviejukebox.core.tools;
 
+import com.moviejukebox.common.tools.PropertyTools;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;

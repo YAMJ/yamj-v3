@@ -1,5 +1,6 @@
 package com.moviejukebox.core.tools;
 
+import com.moviejukebox.common.tools.PropertyTools;
 import com.moviejukebox.common.util.KeywordMap;
 import com.moviejukebox.common.util.PatternUtils;
 import com.moviejukebox.common.util.TokensPatternMap;

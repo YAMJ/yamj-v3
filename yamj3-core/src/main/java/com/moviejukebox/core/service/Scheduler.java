@@ -8,7 +8,7 @@ import com.moviejukebox.common.type.StatusType;
 import com.moviejukebox.core.service.mediaimport.MediaImportService;
 import com.moviejukebox.core.service.moviedb.MovieDatabaseRunner;
 import com.moviejukebox.core.service.moviedb.MovieDatabaseService;
-import com.moviejukebox.core.tools.PropertyTools;
+import com.moviejukebox.common.tools.PropertyTools;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;

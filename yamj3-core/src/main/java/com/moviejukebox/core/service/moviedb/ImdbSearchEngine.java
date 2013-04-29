@@ -1,6 +1,6 @@
 package com.moviejukebox.core.service.moviedb;
 
-import com.moviejukebox.core.tools.PropertyTools;
+import com.moviejukebox.common.tools.PropertyTools;
 import com.moviejukebox.core.tools.web.HTMLTools;
 import com.moviejukebox.core.tools.web.PoolingHttpClient;
 import com.moviejukebox.core.tools.web.SearchEngineTools;
