@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 @Service("filenameScanner")
 public class FilenameScanner {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FilenameScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FilenameScanner.class);
     // Allow the use of [IMDB tt123456] to define the IMDB reference
     private static final Pattern ID_PATTERN = PatternUtils.patt("\\[ID ([^\\[\\]]*)\\]");
     // Search for tt followed by 6 or 7 digits and then a word boundary
@@ -211,7 +211,7 @@ public class FilenameScanner {
                 return FileType.IMAGE;
             }
         } catch (Exception error) {
-            LOGGER.error("Failed to determine file type for: " + fileName, error);
+            LOG.error("Failed to determine file type for: {}", fileName, error);
         }
         return FileType.UNKNOWN;
     }
@@ -221,7 +221,7 @@ public class FilenameScanner {
         if (useParentRegex && useParentPattern.matcher(dto.getName()).find()) {
             // Just go up one parent
             dto.setRest(dto.getParentName());
-            LOGGER.debug("UseParentPattern matched for " + dto.getName() + " - Using parent folder name: " + dto.getParentName());
+            LOG.debug("UseParentPattern matched for {} - Using parent folder name: {}", dto.getName(), dto.getParentName());
         } else {
             dto.setRest(dto.getName());
         }
@@ -340,7 +340,7 @@ public class FilenameScanner {
                 if (idString.length == 2) {
                     dto.setId(idString[0].toLowerCase(), idString[1]);
                 } else {
-                    LOGGER.debug("Error decoding ID from filename: " + matcher.group(1));
+                    LOG.debug("Error decoding ID from filename: {}", matcher.group(1));
                 }
             } else {
                 matcher = IMDB_PATTERN.matcher(dto.getRest());

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Service("languageTools")
 public class LanguageTools {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LanguageTools.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LanguageTools.class);
     /**
      * Mapping exact tokens to language.
      *
@@ -80,7 +80,7 @@ public class LanguageTools {
                     strictLanguageMap.put(lang, values);
                     looseLanguageMap.put(lang, values);
                 } else {
-                    LOGGER.info("No values found for language code: " + lang);
+                    LOG.info("No values found for language code '{}'", lang);
                 }
             }
         }

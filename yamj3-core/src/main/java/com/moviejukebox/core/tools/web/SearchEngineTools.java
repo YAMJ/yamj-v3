@@ -5,11 +5,12 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.LinkedList;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SearchEngineTools {
 
-    private static final Logger LOGGER = Logger.getLogger(SearchEngineTools.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SearchEngineTools.class);
     private final PoolingHttpClient httpClient;
     private LinkedList<String> searchSites;
     private String country;
@@ -92,7 +93,7 @@ public class SearchEngineTools {
     }
 
     public String searchURL(String title, int year, String site, String additional) {
-        String url = null;
+        String url;
 
         String engine = getNextSearchEngine();
         if ("yahoo".equalsIgnoreCase(engine)) {
@@ -121,7 +122,7 @@ public class SearchEngineTools {
     }
 
     public String searchUrlOnGoogle(String title, int year, String site, String additional) {
-        LOGGER.debug("Searching '" + title + "' on google; site=" + site);
+        LOG.debug("Searching '{}' on google; site={}", title, site);
 
         try {
             StringBuilder sb = new StringBuilder("http://");
@@ -152,13 +153,13 @@ public class SearchEngineTools {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
             }
         } catch (Exception error) {
-            LOGGER.error("Failed retrieving link url by google search : " + title, error);
+            LOG.error("Failed retrieving link url by google search {}", title, error);
         }
         return null;
     }
 
     public String searchUrlOnYahoo(String title, int year, String site, String additional) {
-        LOGGER.debug("Searching '" + title + "' on yahoo; site=" + site);
+        LOG.debug("Searching '{}' on yahoo; site={}", title, site);
 
         try {
             StringBuilder sb = new StringBuilder("http://");
@@ -192,13 +193,13 @@ public class SearchEngineTools {
                 }
             }
         } catch (Exception error) {
-            LOGGER.error("Failed retrieving link url by yahoo search: " + title, error);
+            LOG.error("Failed retrieving link url by yahoo search '{}'", title, error);
         }
         return null;
     }
 
     public String searchUrlOnBing(String title, int year, String site, String additional) {
-        LOGGER.debug("Searching '" + title + "' on bing; site=" + site);
+        LOG.debug("Searching '{}' on bing; site={}", title, site);
 
         try {
             StringBuilder sb = new StringBuilder("http://");
@@ -229,13 +230,13 @@ public class SearchEngineTools {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
             }
         } catch (Exception error) {
-            LOGGER.error("Failed retrieving link url by bing search : " + title, error);
+            LOG.error("Failed retrieving link url by bing search {}", title, error);
         }
         return null;
     }
 
     public String searchUrlOnBlekko(String title, int year, String site, String additional) {
-        LOGGER.debug("Searching '" + title + "' on blekko; site=" + site);
+        LOG.debug("Searching '{}' on blekko; site={}", title, site);
 
         try {
             StringBuilder sb = new StringBuilder("http://");
@@ -261,13 +262,13 @@ public class SearchEngineTools {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
             }
         } catch (Exception error) {
-            LOGGER.error("Failed retrieving link url by bing search : " + title, error);
+            LOG.error("Failed retrieving link url by bing search {}", title, error);
         }
         return null;
     }
 
     public String searchUrlOnLycos(String title, int year, String site, String additional) {
-        LOGGER.debug("Searching '" + title + "' on lycos; site=" + site);
+        LOG.debug("Searching '{}' on lycos; site={}", title, site);
 
         try {
             StringBuilder sb = new StringBuilder("http://");
@@ -301,7 +302,7 @@ public class SearchEngineTools {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
             }
         } catch (Exception error) {
-            LOGGER.error("Failed retrieving link url by lycos search: " + title, error);
+            LOG.error("Failed retrieving link url by lycos search {}", title, error);
         }
         return null;
     }

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service("fileImportService")
 public class FileImportServiceImpl implements FileImportService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileImportServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FileImportServiceImpl.class);
     @Autowired
     private StagingService stagingService;
 
@@ -21,6 +21,6 @@ public class FileImportServiceImpl implements FileImportService {
     public void importScanned(ImportDTO importDTO) {
         Library library = stagingService.storeLibrary(importDTO);
         stagingService.storeStageDirectory(importDTO.getStageDirectory(), library);
-        LOGGER.debug("Imported scanned directory: " + importDTO.getStageDirectory().getPath());
+        LOG.debug("Imported scanned directory: {}", importDTO.getStageDirectory().getPath());
     }
 }

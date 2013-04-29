@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingBean {
 
     public static final String IMDB_SCANNER_ID = "imdb";
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImdbScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImdbScanner.class);
     @Autowired
     private PoolingHttpClient httpClient;
     @Autowired
@@ -69,7 +69,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
     public ScanResult scan(VideoData videoData) {
         String imdbId = getMovieId(videoData);
         if (StringUtils.isBlank(imdbId)) {
-            LOGGER.debug("IMDb id not available : " + videoData.getTitle());
+            LOG.debug("IMDb id not available : {}", videoData.getTitle());
             return ScanResult.MISSING_ID;
         }
 
@@ -81,7 +81,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
     public ScanResult scan(Series series) {
         String imdbId = getSeriesId(series);
         if (StringUtils.isBlank(imdbId)) {
-            LOGGER.debug("IMDb id not available : " + series.getTitle());
+            LOG.debug("IMDb id not available: {}", series.getTitle());
             return ScanResult.MISSING_ID;
         }
 

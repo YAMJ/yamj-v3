@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 @Service("subtitleTools")
 public final class SubtitleTools implements InitializingBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SubtitleTools.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SubtitleTools.class);
     private static final String SPLIT_PATTERN = "\\||,|/";
     @Autowired
     private LanguageTools languageTools;
@@ -107,7 +107,7 @@ public final class SubtitleTools implements InitializingBean {
 
         boolean skipped = skippedSubtitles.contains(language.toUpperCase());
         if (skipped) {
-            LOGGER.debug("Skipping subtitle '" + language + "'");
+            LOG.debug("Skipping subtitle '{}'", language);
         }
         return skipped;
     }

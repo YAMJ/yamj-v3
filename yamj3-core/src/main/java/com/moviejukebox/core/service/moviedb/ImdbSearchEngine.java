@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 @Service("imdbSearchEngine")
 public class ImdbSearchEngine implements InitializingBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImdbSearchEngine.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImdbSearchEngine.class);
     private static final String DEFAULT_SITE = "us";
     private static final String OBJECT_MOVIE = "movie";
     private static final String OBJECT_PERSON = "person";
@@ -68,7 +68,7 @@ public class ImdbSearchEngine implements InitializingBean {
         String site = PropertyTools.getProperty("imdb.site", DEFAULT_SITE);
         imdbSiteDef = MATCHES_DATA_PER_SITE.get(site);
         if (imdbSiteDef == null) {
-            LOGGER.warn("No site definition for " + site + " using the default instead " + DEFAULT_SITE);
+            LOG.warn("No site definition for '{}' using the default instead '{}'", site, DEFAULT_SITE);
             site = DEFAULT_SITE;
             imdbSiteDef = MATCHES_DATA_PER_SITE.get(site);
         }
@@ -124,13 +124,13 @@ public class ImdbSearchEngine implements InitializingBean {
                 sb.append("search/name?name=");
                 sb.append(URLEncoder.encode(personName, imdbSiteDef.getCharset().displayName())).append("&role=").append(movieId);
 
-                LOGGER.debug("Querying IMDB for " + sb.toString());
+                LOG.debug("Querying IMDB for '{}'", sb.toString());
                 String xml = httpClient.requestContent(sb.toString());
 
                 // Check if this is an exact match (we got a person page instead of a results list)
                 Matcher titlematch = imdbSiteDef.getPersonRegex().matcher(xml);
                 if (titlematch.find()) {
-                    LOGGER.debug("IMDb returned one match " + titlematch.group(1));
+                    LOG.debug("IMDb returned one match '{}'", titlematch.group(1));
                     return titlematch.group(1);
                 }
 
@@ -142,7 +142,7 @@ public class ImdbSearchEngine implements InitializingBean {
 
             return getImdbPersonId(personName);
         } catch (Exception error) {
-            LOGGER.error("Failed retreiving IMDb Id for person : " + personName, error);
+            LOG.error("Failed retreiving IMDb Id for person '{}'", personName, error);
             return null;
         }
     }
@@ -181,7 +181,7 @@ public class ImdbSearchEngine implements InitializingBean {
         }
 
         if (imdbId.startsWith(objectType.equals(OBJECT_MOVIE) ? "tt" : "nm")) {
-            LOGGER.debug("Found IMDb ID: " + imdbId);
+            LOG.debug("Found IMDb ID '{}'", imdbId);
             return imdbId;
         }
         return null;
@@ -196,7 +196,7 @@ public class ImdbSearchEngine implements InitializingBean {
         try {
             sb.append(URLEncoder.encode(title, imdbSiteDef.getCharset().displayName()));
         } catch (UnsupportedEncodingException ex) {
-            LOGGER.debug("Failed to encode title: " + title);
+            LOG.debug("Failed to encode title '{}'", title);
             sb.append(title);
         }
 
@@ -218,12 +218,12 @@ public class ImdbSearchEngine implements InitializingBean {
         }
         sb.append("&site=aka");
 
-        LOGGER.debug("Querying IMDb for " + sb.toString());
+        LOG.debug("Querying IMDb for '{}'", sb.toString());
         String xml;
         try {
             xml = httpClient.requestContent(sb.toString());
         } catch (IOException ex) {
-            LOGGER.error("Failed retreiving IMDb Id for: " + title, ex);
+            LOG.error("Failed retreiving IMDb Id for '{}'", title, ex);
             return null;
         }
 
@@ -235,7 +235,7 @@ public class ImdbSearchEngine implements InitializingBean {
 
         Matcher titlematch = titleregex.matcher(xml);
         if (titlematch.find()) {
-            LOGGER.debug("IMDb returned one match " + titlematch.group(1));
+            LOG.debug("IMDb returned one match '{}'", titlematch.group(1));
             return titlematch.group(1);
         }
 
@@ -265,7 +265,7 @@ public class ImdbSearchEngine implements InitializingBean {
             try {
                 sb.append(URLEncoder.encode(title, imdbSiteDef.getCharset().displayName()).replace("+", " "));
             } catch (UnsupportedEncodingException ex) {
-                LOGGER.debug("Failed to encode title: " + title);
+                LOG.debug("Failed to encode title '{}'", title);
                 sb.append(title);
             }
             formattedName = sb.toString().toLowerCase();
@@ -323,12 +323,12 @@ public class ImdbSearchEngine implements InitializingBean {
             }
 
             if (firstPersonId.startsWith("nm")) {
-                LOGGER.debug("Found IMDb ID: " + firstPersonId);
+                LOG.debug("Found IMDb ID '{}'", firstPersonId);
                 return firstPersonId;
             }
         }
 
-        LOGGER.debug("Failed to find a match on IMDb");
+        LOG.debug("Failed to find a match on IMDb");
         return null;
     }
 }

@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 public class MovieDatabaseRunner implements Runnable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MovieDatabaseRunner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MovieDatabaseRunner.class);
     private final BlockingQueue<QueueDTO> queue;
     private final MovieDatabaseService controller;
 
@@ -23,7 +23,7 @@ public class MovieDatabaseRunner implements Runnable {
             try {
                 controller.scanMetadata(queueElement);
             } catch (Exception error) {
-                LOGGER.error("Failed to process media data", error);
+                LOG.error("Failed to process media data", error);
                 try {
                     controller.processingError(queueElement);
                 } catch (Exception ignore) {

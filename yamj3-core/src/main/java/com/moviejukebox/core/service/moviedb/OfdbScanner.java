@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 public class OfdbScanner implements IMovieScanner, InitializingBean {
 
     public static final String OFDB_SCANNER_ID = "ofdb";
-    private static final Logger LOGGER = LoggerFactory.getLogger(OfdbScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OfdbScanner.class);
     @Autowired
     private PoolingHttpClient httpClient;
     @Autowired
@@ -90,7 +90,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
             }
 
         } catch (Exception error) {
-            LOGGER.error("Failed retreiving OFDb url for IMDb id: " + imdbId, error);
+            LOG.error("Failed retreiving OFDb url for IMDb id '{}'", imdbId, error);
         }
         return null;
     }
@@ -127,7 +127,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
             return sb.toString();
 
         } catch (Exception error) {
-            LOGGER.error("Failed retrieving OFDb url for title: " + title, error);
+            LOG.error("Failed retrieving OFDb url for title '{}'", title, error);
         }
         return null;
     }
@@ -137,11 +137,11 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
         String ofdbUrl = getMovieId(videoData);
 
         if (StringUtils.isBlank(ofdbUrl)) {
-            LOGGER.debug("OFDb url not available : " + videoData.getTitle());
+            LOG.debug("OFDb url not available '{}'", videoData.getTitle());
             return ScanResult.MISSING_ID;
         }
 
-        LOGGER.debug("OFDb url available (" + ofdbUrl + "), updating video data");
+        LOG.debug("OFDb url available ({}), updating video data", ofdbUrl);
         return updateVideoData(videoData, ofdbUrl);
     }
 
@@ -154,7 +154,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
             String title = HTMLTools.extractTag(xml, "<title>OFDb -", "</title>");
             // check for movie type change
             if (title.contains("[TV-Serie]")) {
-                LOGGER.warn(videoData.getTitle() + " is a TV Show, skipping");
+                LOG.warn("{} is a TV Show, skipping", videoData.getTitle());
                 return ScanResult.TYPE_CHANGE;
             }
 
@@ -196,7 +196,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                         //videoData.setOutline(plot, OFDB_SCANNER_ID);
                     }
                 } catch (Exception error) {
-                    LOGGER.error("Failed retrieving plot : " + ofdbUrl, error);
+                    LOG.error("Failed retrieving plot '{}'", ofdbUrl, error);
                     scanResult = ScanResult.ERROR;
                 }
             }
@@ -267,7 +267,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                 }
             }
         } catch (Exception error) {
-            LOGGER.error("Failed retrieving meta data : " + ofdbUrl, error);
+            LOG.error("Failed retrieving meta data '{}'", ofdbUrl, error);
             scanResult = ScanResult.ERROR;
         }
         return scanResult;

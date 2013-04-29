@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class Scheduler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Scheduler.class);
     @Autowired
     private StagingDao stagingDao;
     @Autowired
@@ -44,11 +44,11 @@ public class Scheduler {
                 // find next stage file to process
                 id = stagingDao.getNextStageFileId(FileType.VIDEO, StatusType.NEW, StatusType.UPDATED);
                 if (id != null) {
-                    LOGGER.debug("Process stage file: " + id);
+                    LOG.debug("Process stage file: {}" , id);
                     this.mediaImportService.processVideo(id);
                 }
             } catch (Exception error) {
-                LOGGER.error("Failed to process stage file", error);
+                LOG.error("Failed to process stage file", error);
                 try {
                     mediaImportService.processingError(id);
                 } catch (Exception ignore) {
@@ -67,11 +67,11 @@ public class Scheduler {
     public void scanMediaData() throws Exception {
         List<QueueDTO> queueElements = mediaDao.getMediaQueueForScanning();
         if (CollectionUtils.isEmpty(queueElements)) {
-            LOGGER.debug("No media data found to scan");
+            LOG.debug("No media data found to scan");
             return;
         }
 
-        LOGGER.info("Found {} media data objects to process", queueElements.size());
+        LOG.info("Found {} media data objects to process", queueElements.size());
         BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
 
         int maxScannerThreads = PropertyTools.getIntProperty("yamj3.scheduler.mediascan.maxThreads", 5);
@@ -90,6 +90,6 @@ public class Scheduler {
             }
         }
 
-        LOGGER.debug("Finished media data scanning");
+        LOG.debug("Finished media data scanning");
     }
 }

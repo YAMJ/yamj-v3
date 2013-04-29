@@ -34,7 +34,7 @@ import org.springframework.beans.factory.DisposableBean;
 
 public class PoolingHttpClient extends DefaultHttpClient implements DisposableBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PoolingHttpClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PoolingHttpClient.class);
     private final Map<String, Integer> groupLimits = new HashMap<String, Integer>();
     private final List<String> routedHosts = new ArrayList<String>();
     private String proxyHost = null;
@@ -63,7 +63,7 @@ public class PoolingHttpClient extends DefaultHttpClient implements DisposableBe
         // Default, can be overridden
         groupLimits.put(".*", 1);
         String limitsProperty = PropertyTools.getProperty("yamj3.http.maxDownloadSlots", ".*=1");
-        LOGGER.debug("Using download limits: " + limitsProperty);
+        LOG.debug("Using download limits: {}" , limitsProperty);
 
         Pattern pattern = Pattern.compile(",?\\s*([^=]+)=(\\d+)");
         Matcher matcher = pattern.matcher(limitsProperty);
@@ -73,7 +73,7 @@ public class PoolingHttpClient extends DefaultHttpClient implements DisposableBe
                 Pattern.compile(group);
                 groupLimits.put(group, Integer.parseInt(matcher.group(2)));
             } catch (Exception error) {
-                LOGGER.debug("Rule \"" + group + "\" is not valid regexp, ignored");
+                LOG.debug("Rule '{}' is not valid regexp, ignored",group);
             }
         }
     }
@@ -135,6 +135,7 @@ public class PoolingHttpClient extends DefaultHttpClient implements DisposableBe
         return params;
     }
 
+    @Override
     protected ClientConnectionManager createClientConnectionManager() {
         PoolingClientConnectionManager clientManager = new PoolingClientConnectionManager();
         clientManager.setDefaultMaxPerRoute(connectionsMaxPerRoute);
@@ -232,7 +233,7 @@ public class PoolingHttpClient extends DefaultHttpClient implements DisposableBe
                 }
                 int maxRequests = groupLimits.get(group);
 
-                LOGGER.debug("IO download host: {}; rule: {}, maxRequests: {}", key, group, maxRequests);
+                LOG.debug("IO download host: {}; rule: {}, maxRequests: {}", key, group, maxRequests);
                 routedHosts.add(key);
 
                 HttpRoute httpRoute = new HttpRoute(httpHost);

@@ -8,14 +8,15 @@ import java.net.URLEncoder;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HTMLTools {
 
     private static final Map<Character, String> AGGRESSIVE_HTML_ENCODE_MAP = new HashMap<Character, String>();
     private static final Map<Character, String> DEFENSIVE_HTML_ENCODE_MAP = new HashMap<Character, String>();
     private static final Map<String, Character> HTML_DECODE_MAP = new HashMap<String, Character>();
-    private static final Logger logger = Logger.getLogger(HTMLTools.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HTMLTools.class);
 
     static {
         /*
@@ -372,7 +373,7 @@ public class HTMLTools {
             try {
                 return URLDecoder.decode(url, "UTF-8");
             } catch (UnsupportedEncodingException ignored) {
-                logger.info("Could not decode URL string: " + url + ", will proceed with undecoded string.");
+                LOG.info("Could not decode URL string '{}', will proceed with undecoded string.", url);
             }
         }
         return url;
@@ -386,7 +387,7 @@ public class HTMLTools {
                 returnUrl = URLEncoder.encode(url, "UTF-8");
                 returnUrl = returnUrl.replace((CharSequence) "+", (CharSequence) "%20"); // why does URLEncoder do that??!!
             } catch (UnsupportedEncodingException ignored) {
-                logger.info("Could not decode URL string: " + returnUrl + ", will proceed with undecoded string.");
+                LOG.info("Could not decode URL string '{}', will proceed with undecoded string.", returnUrl);
             }
         }
         return returnUrl;

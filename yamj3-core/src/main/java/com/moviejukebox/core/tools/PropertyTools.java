@@ -16,7 +16,7 @@ import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 
 public class PropertyTools extends PropertyPlaceholderConfigurer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyTools.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PropertyTools.class);
     private static final Properties properties = new Properties();
     // Default as in PropertyPlaceholderConfigurer
     private int springSystemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
@@ -38,7 +38,7 @@ public class PropertyTools extends PropertyPlaceholderConfigurer {
             properties.put(keyStr, valueStr);
         }
 
-        LOGGER.info("Loaded " + properties.size() + " properties into core");
+        LOG.info("Loaded {} properties into core", properties.size());
     }
 
     public static String getProperty(String key) {
@@ -123,7 +123,7 @@ public class PropertyTools extends PropertyPlaceholderConfigurer {
         if (property == null) {
             property = properties.getProperty(newKey, defaultValue);
         } else {
-            LOGGER.warn("Property '" + oldKey + "' has been deprecated and will be removed; please use '" + newKey + "' instead");
+            LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
         }
         return property;
     }
@@ -133,7 +133,7 @@ public class PropertyTools extends PropertyPlaceholderConfigurer {
         if (property == null) {
             property = properties.getProperty(newKey);
         } else {
-            LOGGER.warn("Property '" + oldKey + "' has been deprecated and will be removed; please use '" + newKey + "' instead");
+            LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
         }
         if (property != null) {
             return Boolean.parseBoolean(property.trim());
@@ -146,7 +146,7 @@ public class PropertyTools extends PropertyPlaceholderConfigurer {
         if (property == null) {
             property = properties.getProperty(newKey);
         } else {
-            LOGGER.warn("Property '" + oldKey + "' has been deprecated and will be removed; please use '" + newKey + "' instead");
+            LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
         }
         if (property != null) {
             try {
@@ -162,7 +162,7 @@ public class PropertyTools extends PropertyPlaceholderConfigurer {
         if (property == null) {
             property = properties.getProperty(newKey);
         } else {
-            LOGGER.warn("Property '" + oldKey + "' has been deprecated and will be removed; please use '" + newKey + "' instead");
+            LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
         }
         if (property != null) {
             try {
@@ -178,7 +178,7 @@ public class PropertyTools extends PropertyPlaceholderConfigurer {
         if (property == null) {
             property = properties.getProperty(newKey);
         } else {
-            LOGGER.warn("Property '" + oldKey + "' has been deprecated and will be removed; please use '" + newKey + "' instead");
+            LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
         }
         if (property != null) {
             try {

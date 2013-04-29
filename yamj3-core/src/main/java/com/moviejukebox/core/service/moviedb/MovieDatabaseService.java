@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service("movieDatabaseService")
 public class MovieDatabaseService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MovieDatabaseService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MovieDatabaseService.class);
     @Autowired
     private MediaDao mediaDao;
     @Autowired
@@ -52,20 +52,20 @@ public class MovieDatabaseService {
         } else if (queueElement.isSeriesElement()) {
             this.scanSeries(queueElement.getId());
         } else {
-            LOGGER.error("No valid element for scanning metadata: " + queueElement);
+            LOG.error("No valid element for scanning metadata '{}'", queueElement);
         }
     }
 
     private void scanVideoData(Long id) {
         VideoData videoData = mediaDao.getVideoData(id);
-        LOGGER.debug("Scanning video data for: " + videoData.getTitle());
+        LOG.debug("Scanning video data for '{}'", videoData.getTitle());
 
         // SCAN MOVIE
 
         String scannerName = PropertyTools.getProperty("yamj3.moviedb.scanner.movie", "imdb");
         IMovieScanner movieScanner = registeredMovieScanner.get(scannerName);
         if (movieScanner == null) {
-            LOGGER.error("Movie scanner not registered: " + scannerName);
+            LOG.error("Movie scanner not registered '{}'", scannerName);
             videoData.setStatus(StatusType.ERROR);
             mediaDao.updateEntity(videoData);
             return;
@@ -76,8 +76,8 @@ public class MovieDatabaseService {
         try {
             scanResult = movieScanner.scan(videoData);
         } catch (Exception error) {
-            LOGGER.error("Failed scanning video data with {} scanner", scannerName);
-            LOGGER.warn("Scanning error", error);
+            LOG.error("Failed scanning video data with {} scanner", scannerName);
+            LOG.warn("Scanning error", error);
         }
 
         // SCAN ALTERNATE
@@ -88,15 +88,15 @@ public class MovieDatabaseService {
 
             scannerName = PropertyTools.getProperty("yamj3.moviedb.scanner.movie.alternate", "");
             if (StringUtils.isNotBlank(scannerName)) {
-                movieScanner = registeredMovieScanner.get(scannerName);;
+                movieScanner = registeredMovieScanner.get(scannerName);
             }
 
             if (movieScanner != null) {
                 try {
                     movieScanner.scan(videoData);
                 } catch (Exception error) {
-                    LOGGER.error("Failed scanning video data with {} alternate scanner", scannerName);
-                    LOGGER.warn("Alternate scanning error", error);
+                    LOG.error("Failed scanning video data with {} alternate scanner", scannerName);
+                    LOG.warn("Alternate scanning error", error);
                 }
             }
         }
@@ -130,20 +130,17 @@ public class MovieDatabaseService {
 
     private void scanSeries(Long id) {
         Series series = mediaDao.getSeries(id);
-        LOGGER.debug("Scanning series for: " + series.getTitle());
+        LOG.debug("Scanning series for '{}'", series.getTitle());
 
         // SCAN MOVIE
 
         String scannerName = PropertyTools.getProperty("yamj3.moviedb.scanner.series", "thetvdb");
         ISeriesScanner seriesScanner = registeredSeriesScanner.get(scannerName);
         if (seriesScanner == null) {
-            LOGGER.error("Series scanner not registered: " + scannerName);
+            LOG.error("Series scanner '{}' not registered", scannerName);
             series.setStatus(StatusType.ERROR);
             mediaDao.updateEntity(series);
-            return;
         }
-
-        return;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
