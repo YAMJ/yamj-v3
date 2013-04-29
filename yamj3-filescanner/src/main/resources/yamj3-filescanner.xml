@@ -33,8 +33,8 @@
 
     <bean id="pingCore"
           class="com.moviejukebox.filescanner.service.PingCore">
-        <property name="timeoutSeconds" value="30"/>
-        <property name="numberOfRetries" value="3"/>
+        <property name="timeoutSeconds" value="${filescanner.pingcore.timeout}"/>
+        <property name="numberOfRetries" value="${filescanner.pingcore.retry}"/>
     </bean>
 
     <bean id="fileImportService"

@@ -5,6 +5,7 @@ import com.moviejukebox.common.dto.ImportDTO;
 import com.moviejukebox.common.dto.StageDirectoryDTO;
 import com.moviejukebox.common.dto.StageFileDTO;
 import com.moviejukebox.common.remote.service.FileImportService;
+import com.moviejukebox.common.tools.PropertyTools;
 import com.moviejukebox.common.type.DirectoryType;
 import com.moviejukebox.common.type.ExitType;
 import com.moviejukebox.filescanner.tools.Watcher;
@@ -37,19 +38,18 @@ public class WatcherManagementImpl implements ScannerManagement {
      * TODO: determine what files have changed between scans
      * TODO: add library file reader
      * TODO: add multiple directory location support
-     *
      */
     private static final Logger LOG = LoggerFactory.getLogger(WatcherManagementImpl.class);
     // The default watched status
-    private static final Boolean DEFAULT_WATCH_STATE = Boolean.FALSE;    // TODO: Should be a property
+    private static final Boolean DEFAULT_WATCH_STATE = PropertyTools.getBooleanProperty("filescanner.watch.default", Boolean.FALSE);
     // Spring service(s)
     @Resource(name = "fileImportService")
     private FileImportService fileImportService;
     @Resource(name = "libraryCollection")
     private LibraryCollection libraryCollection;
     // ImportDTO constants
-    private static final String DEFAULT_CLIENT = "FileScanner";
-    private static final String DEFAULT_PLAYER_PATH = "";
+    private static final String DEFAULT_CLIENT = PropertyTools.getProperty("filescanner.default.client", "FileScanner");
+    private static final String DEFAULT_PLAYER_PATH = PropertyTools.getProperty("filescanner.default.playerpath", "");
 
     /**
      * Start the scanner and process the command line properties.

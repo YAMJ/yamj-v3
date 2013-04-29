@@ -4,7 +4,8 @@ import com.moviejukebox.common.tools.DateTimeTools;
 import java.util.EnumMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class to store any statistics about the jukebox
@@ -13,7 +14,7 @@ import org.apache.log4j.Logger;
  */
 public class Statistics {
 
-    private static final Logger LOG = Logger.getLogger(Statistics.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Statistics.class);
     // Statistics
     private EnumMap<StatType, Integer> statistics = new EnumMap<StatType, Integer>(StatType.class);
     private EnumMap<TimeType, Long> times = new EnumMap<TimeType, Long>(TimeType.class);
