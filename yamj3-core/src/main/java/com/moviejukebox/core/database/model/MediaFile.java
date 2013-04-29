@@ -20,7 +20,7 @@ import org.hibernate.annotations.Parameter;
 @TypeDef(name = "statusType",
         typeClass = EnumStringUserType.class,
         parameters = {
-    @Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.StatusType")})
+    @Parameter(name = "enumClassName", value = "com.moviejukebox.common.type.StatusType")})
 @Entity
 @Table(name = "mediafile")
 public class MediaFile extends AbstractAuditable implements Serializable {

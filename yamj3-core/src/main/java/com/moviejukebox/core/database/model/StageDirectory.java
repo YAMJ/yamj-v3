@@ -31,7 +31,7 @@ import org.hibernate.annotations.NaturalId;
 @TypeDef(name = "statusType",
         typeClass = EnumStringUserType.class,
         parameters = {
-    @Parameter(name = "enumClassName", value = "com.moviejukebox.core.database.model.type.StatusType")})
+    @Parameter(name = "enumClassName", value = "com.moviejukebox.common.type.StatusType")})
 @Entity
 @Table(name = "stage_directory")
 public class StageDirectory extends AbstractAuditable implements Serializable {
