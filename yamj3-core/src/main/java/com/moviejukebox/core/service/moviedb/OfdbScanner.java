@@ -20,8 +20,9 @@ import org.springframework.stereotype.Service;
 @Service("ofdbScanner")
 public class OfdbScanner implements IMovieScanner, InitializingBean {
 
-    public static final String OFDB_SCANNER_ID = "ofdb";
     private static final Logger LOG = LoggerFactory.getLogger(OfdbScanner.class);
+    private static final String OFDB_SCANNER_ID = "ofdb";
+    private static final String IMDB_ID = "imdb";
     @Autowired
     private PoolingHttpClient httpClient;
     @Autowired
@@ -46,7 +47,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
         String ofdbId = videoData.getMoviedbId(OFDB_SCANNER_ID);
         if (StringUtils.isBlank(ofdbId)) {
             // find by IMDb id
-            String imdbId = videoData.getMoviedbId("imdb");
+            String imdbId = videoData.getMoviedbId(IMDB_ID);
             if (StringUtils.isNotBlank(imdbId)) {
                 // if IMDb id is present then use this
                 ofdbId = getOfdbIdByImdbId(imdbId);
