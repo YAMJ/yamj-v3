@@ -20,6 +20,7 @@ import com.moviejukebox.filescanner.comparator.FileTypeComparator;
 import com.moviejukebox.filescanner.model.Library;
 import com.moviejukebox.filescanner.model.LibraryCollection;
 import com.moviejukebox.filescanner.model.StatType;
+import com.moviejukebox.filescanner.service.PingCore;
 import com.moviejukebox.filescanner.tools.DirectoryEnding;
 import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
@@ -47,6 +48,8 @@ public class WatcherManagementImpl implements ScannerManagement {
     private FileImportService fileImportService;
     @Resource(name = "libraryCollection")
     private LibraryCollection libraryCollection;
+    @Resource(name = "pingCore")
+    private PingCore pingCore;
     // ImportDTO constants
     private static final String DEFAULT_CLIENT = PropertyTools.getProperty("filescanner.default.client", "FileScanner");
     private static final String DEFAULT_PLAYER_PATH = PropertyTools.getProperty("filescanner.default.playerpath", "");
@@ -61,6 +64,7 @@ public class WatcherManagementImpl implements ScannerManagement {
     public ExitType runScanner(CmdLineParser parser) {
         libraryCollection.setDefaultClient(DEFAULT_CLIENT);
         libraryCollection.setDefaultPlayerPath(DEFAULT_PLAYER_PATH);
+        pingCore.check(0, 0);   // Do a quick check of the status of the connection
 
         String directoryProperty = parser.getParsedOptionValue("d");
         boolean watchEnabled = parseWatchStatus(parser.getParsedOptionValue("w"));
@@ -137,10 +141,7 @@ public class WatcherManagementImpl implements ScannerManagement {
 
         scanDir(library, baseDirectory);
 
-        LOG.info("Checking directory status");
-        for (Entry<String, StatusType> entry : library.getDirectoryStatus().entrySet()) {
-            LOG.info("  {} = {}", entry.getKey(), entry.getValue());
-        }
+        sendLibrary(library);
         LOG.info("Completed.");
 
         return status;
@@ -242,6 +243,29 @@ public class WatcherManagementImpl implements ScannerManagement {
             status = CONNECT_FAILURE;
         }
         return status;
+    }
+
+    /**
+     * Check to see if the library entries need sending to the core server
+     */
+    private void sendLibrary(Library library) {
+        LOG.info("Checking directory status for library {}", library.getImportDTO().getBaseDirectory());
+
+        LOG.info(pingCore.status());
+        for (Entry<String, StatusType> entry : library.getDirectoryStatus().entrySet()) {
+            LOG.info("  {} = {}", library.getRelativeDir(entry.getKey()), entry.getValue());
+            if (pingCore.isConnected()) {
+                if (entry.getValue() != StatusType.DONE) {
+                    LOG.info("    Sending to core...");
+                    StageDirectoryDTO stageDir = library.getDirectory(entry.getKey());
+                    send(library.getImportDTO(stageDir));
+                } else {
+                    LOG.info("    Already sent to core, skipping");
+                }
+            } else {
+                LOG.info("    Unable to send to core because of connection issues.");
+            }
+        }
     }
 
     /**

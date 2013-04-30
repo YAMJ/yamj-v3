@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.io.FilenameUtils;
 
 /**
  *
@@ -121,6 +122,16 @@ public class Library implements Serializable {
     }
 
     /**
+     * Get the stage directory for a path
+     *
+     * @param stageDirPath
+     * @return
+     */
+    public StageDirectoryDTO getDirectory(String stageDirPath) {
+        return directories.get(stageDirPath);
+    }
+
+    /**
      * Get the ImportDTO for the library
      *
      * @return
@@ -229,14 +240,25 @@ public class Library implements Serializable {
      * @return
      */
     public String getRelativeDir(File directory) {
-        if (directory.getAbsolutePath().startsWith(importDTO.getBaseDirectory())) {
-            if (directory.getAbsolutePath().length() > importDTO.getBaseDirectory().length()) {
-                return directory.getAbsolutePath().substring(importDTO.getBaseDirectory().length() + 1);
+        return getRelativeDir(directory.getAbsolutePath());
+    }
+
+    /**
+     * Calculate the relative directory from the library base directory
+     *
+     * @param directory
+     * @return
+     */
+    public String getRelativeDir(String absolutePath) {
+        if (absolutePath.startsWith(importDTO.getBaseDirectory())) {
+            if (absolutePath.length() > importDTO.getBaseDirectory().length()) {
+                return absolutePath.substring(importDTO.getBaseDirectory().length() + 1);
             } else {
-                return directory.getName();
+                return FilenameUtils.getBaseName(absolutePath);
             }
         } else {
-            return directory.getAbsolutePath();
+            return absolutePath;
         }
+
     }
 }
