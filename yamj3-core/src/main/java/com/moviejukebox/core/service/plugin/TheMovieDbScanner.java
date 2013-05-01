@@ -1,4 +1,4 @@
-package com.moviejukebox.core.service.moviedb;
+package com.moviejukebox.core.service.plugin;
 
 import com.moviejukebox.common.tools.PropertyTools;
 import com.moviejukebox.core.database.model.VideoData;
@@ -25,8 +25,8 @@ public class TheMovieDbScanner implements IMovieScanner, InitializingBean {
     private static final boolean INCLUDE_ADULT = PropertyTools.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
     private static final int SEARCH_MATCH = PropertyTools.getIntProperty("themoviedb.searchMatch", 3);
     @Autowired
-    private MovieDatabaseService movieDatabaseService;
-    private static final String API_KEY = PropertyTools.getProperty("themoviedb.apikey", "");
+    private PluginDatabaseService pluginDatabaseService;
+    private static final String API_KEY = PropertyTools.getProperty("APIKEY.themoviedb", "");
     private static TheMovieDbApi tmdbApi;
 
     @Override
@@ -40,7 +40,7 @@ public class TheMovieDbScanner implements IMovieScanner, InitializingBean {
             try {
                 tmdbApi = new TheMovieDbApi(API_KEY);
                 // register this scanner
-                movieDatabaseService.registerMovieScanner(this);
+                pluginDatabaseService.registerMovieScanner(this);
 
             } catch (MovieDbException ex) {
                 LOG.error("Unable to initialise TheMovieDbScanner, error: {}", ex.getMessage());

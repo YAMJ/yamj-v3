@@ -1,4 +1,4 @@
-package com.moviejukebox.core.service.moviedb;
+package com.moviejukebox.core.service.plugin;
 
 import com.moviejukebox.core.database.dao.CommonDao;
 import com.moviejukebox.core.database.dao.MediaDao;
@@ -19,10 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service("movieDatabaseService")
-public class MovieDatabaseService {
+@Service("pluginDatabaseService")
+public class PluginDatabaseService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MovieDatabaseService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PluginDatabaseService.class);
     @Autowired
     private MediaDao mediaDao;
     @Autowired

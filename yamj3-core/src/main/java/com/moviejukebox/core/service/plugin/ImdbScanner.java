@@ -1,4 +1,4 @@
-package com.moviejukebox.core.service.moviedb;
+package com.moviejukebox.core.service.plugin;
 
 import com.moviejukebox.core.database.model.Series;
 import com.moviejukebox.core.database.model.VideoData;
@@ -20,7 +20,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
     @Autowired
-    private MovieDatabaseService movieDatabaseService;
+    private PluginDatabaseService pluginDatabaseService;
 
     @Override
     public String getScannerName() {
@@ -30,8 +30,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
     @Override
     public void afterPropertiesSet() throws Exception {
         // register this scanner
-        movieDatabaseService.registerMovieScanner(this);
-        movieDatabaseService.registerSeriesScanner(this);
+        pluginDatabaseService.registerMovieScanner(this);
+        pluginDatabaseService.registerSeriesScanner(this);
     }
 
     @Override

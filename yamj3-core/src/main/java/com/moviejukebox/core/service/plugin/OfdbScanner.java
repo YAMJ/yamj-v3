@@ -1,4 +1,4 @@
-package com.moviejukebox.core.service.moviedb;
+package com.moviejukebox.core.service.plugin;
 
 import com.moviejukebox.core.database.model.VideoData;
 import com.moviejukebox.core.database.model.dto.CreditDTO;
@@ -26,7 +26,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     @Autowired
     private PoolingHttpClient httpClient;
     @Autowired
-    private MovieDatabaseService movieDatabaseService;
+    private PluginDatabaseService pluginDatabaseService;
     private SearchEngineTools searchEngineTools;
 
     @Override
@@ -39,7 +39,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
         searchEngineTools = new SearchEngineTools(httpClient, "de");
 
         // register this scanner
-        movieDatabaseService.registerMovieScanner(this);
+        pluginDatabaseService.registerMovieScanner(this);
     }
 
     @Override

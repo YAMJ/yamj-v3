@@ -1,5 +1,6 @@
 package com.moviejukebox.core.service.moviedb;
 
+import com.moviejukebox.core.service.plugin.OfdbScanner;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;

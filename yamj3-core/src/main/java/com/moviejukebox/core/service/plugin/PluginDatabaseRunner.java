@@ -1,17 +1,17 @@
-package com.moviejukebox.core.service.moviedb;
+package com.moviejukebox.core.service.plugin;
 
 import com.moviejukebox.core.database.model.dto.QueueDTO;
 import java.util.concurrent.BlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MovieDatabaseRunner implements Runnable {
+public class PluginDatabaseRunner implements Runnable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MovieDatabaseRunner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PluginDatabaseRunner.class);
     private final BlockingQueue<QueueDTO> queue;
-    private final MovieDatabaseService controller;
+    private final PluginDatabaseService controller;
 
-    public MovieDatabaseRunner(BlockingQueue<QueueDTO> queue, MovieDatabaseService controller) {
+    public PluginDatabaseRunner(BlockingQueue<QueueDTO> queue, PluginDatabaseService controller) {
         this.queue = queue;
         this.controller = controller;
     }

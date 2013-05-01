@@ -1,4 +1,4 @@
-package com.moviejukebox.core.service.moviedb;
+package com.moviejukebox.core.service.plugin;
 
 import java.nio.charset.Charset;
 import java.util.regex.Pattern;

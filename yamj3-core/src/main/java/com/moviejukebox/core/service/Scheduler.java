@@ -6,8 +6,8 @@ import com.moviejukebox.core.database.model.dto.QueueDTO;
 import com.moviejukebox.core.database.model.type.FileType;
 import com.moviejukebox.common.type.StatusType;
 import com.moviejukebox.core.service.mediaimport.MediaImportService;
-import com.moviejukebox.core.service.moviedb.MovieDatabaseRunner;
-import com.moviejukebox.core.service.moviedb.MovieDatabaseService;
+import com.moviejukebox.core.service.plugin.PluginDatabaseRunner;
+import com.moviejukebox.core.service.plugin.PluginDatabaseService;
 import com.moviejukebox.common.tools.PropertyTools;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -32,7 +32,7 @@ public class Scheduler {
     @Autowired
     private MediaImportService mediaImportService;
     @Autowired
-    private MovieDatabaseService movieDatabaseController;
+    private PluginDatabaseService movieDatabaseController;
 
     @Scheduled(initialDelay = 10000, fixedDelay = 30000)
     public void processStageFiles() throws Exception {
@@ -77,7 +77,7 @@ public class Scheduler {
         int maxScannerThreads = PropertyTools.getIntProperty("yamj3.scheduler.mediascan.maxThreads", 5);
         ExecutorService executor = Executors.newFixedThreadPool(maxScannerThreads);
         for (int i = 0; i < maxScannerThreads; i++) {
-            MovieDatabaseRunner worker = new MovieDatabaseRunner(queue, movieDatabaseController);
+            PluginDatabaseRunner worker = new PluginDatabaseRunner(queue, movieDatabaseController);
             executor.execute(worker);
         }
         executor.shutdown();

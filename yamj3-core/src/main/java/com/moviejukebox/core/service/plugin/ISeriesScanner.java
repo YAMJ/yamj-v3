@@ -1,8 +1,8 @@
-package com.moviejukebox.core.service.moviedb;
+package com.moviejukebox.core.service.plugin;
 
 import com.moviejukebox.core.database.model.Series;
 
-public interface ISeriesScanner extends IMovieDatabaseScanner {
+public interface ISeriesScanner extends IPluginDatabaseScanner {
 
     public String getSeriesId(Series series);
 

@@ -1,8 +1,8 @@
-package com.moviejukebox.core.service.moviedb;
+package com.moviejukebox.core.service.plugin;
 
 import com.moviejukebox.core.database.model.VideoData;
 
-public interface IMovieScanner extends IMovieDatabaseScanner {
+public interface IMovieScanner extends IPluginDatabaseScanner {
 
     public String getMovieId(VideoData videoData);
 

@@ -1,4 +1,4 @@
-package com.moviejukebox.core.service.moviedb;
+package com.moviejukebox.core.service.plugin;
 
 import com.moviejukebox.common.tools.PropertyTools;
 import com.moviejukebox.core.tools.web.HTMLTools;
