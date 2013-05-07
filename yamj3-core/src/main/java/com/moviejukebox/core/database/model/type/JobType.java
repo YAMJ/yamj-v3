@@ -5,7 +5,8 @@ public enum JobType {
     UNKNOWN,
     DIRECTOR,
     ACTOR,
-    WRITER;
+    WRITER,
+    PRODUCER;
 
     public static JobType fromString(String type) {
         try {
