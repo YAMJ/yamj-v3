@@ -187,6 +187,10 @@ public class Series extends AbstractAuditable implements
         this.ratings = ratings;
     }
 
+    public void addRating(String source, Integer rating) {
+        this.ratings.put(source, rating);
+    }
+
     public Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
