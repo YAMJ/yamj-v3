@@ -58,11 +58,12 @@ public class PluginDatabaseService {
 
     private void scanVideoData(Long id) {
         VideoData videoData = mediaDao.getVideoData(id);
-        LOG.debug("Scanning video data for '{}'", videoData.getTitle());
 
         // SCAN MOVIE
 
-        String scannerName = PropertyTools.getProperty("yamj3.moviedb.scanner.movie", "imdb");
+        String scannerName = PropertyTools.getProperty("yamj3.moviedb.scanner.movie", "tmdb");
+        LOG.debug("Scanning movie data for '{}' using {}", videoData.getTitle(), scannerName);
+
         IMovieScanner movieScanner = registeredMovieScanner.get(scannerName);
         if (movieScanner == null) {
             LOG.error("Movie scanner not registered '{}'", scannerName);
@@ -130,12 +131,12 @@ public class PluginDatabaseService {
 
     private void scanSeries(Long id) {
         Series series = mediaDao.getSeries(id);
-        LOG.debug("Scanning series for '{}'", series.getTitle());
 
-        // SCAN MOVIE
-
-        String scannerName = PropertyTools.getProperty("yamj3.moviedb.scanner.series", "thetvdb");
+        // SCAN SERIES
+        String scannerName = PropertyTools.getProperty("yamj3.moviedb.scanner.series", "tvdb");
         ISeriesScanner seriesScanner = registeredSeriesScanner.get(scannerName);
+        LOG.debug("Scanning series data for '{}' using {}", series.getTitle(), scannerName);
+
         if (seriesScanner == null) {
             LOG.error("Series scanner '{}' not registered", scannerName);
             series.setStatus(StatusType.ERROR);

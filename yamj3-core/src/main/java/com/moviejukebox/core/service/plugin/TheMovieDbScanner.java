@@ -190,7 +190,7 @@ public class TheMovieDbScanner implements IMovieScanner, InitializingBean {
         }
         videoData.setGenres(genres);
 
-        // CAST
+        // CAST & CREW
         try {
             CreditDTO credit;
             for (com.omertron.themoviedbapi.model.Person person : tmdbApi.getMovieCasts(Integer.parseInt(tmdbID))) {
