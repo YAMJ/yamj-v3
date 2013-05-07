@@ -30,7 +30,7 @@ public class QueueDTO {
     }
 
     public void setType(String type) {
-        this.type = type;
+        this.type = type.trim();
     }
 
     public boolean isVideoDataElement() {
