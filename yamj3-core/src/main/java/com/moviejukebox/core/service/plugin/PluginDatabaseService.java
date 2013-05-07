@@ -23,6 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class PluginDatabaseService {
 
     private static final Logger LOG = LoggerFactory.getLogger(PluginDatabaseService.class);
+    private static final String VIDEO_SCANNER = PropertyTools.getProperty("yamj3.moviedb.scanner.movie", "tmdb");
+    private static final String VIDEO_SCANNER_ALT = PropertyTools.getProperty("yamj3.moviedb.scanner.movie.alternate", "");
+    private static final String SERIES_SCANNER = PropertyTools.getProperty("yamj3.moviedb.scanner.series", "tvdb");
+    private static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.moviedb.scanner.series.alternate", "");
     @Autowired
     private MediaDao mediaDao;
     @Autowired
@@ -60,8 +64,7 @@ public class PluginDatabaseService {
         VideoData videoData = mediaDao.getVideoData(id);
 
         // SCAN MOVIE
-
-        String scannerName = PropertyTools.getProperty("yamj3.moviedb.scanner.movie", "tmdb");
+        String scannerName = VIDEO_SCANNER;
         LOG.debug("Scanning movie data for '{}' using {}", videoData.getTitle(), scannerName);
 
         IMovieScanner movieScanner = registeredMovieScanner.get(scannerName);
@@ -87,7 +90,7 @@ public class PluginDatabaseService {
         if (!ScanResult.OK.equals(scanResult)) {
             movieScanner = null;
 
-            scannerName = PropertyTools.getProperty("yamj3.moviedb.scanner.movie.alternate", "");
+            scannerName = VIDEO_SCANNER_ALT;
             if (StringUtils.isNotBlank(scannerName)) {
                 movieScanner = registeredMovieScanner.get(scannerName);
             }
@@ -133,15 +136,43 @@ public class PluginDatabaseService {
         Series series = mediaDao.getSeries(id);
 
         // SCAN SERIES
-        String scannerName = PropertyTools.getProperty("yamj3.moviedb.scanner.series", "tvdb");
-        ISeriesScanner seriesScanner = registeredSeriesScanner.get(scannerName);
+        String scannerName = SERIES_SCANNER;
         LOG.debug("Scanning series data for '{}' using {}", series.getTitle(), scannerName);
 
+        ISeriesScanner seriesScanner = registeredSeriesScanner.get(scannerName);
         if (seriesScanner == null) {
             LOG.error("Series scanner '{}' not registered", scannerName);
             series.setStatus(StatusType.ERROR);
             mediaDao.updateEntity(series);
         }
+
+        // Scan series data
+        ScanResult scanResult = ScanResult.ERROR;
+        try {
+            scanResult = seriesScanner.scan(series);
+        } catch (Exception error) {
+            LOG.error("Failed scanning series data with {} scanner", scannerName);
+            LOG.warn("Scanning error", error);
+        }
+
+        // SCAN ALTERNATE
+        // TODO alternate scanning
+
+        // STORAGE
+
+        // update genres
+        // TODO: Add genres to Series
+
+        // update cast and crew
+        // TODO: Add cast & crew to Series
+
+        // update video data and reset status
+        if (ScanResult.OK.equals(scanResult)) {
+            series.setStatus(StatusType.DONE);
+        } else {
+            series.setStatus(StatusType.ERROR);
+        }
+        mediaDao.updateEntity(series);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
