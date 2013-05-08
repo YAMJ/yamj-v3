@@ -76,7 +76,7 @@ public class MediaImportService {
                 // NEW video data
                 videoData = new VideoData();
                 videoData.setIdentifier(identifier);
-                videoData.setMoviedbIdMap(dto.getIdMap());
+                videoData.setSourcedbIdMap(dto.getIdMap());
                 videoData.setTitle(dto.getTitle(), MEDIA_SOURCE);
                 videoData.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                 videoData.setPublicationYear(dto.getYear(), MEDIA_SOURCE);
@@ -122,7 +122,7 @@ public class MediaImportService {
                             series = new Series();
                             series.setIdentifier(seriesIdentifier);
                             series.setTitle(dto.getTitle(), MEDIA_SOURCE);
-                            series.setMoviedbIdMap(dto.getIdMap());
+                            series.setSourcedbIdMap(dto.getIdMap());
                             series.setStatus(StatusType.NEW);
                             mediaDao.saveEntity(series);
 

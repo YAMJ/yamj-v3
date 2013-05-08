@@ -33,7 +33,7 @@ import org.hibernate.annotations.Parameter;
 @Table(name = "season")
 @SuppressWarnings("deprecation")
 public class Season extends AbstractAuditable implements
-        IMoviedbIdentifiable, Serializable {
+        ISourcedbIdentifiable, Serializable {
 
     private static final long serialVersionUID = 7589022259013410259L;
     /**
@@ -67,14 +67,14 @@ public class Season extends AbstractAuditable implements
     @JoinTable(name = "season_ids", joinColumns =
             @JoinColumn(name = "season_id"))
     @Fetch(value = FetchMode.SELECT)
-    @MapKeyColumn(name = "moviedb", length = 40)
-    @Column(name = "moviedb_id", length = 200)
-    private Map<String, String> moviedbIdMap = new HashMap<String, String>(0);
+    @MapKeyColumn(name = "sourcedb", length = 40)
+    @Column(name = "sourcedb_id", length = 200)
+    private Map<String, String> sourcedbIdMap = new HashMap<String, String>(0);
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "season_ratings", joinColumns =
             @JoinColumn(name = "season_id"))
     @Fetch(value = FetchMode.SELECT)
-    @MapKeyColumn(name = "moviedb", length = 40)
+    @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", length = 30)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
     @ElementCollection(fetch = FetchType.EAGER)
@@ -166,23 +166,23 @@ public class Season extends AbstractAuditable implements
         this.status = status;
     }
 
-    public Map<String, String> getMoviedbIdMap() {
-        return moviedbIdMap;
+    public Map<String, String> getSourcedbIdMap() {
+        return sourcedbIdMap;
     }
 
     @Override
-    public String getMoviedbId(String moviedb) {
-        return moviedbIdMap.get(moviedb);
+    public String getSourcedbId(String sourcedb) {
+        return sourcedbIdMap.get(sourcedb);
     }
 
-    public void setMoviedbIdMap(Map<String, String> moviedbIdMap) {
-        this.moviedbIdMap = moviedbIdMap;
+    public void setSourcedbIdMap(Map<String, String> sourcedbIdMap) {
+        this.sourcedbIdMap = sourcedbIdMap;
     }
 
     @Override
-    public void setMoviedbId(String moviedb, String id) {
+    public void setSourcedbId(String sourcedb, String id) {
         if (StringUtils.isNotBlank(id)) {
-            moviedbIdMap.put(moviedb, id);
+            sourcedbIdMap.put(sourcedb, id);
         }
     }
 

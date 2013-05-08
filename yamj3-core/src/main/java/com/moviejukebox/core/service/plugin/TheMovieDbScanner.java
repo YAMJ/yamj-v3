@@ -58,8 +58,8 @@ public class TheMovieDbScanner implements IMovieScanner, InitializingBean {
 
     @Override
     public String getMovieId(VideoData videoData) {
-        String tmdbID = videoData.getMoviedbId(TMDB_SCANNER_ID);
-        String imdbID = videoData.getMoviedbId(IMDB_SCANNER_ID);
+        String tmdbID = videoData.getSourcedbId(TMDB_SCANNER_ID);
+        String imdbID = videoData.getSourcedbId(IMDB_SCANNER_ID);
         MovieDb moviedb = null;
 
         // First look to see if we have a TMDb ID as this will make looking the film up easier
@@ -96,7 +96,7 @@ public class TheMovieDbScanner implements IMovieScanner, InitializingBean {
 
         if (StringUtils.isNotBlank(tmdbID)) {
             LOG.info("Found TMDB ID: {}", tmdbID);
-            videoData.setMoviedbId(TMDB_SCANNER_ID, tmdbID);
+            videoData.setSourcedbId(TMDB_SCANNER_ID, tmdbID);
         } else {
             LOG.info("No TMDB ID found for ", videoData.getTitle());
         }
@@ -140,7 +140,7 @@ public class TheMovieDbScanner implements IMovieScanner, InitializingBean {
 
     @Override
     public ScanResult scan(VideoData videoData) {
-//        String tmdbID = videoData.getMoviedbId(TMDB_SCANNER_ID);
+//        String tmdbID = videoData.getSourcedbId(TMDB_SCANNER_ID);
         String tmdbID = getMovieId(videoData);
 
         if (StringUtils.isBlank(tmdbID)) {
@@ -152,7 +152,7 @@ public class TheMovieDbScanner implements IMovieScanner, InitializingBean {
     }
 
     private ScanResult updateVideoData(VideoData videoData) {
-        String tmdbID = videoData.getMoviedbId(TMDB_SCANNER_ID);
+        String tmdbID = videoData.getSourcedbId(TMDB_SCANNER_ID);
         MovieDb moviedb;
 
         if (StringUtils.isBlank(tmdbID)) {
@@ -195,8 +195,8 @@ public class TheMovieDbScanner implements IMovieScanner, InitializingBean {
             CreditDTO credit;
             for (com.omertron.themoviedbapi.model.Person person : tmdbApi.getMovieCasts(Integer.parseInt(tmdbID))) {
                 credit = new CreditDTO();
-                credit.setMoviedb(TMDB_SCANNER_ID);
-                credit.setMoviedbId(String.valueOf(person.getId()));
+                credit.setSourcedb(TMDB_SCANNER_ID);
+                credit.setSourcedbId(String.valueOf(person.getId()));
                 credit.setName(person.getName());
                 credit.setRole(person.getCharacter());
 

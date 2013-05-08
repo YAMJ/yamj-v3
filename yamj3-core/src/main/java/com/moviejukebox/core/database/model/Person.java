@@ -35,8 +35,8 @@ public class Person extends AbstractAuditable implements Serializable {
     @JoinTable(name = "person_ids", joinColumns =
             @JoinColumn(name = "person_id"))
     @Fetch(value = FetchMode.SELECT)
-    @MapKeyColumn(name = "moviedb", length = 40)
-    @Column(name = "moviedb_id", length = 40)
+    @MapKeyColumn(name = "sourcedb", length = 40)
+    @Column(name = "sourcedb_id", length = 40)
     private Map<String, String> personIds = new HashMap<String, String>(0);
 
     // GETTER and SETTER
@@ -96,8 +96,8 @@ public class Person extends AbstractAuditable implements Serializable {
         this.personIds = personIds;
     }
 
-    public void setPersonId(String moviedb, String personId) {
-        this.personIds.put(moviedb, personId);
+    public void setPersonId(String sourcedb, String personId) {
+        this.personIds.put(sourcedb, personId);
     }
 
     // EQUALITY CHECKS

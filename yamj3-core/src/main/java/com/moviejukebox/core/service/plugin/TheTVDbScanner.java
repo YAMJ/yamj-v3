@@ -51,7 +51,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
     @Override
     public String getSeriesId(Series series) {
-        String id = series.getMoviedbId(TVDB_SCANNER_ID);
+        String id = series.getSourcedbId(TVDB_SCANNER_ID);
 
         if (StringUtils.isBlank(id)) {
             return getSeriesId(series.getTitle(), series.getStartYear());
@@ -96,8 +96,8 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         if (StringUtils.isNotBlank(id)) {
             com.omertron.thetvdbapi.model.Series tvdbSeries = tvdbApi.getSeries(id, DEFAULT_LANGUAGE);
 
-            series.setMoviedbId(TVDB_SCANNER_ID, tvdbSeries.getId());
-            series.setMoviedbId(ImdbScanner.getScannerId(), tvdbSeries.getImdbId());
+            series.setSourcedbId(TVDB_SCANNER_ID, tvdbSeries.getId());
+            series.setSourcedbId(ImdbScanner.getScannerId(), tvdbSeries.getImdbId());
             series.setOutline(tvdbSeries.getOverview());
             series.setPlot(tvdbSeries.getOverview());
 

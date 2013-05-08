@@ -23,10 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class PluginDatabaseService {
 
     private static final Logger LOG = LoggerFactory.getLogger(PluginDatabaseService.class);
-    private static final String VIDEO_SCANNER = PropertyTools.getProperty("yamj3.moviedb.scanner.movie", "tmdb");
-    private static final String VIDEO_SCANNER_ALT = PropertyTools.getProperty("yamj3.moviedb.scanner.movie.alternate", "");
-    private static final String SERIES_SCANNER = PropertyTools.getProperty("yamj3.moviedb.scanner.series", "tvdb");
-    private static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.moviedb.scanner.series.alternate", "");
+    private static final String VIDEO_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie", "tmdb");
+    private static final String VIDEO_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie.alternate", "");
+    private static final String SERIES_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.series", "tvdb");
+    private static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.alternate", "");
     @Autowired
     private MediaDao mediaDao;
     @Autowired
@@ -212,16 +212,16 @@ public class PluginDatabaseService {
 
             if (person != null) {
                 // update person id
-                if (StringUtils.isNotBlank(dto.getMoviedb()) && StringUtils.isNotBlank(dto.getMoviedbId())) {
-                    person.setPersonId(dto.getMoviedb(), dto.getMoviedbId());
+                if (StringUtils.isNotBlank(dto.getSourcedb()) && StringUtils.isNotBlank(dto.getSourcedbId())) {
+                    person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
                     personDao.updateEntity(person);
                 }
             } else {
                 // create new person
                 person = new Person();
                 person.setName(dto.getName());
-                if (StringUtils.isNotBlank(dto.getMoviedb()) && StringUtils.isNotBlank(dto.getMoviedbId())) {
-                    person.setPersonId(dto.getMoviedb(), dto.getMoviedbId());
+                if (StringUtils.isNotBlank(dto.getSourcedb()) && StringUtils.isNotBlank(dto.getSourcedbId())) {
+                    person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
                 }
                 personDao.saveEntity(person);
             }

@@ -8,8 +8,8 @@ public class CreditDTO {
     private JobType jobType;
     private String role;
     private String aka;
-    private String moviedb;
-    private String moviedbId;
+    private String sourcedb;
+    private String sourcedbId;
 
     public CreditDTO() {
     }
@@ -56,19 +56,19 @@ public class CreditDTO {
         this.aka = aka;
     }
 
-    public String getMoviedb() {
-        return moviedb;
+    public String getSourcedb() {
+        return sourcedb;
     }
 
-    public void setMoviedb(String moviedb) {
-        this.moviedb = moviedb;
+    public void setSourcedb(String sourcedb) {
+        this.sourcedb = sourcedb;
     }
 
-    public String getMoviedbId() {
-        return moviedbId;
+    public String getSourcedbId() {
+        return sourcedbId;
     }
 
-    public void setMoviedbId(String moviedbId) {
-        this.moviedbId = moviedbId;
+    public void setSourcedbId(String sourcedbId) {
+        this.sourcedbId = sourcedbId;
     }
 }
