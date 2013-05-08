@@ -15,7 +15,7 @@
 ">
 
     <context:annotation-config />
-    <context:component-scan base-package="com.moviejukebox.filescanner"/>
+    <context:component-scan base-package="com.yamj.filescanner"/>
 
     <bean id="propertyConfigurer"
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -29,10 +29,10 @@
     </bean>
 
     <bean id="scannerManagement"
-          class="com.moviejukebox.filescanner.WatcherManagementImpl"/>
+          class="com.yamj.filescanner.WatcherManagementImpl"/>
 
     <bean id="pingCore"
-          class="com.moviejukebox.filescanner.service.PingCore">
+          class="com.yamj.filescanner.service.PingCore">
         <property name="timeoutSeconds" value="${filescanner.pingcore.timeout}"/>
         <property name="numberOfRetries" value="${filescanner.pingcore.retry}"/>
     </bean>
@@ -40,35 +40,35 @@
     <bean id="fileImportService"
           class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
         <property name="serviceUrl" value="http://${yamj3.core.host}:${yamj3.core.port}/yamj3/FileImportService"/>
-        <property name="serviceInterface" value="com.moviejukebox.common.remote.service.FileImportService"/>
+        <property name="serviceInterface" value="com.yamj.common.remote.service.FileImportService"/>
     </bean>
 
     <bean id="pingService"
           class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
         <property name="serviceUrl" value="http://${yamj3.core.host}:${yamj3.core.port}/yamj3/PingService"/>
-        <property name="serviceInterface" value="com.moviejukebox.common.remote.service.PingService"/>
+        <property name="serviceInterface" value="com.yamj.common.remote.service.PingService"/>
     </bean>
 
     <bean id="xmlTools"
-          class="com.moviejukebox.filescanner.tools.XmlTools">
+          class="com.yamj.filescanner.tools.XmlTools">
         <property name="marshaller" ref="xstreamMarshaller" />
         <property name="unmarshaller" ref="xstreamMarshaller" />
     </bean>
 
     <bean id="libraryCollection"
-          class="com.moviejukebox.filescanner.model.LibraryCollection">
+          class="com.yamj.filescanner.model.LibraryCollection">
     </bean>
 
     <bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
         <property name="aliases">
             <props>
-                <prop key="libraries">com.moviejukebox.filescanner.dto.LibraryDTO</prop>
-                <prop key="library">com.moviejukebox.filescanner.dto.LibraryEntryDTO</prop>
+                <prop key="libraries">com.yamj.filescanner.dto.LibraryDTO</prop>
+                <prop key="library">com.yamj.filescanner.dto.LibraryEntryDTO</prop>
             </props>
         </property>
         <property name="implicitCollections">
             <map>
-                <entry key="com.moviejukebox.filescanner.dto.LibraryDTO" value="libraries" />
+                <entry key="com.yamj.filescanner.dto.LibraryDTO" value="libraries" />
             </map>
         </property>
     </bean>

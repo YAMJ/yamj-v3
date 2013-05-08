@@ -3,8 +3,8 @@
 
     <!-- The Basics -->
     <parent>
-        <groupId>com.moviejukebox</groupId>
-        <artifactId>moviejukebox3</artifactId>
+        <groupId>com.yamj</groupId>
+        <artifactId>yamj3</artifactId>
         <version>3.0-SNAPSHOT</version>
     </parent>
     <artifactId>yamj3-common</artifactId>
@@ -16,7 +16,7 @@
 
     <!-- Project Information -->
     <name>YAMJ3 Common</name>
-    <description>Common of MovieJukebox project</description>
+    <description>Common of YAMJ project</description>
 
     <properties>
         <skipTests>false</skipTests>

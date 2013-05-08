@@ -4,8 +4,8 @@
 
     <!-- The Basics -->
     <parent>
-        <groupId>com.moviejukebox</groupId>
-        <artifactId>moviejukebox3</artifactId>
+        <groupId>com.yamj</groupId>
+        <artifactId>yamj3</artifactId>
         <version>3.0-SNAPSHOT</version>
     </parent>
     <artifactId>yamj3-jetty</artifactId>
@@ -17,7 +17,7 @@
 
     <!-- Project Information -->
     <name>YAMJ3 Jetty</name>
-    <description>Core of MovieJukebox project</description>
+    <description>Core of YAMJ project</description>
 
     <properties>
         <skipTests>true</skipTests>
@@ -114,7 +114,7 @@
                             <Specification-Version>${project.version}</Specification-Version>
                             <Implementation-Version>${buildNumber}</Implementation-Version>
                             <Implementation-Title>${timestamp}</Implementation-Title>
-                            <Main-Class>com.moviejukebox.jetty.Start</Main-Class>
+                            <Main-Class>com.yamj.jetty.Start</Main-Class>
                         </manifestEntries>
                     </archive>
                 </configuration>

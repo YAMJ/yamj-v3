@@ -29,5 +29,5 @@ First Try
 ---------
 You just can run: JettyCore from the yamj3-jetty package. Then a jetty server on port 8888 will be started.
 
-Also you can run MoviejukeboxBatch with parameter "-b ping".
+Also you can run Batch with parameter "-b ping".
 Then yamj3-batch calls the exposed service "PingService" on the running jetty server and returns a result.

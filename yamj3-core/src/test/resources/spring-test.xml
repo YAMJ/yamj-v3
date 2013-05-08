@@ -12,15 +12,15 @@
     http://www.springframework.org/schema/context/spring-context-3.0.xsd
     http://www.springframework.org/schema/task
     http://www.springframework.org/schema/task/spring-task-3.0.xsd">
-    
-    <context:annotation-config />
-    <context:component-scan base-package="com.moviejukebox"/>
 
-     <bean id="propertyConfigurer" class="com.moviejukebox.core.tools.PropertyTools">
+    <context:annotation-config />
+    <context:component-scan base-package="com.yamj"/>
+
+     <bean id="propertyConfigurer" class="com.yamj.core.tools.PropertyTools">
         <property name="locations">
             <list>
                 <value>classpath:/yamj3.core.properties</value>
-                <value>file:${yamj3.home}/conf/moviejukebox.properties</value>
+                <value>file:${yamj3.home}/conf/yamj.properties</value>
             </list>
         </property>
         <property name="ignoreResourceNotFound" value="true"/>

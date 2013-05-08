@@ -3,8 +3,8 @@
 
     <!-- The Basics -->
     <parent>
-        <groupId>com.moviejukebox</groupId>
-        <artifactId>moviejukebox3</artifactId>
+        <groupId>com.yamj</groupId>
+        <artifactId>yamj3</artifactId>
         <version>3.0-SNAPSHOT</version>
     </parent>
 
@@ -101,7 +101,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.moviejukebox.filescanner.FileScanner</mainClass>
+                            <mainClass>com.yamj.filescanner.FileScanner</mainClass>
                         </manifest>
                         <manifestEntries>
                             <Specification-Title>YAMJ3 - File Scanner</Specification-Title>
@@ -145,7 +145,7 @@
                             <archive>
                                 <manifest>
                                     <addClasspath>true</addClasspath>
-                                    <mainClass>com.moviejukebox.filescanner.FileScanner</mainClass>
+                                    <mainClass>com.yamj.filescanner.FileScanner</mainClass>
                                 </manifest>
                                 <manifestEntries>
                                     <Specification-Title>YAMJ3 - File Scanner</Specification-Title>

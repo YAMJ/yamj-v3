@@ -1,0 +1,1 @@
+This directory contains information on the third party licences or notices that are required to be provided with the project.
