@@ -23,7 +23,7 @@ public class PluginDatabaseRunner implements Runnable {
             try {
                 controller.scanMetadata(queueElement);
             } catch (Exception error) {
-                LOG.error("Failed to process media data", error);
+                LOG.error("Failed to process meta data", error);
                 try {
                     controller.processingError(queueElement);
                 } catch (Exception ignore) {

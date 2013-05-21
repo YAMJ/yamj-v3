@@ -3,16 +3,17 @@ package com.yamj.core.service.plugin;
 import com.yamj.core.database.dao.CommonDao;
 import com.yamj.core.database.dao.MediaDao;
 import com.yamj.core.database.dao.PersonDao;
-import com.yamj.core.database.model.dto.CreditDTO;
 import com.yamj.core.database.model.dto.QueueDTO;
-import com.yamj.core.database.model.type.JobType;
-import com.yamj.common.type.StatusType;
 import com.yamj.common.tools.PropertyTools;
+import com.yamj.common.type.StatusType;
 import com.yamj.core.database.model.CastCrew;
 import com.yamj.core.database.model.Genre;
 import com.yamj.core.database.model.Person;
 import com.yamj.core.database.model.Series;
 import com.yamj.core.database.model.VideoData;
+import com.yamj.core.database.model.dto.CreditDTO;
+import com.yamj.core.database.model.type.JobType;
+import com.yamj.core.database.model.type.MetaDataType;
 import java.util.HashMap;
 import java.util.HashSet;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +32,7 @@ public class PluginDatabaseService {
     private static final String VIDEO_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie.alternate", "");
     private static final String SERIES_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.series", "tvdb");
     private static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.alternate", "");
+    private static final String PERSON_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.person", "tmdb");
     @Autowired
     private MediaDao mediaDao;
     @Autowired
@@ -39,6 +41,7 @@ public class PluginDatabaseService {
     private CommonDao commonDao;
     private HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<String, IMovieScanner>();
     private HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<String, ISeriesScanner>();
+    private HashMap<String, IPersonScanner> registeredPersonScanner = new HashMap<String, IPersonScanner>();
 
     public void registerMovieScanner(IMovieScanner movieScanner) {
         registeredMovieScanner.put(movieScanner.getScannerName().toLowerCase(), movieScanner);
@@ -48,6 +51,10 @@ public class PluginDatabaseService {
         registeredSeriesScanner.put(seriesScanner.getScannerName().toLowerCase(), seriesScanner);
     }
 
+    public void registerPersonScanner(IPersonScanner personScanner) {
+        registeredPersonScanner.put(personScanner.getScannerName().toLowerCase(), personScanner);
+    }
+
     @Transactional(propagation = Propagation.REQUIRED)
     public void scanMetadata(QueueDTO queueElement) {
         if (queueElement == null) {
@@ -55,10 +62,12 @@ public class PluginDatabaseService {
             return;
         }
 
-        if (queueElement.isVideoDataElement()) {
+        if (queueElement.isType(MetaDataType.VIDEODATA)) {
             this.scanVideoData(queueElement.getId());
-        } else if (queueElement.isSeriesElement()) {
+        } else if (queueElement.isType(MetaDataType.SERIES)) {
             this.scanSeries(queueElement.getId());
+        } else if (queueElement.isType(MetaDataType.PERSON)) {
+            this.scanPerson(queueElement.getId());
         } else {
             LOG.error("No valid element for scanning metadata '{}'", queueElement);
         }
@@ -186,7 +195,7 @@ public class PluginDatabaseService {
             return;
         }
 
-        if (queueElement.isVideoDataElement()) {
+        if (queueElement.isType(MetaDataType.VIDEODATA)) {
             VideoData videoData = mediaDao.getVideoData(queueElement.getId());
             if (videoData != null) {
                 videoData.setStatus(StatusType.ERROR);
@@ -227,6 +236,7 @@ public class PluginDatabaseService {
                 if (StringUtils.isNotBlank(dto.getSourcedb()) && StringUtils.isNotBlank(dto.getSourcedbId())) {
                     person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
                 }
+                person.setStatus(StatusType.NEW);
                 personDao.saveEntity(person);
             }
 
@@ -250,5 +260,43 @@ public class PluginDatabaseService {
                 personDao.saveEntity(castCrew);
             }
         }
+    }
+
+    /**
+     * Scan the data site for information on the person
+     *
+     * @param id
+     */
+    private void scanPerson(Long id) {
+        LOG.info("Scanning for information on person id '{}'", id);
+        Person person = personDao.getPerson(id);
+
+        String scannerName = PERSON_SCANNER;
+        LOG.debug("Scanning person data for '{}' using {}", person.getName(), scannerName);
+
+        IPersonScanner personScanner = registeredPersonScanner.get(scannerName);
+
+        if (personScanner == null) {
+            LOG.error("Person scanner '{}' not registered", scannerName);
+            person.setStatus(StatusType.ERROR);
+            personDao.updateEntity(person);
+        }
+
+        // Scan series data
+        ScanResult scanResult = ScanResult.ERROR;
+        try {
+            scanResult = personScanner.scan(person);
+        } catch (Exception error) {
+            LOG.error("Failed scanning person data with {} scanner", scannerName);
+            LOG.warn("Scanning error", error);
+        }
+
+        // update video data and reset status
+        if (ScanResult.OK.equals(scanResult)) {
+            person.setStatus(StatusType.DONE);
+        } else {
+            person.setStatus(StatusType.ERROR);
+        }
+        personDao.updateEntity(person);
     }
 }

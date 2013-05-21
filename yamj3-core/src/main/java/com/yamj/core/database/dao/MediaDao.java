@@ -7,6 +7,7 @@ import com.yamj.core.database.model.VideoData;
 import com.yamj.core.database.model.dto.QueueDTO;
 import com.yamj.core.database.model.dto.QueueDTOComparator;
 import com.yamj.common.type.StatusType;
+import com.yamj.core.database.model.type.MetaDataType;
 import com.yamj.core.hibernate.ExtendedHibernateDaoSupport;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -106,12 +107,12 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
 
     public List<QueueDTO> getMediaQueueForScanning() {
         final StringBuilder sql = new StringBuilder();
-        sql.append("select vd.id,'videodata' as mediatype,vd.create_timestamp,vd.update_timestamp ");
+        sql.append("select vd.id,'").append(MetaDataType.VIDEODATA).append("' as mediatype,vd.create_timestamp,vd.update_timestamp ");
         sql.append("from videodata vd ");
         sql.append("where vd.status in ('NEW','UPDATED') ");
         sql.append("and vd.episode<0 ");
         sql.append("union ");
-        sql.append("select se.id,'series' as mediatype,se.create_timestamp,se.update_timestamp ");
+        sql.append("select se.id,'").append(MetaDataType.SERIES).append("' as mediatype,se.create_timestamp,se.update_timestamp ");
         sql.append("from series se ");
         sql.append("where se.status in ('NEW','UPDATED') ");
 

@@ -2,6 +2,7 @@ package com.yamj.core.database.model.dto;
 
 import com.yamj.core.database.model.type.JobType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class CreditDTO {
 
@@ -75,6 +76,6 @@ public class CreditDTO {
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

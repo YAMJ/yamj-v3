@@ -15,14 +15,19 @@ import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.model.MovieDb;
 import com.omertron.themoviedbapi.model.PersonType;
 import com.omertron.themoviedbapi.model.ProductionCountry;
+import com.omertron.themoviedbapi.results.TmdbResultsList;
+import com.yamj.core.database.model.Person;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
 
 @Service("tmdbScanner")
-public class TheMovieDbScanner implements IMovieScanner, InitializingBean {
+public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, InitializingBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbScanner.class);
     private static final String TMDB_SCANNER_ID = "tmdb";
@@ -47,6 +52,7 @@ public class TheMovieDbScanner implements IMovieScanner, InitializingBean {
                 tmdbApi = new TheMovieDbApi(API_KEY);
                 // register this scanner
                 pluginDatabaseService.registerMovieScanner(this);
+                pluginDatabaseService.registerPersonScanner(this);
 
             } catch (MovieDbException ex) {
                 LOG.error("Unable to initialise TheMovieDbScanner, error: {}", ex.getMessage());
@@ -109,7 +115,7 @@ public class TheMovieDbScanner implements IMovieScanner, InitializingBean {
 
         try {
             // Search using movie name
-            List<MovieDb> movieList = tmdbApi.searchMovie(title, year, DEFAULT_LANGUAGE, INCLUDE_ADULT, 0);
+            List<MovieDb> movieList = tmdbApi.searchMovie(title, year, DEFAULT_LANGUAGE, INCLUDE_ADULT, 0).getResults();
             LOG.info("Found {} potential matches for {} ({})", movieList.size(), title, year);
             // Iterate over the list until we find a match
             for (MovieDb m : movieList) {
@@ -193,7 +199,7 @@ public class TheMovieDbScanner implements IMovieScanner, InitializingBean {
         // CAST & CREW
         try {
             CreditDTO credit;
-            for (com.omertron.themoviedbapi.model.Person person : tmdbApi.getMovieCasts(Integer.parseInt(tmdbID))) {
+            for (com.omertron.themoviedbapi.model.Person person : tmdbApi.getMovieCasts(Integer.parseInt(tmdbID)).getResults()) {
                 credit = new CreditDTO();
                 credit.setSourcedb(TMDB_SCANNER_ID);
                 credit.setSourcedbId(String.valueOf(person.getId()));
@@ -230,5 +236,96 @@ public class TheMovieDbScanner implements IMovieScanner, InitializingBean {
         }
 
         return ScanResult.OK;
+    }
+
+    @Override
+    public String getPersonId(Person person) {
+        String id = person.getPersonId(TMDB_SCANNER_ID);
+        if (StringUtils.isNotBlank(id)) {
+            return id;
+        } else if (StringUtils.isNotBlank(person.getName())) {
+            return getPersonId(person.getName());
+        } else {
+            LOG.error("No ID or Name found for {}", person.toString());
+            return "";
+        }
+    }
+
+    @Override
+    public String getPersonId(String name) {
+        String id = "";
+        com.omertron.themoviedbapi.model.Person closestPerson = null;
+        int closestMatch = Integer.MAX_VALUE;
+
+        try {
+            TmdbResultsList<com.omertron.themoviedbapi.model.Person> results = tmdbApi.searchPeople(name, INCLUDE_ADULT, 0);
+            LOG.info("Found {} results for '{}'", results.getResults().size(), name);
+            for (com.omertron.themoviedbapi.model.Person person : results.getResults()) {
+                LOG.info("  Checking '{}' against '{}'", name, person.getName());
+                if (name.equalsIgnoreCase(person.getName())) {
+                    id = String.valueOf(person.getId());
+                    break;
+                } else {
+                    int lhDistance = StringUtils.getLevenshteinDistance(name, person.getName());
+                    if (lhDistance < closestMatch) {
+                        closestMatch = lhDistance;
+                        closestPerson = person;
+                    }
+                }
+            }
+
+            if (closestPerson != null) {
+                id = String.valueOf(closestPerson.getId());
+                LOG.info("Closest match to '{}' is '{}' differing by {} characters", name, closestPerson.getName(), closestMatch);
+            } else {
+                LOG.info("No direct match found for '{}'", name);
+            }
+        } catch (MovieDbException ex) {
+            LOG.warn("Failed to get information on '{}' from {}, error: {}", name, TMDB_SCANNER_ID, ex.getMessage());
+        }
+        return id;
+    }
+
+    @Override
+    public ScanResult scan(Person person) {
+        String id = getPersonId(person);
+        if (StringUtils.isBlank(id) || !StringUtils.isNumeric(id)) {
+            return ScanResult.MISSING_ID;
+        }
+
+        try {
+            com.omertron.themoviedbapi.model.Person tmdbPerson = tmdbApi.getPersonInfo(Integer.parseInt(id));
+
+            person.setBiography(tmdbPerson.getBiography());
+            person.setBirthPlace(tmdbPerson.getBirthplace());
+            person.setPersonId(ImdbScanner.getScannerId(), tmdbPerson.getImdbId());
+
+            Date parsedDate = parseDate(tmdbPerson.getBirthday());
+            if (parsedDate != null) {
+                person.setBirthDay(parsedDate);
+            }
+
+            parsedDate = parseDate(tmdbPerson.getDeathday());
+            if (parsedDate != null) {
+                person.setDeathDay(parsedDate);
+            }
+        } catch (MovieDbException ex) {
+            LOG.warn("Failed to get information on {}-'{}', error: {}", id, person.getName(), ex.getMessage());
+            return ScanResult.ERROR;
+        }
+
+        LOG.debug("Processed person: {}", person.toString());
+        return ScanResult.OK;
+    }
+
+    private Date parseDate(String dateToConvert) {
+        if (StringUtils.isNotBlank(dateToConvert)) {
+            try {
+                return DateUtils.parseDate(dateToConvert, "yyyy-MM-dd");
+            } catch (ParseException ex) {
+                LOG.warn("Failed to convert date '{}'", dateToConvert);
+            }
+        }
+        return null;
     }
 }

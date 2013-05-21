@@ -1,5 +1,7 @@
 package com.yamj.core.database.model;
 
+import com.yamj.common.type.StatusType;
+import com.yamj.core.hibernate.usertypes.EnumStringUserType;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,7 +11,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
+@TypeDefs({
+    @TypeDef(name = "statusType",
+            typeClass = EnumStringUserType.class,
+            parameters = {
+        @org.hibernate.annotations.Parameter(name = "enumClassName", value = "com.yamj.common.type.StatusType")})
+})
 @Entity
 @Table(name = "person")
 public class Person extends AbstractAuditable implements Serializable {
@@ -38,6 +49,9 @@ public class Person extends AbstractAuditable implements Serializable {
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 40)
     private Map<String, String> personIds = new HashMap<String, String>(0);
+    @Type(type = "statusType")
+    @Column(name = "status", nullable = false, length = 30)
+    private StatusType status;
 
     // GETTER and SETTER
     public String getName() {
@@ -88,11 +102,19 @@ public class Person extends AbstractAuditable implements Serializable {
         this.biography = biography;
     }
 
-    public Map<String, String> getPersonIds() {
+    public String getPersonId(String sourcedb) {
+        if (personIds.containsKey(sourcedb)) {
+            return personIds.get(sourcedb);
+        } else {
+            return "";
+        }
+    }
+
+    public Map<String, String> getPersonIdMap() {
         return personIds;
     }
 
-    public void setPersonIds(Map<String, String> personIds) {
+    public void setPersonIdMap(Map<String, String> personIds) {
         this.personIds = personIds;
     }
 
@@ -100,6 +122,13 @@ public class Person extends AbstractAuditable implements Serializable {
         this.personIds.put(sourcedb, personId);
     }
 
+    public StatusType getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusType status) {
+        this.status = status;
+    }
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
