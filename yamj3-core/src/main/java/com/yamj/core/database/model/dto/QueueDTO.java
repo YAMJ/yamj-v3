@@ -1,6 +1,7 @@
 package com.yamj.core.database.model.dto;
 
 import java.util.Date;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class QueueDTO {
 
@@ -47,12 +48,6 @@ public class QueueDTO {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("QueueDTO [ID=");
-        sb.append(getId());
-        sb.append(", mediaType=");
-        sb.append(getType());
-        sb.append("]");
-        return sb.toString();
+        return ToStringBuilder.reflectionToString(this);
     }
 }

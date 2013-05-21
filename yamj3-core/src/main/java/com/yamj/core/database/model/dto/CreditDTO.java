@@ -1,6 +1,7 @@
 package com.yamj.core.database.model.dto;
 
 import com.yamj.core.database.model.type.JobType;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class CreditDTO {
 
@@ -70,5 +71,10 @@ public class CreditDTO {
 
     public void setSourcedbId(String sourcedbId) {
         this.sourcedbId = sourcedbId;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }
