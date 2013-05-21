@@ -7,6 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
 import com.yamj.core.hibernate.Identifiable;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Abstract implementation of an identifiable object.
@@ -29,5 +30,10 @@ public abstract class AbstractIdentifiable implements Identifiable {
     @SuppressWarnings("unused")
     private void setId(long id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }

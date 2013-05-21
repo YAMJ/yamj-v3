@@ -12,6 +12,7 @@ import javax.persistence.TemporalType;
 
 import com.yamj.core.hibernate.Auditable;
 import com.yamj.core.hibernate.Identifiable;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Abstract implementation of an identifiable and auditable object.
@@ -59,5 +60,10 @@ public abstract class AbstractAuditable implements Auditable, Identifiable {
 
     public void setUpdateTimestamp(final Date updateTimestamp) {
         this.updateTimestamp = updateTimestamp;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }
