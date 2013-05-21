@@ -6,12 +6,12 @@ import org.eclipse.jetty.util.resource.ResourceCollection;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 public class JettyCore {
-    
+
     public static void main(final String[] aArgs) throws Exception {
         BasicConfigurator.configure();
         final Server server = new Server(8888);
         server.setHandler(createWebAppContext());
-        
+
         server.start();
         server.join();
     }
@@ -19,7 +19,7 @@ public class JettyCore {
     private static WebAppContext createWebAppContext() {
         final WebAppContext context = new WebAppContext();
         context.setContextPath("/yamj3");
-        context.setBaseResource(new ResourceCollection(new String[] { "./../yamj3-core/src/main/webapp/" }));
+        context.setBaseResource(new ResourceCollection(new String[]{"./../yamj3-core/src/main/webapp/"}));
         return context;
     }
 }
