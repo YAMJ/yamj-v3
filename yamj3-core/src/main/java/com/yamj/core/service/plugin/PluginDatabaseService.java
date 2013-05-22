@@ -268,13 +268,11 @@ public class PluginDatabaseService {
      * @param id
      */
     private void scanPerson(Long id) {
-        LOG.info("Scanning for information on person id '{}'", id);
+        String scannerName = PERSON_SCANNER;
+        IPersonScanner personScanner = registeredPersonScanner.get(scannerName);
         Person person = personDao.getPerson(id);
 
-        String scannerName = PERSON_SCANNER;
-        LOG.debug("Scanning person data for '{}' using {}", person.getName(), scannerName);
-
-        IPersonScanner personScanner = registeredPersonScanner.get(scannerName);
+        LOG.info("Scanning for information on person {}-'{}' using {}", id, person.getName(), scannerName);
 
         if (personScanner == null) {
             LOG.error("Person scanner '{}' not registered", scannerName);
@@ -287,12 +285,13 @@ public class PluginDatabaseService {
         try {
             scanResult = personScanner.scan(person);
         } catch (Exception error) {
-            LOG.error("Failed scanning person data with {} scanner", scannerName);
+            LOG.error("Failed scanning person (ID '{}') data with {} scanner", id, scannerName);
             LOG.warn("Scanning error", error);
         }
 
         // update video data and reset status
         if (ScanResult.OK.equals(scanResult)) {
+            LOG.debug("Person {}-'{}', scanned OK", id, person.getName());
             person.setStatus(StatusType.DONE);
         } else {
             person.setStatus(StatusType.ERROR);
