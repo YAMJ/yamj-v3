@@ -220,6 +220,22 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
                         credit.setJobType(JobType.DIRECTOR);
                     } else if (person.getDepartment().equalsIgnoreCase("production")) {
                         credit.setJobType(JobType.PRODUCER);
+                    } else if (person.getDepartment().equalsIgnoreCase("sound")) {
+                        credit.setJobType(JobType.SOUND);
+                    } else if (person.getDepartment().equalsIgnoreCase("camera")) {
+                        credit.setJobType(JobType.CAMERA);
+                    } else if (person.getDepartment().equalsIgnoreCase("art")) {
+                        credit.setJobType(JobType.ART);
+                    } else if (person.getDepartment().equalsIgnoreCase("editing")) {
+                        credit.setJobType(JobType.EDITING);
+                    } else if (person.getDepartment().equalsIgnoreCase("costume & make-up")) {
+                        credit.setJobType(JobType.COSTUME_MAKEUP);
+                    } else if (person.getDepartment().equalsIgnoreCase("crew")) {
+                        credit.setJobType(JobType.CREW);
+                    } else if (person.getDepartment().equalsIgnoreCase("visual effects")) {
+                        credit.setJobType(JobType.EFFECTS);
+                    } else if (person.getDepartment().equalsIgnoreCase("lighting")) {
+                        credit.setJobType(JobType.LIGHTING);
                     } else {
                         LOG.debug("Adding unknown department '{}' for: '{}', person: '{}'", person.getDepartment(), videoData.getTitle(), person.getName());
                         LOG.trace("Person: {}", person.toString());

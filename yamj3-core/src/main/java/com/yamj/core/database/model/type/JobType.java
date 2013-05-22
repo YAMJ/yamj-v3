@@ -24,7 +24,39 @@ public enum JobType {
     /**
      * The person is a producer
      */
-    PRODUCER;
+    PRODUCER,
+    /*
+     * Camera and film related jobs
+     */
+    CAMERA,
+    /*
+     * Editing jobs, e.g. Editor, Dialog editor, Color Timer
+     */
+    EDITING,
+    /*
+     * All art related jobs
+     */
+    ART,
+    /*
+     * Costume and Make-up jobs
+     */
+    COSTUME_MAKEUP,
+    /*
+     * Sound jobs
+     */
+    SOUND,
+    /*
+     * Special effects
+     */
+    EFFECTS,
+    /*
+     * Misc Crew
+     */
+    CREW,
+    /*
+     * Lighting jobs
+     */
+    LIGHTING;
 
     /**
      * Determine the job type from a string
