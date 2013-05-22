@@ -63,6 +63,13 @@ public abstract class ExtendedHibernateDaoSupport extends HibernateDaoSupport im
     /**
      * {@inheritDoc}
      */
+    public final void saveOrUpdate(final Object object) {
+        this.getHibernateTemplate().saveOrUpdate(object);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final void updateEntity(final Object entity) {
         this.getHibernateTemplate().update(entity);
