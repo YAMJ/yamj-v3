@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -124,11 +125,11 @@ public class PluginDatabaseService {
         HashSet<Genre> genres = new HashSet<Genre>(0);
         for (Genre genre : videoData.getGenres()) {
             Genre stored = commonDao.getGenre(genre.getName());
-            if (stored != null) {
-                genres.add(stored);
-            } else {
+            if (stored == null) {
                 commonDao.saveEntity(genre);
                 genres.add(genre);
+            } else {
+                genres.add(stored);
             }
         }
         videoData.setGenres(genres);
@@ -220,7 +221,10 @@ public class PluginDatabaseService {
 
             // find person if not found
             if (person == null) {
+                LOG.info("Attempting to retrieve information on '{}' from database", dto.getName());
                 person = personDao.getPerson(dto.getName());
+            } else {
+                LOG.debug("Found '{}' in cast table", person.getName());
             }
 
             if (person != null) {
@@ -240,15 +244,7 @@ public class PluginDatabaseService {
                 personDao.saveEntity(person);
             }
 
-            if (castCrew != null) {
-                // update role
-                if (StringUtils.isBlank(castCrew.getRole())
-                        && JobType.ACTOR.equals(castCrew.getJobType())
-                        && StringUtils.isNotBlank(dto.getRole())) {
-                    castCrew.setRole(dto.getRole());
-                    personDao.updateEntity(castCrew);
-                }
-            } else {
+            if (castCrew == null) {
                 castCrew = new CastCrew();
                 castCrew.setPerson(person);
                 castCrew.setVideoData(videoData);
@@ -257,7 +253,20 @@ public class PluginDatabaseService {
                     castCrew.setRole(dto.getRole());
                 }
                 videoData.addCredit(castCrew);
-                personDao.saveEntity(castCrew);
+                
+                try {
+                    personDao.saveOrUpdate(castCrew);
+                } catch (DataIntegrityViolationException ex) {
+                    LOG.warn("Constraint error: {}", ex.getMessage());
+                }
+            } else {
+                // update role
+                if (StringUtils.isBlank(castCrew.getRole())
+                        && JobType.ACTOR.equals(castCrew.getJobType())
+                        && StringUtils.isNotBlank(dto.getRole())) {
+                    castCrew.setRole(dto.getRole());
+                    personDao.updateEntity(castCrew);
+                }
             }
         }
     }

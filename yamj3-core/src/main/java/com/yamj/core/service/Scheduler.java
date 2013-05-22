@@ -29,7 +29,7 @@ public class Scheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(Scheduler.class);
     private static final int mediaScannerThreads = PropertyTools.getIntProperty("yamj3.scheduler.mediascan.maxThreads", 5);
-    private static final int peopleScannerThreads = PropertyTools.getIntProperty("yamj3.scheduler.peoplescan.maxThreads", 1);
+    private static final int peopleScannerThreads = PropertyTools.getIntProperty("yamj3.scheduler.peoplescan.maxThreads", 5);
 
     @Autowired
     private StagingDao stagingDao;
