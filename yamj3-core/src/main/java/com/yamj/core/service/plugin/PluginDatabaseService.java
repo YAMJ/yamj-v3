@@ -90,10 +90,11 @@ public class PluginDatabaseService {
         }
 
         // scan video data
-        ScanResult scanResult = ScanResult.ERROR;
+        ScanResult scanResult;
         try {
             scanResult = movieScanner.scan(videoData);
         } catch (Exception error) {
+            scanResult = ScanResult.ERROR;
             LOG.error("Failed scanning video data with {} scanner", scannerName);
             LOG.warn("Scanning error", error);
         }
@@ -159,10 +160,11 @@ public class PluginDatabaseService {
         }
 
         // Scan series data
-        ScanResult scanResult = ScanResult.ERROR;
+        ScanResult scanResult;
         try {
             scanResult = seriesScanner.scan(series);
         } catch (Exception error) {
+            scanResult = ScanResult.ERROR;
             LOG.error("Failed scanning series data with {} scanner", scannerName);
             LOG.warn("Scanning error", error);
         }
@@ -304,10 +306,11 @@ public class PluginDatabaseService {
         }
 
         // Scan series data
-        ScanResult scanResult = ScanResult.ERROR;
+        ScanResult scanResult;
         try {
             scanResult = personScanner.scan(person);
         } catch (Exception error) {
+            scanResult = ScanResult.ERROR;
             LOG.error("Failed scanning person (ID '{}') data with {} scanner", id, scannerName);
             LOG.warn("Scanning error", error);
         }
