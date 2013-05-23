@@ -98,9 +98,7 @@ public class PluginDatabaseService {
             LOG.warn("Scanning error", error);
         }
 
-        // SCAN ALTERNATE
-        // TODO alternate scanning
-
+        // alternate scanning if main scanner failed
         if (!ScanResult.OK.equals(scanResult)) {
             movieScanner = null;
 
@@ -169,8 +167,24 @@ public class PluginDatabaseService {
             LOG.warn("Scanning error", error);
         }
 
-        // SCAN ALTERNATE
-        // TODO alternate scanning
+        // alternate scanning if main scanner failed
+        if (!ScanResult.OK.equals(scanResult)) {
+            seriesScanner = null;
+
+            scannerName = SERIES_SCANNER_ALT;
+            if (StringUtils.isNotBlank(scannerName)) {
+                seriesScanner = registeredSeriesScanner.get(scannerName);
+            }
+
+            if (seriesScanner != null) {
+                try {
+                    seriesScanner.scan(series);
+                } catch (Exception error) {
+                    LOG.error("Failed scanning series data with {} alternate scanner", scannerName);
+                    LOG.warn("Alternate scanning error", error);
+                }
+            }
+        }
 
         // STORAGE
 
