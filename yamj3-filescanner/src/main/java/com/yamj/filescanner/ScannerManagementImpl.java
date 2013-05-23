@@ -24,6 +24,7 @@ import com.yamj.filescanner.service.PingCore;
 import com.yamj.filescanner.tools.DirectoryEnding;
 import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 
@@ -32,7 +33,7 @@ import org.springframework.remoting.RemoteConnectFailureException;
  *
  * @author Stuart
  */
-public class WatcherManagementImpl implements ScannerManagement {
+public class ScannerManagementImpl implements ScannerManagement {
 
     /*
      * TODO: choose between watcher process and simple re-scan
@@ -40,15 +41,15 @@ public class WatcherManagementImpl implements ScannerManagement {
      * TODO: add library file reader
      * TODO: add multiple directory location support
      */
-    private static final Logger LOG = LoggerFactory.getLogger(WatcherManagementImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ScannerManagementImpl.class);
     // The default watched status
     private static final Boolean DEFAULT_WATCH_STATE = PropertyTools.getBooleanProperty("filescanner.watch.default", Boolean.FALSE);
     // Spring service(s)
-    @Resource(name = "fileImportService")
+    @Autowired
     private FileImportService fileImportService;
-    @Resource(name = "libraryCollection")
+    @Autowired
     private LibraryCollection libraryCollection;
-    @Resource(name = "pingCore")
+    @Autowired
     private PingCore pingCore;
     // ImportDTO constants
     private static final String DEFAULT_CLIENT = PropertyTools.getProperty("filescanner.default.client", "FileScanner");

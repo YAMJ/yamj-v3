@@ -17,6 +17,9 @@
     <context:annotation-config />
     <context:component-scan base-package="com.yamj.filescanner"/>
 
+    <!-- Activates @Scheduled and @Async annotations for scheduling -->
+    <task:annotation-driven />
+
     <bean id="propertyConfigurer"
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations">
@@ -29,7 +32,7 @@
     </bean>
 
     <bean id="scannerManagement"
-          class="com.yamj.filescanner.WatcherManagementImpl"/>
+          class="com.yamj.filescanner.ScannerManagementImpl"/>
 
     <bean id="pingCore"
           class="com.yamj.filescanner.service.PingCore">
