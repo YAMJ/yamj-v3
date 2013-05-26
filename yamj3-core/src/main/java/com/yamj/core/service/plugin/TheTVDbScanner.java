@@ -101,10 +101,12 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             series.setOutline(tvdbSeries.getOverview());
             series.setPlot(tvdbSeries.getOverview());
 
-            try {
-                series.addRating(TVDB_SCANNER_ID, (int) (Float.parseFloat(tvdbSeries.getRating()) * 10));
-            } catch (NumberFormatException nfe) {
-                LOG.warn("Failed to convert TVDB rating '{}' to an integer, error: {}", tvdbSeries.getRating(), nfe.getMessage());
+            if (StringUtils.isNumeric(tvdbSeries.getRating())) {
+                try {
+                    series.addRating(TVDB_SCANNER_ID, (int) (Float.parseFloat(tvdbSeries.getRating()) * 10));
+                } catch (NumberFormatException nfe) {
+                    LOG.warn("Failed to convert TVDB rating '{}' to an integer, error: {}", tvdbSeries.getRating(), nfe.getMessage());
+                }
             }
 
             String faDate = tvdbSeries.getFirstAired();

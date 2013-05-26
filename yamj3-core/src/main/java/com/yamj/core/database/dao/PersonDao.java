@@ -67,7 +67,7 @@ public class PersonDao extends ExtendedHibernateDaoSupport {
         final StringBuilder sql = new StringBuilder();
         sql.append("select id, '").append(MetaDataType.PERSON).append("' as mediatype, create_timestamp, update_timestamp ");
         sql.append("from person ");
-        sql.append("where status in ('NEW','UPDATED') ");
+        sql.append("where status in ('").append(StatusType.NEW).append("','").append(StatusType.UPDATED).append("') ");
 
         return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<List<QueueDTO>>() {
             @Override
