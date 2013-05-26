@@ -4,14 +4,13 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:oxm="http://www.springframework.org/schema/oxm"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-    http://www.springframework.org/schema/context
-    http://www.springframework.org/schema/context/spring-context-3.0.xsd
-    http://www.springframework.org/schema/aop
-    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
-    http://www.springframework.org/schema/oxm
-    http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="
+    http://www.springframework.org/schema/beans     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/context   http://www.springframework.org/schema/context/spring-context-3.0.xsd
+    http://www.springframework.org/schema/aop       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/oxm       http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd
+    http://www.springframework.org/schema/task      http://www.springframework.org/schema/task/spring-task.xsd
 ">
 
     <context:annotation-config />
@@ -31,13 +30,28 @@
         <property name="ignoreResourceNotFound" value="true"/>
     </bean>
 
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="${filescanner.taskexecutor.corePoolSize}" />
+        <property name="maxPoolSize" value="${filescanner.taskexecutor.maxPoolSize}" />
+        <property name="queueCapacity" value="${filescanner.taskexecutor.queueCapacity}" />
+    </bean>
+
     <bean id="scannerManagement"
-          class="com.yamj.filescanner.ScannerManagementImpl"/>
+          class="com.yamj.filescanner.ScannerManagementImpl">
+        <property name="yamjExecutor" ref="taskExecutor"/>
+    </bean>
 
     <bean id="pingCore"
           class="com.yamj.filescanner.service.PingCore">
         <property name="timeoutSeconds" value="${filescanner.pingcore.timeout}"/>
         <property name="numberOfRetries" value="${filescanner.pingcore.retry}"/>
+    </bean>
+
+    <bean id="sendToCore"
+          class="com.yamj.filescanner.service.SendToCore"
+          scope="prototype">
+        <property name="timeoutSeconds" value="${filescanner.sendtocore.timeout}"/>
+        <property name="numberOfRetries" value="${filescanner.sendtocore.retry}"/>
     </bean>
 
     <bean id="fileImportService"
@@ -75,4 +89,9 @@
             </map>
         </property>
     </bean>
+
+    <bean id="applicationContextProvider"
+          class="com.yamj.filescanner.ApplicationContextProvider">
+    </bean>
+
 </beans>
