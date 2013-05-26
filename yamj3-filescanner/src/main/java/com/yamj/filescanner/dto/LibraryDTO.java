@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class LibraryDTO implements Serializable {
 
-    List<LibraryEntryDTO> libraries = new ArrayList<LibraryEntryDTO>();
+    private List<LibraryEntryDTO> libraries = new ArrayList<LibraryEntryDTO>();
 
     /**
      * Get the list of libraries

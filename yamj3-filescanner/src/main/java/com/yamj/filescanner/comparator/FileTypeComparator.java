@@ -12,7 +12,7 @@ import java.util.Comparator;
  */
 public class FileTypeComparator implements Comparator<File> {
 
-    boolean directoriesFirst;
+    private boolean directoriesFirst;
 
     /**
      * Sorts files based on the type (directory/file).
