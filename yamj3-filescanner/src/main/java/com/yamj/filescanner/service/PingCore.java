@@ -5,8 +5,8 @@ import com.yamj.common.tools.DateTimeTools;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.annotation.Resource;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +26,7 @@ public final class PingCore {
     private DateTime lastCheck;
     private boolean connected;
     // Spring service(s)
-    @Resource(name = "pingService")
+    @Autowired
     private PingService pingService;
 
     public PingCore() {

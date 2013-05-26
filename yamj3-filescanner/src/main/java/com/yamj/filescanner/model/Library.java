@@ -7,7 +7,9 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 
 /**
  *
@@ -18,7 +20,7 @@ public class Library implements Serializable {
     private boolean watch;
     private Statistics statistics;
     private Map<String, StageDirectoryDTO> directories;
-    private Map<String, StatusType> directoryStatus;
+    private Map<String, Future<StatusType>> directoryStatus;
     private ImportDTO importDTO;
 
     /**
@@ -28,7 +30,7 @@ public class Library implements Serializable {
         this.watch = Boolean.FALSE;
         this.statistics = new Statistics();
         this.directories = new HashMap<String, StageDirectoryDTO>(1);
-        this.directoryStatus = new HashMap<String, StatusType>(1);
+        this.directoryStatus = new HashMap<String, Future<StatusType>>(1);
         importDTO = new ImportDTO();
     }
 
@@ -87,7 +89,7 @@ public class Library implements Serializable {
 
         directoryStatus.clear();
         for (String path : this.directories.keySet()) {
-            addDirectoryStatus(path, StatusType.NEW);
+            addDirectoryStatus(path, ConcurrentUtils.constantFuture(StatusType.NEW));
         }
     }
 
@@ -169,7 +171,7 @@ public class Library implements Serializable {
      *
      * @return
      */
-    public Map<String, StatusType> getDirectoryStatus() {
+    public Map<String, Future<StatusType>> getDirectoryStatus() {
         return directoryStatus;
     }
 
@@ -178,7 +180,7 @@ public class Library implements Serializable {
      *
      * @param directoryStatus
      */
-    public void setDirectoryStatus(Map<String, StatusType> directoryStatus) {
+    public void setDirectoryStatus(Map<String, Future<StatusType>> directoryStatus) {
         this.directoryStatus = directoryStatus;
     }
 
@@ -188,7 +190,7 @@ public class Library implements Serializable {
      * @param path
      * @param status
      */
-    public void addDirectoryStatus(String path, StatusType status) {
+    public void addDirectoryStatus(String path, Future<StatusType> status) {
         this.directoryStatus.put(path, status);
     }
 
@@ -202,10 +204,10 @@ public class Library implements Serializable {
     public void addDirectoryStatus(String path) {
         if (directoryStatus.containsKey(path)) {
             // Set to updated
-            addDirectoryStatus(path, StatusType.UPDATED);
+            addDirectoryStatus(path, ConcurrentUtils.constantFuture(StatusType.UPDATED));
         } else {
             // Set to updated
-            addDirectoryStatus(path, StatusType.NEW);
+            addDirectoryStatus(path, ConcurrentUtils.constantFuture(StatusType.NEW));
         }
     }
 
@@ -215,12 +217,12 @@ public class Library implements Serializable {
      * @param path
      * @return
      */
-    public StatusType findDirectoryStatus(String path) {
+    public Future<StatusType> findDirectoryStatus(String path) {
         if (directoryStatus.containsKey(path)) {
             return directoryStatus.get(path);
         } else {
             // Don't know if this is the right status to send here
-            return StatusType.NEW;
+            return ConcurrentUtils.constantFuture(StatusType.NEW);
         }
     }
 
