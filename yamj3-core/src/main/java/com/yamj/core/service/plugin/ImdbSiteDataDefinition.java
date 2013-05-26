@@ -73,7 +73,7 @@ public class ImdbSiteDataDefinition {
         titleRegex = Pattern.compile(Pattern.quote("<link rel=\"canonical\" href=\"" + this.getSite() + "title/(tt\\d+)/\""));
     }
 
-    public String getSite() {
+    public final String getSite() {
         return site;
     }
 
