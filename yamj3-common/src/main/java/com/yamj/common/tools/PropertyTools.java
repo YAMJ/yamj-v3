@@ -14,12 +14,16 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 
-public class PropertyTools extends PropertyPlaceholderConfigurer {
+public final class PropertyTools extends PropertyPlaceholderConfigurer {
 
     private static final Logger LOG = LoggerFactory.getLogger(PropertyTools.class);
     private static final Properties properties = new Properties();
     // Default as in PropertyPlaceholderConfigurer
     private int springSystemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
+
+    private PropertyTools() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     @Override
     public void setSystemPropertiesMode(int systemPropertiesMode) {

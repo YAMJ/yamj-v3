@@ -13,11 +13,15 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
-public class DateTimeTools {
+public final class DateTimeTools {
 
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd";
     private static final PeriodFormatter TIME_FORMAT_COLON = createPeriodFormatter(":", ":", "");
     private static final PeriodFormatter TIME_FORMAT_TEXT = createPeriodFormatter("h", "m", "s");
+
+    private DateTimeTools() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     /**
      * Create a Period Formatter with the given delimiters
@@ -37,10 +41,6 @@ public class DateTimeTools {
                 .appendSecondsWithOptionalMillis()
                 .appendSuffix(secondText)
                 .toFormatter();
-    }
-
-    private DateTimeTools() {
-        throw new UnsupportedOperationException("Class cannot be instantiated");
     }
 
     /**

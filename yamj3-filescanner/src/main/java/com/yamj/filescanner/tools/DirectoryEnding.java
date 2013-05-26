@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * @author Stuart
  */
-public class DirectoryEnding {
+public final class DirectoryEnding {
 
     // Directory endings for DVD and Blurays
     private static final Map<String, DirectoryType> DIR_ENDINGS = new HashMap<String, DirectoryType>(3);
@@ -23,7 +23,7 @@ public class DirectoryEnding {
     }
 
     private DirectoryEnding() {
-        throw new UnsupportedOperationException("Cannot initialise class");
+        throw new UnsupportedOperationException("Utility class");
     }
 
     /**
