@@ -157,6 +157,7 @@ public class PluginDatabaseService {
             LOG.error("Series scanner '{}' not registered", scannerName);
             series.setStatus(StatusType.ERROR);
             mediaDao.updateEntity(series);
+            return;
         }
 
         // Scan series data
@@ -269,7 +270,7 @@ public class PluginDatabaseService {
                     castCrew.setRole(dto.getRole());
                 }
                 videoData.addCredit(castCrew);
-                
+
                 try {
                     personDao.saveOrUpdate(castCrew);
                 } catch (DataIntegrityViolationException ex) {
@@ -303,6 +304,7 @@ public class PluginDatabaseService {
             LOG.error("Person scanner '{}' not registered", scannerName);
             person.setStatus(StatusType.ERROR);
             personDao.updateEntity(person);
+            return;
         }
 
         // Scan series data
