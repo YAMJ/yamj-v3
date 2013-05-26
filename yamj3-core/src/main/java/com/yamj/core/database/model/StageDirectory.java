@@ -110,10 +110,10 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
-        final int PRIME = 17;
+        final int prime = 17;
         int result = 1;
-        result = PRIME * result + (this.directoryPath == null ? 0 : this.directoryPath.hashCode());
-        result = PRIME * result + (this.library == null ? 0 : this.library.hashCode());
+        result = prime * result + (this.directoryPath == null ? 0 : this.directoryPath.hashCode());
+        result = prime * result + (this.library == null ? 0 : this.library.hashCode());
         return result;
     }
 

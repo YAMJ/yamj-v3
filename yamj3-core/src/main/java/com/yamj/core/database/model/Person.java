@@ -132,9 +132,9 @@ public class Person extends AbstractAuditable implements Serializable {
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
-        final int PRIME = 17;
+        final int prime = 17;
         int result = 1;
-        result = PRIME * result + (this.name == null ? 0 : this.name.hashCode());
+        result = prime * result + (this.name == null ? 0 : this.name.hashCode());
         return result;
     }
 

@@ -207,9 +207,9 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
-        final int PRIME = 17;
+        final int prime = 17;
         int result = 1;
-        result = PRIME * result + (this.fileName == null ? 0 : this.fileName.hashCode());
+        result = prime * result + (this.fileName == null ? 0 : this.fileName.hashCode());
         return result;
     }
 

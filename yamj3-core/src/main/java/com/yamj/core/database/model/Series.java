@@ -214,9 +214,9 @@ public class Series extends AbstractAuditable implements
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
-        final int PRIME = 17;
+        final int prime = 17;
         int result = 1;
-        result = PRIME * result + (this.identifier == null ? 0 : this.identifier.hashCode());
+        result = prime * result + (this.identifier == null ? 0 : this.identifier.hashCode());
         return result;
     }
 

@@ -59,10 +59,10 @@ public class Library extends AbstractIdentifiable implements Serializable {
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
-        final int PRIME = 17;
+        final int prime = 17;
         int result = 1;
-        result = PRIME * result + (this.client == null ? 0 : this.client.hashCode());
-        result = PRIME * result + (this.playerPath == null ? 0 : this.playerPath.hashCode());
+        result = prime * result + (this.client == null ? 0 : this.client.hashCode());
+        result = prime * result + (this.playerPath == null ? 0 : this.playerPath.hashCode());
         return result;
     }
 
