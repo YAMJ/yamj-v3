@@ -86,7 +86,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
             if (beginIndex != -1) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("http://www.ofdb.de/");
-                sb.append(xml.substring(beginIndex, xml.indexOf("\"", beginIndex)));
+                sb.append(xml.substring(beginIndex, xml.indexOf('\"', beginIndex)));
                 return sb.toString();
             }
 
@@ -169,9 +169,9 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
 //            if (OverrideTools.checkOverwriteTitle(videoData, OFDB_SCANNER_ID)) {
             {
                 String titleShort = HTMLTools.extractTag(xml, "<title>OFDb -", "</title>");
-                if (titleShort.indexOf("(") > 0) {
+                if (titleShort.indexOf('(') > 0) {
                     // strip year from title
-                    titleShort = titleShort.substring(0, titleShort.lastIndexOf("(")).trim();
+                    titleShort = titleShort.substring(0, titleShort.lastIndexOf('(')).trim();
                 }
                 videoData.setTitle(titleShort, OFDB_SCANNER_ID);
             }
@@ -205,7 +205,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
             // scrape additional informations
             int beginIndex = xml.indexOf("view.php?page=film_detail");
             if (beginIndex != -1) {
-                String detailUrl = "http://www.ofdb.de/" + xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
+                String detailUrl = "http://www.ofdb.de/" + xml.substring(beginIndex, xml.indexOf('\"', beginIndex));
                 String detailXml = httpClient.requestContent(detailUrl);
 
                 // resolve for additional informations

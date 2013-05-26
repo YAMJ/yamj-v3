@@ -188,7 +188,7 @@ public class FilenameScanner {
 
     public FileType determineFileType(String fileName) {
         try {
-            int index = fileName.lastIndexOf(".");
+            int index = fileName.lastIndexOf('.');
             if (index < 0) {
                 return FileType.UNKNOWN;
             }
