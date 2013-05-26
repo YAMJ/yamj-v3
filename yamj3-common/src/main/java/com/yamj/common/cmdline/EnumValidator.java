@@ -16,7 +16,7 @@ public class EnumValidator extends OptionValidator {
      * @param allowedValues array of allowed values
      */
     public EnumValidator(final String allowedValues[]) {
-        this.allowedValues = allowedValues;
+        this.allowedValues = allowedValues.clone();
     }
 
     /**
