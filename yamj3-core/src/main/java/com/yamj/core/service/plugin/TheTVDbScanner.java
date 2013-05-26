@@ -20,7 +20,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheTVDbScanner.class);
     private static final String TVDB_SCANNER_ID = "tvdb";
-    private static TheTVDBApi tvdbApi;
+    private TheTVDBApi tvdbApi;
     private static final String API_KEY = PropertyTools.getProperty("APIKEY.tvdb", "");
     private static final String DEFAULT_LANGUAGE = PropertyTools.getProperty("thetvdb.language", "en");
     private static final int YEAR_MIN = 1900;

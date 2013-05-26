@@ -38,7 +38,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     @Autowired
     private PluginDatabaseService pluginDatabaseService;
     private static final String API_KEY = PropertyTools.getProperty("APIKEY.themoviedb", "");
-    private static TheMovieDbApi tmdbApi;
+    private TheMovieDbApi tmdbApi;
 
     @Override
     public String getScannerName() {
