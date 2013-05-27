@@ -20,7 +20,7 @@
 
     <properties>
         <!--This is used for the assembly plugin-->
-        <distribution.format>dir</distribution.format>
+        <distribution.format>zip</distribution.format>
         <!--Skip the tests if not needed-->
         <skipTests>true</skipTests>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -157,9 +157,11 @@
                             <descriptors>
                                 <descriptor>src/main/resources/bin.xml</descriptor>
                             </descriptors>
+<!-- Used to create a single jar
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
+-->
                         </configuration>
                     </execution>
                 </executions>
