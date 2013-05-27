@@ -125,10 +125,10 @@ public abstract class ExtendedHibernateDaoSupport extends HibernateDaoSupport im
     protected Long convertRowElementToLong(Object rowElement) {
         if (rowElement == null) {
             return Long.valueOf(0);
-        } else if (rowElement instanceof BigDecimal) {
-            return (Long) rowElement;
+        } else if (StringUtils.isNumeric(rowElement.toString())) {
+            return Long.valueOf(rowElement.toString());
         } else {
-            return new Long(rowElement.toString());
+            return Long.valueOf(0);
         }
     }
 
