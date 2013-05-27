@@ -1,6 +1,7 @@
 package com.yamj.filescanner.comparator;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Comparator;
 
 /**
@@ -10,8 +11,9 @@ import java.util.Comparator;
  *
  * @author Stuart
  */
-public class FileTypeComparator implements Comparator<File> {
+public class FileTypeComparator implements Comparator<File>, Serializable {
 
+    private static final long serialVersionUID = 1L;
     private boolean directoriesFirst;
 
     /**

@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Statistics {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Statistics.class);
+//    private static final Logger LOG = LoggerFactory.getLogger(Statistics.class);
     // Statistics
     private EnumMap<StatType, Integer> statistics = new EnumMap<StatType, Integer>(StatType.class);
     private EnumMap<TimeType, Long> times = new EnumMap<TimeType, Long>(TimeType.class);
@@ -37,7 +37,7 @@ public class Statistics {
      * @param stat
      * @return
      */
-    public int getStatistic(StatType stat) {
+    public synchronized int getStatistic(StatType stat) {
         return statistics.get(stat);
     }
 

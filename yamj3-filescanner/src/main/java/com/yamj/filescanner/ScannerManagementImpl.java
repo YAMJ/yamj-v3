@@ -53,8 +53,8 @@ public class ScannerManagementImpl implements ScannerManagement {
     private static final Boolean DEFAULT_WATCH_STATE = PropertyTools.getBooleanProperty("filescanner.watch.default", Boolean.FALSE);
     private AtomicInteger runningCount = new AtomicInteger(0);
     // Spring service(s)
-    @Autowired
-    private FileImportService fileImportService;
+//    @Autowired
+//    private FileImportService fileImportService;
     @Autowired
     private LibraryCollection libraryCollection;
     @Autowired

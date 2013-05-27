@@ -14,7 +14,7 @@ public class Watcher {
     private final WatchService watcher = FileSystems.getDefault().newWatchService();
     private final Map<WatchKey, Path> keys = new HashMap<WatchKey, Path>();
     private boolean trace = Boolean.FALSE;
-    private static final WatchEvent.Kind[] standardEvents = {ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE};
+    private static final WatchEvent.Kind[] STANDARD_EVENTS = {ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE};
     private boolean watchEnabled = Boolean.TRUE;    // keep watching the directories
 
     private static <T> WatchEvent<T> cast(WatchEvent<?> event) {
@@ -74,7 +74,7 @@ public class Watcher {
     private void register(Path dir) {
         WatchKey key = null;
         try {
-            key = dir.register(watcher, standardEvents, FILE_TREE);
+            key = dir.register(watcher, STANDARD_EVENTS, FILE_TREE);
         } catch (UnsupportedOperationException ex) {
             LOG.warn("File watching not supported: {}", ex.getMessage());
         } catch (IOException ex) {

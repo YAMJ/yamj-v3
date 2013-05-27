@@ -4,10 +4,8 @@ import com.yamj.common.dto.ImportDTO;
 import com.yamj.common.remote.service.FileImportService;
 import com.yamj.common.type.StatusType;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.lang3.concurrent.AtomicInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +17,8 @@ public class SendToCore implements Callable<StatusType> {
     private static final Logger LOG = LoggerFactory.getLogger(SendToCore.class);
     @Autowired
     private FileImportService fileImportService;
-    @Autowired
-    private PingCore pingCore;
+//    @Autowired
+//    private PingCore pingCore;
     private ImportDTO importDto;
     private int timeoutSeconds;
     private int numberOfRetries;
@@ -73,7 +71,7 @@ public class SendToCore implements Callable<StatusType> {
         return status;
     }
 
-    private StatusType send() throws RemoteConnectFailureException, RemoteAccessException {
+    private StatusType send() {
         StatusType status;
         try {
             LOG.debug("Sending: {}", importDto.toString());

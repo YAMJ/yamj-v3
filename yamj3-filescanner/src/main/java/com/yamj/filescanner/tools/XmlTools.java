@@ -43,8 +43,7 @@ public class XmlTools {
         FileInputStream is = null;
         try {
             is = new FileInputStream(filename);
-            Object obj = unmarshaller.unmarshal(new StreamSource(is));
-            return (T) obj;
+            return (T) unmarshaller.unmarshal(new StreamSource(is));
         } catch (FileNotFoundException ex) {
             LOG.warn("File not found: {}", filename);
         } catch (IOException ex) {

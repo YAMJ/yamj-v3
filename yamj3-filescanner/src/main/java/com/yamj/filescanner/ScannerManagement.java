@@ -5,5 +5,5 @@ import com.yamj.common.type.ExitType;
 
 public interface ScannerManagement {
 
-    public ExitType runScanner(CmdLineParser parser);
+    ExitType runScanner(CmdLineParser parser);
 }

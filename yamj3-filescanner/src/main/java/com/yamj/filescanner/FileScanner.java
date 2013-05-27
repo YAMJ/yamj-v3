@@ -17,7 +17,11 @@ public class FileScanner {
     private static final Logger LOG = LoggerFactory.getLogger(FileScanner.class);
     private static final String LOG_FILENAME = "yamj-filescanner";
 
-    public static void main(String[] args) throws Exception {
+    private FileScanner() {
+        throw new RuntimeException("Utility class");
+    }
+
+    public static void main(String[] args) {
         System.setProperty("file.name", LOG_FILENAME);
         PropertyConfigurator.configure("config/log4j.properties");
 
@@ -35,7 +39,7 @@ public class FileScanner {
                 status = main.execute(parser);
             }
         } catch (CmdLineException ex) {
-            LOG.error("Failed to parse command line options: {}",  ex.getMessage());
+            LOG.error("Failed to parse command line options: {}", ex.getMessage());
             help(parser);
             status = CMDLINE_ERROR;
         }
