@@ -4,8 +4,6 @@ import com.yamj.common.tools.DateTimeTools;
 import java.util.EnumMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Class to store any statistics about the jukebox

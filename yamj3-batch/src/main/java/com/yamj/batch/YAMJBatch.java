@@ -24,6 +24,10 @@ public class YAMJBatch {
         System.exit(status);
     }
 
+    private YAMJBatch() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     private static CmdLineParser getCmdLineParser() {
         CmdLineParser parser = new CmdLineParser();
         parser.addOption(new CmdLineOption("b", "batch", "The batch parameter", true, true));
@@ -34,7 +38,7 @@ public class YAMJBatch {
     private int execute(CmdLineParser parser) {
         int status;
         try {
-            ApplicationContext  applicationContext = new ClassPathXmlApplicationContext("yamj3-batch.xml");
+            ApplicationContext applicationContext = new ClassPathXmlApplicationContext("yamj3-batch.xml");
             BatchManagement batchManagement = (BatchManagement) applicationContext.getBean("batchManagement");
             status = batchManagement.runBatch(parser);
         } catch (Exception error) {

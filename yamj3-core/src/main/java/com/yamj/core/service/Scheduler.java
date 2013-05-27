@@ -28,8 +28,8 @@ import org.springframework.stereotype.Service;
 public class Scheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(Scheduler.class);
-    private static final int mediaScannerThreads = PropertyTools.getIntProperty("yamj3.scheduler.mediascan.maxThreads", 5);
-    private static final int peopleScannerThreads = PropertyTools.getIntProperty("yamj3.scheduler.peoplescan.maxThreads", 5);
+    private static final int MEDIA_SCANNER_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.mediascan.maxThreads", 5);
+    private static final int PEOPLE_SCANNER_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.peoplescan.maxThreads", 5);
 
     @Autowired
     private StagingDao stagingDao;
@@ -95,8 +95,8 @@ public class Scheduler {
         LOG.info("Found {} media data objects to process", queueElements.size());
         BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
 
-        ExecutorService executor = Executors.newFixedThreadPool(mediaScannerThreads);
-        for (int i = 0; i < mediaScannerThreads; i++) {
+        ExecutorService executor = Executors.newFixedThreadPool(MEDIA_SCANNER_THREADS);
+        for (int i = 0; i < MEDIA_SCANNER_THREADS; i++) {
             PluginDatabaseRunner worker = new PluginDatabaseRunner(queue, pluginDatabaseController);
             executor.execute(worker);
         }
@@ -124,8 +124,8 @@ public class Scheduler {
         LOG.info("Found {} people objects to process", queueElements.size());
         BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
 
-        ExecutorService executor = Executors.newFixedThreadPool(peopleScannerThreads);
-        for (int i = 0; i < peopleScannerThreads; i++) {
+        ExecutorService executor = Executors.newFixedThreadPool(PEOPLE_SCANNER_THREADS);
+        for (int i = 0; i < PEOPLE_SCANNER_THREADS; i++) {
             PluginDatabaseRunner worker = new PluginDatabaseRunner(queue, pluginDatabaseController);
             executor.execute(worker);
         }

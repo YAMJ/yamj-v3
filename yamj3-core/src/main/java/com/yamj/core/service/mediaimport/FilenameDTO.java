@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class FilenameDTO {
 
-    private static DecimalFormat PADDED_FORMAT = new DecimalFormat("000"); // Issue 190
+    private static DecimalFormat paddedFormat = new DecimalFormat("000"); // Issue 190
     private final String name;
     private final String parentName;
     private final boolean directory;
@@ -240,9 +240,9 @@ public class FilenameDTO {
         sb.append("_");
         sb.append(getYear() > -1 ? getYear() : "0000");
         sb.append("_");
-        sb.append(PADDED_FORMAT.format(getSeason()));
+        sb.append(paddedFormat.format(getSeason()));
         sb.append("_");
-        sb.append(PADDED_FORMAT.format(episode));
+        sb.append(paddedFormat.format(episode));
         return sb.toString();
     }
 
@@ -252,7 +252,7 @@ public class FilenameDTO {
         sb.append("_");
         sb.append(getYear() > -1 ? getYear() : "0000");
         sb.append("_");
-        sb.append(PADDED_FORMAT.format(getSeason()));
+        sb.append(paddedFormat.format(getSeason()));
         return sb.toString();
     }
 

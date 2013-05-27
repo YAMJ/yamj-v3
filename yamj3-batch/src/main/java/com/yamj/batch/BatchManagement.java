@@ -4,5 +4,5 @@ import com.yamj.common.cmdline.CmdLineParser;
 
 public interface BatchManagement {
 
-    public int runBatch(CmdLineParser parser);
+    int runBatch(CmdLineParser parser);
 }

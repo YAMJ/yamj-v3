@@ -17,7 +17,7 @@ import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 public final class PropertyTools extends PropertyPlaceholderConfigurer {
 
     private static final Logger LOG = LoggerFactory.getLogger(PropertyTools.class);
-    private static final Properties properties = new Properties();
+    private static final Properties PROPERTIES = new Properties();
     // Default as in PropertyPlaceholderConfigurer
     private int springSystemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
 
@@ -35,22 +35,22 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
     protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props) throws BeansException {
         super.processProperties(beanFactory, props);
 
-        properties.clear();
+        PROPERTIES.clear();
         for (Object key : props.keySet()) {
             String keyStr = key.toString();
             String valueStr = resolvePlaceholder(keyStr, props, springSystemPropertiesMode);
-            properties.put(keyStr, valueStr);
+            PROPERTIES.put(keyStr, valueStr);
         }
 
-        LOG.info("Loaded {} properties into core", properties.size());
+        LOG.info("Loaded {} properties into core", PROPERTIES.size());
     }
 
     public static String getProperty(String key) {
-        return properties.getProperty(key);
+        return PROPERTIES.getProperty(key);
     }
 
     public static String getProperty(String key, String defaultValue) {
-        return properties.getProperty(key, defaultValue);
+        return PROPERTIES.getProperty(key, defaultValue);
     }
 
     /**
@@ -61,7 +61,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
      * @return
      */
     public static boolean getBooleanProperty(String key, boolean defaultValue) {
-        String property = properties.getProperty(key);
+        String property = PROPERTIES.getProperty(key);
         if (property != null) {
             return Boolean.parseBoolean(property.trim());
         }
@@ -76,7 +76,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
      * @return
      */
     public static int getIntProperty(String key, int defaultValue) {
-        String property = properties.getProperty(key);
+        String property = PROPERTIES.getProperty(key);
         if (property != null) {
             try {
                 return Integer.parseInt(property.trim());
@@ -94,7 +94,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
      * @return
      */
     public static long getLongProperty(String key, long defaultValue) {
-        String property = properties.getProperty(key);
+        String property = PROPERTIES.getProperty(key);
         if (property != null) {
             try {
                 return Long.parseLong(property.trim());
@@ -112,7 +112,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
      * @return
      */
     public static float getFloatProperty(String key, float defaultValue) {
-        String property = properties.getProperty(key);
+        String property = PROPERTIES.getProperty(key);
         if (property != null) {
             try {
                 return Float.parseFloat(property.trim());
@@ -123,9 +123,9 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
     }
 
     public static String getReplacedProperty(String newKey, String oldKey, String defaultValue) {
-        String property = properties.getProperty(oldKey);
+        String property = PROPERTIES.getProperty(oldKey);
         if (property == null) {
-            property = properties.getProperty(newKey, defaultValue);
+            property = PROPERTIES.getProperty(newKey, defaultValue);
         } else {
             LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
         }
@@ -133,9 +133,9 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
     }
 
     public static boolean getReplacedBooleanProperty(String newKey, String oldKey, boolean defaultValue) {
-        String property = properties.getProperty(oldKey);
+        String property = PROPERTIES.getProperty(oldKey);
         if (property == null) {
-            property = properties.getProperty(newKey);
+            property = PROPERTIES.getProperty(newKey);
         } else {
             LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
         }
@@ -146,9 +146,9 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
     }
 
     public static int getReplacedIntProperty(String newKey, String oldKey, int defaultValue) {
-        String property = properties.getProperty(oldKey);
+        String property = PROPERTIES.getProperty(oldKey);
         if (property == null) {
-            property = properties.getProperty(newKey);
+            property = PROPERTIES.getProperty(newKey);
         } else {
             LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
         }
@@ -162,9 +162,9 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
     }
 
     public static long getReplacedLongProperty(String newKey, String oldKey, long defaultValue) {
-        String property = properties.getProperty(oldKey);
+        String property = PROPERTIES.getProperty(oldKey);
         if (property == null) {
-            property = properties.getProperty(newKey);
+            property = PROPERTIES.getProperty(newKey);
         } else {
             LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
         }
@@ -178,9 +178,9 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
     }
 
     public static float getReplacedFloatProperty(String newKey, String oldKey, float defaultValue) {
-        String property = properties.getProperty(oldKey);
+        String property = PROPERTIES.getProperty(oldKey);
         if (property == null) {
-            property = properties.getProperty(newKey);
+            property = PROPERTIES.getProperty(newKey);
         } else {
             LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
         }
@@ -197,23 +197,23 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
     public static Set<Entry<Object, Object>> getEntrySet() {
         // Issue 728
         // Shamelessly adapted from: http://stackoverflow.com/questions/54295/how-to-write-java-util-properties-to-xml-with-sorted-keys
-        return new TreeMap<Object, Object>(properties).entrySet();
+        return new TreeMap<Object, Object>(PROPERTIES).entrySet();
     }
 
     public static void setProperty(String key, String value) {
-        properties.setProperty(key, value);
+        PROPERTIES.setProperty(key, value);
     }
 
     public static void setProperty(String key, boolean value) {
-        properties.setProperty(key, Boolean.toString(value));
+        PROPERTIES.setProperty(key, Boolean.toString(value));
     }
 
     public static void setProperty(String key, int value) {
-        properties.setProperty(key, Integer.toString(value));
+        PROPERTIES.setProperty(key, Integer.toString(value));
     }
 
     public static void setProperty(String key, long value) {
-        properties.setProperty(key, Long.toString(value));
+        PROPERTIES.setProperty(key, Long.toString(value));
     }
 
     /**

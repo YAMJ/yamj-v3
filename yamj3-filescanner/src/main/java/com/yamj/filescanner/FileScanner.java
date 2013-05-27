@@ -5,6 +5,7 @@ import com.yamj.common.cmdline.CmdLineOption;
 import com.yamj.common.cmdline.CmdLineParser;
 import com.yamj.common.type.ExitType;
 import static com.yamj.common.type.ExitType.*;
+import javax.naming.OperationNotSupportedException;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,13 +13,13 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-public class FileScanner {
+public final class FileScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileScanner.class);
     private static final String LOG_FILENAME = "yamj-filescanner";
 
     private FileScanner() {
-        throw new RuntimeException("Utility class");
+        throw new UnsupportedOperationException("Utility class");
     }
 
     public static void main(String[] args) {

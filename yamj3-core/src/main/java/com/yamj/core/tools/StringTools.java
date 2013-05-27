@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
-public class StringTools {
+public final class StringTools {
 
     private static final Pattern CLEAN_STRING_PATTERN = Pattern.compile("[^a-zA-Z0-9]");
     // Number formatting
@@ -18,7 +18,11 @@ public class StringTools {
     private static final DecimalFormat FILESIZE_FORMAT_0 = new DecimalFormat("0");
     private static final DecimalFormat FILESIZE_FORMAT_1 = new DecimalFormat("0.#");
     private static final DecimalFormat FILESIZE_FORMAT_2 = new DecimalFormat("0.##");
-    private static final Map<Character, Character> charReplacementMap = new HashMap<Character, Character>();
+    private static final Map<Character, Character> CHAR_REPLACEMENT_MAP = new HashMap<Character, Character>();
+
+    private StringTools() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     static {
         // Populate the charReplacementMap
@@ -32,7 +36,7 @@ public class StringTools {
                 String key = token.substring(0, idx).trim();
                 String value = token.substring(idx + 1).trim();
                 if (key.length() == 1 && value.length() == 1) {
-                    charReplacementMap.put(Character.valueOf(key.charAt(0)), Character.valueOf(value.charAt(0)));
+                    CHAR_REPLACEMENT_MAP.put(Character.valueOf(key.charAt(0)), Character.valueOf(value.charAt(0)));
                 }
             }
         }
@@ -45,7 +49,7 @@ public class StringTools {
      * @return
      */
     public static String characterMapReplacement(Character charToReplace) {
-        Character tempC = charReplacementMap.get(charToReplace);
+        Character tempC = CHAR_REPLACEMENT_MAP.get(charToReplace);
         if (tempC == null) {
             return charToReplace.toString();
         } else {
@@ -64,7 +68,7 @@ public class StringTools {
         StringBuilder sb = new StringBuilder();
 
         for (Character c : stringToReplace.toCharArray()) {
-            tempC = charReplacementMap.get(c);
+            tempC = CHAR_REPLACEMENT_MAP.get(c);
             if (tempC == null) {
                 sb.append(c);
             } else {

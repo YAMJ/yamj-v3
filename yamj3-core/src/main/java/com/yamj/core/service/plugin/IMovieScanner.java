@@ -4,9 +4,9 @@ import com.yamj.core.database.model.VideoData;
 
 public interface IMovieScanner extends IPluginDatabaseScanner {
 
-    public String getMovieId(VideoData videoData);
+    String getMovieId(VideoData videoData);
 
-    public String getMovieId(String title, int year);
+    String getMovieId(String title, int year);
 
-    public ScanResult scan(VideoData videoData);
+    ScanResult scan(VideoData videoData);
 }

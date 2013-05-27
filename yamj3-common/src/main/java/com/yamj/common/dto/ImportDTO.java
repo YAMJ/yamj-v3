@@ -1,6 +1,8 @@
 package com.yamj.common.dto;
 
 import java.io.Serializable;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Object for importing a directory of a library into the core server.
@@ -47,6 +49,6 @@ public class ImportDTO implements Serializable {
 
     @Override
     public String toString() {
-        return "ImportDTO{playerPath='" + playerPath + "', baseDirectory='" + baseDirectory + "', directory=" + stageDirectory.getPath() + "}";
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

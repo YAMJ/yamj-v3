@@ -12,7 +12,7 @@ public interface ExtendedHibernateDao {
      *
      * @param entity the entity to store
      */
-    public void storeEntity(final Object entity);
+    void storeEntity(final Object entity);
 
     /**
      * Store all entities.
@@ -20,26 +20,26 @@ public interface ExtendedHibernateDao {
      * @param entities the entities to store
      */
     @SuppressWarnings("rawtypes")
-    public void storeAll(final Collection entities);
+    void storeAll(final Collection entities);
 
     /**
      * Save an entity.
      *
      * @param entity the entity to save
      */
-    public void saveEntity(final Object object);
+    void saveEntity(final Object object);
 
     /**
      * Update an entity.
      *
      * @param entity the entity to update
      */
-    public void updateEntity(final Object entity);
+    void updateEntity(final Object entity);
 
     /**
      * Delete an entity.
      *
      * @param entity the entity to delete
      */
-    public void deleteEntity(final Object entity);
+    void deleteEntity(final Object entity);
 }

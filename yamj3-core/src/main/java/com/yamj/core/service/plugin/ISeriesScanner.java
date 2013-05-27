@@ -4,9 +4,9 @@ import com.yamj.core.database.model.Series;
 
 public interface ISeriesScanner extends IPluginDatabaseScanner {
 
-    public String getSeriesId(Series series);
+    String getSeriesId(Series series);
 
-    public String getSeriesId(String title, int year);
+    String getSeriesId(String title, int year);
 
-    public ScanResult scan(Series series);
+    ScanResult scan(Series series);
 }

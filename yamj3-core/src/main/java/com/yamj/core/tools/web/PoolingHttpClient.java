@@ -4,6 +4,7 @@ import com.yamj.common.tools.PropertyTools;
 import java.io.*;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,7 +64,7 @@ public class PoolingHttpClient extends DefaultHttpClient implements DisposableBe
         // Default, can be overridden
         groupLimits.put(".*", 1);
         String limitsProperty = PropertyTools.getProperty("yamj3.http.maxDownloadSlots", ".*=1");
-        LOG.debug("Using download limits: {}" , limitsProperty);
+        LOG.debug("Using download limits: {}", limitsProperty);
 
         Pattern pattern = Pattern.compile(",?\\s*([^=]+)=(\\d+)");
         Matcher matcher = pattern.matcher(limitsProperty);
@@ -73,7 +74,7 @@ public class PoolingHttpClient extends DefaultHttpClient implements DisposableBe
                 Pattern.compile(group);
                 groupLimits.put(group, Integer.parseInt(matcher.group(2)));
             } catch (Exception error) {
-                LOG.debug("Rule '{}' is not valid regexp, ignored",group);
+                LOG.debug("Rule '{}' is not valid regexp, ignored", group);
             }
         }
     }
@@ -165,7 +166,7 @@ public class PoolingHttpClient extends DefaultHttpClient implements DisposableBe
 
         int statusCode = response.getStatusLine().getStatusCode();
         if (statusCode != 200) {
-            throw new RuntimeException("Unexpected status " + statusCode + " for uri " + uri);
+            throw new RemoteException("Unexpected status " + statusCode + " for uri " + uri);
         }
 
         return readContent(response, charset);

@@ -4,7 +4,6 @@ import com.yamj.common.cmdline.CmdLineParser;
 import com.yamj.common.dto.ImportDTO;
 import com.yamj.common.dto.StageDirectoryDTO;
 import com.yamj.common.dto.StageFileDTO;
-import com.yamj.common.remote.service.FileImportService;
 import com.yamj.common.tools.PropertyTools;
 import com.yamj.common.type.DirectoryType;
 import com.yamj.common.type.ExitType;

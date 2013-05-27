@@ -1,8 +1,9 @@
 package com.yamj.core.database.model.dto;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
-public class QueueDTOComparator implements Comparator<QueueDTO> {
+public class QueueDTOComparator implements Comparator<QueueDTO>, Serializable {
 
     @Override
     public int compare(QueueDTO o1, QueueDTO o2) {

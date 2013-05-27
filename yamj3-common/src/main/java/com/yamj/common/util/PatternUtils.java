@@ -12,6 +12,10 @@ public final class PatternUtils {
     public static final Pattern WORD_DELIMITERS_MATCH_PATTERN = patt("(?:[" + Pattern.quote(WORD_DELIMITERS_STRING) + "]|$|^)");
     public static final String SPACE_SLASH_SPACE = " / ";
 
+    private PatternUtils() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     /**
      * @param regex
      * @return Exact pattern

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
@@ -108,10 +109,10 @@ public abstract class ExtendedHibernateDaoSupport extends HibernateDaoSupport im
     protected Integer convertRowElementToInteger(Object rowElement) {
         if (rowElement == null) {
             return Integer.valueOf(0);
-        } else if (rowElement instanceof BigDecimal) {
-            return (Integer) rowElement;
+        } else if (StringUtils.isNumeric(rowElement.toString())) {
+            return Integer.valueOf(rowElement.toString());
         } else {
-            return new Integer(rowElement.toString());
+            return Integer.valueOf(0);
         }
     }
 
