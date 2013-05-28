@@ -15,9 +15,9 @@ public class Library extends AbstractIdentifiable implements Serializable {
     @Column(name = "client", nullable = false, length = 100)
     private String client;
     @NaturalId
-    @Column(name = "player_path", nullable = false, length = 500)
+    @Column(name = "player_path", nullable = false, length = 255)
     private String playerPath;
-    @Column(name = "base_directory", nullable = false, length = 500)
+    @Column(name = "base_directory", nullable = false, length = 255)
     private String baseDirectory;
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "last_scanned", nullable = false)

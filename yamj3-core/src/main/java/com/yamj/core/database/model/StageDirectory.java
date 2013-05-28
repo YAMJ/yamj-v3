@@ -38,7 +38,7 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 1706389732909764283L;
     @NaturalId
-    @Column(name = "directory_path", nullable = false, length = 500)
+    @Column(name = "directory_path", nullable = false, length = 255)
     private String directoryPath;
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "directory_date", nullable = false)

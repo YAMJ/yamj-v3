@@ -21,10 +21,6 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
     // Default as in PropertyPlaceholderConfigurer
     private int springSystemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
 
-    private PropertyTools() {
-        throw new UnsupportedOperationException("Utility class");
-    }
-
     @Override
     public void setSystemPropertiesMode(int systemPropertiesMode) {
         super.setSystemPropertiesMode(systemPropertiesMode);
