@@ -1,7 +1,6 @@
 package com.yamj.core.tools.web;
 
-import com.yamj.api.common.http.AbstractPoolingHttpClient;
-
+import com.moviejukebox.api.common.http.AbstractPoolingHttpClient;
 import com.yamj.common.tools.PropertyTools;
 import java.io.IOException;
 import java.net.URI;
