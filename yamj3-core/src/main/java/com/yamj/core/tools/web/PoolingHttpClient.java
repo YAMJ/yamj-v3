@@ -125,7 +125,8 @@ public class PoolingHttpClient extends AbstractPoolingHttpClient implements Disp
 
     @Override
     public String requestContent(String uri, Charset charset) throws IOException {
-        return this.requestContent(URI.create(uri), charset);
+        HttpGet httpGet = new HttpGet(uri);
+        return this.requestContent(httpGet, charset);
     }
 
     @Override
@@ -136,7 +137,16 @@ public class PoolingHttpClient extends AbstractPoolingHttpClient implements Disp
     @Override
     public String requestContent(URI uri, Charset charset) throws IOException {
         HttpGet httpGet = new HttpGet(uri);
+        return this.requestContent(httpGet, charset);
+    }
 
+    @Override
+    public String requestContent(HttpGet httpGet) throws IOException {
+        return this.requestContent(httpGet, null);
+    }
+
+    @Override
+    public String requestContent(HttpGet httpGet, Charset charset) throws IOException {
         // set route (if not set before)
         setRoute(httpGet);
 
@@ -144,7 +154,7 @@ public class PoolingHttpClient extends AbstractPoolingHttpClient implements Disp
 
         int statusCode = response.getStatusLine().getStatusCode();
         if (statusCode != 200) {
-            throw new RuntimeException("Unexpected status " + statusCode + " for uri " + uri);
+            throw new RuntimeException("Unexpected status " + statusCode + " for uri " + httpGet.getURI());
         }
 
         return readContent(response, charset);
