@@ -20,6 +20,7 @@
     <description>Core of YAMJ project</description>
 
     <properties>
+        <distribution.format>zip</distribution.format>
         <skipTests>true</skipTests>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -30,14 +31,18 @@
         <!-- PROJECT -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>yamj3-core</artifactId>
+            <artifactId>yamj3-common</artifactId>
         </dependency>
         <!-- OTHER -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-         <!--LOGGING--> 
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <!--LOGGING-->
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
@@ -45,7 +50,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <scope>test</scope>
         </dependency>
         <!-- JETTY -->
         <dependency>
@@ -112,8 +116,12 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
+                        <manifest>
+                            <addClasspath>false</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                        </manifest>
                         <manifestEntries>
-                            <Specification-Title>YAMJ3 - Jetty</Specification-Title>
+                            <Specification-Title>${project.name}</Specification-Title>
                             <Specification-Version>${project.version}</Specification-Version>
                             <Implementation-Version>${buildNumber}</Implementation-Version>
                             <Implementation-Title>${timestamp}</Implementation-Title>
@@ -122,6 +130,101 @@
                     </archive>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeScope>compile</includeScope>
+                            <outputDirectory>${project.build.directory}/dependencies</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>distro-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/resources/bin.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>create-version-txt</id>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <target>
+                                <property name="version_file"     value="${project.build.directory}/version.txt" />
+                                <property name="header_line"      value="${project.name}${line.separator}" />
+                                <property name="build_date_line"  value="Build Date: ${timestamp}${line.separator}" />
+                                <property name="version_line"     value="Version   : ${project.version}${line.separator}" />
+                                <property name="buildnumber_line" value="Git-SHA   : ${buildNumber}${line.separator}" />
+                                <echo>Writing version file: ${version_file}</echo>
+                                <echo file="${version_file}" append="false">${header_line}</echo>
+                                <echo file="${version_file}" append="true">${build_date_line}</echo>
+                                <echo file="${version_file}" append="true">${version_line}</echo>
+                                <echo file="${version_file}" append="true">${buildnumber_line}</echo>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>create-batch-file</id>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <target>
+                                <property name="batch_file" value="${project.build.directory}/jetty.cmd" />
+                                <property name="title_1"    value="# ${project.name}${line.separator}" />
+                                <property name="title_2"    value="# ${project.description}${line.separator}" />
+                                <property name="title_3"    value="# Version: ${project.version}${line.separator}" />
+                                <property name="title_4"    value="# Git-SHA: ${buildNumber}${line.separator}" />
+                                <property name="line_1"     value="@echo off${line.separator}" />
+                                <property name="line_2"     value="cls${line.separator}" />
+                                <property name="line_3"     value="java -classpath .;dependencies/*;lib/* com.yamj.jetty.Start %*${line.separator}" />
+                                <property name="line_4"     value="pause${line.separator}" />
+                                <echo>Writing batch file: ${batch_file}</echo>
+                                <echo file="${batch_file}" append="false">${line_1}</echo>
+                                <echo file="${batch_file}" append="true">${title_1}</echo>
+                                <echo file="${batch_file}" append="true">${title_2}</echo>
+                                <echo file="${batch_file}" append="true">${title_3}</echo>
+                                <echo file="${batch_file}" append="true">${title_4}</echo>
+                                <echo file="${batch_file}" append="true">${line_2}</echo>
+                                <echo file="${batch_file}" append="true">${line_3}</echo>
+                                <echo file="${batch_file}" append="true">${line_4}</echo>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 

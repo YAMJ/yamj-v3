@@ -26,6 +26,10 @@ public enum ExitType {
      */
     CONNECT_FAILURE(4),
     /*
+     * Failed to start
+     */
+    STARTUP_FAILURE(4),
+    /*
      * Unable to watch a directory
      */
     WATCH_FAILURE(5);

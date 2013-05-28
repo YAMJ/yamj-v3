@@ -189,9 +189,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
         return defaultValue;
     }
 
-    // Issue 309
     public static Set<Entry<Object, Object>> getEntrySet() {
-        // Issue 728
         // Shamelessly adapted from: http://stackoverflow.com/questions/54295/how-to-write-java-util-properties-to-xml-with-sorted-keys
         return new TreeMap<Object, Object>(PROPERTIES).entrySet();
     }

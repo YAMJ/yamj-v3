@@ -52,7 +52,7 @@
             <artifactId>slf4j-log4j12</artifactId>
         </dependency>
 
-
+        <!-- TEST -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
