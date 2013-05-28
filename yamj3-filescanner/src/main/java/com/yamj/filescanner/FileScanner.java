@@ -17,10 +17,6 @@ public final class FileScanner {
     private static final Logger LOG = LoggerFactory.getLogger(FileScanner.class);
     private static final String LOG_FILENAME = "yamj-filescanner";
 
-    private FileScanner() {
-        throw new UnsupportedOperationException("Utility class");
-    }
-
     public static void main(String[] args) {
         System.setProperty("file.name", LOG_FILENAME);
         PropertyConfigurator.configure("config/log4j.properties");
@@ -46,11 +42,22 @@ public final class FileScanner {
         System.exit(status.getReturn());
     }
 
+    /**
+     * Print the title
+     */
+    private static void printHeader() {
+        LOG.info("YAMJ v3 File Scanner");
+        LOG.info("~~~~ ~~ ~~~~ ~~~~~~~");
+        LOG.info("Scans the specified directory for media files.");
+    }
+
+    /**
+     * Print the parse descriptions
+     *
+     * @param parser
+     */
     private static void help(CmdLineParser parser) {
-        LOG.error("YAMJ v3 File Scanner");
-        LOG.error("~~~~ ~~ ~~~~ ~~~~~~~");
-        LOG.error("Scans the specified directory for media files.");
-        LOG.error(parser.getDescriptions());
+        LOG.info(parser.getDescriptions());
     }
 
     private static CmdLineParser getCmdLineParser() {
