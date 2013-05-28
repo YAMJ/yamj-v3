@@ -5,7 +5,6 @@ import com.yamj.common.cmdline.CmdLineOption;
 import com.yamj.common.cmdline.CmdLineParser;
 import com.yamj.common.type.ExitType;
 import static com.yamj.common.type.ExitType.*;
-import javax.naming.OperationNotSupportedException;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
