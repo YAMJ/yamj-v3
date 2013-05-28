@@ -14,9 +14,7 @@ import org.hibernate.annotations.Parameter;
         parameters = {
     @Parameter(name = "enumClassName", value = "com.yamj.core.database.model.type.JobType")})
 @Entity
-@Table(name = "cast_crew",
-        uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"person_id", "data_id", "job"})})
+@Table(name = "cast_crew")
 public class CastCrew extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -3941301942248344131L;
@@ -32,6 +30,7 @@ public class CastCrew extends AbstractIdentifiable implements Serializable {
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "data_id", insertable = false, updatable = false, nullable = false)
     private VideoData videoData;
+    @NaturalId
     @Type(type = "jobType")
     @Column(name = "job", nullable = false, length = 30)
     private JobType jobType;
