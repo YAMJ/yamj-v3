@@ -35,7 +35,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -6247352843375054146L;
     @NaturalId(mutable = true)
-    @Column(name = "file_name", nullable = false, length = 500)
+    @Column(name = "file_name", nullable = false, length = 255)
     private String fileName;
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.EAGER)

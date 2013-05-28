@@ -27,7 +27,7 @@ public class MediaFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 8411423609119475972L;
     @NaturalId
-    @Column(name = "fileName", nullable = false, length = 500)
+    @Column(name = "fileName", nullable = false, length = 255)
     private String fileName;
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "file_date")
