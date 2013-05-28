@@ -1,5 +1,7 @@
 package com.yamj.core.database.model;
 
+import org.hibernate.annotations.Index;
+
 import com.yamj.core.database.model.type.OverrideFlag;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,22 +9,18 @@ import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.MapKey;
 
-@Entity
-@Table(name = "season")
 @SuppressWarnings("deprecation")
-public class Season extends AbstractMetadata implements ISourcedbIdentifiable  {
+@javax.persistence.Entity
+@javax.persistence.Table(name = "season")
+@org.hibernate.annotations.Table(appliesTo = "season",
+    indexes = {@Index(name = "season_title", columnNames = {"title"})})
+public class Season extends AbstractMetadata {
 
     private static final long serialVersionUID = 7589022259013410259L;
-
-    @Index(name = "season_title")
-    @Column(name = "title", nullable = false, length = 255)
-    private String title;
 
     @Index(name = "season_season")
     @Column(name = "season", nullable = false)
@@ -64,21 +62,6 @@ public class Season extends AbstractMetadata implements ISourcedbIdentifiable  {
 
     // GETTER and SETTER
     
-    public String getTitle() {
-        return title;
-    }
-
-    private void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setTitle(String title, String source) {
-        if (!StringUtils.isBlank(title)) {
-            setTitle(title);
-            setOverrideFlag(OverrideFlag.TITLE, source);
-        }
-    }
-
     public int getSeason() {
         return season;
     }
@@ -131,8 +114,14 @@ public class Season extends AbstractMetadata implements ISourcedbIdentifiable  {
         this.overrideFlags = overrideFlags;
     }
 
+    @Override
     public void setOverrideFlag(OverrideFlag overrideFlag, String source) {
         this.overrideFlags.put(overrideFlag, source);
+    }
+
+    @Override
+    public String getOverrideSource(OverrideFlag overrideFlag) {
+        return overrideFlags.get(overrideFlag);
     }
 
     public Series getSeries() {

@@ -28,7 +28,7 @@ public class CastCrew extends AbstractIdentifiable implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_CASTCREW_VIDEODATA")
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "data_id", insertable = false, updatable = false, nullable = false)
+    @JoinColumn(name = "videodata_id", insertable = false, updatable = false, nullable = false)
     private VideoData videoData;
     @NaturalId
     @Type(type = "jobType")

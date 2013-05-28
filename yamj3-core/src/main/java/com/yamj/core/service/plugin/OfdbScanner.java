@@ -3,9 +3,11 @@ package com.yamj.core.service.plugin;
 import com.yamj.core.database.model.VideoData;
 import com.yamj.core.database.model.dto.CreditDTO;
 import com.yamj.core.database.model.type.JobType;
+import com.yamj.core.database.model.type.OverrideFlag;
+import com.yamj.core.tools.OverrideTools;
 import com.yamj.core.tools.StringTools;
-import com.yamj.core.tools.web.PoolingHttpClient;
 import com.yamj.core.tools.web.HTMLTools;
+import com.yamj.core.tools.web.PoolingHttpClient;
 import com.yamj.core.tools.web.SearchEngineTools;
 import java.net.URLEncoder;
 import java.util.HashSet;
@@ -74,7 +76,6 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
 
     private String getOfdbIdByImdbId(String imdbId) {
         try {
-            //String xml = webBrowser.request("http://www.ofdb.de/view.php?page=suchergebnis&SText=" + imdbId + "&Kat=IMDb");
             String xml = httpClient.requestContent("http://www.ofdb.de/view.php?page=suchergebnis&SText=" + imdbId + "&Kat=IMDb");
 
             int beginIndex = xml.indexOf("Ergebnis der Suchanfrage");
@@ -166,8 +167,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                 videoData.setSourcedbId(IMDB_SCANNER_ID, "tt" + imdbId);
             }
 
-//            if (OverrideTools.checkOverwriteTitle(videoData, OFDB_SCANNER_ID)) {
-            {
+            if (OverrideTools.checkOverwriteTitle(videoData, OFDB_SCANNER_ID)) {
                 String titleShort = HTMLTools.extractTag(xml, "<title>OFDb -", "</title>");
                 if (titleShort.indexOf('(') > 0) {
                     // strip year from title
@@ -178,7 +178,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
 
             // scrape plot and outline
             String plotMarker = HTMLTools.extractTag(xml, "<a href=\"plot/", 0, "\"");
-            if (StringUtils.isNotBlank(plotMarker) /*&& OverrideTools.checkOneOverwrite(videoData, OFDB_SCANNER_ID, OverrideFlag.PLOT, OverrideFlag.OUTLINE)*/) {
+            if (StringUtils.isNotBlank(plotMarker) && OverrideTools.checkOneOverwrite(videoData, OFDB_SCANNER_ID, OverrideFlag.PLOT, OverrideFlag.OUTLINE)) {
                 try {
                     String plotXml = httpClient.requestContent("http://www.ofdb.de/plot/" + plotMarker);
 
@@ -187,14 +187,12 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                     String plot = plotXml.substring(firstindex, lastindex);
                     plot = plot.replaceAll("<br />", " ");
 
-//                    if (OverrideTools.checkOverwritePlot(videoData, OFDB_SCANNER_ID)) {
-                    {
+                    if (OverrideTools.checkOverwritePlot(videoData, OFDB_SCANNER_ID)) {
                         videoData.setPlot(plot, OFDB_SCANNER_ID);
                     }
 
-//                    if (OverrideTools.checkOverwriteOutline(videoData, OFDB_SCANNER_ID)) {
-                    {
-                        //videoData.setOutline(plot, OFDB_SCANNER_ID);
+                    if (OverrideTools.checkOverwriteOutline(videoData, OFDB_SCANNER_ID)) {
+                        videoData.setOutline(plot, OFDB_SCANNER_ID);
                     }
                 } catch (Exception error) {
                     LOG.error("Failed retrieving plot '{}'", ofdbUrl, error);
@@ -212,20 +210,17 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                 List<String> tags = HTMLTools.extractHtmlTags(detailXml, "<!-- Rechte Spalte -->", "</table>", "<tr", "</tr>");
 
                 for (String tag : tags) {
-//                    if (OverrideTools.checkOverwriteOriginalTitle(videoData, OFDB_SCANNER_ID) && tag.contains("Originaltitel")) {
-                    if (tag.contains("Originaltitel")) {
+                    if (OverrideTools.checkOverwriteOriginalTitle(videoData, OFDB_SCANNER_ID) && tag.contains("Originaltitel")) {
                         String scraped = HTMLTools.removeHtmlTags(HTMLTools.extractTag(tag, "class=\"Daten\">", "</font>")).trim();
                         videoData.setTitleOriginal(scraped, OFDB_SCANNER_ID);
                     }
 
-//                    if (OverrideTools.checkOverwriteYear(videoData, OFDB_SCANNER_ID) && tag.contains("Erscheinungsjahr")) {
-                    if (tag.contains("Erscheinungsjahr")) {
+                    if (OverrideTools.checkOverwriteYear(videoData, OFDB_SCANNER_ID) && tag.contains("Erscheinungsjahr")) {
                         String scraped = HTMLTools.removeHtmlTags(HTMLTools.extractTag(tag, "class=\"Daten\">", "</font>")).trim();
                         videoData.setPublicationYear(StringTools.toYear(scraped), OFDB_SCANNER_ID);
                     }
 
-//                    if (OverrideTools.checkOverwriteCountry(videoData, OFDB_SCANNER_ID) && tag.contains("Herstellungsland")) {
-                    if (tag.contains("Herstellungsland")) {
+                    if (OverrideTools.checkOverwriteCountry(videoData, OFDB_SCANNER_ID) && tag.contains("Herstellungsland")) {
                         List<String> scraped = HTMLTools.extractHtmlTags(tag, "class=\"Daten\"", "</td>", "<a", "</a>");
                         if (scraped.size() > 0) {
                             // TODO set more countries in movie

@@ -1,19 +1,14 @@
 package com.yamj.core.database.model;
 
-import com.yamj.core.hibernate.usertypes.EnumStringUserType;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
-
 import com.yamj.common.type.StatusType;
 import com.yamj.core.database.model.type.OverrideFlag;
+import com.yamj.core.hibernate.usertypes.EnumStringUserType;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.*;
 
 /**
  * Abstract implementation of an metadata object.
@@ -27,19 +22,22 @@ import org.hibernate.annotations.Type;
             parameters = {@Parameter(name = "enumClassName", value = "com.yamj.common.type.StatusType")})
 })
 
-
 @MappedSuperclass
-public abstract class AbstractMetadata extends AbstractAuditable implements Serializable {
+public abstract class AbstractMetadata extends AbstractAuditable 
+    implements ISourcedbIdentifiable, Serializable {
 
     private static final long serialVersionUID = -556558470067852056L;
 
     /**
-     * This is the video data identifier. This will be generated from a scanned file name.
+     * This will be generated from a scanned file name.
      */
     @NaturalId
-    @Column(name = "identifier", unique = true, length = 200)
+    @Column(name = "identifier", length = 200, nullable = false)
     protected String identifier;
     
+    @Column(name = "title", nullable = false, length = 255)
+    private String title;
+
     @Column(name = "title_original", length = 255)
     private String titleOriginal;
     
@@ -63,6 +61,21 @@ public abstract class AbstractMetadata extends AbstractAuditable implements Seri
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    protected void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setTitle(String title, String source) {
+        if (!StringUtils.isBlank(title)) {
+            setTitle(title);
+            setOverrideFlag(OverrideFlag.TITLE, source);
+        }
     }
 
     public String getTitleOriginal() {
@@ -118,5 +131,7 @@ public abstract class AbstractMetadata extends AbstractAuditable implements Seri
         this.status = status;
     }
 
+    public abstract String getOverrideSource(OverrideFlag overrideFlag);
+    
     public abstract void setOverrideFlag(OverrideFlag overrideFlag, String source);
 }

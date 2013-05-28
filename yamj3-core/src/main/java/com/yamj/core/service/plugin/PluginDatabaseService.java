@@ -29,10 +29,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class PluginDatabaseService {
 
     private static final Logger LOG = LoggerFactory.getLogger(PluginDatabaseService.class);
-    private static final String VIDEO_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie", "tmdb");
-    private static final String VIDEO_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie.alternate", "");
-    private static final String SERIES_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.series", "tvdb");
-    private static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.alternate", "");
+    public static final String VIDEO_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie", "tmdb");
+    public static final String VIDEO_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie.alternate", "");
+    public static final String SERIES_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.series", "tvdb");
+    public static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.alternate", "");
     private static final String PERSON_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.person", "tmdb");
     @Autowired
     private MediaDao mediaDao;
@@ -47,7 +47,7 @@ public class PluginDatabaseService {
     public void registerMovieScanner(IMovieScanner movieScanner) {
         registeredMovieScanner.put(movieScanner.getScannerName().toLowerCase(), movieScanner);
     }
-
+    
     public void registerSeriesScanner(ISeriesScanner seriesScanner) {
         registeredSeriesScanner.put(seriesScanner.getScannerName().toLowerCase(), seriesScanner);
     }

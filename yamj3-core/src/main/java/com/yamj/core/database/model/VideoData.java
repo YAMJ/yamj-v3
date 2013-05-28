@@ -17,17 +17,15 @@ import org.hibernate.annotations.*;
 import org.hibernate.annotations.MapKey;
 import org.hibernate.annotations.Parameter;
 
-@Entity
-@Table(name = "videodata")
 @SuppressWarnings({"unused", "deprecation"})
-public class VideoData extends AbstractMetadata implements ISourcedbIdentifiable {
+@javax.persistence.Entity
+@javax.persistence.Table(name = "videodata")
+@org.hibernate.annotations.Table(appliesTo = "videodata",
+    indexes = {@Index(name = "videodata_title", columnNames = {"title"})})
+public class VideoData extends AbstractMetadata {
 
     private static final long serialVersionUID = 5719107822219333629L;
 
-    @Index(name = "videodata_title")
-    @Column(name = "title", nullable = false, length = 255)
-    private String title;
-    
     @Column(name = "episode", nullable = false)
     private int episode = -1;
     
@@ -92,28 +90,13 @@ public class VideoData extends AbstractMetadata implements ISourcedbIdentifiable
     
     @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY, orphanRemoval = true)
     @OrderColumn(name = "order_data", nullable = false)
-    @JoinColumn(name = "data_id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false)
     private List<CastCrew> credits = new ArrayList<CastCrew>(0);
     
     @Transient
     private List<CreditDTO> creditDTOS = new ArrayList<CreditDTO>(0);
 
     // GETTER and SETTER
-
-    public String getTitle() {
-        return title;
-    }
-
-    private void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setTitle(String title, String source) {
-        if (StringUtils.isNotBlank(title)) {
-            setTitle(title);
-            setOverrideFlag(OverrideFlag.TITLE, source);
-        }
-    }
 
     public int getPublicationYear() {
         return publicationYear;
@@ -165,16 +148,30 @@ public class VideoData extends AbstractMetadata implements ISourcedbIdentifiable
         return tagline;
     }
 
-    public void setTagline(String tagline) {
+    private void setTagline(String tagline) {
         this.tagline = tagline;
+    }
+
+    public void setTagline(String tagline, String source) {
+        if (StringUtils.isNotBlank(tagline)) {
+            this.tagline = tagline;
+            setOverrideFlag(OverrideFlag.TAGLINE, source);
+        }
     }
 
     public String getQuote() {
         return quote;
     }
 
-    public void setQuote(String quote) {
+    private void setQuote(String quote) {
         this.quote = quote;
+    }
+
+    public void setQuote(String quote, String source) {
+        if (StringUtils.isNotBlank(quote)) {
+            this.quote = quote;
+            setOverrideFlag(OverrideFlag.QUOTE, source);
+        }
     }
 
     public String getCountry() {
@@ -228,8 +225,14 @@ public class VideoData extends AbstractMetadata implements ISourcedbIdentifiable
         this.overrideFlags = overrideFlags;
     }
 
+    @Override
     public void setOverrideFlag(OverrideFlag overrideFlag, String source) {
         this.overrideFlags.put(overrideFlag, source);
+    }
+
+    @Override
+    public String getOverrideSource(OverrideFlag overrideFlag) {
+        return overrideFlags.get(overrideFlag);
     }
 
     public Set<Genre> getGenres() {

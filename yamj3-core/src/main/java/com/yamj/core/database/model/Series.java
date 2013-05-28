@@ -1,5 +1,7 @@
 package com.yamj.core.database.model;
 
+import org.hibernate.annotations.Index;
+
 import com.yamj.core.database.model.type.OverrideFlag;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,23 +9,19 @@ import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.MapKey;
 
-@Entity
-@Table(name = "series")
 @SuppressWarnings("deprecation")
-public class Series extends AbstractMetadata implements ISourcedbIdentifiable {
+@javax.persistence.Entity
+@javax.persistence.Table(name = "series")
+@org.hibernate.annotations.Table(appliesTo = "series",
+    indexes = {@Index(name = "series_title", columnNames = {"title"})})
+public class Series extends AbstractMetadata {
 
     private static final long serialVersionUID = -3336182194593898858L;
 
-    @Index(name = "series_title")
-    @Column(name = "title", nullable = false, length = 255)
-    private String title;
-    
     @Column(name = "start_year")
     private int startYear = -1;
     
@@ -57,21 +55,6 @@ public class Series extends AbstractMetadata implements ISourcedbIdentifiable {
 
     // GETTER and SETTER
     
-    public String getTitle() {
-        return title;
-    }
-
-    private void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setTitle(String title, String source) {
-        if (!StringUtils.isBlank(title)) {
-            setTitle(title);
-            setOverrideFlag(OverrideFlag.TITLE, source);
-        }
-    }
-
     public int getStartYear() {
         return startYear;
     }
@@ -128,8 +111,14 @@ public class Series extends AbstractMetadata implements ISourcedbIdentifiable {
         this.overrideFlags = overrideFlags;
     }
 
+    @Override
     public void setOverrideFlag(OverrideFlag overrideFlag, String source) {
         this.overrideFlags.put(overrideFlag, source);
+    }
+
+    @Override
+    public String getOverrideSource(OverrideFlag overrideFlag) {
+        return overrideFlags.get(overrideFlag);
     }
 
     public Set<Season> getSeasons() {
@@ -139,7 +128,7 @@ public class Series extends AbstractMetadata implements ISourcedbIdentifiable {
     public void setSeasons(Set<Season> seasons) {
         this.seasons = seasons;
     }
-
+    
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
