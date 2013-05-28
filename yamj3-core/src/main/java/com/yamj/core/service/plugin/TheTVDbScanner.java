@@ -98,8 +98,8 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
             series.setSourcedbId(TVDB_SCANNER_ID, tvdbSeries.getId());
             series.setSourcedbId(ImdbScanner.getScannerId(), tvdbSeries.getImdbId());
-            series.setOutline(tvdbSeries.getOverview());
-            series.setPlot(tvdbSeries.getOverview());
+            series.setOutline(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
+            series.setPlot(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
 
             if (StringUtils.isNumeric(tvdbSeries.getRating())) {
                 try {

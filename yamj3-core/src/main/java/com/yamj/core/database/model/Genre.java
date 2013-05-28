@@ -12,6 +12,7 @@ import org.hibernate.annotations.NaturalId;
 public class Genre extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -5113519542293276527L;
+    
     @NaturalId(mutable = true)
     @Column(name = "name", nullable = false, length = 50)
     private String name;
@@ -24,6 +25,7 @@ public class Genre extends AbstractIdentifiable implements Serializable {
     }
 
     // GETTER and SETTER
+    
     public String getName() {
         return name;
     }
@@ -33,6 +35,7 @@ public class Genre extends AbstractIdentifiable implements Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         final int prime = 17;

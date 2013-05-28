@@ -101,12 +101,7 @@ public class PluginDatabaseService {
 
         // alternate scanning if main scanner failed
         if (!ScanResult.OK.equals(scanResult)) {
-            movieScanner = null;
-
-            scannerName = VIDEO_SCANNER_ALT;
-            if (StringUtils.isNotBlank(scannerName)) {
-                movieScanner = registeredMovieScanner.get(scannerName);
-            }
+            movieScanner = registeredMovieScanner.get(VIDEO_SCANNER_ALT);
 
             if (movieScanner != null) {
                 try {
@@ -172,12 +167,7 @@ public class PluginDatabaseService {
 
         // alternate scanning if main scanner failed
         if (!ScanResult.OK.equals(scanResult)) {
-            seriesScanner = null;
-
-            scannerName = SERIES_SCANNER_ALT;
-            if (StringUtils.isNotBlank(scannerName)) {
-                seriesScanner = registeredSeriesScanner.get(scannerName);
-            }
+            seriesScanner = registeredSeriesScanner.get(SERIES_SCANNER_ALT);
 
             if (seriesScanner != null) {
                 try {
