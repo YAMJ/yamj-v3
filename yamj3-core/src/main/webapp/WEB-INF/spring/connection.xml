@@ -10,6 +10,8 @@
         <property name="proxyPort" value="${yamj3.http.proxyPort}" />
         <property name="proxyUsername" value="${yamj3.http.proxyUsername}" />
         <property name="proxyPassword" value="${yamj3.http.proxyPassword}" />
+        <property name="connectionTimeout" value="${yamj3.http.connectionTimeout}" />
+        <property name="socketTimeout" value="${yamj3.http.socketTimeout}" />
         <property name="connectionsMaxPerRoute" value="${yamj3.http.connections.maxPerRoute}" />
         <property name="connectionsMaxTotal" value="${yamj3.http.connections.maxTotal}" />
     </bean>
