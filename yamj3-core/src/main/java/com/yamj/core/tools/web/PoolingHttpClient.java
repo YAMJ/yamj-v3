@@ -4,6 +4,8 @@ import com.moviejukebox.api.common.http.AbstractPoolingHttpClient;
 import com.yamj.common.tools.PropertyTools;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -100,12 +102,39 @@ public class PoolingHttpClient extends AbstractPoolingHttpClient implements Disp
     }
 
     @Override
+    public String requestContent(URL url) throws IOException {
+        return this.requestContent(url, null);
+    }
+
+    @Override
+    public String requestContent(URL url, Charset charset) throws IOException {
+        URI uri;
+        try {
+            uri = url.toURI();
+        } catch (URISyntaxException ex) {
+            throw new IllegalArgumentException("Invalid url " + url, ex);
+        }
+        
+        return this.requestContent(uri, charset);
+    }
+
+    @Override
     public String requestContent(String uri) throws IOException {
         return this.requestContent(uri, null);
     }
 
     @Override
     public String requestContent(String uri, Charset charset) throws IOException {
+        return this.requestContent(URI.create(uri), charset);
+    }
+
+    @Override
+    public String requestContent(URI uri) throws IOException {
+        return this.requestContent(uri, null);
+    }
+
+    @Override
+    public String requestContent(URI uri, Charset charset) throws IOException {
         HttpGet httpGet = new HttpGet(uri);
 
         // set route (if not set before)
