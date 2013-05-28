@@ -5,6 +5,7 @@ import com.yamj.core.database.model.Series;
 import com.yamj.core.database.model.dto.CreditDTO;
 import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.thetvdbapi.model.Actor;
+import com.yamj.core.tools.web.PoolingHttpClient;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +28,8 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
     private static final int YEAR_MAX = 2050;
     @Autowired
     private PluginDatabaseService pluginDatabaseService;
+    @Autowired
+    private PoolingHttpClient httpClient;
 
     @Override
     public String getScannerName() {
@@ -37,7 +40,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
     public void afterPropertiesSet() throws Exception {
         if (StringUtils.isNotBlank(API_KEY)) {
             try {
-                tvdbApi = new TheTVDBApi(API_KEY);
+                tvdbApi = new TheTVDBApi(API_KEY, httpClient);
                 // register this scanner
                 pluginDatabaseService.registerSeriesScanner(this);
 

@@ -17,6 +17,7 @@ import com.omertron.themoviedbapi.model.PersonType;
 import com.omertron.themoviedbapi.model.ProductionCountry;
 import com.omertron.themoviedbapi.results.TmdbResultsList;
 import com.yamj.core.database.model.Person;
+import com.yamj.core.tools.web.PoolingHttpClient;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashSet;
@@ -37,6 +38,8 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     private static final int SEARCH_MATCH = PropertyTools.getIntProperty("themoviedb.searchMatch", 3);
     @Autowired
     private PluginDatabaseService pluginDatabaseService;
+    @Autowired
+    private PoolingHttpClient httpClient;
     private static final String API_KEY = PropertyTools.getProperty("APIKEY.themoviedb", "");
     private TheMovieDbApi tmdbApi;
 
@@ -49,7 +52,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     public void afterPropertiesSet() {
         if (StringUtils.isNotBlank(API_KEY)) {
             try {
-                tmdbApi = new TheMovieDbApi(API_KEY);
+                tmdbApi = new TheMovieDbApi(API_KEY, httpClient);
                 // register this scanner
                 pluginDatabaseService.registerMovieScanner(this);
                 pluginDatabaseService.registerPersonScanner(this);
