@@ -302,44 +302,6 @@ public class ScannerManagementImpl implements ScannerManagement {
     }
 
     /**
-     * Check to see if the library entries need sending to the core server
-     */
-    private void sendLibrary2(Library library) {
-        LOG.info("Checking directory status for library {}", library.getImportDTO().getBaseDirectory());
-
-        LOG.info(pingCore.status());
-        pingCore.check(10, 30);
-        for (Entry<String, Future<StatusType>> entry : library.getDirectoryStatus().entrySet()) {
-            Future<StatusType> fStatus = entry.getValue();
-            String relDir = library.getRelativeDir(entry.getKey());
-            LOG.info("  {} = Done: {}", relDir, fStatus.isDone());
-            if (pingCore.isConnected()) {
-                if (fStatus.isDone()) {
-                    StatusType status;
-                    try {
-                        status = fStatus.get();
-                    } catch (InterruptedException ex) {
-                        status = StatusType.ERROR;
-                    } catch (ExecutionException ex) {
-                        status = StatusType.ERROR;
-                    }
-
-                    if (status != StatusType.DONE) {
-                        LOG.info("    {}: Sending to core...", relDir);
-                        sendToCore(library, library.getDirectory(entry.getKey()));
-                    } else {
-                        LOG.info("    {}: Already sent to core, status: {}", relDir, status);
-                    }
-                } else {
-                    LOG.info("  {}: Not completed yet", relDir);
-                }
-            } else {
-                LOG.info("  {}: Unable to send to core because of connection issues.", relDir);
-            }
-        }
-    }
-
-    /**
      * Get the watched status from the command line property or return the default value.
      *
      * @param parsedOptionValue the property from the command line

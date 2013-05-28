@@ -21,6 +21,7 @@ public final class FileScanner {
         System.setProperty("file.name", LOG_FILENAME);
         PropertyConfigurator.configure("config/log4j.properties");
 
+        printHeader();
         CmdLineParser parser = getCmdLineParser();
 
         ExitType status;
@@ -65,9 +66,6 @@ public final class FileScanner {
         parser.addOption(new CmdLineOption("d", "direcctory", "The directory to process", true, true));
         parser.addOption(new CmdLineOption("w", "watcher", "Keep watching the directories for changes", false, true));
         parser.addOption(new CmdLineOption("l", "library", "The library file to read", false, true));
-        // Nothing is done with these at the moment
-        parser.addOption(new CmdLineOption("h", "host", "The IP Address of the core server", false, true));
-        parser.addOption(new CmdLineOption("p", "port", "The port for the core server", false, true));
         return parser;
     }
 
