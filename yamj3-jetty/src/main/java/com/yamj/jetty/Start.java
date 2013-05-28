@@ -32,6 +32,8 @@ public class Start {
         System.setProperty("file.name", LOG_FILENAME);
         PropertyConfigurator.configure("config/log4j.properties");
 
+        printHeader();
+
         CmdLineParser parser = getCmdLineParser();
         ExitType status;
         try {
@@ -111,19 +113,35 @@ public class Start {
         }
     }
 
-    private static void help(CmdLineParser parser) {
-        LOG.error("YAMJ v3 Jetty Server");
-        LOG.error("~~~~ ~~ ~~~~~ ~~~~~~");
-        LOG.error("Starts the YAMJ v3 Core server.");
-        LOG.error(parser.getDescriptions());
+    /**
+     * Print the title
+     */
+    private static void printHeader() {
+        LOG.info("YAMJ v3 Jetty Server");
+        LOG.info("~~~~ ~~ ~~~~~ ~~~~~~");
+        LOG.info("Starts the YAMJ v3 Core server.");
     }
 
+    /**
+     * Print the parse descriptions
+     *
+     * @param parser
+     */
+    private static void help(CmdLineParser parser) {
+        LOG.info(parser.getDescriptions());
+    }
+
+    /**
+     * Create the command line parser
+     *
+     * @return
+     */
     private static CmdLineParser getCmdLineParser() {
         CmdLineParser parser = new CmdLineParser();
         parser.addOption(new CmdLineOption("h", "home", "the home directory for jetty, default: '" + yamjHome + "'", false, true));
         parser.addOption(new CmdLineOption("p", "port", "The port for the core server, default: " + yamjPort, false, true));
-        parser.addOption(new CmdLineOption("sp", "shutdown-port", "The port to shutdown the server, default: " + yamjShutdownPort, false, true));
-        parser.addOption(new CmdLineOption("ss", "stop-shutdown", "Shutdown the server when exiting, default: " + yamjStopAtShutdown, false, false));
+        parser.addOption(new CmdLineOption("sp", "shutdown port", "The port to shutdown the server, default: " + yamjShutdownPort, false, true));
+        parser.addOption(new CmdLineOption("ss", "stop shutdown", "Shutdown the server when exiting, default: " + yamjStopAtShutdown, false, false));
 
         return parser;
     }
