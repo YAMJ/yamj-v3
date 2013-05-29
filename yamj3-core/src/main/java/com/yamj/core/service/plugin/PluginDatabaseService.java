@@ -34,12 +34,14 @@ public class PluginDatabaseService {
     public static final String SERIES_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.series", "tvdb");
     public static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.alternate", "");
     private static final String PERSON_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.person", "tmdb");
+    
     @Autowired
     private MediaDao mediaDao;
     @Autowired
     private PersonDao personDao;
     @Autowired
     private CommonDao commonDao;
+    
     private HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<String, IMovieScanner>();
     private HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<String, ISeriesScanner>();
     private HashMap<String, IPersonScanner> registeredPersonScanner = new HashMap<String, IPersonScanner>();
@@ -78,12 +80,11 @@ public class PluginDatabaseService {
         VideoData videoData = mediaDao.getVideoData(id);
 
         // SCAN MOVIE
-        String scannerName = VIDEO_SCANNER;
-        LOG.debug("Scanning movie data for '{}' using {}", videoData.getTitle(), scannerName);
+        LOG.debug("Scanning movie data for '{}' using {}", videoData.getTitle(), VIDEO_SCANNER);
 
-        IMovieScanner movieScanner = registeredMovieScanner.get(scannerName);
+        IMovieScanner movieScanner = registeredMovieScanner.get(VIDEO_SCANNER);
         if (movieScanner == null) {
-            LOG.error("Movie scanner not registered '{}'", scannerName);
+            LOG.error("Video data scanner not registered '{}'", VIDEO_SCANNER);
             videoData.setStatus(StatusType.ERROR);
             mediaDao.updateEntity(videoData);
             return;
@@ -95,7 +96,7 @@ public class PluginDatabaseService {
             scanResult = movieScanner.scan(videoData);
         } catch (Exception error) {
             scanResult = ScanResult.ERROR;
-            LOG.error("Failed scanning video data with {} scanner", scannerName);
+            LOG.error("Failed scanning video data with {} scanner", VIDEO_SCANNER);
             LOG.warn("Scanning error", error);
         }
 
@@ -107,7 +108,7 @@ public class PluginDatabaseService {
                 try {
                     movieScanner.scan(videoData);
                 } catch (Exception error) {
-                    LOG.error("Failed scanning video data with {} alternate scanner", scannerName);
+                    LOG.error("Failed scanning video data with {} alternate scanner", VIDEO_SCANNER_ALT);
                     LOG.warn("Alternate scanning error", error);
                 }
             }
@@ -116,17 +117,7 @@ public class PluginDatabaseService {
         // STORAGE
 
         // update genres
-        HashSet<Genre> genres = new HashSet<Genre>(0);
-        for (Genre genre : videoData.getGenres()) {
-            Genre stored = commonDao.getGenre(genre.getName());
-            if (stored == null) {
-                commonDao.saveEntity(genre);
-                genres.add(genre);
-            } else {
-                genres.add(stored);
-            }
-        }
-        videoData.setGenres(genres);
+        updateGenres(videoData);
 
         // update cast and crew
         updateCastCrew(videoData);
@@ -144,24 +135,23 @@ public class PluginDatabaseService {
         Series series = mediaDao.getSeries(id);
 
         // SCAN SERIES
-        String scannerName = SERIES_SCANNER;
-        LOG.debug("Scanning series data for '{}' using {}", series.getTitle(), scannerName);
+        LOG.debug("Scanning series data for '{}' using {}", series.getTitle(), SERIES_SCANNER);
 
-        ISeriesScanner seriesScanner = registeredSeriesScanner.get(scannerName);
+        ISeriesScanner seriesScanner = registeredSeriesScanner.get(SERIES_SCANNER);
         if (seriesScanner == null) {
-            LOG.error("Series scanner '{}' not registered", scannerName);
+            LOG.error("Series scanner '{}' not registered", SERIES_SCANNER);
             series.setStatus(StatusType.ERROR);
             mediaDao.updateEntity(series);
             return;
         }
 
-        // Scan series data
+        // scan series
         ScanResult scanResult;
         try {
             scanResult = seriesScanner.scan(series);
         } catch (Exception error) {
             scanResult = ScanResult.ERROR;
-            LOG.error("Failed scanning series data with {} scanner", scannerName);
+            LOG.error("Failed scanning series data with {} scanner", SERIES_SCANNER);
             LOG.warn("Scanning error", error);
         }
 
@@ -173,7 +163,7 @@ public class PluginDatabaseService {
                 try {
                     seriesScanner.scan(series);
                 } catch (Exception error) {
-                    LOG.error("Failed scanning series data with {} alternate scanner", scannerName);
+                    LOG.error("Failed scanning series data with {} alternate scanner", SERIES_SCANNER_ALT);
                     LOG.warn("Alternate scanning error", error);
                 }
             }
@@ -209,10 +199,35 @@ public class PluginDatabaseService {
                 videoData.setStatus(StatusType.ERROR);
                 mediaDao.updateEntity(videoData);
             }
+        } else if (queueElement.isType(MetaDataType.SERIES)) {
+            Series series = mediaDao.getSeries(queueElement.getId());
+            if (series != null) {
+                series.setStatus(StatusType.ERROR);
+                mediaDao.updateEntity(series);
+            }
+        } else if (queueElement.isType(MetaDataType.PERSON)) {
+            Person person = mediaDao.getPerson(queueElement.getId());
+            if (person != null) {
+                person.setStatus(StatusType.ERROR);
+                mediaDao.updateEntity(person);
+            }
         }
-        // TODO series and season
     }
 
+    private void updateGenres(VideoData videoData) {
+        HashSet<Genre> genres = new HashSet<Genre>(0);
+        for (Genre genre : videoData.getGenres()) {
+            Genre stored = commonDao.getGenre(genre.getName());
+            if (stored == null) {
+                commonDao.saveEntity(genre);
+                genres.add(genre);
+            } else {
+                genres.add(stored);
+            }
+        }
+        videoData.setGenres(genres);
+    }
+    
     private void updateCastCrew(VideoData videoData) {
         for (CreditDTO dto : videoData.getCreditDTOS()) {
             Person person = null;
