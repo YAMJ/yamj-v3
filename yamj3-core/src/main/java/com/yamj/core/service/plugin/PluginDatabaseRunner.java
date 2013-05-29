@@ -27,7 +27,7 @@ public class PluginDatabaseRunner implements Runnable {
                 try {
                     controller.processingError(queueElement);
                 } catch (Exception ignore) {
-                    // ignore this error;
+                    // ignore this error
                 }
             }
             queueElement = queue.poll();

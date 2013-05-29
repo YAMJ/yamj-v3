@@ -1,12 +1,9 @@
 package com.yamj.core.database.dao;
 
-import com.yamj.core.database.model.MediaFile;
-import com.yamj.core.database.model.Season;
-import com.yamj.core.database.model.Series;
-import com.yamj.core.database.model.VideoData;
+import com.yamj.common.type.StatusType;
+import com.yamj.core.database.model.*;
 import com.yamj.core.database.model.dto.QueueDTO;
 import com.yamj.core.database.model.dto.QueueDTOComparator;
-import com.yamj.common.type.StatusType;
 import com.yamj.core.database.model.type.MetaDataType;
 import com.yamj.core.hibernate.ExtendedHibernateDaoSupport;
 import java.sql.SQLException;
@@ -88,6 +85,10 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
                 return (Series) criteria.uniqueResult();
             }
         });
+    }
+
+    public Person getPerson(Long id) {
+        return this.getHibernateTemplate().get(Person.class, id);
     }
 
     public List<Long> getVideoDataIds(final StatusType... statusTypes) {
