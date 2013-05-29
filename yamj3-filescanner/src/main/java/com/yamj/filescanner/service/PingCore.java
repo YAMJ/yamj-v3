@@ -97,6 +97,10 @@ public final class PingCore {
         } catch (RemoteConnectFailureException ex) {
             LOG.error("Failed to connect to the core server: {}", ex.getMessage());
             status = Boolean.FALSE;
+        } catch (Exception ex) {
+            // Hate catching general exceptions, but should determine how this is thrown
+            LOG.error("General failure to connect to the core server: {}", ex.getMessage());
+            status = Boolean.FALSE;
         }
         connected = status;
         return status;
