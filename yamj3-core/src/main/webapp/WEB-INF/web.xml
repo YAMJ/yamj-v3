@@ -1,6 +1,6 @@
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" 
-  xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee  http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="yamj3" version="3.0">
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee  http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="yamj3" version="3.0">
 
     <display-name>YAMJ3 Core</display-name>
     <description>YAMJ3 Core</description>
@@ -15,8 +15,8 @@
         <param-value>/WEB-INF/log4j.properties</param-value>
     </context-param>
     <context-param>
-         <param-name>contextConfigLocation</param-name>
-         <param-value>/WEB-INF/spring/spring*.xml</param-value>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/spring/spring*.xml</param-value>
     </context-param>
 
     <filter>
@@ -32,24 +32,24 @@
         <filter-name>encoding-filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-                
+
     <listener>
         <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
     </listener>
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
-    
+
     <servlet>
         <servlet-name>yamj3</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
-    </servlet>  
+    </servlet>
 
     <servlet-mapping>
         <servlet-name>yamj3</servlet-name>
         <url-pattern>/</url-pattern>
-    </servlet-mapping>      
+    </servlet-mapping>
 
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
