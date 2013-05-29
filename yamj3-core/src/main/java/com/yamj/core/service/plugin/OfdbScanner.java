@@ -22,9 +22,8 @@ import org.springframework.stereotype.Service;
 @Service("ofdbScanner")
 public class OfdbScanner implements IMovieScanner, InitializingBean {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OfdbScanner.class);
     private static final String OFDB_SCANNER_ID = "ofdb";
-    private static final String IMDB_SCANNER_ID = ImdbScanner.getScannerId();
+    private static final Logger LOG = LoggerFactory.getLogger(OfdbScanner.class);
     @Autowired
     private PoolingHttpClient httpClient;
     @Autowired
@@ -49,7 +48,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
         String ofdbId = videoData.getSourcedbId(OFDB_SCANNER_ID);
         if (StringUtils.isBlank(ofdbId)) {
             // find by IMDb id
-            String imdbId = videoData.getSourcedbId(IMDB_SCANNER_ID);
+            String imdbId = videoData.getSourcedbId(ImdbScanner.IMDB_SCANNER_ID);
             if (StringUtils.isNotBlank(imdbId)) {
                 // if IMDb id is present then use this
                 ofdbId = getOfdbIdByImdbId(imdbId);
@@ -161,10 +160,10 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
             }
 
             // retrieve IMDb id if not set
-            String imdbId = videoData.getSourcedbId(IMDB_SCANNER_ID);
+            String imdbId = videoData.getSourcedbId(ImdbScanner.IMDB_SCANNER_ID);
             if (StringUtils.isBlank(imdbId)) {
                 imdbId = HTMLTools.extractTag(xml, "href=\"http://www.imdb.com/Title?", "\"");
-                videoData.setSourcedbId(IMDB_SCANNER_ID, "tt" + imdbId);
+                videoData.setSourcedbId(ImdbScanner.IMDB_SCANNER_ID, "tt" + imdbId);
             }
 
             if (OverrideTools.checkOverwriteTitle(videoData, OFDB_SCANNER_ID)) {

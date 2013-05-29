@@ -1,15 +1,18 @@
 package com.yamj.core.service;
 
+import com.yamj.common.tools.PropertyTools;
+import com.yamj.common.type.StatusType;
+import com.yamj.core.database.dao.ArtworkDao;
 import com.yamj.core.database.dao.MediaDao;
+import com.yamj.core.database.dao.PersonDao;
 import com.yamj.core.database.dao.StagingDao;
 import com.yamj.core.database.model.dto.QueueDTO;
 import com.yamj.core.database.model.type.FileType;
-import com.yamj.common.type.StatusType;
+import com.yamj.core.service.artwork.ArtworkScannerRunner;
+import com.yamj.core.service.artwork.ArtworkScannerService;
 import com.yamj.core.service.mediaimport.MediaImportService;
 import com.yamj.core.service.plugin.PluginDatabaseRunner;
 import com.yamj.core.service.plugin.PluginDatabaseService;
-import com.yamj.common.tools.PropertyTools;
-import com.yamj.core.database.dao.PersonDao;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -30,15 +33,20 @@ public class Scheduler {
     private static final Logger LOG = LoggerFactory.getLogger(Scheduler.class);
     private static final int MEDIA_SCANNER_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.mediascan.maxThreads", 5);
     private static final int PEOPLE_SCANNER_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.peoplescan.maxThreads", 5);
+    private static final int ARTWORK_SCANNER_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.artworkscan.maxThreads", 3);
 
     @Autowired
     private StagingDao stagingDao;
+    @Autowired
+    private ArtworkDao artworkDao;
     @Autowired
     private MediaDao mediaDao;
     @Autowired
     private MediaImportService mediaImportService;
     @Autowired
-    private PluginDatabaseService pluginDatabaseController;
+    private PluginDatabaseService pluginDatabaseService;
+    @Autowired
+    private ArtworkScannerService artworkScannerService;
     @Autowired
     private PersonDao personDao;
 
@@ -76,12 +84,6 @@ public class Scheduler {
         // PROCESS SUBTITLES
 
         // PROCESS PEOPLE
-//        do {
-//            id = personDao.getNextPersonId(StatusType.NEW, StatusType.UPDATED);
-//            if (id != null) {
-//                LOG.debug("Process person: {}", id);
-//            }
-//        } while (id != null);
     }
 
     @Scheduled(initialDelay = 15000, fixedDelay = 45000)
@@ -97,7 +99,7 @@ public class Scheduler {
 
         ExecutorService executor = Executors.newFixedThreadPool(MEDIA_SCANNER_THREADS);
         for (int i = 0; i < MEDIA_SCANNER_THREADS; i++) {
-            PluginDatabaseRunner worker = new PluginDatabaseRunner(queue, pluginDatabaseController);
+            PluginDatabaseRunner worker = new PluginDatabaseRunner(queue, pluginDatabaseService);
             executor.execute(worker);
         }
         executor.shutdown();
@@ -106,8 +108,7 @@ public class Scheduler {
         while (!executor.isTerminated()) {
             try {
                 Thread.sleep(5000);
-            } catch (InterruptedException ignore) {
-            }
+            } catch (InterruptedException ignore) {}
         }
 
         LOG.debug("Finished media data scanning");
@@ -126,7 +127,7 @@ public class Scheduler {
 
         ExecutorService executor = Executors.newFixedThreadPool(PEOPLE_SCANNER_THREADS);
         for (int i = 0; i < PEOPLE_SCANNER_THREADS; i++) {
-            PluginDatabaseRunner worker = new PluginDatabaseRunner(queue, pluginDatabaseController);
+            PluginDatabaseRunner worker = new PluginDatabaseRunner(queue, pluginDatabaseService);
             executor.execute(worker);
         }
         executor.shutdown();
@@ -135,10 +136,39 @@ public class Scheduler {
         while (!executor.isTerminated()) {
             try {
                 Thread.sleep(5000);
-            } catch (InterruptedException ignore) {
-            }
+            } catch (InterruptedException ignore) {}
+           
         }
 
         LOG.debug("Finished person data scanning");
     }
+    
+    @Scheduled(initialDelay = 15000, fixedDelay = 45000)
+    public void scanArtwork() throws Exception {
+        List<QueueDTO> queueElements = artworkDao.getArtworkQueueForScanning();
+        if (CollectionUtils.isEmpty(queueElements)) {
+            LOG.debug("No artwork found to scan");
+            return;
+        }
+
+        LOG.info("Found {} artwork objects to process", queueElements.size());
+        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
+
+        ExecutorService executor = Executors.newFixedThreadPool(ARTWORK_SCANNER_THREADS);
+        for (int i = 0; i < ARTWORK_SCANNER_THREADS; i++) {
+            ArtworkScannerRunner worker = new ArtworkScannerRunner(queue, artworkScannerService);
+            executor.execute(worker);
+        }
+        executor.shutdown();
+
+        // run until all workers have finished
+        while (!executor.isTerminated()) {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException ignore) {}
+        }
+
+        LOG.debug("Finished artwork scanning");
+    }
+
 }

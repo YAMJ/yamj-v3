@@ -1,5 +1,6 @@
 package com.yamj.core.database.model.dto;
 
+import com.yamj.core.database.model.type.ArtworkType;
 import com.yamj.core.database.model.type.MetaDataType;
 import java.util.Date;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -9,9 +10,11 @@ public class QueueDTO {
 
     private Long id;
     private Date date;
-    private MetaDataType type;
-
+    private MetaDataType metadataType;
+    private ArtworkType artworkType;
+    
     // GETTER and SETTER
+    
     public Long getId() {
         return id;
     }
@@ -28,20 +31,36 @@ public class QueueDTO {
         this.date = date;
     }
 
-    public MetaDataType getType() {
-        return type;
+    public MetaDataType getMetadataType() {
+        return metadataType;
     }
 
-    public void setType(String type) {
-        this.type = MetaDataType.fromString(type);
+    public void setMetadataType(String metadataType) {
+        this.metadataType = MetaDataType.fromString(metadataType);
     }
 
-    public void setType(MetaDataType type) {
-        this.type = type;
+    public void setMetadataType(MetaDataType metadataType) {
+        this.metadataType = metadataType;
     }
 
-    public boolean isType(MetaDataType type) {
-        return this.type == type;
+    public boolean isMetadataType(MetaDataType metadataType) {
+        return this.metadataType == metadataType;
+    }
+
+    public ArtworkType getArtworkType() {
+        return artworkType;
+    }
+
+    public void setArtworkType(String artworkType) {
+        this.artworkType = ArtworkType.fromString(artworkType);
+    }
+
+    public void setArtworkType(ArtworkType artworkType) {
+        this.artworkType = artworkType;
+    }
+
+    public boolean isArtworkType(ArtworkType artworkType) {
+        return this.artworkType == artworkType;
     }
 
     @Override

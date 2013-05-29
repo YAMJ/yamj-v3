@@ -65,11 +65,11 @@ public class PluginDatabaseService {
             return;
         }
 
-        if (queueElement.isType(MetaDataType.VIDEODATA)) {
+        if (queueElement.isMetadataType(MetaDataType.VIDEODATA)) {
             this.scanVideoData(queueElement.getId());
-        } else if (queueElement.isType(MetaDataType.SERIES)) {
+        } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
             this.scanSeries(queueElement.getId());
-        } else if (queueElement.isType(MetaDataType.PERSON)) {
+        } else if (queueElement.isMetadataType(MetaDataType.PERSON)) {
             this.scanPerson(queueElement.getId());
         } else {
             LOG.error("No valid element for scanning metadata '{}'", queueElement);
@@ -193,19 +193,19 @@ public class PluginDatabaseService {
             return;
         }
 
-        if (queueElement.isType(MetaDataType.VIDEODATA)) {
+        if (queueElement.isMetadataType(MetaDataType.VIDEODATA)) {
             VideoData videoData = mediaDao.getVideoData(queueElement.getId());
             if (videoData != null) {
                 videoData.setStatus(StatusType.ERROR);
                 mediaDao.updateEntity(videoData);
             }
-        } else if (queueElement.isType(MetaDataType.SERIES)) {
+        } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
             Series series = mediaDao.getSeries(queueElement.getId());
             if (series != null) {
                 series.setStatus(StatusType.ERROR);
                 mediaDao.updateEntity(series);
             }
-        } else if (queueElement.isType(MetaDataType.PERSON)) {
+        } else if (queueElement.isMetadataType(MetaDataType.PERSON)) {
             Person person = mediaDao.getPerson(queueElement.getId());
             if (person != null) {
                 person.setStatus(StatusType.ERROR);

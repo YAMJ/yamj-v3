@@ -24,7 +24,7 @@ import org.hibernate.annotations.*;
 
 @MappedSuperclass
 public abstract class AbstractMetadata extends AbstractAuditable 
-    implements ISourcedbIdentifiable, Serializable {
+    implements IMetadata, Serializable {
 
     private static final long serialVersionUID = -556558470067852056L;
 
@@ -129,6 +129,36 @@ public abstract class AbstractMetadata extends AbstractAuditable
 
     public void setStatus(StatusType status) {
         this.status = status;
+    }
+
+    @Override
+    public final int getYear() {
+        if (this instanceof VideoData) {
+            return ((VideoData)this).getPublicationYear();
+        } else if (this instanceof Series) {
+            return ((Series)this).getStartYear();
+        }
+        // TODO season get year from first aired date
+        return -1;
+    }
+
+    @Override
+    public final int getSeasonNumber() {
+        if (this instanceof Season) {
+            return ((Season)this).getSeason();
+        } else if (this instanceof Series) {
+            // use first season for series
+            return 1;
+        }
+        return -1;
+    }
+
+    @Override
+    public final int getEpisodeNumber() {
+        if (this instanceof VideoData) {
+            return ((VideoData)this).getEpisode();
+        }
+        return -1;
     }
 
     public abstract String getOverrideSource(OverrideFlag overrideFlag);

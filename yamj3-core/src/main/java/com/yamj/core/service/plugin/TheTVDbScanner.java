@@ -19,13 +19,15 @@ import org.springframework.stereotype.Service;
 @Service("tvdbScanner")
 public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TheTVDbScanner.class);
     private static final String TVDB_SCANNER_ID = "tvdb";
-    private TheTVDBApi tvdbApi;
+    private static final Logger LOG = LoggerFactory.getLogger(TheTVDbScanner.class);
     private static final String API_KEY = PropertyTools.getProperty("APIKEY.tvdb", "");
     private static final String DEFAULT_LANGUAGE = PropertyTools.getProperty("thetvdb.language", "en");
     private static final int YEAR_MIN = 1900;
     private static final int YEAR_MAX = 2050;
+
+    private TheTVDBApi tvdbApi;
+
     @Autowired
     private PluginDatabaseService pluginDatabaseService;
     @Autowired
@@ -100,7 +102,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             com.omertron.thetvdbapi.model.Series tvdbSeries = tvdbApi.getSeries(id, DEFAULT_LANGUAGE);
 
             series.setSourcedbId(TVDB_SCANNER_ID, tvdbSeries.getId());
-            series.setSourcedbId(ImdbScanner.getScannerId(), tvdbSeries.getImdbId());
+            series.setSourcedbId(ImdbScanner.IMDB_SCANNER_ID, tvdbSeries.getImdbId());
             series.setOutline(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
             series.setPlot(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
 

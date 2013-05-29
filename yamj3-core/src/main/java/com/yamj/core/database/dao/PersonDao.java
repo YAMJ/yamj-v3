@@ -65,9 +65,15 @@ public class PersonDao extends ExtendedHibernateDaoSupport {
 
     public List<QueueDTO> getPersonQueueForScanning() {
         final StringBuilder sql = new StringBuilder();
-        sql.append("select id, '").append(MetaDataType.PERSON).append("' as mediatype, create_timestamp, update_timestamp ");
+        sql.append("select id, '");
+        sql.append(MetaDataType.PERSON);
+        sql.append("' as mediatype, create_timestamp, update_timestamp ");
         sql.append("from person ");
-        sql.append("where status in ('").append(StatusType.NEW).append("','").append(StatusType.UPDATED).append("') ");
+        sql.append("where status in ('");
+        sql.append(StatusType.NEW);
+        sql.append("','");
+        sql.append(StatusType.UPDATED);
+        sql.append("') ");
 
         return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<List<QueueDTO>>() {
             @Override
@@ -82,7 +88,7 @@ public class PersonDao extends ExtendedHibernateDaoSupport {
                 for (Object[] object : objects) {
                     QueueDTO queueElement = new QueueDTO();
                     queueElement.setId(convertRowElementToLong(object[0]));
-                    queueElement.setType(convertRowElementToString(object[1]));
+                    queueElement.setMetadataType(convertRowElementToString(object[1]));
                     queueElement.setDate(convertRowElementToDate(object[3]));
                     if (queueElement.getDate() == null) {
                         queueElement.setDate(convertRowElementToDate(object[2]));

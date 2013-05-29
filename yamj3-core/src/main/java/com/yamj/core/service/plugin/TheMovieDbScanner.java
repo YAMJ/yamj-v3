@@ -30,9 +30,8 @@ import org.joda.time.DateTime;
 @Service("tmdbScanner")
 public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, InitializingBean {
 
+    public static final String TMDB_SCANNER_ID = "tmdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbScanner.class);
-    private static final String TMDB_SCANNER_ID = "tmdb";
-    private static final String IMDB_SCANNER_ID = ImdbScanner.getScannerId();
     private static final String DEFAULT_LANGUAGE = PropertyTools.getProperty("themoviedb.language", "en");
     private static final boolean INCLUDE_ADULT = PropertyTools.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
     private static final int SEARCH_MATCH = PropertyTools.getIntProperty("themoviedb.searchMatch", 3);
@@ -68,7 +67,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     @Override
     public String getMovieId(VideoData videoData) {
         String tmdbID = videoData.getSourcedbId(TMDB_SCANNER_ID);
-        String imdbID = videoData.getSourcedbId(IMDB_SCANNER_ID);
+        String imdbID = videoData.getSourcedbId(ImdbScanner.IMDB_SCANNER_ID);
         MovieDb moviedb = null;
 
         // First look to see if we have a TMDb ID as this will make looking the film up easier
@@ -324,7 +323,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
             person.setBiography(tmdbPerson.getBiography());
             person.setBirthPlace(tmdbPerson.getBirthplace());
-            person.setPersonId(ImdbScanner.getScannerId(), tmdbPerson.getImdbId());
+            person.setPersonId(ImdbScanner.IMDB_SCANNER_ID, tmdbPerson.getImdbId());
 
             Date parsedDate = parseDate(tmdbPerson.getBirthday());
             if (parsedDate != null) {

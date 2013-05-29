@@ -108,12 +108,16 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
 
     public List<QueueDTO> getMediaQueueForScanning() {
         final StringBuilder sql = new StringBuilder();
-        sql.append("select vd.id,'").append(MetaDataType.VIDEODATA).append("' as mediatype,vd.create_timestamp,vd.update_timestamp ");
+        sql.append("select vd.id,'");
+        sql.append(MetaDataType.VIDEODATA);
+        sql.append("' as mediatype,vd.create_timestamp,vd.update_timestamp ");
         sql.append("from videodata vd ");
         sql.append("where vd.status in ('NEW','UPDATED') ");
         sql.append("and vd.episode<0 ");
         sql.append("union ");
-        sql.append("select se.id,'").append(MetaDataType.SERIES).append("' as mediatype,se.create_timestamp,se.update_timestamp ");
+        sql.append("select se.id,'");
+        sql.append(MetaDataType.SERIES);
+        sql.append("' as mediatype,se.create_timestamp,se.update_timestamp ");
         sql.append("from series se ");
         sql.append("where se.status in ('NEW','UPDATED') ");
 
@@ -130,7 +134,7 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
                 for (Object[] object : objects) {
                     QueueDTO queueElement = new QueueDTO();
                     queueElement.setId(convertRowElementToLong(object[0]));
-                    queueElement.setType(convertRowElementToString(object[1]));
+                    queueElement.setMetadataType(convertRowElementToString(object[1]));
                     queueElement.setDate(convertRowElementToDate(object[3]));
                     if (queueElement.getDate() == null) {
                         queueElement.setDate(convertRowElementToDate(object[2]));

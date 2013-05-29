@@ -1,17 +1,17 @@
-package com.yamj.core.service.plugin;
+package com.yamj.core.service.artwork;
 
 import com.yamj.core.database.model.dto.QueueDTO;
 import java.util.concurrent.BlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PluginDatabaseRunner implements Runnable {
+public class ArtworkScannerRunner implements Runnable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PluginDatabaseRunner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ArtworkScannerRunner.class);
     private final BlockingQueue<QueueDTO> queue;
-    private final PluginDatabaseService service;
+    private final ArtworkScannerService service;
 
-    public PluginDatabaseRunner(BlockingQueue<QueueDTO> queue, PluginDatabaseService service) {
+    public ArtworkScannerRunner(BlockingQueue<QueueDTO> queue, ArtworkScannerService service) {
         this.queue = queue;
         this.service = service;
     }
@@ -21,9 +21,9 @@ public class PluginDatabaseRunner implements Runnable {
         QueueDTO queueElement = queue.poll();
         while (queueElement != null) {
             try {
-                service.scanMetadata(queueElement);
+                service.scanArtwork(queueElement);
             } catch (Exception error) {
-                LOG.error("Failed to process meta data", error);
+                LOG.error("Failed to process artwork", error);
                 try {
                     service.processingError(queueElement);
                 } catch (Exception ignore) {

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service("imdbScanner")
 public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingBean {
 
-    private static final String IMDB_SCANNER_ID = "imdb";
+    public static final String IMDB_SCANNER_ID = "imdb";
     private static final Logger LOG = LoggerFactory.getLogger(ImdbScanner.class);
     @Autowired
     private PoolingHttpClient httpClient;
@@ -24,14 +24,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
 
     @Override
     public String getScannerName() {
-        return IMDB_SCANNER_ID;
-    }
-
-    /**
-     * Get the imdb scanner id
-     * @return
-     */
-    public static String getScannerId() {
         return IMDB_SCANNER_ID;
     }
 

@@ -7,6 +7,7 @@ public enum StatusType {
     DELETED,
     ERROR,
     PROCESS,
+    MISSING,
     DONE;
     
     public static StatusType fromString(String type) {

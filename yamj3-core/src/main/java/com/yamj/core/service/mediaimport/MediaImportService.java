@@ -92,12 +92,14 @@ public class MediaImportService {
                 // create new poster artwork entry
                 Artwork poster = new Artwork();
                 poster.setArtworkType(ArtworkType.POSTER);
+                poster.setStatus(StatusType.NEW);
                 poster.setVideoData(videoData);
                 mediaDao.saveEntity(poster);
 
                 // create new fanart artwork entry
                 Artwork fanart = new Artwork();
                 fanart.setArtworkType(ArtworkType.FANART);
+                fanart.setStatus(StatusType.NEW);
                 fanart.setVideoData(videoData);
                 mediaDao.saveEntity(fanart);
 
@@ -133,17 +135,21 @@ public class MediaImportService {
                             // create new poster artwork entry
                             Artwork poster = new Artwork();
                             poster.setArtworkType(ArtworkType.POSTER);
+                            poster.setStatus(StatusType.NEW);
                             poster.setSeries(series);
                             mediaDao.saveEntity(poster);
 
                             // create new fanart artwork entry
                             Artwork fanart = new Artwork();
                             fanart.setArtworkType(ArtworkType.FANART);
+                            fanart.setStatus(StatusType.NEW);
+                            fanart.setSeries(series);
                             mediaDao.saveEntity(fanart);
 
                             // create new banner artwork entry
                             Artwork banner = new Artwork();
                             banner.setArtworkType(ArtworkType.BANNER);
+                            banner.setStatus(StatusType.NEW);
                             banner.setSeries(series);
                             mediaDao.saveEntity(banner);
                         }
@@ -159,12 +165,14 @@ public class MediaImportService {
                         // create new poster artwork entry
                         Artwork poster = new Artwork();
                         poster.setArtworkType(ArtworkType.POSTER);
+                        poster.setStatus(StatusType.NEW);
                         poster.setSeason(season);
                         mediaDao.saveEntity(poster);
 
                         // create new fanart artwork entry
                         Artwork fanart = new Artwork();
                         fanart.setArtworkType(ArtworkType.FANART);
+                        fanart.setStatus(StatusType.NEW);
                         fanart.setSeason(season);
                         mediaDao.saveEntity(fanart);
                     }
@@ -188,6 +196,7 @@ public class MediaImportService {
                     // create new videoimage artwork entry
                     Artwork videoimage = new Artwork();
                     videoimage.setArtworkType(ArtworkType.VIDEOIMAGE);
+                    videoimage.setStatus(StatusType.NEW);
                     videoimage.setVideoData(videoData);
                     mediaDao.saveEntity(videoimage);
 

@@ -34,25 +34,32 @@ import org.hibernate.annotations.Parameter;
 public class StageFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -6247352843375054146L;
+    
     @NaturalId(mutable = true)
     @Column(name = "file_name", nullable = false, length = 255)
     private String fileName;
+    
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.EAGER)
     @ForeignKey(name = "FK_FILE_DIRECTORY")
     @JoinColumn(name = "directory_id", nullable = false)
     private StageDirectory stageDirectory;
+    
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "file_date", nullable = false)
     private Date fileDate;
+    
     @Column(name = "file_size", nullable = false)
     private long fileSize = -1;
+    
     @Type(type = "fileType")
     @Column(name = "file_type", nullable = false, length = 30)
     private FileType fileType;
+    
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_FILE_MEDIAFILE")
     @Fetch(FetchMode.SELECT)
