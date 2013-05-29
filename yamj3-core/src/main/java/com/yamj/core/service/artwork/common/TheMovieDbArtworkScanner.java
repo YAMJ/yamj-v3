@@ -1,4 +1,6 @@
-package com.yamj.core.service.artwork.poster;
+package com.yamj.core.service.artwork.common;
+
+import com.yamj.core.service.artwork.ArtworkScannerService;
 
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
@@ -6,7 +8,8 @@ import com.omertron.themoviedbapi.model.MovieDb;
 import com.yamj.common.tools.PropertyTools;
 import com.yamj.common.tools.web.PoolingHttpClient;
 import com.yamj.core.database.model.IMetadata;
-import com.yamj.core.service.artwork.ArtworkScannerService;
+import com.yamj.core.service.artwork.fanart.IMovieFanartScanner;
+import com.yamj.core.service.artwork.poster.IMoviePosterScanner;
 import com.yamj.core.service.plugin.ImdbScanner;
 import com.yamj.core.service.plugin.TheMovieDbScanner;
 import java.net.URL;
@@ -17,15 +20,17 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service("tmdbPosterScanner")
-public class TheMovieDbPosterScanner extends AbstractMoviePosterScanner
-    implements InitializingBean
+@Service("tmdbArtworkScanner")
+public class TheMovieDbArtworkScanner implements 
+    IMoviePosterScanner, IMovieFanartScanner, InitializingBean
 {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbPosterScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbArtworkScanner.class);
     private static final String DEFAULT_POSTER_SIZE = "original";
+    private static final String DEFAULT_FANART_SIZE = "original";
     private static final String API_KEY = PropertyTools.getProperty("APIKEY.themoviedb", "");
-    private String languageCode;
+    private static final String DEFAULT_LANGUAGE = PropertyTools.getProperty("themoviedb.language", "en");
+
     private TheMovieDbApi tmdbApi;
 
     @Autowired
@@ -47,11 +52,12 @@ public class TheMovieDbPosterScanner extends AbstractMoviePosterScanner
                 tmdbApi = new TheMovieDbApi(API_KEY, httpClient);
                 // register this scanner
                 artworkScannerService.registerMoviePosterScanner(this);
+                artworkScannerService.registerMovieFanartScanner(this);
             } catch (MovieDbException ex) {
-                LOG.error("Unable to initialise TheMovieDbPosterScanner, error: {}", ex.getMessage());
+                LOG.error("Unable to initialise TheMovieDbArtworkScanner, error: {}", ex.getMessage());
             }
         } else {
-            LOG.error("Failed to initialise TheMovieDbPosterScanner, no API KEY available");
+            LOG.error("Failed to initialise TheMovieDbArtworkScanner, no API KEY available");
         }
     }
 
@@ -65,18 +71,38 @@ public class TheMovieDbPosterScanner extends AbstractMoviePosterScanner
         String id = this.getId(title, year);
         return this.getPosterUrl(id);
     }
-    
+
+    @Override
+    public String getFanartUrl(String title, int year) {
+        String id = this.getId(title, year);
+        return this.getFanartUrl(id);
+    }
+
     @Override
     public String getPosterUrl(String id) {
         String url = null;
         if (StringUtils.isNumeric(id)) {
             try {
-                MovieDb moviedb = tmdbApi.getMovieInfo(Integer.parseInt(id), languageCode);
-                LOG.debug("Movie found on TheMovieDB.org: http://www.themoviedb.org/movie/" + id);
+                MovieDb moviedb = tmdbApi.getMovieInfo(Integer.parseInt(id), DEFAULT_LANGUAGE);
                 URL posterURL = tmdbApi.createImageUrl(moviedb.getPosterPath(), DEFAULT_POSTER_SIZE);
                 url = posterURL.toString();
-            } catch (MovieDbException ex) {
-                LOG.warn("Failed to get the poster URL for TMDb ID " + id + " " + ex.getMessage());
+            } catch (MovieDbException error) {
+                LOG.warn("Failed to get the poster URL for TMDb ID {}", id, error);
+            }
+        }
+        return url;
+    }
+
+    @Override
+    public String getFanartUrl(String id) {
+        String url = null;
+        if (StringUtils.isNumeric(id)) {
+            try {
+                MovieDb moviedb = tmdbApi.getMovieInfo(Integer.parseInt(id), DEFAULT_LANGUAGE);
+                URL fanartURL = tmdbApi.createImageUrl(moviedb.getBackdropPath(), DEFAULT_FANART_SIZE);
+                url = fanartURL.toString();
+            } catch (MovieDbException error) {
+                LOG.warn("Failed to get the fanart URL for TMDb ID {}", id, error);
             }
         }
         return url;
@@ -85,16 +111,17 @@ public class TheMovieDbPosterScanner extends AbstractMoviePosterScanner
     @Override
     public String getPosterUrl(IMetadata metadata) {
         String id = getId(metadata);
-
-        if (StringUtils.isBlank(id)) {
-            id = getId(metadata.getTitleOriginal(), metadata.getYear());
-            if (StringUtils.isNotBlank(id)) {
-                metadata.setSourcedbId(getScannerName(), id);
-            }
-        }
-
         if (StringUtils.isNotBlank(id)) {
             return getPosterUrl(id);
+        }
+        return null;
+    }
+
+    @Override
+    public String getFanartUrl(IMetadata metadata) {
+        String id = getId(metadata);
+        if (StringUtils.isNotBlank(id)) {
+            return getFanartUrl(id);
         }
         return null;
     }
@@ -106,12 +133,12 @@ public class TheMovieDbPosterScanner extends AbstractMoviePosterScanner
             return tmdbID;
         }
 
+        // Search based on IMDb ID
         String imdbID = metadata.getSourcedbId(ImdbScanner.IMDB_SCANNER_ID);
         if (StringUtils.isNotBlank(imdbID)) {
-            // Search based on IMDb ID
             MovieDb moviedb = null;
             try {
-                moviedb = tmdbApi.getMovieInfoImdb(imdbID, languageCode);
+                moviedb = tmdbApi.getMovieInfoImdb(imdbID, DEFAULT_LANGUAGE);
             } catch (MovieDbException ex) {
                 LOG.warn("Failed to get TMDb ID for " + imdbID + " - " + ex.getMessage());
             }
@@ -119,11 +146,20 @@ public class TheMovieDbPosterScanner extends AbstractMoviePosterScanner
             if (moviedb != null) {
                 tmdbID = String.valueOf(moviedb.getId());
                 if (StringUtils.isNumeric(tmdbID)) {
+                    metadata.setSourcedbId(getScannerName(), tmdbID);
                     return tmdbID;
                 }
             }
         }
-        
+
+        // Search based on title and year
+        String title = StringUtils.isBlank(metadata.getTitleOriginal())?metadata.getTitle():metadata.getTitleOriginal();
+        tmdbID = getId(title, metadata.getYear());
+        if (StringUtils.isNumeric(tmdbID)) {
+            metadata.setSourcedbId(getScannerName(), tmdbID);
+            return tmdbID;
+        }
+
         LOG.warn("No TMDb id found for movie");
         return null;
     }

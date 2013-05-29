@@ -1,16 +1,16 @@
-package com.yamj.core.service.artwork.poster;
+package com.yamj.core.service.artwork.fanart;
 
 import com.yamj.core.database.model.IMetadata;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractMoviePosterScanner implements IMoviePosterScanner {
+public abstract class AbstractMovieFanartScanner implements IMovieFanartScanner {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractMoviePosterScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractMovieFanartScanner.class);
 
     @Override
-    public String getPosterUrl(IMetadata metadata) {
+    public String getFanartUrl(IMetadata metadata) {
         String id = metadata.getSourcedbId(getScannerName());
         if (StringUtils.isBlank(id)) {
             if (StringUtils.isBlank(metadata.getTitleOriginal())) {
@@ -29,7 +29,7 @@ public abstract class AbstractMoviePosterScanner implements IMoviePosterScanner 
         }
 
         if (!(StringUtils.isBlank(id) || "-1".equals(id) || "0".equals(id))) {
-            return getPosterUrl(id);
+            return getFanartUrl(id);
         }
 
         return null;

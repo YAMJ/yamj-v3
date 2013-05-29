@@ -3,9 +3,10 @@ package com.yamj.core.service.artwork;
 import com.yamj.common.type.StatusType;
 import com.yamj.core.database.dao.ArtworkDao;
 import com.yamj.core.database.model.Artwork;
-import com.yamj.core.database.model.IMetadata;
 import com.yamj.core.database.model.dto.QueueDTO;
 import com.yamj.core.database.model.type.ArtworkType;
+import com.yamj.core.service.artwork.fanart.IFanartScanner;
+import com.yamj.core.service.artwork.fanart.IMovieFanartScanner;
 import com.yamj.core.service.artwork.poster.IMoviePosterScanner;
 import com.yamj.core.service.artwork.poster.IPosterScanner;
 import java.util.HashMap;
@@ -26,9 +27,14 @@ public class ArtworkScannerService {
     private ArtworkDao artworkDao;
 
     private HashMap<String, IMoviePosterScanner> registeredMoviePosterScanner = new HashMap<String, IMoviePosterScanner>();
+    private HashMap<String, IMovieFanartScanner> registeredMovieFanartScanner = new HashMap<String, IMovieFanartScanner>();
 
     public void registerMoviePosterScanner(IMoviePosterScanner posterScanner) {
         registeredMoviePosterScanner.put(posterScanner.getScannerName().toLowerCase(), posterScanner);
+    }
+
+    public void registerMovieFanartScanner(IMovieFanartScanner fanartScanner) {
+        registeredMovieFanartScanner.put(fanartScanner.getScannerName().toLowerCase(), fanartScanner);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -38,17 +44,32 @@ public class ArtworkScannerService {
             return;
         }
 
-        if (queueElement.isArtworkType(ArtworkType.POSTER)) {
-            this.scanPoster(queueElement.getId());
-//        } else if (queueElement.isArtworkType(ArtworkType.FANART)) {
-//            this.scanSeries(queueElement.getId());
-//        } else if (queueElement.isArtworkType(ArtworkType.BANNER)) {
-//            this.scanPerson(queueElement.getId());
-//        } else if (queueElement.isArtworkType(ArtworkType.VIDEOIMAGE)) {
-//            this.scanPerson(queueElement.getId());
-        } else {
-           throw new RuntimeException("No valid element for scanning artwork '"+queueElement+"'");
+        Artwork artwork = artworkDao.getArtwork(queueElement.getId());
+        if (artwork == null) {
+            throw new RuntimeException("Found no artwork for id " + queueElement.getId());
         }
+        
+        if (ArtworkType.POSTER.equals(artwork.getArtworkType())) {
+            boolean found = this.scanPosterLocal(artwork);
+            if (!found) {
+                this.scanPosterOnline(artwork);
+            }
+        } else if (ArtworkType.FANART.equals(artwork.getArtworkType())) {
+            boolean found = this.scanFanartLocal(artwork);
+            if (!found) {
+                this.scanFanartOnline(artwork);
+            }
+        } else {
+            throw new RuntimeException("No valid element for scanning artwork '"+queueElement+"'");
+        }
+
+        // update artwork in database
+        if (artwork.getStageFile() == null && StringUtils.isBlank(artwork.getUrl())) {
+            artwork.setStatus(StatusType.MISSING);
+        } else {
+            artwork.setStatus(StatusType.PROCESS);
+        }
+        artworkDao.updateEntity(artwork);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -65,45 +86,59 @@ public class ArtworkScannerService {
         }
     }
 
-    private void scanPoster(Long id) {
-        Artwork artwork = artworkDao.getArtwork(id);
+    private boolean scanPosterLocal(Artwork artwork) {
+        LOG.trace("Scan local for poster: {}", artwork);
         
-        // TODO local scan for poster
-        
-        IMetadata metadata;
-        if (artwork.getVideoData() != null) {
-            metadata = artwork.getVideoData();
-        } else if (artwork.getSeason() != null) {
-            metadata = artwork.getSeason();
-        } else if (artwork.getSeries() != null) {
-            metadata = artwork.getSeries();
-        } else {
-            throw new RuntimeException("Artwork has no associated metadata");
-        }
-        
-        // only scan if status is OK
-        // TODO should be checked in database query
-        if (!StatusType.DONE.equals(metadata.getStatus())) {
-            return;
-        }
-        
-        // TODO evaluate search priority
-        LOG.debug("Scan for poster: {}", artwork);
-        String url = null;
+        // TODO local scan
+        return false;
+    }
 
-        for (IPosterScanner scanner : this.registeredMoviePosterScanner.values()) {
-            url = scanner.getPosterUrl(metadata);
-            if (StringUtils.isNotBlank(url)) {
-                break;
+    private void scanPosterOnline(Artwork artwork) {
+        LOG.trace("Scan online for poster: {}", artwork);
+
+        String posterUrl = null;
+
+        if (artwork.getVideoData() != null) {
+            // CASE: movie poster scan
+
+            // TODO evaluate search priority
+            for (IPosterScanner scanner : this.registeredMoviePosterScanner.values()) {
+                posterUrl = scanner.getPosterUrl(artwork.getVideoData());
+                if (StringUtils.isNotBlank(posterUrl)) {
+                    artwork.setUrl(posterUrl);
+                    break;
+                }
             }
-        }
-        
-        if (StringUtils.isBlank(url)) {
-            artwork.setStatus(StatusType.MISSING);
         } else {
-            artwork.setUrl(url);
-            artwork.setStatus(StatusType.DONE);
+            throw new RuntimeException("Artwork search not implemented for " + artwork);
         }
-        artworkDao.updateEntity(artwork);
+    }
+
+    private boolean scanFanartLocal(Artwork artwork) {
+        LOG.trace("Scan local for fanart: {}", artwork);
+        
+        // TODO local scan
+        return false;
+    }
+
+    private void scanFanartOnline(Artwork artwork) {
+        LOG.trace("Scan online for fanart: {}", artwork);
+
+        String fanartUrl = null;
+
+        if (artwork.getVideoData() != null) {
+            // CASE: movie fanart scan
+
+            // TODO evaluate search priority
+            for (IFanartScanner scanner : this.registeredMovieFanartScanner.values()) {
+                fanartUrl = scanner.getFanartUrl(artwork.getVideoData());
+                if (StringUtils.isNotBlank(fanartUrl)) {
+                    artwork.setUrl(fanartUrl);
+                    break;
+                }
+            }
+        } else {
+            throw new RuntimeException("Artwork search not implemented for " + artwork);
+        }
     }
 }
