@@ -1,5 +1,6 @@
 package com.yamj.core.service.artwork;
 
+import com.yamj.common.tools.PropertyTools;
 import com.yamj.common.type.StatusType;
 import com.yamj.core.database.dao.ArtworkDao;
 import com.yamj.core.database.model.Artwork;
@@ -9,7 +10,9 @@ import com.yamj.core.service.artwork.fanart.IFanartScanner;
 import com.yamj.core.service.artwork.fanart.IMovieFanartScanner;
 import com.yamj.core.service.artwork.poster.IMoviePosterScanner;
 import com.yamj.core.service.artwork.poster.IPosterScanner;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,13 +25,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class ArtworkScannerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkScannerService.class);
+    private static List<String> POSTER_MOVIE_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.poster.movie.priorities", "tmdb").toLowerCase().split(","));
+    private static List<String> FANART_MOVIE_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.fanart.movie.priorities", "tmdb").toLowerCase().split(","));
+    private HashMap<String, IMoviePosterScanner> registeredMoviePosterScanner = new HashMap<String, IMoviePosterScanner>();
+    private HashMap<String, IMovieFanartScanner> registeredMovieFanartScanner = new HashMap<String, IMovieFanartScanner>();
     
     @Autowired
     private ArtworkDao artworkDao;
-
-    private HashMap<String, IMoviePosterScanner> registeredMoviePosterScanner = new HashMap<String, IMoviePosterScanner>();
-    private HashMap<String, IMovieFanartScanner> registeredMovieFanartScanner = new HashMap<String, IMovieFanartScanner>();
-
+    
     public void registerMoviePosterScanner(IMoviePosterScanner posterScanner) {
         registeredMoviePosterScanner.put(posterScanner.getScannerName().toLowerCase(), posterScanner);
     }
@@ -36,7 +40,7 @@ public class ArtworkScannerService {
     public void registerMovieFanartScanner(IMovieFanartScanner fanartScanner) {
         registeredMovieFanartScanner.put(fanartScanner.getScannerName().toLowerCase(), fanartScanner);
     }
-
+    
     @Transactional(propagation = Propagation.REQUIRED)
     public void scanArtwork(QueueDTO queueElement) {
         if (queueElement == null) {
@@ -100,13 +104,14 @@ public class ArtworkScannerService {
 
         if (artwork.getVideoData() != null) {
             // CASE: movie poster scan
-
-            // TODO evaluate search priority
-            for (IPosterScanner scanner : this.registeredMoviePosterScanner.values()) {
-                posterUrl = scanner.getPosterUrl(artwork.getVideoData());
-                if (StringUtils.isNotBlank(posterUrl)) {
-                    artwork.setUrl(posterUrl);
-                    break;
+            for (String prio : POSTER_MOVIE_PRIORITIES) {
+                IPosterScanner scanner = registeredMoviePosterScanner.get(prio);
+                if (scanner != null) {
+                    posterUrl = scanner.getPosterUrl(artwork.getVideoData());
+                    if (StringUtils.isNotBlank(posterUrl)) {
+                        artwork.setUrl(posterUrl);
+                        break;
+                    }
                 }
             }
         } else {
@@ -127,14 +132,15 @@ public class ArtworkScannerService {
         String fanartUrl = null;
 
         if (artwork.getVideoData() != null) {
-            // CASE: movie fanart scan
-
-            // TODO evaluate search priority
-            for (IFanartScanner scanner : this.registeredMovieFanartScanner.values()) {
-                fanartUrl = scanner.getFanartUrl(artwork.getVideoData());
-                if (StringUtils.isNotBlank(fanartUrl)) {
-                    artwork.setUrl(fanartUrl);
-                    break;
+            // CASE: movie fanart
+            for (String prio : FANART_MOVIE_PRIORITIES) {
+                IFanartScanner scanner = registeredMovieFanartScanner.get(prio);
+                if (scanner != null) {
+                    fanartUrl = scanner.getFanartUrl(artwork.getVideoData());
+                    if (StringUtils.isNotBlank(fanartUrl)) {
+                        artwork.setUrl(fanartUrl);
+                        break;
+                    }
                 }
             }
         } else {

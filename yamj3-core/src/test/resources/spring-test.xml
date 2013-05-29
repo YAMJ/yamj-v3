@@ -16,7 +16,7 @@
     <context:annotation-config />
     <context:component-scan base-package="com.yamj"/>
 
-     <bean id="propertyConfigurer" class="com.yamj.core.tools.PropertyTools">
+     <bean id="propertyConfigurer" class="com.yamj.common.tools.PropertyTools">
         <property name="locations">
             <list>
                 <value>classpath:/yamj3.core.properties</value>
@@ -26,6 +26,7 @@
         <property name="ignoreResourceNotFound" value="true"/>
     </bean>
 
+    <import resource="file:src/main/webapp/WEB-INF/spring/connection.xml"/>
     <import resource="file:src/main/webapp/WEB-INF/spring/database.xml"/>
 
 </beans>

@@ -47,10 +47,11 @@ public class YahooPosterScanner extends AbstractMoviePosterScanner
 
             String xml = httpClient.requestContent(sb.toString());
             int beginIndex = xml.indexOf("imgurl=");
-            int endIndex = xml.indexOf("%26", beginIndex);
-
-            if (beginIndex != -1 && endIndex > beginIndex) {
-                posterUrl = URLDecoder.decode(xml.substring(beginIndex + 7, endIndex), "UTF-8");
+            if (beginIndex > 0) {
+                int endIndex = xml.indexOf("rurl=", beginIndex);
+                if (endIndex > 0) {
+                    posterUrl = URLDecoder.decode(xml.substring(beginIndex + 7, endIndex-1), "UTF-8");
+                }
             }
         } catch (Exception error) {
             LOG.error("Failed retreiving poster URL from yahoo images : " + title, error);
