@@ -17,7 +17,7 @@ import com.omertron.themoviedbapi.model.PersonType;
 import com.omertron.themoviedbapi.model.ProductionCountry;
 import com.omertron.themoviedbapi.results.TmdbResultsList;
 import com.yamj.core.database.model.Person;
-import com.yamj.core.tools.web.PoolingHttpClient;
+import com.yamj.common.tools.web.PoolingHttpClient;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashSet;

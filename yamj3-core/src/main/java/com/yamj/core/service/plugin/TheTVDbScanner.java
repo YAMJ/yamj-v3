@@ -5,7 +5,7 @@ import com.yamj.core.database.model.Series;
 import com.yamj.core.database.model.dto.CreditDTO;
 import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.thetvdbapi.model.Actor;
-import com.yamj.core.tools.web.PoolingHttpClient;
+import com.yamj.common.tools.web.PoolingHttpClient;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;

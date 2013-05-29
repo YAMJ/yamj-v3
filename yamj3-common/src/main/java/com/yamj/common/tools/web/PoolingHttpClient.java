@@ -1,4 +1,4 @@
-package com.yamj.core.tools.web;
+package com.yamj.common.tools.web;
 
 import com.moviejukebox.api.common.http.AbstractPoolingHttpClient;
 import com.yamj.common.tools.PropertyTools;
@@ -114,7 +114,7 @@ public class PoolingHttpClient extends AbstractPoolingHttpClient implements Disp
         } catch (URISyntaxException ex) {
             throw new IllegalArgumentException("Invalid url " + url, ex);
         }
-        
+
         return this.requestContent(uri, charset);
     }
 

@@ -1,6 +1,7 @@
 package com.yamj.core.tools.web;
 
 import com.yamj.common.tools.PropertyTools;
+import com.yamj.common.tools.web.PoolingHttpClient;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.LinkedList;

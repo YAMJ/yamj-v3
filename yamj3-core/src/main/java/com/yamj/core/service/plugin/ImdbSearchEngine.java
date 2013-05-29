@@ -2,7 +2,7 @@ package com.yamj.core.service.plugin;
 
 import com.yamj.common.tools.PropertyTools;
 import com.yamj.core.tools.web.HTMLTools;
-import com.yamj.core.tools.web.PoolingHttpClient;
+import com.yamj.common.tools.web.PoolingHttpClient;
 import com.yamj.core.tools.web.SearchEngineTools;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
