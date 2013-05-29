@@ -5,7 +5,7 @@
    xsi:schemaLocation="http://www.springframework.org/schema/beans
      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <bean  id="poolingHttpClient" class="com.yamj.core.tools.web.PoolingHttpClient">
+    <bean  id="poolingHttpClient" class="com.yamj.common.tools.web.PoolingHttpClient">
         <property name="proxyHost" value="${yamj3.http.proxyHost}" />
         <property name="proxyPort" value="${yamj3.http.proxyPort}" />
         <property name="proxyUsername" value="${yamj3.http.proxyUsername}" />

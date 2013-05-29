@@ -172,3 +172,4 @@ target/
 /yamj3-common/nbproject/
 /data-sources.xml
 /yamj3-core/src/main/resources/my_settings.txt
+/yamj3-filescanner/logs/

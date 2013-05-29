@@ -73,6 +73,7 @@ public class PoolingHttpClient extends AbstractPoolingHttpClient implements Disp
         return connectionsMaxPerRoute;
     }
 
+    @Override
     public void setConnectionsMaxPerRoute(int connectionsMaxPerRoute) {
         this.connectionsMaxPerRoute = connectionsMaxPerRoute;
     }
@@ -81,6 +82,7 @@ public class PoolingHttpClient extends AbstractPoolingHttpClient implements Disp
         return connectionsMaxTotal;
     }
 
+    @Override
     public void setConnectionsMaxTotal(int connectionsMaxTotal) {
         this.connectionsMaxTotal = connectionsMaxTotal;
     }
