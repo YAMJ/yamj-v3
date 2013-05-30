@@ -71,19 +71,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Specification-Title>YAMJ3 - Common</Specification-Title>
-                            <Specification-Version>${project.version}</Specification-Version>
-                            <Implementation-Version>${buildNumber}</Implementation-Version>
-                            <Implementation-Title>${timestamp}</Implementation-Title>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
+                <!--Settings are taken from root pom.xml-->
             </plugin>
 
-                        <plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
                 <configuration>

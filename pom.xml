@@ -259,6 +259,11 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>2.3</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
                     <version>2.2.1</version>
                 </plugin>
@@ -351,6 +356,28 @@
                     <target>1.6</target>
                     <failOnError>true</failOnError>
                     <verbose>true</verbose>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>false</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                        </manifest>
+                        <manifestEntries>
+                            <Implementation-Title>${project.name}</Implementation-Title>
+                            <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+
+                            <Specification-Title>${project.description}</Specification-Title>
+                            <Specification-Vendor>${timestamp}</Specification-Vendor>
+                            <Specification-Version>${buildNumber}</Specification-Version>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
             </plugin>
 

@@ -101,21 +101,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <!--Settings are taken from root pom.xml-->
                 <configuration>
                     <archive>
                         <manifest>
-                            <addClasspath>true</addClasspath>
                             <mainClass>com.yamj.filescanner.FileScanner</mainClass>
                         </manifest>
-                        <manifestEntries>
-                            <Implementation-Title>${project.name}</Implementation-Title>
-                            <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
-                            <Implementation-Version>${project.version}</Implementation-Version>
-
-                            <Specification-Title>${project.description}</Specification-Title>
-                            <Specification-Vendor>${timestamp}</Specification-Vendor>
-                            <Specification-Version>${buildNumber}</Specification-Version>
-                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
@@ -149,22 +140,11 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <archive>
-                                <manifest>
-                                    <addClasspath>true</addClasspath>
-                                    <mainClass>com.yamj.filescanner.FileScanner</mainClass>
-                                </manifest>
-                                <manifestEntries>
-                                    <Specification-Title>${project.name}</Specification-Title>
-                                    <Specification-Version>${project.version}</Specification-Version>
-                                    <Implementation-Version>${buildNumber}</Implementation-Version>
-                                    <Implementation-Title>${timestamp}</Implementation-Title>
-                                </manifestEntries>
-                            </archive>
                             <descriptors>
                                 <descriptor>src/main/resources/bin.xml</descriptor>
                             </descriptors>
                         </configuration>
+
                     </execution>
                 </executions>
             </plugin>
@@ -206,7 +186,7 @@
                                 <property name="title_4"    value="REM Git-SHA: ${buildNumber}${line.separator}" />
                                 <property name="line_1"     value="@echo off${line.separator}" />
                                 <property name="line_2"     value="cls${line.separator}" />
-                                <property name="line_3"     value="java -jar lib/${project.artifactId}-${project.version}.jar %*${line.separator}" />
+                                <property name="line_3"     value="java -classpath .;lib/* com.yamj.filescanner.FileScanner %*${line.separator}" />
                                 <echo>Writing batch file: ${batch_file}</echo>
                                 <echo file="${batch_file}" append="false">${line_1}</echo>
                                 <echo file="${batch_file}" append="true">${title_1}</echo>

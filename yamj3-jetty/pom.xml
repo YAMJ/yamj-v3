@@ -114,19 +114,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <!--Settings are taken from root pom.xml-->
                 <configuration>
                     <archive>
                         <manifest>
-                            <addClasspath>false</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>com.yamj.jetty.Start</mainClass>
                         </manifest>
-                        <manifestEntries>
-                            <Specification-Title>${project.name}</Specification-Title>
-                            <Specification-Version>${project.version}</Specification-Version>
-                            <Implementation-Version>${buildNumber}</Implementation-Version>
-                            <Implementation-Title>${timestamp}</Implementation-Title>
-                            <Main-Class>com.yamj.jetty.Start</Main-Class>
-                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
@@ -224,7 +217,7 @@
                                 <property name="title_4"    value="# Git-SHA: ${buildNumber}${line.separator}" />
                                 <property name="line_1"     value="@echo off${line.separator}" />
                                 <property name="line_2"     value="cls${line.separator}" />
-                                <property name="line_3"     value="java -classpath .;dependencies/*;lib/* com.yamj.jetty.Start %*${line.separator}" />
+                                <property name="line_3"     value="java -classpath .;lib/* com.yamj.jetty.Start %*${line.separator}" />
                                 <property name="line_4"     value="pause${line.separator}" />
                                 <echo>Writing batch file: ${batch_file}</echo>
                                 <echo file="${batch_file}" append="false">${line_1}</echo>
