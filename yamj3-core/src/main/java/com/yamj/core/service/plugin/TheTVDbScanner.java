@@ -1,5 +1,7 @@
 package com.yamj.core.service.plugin;
 
+import com.yamj.core.tools.OverrideTools;
+
 import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.thetvdbapi.model.Actor;
 import com.yamj.common.tools.PropertyTools;
@@ -89,8 +91,18 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
             series.setSourcedbId(TVDB_SCANNER_ID, tvdbSeries.getId());
             series.setSourcedbId(ImdbScanner.IMDB_SCANNER_ID, tvdbSeries.getImdbId());
-            series.setOutline(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
-            series.setPlot(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
+
+            if (OverrideTools.checkOverwriteTitle(series, TVDB_SCANNER_ID)) {
+                series.setTitle(tvdbSeries.getSeriesName(), TVDB_SCANNER_ID);
+            }
+
+            if (OverrideTools.checkOverwritePlot(series, TVDB_SCANNER_ID)) {
+                series.setPlot(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
+            }
+            
+            if (OverrideTools.checkOverwriteOutline(series, TVDB_SCANNER_ID)) {
+                series.setOutline(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
+            }
 
             if (StringUtils.isNumeric(tvdbSeries.getRating())) {
                 try {
@@ -106,8 +118,6 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                     series.setStartYear(Integer.parseInt(faDate.substring(0, 4)));
                 }
             }
-            series.setTitle(tvdbSeries.getSeriesName(), TVDB_SCANNER_ID);
-            series.setUpdateTimestamp(new Date());
 
             // CAST & CREW
             CreditDTO credit;
