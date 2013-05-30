@@ -146,9 +146,6 @@ public abstract class AbstractMetadata extends AbstractAuditable
     public final int getSeasonNumber() {
         if (this instanceof Season) {
             return ((Season)this).getSeason();
-        } else if (this instanceof Series) {
-            // use first season for series
-            return 1;
         }
         return -1;
     }

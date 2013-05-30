@@ -1,17 +1,13 @@
 package com.yamj.core.service.plugin;
 
+import com.yamj.common.tools.PropertyTools;
+import com.yamj.common.type.StatusType;
 import com.yamj.core.database.dao.CommonDao;
 import com.yamj.core.database.dao.MediaDao;
 import com.yamj.core.database.dao.PersonDao;
-import com.yamj.core.database.model.dto.QueueDTO;
-import com.yamj.common.tools.PropertyTools;
-import com.yamj.common.type.StatusType;
-import com.yamj.core.database.model.CastCrew;
-import com.yamj.core.database.model.Genre;
-import com.yamj.core.database.model.Person;
-import com.yamj.core.database.model.Series;
-import com.yamj.core.database.model.VideoData;
+import com.yamj.core.database.model.*;
 import com.yamj.core.database.model.dto.CreditDTO;
+import com.yamj.core.database.model.dto.QueueDTO;
 import com.yamj.core.database.model.type.JobType;
 import com.yamj.core.database.model.type.MetaDataType;
 import java.util.HashMap;
@@ -20,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -115,11 +110,7 @@ public class PluginDatabaseService {
         }
 
         // STORAGE
-
-        // update genres
         updateGenres(videoData);
-
-        // update cast and crew
         updateCastCrew(videoData);
 
         // update video data and reset status
@@ -170,14 +161,26 @@ public class PluginDatabaseService {
         }
 
         // STORAGE
+        // TODO add genres to Series
+        updateCastCrew(series);
 
-        // update genres
-        // TODO: Add genres to Series
+        // update underlying seasons and episodes
+        for (Season season : series.getSeasons()) {
+            if (StatusType.PROCESS.equals(season.getStatus())) {
+                season.setStatus(StatusType.DONE);
+                mediaDao.updateEntity(season);
+            }
+            for (VideoData videoData : season.getVideoDatas()) {
+                if (StatusType.PROCESS.equals(videoData.getStatus())) {
+                    updateGenres(videoData);
+                    updateCastCrew(videoData);
+                    videoData.setStatus(StatusType.DONE);
+                    mediaDao.updateEntity(videoData);
+                }
+            }
+        }
 
-        // update cast and crew
-        // TODO: Add cast & crew to Series
-
-        // update video data and reset status
+        // update series and reset status
         if (ScanResult.OK.equals(scanResult)) {
             series.setStatus(StatusType.DONE);
         } else {
@@ -233,7 +236,7 @@ public class PluginDatabaseService {
             Person person = null;
             CastCrew castCrew = null;
 
-            for (CastCrew credit : videoData.getCredits()) {
+            for (CastCrew credit : videoData.getVideoDataCredits()) {
                 if ((credit.getJobType() == dto.getJobType()) && StringUtils.equalsIgnoreCase(dto.getName(), credit.getPerson().getName())) {
                     castCrew = credit;
                     person = credit.getPerson();
@@ -269,18 +272,73 @@ public class PluginDatabaseService {
             if (castCrew == null) {
                 castCrew = new CastCrew();
                 castCrew.setPerson(person);
-                castCrew.setVideoData(videoData);
                 castCrew.setJobType(dto.getJobType());
                 if (StringUtils.isNotBlank(dto.getRole())) {
                     castCrew.setRole(dto.getRole());
                 }
-                videoData.addCredit(castCrew);
-
-                try {
-                    personDao.saveOrUpdate(castCrew);
-                } catch (DataIntegrityViolationException ex) {
-                    LOG.warn("Constraint error: {}", ex.getMessage());
+                castCrew.setVideoData(videoData);
+                videoData.addVideoDataCredit(castCrew);
+                personDao.saveEntity(castCrew);
+            } else {
+                // update role
+                if (StringUtils.isBlank(castCrew.getRole())
+                        && JobType.ACTOR.equals(castCrew.getJobType())
+                        && StringUtils.isNotBlank(dto.getRole())) {
+                    castCrew.setRole(dto.getRole());
+                    personDao.updateEntity(castCrew);
                 }
+            }
+        }
+    }
+
+    private void updateCastCrew(Series series) {
+        for (CreditDTO dto : series.getCreditDTOS()) {
+            Person person = null;
+            CastCrew castCrew = null;
+
+            for (CastCrew credit : series.getSeriesCredits()) {
+                if ((credit.getJobType() == dto.getJobType()) && StringUtils.equalsIgnoreCase(dto.getName(), credit.getPerson().getName())) {
+                    castCrew = credit;
+                    person = credit.getPerson();
+                    break;
+                }
+            }
+
+            // find person if not found
+            if (person == null) {
+                LOG.info("Attempting to retrieve information on '{}' from database", dto.getName());
+                person = personDao.getPerson(dto.getName());
+            } else {
+                LOG.debug("Found '{}' in cast table", person.getName());
+            }
+
+            if (person != null) {
+                // update person id
+                if (StringUtils.isNotBlank(dto.getSourcedb()) && StringUtils.isNotBlank(dto.getSourcedbId())) {
+                    person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
+                    personDao.updateEntity(person);
+                }
+            } else {
+                // create new person
+                person = new Person();
+                person.setName(dto.getName());
+                if (StringUtils.isNotBlank(dto.getSourcedb()) && StringUtils.isNotBlank(dto.getSourcedbId())) {
+                    person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
+                }
+                person.setStatus(StatusType.NEW);
+                personDao.saveEntity(person);
+            }
+
+            if (castCrew == null) {
+                castCrew = new CastCrew();
+                castCrew.setPerson(person);
+                castCrew.setJobType(dto.getJobType());
+                if (StringUtils.isNotBlank(dto.getRole())) {
+                    castCrew.setRole(dto.getRole());
+                }
+                castCrew.setSeries(series);
+                series.addSeriesCredit(castCrew);
+                personDao.saveEntity(castCrew);
             } else {
                 // update role
                 if (StringUtils.isBlank(castCrew.getRole())

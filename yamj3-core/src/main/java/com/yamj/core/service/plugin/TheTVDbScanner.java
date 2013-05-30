@@ -1,14 +1,19 @@
 package com.yamj.core.service.plugin;
 
-import com.yamj.core.tools.OverrideTools;
+import com.yamj.core.database.model.type.JobType;
 
 import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.thetvdbapi.model.Actor;
+import com.omertron.thetvdbapi.model.Episode;
 import com.yamj.common.tools.PropertyTools;
+import com.yamj.common.type.StatusType;
+import com.yamj.core.database.model.Season;
 import com.yamj.core.database.model.Series;
+import com.yamj.core.database.model.VideoData;
 import com.yamj.core.database.model.dto.CreditDTO;
-import java.util.Date;
+import com.yamj.core.tools.OverrideTools;
 import java.util.List;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -104,6 +109,8 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                 series.setOutline(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
             }
 
+            // TODO more values
+            
             if (StringUtils.isNumeric(tvdbSeries.getRating())) {
                 try {
                     series.addRating(TVDB_SCANNER_ID, (int) (Float.parseFloat(tvdbSeries.getRating()) * 10));
@@ -120,16 +127,123 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             }
 
             // CAST & CREW
-            CreditDTO credit;
-            for (Actor person : tvdbApi.getActors(id)) {
-                // TODO: Add people processing
-                LOG.trace("Person: {}", person.toString());
+            
+            for (Actor actor : tvdbApi.getActors(id)) {
+                series.addCreditDTO(new CreditDTO(JobType.ACTOR, actor.getName(), actor.getRole()));
             }
+
+            // SCAN SEASONS
+            this.scanSeasons(series, tvdbSeries);
 
             return ScanResult.OK;
         } else {
             return ScanResult.MISSING_ID;
         }
 
+    }
+    
+    private void scanSeasons(Series series, com.omertron.thetvdbapi.model.Series tvdbSeries) {
+        
+        for (Season season : series.getSeasons()) {
+            
+            // update season values if not done before
+            if (!StatusType.DONE.equals(season.getStatus())) {
+                // use values from series
+                if (OverrideTools.checkOverwriteTitle(season, TVDB_SCANNER_ID)) {
+                    season.setTitle(tvdbSeries.getSeriesName(), TVDB_SCANNER_ID);
+                }
+
+                if (OverrideTools.checkOverwritePlot(season, TVDB_SCANNER_ID)) {
+                    season.setPlot(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
+                }
+                
+                if (OverrideTools.checkOverwriteOutline(season, TVDB_SCANNER_ID)) {
+                    season.setOutline(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
+                }
+
+                // TODO common usable format
+                season.setFirstAired(tvdbSeries.getFirstAired());
+
+                // set status of season in process to allow alternate scan
+                season.setStatus(StatusType.PROCESS);
+
+                // scan episodes
+                this.scanEpisodes(season);
+            }
+        }
+    }
+    
+    private void scanEpisodes(Season season) {
+        if (CollectionUtils.isEmpty(season.getVideoDatas())) {
+            return;
+        }
+
+        String seriesId = season.getSeries().getSourcedbId(TVDB_SCANNER_ID);
+        List<Episode> episodeList = tvdbApi.getSeasonEpisodes(seriesId, season.getSeason(), DEFAULT_LANGUAGE);
+        
+        for (VideoData videoData : season.getVideoDatas()) {
+
+            // update episode values if not done before
+            if (!StatusType.DONE.equals(videoData.getStatus())) {
+                
+                Episode episode = this.findEpisode(episodeList, season.getSeason(), videoData.getEpisode());
+                if (episode == null) {
+                    videoData.setStatus(StatusType.MISSING);
+                } else {
+
+                    if (OverrideTools.checkOverwriteTitle(videoData, TVDB_SCANNER_ID)) {
+                        videoData.setTitle(episode.getEpisodeName(), TVDB_SCANNER_ID);
+                    }
+                    
+                    if (OverrideTools.checkOverwritePlot(videoData, TVDB_SCANNER_ID)) {
+                        videoData.setPlot(episode.getOverview(), TVDB_SCANNER_ID);
+                    }
+
+                    if (CollectionUtils.isNotEmpty(episode.getDirectors())) {
+                        for (String director : episode.getDirectors()) {
+                            videoData.addCreditDTO(new CreditDTO(JobType.DIRECTOR, director));
+                        }
+                    }
+
+                    if (CollectionUtils.isNotEmpty(episode.getWriters())) {
+                        for (String writer : episode.getWriters()) {
+                            videoData.addCreditDTO(new CreditDTO(JobType.WRITER, writer));
+                        }
+                    }
+
+                    if (CollectionUtils.isNotEmpty(episode.getGuestStars())) {
+                        for (String guestStar : episode.getGuestStars()) {
+                            videoData.addCreditDTO(new CreditDTO(JobType.ACTOR, guestStar, "Guest Star"));
+                        }
+                    }
+
+                    // TODO more values
+
+                    // set status of video data in process to allow alternate scan
+                    videoData.setStatus(StatusType.PROCESS);
+                }
+            }
+        }
+    }
+
+    /**
+     * Locate the specific episode from the list of episodes
+     *
+     * @param episodeList
+     * @param seasonNumber
+     * @param episodeNumber
+     * @return
+     */
+    private Episode findEpisode(List<Episode> episodeList, int seasonNumber, int episodeNumber) {
+        if (CollectionUtils.isEmpty(episodeList)) {
+            return null;
+        }
+
+        for (Episode episode : episodeList) {
+            if (episode.getSeasonNumber() == seasonNumber && episode.getEpisodeNumber() == episodeNumber) {
+                return episode;
+            }
+        }
+        return null;
     }
 }

@@ -1,14 +1,11 @@
 package com.yamj.core.database.model;
 
-import org.hibernate.annotations.Index;
-
+import com.yamj.core.database.model.dto.CreditDTO;
 import com.yamj.core.database.model.type.OverrideFlag;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
+import javax.persistence.OrderBy;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.MapKey;
@@ -52,6 +49,14 @@ public class Series extends AbstractMetadata {
     
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
     private Set<Season> seasons = new HashSet<Season>(0);
+
+    @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OrderBy("id ASC")
+    @JoinColumn(name = "series_id")
+    private List<CastCrew> seriesCredits = new ArrayList<CastCrew>(0);
+    
+    @Transient
+    private List<CreditDTO> creditDTOS = new ArrayList<CreditDTO>(0);
 
     // GETTER and SETTER
     
@@ -129,6 +134,26 @@ public class Series extends AbstractMetadata {
         this.seasons = seasons;
     }
     
+    public List<CastCrew> getSeriesCredits() {
+        return seriesCredits;
+    }
+
+    public void setSeriesCredits(List<CastCrew> seriesCredits) {
+        this.seriesCredits = seriesCredits;
+    }
+
+    public void addSeriesCredit(CastCrew castCrew) {
+        this.seriesCredits.add(castCrew);
+    }
+
+    public List<CreditDTO> getCreditDTOS() {
+        return creditDTOS;
+    }
+
+    public void addCreditDTO(CreditDTO creditDTO) {
+        this.creditDTOS.add(creditDTO);
+    }
+
     // EQUALITY CHECKS
     @Override
     public int hashCode() {

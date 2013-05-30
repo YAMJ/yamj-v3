@@ -1,5 +1,9 @@
 package com.yamj.core.database.model;
 
+import javax.persistence.OrderBy;
+
+import javax.persistence.OrderColumn;
+
 import org.hibernate.annotations.Index;
 
 import com.yamj.core.database.model.dto.CreditDTO;
@@ -89,9 +93,9 @@ public class VideoData extends AbstractMetadata {
     private Set<MediaFile> mediaFiles = new HashSet<MediaFile>(0);
     
     @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY, orphanRemoval = true)
-    @OrderColumn(name = "order_data", nullable = false)
-    @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false)
-    private List<CastCrew> credits = new ArrayList<CastCrew>(0);
+    @OrderBy("id ASC")
+    @JoinColumn(name = "videodata_id")
+    private List<CastCrew> videoDataCredits = new ArrayList<CastCrew>(0);
     
     @Transient
     private List<CreditDTO> creditDTOS = new ArrayList<CreditDTO>(0);
@@ -272,16 +276,16 @@ public class VideoData extends AbstractMetadata {
         this.mediaFiles.add(mediaFile);
     }
 
-    public List<CastCrew> getCredits() {
-        return credits;
+    public List<CastCrew> getVideoDataCredits() {
+        return videoDataCredits;
     }
 
-    public void setCredits(List<CastCrew> credits) {
-        this.credits = credits;
+    public void setVideoDataCredits(List<CastCrew> videoDataCredits) {
+        this.videoDataCredits = videoDataCredits;
     }
 
-    public void addCredit(CastCrew castCrew) {
-        this.credits.add(castCrew);
+    public void addVideoDataCredit(CastCrew castCrew) {
+        this.videoDataCredits.add(castCrew);
     }
 
     public List<CreditDTO> getCreditDTOS() {

@@ -18,22 +18,33 @@ import org.hibernate.annotations.Parameter;
 public class CastCrew extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -3941301942248344131L;
+    
     @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_CASTCREW_PERSON")
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "person_id")
+    @JoinColumn(name = "person_id", nullable = false)
     private Person person;
+    
     @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_CASTCREW_VIDEODATA")
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "videodata_id", insertable = false, updatable = false, nullable = false)
+    @JoinColumn(name = "videodata_id")
     private VideoData videoData;
+    
+    @NaturalId
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_CASTCREW_SERIES")
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "series_id")
+    private Series series;
+    
     @NaturalId
     @Type(type = "jobType")
     @Column(name = "job", nullable = false, length = 30)
     private JobType jobType;
+    
     @Column(name = "role", length = 255)
     private String role;
 
@@ -52,6 +63,14 @@ public class CastCrew extends AbstractIdentifiable implements Serializable {
 
     public void setVideoData(VideoData videoData) {
         this.videoData = videoData;
+    }
+
+    public Series getSeries() {
+        return series;
+    }
+
+    public void setSeries(Series series) {
+        this.series = series;
     }
 
     public JobType getJobType() {
