@@ -166,10 +166,10 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
                 // set status of season in process to allow alternate scan
                 season.setStatus(StatusType.PROCESS);
-
-                // scan episodes
-                this.scanEpisodes(season);
             }
+
+            // scan episodes
+            this.scanEpisodes(season);
         }
     }
     
