@@ -20,8 +20,8 @@
     <bean id="propertyConfigurer" class="com.yamj.common.tools.PropertyTools">
         <property name="locations">
             <list>
-                <value>classpath:/yamj3.core.properties</value>
-                <value>file:${yamj3.home}/config/yamj3.properties</value>
+                <value>classpath:/yamj3-core.properties</value>
+                <value>file:${yamj3.home}/config/yamj3-core.properties</value>
             </list>
         </property>
         <property name="ignoreResourceNotFound" value="true"/>

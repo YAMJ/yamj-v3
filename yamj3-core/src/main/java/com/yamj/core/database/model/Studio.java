@@ -12,6 +12,7 @@ import org.hibernate.annotations.NaturalId;
 public class Studio extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -5113519542293276527L;
+    
     @NaturalId(mutable = true)
     @Column(name = "name", nullable = false, length = 200)
     private String name;

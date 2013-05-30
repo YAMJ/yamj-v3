@@ -56,6 +56,12 @@ public class BatchManagementImpl implements BatchManagement {
                 stageDirectory.addStageFile(stageFile);
 
                 stageFile = new StageFileDTO();
+                stageFile.setFileName("Avatar (2009) (Extended).sdtv.mkv");
+                stageFile.setFileDate(System.currentTimeMillis());
+                stageFile.setFileSize(2344165L);
+                stageDirectory.addStageFile(stageFile);
+
+                stageFile = new StageFileDTO();
                 stageFile.setFileName("Avatar (2009).bdrip.nfo");
                 stageFile.setFileDate(System.currentTimeMillis());
                 stageFile.setFileSize(10L);

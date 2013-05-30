@@ -160,18 +160,14 @@ public class PluginDatabaseService {
             }
         }
 
-        // STORAGE
-        // TODO add genres to Series
-        updateCastCrew(series);
-
         // update underlying seasons and episodes
         for (Season season : series.getSeasons()) {
-            if (StatusType.PROCESS.equals(season.getStatus())) {
+            if (StatusType.PROCESSED.equals(season.getStatus())) {
                 season.setStatus(StatusType.DONE);
                 mediaDao.updateEntity(season);
             }
             for (VideoData videoData : season.getVideoDatas()) {
-                if (StatusType.PROCESS.equals(videoData.getStatus())) {
+                if (StatusType.PROCESSED.equals(videoData.getStatus())) {
                     updateGenres(videoData);
                     updateCastCrew(videoData);
                     videoData.setStatus(StatusType.DONE);
@@ -236,7 +232,7 @@ public class PluginDatabaseService {
             Person person = null;
             CastCrew castCrew = null;
 
-            for (CastCrew credit : videoData.getVideoDataCredits()) {
+            for (CastCrew credit : videoData.getCredits()) {
                 if ((credit.getJobType() == dto.getJobType()) && StringUtils.equalsIgnoreCase(dto.getName(), credit.getPerson().getName())) {
                     castCrew = credit;
                     person = credit.getPerson();
@@ -277,67 +273,7 @@ public class PluginDatabaseService {
                     castCrew.setRole(dto.getRole());
                 }
                 castCrew.setVideoData(videoData);
-                videoData.addVideoDataCredit(castCrew);
-                personDao.saveEntity(castCrew);
-            } else {
-                // update role
-                if (StringUtils.isBlank(castCrew.getRole())
-                        && JobType.ACTOR.equals(castCrew.getJobType())
-                        && StringUtils.isNotBlank(dto.getRole())) {
-                    castCrew.setRole(dto.getRole());
-                    personDao.updateEntity(castCrew);
-                }
-            }
-        }
-    }
-
-    private void updateCastCrew(Series series) {
-        for (CreditDTO dto : series.getCreditDTOS()) {
-            Person person = null;
-            CastCrew castCrew = null;
-
-            for (CastCrew credit : series.getSeriesCredits()) {
-                if ((credit.getJobType() == dto.getJobType()) && StringUtils.equalsIgnoreCase(dto.getName(), credit.getPerson().getName())) {
-                    castCrew = credit;
-                    person = credit.getPerson();
-                    break;
-                }
-            }
-
-            // find person if not found
-            if (person == null) {
-                LOG.info("Attempting to retrieve information on '{}' from database", dto.getName());
-                person = personDao.getPerson(dto.getName());
-            } else {
-                LOG.debug("Found '{}' in cast table", person.getName());
-            }
-
-            if (person != null) {
-                // update person id
-                if (StringUtils.isNotBlank(dto.getSourcedb()) && StringUtils.isNotBlank(dto.getSourcedbId())) {
-                    person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
-                    personDao.updateEntity(person);
-                }
-            } else {
-                // create new person
-                person = new Person();
-                person.setName(dto.getName());
-                if (StringUtils.isNotBlank(dto.getSourcedb()) && StringUtils.isNotBlank(dto.getSourcedbId())) {
-                    person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
-                }
-                person.setStatus(StatusType.NEW);
-                personDao.saveEntity(person);
-            }
-
-            if (castCrew == null) {
-                castCrew = new CastCrew();
-                castCrew.setPerson(person);
-                castCrew.setJobType(dto.getJobType());
-                if (StringUtils.isNotBlank(dto.getRole())) {
-                    castCrew.setRole(dto.getRole());
-                }
-                castCrew.setSeries(series);
-                series.addSeriesCredit(castCrew);
+                videoData.addCredit(castCrew);
                 personDao.saveEntity(castCrew);
             } else {
                 // update role

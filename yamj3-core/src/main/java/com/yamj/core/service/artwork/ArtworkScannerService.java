@@ -4,6 +4,7 @@ import com.yamj.common.tools.PropertyTools;
 import com.yamj.common.type.StatusType;
 import com.yamj.core.database.dao.ArtworkDao;
 import com.yamj.core.database.model.Artwork;
+import com.yamj.core.database.model.IMetadata;
 import com.yamj.core.database.model.dto.QueueDTO;
 import com.yamj.core.database.model.type.ArtworkType;
 import com.yamj.core.service.artwork.fanart.IFanartScanner;
@@ -53,6 +54,22 @@ public class ArtworkScannerService {
             throw new RuntimeException("Found no artwork for id " + queueElement.getId());
         }
         
+        // TODO select out in database query
+        IMetadata metadata;
+        if (artwork.getVideoData() != null) {
+            metadata = artwork.getVideoData();
+        } else if (artwork.getSeason() != null) {
+            metadata = artwork.getSeason();
+        } else if (artwork.getSeries() != null) {
+            metadata = artwork.getSeries();
+        } else {
+            throw new RuntimeException("Artwork has no associated metadata");
+        }
+        if (!StatusType.DONE.equals(metadata.getStatus())) {
+            // must be done
+            return;
+        }
+        
         if (ArtworkType.POSTER.equals(artwork.getArtworkType())) {
             boolean found = this.scanPosterLocal(artwork);
             if (!found) {
@@ -71,7 +88,7 @@ public class ArtworkScannerService {
         if (artwork.getStageFile() == null && StringUtils.isBlank(artwork.getUrl())) {
             artwork.setStatus(StatusType.MISSING);
         } else {
-            artwork.setStatus(StatusType.PROCESS);
+            artwork.setStatus(StatusType.PROCESSED);
         }
         artworkDao.updateEntity(artwork);
     }

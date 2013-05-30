@@ -7,13 +7,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
+import org.hibernate.annotations.*;
 
 @TypeDefs({
     @TypeDef(name = "statusType",
@@ -26,29 +23,37 @@ import org.hibernate.annotations.TypeDefs;
 public class Person extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 660066902996412843L;
+    
     @NaturalId(mutable = true)
     @Column(name = "name", nullable = false, length = 255)
     private String name;
+    
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "birth_day")
     private Date birthDay;
+    
     @Column(name = "birth_place", length = 255)
     private String birthPlace;
+    
     @Column(name = "birth_name", length = 255)
     private String birthName;
+    
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "death_day")
     private Date deathDay;
+    
     @Lob
     @Column(name = "biography", length = 50000)
     private String biography;
+    
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "person_ids", joinColumns =
-            @JoinColumn(name = "person_id"))
+    @JoinTable(name = "person_ids", joinColumns = @JoinColumn(name = "person_id"))
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 40)
     private Map<String, String> personIds = new HashMap<String, String>(0);
+    
+    @Index(name = "people_status")
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;

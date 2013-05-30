@@ -30,12 +30,16 @@ public class ClassTools {
         // Build number
         String buildNumber = myClass.getPackage().getSpecificationVersion();
 
-        myLog.info("{} {}", projectName, projectVersion);
-        myLog.info("{} {}", StringUtils.repeat("~", projectName.length()), StringUtils.repeat("~", projectVersion.length()));
-        myLog.info("{}", moduleName);
-        myLog.info("");
-        myLog.info("  Revision: {}", buildNumber);
-        myLog.info("Build Time: {}", buildTimestamp);
-        myLog.info("");
+        if (projectName != null) {
+            // just print out if project name has been set
+            
+            myLog.info("{} {}", projectName, projectVersion);
+            myLog.info("{} {}", StringUtils.repeat("~", projectName.length()), StringUtils.repeat("~", projectVersion.length()));
+            myLog.info("{}", moduleName);
+            myLog.info("");
+            myLog.info("  Revision: {}", buildNumber);
+            myLog.info("Build Time: {}", buildTimestamp);
+            myLog.info("");
+        }
     }
 }

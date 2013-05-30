@@ -12,13 +12,16 @@ import org.hibernate.annotations.NaturalId;
 public class Certification extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 5949467240717893584L;
+    
     @NaturalId(mutable = true)
     @Column(name = "certification_text", nullable = false, length = 50)
     private String certificationText;
-    @Column(name = "country", length = 100)
+    
+    @Column(name = "country", length = 100, nullable = false)
     private String country;
 
     // GETTER and SETTER
+    
     public String getCertificationText() {
         return certificationText;
     }

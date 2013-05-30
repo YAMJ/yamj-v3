@@ -30,15 +30,8 @@ public class CastCrew extends AbstractIdentifiable implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_CASTCREW_VIDEODATA")
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "videodata_id")
+    @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false)
     private VideoData videoData;
-    
-    @NaturalId
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_CASTCREW_SERIES")
-    @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "series_id")
-    private Series series;
     
     @NaturalId
     @Type(type = "jobType")
@@ -63,14 +56,6 @@ public class CastCrew extends AbstractIdentifiable implements Serializable {
 
     public void setVideoData(VideoData videoData) {
         this.videoData = videoData;
-    }
-
-    public Series getSeries() {
-        return series;
-    }
-
-    public void setSeries(Series series) {
-        this.series = series;
     }
 
     public JobType getJobType() {

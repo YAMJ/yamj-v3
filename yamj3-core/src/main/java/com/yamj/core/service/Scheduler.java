@@ -24,6 +24,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -55,6 +56,7 @@ public class Scheduler {
         ToStringBuilder.setDefaultStyle(ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
+    @Async
     @Scheduled(initialDelay = 10000, fixedDelay = 30000)
     public void processStageFiles() throws Exception {
         Long id = null;
@@ -86,6 +88,7 @@ public class Scheduler {
         // PROCESS PEOPLE
     }
 
+    @Async
     @Scheduled(initialDelay = 15000, fixedDelay = 45000)
     public void scanMediaData() throws Exception {
         List<QueueDTO> queueElements = mediaDao.getMediaQueueForScanning();
@@ -114,6 +117,7 @@ public class Scheduler {
         LOG.debug("Finished media data scanning");
     }
 
+    @Async
     @Scheduled(initialDelay = 15000, fixedDelay = 45000)
     public void scanPeopleData() throws Exception {
         List<QueueDTO> queueElements = personDao.getPersonQueueForScanning();
@@ -143,6 +147,7 @@ public class Scheduler {
         LOG.debug("Finished person data scanning");
     }
     
+    @Async
     @Scheduled(initialDelay = 15000, fixedDelay = 45000)
     public void scanArtwork() throws Exception {
         List<QueueDTO> queueElements = artworkDao.getArtworkQueueForScanning();

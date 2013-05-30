@@ -1,7 +1,5 @@
 package com.yamj.core.service.plugin;
 
-import com.yamj.core.database.model.type.JobType;
-
 import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
@@ -11,7 +9,9 @@ import com.yamj.core.database.model.Season;
 import com.yamj.core.database.model.Series;
 import com.yamj.core.database.model.VideoData;
 import com.yamj.core.database.model.dto.CreditDTO;
+import com.yamj.core.database.model.type.JobType;
 import com.yamj.core.tools.OverrideTools;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -128,12 +128,14 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
             // CAST & CREW
             
+            List<CreditDTO> actors = new ArrayList<CreditDTO>();
             for (Actor actor : tvdbApi.getActors(id)) {
-                series.addCreditDTO(new CreditDTO(JobType.ACTOR, actor.getName(), actor.getRole()));
+                actors.add(new CreditDTO(JobType.ACTOR, actor.getName(), actor.getRole()));
             }
 
             // SCAN SEASONS
-            this.scanSeasons(series, tvdbSeries);
+            
+            this.scanSeasons(series, tvdbSeries, actors);
 
             return ScanResult.OK;
         } else {
@@ -142,7 +144,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
     }
     
-    private void scanSeasons(Series series, com.omertron.thetvdbapi.model.Series tvdbSeries) {
+    private void scanSeasons(Series series, com.omertron.thetvdbapi.model.Series tvdbSeries, List<CreditDTO> actors) {
         
         for (Season season : series.getSeasons()) {
             
@@ -165,15 +167,15 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                 season.setFirstAired(tvdbSeries.getFirstAired());
 
                 // set status of season in process to allow alternate scan
-                season.setStatus(StatusType.PROCESS);
+                season.setStatus(StatusType.PROCESSED);
             }
 
             // scan episodes
-            this.scanEpisodes(season);
+            this.scanEpisodes(season, actors);
         }
     }
     
-    private void scanEpisodes(Season season) {
+    private void scanEpisodes(Season season, List<CreditDTO> actors) {
         if (CollectionUtils.isEmpty(season.getVideoDatas())) {
             return;
         }
@@ -199,28 +201,23 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                         videoData.setPlot(episode.getOverview(), TVDB_SCANNER_ID);
                     }
 
-                    if (CollectionUtils.isNotEmpty(episode.getDirectors())) {
-                        for (String director : episode.getDirectors()) {
-                            videoData.addCreditDTO(new CreditDTO(JobType.DIRECTOR, director));
-                        }
+                    // cast and crew
+                    videoData.addCredditDTOS(actors);
+                    
+                    for (String director : episode.getDirectors()) {
+                        videoData.addCreditDTO(new CreditDTO(JobType.DIRECTOR, director));
                     }
-
-                    if (CollectionUtils.isNotEmpty(episode.getWriters())) {
-                        for (String writer : episode.getWriters()) {
-                            videoData.addCreditDTO(new CreditDTO(JobType.WRITER, writer));
-                        }
+                    for (String writer : episode.getWriters()) {
+                        videoData.addCreditDTO(new CreditDTO(JobType.WRITER, writer));
                     }
-
-                    if (CollectionUtils.isNotEmpty(episode.getGuestStars())) {
-                        for (String guestStar : episode.getGuestStars()) {
-                            videoData.addCreditDTO(new CreditDTO(JobType.ACTOR, guestStar, "Guest Star"));
-                        }
+                    for (String guestStar : episode.getGuestStars()) {
+                        videoData.addCreditDTO(new CreditDTO(JobType.ACTOR, guestStar, "Guest Star"));
                     }
 
                     // TODO more values
 
                     // set status of video data in process to allow alternate scan
-                    videoData.setStatus(StatusType.PROCESS);
+                    videoData.setStatus(StatusType.PROCESSED);
                 }
             }
         }

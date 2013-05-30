@@ -17,7 +17,10 @@ import org.hibernate.annotations.MapKey;
 @javax.persistence.Entity
 @javax.persistence.Table(name = "season")
 @org.hibernate.annotations.Table(appliesTo = "season",
-    indexes = {@Index(name = "season_title", columnNames = {"title"})})
+    indexes = {
+        @Index(name = "season_title", columnNames = {"title"}),
+        @Index(name = "season_status", columnNames = {"status"})
+})
 public class Season extends AbstractMetadata {
 
     private static final long serialVersionUID = 7589022259013410259L;

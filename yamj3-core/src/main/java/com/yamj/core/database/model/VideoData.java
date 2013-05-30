@@ -1,5 +1,10 @@
 package com.yamj.core.database.model;
 
+import javax.persistence.JoinColumn;
+
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+
 import javax.persistence.OrderBy;
 
 import javax.persistence.OrderColumn;
@@ -25,7 +30,10 @@ import org.hibernate.annotations.Parameter;
 @javax.persistence.Entity
 @javax.persistence.Table(name = "videodata")
 @org.hibernate.annotations.Table(appliesTo = "videodata",
-    indexes = {@Index(name = "videodata_title", columnNames = {"title"})})
+    indexes = {
+        @Index(name = "videodata_title", columnNames = {"title"}),
+        @Index(name = "videodata_status", columnNames = {"status"})
+    })
 public class VideoData extends AbstractMetadata {
 
     private static final long serialVersionUID = 5719107822219333629L;
@@ -34,13 +42,13 @@ public class VideoData extends AbstractMetadata {
     private int episode = -1;
     
     @Index(name = "videodata_publication_year")
-    @Column(name = "publication_year")
+    @Column(name = "publication_year", nullable = false)
     private int publicationYear = -1;
     
     @Column(name = "release_date", length = 10)
     private String releaseDate;
     
-    @Column(name = "top_rank")
+    @Column(name = "top_rank", nullable = false)
     private int topRank = -1;
     
     @Lob
@@ -92,10 +100,10 @@ public class VideoData extends AbstractMetadata {
     @ManyToMany(mappedBy = "videoDatas")
     private Set<MediaFile> mediaFiles = new HashSet<MediaFile>(0);
     
-    @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY, orphanRemoval = true)
-    @OrderBy("id ASC")
-    @JoinColumn(name = "videodata_id")
-    private List<CastCrew> videoDataCredits = new ArrayList<CastCrew>(0);
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OrderColumn(name = "ordering", nullable = false)
+    @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false)
+    private List<CastCrew> credits = new ArrayList<CastCrew>(0);
     
     @Transient
     private List<CreditDTO> creditDTOS = new ArrayList<CreditDTO>(0);
@@ -276,16 +284,16 @@ public class VideoData extends AbstractMetadata {
         this.mediaFiles.add(mediaFile);
     }
 
-    public List<CastCrew> getVideoDataCredits() {
-        return videoDataCredits;
+    public List<CastCrew> getCredits() {
+        return credits;
     }
 
-    public void setVideoDataCredits(List<CastCrew> videoDataCredits) {
-        this.videoDataCredits = videoDataCredits;
+    public void setCredits(List<CastCrew> credits) {
+        this.credits = credits;
     }
 
-    public void addVideoDataCredit(CastCrew castCrew) {
-        this.videoDataCredits.add(castCrew);
+    public void addCredit(CastCrew credit) {
+        this.credits.add(credit);
     }
 
     public List<CreditDTO> getCreditDTOS() {
@@ -296,6 +304,10 @@ public class VideoData extends AbstractMetadata {
         this.creditDTOS.add(creditDTO);
     }
 
+    public void addCredditDTOS(List<CreditDTO> creditDTOS) {
+        this.creditDTOS.addAll(creditDTOS);
+    }
+    
     // EQUALITY CHECKS
     @Override
     public int hashCode() {

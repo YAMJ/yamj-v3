@@ -6,7 +6,7 @@ public enum StatusType {
     UPDATED,
     DELETED,
     ERROR,
-    PROCESS,
+    PROCESSED,
     MISSING,
     DONE;
     
