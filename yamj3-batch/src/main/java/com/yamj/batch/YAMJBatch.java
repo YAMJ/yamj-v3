@@ -3,12 +3,20 @@ package com.yamj.batch;
 import com.yamj.common.cmdline.CmdLineException;
 import com.yamj.common.cmdline.CmdLineOption;
 import com.yamj.common.cmdline.CmdLineParser;
+import com.yamj.common.tools.ClassTools;
+import org.apache.log4j.BasicConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class YAMJBatch {
 
+    private static final Logger LOG = LoggerFactory.getLogger(YAMJBatch.class);
+
     public static void main(String[] args) throws Exception {
+        BasicConfigurator.configure();
+        ClassTools.printHeader(YAMJBatch.class, LOG);
         CmdLineParser parser = getCmdLineParser();
 
         int status;
@@ -38,7 +46,7 @@ public class YAMJBatch {
             BatchManagement batchManagement = (BatchManagement) applicationContext.getBean("batchManagement");
             status = batchManagement.runBatch(parser);
         } catch (Exception error) {
-            System.err.println("Failed to load batch configuration");
+            LOG.error("Failed to load batch configuration");
             error.printStackTrace(System.err);
             status = 2;
         }

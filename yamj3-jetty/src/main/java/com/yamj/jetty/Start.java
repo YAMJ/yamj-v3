@@ -3,6 +3,7 @@ package com.yamj.jetty;
 import com.yamj.common.cmdline.CmdLineException;
 import com.yamj.common.cmdline.CmdLineOption;
 import com.yamj.common.cmdline.CmdLineParser;
+import com.yamj.common.tools.ClassTools;
 import com.yamj.common.type.ExitType;
 import static com.yamj.common.type.ExitType.*;
 import java.io.File;
@@ -32,7 +33,7 @@ public class Start {
         System.setProperty("file.name", LOG_FILENAME);
         PropertyConfigurator.configure("config/log4j.properties");
 
-        printHeader();
+        ClassTools.printHeader(Start.class, LOG);
 
         CmdLineParser parser = getCmdLineParser();
         ExitType status;
@@ -111,15 +112,6 @@ public class Start {
             LOG.error("General server eror, message: ", ex.getMessage());
             return STARTUP_FAILURE;
         }
-    }
-
-    /**
-     * Print the title
-     */
-    private static void printHeader() {
-        LOG.info("YAMJ v3 Jetty Server");
-        LOG.info("~~~~ ~~ ~~~~~ ~~~~~~");
-        LOG.info("Starts the YAMJ v3 Core server.");
     }
 
     /**
