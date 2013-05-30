@@ -8,6 +8,7 @@ import com.yamj.common.type.ExitType;
 import static com.yamj.common.type.ExitType.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.PropertyConfigurator;
@@ -68,11 +69,18 @@ public class Start {
         File warFile = new File(warFilename);
 
         if (warFile.exists()) {
+            try {
+                // This is a temporary fix until the yamj3.home can be read from the servlet
+                System.setProperty("yamj3.home", (new File(yamjHome)).getCanonicalPath());
+            } catch (IOException ex) {
+                System.setProperty("yamj3.home", yamjHome);
+            }
             LOG.info("YAMJ Home: '{}'", yamjHome);
             LOG.info("YAMJ Port: {}", yamjPort);
             LOG.info("YAMJ Shudown Port: {}", yamjShutdownPort);
             LOG.info("YAMJ {} stop at Shutdown", yamjStopAtShutdown ? "will" : "will not");
             LOG.info("Using war file: {}", warFilename);
+            LOG.info("");
         } else {
             help(parser);
             LOG.info("");
