@@ -21,7 +21,7 @@
         <property name="locations">
             <list>
                 <value>classpath:/yamj3.core.properties</value>
-                <value>file:${yamj3.home}/config/yamj.properties</value>
+                <value>file:${yamj3.home}/config/yamj3.properties</value>
             </list>
         </property>
         <property name="ignoreResourceNotFound" value="true"/>

@@ -16,4 +16,14 @@
         <property name="connectionsMaxTotal" value="${yamj3.http.connections.maxTotal}" />
     </bean>
 
+    <bean id="theMovieDbApi" class="com.omertron.themoviedbapi.TheMovieDbApi">
+        <constructor-arg index="0" value="${APIKEY.themoviedb}"/>
+        <constructor-arg index="1" ref="poolingHttpClient"/>
+    </bean>
+
+    <bean id="theTvDbApi" class="com.omertron.thetvdbapi.TheTVDBApi">
+        <constructor-arg index="0" value="${APIKEY.tvdb}"/>
+        <constructor-arg index="1" ref="poolingHttpClient"/>
+    </bean>
+
 </beans>

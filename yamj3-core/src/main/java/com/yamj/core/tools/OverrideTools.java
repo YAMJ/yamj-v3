@@ -53,7 +53,7 @@ public final class OverrideTools {
         putVideodataPriorities(OverrideFlag.OUTLINE, sources);
         sources = PropertyTools.getProperty("priority.season.outline", "nfo,plugin_series,alternate_series");
         putSeasonPriorities(OverrideFlag.OUTLINE, sources);
-        sources = PropertyTools.getProperty("priority.tv.outline", "nfo,plugin_series,alternate_series");
+        sources = PropertyTools.getProperty("priority.series.outline", "nfo,plugin_series,alternate_series");
         putSeriesPriorities(OverrideFlag.OUTLINE, sources);
         // plot
         sources = PropertyTools.getProperty("priority.videodata.plot", "nfo,plugin_video,plugin_series,alternate_video,alternate_series");

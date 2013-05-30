@@ -1,11 +1,10 @@
 package com.yamj.core.service.plugin;
 
+import com.omertron.thetvdbapi.TheTVDBApi;
+import com.omertron.thetvdbapi.model.Actor;
 import com.yamj.common.tools.PropertyTools;
 import com.yamj.core.database.model.Series;
 import com.yamj.core.database.model.dto.CreditDTO;
-import com.omertron.thetvdbapi.TheTVDBApi;
-import com.omertron.thetvdbapi.model.Actor;
-import com.yamj.common.tools.web.PoolingHttpClient;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -19,19 +18,16 @@ import org.springframework.stereotype.Service;
 @Service("tvdbScanner")
 public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
-    private static final String TVDB_SCANNER_ID = "tvdb";
+    public static final String TVDB_SCANNER_ID = "tvdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheTVDbScanner.class);
-    private static final String API_KEY = PropertyTools.getProperty("APIKEY.tvdb", "");
     private static final String DEFAULT_LANGUAGE = PropertyTools.getProperty("thetvdb.language", "en");
     private static final int YEAR_MIN = 1900;
     private static final int YEAR_MAX = 2050;
 
-    private TheTVDBApi tvdbApi;
-
     @Autowired
     private PluginDatabaseService pluginDatabaseService;
     @Autowired
-    private PoolingHttpClient httpClient;
+    private TheTVDBApi tvdbApi;
 
     @Override
     public String getScannerName() {
@@ -40,18 +36,8 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (StringUtils.isNotBlank(API_KEY)) {
-            try {
-                tvdbApi = new TheTVDBApi(API_KEY, httpClient);
-                // register this scanner
-                pluginDatabaseService.registerSeriesScanner(this);
-
-            } catch (Exception ex) {
-                LOG.error("Unable to initialise TheTVDbScanner, error: {}", ex.getMessage());
-            }
-        } else {
-            LOG.error("Failed to initialise TheTVDbScanner, no API KEY available");
-        }
+        // register this scanner
+        pluginDatabaseService.registerSeriesScanner(this);
     }
 
     @Override

@@ -1,13 +1,11 @@
 package com.yamj.core.service.artwork.common;
 
-import com.yamj.core.service.artwork.ArtworkScannerService;
-
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.model.MovieDb;
 import com.yamj.common.tools.PropertyTools;
-import com.yamj.common.tools.web.PoolingHttpClient;
 import com.yamj.core.database.model.IMetadata;
+import com.yamj.core.service.artwork.ArtworkScannerService;
 import com.yamj.core.service.artwork.fanart.IMovieFanartScanner;
 import com.yamj.core.service.artwork.poster.IMoviePosterScanner;
 import com.yamj.core.service.plugin.ImdbScanner;
@@ -24,19 +22,15 @@ import org.springframework.stereotype.Service;
 public class TheMovieDbArtworkScanner implements 
     IMoviePosterScanner, IMovieFanartScanner, InitializingBean
 {
-
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbArtworkScanner.class);
     private static final String DEFAULT_POSTER_SIZE = "original";
     private static final String DEFAULT_FANART_SIZE = "original";
-    private static final String API_KEY = PropertyTools.getProperty("APIKEY.themoviedb", "");
     private static final String DEFAULT_LANGUAGE = PropertyTools.getProperty("themoviedb.language", "en");
-
-    private TheMovieDbApi tmdbApi;
 
     @Autowired
     private ArtworkScannerService artworkScannerService;
     @Autowired
-    private PoolingHttpClient httpClient;
+    private TheMovieDbApi tmdbApi;
     @Autowired
     private TheMovieDbScanner tmdbScanner;
     
@@ -47,18 +41,9 @@ public class TheMovieDbArtworkScanner implements
 
     @Override
     public void afterPropertiesSet() {
-        if (StringUtils.isNotBlank(API_KEY)) {
-            try {
-                tmdbApi = new TheMovieDbApi(API_KEY, httpClient);
-                // register this scanner
-                artworkScannerService.registerMoviePosterScanner(this);
-                artworkScannerService.registerMovieFanartScanner(this);
-            } catch (MovieDbException ex) {
-                LOG.error("Unable to initialise TheMovieDbArtworkScanner, error: {}", ex.getMessage());
-            }
-        } else {
-            LOG.error("Failed to initialise TheMovieDbArtworkScanner, no API KEY available");
-        }
+        // register this scanner
+        artworkScannerService.registerMoviePosterScanner(this);
+        artworkScannerService.registerMovieFanartScanner(this);
     }
 
     @Override

@@ -1,23 +1,17 @@
 package com.yamj.core.service.plugin;
 
-import com.yamj.common.tools.PropertyTools;
-import com.yamj.core.database.model.Genre;
-import com.yamj.core.database.model.VideoData;
-import com.yamj.core.database.model.dto.CreditDTO;
-import com.yamj.core.database.model.type.JobType;
 import com.omertron.themoviedbapi.MovieDbException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.model.MovieDb;
 import com.omertron.themoviedbapi.model.PersonType;
 import com.omertron.themoviedbapi.model.ProductionCountry;
 import com.omertron.themoviedbapi.results.TmdbResultsList;
+import com.yamj.common.tools.PropertyTools;
+import com.yamj.core.database.model.Genre;
 import com.yamj.core.database.model.Person;
-import com.yamj.common.tools.web.PoolingHttpClient;
+import com.yamj.core.database.model.VideoData;
+import com.yamj.core.database.model.dto.CreditDTO;
+import com.yamj.core.database.model.type.JobType;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashSet;
@@ -26,6 +20,11 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service("tmdbScanner")
 public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, InitializingBean {
@@ -38,8 +37,6 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     @Autowired
     private PluginDatabaseService pluginDatabaseService;
     @Autowired
-    private PoolingHttpClient httpClient;
-    private static final String API_KEY = PropertyTools.getProperty("APIKEY.themoviedb", "");
     private TheMovieDbApi tmdbApi;
 
     @Override
@@ -49,19 +46,9 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
     @Override
     public void afterPropertiesSet() {
-        if (StringUtils.isNotBlank(API_KEY)) {
-            try {
-                tmdbApi = new TheMovieDbApi(API_KEY, httpClient);
-                // register this scanner
-                pluginDatabaseService.registerMovieScanner(this);
-                pluginDatabaseService.registerPersonScanner(this);
-
-            } catch (MovieDbException ex) {
-                LOG.error("Unable to initialise TheMovieDbScanner, error: {}", ex.getMessage());
-            }
-        } else {
-            LOG.error("Failed to initialise TheMovieDbScanner, no API KEY available");
-        }
+        // register this scanner
+        pluginDatabaseService.registerMovieScanner(this);
+        pluginDatabaseService.registerPersonScanner(this);
     }
 
     @Override
