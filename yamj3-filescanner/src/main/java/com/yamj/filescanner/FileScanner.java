@@ -5,6 +5,7 @@ import com.yamj.common.cmdline.CmdLineOption;
 import com.yamj.common.cmdline.CmdLineParser;
 import com.yamj.common.type.ExitType;
 import static com.yamj.common.type.ExitType.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,9 +48,20 @@ public final class FileScanner {
      * Print the title
      */
     private static void printHeader() {
-        LOG.info("YAMJ v3 File Scanner");
-        LOG.info("~~~~ ~~ ~~~~ ~~~~~~~");
-        LOG.info("Scans the specified directory for media files.");
+        String projectName = FileScanner.class.getPackage().getImplementationVendor();   // "YAMJ"
+        String projectVersion = FileScanner.class.getPackage().getImplementationVersion();  // Project version
+        String moduleName = FileScanner.class.getPackage().getImplementationTitle();    // Module Name
+//        String moduleDesc = FileScanner.class.getPackage().getSpecificationTitle();     // Module description
+        String buildTimestamp = FileScanner.class.getPackage().getSpecificationVendor();    // Build timestamp
+        String buildNumber = FileScanner.class.getPackage().getSpecificationVersion();   // Build number
+
+        LOG.info("{} {}", projectName, projectVersion);
+        LOG.info(StringUtils.repeat("~", (projectName.length() + projectVersion.length() + 1)));
+        LOG.info("{}", moduleName);
+        LOG.info("");
+        LOG.info("  Revision: {}", buildNumber);
+        LOG.info("Build Time: {}", buildTimestamp);
+        LOG.info("");
     }
 
     /**
@@ -71,9 +83,11 @@ public final class FileScanner {
 
     private ExitType execute(CmdLineParser parser) {
         ExitType status;
+
         try {
             ApplicationContext applicationContext = new ClassPathXmlApplicationContext("yamj3-filescanner.xml");
             ScannerManagement scannerManagement = (ScannerManagement) applicationContext.getBean("scannerManagement");
+
             status = scannerManagement.runScanner(parser);
         } catch (BeansException ex) {
             LOG.error("Failed to load scanner configuration");

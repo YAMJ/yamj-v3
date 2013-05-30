@@ -35,6 +35,12 @@
         </developer>
     </developers>
 
+    <scm>
+        <url>scm:git:git@github.com:YAMJ/yamj-v3.git</url>
+        <connection>scm:git:git@github.com:YAMJ/yamj-v3.git</connection>
+        <developerConnection>scm:git:git@github.com:YAMJ/yamj-v3.git</developerConnection>
+    </scm>
+
     <modules>
         <module>yamj3-common</module>
         <module>yamj3-core</module>
@@ -298,7 +304,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>validate</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>create</goal>
                         </goals>
