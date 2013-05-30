@@ -224,7 +224,7 @@ public final class OverrideTools {
         }
 
         // get and check new priority
-        int newPrio = priorities.indexOf(newSource.toUpperCase());
+        int newPrio = priorities.indexOf(newSource.toLowerCase());
         if (newPrio == -1) {
             // priority for new source not found
             // -> actual source has higher priority
@@ -232,7 +232,7 @@ public final class OverrideTools {
         }
 
         // check actual priority
-        int actualPrio = priorities.indexOf(actualSource.toUpperCase());
+        int actualPrio = priorities.indexOf(actualSource.toLowerCase());
         if ((actualPrio == -1) || (newPrio <= actualPrio)) {
             // -> new source has higher priority
             return Boolean.TRUE;
