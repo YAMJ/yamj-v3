@@ -13,14 +13,6 @@
     <description>File Scanner client for YAMJ v3</description>
     <artifactId>yamj3-filescanner</artifactId>
     <packaging>jar</packaging>
-    <organization>
-        <name>Yet Another Movie Jukebox</name>
-        <url>https://github.com/YAMJ/</url>
-    </organization>
-
-    <prerequisites>
-        <maven>3.0.3</maven>
-    </prerequisites>
 
     <properties>
         <!--This is used for the assembly plugin-->

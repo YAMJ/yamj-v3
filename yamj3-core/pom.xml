@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -9,18 +8,14 @@
         <version>3.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>yamj3-core</artifactId>
-    <packaging>war</packaging>
-
-    <prerequisites>
-        <maven>3.0.3</maven>
-    </prerequisites>
-
     <!-- Project Information -->
     <name>YAMJ3 Core</name>
     <description>Core of YAMJ project</description>
+    <artifactId>yamj3-core</artifactId>
+    <packaging>war</packaging>
 
     <properties>
+        <!--Skip the tests if not needed-->
         <skipTests>true</skipTests>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -64,6 +59,10 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
         </dependency>
         <!-- HIBERNATE -->
         <dependency>

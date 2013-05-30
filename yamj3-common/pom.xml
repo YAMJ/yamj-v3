@@ -7,18 +7,15 @@
         <artifactId>yamj3</artifactId>
         <version>3.0-SNAPSHOT</version>
     </parent>
-    <artifactId>yamj3-common</artifactId>
-    <packaging>jar</packaging>
-
-    <prerequisites>
-        <maven>3.0.3</maven>
-    </prerequisites>
 
     <!-- Project Information -->
     <name>YAMJ3 Common</name>
     <description>Common of YAMJ project</description>
+    <artifactId>yamj3-common</artifactId>
+    <packaging>jar</packaging>
 
     <properties>
+        <!--Skip the tests if not needed-->
         <skipTests>false</skipTests>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
