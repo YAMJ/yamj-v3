@@ -1,11 +1,6 @@
 package org.yamj.core.tools.web;
 
-<<<<<<< HEAD:yamj3-core/src/main/java/org/yamj/core/tools/web/PoolingHttpClient.java
-import com.moviejukebox.api.common.http.AbstractPoolingHttpClient;
 import org.yamj.common.tools.PropertyTools;
-=======
-import com.yamj.common.tools.PropertyTools;
->>>>>>> d03ca5af6828c25c034b777a332d888f5ace555e:yamj3-core/src/main/java/com/yamj/core/tools/web/PoolingHttpClient.java
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
