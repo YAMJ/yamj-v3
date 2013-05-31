@@ -38,7 +38,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
             PROPERTIES.put(keyStr, valueStr);
         }
 
-        LOG.info("Loaded {} properties into core", PROPERTIES.size());
+        LOG.info("Loaded {} properties", PROPERTIES.size());
     }
 
     public static String getProperty(String key) {
