@@ -3,7 +3,7 @@
 
     <!-- The Basics -->
     <parent>
-        <groupId>com.yamj</groupId>
+        <groupId>org.yamj</groupId>
         <artifactId>yamj3</artifactId>
         <version>3.0-SNAPSHOT</version>
     </parent>
@@ -97,7 +97,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.yamj.filescanner.FileScanner</mainClass>
+                            <mainClass>org.yamj.filescanner.FileScanner</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -178,7 +178,7 @@
                                 <property name="title_4"    value="REM Git-SHA: ${buildNumber}${line.separator}" />
                                 <property name="line_1"     value="@echo off${line.separator}" />
                                 <property name="line_2"     value="cls${line.separator}" />
-                                <property name="line_3"     value="java -classpath .;lib/* com.yamj.filescanner.FileScanner %*${line.separator}" />
+                                <property name="line_3"     value="java -classpath .;lib/* org.yamj.filescanner.FileScanner %*${line.separator}" />
                                 <echo>Writing batch file: ${batch_file}</echo>
                                 <echo file="${batch_file}" append="false">${line_1}</echo>
                                 <echo file="${batch_file}" append="true">${title_1}</echo>

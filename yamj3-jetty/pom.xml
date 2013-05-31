@@ -3,7 +3,7 @@
 
     <!-- The Basics -->
     <parent>
-        <groupId>com.yamj</groupId>
+        <groupId>org.yamj</groupId>
         <artifactId>yamj3</artifactId>
         <version>3.0-SNAPSHOT</version>
     </parent>
@@ -115,7 +115,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.yamj.jetty.Start</mainClass>
+                            <mainClass>org.yamj.jetty.Start</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -214,7 +214,7 @@
                                 <property name="title_4"    value="# Git-SHA: ${buildNumber}${line.separator}" />
                                 <property name="line_1"     value="@echo off${line.separator}" />
                                 <property name="line_2"     value="cls${line.separator}" />
-                                <property name="line_3"     value="java -classpath .;lib/* com.yamj.jetty.Start %*${line.separator}" />
+                                <property name="line_3"     value="java -classpath .;lib/* org.yamj.jetty.Start %*${line.separator}" />
                                 <property name="line_4"     value="pause${line.separator}" />
                                 <echo>Writing batch file: ${batch_file}</echo>
                                 <echo file="${batch_file}" append="false">${line_1}</echo>

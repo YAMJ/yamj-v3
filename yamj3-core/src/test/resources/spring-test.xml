@@ -14,9 +14,9 @@
     http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
     <context:annotation-config />
-    <context:component-scan base-package="com.yamj"/>
+    <context:component-scan base-package="org.yamj"/>
 
-     <bean id="propertyConfigurer" class="com.yamj.common.tools.PropertyTools">
+     <bean id="propertyConfigurer" class="org.yamj.common.tools.PropertyTools">
         <property name="locations">
             <list>
                 <value>classpath:/yamj3.core.properties</value>

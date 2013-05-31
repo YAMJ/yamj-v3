@@ -14,7 +14,7 @@
     <packaging>pom</packaging>
 
     <version>3.0-SNAPSHOT</version>
-    <groupId>com.yamj</groupId>
+    <groupId>org.yamj</groupId>
 
     <organization>
         <name>Yet Another Movie Jukebox</name>

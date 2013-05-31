@@ -22,9 +22,9 @@
     <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
         <property name="entityInterceptor">
-            <bean class="com.yamj.core.hibernate.AuditInterceptor"/>
+            <bean class="org.yamj.core.hibernate.AuditInterceptor"/>
         </property>
-        <property name="packagesToScan" value="com.yamj.core.database.model"/>
+        <property name="packagesToScan" value="org.yamj.core.database.model"/>
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">${yamj3.database.dialect}</prop>
