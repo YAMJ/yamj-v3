@@ -42,6 +42,9 @@ public class GitHubServiceImpl implements GitHubService {
         } catch (IOException ex) {
             LOG.warn("Unable to get GitHub information, error: {}", ex.getMessage());
             return returnDate;
+        } catch (RuntimeException ex) {
+            LOG.warn("Unable to get GitHub information, error: {}", ex.getMessage());
+            return returnDate;
         }
 
         return returnDate;

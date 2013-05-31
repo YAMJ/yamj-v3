@@ -4,6 +4,7 @@ import com.yamj.common.cmdline.CmdLineParser;
 import com.yamj.common.dto.ImportDTO;
 import com.yamj.common.dto.StageDirectoryDTO;
 import com.yamj.common.dto.StageFileDTO;
+import com.yamj.common.remote.service.GitHubService;
 import com.yamj.common.tools.PropertyTools;
 import com.yamj.common.type.DirectoryType;
 import com.yamj.common.type.ExitType;
@@ -60,6 +61,8 @@ public class ScannerManagementImpl implements ScannerManagement {
     private PingCore pingCore;
     @Autowired
     private ThreadPoolTaskExecutor yamjExecutor;
+    @Autowired
+    private GitHubService githubService;
     // ImportDTO constants
     private static final String DEFAULT_CLIENT = PropertyTools.getProperty("filescanner.default.client", "FileScanner");
     private static final String DEFAULT_PLAYER_PATH = PropertyTools.getProperty("filescanner.default.playerpath", "");
@@ -72,6 +75,12 @@ public class ScannerManagementImpl implements ScannerManagement {
      */
     @Override
     public ExitType runScanner(CmdLineParser parser) {
+        try {
+            LOG.info("GitHub Date: {}", githubService.pushDate());
+        } catch (Exception ex) {
+            LOG.info("Failed to get GitHub status, error: {}", ex.getMessage());
+        }
+
         libraryCollection.setDefaultClient(DEFAULT_CLIENT);
         libraryCollection.setDefaultPlayerPath(DEFAULT_PLAYER_PATH);
         pingCore.check(0, 0);   // Do a quick check of the status of the connection

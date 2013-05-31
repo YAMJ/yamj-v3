@@ -66,6 +66,12 @@
         <property name="serviceInterface" value="com.yamj.common.remote.service.PingService"/>
     </bean>
 
+    <bean id="githubService"
+          class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+        <property name="serviceUrl" value="http://${yamj3.core.host}:${yamj3.core.port}/yamj3/GitHubService"/>
+        <property name="serviceInterface" value="com.yamj.common.remote.service.GitHubService"/>
+    </bean>
+
     <bean id="xmlTools"
           class="com.yamj.filescanner.tools.XmlTools">
         <property name="marshaller" ref="xstreamMarshaller" />
