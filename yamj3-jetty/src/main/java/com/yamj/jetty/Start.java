@@ -96,7 +96,7 @@ public class Start {
 
         try {
             WebAppContext webapp = new WebAppContext();
-            webapp.setContextPath("/");
+            webapp.setContextPath("/yamj3");
             webapp.setWar(warFile.getCanonicalPath());
             server.setHandler(webapp);
 
