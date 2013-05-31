@@ -1,6 +1,6 @@
 package com.yamj.core.service.artwork.poster;
 
-import com.yamj.common.tools.web.PoolingHttpClient;
+import com.yamj.core.tools.web.PoolingHttpClient;
 import com.yamj.core.service.artwork.ArtworkScannerService;
 import java.net.URLDecoder;
 import java.net.URLEncoder;

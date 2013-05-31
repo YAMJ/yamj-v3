@@ -1,7 +1,7 @@
 package com.yamj.core.remote.service;
 
 import com.yamj.common.remote.service.GitHubService;
-import com.yamj.common.tools.web.PoolingHttpClient;
+import com.yamj.core.tools.web.PoolingHttpClient;
 import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

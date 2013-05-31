@@ -7,7 +7,7 @@ import com.yamj.core.database.model.type.OverrideFlag;
 import com.yamj.core.tools.OverrideTools;
 import com.yamj.core.tools.StringTools;
 import com.yamj.core.tools.web.HTMLTools;
-import com.yamj.common.tools.web.PoolingHttpClient;
+import com.yamj.core.tools.web.PoolingHttpClient;
 import com.yamj.core.tools.web.SearchEngineTools;
 import java.net.URLEncoder;
 import java.util.HashSet;

@@ -25,6 +25,7 @@
     </properties>
 
     <dependencies>
+        <!--
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
@@ -33,6 +34,7 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
         </dependency>
+        -->
         <!-- PROJECT -->
         <dependency>
             <groupId>${project.groupId}</groupId>

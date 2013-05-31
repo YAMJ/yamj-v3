@@ -50,12 +50,6 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--APIS-->
-        <dependency>
-            <groupId>com.moviejukebox</groupId>
-            <artifactId>api-common</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <build>

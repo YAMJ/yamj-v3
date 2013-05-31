@@ -1,4 +1,4 @@
-package com.yamj.common.tools.web;
+package com.yamj.core.tools.web;
 
 import com.moviejukebox.api.common.http.AbstractPoolingHttpClient;
 import com.yamj.common.tools.PropertyTools;

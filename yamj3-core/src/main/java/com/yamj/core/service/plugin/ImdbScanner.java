@@ -2,7 +2,7 @@ package com.yamj.core.service.plugin;
 
 import com.yamj.core.database.model.Series;
 import com.yamj.core.database.model.VideoData;
-import com.yamj.common.tools.web.PoolingHttpClient;
+import com.yamj.core.tools.web.PoolingHttpClient;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
