@@ -16,6 +16,7 @@ public class ClassTools {
      * @param myClass Class to get the information for
      * @param myLog Logger to write the information to
      */
+    @SuppressWarnings("rawtypes")
     public static void printHeader(Class myClass, Logger myLog) {
         // Contains "Yet Another Movie Jukebox"
         String projectName = myClass.getPackage().getImplementationVendor();
