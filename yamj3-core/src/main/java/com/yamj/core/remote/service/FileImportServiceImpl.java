@@ -19,8 +19,14 @@ public class FileImportServiceImpl implements FileImportService {
 
     @Override
     public void importScanned(ImportDTO importDTO) {
-        Library library = stagingService.storeLibrary(importDTO);
-        stagingService.storeStageDirectory(importDTO.getStageDirectory(), library);
-        LOG.debug("Imported scanned directory: {}", importDTO.getStageDirectory().getPath());
+        Library library;
+        try {
+            library = stagingService.storeLibrary(importDTO);
+            stagingService.storeStageDirectory(importDTO.getStageDirectory(), library);
+            LOG.debug("Imported scanned directory: {}", importDTO.getStageDirectory().getPath());
+        } catch (Exception error) {
+            LOG.error("Failed to import scanned directory: {}", importDTO.getStageDirectory().getPath(), error);
+            throw new RuntimeException("Failed to import scanned directory: "+importDTO.getStageDirectory().getPath());
+        }
     }
 }
