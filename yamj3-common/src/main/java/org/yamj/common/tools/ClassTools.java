@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tools that are useful to the classes themselves, not necessary for functionality
@@ -11,6 +12,8 @@ import org.slf4j.Logger;
  * @author stuart.boston
  */
 public class ClassTools {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ClassTools.class);
 
     /**
      * Print the title and build information
@@ -108,5 +111,23 @@ public class ClassTools {
         pw.flush();
         sw.flush();
         return sw.toString();
+    }
+
+    /**
+     * Check to see if a system property has been set, and set it if not.
+     *
+     * @param property
+     * @param defaultValue
+     */
+    public static String checkSystemProperty(String property, String defaultValue) {
+        // Check to see if the yamj3.home property is set
+        String systemProperty = System.getProperty(property, "");
+        if (StringUtils.isBlank(systemProperty)) {
+            LOG.debug("System property '{}' not found. Setting to '{}'", property, defaultValue);
+            System.setProperty(property, defaultValue);
+            return defaultValue;
+        } else {
+            return systemProperty;
+        }
     }
 }

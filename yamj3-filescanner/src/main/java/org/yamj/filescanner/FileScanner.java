@@ -1,5 +1,7 @@
 package org.yamj.filescanner;
 
+import java.io.File;
+import java.io.IOException;
 import org.yamj.common.cmdline.CmdLineException;
 import org.yamj.common.cmdline.CmdLineOption;
 import org.yamj.common.cmdline.CmdLineParser;
@@ -18,9 +20,19 @@ public final class FileScanner {
     private static final Logger LOG = LoggerFactory.getLogger(FileScanner.class);
     private static final String LOG_FILENAME = "yamj-filescanner";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         System.setProperty("file.name", LOG_FILENAME);
         PropertyConfigurator.configure("config/log4j.properties");
+
+        // Get the current directory
+        String yamjHome = ClassTools.checkSystemProperty("yamj3.home", (new File(".")).getCanonicalPath());
+
+        try {
+            // This is a temporary fix until the yamj3.home can be read from the servlet
+            ClassTools.checkSystemProperty("yamj3.home", (new File(yamjHome)).getCanonicalPath());
+        } catch (IOException ex) {
+            ClassTools.checkSystemProperty("yamj3.home", yamjHome);
+        }
 
         ClassTools.printHeader(FileScanner.class, LOG);
         CmdLineParser parser = getCmdLineParser();

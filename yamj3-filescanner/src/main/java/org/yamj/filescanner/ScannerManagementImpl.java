@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.yamj.common.tools.ClassTools;
 
@@ -75,11 +76,17 @@ public class ScannerManagementImpl implements ScannerManagement {
      */
     @Override
     public ExitType runScanner(CmdLineParser parser) {
-        String fsDate = ClassTools.getBuildTimestamp(ScannerManagementImpl.class);
-        boolean installationOk = githubService.checkInstallationDate(fsDate, MAX_INSTALL_AGE);
+        try {
+            String fsDate = ClassTools.getBuildTimestamp(ScannerManagementImpl.class);
+            boolean installationOk = githubService.checkInstallationDate(fsDate, MAX_INSTALL_AGE);
 
-        if(!installationOk) {
-            LOG.error("***** Your installation is old. You should consider updating! *****");
+            if (installationOk) {
+                LOG.info("Installation is less than {} days old.", MAX_INSTALL_AGE);
+            } else {
+                LOG.error("***** Your installation is more than {} days old. You should consider updating! *****", MAX_INSTALL_AGE);
+            }
+        } catch (RemoteConnectFailureException ex) {
+            LOG.warn("Failed to get GitHub status, error: {}", ex.getMessage());
         }
 
         libraryCollection.setDefaultClient(DEFAULT_CLIENT);
