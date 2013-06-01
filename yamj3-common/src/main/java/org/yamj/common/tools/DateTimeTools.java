@@ -10,6 +10,7 @@ import org.joda.time.Period;
 import org.joda.time.PeriodType;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
@@ -18,6 +19,9 @@ public final class DateTimeTools {
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd";
     private static final PeriodFormatter TIME_FORMAT_COLON = createPeriodFormatter(":", ":", "");
     private static final PeriodFormatter TIME_FORMAT_TEXT = createPeriodFormatter("h", "m", "s");
+    // Some default formats in use
+    public static final String ISO8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+    public static final String BUILD_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     private DateTimeTools() {
         throw new UnsupportedOperationException("Utility class");
@@ -205,5 +209,17 @@ public final class DateTimeTools {
         }
 
         return returnValue;
+    }
+
+    /**
+     * Parses a string in the provided format to a DateTime
+     *
+     * @param stringDate the date to parse
+     * @param datePattern the pattern to parse
+     * @return
+     */
+    public static DateTime parseDate(String stringDate, String datePattern) {
+        DateTimeFormatter formatter = DateTimeFormat.forPattern(datePattern);
+        return formatter.parseDateTime(stringDate);
     }
 }

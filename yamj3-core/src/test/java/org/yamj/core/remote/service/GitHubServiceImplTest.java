@@ -1,7 +1,7 @@
 package org.yamj.core.remote.service;
 
-import org.yamj.core.remote.service.GitHubServiceImpl;
 import javax.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.junit.Assert.*;
 
 public class GitHubServiceImplTest {
 
@@ -19,11 +20,11 @@ public class GitHubServiceImplTest {
     private GitHubServiceImpl github;
 
     public GitHubServiceImplTest() {
-        BasicConfigurator.configure();
     }
 
     @BeforeClass
     public static void setUpClass() {
+        BasicConfigurator.configure();
     }
 
     @AfterClass
@@ -51,9 +52,8 @@ public class GitHubServiceImplTest {
     @Test
     public void testPushDate() {
         LOG.info("pushDate");
-        String expResult = "";
         String result = github.pushDate();
-        System.out.println("Got result: '" + result + "'");
-//        assertEquals(expResult, result);
+        LOG.info("Got result: '{}'", result);
+        assertTrue("Returned date is blank", StringUtils.isNotBlank(result));
     }
 }

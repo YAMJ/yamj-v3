@@ -34,6 +34,7 @@ import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.yamj.common.tools.ClassTools;
 
 /**
  * Performs an initial scan of the library location and then updates when changes occur.
@@ -52,9 +53,6 @@ public class ScannerManagementImpl implements ScannerManagement {
     // The default watched status
     private static final Boolean DEFAULT_WATCH_STATE = PropertyTools.getBooleanProperty("filescanner.watch.default", Boolean.FALSE);
     private AtomicInteger runningCount = new AtomicInteger(0);
-    // Spring service(s)
-//    @Autowired
-//    private FileImportService fileImportService;
     @Autowired
     private LibraryCollection libraryCollection;
     @Autowired
@@ -66,6 +64,8 @@ public class ScannerManagementImpl implements ScannerManagement {
     // ImportDTO constants
     private static final String DEFAULT_CLIENT = PropertyTools.getProperty("filescanner.default.client", "FileScanner");
     private static final String DEFAULT_PLAYER_PATH = PropertyTools.getProperty("filescanner.default.playerpath", "");
+    // Date check
+    private static final int MAX_INSTALL_AGE = PropertyTools.getIntProperty("filescanner.datecheck.max", 1);
 
     /**
      * Start the scanner and process the command line properties.
@@ -75,10 +75,11 @@ public class ScannerManagementImpl implements ScannerManagement {
      */
     @Override
     public ExitType runScanner(CmdLineParser parser) {
-        try {
-            LOG.info("GitHub Date: {}", githubService.pushDate());
-        } catch (Exception ex) {
-            LOG.info("Failed to get GitHub status, error: {}", ex.getMessage());
+        String fsDate = ClassTools.getBuildTimestamp(ScannerManagementImpl.class);
+        boolean installationOk = githubService.checkInstallationDate(fsDate, MAX_INSTALL_AGE);
+
+        if(!installationOk) {
+            LOG.error("***** Your installation is old. You should consider updating! *****");
         }
 
         libraryCollection.setDefaultClient(DEFAULT_CLIENT);
