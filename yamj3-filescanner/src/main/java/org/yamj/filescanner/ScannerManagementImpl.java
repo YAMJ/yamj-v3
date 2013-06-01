@@ -65,7 +65,7 @@ public class ScannerManagementImpl implements ScannerManagement {
     private static final String DEFAULT_CLIENT = PropertyTools.getProperty("filescanner.default.client", "FileScanner");
     private static final String DEFAULT_PLAYER_PATH = PropertyTools.getProperty("filescanner.default.playerpath", "");
     // Date check
-    private static final int MAX_INSTALL_AGE = PropertyTools.getIntProperty("filescanner.datecheck.max", 1);
+    private static final int MAX_INSTALL_AGE = PropertyTools.getIntProperty("filescanner.installation.maxdays", 1);
 
     /**
      * Start the scanner and process the command line properties.
