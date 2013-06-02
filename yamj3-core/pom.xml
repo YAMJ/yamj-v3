@@ -137,6 +137,11 @@
             <artifactId>thetvdbapi</artifactId>
             <version>1.6-SNAPSHOT</version>
         </dependency>
+        <!--JACKSON JSON-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-hibernate3</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

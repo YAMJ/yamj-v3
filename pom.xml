@@ -222,6 +222,12 @@
                 <artifactId>joda-time</artifactId>
                 <version>2.2</version>
             </dependency>
+            <!--JACKSON JSON-->
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-hibernate3</artifactId>
+                <version>2.2.1</version>
+            </dependency>
             <!-- TESTING -->
             <dependency>
                 <groupId>junit</groupId>
