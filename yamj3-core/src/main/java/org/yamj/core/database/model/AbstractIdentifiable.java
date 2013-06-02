@@ -1,10 +1,12 @@
 package org.yamj.core.database.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 
 import org.yamj.core.hibernate.Identifiable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -15,12 +17,15 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * @author <a href="mailto:markus@bader-it.de">Markus Bader</a>
  */
 @MappedSuperclass
-public abstract class AbstractIdentifiable implements Identifiable {
+public abstract class AbstractIdentifiable implements Identifiable, IJsonObject {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
+    @JsonIgnore
+    @Transient
+    private String jsonCallback;
 
     @Override
     public long getId() {
@@ -30,6 +35,15 @@ public abstract class AbstractIdentifiable implements Identifiable {
     @SuppressWarnings("unused")
     private void setId(long id) {
         this.id = id;
+    }
+    @Override
+    public String getJsonCallback() {
+        return jsonCallback;
+    }
+
+    @Override
+    public void setJsonCallback(String jsonCallback) {
+        this.jsonCallback = jsonCallback;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.yamj.core.database.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -9,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.yamj.core.hibernate.Auditable;
 import org.yamj.core.hibernate.Identifiable;
@@ -18,7 +20,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * Abstract implementation of an identifiable and auditable object.
  */
 @MappedSuperclass
-public abstract class AbstractAuditable implements Auditable, Identifiable {
+public abstract class AbstractAuditable implements Auditable, Identifiable, IJsonObject {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,6 +32,9 @@ public abstract class AbstractAuditable implements Auditable, Identifiable {
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "update_timestamp")
     private Date updateTimestamp;
+    @JsonIgnore
+    @Transient
+    private String jsonCallback;
 
     @Override
     public long getId() {
@@ -60,6 +65,16 @@ public abstract class AbstractAuditable implements Auditable, Identifiable {
 
     public void setUpdateTimestamp(final Date updateTimestamp) {
         this.updateTimestamp = updateTimestamp;
+    }
+
+    @Override
+    public String getJsonCallback() {
+        return jsonCallback;
+    }
+
+    @Override
+    public void setJsonCallback(String jsonCallback) {
+        this.jsonCallback = jsonCallback;
     }
 
     @Override

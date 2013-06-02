@@ -1,5 +1,6 @@
 package org.yamj.core.database.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.hibernate.usertypes.EnumStringUserType;
@@ -7,6 +8,7 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
 
@@ -16,45 +18,42 @@ import org.hibernate.annotations.*;
 @TypeDefs({
     @TypeDef(name = "overrideFlag",
             typeClass = EnumStringUserType.class,
-            parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.OverrideFlag")}),
+            parameters = {
+        @Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.OverrideFlag")}),
     @TypeDef(name = "statusType",
             typeClass = EnumStringUserType.class,
-            parameters = {@Parameter(name = "enumClassName", value = "org.yamj.common.type.StatusType")})
+            parameters = {
+        @Parameter(name = "enumClassName", value = "org.yamj.common.type.StatusType")})
 })
-
 @MappedSuperclass
 public abstract class AbstractMetadata extends AbstractAuditable
-    implements IMetadata, Serializable {
+        implements IMetadata, Serializable, IJsonObject {
 
     private static final long serialVersionUID = -556558470067852056L;
-
     /**
      * This will be generated from a scanned file name.
      */
     @NaturalId
     @Column(name = "identifier", length = 200, nullable = false)
     protected String identifier;
-
     @Column(name = "title", nullable = false, length = 255)
     private String title;
-
     @Column(name = "title_original", length = 255)
     private String titleOriginal;
-
     @Lob
     @Column(name = "plot", length = 50000)
     private String plot;
-
     @Lob
     @Column(name = "outline", length = 50000)
     private String outline;
-
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
+    @JsonIgnore
+    @Transient
+    private String jsonCallback;
 
     // GETTER and SETTER
-
     public String getIdentifier() {
         return identifier;
     }
@@ -137,9 +136,9 @@ public abstract class AbstractMetadata extends AbstractAuditable
     @Override
     public final int getYear() {
         if (this instanceof VideoData) {
-            return ((VideoData)this).getPublicationYear();
+            return ((VideoData) this).getPublicationYear();
         } else if (this instanceof Series) {
-            return ((Series)this).getStartYear();
+            return ((Series) this).getStartYear();
         }
         // TODO season get year from first aired date
         return -1;
@@ -148,7 +147,7 @@ public abstract class AbstractMetadata extends AbstractAuditable
     @Override
     public final int getSeasonNumber() {
         if (this instanceof Season) {
-            return ((Season)this).getSeason();
+            return ((Season) this).getSeason();
         }
         return -1;
     }
@@ -156,9 +155,19 @@ public abstract class AbstractMetadata extends AbstractAuditable
     @Override
     public final int getEpisodeNumber() {
         if (this instanceof VideoData) {
-            return ((VideoData)this).getEpisode();
+            return ((VideoData) this).getEpisode();
         }
         return -1;
+    }
+
+    @Override
+    public String getJsonCallback() {
+        return jsonCallback;
+    }
+
+    @Override
+    public void setJsonCallback(String jsonCallback) {
+        this.jsonCallback = jsonCallback;
     }
 
     public abstract String getOverrideSource(OverrideFlag overrideFlag);
