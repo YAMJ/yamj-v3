@@ -20,21 +20,26 @@ import org.yamj.filescanner.service.SendToCore;
 import org.yamj.filescanner.tools.DirectoryEnding;
 import org.yamj.filescanner.tools.Watcher;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.CollectionUtils;
 import org.yamj.common.tools.ClassTools;
 
 /**
@@ -67,6 +72,17 @@ public class ScannerManagementImpl implements ScannerManagement {
     private static final String DEFAULT_PLAYER_PATH = PropertyTools.getProperty("filescanner.default.playerpath", "");
     // Date check
     private static final int MAX_INSTALL_AGE = PropertyTools.getIntProperty("filescanner.installation.maxdays", 1);
+    // Map of filenames & extensions that cause scanning of a directory to stop or a filename to be ignored
+    private static final Map<String, List<String>> BREAK_SCANNING = new HashMap<String, List<String>>();
+
+    static {
+        // Set up the break scanning list. A "null" for the list means all files.
+        // Ensure all filenames and extensions are lowercase
+        BREAK_SCANNING.put(".mjbignore", null);
+        BREAK_SCANNING.put(".no_all.nmj", null);
+        BREAK_SCANNING.put(".no_video.nmj", Arrays.asList("avi", "mkv"));
+        BREAK_SCANNING.put(".no_photo.nmj", Arrays.asList("jpg", "png"));
+    }
 
     /**
      * Start the scanner and process the command line properties.
@@ -203,22 +219,52 @@ public class ScannerManagementImpl implements ScannerManagement {
             FileTypeComparator comp = new FileTypeComparator(Boolean.FALSE);
             Collections.sort(currentFileList, comp);
 
+            /*
+             * We need to scan the directory and look for any of the exclusion filenames.
+             *
+             * We then build a list of those excluded extensions, so that when we scan the filename list we can exclude the unwanted files.
+             */
+            List<String> exclusions = new ArrayList<String>();
             for (File file : currentFileList) {
                 if (file.isFile()) {
-                    stageDir.addStageFile(scanFile(file));
-                    library.getStatistics().increment(StatType.FILE);
+                    String lcFilename = file.getName().toLowerCase();
+                    if (BREAK_SCANNING.containsKey(lcFilename)) {
+                        if (CollectionUtils.isEmpty(BREAK_SCANNING.get(lcFilename))) {
+                            // Because the value is null or empty we exclude the whole directory, so quit now.
+                            LOG.debug("Exclusion file '{}' found, skipping scanning of directory {}.", lcFilename, file.getParent());
+                            return null;
+                        } else {
+                            // We found a match, so add it to our local copy
+                            LOG.debug("Exclusion file '{}' found, will exclude all {} file types", lcFilename, BREAK_SCANNING.get(lcFilename).toString());
+                            exclusions.addAll(BREAK_SCANNING.get(lcFilename));
+                        }
+                    }
                 } else {
-                    // First directory we find, we can stop (because we are sorted files first)
+                    // First directory we find, we can stop (because we sorted the files first)
+                    break;
+                }
+            }
+
+            /*
+             * Scan the directory properly
+             */
+            for (File file : currentFileList) {
+                if (file.isFile()) {
+                    String lcFilename = file.getName().toLowerCase();
+                    if (exclusions.contains(FilenameUtils.getExtension(lcFilename)) || BREAK_SCANNING.containsKey(lcFilename)) {
+                        LOG.debug("File name '{}' excluded because it's listed in the exlusion list for this directory", file.getName());
+                        continue;
+                    } else {
+                        stageDir.addStageFile(scanFile(file));
+                        library.getStatistics().increment(StatType.FILE);
+                    }
+                } else {
+                    // First directory we find, we can stop (because we sorted the files first)
                     break;
                 }
             }
 
             library.addDirectory(stageDir);
-            // Now send the directory files before processing the directories
-//            ExitType sendStatus = send(library.getImportDTO(stageDir));
-//            if (sendStatus == ExitType.SUCCESS) {
-//                library.addDirectoryStatus(stageDir.getPath(), StatusType.DONE);
-//            }
             sendToCore(library, stageDir);
 
             // Resort the files with directories first
@@ -229,7 +275,7 @@ public class ScannerManagementImpl implements ScannerManagement {
             for (File scanDir : currentFileList) {
                 if (scanDir.isDirectory()) {
                     if (scanDir(library, scanDir) == null) {
-                        LOG.info("Not adding directory '{}', no files found", scanDir.getAbsolutePath());
+                        LOG.info("Not adding directory '{}', no files found or all excluded", scanDir.getAbsolutePath());
                     }
                 } else {
                     // First file we find, we can stop (because we are sorted directories first)
