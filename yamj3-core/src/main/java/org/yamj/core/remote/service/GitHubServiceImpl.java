@@ -90,6 +90,11 @@ public class GitHubServiceImpl implements GitHubService {
         LOG.debug("GitHub Date: {}", ghDate);
         LOG.debug("Build Date : {}", buildDate);
 
+        if (StringUtils.isBlank(ghDate) || StringUtils.isBlank(buildDate)) {
+            LOG.debug("Invalid (blank) date, check skipped");
+            return Boolean.TRUE;
+        }
+
         DateTime dt1 = DateTimeTools.parseDate(ghDate, DateTimeTools.ISO8601_FORMAT);
         DateTime dt2 = DateTimeTools.parseDate(buildDate, DateTimeTools.BUILD_FORMAT);
         long diff = DateTimeTools.getDuration(dt1, dt2);
