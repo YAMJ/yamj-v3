@@ -17,19 +17,6 @@
     <!-- Activates @Scheduled and @Async annotations for scheduling -->
     <task:annotation-driven />
 
-    <!--MVC Stuff for the JSON API-->
-    <mvc:annotation-driven>
-        <mvc:message-converters>
-            <!-- Use the HibernateAware mapper instead of the default -->
-            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
-                <property name="objectMapper">
-                    <bean class="org.yamj.core.hibernate.HibernateAwareObjectMapper" />
-                </property>
-            </bean>
-        </mvc:message-converters>
-    </mvc:annotation-driven>
-    <mvc:default-servlet-handler />
-
     <bean id="propertyConfigurer" class="org.yamj.common.tools.PropertyTools">
         <property name="locations">
             <list>
@@ -44,11 +31,22 @@
     <import resource="spring/database.xml"/>
     <import resource="spring/remote.xml"/>
 
-    <!-- Configures the @Controller programming model -->
-    <mvc:annotation-driven/>
-
     <!-- Forwards requests to the "/" resource to the "home" view -->
     <mvc:view-controller path="/" view-name="index"/>
+
+    <!-- Configures the @Controller programming model -->
+    <!--MVC Stuff for the JSON API-->
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <!-- Use the HibernateAware mapper instead of the default -->
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="objectMapper">
+                    <bean class="org.yamj.core.hibernate.HibernateAwareObjectMapper" />
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <mvc:default-servlet-handler />
 
     <!-- Resolve jsp's -->
     <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">

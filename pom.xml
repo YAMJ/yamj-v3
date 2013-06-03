@@ -228,6 +228,12 @@
                 <artifactId>jackson-datatype-hibernate3</artifactId>
                 <version>2.2.1</version>
             </dependency>
+            <!--SERVLET-->
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>servlet-api</artifactId>
+                <version>2.5</version>
+            </dependency>
             <!-- TESTING -->
             <dependency>
                 <groupId>junit</groupId>
@@ -403,13 +409,5 @@
         </plugins>
 
     </build>
-
-    <repositories>
-        <repository>
-            <id>m2.dev.java.net</id>
-            <url>http://download.java.net/maven/2</url>
-            <layout>default</layout>
-        </repository>
-    </repositories>
 
 </project>
