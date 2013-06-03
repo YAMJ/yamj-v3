@@ -20,7 +20,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * Abstract implementation of an identifiable and auditable object.
  */
 @MappedSuperclass
-public abstract class AbstractAuditable implements Auditable, Identifiable, IJsonObject {
+public abstract class AbstractAuditable implements Auditable, Identifiable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -65,16 +65,6 @@ public abstract class AbstractAuditable implements Auditable, Identifiable, IJso
 
     public void setUpdateTimestamp(final Date updateTimestamp) {
         this.updateTimestamp = updateTimestamp;
-    }
-
-    @Override
-    public String getJsonCallback() {
-        return jsonCallback;
-    }
-
-    @Override
-    public void setJsonCallback(String jsonCallback) {
-        this.jsonCallback = jsonCallback;
     }
 
     @Override

@@ -27,7 +27,7 @@ import org.hibernate.annotations.*;
 })
 @MappedSuperclass
 public abstract class AbstractMetadata extends AbstractAuditable
-        implements IMetadata, Serializable, IJsonObject {
+        implements IMetadata, Serializable {
 
     private static final long serialVersionUID = -556558470067852056L;
     /**
@@ -49,9 +49,6 @@ public abstract class AbstractMetadata extends AbstractAuditable
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
-    @JsonIgnore
-    @Transient
-    private String jsonCallback;
 
     // GETTER and SETTER
     public String getIdentifier() {
@@ -158,16 +155,6 @@ public abstract class AbstractMetadata extends AbstractAuditable
             return ((VideoData) this).getEpisode();
         }
         return -1;
-    }
-
-    @Override
-    public String getJsonCallback() {
-        return jsonCallback;
-    }
-
-    @Override
-    public void setJsonCallback(String jsonCallback) {
-        this.jsonCallback = jsonCallback;
     }
 
     public abstract String getOverrideSource(OverrideFlag overrideFlag);
