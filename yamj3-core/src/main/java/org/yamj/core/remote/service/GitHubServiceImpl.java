@@ -15,6 +15,11 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.tools.ClassTools;
 import org.yamj.common.tools.DateTimeTools;
 
+/**
+ * Calls GitHub to determine the last code update
+ *
+ * @author stuart.boston
+ */
 @Service("githubService")
 public class GitHubServiceImpl implements GitHubService {
 
@@ -30,6 +35,13 @@ public class GitHubServiceImpl implements GitHubService {
     @Autowired
     private PoolingHttpClient httpClient;
 
+    /**
+     * Get the date of the last push to a repository
+     *
+     * @param owner
+     * @param repository
+     * @return
+     */
     @Override
     public String pushDate(String owner, String repository) {
         if (StringUtils.isBlank(owner) || StringUtils.isBlank(repository)) {
@@ -74,16 +86,36 @@ public class GitHubServiceImpl implements GitHubService {
         return returnDate;
     }
 
+    /**
+     * Get the last push date for the default YAMJ repository
+     */
     @Override
     public String pushDate() {
         return pushDate(GH_OWNER, GH_REPO);
     }
 
+    /**
+     * Check the installation date of the default repository
+     *
+     * @param buildDate
+     * @param maxAgeDays
+     * @return
+     */
     @Override
     public boolean checkInstallationDate(String buildDate, int maxAgeDays) {
         return checkInstallationDate(GH_OWNER, GH_REPO, buildDate, maxAgeDays);
     }
 
+    /**
+     * Compare the installation date of the build against the push date of the repository. <br>
+     * If the difference is greater than maxAgeDays, return false
+     *
+     * @param owner
+     * @param repository
+     * @param buildDate
+     * @param maxAgeDays
+     * @return
+     */
     @Override
     public boolean checkInstallationDate(String owner, String repository, String buildDate, int maxAgeDays) {
         String ghDate = pushDate(owner, repository);
