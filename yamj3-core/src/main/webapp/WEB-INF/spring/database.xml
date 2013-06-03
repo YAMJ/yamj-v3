@@ -16,6 +16,13 @@
         <property name="maxActive" value="${yamj3.database.connections.maxActive}"/>
         <property name="maxIdle" value="${yamj3.database.connections.maxIdle}"/>
         <property name="maxWait" value="${yamj3.database.connections.maxWait}"/>
+        <property name="minEvictableIdleTimeMillis" value="${yamj3.database.connections.minEvictableIdleTimeMillis}"/>
+        <property name="timeBetweenEvictionRunsMillis" value="${yamj3.database.connections.timeBetweenEvictionRunsMillis}"/>
+        <property name="numTestsPerEvictionRun" value="${yamj3.database.connections.numTestsPerEvictionRun}"/>
+        <property name="testOnBorrow" value="${yamj3.database.connections.testOnBorrow}"/>
+        <property name="testWhileIdle" value="${yamj3.database.connections.testWhileIdle}"/>
+        <property name="testOnReturn" value="${yamj3.database.connections.testOnReturn}"/>
+        <property name="validationQuery" value="${yamj3.database.connections.validationQuery}"/>
         <property name="poolPreparedStatements" value="true" />
     </bean>
 
