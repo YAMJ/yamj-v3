@@ -17,7 +17,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * @author <a href="mailto:markus@bader-it.de">Markus Bader</a>
  */
 @MappedSuperclass
-public abstract class AbstractIdentifiable implements Identifiable, IJsonObject {
+public abstract class AbstractIdentifiable implements Identifiable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,15 +35,6 @@ public abstract class AbstractIdentifiable implements Identifiable, IJsonObject 
     @SuppressWarnings("unused")
     private void setId(long id) {
         this.id = id;
-    }
-    @Override
-    public String getJsonCallback() {
-        return jsonCallback;
-    }
-
-    @Override
-    public void setJsonCallback(String jsonCallback) {
-        this.jsonCallback = jsonCallback;
     }
 
     @Override
