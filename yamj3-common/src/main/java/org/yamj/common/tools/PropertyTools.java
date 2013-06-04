@@ -211,8 +211,11 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
     }
 
     /**
-     * Collect keywords list and appropriate keyword values. Example: my.languages = EN,FR my.languages.EN = English my.languages.FR
-     * = French
+     * Collect keywords list and appropriate keyword values. <br>
+     * Example: <br>
+     * my.languages = EN,FR<br>
+     * my.languages.EN = English<br>
+     * my.languages.FR = French
      *
      * @param prefix Key for keywords list and prefix for value searching.
      * @return Ordered keyword list and map.
