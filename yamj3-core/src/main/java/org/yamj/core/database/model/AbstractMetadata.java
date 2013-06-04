@@ -1,6 +1,5 @@
 package org.yamj.core.database.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.hibernate.usertypes.EnumStringUserType;
@@ -8,7 +7,6 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
 

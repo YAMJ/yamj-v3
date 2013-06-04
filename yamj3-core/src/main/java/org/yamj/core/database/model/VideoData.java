@@ -4,27 +4,17 @@ import javax.persistence.JoinColumn;
 
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
-
-import javax.persistence.OrderBy;
-
 import javax.persistence.OrderColumn;
-
 import org.hibernate.annotations.Index;
-
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.OverrideFlag;
-import org.yamj.core.hibernate.usertypes.EnumStringUserType;
-import java.io.Serializable;
 import java.util.*;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.MapKey;
-import org.hibernate.annotations.Parameter;
 
 @SuppressWarnings({"unused", "deprecation"})
 @javax.persistence.Entity
@@ -40,42 +30,42 @@ public class VideoData extends AbstractMetadata {
 
     @Column(name = "episode", nullable = false)
     private int episode = -1;
-    
+
     @Index(name = "videodata_publication_year")
     @Column(name = "publication_year", nullable = false)
     private int publicationYear = -1;
-    
+
     @Column(name = "release_date", length = 10)
     private String releaseDate;
-    
+
     @Column(name = "top_rank", nullable = false)
     private int topRank = -1;
-    
+
     @Lob
     @Column(name = "tagline", length = 25000)
     private String tagline;
-    
+
     @Lob
     @Column(name = "quote", length = 25000)
     private String quote;
-    
+
     @Column(name = "country", length = 100)
     private String country;
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_ids", joinColumns = @JoinColumn(name = "videodata_id"))
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200)
     private Map<String, String> sourcedbIdMap = new HashMap<String, String>(0);
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_ratings", joinColumns = @JoinColumn(name = "videodata_id"))
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", length = 30)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_override", joinColumns =@JoinColumn(name = "videodata_id"))
     @Fetch(value = FetchMode.SELECT)
@@ -90,21 +80,21 @@ public class VideoData extends AbstractMetadata {
         joinColumns = {@JoinColumn(name = "data_id")},
         inverseJoinColumns = {@JoinColumn(name = "genre_id")})
     private Set<Genre> genres = new HashSet<Genre>(0);
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_VIDEODATA_SEASON")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "season_id")
     private Season season;
-    
+
     @ManyToMany(mappedBy = "videoDatas")
     private Set<MediaFile> mediaFiles = new HashSet<MediaFile>(0);
-    
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @OrderColumn(name = "ordering", nullable = false)
     @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false)
     private List<CastCrew> credits = new ArrayList<CastCrew>(0);
-    
+
     @Transient
     private List<CreditDTO> creditDTOS = new ArrayList<CreditDTO>(0);
 
@@ -307,7 +297,7 @@ public class VideoData extends AbstractMetadata {
     public void addCredditDTOS(List<CreditDTO> creditDTOS) {
         this.creditDTOS.addAll(creditDTOS);
     }
-    
+
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
