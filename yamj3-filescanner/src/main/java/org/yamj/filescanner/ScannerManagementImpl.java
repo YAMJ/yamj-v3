@@ -34,7 +34,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.remoting.RemoteConnectFailureException;
@@ -312,15 +311,13 @@ public class ScannerManagementImpl implements ScannerManagement {
 
         ApplicationContext appContext = ApplicationContextProvider.getApplicationContext();
         SendToCore stc = (SendToCore) appContext.getBean("sendToCore");
-
         stc.setImportDto(dto);
-
         stc.setCounter(runningCount);
         FutureTask<StatusType> task = new FutureTask<StatusType>(stc);
 
         yamjExecutor.submit(task);
-
-        library.addDirectoryStatus(stageDir.getPath(), ConcurrentUtils.constantFuture(StatusType.DONE));
+//        library.addDirectoryStatus(stageDir.getPath(), ConcurrentUtils.constantFuture(StatusType.DONE));
+        library.addDirectoryStatus(stageDir.getPath(), task);
     }
 
     /**
@@ -331,40 +328,76 @@ public class ScannerManagementImpl implements ScannerManagement {
      * @param library
      */
     private void checkLibraryAllSent(Library library) {
-
-        if (runningCount.get() > 0) {
-            LOG.info("There are {} remaining threads, waiting until they complete", runningCount.get());
-            while (yamjExecutor.getActiveCount() > 0) {
+        int processedDone, processedError, unprocessed;
+        do {
+            processedDone = 0;
+            processedError = 0;
+            unprocessed = 0;
+            LOG.info("There are {} items remaining to be sent to core.", runningCount.get());
+            for (Entry<String, Future<StatusType>> entry : library.getDirectoryStatus().entrySet()) {
                 try {
+                    if (entry.getValue().isDone()) {
+                        LOG.info("{} - Status: {}", entry.getKey(), entry.getValue().get());
+                        if (entry.getValue().get() == StatusType.ERROR) {
+                            processedError++;
+                        } else {
+                            processedDone++;
+                        }
+                    } else {
+                        LOG.info("{} - Not yet processed", entry.getKey());
+                        unprocessed++;
+                    }
+                } catch (InterruptedException ex) {
+                } catch (ExecutionException ex) {
+                }
+            }
+
+            LOG.info("Done: {}, Error: {}, Unprocessed: {}", processedDone, processedError, unprocessed);
+
+            if (unprocessed > 0) {
+                try {
+                    LOG.info("Sleeping...");
                     TimeUnit.SECONDS.sleep(10);
                 } catch (InterruptedException ex) {
                     //
                 }
-                LOG.info("Remaining: {}", runningCount.get());
             }
-            LOG.info("Completed");
-        }
-        yamjExecutor.shutdown();
+        } while (unprocessed > 0);
 
-        LOG.info("Checking status of running threads.");
-        boolean allDone = Boolean.TRUE;
-        do {
-            try {
-                TimeUnit.SECONDS.sleep(10);
-            } catch (InterruptedException ex) {
-                //
-            }
 
-            for (Entry<String, Future<StatusType>> entry : library.getDirectoryStatus().entrySet()) {
-                try {
-                    LOG.info("{}: {}", entry.getKey(), entry.getValue().get());
-                } catch (InterruptedException ex) {
-                } catch (ExecutionException ex) {
-                }
-                allDone = allDone && entry.getValue().isDone();
-            }
-            LOG.info("All Done?: {}\n\n", allDone);
-        } while (!allDone);
+//        if (runningCount.get() > 0) {
+//            LOG.info("There are {} remaining threads, waiting until they complete", runningCount.get());
+//            while (yamjExecutor.getActiveCount() > 0) {
+//                try {
+//                    TimeUnit.SECONDS.sleep(10);
+//                } catch (InterruptedException ex) {
+//                    //
+//                }
+//                LOG.info("Remaining: {}", runningCount.get());
+//            }
+//            LOG.info("Completed");
+//        }
+//        yamjExecutor.shutdown();
+//
+//        LOG.info("Checking status of running threads.");
+//        boolean allDone = Boolean.TRUE;
+//        do {
+//            try {
+//                TimeUnit.SECONDS.sleep(10);
+//            } catch (InterruptedException ex) {
+//                //
+//            }
+//
+//            for (Entry<String, Future<StatusType>> entry : library.getDirectoryStatus().entrySet()) {
+//                try {
+//                    LOG.info("{}: {}", entry.getKey(), entry.getValue().get());
+//                } catch (InterruptedException ex) {
+//                } catch (ExecutionException ex) {
+//                }
+//                allDone = allDone && entry.getValue().isDone();
+//            }
+//            LOG.info("All Done?: {}\n\n", allDone);
+//        } while (!allDone);
     }
 
     /**
