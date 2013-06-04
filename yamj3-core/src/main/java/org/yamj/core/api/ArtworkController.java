@@ -20,8 +20,8 @@ public class ArtworkController {
     private ArtworkDao artworkDao;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public @ResponseBody
-    Artwork getArtworkById(@PathVariable String id) {
+    @ResponseBody
+    public Artwork getArtworkById(@PathVariable String id) {
         LOG.info("Getting artwork with ID '{}'", id);
         return artworkDao.getArtwork(Long.parseLong(id));
     }

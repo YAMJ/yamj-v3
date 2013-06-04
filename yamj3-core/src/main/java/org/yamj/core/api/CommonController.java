@@ -22,24 +22,23 @@ public class CommonController {
     private CommonDao commonDao;
 
     @RequestMapping(value = "/genre/{name}", method = RequestMethod.GET)
-    public @ResponseBody
-    Genre getGenre(@PathVariable String name) {
+    @ResponseBody
+    public Genre getGenre(@PathVariable String name) {
         LOG.info("Getting genre '{}'", name);
         return commonDao.getGenre(name);
     }
 
     @RequestMapping(value = "/certification/{name}", method = RequestMethod.GET)
-    public @ResponseBody
-    Certification getCertification(@PathVariable String name) {
+    @ResponseBody
+    public Certification getCertification(@PathVariable String name) {
         LOG.info("Getting certification '{}'", name);
         return commonDao.getCertification(name);
     }
 
     @RequestMapping(value = "/studio/{name}", method = RequestMethod.GET)
-    public @ResponseBody
-    Studio getStudio(@PathVariable String name) {
+    @ResponseBody
+    public Studio getStudio(@PathVariable String name) {
         LOG.info("Getting studio '{}'", name);
         return commonDao.getStudio(name);
     }
-
 }

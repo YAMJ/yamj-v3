@@ -20,8 +20,8 @@ public class PersonController {
     private MediaDao mediaDao;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public @ResponseBody
-    Person getVideoById(@PathVariable String id) {
+    @ResponseBody
+    public Person getVideoById(@PathVariable String id) {
         LOG.info("Getting person with ID '{}'", id);
         return mediaDao.getPerson(Long.parseLong(id));
     }
