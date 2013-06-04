@@ -1,6 +1,6 @@
 /*
  *      Copyright (c) 2004-2013 YAMJ Members
- *      http://code.google.com/p/moviejukebox/people/list
+ *      https://github.com/organizations/YAMJ/teams
  *
  *      This file is part of the Yet Another Media Jukebox (YAMJ).
  *
@@ -17,7 +17,7 @@
  *      You should have received a copy of the GNU General Public License
  *      along with the YAMJ.  If not, see <http://www.gnu.org/licenses/>.
  *
- *      Web: http://code.google.com/p/moviejukebox/
+ *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
 package org.yamj.common.tools;
