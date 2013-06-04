@@ -3,6 +3,8 @@ package org.yamj.common.dto;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Object for importing stage directories into the core server.
@@ -44,6 +46,6 @@ public class StageDirectoryDTO implements Serializable {
 
     @Override
     public String toString() {
-        return "StageDirectoryDTO{" + "path=" + path + ", date=" + date + ", stageFiles=" + stageFiles.size() + '}';
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }
