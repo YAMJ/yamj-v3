@@ -73,15 +73,15 @@ public class ScannerManagementImpl implements ScannerManagement {
     // Date check
     private static final int MAX_INSTALL_AGE = PropertyTools.getIntProperty("filescanner.installation.maxdays", 1);
     // Map of filenames & extensions that cause scanning of a directory to stop or a filename to be ignored
-    private static final Map<String, List<String>> BREAK_SCANNING = new HashMap<String, List<String>>();
+    private static final Map<String, List<String>> DIR_EXCLUSIONS = new HashMap<String, List<String>>();
 
     static {
         // Set up the break scanning list. A "null" for the list means all files.
         // Ensure all filenames and extensions are lowercase
-        BREAK_SCANNING.put(".mjbignore", null);
-        BREAK_SCANNING.put(".no_all.nmj", null);
-        BREAK_SCANNING.put(".no_video.nmj", Arrays.asList("avi", "mkv"));
-        BREAK_SCANNING.put(".no_photo.nmj", Arrays.asList("jpg", "png"));
+        DIR_EXCLUSIONS.put(".mjbignore", null);
+        DIR_EXCLUSIONS.put(".no_all.nmj", null);
+        DIR_EXCLUSIONS.put(".no_video.nmj", Arrays.asList("avi", "mkv"));
+        DIR_EXCLUSIONS.put(".no_photo.nmj", Arrays.asList("jpg", "png"));
     }
 
     /**
@@ -228,15 +228,15 @@ public class ScannerManagementImpl implements ScannerManagement {
             for (File file : currentFileList) {
                 if (file.isFile()) {
                     String lcFilename = file.getName().toLowerCase();
-                    if (BREAK_SCANNING.containsKey(lcFilename)) {
-                        if (CollectionUtils.isEmpty(BREAK_SCANNING.get(lcFilename))) {
+                    if (DIR_EXCLUSIONS.containsKey(lcFilename)) {
+                        if (CollectionUtils.isEmpty(DIR_EXCLUSIONS.get(lcFilename))) {
                             // Because the value is null or empty we exclude the whole directory, so quit now.
                             LOG.debug("Exclusion file '{}' found, skipping scanning of directory {}.", lcFilename, file.getParent());
                             return null;
                         } else {
                             // We found a match, so add it to our local copy
-                            LOG.debug("Exclusion file '{}' found, will exclude all {} file types", lcFilename, BREAK_SCANNING.get(lcFilename).toString());
-                            exclusions.addAll(BREAK_SCANNING.get(lcFilename));
+                            LOG.debug("Exclusion file '{}' found, will exclude all {} file types", lcFilename, DIR_EXCLUSIONS.get(lcFilename).toString());
+                            exclusions.addAll(DIR_EXCLUSIONS.get(lcFilename));
                         }
                     }
                 } else {
@@ -251,7 +251,7 @@ public class ScannerManagementImpl implements ScannerManagement {
             for (File file : currentFileList) {
                 if (file.isFile()) {
                     String lcFilename = file.getName().toLowerCase();
-                    if (exclusions.contains(FilenameUtils.getExtension(lcFilename)) || BREAK_SCANNING.containsKey(lcFilename)) {
+                    if (exclusions.contains(FilenameUtils.getExtension(lcFilename)) || DIR_EXCLUSIONS.containsKey(lcFilename)) {
                         LOG.debug("File name '{}' excluded because it's listed in the exlusion list for this directory", file.getName());
                         continue;
                     } else {
@@ -309,12 +309,17 @@ public class ScannerManagementImpl implements ScannerManagement {
         ImportDTO dto = library.getImportDTO(stageDir);
 
         LOG.debug("Sending #{}: {}", runningCount.incrementAndGet(), dto.getBaseDirectory());
-        ApplicationContext cntx = ApplicationContextProvider.getApplicationContext();
-        SendToCore stc = (SendToCore) cntx.getBean("sendToCore");
+
+        ApplicationContext appContext = ApplicationContextProvider.getApplicationContext();
+        SendToCore stc = (SendToCore) appContext.getBean("sendToCore");
+
         stc.setImportDto(dto);
+
         stc.setCounter(runningCount);
         FutureTask<StatusType> task = new FutureTask<StatusType>(stc);
+
         yamjExecutor.submit(task);
+
         library.addDirectoryStatus(stageDir.getPath(), ConcurrentUtils.constantFuture(StatusType.DONE));
     }
 
@@ -326,25 +331,23 @@ public class ScannerManagementImpl implements ScannerManagement {
      * @param library
      */
     private void checkLibraryAllSent(Library library) {
-        while (yamjExecutor.getActiveCount() > 0) {
-            LOG.info("Remaining: {}, Active count: {}, Core Pool: {}, Max Pool: {}, Pool Size: {}",
-                    runningCount.get(),
-                    yamjExecutor.getActiveCount(),
-                    yamjExecutor.getCorePoolSize(),
-                    yamjExecutor.getMaxPoolSize(),
-                    yamjExecutor.getPoolSize());
-            try {
-                TimeUnit.SECONDS.sleep(10);
-            } catch (InterruptedException ex) {
-                //
-            }
-        }
 
-        LOG.info("Completed");
+        if (runningCount.get() > 0) {
+            LOG.info("There are {} remaining threads, waiting until they complete", runningCount.get());
+            while (yamjExecutor.getActiveCount() > 0) {
+                try {
+                    TimeUnit.SECONDS.sleep(10);
+                } catch (InterruptedException ex) {
+                    //
+                }
+                LOG.info("Remaining: {}", runningCount.get());
+            }
+            LOG.info("Completed");
+        }
         yamjExecutor.shutdown();
 
         LOG.info("Checking status of running threads.");
-        boolean allDone = Boolean.FALSE;
+        boolean allDone = Boolean.TRUE;
         do {
             try {
                 TimeUnit.SECONDS.sleep(10);
@@ -358,7 +361,7 @@ public class ScannerManagementImpl implements ScannerManagement {
                 } catch (InterruptedException ex) {
                 } catch (ExecutionException ex) {
                 }
-                allDone = allDone || entry.getValue().isDone();
+                allDone = allDone && entry.getValue().isDone();
             }
             LOG.info("All Done?: {}\n\n", allDone);
         } while (!allDone);

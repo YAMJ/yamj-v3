@@ -57,7 +57,7 @@ public final class StageFileDTO implements Serializable {
         if (dt.isBeforeNow()) {
             this.fileDate = fileDate;
         } else {
-            LOG.warn("File {} has a date greater than now, using current date", fileName);
+            LOG.warn("File '{}' has a date greater than now, using current date", fileName);
             this.fileDate = DateTime.now().getMillis();
         }
     }

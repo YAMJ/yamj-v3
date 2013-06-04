@@ -74,7 +74,7 @@ public class SendToCore implements Callable<StatusType> {
     private StatusType send() {
         StatusType status;
         try {
-            LOG.debug("Sending: {}", importDto.toString());
+            LOG.debug("Sending: {}", importDto.getBaseDirectory());
             fileImportService.importScanned(importDto);
             LOG.debug("Successfully queued");
             status = StatusType.DONE;
