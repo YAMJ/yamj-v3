@@ -18,6 +18,6 @@ This is a real webapp; can be started with a jetty server or deployed to an exis
 ### yamj3-filescanner:
 > The file scanner for processing the media directories and sending the file information to the core processor.
 
-First Try
----------
-You just can run: JettyCore from the yamj3-jetty package. Then a jetty server on port 8888 will be started.
+Running YAMJv3 Alpha
+--------------------
+Please see [this wiki page](https://github.com/YAMJ/yamj-v3/wiki/Getting-Started-with-the-Alpha-Test) for instructions on how to run YAMJv3
