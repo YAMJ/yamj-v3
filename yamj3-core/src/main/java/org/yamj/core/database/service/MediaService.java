@@ -16,7 +16,6 @@ import org.yamj.core.database.dao.MediaDao;
 import org.yamj.core.database.dao.PersonDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.database.model.type.JobType;
 
 @Service("mediaService")
 public class MediaService {
@@ -149,39 +148,29 @@ public class MediaService {
 
             if (person != null) {
                 // update person id
-                if (StringUtils.isNotBlank(dto.getSourcedb()) && StringUtils.isNotBlank(dto.getSourcedbId())) {
-                    person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
+                if (person.setPersonId(dto.getSourcedb(), dto.getSourcedbId())) {
                     personDao.updateEntity(person);
                 }
             } else {
                 // create new person
                 person = new Person();
                 person.setName(dto.getName());
-                if (StringUtils.isNotBlank(dto.getSourcedb()) && StringUtils.isNotBlank(dto.getSourcedbId())) {
-                    person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
-                }
+                person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
                 person.setStatus(StatusType.NEW);
                 personDao.saveEntity(person);
             }
 
             if (castCrew == null) {
+                // create new association between person and video 
                 castCrew = new CastCrew();
                 castCrew.setPerson(person);
-                castCrew.setJobType(dto.getJobType());
-                if (StringUtils.isNotBlank(dto.getRole())) {
-                    castCrew.setRole(dto.getRole());
-                }
+                castCrew.setJob(dto.getJobType(), dto.getRole());
                 castCrew.setVideoData(videoData);
                 videoData.addCredit(castCrew);
                 personDao.saveEntity(castCrew);
-            } else {
-                // update role
-                if (StringUtils.isBlank(castCrew.getRole())
-                        && JobType.ACTOR.equals(castCrew.getJobType())
-                        && StringUtils.isNotBlank(dto.getRole())) {
-                    castCrew.setRole(dto.getRole());
-                    personDao.updateEntity(castCrew);
-                }
+            } else if (castCrew.setJob(castCrew.getJobType(), dto.getRole())) {
+                // updated role
+                personDao.updateEntity(castCrew);
             }
         }
     }

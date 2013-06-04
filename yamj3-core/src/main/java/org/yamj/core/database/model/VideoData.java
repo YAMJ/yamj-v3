@@ -1,5 +1,7 @@
 package org.yamj.core.database.model;
 
+import org.yamj.common.type.StatusType;
+
 import javax.persistence.JoinColumn;
 
 import javax.persistence.FetchType;
@@ -296,6 +298,25 @@ public class VideoData extends AbstractMetadata {
 
     public void addCredditDTOS(List<CreditDTO> creditDTOS) {
         this.creditDTOS.addAll(creditDTOS);
+    }
+
+    // TV CHECKS
+    
+    public boolean isScannableTvEpisode() {
+        if (StatusType.DONE.equals(this.getStatus())) {
+            return false;
+        } else if (this.getEpisode() < 0) {
+            return false;
+        }
+        return true;
+    }
+
+    public void setTvEpisodeScanned() {
+        this.setStatus(StatusType.PROCESSED);
+    }
+
+    public void setTvEpisodeMissing() {
+        this.setStatus(StatusType.MISSING);
     }
 
     // EQUALITY CHECKS

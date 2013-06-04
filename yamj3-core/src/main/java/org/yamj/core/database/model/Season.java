@@ -1,17 +1,13 @@
 package org.yamj.core.database.model;
 
-import org.hibernate.annotations.Index;
-
-import org.yamj.core.database.model.type.OverrideFlag;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.MapKey;
+import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.type.OverrideFlag;
 
 @SuppressWarnings("deprecation")
 @javax.persistence.Entity
@@ -143,6 +139,33 @@ public class Season extends AbstractMetadata {
         this.videoDatas = videoDatas;
     }
 
+    // TV CHECKS
+
+    public List<VideoData> getScannableTvEpisodes() {
+        List<VideoData> episodes = new ArrayList<VideoData>();
+        for (VideoData videoData : getVideoDatas()) {
+            if (videoData.isScannableTvEpisode()) {
+                episodes.add(videoData);
+            }
+        }
+        return episodes;
+    }
+    
+    public boolean isScannableTvSeason() {
+        if (StatusType.DONE.equals(this.getStatus())) {
+            return false;
+        }
+        return true;
+    }
+
+    public void setTvSeasonScanned() {
+        this.setStatus(StatusType.PROCESSED);
+    }
+
+    public void setTvSeasonMissing() {
+        this.setStatus(StatusType.MISSING);
+    }
+    
     // EQUALITY CHECKS
     
     @Override

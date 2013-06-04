@@ -1,5 +1,7 @@
 package org.yamj.core.database.model;
 
+import org.apache.commons.lang3.StringUtils;
+
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.hibernate.usertypes.EnumStringUserType;
 import java.io.Serializable;
@@ -42,6 +44,7 @@ public class CastCrew extends AbstractIdentifiable implements Serializable {
     private String role;
 
     // GETTER and SETTER
+    
     public Person getPerson() {
         return person;
     }
@@ -62,7 +65,7 @@ public class CastCrew extends AbstractIdentifiable implements Serializable {
         return jobType;
     }
 
-    public void setJobType(JobType jobType) {
+    private void setJobType(JobType jobType) {
         this.jobType = jobType;
     }
 
@@ -70,7 +73,19 @@ public class CastCrew extends AbstractIdentifiable implements Serializable {
         return role;
     }
 
-    public void setRole(String role) {
+    private void setRole(String role) {
         this.role = role;
+    }
+    
+    public boolean setJob(JobType jobType, String role) {
+        setJobType(jobType);
+        if ((JobType.ACTOR.equals(jobType) || JobType.GUEST_STAR.equals(jobType))
+            && StringUtils.isNotBlank(role)
+            && !StringUtils.equals(getRole(), role))
+        {
+            setRole(role);
+            return true;
+        }
+        return false;
     }
 }

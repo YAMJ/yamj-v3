@@ -3,14 +3,6 @@ package org.yamj.core.service.plugin;
 import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
-import org.yamj.common.tools.PropertyTools;
-import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
-import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.database.model.type.JobType;
-import org.yamj.core.tools.OverrideTools;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
@@ -21,6 +13,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.common.tools.PropertyTools;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.dto.CreditDTO;
+import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.tools.OverrideTools;
 
 @Service("tvdbScanner")
 public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
@@ -90,63 +89,63 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
     public ScanResult scan(Series series) {
         String id = getSeriesId(series);
 
-        if (StringUtils.isNotBlank(id)) {
-            com.omertron.thetvdbapi.model.Series tvdbSeries = tvdbApi.getSeries(id, DEFAULT_LANGUAGE);
-
-            series.setSourcedbId(TVDB_SCANNER_ID, tvdbSeries.getId());
-            series.setSourcedbId(ImdbScanner.IMDB_SCANNER_ID, tvdbSeries.getImdbId());
-
-            if (OverrideTools.checkOverwriteTitle(series, TVDB_SCANNER_ID)) {
-                series.setTitle(tvdbSeries.getSeriesName(), TVDB_SCANNER_ID);
-            }
-
-            if (OverrideTools.checkOverwritePlot(series, TVDB_SCANNER_ID)) {
-                series.setPlot(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
-            }
-
-            if (OverrideTools.checkOverwriteOutline(series, TVDB_SCANNER_ID)) {
-                series.setOutline(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
-            }
-
-            // TODO more values
-
-            if (StringUtils.isNumeric(tvdbSeries.getRating())) {
-                try {
-                    series.addRating(TVDB_SCANNER_ID, (int) (Float.parseFloat(tvdbSeries.getRating()) * 10));
-                } catch (NumberFormatException nfe) {
-                    LOG.warn("Failed to convert TVDB rating '{}' to an integer, error: {}", tvdbSeries.getRating(), nfe.getMessage());
-                }
-            }
-
-            String faDate = tvdbSeries.getFirstAired();
-            if (StringUtils.isNotBlank(faDate) && (faDate.length() >= 4)) {
-                series.setStartYear(Integer.parseInt(faDate.substring(0, 4)));
-            }
-
-            // CAST & CREW
-
-            List<CreditDTO> actors = new ArrayList<CreditDTO>();
-            for (Actor actor : tvdbApi.getActors(id)) {
-                actors.add(new CreditDTO(JobType.ACTOR, actor.getName(), actor.getRole()));
-            }
-
-            // SCAN SEASONS
-
-            this.scanSeasons(series, tvdbSeries, actors);
-
-            return ScanResult.OK;
-        } else {
+        if (StringUtils.isBlank(id)) {
             return ScanResult.MISSING_ID;
         }
+        
+        com.omertron.thetvdbapi.model.Series tvdbSeries = tvdbApi.getSeries(id, DEFAULT_LANGUAGE);
 
+        series.setSourcedbId(TVDB_SCANNER_ID, tvdbSeries.getId());
+        series.setSourcedbId(ImdbScanner.IMDB_SCANNER_ID, tvdbSeries.getImdbId());
+
+        if (OverrideTools.checkOverwriteTitle(series, TVDB_SCANNER_ID)) {
+            series.setTitle(tvdbSeries.getSeriesName(), TVDB_SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwritePlot(series, TVDB_SCANNER_ID)) {
+            series.setPlot(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteOutline(series, TVDB_SCANNER_ID)) {
+            series.setOutline(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
+        }
+
+        // TODO more values
+
+        if (StringUtils.isNumeric(tvdbSeries.getRating())) {
+            try {
+                series.addRating(TVDB_SCANNER_ID, (int) (Float.parseFloat(tvdbSeries.getRating()) * 10));
+            } catch (NumberFormatException nfe) {
+                LOG.warn("Failed to convert TVDB rating '{}' to an integer, error: {}", tvdbSeries.getRating(), nfe.getMessage());
+            }
+        }
+
+        String faDate = tvdbSeries.getFirstAired();
+        if (StringUtils.isNotBlank(faDate) && (faDate.length() >= 4)) {
+            series.setStartYear(Integer.parseInt(faDate.substring(0, 4)));
+        }
+
+        // CAST & CREW
+
+        List<CreditDTO> actors = new ArrayList<CreditDTO>();
+        for (Actor actor : tvdbApi.getActors(id)) {
+            actors.add(new CreditDTO(JobType.ACTOR, actor.getName(), actor.getRole()));
+        }
+
+        // SCAN SEASONS
+
+        this.scanSeasons(series, tvdbSeries, actors);
+
+        return ScanResult.OK;
     }
 
     private void scanSeasons(Series series, com.omertron.thetvdbapi.model.Series tvdbSeries, List<CreditDTO> actors) {
 
         for (Season season : series.getSeasons()) {
-
+            
             // update season values if not done before
-            if (!StatusType.DONE.equals(season.getStatus())) {
+            if (season.isScannableTvSeason()) {
+
                 // use values from series
                 if (OverrideTools.checkOverwriteTitle(season, TVDB_SCANNER_ID)) {
                     season.setTitle(tvdbSeries.getSeriesName(), TVDB_SCANNER_ID);
@@ -163,8 +162,8 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                 // TODO common usable format
                 season.setFirstAired(tvdbSeries.getFirstAired());
 
-                // set status of season in process to allow alternate scan
-                season.setStatus(StatusType.PROCESSED);
+                // mark as scanned
+                season.setTvSeasonScanned();
             }
 
             // scan episodes
@@ -176,46 +175,50 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         if (CollectionUtils.isEmpty(season.getVideoDatas())) {
             return;
         }
+        
+        // get episodes to scan
+        List<VideoData> videoDatas = season.getScannableTvEpisodes();
+        if (CollectionUtils.isEmpty(videoDatas)) {
+            // nothing to do anymore
+            return;
+        }
 
         String seriesId = season.getSeries().getSourcedbId(TVDB_SCANNER_ID);
         List<Episode> episodeList = tvdbApi.getSeasonEpisodes(seriesId, season.getSeason(), DEFAULT_LANGUAGE);
 
-        for (VideoData videoData : season.getVideoDatas()) {
+        for (VideoData videoData : videoDatas) {
 
-            // update episode values if not done before
-            if (!StatusType.DONE.equals(videoData.getStatus())) {
+            Episode episode = this.findEpisode(episodeList, season.getSeason(), videoData.getEpisode());
+            if (episode == null) {
+                // mark episode as missing
+                videoData.setTvEpisodeMissing();
+            } else {
 
-                Episode episode = this.findEpisode(episodeList, season.getSeason(), videoData.getEpisode());
-                if (episode == null) {
-                    videoData.setStatus(StatusType.MISSING);
-                } else {
-
-                    if (OverrideTools.checkOverwriteTitle(videoData, TVDB_SCANNER_ID)) {
-                        videoData.setTitle(episode.getEpisodeName(), TVDB_SCANNER_ID);
-                    }
-
-                    if (OverrideTools.checkOverwritePlot(videoData, TVDB_SCANNER_ID)) {
-                        videoData.setPlot(episode.getOverview(), TVDB_SCANNER_ID);
-                    }
-
-                    // cast and crew
-                    videoData.addCredditDTOS(actors);
-
-                    for (String director : episode.getDirectors()) {
-                        videoData.addCreditDTO(new CreditDTO(JobType.DIRECTOR, director));
-                    }
-                    for (String writer : episode.getWriters()) {
-                        videoData.addCreditDTO(new CreditDTO(JobType.WRITER, writer));
-                    }
-                    for (String guestStar : episode.getGuestStars()) {
-                        videoData.addCreditDTO(new CreditDTO(JobType.ACTOR, guestStar, "Guest Star"));
-                    }
-
-                    // TODO more values
-
-                    // set status of video data in process to allow alternate scan
-                    videoData.setStatus(StatusType.PROCESSED);
+                if (OverrideTools.checkOverwriteTitle(videoData, TVDB_SCANNER_ID)) {
+                    videoData.setTitle(episode.getEpisodeName(), TVDB_SCANNER_ID);
                 }
+
+                if (OverrideTools.checkOverwritePlot(videoData, TVDB_SCANNER_ID)) {
+                    videoData.setPlot(episode.getOverview(), TVDB_SCANNER_ID);
+                }
+
+                // cast and crew
+                videoData.addCredditDTOS(actors);
+
+                for (String director : episode.getDirectors()) {
+                    videoData.addCreditDTO(new CreditDTO(JobType.DIRECTOR, director));
+                }
+                for (String writer : episode.getWriters()) {
+                    videoData.addCreditDTO(new CreditDTO(JobType.WRITER, writer));
+                }
+                for (String guestStar : episode.getGuestStars()) {
+                    videoData.addCreditDTO(new CreditDTO(JobType.GUEST_STAR, guestStar));
+                }
+
+                // TODO more values
+
+                // mark episode as missing
+                videoData.setTvEpisodeScanned();
             }
         }
     }

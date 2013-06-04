@@ -18,6 +18,10 @@ public enum JobType {
      */
     ACTOR,
     /**
+     * The person is a guest star (kind of actor)
+     */
+    GUEST_STAR,
+    /**
      * The person is a writer
      */
     WRITER,
@@ -25,35 +29,35 @@ public enum JobType {
      * The person is a producer
      */
     PRODUCER,
-    /*
+    /**
      * Camera and film related jobs
      */
     CAMERA,
-    /*
+    /**
      * Editing jobs, e.g. Editor, Dialog editor, Color Timer
      */
     EDITING,
-    /*
+    /**
      * All art related jobs
      */
     ART,
-    /*
+    /**
      * Costume and Make-up jobs
      */
     COSTUME_MAKEUP,
-    /*
+    /**
      * Sound jobs
      */
     SOUND,
-    /*
+    /**
      * Special effects
      */
     EFFECTS,
-    /*
+    /**
      * Misc Crew
      */
     CREW,
-    /*
+    /**
      * Lighting jobs
      */
     LIGHTING;

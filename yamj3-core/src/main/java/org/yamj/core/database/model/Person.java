@@ -124,8 +124,12 @@ public class Person extends AbstractAuditable implements Serializable {
         this.personIds = personIds;
     }
 
-    public void setPersonId(String sourcedb, String personId) {
+    public boolean setPersonId(String sourcedb, String personId) {
+        if (StringUtils.isBlank(sourcedb) || StringUtils.isBlank(personId)) {
+            return false;
+        }
         this.personIds.put(sourcedb, personId);
+        return true;
     }
 
     public StatusType getStatus() {
