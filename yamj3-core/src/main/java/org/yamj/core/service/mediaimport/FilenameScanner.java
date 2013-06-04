@@ -449,17 +449,15 @@ public class FilenameScanner {
             }
 
             // PART TITLE
-            if (dto.getPart() >= 0) {
-                // Just do this for no extra, already named.
-                if (!dto.isExtra()) {
-                    ipart += 6;
-                    Matcher matcher = SECOND_TITLE_PATTERN.matcher(rest.substring(ipart));
-                    while (matcher.find()) {
-                        String title = cleanUpTitle(matcher.group(1));
-                        if (title.length() > 0) {
-                            dto.setPartTitle(title);
-                            break;
-                        }
+            // Just do this for no extra, already named.
+            if ((dto.getPart() >= 0) && !dto.isExtra()) {
+                ipart += 6;
+                Matcher matcher = SECOND_TITLE_PATTERN.matcher(rest.substring(ipart));
+                while (matcher.find()) {
+                    String title = cleanUpTitle(matcher.group(1));
+                    if (title.length() > 0) {
+                        dto.setPartTitle(title);
+                        break;
                     }
                 }
             }

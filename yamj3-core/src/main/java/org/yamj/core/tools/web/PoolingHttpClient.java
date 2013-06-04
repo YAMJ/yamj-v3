@@ -50,7 +50,7 @@ public class PoolingHttpClient extends DefaultPoolingHttpClient implements Dispo
         // Default, can be overridden
         groupLimits.put(".*", 1);
         String limitsProperty = PropertyTools.getProperty("yamj3.http.maxDownloadSlots", ".*=1");
-        LOG.debug("Using download limits: {}" , limitsProperty);
+        LOG.debug("Using download limits: {}", limitsProperty);
 
         Pattern pattern = Pattern.compile(",?\\s*([^=]+)=(\\d+)");
         Matcher matcher = pattern.matcher(limitsProperty);
@@ -60,7 +60,7 @@ public class PoolingHttpClient extends DefaultPoolingHttpClient implements Dispo
                 Pattern.compile(group);
                 groupLimits.put(group, Integer.parseInt(matcher.group(2)));
             } catch (Exception error) {
-                LOG.debug("Rule '{}' is not valid regexp, ignored",group);
+                LOG.debug("Rule '{}' is not valid regexp, ignored", group);
             }
         }
     }
@@ -96,10 +96,9 @@ public class PoolingHttpClient extends DefaultPoolingHttpClient implements Dispo
             if (!routedHosts.contains(key)) {
                 String group = ".*";
                 for (String searchGroup : groupLimits.keySet()) {
-                    if (key.matches(searchGroup)) {
-                        if (searchGroup.length() > group.length()) {
-                            group = searchGroup;
-                        }
+                    if (key.matches(searchGroup) && searchGroup.length() > group.length()) {
+                        group = searchGroup;
+
                     }
                 }
                 int maxRequests = groupLimits.get(group);

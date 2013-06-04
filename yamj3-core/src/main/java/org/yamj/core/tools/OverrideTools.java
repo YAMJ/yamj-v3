@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 public final class OverrideTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(OverrideTools.class);
-    
     // check skip if not in priority list
     private static final boolean SKIP_NOT_IN_LIST = PropertyTools.getBooleanProperty("priority.checks.skipNotInList", Boolean.FALSE);
     // handling for set default plugins
@@ -30,7 +29,6 @@ public final class OverrideTools {
     private static final String PLUGIN_VIDEODATA_ALT = PluginDatabaseService.VIDEO_SCANNER_ALT;
     private static final String PLUGIN_SERIES = PluginDatabaseService.SERIES_SCANNER;
     private static final String PLUGIN_SERIES_ALT = PluginDatabaseService.SERIES_SCANNER_ALT;
-    
     private static final Map<OverrideFlag, List<String>> videodataPriorities = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
     private static final Map<OverrideFlag, List<String>> seasonPriorities = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
     private static final Map<OverrideFlag, List<String>> seriesPriorities = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
@@ -140,20 +138,16 @@ public final class OverrideTools {
                 newSources = newSources.replace(TYPE_PLUGIN_SERIES, PLUGIN_SERIES);
             }
 
-            if (newSources.contains(TYPE_ALTERNATE_VIDEO)) {
-                if (StringUtils.isNotBlank(PLUGIN_VIDEODATA_ALT) && !newSources.contains(PLUGIN_VIDEODATA_ALT)) {
-                    // replace pattern with alternate video plugin
-                    newSources = newSources.replace(TYPE_ALTERNATE_VIDEO, PLUGIN_VIDEODATA_ALT);
-                }
+            if (newSources.contains(TYPE_ALTERNATE_VIDEO) && (StringUtils.isNotBlank(PLUGIN_VIDEODATA_ALT) && !newSources.contains(PLUGIN_VIDEODATA_ALT))) {
+                // replace pattern with alternate video plugin
+                newSources = newSources.replace(TYPE_ALTERNATE_VIDEO, PLUGIN_VIDEODATA_ALT);
             }
 
-            if (newSources.contains(TYPE_ALTERNATE_SERIES)) {
-                if (StringUtils.isNotBlank(PLUGIN_SERIES_ALT) && !newSources.contains(PLUGIN_SERIES_ALT)) {
-                    // replace pattern with alternate series plugin
-                    newSources = newSources.replace(TYPE_ALTERNATE_SERIES, PLUGIN_SERIES_ALT);
-                }
+            if (newSources.contains(TYPE_ALTERNATE_SERIES) && (StringUtils.isNotBlank(PLUGIN_SERIES_ALT) && !newSources.contains(PLUGIN_SERIES_ALT))) {
+                // replace pattern with alternate series plugin
+                newSources = newSources.replace(TYPE_ALTERNATE_SERIES, PLUGIN_SERIES_ALT);
             }
-            
+
             priorities = new ArrayList<String>(Arrays.asList(newSources.split(",")));
             priorities.remove(TYPE_PLUGIN_VIDEO);
             priorities.remove(TYPE_PLUGIN_SERIES);
@@ -162,7 +156,7 @@ public final class OverrideTools {
         }
         return priorities;
     }
-    
+
     private static boolean skipCheck(AbstractMetadata metadata, OverrideFlag overrideFlag, String source) {
         if (SKIP_NOT_IN_LIST) {
 
@@ -178,7 +172,7 @@ public final class OverrideTools {
             } catch (Exception ignore) {
                 // ignore this error
             }
-            
+
             // index < 0 means: not in list, so skip the check
             return (index < 0);
         }

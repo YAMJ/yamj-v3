@@ -30,7 +30,6 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
     private static final String DEFAULT_LANGUAGE = PropertyTools.getProperty("thetvdb.language", "en");
     private static final int YEAR_MIN = 1900;
     private static final int YEAR_MAX = 2050;
-
     @Autowired
     private PluginDatabaseService pluginDatabaseService;
     @Autowired
@@ -104,13 +103,13 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             if (OverrideTools.checkOverwritePlot(series, TVDB_SCANNER_ID)) {
                 series.setPlot(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
             }
-            
+
             if (OverrideTools.checkOverwriteOutline(series, TVDB_SCANNER_ID)) {
                 series.setOutline(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
             }
 
             // TODO more values
-            
+
             if (StringUtils.isNumeric(tvdbSeries.getRating())) {
                 try {
                     series.addRating(TVDB_SCANNER_ID, (int) (Float.parseFloat(tvdbSeries.getRating()) * 10));
@@ -120,21 +119,19 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             }
 
             String faDate = tvdbSeries.getFirstAired();
-            if (StringUtils.isNotBlank(faDate)) {
-                if (faDate.length() >= 4) {
-                    series.setStartYear(Integer.parseInt(faDate.substring(0, 4)));
-                }
+            if (StringUtils.isNotBlank(faDate) && (faDate.length() >= 4)) {
+                series.setStartYear(Integer.parseInt(faDate.substring(0, 4)));
             }
 
             // CAST & CREW
-            
+
             List<CreditDTO> actors = new ArrayList<CreditDTO>();
             for (Actor actor : tvdbApi.getActors(id)) {
                 actors.add(new CreditDTO(JobType.ACTOR, actor.getName(), actor.getRole()));
             }
 
             // SCAN SEASONS
-            
+
             this.scanSeasons(series, tvdbSeries, actors);
 
             return ScanResult.OK;
@@ -143,11 +140,11 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         }
 
     }
-    
+
     private void scanSeasons(Series series, com.omertron.thetvdbapi.model.Series tvdbSeries, List<CreditDTO> actors) {
-        
+
         for (Season season : series.getSeasons()) {
-            
+
             // update season values if not done before
             if (!StatusType.DONE.equals(season.getStatus())) {
                 // use values from series
@@ -158,7 +155,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                 if (OverrideTools.checkOverwritePlot(season, TVDB_SCANNER_ID)) {
                     season.setPlot(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
                 }
-                
+
                 if (OverrideTools.checkOverwriteOutline(season, TVDB_SCANNER_ID)) {
                     season.setOutline(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
                 }
@@ -174,7 +171,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             this.scanEpisodes(season, actors);
         }
     }
-    
+
     private void scanEpisodes(Season season, List<CreditDTO> actors) {
         if (CollectionUtils.isEmpty(season.getVideoDatas())) {
             return;
@@ -182,12 +179,12 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
         String seriesId = season.getSeries().getSourcedbId(TVDB_SCANNER_ID);
         List<Episode> episodeList = tvdbApi.getSeasonEpisodes(seriesId, season.getSeason(), DEFAULT_LANGUAGE);
-        
+
         for (VideoData videoData : season.getVideoDatas()) {
 
             // update episode values if not done before
             if (!StatusType.DONE.equals(videoData.getStatus())) {
-                
+
                 Episode episode = this.findEpisode(episodeList, season.getSeason(), videoData.getEpisode());
                 if (episode == null) {
                     videoData.setStatus(StatusType.MISSING);
@@ -196,14 +193,14 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                     if (OverrideTools.checkOverwriteTitle(videoData, TVDB_SCANNER_ID)) {
                         videoData.setTitle(episode.getEpisodeName(), TVDB_SCANNER_ID);
                     }
-                    
+
                     if (OverrideTools.checkOverwritePlot(videoData, TVDB_SCANNER_ID)) {
                         videoData.setPlot(episode.getOverview(), TVDB_SCANNER_ID);
                     }
 
                     // cast and crew
                     videoData.addCredditDTOS(actors);
-                    
+
                     for (String director : episode.getDirectors()) {
                         videoData.addCreditDTO(new CreditDTO(JobType.DIRECTOR, director));
                     }
