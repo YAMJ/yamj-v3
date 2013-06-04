@@ -59,6 +59,7 @@ public class Person extends AbstractAuditable implements Serializable {
     private StatusType status;
 
     // GETTER and SETTER
+    
     public String getName() {
         return name;
     }
@@ -134,7 +135,9 @@ public class Person extends AbstractAuditable implements Serializable {
     public void setStatus(StatusType status) {
         this.status = status;
     }
+    
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         final int prime = 17;
@@ -156,5 +159,16 @@ public class Person extends AbstractAuditable implements Serializable {
         }
         Person castOther = (Person) other;
         return StringUtils.equals(this.name, castOther.name);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Person [ID=");
+        sb.append(getId());
+        sb.append(", name=");
+        sb.append(getName());
+        sb.append("]");
+        return sb.toString();
     }
 }

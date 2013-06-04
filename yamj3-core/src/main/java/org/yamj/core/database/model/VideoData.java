@@ -299,6 +299,7 @@ public class VideoData extends AbstractMetadata {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         final int prime = 17;
@@ -320,5 +321,20 @@ public class VideoData extends AbstractMetadata {
         }
         VideoData castOther = (VideoData) other;
         return StringUtils.equals(this.identifier, castOther.identifier);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("VideoData [ID=");
+        sb.append(getId());
+        sb.append(", identifier=");
+        sb.append(getIdentifier());
+        sb.append(", title=");
+        sb.append(getTitle());
+        sb.append(", title=");
+        sb.append(getYear());
+        sb.append("]");
+        return sb.toString();
     }
 }

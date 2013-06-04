@@ -39,6 +39,7 @@ public class Certification extends AbstractIdentifiable implements Serializable 
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         final int prime = 17;

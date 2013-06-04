@@ -121,4 +121,25 @@ public class Artwork extends AbstractAuditable implements Serializable {
     public void setSeries(Series series) {
         this.series = series;
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Artwork [ID=");
+        sb.append(getId());
+        sb.append(", type=");
+        sb.append(getArtworkType());
+        sb.append(", destination=");
+        if (getVideoData() != null) {
+            sb.append("VideoData");
+        } else if (getSeason() != null) {
+            sb.append("Season");
+        } else if (getSeries() != null) {
+            sb.append("Series");
+        } else {
+            sb.append("Unknown");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
 }

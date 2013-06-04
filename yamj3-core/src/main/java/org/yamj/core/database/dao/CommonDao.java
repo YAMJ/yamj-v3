@@ -1,5 +1,7 @@
 package org.yamj.core.database.dao;
 
+import java.util.List;
+
 import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Genre;
@@ -16,6 +18,11 @@ import org.springframework.stereotype.Service;
 
 @Service("commonDao")
 public class CommonDao extends ExtendedHibernateDaoSupport {
+
+    @SuppressWarnings("rawtypes")
+    public List getObjectsById(CharSequence query, long id) {
+        return getHibernateTemplate().find(query.toString(), id);
+    }
 
     public Genre getGenre(final String name) {
         return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<Genre>() {

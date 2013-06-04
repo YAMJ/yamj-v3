@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import org.hibernate.*;
 import org.hibernate.criterion.Restrictions;
-import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
@@ -34,17 +33,6 @@ public class PersonDao extends ExtendedHibernateDaoSupport {
 
     public Person getPerson(final long id) {
         return this.getHibernateTemplate().get(Person.class, id);
-    }
-
-    @SuppressWarnings("unchecked")
-    public Person getRequiredPerson(Long id) {
-        final StringBuffer sb = new StringBuffer();
-        sb.append("from Person person where person.id = ?");
-        
-        // later on there it could be necessary to fetch associated entities
-        
-        List<Person> persons = getHibernateTemplate().find(sb.toString(), id);
-        return DataAccessUtils.requiredUniqueResult(persons);
     }
 
     public List<QueueDTO> getPersonQueueForScanning(final int maxResults) {

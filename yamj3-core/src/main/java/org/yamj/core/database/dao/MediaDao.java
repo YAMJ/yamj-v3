@@ -1,24 +1,21 @@
 package org.yamj.core.database.dao;
 
-import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.dto.QueueDTOComparator;
-import org.yamj.core.database.model.type.MetaDataType;
-import org.yamj.core.hibernate.ExtendedHibernateDaoSupport;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.hibernate.*;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.MediaFile;
-import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.dto.QueueDTOComparator;
+import org.yamj.core.database.model.type.MetaDataType;
+import org.yamj.core.hibernate.ExtendedHibernateDaoSupport;
 
 @Service("mediaDao")
 public class MediaDao extends ExtendedHibernateDaoSupport {
@@ -56,7 +53,7 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
             }
         });
     }
-
+    
     public Season getSeason(Long id) {
         return this.getHibernateTemplate().get(Season.class, id);
     }
@@ -87,25 +84,6 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
                 criteria.setCacheable(true);
                 criteria.setCacheMode(CacheMode.NORMAL);
                 return (Series) criteria.uniqueResult();
-            }
-        });
-    }
-
-    public Person getPerson(Long id) {
-        return this.getHibernateTemplate().get(Person.class, id);
-    }
-
-    public List<Long> getVideoDataIds(final StatusType... statusTypes) {
-        return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<List<Long>>() {
-            @Override
-            @SuppressWarnings("unchecked")
-            public List<Long> doInHibernate(Session session) throws HibernateException, SQLException {
-                Criteria criteria = session.createCriteria(VideoData.class);
-                criteria.add(Restrictions.in("status", statusTypes));
-                criteria.setProjection(Projections.id());
-                criteria.setCacheable(true);
-                criteria.setCacheMode(CacheMode.NORMAL);
-                return criteria.list();
             }
         });
     }

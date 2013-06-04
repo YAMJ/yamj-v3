@@ -58,4 +58,15 @@ public class Genre extends AbstractIdentifiable implements Serializable {
         Genre castOther = (Genre) other;
         return StringUtils.equals(this.name, castOther.name);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Genre [ID=");
+        sb.append(getId());
+        sb.append(", name=");
+        sb.append(getName());
+        sb.append("]");
+        return sb.toString();
+    }
 }

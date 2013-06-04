@@ -156,4 +156,19 @@ public class Series extends AbstractMetadata {
         Series castOther = (Series) other;
         return StringUtils.equals(this.identifier, castOther.identifier);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Series [ID=");
+        sb.append(getId());
+        sb.append(", identifier=");
+        sb.append(getIdentifier());
+        sb.append(", title=");
+        sb.append(getTitle());
+        sb.append(", title=");
+        sb.append(getYear());
+        sb.append("]");
+        return sb.toString();
+    }
 }

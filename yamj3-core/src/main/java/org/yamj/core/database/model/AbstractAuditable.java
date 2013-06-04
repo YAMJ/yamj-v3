@@ -2,19 +2,9 @@ package org.yamj.core.database.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-
+import javax.persistence.*;
 import org.yamj.core.hibernate.Auditable;
 import org.yamj.core.hibernate.Identifiable;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Abstract implementation of an identifiable and auditable object.
@@ -65,10 +55,5 @@ public abstract class AbstractAuditable implements Auditable, Identifiable {
 
     public void setUpdateTimestamp(final Date updateTimestamp) {
         this.updateTimestamp = updateTimestamp;
-    }
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
     }
 }
