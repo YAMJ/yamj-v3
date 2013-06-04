@@ -29,9 +29,9 @@ public final class OverrideTools {
     private static final String PLUGIN_VIDEODATA_ALT = PluginDatabaseService.VIDEO_SCANNER_ALT;
     private static final String PLUGIN_SERIES = PluginDatabaseService.SERIES_SCANNER;
     private static final String PLUGIN_SERIES_ALT = PluginDatabaseService.SERIES_SCANNER_ALT;
-    private static final Map<OverrideFlag, List<String>> videodataPriorities = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
-    private static final Map<OverrideFlag, List<String>> seasonPriorities = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
-    private static final Map<OverrideFlag, List<String>> seriesPriorities = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
+    private static final Map<OverrideFlag, List<String>> VIDEODATA_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
+    private static final Map<OverrideFlag, List<String>> SEASON_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
+    private static final Map<OverrideFlag, List<String>> SERIES_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
 
     static {
         String sources;
@@ -92,7 +92,7 @@ public final class OverrideTools {
         if (LOG.isDebugEnabled()) {
             LOG.debug(overrideFlag.name() + " (VideoData) priorities " + priorities.toString());
         }
-        videodataPriorities.put(overrideFlag, priorities);
+        VIDEODATA_PRIORITIES.put(overrideFlag, priorities);
     }
 
     /**
@@ -106,7 +106,7 @@ public final class OverrideTools {
         if (LOG.isDebugEnabled()) {
             LOG.debug(overrideFlag.name() + " (Season) priorities " + priorities.toString());
         }
-        seasonPriorities.put(overrideFlag, priorities);
+        SEASON_PRIORITIES.put(overrideFlag, priorities);
     }
 
     /**
@@ -120,7 +120,7 @@ public final class OverrideTools {
         if (LOG.isDebugEnabled()) {
             LOG.debug(overrideFlag.name() + " (Series) priorities " + priorities.toString());
         }
-        seriesPriorities.put(overrideFlag, priorities);
+        SERIES_PRIORITIES.put(overrideFlag, priorities);
     }
 
     private static List<String> resolvePriorities(String sources) {
@@ -163,11 +163,11 @@ public final class OverrideTools {
             int index = -1;
             try {
                 if (metadata instanceof VideoData) {
-                    index = videodataPriorities.get(overrideFlag).indexOf(source.toLowerCase());
+                    index = VIDEODATA_PRIORITIES.get(overrideFlag).indexOf(source.toLowerCase());
                 } else if (metadata instanceof Season) {
-                    index = seasonPriorities.get(overrideFlag).indexOf(source.toLowerCase());
+                    index = SEASON_PRIORITIES.get(overrideFlag).indexOf(source.toLowerCase());
                 } else if (metadata instanceof Series) {
-                    index = seriesPriorities.get(overrideFlag).indexOf(source.toLowerCase());
+                    index = SERIES_PRIORITIES.get(overrideFlag).indexOf(source.toLowerCase());
                 }
             } catch (Exception ignore) {
                 // ignore this error
@@ -208,11 +208,11 @@ public final class OverrideTools {
         // both sources are valid so get priorities
         List<String> priorities;
         if (metadata instanceof VideoData) {
-            priorities = videodataPriorities.get(overrideFlag);
+            priorities = VIDEODATA_PRIORITIES.get(overrideFlag);
         } else if (metadata instanceof Season) {
-            priorities = seasonPriorities.get(overrideFlag);
+            priorities = SEASON_PRIORITIES.get(overrideFlag);
         } else if (metadata instanceof Series) {
-            priorities = seriesPriorities.get(overrideFlag);
+            priorities = SERIES_PRIORITIES.get(overrideFlag);
         } else {
             priorities = Collections.emptyList();
         }
