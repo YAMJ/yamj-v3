@@ -328,8 +328,13 @@ public class ScannerManagementImpl implements ScannerManagement {
      * @param library
      */
     private void checkLibraryAllSent(Library library) {
+        int retryCount = 3; // The number of times to retry sending the files to core
+        List<String> resendDirs = new ArrayList<String>();
+
         int processedDone, processedError, unprocessed;
         do {
+            // Clear the directories to resend.
+            resendDirs.clear();
             processedDone = 0;
             processedError = 0;
             unprocessed = 0;
@@ -340,6 +345,8 @@ public class ScannerManagementImpl implements ScannerManagement {
                         LOG.info("{} - Status: {}", entry.getKey(), entry.getValue().get());
                         if (entry.getValue().get() == StatusType.ERROR) {
                             processedError++;
+                            // Add the directory to the list to resend.
+                            resendDirs.add(entry.getKey());
                         } else {
                             processedDone++;
                         }
@@ -354,6 +361,20 @@ public class ScannerManagementImpl implements ScannerManagement {
 
             LOG.info("Done: {}, Error: {}, Unprocessed: {}", processedDone, processedError, unprocessed);
 
+            if (processedError > 0) {
+                LOG.info("There were {} errors sending to the server. Will attempt to send {} more times.", processedError, retryCount--);
+
+                for (String errorDir : resendDirs) {
+                    LOG.info("Resending '{}' to the core", errorDir);
+                    // Get the error StageDTO
+                    StageDirectoryDTO stageDto = library.getDirectory(errorDir);
+                    // Now resend it to the core
+                    sendToCore(library, stageDto);
+                    // Add one to the unprocessed count
+                    unprocessed++;
+                }
+            }
+
             if (unprocessed > 0) {
                 try {
                     LOG.info("Sleeping...");
@@ -362,42 +383,8 @@ public class ScannerManagementImpl implements ScannerManagement {
                     //
                 }
             }
-        } while (unprocessed > 0);
+        } while (unprocessed > 0 && retryCount >= 0);
 
-
-//        if (runningCount.get() > 0) {
-//            LOG.info("There are {} remaining threads, waiting until they complete", runningCount.get());
-//            while (yamjExecutor.getActiveCount() > 0) {
-//                try {
-//                    TimeUnit.SECONDS.sleep(10);
-//                } catch (InterruptedException ex) {
-//                    //
-//                }
-//                LOG.info("Remaining: {}", runningCount.get());
-//            }
-//            LOG.info("Completed");
-//        }
-//        yamjExecutor.shutdown();
-//
-//        LOG.info("Checking status of running threads.");
-//        boolean allDone = Boolean.TRUE;
-//        do {
-//            try {
-//                TimeUnit.SECONDS.sleep(10);
-//            } catch (InterruptedException ex) {
-//                //
-//            }
-//
-//            for (Entry<String, Future<StatusType>> entry : library.getDirectoryStatus().entrySet()) {
-//                try {
-//                    LOG.info("{}: {}", entry.getKey(), entry.getValue().get());
-//                } catch (InterruptedException ex) {
-//                } catch (ExecutionException ex) {
-//                }
-//                allDone = allDone && entry.getValue().isDone();
-//            }
-//            LOG.info("All Done?: {}\n\n", allDone);
-//        } while (!allDone);
     }
 
     /**
