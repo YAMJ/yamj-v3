@@ -32,9 +32,12 @@ import org.springframework.stereotype.Service;
 public class Scheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(Scheduler.class);
-    private static final int MEDIA_SCANNER_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.mediascan.maxThreads", 5);
-    private static final int PEOPLE_SCANNER_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.peoplescan.maxThreads", 5);
-    private static final int ARTWORK_SCANNER_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.artworkscan.maxThreads", 3);
+    private static final int MEDIA_SCANNER_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.mediascan.maxThreads", 5);
+    private static final int MEDIA_SCANNER_MAX_RESULTS = PropertyTools.getIntProperty("yamj3.scheduler.mediascan.maxResults", 20);
+    private static final int PEOPLE_SCANNER_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.peoplescan.maxThreads", 5);
+    private static final int PEOPLE_SCANNER_MAX_RESULTS = PropertyTools.getIntProperty("yamj3.scheduler.peoplescan.maxResults", 40);
+    private static final int ARTWORK_SCANNER_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.artworkscan.maxThreads", 3);
+    private static final int ARTWORK_SCANNER_MAX_RESULTS = PropertyTools.getIntProperty("yamj3.scheduler.artworkscan.maxResults", 30);
 
     @Autowired
     private StagingDao stagingDao;
@@ -91,7 +94,7 @@ public class Scheduler {
     @Async
     @Scheduled(initialDelay = 15000, fixedDelay = 45000)
     public void scanMediaData() throws Exception {
-        List<QueueDTO> queueElements = mediaDao.getMediaQueueForScanning();
+        List<QueueDTO> queueElements = mediaDao.getMediaQueueForScanning(MEDIA_SCANNER_MAX_RESULTS);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.debug("No media data found to scan");
             return;
@@ -100,8 +103,8 @@ public class Scheduler {
         LOG.info("Found {} media data objects to process", queueElements.size());
         BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
 
-        ExecutorService executor = Executors.newFixedThreadPool(MEDIA_SCANNER_THREADS);
-        for (int i = 0; i < MEDIA_SCANNER_THREADS; i++) {
+        ExecutorService executor = Executors.newFixedThreadPool(MEDIA_SCANNER_MAX_THREADS);
+        for (int i = 0; i < MEDIA_SCANNER_MAX_THREADS; i++) {
             PluginDatabaseRunner worker = new PluginDatabaseRunner(queue, pluginDatabaseService);
             executor.execute(worker);
         }
@@ -120,7 +123,7 @@ public class Scheduler {
     @Async
     @Scheduled(initialDelay = 15000, fixedDelay = 45000)
     public void scanPeopleData() throws Exception {
-        List<QueueDTO> queueElements = personDao.getPersonQueueForScanning();
+        List<QueueDTO> queueElements = personDao.getPersonQueueForScanning(PEOPLE_SCANNER_MAX_RESULTS);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.debug("No people data found to scan");
             return;
@@ -129,8 +132,8 @@ public class Scheduler {
         LOG.info("Found {} people objects to process", queueElements.size());
         BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
 
-        ExecutorService executor = Executors.newFixedThreadPool(PEOPLE_SCANNER_THREADS);
-        for (int i = 0; i < PEOPLE_SCANNER_THREADS; i++) {
+        ExecutorService executor = Executors.newFixedThreadPool(PEOPLE_SCANNER_MAX_THREADS);
+        for (int i = 0; i < PEOPLE_SCANNER_MAX_THREADS; i++) {
             PluginDatabaseRunner worker = new PluginDatabaseRunner(queue, pluginDatabaseService);
             executor.execute(worker);
         }
@@ -150,7 +153,7 @@ public class Scheduler {
     @Async
     @Scheduled(initialDelay = 15000, fixedDelay = 45000)
     public void scanArtwork() throws Exception {
-        List<QueueDTO> queueElements = artworkDao.getArtworkQueueForScanning();
+        List<QueueDTO> queueElements = artworkDao.getArtworkQueueForScanning(ARTWORK_SCANNER_MAX_RESULTS);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.debug("No artwork found to scan");
             return;
@@ -159,8 +162,8 @@ public class Scheduler {
         LOG.info("Found {} artwork objects to process", queueElements.size());
         BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
 
-        ExecutorService executor = Executors.newFixedThreadPool(ARTWORK_SCANNER_THREADS);
-        for (int i = 0; i < ARTWORK_SCANNER_THREADS; i++) {
+        ExecutorService executor = Executors.newFixedThreadPool(ARTWORK_SCANNER_MAX_THREADS);
+        for (int i = 0; i < ARTWORK_SCANNER_MAX_THREADS; i++) {
             ArtworkScannerRunner worker = new ArtworkScannerRunner(queue, artworkScannerService);
             executor.execute(worker);
         }

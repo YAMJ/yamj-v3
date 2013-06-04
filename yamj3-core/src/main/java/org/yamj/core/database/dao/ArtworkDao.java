@@ -21,7 +21,7 @@ public class ArtworkDao extends ExtendedHibernateDaoSupport {
         return this.getHibernateTemplate().get(Artwork.class, id);
     }
 
-    public List<QueueDTO> getArtworkQueueForScanning() {
+    public List<QueueDTO> getArtworkQueueForScanning(final int maxResults) {
         final StringBuilder sql = new StringBuilder();
         sql.append("select art.id,art.artwork_type,art.create_timestamp,art.update_timestamp ");
         sql.append("from artwork art, videodata vd, series ser, season sea ");
@@ -37,7 +37,10 @@ public class ArtworkDao extends ExtendedHibernateDaoSupport {
                 SQLQuery query = session.createSQLQuery(sql.toString());
                 query.setReadOnly(true);
                 query.setCacheable(true);
-
+                if (maxResults > 0) {
+                    query.setMaxResults(maxResults);
+                }
+                
                 List<QueueDTO> queueElements = new ArrayList<QueueDTO>();
                 List<Object[]> objects = query.list();
                 for (Object[] object : objects) {

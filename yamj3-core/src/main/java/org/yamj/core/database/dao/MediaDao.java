@@ -110,7 +110,7 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
         });
     }
 
-    public List<QueueDTO> getMediaQueueForScanning() {
+    public List<QueueDTO> getMediaQueueForScanning(final int maxResults) {
         final StringBuilder sql = new StringBuilder();
         sql.append("select vd.id,'");
         sql.append(MetaDataType.VIDEODATA);
@@ -124,7 +124,7 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
         sql.append("' as mediatype,se.create_timestamp,se.update_timestamp ");
         sql.append("from series se ");
         sql.append("where se.status in ('NEW','UPDATED') ");
-
+        
         return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<List<QueueDTO>>() {
             @Override
             @SuppressWarnings("unchecked")
@@ -132,7 +132,10 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
                 SQLQuery query = session.createSQLQuery(sql.toString());
                 query.setReadOnly(true);
                 query.setCacheable(true);
-
+                if (maxResults > 0) {
+                    query.setMaxResults(maxResults);
+                }
+                
                 List<QueueDTO> queueElements = new ArrayList<QueueDTO>();
                 List<Object[]> objects = query.list();
                 for (Object[] object : objects) {

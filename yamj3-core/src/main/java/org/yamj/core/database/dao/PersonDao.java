@@ -63,7 +63,7 @@ public class PersonDao extends ExtendedHibernateDaoSupport {
         });
     }
 
-    public List<QueueDTO> getPersonQueueForScanning() {
+    public List<QueueDTO> getPersonQueueForScanning(final int maxResults) {
         final StringBuilder sql = new StringBuilder();
         sql.append("select id, '");
         sql.append(MetaDataType.PERSON);
@@ -82,6 +82,9 @@ public class PersonDao extends ExtendedHibernateDaoSupport {
                 SQLQuery query = session.createSQLQuery(sql.toString());
                 query.setReadOnly(true);
                 query.setCacheable(true);
+                if (maxResults > 0) {
+                    query.setMaxResults(maxResults);
+                }
 
                 List<QueueDTO> queueElements = new ArrayList<QueueDTO>();
                 List<Object[]> objects = query.list();
