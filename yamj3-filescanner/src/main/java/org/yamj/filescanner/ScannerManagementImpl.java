@@ -34,7 +34,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.remoting.RemoteConnectFailureException;
@@ -312,15 +311,13 @@ public class ScannerManagementImpl implements ScannerManagement {
 
         ApplicationContext appContext = ApplicationContextProvider.getApplicationContext();
         SendToCore stc = (SendToCore) appContext.getBean("sendToCore");
-
         stc.setImportDto(dto);
-
         stc.setCounter(runningCount);
         FutureTask<StatusType> task = new FutureTask<StatusType>(stc);
 
         yamjExecutor.submit(task);
-
-        library.addDirectoryStatus(stageDir.getPath(), ConcurrentUtils.constantFuture(StatusType.DONE));
+//        library.addDirectoryStatus(stageDir.getPath(), ConcurrentUtils.constantFuture(StatusType.DONE));
+        library.addDirectoryStatus(stageDir.getPath(), task);
     }
 
     /**

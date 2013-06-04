@@ -17,8 +17,6 @@ public class SendToCore implements Callable<StatusType> {
     private static final Logger LOG = LoggerFactory.getLogger(SendToCore.class);
     @Autowired
     private FileImportService fileImportService;
-//    @Autowired
-//    private PingCore pingCore;
     private ImportDTO importDto;
     private int timeoutSeconds;
     private int numberOfRetries;
