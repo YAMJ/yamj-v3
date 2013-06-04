@@ -31,7 +31,7 @@ public class GitHubServiceImpl implements GitHubService {
     private static final String ACCEPT = "Accept";
     private static final String GH_USER_AGENT = "GitHubJava/2.1.0";
     private static final String GH_ACCEPT = "application/vnd.github.beta+json";
-    private static final int DAY_AS_MILLIS = 24 * 60 * 60 * 1000;
+    private static final long MILLISECONDS_PER_DAY = 24L * 60 * 60 * 1000;
     @Autowired
     private PoolingHttpClient httpClient;
 
@@ -132,7 +132,7 @@ public class GitHubServiceImpl implements GitHubService {
         long diff = DateTimeTools.getDuration(dt1, dt2);
 
         LOG.debug("Difference : {}", diff, DateTimeTools.formatDurationColon(diff));
-        if (diff > (maxAgeDays * DAY_AS_MILLIS)) {
+        if (diff > (maxAgeDays * MILLISECONDS_PER_DAY)) {
             LOG.warn("Your installation is older than () days! Please update it", maxAgeDays);
             return Boolean.FALSE;
         } else if (diff > 0) {
