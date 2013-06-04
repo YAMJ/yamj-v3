@@ -1,3 +1,25 @@
+/*
+ *      Copyright (c) 2004-2013 YAMJ Members
+ *      https://github.com/organizations/YAMJ/teams
+ *
+ *      This file is part of the Yet Another Media Jukebox (YAMJ).
+ *
+ *      The YAMJ is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      any later version.
+ *
+ *      YAMJ is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with the YAMJ.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Web: https://github.com/YAMJ/yamj-v3
+ *
+ */
 package org.yamj.core.database.dao;
 
 import java.sql.SQLException;
@@ -30,7 +52,7 @@ public class ArtworkDao extends ExtendedHibernateDaoSupport {
         sb.append("left outer join fetch art.season ");
         sb.append("left outer join fetch art.series ");
         sb.append("where art.id = ?");
-        
+
         List<Artwork> artworks = getHibernateTemplate().find(sb.toString(), id);
         return DataAccessUtils.requiredUniqueResult(artworks);
     }
@@ -43,7 +65,7 @@ public class ArtworkDao extends ExtendedHibernateDaoSupport {
         sql.append("and (art.videodata_id is null or (art.videodata_id=vd.id and vd.status='DONE')) ");
         sql.append("and (art.season_id is null or (art.season_id=sea.id and sea.status='DONE')) ");
         sql.append("and (art.series_id is null or (art.series_id=ser.id and ser.status='DONE')) ");
-        
+
         return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<List<QueueDTO>>() {
             @Override
             @SuppressWarnings("unchecked")
@@ -54,7 +76,7 @@ public class ArtworkDao extends ExtendedHibernateDaoSupport {
                 if (maxResults > 0) {
                     query.setMaxResults(maxResults);
                 }
-                
+
                 List<QueueDTO> queueElements = new ArrayList<QueueDTO>();
                 List<Object[]> objects = query.list();
                 for (Object[] object : objects) {

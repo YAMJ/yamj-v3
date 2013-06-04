@@ -1,3 +1,25 @@
+/*
+ *      Copyright (c) 2004-2013 YAMJ Members
+ *      https://github.com/organizations/YAMJ/teams
+ *
+ *      This file is part of the Yet Another Media Jukebox (YAMJ).
+ *
+ *      The YAMJ is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      any later version.
+ *
+ *      YAMJ is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with the YAMJ.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Web: https://github.com/YAMJ/yamj-v3
+ *
+ */
 package org.yamj.core.service.artwork.common;
 
 import com.omertron.themoviedbapi.MovieDbException;
@@ -19,7 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service("tmdbArtworkScanner")
-public class TheMovieDbArtworkScanner implements 
+public class TheMovieDbArtworkScanner implements
     IMoviePosterScanner, IMovieFanartScanner, InitializingBean
 {
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbArtworkScanner.class);
@@ -33,7 +55,7 @@ public class TheMovieDbArtworkScanner implements
     private TheMovieDbApi tmdbApi;
     @Autowired
     private TheMovieDbScanner tmdbScanner;
-    
+
     @Override
     public String getScannerName() {
         return TheMovieDbScanner.TMDB_SCANNER_ID;
@@ -127,7 +149,7 @@ public class TheMovieDbArtworkScanner implements
             } catch (MovieDbException ex) {
                 LOG.warn("Failed to get TMDb ID for " + imdbID + " - " + ex.getMessage());
             }
-            
+
             if (moviedb != null) {
                 tmdbID = String.valueOf(moviedb.getId());
                 if (StringUtils.isNumeric(tmdbID)) {

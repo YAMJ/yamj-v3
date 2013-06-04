@@ -1,3 +1,25 @@
+/*
+ *      Copyright (c) 2004-2013 YAMJ Members
+ *      https://github.com/organizations/YAMJ/teams
+ *
+ *      This file is part of the Yet Another Media Jukebox (YAMJ).
+ *
+ *      The YAMJ is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      any later version.
+ *
+ *      YAMJ is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with the YAMJ.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Web: https://github.com/YAMJ/yamj-v3
+ *
+ */
 package org.yamj.core.service.artwork;
 
 import java.util.Arrays;
@@ -29,10 +51,10 @@ public class ArtworkScannerService {
     private static List<String> FANART_MOVIE_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.fanart.movie.priorities", "tmdb").toLowerCase().split(","));
     private HashMap<String, IMoviePosterScanner> registeredMoviePosterScanner = new HashMap<String, IMoviePosterScanner>();
     private HashMap<String, IMovieFanartScanner> registeredMovieFanartScanner = new HashMap<String, IMovieFanartScanner>();
-    
+
     @Autowired
     private ArtworkDao artworkDao;
-    
+
     public void registerMoviePosterScanner(IMoviePosterScanner posterScanner) {
         registeredMoviePosterScanner.put(posterScanner.getScannerName().toLowerCase(), posterScanner);
     }
@@ -40,7 +62,7 @@ public class ArtworkScannerService {
     public void registerMovieFanartScanner(IMovieFanartScanner fanartScanner) {
         registeredMovieFanartScanner.put(fanartScanner.getScannerName().toLowerCase(), fanartScanner);
     }
-    
+
     public void scanArtwork(QueueDTO queueElement) {
         if (queueElement == null) {
             // nothing to
@@ -49,7 +71,7 @@ public class ArtworkScannerService {
 
         // get unique required artwork
         Artwork artwork = artworkDao.getRequiredArtwork(queueElement.getId());
-        
+
         if (ArtworkType.POSTER.equals(artwork.getArtworkType())) {
             boolean found = this.scanPosterLocal(artwork);
             if (!found) {
@@ -89,7 +111,7 @@ public class ArtworkScannerService {
 
     private boolean scanPosterLocal(Artwork artwork) {
         LOG.trace("Scan local for poster: {}", artwork);
-        
+
         // TODO local scan
         return false;
     }
@@ -118,7 +140,7 @@ public class ArtworkScannerService {
 
     private boolean scanFanartLocal(Artwork artwork) {
         LOG.trace("Scan local for fanart: {}", artwork);
-        
+
         // TODO local scan
         return false;
     }

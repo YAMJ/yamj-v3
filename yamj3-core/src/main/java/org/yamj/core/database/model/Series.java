@@ -1,3 +1,25 @@
+/*
+ *      Copyright (c) 2004-2013 YAMJ Members
+ *      https://github.com/organizations/YAMJ/teams
+ *
+ *      This file is part of the Yet Another Media Jukebox (YAMJ).
+ *
+ *      The YAMJ is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      any later version.
+ *
+ *      YAMJ is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with the YAMJ.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Web: https://github.com/YAMJ/yamj-v3
+ *
+ */
 package org.yamj.core.database.model;
 
 import org.hibernate.annotations.Index;
@@ -27,24 +49,24 @@ public class Series extends AbstractMetadata {
 
     @Column(name = "start_year")
     private int startYear = -1;
-    
+
     @Column(name = "end_year")
     private int endYear = -1;
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_ids", joinColumns = @JoinColumn(name = "series_id"))
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200)
     private Map<String, String> sourcedbIdMap = new HashMap<String, String>(0);
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_ratings", joinColumns = @JoinColumn(name = "series_id"))
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", length = 30)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_override", joinColumns = @JoinColumn(name = "series_id"))
     @Fetch(value = FetchMode.SELECT)
@@ -52,12 +74,12 @@ public class Series extends AbstractMetadata {
     @MapKey(type = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30)
     private Map<OverrideFlag, String> overrideFlags = new HashMap<OverrideFlag, String>(0);
-    
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
     private Set<Season> seasons = new HashSet<Season>(0);
 
     // GETTER and SETTER
-    
+
     public int getStartYear() {
         return startYear;
     }
@@ -131,9 +153,9 @@ public class Series extends AbstractMetadata {
     public void setSeasons(Set<Season> seasons) {
         this.seasons = seasons;
     }
-    
+
     // EQUALITY CHECKS
-    
+
     @Override
     public int hashCode() {
         final int prime = 17;

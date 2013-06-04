@@ -1,3 +1,25 @@
+/*
+ *      Copyright (c) 2004-2013 YAMJ Members
+ *      https://github.com/organizations/YAMJ/teams
+ *
+ *      This file is part of the Yet Another Media Jukebox (YAMJ).
+ *
+ *      The YAMJ is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      any later version.
+ *
+ *      YAMJ is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with the YAMJ.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Web: https://github.com/YAMJ/yamj-v3
+ *
+ */
 package org.yamj.core.database.service;
 
 import java.util.HashSet;
@@ -36,14 +58,14 @@ public class MediaService {
     public void update(Object entity) {
         this.commonDao.updateEntity(entity);
     }
-        
+
     public VideoData getRequiredVideoData(Long id) {
         final StringBuilder sb = new StringBuilder();
         sb.append("from VideoData vd ");
         sb.append("left outer join fetch vd.genres ");
         sb.append("left outer join fetch vd.credits c ");
         sb.append("where vd.id = ?" );
-        
+
         @SuppressWarnings("unchecked")
         List<VideoData> objects = this.commonDao.getObjectsById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
@@ -56,7 +78,7 @@ public class MediaService {
         sb.append("join fetch sea.videoDatas vd ");
         sb.append("left outer join fetch vd.credits c ");
         sb.append("where ser.id = ?" );
-        
+
         @SuppressWarnings("unchecked")
         List<Series> objects = this.commonDao.getObjectsById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
@@ -65,14 +87,14 @@ public class MediaService {
     public Person getRequiredPerson(Long id) {
         final StringBuilder sb = new StringBuilder();
         sb.append("from Person person where person.id = ?");
-    
+
         // later on there it could be necessary to fetch associated entities
-    
+
         @SuppressWarnings("unchecked")
         List<Person> objects = this.commonDao.getObjectsById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
-    
+
     @Transactional(propagation = Propagation.REQUIRED)
     public void store(VideoData videoData) {
         // update entity
@@ -80,7 +102,7 @@ public class MediaService {
 
         // update genres
         updateGenres(videoData);
-        
+
         // update cast and crew
         updateCastCrew(videoData);
     }
@@ -161,7 +183,7 @@ public class MediaService {
             }
 
             if (castCrew == null) {
-                // create new association between person and video 
+                // create new association between person and video
                 castCrew = new CastCrew();
                 castCrew.setPerson(person);
                 castCrew.setJob(dto.getJobType(), dto.getRole());
@@ -174,7 +196,7 @@ public class MediaService {
             }
         }
     }
-    
+
     @Transactional(propagation = Propagation.REQUIRED)
     public void errorVideoData(Long id) {
         VideoData videoData = mediaDao.getVideoData(id);

@@ -1,3 +1,25 @@
+/*
+ *      Copyright (c) 2004-2013 YAMJ Members
+ *      https://github.com/organizations/YAMJ/teams
+ *
+ *      This file is part of the Yet Another Media Jukebox (YAMJ).
+ *
+ *      The YAMJ is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      any later version.
+ *
+ *      YAMJ is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with the YAMJ.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Web: https://github.com/YAMJ/yamj-v3
+ *
+ */
 package org.yamj.core.database.dao;
 
 import java.sql.SQLException;
@@ -53,7 +75,7 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
             }
         });
     }
-    
+
     public Season getSeason(Long id) {
         return this.getHibernateTemplate().get(Season.class, id);
     }
@@ -106,7 +128,7 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
         sql.append("and (ser.status in ('NEW','UPDATED') ");
         sql.append(" or  sea.status in ('NEW','UPDATED') ");
         sql.append(" or  vd.status in  ('NEW','UPDATED')) ");
-        
+
         return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<List<QueueDTO>>() {
             @Override
             @SuppressWarnings("unchecked")
@@ -117,7 +139,7 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
                 if (maxResults > 0) {
                     query.setMaxResults(maxResults);
                 }
-                
+
                 List<QueueDTO> queueElements = new ArrayList<QueueDTO>();
                 List<Object[]> objects = query.list();
                 for (Object[] object : objects) {
