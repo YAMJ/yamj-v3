@@ -117,11 +117,15 @@ public final class DateTimeTools {
      *
      * @param start
      * @param end
-     * @return
+     * @return the difference (in milliseconds) or -1 if "start" is after "end"
      */
     public static long getDuration(DateTime start, DateTime end) {
-        Interval interval = new Interval(start, end);
-        return interval.toDurationMillis();
+        if (start.isBefore(end)) {
+            Interval interval = new Interval(start, end);
+            return interval.toDurationMillis();
+        } else {
+            return -1L;
+        }
     }
 
     /**

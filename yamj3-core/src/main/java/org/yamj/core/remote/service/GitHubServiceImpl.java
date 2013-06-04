@@ -130,13 +130,16 @@ public class GitHubServiceImpl implements GitHubService {
         DateTime dt1 = DateTimeTools.parseDate(ghDate, DateTimeTools.ISO8601_FORMAT);
         DateTime dt2 = DateTimeTools.parseDate(buildDate, DateTimeTools.BUILD_FORMAT);
         long diff = DateTimeTools.getDuration(dt1, dt2);
+
         LOG.debug("Difference : {}", diff, DateTimeTools.formatDurationColon(diff));
         if (diff > (maxAgeDays * DAY_AS_MILLIS)) {
             LOG.warn("Your installation is older than () days! Please update it", maxAgeDays);
             return Boolean.FALSE;
-        } else {
+        } else if (diff > 0) {
             LOG.debug("Your installation is only {} old.", DateTimeTools.formatDurationText(diff));
-            return Boolean.TRUE;
+        } else {
+            LOG.debug("Your installation is up to date");
         }
+        return Boolean.TRUE;
     }
 }
