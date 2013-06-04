@@ -1,24 +1,20 @@
 package org.yamj.core.database.dao;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.hibernate.*;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.orm.hibernate3.HibernateCallback;
+import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
 import org.yamj.core.database.model.type.MetaDataType;
 import org.yamj.core.hibernate.ExtendedHibernateDaoSupport;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import org.hibernate.CacheMode;
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.stereotype.Service;
 
 @Service("personDao")
 public class PersonDao extends ExtendedHibernateDaoSupport {
@@ -37,30 +33,18 @@ public class PersonDao extends ExtendedHibernateDaoSupport {
     }
 
     public Person getPerson(final long id) {
-        return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<Person>() {
-            @Override
-            public Person doInHibernate(Session session) throws HibernateException, SQLException {
-                Criteria criteria = session.createCriteria(Person.class);
-                criteria.add(Restrictions.naturalId().set("id", id));
-                criteria.setCacheable(true);
-                criteria.setCacheMode(CacheMode.NORMAL);
-                return (Person) criteria.uniqueResult();
-            }
-        });
+        return this.getHibernateTemplate().get(Person.class, id);
     }
 
-    public Long getNextPersonId(final StatusType... statusTypes) {
-        return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<Long>() {
-            @Override
-            public Long doInHibernate(Session session) throws HibernateException, SQLException {
-                Criteria criteria = session.createCriteria(Person.class);
-                criteria.add(Restrictions.in("status", statusTypes));
-                criteria.setProjection(Projections.min("id"));
-                criteria.setCacheable(true);
-                criteria.setCacheMode(CacheMode.NORMAL);
-                return (Long) criteria.uniqueResult();
-            }
-        });
+    @SuppressWarnings("unchecked")
+    public Person getRequiredPerson(Long id) {
+        final StringBuffer sb = new StringBuffer();
+        sb.append("from Person person where person.id = ?");
+        
+        // later on there it could be necessary to fetch associated entities
+        
+        List<Person> persons = getHibernateTemplate().find(sb.toString(), id);
+        return DataAccessUtils.requiredUniqueResult(persons);
     }
 
     public List<QueueDTO> getPersonQueueForScanning(final int maxResults) {

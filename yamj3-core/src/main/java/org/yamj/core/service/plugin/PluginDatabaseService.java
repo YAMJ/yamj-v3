@@ -1,14 +1,5 @@
 package org.yamj.core.service.plugin;
 
-import org.yamj.common.tools.PropertyTools;
-import org.yamj.common.type.StatusType;
-import org.yamj.core.database.dao.CommonDao;
-import org.yamj.core.database.dao.MediaDao;
-import org.yamj.core.database.dao.PersonDao;
-import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.type.JobType;
-import org.yamj.core.database.model.type.MetaDataType;
 import java.util.HashMap;
 import java.util.HashSet;
 import org.apache.commons.lang3.StringUtils;
@@ -18,12 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.yamj.core.database.model.CastCrew;
-import org.yamj.core.database.model.Genre;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.common.tools.PropertyTools;
+import org.yamj.common.type.StatusType;
+import org.yamj.core.database.dao.CommonDao;
+import org.yamj.core.database.dao.MediaDao;
+import org.yamj.core.database.dao.PersonDao;
+import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.dto.CreditDTO;
+import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.database.model.type.MetaDataType;
 
 @Service("pluginDatabaseService")
 public class PluginDatabaseService {
@@ -59,24 +54,7 @@ public class PluginDatabaseService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void scanMetadata(QueueDTO queueElement) {
-        if (queueElement == null) {
-            // nothing to
-            return;
-        }
-
-        if (queueElement.isMetadataType(MetaDataType.VIDEODATA)) {
-            this.scanVideoData(queueElement.getId());
-        } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
-            this.scanSeries(queueElement.getId());
-        } else if (queueElement.isMetadataType(MetaDataType.PERSON)) {
-            this.scanPerson(queueElement.getId());
-        } else {
-            LOG.error("No valid element for scanning metadata '{}'", queueElement);
-        }
-    }
-
-    private void scanVideoData(Long id) {
+    public void scanVideoData(Long id) {
         VideoData videoData = mediaDao.getVideoData(id);
 
         // SCAN MOVIE
@@ -127,7 +105,8 @@ public class PluginDatabaseService {
         mediaDao.updateEntity(videoData);
     }
 
-    private void scanSeries(Long id) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void scanSeries(Long id) {
         Series series = mediaDao.getSeries(id);
 
         // SCAN SERIES
@@ -294,14 +273,12 @@ public class PluginDatabaseService {
 
     /**
      * Scan the data site for information on the person
-     *
-     * @param id
      */
-    private void scanPerson(Long id) {
+    public void scanPerson(Long id) {
         String scannerName = PERSON_SCANNER;
         IPersonScanner personScanner = registeredPersonScanner.get(scannerName);
-        Person person = personDao.getPerson(id);
-
+        Person person = personDao.getRequiredPerson(id);
+        
         LOG.info("Scanning for information on person {}-'{}' using {}", id, person.getName(), scannerName);
 
         if (personScanner == null) {
@@ -321,10 +298,12 @@ public class PluginDatabaseService {
             LOG.warn("Scanning error", error);
         }
 
-        // update video data and reset status
+        // update person and reset status
         if (ScanResult.OK.equals(scanResult)) {
             LOG.debug("Person {}-'{}', scanned OK", id, person.getName());
             person.setStatus(StatusType.DONE);
+        } else if (ScanResult.MISSING_ID.equals(scanResult)) {
+            person.setStatus(StatusType.MISSING);
         } else {
             person.setStatus(StatusType.ERROR);
         }

@@ -1,9 +1,5 @@
 package org.yamj.core.database.dao;
 
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.dto.QueueDTOComparator;
-import org.yamj.core.hibernate.ExtendedHibernateDaoSupport;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,14 +7,32 @@ import java.util.List;
 import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.stereotype.Service;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.dto.QueueDTOComparator;
+import org.yamj.core.hibernate.ExtendedHibernateDaoSupport;
 
 @Service("artworkDao")
 public class ArtworkDao extends ExtendedHibernateDaoSupport {
 
     public Artwork getArtwork(Long id) {
         return this.getHibernateTemplate().get(Artwork.class, id);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Artwork getRequiredArtwork(Long id) {
+        final StringBuffer sb = new StringBuffer();
+        sb.append("from Artwork art ");
+        sb.append("left outer join fetch art.videoData ");
+        sb.append("left outer join fetch art.season ");
+        sb.append("left outer join fetch art.series ");
+        sb.append("where art.id = ?");
+        
+        List<Artwork> artworks = getHibernateTemplate().find(sb.toString(), id);
+        return DataAccessUtils.requiredUniqueResult(artworks);
     }
 
     public List<QueueDTO> getArtworkQueueForScanning(final int maxResults) {

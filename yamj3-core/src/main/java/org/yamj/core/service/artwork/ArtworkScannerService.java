@@ -41,17 +41,14 @@ public class ArtworkScannerService {
         registeredMovieFanartScanner.put(fanartScanner.getScannerName().toLowerCase(), fanartScanner);
     }
     
-    @Transactional(propagation = Propagation.REQUIRED)
     public void scanArtwork(QueueDTO queueElement) {
         if (queueElement == null) {
             // nothing to
             return;
         }
 
-        Artwork artwork = artworkDao.getArtwork(queueElement.getId());
-        if (artwork == null) {
-            throw new RuntimeException("Found no artwork for id " + queueElement.getId());
-        }
+        // get unique required artwork
+        Artwork artwork = artworkDao.getRequiredArtwork(queueElement.getId());
         
         if (ArtworkType.POSTER.equals(artwork.getArtworkType())) {
             boolean found = this.scanPosterLocal(artwork);

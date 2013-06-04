@@ -1,5 +1,7 @@
 package org.yamj.core.service.plugin;
 
+import org.yamj.core.database.model.type.MetaDataType;
+
 import org.yamj.core.database.model.dto.QueueDTO;
 import java.util.concurrent.BlockingQueue;
 import org.slf4j.Logger;
@@ -20,8 +22,17 @@ public class PluginDatabaseRunner implements Runnable {
     public void run() {
         QueueDTO queueElement = queue.poll();
         while (queueElement != null) {
+            
             try {
-                service.scanMetadata(queueElement);
+                if (queueElement.isMetadataType(MetaDataType.VIDEODATA)) {
+                    service.scanVideoData(queueElement.getId());
+                } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
+                    service.scanSeries(queueElement.getId());
+                } else if (queueElement.isMetadataType(MetaDataType.PERSON)) {
+                    service.scanPerson(queueElement.getId());
+                } else {
+                    LOG.error("No valid element for scanning metadata '{}'", queueElement);
+                }
             } catch (Exception error) {
                 LOG.error("Failed to process meta data", error);
                 try {
