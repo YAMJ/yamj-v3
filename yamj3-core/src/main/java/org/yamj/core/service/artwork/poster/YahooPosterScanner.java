@@ -51,6 +51,8 @@ public class YahooPosterScanner extends AbstractMoviePosterScanner
                 int endIndex = xml.indexOf("rurl=", beginIndex);
                 if (endIndex > 0) {
                     posterUrl = URLDecoder.decode(xml.substring(beginIndex + 7, endIndex-1), "UTF-8");
+                } else {
+                    posterUrl = URLDecoder.decode(xml.substring(beginIndex + 7), "UTF-8");
                 }
             }
         } catch (Exception error) {

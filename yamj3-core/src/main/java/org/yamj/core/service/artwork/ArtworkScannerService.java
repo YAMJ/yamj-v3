@@ -1,16 +1,5 @@
 package org.yamj.core.service.artwork;
 
-import org.yamj.common.tools.PropertyTools;
-import org.yamj.common.type.StatusType;
-import org.yamj.core.database.dao.ArtworkDao;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.IMetadata;
-import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.service.artwork.fanart.IFanartScanner;
-import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
-import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
-import org.yamj.core.service.artwork.poster.IPosterScanner;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.yamj.common.tools.PropertyTools;
+import org.yamj.common.type.StatusType;
+import org.yamj.core.database.dao.ArtworkDao;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.service.artwork.fanart.IFanartScanner;
+import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
+import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
+import org.yamj.core.service.artwork.poster.IPosterScanner;
 
 @Service("artworkScannerService")
 public class ArtworkScannerService {
@@ -52,22 +51,6 @@ public class ArtworkScannerService {
         Artwork artwork = artworkDao.getArtwork(queueElement.getId());
         if (artwork == null) {
             throw new RuntimeException("Found no artwork for id " + queueElement.getId());
-        }
-        
-        // TODO select out in database query
-        IMetadata metadata;
-        if (artwork.getVideoData() != null) {
-            metadata = artwork.getVideoData();
-        } else if (artwork.getSeason() != null) {
-            metadata = artwork.getSeason();
-        } else if (artwork.getSeries() != null) {
-            metadata = artwork.getSeries();
-        } else {
-            throw new RuntimeException("Artwork has no associated metadata");
-        }
-        if (!StatusType.DONE.equals(metadata.getStatus())) {
-            // must be done
-            return;
         }
         
         if (ArtworkType.POSTER.equals(artwork.getArtworkType())) {

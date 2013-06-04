@@ -23,9 +23,12 @@ public class ArtworkDao extends ExtendedHibernateDaoSupport {
 
     public List<QueueDTO> getArtworkQueueForScanning() {
         final StringBuilder sql = new StringBuilder();
-        sql.append("select id,artwork_type,create_timestamp,update_timestamp ");
-        sql.append("from artwork ");
-        sql.append("where status in ('NEW') ");
+        sql.append("select art.id,art.artwork_type,art.create_timestamp,art.update_timestamp ");
+        sql.append("from artwork art, videodata vd, series ser, season sea ");
+        sql.append("where art.status = 'NEW' ");
+        sql.append("and (art.videodata_id is null or (art.videodata_id=vd.id and vd.status='DONE')) ");
+        sql.append("and (art.season_id is null or (art.season_id=sea.id and sea.status='DONE')) ");
+        sql.append("and (art.series_id is null or (art.series_id=ser.id and ser.status='DONE')) ");
         
         return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<List<QueueDTO>>() {
             @Override
