@@ -11,7 +11,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  */
 public class StageDirectoryDTO implements Serializable {
 
-    private static final long serialVersionUID = 4310308645268137615L;
+    private static final long serialVersionUID = 2L;
     private String path;
     private long date;
     private List<StageFileDTO> stageFiles = new ArrayList<StageFileDTO>(0);
