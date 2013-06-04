@@ -235,9 +235,9 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
     /**
      * Collect keywords list and appropriate keyword values. <br>
      * Example: <br>
-     * my.languages = EN,FR<br>
-     * my.languages.EN = English<br>
-     * my.languages.FR = French
+     * my.languages=EN,FR<br>
+     * my.languages.EN=English<br>
+     * my.languages.FR=French
      *
      * @param prefix Key for keywords list and prefix for value searching.
      * @return Ordered keyword list and map.
@@ -245,17 +245,17 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
     public static KeywordMap getKeywordMap(String prefix, String defaultValue) {
         KeywordMap keywordMap = new KeywordMap();
 
-        String languages = getProperty(prefix, defaultValue);
-        if (!isBlank(languages)) {
-            for (String lang : languages.split("[ ,]+")) {
-                lang = StringUtils.trimToNull(lang);
-                if (lang == null) {
+        String propertyString = getProperty(prefix, defaultValue);
+        if (!isBlank(propertyString)) {
+            for (String singleProperty : propertyString.split("[ ,]+")) {
+                singleProperty = StringUtils.trimToNull(singleProperty);
+                if (singleProperty == null) {
                     continue;
                 }
-                keywordMap.getKeywords().add(lang);
-                String values = getProperty(prefix + "." + lang);
+                keywordMap.getKeywords().add(singleProperty);
+                String values = getProperty(prefix + "." + singleProperty);
                 if (values != null) {
-                    keywordMap.put(lang, values);
+                    keywordMap.put(singleProperty, values);
                 }
             }
         }

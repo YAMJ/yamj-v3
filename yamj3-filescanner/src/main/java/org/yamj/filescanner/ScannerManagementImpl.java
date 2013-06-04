@@ -62,6 +62,8 @@ import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.tools.ClassTools;
+import org.yamj.common.tools.StringTools;
+import org.yamj.common.util.KeywordMap;
 
 /**
  * Performs an initial scan of the library location and then updates when changes occur.
@@ -91,6 +93,7 @@ public class ScannerManagementImpl implements ScannerManagement {
     // ImportDTO constants
     private static final String DEFAULT_CLIENT = PropertyTools.getProperty("filescanner.default.client", "FileScanner");
     private static final String DEFAULT_PLAYER_PATH = PropertyTools.getProperty("filescanner.default.playerpath", "");
+    private static final String DEFAULT_SPLIT = ",|;";
     // Date check
     private static final int MAX_INSTALL_AGE = PropertyTools.getIntProperty("filescanner.installation.maxdays", 1);
     // Map of filenames & extensions that cause scanning of a directory to stop or a filename to be ignored
@@ -100,10 +103,49 @@ public class ScannerManagementImpl implements ScannerManagement {
     static {
         // Set up the break scanning list. A "null" for the list means all files.
         // Ensure all filenames and extensions are lowercase
+        boolean nmjCompliant = PropertyTools.getBooleanProperty("filescanner.nmjCompliant", Boolean.FALSE);
+        KeywordMap fsIgnore = PropertyTools.getKeywordMap("filescanner.ignore", "");
+
         DIR_EXCLUSIONS.put(".mjbignore", null);
-        DIR_EXCLUSIONS.put(".no_all.nmj", null);
-        DIR_EXCLUSIONS.put(".no_video.nmj", Arrays.asList("avi", "mkv"));
-        DIR_EXCLUSIONS.put(".no_photo.nmj", Arrays.asList("jpg", "png"));
+        if (nmjCompliant) {
+            DIR_EXCLUSIONS.put(".no_all.nmj", null);
+        }
+
+        List<String> keywordList = processKeywords(fsIgnore, "file");
+        if (!keywordList.isEmpty()) {
+            DIR_IGNORE_FILES.addAll(keywordList);
+        }
+
+        keywordList = processKeywords(fsIgnore, "video");
+        if (!keywordList.isEmpty()) {
+            DIR_EXCLUSIONS.put(".no_video.yamj", keywordList);
+            if (nmjCompliant) {
+                DIR_EXCLUSIONS.put(".no_video.nmj", keywordList);
+            }
+        }
+
+        keywordList = processKeywords(fsIgnore, "image");
+        if (!keywordList.isEmpty()) {
+            DIR_EXCLUSIONS.put(".no_image.yamj", keywordList);
+            if (nmjCompliant) {
+                DIR_EXCLUSIONS.put(".no_photo.nmj", keywordList);
+            }
+        }
+
+        keywordList = processKeywords(fsIgnore, "other");
+        if (!keywordList.isEmpty()) {
+            DIR_EXCLUSIONS.put(".no_other.yamj", keywordList);
+        }
+        LOG.debug("Directory exclusions: {}", DIR_EXCLUSIONS.toString());
+        LOG.debug("File exclusions: {}", DIR_IGNORE_FILES);
+    }
+
+    private static List<String> processKeywords(KeywordMap fsIgnore, String keyName) {
+        if (fsIgnore.containsKey(keyName) && StringUtils.isNotBlank(fsIgnore.get(keyName))) {
+            return StringTools.splitList(fsIgnore.get(keyName), DEFAULT_SPLIT);
+        } else {
+            return Collections.EMPTY_LIST;
+        }
     }
 
     /**
@@ -273,7 +315,9 @@ public class ScannerManagementImpl implements ScannerManagement {
             for (File file : currentFileList) {
                 if (file.isFile()) {
                     String lcFilename = file.getName().toLowerCase();
-                    if (exclusions.contains(FilenameUtils.getExtension(lcFilename)) || DIR_EXCLUSIONS.containsKey(lcFilename)) {
+                    if (exclusions.contains(FilenameUtils.getExtension(lcFilename))
+                            || DIR_EXCLUSIONS.containsKey(lcFilename)
+                            || DIR_IGNORE_FILES.contains(lcFilename)) {
                         LOG.debug("File name '{}' excluded because it's listed in the exlusion list for this directory", file.getName());
                         continue;
                     } else {
