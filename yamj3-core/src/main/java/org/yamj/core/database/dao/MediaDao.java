@@ -97,11 +97,15 @@ public class MediaDao extends ExtendedHibernateDaoSupport {
         sql.append("where vd.status in ('NEW','UPDATED') ");
         sql.append("and vd.episode<0 ");
         sql.append("union ");
-        sql.append("select se.id,'");
+        sql.append("select ser.id,'");
         sql.append(MetaDataType.SERIES);
-        sql.append("' as mediatype,se.create_timestamp,se.update_timestamp ");
-        sql.append("from series se ");
-        sql.append("where se.status in ('NEW','UPDATED') ");
+        sql.append("' as mediatype,ser.create_timestamp,ser.update_timestamp ");
+        sql.append("from series ser, season sea, videodata vd ");
+        sql.append("where ser.id=sea.series_id ");
+        sql.append("and sea.id=vd.season_id ");
+        sql.append("and (ser.status in ('NEW','UPDATED') ");
+        sql.append(" or  sea.status in ('NEW','UPDATED') ");
+        sql.append(" or  vd.status in  ('NEW','UPDATED')) ");
         
         return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<List<QueueDTO>>() {
             @Override
