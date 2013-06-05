@@ -108,7 +108,7 @@ public class MetadataStorageService {
         sb.append("where vd.id = ?" );
 
         @SuppressWarnings("unchecked")
-        List<VideoData> objects = this.commonDao.getObjectsById(sb, id);
+        List<VideoData> objects = this.commonDao.find(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
@@ -122,7 +122,7 @@ public class MetadataStorageService {
         sb.append("where ser.id = ?" );
 
         @SuppressWarnings("unchecked")
-        List<Series> objects = this.commonDao.getObjectsById(sb, id);
+        List<Series> objects = this.commonDao.find(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
@@ -134,7 +134,7 @@ public class MetadataStorageService {
         // later on there it could be necessary to fetch associated entities
 
         @SuppressWarnings("unchecked")
-        List<Person> objects = this.commonDao.getObjectsById(sb, id);
+        List<Person> objects = this.commonDao.find(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 

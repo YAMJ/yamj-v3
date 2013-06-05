@@ -22,88 +22,86 @@
  */
 package org.yamj.core.hibernate;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 /**
- * Extended hibernate DAO support.
+ * Hibernate DAO implementation
  */
-public abstract class ExtendedHibernateDaoSupport extends HibernateDaoSupport implements ExtendedHibernateDao {
+public abstract class HibernateDao  {
 
     @Autowired
-    public void setExtendedSessionFactory(SessionFactory sessionFactory) {
-        super.setSessionFactory(sessionFactory);
+    private SessionFactory sessionFactory;
+    
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected ExtendedHibernateTemplate createHibernateTemplate(SessionFactory sessionFactory) {
-        return new ExtendedHibernateTemplate(sessionFactory);
+    public Session getSession() {
+        return sessionFactory.getCurrentSession();
     }
-
+    
     /**
-     * Get the extended hibernate template.
+     * Store an entity.
      *
-     * @return the hibernate template
+     * @param entity the entity to store
      */
-    public final ExtendedHibernateTemplate getExtendedHibernateTemplate() {
-        return (ExtendedHibernateTemplate) this.getHibernateTemplate();
+    public void storeEntity(final Object entity) {
+        getSession().saveOrUpdate(entity);
     }
 
     /**
-     * {@inheritDoc}
+     * Store all entities.
+     *
+     * @param entities the entities to store
      */
-    @Override
-    public final void storeEntity(final Object entity) {
-        this.getHibernateTemplate().saveOrUpdate(entity);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     @SuppressWarnings("rawtypes")
     public void storeAll(final Collection entities) {
-        this.getHibernateTemplate().saveOrUpdateAll(entities);
+        Session session = getSession();
+        for (Object entity : entities) {
+            session.saveOrUpdate(entity);
+        }
     }
 
     /**
-     * {@inheritDoc}
+     * Save an entity.
+     *
+     * @param entity the entity to save
      */
-    @Override
-    public final void saveEntity(final Object object) {
-        this.getHibernateTemplate().save(object);
+    public void saveEntity(final Object entity) {
+        getSession().save(entity);
     }
 
     /**
-     * {@inheritDoc}
+     * Update an entity.
+     *
+     * @param entity the entity to update
      */
-    public final void saveOrUpdate(final Object object) {
-        this.getHibernateTemplate().saveOrUpdate(object);
+    public void updateEntity(final Object entity) {
+        getSession().update(entity);
     }
 
     /**
-     * {@inheritDoc}
+     * Delete an entity.
+     *
+     * @param entity the entity to delete
      */
-    @Override
-    public final void updateEntity(final Object entity) {
-        this.getHibernateTemplate().update(entity);
+    public void deleteEntity(final Object entity) {
+        getSession().save(entity);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final void deleteEntity(final Object entity) {
-        this.getHibernateTemplate().delete(entity);
+    @SuppressWarnings("unchecked")
+    public <T> T get(Class<T> entityClass, Serializable id) {
+        return (T) getSession().get(entityClass, id);
     }
 
     /**
@@ -183,7 +181,7 @@ public abstract class ExtendedHibernateDaoSupport extends HibernateDaoSupport im
         } else if (rowElement instanceof Timestamp) {
             return (Timestamp) rowElement;
         } else {
-            // TODO invalid ttimestamp
+            // TODO invalid timestamp
             return null;
         }
     }
@@ -202,5 +200,26 @@ public abstract class ExtendedHibernateDaoSupport extends HibernateDaoSupport im
         } else {
             return new BigDecimal(rowElement.toString());
         }
+    }
+
+    @SuppressWarnings("rawtypes")
+    public List find(CharSequence queryString) {
+        return find(queryString, (Object[]) null);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public List find(CharSequence queryString, Object value) {
+        return find(queryString, new Object[] {value});
+    }
+
+    @SuppressWarnings("rawtypes")
+    public List find(final CharSequence query, final Object... values) {
+        Query queryObject = getSession().createQuery(query.toString());
+        if (values != null) {
+            for (int i = 0; i < values.length; i++) {
+                queryObject.setParameter(i, values[i]);
+            }
+        }
+        return queryObject.list();
     }
 }

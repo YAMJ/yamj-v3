@@ -22,34 +22,18 @@
  */
 package org.yamj.core.database.dao;
 
-import java.sql.SQLException;
-import org.hibernate.CacheMode;
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.MediaFile;
-import org.yamj.core.hibernate.ExtendedHibernateDaoSupport;
+import org.yamj.core.hibernate.HibernateDao;
 
 @Service("mediaDao")
-public class MediaDao extends ExtendedHibernateDaoSupport {
+public class MediaDao extends HibernateDao {
 
     public MediaFile getMediaFile(Long id) {
-        return this.getHibernateTemplate().get(MediaFile.class, id);
+        return get(MediaFile.class, id);
     }
 
-    public MediaFile getMediaFile(final String fileName) {
-        return this.getHibernateTemplate().executeWithNativeSession(new HibernateCallback<MediaFile>() {
-            @Override
-            public MediaFile doInHibernate(Session session) throws HibernateException, SQLException {
-                Criteria criteria = session.createCriteria(MediaFile.class);
-                criteria.add(Restrictions.naturalId().set("fileName", fileName));
-                criteria.setCacheable(true);
-                criteria.setCacheMode(CacheMode.NORMAL);
-                return (MediaFile) criteria.uniqueResult();
-            }
-        });
+    public MediaFile getMediaFile(String fileName) {
+        return (MediaFile)getSession().byNaturalId(MediaFile.class).using("fileName", fileName).load();
     }
 }

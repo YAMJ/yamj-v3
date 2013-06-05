@@ -22,6 +22,8 @@
  */
 package org.yamj.core.hibernate.usertypes;
 
+import org.hibernate.engine.spi.SessionImplementor;
+
 import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -157,11 +159,11 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
     }
 
     /**
-     * @see UserType#nullSafeGet(ResultSet, String[], Object)
+     * @see UserType#nullSafeGet(ResultSet, String[], SessionImplementor, Object)
      */
     @Override
     @SuppressWarnings("unchecked")
-    public Object nullSafeGet(final ResultSet rs, final String[] names, final Object owner) throws HibernateException,
+    public Object nullSafeGet(final ResultSet rs, final String[] names, final SessionImplementor session, final Object owner) throws HibernateException,
             SQLException {
         int ordinal = rs.getInt(names[0]);
 
@@ -171,11 +173,11 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
     }
 
     /**
-     * @see UserType#nullSafeSet(PreparedStatement, Object, int)
+     * @see UserType#nullSafeSet(PreparedStatement, Object, int, SessionImplementor)
      */
     @Override
     @SuppressWarnings("rawtypes")
-    public void nullSafeSet(final PreparedStatement st, final Object value, final int index) throws HibernateException,
+    public void nullSafeSet(final PreparedStatement st, final Object value, final int index, final SessionImplementor session) throws HibernateException,
             SQLException {
         if (value == null) {
             st.setNull(index, Types.INTEGER);

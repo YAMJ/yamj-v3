@@ -24,14 +24,14 @@ package org.yamj.core.database.model;
 
 import java.util.*;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.*;
-import org.hibernate.annotations.MapKey;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.Index;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
-@SuppressWarnings("deprecation")
 @javax.persistence.Entity
 @javax.persistence.Table(name = "season")
 @org.hibernate.annotations.Table(appliesTo = "season",
@@ -68,7 +68,6 @@ public class Season extends AbstractMetadata {
     @JoinTable(name = "season_override", joinColumns = @JoinColumn(name = "season_id"))
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
-    @MapKey(type = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30)
     private Map<OverrideFlag, String> overrideFlags = new HashMap<OverrideFlag, String>(0);
 

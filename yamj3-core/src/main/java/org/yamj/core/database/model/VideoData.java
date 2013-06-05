@@ -22,25 +22,19 @@
  */
 package org.yamj.core.database.model;
 
-import org.yamj.common.type.StatusType;
-
-import javax.persistence.JoinColumn;
-
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderColumn;
-import org.hibernate.annotations.Index;
-import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.database.model.type.OverrideFlag;
 import java.util.*;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.*;
-import org.hibernate.annotations.MapKey;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.Index;
+import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.dto.CreditDTO;
+import org.yamj.core.database.model.type.OverrideFlag;
 
-@SuppressWarnings({"unused", "deprecation"})
+@SuppressWarnings("unused")
 @javax.persistence.Entity
 @javax.persistence.Table(name = "videodata")
 @org.hibernate.annotations.Table(appliesTo = "videodata",
@@ -94,7 +88,6 @@ public class VideoData extends AbstractMetadata {
     @JoinTable(name = "videodata_override", joinColumns =@JoinColumn(name = "videodata_id"))
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
-    @MapKey(type = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30)
     private Map<OverrideFlag, String> overrideFlags = new HashMap<OverrideFlag, String>(0);
 

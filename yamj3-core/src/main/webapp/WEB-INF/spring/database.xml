@@ -14,6 +14,7 @@
         <property name="password" value="${yamj3.database.password}"/>
         <property name="initialSize" value="${yamj3.database.connections.initialSize}" />
         <property name="maxActive" value="${yamj3.database.connections.maxActive}"/>
+        <property name="minIdle" value="${yamj3.database.connections.minIdle}"/>
         <property name="maxIdle" value="${yamj3.database.connections.maxIdle}"/>
         <property name="maxWait" value="${yamj3.database.connections.maxWait}"/>
         <property name="minEvictableIdleTimeMillis" value="${yamj3.database.connections.minEvictableIdleTimeMillis}"/>
@@ -26,7 +27,7 @@
         <property name="poolPreparedStatements" value="true" />
     </bean>
 
-    <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
         <property name="entityInterceptor">
             <bean class="org.yamj.core.hibernate.AuditInterceptor"/>
@@ -44,16 +45,9 @@
                 <prop key="hibernate.cache.use_second_level_cache">false</prop>
             </props>
         </property>
-        <property name="eventListeners">
-            <map>
-                <entry key="merge">
-                    <bean class="org.springframework.orm.hibernate3.support.IdTransferringMergeEventListener"/>
-                </entry>
-            </map>
-        </property>
     </bean>
 
-    <bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
 

@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Properties;
 import org.hibernate.HibernateException;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.usertype.ParameterizedType;
 import org.hibernate.usertype.UserType;
 
@@ -161,11 +162,11 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
     }
 
     /**
-     * @see UserType#nullSafeGet(ResultSet, String[], Object)
+     * @see UserType#nullSafeGet(ResultSet, String[], SessionImplementor, Object)
      */
     @Override
     @SuppressWarnings("unchecked")
-    public Object nullSafeGet(final ResultSet rs, final String[] names, final Object owner) throws HibernateException,
+    public Object nullSafeGet(final ResultSet rs, final String[] names, final SessionImplementor session, final Object owner) throws HibernateException,
             SQLException {
         String name = rs.getString(names[0]);
         Enum<?> result = null;
@@ -176,11 +177,11 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
     }
 
     /**
-     * @see UserType#nullSafeSet(PreparedStatement, Object, int)
+     * @see UserType#nullSafeSet(PreparedStatement, Object, int, SessionImplementor)
      */
     @Override
     @SuppressWarnings("rawtypes")
-    public void nullSafeSet(final PreparedStatement st, final Object value, final int index) throws HibernateException,
+    public void nullSafeSet(final PreparedStatement st, final Object value, final int index, final SessionImplementor session) throws HibernateException,
             SQLException {
         if (null == value) {
             st.setNull(index, Types.VARCHAR);

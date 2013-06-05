@@ -75,7 +75,7 @@ public class ArtworkStorageService {
         sb.append("where art.id = ?");
 
         @SuppressWarnings("unchecked")
-        List<Artwork> objects = this.commonDao.getObjectsById(sb, id);
+        List<Artwork> objects = this.commonDao.find(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 

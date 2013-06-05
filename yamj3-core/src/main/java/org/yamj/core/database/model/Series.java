@@ -22,20 +22,17 @@
  */
 package org.yamj.core.database.model;
 
-import org.hibernate.annotations.Index;
-
-import org.yamj.core.database.model.type.OverrideFlag;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.*;
-import org.hibernate.annotations.MapKey;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Index;
+import org.yamj.core.database.model.type.OverrideFlag;
 
-@SuppressWarnings("deprecation")
 @javax.persistence.Entity
 @javax.persistence.Table(name = "series")
 @org.hibernate.annotations.Table(appliesTo = "series",
@@ -71,7 +68,6 @@ public class Series extends AbstractMetadata {
     @JoinTable(name = "series_override", joinColumns = @JoinColumn(name = "series_id"))
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
-    @MapKey(type = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30)
     private Map<OverrideFlag, String> overrideFlags = new HashMap<OverrideFlag, String>(0);
 
