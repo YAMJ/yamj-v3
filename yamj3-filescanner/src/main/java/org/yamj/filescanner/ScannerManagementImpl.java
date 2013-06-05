@@ -42,6 +42,7 @@ import org.yamj.filescanner.service.SendToCore;
 import org.yamj.filescanner.tools.DirectoryEnding;
 import org.yamj.filescanner.tools.Watcher;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,6 +55,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,6 +96,7 @@ public class ScannerManagementImpl implements ScannerManagement {
     private static final String DEFAULT_CLIENT = PropertyTools.getProperty("filescanner.default.client", "FileScanner");
     private static final String DEFAULT_PLAYER_PATH = PropertyTools.getProperty("filescanner.default.playerpath", "");
     private static final String DEFAULT_SPLIT = ",|;";
+    private static final String FILE_MJBIGNORE = ".mjbignore";
     // Date check
     private static final int MAX_INSTALL_AGE = PropertyTools.getIntProperty("filescanner.installation.maxdays", 1);
     // Map of filenames & extensions that cause scanning of a directory to stop or a filename to be ignored
@@ -106,7 +109,7 @@ public class ScannerManagementImpl implements ScannerManagement {
         boolean nmjCompliant = PropertyTools.getBooleanProperty("filescanner.nmjCompliant", Boolean.FALSE);
         KeywordMap fsIgnore = PropertyTools.getKeywordMap("filescanner.ignore", "");
 
-        DIR_EXCLUSIONS.put(".mjbignore", null);
+        DIR_EXCLUSIONS.put(FILE_MJBIGNORE, null);
         if (nmjCompliant) {
             DIR_EXCLUSIONS.put(".no_all.nmj", null);
         }
@@ -273,6 +276,15 @@ public class ScannerManagementImpl implements ScannerManagement {
             library.getStatistics().increment(dirType == DirectoryType.BLURAY ? StatType.BLURAY : StatType.DVD);
             stageDir = null;
         } else {
+            try {
+                if (FileUtils.directoryContains(directory, new File(directory, FILE_MJBIGNORE))) {
+                    LOG.debug("Exclusion file '{}' found, skipping scanning of directory {}.", FILE_MJBIGNORE, directory.getName());
+                    return null;
+                }
+            } catch (IOException ex) {
+                LOG.trace("Failed to seach for '{}' in the directory {}", FILE_MJBIGNORE, directory.getName());
+            }
+
             stageDir = new StageDirectoryDTO();
             stageDir.setPath(directory.getAbsolutePath());
             stageDir.setDate(directory.lastModified());
