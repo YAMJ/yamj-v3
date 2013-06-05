@@ -65,7 +65,6 @@ import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.model.YamjInfo;
-import org.yamj.common.tools.ClassTools;
 import org.yamj.common.tools.StringTools;
 import org.yamj.common.util.KeywordMap;
 

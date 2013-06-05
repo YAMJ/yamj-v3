@@ -3,7 +3,6 @@ package org.yamj.batch;
 import org.yamj.common.cmdline.CmdLineException;
 import org.yamj.common.cmdline.CmdLineOption;
 import org.yamj.common.cmdline.CmdLineParser;
-import org.yamj.common.tools.ClassTools;
 import org.apache.log4j.BasicConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
