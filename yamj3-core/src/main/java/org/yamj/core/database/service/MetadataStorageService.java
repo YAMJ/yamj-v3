@@ -34,31 +34,72 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.CommonDao;
-import org.yamj.core.database.dao.MediaDao;
-import org.yamj.core.database.dao.PersonDao;
+import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
+import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.type.MetaDataType;
 
-@Service("mediaService")
-public class MediaService {
+@Service("metadataStorageService")
+public class MetadataStorageService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MediaService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MetadataStorageService.class);
 
-    @Autowired
-    private MediaDao mediaDao;
-    @Autowired
-    private PersonDao personDao;
     @Autowired
     private CommonDao commonDao;
+    @Autowired
+    private MetadataDao metadataDao;
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public void save(Object entity) {
         this.commonDao.saveEntity(entity);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public void update(Object entity) {
         this.commonDao.updateEntity(entity);
     }
 
+    @Transactional(readOnly = true)
+    public List<QueueDTO> getMediaQueueForScanning(final int maxResults) {
+        final StringBuilder sql = new StringBuilder();
+        sql.append("select vd.id,'");
+        sql.append(MetaDataType.VIDEODATA);
+        sql.append("' as mediatype,vd.create_timestamp,vd.update_timestamp ");
+        sql.append("from videodata vd ");
+        sql.append("where vd.status in ('NEW','UPDATED') ");
+        sql.append("and vd.episode<0 ");
+        sql.append("union ");
+        sql.append("select ser.id,'");
+        sql.append(MetaDataType.SERIES);
+        sql.append("' as mediatype,ser.create_timestamp,ser.update_timestamp ");
+        sql.append("from series ser, season sea, videodata vd ");
+        sql.append("where ser.id=sea.series_id ");
+        sql.append("and sea.id=vd.season_id ");
+        sql.append("and (ser.status in ('NEW','UPDATED') ");
+        sql.append(" or  sea.status in ('NEW','UPDATED') ");
+        sql.append(" or  vd.status in  ('NEW','UPDATED')) ");
+
+        return metadataDao.getMetadataQueue(sql, maxResults);
+    }
+    
+    @Transactional(readOnly = true)
+    public List<QueueDTO> getPersonQueueForScanning(final int maxResults) {
+        final StringBuilder sql = new StringBuilder();
+        sql.append("select id, '");
+        sql.append(MetaDataType.PERSON);
+        sql.append("' as mediatype, create_timestamp, update_timestamp ");
+        sql.append("from person ");
+        sql.append("where status in ('");
+        sql.append(StatusType.NEW);
+        sql.append("','");
+        sql.append(StatusType.UPDATED);
+        sql.append("') ");
+
+        return metadataDao.getMetadataQueue(sql, maxResults);
+    }
+
+    @Transactional(readOnly = true)
     public VideoData getRequiredVideoData(Long id) {
         final StringBuilder sb = new StringBuilder();
         sb.append("from VideoData vd ");
@@ -71,6 +112,7 @@ public class MediaService {
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
+    @Transactional(readOnly = true)
     public Series getRequiredSeries(Long id) {
         final StringBuilder sb = new StringBuilder();
         sb.append("from Series ser ");
@@ -84,6 +126,7 @@ public class MediaService {
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
+    @Transactional(readOnly = true)
     public Person getRequiredPerson(Long id) {
         final StringBuilder sb = new StringBuilder();
         sb.append("from Person person where person.id = ?");
@@ -98,7 +141,7 @@ public class MediaService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void store(VideoData videoData) {
         // update entity
-        mediaDao.updateEntity(videoData);
+        metadataDao.updateEntity(videoData);
 
         // update genres
         updateGenres(videoData);
@@ -110,13 +153,13 @@ public class MediaService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void store(Series series) {
         // update entity
-        mediaDao.updateEntity(series);
+        metadataDao.updateEntity(series);
 
         // update underlying seasons and episodes
         for (Season season : series.getSeasons()) {
             if (StatusType.PROCESSED.equals(season.getStatus())) {
                 season.setStatus(StatusType.DONE);
-                mediaDao.updateEntity(season);
+                metadataDao.updateEntity(season);
             }
             for (VideoData videoData : season.getVideoDatas()) {
                 if (StatusType.PROCESSED.equals(videoData.getStatus())) {
@@ -130,7 +173,7 @@ public class MediaService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void store(Person person) {
         // update entity
-        personDao.updateEntity(person);
+        metadataDao.updateEntity(person);
     }
 
     private void updateGenres(VideoData videoData) {
@@ -163,7 +206,7 @@ public class MediaService {
             // find person if not found
             if (person == null) {
                 LOG.info("Attempting to retrieve information on '{}' from database", dto.getName());
-                person = personDao.getPerson(dto.getName());
+                person = metadataDao.getPerson(dto.getName());
             } else {
                 LOG.debug("Found '{}' in cast table", person.getName());
             }
@@ -171,7 +214,7 @@ public class MediaService {
             if (person != null) {
                 // update person id
                 if (person.setPersonId(dto.getSourcedb(), dto.getSourcedbId())) {
-                    personDao.updateEntity(person);
+                    metadataDao.updateEntity(person);
                 }
             } else {
                 // create new person
@@ -179,7 +222,7 @@ public class MediaService {
                 person.setName(dto.getName());
                 person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
                 person.setStatus(StatusType.NEW);
-                personDao.saveEntity(person);
+                metadataDao.saveEntity(person);
             }
 
             if (castCrew == null) {
@@ -189,38 +232,38 @@ public class MediaService {
                 castCrew.setJob(dto.getJobType(), dto.getRole());
                 castCrew.setVideoData(videoData);
                 videoData.addCredit(castCrew);
-                personDao.saveEntity(castCrew);
+                metadataDao.saveEntity(castCrew);
             } else if (castCrew.setJob(castCrew.getJobType(), dto.getRole())) {
                 // updated role
-                personDao.updateEntity(castCrew);
+                metadataDao.updateEntity(castCrew);
             }
         }
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void errorVideoData(Long id) {
-        VideoData videoData = mediaDao.getVideoData(id);
+        VideoData videoData = metadataDao.getVideoData(id);
         if (videoData != null) {
             videoData.setStatus(StatusType.ERROR);
-            mediaDao.updateEntity(videoData);
+            metadataDao.updateEntity(videoData);
         }
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void errorSeries(Long id) {
-        Series series = mediaDao.getSeries(id);
+        Series series = metadataDao.getSeries(id);
         if (series != null) {
             series.setStatus(StatusType.ERROR);
-            mediaDao.updateEntity(series);
+            metadataDao.updateEntity(series);
         }
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void errorPerson(Long id) {
-        Person person = personDao.getPerson(id);
+        Person person = metadataDao.getPerson(id);
         if (person != null) {
             person.setStatus(StatusType.ERROR);
-            personDao.updateEntity(person);
+            metadataDao.updateEntity(person);
         }
     }
 }

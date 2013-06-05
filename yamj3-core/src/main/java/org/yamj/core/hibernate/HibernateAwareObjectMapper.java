@@ -35,6 +35,8 @@ import com.fasterxml.jackson.datatype.hibernate3.Hibernate3Module;
  */
 public class HibernateAwareObjectMapper extends ObjectMapper {
 
+    private static final long serialVersionUID = 34607231867726798L;
+
     public HibernateAwareObjectMapper() {
         registerModule(new Hibernate3Module());
     }

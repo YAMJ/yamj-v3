@@ -42,7 +42,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
     @Autowired
-    private PluginDatabaseService pluginDatabaseService;
+    private PluginMetadataService pluginMetadataService;
 
     @Override
     public String getScannerName() {
@@ -52,8 +52,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
     @Override
     public void afterPropertiesSet() throws Exception {
         // register this scanner
-        pluginDatabaseService.registerMovieScanner(this);
-        pluginDatabaseService.registerSeriesScanner(this);
+        pluginMetadataService.registerMovieScanner(this);
+        pluginMetadataService.registerSeriesScanner(this);
     }
 
     @Override

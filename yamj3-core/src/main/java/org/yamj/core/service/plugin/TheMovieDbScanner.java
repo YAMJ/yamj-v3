@@ -57,7 +57,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     private static final boolean INCLUDE_ADULT = PropertyTools.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
     private static final int SEARCH_MATCH = PropertyTools.getIntProperty("themoviedb.searchMatch", 3);
     @Autowired
-    private PluginDatabaseService pluginDatabaseService;
+    private PluginMetadataService pluginMetadataService;
     @Autowired
     private TheMovieDbApi tmdbApi;
 
@@ -69,8 +69,8 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     @Override
     public void afterPropertiesSet() {
         // register this scanner
-        pluginDatabaseService.registerMovieScanner(this);
-        pluginDatabaseService.registerPersonScanner(this);
+        pluginMetadataService.registerMovieScanner(this);
+        pluginMetadataService.registerPersonScanner(this);
     }
 
     @Override

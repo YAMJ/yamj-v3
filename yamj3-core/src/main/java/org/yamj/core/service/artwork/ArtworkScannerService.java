@@ -30,14 +30,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.service.artwork.fanart.IFanartScanner;
 import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
 import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
@@ -53,7 +51,7 @@ public class ArtworkScannerService {
     private HashMap<String, IMovieFanartScanner> registeredMovieFanartScanner = new HashMap<String, IMovieFanartScanner>();
 
     @Autowired
-    private ArtworkDao artworkDao;
+    private ArtworkStorageService artworkStorageService;
 
     public void registerMoviePosterScanner(IMoviePosterScanner posterScanner) {
         registeredMoviePosterScanner.put(posterScanner.getScannerName().toLowerCase(), posterScanner);
@@ -70,7 +68,7 @@ public class ArtworkScannerService {
         }
 
         // get unique required artwork
-        Artwork artwork = artworkDao.getRequiredArtwork(queueElement.getId());
+        Artwork artwork = artworkStorageService.getRequiredArtwork(queueElement.getId());
 
         if (ArtworkType.POSTER.equals(artwork.getArtworkType())) {
             boolean found = this.scanPosterLocal(artwork);
@@ -83,7 +81,7 @@ public class ArtworkScannerService {
                 this.scanFanartOnline(artwork);
             }
         } else {
-            throw new RuntimeException("No valid element for scanning artwork '"+queueElement+"'");
+            throw new RuntimeException("Artwork scan not implemented for " + artwork);
         }
 
         // update artwork in database
@@ -92,21 +90,7 @@ public class ArtworkScannerService {
         } else {
             artwork.setStatus(StatusType.PROCESSED);
         }
-        artworkDao.updateEntity(artwork);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void processingError(QueueDTO queueElement) {
-        if (queueElement == null) {
-            // nothing to
-            return;
-        }
-
-        Artwork artwork = artworkDao.getArtwork(queueElement.getId());
-        if (artwork != null) {
-            artwork.setStatus(StatusType.ERROR);
-            artworkDao.updateEntity(artwork);
-        }
+        artworkStorageService.update(artwork);
     }
 
     private boolean scanPosterLocal(Artwork artwork) {
@@ -134,7 +118,7 @@ public class ArtworkScannerService {
                 }
             }
         } else {
-            throw new RuntimeException("Artwork search not implemented for " + artwork);
+            throw new RuntimeException("Artwork scan not implemented for " + artwork);
         }
     }
 
@@ -165,5 +149,14 @@ public class ArtworkScannerService {
         } else {
             throw new RuntimeException("Artwork search not implemented for " + artwork);
         }
+    }
+
+    public void processingError(QueueDTO queueElement) {
+        if (queueElement == null) {
+            // nothing to
+            return;
+        }
+
+        artworkStorageService.errorArtwork(queueElement.getId());
     }
 }

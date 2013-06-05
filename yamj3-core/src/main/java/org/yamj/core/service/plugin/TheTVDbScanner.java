@@ -52,7 +52,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
     private static final int YEAR_MIN = 1900;
     private static final int YEAR_MAX = 2050;
     @Autowired
-    private PluginDatabaseService pluginDatabaseService;
+    private PluginMetadataService pluginMetadataService;
     @Autowired
     private TheTVDBApi tvdbApi;
 
@@ -64,7 +64,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         // register this scanner
-        pluginDatabaseService.registerSeriesScanner(this);
+        pluginMetadataService.registerSeriesScanner(this);
     }
 
     @Override

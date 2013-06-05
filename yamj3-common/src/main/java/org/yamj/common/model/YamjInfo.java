@@ -22,6 +22,7 @@
  */
 package org.yamj.common.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.lang.management.ManagementFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -29,7 +30,6 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.DateTimeTools;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Provides information on the build of YAMJ<br>
@@ -54,13 +54,21 @@ public class YamjInfo {
     private String osVersion;
     private DateTime startUpDateTime;
 
+    @SuppressWarnings("unused")
+    private YamjInfo() {}
+
+    @SuppressWarnings("rawtypes")
     public YamjInfo(Class myClass) {
         // YAMJ Stuff
         this.projectName = myClass.getPackage().getImplementationVendor();
         this.projectVersion = myClass.getPackage().getImplementationVersion();
         this.moduleName = myClass.getPackage().getImplementationTitle();
         this.moduleDescription = myClass.getPackage().getSpecificationTitle();
-        this.buildDateTime = DateTimeTools.parseDate(myClass.getPackage().getSpecificationVendor(), DateTimeTools.BUILD_FORMAT);
+        if (myClass.getPackage().getSpecificationVendor() != null) {
+            this.buildDateTime = DateTimeTools.parseDate(myClass.getPackage().getSpecificationVendor(), DateTimeTools.BUILD_FORMAT);
+        } else {
+            this.buildDateTime = new DateTime();
+        }
         this.buildRevision = myClass.getPackage().getSpecificationVersion();
 
         // System Stuff
@@ -74,10 +82,7 @@ public class YamjInfo {
         this.startUpDateTime = new DateTime(ManagementFactory.getRuntimeMXBean().getStartTime());
     }
 
-    private YamjInfo() {
-    }
 
-    //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public String getProjectName() {
         return projectName;
     }

@@ -22,17 +22,17 @@
  */
 package org.yamj.core.tools;
 
+import java.util.*;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.AbstractMetadata;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.OverrideFlag;
-import org.yamj.core.service.plugin.PluginDatabaseService;
-import java.util.*;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.yamj.core.service.plugin.PluginMetadataService;
 
 /**
  * Holds some override tools.
@@ -47,10 +47,10 @@ public final class OverrideTools {
     private static final String TYPE_PLUGIN_SERIES = "plugin_series";
     private static final String TYPE_ALTERNATE_VIDEO = "alternate_video";
     private static final String TYPE_ALTERNATE_SERIES = "alternate_series";
-    private static final String PLUGIN_VIDEODATA = PluginDatabaseService.VIDEO_SCANNER_ALT;
-    private static final String PLUGIN_VIDEODATA_ALT = PluginDatabaseService.VIDEO_SCANNER_ALT;
-    private static final String PLUGIN_SERIES = PluginDatabaseService.SERIES_SCANNER;
-    private static final String PLUGIN_SERIES_ALT = PluginDatabaseService.SERIES_SCANNER_ALT;
+    private static final String PLUGIN_VIDEODATA = PluginMetadataService.VIDEO_SCANNER_ALT;
+    private static final String PLUGIN_VIDEODATA_ALT = PluginMetadataService.VIDEO_SCANNER_ALT;
+    private static final String PLUGIN_SERIES = PluginMetadataService.SERIES_SCANNER;
+    private static final String PLUGIN_SERIES_ALT = PluginMetadataService.SERIES_SCANNER_ALT;
     private static final Map<OverrideFlag, List<String>> VIDEODATA_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
     private static final Map<OverrideFlag, List<String>> SEASON_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
     private static final Map<OverrideFlag, List<String>> SERIES_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
