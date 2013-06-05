@@ -104,7 +104,7 @@ public class ScannerManagementImpl implements ScannerManagement {
     private static final Map<String, List<String>> DIR_EXCLUSIONS = new HashMap<String, List<String>>();
     private static final List<String> DIR_IGNORE_FILES = new ArrayList<String>();
     // YAMJ Information
-    private static final YamjInfo yamjInfo = new YamjInfo(ScannerManagementImpl.class);
+    private static final YamjInfo YAMJ_INFO = new YamjInfo(ScannerManagementImpl.class);
 
     static {
         // Set up the break scanning list. A "null" for the list means all files.
@@ -163,7 +163,7 @@ public class ScannerManagementImpl implements ScannerManagement {
     @Override
     public ExitType runScanner(CmdLineParser parser) {
         try {
-            DateTime fsDate = yamjInfo.getBuildDateTime();
+            DateTime fsDate = YAMJ_INFO.getBuildDateTime();
             boolean installationOk = githubService.checkInstallationDate(fsDate, MAX_INSTALL_AGE);
 
             if (installationOk) {

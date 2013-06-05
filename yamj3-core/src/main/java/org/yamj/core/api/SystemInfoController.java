@@ -32,20 +32,20 @@ import org.yamj.common.model.YamjInfo;
 @RequestMapping("/system/**")
 public class SystemInfoController {
 
-    private static final YamjInfo yamjInfo = new YamjInfo(SystemInfoController.class);
+    private static final YamjInfo YAMJ_INFO = new YamjInfo(SystemInfoController.class);
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     @ResponseBody
     public String getSystemUp() {
         StringBuilder sb = new StringBuilder("YAMJ v3 is running, uptime ");
-        sb.append(yamjInfo.getUptime());
+        sb.append(YAMJ_INFO.getUptime());
         return sb.toString();
     }
 
     @RequestMapping(value = "/info", method = RequestMethod.GET)
     @ResponseBody
     public YamjInfo getYamjInfo() {
-        return yamjInfo;
+        return YAMJ_INFO;
     }
 
 }
