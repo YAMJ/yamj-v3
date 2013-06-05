@@ -1,0 +1,159 @@
+/*
+ *      Copyright (c) 2004-2013 YAMJ Members
+ *      https://github.com/organizations/YAMJ/teams
+ *
+ *      This file is part of the Yet Another Media Jukebox (YAMJ).
+ *
+ *      The YAMJ is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      any later version.
+ *
+ *      YAMJ is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with the YAMJ.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Web: https://github.com/YAMJ/yamj-v3
+ *
+ */
+package org.yamj.common.model;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yamj.common.tools.DateTimeTools;
+
+/**
+ * Provides information on the build of YAMJ<br>
+ * This comes from the manifest file when the classes are built<br>
+ * Also there is some system level information collected<br>
+ *
+ * @author stuart.boston
+ */
+public class YamjInfo {
+
+    private static final Logger LOG = LoggerFactory.getLogger(YamjInfo.class);
+    private String projectName;
+    private String projectVersion;
+    private String moduleName;
+    private String moduleDescription;
+    private DateTime buildDateTime;
+    private String buildRevision;
+    private int processorCores;
+    private String javaVersion;
+    private String osArch;
+    private String osName;
+    private String osVersion;
+
+    public YamjInfo(Class myClass) {
+        this.projectName = myClass.getPackage().getImplementationVendor();
+        this.projectVersion = myClass.getPackage().getImplementationVersion();
+        this.moduleName = myClass.getPackage().getImplementationTitle();
+        this.moduleDescription = myClass.getPackage().getSpecificationTitle();
+        this.buildDateTime = DateTimeTools.parseDate(myClass.getPackage().getSpecificationVendor(), DateTimeTools.BUILD_FORMAT);
+        this.buildRevision = myClass.getPackage().getSpecificationVersion();
+
+        this.processorCores = Runtime.getRuntime().availableProcessors();
+        this.javaVersion = SystemUtils.JAVA_VERSION;
+        this.osArch = SystemUtils.OS_ARCH;
+        this.osName = SystemUtils.OS_NAME;
+        this.osVersion = SystemUtils.OS_VERSION;
+    }
+
+    //<editor-fold defaultstate="collapsed" desc="Getter Methods">
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public String getProjectVersion() {
+        return projectVersion;
+    }
+
+    public DateTime getBuildDateTime() {
+        return buildDateTime;
+    }
+
+    public String getBuildRevision() {
+        return buildRevision;
+    }
+
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public String getModuleDescription() {
+        return moduleDescription;
+    }
+
+    public int getProcessorCores() {
+        return processorCores;
+    }
+
+    public String getJavaVersion() {
+        return javaVersion;
+    }
+
+    public String getOsArch() {
+        return osArch;
+    }
+
+    public String getOsName() {
+        return osName;
+    }
+
+    public String getOsVersion() {
+        return osVersion;
+    }
+    //</editor-fold>
+
+    /**
+     * Output the header information to the log file
+     *
+     */
+    public void printHeader(Logger log) {
+        if (StringUtils.isNotBlank(projectName)) {
+            // just print out if project name has been set
+            log.info("{} {}", projectName, projectVersion);
+            log.info("{} {}", StringUtils.repeat("~", projectName.length()), StringUtils.repeat("~", projectVersion.length()));
+            log.info("{}", moduleName);
+            log.info("");
+            log.info("  Revision: {}", buildRevision);
+            log.info("Build Time: {}", DateTimeTools.convertDateToString(buildDateTime, DateTimeTools.BUILD_FORMAT));
+            log.info("      Java: {}", javaVersion);
+            log.info("");
+        }
+    }
+
+    /**
+     * Output the header information to the log file
+     *
+     */
+    public void printHeader() {
+        printHeader(LOG);
+    }
+
+    /**
+     * Display some information on the system
+     */
+    public void printSystemInfo() {
+        printSystemInfo(LOG);
+    }
+
+    /**
+     * Display some information on the system
+     *
+     * @param log
+     */
+    public void printSystemInfo(Logger log) {
+        log.info("Operating System: {}", osName);
+        log.info("         Version: {}", osVersion);
+        log.info("    Architecture: {}", osArch);
+        log.info(" Processor Cores: {}", processorCores);
+    }
+}

@@ -124,7 +124,7 @@ public class GitHubServiceImpl implements GitHubService {
      * @return
      */
     @Override
-    public boolean checkInstallationDate(String buildDate, int maxAgeDays) {
+    public boolean checkInstallationDate(DateTime buildDate, int maxAgeDays) {
         return checkInstallationDate(GH_OWNER, GH_REPO, buildDate, maxAgeDays);
     }
 
@@ -139,19 +139,18 @@ public class GitHubServiceImpl implements GitHubService {
      * @return
      */
     @Override
-    public boolean checkInstallationDate(String owner, String repository, String buildDate, int maxAgeDays) {
+    public boolean checkInstallationDate(String owner, String repository, DateTime buildDate, int maxAgeDays) {
         String ghDate = pushDate(owner, repository);
         LOG.debug("GitHub Date: {}", ghDate);
         LOG.debug("Build Date : {}", buildDate);
 
-        if (StringUtils.isBlank(ghDate) || StringUtils.isBlank(buildDate)) {
+        if (StringUtils.isBlank(ghDate) || buildDate == null) {
             LOG.debug("Invalid (blank) date, check skipped");
             return Boolean.TRUE;
         }
 
         DateTime dt1 = DateTimeTools.parseDate(ghDate, DateTimeTools.ISO8601_FORMAT);
-        DateTime dt2 = DateTimeTools.parseDate(buildDate, DateTimeTools.BUILD_FORMAT);
-        long diff = DateTimeTools.getDuration(dt1, dt2);
+        long diff = DateTimeTools.getDuration(dt1, buildDate);
 
         LOG.debug("Difference : {}", diff, DateTimeTools.formatDurationColon(diff));
         if (diff > (maxAgeDays * MILLISECONDS_PER_DAY)) {

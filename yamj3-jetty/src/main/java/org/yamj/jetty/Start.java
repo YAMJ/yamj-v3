@@ -38,6 +38,7 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamj.common.model.YamjInfo;
 
 public class Start {
 
@@ -55,7 +56,8 @@ public class Start {
         System.setProperty("file.name", LOG_FILENAME);
         PropertyConfigurator.configure("config/log4j.properties");
 
-        ClassTools.printHeader(Start.class, LOG);
+        YamjInfo yi = new YamjInfo(Start.class);
+        yi.printHeader(LOG);
 
         CmdLineParser parser = getCmdLineParser();
         ExitType status;

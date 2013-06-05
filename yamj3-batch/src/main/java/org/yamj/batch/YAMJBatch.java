@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.yamj.common.model.YamjInfo;
 
 public class YAMJBatch {
 
@@ -16,7 +17,9 @@ public class YAMJBatch {
 
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure();
-        ClassTools.printHeader(YAMJBatch.class, LOG);
+        YamjInfo yi = new YamjInfo(YAMJBatch.class);
+        yi.printHeader(LOG);
+
         CmdLineParser parser = getCmdLineParser();
 
         int status;

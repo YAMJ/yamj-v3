@@ -58,11 +58,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.CollectionUtils;
+import org.yamj.common.model.YamjInfo;
 import org.yamj.common.tools.ClassTools;
 import org.yamj.common.tools.StringTools;
 import org.yamj.common.util.KeywordMap;
@@ -102,6 +104,8 @@ public class ScannerManagementImpl implements ScannerManagement {
     // Map of filenames & extensions that cause scanning of a directory to stop or a filename to be ignored
     private static final Map<String, List<String>> DIR_EXCLUSIONS = new HashMap<String, List<String>>();
     private static final List<String> DIR_IGNORE_FILES = new ArrayList<String>();
+    // YAMJ Information
+    private static final YamjInfo yamjInfo = new YamjInfo(ScannerManagementImpl.class);
 
     static {
         // Set up the break scanning list. A "null" for the list means all files.
@@ -160,7 +164,7 @@ public class ScannerManagementImpl implements ScannerManagement {
     @Override
     public ExitType runScanner(CmdLineParser parser) {
         try {
-            String fsDate = ClassTools.getBuildTimestamp(ScannerManagementImpl.class);
+            DateTime fsDate = yamjInfo.getBuildDateTime();
             boolean installationOk = githubService.checkInstallationDate(fsDate, MAX_INSTALL_AGE);
 
             if (installationOk) {

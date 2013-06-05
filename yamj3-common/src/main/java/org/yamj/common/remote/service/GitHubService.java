@@ -22,6 +22,8 @@
  */
 package org.yamj.common.remote.service;
 
+import org.joda.time.DateTime;
+
 public interface GitHubService {
 
     /**
@@ -47,7 +49,7 @@ public interface GitHubService {
      * @param maxAge
      * @return
      */
-    boolean checkInstallationDate(String buildDate, int maxAgeDays);
+    boolean checkInstallationDate(DateTime buildDate, int maxAgeDays);
 
     /**
      * Check the installation date of the owner/repository
@@ -58,5 +60,5 @@ public interface GitHubService {
      * @param maxAge
      * @return
      */
-    boolean checkInstallationDate(String owner, String repository, String buildDate, int maxAgeDays);
+    boolean checkInstallationDate(String owner, String repository, DateTime buildDate, int maxAgeDays);
 }

@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.yamj.common.model.YamjInfo;
 
 public final class FileScanner {
 
@@ -56,7 +57,8 @@ public final class FileScanner {
             ClassTools.checkSystemProperty("yamj3.home", yamjHome);
         }
 
-        ClassTools.printHeader(FileScanner.class, LOG);
+        YamjInfo yi = new YamjInfo(FileScanner.class);
+        yi.printHeader(LOG);
         CmdLineParser parser = getCmdLineParser();
 
         ExitType status;
