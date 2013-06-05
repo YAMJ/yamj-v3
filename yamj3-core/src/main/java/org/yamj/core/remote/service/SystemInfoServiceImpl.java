@@ -22,11 +22,11 @@
  */
 package org.yamj.core.remote.service;
 
-import org.yamj.common.remote.service.PingService;
+import org.yamj.common.remote.service.SystemInfoService;
 import org.springframework.stereotype.Service;
 
-@Service("pingService")
-public class PingServiceImpl implements PingService {
+@Service("systemInfoService")
+public class SystemInfoServiceImpl implements SystemInfoService {
 
     @Override
     public String ping() {

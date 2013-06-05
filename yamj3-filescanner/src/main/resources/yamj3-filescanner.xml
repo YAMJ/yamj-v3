@@ -41,10 +41,10 @@
         <property name="yamjExecutor" ref="taskExecutor"/>
     </bean>
 
-    <bean id="pingCore"
-          class="org.yamj.filescanner.service.PingCore">
-        <property name="timeoutSeconds" value="${filescanner.pingcore.timeout}"/>
-        <property name="numberOfRetries" value="${filescanner.pingcore.retry}"/>
+    <bean id="systemInfoCore"
+          class="org.yamj.filescanner.service.SystemInfoCore">
+        <property name="timeoutSeconds" value="${filescanner.sicore.timeout}"/>
+        <property name="numberOfRetries" value="${filescanner.sicore.retry}"/>
     </bean>
 
     <bean id="sendToCore"
@@ -60,10 +60,10 @@
         <property name="serviceInterface" value="org.yamj.common.remote.service.FileImportService"/>
     </bean>
 
-    <bean id="pingService"
+    <bean id="systemInfoService"
           class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
-        <property name="serviceUrl" value="http://${yamj3.core.host}:${yamj3.core.port}/yamj3/PingService"/>
-        <property name="serviceInterface" value="org.yamj.common.remote.service.PingService"/>
+        <property name="serviceUrl" value="http://${yamj3.core.host}:${yamj3.core.port}/yamj3/SystemInfoService"/>
+        <property name="serviceInterface" value="org.yamj.common.remote.service.SystemInfoService"/>
     </bean>
 
     <bean id="githubService"

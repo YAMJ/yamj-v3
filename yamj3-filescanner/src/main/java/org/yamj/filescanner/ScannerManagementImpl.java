@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.filescanner.model.LibraryCollection;
 import org.yamj.filescanner.model.StatType;
-import org.yamj.filescanner.service.PingCore;
+import org.yamj.filescanner.service.SystemInfoCore;
 import org.yamj.filescanner.service.SendToCore;
 import org.yamj.filescanner.tools.DirectoryEnding;
 import org.yamj.filescanner.tools.Watcher;
@@ -87,7 +87,7 @@ public class ScannerManagementImpl implements ScannerManagement {
     @Autowired
     private LibraryCollection libraryCollection;
     @Autowired
-    private PingCore pingCore;
+    private SystemInfoCore pingCore;
     @Autowired
     private ThreadPoolTaskExecutor yamjExecutor;
     @Autowired

@@ -5,13 +5,13 @@ import org.yamj.common.dto.ImportDTO;
 import org.yamj.common.dto.StageDirectoryDTO;
 import org.yamj.common.dto.StageFileDTO;
 import org.yamj.common.remote.service.FileImportService;
-import org.yamj.common.remote.service.PingService;
 import javax.annotation.Resource;
+import org.yamj.common.remote.service.SystemInfoService;
 
 public class BatchManagementImpl implements BatchManagement {
 
-    @Resource(name ="pingService")
-    private PingService pingService;
+    @Resource(name ="systemInfoService")
+    private SystemInfoService systemInfoService;
 
     @Resource(name ="fileImportService")
     private FileImportService fileImportService;
@@ -26,7 +26,7 @@ public class BatchManagementImpl implements BatchManagement {
 
             if ("ping".equalsIgnoreCase(batchName)) {
                 //
-                System.out.println(pingService.ping());
+                System.out.println(systemInfoService.ping());
 
             // JUST FOR TESTING
             } else if ("filetest".equalsIgnoreCase(batchName)) {
@@ -40,7 +40,7 @@ public class BatchManagementImpl implements BatchManagement {
                 stageDirectory.setDate(System.currentTimeMillis());
                 stageDirectory.setPath("D:\\test\\movies\\");
                 importDTO.setStageDirectory(stageDirectory);
-                
+
                 // import scanned
                 fileImportService.importScanned(importDTO);
 
@@ -48,7 +48,7 @@ public class BatchManagementImpl implements BatchManagement {
                 stageDirectory.setDate(System.currentTimeMillis());
                 stageDirectory.setPath("D:\\test\\movies\\Action");
                 importDTO.setStageDirectory(stageDirectory);
-                
+
                 StageFileDTO stageFile = new StageFileDTO();
                 stageFile.setFileName("Avatar (2009).bdrip.mkv");
                 stageFile.setFileDate(System.currentTimeMillis());

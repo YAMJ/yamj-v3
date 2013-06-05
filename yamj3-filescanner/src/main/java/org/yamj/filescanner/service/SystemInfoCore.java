@@ -22,7 +22,7 @@
  */
 package org.yamj.filescanner.service;
 
-import org.yamj.common.remote.service.PingService;
+import org.yamj.common.remote.service.SystemInfoService;
 import org.yamj.common.tools.DateTimeTools;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -37,10 +37,10 @@ import org.springframework.stereotype.Service;
  *
  * @author Stuart
  */
-@Service("pingCore")
-public final class PingCore {
+@Service("systemInfoCore")
+public final class SystemInfoCore {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PingCore.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SystemInfoCore.class);
     private static final String DATETIME_FORMAT = "yyyy-MM-dd hh:mm:ss";
     private static final long DIFF_CHECK_SECONDS = 5;
     private int timeoutSeconds;
@@ -49,9 +49,9 @@ public final class PingCore {
     private boolean connected;
     // Spring service(s)
     @Autowired
-    private PingService pingService;
+    private SystemInfoService pingService;
 
-    public PingCore() {
+    public SystemInfoCore() {
     }
 
     public void setTimeoutSeconds(int timeoutSeconds) {

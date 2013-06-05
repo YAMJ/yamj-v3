@@ -5,17 +5,20 @@
     http://www.springframework.org/schema/beans     http://www.springframework.org/schema/beans/spring-beans.xsd
 ">
 
-    <bean name="/PingService" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
-        <property name="service" ref="pingService"/>
-        <property name="serviceInterface" value="org.yamj.common.remote.service.PingService"/>
+    <bean name="/SystemInfoService"
+          class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
+        <property name="service" ref="systemInfoService"/>
+        <property name="serviceInterface" value="org.yamj.common.remote.service.SystemInfoService"/>
     </bean>
 
-    <bean name="/FileImportService" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
+    <bean name="/FileImportService"
+          class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
         <property name="service" ref="fileImportService"/>
         <property name="serviceInterface" value="org.yamj.common.remote.service.FileImportService"/>
     </bean>
 
-    <bean name="/GitHubService" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
+    <bean name="/GitHubService"
+          class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
         <property name="service" ref="githubService"/>
         <property name="serviceInterface" value="org.yamj.common.remote.service.GitHubService"/>
     </bean>

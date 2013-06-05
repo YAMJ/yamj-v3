@@ -22,7 +22,16 @@
  */
 package org.yamj.common.remote.service;
 
-public interface PingService {
+/**
+ * Provides a set of services about the YAMJ system
+ *
+ * @author stuart.boston
+ */
+public interface SystemInfoService {
 
+    /**
+     * Simple method to return a "I'm running" response
+     * @return
+     */
     String ping();
 }
