@@ -81,7 +81,7 @@ public class ArtworkScannerService {
                 this.scanFanartOnline(artwork);
             }
         } else {
-            throw new RuntimeException("No valid element for scanning artwork '"+queueElement+"'");
+            throw new RuntimeException("Artwork scan not implemented for " + artwork);
         }
 
         // update artwork in database
@@ -118,7 +118,7 @@ public class ArtworkScannerService {
                 }
             }
         } else {
-            throw new RuntimeException("Artwork search not implemented for " + artwork);
+            throw new RuntimeException("Artwork scan not implemented for " + artwork);
         }
     }
 
