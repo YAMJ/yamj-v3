@@ -34,12 +34,12 @@ import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.MetaDataType;
-import org.yamj.core.database.service.MediaService;
+import org.yamj.core.database.service.MetadataStorageService;
 
-@Service("pluginDatabaseService")
-public class PluginDatabaseService {
+@Service("pluginMetadataService")
+public class PluginMetadataService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PluginDatabaseService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PluginMetadataService.class);
     public static final String VIDEO_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie", "tmdb");
     public static final String VIDEO_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie.alternate", "");
     public static final String SERIES_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.series", "tvdb");
@@ -47,7 +47,7 @@ public class PluginDatabaseService {
     private static final String PERSON_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.person", "tmdb");
 
     @Autowired
-    private MediaService mediaService;
+    private MetadataStorageService metadataStorageService;
 
     private HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<String, IMovieScanner>();
     private HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<String, ISeriesScanner>();
@@ -66,7 +66,7 @@ public class PluginDatabaseService {
     }
 
     public void scanVideoData(Long id) {
-        VideoData videoData = mediaService.getRequiredVideoData(id);
+        VideoData videoData = metadataStorageService.getRequiredVideoData(id);
 
         // SCAN MOVIE
         LOG.debug("Scanning movie data for '{}' using {}", videoData.getTitle(), VIDEO_SCANNER);
@@ -75,7 +75,7 @@ public class PluginDatabaseService {
         if (movieScanner == null) {
             LOG.error("Video data scanner not registered '{}'", VIDEO_SCANNER);
             videoData.setStatus(StatusType.ERROR);
-            mediaService.update(videoData);
+            metadataStorageService.update(videoData);
             return;
         }
 
@@ -113,11 +113,11 @@ public class PluginDatabaseService {
         }
 
         // storage
-        mediaService.store(videoData);
+        metadataStorageService.store(videoData);
     }
 
     public void scanSeries(Long id) {
-        Series series = mediaService.getRequiredSeries(id);
+        Series series = metadataStorageService.getRequiredSeries(id);
 
         // SCAN SERIES
         LOG.debug("Scanning series data for '{}' using {}", series.getTitle(), SERIES_SCANNER);
@@ -126,7 +126,7 @@ public class PluginDatabaseService {
         if (seriesScanner == null) {
             LOG.error("Series scanner '{}' not registered", SERIES_SCANNER);
             series.setStatus(StatusType.ERROR);
-            mediaService.update(series);
+            metadataStorageService.update(series);
             return;
         }
 
@@ -164,7 +164,7 @@ public class PluginDatabaseService {
         }
 
         // storage
-        mediaService.store(series);
+        metadataStorageService.store(series);
     }
 
     /**
@@ -173,14 +173,14 @@ public class PluginDatabaseService {
     public void scanPerson(Long id) {
         String scannerName = PERSON_SCANNER;
         IPersonScanner personScanner = registeredPersonScanner.get(scannerName);
-        Person person = mediaService.getRequiredPerson(id);
+        Person person = metadataStorageService.getRequiredPerson(id);
 
         LOG.info("Scanning for information on person {}-'{}' using {}", id, person.getName(), scannerName);
 
         if (personScanner == null) {
             LOG.error("Person scanner '{}' not registered", scannerName);
             person.setStatus(StatusType.ERROR);
-            mediaService.update(person);
+            metadataStorageService.update(person);
             return;
         }
 
@@ -205,7 +205,7 @@ public class PluginDatabaseService {
         }
 
         // storage
-        mediaService.store(person);
+        metadataStorageService.store(person);
     }
 
     public void processingError(QueueDTO queueElement) {
@@ -215,11 +215,11 @@ public class PluginDatabaseService {
         }
 
         if (queueElement.isMetadataType(MetaDataType.VIDEODATA)) {
-            mediaService.errorVideoData(queueElement.getId());
+            metadataStorageService.errorVideoData(queueElement.getId());
         } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
-            mediaService.errorSeries(queueElement.getId());
+            metadataStorageService.errorSeries(queueElement.getId());
         } else if (queueElement.isMetadataType(MetaDataType.PERSON)) {
-            mediaService.errorPerson(queueElement.getId());
+            metadataStorageService.errorPerson(queueElement.getId());
         }
     }
 }

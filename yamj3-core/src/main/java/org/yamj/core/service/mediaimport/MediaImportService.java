@@ -22,21 +22,18 @@
  */
 package org.yamj.core.service.mediaimport;
 
-import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.database.dao.MediaDao;
-import org.yamj.core.database.dao.StagingDao;
-import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.MediaFile;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.VideoData;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.yamj.common.type.StatusType;
+import org.yamj.core.database.dao.MediaDao;
+import org.yamj.core.database.dao.MetadataDao;
+import org.yamj.core.database.dao.StagingDao;
+import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.model.type.FileType;
 
 /**
  * The media import service is a spring-managed service. This will be used by the MediaImportRunner only in order to access other
@@ -52,7 +49,14 @@ public class MediaImportService {
     @Autowired
     private MediaDao mediaDao;
     @Autowired
+    private MetadataDao metadataDao;
+    @Autowired
     private FilenameScanner filenameScanner;
+
+    @Transactional(readOnly = true)
+    public Long getNextStageFileId(final FileType fileType, final StatusType... statusTypes) {
+        return this.stagingDao.getNextStageFileId(fileType, statusTypes);
+    }
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void processVideo(long id) {
@@ -70,6 +74,7 @@ public class MediaImportService {
         filenameScanner.scan(dto);
 
         // MEDIA FILE
+        
         MediaFile mediaFile = mediaDao.getMediaFile(stageFile.getFileName());
         if (mediaFile == null) {
             // NEW media file
@@ -93,11 +98,13 @@ public class MediaImportService {
             // - Stored in another directory?
         }
 
+        // METADATA OBJECTS
+        
         if (dto.isMovie()) {
             // VIDEO DATA for movies
 
             String identifier = dto.buildIdentifier();
-            VideoData videoData = mediaDao.getVideoData(identifier);
+            VideoData videoData = metadataDao.getVideoData(identifier);
             if (videoData == null) {
                 // NEW video data
                 videoData = new VideoData();
@@ -109,71 +116,71 @@ public class MediaImportService {
                 videoData.setStatus(StatusType.NEW);
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);
-                mediaDao.saveEntity(videoData);
+                metadataDao.saveEntity(videoData);
 
                 // create new poster artwork entry
                 Artwork poster = new Artwork();
                 poster.setArtworkType(ArtworkType.POSTER);
                 poster.setStatus(StatusType.NEW);
                 poster.setVideoData(videoData);
-                mediaDao.saveEntity(poster);
+                metadataDao.saveEntity(poster);
 
                 // create new fanart artwork entry
                 Artwork fanart = new Artwork();
                 fanart.setArtworkType(ArtworkType.FANART);
                 fanart.setStatus(StatusType.NEW);
                 fanart.setVideoData(videoData);
-                mediaDao.saveEntity(fanart);
+                metadataDao.saveEntity(fanart);
 
             } else {
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);
-                mediaDao.updateEntity(videoData);
+                metadataDao.updateEntity(videoData);
             }
         } else {
             // VIDEO DATA for episodes
             for (Integer episode : dto.getEpisodes()) {
                 String identifier = dto.buildEpisodeIdentifier(episode);
-                VideoData videoData = mediaDao.getVideoData(identifier);
+                VideoData videoData = metadataDao.getVideoData(identifier);
                 if (videoData == null) {
                     // NEW video data
 
                     // get or create season
                     String seasonIdentifier = dto.buildSeasonIdentifier();
-                    Season season = mediaDao.getSeason(seasonIdentifier);
+                    Season season = metadataDao.getSeason(seasonIdentifier);
                     if (season == null) {
 
                         // get or create series
                         String seriesIdentifier = dto.buildIdentifier();
-                        Series series = mediaDao.getSeries(seriesIdentifier);
+                        Series series = metadataDao.getSeries(seriesIdentifier);
                         if (series == null) {
                             series = new Series();
                             series.setIdentifier(seriesIdentifier);
                             series.setTitle(dto.getTitle(), MEDIA_SOURCE);
                             series.setMoviedbIdMap(dto.getIdMap());
                             series.setStatus(StatusType.NEW);
-                            mediaDao.saveEntity(series);
+                            metadataDao.saveEntity(series);
 
                             // create new poster artwork entry
                             Artwork poster = new Artwork();
                             poster.setArtworkType(ArtworkType.POSTER);
                             poster.setStatus(StatusType.NEW);
                             poster.setSeries(series);
-                            mediaDao.saveEntity(poster);
+                            metadataDao.saveEntity(poster);
 
                             // create new fanart artwork entry
                             Artwork fanart = new Artwork();
                             fanart.setArtworkType(ArtworkType.FANART);
                             fanart.setStatus(StatusType.NEW);
                             fanart.setSeries(series);
-                            mediaDao.saveEntity(fanart);
+                            metadataDao.saveEntity(fanart);
 
                             // create new banner artwork entry
                             Artwork banner = new Artwork();
                             banner.setArtworkType(ArtworkType.BANNER);
                             banner.setStatus(StatusType.NEW);
                             banner.setSeries(series);
-                            mediaDao.saveEntity(banner);
+                            metadataDao.saveEntity(banner);
                         }
 
                         season = new Season();
@@ -182,21 +189,21 @@ public class MediaImportService {
                         season.setTitle(dto.getTitle(), MEDIA_SOURCE);
                         season.setSeries(series);
                         season.setStatus(StatusType.NEW);
-                        mediaDao.saveEntity(season);
+                        metadataDao.saveEntity(season);
 
                         // create new poster artwork entry
                         Artwork poster = new Artwork();
                         poster.setArtworkType(ArtworkType.POSTER);
                         poster.setStatus(StatusType.NEW);
                         poster.setSeason(season);
-                        mediaDao.saveEntity(poster);
+                        metadataDao.saveEntity(poster);
 
                         // create new fanart artwork entry
                         Artwork fanart = new Artwork();
                         fanart.setArtworkType(ArtworkType.FANART);
                         fanart.setStatus(StatusType.NEW);
                         fanart.setSeason(season);
-                        mediaDao.saveEntity(fanart);
+                        metadataDao.saveEntity(fanart);
                     }
 
                     videoData = new VideoData();
@@ -213,19 +220,19 @@ public class MediaImportService {
                     videoData.setEpisode(episode);
                     mediaFile.addVideoData(videoData);
                     videoData.addMediaFile(mediaFile);
-                    mediaDao.saveEntity(videoData);
+                    metadataDao.saveEntity(videoData);
 
                     // create new videoimage artwork entry
                     Artwork videoimage = new Artwork();
                     videoimage.setArtworkType(ArtworkType.VIDEOIMAGE);
                     videoimage.setStatus(StatusType.NEW);
                     videoimage.setVideoData(videoData);
-                    mediaDao.saveEntity(videoimage);
+                    metadataDao.saveEntity(videoimage);
 
                 } else {
                     mediaFile.addVideoData(videoData);
                     videoData.addMediaFile(mediaFile);
-                    mediaDao.updateEntity(videoData);
+                    metadataDao.updateEntity(videoData);
                 }
             }
         }

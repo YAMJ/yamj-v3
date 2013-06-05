@@ -29,13 +29,13 @@ import java.util.concurrent.BlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PluginDatabaseRunner implements Runnable {
+public class PluginMetadataRunner implements Runnable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PluginDatabaseRunner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PluginMetadataRunner.class);
     private final BlockingQueue<QueueDTO> queue;
-    private final PluginDatabaseService service;
+    private final PluginMetadataService service;
 
-    public PluginDatabaseRunner(BlockingQueue<QueueDTO> queue, PluginDatabaseService service) {
+    public PluginMetadataRunner(BlockingQueue<QueueDTO> queue, PluginMetadataService service) {
         this.queue = queue;
         this.service = service;
     }

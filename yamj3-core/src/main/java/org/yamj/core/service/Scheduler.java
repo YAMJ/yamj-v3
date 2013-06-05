@@ -22,19 +22,6 @@
  */
 package org.yamj.core.service;
 
-import org.yamj.common.tools.PropertyTools;
-import org.yamj.common.type.StatusType;
-import org.yamj.core.database.dao.ArtworkDao;
-import org.yamj.core.database.dao.MediaDao;
-import org.yamj.core.database.dao.PersonDao;
-import org.yamj.core.database.dao.StagingDao;
-import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.type.FileType;
-import org.yamj.core.service.artwork.ArtworkScannerRunner;
-import org.yamj.core.service.artwork.ArtworkScannerService;
-import org.yamj.core.service.mediaimport.MediaImportService;
-import org.yamj.core.service.plugin.PluginDatabaseRunner;
-import org.yamj.core.service.plugin.PluginDatabaseService;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -49,6 +36,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.yamj.common.tools.PropertyTools;
+import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.database.service.ArtworkStorageService;
+import org.yamj.core.database.service.MetadataStorageService;
+import org.yamj.core.service.artwork.ArtworkScannerRunner;
+import org.yamj.core.service.artwork.ArtworkScannerService;
+import org.yamj.core.service.mediaimport.MediaImportService;
+import org.yamj.core.service.plugin.PluginMetadataRunner;
+import org.yamj.core.service.plugin.PluginMetadataService;
 
 @Service
 public class Scheduler {
@@ -62,19 +60,15 @@ public class Scheduler {
     private static final int ARTWORK_SCANNER_MAX_RESULTS = PropertyTools.getIntProperty("yamj3.scheduler.artworkscan.maxResults", 30);
 
     @Autowired
-    private StagingDao stagingDao;
-    @Autowired
-    private ArtworkDao artworkDao;
-    @Autowired
-    private MediaDao mediaDao;
-    @Autowired
     private MediaImportService mediaImportService;
     @Autowired
-    private PluginDatabaseService pluginDatabaseService;
+    private MetadataStorageService metadataStorageService;
+    @Autowired
+    private PluginMetadataService pluginMetadataService;
+    @Autowired
+    private ArtworkStorageService artworkStorageService;
     @Autowired
     private ArtworkScannerService artworkScannerService;
-    @Autowired
-    private PersonDao personDao;
 
     static {
         // Configure the ToStringBuilder to use the short prefix by default
@@ -90,15 +84,15 @@ public class Scheduler {
         do {
             try {
                 // find next stage file to process
-                id = stagingDao.getNextStageFileId(FileType.VIDEO, StatusType.NEW, StatusType.UPDATED);
+                id = mediaImportService.getNextStageFileId(FileType.VIDEO, StatusType.NEW, StatusType.UPDATED);
                 if (id != null) {
                     LOG.debug("Process stage file: {}", id);
-                    this.mediaImportService.processVideo(id);
+                    mediaImportService.processVideo(id);
                 }
             } catch (Exception error) {
                 LOG.error("Failed to process stage file", error);
                 try {
-                    this.mediaImportService.processingError(id);
+                    mediaImportService.processingError(id);
                 } catch (Exception ignore) {
                 }
             }
@@ -116,7 +110,7 @@ public class Scheduler {
     @Async
     @Scheduled(initialDelay = 15000, fixedDelay = 45000)
     public void scanMediaData() throws Exception {
-        List<QueueDTO> queueElements = mediaDao.getMediaQueueForScanning(MEDIA_SCANNER_MAX_RESULTS);
+        List<QueueDTO> queueElements = metadataStorageService.getMediaQueueForScanning(MEDIA_SCANNER_MAX_RESULTS);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.debug("No media data found to scan");
             return;
@@ -127,7 +121,7 @@ public class Scheduler {
 
         ExecutorService executor = Executors.newFixedThreadPool(MEDIA_SCANNER_MAX_THREADS);
         for (int i = 0; i < MEDIA_SCANNER_MAX_THREADS; i++) {
-            PluginDatabaseRunner worker = new PluginDatabaseRunner(queue, pluginDatabaseService);
+            PluginMetadataRunner worker = new PluginMetadataRunner(queue, pluginMetadataService);
             executor.execute(worker);
         }
         executor.shutdown();
@@ -145,7 +139,7 @@ public class Scheduler {
     @Async
     @Scheduled(initialDelay = 15000, fixedDelay = 45000)
     public void scanPeopleData() throws Exception {
-        List<QueueDTO> queueElements = personDao.getPersonQueueForScanning(PEOPLE_SCANNER_MAX_RESULTS);
+        List<QueueDTO> queueElements = metadataStorageService.getPersonQueueForScanning(PEOPLE_SCANNER_MAX_RESULTS);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.debug("No people data found to scan");
             return;
@@ -156,7 +150,7 @@ public class Scheduler {
 
         ExecutorService executor = Executors.newFixedThreadPool(PEOPLE_SCANNER_MAX_THREADS);
         for (int i = 0; i < PEOPLE_SCANNER_MAX_THREADS; i++) {
-            PluginDatabaseRunner worker = new PluginDatabaseRunner(queue, pluginDatabaseService);
+            PluginMetadataRunner worker = new PluginMetadataRunner(queue, pluginMetadataService);
             executor.execute(worker);
         }
         executor.shutdown();
@@ -175,7 +169,7 @@ public class Scheduler {
     @Async
     @Scheduled(initialDelay = 15000, fixedDelay = 45000)
     public void scanArtwork() throws Exception {
-        List<QueueDTO> queueElements = artworkDao.getArtworkQueueForScanning(ARTWORK_SCANNER_MAX_RESULTS);
+        List<QueueDTO> queueElements = artworkStorageService.getArtworkQueueForScanning(ARTWORK_SCANNER_MAX_RESULTS);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.debug("No artwork found to scan");
             return;
