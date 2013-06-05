@@ -20,24 +20,35 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.remote.service;
+package org.yamj.core.api;
 
-import org.yamj.common.remote.service.SystemInfoService;
-import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.common.model.YamjInfo;
 
-@Service("systemInfoService")
-public class SystemInfoServiceImpl implements SystemInfoService {
+@Controller
+@RequestMapping("/system")
+public class SystemInfoController {
 
-    private YamjInfo yamjInfo = new YamjInfo(SystemInfoServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SystemInfoController.class);
+    private static final YamjInfo yamjInfo = new YamjInfo(SystemInfoController.class);
 
-    @Override
-    public String ping() {
-        return "YAMJ3 Core is running";
+    @RequestMapping(value = "", method = RequestMethod.GET)
+    @ResponseBody
+    public String getSystemUp() {
+        StringBuilder sb = new StringBuilder("YAMJ v3 is running, uptime ");
+        sb.append(yamjInfo.getUptime());
+        return sb.toString();
     }
 
-    @Override
-    public YamjInfo systemInfo() {
+    @RequestMapping(value = "/info", method = RequestMethod.GET)
+    @ResponseBody
+    public YamjInfo getYamjInfo() {
         return yamjInfo;
     }
+
 }

@@ -22,12 +22,14 @@
  */
 package org.yamj.common.model;
 
+import java.lang.management.ManagementFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.DateTimeTools;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Provides information on the build of YAMJ<br>
@@ -50,8 +52,10 @@ public class YamjInfo {
     private String osArch;
     private String osName;
     private String osVersion;
+    private DateTime startUpDateTime;
 
     public YamjInfo(Class myClass) {
+        // YAMJ Stuff
         this.projectName = myClass.getPackage().getImplementationVendor();
         this.projectVersion = myClass.getPackage().getImplementationVersion();
         this.moduleName = myClass.getPackage().getImplementationTitle();
@@ -59,11 +63,18 @@ public class YamjInfo {
         this.buildDateTime = DateTimeTools.parseDate(myClass.getPackage().getSpecificationVendor(), DateTimeTools.BUILD_FORMAT);
         this.buildRevision = myClass.getPackage().getSpecificationVersion();
 
+        // System Stuff
         this.processorCores = Runtime.getRuntime().availableProcessors();
         this.javaVersion = SystemUtils.JAVA_VERSION;
         this.osArch = SystemUtils.OS_ARCH;
         this.osName = SystemUtils.OS_NAME;
         this.osVersion = SystemUtils.OS_VERSION;
+
+        // Times
+        this.startUpDateTime = new DateTime(ManagementFactory.getRuntimeMXBean().getStartTime());
+    }
+
+    private YamjInfo() {
     }
 
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
@@ -75,8 +86,14 @@ public class YamjInfo {
         return projectVersion;
     }
 
+    @JsonIgnore //Ignore this for JSON output (use the String version instead
     public DateTime getBuildDateTime() {
         return buildDateTime;
+    }
+
+    @JsonIgnore //Ignore this for JSON output (use the String version instead
+    public DateTime getStartUpDateTime() {
+        return startUpDateTime;
     }
 
     public String getBuildRevision() {
@@ -110,6 +127,18 @@ public class YamjInfo {
     public String getOsVersion() {
         return osVersion;
     }
+
+    public String getBuildDate() {
+        return DateTimeTools.convertDateToString(buildDateTime, DateTimeTools.BUILD_FORMAT);
+    }
+
+    public String getStartUpTime(){
+        return DateTimeTools.convertDateToString(startUpDateTime, DateTimeTools.BUILD_FORMAT);
+    }
+
+    public String getUptime() {
+        return DateTimeTools.formatDurationText(ManagementFactory.getRuntimeMXBean().getUptime());
+    }
     //</editor-fold>
 
     /**
@@ -124,7 +153,7 @@ public class YamjInfo {
             log.info("{}", moduleName);
             log.info("");
             log.info("  Revision: {}", buildRevision);
-            log.info("Build Time: {}", DateTimeTools.convertDateToString(buildDateTime, DateTimeTools.BUILD_FORMAT));
+            log.info("Build Time: {}", getBuildDate());
             log.info("      Java: {}", javaVersion);
             log.info("");
         }
@@ -155,5 +184,8 @@ public class YamjInfo {
         log.info("         Version: {}", osVersion);
         log.info("    Architecture: {}", osArch);
         log.info(" Processor Cores: {}", processorCores);
+        log.info("");
+        log.info("Core Start Time : {}", getStartUpTime());
+        log.info("Core Uptime     : {}", getUptime());
     }
 }

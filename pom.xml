@@ -65,6 +65,7 @@
         <hibernate.version>3.6.10.Final</hibernate.version>
         <spring.version>3.2.2.RELEASE</spring.version>
         <org.slf4j.version>1.7.5</org.slf4j.version>
+        <jackson.version>2.2.1</jackson.version>
     </properties>
 
     <profiles>
@@ -186,12 +187,7 @@
                 <artifactId>hibernate-entitymanager</artifactId>
                 <version>${hibernate.version}</version>
             </dependency>
-            <!-- COMMON -->
-            <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>1.2.17</version>
-            </dependency>
+            <!--LOGGING-->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -201,6 +197,12 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-log4j12</artifactId>
                 <version>${org.slf4j.version}</version>
+            </dependency>
+            <!-- COMMON -->
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>1.2.17</version>
             </dependency>
             <dependency>
                 <groupId>commons-collections</groupId>
@@ -226,7 +228,12 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-hibernate3</artifactId>
-                <version>2.2.1</version>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
             </dependency>
             <!--SERVLET-->
             <dependency>

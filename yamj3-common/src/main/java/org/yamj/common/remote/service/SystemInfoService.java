@@ -22,6 +22,8 @@
  */
 package org.yamj.common.remote.service;
 
+import org.yamj.common.model.YamjInfo;
+
 /**
  * Provides a set of services about the YAMJ system
  *
@@ -31,7 +33,14 @@ public interface SystemInfoService {
 
     /**
      * Simple method to return a "I'm running" response
+     *
      * @return
      */
     String ping();
+
+    /**
+     * Get the information on the system
+     * @return
+     */
+    YamjInfo systemInfo();
 }
