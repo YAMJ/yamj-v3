@@ -23,7 +23,7 @@
 package org.yamj.core.hibernate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.hibernate3.Hibernate3Module;
+import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
 
 /**
  * Taken from the Jackson Hibernate module<br>
@@ -38,6 +38,6 @@ public class HibernateAwareObjectMapper extends ObjectMapper {
     private static final long serialVersionUID = 34607231867726798L;
 
     public HibernateAwareObjectMapper() {
-        registerModule(new Hibernate3Module());
+        registerModule(new Hibernate4Module());
     }
 }
