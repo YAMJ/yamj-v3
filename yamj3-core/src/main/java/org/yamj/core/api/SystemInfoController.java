@@ -22,8 +22,6 @@
  */
 package org.yamj.core.api;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -34,7 +32,6 @@ import org.yamj.common.model.YamjInfo;
 @RequestMapping("/system")
 public class SystemInfoController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SystemInfoController.class);
     private static final YamjInfo yamjInfo = new YamjInfo(SystemInfoController.class);
 
     @RequestMapping(value = "", method = RequestMethod.GET)
