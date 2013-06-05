@@ -36,7 +36,7 @@ import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 
 @Controller
-@RequestMapping("/api/video")
+@RequestMapping("/api/video/**")
 public class VideoController {
 
     private static final Logger LOG = LoggerFactory.getLogger(VideoController.class);

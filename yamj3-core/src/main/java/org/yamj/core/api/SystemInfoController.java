@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.common.model.YamjInfo;
 
 @Controller
-@RequestMapping("/system")
+@RequestMapping("/system/**")
 public class SystemInfoController {
 
     private static final Logger LOG = LoggerFactory.getLogger(SystemInfoController.class);

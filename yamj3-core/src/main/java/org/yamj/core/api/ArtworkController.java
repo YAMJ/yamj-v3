@@ -34,7 +34,7 @@ import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.model.Artwork;
 
 @Controller
-@RequestMapping("/api/artwork")
+@RequestMapping("/api/artwork/**")
 public class ArtworkController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkController.class);

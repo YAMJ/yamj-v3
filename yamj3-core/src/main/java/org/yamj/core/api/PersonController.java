@@ -34,7 +34,7 @@ import org.yamj.core.database.dao.PersonDao;
 import org.yamj.core.database.model.Person;
 
 @Controller
-@RequestMapping("/api/person")
+@RequestMapping("/api/person/**")
 public class PersonController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PersonController.class);
