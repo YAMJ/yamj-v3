@@ -203,23 +203,10 @@ public abstract class HibernateDao  {
     }
 
     @SuppressWarnings("rawtypes")
-    public List find(CharSequence queryString) {
-        return find(queryString, (Object[]) null);
-    }
-
-    @SuppressWarnings("rawtypes")
-    public List find(CharSequence queryString, Object value) {
-        return find(queryString, new Object[] {value});
-    }
-
-    @SuppressWarnings("rawtypes")
-    public List find(final CharSequence query, final Object... values) {
-        Query queryObject = getSession().createQuery(query.toString());
-        if (values != null) {
-            for (int i = 0; i < values.length; i++) {
-                queryObject.setParameter(i, values[i]);
-            }
-        }
+    public List findById(CharSequence queryString, Long id) {
+        Query queryObject = getSession().createQuery(queryString.toString());
+        queryObject.setCacheable(true);
+        queryObject.setParameter("id", id);
         return queryObject.list();
     }
 }

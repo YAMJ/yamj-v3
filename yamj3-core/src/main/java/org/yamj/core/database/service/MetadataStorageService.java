@@ -105,10 +105,10 @@ public class MetadataStorageService {
         sb.append("from VideoData vd ");
         sb.append("left outer join fetch vd.genres ");
         sb.append("left outer join fetch vd.credits c ");
-        sb.append("where vd.id = ?" );
+        sb.append("where vd.id = :id" );
 
         @SuppressWarnings("unchecked")
-        List<VideoData> objects = this.commonDao.find(sb, id);
+        List<VideoData> objects = this.commonDao.findById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
@@ -119,22 +119,22 @@ public class MetadataStorageService {
         sb.append("join fetch ser.seasons sea ");
         sb.append("join fetch sea.videoDatas vd ");
         sb.append("left outer join fetch vd.credits c ");
-        sb.append("where ser.id = ?" );
+        sb.append("where ser.id = :id" );
 
         @SuppressWarnings("unchecked")
-        List<Series> objects = this.commonDao.find(sb, id);
+        List<Series> objects = this.commonDao.findById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
     @Transactional(readOnly = true)
     public Person getRequiredPerson(Long id) {
         final StringBuilder sb = new StringBuilder();
-        sb.append("from Person person where person.id = ?");
+        sb.append("from Person person where person.id = :id");
 
         // later on there it could be necessary to fetch associated entities
 
         @SuppressWarnings("unchecked")
-        List<Person> objects = this.commonDao.find(sb, id);
+        List<Person> objects = this.commonDao.findById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 

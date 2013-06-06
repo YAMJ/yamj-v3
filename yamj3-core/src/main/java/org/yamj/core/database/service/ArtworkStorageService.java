@@ -72,10 +72,10 @@ public class ArtworkStorageService {
         sb.append("left outer join fetch art.videoData ");
         sb.append("left outer join fetch art.season ");
         sb.append("left outer join fetch art.series ");
-        sb.append("where art.id = ?");
+        sb.append("where art.id = :id");
 
         @SuppressWarnings("unchecked")
-        List<Artwork> objects = this.commonDao.find(sb, id);
+        List<Artwork> objects = this.commonDao.findById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
