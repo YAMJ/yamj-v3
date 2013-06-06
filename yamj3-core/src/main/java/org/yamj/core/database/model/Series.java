@@ -22,8 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import org.hibernate.annotations.ForeignKey;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,15 +30,18 @@ import javax.persistence.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.Index;
 import org.yamj.core.database.model.type.OverrideFlag;
 
-@javax.persistence.Entity
-@javax.persistence.Table(name = "series")
+@Entity
+@Table(name = "series",
+    uniqueConstraints= @UniqueConstraint(name="UIX_SERIES_NATURALID", columnNames={"identifier"})
+)
 @org.hibernate.annotations.Table(appliesTo = "series",
     indexes = {
-        @Index(name = "series_title", columnNames = {"title"}),
-        @Index(name = "series_status", columnNames = {"status"})
+        @Index(name = "IX_SERIES_TITLE", columnNames = {"title"}),
+        @Index(name = "IX_SERIES_STATUS", columnNames = {"status"})
 })
 public class Series extends AbstractMetadata {
 

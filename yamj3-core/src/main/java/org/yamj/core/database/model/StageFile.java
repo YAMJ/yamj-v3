@@ -22,6 +22,10 @@
  */
 package org.yamj.core.database.model;
 
+import org.hibernate.annotations.Index;
+
+import javax.persistence.UniqueConstraint;
+
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -51,8 +55,11 @@ import org.hibernate.annotations.Parameter;
             parameters = {
         @Parameter(name = "enumClassName", value = "org.yamj.common.type.StatusType")})
 })
+
 @Entity
-@Table(name = "stage_file")
+@Table(name = "stage_file",
+    uniqueConstraints= @UniqueConstraint(name="UIX_STAGEFILE_NATURALID", columnNames={"file_name", "directory_id"})
+)
 public class StageFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -6247352843375054146L;
@@ -78,6 +85,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
     @Column(name = "file_type", nullable = false, length = 30)
     private FileType fileType;
 
+    @Index(name = "IX_STAGEFILE_STATUS")
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;

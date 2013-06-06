@@ -26,11 +26,14 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
-@Table(name = "genre")
+@Table(name = "genre",
+    uniqueConstraints= @UniqueConstraint(name="UIX_GENRE_NATURALID", columnNames={"name"})
+)
 public class Genre extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -5113519542293276527L;
@@ -39,8 +42,7 @@ public class Genre extends AbstractIdentifiable implements Serializable {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    public Genre() {
-    }
+    public Genre() {}
 
     public Genre(String name) {
         this.name = name;

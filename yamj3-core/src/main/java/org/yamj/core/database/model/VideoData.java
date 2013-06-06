@@ -35,12 +35,14 @@ import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.OverrideFlag;
 
 @SuppressWarnings("unused")
-@javax.persistence.Entity
-@javax.persistence.Table(name = "videodata")
+@Entity
+@Table(name = "videodata",
+    uniqueConstraints= @UniqueConstraint(name="UIX_VIDEODATA_NATURALID", columnNames={"identifier"})
+)
 @org.hibernate.annotations.Table(appliesTo = "videodata",
     indexes = {
-        @Index(name = "videodata_title", columnNames = {"title"}),
-        @Index(name = "videodata_status", columnNames = {"status"})
+        @Index(name = "IX_VIDEODATA_TITLE", columnNames = {"title"}),
+        @Index(name = "IX_VIDEODATA_STATUS", columnNames = {"status"})
     })
 public class VideoData extends AbstractMetadata {
 
@@ -49,7 +51,7 @@ public class VideoData extends AbstractMetadata {
     @Column(name = "episode", nullable = false)
     private int episode = -1;
 
-    @Index(name = "videodata_publication_year")
+    @Index(name = "IX_VIDEODATA_PUBLICATIONYEAR")
     @Column(name = "publication_year", nullable = false)
     private int publicationYear = -1;
 

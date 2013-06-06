@@ -22,6 +22,9 @@
  */
 package org.yamj.core.database.model;
 
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
@@ -29,18 +32,24 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
-@Table(name = "library")
+@Table(name = "library",
+    uniqueConstraints= @UniqueConstraint(name="UIX_LIBRARY_NATURALID", columnNames={"client", "player_path"})
+)
 public class Library extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -3086992329257871600L;
+    
     @NaturalId
     @Column(name = "client", nullable = false, length = 100)
     private String client;
+    
     @NaturalId
     @Column(name = "player_path", nullable = false, length = 255)
     private String playerPath;
+    
     @Column(name = "base_directory", nullable = false, length = 255)
     private String baseDirectory;
+    
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "last_scanned", nullable = false)
     private Date lastScanned;

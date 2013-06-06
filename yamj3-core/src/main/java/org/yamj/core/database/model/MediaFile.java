@@ -22,6 +22,9 @@
  */
 package org.yamj.core.database.model;
 
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
 import org.hibernate.annotations.ForeignKey;
 
 import java.io.Serializable;
@@ -41,8 +44,11 @@ import org.yamj.core.hibernate.usertypes.EnumStringUserType;
         typeClass = EnumStringUserType.class,
         parameters = {
     @Parameter(name = "enumClassName", value = "org.yamj.common.type.StatusType")})
+
 @Entity
-@Table(name = "mediafile")
+@Table(name = "mediafile",
+    uniqueConstraints= @UniqueConstraint(name="UIX_MEDIAFILE_NATURALID", columnNames={"fileName"})
+)
 public class MediaFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 8411423609119475972L;

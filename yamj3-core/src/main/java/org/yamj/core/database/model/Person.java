@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import javax.persistence.UniqueConstraint;
+
 import org.hibernate.annotations.ForeignKey;
 
 import org.yamj.common.type.StatusType;
@@ -42,8 +44,11 @@ import org.hibernate.annotations.*;
             parameters = {
         @org.hibernate.annotations.Parameter(name = "enumClassName", value = "org.yamj.common.type.StatusType")})
 })
+
 @Entity
-@Table(name = "person")
+@Table(name = "person",
+    uniqueConstraints= @UniqueConstraint(name="UIX_PERSON_NATURALID", columnNames={"name"})
+)
 public class Person extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 660066902996412843L;
@@ -78,7 +83,7 @@ public class Person extends AbstractAuditable implements Serializable {
     @Column(name = "sourcedb_id", length = 40)
     private Map<String, String> personIds = new HashMap<String, String>(0);
 
-    @Index(name = "people_status")
+    @Index(name = "IX_PEOPLE_STATUS")
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;

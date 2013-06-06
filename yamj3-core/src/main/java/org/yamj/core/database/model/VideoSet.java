@@ -31,18 +31,22 @@ import org.hibernate.annotations.ForeignKey;
 public class VideoSet extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -3478878273175067619L;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_VIDEOSET_VIDEODATA")
     @JoinColumn(name = "data_id", nullable = false)
     private VideoData videoData;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_VIDEOSET_BOXEDSET")
     @JoinColumn(name = "boxedset_id", nullable = false)
     private BoxedSet boxedSet;
+    
     @JoinColumn(name = "ordering", nullable = false)
     private int ordering = -1;
 
     // GETTER and SETTER
+    
     public VideoData getVideoData() {
         return videoData;
     }

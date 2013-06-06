@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import javax.persistence.UniqueConstraint;
+
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,7 +32,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
-@Table(name = "studio")
+@Table(name = "studio",
+    uniqueConstraints= @UniqueConstraint(name="UK_STUDIO_NATURALID", columnNames={"name"})
+)
+
 public class Studio extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -5113519542293276527L;
@@ -40,6 +45,7 @@ public class Studio extends AbstractIdentifiable implements Serializable {
     private String name;
 
     // GETTER and SETTER
+    
     public String getName() {
         return name;
     }
@@ -49,6 +55,7 @@ public class Studio extends AbstractIdentifiable implements Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         final int prime = 17;

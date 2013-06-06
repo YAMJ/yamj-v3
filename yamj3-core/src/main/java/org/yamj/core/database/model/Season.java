@@ -32,18 +32,20 @@ import org.hibernate.annotations.Index;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
-@javax.persistence.Entity
-@javax.persistence.Table(name = "season")
+@Entity
+@Table(name = "season",
+    uniqueConstraints= @UniqueConstraint(name="UIX_SEASON_NATURALID", columnNames={"identifier"})
+)
 @org.hibernate.annotations.Table(appliesTo = "season",
     indexes = {
-        @Index(name = "season_title", columnNames = {"title"}),
-        @Index(name = "season_status", columnNames = {"status"})
+        @Index(name = "IX_SEASON_TITLE", columnNames = {"title"}),
+        @Index(name = "IX_SEASON_STATUS", columnNames = {"status"})
 })
 public class Season extends AbstractMetadata {
 
     private static final long serialVersionUID = 7589022259013410259L;
 
-    @Index(name = "season_season")
+    @Index(name = "IX_SEASON_SEASON")
     @Column(name = "season", nullable = false)
     private int season;
 

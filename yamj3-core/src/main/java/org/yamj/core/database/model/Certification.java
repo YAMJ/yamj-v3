@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import javax.persistence.UniqueConstraint;
+
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,7 +32,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
-@Table(name = "certification")
+@Table(name = "certification",
+    uniqueConstraints= @UniqueConstraint(name="UIX_CERTIFICATION_NATURALID", columnNames={"certification_text"})
+)
 public class Certification extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 5949467240717893584L;

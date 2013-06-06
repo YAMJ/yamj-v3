@@ -27,6 +27,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import org.hibernate.annotations.NaturalId;
 
 /**
  * Used to store the various ratings for a video
@@ -37,20 +38,25 @@ import javax.persistence.UniqueConstraint;
  */
 @Entity
 @Table(name = "rating",
-        uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"video_id", "source_id", "rating"})})
+    uniqueConstraints = @UniqueConstraint(name = "UIX_RATING_NATURALID", columnNames = {"video_id", "source_id", "rating"})
+)
 public class Rating extends AbstractIdentifiable implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2096820906526625018L;
+
+    @NaturalId
     @Column(name = "video_id", nullable = false)
     private int videoId;
+
+    @NaturalId
     @Column(name = "source_id", nullable = false, length = 50)
     private String sourceId;
+
+    @NaturalId
     @Column(name = "rating", nullable = false)
     private int rating;
 
-    public Rating() {
-    }
+    public Rating() {}
 
     public Rating(int videoId, String sourceId, int rating) {
         this.videoId = videoId;

@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import javax.persistence.UniqueConstraint;
+
 import org.apache.commons.lang3.StringUtils;
 
 import org.yamj.core.database.model.type.JobType;
@@ -37,8 +39,11 @@ import org.hibernate.annotations.Parameter;
         typeClass = EnumStringUserType.class,
         parameters = {
     @Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.JobType")})
+
 @Entity
-@Table(name = "cast_crew")
+@Table(name = "cast_crew",
+    uniqueConstraints= @UniqueConstraint(name="UIX_CASTCREW_NATURALID", columnNames={"person_id", "videodata_id", "job"})
+)
 public class CastCrew extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -3941301942248344131L;

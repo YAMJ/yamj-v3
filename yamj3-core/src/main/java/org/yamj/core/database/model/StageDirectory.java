@@ -22,65 +22,62 @@
  */
 package org.yamj.core.database.model;
 
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import org.hibernate.annotations.ForeignKey;
-
-import org.yamj.common.type.StatusType;
-import org.hibernate.annotations.Type;
-
+import java.io.Serializable;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.*;
 import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-
-import org.yamj.core.hibernate.usertypes.EnumStringUserType;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.TypeDef;
-
-import java.util.Date;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import java.io.Serializable;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.Parameter;
+import org.yamj.common.type.StatusType;
+import org.yamj.core.hibernate.usertypes.EnumStringUserType;
 
 @TypeDef(name = "statusType",
         typeClass = EnumStringUserType.class,
         parameters = {
     @Parameter(name = "enumClassName", value = "org.yamj.common.type.StatusType")})
+
 @Entity
-@Table(name = "stage_directory")
+@Table(name = "stage_directory",
+    uniqueConstraints= @UniqueConstraint(name="UIX_STAGEDIRECTORY_NATURALID", columnNames={"directory_path", "library_id"})
+)
 public class StageDirectory extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 1706389732909764283L;
+    
     @NaturalId
     @Column(name = "directory_path", nullable = false, length = 255)
     private String directoryPath;
+    
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "directory_date", nullable = false)
     private Date directoryDate;
+    
+    @Index(name = "IX_STAGEDIRECTORY_STATUS")
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
+    
     @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_DIRECTORY_LIBRARY")
+    @ForeignKey(name = "FK_STAGEDIRECTORY_LIBRARY")
     @JoinColumn(name = "library_id", nullable = false)
     private Library library;
+    
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_DIRECTORY_PARENT")
+    @ForeignKey(name = "FK_STAGEDIRECTORY_PARENT")
     @JoinColumn(name = "parent_id")
     private StageDirectory parentDirectory;
+    
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "stageDirectory")
     private Set<StageFile> stageFiles = new HashSet<StageFile>(0);
 
     // GETTER and SETTER
+    
     public String getDirectoryPath() {
         return directoryPath;
     }
@@ -130,6 +127,7 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         final int prime = 17;
