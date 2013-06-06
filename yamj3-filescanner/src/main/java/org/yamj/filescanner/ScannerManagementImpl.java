@@ -61,6 +61,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.CollectionUtils;
@@ -162,18 +163,7 @@ public class ScannerManagementImpl implements ScannerManagement {
      */
     @Override
     public ExitType runScanner(CmdLineParser parser) {
-        try {
-            DateTime fsDate = YAMJ_INFO.getBuildDateTime();
-            boolean installationOk = githubService.checkInstallationDate(fsDate, MAX_INSTALL_AGE);
-
-            if (installationOk) {
-                LOG.info("Installation is less than {} days old.", MAX_INSTALL_AGE);
-            } else {
-                LOG.error("***** Your installation is more than {} days old. You should consider updating! *****", MAX_INSTALL_AGE);
-            }
-        } catch (RemoteConnectFailureException ex) {
-            LOG.warn("Failed to get GitHub status, error: {}", ex.getMessage());
-        }
+        checkGitHubStatus();
 
         libraryCollection.setDefaultClient(DEFAULT_CLIENT);
         libraryCollection.setDefaultPlayerPath(DEFAULT_PLAYER_PATH);
@@ -488,5 +478,22 @@ public class ScannerManagementImpl implements ScannerManagement {
 
     public void setYamjExecutor(ThreadPoolTaskExecutor yamjExecutor) {
         this.yamjExecutor = yamjExecutor;
+    }
+
+    private void checkGitHubStatus() {
+        try {
+            DateTime fsDate = YAMJ_INFO.getBuildDateTime();
+            boolean installationOk = githubService.checkInstallationDate(fsDate, MAX_INSTALL_AGE);
+
+            if (installationOk) {
+                LOG.info("Installation is less than {} days old.", MAX_INSTALL_AGE);
+            } else {
+                LOG.error("***** Your installation is more than {} days old. You should consider updating! *****", MAX_INSTALL_AGE);
+            }
+        } catch (RemoteConnectFailureException ex) {
+            LOG.warn("Failed to get GitHub status, error: {}", ex.getMessage());
+        } catch (RemoteAccessException ex) {
+            LOG.warn("Failed to get GitHub status, error: {}", ex.getMessage());
+        }
     }
 }
