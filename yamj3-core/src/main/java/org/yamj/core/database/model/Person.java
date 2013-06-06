@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import org.hibernate.annotations.ForeignKey;
+
 import org.yamj.common.type.StatusType;
 import org.yamj.core.hibernate.usertypes.EnumStringUserType;
 import java.io.Serializable;
@@ -70,6 +72,7 @@ public class Person extends AbstractAuditable implements Serializable {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "person_ids", joinColumns = @JoinColumn(name = "person_id"))
+    @ForeignKey(name = "FK_PERSON_SOURCEIDS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 40)

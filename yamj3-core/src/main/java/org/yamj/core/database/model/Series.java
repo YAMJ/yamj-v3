@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import org.hibernate.annotations.ForeignKey;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -52,6 +54,7 @@ public class Series extends AbstractMetadata {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_ids", joinColumns = @JoinColumn(name = "series_id"))
+    @ForeignKey(name = "FK_SERIES_SOURCEIDS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200)
@@ -59,6 +62,7 @@ public class Series extends AbstractMetadata {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_ratings", joinColumns = @JoinColumn(name = "series_id"))
+    @ForeignKey(name = "FK_SERIES_RATINGS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", length = 30)
@@ -66,6 +70,7 @@ public class Series extends AbstractMetadata {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_override", joinColumns = @JoinColumn(name = "series_id"))
+    @ForeignKey(name = "FK_SERIES_OVERRIDE")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
     @Column(name = "source", length = 30)

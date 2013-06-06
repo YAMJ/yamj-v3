@@ -63,7 +63,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.EAGER)
-    @ForeignKey(name = "FK_FILE_DIRECTORY")
+    @ForeignKey(name = "FK_STAGEFILE_DIRECTORY")
     @JoinColumn(name = "directory_id", nullable = false)
     private StageDirectory stageDirectory;
 
@@ -83,8 +83,8 @@ public class StageFile extends AbstractAuditable implements Serializable {
     private StatusType status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_FILE_MEDIAFILE")
     @Fetch(FetchMode.SELECT)
+    @ForeignKey(name = "FK_STAGEFILE_MEDIAFILE")
     @JoinColumn(name = "mediafile_id")
     private MediaFile mediaFile;
 

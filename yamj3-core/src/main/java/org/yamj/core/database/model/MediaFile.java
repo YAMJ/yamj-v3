@@ -22,22 +22,20 @@
  */
 package org.yamj.core.database.model;
 
-import org.yamj.common.type.StatusType;
-import javax.persistence.Column;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.ForeignKey;
 
-import org.yamj.core.hibernate.usertypes.EnumStringUserType;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.yamj.common.type.StatusType;
+import org.yamj.core.hibernate.usertypes.EnumStringUserType;
 
 @TypeDef(name = "statusType",
         typeClass = EnumStringUserType.class,
@@ -48,44 +46,58 @@ import org.hibernate.annotations.Parameter;
 public class MediaFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 8411423609119475972L;
+    
     @NaturalId
     @Column(name = "fileName", nullable = false, length = 255)
     private String fileName;
+    
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "file_date")
     private Date fileDate;
+    
     @Column(name = "file_size")
     private long fileSize = -1;
+    
     @Column(name = "part")
     private int part;
+    
     @Column(name = "container", length = 30)
     private String container;
+    
     @Column(name = "codec", length = 50)
     private String codec;
+    
     @Column(name = "bitrate")
     private int bitrate = -1;
+    
     @Column(name = "fps")
     private float fps = 60;
+    
     @Column(name = "width")
     private int width = -1;
+    
     @Column(name = "height")
     private int height = -1;
+    
     @Column(name = "aspect", length = 30)
     private String aspect;
+    
     @Column(name = "runtime")
     private long runtime;
+    
     @Column(name = "video_source", length = 30)
     private String videoSource;
+    
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
+    
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "mediafile_videodata",
-            joinColumns = {
-        @JoinColumn(name = "mediafile_id")},
-            inverseJoinColumns = {
-        @JoinColumn(name = "videodata_id")})
+        joinColumns = {@JoinColumn(name = "mediafile_id")}, inverseJoinColumns = {@JoinColumn(name = "videodata_id")})
+    @ForeignKey(name = "FK_REL_MEDIAFILE_VIDEODATA")
     private Set<VideoData> videoDatas = new HashSet<VideoData>(0);
+    
     @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "mediaFile")
     private Set<StageFile> stageFiles = new HashSet<StageFile>(0);
 

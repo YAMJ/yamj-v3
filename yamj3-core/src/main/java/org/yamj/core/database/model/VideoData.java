@@ -72,6 +72,7 @@ public class VideoData extends AbstractMetadata {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_ids", joinColumns = @JoinColumn(name = "videodata_id"))
+    @ForeignKey(name = "FK_VIDEODATA_SOURCEIDS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200)
@@ -79,6 +80,7 @@ public class VideoData extends AbstractMetadata {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_ratings", joinColumns = @JoinColumn(name = "videodata_id"))
+    @ForeignKey(name = "FK_VIDEODATA_RATINGS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", length = 30)
@@ -86,6 +88,7 @@ public class VideoData extends AbstractMetadata {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_override", joinColumns =@JoinColumn(name = "videodata_id"))
+    @ForeignKey(name = "FK_VIDEODATA_OVERRIDE")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
     @Column(name = "source", length = 30)
@@ -105,6 +108,7 @@ public class VideoData extends AbstractMetadata {
     private Season season;
 
     @ManyToMany(mappedBy = "videoDatas")
+    @ForeignKey(name = "FK_REL_VIDEODATA_MEDIAFILE")
     private Set<MediaFile> mediaFiles = new HashSet<MediaFile>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)

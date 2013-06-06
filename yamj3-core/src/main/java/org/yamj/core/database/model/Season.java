@@ -52,6 +52,7 @@ public class Season extends AbstractMetadata {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "season_ids", joinColumns = @JoinColumn(name = "season_id"))
+    @ForeignKey(name = "FK_SEASON_SOURCEIDS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200)
@@ -59,6 +60,7 @@ public class Season extends AbstractMetadata {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "season_ratings", joinColumns = @JoinColumn(name = "season_id"))
+    @ForeignKey(name = "FK_SEASON_RATINGS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", length = 30)
@@ -66,6 +68,7 @@ public class Season extends AbstractMetadata {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "season_override", joinColumns = @JoinColumn(name = "season_id"))
+    @ForeignKey(name = "FK_SEASON_OVERRIDE")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
     @Column(name = "source", length = 30)
