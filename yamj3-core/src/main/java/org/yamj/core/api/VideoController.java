@@ -22,8 +22,6 @@
  */
 package org.yamj.core.api;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +30,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
 @RequestMapping("/api/video/**")
@@ -43,29 +41,26 @@ public class VideoController {
 
     private static final Logger LOG = LoggerFactory.getLogger(VideoController.class);
     @Autowired
-    private MetadataDao metadataDao;
+    private JsonApiStorageService jsonApiStorageService;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
-    @Transactional(readOnly = true)
     public VideoData getVideoById(@PathVariable String id) {
         LOG.info("Getting video with ID '{}'", id);
-        return metadataDao.getVideoData(Long.parseLong(id));
+        return jsonApiStorageService.getEntityById(VideoData.class, Long.parseLong(id));
     }
 
     @RequestMapping(value = "/series/{id}", method = RequestMethod.GET)
     @ResponseBody
-    @Transactional(readOnly = true)
     public Series getSeriesById(@PathVariable String id) {
         LOG.info("Getting series with ID '{}'", id);
-        return metadataDao.getSeries(Long.parseLong(id));
+        return jsonApiStorageService.getEntityById(Series.class, Long.parseLong(id));
     }
 
     @RequestMapping(value = "/season/{id}", method = RequestMethod.GET)
     @ResponseBody
-    @Transactional(readOnly = true)
     public Season getSeasonById(@PathVariable String id) {
         LOG.info("Getting season with ID '{}'", id);
-        return metadataDao.getSeason(Long.parseLong(id));
+        return jsonApiStorageService.getEntityById(Season.class, Long.parseLong(id));
     }
 }

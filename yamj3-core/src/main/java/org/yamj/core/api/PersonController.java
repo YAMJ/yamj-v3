@@ -22,8 +22,6 @@
  */
 package org.yamj.core.api;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +30,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.model.Person;
+import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
 @RequestMapping("/api/person/**")
@@ -41,13 +39,12 @@ public class PersonController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PersonController.class);
     @Autowired
-    private MetadataDao metadataDao;
+    private JsonApiStorageService jsonApiStorageService;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
-    @Transactional(readOnly = true)
-    public Person getVideoById(@PathVariable String id) {
+    public Person getPersonById(@PathVariable String id) {
         LOG.info("Getting person with ID '{}'", id);
-        return metadataDao.getPerson(Long.parseLong(id));
+        return jsonApiStorageService.getEntityById(Person.class, Long.parseLong(id));
     }
 }
