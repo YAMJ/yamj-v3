@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import org.hibernate.annotations.NaturalId;
+
 import javax.persistence.UniqueConstraint;
 
 import org.yamj.common.type.StatusType;
@@ -55,7 +57,7 @@ public class Artwork extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -981494909436217076L;
 
-    @NaturalId
+    @NaturalId(mutable = true)
     @Type(type = "artworkType")
     @Column(name = "artwork_type", nullable = false)
     private ArtworkType artworkType;
@@ -73,21 +75,21 @@ public class Artwork extends AbstractAuditable implements Serializable {
     @JoinColumn(name = "stagefile_id")
     private StageFile stageFile;
 
-    @NaturalId
+    @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_VIDEODATA")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "videodata_id")
     private VideoData videoData;
 
-    @NaturalId
+    @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_SEASON")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "season_id")
     private Season season;
 
-    @NaturalId
+    @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_SERIES")
     @Fetch(FetchMode.SELECT)
