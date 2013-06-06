@@ -47,5 +47,4 @@ public class SystemInfoController {
     public YamjInfo getYamjInfo() {
         return YAMJ_INFO;
     }
-
 }
