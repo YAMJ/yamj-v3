@@ -22,6 +22,8 @@
  */
 package org.yamj.core.api;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,7 @@ public class VideoController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
+    @Transactional(readOnly = true)
     public VideoData getVideoById(@PathVariable String id) {
         LOG.info("Getting video with ID '{}'", id);
         return metadataDao.getVideoData(Long.parseLong(id));
@@ -52,6 +55,7 @@ public class VideoController {
 
     @RequestMapping(value = "/series/{id}", method = RequestMethod.GET)
     @ResponseBody
+    @Transactional(readOnly = true)
     public Series getSeriesById(@PathVariable String id) {
         LOG.info("Getting series with ID '{}'", id);
         return metadataDao.getSeries(Long.parseLong(id));
@@ -59,6 +63,7 @@ public class VideoController {
 
     @RequestMapping(value = "/season/{id}", method = RequestMethod.GET)
     @ResponseBody
+    @Transactional(readOnly = true)
     public Season getSeasonById(@PathVariable String id) {
         LOG.info("Getting season with ID '{}'", id);
         return metadataDao.getSeason(Long.parseLong(id));

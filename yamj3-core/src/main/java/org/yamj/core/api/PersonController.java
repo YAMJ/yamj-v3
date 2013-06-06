@@ -22,6 +22,8 @@
  */
 package org.yamj.core.api;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,7 @@ public class PersonController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
+    @Transactional(readOnly = true)
     public Person getVideoById(@PathVariable String id) {
         LOG.info("Getting person with ID '{}'", id);
         return metadataDao.getPerson(Long.parseLong(id));

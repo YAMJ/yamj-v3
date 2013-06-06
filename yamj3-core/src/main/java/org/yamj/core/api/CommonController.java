@@ -22,6 +22,8 @@
  */
 package org.yamj.core.api;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,7 @@ public class CommonController {
 
     @RequestMapping(value = "/genre/{name}", method = RequestMethod.GET)
     @ResponseBody
+    @Transactional(readOnly = true)
     public Genre getGenre(@PathVariable String name) {
         LOG.info("Getting genre '{}'", name);
         return commonDao.getGenre(name);
@@ -52,6 +55,7 @@ public class CommonController {
 
     @RequestMapping(value = "/certification/{name}", method = RequestMethod.GET)
     @ResponseBody
+    @Transactional(readOnly = true)
     public Certification getCertification(@PathVariable String name) {
         LOG.info("Getting certification '{}'", name);
         return commonDao.getCertification(name);
@@ -59,6 +63,7 @@ public class CommonController {
 
     @RequestMapping(value = "/studio/{name}", method = RequestMethod.GET)
     @ResponseBody
+    @Transactional(readOnly = true)
     public Studio getStudio(@PathVariable String name) {
         LOG.info("Getting studio '{}'", name);
         return commonDao.getStudio(name);
