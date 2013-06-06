@@ -73,21 +73,21 @@ public class SendToCore implements Callable<StatusType> {
         int currentTry = 1;
 
         do {
-            LOG.debug("SendToCore try {}/{}", currentTry++, numberOfRetries);
+            LOG.debug("{}: SendToCore try {}/{}", importDto.getBaseDirectory(), currentTry++, numberOfRetries);
             status = send();
             // Only sleep if there was an error
             if (status == StatusType.ERROR) {
                 try {
-                    LOG.debug("Error sending to core, waiting {} seconds to retry", timeoutSeconds);
+                    LOG.debug("{}: Error sending to core, waiting {} seconds to retry", importDto.getBaseDirectory(), timeoutSeconds);
                     TimeUnit.SECONDS.sleep(timeoutSeconds);
                 } catch (InterruptedException ex) {
-                    LOG.trace("Interrupted whilst waiting {} seconds for the send to complete", timeoutSeconds);
+                    LOG.trace("{}: Interrupted whilst waiting {} seconds for the send to complete", importDto.getBaseDirectory(), timeoutSeconds);
                 }
             }
         } while (status == StatusType.ERROR && currentTry <= numberOfRetries);
 
         // Whether or not the message was sent, quit
-        LOG.info("Exiting with status {}, remaining threads: {}", status, runningCount.decrementAndGet());
+        LOG.info("{}: Exiting with status {}, remaining threads: {}", importDto.getBaseDirectory(), status, runningCount.decrementAndGet());
         return status;
     }
 
@@ -96,13 +96,13 @@ public class SendToCore implements Callable<StatusType> {
         try {
             LOG.debug("Sending: {}", importDto.getBaseDirectory());
             fileImportService.importScanned(importDto);
-            LOG.debug("Successfully queued");
+            LOG.debug("{}: Successfully queued", importDto.getBaseDirectory());
             status = StatusType.DONE;
         } catch (RemoteConnectFailureException ex) {
-            LOG.error("Failed to connect to the core server: {}", ex.getMessage());
+            LOG.error("{}: Failed to connect to the core server: {}", importDto.getBaseDirectory(), ex.getMessage());
             status = StatusType.ERROR;
         } catch (RemoteAccessException ex) {
-            LOG.error("Failed to send object to the core server: {}", ex.getMessage());
+            LOG.error("{}: Failed to send object to the core server: {}", importDto.getBaseDirectory(), ex.getMessage());
             status = StatusType.ERROR;
         }
         return status;
