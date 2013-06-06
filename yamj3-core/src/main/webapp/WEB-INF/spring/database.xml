@@ -12,6 +12,7 @@
         <property name="url" value="${yamj3.database.url}" />
         <property name="username" value="${yamj3.database.username}"/>
         <property name="password" value="${yamj3.database.password}"/>
+        <property name="validationQuery" value="${yamj3.database.validationQuery}"/>
         <property name="initialSize" value="${yamj3.database.connections.initialSize}" />
         <property name="maxActive" value="${yamj3.database.connections.maxActive}"/>
         <property name="minIdle" value="${yamj3.database.connections.minIdle}"/>
@@ -23,7 +24,6 @@
         <property name="testOnBorrow" value="${yamj3.database.connections.testOnBorrow}"/>
         <property name="testWhileIdle" value="${yamj3.database.connections.testWhileIdle}"/>
         <property name="testOnReturn" value="${yamj3.database.connections.testOnReturn}"/>
-        <property name="validationQuery" value="${yamj3.database.connections.validationQuery}"/>
         <property name="poolPreparedStatements" value="true" />
     </bean>
 
