@@ -14,16 +14,17 @@ Currently the API reflects the underlying model as used in the core, so there ar
 All comments can be written in (support [Markdown](http://daringfireball.net/projects/markdown/syntax) syntax)
 ***
 The API can be called using the following base URL:
-`http://{CORE_IP}/yamj3/api/`
+`http://{CORE_IP}/yamj3/`
 
 `{CORE_IP}` is the address of where your jetty install is running, usually you can use `localhost`.
-
-You then append the following to that URL and replace `{id}` with the internal (database) ID of the object you want.
 
 ## JSON & JSONP
 If you require JSONP formatted data, you can call the URL and append the following:
 
-`.json?callback={function}`
+    .json?callback={function}
+**Example**
+
+    http://localhost/yamj3/video/1.json?callback={function}
 
 ---
 
@@ -34,8 +35,144 @@ These methods get information on the videos in the database
 --
 
 Retrieve information on the video
-GET /movie/{id}
+GET /api/movie/{id}
 < 200 
 < Content-Type: application/json
-{"id":1,"createTimestamp":1370540495000,"updateTimestamp":1370540510000,"identifier":"Nikita_0000_001_022","title":"Pandora (2)","titleOriginal":"Pandora (2)","plot":"Percy makes a move to take over the CIA, Alex goes rogue, and Michael gets trapped inside Division making him unable to help Nikita, who may have to pay with her life for helping Alex. ","outline":null,"status":"DONE","episode":22,"publicationYear":-1,"releaseDate":null,"topRank":-1,"tagline":null,"quote":null,"country":null,"ratings":{},"overrideFlags":{"ORIGINALTITLE":"filename","PLOT":"tvdb","TITLE":"tvdb"},"genres":null,"season":null,"mediaFiles":null,"credits":null,"creditDTOS":[],"moviedbIdMap":{},"scannableTvEpisode":false,"year":-1,"seasonNumber":-1,"episodeNumber":22,"newlyCreated":false}
+{
+    "id":1,
+    "createTimestamp":1370540495000,
+    "updateTimestamp":1370540510000,
+    "identifier":"Nikita_0000_001_022",
+    "title":"Pandora (2)",
+    "titleOriginal":"Pandora (2)",
+    "plot":"Percy makes a move to take over the CIA, Alex goes rogue, and Michael gets trapped inside Division making him unable to help Nikita, who may have to pay with her life for helping Alex. ",
+    "outline":null,
+    "status":"DONE",
+    "episode":22,
+    "publicationYear":-1,
+    "releaseDate":null,
+    "topRank":-1,
+    "tagline":null,
+    "quote":null,
+    "country":null,
+    "ratings":{},
+    "overrideFlags":
+    {
+        "ORIGINALTITLE":"filename",
+        "PLOT":"tvdb",
+        "TITLE":"tvdb"
+    },
+    "genres":null,
+    "season":null,
+    "mediaFiles":null,
+    "credits":null,
+    "creditDTOS":[],
+    "moviedbIdMap":{},
+    "scannableTvEpisode":false,
+    "year":-1,
+    "seasonNumber":-1,
+    "episodeNumber":22,
+    "newlyCreated":false}
+
+Retrieve information on the series
+GET /api/series/{id}
+< 200
+< Content-Type: application/json
+{}
+
+Retrieve information on the season
+GET /api/season/{id}
+< 200
+< Content-Type: application/json
+{}
+
+
+--
+Artwork
+--
+
+Get information on the artwork
+GET /api/artwork/{id}
+< 200
+< Content-Type: application/json
+{}
+
+
+--
+Person
+--
+
+Get information on the person
+GET /api/person/{id}
+< 200
+< Content-Type: application/json
+{}
+
+
+--
+Other
+--
+
+Get information on the genre
+GET /api/genre/{id}
+< 200
+< Content-Type: application/json
+{}
+
+
+Get information on the certification
+GET /api/certificate/{id}
+< 200
+< Content-Type: application/json
+{}
+
+
+Get information on the studio
+GET /api/studio/{id}
+< 200
+< Content-Type: application/json
+{}
+
+
+
+--
+System Information
+This API returns information about the state of the YAMJ Core.
+--
+
+Get a simple text response with the uptime of the core.
+
+This is not intended to be consumed programmatically, it is intended to provide a "ping" types response for checking that the core is running.
+GET /system
+< 200
+< Content-Type: text
+{YAMJ v3 is running, uptime 1h07m20.198s}
+
+
+Get information on the system
+GET /system/info
+< 200
+< Content-Type: application/json
+{
+    "projectName":"Yet Another Movie Jukebox",
+    "projectVersion":"3.0-SNAPSHOT",
+    "moduleName":"YAMJ3 Core",
+    "moduleDescription":"Core of YAMJ project",
+    "buildRevision":"0664191103",
+    "processorCores":8,
+    "javaVersion":"1.7.0_21",
+    "osArch":"amd64",
+    "osName":"Windows 7",
+    "osVersion":"6.1",
+    "startUpTime":"2013-06-06 18:50:22",
+    "buildDate":"2013-06-06 18:50:01",
+    "uptime":"1h10m47.407s"
+}
+
+
+
+
+
+
+
 
