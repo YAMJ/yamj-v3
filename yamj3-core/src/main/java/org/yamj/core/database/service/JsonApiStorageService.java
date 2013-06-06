@@ -23,6 +23,7 @@
 package org.yamj.core.database.service;
 
 import java.io.Serializable;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +38,7 @@ public class JsonApiStorageService {
 
     @Autowired
     private CommonDao commonDao;
-    
+
     @Transactional(readOnly = true)
     public <T> T getEntityById(Class<T> entityClass, Serializable id) {
         return commonDao.get(entityClass, id);
@@ -46,6 +47,11 @@ public class JsonApiStorageService {
     @Transactional(readOnly = true)
     public Genre getGenre(String name) {
         return commonDao.getGenre(name);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Genre> getGenres(String search, String place, String sort, int queryFrom, int queryMax) {
+        return commonDao.getGenres(search, place, sort, queryFrom, queryMax);
     }
 
     @Transactional(readOnly = true)

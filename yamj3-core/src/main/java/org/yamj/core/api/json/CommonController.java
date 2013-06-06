@@ -22,6 +22,7 @@
  */
 package org.yamj.core.api.json;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Genre;
@@ -36,7 +38,7 @@ import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
-@RequestMapping("/api")
+@RequestMapping("/api/**")
 public class CommonController {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommonController.class);
@@ -48,6 +50,19 @@ public class CommonController {
     public Genre getGenre(@PathVariable String name) {
         LOG.info("Getting genre '{}'", name);
         return jsonApiStorageService.getGenre(name);
+    }
+
+    @RequestMapping(value = "/genres", method = RequestMethod.GET)
+    @ResponseBody
+    public List<Genre> getGenres(
+            @RequestParam(required = false, defaultValue = "") String search,
+            @RequestParam(required = false, defaultValue = "") String place,
+            @RequestParam(required = false, defaultValue = "") String sort,
+            @RequestParam(required = false, defaultValue = "-1") Integer start,
+            @RequestParam(required = false, defaultValue = "-1") Integer max) {
+
+        LOG.info("Getting genre list Search: '{}', Place: '{}', Sort: '{}', Max: {}, Start: {}", search, place, sort, max, start);
+        return jsonApiStorageService.getGenres(search, place, sort, start, max);
     }
 
     @RequestMapping(value = "/certification/{name}", method = RequestMethod.GET)

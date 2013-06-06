@@ -49,7 +49,6 @@ public class ArtworkScannerService {
     private static List<String> FANART_MOVIE_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.fanart.movie.priorities", "tmdb").toLowerCase().split(","));
     private HashMap<String, IMoviePosterScanner> registeredMoviePosterScanner = new HashMap<String, IMoviePosterScanner>();
     private HashMap<String, IMovieFanartScanner> registeredMovieFanartScanner = new HashMap<String, IMovieFanartScanner>();
-
     @Autowired
     private ArtworkStorageService artworkStorageService;
 
@@ -103,7 +102,7 @@ public class ArtworkScannerService {
     private void scanPosterOnline(Artwork artwork) {
         LOG.trace("Scan online for poster: {}", artwork);
 
-        String posterUrl = null;
+        String posterUrl;
 
         if (artwork.getVideoData() != null) {
             // CASE: movie poster scan
@@ -132,7 +131,7 @@ public class ArtworkScannerService {
     private void scanFanartOnline(Artwork artwork) {
         LOG.trace("Scan online for fanart: {}", artwork);
 
-        String fanartUrl = null;
+        String fanartUrl;
 
         if (artwork.getVideoData() != null) {
             // CASE: movie fanart
@@ -147,7 +146,8 @@ public class ArtworkScannerService {
                 }
             }
         } else {
-            throw new RuntimeException("Artwork search not implemented for " + artwork);
+            // Don't throw an exception here, just a debug message for now
+            LOG.debug("Artwork search not implemented for {}" + artwork);
         }
     }
 

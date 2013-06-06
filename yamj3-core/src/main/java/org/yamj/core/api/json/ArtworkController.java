@@ -45,6 +45,6 @@ public class ArtworkController {
     @ResponseBody
     public Artwork getArtworkById(@PathVariable String id) {
         LOG.info("Getting artwork with ID '{}'", id);
-        return jsonApiStorageService.getEntityById(Artwork.class,Long.parseLong(id));
+        return jsonApiStorageService.getEntityById(Artwork.class, Long.parseLong(id));
     }
 }
