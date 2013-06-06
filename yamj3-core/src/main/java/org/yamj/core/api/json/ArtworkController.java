@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api;
+package org.yamj.core.api.json;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,37 +30,21 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.yamj.core.database.model.Certification;
-import org.yamj.core.database.model.Genre;
-import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
-@RequestMapping("/api")
-public class CommonController {
+@RequestMapping("/api/artwork/**")
+public class ArtworkController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CommonController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ArtworkController.class);
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
 
-    @RequestMapping(value = "/genre/{name}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public Genre getGenre(@PathVariable String name) {
-        LOG.info("Getting genre '{}'", name);
-        return jsonApiStorageService.getGenre(name);
-    }
-
-    @RequestMapping(value = "/certification/{name}", method = RequestMethod.GET)
-    @ResponseBody
-    public Certification getCertification(@PathVariable String name) {
-        LOG.info("Getting certification '{}'", name);
-        return jsonApiStorageService.getCertification(name);
-    }
-
-    @RequestMapping(value = "/studio/{name}", method = RequestMethod.GET)
-    @ResponseBody
-    public Studio getStudio(@PathVariable String name) {
-        LOG.info("Getting studio '{}'", name);
-        return jsonApiStorageService.getStudio(name);
+    public Artwork getArtworkById(@PathVariable String id) {
+        LOG.info("Getting artwork with ID '{}'", id);
+        return jsonApiStorageService.getEntityById(Artwork.class,Long.parseLong(id));
     }
 }

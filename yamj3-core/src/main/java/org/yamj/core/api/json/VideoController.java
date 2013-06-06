@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api;
+package org.yamj.core.api.json;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,21 +30,37 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
-@RequestMapping("/api/artwork/**")
-public class ArtworkController {
+@RequestMapping("/api/video/**")
+public class VideoController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ArtworkController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VideoController.class);
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public Artwork getArtworkById(@PathVariable String id) {
-        LOG.info("Getting artwork with ID '{}'", id);
-        return jsonApiStorageService.getEntityById(Artwork.class,Long.parseLong(id));
+    public VideoData getVideoById(@PathVariable String id) {
+        LOG.info("Getting video with ID '{}'", id);
+        return jsonApiStorageService.getEntityById(VideoData.class, Long.parseLong(id));
+    }
+
+    @RequestMapping(value = "/series/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public Series getSeriesById(@PathVariable String id) {
+        LOG.info("Getting series with ID '{}'", id);
+        return jsonApiStorageService.getEntityById(Series.class, Long.parseLong(id));
+    }
+
+    @RequestMapping(value = "/season/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public Season getSeasonById(@PathVariable String id) {
+        LOG.info("Getting season with ID '{}'", id);
+        return jsonApiStorageService.getEntityById(Season.class, Long.parseLong(id));
     }
 }

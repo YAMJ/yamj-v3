@@ -20,32 +20,31 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api;
+package org.yamj.core.api.json;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.yamj.common.model.YamjInfo;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
-@RequestMapping("/system/**")
-public class SystemInfoController {
+@RequestMapping("/api/person/**")
+public class PersonController {
 
-    private static final YamjInfo YAMJ_INFO = new YamjInfo(SystemInfoController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PersonController.class);
+    @Autowired
+    private JsonApiStorageService jsonApiStorageService;
 
-    @RequestMapping(value = "", method = RequestMethod.GET)
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public String getSystemUp() {
-        StringBuilder sb = new StringBuilder("YAMJ v3 is running, uptime ");
-        sb.append(YAMJ_INFO.getUptime());
-        return sb.toString();
+    public Person getPersonById(@PathVariable String id) {
+        LOG.info("Getting person with ID '{}'", id);
+        return jsonApiStorageService.getEntityById(Person.class, Long.parseLong(id));
     }
-
-    @RequestMapping(value = "/info", method = RequestMethod.GET)
-    @ResponseBody
-    public YamjInfo getYamjInfo() {
-        return YAMJ_INFO;
-    }
-
 }
