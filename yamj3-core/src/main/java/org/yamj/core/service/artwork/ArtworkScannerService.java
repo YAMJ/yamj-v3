@@ -80,7 +80,8 @@ public class ArtworkScannerService {
                 this.scanFanartOnline(artwork);
             }
         } else {
-            throw new RuntimeException("Artwork scan not implemented for " + artwork);
+            // Don't throw an exception here, just a debug message for now
+            LOG.debug("Artwork scan not implemented for {}", artwork);
         }
 
         // update artwork in database
@@ -117,7 +118,8 @@ public class ArtworkScannerService {
                 }
             }
         } else {
-            throw new RuntimeException("Artwork scan not implemented for " + artwork);
+            // Don't throw an exception here, just a debug message for now
+            LOG.debug("Artwork scan not implemented for {}", artwork);
         }
     }
 
