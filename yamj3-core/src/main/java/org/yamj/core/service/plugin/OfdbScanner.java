@@ -256,7 +256,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                         for (String genre : scraped) {
                             genres.add(HTMLTools.removeHtmlTags(genre).trim());
                         }
-                        videoData.setGenres(genres, OFDB_SCANNER_ID);
+                        videoData.setGenreNames(genres, OFDB_SCANNER_ID);
                     }
                 }
 

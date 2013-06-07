@@ -23,6 +23,10 @@
 package org.yamj.core.database.dao;
 
 import java.util.List;
+import org.hibernate.Criteria;
+import org.hibernate.LockMode;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Service;
 import org.yamj.core.api.Parameters;
 import org.yamj.core.database.model.BoxedSet;
@@ -33,6 +37,20 @@ import org.yamj.core.hibernate.HibernateDao;
 
 @Service("commonDao")
 public class CommonDao extends HibernateDao {
+
+    public void storeGenre(String genreName) {
+        Session session = getSession();
+        Criteria criteria = session.createCriteria(Genre.class);
+        criteria.setLockMode(LockMode.PESSIMISTIC_WRITE);
+        criteria.add(Restrictions.eq("name", genreName));
+        Genre genre = (Genre)criteria.uniqueResult();
+        if (genre == null) {
+            // create new person
+            genre = new Genre();
+            genre.setName(genreName);
+            session.save(genre);
+        }
+    }
 
     public Genre getGenre(String name) {
         return getByName(Genre.class, name);

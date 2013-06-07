@@ -55,8 +55,4 @@ public class PersonDao extends HibernateDao {
             }
         }
     }
-
-    public Person getPerson(final long id) {
-        return getById(Person.class, id);
-    }
 }

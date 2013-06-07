@@ -29,6 +29,7 @@ public enum OverrideFlag {
 
     UNKNOWN,
     COUNTRY,
+    GENRES,
     ORIGINALTITLE,
     OUTLINE,
     PLOT,

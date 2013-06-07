@@ -28,12 +28,6 @@ import com.omertron.themoviedbapi.model.MovieDb;
 import com.omertron.themoviedbapi.model.PersonType;
 import com.omertron.themoviedbapi.model.ProductionCountry;
 import com.omertron.themoviedbapi.results.TmdbResultsList;
-import org.yamj.common.tools.PropertyTools;
-import org.yamj.core.database.model.Genre;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.VideoData;
-import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.database.model.type.JobType;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashSet;
@@ -47,6 +41,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.common.tools.PropertyTools;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.dto.CreditDTO;
+import org.yamj.core.database.model.type.JobType;
 
 @Service("tmdbScanner")
 public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, InitializingBean {
@@ -201,11 +200,11 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         }
 
         // GENRES
-        Set<Genre> genres = new HashSet<Genre>();
+        Set<String> genreNames = new HashSet<String>();
         for (com.omertron.themoviedbapi.model.Genre genre : moviedb.getGenres()) {
-            genres.add(new Genre(genre.getName()));
+            genreNames.add(genre.getName());
         }
-        videoData.setGenres(genres);
+        videoData.setGenreNames(genreNames, TMDB_SCANNER_ID);
 
         // CAST & CREW
         try {

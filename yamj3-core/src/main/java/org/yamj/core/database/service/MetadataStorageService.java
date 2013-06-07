@@ -142,7 +142,23 @@ public class MetadataStorageService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void store(VideoData videoData) {
+    public void storeGenre(String genreName) {
+        commonDao.storeGenre(genreName);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void storePerson(CreditDTO dto) {
+        personDao.storePerson(dto);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updatePerson(Person person) {
+        // update entity
+        metadataDao.updateEntity(person);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateVideoData(VideoData videoData) {
         // update entity
         metadataDao.updateEntity(videoData);
 
@@ -154,7 +170,7 @@ public class MetadataStorageService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void store(Series series) {
+    public void updateSeries(Series series) {
         // update entity
         metadataDao.updateEntity(series);
 
@@ -167,16 +183,10 @@ public class MetadataStorageService {
             for (VideoData videoData : season.getVideoDatas()) {
                 if (StatusType.PROCESSED.equals(videoData.getStatus())) {
                     videoData.setStatus(StatusType.DONE);
-                    store(videoData);
+                    updateVideoData(videoData);
                 }
             }
         }
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void store(Person person) {
-        // update entity
-        metadataDao.updateEntity(person);
     }
 
     private void updateGenres(VideoData videoData) {

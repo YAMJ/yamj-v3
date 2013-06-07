@@ -22,17 +22,14 @@
  */
 package org.yamj.core.database.model;
 
-import org.hibernate.annotations.MapKeyType;
-import org.hibernate.annotations.Type;
-
 import java.util.*;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.ForeignKey;
-import org.hibernate.annotations.Index;
+import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.OverrideFlag;
@@ -124,6 +121,9 @@ public class VideoData extends AbstractMetadata {
 
     @Transient
     private List<CreditDTO> creditDTOS = new ArrayList<CreditDTO>(0);
+
+    @Transient
+    private Set<String> genreNames = new HashSet<String>(0);
 
     // GETTER and SETTER
 
@@ -272,15 +272,6 @@ public class VideoData extends AbstractMetadata {
         this.genres = genres;
     }
 
-    public void setGenres(Collection<String> genres, String source) {
-        if (CollectionUtils.isNotEmpty(genres)) {
-            this.genres.clear();
-            for (String genre : genres) {
-                this.genres.add(new Genre(genre));
-            }
-        }
-    }
-
     public Season getSeason() {
         return season;
     }
@@ -313,6 +304,8 @@ public class VideoData extends AbstractMetadata {
         this.credits.add(credit);
     }
 
+    // TRANSIENTS METHODS
+    
     public List<CreditDTO> getCreditDTOS() {
         return creditDTOS;
     }
@@ -325,6 +318,17 @@ public class VideoData extends AbstractMetadata {
         this.creditDTOS.addAll(creditDTOS);
     }
 
+    public Set<String> getGenreNames() {
+        return genreNames;
+    }
+
+    public void setGenreNames(Set<String> genreNames, String source) {
+        if (CollectionUtils.isNotEmpty(genreNames)) {
+            this.genreNames = genreNames;
+            setOverrideFlag(OverrideFlag.COUNTRY, source);
+        }
+    }
+    
     // TV CHECKS
 
     public boolean isScannableTvEpisode() {

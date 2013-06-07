@@ -30,8 +30,10 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.MetaDataType;
 import org.yamj.core.database.service.MetadataStorageService;
@@ -103,6 +105,8 @@ public class PluginMetadataService {
             }
         }
 
+        // DATABASE STORAGE
+        
         // set status
         if (ScanResult.OK.equals(scanResult)) {
             videoData.setStatus(StatusType.DONE);
@@ -112,8 +116,11 @@ public class PluginMetadataService {
             videoData.setStatus(StatusType.ERROR);
         }
 
+        // store associated entities
+        storeAssociatedEntities(videoData);
+        
         // storage
-        metadataStorageService.store(videoData);
+        metadataStorageService.updateVideoData(videoData);
     }
 
     public void scanSeries(Long id) {
@@ -153,6 +160,7 @@ public class PluginMetadataService {
                 }
             }
         }
+        // DATABASE STORAGE
 
         // set status
         if (ScanResult.OK.equals(scanResult)) {
@@ -163,10 +171,39 @@ public class PluginMetadataService {
             series.setStatus(StatusType.ERROR);
         }
 
+        // store associated entities
+        for (Season season : series.getSeasons()) {
+            for (VideoData videoData : season.getVideoDatas()) {
+                storeAssociatedEntities(videoData);
+            }
+        }
+
         // storage
-        metadataStorageService.store(series);
+        metadataStorageService.updateSeries(series);
     }
 
+    private void storeAssociatedEntities(VideoData videoData) {
+        // store genres
+        for (String genreName : videoData.getGenreNames()) {
+            try {
+                metadataStorageService.storeGenre(genreName);
+            } catch (Exception error) {
+                LOG.error("Failed to store genre '{}'", genreName);
+                LOG.warn("Storage error", error);
+            }
+        }
+        
+        // store persons
+        for (CreditDTO creditDTO : videoData.getCreditDTOS()) {
+            try {
+                metadataStorageService.storePerson(creditDTO);
+            } catch (Exception error) {
+                LOG.error("Failed to store person '{}'", creditDTO.getName());
+                LOG.warn("Storage error", error);
+            }
+        }
+    }
+    
     /**
      * Scan the data site for information on the person
      */
@@ -184,7 +221,7 @@ public class PluginMetadataService {
             return;
         }
 
-        // Scan series data
+        // Scan person data
         ScanResult scanResult;
         try {
             scanResult = personScanner.scan(person);
@@ -193,6 +230,8 @@ public class PluginMetadataService {
             LOG.error("Failed scanning person (ID '{}') data with {} scanner", id, scannerName);
             LOG.warn("Scanning error", error);
         }
+
+        // DATABASE STORAGE
 
         // update person and reset status
         if (ScanResult.OK.equals(scanResult)) {
@@ -205,7 +244,7 @@ public class PluginMetadataService {
         }
 
         // storage
-        metadataStorageService.store(person);
+        metadataStorageService.updatePerson(person);
     }
 
     public void processingError(QueueDTO queueElement) {
