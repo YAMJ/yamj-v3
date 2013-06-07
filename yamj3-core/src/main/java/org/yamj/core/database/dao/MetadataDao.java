@@ -22,6 +22,14 @@
  */
 package org.yamj.core.database.dao;
 
+import org.hibernate.Criteria;
+import org.hibernate.LockMode;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.dto.CreditDTO;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -63,27 +71,36 @@ public class MetadataDao extends HibernateDao {
         return queueElements;
     }
 
-    public VideoData getVideoData(Long id) {
-        return getById(VideoData.class, id);
+    public void storePerson(CreditDTO dto) {
+        Session session = getSession();
+        Criteria criteria = session.createCriteria(Person.class);
+        criteria.setLockMode(LockMode.PESSIMISTIC_WRITE);
+        criteria.add(Restrictions.eq("name", dto.getName()));
+        Person person = (Person)criteria.uniqueResult();
+        if (person == null) {
+            // create new person
+            person = new Person();
+            person.setName(dto.getName());
+            person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
+            person.setStatus(StatusType.NEW);
+            session.save(person);
+        } else {
+            // update person if ID has has been set
+            if (person.setPersonId(dto.getSourcedb(), dto.getSourcedbId())) {
+                session.update(person);
+            }
+        }
     }
 
     public VideoData getVideoData(String identifier) {
-        return (VideoData)getSession().byNaturalId(VideoData.class).using("identifier", identifier).load();
-    }
-
-    public Season getSeason(Long id) {
-        return getById(Season.class, id);
+        return getByField(VideoData.class, "identifier", identifier);
     }
 
     public Season getSeason(String identifier) {
-        return (Season)getSession().byNaturalId(Season.class).using("identifier", identifier).load();
-    }
-
-    public Series getSeries(Long id) {
-        return getById(Series.class, id);
+        return getByField(Season.class, "identifier", identifier);
     }
 
     public Series getSeries(String identifier) {
-        return (Series)getSession().byNaturalId(Series.class).using("identifier", identifier).load();
+        return getByField(Series.class, "identifier", identifier);
     }
 }

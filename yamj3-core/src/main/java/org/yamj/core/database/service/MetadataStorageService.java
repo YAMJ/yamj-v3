@@ -37,7 +37,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.MetadataDao;
-import org.yamj.core.database.dao.PersonDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
@@ -52,8 +51,6 @@ public class MetadataStorageService {
     private CommonDao commonDao;
     @Autowired
     private MetadataDao metadataDao;
-    @Autowired
-    private PersonDao personDao;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void save(Object entity) {
@@ -150,7 +147,7 @@ public class MetadataStorageService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void storePerson(CreditDTO dto) {
-        personDao.storePerson(dto);
+        metadataDao.storePerson(dto);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -222,7 +219,7 @@ public class MetadataStorageService {
             // find person if not found
             if (person == null) {
                 LOG.info("Attempting to retrieve information on '{}' from database", dto.getName());
-                person = personDao.getByName(Person.class, dto.getName());
+                person = metadataDao.getByName(Person.class, dto.getName());
                 if (person == null) {
                     LOG.warn("Person '{}' not found, skipping", dto.getName());
                     return;
@@ -253,7 +250,7 @@ public class MetadataStorageService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void errorVideoData(Long id) {
-        VideoData videoData = metadataDao.getVideoData(id);
+        VideoData videoData = metadataDao.getById(VideoData.class, id);
         if (videoData != null) {
             videoData.setStatus(StatusType.ERROR);
             metadataDao.updateEntity(videoData);
@@ -262,7 +259,7 @@ public class MetadataStorageService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void errorSeries(Long id) {
-        Series series = metadataDao.getSeries(id);
+        Series series = metadataDao.getById(Series.class, id);
         if (series != null) {
             series.setStatus(StatusType.ERROR);
             metadataDao.updateEntity(series);
@@ -271,10 +268,10 @@ public class MetadataStorageService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void errorPerson(Long id) {
-        Person person = personDao.getById(Person.class, id);
+        Person person = metadataDao.getById(Person.class, id);
         if (person != null) {
             person.setStatus(StatusType.ERROR);
-            personDao.updateEntity(person);
+            metadataDao.updateEntity(person);
         }
     }
 }

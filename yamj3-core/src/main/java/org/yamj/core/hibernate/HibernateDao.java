@@ -113,7 +113,7 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings("unchecked")
     public <T> T getById(Class<T> entityClass, Serializable id) {
-        return (T) getSession().get(entityClass, id);
+        return (T) getSession().byId(entityClass).getReference(id);
     }
 
     /**
