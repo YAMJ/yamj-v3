@@ -42,8 +42,8 @@ import org.yamj.core.database.service.MetadataStorageService;
 public class PluginMetadataService {
 
     private static final Logger LOG = LoggerFactory.getLogger(PluginMetadataService.class);
-    public static final String VIDEO_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie", "tmdb");
-    public static final String VIDEO_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie.alternate", "");
+    public static final String MOVIE_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie", "tmdb");
+    public static final String MOVIE_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie.alternate", "");
     public static final String SERIES_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.series", "tvdb");
     public static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.alternate", "");
     private static final String PERSON_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.person", "tmdb");
@@ -67,19 +67,14 @@ public class PluginMetadataService {
         registeredPersonScanner.put(personScanner.getScannerName().toLowerCase(), personScanner);
     }
 
-    public void scanVideoData(Long id) {
-        VideoData videoData = metadataStorageService.getRequiredVideoData(id);
-
-        // SCAN MOVIE
-        LOG.debug("Scanning movie data for '{}' using {}", videoData.getTitle(), VIDEO_SCANNER);
-
-        IMovieScanner movieScanner = registeredMovieScanner.get(VIDEO_SCANNER);
+    public void scanMovie(Long id) {
+        IMovieScanner movieScanner = registeredMovieScanner.get(MOVIE_SCANNER);
         if (movieScanner == null) {
-            LOG.error("Video data scanner not registered '{}'", VIDEO_SCANNER);
-            videoData.setStatus(StatusType.ERROR);
-            metadataStorageService.update(videoData);
-            return;
+            throw new RuntimeException("Movie scanner '" + MOVIE_SCANNER  + "' not registered");
         }
+
+        VideoData videoData = metadataStorageService.getRequiredVideoData(id);
+        LOG.debug("Scanning movie data for '{}' using {}", videoData.getTitle(), MOVIE_SCANNER);
 
         // scan video data
         ScanResult scanResult;
@@ -87,55 +82,59 @@ public class PluginMetadataService {
             scanResult = movieScanner.scan(videoData);
         } catch (Exception error) {
             scanResult = ScanResult.ERROR;
-            LOG.error("Failed scanning video data with {} scanner", VIDEO_SCANNER);
+            LOG.error("Failed scanning movie with {} scanner", MOVIE_SCANNER);
             LOG.warn("Scanning error", error);
         }
 
         // alternate scanning if main scanner failed
         if (!ScanResult.OK.equals(scanResult)) {
-            movieScanner = registeredMovieScanner.get(VIDEO_SCANNER_ALT);
+            movieScanner = registeredMovieScanner.get(MOVIE_SCANNER_ALT);
 
             if (movieScanner != null) {
+                LOG.debug("Alternate scanning movie data for '{}' using {}", videoData.getTitle(), MOVIE_SCANNER_ALT);
+                
                 try {
                     movieScanner.scan(videoData);
                 } catch (Exception error) {
-                    LOG.error("Failed scanning video data with {} alternate scanner", VIDEO_SCANNER_ALT);
+                    LOG.error("Failed scanning movie with {} alternate scanner", MOVIE_SCANNER_ALT);
                     LOG.warn("Alternate scanning error", error);
                 }
             }
         }
 
-        // DATABASE STORAGE
-        
         // set status
         if (ScanResult.OK.equals(scanResult)) {
+            LOG.debug("Movie {}-'{}', scanned OK", id, videoData.getTitle());
             videoData.setStatus(StatusType.DONE);
         } else if (ScanResult.MISSING_ID.equals(scanResult)){
-            videoData.setStatus(StatusType.MISSING);
+            LOG.debug("Movie {}-'{}', not found", id, videoData.getTitle());
+            videoData.setStatus(StatusType.NOTFOUND);
         } else {
             videoData.setStatus(StatusType.ERROR);
         }
 
         // store associated entities
         storeAssociatedEntities(videoData);
-        
-        // storage
-        metadataStorageService.updateVideoData(videoData);
+
+        // update data in database
+        try {
+            metadataStorageService.updateVideoData(videoData);
+        } catch (Exception error) {
+            // NOTE: status will not be changed
+            LOG.error("Failed storing movie {}-'{}'", id, videoData.getTitle());
+            LOG.warn("Storage error", error);
+        }
     }
 
     public void scanSeries(Long id) {
-        Series series = metadataStorageService.getRequiredSeries(id);
-
-        // SCAN SERIES
-        LOG.debug("Scanning series data for '{}' using {}", series.getTitle(), SERIES_SCANNER);
-
         ISeriesScanner seriesScanner = registeredSeriesScanner.get(SERIES_SCANNER);
         if (seriesScanner == null) {
-            LOG.error("Series scanner '{}' not registered", SERIES_SCANNER);
-            series.setStatus(StatusType.ERROR);
-            metadataStorageService.update(series);
-            return;
+            throw new RuntimeException("Series scanner '" + SERIES_SCANNER  + "' not registered");
         }
+
+        Series series = metadataStorageService.getRequiredSeries(id);
+        LOG.debug("Scanning series data for '{}' using {}", series.getTitle(), SERIES_SCANNER);
+
 
         // scan series
         ScanResult scanResult;
@@ -152,6 +151,8 @@ public class PluginMetadataService {
             seriesScanner = registeredSeriesScanner.get(SERIES_SCANNER_ALT);
 
             if (seriesScanner != null) {
+                LOG.debug("Alternate scanning series data for '{}' using {}", series.getTitle(), SERIES_SCANNER_ALT);
+                
                 try {
                     seriesScanner.scan(series);
                 } catch (Exception error) {
@@ -160,13 +161,14 @@ public class PluginMetadataService {
                 }
             }
         }
-        // DATABASE STORAGE
 
         // set status
         if (ScanResult.OK.equals(scanResult)) {
+            LOG.debug("Series {}-'{}', scanned OK", id, series.getTitle());
             series.setStatus(StatusType.DONE);
         } else if (ScanResult.MISSING_ID.equals(scanResult)) {
-            series.setStatus(StatusType.MISSING);
+            LOG.debug("Series {}-'{}', not found", id, series.getTitle());
+            series.setStatus(StatusType.NOTFOUND);
         } else {
             series.setStatus(StatusType.ERROR);
         }
@@ -178,8 +180,14 @@ public class PluginMetadataService {
             }
         }
 
-        // storage
-        metadataStorageService.updateSeries(series);
+        // update data in database
+        try {
+            metadataStorageService.updateSeries(series);
+        } catch (Exception error) {
+            // NOTE: status will not be changed
+            LOG.error("Failed storing series {}-'{}'", id, series.getTitle());
+            LOG.warn("Storage error", error);
+        }
     }
 
     private void storeAssociatedEntities(VideoData videoData) {
@@ -208,43 +216,43 @@ public class PluginMetadataService {
      * Scan the data site for information on the person
      */
     public void scanPerson(Long id) {
-        String scannerName = PERSON_SCANNER;
-        IPersonScanner personScanner = registeredPersonScanner.get(scannerName);
-        Person person = metadataStorageService.getRequiredPerson(id);
-
-        LOG.info("Scanning for information on person {}-'{}' using {}", id, person.getName(), scannerName);
-
+        IPersonScanner personScanner = registeredPersonScanner.get(PERSON_SCANNER);
         if (personScanner == null) {
-            LOG.error("Person scanner '{}' not registered", scannerName);
-            person.setStatus(StatusType.ERROR);
-            metadataStorageService.update(person);
-            return;
+            throw new RuntimeException("Person scanner '" + PERSON_SCANNER  + "' not registered");
         }
 
-        // Scan person data
+        Person person = metadataStorageService.getRequiredPerson(id);
+        LOG.info("Scanning for information on person {}-'{}' using {}", id, person.getName(), PERSON_SCANNER);
+
+        // scan person data
         ScanResult scanResult;
         try {
             scanResult = personScanner.scan(person);
         } catch (Exception error) {
             scanResult = ScanResult.ERROR;
-            LOG.error("Failed scanning person (ID '{}') data with {} scanner", id, scannerName);
+            LOG.error("Failed scanning person (ID '{}') data with {} scanner", id, PERSON_SCANNER);
             LOG.warn("Scanning error", error);
         }
 
-        // DATABASE STORAGE
-
-        // update person and reset status
+        // set status
         if (ScanResult.OK.equals(scanResult)) {
             LOG.debug("Person {}-'{}', scanned OK", id, person.getName());
             person.setStatus(StatusType.DONE);
         } else if (ScanResult.MISSING_ID.equals(scanResult)) {
-            person.setStatus(StatusType.MISSING);
+            LOG.debug("Person {}-'{}', not found", id, person.getName());
+            person.setStatus(StatusType.NOTFOUND);
         } else {
             person.setStatus(StatusType.ERROR);
         }
 
-        // storage
-        metadataStorageService.updatePerson(person);
+        // update data in database
+        try {
+            metadataStorageService.updatePerson(person);
+        } catch (Exception error) {
+            // NOTE: status will not be changed
+            LOG.error("Failed storing person {}-'{}'", id, person.getName());
+            LOG.warn("Storage error", error);
+        }
     }
 
     public void processingError(QueueDTO queueElement) {
@@ -253,7 +261,7 @@ public class PluginMetadataService {
             return;
         }
 
-        if (queueElement.isMetadataType(MetaDataType.VIDEODATA)) {
+        if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
             metadataStorageService.errorVideoData(queueElement.getId());
         } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
             metadataStorageService.errorSeries(queueElement.getId());

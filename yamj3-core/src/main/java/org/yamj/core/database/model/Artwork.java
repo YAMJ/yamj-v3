@@ -22,25 +22,17 @@
  */
 package org.yamj.core.database.model;
 
-import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Index;
 
-import javax.persistence.UniqueConstraint;
-
-import org.yamj.common.type.StatusType;
-import javax.persistence.Column;
-import org.hibernate.annotations.Type;
-
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
-
-import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.hibernate.usertypes.EnumStringUserType;
 import java.io.Serializable;
 import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Parameter;
+import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.hibernate.usertypes.EnumStringUserType;
 
 @TypeDefs({
     @TypeDef(name = "artworkType", typeClass = EnumStringUserType.class,
@@ -50,18 +42,16 @@ import org.hibernate.annotations.Parameter;
 })
 
 @Entity
-@Table(name = "artwork",
-    uniqueConstraints= @UniqueConstraint(name="UIX_ARTWORK_NATURALID", columnNames={"artwork_type", "videodata_id", "season_id", "series_id"})
-)
+@Table(name = "artwork")
 public class Artwork extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -981494909436217076L;
 
-    @NaturalId(mutable = true)
     @Type(type = "artworkType")
     @Column(name = "artwork_type", nullable = false)
     private ArtworkType artworkType;
 
+    @Index(name = "IX_ARTWORK_STATUS")
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
@@ -75,21 +65,18 @@ public class Artwork extends AbstractAuditable implements Serializable {
     @JoinColumn(name = "stagefile_id")
     private StageFile stageFile;
 
-    @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_VIDEODATA")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "videodata_id")
     private VideoData videoData;
 
-    @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_SEASON")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "season_id")
     private Season season;
 
-    @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_SERIES")
     @Fetch(FetchMode.SELECT)

@@ -44,12 +44,12 @@ public final class OverrideTools {
     // check skip if not in priority list
     private static final boolean SKIP_NOT_IN_LIST = PropertyTools.getBooleanProperty("priority.checks.skipNotInList", Boolean.FALSE);
     // handling for set default plugins
-    private static final String TYPE_PLUGIN_VIDEO = "plugin_video";
+    private static final String TYPE_PLUGIN_MOVIE = "plugin_movie";
     private static final String TYPE_PLUGIN_SERIES = "plugin_series";
-    private static final String TYPE_ALTERNATE_VIDEO = "alternate_video";
+    private static final String TYPE_ALTERNATE_MOVIE = "alternate_movie";
     private static final String TYPE_ALTERNATE_SERIES = "alternate_series";
-    private static final String PLUGIN_VIDEODATA = PluginMetadataService.VIDEO_SCANNER_ALT;
-    private static final String PLUGIN_VIDEODATA_ALT = PluginMetadataService.VIDEO_SCANNER_ALT;
+    private static final String PLUGIN_MOVIE = PluginMetadataService.MOVIE_SCANNER;
+    private static final String PLUGIN_MOVIE_ALT = PluginMetadataService.MOVIE_SCANNER_ALT;
     private static final String PLUGIN_SERIES = PluginMetadataService.SERIES_SCANNER;
     private static final String PLUGIN_SERIES_ALT = PluginMetadataService.SERIES_SCANNER_ALT;
     private static final Map<OverrideFlag, List<String>> VIDEODATA_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
@@ -60,50 +60,50 @@ public final class OverrideTools {
         String sources;
 
         // country
-        sources = PropertyTools.getProperty("priority.videodata.country", "nfo,plugin_video,plugin_series,alternate_video,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.country", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
         putVideodataPriorities(OverrideFlag.COUNTRY, sources);
         // genres
-        sources = PropertyTools.getProperty("priority.videodata.genres", "nfo,plugin_video,plugin_series,alternate_video,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.genres", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
         putVideodataPriorities(OverrideFlag.GENRES, sources);
         // original title
-        sources = PropertyTools.getProperty("priority.videodata.originaltitle", "nfo,plugin_video,plugin_series,alternate_video,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.originaltitle", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
         putVideodataPriorities(OverrideFlag.ORIGINALTITLE, sources);
         sources = PropertyTools.getProperty("priority.season.originaltitle", "nfo,plugin_series,alternate_series");
         putSeasonPriorities(OverrideFlag.ORIGINALTITLE, sources);
         sources = PropertyTools.getProperty("priority.series.originaltitle", "nfo,plugin_series,alternate_series");
         putSeriesPriorities(OverrideFlag.ORIGINALTITLE, sources);
         // outline
-        sources = PropertyTools.getProperty("priority.videodata.outline", "nfo,plugin_video,plugin_series,alternate_video,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.outline", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
         putVideodataPriorities(OverrideFlag.OUTLINE, sources);
         sources = PropertyTools.getProperty("priority.season.outline", "nfo,plugin_series,alternate_series");
         putSeasonPriorities(OverrideFlag.OUTLINE, sources);
         sources = PropertyTools.getProperty("priority.series.outline", "nfo,plugin_series,alternate_series");
         putSeriesPriorities(OverrideFlag.OUTLINE, sources);
         // plot
-        sources = PropertyTools.getProperty("priority.videodata.plot", "nfo,plugin_video,plugin_series,alternate_video,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.plot", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
         putVideodataPriorities(OverrideFlag.PLOT, sources);
         sources = PropertyTools.getProperty("priority.season.plot", "nfo,plugin_series,alternate_series");
         putSeasonPriorities(OverrideFlag.PLOT, sources);
         sources = PropertyTools.getProperty("priority.series.plot", "nfo,plugin_series,alternate_series");
         putSeriesPriorities(OverrideFlag.PLOT, sources);
         // quote
-        sources = PropertyTools.getProperty("priority.videodata.quote", "nfo,plugin_video,plugin_series,alternate_video,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.quote", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
         putVideodataPriorities(OverrideFlag.QUOTE, sources);
         // releasedate
-        sources = PropertyTools.getProperty("priority.videodata.releasedate", "nfo,plugin_video,plugin_series,alternate_video,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.releasedate", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
         putVideodataPriorities(OverrideFlag.RELEASEDATE, sources);
         // tagline
-        sources = PropertyTools.getProperty("priority.videodata.tagline", "nfo,plugin_video,plugin_series,alternate_video,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.tagline", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
         putVideodataPriorities(OverrideFlag.TAGLINE, sources);
         // title
-        sources = PropertyTools.getProperty("priority.videodata.title", "nfo,plugin_video,plugin_series,alternate_video,alternate_series,filename");
+        sources = PropertyTools.getProperty("priority.videodata.title", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series,filename");
         putVideodataPriorities(OverrideFlag.TITLE, sources);
         sources = PropertyTools.getProperty("priority.season.title", "nfo,plugin_series,alternate_series,filename");
         putSeasonPriorities(OverrideFlag.TITLE, sources);
         sources = PropertyTools.getProperty("priority.series.title", "nfo,plugin_series,alternate_series,filename");
         putSeriesPriorities(OverrideFlag.TITLE, sources);
         // year
-        sources = PropertyTools.getProperty("priority.videodata.year", "nfo,plugin_video,plugin_series,alternate_video,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.year", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
         putVideodataPriorities(OverrideFlag.YEAR, sources);
     }
 
@@ -155,18 +155,18 @@ public final class OverrideTools {
             priorities = Collections.emptyList();
         } else {
             String newSources = sources.toLowerCase();
-            if (newSources.contains(TYPE_PLUGIN_VIDEO) && !newSources.contains(PLUGIN_VIDEODATA)) {
+            if (newSources.contains(TYPE_PLUGIN_MOVIE) && !newSources.contains(PLUGIN_MOVIE)) {
                 // replace pattern with video plugin
-                newSources = newSources.replace(TYPE_PLUGIN_VIDEO, PLUGIN_VIDEODATA);
+                newSources = newSources.replace(TYPE_PLUGIN_MOVIE, PLUGIN_MOVIE);
             }
             if (newSources.contains(TYPE_PLUGIN_SERIES) && !newSources.contains(PLUGIN_SERIES)) {
                 // replace pattern with series plugin
                 newSources = newSources.replace(TYPE_PLUGIN_SERIES, PLUGIN_SERIES);
             }
 
-            if (newSources.contains(TYPE_ALTERNATE_VIDEO) && (StringUtils.isNotBlank(PLUGIN_VIDEODATA_ALT) && !newSources.contains(PLUGIN_VIDEODATA_ALT))) {
+            if (newSources.contains(TYPE_ALTERNATE_MOVIE) && (StringUtils.isNotBlank(PLUGIN_MOVIE_ALT) && !newSources.contains(PLUGIN_MOVIE_ALT))) {
                 // replace pattern with alternate video plugin
-                newSources = newSources.replace(TYPE_ALTERNATE_VIDEO, PLUGIN_VIDEODATA_ALT);
+                newSources = newSources.replace(TYPE_ALTERNATE_MOVIE, PLUGIN_MOVIE_ALT);
             }
 
             if (newSources.contains(TYPE_ALTERNATE_SERIES) && (StringUtils.isNotBlank(PLUGIN_SERIES_ALT) && !newSources.contains(PLUGIN_SERIES_ALT))) {
@@ -175,9 +175,9 @@ public final class OverrideTools {
             }
 
             priorities = new ArrayList<String>(Arrays.asList(newSources.split(",")));
-            priorities.remove(TYPE_PLUGIN_VIDEO);
+            priorities.remove(TYPE_PLUGIN_MOVIE);
             priorities.remove(TYPE_PLUGIN_SERIES);
-            priorities.remove(TYPE_ALTERNATE_VIDEO);
+            priorities.remove(TYPE_ALTERNATE_MOVIE);
             priorities.remove(TYPE_ALTERNATE_SERIES);
         }
         return priorities;

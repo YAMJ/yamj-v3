@@ -103,6 +103,12 @@ public class BatchManagementImpl implements BatchManagement {
                 stageFile.setFileSize(5000L);
                 stageDirectory.addStageFile(stageFile);
 
+                stageFile = new StageFileDTO();
+                stageFile.setFileName("Aliens Vs Predator - Requiem - x264 720p DD5.1.mkv");
+                stageFile.setFileDate(System.currentTimeMillis());
+                stageFile.setFileSize(5000L);
+                stageDirectory.addStageFile(stageFile);
+                
                 // import scanned
                 fileImportService.importScanned(importDTO);
 

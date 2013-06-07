@@ -48,8 +48,8 @@ public class ArtworkStorageService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void update(Object entity) {
-        this.commonDao.updateEntity(entity);
+    public void updateArtwork(Artwork artwork) {
+        this.commonDao.updateEntity(artwork);
     }
 
     @Transactional(readOnly = true)
@@ -58,7 +58,7 @@ public class ArtworkStorageService {
         sql.append("select distinct art.id,art.artwork_type,art.create_timestamp,art.update_timestamp ");
         sql.append("from artwork art ");
         sql.append("left outer join videodata vd on vd.id=art.videodata_id ");
-        sql.append("left outer join season sea on sea.id=art.series_id ");
+        sql.append("left outer join season sea on sea.id=art.season_id ");
         sql.append("left outer join series ser on ser.id=art.series_id ");
         sql.append("where art.status = 'NEW' ");
         sql.append("and (vd.status is null or vd.status='DONE') ");

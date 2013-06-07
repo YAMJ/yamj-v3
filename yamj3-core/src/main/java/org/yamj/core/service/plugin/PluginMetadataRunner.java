@@ -46,8 +46,8 @@ public class PluginMetadataRunner implements Runnable {
         while (queueElement != null) {
 
             try {
-                if (queueElement.isMetadataType(MetaDataType.VIDEODATA)) {
-                    service.scanVideoData(queueElement.getId());
+                if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
+                    service.scanMovie(queueElement.getId());
                 } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
                     service.scanSeries(queueElement.getId());
                 } else if (queueElement.isMetadataType(MetaDataType.PERSON)) {

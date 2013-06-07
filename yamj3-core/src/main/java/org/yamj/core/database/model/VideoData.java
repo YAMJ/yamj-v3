@@ -97,7 +97,7 @@ public class VideoData extends AbstractMetadata {
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
-    private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
+    private Map<OverrideFlag, String> overrideFlags = new HashMap<OverrideFlag, String>(0);
 
     @ManyToMany
     @ForeignKey(name = "FK_DATAGENRES_VIDEODATA", inverseName = "FK_DATAGENRES_GENRE")
@@ -120,6 +120,9 @@ public class VideoData extends AbstractMetadata {
     @OrderColumn(name = "ordering", nullable = false)
     @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false)
     private List<CastCrew> credits = new ArrayList<CastCrew>(0);
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
+    private List<Artwork> artworks = new ArrayList<Artwork>(0);
 
     @Transient
     private List<CreditDTO> creditDTOS = new ArrayList<CreditDTO>(0);
@@ -306,8 +309,16 @@ public class VideoData extends AbstractMetadata {
         this.credits.add(credit);
     }
 
-    // TRANSIENTS METHODS
+    public List<Artwork> getArtworks() {
+        return artworks;
+    }
 
+    public void setArtworks(List<Artwork> artworks) {
+        this.artworks = artworks;
+    }
+
+    // TRANSIENTS METHODS
+    
     public List<CreditDTO> getCreditDTOS() {
         return creditDTOS;
     }
@@ -327,7 +338,7 @@ public class VideoData extends AbstractMetadata {
     public void setGenreNames(Set<String> genreNames, String source) {
         if (CollectionUtils.isNotEmpty(genreNames)) {
             this.genreNames = genreNames;
-            setOverrideFlag(OverrideFlag.COUNTRY, source);
+            setOverrideFlag(OverrideFlag.GENRES, source);
         }
     }
 
@@ -346,8 +357,8 @@ public class VideoData extends AbstractMetadata {
         this.setStatus(StatusType.PROCESSED);
     }
 
-    public void setTvEpisodeMissing() {
-        this.setStatus(StatusType.MISSING);
+    public void setTvEpisodeNotFound() {
+        this.setStatus(StatusType.NOTFOUND);
     }
 
     // EQUALITY CHECKS

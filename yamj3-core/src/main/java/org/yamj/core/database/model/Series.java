@@ -22,6 +22,12 @@
  */
 package org.yamj.core.database.model;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+
 import org.hibernate.annotations.MapKeyType;
 import org.hibernate.annotations.Type;
 
@@ -83,6 +89,9 @@ public class Series extends AbstractMetadata {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
     private Set<Season> seasons = new HashSet<Season>(0);
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
+    private List<Artwork> artworks = new ArrayList<Artwork>(0);
 
     // GETTER and SETTER
 
@@ -158,6 +167,14 @@ public class Series extends AbstractMetadata {
 
     public void setSeasons(Set<Season> seasons) {
         this.seasons = seasons;
+    }
+
+    public List<Artwork> getArtworks() {
+        return artworks;
+    }
+
+    public void setArtworks(List<Artwork> artworks) {
+        this.artworks = artworks;
     }
 
     // EQUALITY CHECKS

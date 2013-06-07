@@ -204,6 +204,13 @@ public class MediaImportService {
                         fanart.setStatus(StatusType.NEW);
                         fanart.setSeason(season);
                         metadataDao.saveEntity(fanart);
+
+                        // create new banner artwork entry
+                        Artwork banner = new Artwork();
+                        banner.setArtworkType(ArtworkType.BANNER);
+                        banner.setStatus(StatusType.NEW);
+                        banner.setSeason(season);
+                        metadataDao.saveEntity(banner);
                     }
 
                     videoData = new VideoData();
@@ -227,6 +234,7 @@ public class MediaImportService {
                     videoimage.setArtworkType(ArtworkType.VIDEOIMAGE);
                     videoimage.setStatus(StatusType.NEW);
                     videoimage.setVideoData(videoData);
+                    //videoData.addArtwork(videoimage);
                     metadataDao.saveEntity(videoimage);
 
                 } else {

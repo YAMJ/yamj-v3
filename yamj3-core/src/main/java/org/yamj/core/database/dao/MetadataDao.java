@@ -71,6 +71,18 @@ public class MetadataDao extends HibernateDao {
         return queueElements;
     }
 
+    public VideoData getVideoData(String identifier) {
+        return getByField(VideoData.class, "identifier", identifier);
+    }
+
+    public Season getSeason(String identifier) {
+        return getByField(Season.class, "identifier", identifier);
+    }
+
+    public Series getSeries(String identifier) {
+        return getByField(Series.class, "identifier", identifier);
+    }
+
     public void storePerson(CreditDTO dto) {
         Session session = getSession();
         Criteria criteria = session.createCriteria(Person.class);
@@ -90,17 +102,5 @@ public class MetadataDao extends HibernateDao {
                 session.update(person);
             }
         }
-    }
-
-    public VideoData getVideoData(String identifier) {
-        return getByField(VideoData.class, "identifier", identifier);
-    }
-
-    public Season getSeason(String identifier) {
-        return getByField(Season.class, "identifier", identifier);
-    }
-
-    public Series getSeries(String identifier) {
-        return getByField(Series.class, "identifier", identifier);
     }
 }

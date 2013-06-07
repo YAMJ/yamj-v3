@@ -84,13 +84,21 @@ public class ArtworkScannerService {
             LOG.debug("Artwork scan not implemented for {}", artwork);
         }
 
-        // update artwork in database
+        // set status
         if (artwork.getStageFile() == null && StringUtils.isBlank(artwork.getUrl())) {
-            artwork.setStatus(StatusType.MISSING);
+            artwork.setStatus(StatusType.NOTFOUND);
         } else {
             artwork.setStatus(StatusType.PROCESSED);
         }
-        artworkStorageService.update(artwork);
+
+        // storage
+        try {
+            artworkStorageService.updateArtwork(artwork);
+        } catch (Exception error) {
+            // NOTE: status will not be changed
+            LOG.error("Failed storing artwork {}-{}", queueElement.getId(), artwork.getArtworkType().toString());
+            LOG.warn("Storage error", error);
+        }
     }
 
     private boolean scanPosterLocal(Artwork artwork) {
@@ -149,7 +157,7 @@ public class ArtworkScannerService {
             }
         } else {
             // Don't throw an exception here, just a debug message for now
-            LOG.debug("Artwork search not implemented for {}" + artwork);
+            LOG.debug("Artwork search not implemented for {}", artwork);
         }
     }
 

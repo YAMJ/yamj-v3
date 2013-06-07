@@ -29,8 +29,7 @@ package org.yamj.core.database.model.type;
  */
 public enum MetaDataType {
 
-    VIDEODATA,
-    SEASON,
+    MOVIE,
     SERIES,
     PERSON;
 
@@ -38,7 +37,7 @@ public enum MetaDataType {
         try {
             return MetaDataType.valueOf(type.trim().toUpperCase());
         } catch (IllegalArgumentException ex) {
-            return VIDEODATA;
+            return MOVIE;
         }
     }
 }

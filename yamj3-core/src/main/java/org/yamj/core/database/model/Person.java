@@ -83,7 +83,7 @@ public class Person extends AbstractAuditable implements Serializable {
     @Column(name = "sourcedb_id", length = 40)
     private Map<String, String> personIds = new HashMap<String, String>(0);
 
-    @Index(name = "IX_PEOPLE_STATUS")
+    @Index(name = "IX_PERSON_STATUS")
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;

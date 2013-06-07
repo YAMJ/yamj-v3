@@ -212,8 +212,8 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
             Episode episode = this.findEpisode(episodeList, season.getSeason(), videoData.getEpisode());
             if (episode == null) {
-                // mark episode as missing
-                videoData.setTvEpisodeMissing();
+                // mark episode as not found
+                videoData.setTvEpisodeNotFound();
             } else {
 
                 if (OverrideTools.checkOverwriteTitle(videoData, TVDB_SCANNER_ID)) {

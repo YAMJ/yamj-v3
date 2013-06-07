@@ -29,7 +29,7 @@ public enum StatusType {
     DELETED,
     ERROR,
     PROCESSED,
-    MISSING,
+    NOTFOUND,
     DONE;
 
     public static StatusType fromString(String type) {

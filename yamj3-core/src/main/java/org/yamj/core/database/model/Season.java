@@ -22,6 +22,11 @@
  */
 package org.yamj.core.database.model;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+
 import java.util.*;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
@@ -85,6 +90,9 @@ public class Season extends AbstractMetadata {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "season")
     private Set<VideoData> videoDatas = new HashSet<VideoData>(0);
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "season")
+    private List<Artwork> artworks = new ArrayList<Artwork>(0);
 
     // GETTER and SETTER
 
@@ -166,6 +174,14 @@ public class Season extends AbstractMetadata {
         this.videoDatas = videoDatas;
     }
 
+    public List<Artwork> getArtworks() {
+        return artworks;
+    }
+
+    public void setArtworks(List<Artwork> artworks) {
+        this.artworks = artworks;
+    }
+
     // TV CHECKS
 
     public List<VideoData> getScannableTvEpisodes() {
@@ -189,8 +205,8 @@ public class Season extends AbstractMetadata {
         this.setStatus(StatusType.PROCESSED);
     }
 
-    public void setTvSeasonMissing() {
-        this.setStatus(StatusType.MISSING);
+    public void setTvSeasonNotFound() {
+        this.setStatus(StatusType.NOTFOUND);
     }
 
     // EQUALITY CHECKS

@@ -66,7 +66,7 @@ public class MetadataStorageService {
     public List<QueueDTO> getMediaQueueForScanning(final int maxResults) {
         final StringBuilder sql = new StringBuilder();
         sql.append("select vd.id,'");
-        sql.append(MetaDataType.VIDEODATA);
+        sql.append(MetaDataType.MOVIE);
         sql.append("' as mediatype,vd.create_timestamp,vd.update_timestamp ");
         sql.append("from videodata vd ");
         sql.append("where vd.status in ('NEW','UPDATED') ");
@@ -130,14 +130,8 @@ public class MetadataStorageService {
 
     @Transactional(readOnly = true)
     public Person getRequiredPerson(Long id) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("from Person person where person.id = :id");
-
         // later on there it could be necessary to fetch associated entities
-
-        @SuppressWarnings("unchecked")
-        List<Person> objects = this.commonDao.findById(sb, id);
-        return DataAccessUtils.requiredUniqueResult(objects);
+        return metadataDao.getById(Person.class, id);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -226,11 +220,6 @@ public class MetadataStorageService {
                 }
             } else {
                 LOG.debug("Found '{}' in cast table", person.getName());
-            }
-
-            // update person id
-            if (person.setPersonId(dto.getSourcedb(), dto.getSourcedbId())) {
-                metadataDao.updateEntity(person);
             }
 
             if (castCrew == null) {
