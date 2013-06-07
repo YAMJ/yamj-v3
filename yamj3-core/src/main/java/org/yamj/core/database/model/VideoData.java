@@ -22,6 +22,7 @@
  */
 package org.yamj.core.database.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
@@ -88,6 +89,7 @@ public class VideoData extends AbstractMetadata {
     @Column(name = "rating", length = 30, nullable = false)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
 
+    @JsonIgnore //Ignore this for JSON output
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_override", joinColumns =@JoinColumn(name = "videodata_id"))
     @ForeignKey(name = "FK_VIDEODATA_OVERRIDE")
@@ -95,7 +97,7 @@ public class VideoData extends AbstractMetadata {
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
-    private Map<OverrideFlag, String> overrideFlags = new HashMap<OverrideFlag, String>(0);
+    private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
 
     @ManyToMany
     @ForeignKey(name = "FK_DATAGENRES_VIDEODATA", inverseName = "FK_DATAGENRES_GENRE")
@@ -305,7 +307,7 @@ public class VideoData extends AbstractMetadata {
     }
 
     // TRANSIENTS METHODS
-    
+
     public List<CreditDTO> getCreditDTOS() {
         return creditDTOS;
     }
@@ -328,7 +330,7 @@ public class VideoData extends AbstractMetadata {
             setOverrideFlag(OverrideFlag.COUNTRY, source);
         }
     }
-    
+
     // TV CHECKS
 
     public boolean isScannableTvEpisode() {

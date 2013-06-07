@@ -33,6 +33,7 @@ import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Service("commonDao")
@@ -43,7 +44,7 @@ public class CommonDao extends HibernateDao {
         Criteria criteria = session.createCriteria(Genre.class);
         criteria.setLockMode(LockMode.PESSIMISTIC_WRITE);
         criteria.add(Restrictions.eq("name", genreName));
-        Genre genre = (Genre)criteria.uniqueResult();
+        Genre genre = (Genre) criteria.uniqueResult();
         if (genre == null) {
             // create new person
             genre = new Genre();
@@ -82,5 +83,9 @@ public class CommonDao extends HibernateDao {
 
     public List<Studio> getStudios(Parameters params) {
         return getList(Studio.class, params);
+    }
+
+    public List<VideoData> getVideos(Parameters params) {
+        return getList(VideoData.class, params);
     }
 }

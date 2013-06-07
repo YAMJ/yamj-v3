@@ -24,6 +24,8 @@ package org.yamj.core.database.service;
 
 import java.io.Serializable;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,10 +35,12 @@ import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.VideoData;
 
 @Service("jsonApiStorageService")
 public class JsonApiStorageService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(JsonApiStorageService.class);
     @Autowired
     private CommonDao commonDao;
 
@@ -45,8 +49,16 @@ public class JsonApiStorageService {
         return commonDao.getById(entityClass, id);
     }
 
+    //<editor-fold defaultstate="collapsed" desc="VideoData Methods">
     @Transactional(readOnly = true)
-    public Genre getGenre(int id) {
+    public List<VideoData> getVideos(Parameters params) {
+        return commonDao.getVideos(params);
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Genre Methods">
+    @Transactional(readOnly = true)
+    public Genre getGenre(Serializable id) {
         return commonDao.getById(Genre.class, id);
     }
 
@@ -59,9 +71,11 @@ public class JsonApiStorageService {
     public List<Genre> getGenres(Parameters params) {
         return commonDao.getList(Genre.class, params);
     }
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Certification Methods">
     @Transactional(readOnly = true)
-    public Certification getCertification(int id) {
+    public Certification getCertification(Serializable id) {
         return commonDao.getById(Certification.class, id);
     }
 
@@ -74,9 +88,11 @@ public class JsonApiStorageService {
     public List<Certification> getCertifications(Parameters params) {
         return commonDao.getList(Certification.class, params);
     }
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Boxed Set Methods">
     @Transactional(readOnly = true)
-    public BoxedSet getBoxedSet(int id) {
+    public BoxedSet getBoxedSet(Serializable id) {
         return commonDao.getById(BoxedSet.class, id);
     }
 
@@ -89,9 +105,11 @@ public class JsonApiStorageService {
     public List<BoxedSet> getBoxedSets(Parameters params) {
         return commonDao.getList(BoxedSet.class, params);
     }
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Studio Methods">
     @Transactional(readOnly = true)
-    public Studio getStudio(int id) {
+    public Studio getStudio(Serializable id) {
         return commonDao.getById(Studio.class, id);
     }
 
@@ -104,4 +122,5 @@ public class JsonApiStorageService {
     public List<Studio> getStudios(Parameters params) {
         return commonDao.getList(Studio.class, params);
     }
+    //</editor-fold>
 }

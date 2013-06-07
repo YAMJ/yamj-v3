@@ -55,7 +55,7 @@ public class CommonController {
     public Genre getGenre(@PathVariable String name) {
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting genre with ID '{}'", name);
-            return jsonApiStorageService.getGenre(Integer.parseInt(name));
+            return jsonApiStorageService.getGenre(Long.parseLong(name));
         } else {
             LOG.info("Getting genre with name '{}'", name);
             return jsonApiStorageService.getGenre(name);
@@ -94,7 +94,7 @@ public class CommonController {
     public Certification getCertification(@PathVariable String name) {
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting genre with ID '{}'", name);
-            return jsonApiStorageService.getCertification(Integer.parseInt(name));
+            return jsonApiStorageService.getCertification(Long.parseLong(name));
         } else {
             LOG.info("Getting certification '{}'", name);
             return jsonApiStorageService.getCertification(name);
@@ -133,7 +133,7 @@ public class CommonController {
     public Studio getStudio(@PathVariable String name) {
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting studio with ID '{}'", name);
-            return jsonApiStorageService.getStudio(Integer.parseInt(name));
+            return jsonApiStorageService.getStudio(Long.parseLong(name));
         } else {
             LOG.info("Getting studio '{}'", name);
             return jsonApiStorageService.getStudio(name);
@@ -172,7 +172,7 @@ public class CommonController {
     public BoxedSet getBoxSet(@PathVariable String name) {
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting boxset with ID '{}'", name);
-            return jsonApiStorageService.getBoxedSet(Integer.parseInt(name));
+            return jsonApiStorageService.getBoxedSet(Long.parseLong(name));
         } else {
             LOG.info("Getting boxset '{}'", name);
             return jsonApiStorageService.getBoxedSet(name);
