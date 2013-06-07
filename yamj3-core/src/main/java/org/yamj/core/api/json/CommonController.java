@@ -23,6 +23,7 @@
 package org.yamj.core.api.json;
 
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.ListWrapper;
 import org.yamj.core.api.ParameterType;
 import org.yamj.core.api.Parameters;
+import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
@@ -51,8 +53,13 @@ public class CommonController {
     @RequestMapping(value = "/genre/{name}", method = RequestMethod.GET)
     @ResponseBody
     public Genre getGenre(@PathVariable String name) {
-        LOG.info("Getting genre '{}'", name);
-        return jsonApiStorageService.getGenre(name);
+        if (StringUtils.isNumeric(name)) {
+            LOG.info("Getting genre with ID '{}'", name);
+            return jsonApiStorageService.getGenre(Integer.parseInt(name));
+        } else {
+            LOG.info("Getting genre with name '{}'", name);
+            return jsonApiStorageService.getGenre(name);
+        }
     }
 
     @RequestMapping(value = "/genres", method = RequestMethod.GET)
@@ -85,8 +92,13 @@ public class CommonController {
     @RequestMapping(value = "/certification/{name}", method = RequestMethod.GET)
     @ResponseBody
     public Certification getCertification(@PathVariable String name) {
-        LOG.info("Getting certification '{}'", name);
-        return jsonApiStorageService.getCertification(name);
+        if (StringUtils.isNumeric(name)) {
+            LOG.info("Getting genre with ID '{}'", name);
+            return jsonApiStorageService.getCertification(Integer.parseInt(name));
+        } else {
+            LOG.info("Getting certification '{}'", name);
+            return jsonApiStorageService.getCertification(name);
+        }
     }
 
     @RequestMapping(value = "/certifications", method = RequestMethod.GET)
@@ -119,7 +131,78 @@ public class CommonController {
     @RequestMapping(value = "/studio/{name}", method = RequestMethod.GET)
     @ResponseBody
     public Studio getStudio(@PathVariable String name) {
-        LOG.info("Getting studio '{}'", name);
-        return jsonApiStorageService.getStudio(name);
+        if (StringUtils.isNumeric(name)) {
+            LOG.info("Getting studio with ID '{}'", name);
+            return jsonApiStorageService.getStudio(Integer.parseInt(name));
+        } else {
+            LOG.info("Getting studio '{}'", name);
+            return jsonApiStorageService.getStudio(name);
+        }
+    }
+
+    @RequestMapping(value = "/studios", method = RequestMethod.GET)
+    @ResponseBody
+    public ListWrapper<Studio> getStudios(
+            @RequestParam(required = false, defaultValue = "") String search,
+            @RequestParam(required = false, defaultValue = "") String match,
+            @RequestParam(required = false, defaultValue = "") String sort,
+            @RequestParam(required = false, defaultValue = "certification_text") String field,
+            @RequestParam(required = false, defaultValue = "-1") Integer start,
+            @RequestParam(required = false, defaultValue = "-1") Integer max) {
+
+        Parameters p = new Parameters();
+        p.add(ParameterType.SEARCH, search);
+        p.add(ParameterType.MATCHMODE, match);
+        p.add(ParameterType.SORT, sort);
+        p.add(ParameterType.SORT_FIELD, field);
+        p.add(ParameterType.START, start);
+        p.add(ParameterType.MAX, max);
+
+        LOG.info("Getting studio list with {}", p.toString());
+
+        ListWrapper<Studio> wrapper = new ListWrapper<Studio>();
+        List<Studio> results = jsonApiStorageService.getStudios(p);
+        wrapper.setResults(results);
+        wrapper.setParameters(p);
+        return wrapper;
+    }
+
+    @RequestMapping(value = "/boxedset/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public BoxedSet getBoxSet(@PathVariable String name) {
+        if (StringUtils.isNumeric(name)) {
+            LOG.info("Getting boxset with ID '{}'", name);
+            return jsonApiStorageService.getBoxedSet(Integer.parseInt(name));
+        } else {
+            LOG.info("Getting boxset '{}'", name);
+            return jsonApiStorageService.getBoxedSet(name);
+        }
+    }
+
+    @RequestMapping(value = "/boxedsets", method = RequestMethod.GET)
+    @ResponseBody
+    public ListWrapper<BoxedSet> getBoxSets(
+            @RequestParam(required = false, defaultValue = "") String search,
+            @RequestParam(required = false, defaultValue = "") String match,
+            @RequestParam(required = false, defaultValue = "") String sort,
+            @RequestParam(required = false, defaultValue = "name") String field,
+            @RequestParam(required = false, defaultValue = "-1") Integer start,
+            @RequestParam(required = false, defaultValue = "-1") Integer max) {
+
+        Parameters p = new Parameters();
+        p.add(ParameterType.SEARCH, search);
+        p.add(ParameterType.MATCHMODE, match);
+        p.add(ParameterType.SORT, sort);
+        p.add(ParameterType.SORT_FIELD, field);
+        p.add(ParameterType.START, start);
+        p.add(ParameterType.MAX, max);
+
+        LOG.info("Getting boxset list with {}", p.toString());
+
+        ListWrapper<BoxedSet> wrapper = new ListWrapper<BoxedSet>();
+        List<BoxedSet> results = jsonApiStorageService.getBoxedSets(p);
+        wrapper.setResults(results);
+        wrapper.setParameters(p);
+        return wrapper;
     }
 }

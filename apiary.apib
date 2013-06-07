@@ -36,7 +36,7 @@ These methods get information on the videos in the database
 
 Retrieve information on the video
 GET /api/movie/{id}
-< 200 
+< 200
 < Content-Type: application/json
 {
     "id":1,
@@ -113,26 +113,144 @@ GET /api/person/{id}
 Other
 --
 
-Get information on the genre
-GET /api/genre/{id}
+Get information on a single genre
+***
+**Required Parameters**
+
+`id`        The ID of the genre to get
+
+`name`      The name of the genre to get
+***
+GET /api/genre/{id_or_name}
 < 200
 < Content-Type: application/json
 {}
 
 
-Get information on the certification
-GET /api/certificate/{id}
+Get information genres
+***
+**Optional Parameters**
+
+`search`    The search term to use
+
+`match`     The match method. Can be one of `any` (default), `start`, `end` or `exact`
+
+`sort`      Sort the returned results. Can be one of `asc` or `desc`
+
+`start`     Where to start the list from
+
+`max`       The maximum number of results to return
+
+***
+GET /api/genres
 < 200
 < Content-Type: application/json
 {}
 
 
-Get information on the studio
-GET /api/studio/{id}
+Get information on a single certification
+***
+**Required Parameters**
+
+`id`        The ID of the certificate to get
+
+`name`      The name of the certificate to get
+***
+GET /api/certificate/{id_or_name}
 < 200
 < Content-Type: application/json
 {}
 
+
+Get information certifications
+***
+**Optional Parameters**
+
+`search`    The search term to use
+
+`match`     The match method. Can be one of `any` (default), `start`, `end` or `exact`
+
+`sort`      Sort the returned results. Can be one of `asc` or `desc`
+
+`start`     Where to start the list from
+
+`max`       The maximum number of results to return
+
+***
+GET /api/certifications
+< 200
+< Content-Type: application/json
+{}
+
+
+Get information on a single studio
+***
+**Required Parameters**
+
+`id`        The ID of the studio to get
+
+`name`      The name of the studio to get
+***
+GET /api/studio/{id_or_name}
+< 200
+< Content-Type: application/json
+{}
+
+
+Get information studios
+***
+**Optional Parameters**
+
+`search`    The search term to use
+
+`match`     The match method. Can be one of `any` (default), `start`, `end` or `exact`
+
+`sort`      Sort the returned results. Can be one of `asc` or `desc`
+
+`start`     Where to start the list from
+
+`max`       The maximum number of results to return
+
+***
+GET /api/studios
+< 200
+< Content-Type: application/json
+{}
+
+
+Get information on a single boxed set
+***
+**Required Parameters**
+
+`id`        The ID of the studio to get
+
+`name`      The name of the studio to get
+***
+GET /api/boxedset/{id_or_name}
+< 200
+< Content-Type: application/json
+{}
+
+
+Get information boxed sets
+***
+**Optional Parameters**
+
+`search`    The search term to use
+
+`match`     The match method. Can be one of `any` (default), `start`, `end` or `exact`
+
+`sort`      Sort the returned results. Can be one of `asc` or `desc`
+
+`start`     Where to start the list from
+
+`max`       The maximum number of results to return
+
+***
+GET /api/boxedsets
+< 200
+< Content-Type: application/json
+{}
 
 
 --
@@ -168,11 +286,3 @@ GET /system/info
     "buildDate":"2013-06-06 18:50:01",
     "uptime":"1h10m47.407s"
 }
-
-
-
-
-
-
-
-

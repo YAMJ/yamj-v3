@@ -46,6 +46,11 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = true)
+    public Genre getGenre(int id) {
+        return commonDao.getById(Genre.class, id);
+    }
+
+    @Transactional(readOnly = true)
     public Genre getGenre(String name) {
         return commonDao.getByName(Genre.class, name);
     }
@@ -53,6 +58,11 @@ public class JsonApiStorageService {
     @Transactional(readOnly = true)
     public List<Genre> getGenres(Parameters params) {
         return commonDao.getList(Genre.class, params);
+    }
+
+    @Transactional(readOnly = true)
+    public Certification getCertification(int id) {
+        return commonDao.getById(Certification.class, id);
     }
 
     @Transactional(readOnly = true)
@@ -66,12 +76,32 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = true)
+    public BoxedSet getBoxedSet(int id) {
+        return commonDao.getById(BoxedSet.class, id);
+    }
+
+    @Transactional(readOnly = true)
     public BoxedSet getBoxedSet(String name) {
         return commonDao.getByName(BoxedSet.class, name);
     }
 
     @Transactional(readOnly = true)
+    public List<BoxedSet> getBoxedSets(Parameters params) {
+        return commonDao.getList(BoxedSet.class, params);
+    }
+
+    @Transactional(readOnly = true)
+    public Studio getStudio(int id) {
+        return commonDao.getById(Studio.class, id);
+    }
+
+    @Transactional(readOnly = true)
     public Studio getStudio(String name) {
         return commonDao.getByName(Studio.class, name);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Studio> getStudios(Parameters params) {
+        return commonDao.getList(Studio.class, params);
     }
 }
