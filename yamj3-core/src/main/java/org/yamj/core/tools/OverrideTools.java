@@ -23,6 +23,7 @@
 package org.yamj.core.tools;
 
 import java.util.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,9 @@ public final class OverrideTools {
         // country
         sources = PropertyTools.getProperty("priority.videodata.country", "nfo,plugin_video,plugin_series,alternate_video,alternate_series");
         putVideodataPriorities(OverrideFlag.COUNTRY, sources);
+        // genres
+        sources = PropertyTools.getProperty("priority.videodata.genres", "nfo,plugin_video,plugin_series,alternate_video,alternate_series");
+        putVideodataPriorities(OverrideFlag.GENRES, sources);
         // original title
         sources = PropertyTools.getProperty("priority.videodata.originaltitle", "nfo,plugin_video,plugin_series,alternate_video,alternate_series");
         putVideodataPriorities(OverrideFlag.ORIGINALTITLE, sources);
@@ -287,6 +291,16 @@ public final class OverrideTools {
             }
         }
         return false;
+    }
+
+    public static boolean checkOverwriteGenres(VideoData videoData, String source) {
+        if (skipCheck(videoData, OverrideFlag.COUNTRY, source)) {
+            // skip the check
+            return Boolean.FALSE;
+        } else if (CollectionUtils.isEmpty(videoData.getGenres())) {
+            return Boolean.TRUE;
+        }
+        return checkOverwrite(videoData, OverrideFlag.GENRES, source);
     }
 
     public static boolean checkOverwriteCountry(VideoData videoData, String source) {

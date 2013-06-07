@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.plugin;
 
+import org.yamj.core.tools.OverrideTools;
+
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.model.MovieDb;
@@ -183,29 +185,43 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             return ScanResult.ERROR;
         }
 
-        videoData.setTitle(moviedb.getTitle(), TMDB_SCANNER_ID);
-        videoData.setPlot(moviedb.getOverview(), TMDB_SCANNER_ID);
-        videoData.setOutline(moviedb.getOverview(), TMDB_SCANNER_ID);
-        for (ProductionCountry country : moviedb.getProductionCountries()) {
-            videoData.setCountry(country.getName(), TMDB_SCANNER_ID);
-            break;
+        if (OverrideTools.checkOverwriteTitle(videoData, TMDB_SCANNER_ID)) {
+            videoData.setTitle(moviedb.getTitle(), TMDB_SCANNER_ID);
         }
-
-        // YEAR
-        String year = moviedb.getReleaseDate();
-        // Check if this is the default year and skip it
-        if (!"1900-01-01".equals(year)) {
-            year = (new DateTime(year)).toString("yyyy");
-            videoData.setPublicationYear(Integer.parseInt(year), TMDB_SCANNER_ID);
+        
+        if (OverrideTools.checkOverwritePlot(videoData, TMDB_SCANNER_ID)) {
+            videoData.setPlot(moviedb.getOverview(), TMDB_SCANNER_ID);
         }
-
-        // GENRES
-        Set<String> genreNames = new HashSet<String>();
-        for (com.omertron.themoviedbapi.model.Genre genre : moviedb.getGenres()) {
-            genreNames.add(genre.getName());
+        
+        if (OverrideTools.checkOverwriteOutline(videoData, TMDB_SCANNER_ID)) {
+            videoData.setOutline(moviedb.getOverview(), TMDB_SCANNER_ID);
         }
-        videoData.setGenreNames(genreNames, TMDB_SCANNER_ID);
-
+        
+        if (OverrideTools.checkOverwriteCountry(videoData, TMDB_SCANNER_ID)) {
+            for (ProductionCountry country : moviedb.getProductionCountries()) {
+                videoData.setCountry(country.getName(), TMDB_SCANNER_ID);
+                break;
+            }
+        }
+        
+        if (OverrideTools.checkOverwriteYear(videoData, TMDB_SCANNER_ID)) {
+            String year = moviedb.getReleaseDate();
+            // Check if this is the default year and skip it
+            if (!"1900-01-01".equals(year)) {
+                year = (new DateTime(year)).toString("yyyy");
+                videoData.setPublicationYear(Integer.parseInt(year), TMDB_SCANNER_ID);
+            }
+        }
+        
+        if (OverrideTools.checkOverwriteGenres(videoData, TMDB_SCANNER_ID)) {
+            // GENRES
+            Set<String> genreNames = new HashSet<String>();
+            for (com.omertron.themoviedbapi.model.Genre genre : moviedb.getGenres()) {
+                genreNames.add(genre.getName());
+            }
+            videoData.setGenreNames(genreNames, TMDB_SCANNER_ID);
+        }
+        
         // CAST & CREW
         try {
             CreditDTO credit;

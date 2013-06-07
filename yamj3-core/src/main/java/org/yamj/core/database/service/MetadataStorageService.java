@@ -22,8 +22,10 @@
  */
 package org.yamj.core.database.service;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,14 +192,15 @@ public class MetadataStorageService {
     }
 
     private void updateGenres(VideoData videoData) {
-        HashSet<Genre> genres = new HashSet<Genre>(0);
-        for (Genre genre : videoData.getGenres()) {
-            Genre stored = commonDao.getGenre(genre.getName());
-            if (stored == null) {
-                commonDao.saveEntity(genre);
+        if (CollectionUtils.isEmpty(videoData.getGenreNames())) {
+            return;
+        }
+
+        Set<Genre> genres = new LinkedHashSet<Genre>();
+        for (String genreName : videoData.getGenreNames()) {
+            Genre genre = commonDao.getByName(Genre.class, genreName);
+            if (genre != null) {
                 genres.add(genre);
-            } else {
-                genres.add(stored);
             }
         }
         videoData.setGenres(genres);
@@ -220,22 +223,17 @@ public class MetadataStorageService {
             if (person == null) {
                 LOG.info("Attempting to retrieve information on '{}' from database", dto.getName());
                 person = personDao.getByName(Person.class, dto.getName());
+                if (person == null) {
+                    LOG.warn("Person '{}' not found, skipping", dto.getName());
+                    return;
+                }
             } else {
                 LOG.debug("Found '{}' in cast table", person.getName());
             }
 
-            if (person != null) {
-                // update person id
-                if (person.setPersonId(dto.getSourcedb(), dto.getSourcedbId())) {
-                    metadataDao.updateEntity(person);
-                }
-            } else {
-                // create new person
-                person = new Person();
-                person.setName(dto.getName());
-                person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
-                person.setStatus(StatusType.NEW);
-                metadataDao.saveEntity(person);
+            // update person id
+            if (person.setPersonId(dto.getSourcedb(), dto.getSourcedbId())) {
+                metadataDao.updateEntity(person);
             }
 
             if (castCrew == null) {

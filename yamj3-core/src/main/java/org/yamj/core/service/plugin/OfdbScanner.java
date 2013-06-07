@@ -249,14 +249,13 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                         }
                     }
 
-//                    if (OverrideTools.checkOverwriteGenres(videoData, OFDB_SCANNER_ID) && tag.contains("Genre(s)")) {
-                    if (tag.contains("Genre(s)")) {
+                    if (OverrideTools.checkOverwriteGenres(videoData, OFDB_SCANNER_ID) && tag.contains("Genre(s)")) {
                         List<String> scraped = HTMLTools.extractHtmlTags(tag, "class=\"Daten\"", "</td>", "<a", "</a>");
-                        HashSet<String> genres = new HashSet<String>();
+                        HashSet<String> genreNames = new HashSet<String>();
                         for (String genre : scraped) {
-                            genres.add(HTMLTools.removeHtmlTags(genre).trim());
+                            genreNames.add(HTMLTools.removeHtmlTags(genre).trim());
                         }
-                        videoData.setGenreNames(genres, OFDB_SCANNER_ID);
+                        videoData.setGenreNames(genreNames, OFDB_SCANNER_ID);
                     }
                 }
 
