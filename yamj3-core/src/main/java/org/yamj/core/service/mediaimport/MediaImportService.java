@@ -242,7 +242,8 @@ public class MediaImportService {
         // - create local artwork entries
         // - create set entries
 
-        finish(stageFile);
+        stageFile.setStatus(StatusType.DONE);
+        stagingDao.updateEntity(stageFile);
     }
 
     private void processUpdatedVideo(StageFile stageFile) {
@@ -252,10 +253,6 @@ public class MediaImportService {
         mediaFile.setStatus(StatusType.UPDATED);
         mediaDao.updateEntity(mediaFile);
 
-        finish(stageFile);
-    }
-
-    private void finish(StageFile stageFile) {
         stageFile.setStatus(StatusType.DONE);
         stagingDao.updateEntity(stageFile);
     }
