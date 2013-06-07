@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.List;
 import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Service;
-import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
@@ -86,13 +85,5 @@ public class MetadataDao extends HibernateDao {
 
     public Series getSeries(String identifier) {
         return (Series)getSession().byNaturalId(Series.class).using("identifier", identifier).load();
-    }
-
-    public Person getPerson(String name) {
-        return (Person)getSession().byNaturalId(Person.class).using("name", name).load();
-    }
-
-    public Person getPerson(final long id) {
-        return getById(Person.class, id);
     }
 }

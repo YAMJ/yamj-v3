@@ -23,8 +23,6 @@
 package org.yamj.core.database.dao;
 
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.yamj.core.api.Parameters;
 import org.yamj.core.database.model.BoxedSet;
@@ -35,8 +33,6 @@ import org.yamj.core.hibernate.HibernateDao;
 
 @Service("commonDao")
 public class CommonDao extends HibernateDao {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CommonDao.class);
 
     public Genre getGenre(String name) {
         return getByName(Genre.class, name);

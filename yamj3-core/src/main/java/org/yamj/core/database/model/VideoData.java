@@ -22,6 +22,9 @@
  */
 package org.yamj.core.database.model;
 
+import org.hibernate.annotations.MapKeyType;
+import org.hibernate.annotations.Type;
+
 import java.util.*;
 import javax.persistence.*;
 import org.apache.commons.collections.CollectionUtils;
@@ -77,7 +80,7 @@ public class VideoData extends AbstractMetadata {
     @ForeignKey(name = "FK_VIDEODATA_SOURCEIDS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
-    @Column(name = "sourcedb_id", length = 200)
+    @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourcedbIdMap = new HashMap<String, String>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -85,7 +88,7 @@ public class VideoData extends AbstractMetadata {
     @ForeignKey(name = "FK_VIDEODATA_RATINGS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
-    @Column(name = "rating", length = 30)
+    @Column(name = "rating", length = 30, nullable = false)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -93,7 +96,8 @@ public class VideoData extends AbstractMetadata {
     @ForeignKey(name = "FK_VIDEODATA_OVERRIDE")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
-    @Column(name = "source", length = 30)
+    @MapKeyType(value = @Type(type = "overrideFlag"))
+    @Column(name = "source", length = 30, nullable = false)
     private Map<OverrideFlag, String> overrideFlags = new HashMap<OverrideFlag, String>(0);
 
     @ManyToMany

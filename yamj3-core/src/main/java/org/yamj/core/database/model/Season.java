@@ -24,11 +24,11 @@ package org.yamj.core.database.model;
 
 import java.util.*;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.ForeignKey;
-import org.hibernate.annotations.Index;
+import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
@@ -57,7 +57,7 @@ public class Season extends AbstractMetadata {
     @ForeignKey(name = "FK_SEASON_SOURCEIDS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
-    @Column(name = "sourcedb_id", length = 200)
+    @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourcedbIdMap = new HashMap<String, String>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -65,7 +65,7 @@ public class Season extends AbstractMetadata {
     @ForeignKey(name = "FK_SEASON_RATINGS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
-    @Column(name = "rating", length = 30)
+    @Column(name = "rating", length = 30, nullable = false)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -73,7 +73,8 @@ public class Season extends AbstractMetadata {
     @ForeignKey(name = "FK_SEASON_OVERRIDE")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
-    @Column(name = "source", length = 30)
+    @MapKeyType(value = @Type(type = "overrideFlag"))
+    @Column(name = "source", length = 30, nullable = false)
     private Map<OverrideFlag, String> overrideFlags = new HashMap<OverrideFlag, String>(0);
 
     @ManyToOne(fetch = FetchType.LAZY)

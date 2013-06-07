@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.MetadataDao;
+import org.yamj.core.database.dao.PersonDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
@@ -49,6 +50,8 @@ public class MetadataStorageService {
     private CommonDao commonDao;
     @Autowired
     private MetadataDao metadataDao;
+    @Autowired
+    private PersonDao personDao;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void save(Object entity) {
@@ -206,7 +209,7 @@ public class MetadataStorageService {
             // find person if not found
             if (person == null) {
                 LOG.info("Attempting to retrieve information on '{}' from database", dto.getName());
-                person = metadataDao.getPerson(dto.getName());
+                person = personDao.getByName(Person.class, dto.getName());
             } else {
                 LOG.debug("Found '{}' in cast table", person.getName());
             }
@@ -260,10 +263,10 @@ public class MetadataStorageService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void errorPerson(Long id) {
-        Person person = metadataDao.getPerson(id);
+        Person person = personDao.getById(Person.class, id);
         if (person != null) {
             person.setStatus(StatusType.ERROR);
-            metadataDao.updateEntity(person);
+            personDao.updateEntity(person);
         }
     }
 }

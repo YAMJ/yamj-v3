@@ -136,6 +136,7 @@ public abstract class HibernateDao {
      * @param name
      * @return
      */
+    @SuppressWarnings("unchecked")
     public <T> T getByField(Class<? extends T> entityClass, String field, String name) {
         return (T) getSession().byNaturalId(entityClass).using(field, name).load();
     }
@@ -148,6 +149,7 @@ public abstract class HibernateDao {
      * @param params the parameters (from the Controller
      * @return
      */
+    @SuppressWarnings("unchecked")
     public <T> List<T> getList(Class<? extends T> entityClass, Parameters params) {
         Criteria criteria = getSession().createCriteria(entityClass);
         params.criteriaAddAll(criteria);
