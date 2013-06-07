@@ -64,6 +64,11 @@ public class MetadataScheduler {
 
     @Scheduled(initialDelay = 5000, fixedDelay = 45000)
     public void scanMediaData() throws Exception {
+        if (MEDIA_SCANNER_MAX_THREADS <= 0) {
+            LOG.debug("Media data scanning is disabled");
+            return;
+        }
+        
         List<QueueDTO> queueElements = metadataStorageService.getMediaQueueForScanning(MEDIA_SCANNER_MAX_RESULTS);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.debug("No media data found to scan");
@@ -92,6 +97,11 @@ public class MetadataScheduler {
 
     @Scheduled(initialDelay = 10000, fixedDelay = 45000)
     public void scanPeopleData() throws Exception {
+        if (PEOPLE_SCANNER_MAX_THREADS <= 0) {
+            LOG.debug("People scanning is disabled");
+            return;
+        }
+
         List<QueueDTO> queueElements = metadataStorageService.getPersonQueueForScanning(PEOPLE_SCANNER_MAX_RESULTS);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.debug("No people data found to scan");
@@ -121,6 +131,11 @@ public class MetadataScheduler {
 
     @Scheduled(initialDelay = 15000, fixedDelay = 45000)
     public void scanArtwork() throws Exception {
+        if (ARTWORK_SCANNER_MAX_THREADS <= 0) {
+            LOG.debug("Artwork scanning is disabled");
+            return;
+        }
+        
         List<QueueDTO> queueElements = artworkStorageService.getArtworkQueueForScanning(ARTWORK_SCANNER_MAX_RESULTS);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.debug("No artwork found to scan");
