@@ -27,6 +27,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.yamj.core.api.Parameters;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.database.model.Certification;
@@ -41,31 +42,36 @@ public class JsonApiStorageService {
 
     @Transactional(readOnly = true)
     public <T> T getEntityById(Class<T> entityClass, Serializable id) {
-        return commonDao.get(entityClass, id);
+        return commonDao.getById(entityClass, id);
     }
 
     @Transactional(readOnly = true)
     public Genre getGenre(String name) {
-        return commonDao.getGenre(name);
+        return commonDao.getByName(Genre.class, name);
     }
 
     @Transactional(readOnly = true)
-    public List<Genre> getGenres(String search, String place, String sort, int queryFrom, int queryMax) {
-        return commonDao.getGenres(search, place, sort, queryFrom, queryMax);
+    public List<Genre> getGenres(Parameters params) {
+        return commonDao.getList(Genre.class, params);
     }
 
     @Transactional(readOnly = true)
     public Certification getCertification(String name) {
-        return commonDao.getCertification(name);
+        return commonDao.getByName(Certification.class, name);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Certification> getCertifications(Parameters params) {
+        return commonDao.getList(Certification.class, params);
     }
 
     @Transactional(readOnly = true)
     public BoxedSet getBoxedSet(String name) {
-        return commonDao.getBoxedSet(name);
+        return commonDao.getByName(BoxedSet.class, name);
     }
 
     @Transactional(readOnly = true)
     public Studio getStudio(String name) {
-        return commonDao.getStudio(name);
+        return commonDao.getByName(Studio.class, name);
     }
 }

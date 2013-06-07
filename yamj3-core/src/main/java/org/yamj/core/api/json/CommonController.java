@@ -33,6 +33,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.ListWrapper;
+import org.yamj.core.api.ParameterType;
+import org.yamj.core.api.Parameters;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
@@ -57,20 +59,26 @@ public class CommonController {
     @ResponseBody
     public ListWrapper<Genre> getGenres(
             @RequestParam(required = false, defaultValue = "") String search,
-            @RequestParam(required = false, defaultValue = "") String place,
+            @RequestParam(required = false, defaultValue = "") String match,
             @RequestParam(required = false, defaultValue = "") String sort,
+            @RequestParam(required = false, defaultValue = "name") String field,
             @RequestParam(required = false, defaultValue = "-1") Integer start,
             @RequestParam(required = false, defaultValue = "-1") Integer max) {
 
-        LOG.info("Getting genre list Search: '{}', Place: '{}', Sort: '{}', Max: {}, Start: {}", search, place, sort, max, start);
+        Parameters p = new Parameters();
+        p.add(ParameterType.SEARCH, search);
+        p.add(ParameterType.MATCHMODE, match);
+        p.add(ParameterType.SORT, sort);
+        p.add(ParameterType.SORT_FIELD, field);
+        p.add(ParameterType.START, start);
+        p.add(ParameterType.MAX, max);
+
+        LOG.info("Getting genre list with {}", p.toString());
+
         ListWrapper<Genre> wrapper = new ListWrapper<Genre>();
-        List<Genre> results = jsonApiStorageService.getGenres(search, place, sort, start, max);
+        List<Genre> results = jsonApiStorageService.getGenres(p);
         wrapper.setResults(results);
-        wrapper.addParameter("search", search);
-        wrapper.addParameter("place", place);
-        wrapper.addParameter("sort", sort);
-        wrapper.addParameter("start", String.valueOf(start));
-        wrapper.addParameter("max", String.valueOf(max));
+        wrapper.setParameters(p);
         return wrapper;
     }
 
@@ -79,6 +87,33 @@ public class CommonController {
     public Certification getCertification(@PathVariable String name) {
         LOG.info("Getting certification '{}'", name);
         return jsonApiStorageService.getCertification(name);
+    }
+
+    @RequestMapping(value = "/certifications", method = RequestMethod.GET)
+    @ResponseBody
+    public ListWrapper<Certification> getCertifications(
+            @RequestParam(required = false, defaultValue = "") String search,
+            @RequestParam(required = false, defaultValue = "") String match,
+            @RequestParam(required = false, defaultValue = "") String sort,
+            @RequestParam(required = false, defaultValue = "certification_text") String field,
+            @RequestParam(required = false, defaultValue = "-1") Integer start,
+            @RequestParam(required = false, defaultValue = "-1") Integer max) {
+
+        Parameters p = new Parameters();
+        p.add(ParameterType.SEARCH, search);
+        p.add(ParameterType.MATCHMODE, match);
+        p.add(ParameterType.SORT, sort);
+        p.add(ParameterType.SORT_FIELD, field);
+        p.add(ParameterType.START, start);
+        p.add(ParameterType.MAX, max);
+
+        LOG.info("Getting certification list with {}", p.toString());
+
+        ListWrapper<Certification> wrapper = new ListWrapper<Certification>();
+        List<Certification> results = jsonApiStorageService.getCertifications(p);
+        wrapper.setResults(results);
+        wrapper.setParameters(p);
+        return wrapper;
     }
 
     @RequestMapping(value = "/studio/{name}", method = RequestMethod.GET)

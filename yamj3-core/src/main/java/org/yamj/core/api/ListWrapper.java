@@ -38,7 +38,7 @@ import org.yamj.common.tools.DateTimeTools;
 public final class ListWrapper<T> {
 
     private List<T> results = Collections.EMPTY_LIST;
-    private Map<String, String> parameters = new HashMap<String, String>(0);
+    private Parameters parameters = new Parameters();
     private int count = 0;
     private DateTime queryTime = DateTime.now();
 
@@ -47,7 +47,7 @@ public final class ListWrapper<T> {
         return results;
     }
 
-    public Map<String, String> getParameters() {
+    public Parameters getParameters() {
         return parameters;
     }
 
@@ -72,12 +72,8 @@ public final class ListWrapper<T> {
         }
     }
 
-    public void setParameters(Map<String, String> parameters) {
+    public void setParameters(Parameters parameters) {
         this.parameters = parameters;
-    }
-
-    public void addParameter(String parameter, String value) {
-        this.parameters.put(parameter, value);
     }
 
     public void setQueryTime(DateTime queryTime) {

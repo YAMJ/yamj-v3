@@ -36,7 +36,7 @@ import org.yamj.core.hibernate.HibernateDao;
 public class ArtworkDao extends HibernateDao {
 
     public Artwork getArtwork(Long id) {
-        return get(Artwork.class, id);
+        return getById(Artwork.class, id);
     }
 
     @SuppressWarnings("unchecked")

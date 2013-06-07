@@ -29,19 +29,23 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.CacheMode;
+import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.yamj.core.api.Parameters;
 
 /**
  * Hibernate DAO implementation
  */
-public abstract class HibernateDao  {
+public abstract class HibernateDao {
 
     @Autowired
     private SessionFactory sessionFactory;
-    
+    private static final String FIELD_NAME = "name";
+
     public void setSessionFactory(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
@@ -49,7 +53,7 @@ public abstract class HibernateDao  {
     public Session getSession() {
         return sessionFactory.getCurrentSession();
     }
-    
+
     /**
      * Store an entity.
      *
@@ -99,9 +103,59 @@ public abstract class HibernateDao  {
         getSession().save(entity);
     }
 
+    /**
+     * Get a single object by its id
+     *
+     * @param <T>
+     * @param entityClass
+     * @param id
+     * @return
+     */
     @SuppressWarnings("unchecked")
-    public <T> T get(Class<T> entityClass, Serializable id) {
+    public <T> T getById(Class<T> entityClass, Serializable id) {
         return (T) getSession().get(entityClass, id);
+    }
+
+    /**
+     * Get a single object using the name field
+     *
+     * @param <T>
+     * @param entityClass
+     * @param name
+     * @return
+     */
+    public <T> T getByName(Class<? extends T> entityClass, String name) {
+        return getByField(entityClass, FIELD_NAME, name);
+    }
+
+    /**
+     * Get a single object by the passed field
+     *
+     * @param <T>
+     * @param entityClass
+     * @param name
+     * @return
+     */
+    public <T> T getByField(Class<? extends T> entityClass, String field, String name) {
+        return (T) getSession().byNaturalId(entityClass).using(field, name).load();
+    }
+
+    /**
+     * Build up the list from the passed class and parameters
+     *
+     * @param <T> The type of the expected list
+     * @param entityClass the class of the list
+     * @param params the parameters (from the Controller
+     * @return
+     */
+    public <T> List<T> getList(Class<? extends T> entityClass, Parameters params) {
+        Criteria criteria = getSession().createCriteria(entityClass);
+        params.criteriaAddAll(criteria);
+
+        criteria.setCacheable(Boolean.TRUE);
+        criteria.setCacheMode(CacheMode.NORMAL);
+
+        return criteria.list();
     }
 
     /**

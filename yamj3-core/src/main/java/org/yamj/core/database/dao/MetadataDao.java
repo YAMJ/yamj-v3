@@ -65,7 +65,7 @@ public class MetadataDao extends HibernateDao {
     }
 
     public VideoData getVideoData(Long id) {
-        return get(VideoData.class, id);
+        return getById(VideoData.class, id);
     }
 
     public VideoData getVideoData(String identifier) {
@@ -73,7 +73,7 @@ public class MetadataDao extends HibernateDao {
     }
 
     public Season getSeason(Long id) {
-        return get(Season.class, id);
+        return getById(Season.class, id);
     }
 
     public Season getSeason(String identifier) {
@@ -81,7 +81,7 @@ public class MetadataDao extends HibernateDao {
     }
 
     public Series getSeries(Long id) {
-        return get(Series.class, id);
+        return getById(Series.class, id);
     }
 
     public Series getSeries(String identifier) {
@@ -93,6 +93,6 @@ public class MetadataDao extends HibernateDao {
     }
 
     public Person getPerson(final long id) {
-        return get(Person.class, id);
+        return getById(Person.class, id);
     }
 }

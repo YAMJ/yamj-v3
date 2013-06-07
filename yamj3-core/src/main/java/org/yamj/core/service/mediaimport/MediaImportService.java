@@ -145,12 +145,12 @@ public class MediaImportService {
                 if (videoData == null) {
                     // NEW video data
 
-                    // get or create season
+                    // getById or create season
                     String seasonIdentifier = dto.buildSeasonIdentifier();
                     Season season = metadataDao.getSeason(seasonIdentifier);
                     if (season == null) {
 
-                        // get or create series
+                        // getById or create series
                         String seriesIdentifier = dto.buildIdentifier();
                         Series series = metadataDao.getSeries(seriesIdentifier);
                         if (series == null) {

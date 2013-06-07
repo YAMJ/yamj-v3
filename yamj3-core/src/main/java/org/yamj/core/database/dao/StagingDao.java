@@ -52,7 +52,7 @@ public class StagingDao extends HibernateDao {
     }
 
     public StageFile getStageFile(long id) {
-        return get(StageFile.class, id);
+        return getById(StageFile.class, id);
     }
 
     public StageFile getStageFile(String fileName, StageDirectory stageDirectory) {

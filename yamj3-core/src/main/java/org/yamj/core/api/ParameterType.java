@@ -20,20 +20,17 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.database.dao;
+package org.yamj.core.api;
 
-import org.springframework.stereotype.Service;
-import org.yamj.core.database.model.MediaFile;
-import org.yamj.core.hibernate.HibernateDao;
-
-@Service("mediaDao")
-public class MediaDao extends HibernateDao {
-
-    public MediaFile getMediaFile(Long id) {
-        return getById(MediaFile.class, id);
-    }
-
-    public MediaFile getMediaFile(String fileName) {
-        return (MediaFile)getSession().byNaturalId(MediaFile.class).using("fileName", fileName).load();
-    }
+/**
+ *
+ * @author Stuart
+ */
+public enum ParameterType {
+    SEARCH,
+    MATCHMODE,
+    SORT,
+    SORT_FIELD,
+    START,
+    MAX
 }

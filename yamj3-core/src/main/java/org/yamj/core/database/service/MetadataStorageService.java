@@ -82,7 +82,7 @@ public class MetadataStorageService {
 
         return metadataDao.getMetadataQueue(sql, maxResults);
     }
-    
+
     @Transactional(readOnly = true)
     public List<QueueDTO> getPersonQueueForScanning(final int maxResults) {
         final StringBuilder sql = new StringBuilder();

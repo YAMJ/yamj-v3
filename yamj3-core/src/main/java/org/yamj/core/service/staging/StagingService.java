@@ -74,7 +74,7 @@ public class StagingService {
             stageDirectory.setStatus(StatusType.NEW);
             stageDirectory.setDirectoryDate(new Date(stageDirectoryDTO.getDate()));
 
-            // get parent stage directory
+            // getById parent stage directory
             int lastIndex = normalized.lastIndexOf('/');
             if (lastIndex > 0) {
                 String parentPath = normalized.substring(0, lastIndex);
