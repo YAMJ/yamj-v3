@@ -65,7 +65,7 @@ public class MetadataScheduler {
     @Scheduled(initialDelay = 5000, fixedDelay = 45000)
     public void scanMediaData() throws Exception {
         if (MEDIA_SCANNER_MAX_THREADS <= 0) {
-            LOG.debug("Media data scanning is disabled");
+            LOG.info("Media data scanning is disabled");
             return;
         }
         
@@ -75,7 +75,7 @@ public class MetadataScheduler {
             return;
         }
 
-        LOG.info("Found {} media data objects to process", queueElements.size());
+        LOG.info("Found {} media data objects to process; scan with {} threads", queueElements.size(), MEDIA_SCANNER_MAX_THREADS);
         BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
 
         ExecutorService executor = Executors.newFixedThreadPool(MEDIA_SCANNER_MAX_THREADS);
@@ -98,7 +98,7 @@ public class MetadataScheduler {
     @Scheduled(initialDelay = 10000, fixedDelay = 45000)
     public void scanPeopleData() throws Exception {
         if (PEOPLE_SCANNER_MAX_THREADS <= 0) {
-            LOG.debug("People scanning is disabled");
+            LOG.info("People scanning is disabled");
             return;
         }
 
@@ -108,7 +108,7 @@ public class MetadataScheduler {
             return;
         }
 
-        LOG.info("Found {} people objects to process", queueElements.size());
+        LOG.info("Found {} people objects to process; scan with {} threads", queueElements.size(), PEOPLE_SCANNER_MAX_THREADS);
         BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
 
         ExecutorService executor = Executors.newFixedThreadPool(PEOPLE_SCANNER_MAX_THREADS);
@@ -126,13 +126,13 @@ public class MetadataScheduler {
 
         }
 
-        LOG.debug("Finished person data scanning");
+        LOG.debug("Finished people data scanning");
     }
 
     @Scheduled(initialDelay = 15000, fixedDelay = 45000)
     public void scanArtwork() throws Exception {
         if (ARTWORK_SCANNER_MAX_THREADS <= 0) {
-            LOG.debug("Artwork scanning is disabled");
+            LOG.info("Artwork scanning is disabled");
             return;
         }
         
@@ -142,7 +142,7 @@ public class MetadataScheduler {
             return;
         }
 
-        LOG.info("Found {} artwork objects to process", queueElements.size());
+        LOG.info("Found {} artwork objects to process; scan with {} threads", queueElements.size(), ARTWORK_SCANNER_MAX_THREADS);
         BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
 
         ExecutorService executor = Executors.newFixedThreadPool(ARTWORK_SCANNER_MAX_THREADS);

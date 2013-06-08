@@ -23,6 +23,8 @@
 package org.yamj.core.service.mediaimport;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -43,7 +45,9 @@ import org.yamj.core.database.model.type.FileType;
 @Service("mediaImportService")
 public class MediaImportService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(MediaImportService.class);
     private static final String MEDIA_SOURCE = "filename";
+    
     @Autowired
     private StagingDao stagingDao;
     @Autowired
@@ -62,9 +66,11 @@ public class MediaImportService {
     public void processVideo(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
         if (StatusType.NEW.equals(stageFile.getStatus())) {
+            LOG.info("Process new video {}-'{}'", stageFile.getId(), stageFile.getFileName());
             processNewVideo(stageFile);
         } else {
-            processUpdatedVideo(stageFile);
+            LOG.info("Process updated video {}-'{}'", stageFile.getId(), stageFile.getFileName());
+            processUpdatedMediaFile(stageFile);
         }
     }
 
@@ -72,7 +78,8 @@ public class MediaImportService {
         // scan filename for informations
         FilenameDTO dto = new FilenameDTO(stageFile);
         filenameScanner.scan(dto);
-
+        LOG.debug("Scanned file '{}': title='{}', year='{}'", stageFile.getFileName(), dto.getTitle(), dto.getYear());
+        
         // MEDIA FILE
         
         MediaFile mediaFile = mediaDao.getMediaFile(stageFile.getFileName());
@@ -91,8 +98,11 @@ public class MediaImportService {
             mediaFile.setStatus(StatusType.NEW);
             mediaFile.addStageFile(stageFile);
             stageFile.setMediaFile(mediaFile);
+
+            LOG.debug("Store new media file: '{}'", mediaFile.getFileName());
             mediaDao.saveEntity(mediaFile);
         } else {
+            LOG.warn("Media file for '{}' already present for new stage file", stageFile.getFileName());
             //  Possible reasons for already existing mediaFile:
             // - Other Library?
             // - Stored in another directory?
@@ -106,6 +116,7 @@ public class MediaImportService {
             String identifier = dto.buildIdentifier();
             VideoData videoData = metadataDao.getVideoData(identifier);
             if (videoData == null) {
+
                 // NEW video data
                 videoData = new VideoData();
                 videoData.setIdentifier(identifier);
@@ -116,6 +127,8 @@ public class MediaImportService {
                 videoData.setStatus(StatusType.NEW);
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);
+
+                LOG.debug("Store new movie: '{}' - {}", videoData.getTitle(), videoData.getPublicationYear());
                 metadataDao.saveEntity(videoData);
 
                 // create new poster artwork entry
@@ -159,6 +172,8 @@ public class MediaImportService {
                             series.setTitle(dto.getTitle(), MEDIA_SOURCE);
                             series.setMoviedbIdMap(dto.getIdMap());
                             series.setStatus(StatusType.NEW);
+
+                            LOG.debug("Store new series: '{}'", series.getTitle());
                             metadataDao.saveEntity(series);
 
                             // create new poster artwork entry
@@ -189,6 +204,8 @@ public class MediaImportService {
                         season.setTitle(dto.getTitle(), MEDIA_SOURCE);
                         season.setSeries(series);
                         season.setStatus(StatusType.NEW);
+
+                        LOG.debug("Store new seaon: '{}' - Season {}", season.getTitle(), season.getSeason());
                         metadataDao.saveEntity(season);
 
                         // create new poster artwork entry
@@ -227,6 +244,8 @@ public class MediaImportService {
                     videoData.setEpisode(episode);
                     mediaFile.addVideoData(videoData);
                     videoData.addMediaFile(mediaFile);
+
+                    LOG.debug("Store new episode: '{}' - Season {} - Episode {}", season.getTitle(), season.getSeason(), videoData.getEpisode());
                     metadataDao.saveEntity(videoData);
 
                     // create new videoimage artwork entry
@@ -234,7 +253,6 @@ public class MediaImportService {
                     videoimage.setArtworkType(ArtworkType.VIDEOIMAGE);
                     videoimage.setStatus(StatusType.NEW);
                     videoimage.setVideoData(videoData);
-                    //videoData.addArtwork(videoimage);
                     metadataDao.saveEntity(videoimage);
 
                 } else {
@@ -254,7 +272,7 @@ public class MediaImportService {
         stagingDao.updateEntity(stageFile);
     }
 
-    private void processUpdatedVideo(StageFile stageFile) {
+    private void processUpdatedMediaFile(StageFile stageFile) {
         MediaFile mediaFile = stageFile.getMediaFile();
         mediaFile.setFileDate(stageFile.getFileDate());
         mediaFile.setFileSize(stageFile.getFileSize());

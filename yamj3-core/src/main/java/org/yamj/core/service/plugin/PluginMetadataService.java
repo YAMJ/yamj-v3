@@ -56,14 +56,17 @@ public class PluginMetadataService {
     private HashMap<String, IPersonScanner> registeredPersonScanner = new HashMap<String, IPersonScanner>();
 
     public void registerMovieScanner(IMovieScanner movieScanner) {
+        LOG.info("Registered movie scanner: {}", movieScanner.getScannerName().toLowerCase());
         registeredMovieScanner.put(movieScanner.getScannerName().toLowerCase(), movieScanner);
     }
 
     public void registerSeriesScanner(ISeriesScanner seriesScanner) {
+        LOG.info("Registered series scanner: {}", seriesScanner.getScannerName().toLowerCase());
         registeredSeriesScanner.put(seriesScanner.getScannerName().toLowerCase(), seriesScanner);
     }
 
     public void registerPersonScanner(IPersonScanner personScanner) {
+        LOG.info("Registered person scanner: {}", personScanner.getScannerName().toLowerCase());
         registeredPersonScanner.put(personScanner.getScannerName().toLowerCase(), personScanner);
     }
 
@@ -107,7 +110,7 @@ public class PluginMetadataService {
             LOG.debug("Movie {}-'{}', scanned OK", id, videoData.getTitle());
             videoData.setStatus(StatusType.DONE);
         } else if (ScanResult.MISSING_ID.equals(scanResult)){
-            LOG.debug("Movie {}-'{}', not found", id, videoData.getTitle());
+            LOG.warn("Movie {}-'{}', not found", id, videoData.getTitle());
             videoData.setStatus(StatusType.NOTFOUND);
         } else {
             videoData.setStatus(StatusType.ERROR);
@@ -118,6 +121,7 @@ public class PluginMetadataService {
 
         // update data in database
         try {
+            LOG.debug("Update video data in database: {}-'{}'", videoData.getId(), videoData.getTitle());
             metadataStorageService.updateVideoData(videoData);
         } catch (Exception error) {
             // NOTE: status will not be changed
@@ -167,7 +171,7 @@ public class PluginMetadataService {
             LOG.debug("Series {}-'{}', scanned OK", id, series.getTitle());
             series.setStatus(StatusType.DONE);
         } else if (ScanResult.MISSING_ID.equals(scanResult)) {
-            LOG.debug("Series {}-'{}', not found", id, series.getTitle());
+            LOG.warn("Series {}-'{}', not found", id, series.getTitle());
             series.setStatus(StatusType.NOTFOUND);
         } else {
             series.setStatus(StatusType.ERROR);
@@ -182,6 +186,7 @@ public class PluginMetadataService {
 
         // update data in database
         try {
+            LOG.debug("Update series in database: {}-'{}'", series.getId(), series.getTitle());
             metadataStorageService.updateSeries(series);
         } catch (Exception error) {
             // NOTE: status will not be changed
@@ -239,7 +244,7 @@ public class PluginMetadataService {
             LOG.debug("Person {}-'{}', scanned OK", id, person.getName());
             person.setStatus(StatusType.DONE);
         } else if (ScanResult.MISSING_ID.equals(scanResult)) {
-            LOG.debug("Person {}-'{}', not found", id, person.getName());
+            LOG.warn("Person {}-'{}', not found", id, person.getName());
             person.setStatus(StatusType.NOTFOUND);
         } else {
             person.setStatus(StatusType.ERROR);
@@ -247,6 +252,7 @@ public class PluginMetadataService {
 
         // update data in database
         try {
+            LOG.debug("Update person in database: {}-'{}'", person.getId(), person.getName());
             metadataStorageService.updatePerson(person);
         } catch (Exception error) {
             // NOTE: status will not be changed

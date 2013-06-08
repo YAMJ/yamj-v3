@@ -87,7 +87,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     @Override
     public String getMovieId(String title, int year) {
         // try with OFDb search
-        String ofdbId = getObdbIdByTitleAndYear(title, year);
+        String ofdbId = getOfdbIdByTitleAndYear(title, year);
         if (StringUtils.isBlank(ofdbId)) {
             // try with search engines
             ofdbId = searchEngineTools.searchURL(title, year, "www.ofdb.de/film");
@@ -118,7 +118,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
         return null;
     }
 
-    private String getObdbIdByTitleAndYear(String title, int year) {
+    private String getOfdbIdByTitleAndYear(String title, int year) {
         if (year <= 0) {
             // title and year must be present for successful OFDb advanced search
             // expected are 2 search parameters minimum; so skip here if year is not valid
