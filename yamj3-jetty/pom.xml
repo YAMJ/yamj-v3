@@ -28,7 +28,7 @@
         <!-- PROJECT -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>yamj3-common</artifactId>
+            <artifactId>yamj3-core</artifactId>
         </dependency>
         <!-- OTHER -->
         <dependency>
