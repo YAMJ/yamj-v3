@@ -38,16 +38,16 @@ import org.yamj.core.database.model.type.OverrideFlag;
 @SuppressWarnings("unused")
 @Entity
 @Table(name = "videodata",
-    uniqueConstraints= @UniqueConstraint(name="UIX_VIDEODATA_NATURALID", columnNames={"identifier"})
-)
+        uniqueConstraints =
+        @UniqueConstraint(name = "UIX_VIDEODATA_NATURALID", columnNames = {"identifier"}))
 @org.hibernate.annotations.Table(appliesTo = "videodata",
-    indexes = {
-        @Index(name = "IX_VIDEODATA_TITLE", columnNames = {"title"}),
-        @Index(name = "IX_VIDEODATA_STATUS", columnNames = {"status"})
-    })
+        indexes = {
+    @Index(name = "IX_VIDEODATA_TITLE", columnNames = {"title"}),
+    @Index(name = "IX_VIDEODATA_STATUS", columnNames = {"status"})
+})
 public class VideoData extends AbstractMetadata {
 
-    private static final long serialVersionUID = 5719107822219333629L;
+    private static final long serialVersionUID = 1L;
 
     @Column(name = "episode", nullable = false)
     private int episode = -1;
@@ -74,7 +74,8 @@ public class VideoData extends AbstractMetadata {
     private String country;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "videodata_ids", joinColumns = @JoinColumn(name = "videodata_id"))
+    @JoinTable(name = "videodata_ids", joinColumns =
+            @JoinColumn(name = "videodata_id"))
     @ForeignKey(name = "FK_VIDEODATA_SOURCEIDS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
@@ -82,28 +83,32 @@ public class VideoData extends AbstractMetadata {
     private Map<String, String> sourcedbIdMap = new HashMap<String, String>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "videodata_ratings", joinColumns = @JoinColumn(name = "videodata_id"))
+    @JoinTable(name = "videodata_ratings", joinColumns =
+            @JoinColumn(name = "videodata_id"))
     @ForeignKey(name = "FK_VIDEODATA_RATINGS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", length = 30, nullable = false)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
 
-    @JsonIgnore //Ignore this for JSON output
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "videodata_override", joinColumns =@JoinColumn(name = "videodata_id"))
+    @JoinTable(name = "videodata_override", joinColumns =
+            @JoinColumn(name = "videodata_id"))
     @ForeignKey(name = "FK_VIDEODATA_OVERRIDE")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
-    @MapKeyType(value = @Type(type = "overrideFlag"))
+    @MapKeyType(value =
+            @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
-    private Map<OverrideFlag, String> overrideFlags = new HashMap<OverrideFlag, String>(0);
+    private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
 
     @ManyToMany
     @ForeignKey(name = "FK_DATAGENRES_VIDEODATA", inverseName = "FK_DATAGENRES_GENRE")
     @JoinTable(name = "videodata_genres",
-        joinColumns = {@JoinColumn(name = "data_id")},
-        inverseJoinColumns = {@JoinColumn(name = "genre_id")})
+            joinColumns = {
+        @JoinColumn(name = "data_id")},
+            inverseJoinColumns = {
+        @JoinColumn(name = "genre_id")})
     private Set<Genre> genres = new HashSet<Genre>(0);
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -131,7 +136,6 @@ public class VideoData extends AbstractMetadata {
     private Set<String> genreNames = new HashSet<String>(0);
 
     // GETTER and SETTER
-
     public int getPublicationYear() {
         return publicationYear;
     }
@@ -251,7 +255,7 @@ public class VideoData extends AbstractMetadata {
         this.ratings = ratings;
     }
 
-    @JsonIgnore // This are not needed for the API
+    @JsonIgnore // This is not needed for the API
     public Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
@@ -265,7 +269,7 @@ public class VideoData extends AbstractMetadata {
         this.overrideFlags.put(overrideFlag, source);
     }
 
-    @JsonIgnore // This are not needed for the API
+    @JsonIgnore // This is not needed for the API
     @Override
     public String getOverrideSource(OverrideFlag overrideFlag) {
         return overrideFlags.get(overrideFlag);
@@ -320,8 +324,7 @@ public class VideoData extends AbstractMetadata {
     }
 
     // TRANSIENTS METHODS
-
-    @JsonIgnore // This are not needed for the API
+    @JsonIgnore // This is not needed for the API
     public List<CreditDTO> getCreditDTOS() {
         return creditDTOS;
     }
@@ -346,7 +349,6 @@ public class VideoData extends AbstractMetadata {
     }
 
     // TV CHECKS
-
     public boolean isScannableTvEpisode() {
         if (StatusType.DONE.equals(this.getStatus())) {
             return false;
@@ -365,7 +367,6 @@ public class VideoData extends AbstractMetadata {
     }
 
     // EQUALITY CHECKS
-
     @Override
     public int hashCode() {
         final int prime = 17;

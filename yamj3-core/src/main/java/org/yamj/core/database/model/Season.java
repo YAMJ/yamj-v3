@@ -22,6 +22,7 @@
  */
 package org.yamj.core.database.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.FetchType;
@@ -39,16 +40,16 @@ import org.yamj.core.database.model.type.OverrideFlag;
 
 @Entity
 @Table(name = "season",
-    uniqueConstraints= @UniqueConstraint(name="UIX_SEASON_NATURALID", columnNames={"identifier"})
-)
+        uniqueConstraints =
+        @UniqueConstraint(name = "UIX_SEASON_NATURALID", columnNames = {"identifier"}))
 @org.hibernate.annotations.Table(appliesTo = "season",
-    indexes = {
-        @Index(name = "IX_SEASON_TITLE", columnNames = {"title"}),
-        @Index(name = "IX_SEASON_STATUS", columnNames = {"status"})
+        indexes = {
+    @Index(name = "IX_SEASON_TITLE", columnNames = {"title"}),
+    @Index(name = "IX_SEASON_STATUS", columnNames = {"status"})
 })
 public class Season extends AbstractMetadata {
 
-    private static final long serialVersionUID = 7589022259013410259L;
+    private static final long serialVersionUID = 1L;
 
     @Index(name = "IX_SEASON_SEASON")
     @Column(name = "season", nullable = false)
@@ -58,7 +59,8 @@ public class Season extends AbstractMetadata {
     private String firstAired;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "season_ids", joinColumns = @JoinColumn(name = "season_id"))
+    @JoinTable(name = "season_ids", joinColumns =
+            @JoinColumn(name = "season_id"))
     @ForeignKey(name = "FK_SEASON_SOURCEIDS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
@@ -66,7 +68,8 @@ public class Season extends AbstractMetadata {
     private Map<String, String> sourcedbIdMap = new HashMap<String, String>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "season_ratings", joinColumns = @JoinColumn(name = "season_id"))
+    @JoinTable(name = "season_ratings", joinColumns =
+            @JoinColumn(name = "season_id"))
     @ForeignKey(name = "FK_SEASON_RATINGS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
@@ -74,13 +77,15 @@ public class Season extends AbstractMetadata {
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "season_override", joinColumns = @JoinColumn(name = "season_id"))
+    @JoinTable(name = "season_override", joinColumns =
+            @JoinColumn(name = "season_id"))
     @ForeignKey(name = "FK_SEASON_OVERRIDE")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
-    @MapKeyType(value = @Type(type = "overrideFlag"))
+    @MapKeyType(value =
+            @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
-    private Map<OverrideFlag, String> overrideFlags = new HashMap<OverrideFlag, String>(0);
+    private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
 
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_SEASON_SERIES")
@@ -95,7 +100,6 @@ public class Season extends AbstractMetadata {
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
 
     // GETTER and SETTER
-
     public int getSeason() {
         return season;
     }
@@ -140,6 +144,7 @@ public class Season extends AbstractMetadata {
         this.ratings = ratings;
     }
 
+    @JsonIgnore // This is not needed for the API
     public Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
@@ -153,6 +158,7 @@ public class Season extends AbstractMetadata {
         this.overrideFlags.put(overrideFlag, source);
     }
 
+    @JsonIgnore // This is not needed for the API
     @Override
     public String getOverrideSource(OverrideFlag overrideFlag) {
         return overrideFlags.get(overrideFlag);
@@ -183,7 +189,6 @@ public class Season extends AbstractMetadata {
     }
 
     // TV CHECKS
-
     public List<VideoData> getScannableTvEpisodes() {
         List<VideoData> episodes = new ArrayList<VideoData>();
         for (VideoData videoData : getVideoDatas()) {
@@ -210,7 +215,6 @@ public class Season extends AbstractMetadata {
     }
 
     // EQUALITY CHECKS
-
     @Override
     public int hashCode() {
         final int prime = 17;

@@ -22,7 +22,9 @@
  */
 package org.yamj.core.database.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.FetchType;
@@ -45,16 +47,16 @@ import org.yamj.core.database.model.type.OverrideFlag;
 
 @Entity
 @Table(name = "series",
-    uniqueConstraints= @UniqueConstraint(name="UIX_SERIES_NATURALID", columnNames={"identifier"})
-)
+        uniqueConstraints =
+        @UniqueConstraint(name = "UIX_SERIES_NATURALID", columnNames = {"identifier"}))
 @org.hibernate.annotations.Table(appliesTo = "series",
-    indexes = {
-        @Index(name = "IX_SERIES_TITLE", columnNames = {"title"}),
-        @Index(name = "IX_SERIES_STATUS", columnNames = {"status"})
+        indexes = {
+    @Index(name = "IX_SERIES_TITLE", columnNames = {"title"}),
+    @Index(name = "IX_SERIES_STATUS", columnNames = {"status"})
 })
 public class Series extends AbstractMetadata {
 
-    private static final long serialVersionUID = -3336182194593898858L;
+    private static final long serialVersionUID = 1L;
 
     @Column(name = "start_year")
     private int startYear = -1;
@@ -63,7 +65,8 @@ public class Series extends AbstractMetadata {
     private int endYear = -1;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "series_ids", joinColumns = @JoinColumn(name = "series_id"))
+    @JoinTable(name = "series_ids", joinColumns =
+            @JoinColumn(name = "series_id"))
     @ForeignKey(name = "FK_SERIES_SOURCEIDS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
@@ -71,7 +74,8 @@ public class Series extends AbstractMetadata {
     private Map<String, String> sourcedbIdMap = new HashMap<String, String>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "series_ratings", joinColumns = @JoinColumn(name = "series_id"))
+    @JoinTable(name = "series_ratings", joinColumns =
+            @JoinColumn(name = "series_id"))
     @ForeignKey(name = "FK_SERIES_RATINGS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
@@ -79,13 +83,15 @@ public class Series extends AbstractMetadata {
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "series_override", joinColumns = @JoinColumn(name = "series_id"))
+    @JoinTable(name = "series_override", joinColumns =
+            @JoinColumn(name = "series_id"))
     @ForeignKey(name = "FK_SERIES_OVERRIDE")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
-    @MapKeyType(value = @Type(type = "overrideFlag"))
+    @MapKeyType(value =
+            @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
-    private Map<OverrideFlag, String> overrideFlags = new HashMap<OverrideFlag, String>(0);
+    private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
     private Set<Season> seasons = new HashSet<Season>(0);
@@ -94,7 +100,6 @@ public class Series extends AbstractMetadata {
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
 
     // GETTER and SETTER
-
     public int getStartYear() {
         return startYear;
     }
@@ -143,6 +148,7 @@ public class Series extends AbstractMetadata {
         this.ratings.put(source, rating);
     }
 
+    @JsonIgnore // This is not needed for the API
     public Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
@@ -156,6 +162,7 @@ public class Series extends AbstractMetadata {
         this.overrideFlags.put(overrideFlag, source);
     }
 
+    @JsonIgnore // This is not needed for the API
     @Override
     public String getOverrideSource(OverrideFlag overrideFlag) {
         return overrideFlags.get(overrideFlag);
@@ -178,7 +185,6 @@ public class Series extends AbstractMetadata {
     }
 
     // EQUALITY CHECKS
-
     @Override
     public int hashCode() {
         final int prime = 17;
