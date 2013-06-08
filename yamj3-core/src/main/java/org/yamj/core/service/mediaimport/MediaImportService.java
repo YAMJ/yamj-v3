@@ -78,7 +78,8 @@ public class MediaImportService {
         // scan filename for informations
         FilenameDTO dto = new FilenameDTO(stageFile);
         filenameScanner.scan(dto);
-        LOG.debug("Scanned file '{}': title='{}', year='{}'", stageFile.getFileName(), dto.getTitle(), dto.getYear());
+        LOG.debug("Scanned filename {}-'{}': title='{}', year={}", 
+                stageFile.getId(), stageFile.getFileName(), dto.getTitle(), dto.getYear());
         
         // MEDIA FILE
         
