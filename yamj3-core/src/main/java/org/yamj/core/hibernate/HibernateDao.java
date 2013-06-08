@@ -35,7 +35,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.yamj.core.api.Parameters;
+import org.yamj.core.api.model.Parameters;
 
 /**
  * Hibernate DAO implementation

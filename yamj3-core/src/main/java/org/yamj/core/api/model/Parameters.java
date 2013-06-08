@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api;
+package org.yamj.core.api.model;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -33,7 +33,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.yamj.core.api.ParameterType.*;
+import static org.yamj.core.api.model.ParameterType.*;
 
 /**
  *
@@ -45,6 +45,10 @@ public final class Parameters {
     private static final String RESTRICTION_NAME = "name";
     private static final String SORT_DESC = "desc";
     private static final String SORT_ASC = "asc";
+    private static final String MATCH_ANY = "any";
+    private static final String MATCH_START = "start";
+    private static final String MATCH_END = "end";
+    private static final String MATCH_EXACT = "exact";
     private Map<ParameterType, String> parameters;
 
     public Parameters() {
@@ -70,7 +74,7 @@ public final class Parameters {
      */
     public void add(ParameterType type, String value) {
         if (StringUtils.isNotBlank(value)) {
-            parameters.put(type, value);
+            parameters.put(type, value.toLowerCase());
         }
     }
 
@@ -84,7 +88,7 @@ public final class Parameters {
      */
     public void add(ParameterType type, int value) {
         if (value >= 0) {
-            parameters.put(type, String.valueOf(value));
+            add(type, String.valueOf(value));
         }
     }
 
@@ -118,15 +122,38 @@ public final class Parameters {
     public void criteriaSearch(Criteria criteria) {
         if (parameters.containsKey(SEARCH)) {
             String search = parameters.get(SEARCH);
-            String matchMode = parameters.get(MATCHMODE);
-            if (!parameters.containsKey(MATCHMODE) || "any".equalsIgnoreCase(matchMode)) {
-                criteria.add(Restrictions.ilike(RESTRICTION_NAME, search, MatchMode.ANYWHERE));
-            } else if ("start".equalsIgnoreCase(matchMode)) {
-                criteria.add(Restrictions.ilike(RESTRICTION_NAME, search, MatchMode.START));
-            } else if ("end".equalsIgnoreCase(matchMode)) {
-                criteria.add(Restrictions.ilike(RESTRICTION_NAME, search, MatchMode.START));
+            String matchMode;
+            String searchField;
+
+            // Set the default match mode if not configured
+            if (parameters.containsKey(MATCHMODE)) {
+                matchMode = parameters.get(MATCHMODE);
             } else {
-                criteria.add(Restrictions.ilike(RESTRICTION_NAME, search, MatchMode.EXACT));
+                LOG.debug("No match mode provided, defaulting to {}", MATCH_ANY);
+                parameters.put(MATCHMODE, MATCH_ANY);
+                matchMode = MATCH_ANY;
+            }
+
+            // Set the default search field if not configured
+            if (parameters.containsKey(SEARCH_FIELD)) {
+                searchField = parameters.get(SEARCH_FIELD);
+            } else {
+                LOG.debug("No search field provided, defaulting to {}", RESTRICTION_NAME);
+                parameters.put(SEARCH_FIELD, RESTRICTION_NAME);
+                searchField = RESTRICTION_NAME;
+            }
+
+            if (MATCH_ANY.equalsIgnoreCase(matchMode)) {
+                criteria.add(Restrictions.ilike(searchField, search, MatchMode.ANYWHERE));
+            } else if (MATCH_START.equalsIgnoreCase(matchMode)) {
+                criteria.add(Restrictions.ilike(searchField, search, MatchMode.START));
+            } else if (MATCH_END.equalsIgnoreCase(matchMode)) {
+                criteria.add(Restrictions.ilike(searchField, search, MatchMode.START));
+            } else if (MATCH_EXACT.equalsIgnoreCase(matchMode)) {
+                criteria.add(Restrictions.ilike(searchField, search, MatchMode.EXACT));
+            } else {
+                LOG.trace("Match mode '{}' not recognised, defaulting to {}", matchMode, MATCH_EXACT);
+                criteria.add(Restrictions.ilike(searchField, search, MatchMode.EXACT));
             }
         }
     }

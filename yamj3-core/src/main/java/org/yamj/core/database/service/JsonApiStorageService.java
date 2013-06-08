@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.yamj.core.api.Parameters;
+import org.yamj.core.api.model.Parameters;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.database.model.Certification;

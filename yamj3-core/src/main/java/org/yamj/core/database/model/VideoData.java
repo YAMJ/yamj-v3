@@ -251,6 +251,7 @@ public class VideoData extends AbstractMetadata {
         this.ratings = ratings;
     }
 
+    @JsonIgnore // This are not needed for the API
     public Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
@@ -264,6 +265,7 @@ public class VideoData extends AbstractMetadata {
         this.overrideFlags.put(overrideFlag, source);
     }
 
+    @JsonIgnore // This are not needed for the API
     @Override
     public String getOverrideSource(OverrideFlag overrideFlag) {
         return overrideFlags.get(overrideFlag);
@@ -318,7 +320,8 @@ public class VideoData extends AbstractMetadata {
     }
 
     // TRANSIENTS METHODS
-    
+
+    @JsonIgnore // This are not needed for the API
     public List<CreditDTO> getCreditDTOS() {
         return creditDTOS;
     }

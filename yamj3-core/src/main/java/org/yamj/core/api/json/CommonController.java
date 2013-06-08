@@ -33,9 +33,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.yamj.core.api.ListWrapper;
-import org.yamj.core.api.ParameterType;
-import org.yamj.core.api.Parameters;
+import org.yamj.core.api.model.ApiStatus;
+import org.yamj.core.api.model.ApiWrapperList;
+import org.yamj.core.api.model.ApiWrapperSingle;
+import org.yamj.core.api.model.ParameterType;
+import org.yamj.core.api.model.Parameters;
 import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Genre;
@@ -52,19 +54,24 @@ public class CommonController {
 
     @RequestMapping(value = "/genre/{name}", method = RequestMethod.GET)
     @ResponseBody
-    public Genre getGenre(@PathVariable String name) {
+    public ApiWrapperSingle<Genre> getGenre(@PathVariable String name) {
+        Genre genre;
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting genre with ID '{}'", name);
-            return jsonApiStorageService.getGenre(Long.parseLong(name));
+            genre = jsonApiStorageService.getGenre(Long.parseLong(name));
         } else {
             LOG.info("Getting genre with name '{}'", name);
-            return jsonApiStorageService.getGenre(name);
+            genre = jsonApiStorageService.getGenre(name);
         }
+
+        ApiWrapperSingle<Genre> wrapper = new ApiWrapperSingle<Genre>(genre);
+        wrapper.setStatusCheck();
+        return wrapper;
     }
 
     @RequestMapping(value = "/genres", method = RequestMethod.GET)
     @ResponseBody
-    public ListWrapper<Genre> getGenres(
+    public ApiWrapperList<Genre> getGenres(
             @RequestParam(required = false, defaultValue = "") String search,
             @RequestParam(required = false, defaultValue = "") String match,
             @RequestParam(required = false, defaultValue = "") String sort,
@@ -82,28 +89,34 @@ public class CommonController {
 
         LOG.info("Getting genre list with {}", p.toString());
 
-        ListWrapper<Genre> wrapper = new ListWrapper<Genre>();
+        ApiWrapperList<Genre> wrapper = new ApiWrapperList<Genre>();
         List<Genre> results = jsonApiStorageService.getGenres(p);
         wrapper.setResults(results);
         wrapper.setParameters(p);
+        wrapper.setStatusCheck();
         return wrapper;
     }
 
     @RequestMapping(value = "/certification/{name}", method = RequestMethod.GET)
     @ResponseBody
-    public Certification getCertification(@PathVariable String name) {
+    public ApiWrapperSingle<Certification> getCertification(@PathVariable String name) {
+        Certification certification;
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting genre with ID '{}'", name);
-            return jsonApiStorageService.getCertification(Long.parseLong(name));
+            certification = jsonApiStorageService.getCertification(Long.parseLong(name));
         } else {
             LOG.info("Getting certification '{}'", name);
-            return jsonApiStorageService.getCertification(name);
+            certification = jsonApiStorageService.getCertification(name);
         }
+
+        ApiWrapperSingle<Certification> wrapper = new ApiWrapperSingle<Certification>(certification);
+        wrapper.setStatusCheck();
+        return wrapper;
     }
 
     @RequestMapping(value = "/certifications", method = RequestMethod.GET)
     @ResponseBody
-    public ListWrapper<Certification> getCertifications(
+    public ApiWrapperList<Certification> getCertifications(
             @RequestParam(required = false, defaultValue = "") String search,
             @RequestParam(required = false, defaultValue = "") String match,
             @RequestParam(required = false, defaultValue = "") String sort,
@@ -121,28 +134,35 @@ public class CommonController {
 
         LOG.info("Getting certification list with {}", p.toString());
 
-        ListWrapper<Certification> wrapper = new ListWrapper<Certification>();
+        ApiWrapperList<Certification> wrapper = new ApiWrapperList<Certification>();
         List<Certification> results = jsonApiStorageService.getCertifications(p);
         wrapper.setResults(results);
         wrapper.setParameters(p);
+        wrapper.setStatus(new ApiStatus(200, "OK"));
+
         return wrapper;
     }
 
     @RequestMapping(value = "/studio/{name}", method = RequestMethod.GET)
     @ResponseBody
-    public Studio getStudio(@PathVariable String name) {
+    public ApiWrapperSingle<Studio> getStudio(@PathVariable String name) {
+        Studio studio;
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting studio with ID '{}'", name);
-            return jsonApiStorageService.getStudio(Long.parseLong(name));
+            studio = jsonApiStorageService.getStudio(Long.parseLong(name));
         } else {
             LOG.info("Getting studio '{}'", name);
-            return jsonApiStorageService.getStudio(name);
+            studio = jsonApiStorageService.getStudio(name);
         }
+
+        ApiWrapperSingle<Studio> wrapper = new ApiWrapperSingle<Studio>(studio);
+        wrapper.setStatusCheck();
+        return wrapper;
     }
 
     @RequestMapping(value = "/studios", method = RequestMethod.GET)
     @ResponseBody
-    public ListWrapper<Studio> getStudios(
+    public ApiWrapperList<Studio> getStudios(
             @RequestParam(required = false, defaultValue = "") String search,
             @RequestParam(required = false, defaultValue = "") String match,
             @RequestParam(required = false, defaultValue = "") String sort,
@@ -160,28 +180,35 @@ public class CommonController {
 
         LOG.info("Getting studio list with {}", p.toString());
 
-        ListWrapper<Studio> wrapper = new ListWrapper<Studio>();
+        ApiWrapperList<Studio> wrapper = new ApiWrapperList<Studio>();
         List<Studio> results = jsonApiStorageService.getStudios(p);
         wrapper.setResults(results);
         wrapper.setParameters(p);
+        wrapper.setStatus(new ApiStatus(200, "OK"));
+
         return wrapper;
     }
 
     @RequestMapping(value = "/boxedset/{name}", method = RequestMethod.GET)
     @ResponseBody
-    public BoxedSet getBoxSet(@PathVariable String name) {
+    public ApiWrapperSingle<BoxedSet> getBoxSet(@PathVariable String name) {
+        BoxedSet boxedSet;
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting boxset with ID '{}'", name);
-            return jsonApiStorageService.getBoxedSet(Long.parseLong(name));
+            boxedSet = jsonApiStorageService.getBoxedSet(Long.parseLong(name));
         } else {
             LOG.info("Getting boxset '{}'", name);
-            return jsonApiStorageService.getBoxedSet(name);
+            boxedSet = jsonApiStorageService.getBoxedSet(name);
         }
+
+        ApiWrapperSingle<BoxedSet> wrapper = new ApiWrapperSingle<BoxedSet>(boxedSet);
+        wrapper.setStatusCheck();
+        return wrapper;
     }
 
     @RequestMapping(value = "/boxedsets", method = RequestMethod.GET)
     @ResponseBody
-    public ListWrapper<BoxedSet> getBoxSets(
+    public ApiWrapperList<BoxedSet> getBoxSets(
             @RequestParam(required = false, defaultValue = "") String search,
             @RequestParam(required = false, defaultValue = "") String match,
             @RequestParam(required = false, defaultValue = "") String sort,
@@ -199,10 +226,12 @@ public class CommonController {
 
         LOG.info("Getting boxset list with {}", p.toString());
 
-        ListWrapper<BoxedSet> wrapper = new ListWrapper<BoxedSet>();
+        ApiWrapperList<BoxedSet> wrapper = new ApiWrapperList<BoxedSet>();
         List<BoxedSet> results = jsonApiStorageService.getBoxedSets(p);
         wrapper.setResults(results);
         wrapper.setParameters(p);
+        wrapper.setStatus(new ApiStatus(200, "OK"));
+
         return wrapper;
     }
 }

@@ -20,36 +20,21 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api;
+package org.yamj.core.api.model;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.collections.CollectionUtils;
 import org.joda.time.DateTime;
 import org.yamj.common.tools.DateTimeTools;
 
 /**
- * Default wrapper for a list returned from the API
  *
- * @author stuart.boston
+ * @author Stuart
  */
-public final class ListWrapper<T> {
+public abstract class ApiWrapperAbstract {
 
-    private List<T> results = Collections.EMPTY_LIST;
-    private Parameters parameters = new Parameters();
     private int count = 0;
     private DateTime queryTime = DateTime.now();
-
-    //<editor-fold defaultstate="collapsed" desc="Getter Methods">
-    public List<T> getResults() {
-        return results;
-    }
-
-    public Parameters getParameters() {
-        return parameters;
-    }
+    private ApiStatus status = new ApiStatus();
+    private Parameters parameters = new Parameters();
 
     public int getCount() {
         return count;
@@ -58,26 +43,33 @@ public final class ListWrapper<T> {
     public String getQueryTime() {
         return DateTimeTools.convertDateToString(queryTime, DateTimeTools.BUILD_FORMAT);
     }
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Setter Methods">
-    public void setResults(List<T> results) {
-        this.results = results;
-
-        // Add the list's size
-        if (CollectionUtils.isNotEmpty(results)) {
-            this.count = results.size();
-        } else {
-            this.count = 0;
-        }
+    public ApiStatus getStatus() {
+        return status;
     }
 
-    public void setParameters(Parameters parameters) {
-        this.parameters = parameters;
+    public Parameters getParameters() {
+        return parameters;
     }
 
     public void setQueryTime(DateTime queryTime) {
         this.queryTime = queryTime;
     }
-    //</editor-fold>
+
+    public void setStatus(ApiStatus status) {
+        this.status = status;
+    }
+
+    /**
+     * Shorthand method to create a default "OK" status or "FAIL" status
+     */
+    public abstract void setStatusCheck();
+
+    protected void setCount(int count) {
+        this.count = count;
+    }
+
+    public void setParameters(Parameters parameters) {
+        this.parameters = parameters;
+    }
 }

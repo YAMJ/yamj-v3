@@ -20,17 +20,49 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api;
+package org.yamj.core.api.model;
 
 /**
  *
  * @author Stuart
  */
-public enum ParameterType {
-    SEARCH,
-    MATCHMODE,
-    SORT,
-    SORT_FIELD,
-    START,
-    MAX
+public class ApiStatus {
+
+    private int status;
+    private String message;
+
+    public ApiStatus() {
+        this.status = 100;
+        this.message = "Unknown status";
+    }
+
+    public ApiStatus(int status, String message) {
+        this.status = status;
+        this.message = message;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    /**
+     * The status of the response. Should be one of<br>
+     * 1xx - Provisional status<br>
+     * 2xx - Success<br>
+     * 4xx - Client error<br>
+     * 5xx - Server error<br>
+     *
+     * @param status
+     */
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 }
