@@ -62,7 +62,8 @@ public class Scheduler {
                     mediaImportService.processVideo(id);
                 }
             } catch (Exception error) {
-                LOG.error("Failed to process stage file", error);
+                LOG.error("Failed to process stage file {}", id);
+                LOG.warn("Staging error", error);
                 try {
                     mediaImportService.processingError(id);
                 } catch (Exception ignore) {
