@@ -24,8 +24,8 @@ package org.yamj.filescanner.model;
 
 import org.yamj.common.tools.DateTimeTools;
 import java.util.EnumMap;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 
 /**
  * Class to store any statistics about the jukebox
