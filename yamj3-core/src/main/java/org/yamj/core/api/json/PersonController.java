@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.yamj.core.api.model.ApiWrapperSingle;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.service.JsonApiStorageService;
 
@@ -43,8 +44,11 @@ public class PersonController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public Person getPersonById(@PathVariable String id) {
+    public ApiWrapperSingle<Person> getPersonById(@PathVariable String id) {
         LOG.info("Getting person with ID '{}'", id);
-        return jsonApiStorageService.getEntityById(Person.class, Long.parseLong(id));
+        Person person= jsonApiStorageService.getEntityById(Person.class, Long.parseLong(id));
+        ApiWrapperSingle<Person> wrapper = new ApiWrapperSingle<Person>(person);
+        wrapper.setStatusCheck();
+        return wrapper;
     }
 }

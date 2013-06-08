@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.yamj.core.api.model.ApiWrapperSingle;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.service.JsonApiStorageService;
 
@@ -43,8 +44,11 @@ public class ArtworkController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public Artwork getArtworkById(@PathVariable String id) {
+    public ApiWrapperSingle<Artwork> getArtworkById(@PathVariable String id) {
         LOG.info("Getting artwork with ID '{}'", id);
-        return jsonApiStorageService.getEntityById(Artwork.class, Long.parseLong(id));
+        Artwork artwork = jsonApiStorageService.getEntityById(Artwork.class, Long.parseLong(id));
+        ApiWrapperSingle<Artwork> wrapper = new ApiWrapperSingle<Artwork>(artwork);
+        wrapper.setStatusCheck();
+        return wrapper;
     }
 }
