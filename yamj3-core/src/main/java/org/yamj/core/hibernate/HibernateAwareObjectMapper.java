@@ -24,6 +24,7 @@ package org.yamj.core.hibernate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 
 /**
  * Taken from the Jackson Hibernate module<br>
@@ -34,10 +35,15 @@ import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
  * @author Stuart
  */
 public class HibernateAwareObjectMapper extends ObjectMapper {
-
     private static final long serialVersionUID = 34607231867726798L;
 
     public HibernateAwareObjectMapper() {
-        registerModule(new Hibernate4Module());
+        // https://github.com/FasterXML/jackson-module-hibernate
+        Hibernate4Module hm = new Hibernate4Module();
+        registerModule(hm);
+        hm.configure(Hibernate4Module.Feature.FORCE_LAZY_LOADING, true);
+
+        // https://github.com/FasterXML/jackson-datatype-joda
+        registerModule(new JodaModule());
     }
 }

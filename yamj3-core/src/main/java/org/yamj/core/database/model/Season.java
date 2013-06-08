@@ -189,6 +189,7 @@ public class Season extends AbstractMetadata {
     }
 
     // TV CHECKS
+    @JsonIgnore
     public List<VideoData> getScannableTvEpisodes() {
         List<VideoData> episodes = new ArrayList<VideoData>();
         for (VideoData videoData : getVideoDatas()) {
