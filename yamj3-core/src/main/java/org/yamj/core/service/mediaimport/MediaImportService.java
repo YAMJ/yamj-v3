@@ -81,6 +81,19 @@ public class MediaImportService {
         LOG.debug("Scanned filename {}-'{}': title='{}', year={}", 
                 stageFile.getId(), stageFile.getFileName(), dto.getTitle(), dto.getYear());
         
+        if (StringUtils.isBlank(dto.getTitle()) && (dto.getYear() > 0)) {
+            if (dto.getYear() > 0) {
+                LOG.warn("No valid title scanned from '{}', year will be used as title", stageFile.getFileName());
+                dto.setTitle(String.valueOf(dto.getYear()));
+                dto.setYear(-1);
+            } else {
+                LOG.error("No valid title and year could be scanned from filename '{}'", stageFile.getFileName()); 
+                stageFile.setStatus(StatusType.ERROR);
+                mediaDao.updateEntity(stageFile);
+                return;
+            }
+        }
+        
         // MEDIA FILE
         
         MediaFile mediaFile = mediaDao.getMediaFile(stageFile.getFileName());
@@ -136,6 +149,7 @@ public class MediaImportService {
                 Artwork poster = new Artwork();
                 poster.setArtworkType(ArtworkType.POSTER);
                 poster.setStatus(StatusType.NEW);
+                poster.setCounter(1);
                 poster.setVideoData(videoData);
                 metadataDao.saveEntity(poster);
 
@@ -143,6 +157,7 @@ public class MediaImportService {
                 Artwork fanart = new Artwork();
                 fanart.setArtworkType(ArtworkType.FANART);
                 fanart.setStatus(StatusType.NEW);
+                fanart.setCounter(1);
                 fanart.setVideoData(videoData);
                 metadataDao.saveEntity(fanart);
 
@@ -181,6 +196,7 @@ public class MediaImportService {
                             Artwork poster = new Artwork();
                             poster.setArtworkType(ArtworkType.POSTER);
                             poster.setStatus(StatusType.NEW);
+                            poster.setCounter(1);
                             poster.setSeries(series);
                             metadataDao.saveEntity(poster);
 
@@ -188,6 +204,7 @@ public class MediaImportService {
                             Artwork fanart = new Artwork();
                             fanart.setArtworkType(ArtworkType.FANART);
                             fanart.setStatus(StatusType.NEW);
+                            fanart.setCounter(1);
                             fanart.setSeries(series);
                             metadataDao.saveEntity(fanart);
 
@@ -195,6 +212,7 @@ public class MediaImportService {
                             Artwork banner = new Artwork();
                             banner.setArtworkType(ArtworkType.BANNER);
                             banner.setStatus(StatusType.NEW);
+                            banner.setCounter(1);
                             banner.setSeries(series);
                             metadataDao.saveEntity(banner);
                         }
@@ -213,6 +231,7 @@ public class MediaImportService {
                         Artwork poster = new Artwork();
                         poster.setArtworkType(ArtworkType.POSTER);
                         poster.setStatus(StatusType.NEW);
+                        poster.setCounter(1);
                         poster.setSeason(season);
                         metadataDao.saveEntity(poster);
 
@@ -220,6 +239,7 @@ public class MediaImportService {
                         Artwork fanart = new Artwork();
                         fanart.setArtworkType(ArtworkType.FANART);
                         fanart.setStatus(StatusType.NEW);
+                        fanart.setCounter(1);
                         fanart.setSeason(season);
                         metadataDao.saveEntity(fanart);
 
@@ -227,6 +247,7 @@ public class MediaImportService {
                         Artwork banner = new Artwork();
                         banner.setArtworkType(ArtworkType.BANNER);
                         banner.setStatus(StatusType.NEW);
+                        banner.setCounter(1);
                         banner.setSeason(season);
                         metadataDao.saveEntity(banner);
                     }

@@ -56,6 +56,9 @@ public class Artwork extends AbstractAuditable implements Serializable {
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
 
+    @Column(name = "counter", nullable = false)
+    private int counter = 1;
+
     @Column(name = "url")
     private String url;
 
@@ -101,6 +104,14 @@ public class Artwork extends AbstractAuditable implements Serializable {
         this.status = status;
     }
 
+    public int getCounter() {
+        return counter;
+    }
+
+    public void setCounter(int counter) {
+        this.counter = counter;
+    }
+
     public String getUrl() {
         return url;
     }
@@ -108,7 +119,7 @@ public class Artwork extends AbstractAuditable implements Serializable {
     public void setUrl(String url) {
         this.url = url;
     }
-
+    
     public StageFile getStageFile() {
         return stageFile;
     }
