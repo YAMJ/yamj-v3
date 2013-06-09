@@ -105,22 +105,24 @@ public class PluginMetadataService {
             }
         }
 
-        // set status
-        if (ScanResult.OK.equals(scanResult)) {
-            LOG.debug("Movie {}-'{}', scanned OK", id, videoData.getTitle());
-            videoData.setStatus(StatusType.DONE);
-        } else if (ScanResult.MISSING_ID.equals(scanResult)){
-            LOG.warn("Movie {}-'{}', not found", id, videoData.getTitle());
-            videoData.setStatus(StatusType.NOTFOUND);
-        } else {
-            videoData.setStatus(StatusType.ERROR);
-        }
-
         // store associated entities
-        storeAssociatedEntities(videoData);
+        if (!storeAssociatedEntities(videoData)) {
+            // exit if associated entities couldn't be stored
+            return;
+        }
 
         // update data in database
         try {
+            if (ScanResult.OK.equals(scanResult)) {
+                LOG.debug("Movie {}-'{}', scanned OK", id, videoData.getTitle());
+                videoData.setStatus(StatusType.DONE);
+            } else if (ScanResult.MISSING_ID.equals(scanResult)){
+                LOG.warn("Movie {}-'{}', not found", id, videoData.getTitle());
+                videoData.setStatus(StatusType.NOTFOUND);
+            } else {
+                videoData.setStatus(StatusType.ERROR);
+            }
+
             LOG.debug("Update video data in database: {}-'{}'", videoData.getId(), videoData.getTitle());
             metadataStorageService.updateVideoData(videoData);
         } catch (Exception error) {
@@ -166,26 +168,32 @@ public class PluginMetadataService {
             }
         }
 
-        // set status
-        if (ScanResult.OK.equals(scanResult)) {
-            LOG.debug("Series {}-'{}', scanned OK", id, series.getTitle());
-            series.setStatus(StatusType.DONE);
-        } else if (ScanResult.MISSING_ID.equals(scanResult)) {
-            LOG.warn("Series {}-'{}', not found", id, series.getTitle());
-            series.setStatus(StatusType.NOTFOUND);
-        } else {
-            series.setStatus(StatusType.ERROR);
-        }
-
         // store associated entities
+        boolean result = true;
         for (Season season : series.getSeasons()) {
             for (VideoData videoData : season.getVideoDatas()) {
-                storeAssociatedEntities(videoData);
+                if (!storeAssociatedEntities(videoData)) {
+                    result = false;
+                }
             }
         }
-
+        if (!result) {
+            // exit if associated entities couldn't be stored
+            return;
+        }
+        
         // update data in database
         try {
+            if (ScanResult.OK.equals(scanResult)) {
+                LOG.debug("Series {}-'{}', scanned OK", id, series.getTitle());
+                series.setStatus(StatusType.DONE);
+            } else if (ScanResult.MISSING_ID.equals(scanResult)) {
+                LOG.warn("Series {}-'{}', not found", id, series.getTitle());
+                series.setStatus(StatusType.NOTFOUND);
+            } else {
+                series.setStatus(StatusType.ERROR);
+            }
+
             LOG.debug("Update series in database: {}-'{}'", series.getId(), series.getTitle());
             metadataStorageService.updateSeries(series);
         } catch (Exception error) {
@@ -195,7 +203,9 @@ public class PluginMetadataService {
         }
     }
 
-    private void storeAssociatedEntities(VideoData videoData) {
+    private boolean storeAssociatedEntities(VideoData videoData) {
+        boolean result = true;
+        
         // store genres
         for (String genreName : videoData.getGenreNames()) {
             try {
@@ -203,6 +213,7 @@ public class PluginMetadataService {
             } catch (Exception error) {
                 LOG.error("Failed to store genre '{}'", genreName);
                 LOG.warn("Storage error", error);
+                result = false;
             }
         }
         
@@ -213,8 +224,11 @@ public class PluginMetadataService {
             } catch (Exception error) {
                 LOG.error("Failed to store person '{}'", creditDTO.getName());
                 LOG.warn("Storage error", error);
+                result = false;
             }
         }
+        
+        return result;
     }
     
     /**
