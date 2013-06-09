@@ -22,19 +22,12 @@
  */
 package org.yamj.core.database.dao;
 
-import org.hibernate.Criteria;
-import org.hibernate.LockMode;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.dto.CreditDTO;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Service;
+import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
@@ -82,25 +75,8 @@ public class MetadataDao extends HibernateDao {
     public Series getSeries(String identifier) {
         return getByField(Series.class, "identifier", identifier);
     }
-
-    public void storePerson(CreditDTO dto) {
-        Session session = getSession();
-        Criteria criteria = session.createCriteria(Person.class);
-        criteria.setLockMode(LockMode.PESSIMISTIC_WRITE);
-        criteria.add(Restrictions.eq("name", dto.getName()));
-        Person person = (Person)criteria.uniqueResult();
-        if (person == null) {
-            // create new person
-            person = new Person();
-            person.setName(dto.getName());
-            person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
-            person.setStatus(StatusType.NEW);
-            session.save(person);
-        } else {
-            // update person if ID has has been set
-            if (person.setPersonId(dto.getSourcedb(), dto.getSourcedbId())) {
-                session.update(person);
-            }
-        }
+    
+    public Person getPerson(String name) {
+        return getByName(Person.class, name);
     }
 }

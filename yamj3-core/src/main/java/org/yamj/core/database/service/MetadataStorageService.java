@@ -136,12 +136,31 @@ public class MetadataStorageService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void storeGenre(String genreName) {
-        commonDao.storeGenre(genreName);
+        Genre genre = commonDao.getGenre(genreName);
+        if (genre == null) {
+            // create new person
+            genre = new Genre();
+            genre.setName(genreName);
+            commonDao.saveEntity(genre);
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void storePerson(CreditDTO dto) {
-        metadataDao.storePerson(dto);
+        Person person = metadataDao.getPerson(dto.getName());
+        if (person == null) {
+            // create new person
+            person = new Person();
+            person.setName(dto.getName());
+            person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
+            person.setStatus(StatusType.NEW);
+            metadataDao.saveEntity(person);
+        } else {
+            // update person if ID has has been set
+            if (person.setPersonId(dto.getSourcedb(), dto.getSourcedbId())) {
+                metadataDao.updateEntity(person);
+            }
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

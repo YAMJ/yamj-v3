@@ -23,6 +23,7 @@
 package org.yamj.core.service.plugin;
 
 import java.util.HashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,10 @@ public class PluginMetadataService {
     public static final String SERIES_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.series", "tvdb");
     public static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.alternate", "");
     private static final String PERSON_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.person", "tmdb");
-
+    // locks for calling database methods synchronized
+    private static final ReentrantLock storeGenreLock = new ReentrantLock();
+    private static final ReentrantLock storePersonLock = new ReentrantLock();
+    
     @Autowired
     private MetadataStorageService metadataStorageService;
 
@@ -208,23 +212,29 @@ public class PluginMetadataService {
         
         // store genres
         for (String genreName : videoData.getGenreNames()) {
+            storeGenreLock.lock();
             try {
                 metadataStorageService.storeGenre(genreName);
             } catch (Exception error) {
                 LOG.error("Failed to store genre '{}'", genreName);
                 LOG.warn("Storage error", error);
                 result = false;
+            } finally {
+                storeGenreLock.unlock();
             }
         }
         
         // store persons
         for (CreditDTO creditDTO : videoData.getCreditDTOS()) {
+            storePersonLock.lock();
             try {
                 metadataStorageService.storePerson(creditDTO);
             } catch (Exception error) {
                 LOG.error("Failed to store person '{}'", creditDTO.getName());
                 LOG.warn("Storage error", error);
                 result = false;
+            } finally {
+                storePersonLock.unlock();
             }
         }
         
