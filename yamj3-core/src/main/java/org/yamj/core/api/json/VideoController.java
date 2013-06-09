@@ -69,7 +69,7 @@ public class VideoController {
             @RequestParam(required = false, defaultValue = "") String search,
             @RequestParam(required = false, defaultValue = DEFAULT_FIELD) String searchField,
             @RequestParam(required = false, defaultValue = "") String match,
-            @RequestParam(required = false, defaultValue = "") String sort,
+            @RequestParam(required = false, defaultValue = "asc") String sort,
             @RequestParam(required = false, defaultValue = DEFAULT_FIELD) String sortField,
             @RequestParam(required = false, defaultValue = "-1") Integer start,
             @RequestParam(required = false, defaultValue = "-1") Integer max) {

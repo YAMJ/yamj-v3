@@ -84,6 +84,31 @@ GET /api/video/{id}
 }
 
 
+Get a list of the videos in the database
+***
+**Optional Parameters**
+
+`search`        : The value to search for
+
+`searchField`   : The field to search in. Default is title.
+
+`match`         : The match method. One of "any" (default), "start", "end" or "exact"
+
+`sort`          : The sort direction either "asc" (default) or "desc"
+
+`sortField`     : The field to sort on. Default is title.
+
+`start`         : Where to start the search from. Default is 1
+
+`max`           : The maximum number of records to return. Default is 0 (all)
+
+***
+GET /api/video/list
+< 200
+< Content-Type: application/json
+{}
+
+
 Retrieve information on the series
 GET /api/series/{id}
 < 200
