@@ -131,7 +131,13 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             LOG.info("Found {} potential matches for {} ({})", movieList.size(), title, year);
             // Iterate over the list until we find a match
             for (MovieDb m : movieList) {
-                LOG.debug("Checking " + m.getTitle() + " (" + m.getReleaseDate().substring(0, 4) + ")");
+                String relDate;
+                if (StringUtils.isNotBlank(m.getReleaseDate()) && m.getReleaseDate().length() > 4) {
+                    relDate = m.getReleaseDate().substring(0, 4);
+                } else {
+                    relDate = "";
+                }
+                LOG.debug("Checking " + m.getTitle() + " (" + relDate + ")");
                 if (TheMovieDbApi.compareMovies(m, title, String.valueOf(year), SEARCH_MATCH)) {
                     moviedb = m;
                     break;
