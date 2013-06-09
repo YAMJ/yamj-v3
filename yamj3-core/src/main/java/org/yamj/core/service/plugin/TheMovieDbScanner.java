@@ -178,6 +178,8 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             return ScanResult.MISSING_ID;
         }
 
+        LOG.info("Getting information for TMDB ID:{}-{}", tmdbID, videoData.getTitle());
+
         try {
             moviedb = tmdbApi.getMovieInfo(Integer.parseInt(tmdbID), DEFAULT_LANGUAGE);
         } catch (MovieDbException ex) {
@@ -188,22 +190,22 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         if (OverrideTools.checkOverwriteTitle(videoData, TMDB_SCANNER_ID)) {
             videoData.setTitle(moviedb.getTitle(), TMDB_SCANNER_ID);
         }
-        
+
         if (OverrideTools.checkOverwritePlot(videoData, TMDB_SCANNER_ID)) {
             videoData.setPlot(moviedb.getOverview(), TMDB_SCANNER_ID);
         }
-        
+
         if (OverrideTools.checkOverwriteOutline(videoData, TMDB_SCANNER_ID)) {
             videoData.setOutline(moviedb.getOverview(), TMDB_SCANNER_ID);
         }
-        
+
         if (OverrideTools.checkOverwriteCountry(videoData, TMDB_SCANNER_ID)) {
             for (ProductionCountry country : moviedb.getProductionCountries()) {
                 videoData.setCountry(country.getName(), TMDB_SCANNER_ID);
                 break;
             }
         }
-        
+
         if (OverrideTools.checkOverwriteYear(videoData, TMDB_SCANNER_ID)) {
             String year = moviedb.getReleaseDate();
             // Check if this is the default year and skip it
@@ -212,7 +214,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
                 videoData.setPublicationYear(Integer.parseInt(year), TMDB_SCANNER_ID);
             }
         }
-        
+
         if (OverrideTools.checkOverwriteGenres(videoData, TMDB_SCANNER_ID)) {
             // GENRES
             Set<String> genreNames = new HashSet<String>();
@@ -221,7 +223,9 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             }
             videoData.setGenreNames(genreNames, TMDB_SCANNER_ID);
         }
-        
+
+
+
         // CAST & CREW
         try {
             CreditDTO credit;
