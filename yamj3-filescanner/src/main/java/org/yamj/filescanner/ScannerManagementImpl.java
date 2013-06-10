@@ -55,6 +55,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -103,7 +106,7 @@ public class ScannerManagementImpl implements ScannerManagement {
     private static final int MAX_INSTALL_AGE = PropertyTools.getIntProperty("filescanner.installation.maxdays", 1);
     // Map of filenames & extensions that cause scanning of a directory to stop or a filename to be ignored
     private static final Map<String, List<String>> DIR_EXCLUSIONS = new HashMap<String, List<String>>();
-    private static final List<String> DIR_IGNORE_FILES = new ArrayList<String>();
+    private static final List<Pattern> DIR_IGNORE_FILES;
     // YAMJ Information
     private static final YamjInfo YAMJ_INFO = new YamjInfo(ScannerManagementImpl.class);
 
@@ -119,8 +122,20 @@ public class ScannerManagementImpl implements ScannerManagement {
         }
 
         List<String> keywordList = processKeywords(fsIgnore, "file");
-        if (!keywordList.isEmpty()) {
-            DIR_IGNORE_FILES.addAll(keywordList);
+        if (CollectionUtils.isEmpty(keywordList)) {
+            DIR_IGNORE_FILES = Collections.EMPTY_LIST;
+        } else {
+            DIR_IGNORE_FILES = new ArrayList<Pattern>(keywordList.size());
+            for (String keyword : keywordList) {
+                try {
+                    String regex = keyword.replace("?", ".?").replace("*", ".*?");
+                    LOG.info("Replaced pattern '{}' with regex '{}'", keyword, regex);
+                    DIR_IGNORE_FILES.add(Pattern.compile(regex));
+                } catch (PatternSyntaxException ex) {
+                    LOG.warn("Pattern '{}' not recognised. Error: {}", keyword, ex.getMessage());
+                }
+            }
+//            DIR_IGNORE_FILES.addAll(keywordList);
         }
 
         keywordList = processKeywords(fsIgnore, "video");
@@ -301,11 +316,14 @@ public class ScannerManagementImpl implements ScannerManagement {
                         if (CollectionUtils.isEmpty(DIR_EXCLUSIONS.get(lcFilename))) {
                             // Because the value is null or empty we exclude the whole directory, so quit now.
                             LOG.debug("Exclusion file '{}' found, skipping scanning of directory {}.", lcFilename, file.getParent());
+                            // All files to be excluded, so quit
                             return null;
                         } else {
                             // We found a match, so add it to our local copy
                             LOG.debug("Exclusion file '{}' found, will exclude all {} file types", lcFilename, DIR_EXCLUSIONS.get(lcFilename).toString());
                             exclusions.addAll(DIR_EXCLUSIONS.get(lcFilename));
+                            // Skip to the next file, theres no need of further processing
+                            continue;
                         }
                     }
                 } else {
@@ -314,21 +332,30 @@ public class ScannerManagementImpl implements ScannerManagement {
                 }
             }
 
-            /*
-             * Scan the directory properly
-             */
+            // Create a precompiled Matcher for use later
+            Matcher matcher = Pattern.compile("dummy").matcher("dummy");
+
+            // Scan the directory properly
             for (File file : currentFileList) {
                 if (file.isFile()) {
                     String lcFilename = file.getName().toLowerCase();
-                    if (exclusions.contains(FilenameUtils.getExtension(lcFilename))
-                            || DIR_EXCLUSIONS.containsKey(lcFilename)
-                            || DIR_IGNORE_FILES.contains(lcFilename)) {
+                    if (exclusions.contains(FilenameUtils.getExtension(lcFilename)) || DIR_EXCLUSIONS.containsKey(lcFilename)) {
                         LOG.debug("File name '{}' excluded because it's listed in the exlusion list for this directory", file.getName());
                         continue;
-                    } else {
-                        stageDir.addStageFile(scanFile(file));
-                        library.getStatistics().increment(StatType.FILE);
                     }
+
+                    // Process the DIR_IGNORE_FILES
+                    for (Pattern pattern : DIR_IGNORE_FILES) {
+                        matcher.reset(lcFilename).usePattern(pattern);
+                        if (matcher.matches()) {
+                            // Found the file pattern, so skip the file
+                            LOG.debug("File name '{}' excluded because it matches exlusion pattern '{}'", file.getName(), pattern.pattern());
+                            continue;
+                        }
+                    }
+
+                    stageDir.addStageFile(scanFile(file));
+                    library.getStatistics().increment(StatType.FILE);
                 } else {
                     // First directory we find, we can stop (because we sorted the files first)
                     break;
