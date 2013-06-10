@@ -76,8 +76,8 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
     @Override
     public String getMovieId(VideoData videoData) {
-        String tmdbID = videoData.getSourcedbId(TMDB_SCANNER_ID);
-        String imdbID = videoData.getSourcedbId(ImdbScanner.IMDB_SCANNER_ID);
+        String tmdbID = videoData.getSourceDbId(TMDB_SCANNER_ID);
+        String imdbID = videoData.getSourceDbId(ImdbScanner.IMDB_SCANNER_ID);
         MovieDb moviedb = null;
 
         // First look to see if we have a TMDb ID as this will make looking the film up easier
@@ -114,7 +114,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
         if (StringUtils.isNotBlank(tmdbID)) {
             LOG.info("Found TMDB ID: {}", tmdbID);
-            videoData.setSourcedbId(TMDB_SCANNER_ID, tmdbID);
+            videoData.setSourceDbId(TMDB_SCANNER_ID, tmdbID);
         } else {
             LOG.info("No TMDB ID found for ", videoData.getTitle());
         }
@@ -176,7 +176,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     }
 
     private ScanResult updateVideoData(VideoData videoData) {
-        String tmdbID = videoData.getSourcedbId(TMDB_SCANNER_ID);
+        String tmdbID = videoData.getSourceDbId(TMDB_SCANNER_ID);
         MovieDb moviedb;
 
         if (StringUtils.isBlank(tmdbID)) {

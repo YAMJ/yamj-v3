@@ -22,18 +22,21 @@
  */
 package org.yamj.core.service.artwork.poster;
 
-import org.yamj.core.database.model.IMetadata;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamj.common.tools.PropertyTools;
+import org.yamj.core.database.model.IMetadata;
 
 public abstract class AbstractMoviePosterScanner implements IMoviePosterScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMoviePosterScanner.class);
-
+    protected static final int POSTER_MAX_RESULTS = PropertyTools.getIntProperty("artwork.scanner.poster.maxResults", 1);
+    
     @Override
-    public String getPosterUrl(IMetadata metadata) {
-        String id = metadata.getSourcedbId(getScannerName());
+    public List<String> getPosterURLs(IMetadata metadata) {
+        String id = metadata.getSourceDbId(getScannerName());
         if (StringUtils.isBlank(id)) {
             if (StringUtils.isBlank(metadata.getTitleOriginal())) {
                 id = getId(metadata.getTitle(), metadata.getYear());
@@ -41,17 +44,17 @@ public abstract class AbstractMoviePosterScanner implements IMoviePosterScanner 
                 id = getId(metadata.getTitleOriginal(), metadata.getYear());
                 if (StringUtils.isBlank(id) && !StringUtils.equals(metadata.getTitleOriginal(), metadata.getTitle())) {
                     // didn't find the movie with the original title, try the normal title if it's different
-                    id = this.getId(metadata.getTitle(), metadata.getYear());
+                    id = getId(metadata.getTitle(), metadata.getYear());
                 }
             }
             if (StringUtils.isNotBlank(id)) {
                 LOG.debug("{} : ID found setting it to '{}'", getScannerName(), id);
-                metadata.setSourcedbId(getScannerName(), id);
+                metadata.setSourceDbId(getScannerName(), id);
             }
         }
-
+        
         if (!(StringUtils.isBlank(id) || "-1".equals(id) || "0".equals(id))) {
-            return getPosterUrl(id);
+            return getPosterURLs(id);
         }
 
         return null;

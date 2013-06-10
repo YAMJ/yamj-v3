@@ -58,21 +58,21 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
 
     @Override
     public String getMovieId(VideoData videoData) {
-        String imdbId = videoData.getSourcedbId(IMDB_SCANNER_ID);
+        String imdbId = videoData.getSourceDbId(IMDB_SCANNER_ID);
         if (StringUtils.isBlank(imdbId)) {
             imdbId = getMovieId(videoData.getTitle(), videoData.getPublicationYear());
-            videoData.setSourcedbId(IMDB_SCANNER_ID, imdbId);
+            videoData.setSourceDbId(IMDB_SCANNER_ID, imdbId);
         }
         return imdbId;
     }
 
     @Override
     public String getSeriesId(Series series) {
-        String imdbId = series.getSourcedbId(IMDB_SCANNER_ID);
+        String imdbId = series.getSourceDbId(IMDB_SCANNER_ID);
         if (StringUtils.isBlank(imdbId)) {
             int year = -1; // TODO: get form firsAired value
             imdbId = getSeriesId(series.getTitle(), year);
-            series.setSourcedbId(IMDB_SCANNER_ID, imdbId);
+            series.setSourceDbId(IMDB_SCANNER_ID, imdbId);
         }
         return imdbId;
     }

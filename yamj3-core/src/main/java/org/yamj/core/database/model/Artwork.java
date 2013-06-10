@@ -22,10 +22,11 @@
  */
 package org.yamj.core.database.model;
 
-import org.hibernate.annotations.Index;
-
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.hibernate.annotations.*;
@@ -47,6 +48,7 @@ public class Artwork extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -981494909436217076L;
 
+    @Index(name = "IX_ARTWORK_TYPE")
     @Type(type = "artworkType")
     @Column(name = "artwork_type", nullable = false)
     private ArtworkType artworkType;
@@ -55,18 +57,6 @@ public class Artwork extends AbstractAuditable implements Serializable {
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
-
-    @Column(name = "counter", nullable = false)
-    private int counter = 1;
-
-    @Column(name = "url")
-    private String url;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_ARTWORK_STAGEFILE")
-    @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "stagefile_id")
-    private StageFile stageFile;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_VIDEODATA")
@@ -86,6 +76,9 @@ public class Artwork extends AbstractAuditable implements Serializable {
     @JoinColumn(name = "series_id")
     private Series series;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "artwork")
+    private List<ArtworkLocated> reservoirs = new ArrayList<ArtworkLocated>(0);
+
     // GETTER and SETTER
 
     public ArtworkType getArtworkType() {
@@ -102,30 +95,6 @@ public class Artwork extends AbstractAuditable implements Serializable {
 
     public void setStatus(StatusType status) {
         this.status = status;
-    }
-
-    public int getCounter() {
-        return counter;
-    }
-
-    public void setCounter(int counter) {
-        this.counter = counter;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-    
-    public StageFile getStageFile() {
-        return stageFile;
-    }
-
-    public void setStageFile(StageFile stageFile) {
-        this.stageFile = stageFile;
     }
 
     public VideoData getVideoData() {
@@ -151,6 +120,23 @@ public class Artwork extends AbstractAuditable implements Serializable {
     public void setSeries(Series series) {
         this.series = series;
     }
+
+    // TRANSIENT METHODS
+    
+    public IMetadata getMetadata() {
+        if (getVideoData() != null) {
+            return getVideoData();
+        }
+        if (getSeason() != null) {
+            return getSeason() ;
+        }
+        if (getSeries() != null) {
+            return getSeries();
+        }
+        
+        return null;
+    }
+
 
     @Override
     public String toString() {

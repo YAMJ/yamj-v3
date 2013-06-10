@@ -26,9 +26,9 @@ import org.yamj.common.type.StatusType;
 
 public interface IMetadata {
 
-    String getSourcedbId(String sourcedb);
+    String getSourceDbId(String sourceDb);
 
-    void setSourcedbId(String sourcedb, String id);
+    void setSourceDbId(String sourceDb, String id);
 
     String getTitle();
 

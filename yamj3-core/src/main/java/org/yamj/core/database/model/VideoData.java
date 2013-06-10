@@ -80,7 +80,7 @@ public class VideoData extends AbstractMetadata {
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
-    private Map<String, String> sourcedbIdMap = new HashMap<String, String>(0);
+    private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_ratings", joinColumns =
@@ -227,23 +227,23 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
-    public Map<String, String> getMoviedbIdMap() {
-        return sourcedbIdMap;
+    public Map<String, String> getSourceDbIdMap() {
+        return sourceDbIdMap;
     }
 
     @Override
-    public String getSourcedbId(String sourcedb) {
-        return sourcedbIdMap.get(sourcedb);
+    public String getSourceDbId(String sourceDb) {
+        return sourceDbIdMap.get(sourceDb);
     }
 
-    public void setMoviedbIdMap(Map<String, String> sourcedbIdMap) {
-        this.sourcedbIdMap = sourcedbIdMap;
+    public void setSourceDbIdMap(Map<String, String> sourceDbIdMap) {
+        this.sourceDbIdMap = sourceDbIdMap;
     }
 
     @Override
-    public void setSourcedbId(String sourcedb, String id) {
+    public void setSourceDbId(String sourceDb, String id) {
         if (StringUtils.isNotBlank(id)) {
-            sourcedbIdMap.put(sourcedb, id);
+            sourceDbIdMap.put(sourceDb, id);
         }
     }
 

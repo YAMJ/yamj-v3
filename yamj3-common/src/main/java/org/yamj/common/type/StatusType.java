@@ -30,6 +30,7 @@ public enum StatusType {
     ERROR,
     PROCESSED,
     NOTFOUND,
+    INVALID,
     DONE;
 
     public static StatusType fromString(String type) {

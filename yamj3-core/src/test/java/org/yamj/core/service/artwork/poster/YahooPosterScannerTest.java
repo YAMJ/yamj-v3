@@ -22,6 +22,7 @@
  */
 package org.yamj.core.service.artwork.poster;
 
+import java.util.List;
 import javax.annotation.Resource;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
@@ -35,7 +36,11 @@ public class YahooPosterScannerTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void testPosterUrl() {
-        String url = yahooPosterScanner.getPosterUrl("Avatar", 2009);
-        System.err.println(url);
+        List<String> urls = yahooPosterScanner.getPosterURLs("Avatar", 2009);
+        if (urls != null) {
+            for (String url : urls) {
+                System.err.println(url);
+            }
+        }
     }
 }

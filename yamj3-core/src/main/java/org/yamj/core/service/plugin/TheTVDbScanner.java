@@ -69,7 +69,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
     @Override
     public String getSeriesId(Series series) {
-        String id = series.getSourcedbId(TVDB_SCANNER_ID);
+        String id = series.getSourceDbId(TVDB_SCANNER_ID);
 
         if (StringUtils.isBlank(id)) {
             return getSeriesId(series.getTitle(), series.getStartYear());
@@ -117,8 +117,8 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
         com.omertron.thetvdbapi.model.Series tvdbSeries = tvdbApi.getSeries(id, DEFAULT_LANGUAGE);
 
-        series.setSourcedbId(TVDB_SCANNER_ID, tvdbSeries.getId());
-        series.setSourcedbId(ImdbScanner.IMDB_SCANNER_ID, tvdbSeries.getImdbId());
+        series.setSourceDbId(TVDB_SCANNER_ID, tvdbSeries.getId());
+        series.setSourceDbId(ImdbScanner.IMDB_SCANNER_ID, tvdbSeries.getImdbId());
 
         if (OverrideTools.checkOverwriteTitle(series, TVDB_SCANNER_ID)) {
             series.setTitle(tvdbSeries.getSeriesName(), TVDB_SCANNER_ID);
@@ -205,7 +205,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             return;
         }
 
-        String seriesId = season.getSeries().getSourcedbId(TVDB_SCANNER_ID);
+        String seriesId = season.getSeries().getSourceDbId(TVDB_SCANNER_ID);
         List<Episode> episodeList = tvdbApi.getSeasonEpisodes(seriesId, season.getSeason(), DEFAULT_LANGUAGE);
 
         for (VideoData videoData : videoDatas) {

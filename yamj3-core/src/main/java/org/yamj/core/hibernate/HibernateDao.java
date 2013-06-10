@@ -70,9 +70,11 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings("rawtypes")
     public void storeAll(final Collection entities) {
-        Session session = getSession();
-        for (Object entity : entities) {
-            session.saveOrUpdate(entity);
+        if (entities != null && entities.size()>0) {
+            Session session = getSession();
+            for (Object entity : entities) {
+                session.saveOrUpdate(entity);
+            }
         }
     }
 

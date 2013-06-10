@@ -22,11 +22,12 @@
  */
 package org.yamj.core.service.artwork.fanart;
 
+import java.util.List;
 import org.yamj.core.database.model.IMetadata;
 
 public interface IFanartScanner {
 
     String getScannerName();
 
-    String getFanartUrl(IMetadata metadata);
+    List<String> getFanartURLs(IMetadata metadata);
 }

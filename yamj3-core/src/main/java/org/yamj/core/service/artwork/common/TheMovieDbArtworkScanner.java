@@ -25,6 +25,15 @@ package org.yamj.core.service.artwork.common;
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.model.MovieDb;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.IMetadata;
 import org.yamj.core.service.artwork.ArtworkScannerService;
@@ -32,13 +41,6 @@ import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
 import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
 import org.yamj.core.service.plugin.ImdbScanner;
 import org.yamj.core.service.plugin.TheMovieDbScanner;
-import java.net.URL;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service("tmdbArtworkScanner")
 public class TheMovieDbArtworkScanner implements
@@ -74,74 +76,80 @@ public class TheMovieDbArtworkScanner implements
     }
 
     @Override
-    public String getPosterUrl(String title, int year) {
+    public List<String> getPosterURLs(String title, int year) {
         String id = this.getId(title, year);
-        return this.getPosterUrl(id);
+        return this.getPosterURLs(id);
     }
 
     @Override
-    public String getFanartUrl(String title, int year) {
+    public List<String> getFanartURLs(String title, int year) {
         String id = this.getId(title, year);
-        return this.getFanartUrl(id);
+        return this.getFanartURLs(id);
     }
 
     @Override
-    public String getPosterUrl(String id) {
-        String url = null;
+    public List<String> getPosterURLs(String id) {
+        List<String> urls = null;
+        // TODO retrieve more than one URL
+
         if (StringUtils.isNumeric(id)) {
             try {
                 MovieDb moviedb = tmdbApi.getMovieInfo(Integer.parseInt(id), DEFAULT_LANGUAGE);
                 URL posterURL = tmdbApi.createImageUrl(moviedb.getPosterPath(), DEFAULT_POSTER_SIZE);
-                url = posterURL.toString();
+                if (urls == null) urls = new ArrayList<String>();
+                urls.add(posterURL.toString());
             } catch (MovieDbException error) {
                 LOG.warn("Failed to get the poster URL for TMDb ID {}", id, error);
             }
         }
-        return url;
+        return urls;
     }
 
     @Override
-    public String getFanartUrl(String id) {
-        String url = null;
+    public List<String> getFanartURLs(String id) {
+        List<String> urls = null;
+        // TODO retrieve more than one URL
+        
         if (StringUtils.isNumeric(id)) {
             try {
                 MovieDb moviedb = tmdbApi.getMovieInfo(Integer.parseInt(id), DEFAULT_LANGUAGE);
                 URL fanartURL = tmdbApi.createImageUrl(moviedb.getBackdropPath(), DEFAULT_FANART_SIZE);
-                url = fanartURL.toString();
+                if (urls == null) urls = new ArrayList<String>();
+                urls.add(fanartURL.toString());
             } catch (MovieDbException error) {
                 LOG.warn("Failed to get the fanart URL for TMDb ID {}", id, error);
             }
         }
-        return url;
+        return urls;
     }
 
     @Override
-    public String getPosterUrl(IMetadata metadata) {
+    public List<String> getPosterURLs(IMetadata metadata) {
         String id = getId(metadata);
         if (StringUtils.isNotBlank(id)) {
-            return getPosterUrl(id);
+            return getPosterURLs(id);
         }
         return null;
     }
 
     @Override
-    public String getFanartUrl(IMetadata metadata) {
+    public List<String> getFanartURLs(IMetadata metadata) {
         String id = getId(metadata);
         if (StringUtils.isNotBlank(id)) {
-            return getFanartUrl(id);
+            return getFanartURLs(id);
         }
         return null;
     }
 
     private String getId(IMetadata metadata) {
         // First look to see if we have a TMDb ID as this will make looking the film up easier
-        String tmdbID = metadata.getSourcedbId(getScannerName());
+        String tmdbID = metadata.getSourceDbId(getScannerName());
         if (StringUtils.isNumeric(tmdbID)) {
             return tmdbID;
         }
 
         // Search based on IMDb ID
-        String imdbID = metadata.getSourcedbId(ImdbScanner.IMDB_SCANNER_ID);
+        String imdbID = metadata.getSourceDbId(ImdbScanner.IMDB_SCANNER_ID);
         if (StringUtils.isNotBlank(imdbID)) {
             MovieDb moviedb = null;
             try {
@@ -153,7 +161,7 @@ public class TheMovieDbArtworkScanner implements
             if (moviedb != null) {
                 tmdbID = String.valueOf(moviedb.getId());
                 if (StringUtils.isNumeric(tmdbID)) {
-                    metadata.setSourcedbId(getScannerName(), tmdbID);
+                    metadata.setSourceDbId(getScannerName(), tmdbID);
                     return tmdbID;
                 }
             }
@@ -163,7 +171,7 @@ public class TheMovieDbArtworkScanner implements
         String title = StringUtils.isBlank(metadata.getTitleOriginal())?metadata.getTitle():metadata.getTitleOriginal();
         tmdbID = getId(title, metadata.getYear());
         if (StringUtils.isNumeric(tmdbID)) {
-            metadata.setSourcedbId(getScannerName(), tmdbID);
+            metadata.setSourceDbId(getScannerName(), tmdbID);
             return tmdbID;
         }
 

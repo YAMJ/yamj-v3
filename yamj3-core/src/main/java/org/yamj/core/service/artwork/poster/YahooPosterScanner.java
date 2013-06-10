@@ -22,15 +22,17 @@
  */
 package org.yamj.core.service.artwork.poster;
 
-import org.yamj.core.tools.web.PoolingHttpClient;
-import org.yamj.core.service.artwork.ArtworkScannerService;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.core.service.artwork.ArtworkScannerService;
+import org.yamj.core.tools.web.PoolingHttpClient;
 
 @Service("yahooPosterScanner")
 public class YahooPosterScanner extends AbstractMoviePosterScanner
@@ -55,37 +57,41 @@ public class YahooPosterScanner extends AbstractMoviePosterScanner
 
     @Override
     public String getId(String title, int year) {
-        // No id from yahoo search, return title
+        // Yahoo has no ID, so return the title
         return title;
     }
 
     @Override
-    public String getPosterUrl(String title, int year) {
-        String posterUrl = null;
+    public List<String> getPosterURLs(String title, int year) {
+        List<String> urls = new ArrayList<String>();
+        
         try {
             StringBuilder sb = new StringBuilder("http://fr.images.search.yahoo.com/search/images?p=");
             sb.append(URLEncoder.encode(title, "UTF-8"));
             sb.append("+poster&fr=&ei=utf-8&js=1&x=wrt");
 
             String xml = httpClient.requestContent(sb.toString());
+            
+            // TODO scan more posters at once
+            
             int beginIndex = xml.indexOf("imgurl=");
             if (beginIndex > 0) {
                 int endIndex = xml.indexOf("rurl=", beginIndex);
                 if (endIndex > 0) {
-                    posterUrl = URLDecoder.decode(xml.substring(beginIndex + 7, endIndex-1), "UTF-8");
+                    urls.add(URLDecoder.decode(xml.substring(beginIndex + 7, endIndex-1), "UTF-8"));
                 } else {
-                    posterUrl = URLDecoder.decode(xml.substring(beginIndex + 7), "UTF-8");
+                    urls.add(URLDecoder.decode(xml.substring(beginIndex + 7), "UTF-8"));
                 }
             }
         } catch (Exception error) {
             LOG.error("Failed retreiving poster URL from yahoo images : " + title, error);
         }
 
-        return posterUrl;
+        return urls;
     }
 
     @Override
-    public String getPosterUrl(String id) {
-        return getPosterUrl(id, -1);
+    public List<String> getPosterURLs(String id) {
+        return getPosterURLs(id, -1);
     }
 }

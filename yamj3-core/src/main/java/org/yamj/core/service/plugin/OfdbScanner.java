@@ -67,10 +67,10 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
 
     @Override
     public String getMovieId(VideoData videoData) {
-        String ofdbId = videoData.getSourcedbId(OFDB_SCANNER_ID);
+        String ofdbId = videoData.getSourceDbId(OFDB_SCANNER_ID);
         if (StringUtils.isBlank(ofdbId)) {
             // find by IMDb id
-            String imdbId = videoData.getSourcedbId(ImdbScanner.IMDB_SCANNER_ID);
+            String imdbId = videoData.getSourceDbId(ImdbScanner.IMDB_SCANNER_ID);
             if (StringUtils.isNotBlank(imdbId)) {
                 // if IMDb id is present then use this
                 ofdbId = getOfdbIdByImdbId(imdbId);
@@ -79,7 +79,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                 // try by title and year
                 ofdbId = getMovieId(videoData.getTitle(), videoData.getPublicationYear());
             }
-            videoData.setSourcedbId(OFDB_SCANNER_ID, ofdbId);
+            videoData.setSourceDbId(OFDB_SCANNER_ID, ofdbId);
         }
         return ofdbId;
     }
@@ -182,10 +182,10 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
             }
 
             // retrieve IMDb id if not set
-            String imdbId = videoData.getSourcedbId(ImdbScanner.IMDB_SCANNER_ID);
+            String imdbId = videoData.getSourceDbId(ImdbScanner.IMDB_SCANNER_ID);
             if (StringUtils.isBlank(imdbId)) {
                 imdbId = HTMLTools.extractTag(xml, "href=\"http://www.imdb.com/Title?", "\"");
-                videoData.setSourcedbId(ImdbScanner.IMDB_SCANNER_ID, "tt" + imdbId);
+                videoData.setSourceDbId(ImdbScanner.IMDB_SCANNER_ID, "tt" + imdbId);
             }
 
             if (OverrideTools.checkOverwriteTitle(videoData, OFDB_SCANNER_ID)) {

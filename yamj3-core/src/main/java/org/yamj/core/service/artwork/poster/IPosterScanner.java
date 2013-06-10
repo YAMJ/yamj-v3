@@ -22,11 +22,12 @@
  */
 package org.yamj.core.service.artwork.poster;
 
+import java.util.List;
 import org.yamj.core.database.model.IMetadata;
 
 public interface IPosterScanner {
 
     String getScannerName();
 
-    String getPosterUrl(IMetadata metadata);
+    List<String> getPosterURLs(IMetadata metadata);
 }

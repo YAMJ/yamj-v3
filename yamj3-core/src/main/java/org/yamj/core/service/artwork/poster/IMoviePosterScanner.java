@@ -22,11 +22,13 @@
  */
 package org.yamj.core.service.artwork.poster;
 
+import java.util.List;
+
 public interface IMoviePosterScanner extends IPosterScanner {
 
     String getId(String title, int year);
 
-    String getPosterUrl(String title, int year);
+    List<String> getPosterURLs(String title, int year);
 
-    String getPosterUrl(String id);
+    List<String> getPosterURLs(String id);
 }

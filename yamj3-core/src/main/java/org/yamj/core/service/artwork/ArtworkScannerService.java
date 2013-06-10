@@ -22,10 +22,11 @@
  */
 package org.yamj.core.service.artwork;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.ArtworkStorageService;
@@ -69,31 +71,33 @@ public class ArtworkScannerService {
         // get unique required artwork
         Artwork artwork = artworkStorageService.getRequiredArtwork(queueElement.getId());
 
+        // holds the located artwork
+        List<ArtworkLocated> located = null;
+        
         if (ArtworkType.POSTER.equals(artwork.getArtworkType())) {
-            boolean found = this.scanPosterLocal(artwork);
-            if (!found) {
-                this.scanPosterOnline(artwork);
+            located = this.scanPosterLocal(artwork);
+            if (CollectionUtils.isEmpty(located)) {
+                located = this.scanPosterOnline(artwork);
             }
         } else if (ArtworkType.FANART.equals(artwork.getArtworkType())) {
-            boolean found = this.scanFanartLocal(artwork);
-            if (!found) {
-                this.scanFanartOnline(artwork);
+            located = this.scanFanartLocal(artwork);
+            if (CollectionUtils.isEmpty(located)) {
+                located = this.scanFanartOnline(artwork);
             }
         } else {
             // Don't throw an exception here, just a debug message for now
             LOG.debug("Artwork scan not implemented for {}", artwork);
         }
 
-        // set status
-        if (artwork.getStageFile() == null && StringUtils.isBlank(artwork.getUrl())) {
-            artwork.setStatus(StatusType.NOTFOUND);
-        } else {
-            artwork.setStatus(StatusType.PROCESSED);
-        }
-
         // storage
         try {
-            artworkStorageService.updateArtwork(artwork);
+            if (CollectionUtils.isEmpty(located)) {
+                artwork.setStatus(StatusType.NOTFOUND);
+            } else {
+                artwork.setStatus(StatusType.DONE);
+            }
+
+            artworkStorageService.updateArtwork(artwork, located);
         } catch (Exception error) {
             // NOTE: status will not be changed
             LOG.error("Failed storing artwork {}-{}", queueElement.getId(), artwork.getArtworkType().toString());
@@ -101,26 +105,25 @@ public class ArtworkScannerService {
         }
     }
 
-    private boolean scanPosterLocal(Artwork artwork) {
+    private List<ArtworkLocated> scanPosterLocal(Artwork artwork) {
         LOG.trace("Scan local for poster: {}", artwork);
 
         // TODO local scan
-        return false;
+        return null;
     }
 
-    private void scanPosterOnline(Artwork artwork) {
+    private List<ArtworkLocated> scanPosterOnline(Artwork artwork) {
         LOG.trace("Scan online for poster: {}", artwork);
 
-        String posterUrl;
+        List<String> posterURLs = null;
 
         if (artwork.getVideoData() != null) {
             // CASE: movie poster scan
             for (String prio : POSTER_MOVIE_PRIORITIES) {
                 IPosterScanner scanner = registeredMoviePosterScanner.get(prio);
                 if (scanner != null) {
-                    posterUrl = scanner.getPosterUrl(artwork.getVideoData());
-                    if (StringUtils.isNotBlank(posterUrl)) {
-                        artwork.setUrl(posterUrl);
+                    posterURLs = scanner.getPosterURLs(artwork.getVideoData());
+                    if (CollectionUtils.isNotEmpty(posterURLs)) {
                         break;
                     }
                 }
@@ -129,28 +132,32 @@ public class ArtworkScannerService {
             // Don't throw an exception here, just a debug message for now
             LOG.debug("Artwork scan not implemented for {}", artwork);
         }
+        
+        if (CollectionUtils.isEmpty(posterURLs)) {
+            return null;
+        }
+        return createLocatedArtworks(artwork, posterURLs);
     }
 
-    private boolean scanFanartLocal(Artwork artwork) {
+    private List<ArtworkLocated> scanFanartLocal(Artwork artwork) {
         LOG.trace("Scan local for fanart: {}", artwork);
 
         // TODO local scan
-        return false;
+        return null;
     }
 
-    private void scanFanartOnline(Artwork artwork) {
+    private List<ArtworkLocated> scanFanartOnline(Artwork artwork) {
         LOG.trace("Scan online for fanart: {}", artwork);
 
-        String fanartUrl;
+        List<String> fanartURLs = null;
 
         if (artwork.getVideoData() != null) {
             // CASE: movie fanart
             for (String prio : FANART_MOVIE_PRIORITIES) {
                 IFanartScanner scanner = registeredMovieFanartScanner.get(prio);
                 if (scanner != null) {
-                    fanartUrl = scanner.getFanartUrl(artwork.getVideoData());
-                    if (StringUtils.isNotBlank(fanartUrl)) {
-                        artwork.setUrl(fanartUrl);
+                    fanartURLs = scanner.getFanartURLs(artwork.getVideoData());
+                    if (CollectionUtils.isNotEmpty(fanartURLs)) {
                         break;
                     }
                 }
@@ -159,8 +166,26 @@ public class ArtworkScannerService {
             // Don't throw an exception here, just a debug message for now
             LOG.debug("Artwork search not implemented for {}", artwork);
         }
+        
+        if (CollectionUtils.isEmpty(fanartURLs)) {
+            LOG.debug("No artwork found for: {}", artwork);
+            return null;
+        }
+        return createLocatedArtworks(artwork, fanartURLs);
     }
 
+    private List<ArtworkLocated> createLocatedArtworks(Artwork artwork, List<String> urls) {
+        List<ArtworkLocated> located = new ArrayList<ArtworkLocated>(urls.size());
+        for (String url : urls) {
+            ArtworkLocated l = new ArtworkLocated();
+            l.setArtwork(artwork);
+            l.setUrl(url);
+            l.setStatus(StatusType.NEW);
+            located.add(l);
+        }
+        return located;
+    }
+    
     public void processingError(QueueDTO queueElement) {
         if (queueElement == null) {
             // nothing to
