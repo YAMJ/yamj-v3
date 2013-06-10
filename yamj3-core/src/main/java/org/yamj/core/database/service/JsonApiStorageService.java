@@ -34,6 +34,8 @@ import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Genre;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.model.VideoData;
 
@@ -51,8 +53,18 @@ public class JsonApiStorageService {
 
     //<editor-fold defaultstate="collapsed" desc="VideoData Methods">
     @Transactional(readOnly = true)
-    public List<VideoData> getVideos(Parameters params) {
-        return commonDao.getVideos(params);
+    public List<VideoData> getVideoList(Parameters params) {
+        return commonDao.getVideoList(params);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Series> getSeriesList(Parameters params) {
+        return commonDao.getSeriesList(params);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Season> getSeasonList(Parameters params) {
+        return commonDao.getSeasonList(params);
     }
     //</editor-fold>
 

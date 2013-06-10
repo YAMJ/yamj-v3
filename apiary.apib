@@ -150,6 +150,31 @@ GET /api/series/{id}
 }
 
 
+Get a list of the series information in the database
+***
+**Optional Parameters**
+
+`search`        : The value to search for
+
+`searchField`   : The field to search in. Default is title.
+
+`match`         : The match method. One of "any" (default), "start", "end" or "exact"
+
+`sort`          : The sort direction either "asc" (default) or "desc"
+
+`sortField`     : The field to sort on. Default is title.
+
+`start`         : Where to start the search from. Default is 1
+
+`max`           : The maximum number of records to return. Default is 0 (all)
+
+***
+GET /api/video/series/list
+< 200
+< Content-Type: application/json
+{}
+
+
 Retrieve information on the season
 GET /api/season/{id}
 < 200
@@ -188,6 +213,31 @@ GET /api/season/{id}
       "newlyCreated":false
    }
 }
+
+
+Get a list of the season information in the database
+***
+**Optional Parameters**
+
+`search`        : The value to search for
+
+`searchField`   : The field to search in. Default is title.
+
+`match`         : The match method. One of "any" (default), "start", "end" or "exact"
+
+`sort`          : The sort direction either "asc" (default) or "desc"
+
+`sortField`     : The field to sort on. Default is title.
+
+`start`         : Where to start the search from. Default is 1
+
+`max`           : The maximum number of records to return. Default is 0 (all)
+
+***
+GET /api/video/season/list
+< 200
+< Content-Type: application/json
+{}
 
 
 --

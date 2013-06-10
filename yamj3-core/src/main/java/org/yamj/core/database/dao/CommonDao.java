@@ -63,7 +63,13 @@ public class CommonDao extends HibernateDao {
         return getList(Studio.class, params);
     }
 
-    public List<VideoData> getVideos(Parameters params) {
+    public List<VideoData> getVideoList(Parameters params) {
         return getList(VideoData.class, params);
+    }
+    public List<Series> getSeriesList(Parameters params) {
+        return getList(Series.class, params);
+    }
+    public List<Season> getSeasonList(Parameters params) {
+        return getList(Season.class, params);
     }
 }

@@ -86,7 +86,7 @@ public class VideoController {
         LOG.info("Getting video list with {}", p.toString());
         ApiWrapperList<VideoData> wrapper = new ApiWrapperList<VideoData>();
         try {
-            List<VideoData> results = jsonApiStorageService.getVideos(p);
+            List<VideoData> results = jsonApiStorageService.getVideoList(p);
             wrapper.setResults(results);
             wrapper.setStatusCheck();
         } catch (QueryException ex) {
@@ -107,6 +107,40 @@ public class VideoController {
         return wrapper;
     }
 
+    @RequestMapping(value = "/series/list", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperList<Series> getSeriesList(
+            @RequestParam(required = false, defaultValue = "") String search,
+            @RequestParam(required = false, defaultValue = DEFAULT_FIELD) String searchField,
+            @RequestParam(required = false, defaultValue = "") String match,
+            @RequestParam(required = false, defaultValue = "asc") String sort,
+            @RequestParam(required = false, defaultValue = DEFAULT_FIELD) String sortField,
+            @RequestParam(required = false, defaultValue = "-1") Integer start,
+            @RequestParam(required = false, defaultValue = "-1") Integer max) {
+
+        Parameters p = new Parameters();
+        p.add(ParameterType.SEARCH, search);
+        p.add(ParameterType.SEARCH_FIELD, searchField);
+        p.add(ParameterType.MATCHMODE, match);
+        p.add(ParameterType.SORT, sort);
+        p.add(ParameterType.SORT_FIELD, sortField);
+        p.add(ParameterType.START, start);
+        p.add(ParameterType.MAX, max);
+
+        LOG.info("Getting series list with {}", p.toString());
+        ApiWrapperList<Series> wrapper = new ApiWrapperList<Series>();
+        try {
+            List<Series> results = jsonApiStorageService.getSeriesList(p);
+            wrapper.setResults(results);
+            wrapper.setStatusCheck();
+        } catch (QueryException ex) {
+            wrapper.setResults(Collections.EMPTY_LIST);
+            wrapper.setStatus(new ApiStatus(400, "Error with query"));
+        }
+        wrapper.setParameters(p);
+        return wrapper;
+    }
+
     @RequestMapping(value = "/season/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperSingle<Season> getSeasonById(@PathVariable String id) {
@@ -114,6 +148,40 @@ public class VideoController {
         Season season = jsonApiStorageService.getEntityById(Season.class, Long.parseLong(id));
         ApiWrapperSingle<Season> wrapper = new ApiWrapperSingle<Season>(season);
         wrapper.setStatusCheck();
+        return wrapper;
+    }
+
+    @RequestMapping(value = "/season/list", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperList<Season> getSeasonList(
+            @RequestParam(required = false, defaultValue = "") String search,
+            @RequestParam(required = false, defaultValue = DEFAULT_FIELD) String searchField,
+            @RequestParam(required = false, defaultValue = "") String match,
+            @RequestParam(required = false, defaultValue = "asc") String sort,
+            @RequestParam(required = false, defaultValue = DEFAULT_FIELD) String sortField,
+            @RequestParam(required = false, defaultValue = "-1") Integer start,
+            @RequestParam(required = false, defaultValue = "-1") Integer max) {
+
+        Parameters p = new Parameters();
+        p.add(ParameterType.SEARCH, search);
+        p.add(ParameterType.SEARCH_FIELD, searchField);
+        p.add(ParameterType.MATCHMODE, match);
+        p.add(ParameterType.SORT, sort);
+        p.add(ParameterType.SORT_FIELD, sortField);
+        p.add(ParameterType.START, start);
+        p.add(ParameterType.MAX, max);
+
+        LOG.info("Getting series list with {}", p.toString());
+        ApiWrapperList<Season> wrapper = new ApiWrapperList<Season>();
+        try {
+            List<Season> results = jsonApiStorageService.getSeasonList(p);
+            wrapper.setResults(results);
+            wrapper.setStatusCheck();
+        } catch (QueryException ex) {
+            wrapper.setResults(Collections.EMPTY_LIST);
+            wrapper.setStatus(new ApiStatus(400, "Error with query"));
+        }
+        wrapper.setParameters(p);
         return wrapper;
     }
 }
