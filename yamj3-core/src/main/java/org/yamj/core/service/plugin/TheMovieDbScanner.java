@@ -215,7 +215,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         if (OverrideTools.checkOverwriteYear(videoData, TMDB_SCANNER_ID)) {
             String year = moviedb.getReleaseDate();
             // Check if this is the default year and skip it
-            if (!"1900-01-01".equals(year)) {
+            if (StringUtils.isNotBlank(year) && !"1900-01-01".equals(year)) {
                 year = (new DateTime(year)).toString("yyyy");
                 videoData.setPublicationYear(Integer.parseInt(year), TMDB_SCANNER_ID);
             }
