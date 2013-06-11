@@ -34,6 +34,7 @@ import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.yamj.core.api.model.ParameterType.*;
+import org.yamj.core.database.model.type.ArtworkType;
 
 /**
  *
@@ -112,6 +113,8 @@ public final class Parameters {
         criteriaSort(criteria);
         criteriaStart(criteria);
         criteriaMax(criteria);
+        criteriaArtworkType(criteria);
+        criteriaVideoTypeId(criteria);
     }
 
     /**
@@ -199,6 +202,41 @@ public final class Parameters {
             String start = parameters.get(START);
             if (StringUtils.isNumeric(start)) {
                 criteria.setFirstResult(Integer.parseInt(start));
+            }
+        }
+    }
+
+    /**
+     * Add a limitation to the artwork type returned
+     *
+     * @param criteria
+     */
+    public void criteriaArtworkType(Criteria criteria) {
+        if (parameters.containsKey(ARTWORK_TYPE) && StringUtils.isNotBlank(parameters.get(ARTWORK_TYPE))) {
+            String at = parameters.get(ARTWORK_TYPE);
+            at = ArtworkType.fromString(at).toString();
+            criteria.add(Restrictions.ilike("artwork_type", at, MatchMode.EXACT));
+        }
+    }
+
+    public void criteriaVideoTypeId(Criteria criteria) {
+        String vt = parameters.get(VIDEO_TYPE).toLowerCase();
+        if (StringUtils.isNotBlank(vt)) {
+            String idString = parameters.get(ID);
+            if (StringUtils.isBlank(idString) || !StringUtils.isNumeric(idString)) {
+                LOG.warn("No ID provided for video type '{}' search", vt);
+            } else {
+                Long id = Long.parseLong(idString);
+                LOG.info("Using type '{}' with ID '{}' for artwork search", vt, id);
+                if (vt.equals("video")) {
+                    criteria.add(Restrictions.eq("videoData", id));
+                } else if (vt.equals("series")) {
+                    criteria.add(Restrictions.eq("series", id));
+                } else if (vt.equals("season")) {
+                    criteria.add(Restrictions.eq("season", id));
+                } else {
+                    LOG.warn("Unknown video type '{}' for video type search", vt);
+                }
             }
         }
     }

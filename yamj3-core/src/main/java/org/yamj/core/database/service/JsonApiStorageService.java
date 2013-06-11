@@ -30,7 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.model.Parameters;
+import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
+import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Genre;
@@ -45,6 +47,8 @@ public class JsonApiStorageService {
     private static final Logger LOG = LoggerFactory.getLogger(JsonApiStorageService.class);
     @Autowired
     private CommonDao commonDao;
+    @Autowired
+    private ArtworkDao artworkDao;
 
     @Transactional(readOnly = true)
     public <T> T getEntityById(Class<T> entityClass, Serializable id) {
@@ -133,6 +137,13 @@ public class JsonApiStorageService {
     @Transactional(readOnly = true)
     public List<Studio> getStudios(Parameters params) {
         return commonDao.getList(Studio.class, params);
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Artwork Methods">
+    @Transactional(readOnly = true)
+    public List<Artwork> getArtworkList(Parameters params) {
+        return artworkDao.getArtworkList(params);
     }
     //</editor-fold>
 }

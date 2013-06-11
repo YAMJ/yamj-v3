@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +39,6 @@ public class Scheduler {
 
     @Autowired
     private MediaImportService mediaImportService;
-
-    static {
-        // Configure the ToStringBuilder to use the short prefix by default
-        ToStringBuilder.setDefaultStyle(ToStringStyle.SHORT_PREFIX_STYLE);
-    }
 
     @Async
     @Scheduled(initialDelay = 10000, fixedDelay = 30000)

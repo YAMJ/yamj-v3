@@ -54,7 +54,11 @@ public enum ExitType {
     /*
      * Unable to watch a directory
      */
-    WATCH_FAILURE(5);
+    WATCH_FAILURE(5),
+    /*
+     * Unable to send files to the core
+     */
+    SEND_FAILURE(6);
     private int returnValue;
 
     private ExitType(int returnValue) {

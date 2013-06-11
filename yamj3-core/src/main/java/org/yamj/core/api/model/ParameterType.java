@@ -33,5 +33,8 @@ public enum ParameterType {
     SORT,
     SORT_FIELD,
     START,
-    MAX
+    MAX,
+    ARTWORK_TYPE,
+    VIDEO_TYPE,
+    ID
 }
