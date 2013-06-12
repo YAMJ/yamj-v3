@@ -24,10 +24,10 @@ package org.yamj.core.service.artwork.poster;
 
 import java.util.List;
 import javax.annotation.Resource;
-import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
 public class YahooPosterScannerTest extends AbstractJUnit4SpringContextTests {
@@ -37,7 +37,11 @@ public class YahooPosterScannerTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void testPosterUrl() {
-        List<String> dtos = yahooPosterScanner.getPosterURLs("Avatar", 2009);
-        assertNotNull("No posters found", dtos);
+        List<ArtworkDetailDTO> dtos = yahooPosterScanner.getPosters("Avatar", 2009);
+        if (dtos != null) {
+            for (ArtworkDetailDTO dto : dtos) {
+                System.err.println(dto);
+            }
+        }
     }
 }
