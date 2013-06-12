@@ -23,6 +23,8 @@
 package org.yamj.filescanner.dto;
 
 import java.io.Serializable;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.stereotype.Service;
 
 /**
@@ -193,15 +195,6 @@ public class LibraryEntryDTO implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder tos = new StringBuilder("LibraryFile{");
-        tos.append("path=").append(path);
-        tos.append(", playerpath=").append(playerpath);
-        tos.append(", description=").append(description);
-        tos.append(", include=").append(include);
-        tos.append(", exclude=").append(exclude);
-        tos.append(", scrape=").append(scrape);
-        tos.append(", watch=").append(watch);
-        tos.append('}');
-        return tos.toString();
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

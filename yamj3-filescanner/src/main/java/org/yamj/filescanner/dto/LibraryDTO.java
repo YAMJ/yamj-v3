@@ -25,6 +25,8 @@ package org.yamj.filescanner.dto;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Class to represent the library XML file on disk
@@ -60,5 +62,10 @@ public class LibraryDTO implements Serializable {
      */
     public void addLibrary(LibraryEntryDTO libraryFile) {
         this.libraries.add(libraryFile);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

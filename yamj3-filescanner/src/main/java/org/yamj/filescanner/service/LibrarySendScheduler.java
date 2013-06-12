@@ -40,6 +40,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.yamj.common.dto.ImportDTO;
 import org.yamj.common.dto.StageDirectoryDTO;
+import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.filescanner.ApplicationContextProvider;
 import org.yamj.filescanner.model.Library;
@@ -52,14 +53,23 @@ public class LibrarySendScheduler {
     private static final Logger LOG = LoggerFactory.getLogger(LibrarySendScheduler.class);
     private AtomicInteger runningCount = new AtomicInteger(0);
     private AtomicInteger retryCount = new AtomicInteger(0);
+    private static final int retryMax = PropertyTools.getIntProperty("filescanner.send.retry", 5);
     @Autowired
     private LibraryCollection libraryCollection;
     @Autowired
     private ThreadPoolTaskExecutor yamjExecutor;
 
     @Async
-    @Scheduled(initialDelay = 5000, fixedDelay = 10000)
+    @Scheduled(initialDelay = 10000, fixedDelay = 15000)
     public void sendLibraries() {
+        if (retryCount.get() > retryMax) {
+            LOG.info("Maximum number of retries ({}) exceeded. No further processing attempted.",retryMax);
+            for (Library library : libraryCollection.getLibraries()) {
+                library.setSendingComplete(Boolean.TRUE);
+            }
+            return;
+        }
+
         LOG.info("There are {} libraries to process, this is attempt {} to complete sending.", libraryCollection.size(), retryCount.incrementAndGet());
         LOG.info("There are {} items currently queued to be sent to core.", runningCount.get());
 
@@ -105,7 +115,7 @@ public class LibrarySendScheduler {
                 }
 
                 // When we reach this point we should have completed the library sending
-                LOG.info("Sending complete for {}",library.getImportDTO().getBaseDirectory());
+                LOG.info("Sending complete for {}", library.getImportDTO().getBaseDirectory());
                 library.setSendingComplete(Boolean.TRUE);
                 library.getStatistics().setTime(TimeType.SENDING_END, DateTime.now().getMillis());
             } catch (InterruptedException ex) {

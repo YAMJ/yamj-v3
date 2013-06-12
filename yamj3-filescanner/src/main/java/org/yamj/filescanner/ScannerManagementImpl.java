@@ -74,8 +74,6 @@ public class ScannerManagementImpl implements ScannerManagement {
     /*
      * TODO: choose between watcher process and simple re-scan
      * TODO: determine what files have changed between scans
-     * TODO: add library file reader
-     * TODO: add multiple directory location support
      */
     private static final Logger LOG = LoggerFactory.getLogger(ScannerManagementImpl.class);
     // The default watched status
@@ -169,6 +167,7 @@ public class ScannerManagementImpl implements ScannerManagement {
         checkGitHubStatus();
         libraryCollection.setDefaultClient(DEFAULT_CLIENT);
         libraryCollection.setDefaultPlayerPath(DEFAULT_PLAYER_PATH);
+        libraryCollection.setDefaultWatch(DEFAULT_WATCH_STATE);
         pingCore.check(0, 0);   // Do a quick check of the status of the connection
 
         String directoryProperty = parser.getParsedOptionValue("d");
@@ -176,7 +175,8 @@ public class ScannerManagementImpl implements ScannerManagement {
         String libraryFilename = parser.getParsedOptionValue("l");
 
         if (StringUtils.isNotBlank(libraryFilename)) {
-            libraryCollection.processLibraryFile(libraryFilename, watchEnabled);
+            List<String> libraryList = Arrays.asList(libraryFilename.split(DEFAULT_SPLIT));
+            libraryCollection.processLibraryList(libraryList, watchEnabled);
         }
 
         if (StringUtils.isNotBlank(directoryProperty)) {
@@ -188,6 +188,10 @@ public class ScannerManagementImpl implements ScannerManagement {
         if (libraryCollection.size() == 0) {
             return ExitType.NO_DIRECTORY;
         }
+
+//        String saveFilename="myLibrary.xml";
+//        LOG.info("Saving library to: {}",saveFilename);
+//        libraryCollection.saveLibraryFile(saveFilename);
 
         // Send all libraries to be scanned
         ExitType status = ExitType.SUCCESS;
@@ -340,8 +344,8 @@ public class ScannerManagementImpl implements ScannerManagement {
                 }
             }
 
-            // Create a precompiled Matcher for use later
-            Matcher matcher = Pattern.compile("dummy").matcher("dummy");
+            // Create a precompiled Matcher for use later (Doesn't matter what the values are)
+            Matcher matcher = Pattern.compile(FILE_MJBIGNORE).matcher(FILE_MJBIGNORE);
 
             // Scan the directory properly
             for (File file : currentFileList) {

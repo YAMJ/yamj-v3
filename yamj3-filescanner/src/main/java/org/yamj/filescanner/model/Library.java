@@ -41,6 +41,7 @@ import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 public class Library implements Serializable {
 
     private boolean watch;
+    private String description;
     private Statistics statistics;
     private Map<String, StageDirectoryDTO> directories;
     private Map<String, Future<StatusType>> directoryStatus;
@@ -53,6 +54,7 @@ public class Library implements Serializable {
      */
     public Library() {
         this.watch = Boolean.FALSE;
+        this.description = "";
         this.statistics = new Statistics();
         this.directories = new HashMap<String, StageDirectoryDTO>(1);
         this.directoryStatus = new HashMap<String, Future<StatusType>>(1);
@@ -304,5 +306,13 @@ public class Library implements Serializable {
 
     public void setSendingComplete(boolean sendingComplete) {
         this.sendingComplete.set(sendingComplete);
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
