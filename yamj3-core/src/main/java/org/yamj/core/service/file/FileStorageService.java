@@ -34,7 +34,9 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,5 +149,38 @@ public class FileStorageService {
             return FilenameUtils.concat(this.storagePathArtwork, fileName);
         }
         throw new RuntimeException("Unknown storage type " + type);
+    }
+
+    /**
+     * Create a directory hash from the filename
+     *
+     * @param filename
+     * @return
+     */
+    private static String createDirHash(final String filename) {
+        // Skip if the filename is invalid OR has already been hashed
+        if (StringUtils.isBlank(filename) || filename.contains(File.separator)) {
+            return filename;
+        }
+
+        // Remove all the non-word characters from the filename, replacing with an underscore
+        String cleanFilename = filename.replaceAll("[^\\p{L}\\p{N}]", "_").toLowerCase().trim();
+
+        StringBuilder dirHash = new StringBuilder();
+        dirHash.append(cleanFilename.substring(0, 1)).append(File.separator);
+        dirHash.append(cleanFilename.substring(0, cleanFilename.length() > 1 ? 2 : 1)).append(File.separator);
+        dirHash.append(filename);
+
+        return dirHash.toString();
+    }
+
+    /**
+     * Create a directory has from the filename of a file
+     *
+     * @param file
+     * @return
+     */
+    private static String createDirHash(final File file) {
+        return createDirHash(file.getName());
     }
 }
