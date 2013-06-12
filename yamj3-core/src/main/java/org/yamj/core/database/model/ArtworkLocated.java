@@ -22,17 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import org.apache.commons.lang3.StringUtils;
-
-import org.hibernate.Hibernate;
-
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.ForeignKey;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +29,8 @@ import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Parameter;
 import org.yamj.common.type.StatusType;
@@ -63,14 +54,23 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
 
-    @Column(name = "url")
-    private String url;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORKLOCATED_STAGEFILE")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "stagefile_id")
     private StageFile stageFile;
+
+    @Column(name = "source", length=50)
+    private String source;
+
+    @Column(name = "url", length=255)
+    private String url;
+
+    @Column(name = "language", length=30)
+    private String language;
+
+    @Column(name = "rating", nullable=false)
+    private int rating = -1;
     
     @Column(name = "width", nullable = false)
     private int width = -1;
@@ -100,6 +100,22 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
         this.status = status;
     }
 
+    public StageFile getStageFile() {
+        return stageFile;
+    }
+
+    public void setStageFile(StageFile stageFile) {
+        this.stageFile = stageFile;
+    }
+    
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
     public String getUrl() {
         return url;
     }
@@ -107,13 +123,21 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     public void setUrl(String url) {
         this.url = url;
     }
-    
-    public StageFile getStageFile() {
-        return stageFile;
+
+    public String getLanguage() {
+        return language;
     }
 
-    public void setStageFile(StageFile stageFile) {
-        this.stageFile = stageFile;
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
     }
 
     public int getWidth() {

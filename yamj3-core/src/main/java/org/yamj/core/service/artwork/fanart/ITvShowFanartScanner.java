@@ -23,12 +23,13 @@
 package org.yamj.core.service.artwork.fanart;
 
 import java.util.List;
-import org.yamj.core.database.model.IMetadata;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
-public interface IFanartScanner {
+public interface ITvShowFanartScanner extends IFanartScanner {
 
-    String getScannerName();
+    String getId(String title, int year, int season);
 
-    List<ArtworkDetailDTO> getFanarts(IMetadata metadata);
+    List<ArtworkDetailDTO> getFanarts(String title, int year, int season);
+
+    List<ArtworkDetailDTO> getFanarts(String id, int season);
 }

@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.tools.web.PoolingHttpClient;
 
@@ -62,8 +63,8 @@ public class YahooPosterScanner extends AbstractMoviePosterScanner
     }
 
     @Override
-    public List<String> getPosterURLs(String title, int year) {
-        List<String> urls = new ArrayList<String>();
+    public List<ArtworkDetailDTO> getPosters(String title, int year) {
+        List<ArtworkDetailDTO> dtos = new ArrayList<ArtworkDetailDTO>();
         
         try {
             StringBuilder sb = new StringBuilder("http://fr.images.search.yahoo.com/search/images?p=");
@@ -78,20 +79,22 @@ public class YahooPosterScanner extends AbstractMoviePosterScanner
             if (beginIndex > 0) {
                 int endIndex = xml.indexOf("rurl=", beginIndex);
                 if (endIndex > 0) {
-                    urls.add(URLDecoder.decode(xml.substring(beginIndex + 7, endIndex-1), "UTF-8"));
+                    String url = URLDecoder.decode(xml.substring(beginIndex + 7, endIndex-1), "UTF-8");
+                    dtos.add(new ArtworkDetailDTO(getScannerName(), url));
                 } else {
-                    urls.add(URLDecoder.decode(xml.substring(beginIndex + 7), "UTF-8"));
+                    String url = URLDecoder.decode(xml.substring(beginIndex + 7), "UTF-8");
+                    dtos.add(new ArtworkDetailDTO(getScannerName(), url));
                 }
             }
         } catch (Exception error) {
             LOG.error("Failed retreiving poster URL from yahoo images : " + title, error);
         }
 
-        return urls;
+        return dtos;
     }
 
     @Override
-    public List<String> getPosterURLs(String id) {
-        return getPosterURLs(id, -1);
+    public List<ArtworkDetailDTO> getPosters(String id) {
+        return getPosters(id, -1);
     }
 }

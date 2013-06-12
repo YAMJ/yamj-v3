@@ -26,16 +26,15 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.IMetadata;
+import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
 public abstract class AbstractMoviePosterScanner implements IMoviePosterScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMoviePosterScanner.class);
-    protected static final int POSTER_MAX_RESULTS = PropertyTools.getIntProperty("artwork.scanner.poster.maxResults", 1);
     
     @Override
-    public List<String> getPosterURLs(IMetadata metadata) {
+    public List<ArtworkDetailDTO> getPosters(IMetadata metadata) {
         String id = metadata.getSourceDbId(getScannerName());
         if (StringUtils.isBlank(id)) {
             if (StringUtils.isBlank(metadata.getTitleOriginal())) {
@@ -54,7 +53,7 @@ public abstract class AbstractMoviePosterScanner implements IMoviePosterScanner 
         }
         
         if (!(StringUtils.isBlank(id) || "-1".equals(id) || "0".equals(id))) {
-            return getPosterURLs(id);
+            return getPosters(id);
         }
 
         return null;

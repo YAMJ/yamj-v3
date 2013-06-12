@@ -29,7 +29,7 @@ public enum ArtworkType {
     BANNER,
     FANART,
     VIDEOIMAGE,
-    PERSON;
+    PHOTO;
 
     public static ArtworkType fromString(String type) {
         try {

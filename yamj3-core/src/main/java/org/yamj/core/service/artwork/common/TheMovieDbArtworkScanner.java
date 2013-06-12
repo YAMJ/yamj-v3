@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.IMetadata;
+import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
 import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
@@ -76,67 +77,65 @@ public class TheMovieDbArtworkScanner implements
     }
 
     @Override
-    public List<String> getPosterURLs(String title, int year) {
+    public List<ArtworkDetailDTO> getPosters(String title, int year) {
         String id = this.getId(title, year);
-        return this.getPosterURLs(id);
+        return this.getPosters(id);
     }
 
     @Override
-    public List<String> getFanartURLs(String title, int year) {
+    public List<ArtworkDetailDTO> getFanarts(String title, int year) {
         String id = this.getId(title, year);
-        return this.getFanartURLs(id);
+        return this.getFanarts(id);
     }
 
     @Override
-    public List<String> getPosterURLs(String id) {
-        List<String> urls = null;
-        // TODO retrieve more than one URL
+    public List<ArtworkDetailDTO> getPosters(String id) {
+        List<ArtworkDetailDTO> dtos = new ArrayList<ArtworkDetailDTO>();
+        // TODO retrieve more than one poster info
 
         if (StringUtils.isNumeric(id)) {
             try {
                 MovieDb moviedb = tmdbApi.getMovieInfo(Integer.parseInt(id), DEFAULT_LANGUAGE);
                 URL posterURL = tmdbApi.createImageUrl(moviedb.getPosterPath(), DEFAULT_POSTER_SIZE);
-                if (urls == null) urls = new ArrayList<String>();
-                urls.add(posterURL.toString());
+                dtos.add(new ArtworkDetailDTO(getScannerName(), posterURL.toString()));
             } catch (MovieDbException error) {
                 LOG.warn("Failed to get the poster URL for TMDb ID {}", id, error);
             }
         }
-        return urls;
+        return dtos;
     }
 
     @Override
-    public List<String> getFanartURLs(String id) {
-        List<String> urls = null;
-        // TODO retrieve more than one URL
+    public List<ArtworkDetailDTO> getFanarts(String id) {
+        List<ArtworkDetailDTO> dtos = new ArrayList<ArtworkDetailDTO>();
+        // TODO retrieve more than one fanart info
         
         if (StringUtils.isNumeric(id)) {
             try {
                 MovieDb moviedb = tmdbApi.getMovieInfo(Integer.parseInt(id), DEFAULT_LANGUAGE);
                 URL fanartURL = tmdbApi.createImageUrl(moviedb.getBackdropPath(), DEFAULT_FANART_SIZE);
-                if (urls == null) urls = new ArrayList<String>();
-                urls.add(fanartURL.toString());
+                dtos.add(new ArtworkDetailDTO(getScannerName(), fanartURL.toString()));
             } catch (MovieDbException error) {
                 LOG.warn("Failed to get the fanart URL for TMDb ID {}", id, error);
             }
         }
-        return urls;
+        return dtos;
     }
 
     @Override
-    public List<String> getPosterURLs(IMetadata metadata) {
+    public List<ArtworkDetailDTO> getPosters(IMetadata metadata) {
         String id = getId(metadata);
         if (StringUtils.isNotBlank(id)) {
-            return getPosterURLs(id);
+            return getPosters(id);
         }
         return null;
     }
 
     @Override
-    public List<String> getFanartURLs(IMetadata metadata) {
+    public List<ArtworkDetailDTO> getFanarts(IMetadata metadata) {
         String id = getId(metadata);
         if (StringUtils.isNotBlank(id)) {
-            return getFanartURLs(id);
+            return getFanarts(id);
         }
         return null;
     }

@@ -145,7 +145,6 @@ public class PluginMetadataService {
         Series series = metadataStorageService.getRequiredSeries(id);
         LOG.debug("Scanning series data for '{}' using {}", series.getTitle(), SERIES_SCANNER);
 
-
         // scan series
         ScanResult scanResult;
         try {
@@ -157,6 +156,8 @@ public class PluginMetadataService {
         }
 
         // alternate scanning if main scanner failed
+        // TODO enable alter scanning if requested
+        
         if (!ScanResult.OK.equals(scanResult)) {
             seriesScanner = registeredSeriesScanner.get(SERIES_SCANNER_ALT);
 

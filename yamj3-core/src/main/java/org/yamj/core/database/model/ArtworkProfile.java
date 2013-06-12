@@ -28,10 +28,15 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ImageFormat;
+import org.yamj.core.hibernate.usertypes.EnumStringUserType;
+
+@TypeDefs({
+    @TypeDef(name = "artworkType", typeClass = EnumStringUserType.class,
+            parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ArtworkType")}),
+})
 
 @Entity
 @Table(name = "artwork_profile",
@@ -56,6 +61,18 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     @Column(name = "height", nullable = false)
     private int height = -1;
 
+    @Column(name = "apply_to_movie", nullable = false)
+    private boolean applyToMovie = false;
+
+    @Column(name = "apply_to_series", nullable = false)
+    private boolean applyToSeries = false;
+
+    @Column(name = "apply_to_season", nullable = false)
+    private boolean applyToSeason = false;
+
+    @Column(name = "apply_to_episode", nullable = false)
+    private boolean applyToEpisode = false;
+
     @Column(name = "pre_process", nullable = false)
     private boolean preProcess = false;
     
@@ -76,7 +93,7 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     public void setArtworkType(ArtworkType artworkType) {
         this.artworkType = artworkType;
     }
-
+    
     public int getWidth() {
         return width;
     }
@@ -91,6 +108,38 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
 
     public void setHeight(int height) {
         this.height = height;
+    }
+
+    public boolean isApplyToMovie() {
+        return applyToMovie;
+    }
+
+    public void setApplyToMovie(boolean applyToMovie) {
+        this.applyToMovie = applyToMovie;
+    }
+
+    public boolean isApplyToSeries() {
+        return applyToSeries;
+    }
+
+    public void setApplyToSeries(boolean applyToSeries) {
+        this.applyToSeries = applyToSeries;
+    }
+
+    public boolean isApplyToSeason() {
+        return applyToSeason;
+    }
+
+    public void setApplyToSeason(boolean applyToSeason) {
+        this.applyToSeason = applyToSeason;
+    }
+
+    public boolean isApplyToEpisode() {
+        return applyToEpisode;
+    }
+
+    public void setApplyToEpisode(boolean applyToEpisode) {
+        this.applyToEpisode = applyToEpisode;
     }
 
     public boolean isPreProcess() {
@@ -145,6 +194,15 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
         return 1f;
     }
 
+    public boolean hasRelevantChanges(ArtworkProfile profile) {
+        if (getWidth() != profile.getWidth()) {
+            return true;
+        } else if (getHeight() != profile.getHeight()) {
+            return true;
+        }
+        return false;
+    }
+    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

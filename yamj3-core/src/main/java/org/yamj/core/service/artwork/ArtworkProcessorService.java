@@ -54,8 +54,6 @@ public class ArtworkProcessorService {
 
     @Autowired
     private ArtworkStorageService artworkStorageService;
-    @Autowired
-    private ArtworkProfileService artworkProfileService;
     @Autowired 
     private FileStorageService fileStorageService;
     
@@ -77,7 +75,7 @@ public class ArtworkProcessorService {
             return;
         }
         
-        // store image in file cache
+        // store original in file cache
         String cacheFilename = buildCacheFilename(located);
         LOG.debug("Cache artwork with file name: {}", cacheFilename);
 
@@ -90,7 +88,9 @@ public class ArtworkProcessorService {
                 fileStorageService.store(StorageType.ARTWORK, cacheFilename, url);
             }
         } catch (Exception error) {
-            throw new RuntimeException("Failed to store artwork in file cache: " + cacheFilename, error);
+            LOG.error("Failed to store artwork store artwork in file cache: {}", cacheFilename);
+            LOG.warn("Storage error", error);
+            return;
         }
 
         // store located back into database
@@ -99,7 +99,7 @@ public class ArtworkProcessorService {
         artworkStorageService.updateArtworkLocated(located);
         
         // after that: try preProcessing of images
-        List<ArtworkProfile> profiles = artworkProfileService.getPreProcessProfiles(located.getArtwork().getArtworkType());
+        List<ArtworkProfile> profiles = artworkStorageService.getPreProcessArtworkProfiles(located);
         for (ArtworkProfile profile : profiles) {
             try {
                 generateImage(located, profile);
@@ -110,7 +110,7 @@ public class ArtworkProcessorService {
         }
     }
 
-    private boolean generateImage(ArtworkLocated located, ArtworkProfile profile) throws Exception {
+    private void generateImage(ArtworkLocated located, ArtworkProfile profile) throws Exception {
         LOG.debug("Generate image for {} with profile {}", located, profile.getProfileName());
         BufferedImage imageGraphic = GraphicTools.loadJPEGImage(this.fileStorageService.getFile(StorageType.ARTWORK, located.getCacheFilename()));
 
@@ -135,8 +135,6 @@ public class ArtworkProcessorService {
             // throw error
             throw e;
         }
-        
-        return Boolean.TRUE;
     }
    
     private BufferedImage drawImage(BufferedImage imageGraphic, ArtworkProfile profile) {
@@ -170,33 +168,44 @@ public class ArtworkProcessorService {
         // return image
         return bi;
     }
-    
+
     private String buildCacheFilename(ArtworkLocated located) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(located.getArtwork().getId());
-        sb.append("-");
-        sb.append(located.getId());
-        sb.append("_");
-        sb.append(located.getArtwork().getArtworkType().toString().toLowerCase());
-        sb.append("_original");
-        // TODO determine suffix from URL or stage file name
-        sb.append(".jpg");
-        return sb.toString();
+        return buildCacheFilename(located, null);
     }
 
     private String buildCacheFilename(ArtworkLocated located, ArtworkProfile artworkProfile) {
         StringBuilder sb = new StringBuilder();
-        sb.append(located.getArtwork().getId());
-        sb.append("-");
-        sb.append(located.getId());
-        sb.append("_");
-        sb.append(located.getArtwork().getArtworkType().toString().toLowerCase());
-        sb.append("_gen-");
-        sb.append(artworkProfile.getProfileName());
-        if (ImageFormat.PNG == artworkProfile.getImageFormat()) {
-            sb.append(".png");
+        if (located.getArtwork().getVideoData() != null) {
+            sb.append(located.getArtwork().getVideoData().getIdentifier());
+            sb.append(".video.");
+        } else if (located.getArtwork().getSeason() != null) {
+            sb.append(located.getArtwork().getSeason().getIdentifier());
+            sb.append(".season.");
+        } else if (located.getArtwork().getSeries() != null) {
+            sb.append(located.getArtwork().getSeries().getIdentifier());
+            sb.append(".series.");
         } else {
+            sb.append("unknown_");
+            sb.append(located.getArtwork().getId());
+            sb.append(".");
+        }
+        sb.append(located.getArtwork().getArtworkType().toString().toLowerCase());
+        sb.append(".");
+        sb.append(located.getId());
+        sb.append(".");
+        if (artworkProfile == null) {
+            // it's the original image
+            sb.append("original.");
+            // TODO determine suffix from URL or stage file name
             sb.append(".jpg");
+        } else {
+            // it's a generated image
+            sb.append(artworkProfile.getProfileName().toLowerCase());
+            if (ImageFormat.PNG == artworkProfile.getImageFormat()) {
+                sb.append(".png");
+            } else {
+                sb.append(".jpg");
+            }
         }
         return sb.toString();
     }

@@ -22,7 +22,6 @@
  */
 package org.yamj.core.service.artwork;
 
-import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +33,13 @@ import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.ArtworkStorageService;
 
-@Service("artworkProfileService")
-public class ArtworkProfileService implements InitializingBean {
+/**
+ * Just used for initialization of artwork profiles at startup.
+ */
+@Service
+public class ArtworkInitialization implements InitializingBean {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ArtworkProfileService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ArtworkInitialization.class);
 
     @Autowired
     private ArtworkStorageService artworkStorageService;
@@ -69,8 +71,6 @@ public class ArtworkProfileService implements InitializingBean {
                     valid = false;
                 }
 
-                boolean preProcess = PropertyTools.getBooleanProperty("artwork.profile."+name+".preProcess", Boolean.FALSE);
-                
                 if (!valid) {
                     LOG.warn("Profile {} has no valid setup, so skipping", name);
                     continue;
@@ -81,9 +81,14 @@ public class ArtworkProfileService implements InitializingBean {
                 artworkProfile.setArtworkType(artworkType);
                 artworkProfile.setWidth(Integer.parseInt(width));
                 artworkProfile.setHeight(Integer.parseInt(height));
-                artworkProfile.setPreProcess(preProcess);
+                artworkProfile.setApplyToMovie(PropertyTools.getBooleanProperty("artwork.profile."+name+".applyToMovie", Boolean.FALSE));
+                artworkProfile.setApplyToSeries(PropertyTools.getBooleanProperty("artwork.profile."+name+".applyToSeries", Boolean.FALSE));
+                artworkProfile.setApplyToSeason(PropertyTools.getBooleanProperty("artwork.profile."+name+".applyToSeason", Boolean.FALSE));
+                artworkProfile.setApplyToEpisode(PropertyTools.getBooleanProperty("artwork.profile."+name+".applyToEpisode", Boolean.FALSE));
+                artworkProfile.setPreProcess(PropertyTools.getBooleanProperty("artwork.profile."+name+".preProcess", Boolean.FALSE));
                 
                 try {
+                    // call another service to handle transactions
                     this.artworkStorageService.storeArtworkProfile(artworkProfile);
                 } catch (Exception error) {
                     LOG.error("Failed to store artwork profile {}", artworkProfile);
@@ -93,8 +98,4 @@ public class ArtworkProfileService implements InitializingBean {
         }
     }
     
-    public List<ArtworkProfile> getPreProcessProfiles(ArtworkType artworkType) {
-        // TODO cache profiles to avoid database access
-        return this.artworkStorageService.getArtworkProfiles(artworkType, Boolean.TRUE);
-    }
 }

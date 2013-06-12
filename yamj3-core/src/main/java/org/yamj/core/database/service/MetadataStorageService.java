@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.CommonDao;
@@ -52,12 +51,12 @@ public class MetadataStorageService {
     @Autowired
     private MetadataDao metadataDao;
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public void save(Object entity) {
         this.commonDao.saveEntity(entity);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public void update(Object entity) {
         this.commonDao.updateEntity(entity);
     }
@@ -134,7 +133,7 @@ public class MetadataStorageService {
         return metadataDao.getById(Person.class, id);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public void storeGenre(String genreName) {
         Genre genre = commonDao.getGenre(genreName);
         if (genre == null) {
@@ -145,7 +144,7 @@ public class MetadataStorageService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public void storePerson(CreditDTO dto) {
         Person person = metadataDao.getPerson(dto.getName());
         if (person == null) {
@@ -163,13 +162,13 @@ public class MetadataStorageService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public void updatePerson(Person person) {
         // update entity
         metadataDao.updateEntity(person);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public void updateVideoData(VideoData videoData) {
         // update entity
         metadataDao.updateEntity(videoData);
@@ -181,7 +180,7 @@ public class MetadataStorageService {
         updateCastCrew(videoData);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public void updateSeries(Series series) {
         // update entity
         metadataDao.updateEntity(series);
@@ -234,6 +233,8 @@ public class MetadataStorageService {
                 LOG.info("Attempting to retrieve information on '{}' from database", dto.getName());
                 person = metadataDao.getByName(Person.class, dto.getName());
                 if (person == null) {
+                    // NOTE: person should have been stored before; just be sure
+                    //       to avoid null constraint violation
                     LOG.warn("Person '{}' not found, skipping", dto.getName());
                     return;
                 }
@@ -256,7 +257,7 @@ public class MetadataStorageService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public void errorVideoData(Long id) {
         VideoData videoData = metadataDao.getById(VideoData.class, id);
         if (videoData != null) {
@@ -265,7 +266,7 @@ public class MetadataStorageService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public void errorSeries(Long id) {
         Series series = metadataDao.getById(Series.class, id);
         if (series != null) {
@@ -274,7 +275,7 @@ public class MetadataStorageService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public void errorPerson(Long id) {
         Person person = metadataDao.getById(Person.class, id);
         if (person != null) {

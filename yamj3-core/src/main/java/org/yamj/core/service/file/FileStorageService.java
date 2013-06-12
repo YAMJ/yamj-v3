@@ -49,11 +49,15 @@ public class FileStorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileStorageService.class);
 
-    @Value("${file.storage.path.artwork}")
-    public String storagePathArtwork;
+    private String storagePathArtwork;
     @Autowired
     private PoolingHttpClient httpClient;
 
+    @Value("${yamj3.filestorage.path.artwork}")
+    public void setStoragePathArtwork(String storagePathArtwork) {
+        this.storagePathArtwork = storagePathArtwork;
+        LOG.info("Artwork storage path set to '{}'", storagePathArtwork);
+    }
     
     public boolean exists(StorageType type, String fileName) throws IOException {
         return false;

@@ -23,12 +23,13 @@
 package org.yamj.core.service.artwork.fanart;
 
 import java.util.List;
+import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
 public interface IMovieFanartScanner extends IFanartScanner {
 
     String getId(String title, int year);
 
-    List<String> getFanartURLs(String title, int year);
+    List<ArtworkDetailDTO> getFanarts(String title, int year);
 
-    List<String> getFanartURLs(String id);
+    List<ArtworkDetailDTO> getFanarts(String id);
 }

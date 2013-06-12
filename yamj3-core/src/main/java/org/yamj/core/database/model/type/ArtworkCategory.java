@@ -20,15 +20,12 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork.fanart;
+package org.yamj.core.database.model.type;
 
-import java.util.List;
-import org.yamj.core.database.model.IMetadata;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
+public enum ArtworkCategory {
 
-public interface IFanartScanner {
-
-    String getScannerName();
-
-    List<ArtworkDetailDTO> getFanarts(IMetadata metadata);
+    MOVIE,
+    SERIES,
+    SEASON,
+    EPISODE;
 }
