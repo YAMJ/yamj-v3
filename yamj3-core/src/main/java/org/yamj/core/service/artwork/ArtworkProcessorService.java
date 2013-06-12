@@ -195,7 +195,7 @@ public class ArtworkProcessorService {
         sb.append(".");
         if (artworkProfile == null) {
             // it's the original image
-            sb.append("original.");
+            sb.append("original");
             // TODO determine suffix from URL or stage file name
             sb.append(".jpg");
         } else {
