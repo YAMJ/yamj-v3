@@ -139,6 +139,7 @@ public class TheTVDbArtworkScanner implements
 
         List<ArtworkDetailDTO> returnDTOs = null;
         if (langDTOs.size()>0) {
+            LOG.info("Series {}: Using posters with language '{}'", id, DEFAULT_LANGUAGE);
             returnDTOs = langDTOs;
         } else if (altLangDTOs.size()>0) {
             LOG.info("Series {}: No poster found for language '{}', using posters with language '{}'", id, DEFAULT_LANGUAGE, ALTERNATE_LANGUAGE);
@@ -189,6 +190,7 @@ public class TheTVDbArtworkScanner implements
 
         List<ArtworkDetailDTO> returnDTOs = null;
         if (langDTOs.size()>0) {
+            LOG.info("Season {}-{}: Using posters with language '{}'", id, season, DEFAULT_LANGUAGE);
             returnDTOs = langDTOs;
         } else if (altLangDTOs.size()>0) {
             LOG.info("Season {}-{}: No poster found for language '{}', using posters with language '{}'", id, season, DEFAULT_LANGUAGE, ALTERNATE_LANGUAGE);
@@ -260,6 +262,7 @@ public class TheTVDbArtworkScanner implements
         
         List<ArtworkDetailDTO> returnDTOs = null;
         if (hdDTOs.size()>0) {
+            LOG.info("Series {}: Using HD fanarts", id);
             returnDTOs = hdDTOs;
         } else if (sdDTOs.size()>0) {
             LOG.info("Series {}: No HD fanarts found; using SD fanarts", id);
@@ -302,14 +305,15 @@ public class TheTVDbArtworkScanner implements
         
         List<ArtworkDetailDTO> returnDTOs = null;
         if (hdDTOs.size()>0) {
+            LOG.debug("Season {}-{}: Using HD fanarts", id, season);
             returnDTOs = hdDTOs;
         } else if (sdDTOs.size()>0) {
-            LOG.debug("Season {}-{}: No HD fanarts found; using SD fanarts", id);
+            LOG.debug("Season {}-{}: No HD fanarts found; using SD fanarts", id, season);
             returnDTOs = sdDTOs;
         } else {
             String url = this.getTVDbSeries(id).getFanart();
             if (StringUtils.isNotBlank(url)) {
-                LOG.debug("Season {}-{}: Using default series fanart", id);
+                LOG.debug("Season {}-{}: Using default series fanart", id, season);
                 returnDTOs = new ArrayList<ArtworkDetailDTO>(1);
                 returnDTOs.add(new ArtworkDetailDTO(getScannerName(), url));
             }
