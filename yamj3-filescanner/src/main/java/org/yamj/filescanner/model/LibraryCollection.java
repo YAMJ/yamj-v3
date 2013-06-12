@@ -41,6 +41,7 @@ public class LibraryCollection implements Serializable {
     private List<Library> libraries;
     private String defaultPlayerPath = "";
     private String defaultClient = "";
+    private boolean defaultWatch = Boolean.FALSE;
     // Spring
     @Resource(name = "xmlTools")
     private XmlTools xmlTools;
@@ -141,26 +142,51 @@ public class LibraryCollection implements Serializable {
         } else {
             for (LibraryEntryDTO single : lib.getLibraries()) {
                 LOG.info("Adding library '{}'", single.getDescription());
-                addLibraryDirectory(single.getPath(), defaultWatchState, single.getPlayerpath(), single.getDescription());
+                addLibraryEntry(single);
             }
         }
     }
 
-    public void addLibraryDirectory(String baseDirectory, boolean defaultWatchState) {
-        addLibraryDirectory(baseDirectory, defaultWatchState, defaultPlayerPath, defaultClient);
+    public void saveLibraryFile(String libraryFilename) {
+        LibraryDTO lib = new LibraryDTO();
+        for (Library libraryEntry : libraries) {
+            LibraryEntryDTO le = new LibraryEntryDTO();
+            le.setDescription(libraryEntry.getImportDTO().getClient());
+            le.setExclude("none");
+            le.setInclude("all");
+            le.setPath(libraryEntry.getImportDTO().getBaseDirectory());
+            le.setPlayerpath(libraryEntry.getImportDTO().getPlayerPath());
+            le.setScrape(true);
+            le.setWatch(libraryEntry.isWatch());
+            lib.addLibrary(le);
+        }
+
+        xmlTools.save(libraryFilename, lib);
     }
 
-    public void addLibraryDirectory(String baseDirectory, boolean defaultWatchState, String playerPath, String client) {
+    public void addLibraryDirectory(String baseDirectory, boolean defaultWatchState) {
+        LibraryEntryDTO le = new LibraryEntryDTO();
+        le.setPath(baseDirectory);
+        le.setWatch(defaultWatchState);
+        le.setPlayerpath(defaultPlayerPath);
+        le.setDescription(defaultClient);
+
+        addLibraryEntry(le);
+    }
+
+    public void addLibraryEntry(LibraryEntryDTO libraryEntryDto) {
         Library library = new Library();
 
         // Set up the ImportDTO
         ImportDTO importDto = new ImportDTO();
-        importDto.setBaseDirectory(baseDirectory);
-        importDto.setClient(client);
-        importDto.setPlayerPath(playerPath);
+        importDto.setBaseDirectory(libraryEntryDto.getPath());
+        importDto.setClient(defaultClient);
+        importDto.setPlayerPath(libraryEntryDto.getPlayerpath());
 
+        // Set up the remaining library settings
         library.setImportDTO(importDto);
-        library.setWatch(defaultWatchState);
+        library.setWatch(libraryEntryDto.isWatch());
+        library.setDescription(libraryEntryDto.getDescription());
         add(library);
     }
 
@@ -170,6 +196,10 @@ public class LibraryCollection implements Serializable {
 
     public void setDefaultPlayerPath(String defaultPlayerPath) {
         this.defaultPlayerPath = defaultPlayerPath;
+    }
+
+    public void setDefaultWatch(boolean defaultWatch) {
+        this.defaultWatch = defaultWatch;
     }
 
     public String getDefaultClient() {
