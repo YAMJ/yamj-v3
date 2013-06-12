@@ -34,7 +34,9 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,17 +50,16 @@ import org.yamj.core.tools.web.PoolingHttpClient;
 public class FileStorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileStorageService.class);
-
     private String storagePathArtwork;
     @Autowired
     private PoolingHttpClient httpClient;
 
-    @Value("${yamj3.filestorage.path.artwork}")
+    @Value("${yamj3.file.storage.artwork}")
     public void setStoragePathArtwork(String storagePathArtwork) {
         this.storagePathArtwork = storagePathArtwork;
         LOG.info("Artwork storage path set to '{}'", storagePathArtwork);
     }
-    
+
     public boolean exists(StorageType type, String fileName) throws IOException {
         return false;
     }
@@ -66,12 +67,12 @@ public class FileStorageService {
     public void store(StorageType type, String fileName, URL url) throws IOException {
         LOG.debug("Store file {}; source url: {}", fileName, url.toString());
         String storageFileName = getStorageName(type, fileName);
-        
+
         HttpEntity entity = httpClient.requestResource(url);
         if (entity == null) {
-             throw new RuntimeException("Failed to get content from: " + url);
+            throw new RuntimeException("Failed to get content from: " + url);
         }
-        
+
         OutputStream outputStream = null;
         try {
             outputStream = new FileOutputStream(storageFileName);
@@ -91,14 +92,14 @@ public class FileStorageService {
         LOG.debug("Store {} image: {}", imageFormat, fileName);
         String storageFileName = getStorageName(StorageType.ARTWORK, fileName);
         File outputFile = new File(storageFileName);
-        
+
         ImageWriter writer = null;
         FileImageOutputStream output = null;
         try {
             if (ImageFormat.PNG == imageFormat) {
                 ImageIO.write(bi, "png", outputFile);
             } else {
-                float jpegQuality = (float)quality / 100;
+                float jpegQuality = (float) quality / 100;
                 BufferedImage bufImage = new BufferedImage(bi.getWidth(), bi.getHeight(), BufferedImage.TYPE_INT_RGB);
                 bufImage.createGraphics().drawImage(bi, 0, 0, null, null);
 
@@ -137,16 +138,49 @@ public class FileStorageService {
         File file = getFile(type, fileName);
         return file.delete();
     }
-    
+
     public File getFile(StorageType type, String fileName) throws IOException {
         String storageName = getStorageName(type, fileName);
         return new File(storageName);
     }
-    
+
     private String getStorageName(StorageType type, String fileName) {
         if (StorageType.ARTWORK == type) {
             return FilenameUtils.concat(this.storagePathArtwork, fileName);
         }
         throw new RuntimeException("Unknown storage type " + type);
+    }
+
+    /**
+     * Create a directory hash from the filename
+     *
+     * @param filename
+     * @return
+     */
+    private static String createDirHash(final String filename) {
+        // Skip if the filename is invalid OR has already been hashed
+        if (StringUtils.isBlank(filename) || filename.contains(File.separator)) {
+            return filename;
+        }
+
+        // Remove all the non-word characters from the filename, replacing with an underscore
+        String cleanFilename = filename.replaceAll("[^\\p{L}\\p{N}]", "_").toLowerCase().trim();
+
+        StringBuilder dirHash = new StringBuilder();
+        dirHash.append(cleanFilename.substring(0, 1)).append(File.separator);
+        dirHash.append(cleanFilename.substring(0, cleanFilename.length() > 1 ? 2 : 1)).append(File.separator);
+        dirHash.append(filename);
+
+        return dirHash.toString();
+    }
+
+    /**
+     * Create a directory has from the filename of a file
+     *
+     * @param file
+     * @return
+     */
+    private static String createDirHash(final File file) {
+        return createDirHash(file.getName());
     }
 }
