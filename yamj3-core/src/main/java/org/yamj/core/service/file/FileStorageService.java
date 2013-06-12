@@ -48,17 +48,16 @@ import org.yamj.core.tools.web.PoolingHttpClient;
 public class FileStorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileStorageService.class);
-
     private String storagePathArtwork;
     @Autowired
     private PoolingHttpClient httpClient;
 
-    @Value("${yamj3.filestorage.path.artwork}")
+    @Value("${yamj3.file.storage.artwork}")
     public void setStoragePathArtwork(String storagePathArtwork) {
         this.storagePathArtwork = storagePathArtwork;
         LOG.info("Artwork storage path set to '{}'", storagePathArtwork);
     }
-    
+
     public boolean exists(StorageType type, String fileName) throws IOException {
         return false;
     }
@@ -66,12 +65,12 @@ public class FileStorageService {
     public void store(StorageType type, String fileName, URL url) throws IOException {
         LOG.debug("Store file {}; source url: {}", fileName, url.toString());
         String storageFileName = getStorageName(type, fileName);
-        
+
         HttpEntity entity = httpClient.requestResource(url);
         if (entity == null) {
-             throw new RuntimeException("Failed to get content from: " + url);
+            throw new RuntimeException("Failed to get content from: " + url);
         }
-        
+
         OutputStream outputStream = null;
         try {
             outputStream = new FileOutputStream(storageFileName);
@@ -91,14 +90,14 @@ public class FileStorageService {
         LOG.debug("Store {} image: {}", imageFormat, fileName);
         String storageFileName = getStorageName(StorageType.ARTWORK, fileName);
         File outputFile = new File(storageFileName);
-        
+
         ImageWriter writer = null;
         FileImageOutputStream output = null;
         try {
             if (ImageFormat.PNG == imageFormat) {
                 ImageIO.write(bi, "png", outputFile);
             } else {
-                float jpegQuality = (float)quality / 100;
+                float jpegQuality = (float) quality / 100;
                 BufferedImage bufImage = new BufferedImage(bi.getWidth(), bi.getHeight(), BufferedImage.TYPE_INT_RGB);
                 bufImage.createGraphics().drawImage(bi, 0, 0, null, null);
 
@@ -137,12 +136,12 @@ public class FileStorageService {
         File file = getFile(type, fileName);
         return file.delete();
     }
-    
+
     public File getFile(StorageType type, String fileName) throws IOException {
         String storageName = getStorageName(type, fileName);
         return new File(storageName);
     }
-    
+
     private String getStorageName(StorageType type, String fileName) {
         if (StorageType.ARTWORK == type) {
             return FilenameUtils.concat(this.storagePathArtwork, fileName);
