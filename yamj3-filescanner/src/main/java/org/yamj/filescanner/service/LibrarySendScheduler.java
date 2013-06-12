@@ -22,13 +22,10 @@
  */
 package org.yamj.filescanner.service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 import org.joda.time.DateTime;
@@ -74,7 +71,7 @@ public class LibrarySendScheduler {
             try {
                 for (Map.Entry<String, Future<StatusType>> entry : library.getDirectoryStatus().entrySet()) {
                     LOG.info("    {}: {}", entry.getKey(), entry.getValue().isDone() ? entry.getValue().get() : "Being processed");
-                    boolean sendStatus = Boolean.FALSE;
+                    boolean sendStatus;
                     if (entry.getValue().isDone()) {
                         StatusType processingStatus = entry.getValue().get();
                         if (processingStatus == StatusType.NEW) {
@@ -91,6 +88,8 @@ public class LibrarySendScheduler {
                             sendStatus = Boolean.TRUE;
                         } else {
                             LOG.warn("    Unknown processing status {} for {}", processingStatus, entry.getKey());
+                            // Assume this is correct, so we don't get stuck
+                            sendStatus = Boolean.TRUE;
                         }
                     } else {
                         LOG.warn("    Still being procesed {}", entry.getKey());
@@ -115,72 +114,6 @@ public class LibrarySendScheduler {
                 LOG.info("ExecutionException: {}", ex.getMessage());
             }
         }
-    }
-
-    /**
-     * Check that the library has all the directories sent to the core server
-     *
-     * If there are entries that have not been sent, or need resending, they should be done as well
-     *
-     * @param library
-     */
-    private void checkLibraryAllSent(Library library) {
-        int retryCount2 = 3; // The number of times to retry sending the files to core
-        List<String> resendDirs = new ArrayList<String>();
-
-        int processedDone, processedError, unprocessed;
-        do {
-            // Clear the directories to resend.
-            resendDirs.clear();
-            processedDone = 0;
-            processedError = 0;
-            unprocessed = 0;
-            LOG.info("There are {} items remaining to be sent to core.", runningCount.get());
-            for (Map.Entry<String, Future<StatusType>> entry : library.getDirectoryStatus().entrySet()) {
-                try {
-                    if (entry.getValue().isDone()) {
-                        LOG.info("{} - Status: {}", entry.getKey(), entry.getValue().get());
-                        if (entry.getValue().get() == StatusType.ERROR) {
-                            processedError++;
-                            // Add the directory to the list to resend.
-                            resendDirs.add(entry.getKey());
-                        } else {
-                            processedDone++;
-                        }
-                    } else {
-                        LOG.info("{} - Not yet processed", entry.getKey());
-                        unprocessed++;
-                    }
-                } catch (InterruptedException ex) {
-                    LOG.trace("Interrupted checking '{}'", entry.getKey());
-                } catch (ExecutionException ex) {
-                    LOG.trace("Execution exception with '{}', error: {}", entry.getKey(), ex.getMessage());
-                }
-            }
-
-            LOG.info("Done: {}, Error: {}, Unprocessed: {}", processedDone, processedError, unprocessed);
-
-            if (processedError > 0) {
-                LOG.info("There were {} errors sending to the server. Will attempt to send {} more times.", processedError, retryCount2--);
-
-                for (String errorDir : resendDirs) {
-                    LOG.info("Resending '{}' to the core", errorDir);
-                    sendToCore(library, errorDir);
-                    // Add one to the unprocessed count
-                    unprocessed++;
-                }
-            }
-
-            if (unprocessed > 0) {
-                try {
-                    LOG.info("Waiting for threads to complete...");
-                    TimeUnit.SECONDS.sleep(10);
-                } catch (InterruptedException ex) {
-                    LOG.trace("Interrupted whilst waiting for threads to complete.");
-                }
-            }
-        } while (unprocessed > 0 && retryCount2 >= 0);
-
     }
 
     /**
