@@ -156,9 +156,9 @@ public class ArtworkScannerService {
                 if (scanner != null) {
                     LOG.debug("Use {} scanner for {}", scanner.getScannerName(), artwork);
                     if (artwork.getSeason() != null) {
-                        posters= scanner.getPosters(artwork.getSeason());
+                        posters = scanner.getPosters(artwork.getSeason());
                     } else {
-                        posters= scanner.getPosters(artwork.getSeries());
+                        posters = scanner.getPosters(artwork.getSeries());
                     }
                     if (CollectionUtils.isNotEmpty(posters)) {
                         break;
@@ -192,15 +192,33 @@ public class ArtworkScannerService {
             for (String prio : FANART_MOVIE_PRIORITIES) {
                 IFanartScanner scanner = registeredMovieFanartScanner.get(prio);
                 if (scanner != null) {
+                    LOG.debug("Use {} scanner for {}", scanner.getScannerName(), artwork);  
                     fanarts = scanner.getFanarts(artwork.getVideoData());
                     if (CollectionUtils.isNotEmpty(fanarts)) {
                         break;
                     }
+                } else {
+                    LOG.warn("Desired movie fanart scanner {} not registerd", prio);
                 }
             }
         } else {
-            // Don't throw an exception here, just a debug message for now
-            LOG.debug("Artwork search not implemented for {}", artwork);
+            // CASE: TV show poster scan
+            for (String prio : FANART_TVSHOW_PRIORITIES) {
+                IFanartScanner scanner = registeredTvShowFanartScanner.get(prio);
+                if (scanner != null) {
+                    LOG.debug("Use {} scanner for {}", scanner.getScannerName(), artwork);  
+                    if (artwork.getSeason() != null) {
+                        fanarts = scanner.getFanarts(artwork.getSeason());
+                    } else {
+                        fanarts = scanner.getFanarts(artwork.getSeries());
+                    }
+                    if (CollectionUtils.isNotEmpty(fanarts)) {
+                        break;
+                    }
+                } else {
+                    LOG.warn("Desired TV show fanart scanner {} not registerd", prio);
+                }
+            }
         }
         
         if (CollectionUtils.isEmpty(fanarts)) {
