@@ -34,9 +34,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.type.ImageFormat;
+import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
 
 @Service("fileStorageService")
@@ -146,41 +145,10 @@ public class FileStorageService {
 
     private String getStorageName(StorageType type, String fileName) {
         if (StorageType.ARTWORK == type) {
-            return FilenameUtils.concat(this.storagePathArtwork, fileName);
+            String hashFilename = FilenameUtils.concat(this.storagePathArtwork, FileTools.createDirHash(fileName));
+            FileTools.makeDirectories(hashFilename);
+            return hashFilename;
         }
-        throw new RuntimeException("Unknown storage type " + type);
-    }
-
-    /**
-     * Create a directory hash from the filename
-     *
-     * @param filename
-     * @return
-     */
-    private static String createDirHash(final String filename) {
-        // Skip if the filename is invalid OR has already been hashed
-        if (StringUtils.isBlank(filename) || filename.contains(File.separator)) {
-            return filename;
-        }
-
-        // Remove all the non-word characters from the filename, replacing with an underscore
-        String cleanFilename = filename.replaceAll("[^\\p{L}\\p{N}]", "_").toLowerCase().trim();
-
-        StringBuilder dirHash = new StringBuilder();
-        dirHash.append(cleanFilename.substring(0, 1)).append(File.separator);
-        dirHash.append(cleanFilename.substring(0, cleanFilename.length() > 1 ? 2 : 1)).append(File.separator);
-        dirHash.append(filename);
-
-        return dirHash.toString();
-    }
-
-    /**
-     * Create a directory has from the filename of a file
-     *
-     * @param file
-     * @return
-     */
-    private static String createDirHash(final File file) {
-        return createDirHash(file.getName());
+        throw new IllegalArgumentException("Unknown storage type " + type);
     }
 }

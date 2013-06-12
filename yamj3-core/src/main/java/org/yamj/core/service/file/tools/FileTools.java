@@ -26,6 +26,7 @@ import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,6 @@ public class FileTools {
     private static final Logger LOG = LoggerFactory.getLogger(FileTools.class);
     private static final int BUFF_SIZE = 16 * 1024;
     private static Lock mkdirsLock = new ReentrantLock();
-
     /**
      * One buffer for each thread to allow threaded copies
      */
@@ -171,7 +171,28 @@ public class FileTools {
      * @param sourceDirectory Source directory or file to create the directories directories
      * @return
      */
-    public static Boolean makeDirectories(File file) {
+    public static boolean makeDirectories(String filename) {
+        return makeDirectories(new File(filename));
+    }
+
+    /**
+     * Create all directories up to the level of the file passed
+     *
+     * @param sourceDirectory Source directory or file to create the directories
+     * @param numOfTries Number of attempts that will be made to create the directories
+     * @return
+     */
+    public static boolean makeDirectories(String filename, int numOfTries) {
+        return makeDirectories(new File(filename), numOfTries);
+    }
+
+    /**
+     * Create all directories up to the level of the file passed
+     *
+     * @param sourceDirectory Source directory or file to create the directories directories
+     * @return
+     */
+    public static boolean makeDirectories(File file) {
         return makeDirectories(file, 10);
     }
 
@@ -182,7 +203,7 @@ public class FileTools {
      * @param numOfTries Number of attempts that will be made to create the directories
      * @return
      */
-    public static Boolean makeDirectories(final File sourceDirectory, int numOfTries) {
+    public static boolean makeDirectories(final File sourceDirectory, int numOfTries) {
         File targetDirectory;
         if (sourceDirectory.isDirectory()) {
             targetDirectory = sourceDirectory;
@@ -210,5 +231,38 @@ public class FileTools {
         } finally {
             mkdirsLock.unlock();
         }
+    }
+
+    /**
+     * Create a directory hash from the filename
+     *
+     * @param filename
+     * @return
+     */
+    public static String createDirHash(final String filename) {
+        // Skip if the filename is invalid OR has already been hashed
+        if (StringUtils.isBlank(filename) || filename.contains(File.separator)) {
+            return filename;
+        }
+
+        // Remove all the non-word characters from the filename, replacing with an underscore
+        String cleanFilename = filename.replaceAll("[^\\p{L}\\p{N}]", "_").toLowerCase().trim();
+
+        StringBuilder dirHash = new StringBuilder();
+        dirHash.append(cleanFilename.substring(0, 1)).append(File.separator);
+        dirHash.append(cleanFilename.substring(0, cleanFilename.length() > 1 ? 2 : 1)).append(File.separator);
+        dirHash.append(filename);
+
+        return dirHash.toString();
+    }
+
+    /**
+     * Create a directory has from the filename of a file
+     *
+     * @param file
+     * @return
+     */
+    public static String createDirHash(final File file) {
+        return createDirHash(file.getName());
     }
 }
