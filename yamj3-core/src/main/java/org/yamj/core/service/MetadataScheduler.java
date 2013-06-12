@@ -27,6 +27,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,6 @@ public class MetadataScheduler {
     private static final int PEOPLE_SCANNER_MAX_RESULTS = PropertyTools.getIntProperty("yamj3.scheduler.peoplescan.maxResults", 40);
     private static final int ARTWORK_SCANNER_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.artworkscan.maxThreads", 3);
     private static final int ARTWORK_SCANNER_MAX_RESULTS = PropertyTools.getIntProperty("yamj3.scheduler.artworkscan.maxResults", 30);
-
     @Autowired
     private MetadataStorageService metadataStorageService;
     @Autowired
@@ -68,7 +68,7 @@ public class MetadataScheduler {
             LOG.info("Media data scanning is disabled");
             return;
         }
-        
+
         List<QueueDTO> queueElements = metadataStorageService.getMediaQueueForScanning(MEDIA_SCANNER_MAX_RESULTS);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.debug("No media data found to scan");
@@ -88,8 +88,9 @@ public class MetadataScheduler {
         // run until all workers have finished
         while (!executor.isTerminated()) {
             try {
-                Thread.sleep(5000);
-            } catch (InterruptedException ignore) {}
+                TimeUnit.SECONDS.sleep(5);
+            } catch (InterruptedException ignore) {
+            }
         }
 
         LOG.debug("Finished media data scanning");
@@ -121,8 +122,9 @@ public class MetadataScheduler {
         // run until all workers have finished
         while (!executor.isTerminated()) {
             try {
-                Thread.sleep(5000);
-            } catch (InterruptedException ignore) {}
+                TimeUnit.SECONDS.sleep(5);
+            } catch (InterruptedException ignore) {
+            }
 
         }
 
@@ -135,7 +137,7 @@ public class MetadataScheduler {
             LOG.info("Artwork scanning is disabled");
             return;
         }
-        
+
         List<QueueDTO> queueElements = artworkStorageService.getArtworkQueueForScanning(ARTWORK_SCANNER_MAX_RESULTS);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.debug("No artwork found to scan");
@@ -155,11 +157,11 @@ public class MetadataScheduler {
         // run until all workers have finished
         while (!executor.isTerminated()) {
             try {
-                Thread.sleep(5000);
-            } catch (InterruptedException ignore) {}
+                TimeUnit.SECONDS.sleep(5);
+            } catch (InterruptedException ignore) {
+            }
         }
 
         LOG.debug("Finished artwork scanning");
     }
-
 }

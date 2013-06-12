@@ -45,13 +45,12 @@ import org.yamj.core.service.plugin.TheMovieDbScanner;
 
 @Service("tmdbArtworkScanner")
 public class TheMovieDbArtworkScanner implements
-    IMoviePosterScanner, IMovieFanartScanner, InitializingBean
-{
+        IMoviePosterScanner, IMovieFanartScanner, InitializingBean {
+
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbArtworkScanner.class);
     private static final String DEFAULT_POSTER_SIZE = "original";
     private static final String DEFAULT_FANART_SIZE = "original";
     private static final String DEFAULT_LANGUAGE = PropertyTools.getProperty("themoviedb.language", "en");
-
     @Autowired
     private ArtworkScannerService artworkScannerService;
     @Autowired
@@ -109,7 +108,7 @@ public class TheMovieDbArtworkScanner implements
     public List<ArtworkDetailDTO> getFanarts(String id) {
         List<ArtworkDetailDTO> dtos = new ArrayList<ArtworkDetailDTO>();
         // TODO retrieve more than one fanart info
-        
+
         if (StringUtils.isNumeric(id)) {
             try {
                 MovieDb moviedb = tmdbApi.getMovieInfo(Integer.parseInt(id), DEFAULT_LANGUAGE);
@@ -154,7 +153,7 @@ public class TheMovieDbArtworkScanner implements
             try {
                 moviedb = tmdbApi.getMovieInfoImdb(imdbID, DEFAULT_LANGUAGE);
             } catch (MovieDbException ex) {
-                LOG.warn("Failed to get TMDb ID for " + imdbID + " - " + ex.getMessage());
+                LOG.warn("Failed to get TMDb ID for {}-{}", imdbID, ex.getMessage());
             }
 
             if (moviedb != null) {
@@ -167,7 +166,7 @@ public class TheMovieDbArtworkScanner implements
         }
 
         // Search based on title and year
-        String title = StringUtils.isBlank(metadata.getTitleOriginal())?metadata.getTitle():metadata.getTitleOriginal();
+        String title = StringUtils.isBlank(metadata.getTitleOriginal()) ? metadata.getTitle() : metadata.getTitleOriginal();
         tmdbID = getId(title, metadata.getYear());
         if (StringUtils.isNumeric(tmdbID)) {
             metadata.setSourceDbId(getScannerName(), tmdbID);

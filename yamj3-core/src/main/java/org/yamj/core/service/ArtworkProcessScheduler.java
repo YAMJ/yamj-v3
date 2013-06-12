@@ -27,6 +27,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,6 @@ public class ArtworkProcessScheduler {
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkProcessScheduler.class);
     private static final int ARTWORK_PROCESSOR_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.artworkprocess.maxThreads", 1);
     private static final int ARTWORK_PROCESSOR_MAX_RESULTS = PropertyTools.getIntProperty("yamj3.scheduler.artworkprocess.maxResults", 20);
-
     @Autowired
     private ArtworkStorageService artworkStorageService;
     @Autowired
@@ -57,7 +57,7 @@ public class ArtworkProcessScheduler {
             LOG.info("Artwork processing is disabled");
             return;
         }
-        
+
         List<QueueDTO> queueElements = artworkStorageService.getArtworLocatedQueue(ARTWORK_PROCESSOR_MAX_RESULTS);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.debug("No artwork found to process");
@@ -77,8 +77,9 @@ public class ArtworkProcessScheduler {
         // run until all workers have finished
         while (!executor.isTerminated()) {
             try {
-                Thread.sleep(5000);
-            } catch (InterruptedException ignore) {}
+                TimeUnit.SECONDS.sleep(5);
+            } catch (InterruptedException ignore) {
+            }
         }
 
         LOG.debug("Finished artwork processing");

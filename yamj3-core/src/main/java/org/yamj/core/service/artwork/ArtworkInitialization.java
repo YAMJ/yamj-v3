@@ -40,7 +40,6 @@ import org.yamj.core.database.service.ArtworkStorageService;
 public class ArtworkInitialization implements InitializingBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkInitialization.class);
-
     @Autowired
     private ArtworkStorageService artworkStorageService;
 
@@ -52,20 +51,20 @@ public class ArtworkInitialization implements InitializingBean {
                 String name = defaultProfile;
                 boolean valid = true;
 
-                String type = PropertyTools.getProperty("artwork.profile."+name+".type", ArtworkType.UNKNOWN.toString());
+                String type = PropertyTools.getProperty("artwork.profile." + name + ".type", ArtworkType.UNKNOWN.toString());
                 ArtworkType artworkType = ArtworkType.fromString(type);
                 if (ArtworkType.UNKNOWN == artworkType) {
                     LOG.warn("Property 'artwork.profile.{}.type' denotes invalid artwork type: {}", name, type);
                     valid = false;
                 }
 
-                String width = PropertyTools.getProperty("artwork.profile."+name+".width");
+                String width = PropertyTools.getProperty("artwork.profile." + name + ".width");
                 if (!StringUtils.isNumeric(width)) {
                     LOG.warn("Property 'artwork.profile.{}.width' is not numeric: {}", name, width);
                     valid = false;
                 }
 
-                String height = PropertyTools.getProperty("artwork.profile."+name+".height");
+                String height = PropertyTools.getProperty("artwork.profile." + name + ".height");
                 if (!StringUtils.isNumeric(width)) {
                     LOG.warn("Property 'artwork.profile.{}.height' is not numeric: {}", name, height);
                     valid = false;
@@ -81,12 +80,12 @@ public class ArtworkInitialization implements InitializingBean {
                 artworkProfile.setArtworkType(artworkType);
                 artworkProfile.setWidth(Integer.parseInt(width));
                 artworkProfile.setHeight(Integer.parseInt(height));
-                artworkProfile.setApplyToMovie(PropertyTools.getBooleanProperty("artwork.profile."+name+".applyToMovie", Boolean.FALSE));
-                artworkProfile.setApplyToSeries(PropertyTools.getBooleanProperty("artwork.profile."+name+".applyToSeries", Boolean.FALSE));
-                artworkProfile.setApplyToSeason(PropertyTools.getBooleanProperty("artwork.profile."+name+".applyToSeason", Boolean.FALSE));
-                artworkProfile.setApplyToEpisode(PropertyTools.getBooleanProperty("artwork.profile."+name+".applyToEpisode", Boolean.FALSE));
-                artworkProfile.setPreProcess(PropertyTools.getBooleanProperty("artwork.profile."+name+".preProcess", Boolean.FALSE));
-                
+                artworkProfile.setApplyToMovie(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToMovie", Boolean.FALSE));
+                artworkProfile.setApplyToSeries(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToSeries", Boolean.FALSE));
+                artworkProfile.setApplyToSeason(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToSeason", Boolean.FALSE));
+                artworkProfile.setApplyToEpisode(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToEpisode", Boolean.FALSE));
+                artworkProfile.setPreProcess(PropertyTools.getBooleanProperty("artwork.profile." + name + ".preProcess", Boolean.FALSE));
+
                 try {
                     // call another service to handle transactions
                     this.artworkStorageService.storeArtworkProfile(artworkProfile);
@@ -97,5 +96,4 @@ public class ArtworkInitialization implements InitializingBean {
             }
         }
     }
-    
 }
