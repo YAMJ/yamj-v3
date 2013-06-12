@@ -23,14 +23,12 @@
 package org.yamj.filescanner;
 
 import org.yamj.common.cmdline.CmdLineParser;
-import org.yamj.common.dto.ImportDTO;
 import org.yamj.common.dto.StageDirectoryDTO;
 import org.yamj.common.dto.StageFileDTO;
 import org.yamj.common.remote.service.GitHubService;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.DirectoryType;
 import org.yamj.common.type.ExitType;
-import org.yamj.common.type.StatusType;
 import org.yamj.filescanner.comparator.FileTypeComparator;
 import org.yamj.filescanner.model.Library;
 import org.slf4j.Logger;
@@ -38,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import org.yamj.filescanner.model.LibraryCollection;
 import org.yamj.filescanner.model.StatType;
 import org.yamj.filescanner.service.SystemInfoCore;
-import org.yamj.filescanner.service.SendToCore;
 import org.yamj.filescanner.tools.DirectoryEnding;
 import org.yamj.filescanner.tools.Watcher;
 import java.io.File;
@@ -49,27 +46,22 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.model.YamjInfo;
 import org.yamj.common.tools.StringTools;
+import org.yamj.common.type.StatusType;
 import org.yamj.common.util.KeywordMap;
 
 /**
@@ -88,13 +80,10 @@ public class ScannerManagementImpl implements ScannerManagement {
     private static final Logger LOG = LoggerFactory.getLogger(ScannerManagementImpl.class);
     // The default watched status
     private static final Boolean DEFAULT_WATCH_STATE = PropertyTools.getBooleanProperty("filescanner.watch.default", Boolean.FALSE);
-    private AtomicInteger runningCount = new AtomicInteger(0);
     @Autowired
     private LibraryCollection libraryCollection;
     @Autowired
     private SystemInfoCore pingCore;
-    @Autowired
-    private ThreadPoolTaskExecutor yamjExecutor;
     @Autowired
     private GitHubService githubService;
     // ImportDTO constants
@@ -129,13 +118,12 @@ public class ScannerManagementImpl implements ScannerManagement {
             for (String keyword : keywordList) {
                 try {
                     String regex = keyword.replace("?", ".?").replace("*", ".*?");
-                    LOG.info("Replaced pattern '{}' with regex '{}'", keyword, regex);
+                    LOG.debug("Replaced pattern '{}' with regex '{}'", keyword, regex);
                     DIR_IGNORE_FILES.add(Pattern.compile(regex));
                 } catch (PatternSyntaxException ex) {
                     LOG.warn("Pattern '{}' not recognised. Error: {}", keyword, ex.getMessage());
                 }
             }
-//            DIR_IGNORE_FILES.addAll(keywordList);
         }
 
         keywordList = processKeywords(fsIgnore, "video");
@@ -179,7 +167,6 @@ public class ScannerManagementImpl implements ScannerManagement {
     @Override
     public ExitType runScanner(CmdLineParser parser) {
         checkGitHubStatus();
-
         libraryCollection.setDefaultClient(DEFAULT_CLIENT);
         libraryCollection.setDefaultPlayerPath(DEFAULT_PLAYER_PATH);
         pingCore.check(0, 0);   // Do a quick check of the status of the connection
@@ -202,6 +189,7 @@ public class ScannerManagementImpl implements ScannerManagement {
             return ExitType.NO_DIRECTORY;
         }
 
+        // Send all libraries to be scanned
         ExitType status = ExitType.SUCCESS;
         for (Library library : libraryCollection.getLibraries()) {
             library.getStatistics().setTimeStart(System.currentTimeMillis());
@@ -209,7 +197,29 @@ public class ScannerManagementImpl implements ScannerManagement {
             library.getStatistics().setTimeEnd(System.currentTimeMillis());
             LOG.info("{}", library.getStatistics().generateStatistics(Boolean.TRUE));
             LOG.info("Scanning completed.");
+            library.setScanningComplete(Boolean.TRUE);
         }
+
+        // Wait for the libraries to be sent
+        boolean allDone;
+        do {
+            allDone = Boolean.TRUE;
+            for (Library library : libraryCollection.getLibraries()) {
+                LOG.info("Library '{}' sending status: {}", library.getImportDTO().getBaseDirectory(), library.isSendingComplete() ? "Done" : "Not Done");
+                allDone = allDone && library.isSendingComplete();
+            }
+
+            if (!allDone) {
+                try {
+                    LOG.info("Waiting for library sending to complete...");
+                    TimeUnit.SECONDS.sleep(10);
+                } catch (InterruptedException ex) {
+                    LOG.trace("Interrupted whilst waiting for threads to complete.");
+                }
+            }
+        } while (!allDone);
+
+        LOG.info("Completed sending of all libraries.");
 
         if (watchEnabled) {
             Watcher wd = new Watcher();
@@ -236,7 +246,8 @@ public class ScannerManagementImpl implements ScannerManagement {
             LOG.info("Watching not enabled.");
         }
 
-        LOG.info("Exiting with status {}", status);
+        LOG.info(
+                "Exiting with status {}", status);
 
         return status;
     }
@@ -258,9 +269,6 @@ public class ScannerManagementImpl implements ScannerManagement {
         }
 
         scanDir(library, baseDirectory);
-
-        checkLibraryAllSent(library);
-        LOG.info("Completed.");
 
         return status;
     }
@@ -337,6 +345,7 @@ public class ScannerManagementImpl implements ScannerManagement {
 
             // Scan the directory properly
             for (File file : currentFileList) {
+                boolean excluded = Boolean.FALSE;
                 if (file.isFile()) {
                     String lcFilename = file.getName().toLowerCase();
                     if (exclusions.contains(FilenameUtils.getExtension(lcFilename)) || DIR_EXCLUSIONS.containsKey(lcFilename)) {
@@ -350,12 +359,15 @@ public class ScannerManagementImpl implements ScannerManagement {
                         if (matcher.matches()) {
                             // Found the file pattern, so skip the file
                             LOG.debug("File name '{}' excluded because it matches exlusion pattern '{}'", file.getName(), pattern.pattern());
-                            continue;
+                            excluded = Boolean.TRUE;
+                            break;
                         }
                     }
 
-                    stageDir.addStageFile(scanFile(file));
-                    library.getStatistics().increment(StatType.FILE);
+                    if (!excluded) {
+                        stageDir.addStageFile(scanFile(file));
+                        library.getStatistics().increment(StatType.FILE);
+                    }
                 } else {
                     // First directory we find, we can stop (because we sorted the files first)
                     break;
@@ -363,7 +375,7 @@ public class ScannerManagementImpl implements ScannerManagement {
             }
 
             library.addDirectory(stageDir);
-            sendToCore(library, stageDir);
+            queueForSending(library, stageDir);
 
             // Resort the files with directories first
             comp.setDirectoriesFirst(Boolean.TRUE);
@@ -397,96 +409,6 @@ public class ScannerManagementImpl implements ScannerManagement {
     }
 
     /**
-     * Send an ImportDTO to the core
-     *
-     * Increment the running count
-     *
-     * @param importDto
-     */
-    private void sendToCore(Library library, StageDirectoryDTO stageDir) {
-        ImportDTO dto = library.getImportDTO(stageDir);
-
-        LOG.debug("Sending #{}: {}", runningCount.incrementAndGet(), dto.getBaseDirectory());
-
-        ApplicationContext appContext = ApplicationContextProvider.getApplicationContext();
-        SendToCore stc = (SendToCore) appContext.getBean("sendToCore");
-        stc.setImportDto(dto);
-        stc.setCounter(runningCount);
-        FutureTask<StatusType> task = new FutureTask<StatusType>(stc);
-
-        yamjExecutor.submit(task);
-//        library.addDirectoryStatus(stageDir.getPath(), ConcurrentUtils.constantFuture(StatusType.DONE));
-        library.addDirectoryStatus(stageDir.getPath(), task);
-    }
-
-    /**
-     * Check that the library has all the directories sent to the core server
-     *
-     * If there are entries that have not been sent, or need resending, they should be done as well
-     *
-     * @param library
-     */
-    private void checkLibraryAllSent(Library library) {
-        int retryCount = 3; // The number of times to retry sending the files to core
-        List<String> resendDirs = new ArrayList<String>();
-
-        int processedDone, processedError, unprocessed;
-        do {
-            // Clear the directories to resend.
-            resendDirs.clear();
-            processedDone = 0;
-            processedError = 0;
-            unprocessed = 0;
-            LOG.info("There are {} items remaining to be sent to core.", runningCount.get());
-            for (Entry<String, Future<StatusType>> entry : library.getDirectoryStatus().entrySet()) {
-                try {
-                    if (entry.getValue().isDone()) {
-                        LOG.info("{} - Status: {}", entry.getKey(), entry.getValue().get());
-                        if (entry.getValue().get() == StatusType.ERROR) {
-                            processedError++;
-                            // Add the directory to the list to resend.
-                            resendDirs.add(entry.getKey());
-                        } else {
-                            processedDone++;
-                        }
-                    } else {
-                        LOG.info("{} - Not yet processed", entry.getKey());
-                        unprocessed++;
-                    }
-                } catch (InterruptedException ex) {
-                } catch (ExecutionException ex) {
-                }
-            }
-
-            LOG.info("Done: {}, Error: {}, Unprocessed: {}", processedDone, processedError, unprocessed);
-
-            if (processedError > 0) {
-                LOG.info("There were {} errors sending to the server. Will attempt to send {} more times.", processedError, retryCount--);
-
-                for (String errorDir : resendDirs) {
-                    LOG.info("Resending '{}' to the core", errorDir);
-                    // Get the error StageDTO
-                    StageDirectoryDTO stageDto = library.getDirectory(errorDir);
-                    // Now resend it to the core
-                    sendToCore(library, stageDto);
-                    // Add one to the unprocessed count
-                    unprocessed++;
-                }
-            }
-
-            if (unprocessed > 0) {
-                try {
-                    LOG.info("Sleeping...");
-                    TimeUnit.SECONDS.sleep(10);
-                } catch (InterruptedException ex) {
-                    //
-                }
-            }
-        } while (unprocessed > 0 && retryCount >= 0);
-
-    }
-
-    /**
      * Get the watched status from the command line property or return the default value.
      *
      * @param parsedOptionValue the property from the command line
@@ -497,14 +419,6 @@ public class ScannerManagementImpl implements ScannerManagement {
             return DEFAULT_WATCH_STATE;
         }
         return Boolean.parseBoolean(parsedOptionValue);
-    }
-
-    public ThreadPoolTaskExecutor getYamjExecutor() {
-        return yamjExecutor;
-    }
-
-    public void setYamjExecutor(ThreadPoolTaskExecutor yamjExecutor) {
-        this.yamjExecutor = yamjExecutor;
     }
 
     private void checkGitHubStatus() {
@@ -522,5 +436,15 @@ public class ScannerManagementImpl implements ScannerManagement {
         } catch (RemoteAccessException ex) {
             LOG.warn("Failed to get GitHub status, error: {}", ex.getMessage());
         }
+    }
+
+    /**
+     * Add the file to the library for sending to the core
+     *
+     * @param library
+     * @param stageDir
+     */
+    private void queueForSending(Library library, StageDirectoryDTO stageDir) {
+        library.addDirectoryStatus(stageDir.getPath(), ConcurrentUtils.constantFuture(StatusType.NEW));
     }
 }

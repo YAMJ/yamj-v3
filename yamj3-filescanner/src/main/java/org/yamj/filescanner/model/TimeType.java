@@ -25,5 +25,9 @@ package org.yamj.filescanner.model;
 public enum TimeType {
 
     START,
+    SCANNING_START,
+    SCANNING_END,
+    SENDING_START,
+    SENDING_END,
     END;
 }

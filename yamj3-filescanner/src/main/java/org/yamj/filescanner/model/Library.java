@@ -30,6 +30,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 
@@ -44,6 +45,8 @@ public class Library implements Serializable {
     private Map<String, StageDirectoryDTO> directories;
     private Map<String, Future<StatusType>> directoryStatus;
     private ImportDTO importDTO;
+    private AtomicBoolean scanningComplete;
+    private AtomicBoolean sendingComplete;
 
     /**
      * Create a library
@@ -54,6 +57,8 @@ public class Library implements Serializable {
         this.directories = new HashMap<String, StageDirectoryDTO>(1);
         this.directoryStatus = new HashMap<String, Future<StatusType>>(1);
         importDTO = new ImportDTO();
+        this.scanningComplete = new AtomicBoolean(Boolean.FALSE);
+        this.sendingComplete = new AtomicBoolean(Boolean.FALSE);
     }
 
     /**
@@ -283,6 +288,21 @@ public class Library implements Serializable {
         } else {
             return absolutePath;
         }
+    }
 
+    public boolean isScanningComplete() {
+        return scanningComplete.get();
+    }
+
+    public void setScanningComplete(boolean scanningComplete) {
+        this.scanningComplete.set(scanningComplete);
+    }
+
+    public boolean isSendingComplete() {
+        return sendingComplete.get();
+    }
+
+    public void setSendingComplete(boolean sendingComplete) {
+        this.sendingComplete.set(sendingComplete);
     }
 }

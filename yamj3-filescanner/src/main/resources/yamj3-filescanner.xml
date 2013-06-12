@@ -38,6 +38,10 @@
 
     <bean id="scannerManagement"
           class="org.yamj.filescanner.ScannerManagementImpl">
+    </bean>
+
+    <bean id="librarySendScheduler"
+          class="org.yamj.filescanner.service.LibrarySendScheduler">
         <property name="yamjExecutor" ref="taskExecutor"/>
     </bean>
 
@@ -50,8 +54,6 @@
     <bean id="sendToCore"
           class="org.yamj.filescanner.service.SendToCore"
           scope="prototype">
-        <property name="timeoutSeconds" value="${filescanner.sendtocore.timeout}"/>
-        <property name="numberOfRetries" value="${filescanner.sendtocore.retry}"/>
     </bean>
 
     <bean id="fileImportService"
