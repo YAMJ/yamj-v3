@@ -230,8 +230,6 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             videoData.setGenreNames(genreNames, TMDB_SCANNER_ID);
         }
 
-
-
         // CAST & CREW
         try {
             CreditDTO credit;

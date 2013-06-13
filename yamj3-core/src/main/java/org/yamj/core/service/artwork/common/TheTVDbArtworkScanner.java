@@ -52,28 +52,25 @@ import org.yamj.core.tools.LRUTimedCache;
 
 @Service("tvdbArtworkScanner")
 public class TheTVDbArtworkScanner implements
-    ITvShowPosterScanner, ITvShowFanartScanner, ITvShowBannerScanner, 
-    InitializingBean
-{
+        ITvShowPosterScanner, ITvShowFanartScanner, ITvShowBannerScanner,
+        InitializingBean {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbArtworkScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TheTVDbArtworkScanner.class);
     private static final String DEFAULT_LANGUAGE = PropertyTools.getProperty("thetvdb.language", "en");
     private static final String ALTERNATE_LANGUAGE = PropertyTools.getProperty("thetvdb.language.alternate", "");
-
     @Autowired
     private ArtworkScannerService artworkScannerService;
     @Autowired
     private TheTVDBApi tvdbApi;
     @Autowired
     private TheTVDbScanner tvdbScanner;
-
     // make maximal 20 banners objects maximal 30 minutes accessible
     private Lock bannersLock = new ReentrantLock(true);
-    private LRUTimedCache<String,Banners> bannersCache = new LRUTimedCache<String,Banners>(20, 1800); 
+    private LRUTimedCache<String, Banners> bannersCache = new LRUTimedCache<String, Banners>(20, 1800);
     // make maximal 50 series objects maximal 30 minutes accessible
     private Lock seriesLock = new ReentrantLock(true);
-    private LRUTimedCache<String,com.omertron.thetvdbapi.model.Series> seriesCache = new LRUTimedCache<String,com.omertron.thetvdbapi.model.Series>(50, 1800); 
-    
+    private LRUTimedCache<String, com.omertron.thetvdbapi.model.Series> seriesCache = new LRUTimedCache<String, com.omertron.thetvdbapi.model.Series>(50, 1800);
+
     @Override
     public String getScannerName() {
         return TheTVDbScanner.TVDB_SCANNER_ID;
@@ -90,7 +87,7 @@ public class TheTVDbArtworkScanner implements
     public String getId(String title, int year, int season) {
         return tvdbScanner.getSeriesId(title, year);
     }
-    
+
     @Override
     public List<ArtworkDetailDTO> getPosters(String title, int year, int season) {
         String id = this.getId(title, year, season);
@@ -102,7 +99,7 @@ public class TheTVDbArtworkScanner implements
         if (StringUtils.isBlank(id)) {
             return null;
         }
-        
+
         List<ArtworkDetailDTO> dtos;
         if (season < 0) {
             // series
@@ -121,7 +118,7 @@ public class TheTVDbArtworkScanner implements
 
         // get series artwork
         Banners bannerList = getTVDbBanners(id);
-        
+
         // find posters
         for (Banner banner : bannerList.getPosterList()) {
             if (banner.getBannerType2() == BannerType.Poster) {
@@ -144,13 +141,13 @@ public class TheTVDbArtworkScanner implements
         }
 
         List<ArtworkDetailDTO> returnDTOs = null;
-        if (langDTOs.size()>0) {
+        if (langDTOs.size() > 0) {
             LOG.info("Series {}: Using posters with language '{}'", id, DEFAULT_LANGUAGE);
             returnDTOs = langDTOs;
-        } else if (altLangDTOs.size()>0) {
+        } else if (altLangDTOs.size() > 0) {
             LOG.info("Series {}: No poster found for language '{}', using posters with language '{}'", id, DEFAULT_LANGUAGE, ALTERNATE_LANGUAGE);
             returnDTOs = altLangDTOs;
-        } else if (noLangDTOs.size()>0) {
+        } else if (noLangDTOs.size() > 0) {
             LOG.info("Series {}: No poster found for language '{}', using posters with no language", id, DEFAULT_LANGUAGE);
             returnDTOs = noLangDTOs;
         } else {
@@ -164,7 +161,7 @@ public class TheTVDbArtworkScanner implements
 
         return returnDTOs;
     }
-        
+
     private List<ArtworkDetailDTO> getSeasonPosters(String id, int season) {
         List<ArtworkDetailDTO> langDTOs = new ArrayList<ArtworkDetailDTO>();
         List<ArtworkDetailDTO> altLangDTOs = new ArrayList<ArtworkDetailDTO>();
@@ -172,7 +169,7 @@ public class TheTVDbArtworkScanner implements
 
         // get series artwork
         Banners bannerList = getTVDbBanners(id);
-        
+
         // find posters
         for (Banner banner : bannerList.getSeasonList()) {
             if ((banner.getSeason() == season) && (banner.getBannerType2() == BannerType.Season)) {
@@ -195,13 +192,13 @@ public class TheTVDbArtworkScanner implements
         }
 
         List<ArtworkDetailDTO> returnDTOs = null;
-        if (langDTOs.size()>0) {
+        if (langDTOs.size() > 0) {
             LOG.info("Season {}-{}: Using posters with language '{}'", id, season, DEFAULT_LANGUAGE);
             returnDTOs = langDTOs;
-        } else if (altLangDTOs.size()>0) {
+        } else if (altLangDTOs.size() > 0) {
             LOG.info("Season {}-{}: No poster found for language '{}', using posters with language '{}'", id, season, DEFAULT_LANGUAGE, ALTERNATE_LANGUAGE);
             returnDTOs = altLangDTOs;
-        } else if (noLangDTOs.size()>0) {
+        } else if (noLangDTOs.size() > 0) {
             LOG.info("Season {}-{}: No poster found for language '{}', using posters with no language", id, season, DEFAULT_LANGUAGE);
             returnDTOs = noLangDTOs;
         } else if (CollectionUtils.isNotEmpty(bannerList.getPosterList())) {
@@ -220,7 +217,7 @@ public class TheTVDbArtworkScanner implements
 
         return returnDTOs;
     }
-    
+
     @Override
     public List<ArtworkDetailDTO> getFanarts(String title, int year, int season) {
         String id = this.getId(title, year, season);
@@ -232,7 +229,7 @@ public class TheTVDbArtworkScanner implements
         if (StringUtils.isBlank(id)) {
             return null;
         }
-        
+
         List<ArtworkDetailDTO> dtos;
         if (season < 0) {
             // series
@@ -250,8 +247,8 @@ public class TheTVDbArtworkScanner implements
 
         // get series artwork
         Banners bannerList = getTVDbBanners(id);
-        
-        // find fanarts
+
+        // find fanart
         for (Banner banner : bannerList.getFanartList()) {
             if (banner.getBannerType2() == BannerType.FanartHD) {
                 // HD fanart
@@ -262,17 +259,15 @@ public class TheTVDbArtworkScanner implements
             }
         }
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Series {}: Found {} HD fanarts", id, hdDTOs.size());
-            LOG.debug("Series {}: Found {} SD fanarts", id, sdDTOs.size());
-        }
-        
+        LOG.debug("Series {}: Found {} HD fanart", id, hdDTOs.size());
+        LOG.debug("Series {}: Found {} SD fanart", id, sdDTOs.size());
+
         List<ArtworkDetailDTO> returnDTOs = null;
-        if (hdDTOs.size()>0) {
-            LOG.info("Series {}: Using HD fanarts", id);
+        if (hdDTOs.size() > 0) {
+            LOG.info("Series {}: Using HD fanart", id);
             returnDTOs = hdDTOs;
-        } else if (sdDTOs.size()>0) {
-            LOG.info("Series {}: No HD fanarts found; using SD fanarts", id);
+        } else if (sdDTOs.size() > 0) {
+            LOG.info("Series {}: No HD fanart found; using SD fanart", id);
             returnDTOs = sdDTOs;
         } else {
             String url = this.getTVDbSeries(id).getFanart();
@@ -287,15 +282,15 @@ public class TheTVDbArtworkScanner implements
     }
 
     private List<ArtworkDetailDTO> getSeasonFanarts(String id, int season) {
-        // NOTE: no explicit season fanarts in TheTVDb
-        
+        // NOTE: no explicit season fanart in TheTVDb
+
         List<ArtworkDetailDTO> hdDTOs = new ArrayList<ArtworkDetailDTO>();
         List<ArtworkDetailDTO> sdDTOs = new ArrayList<ArtworkDetailDTO>();
 
         // get series artwork
         Banners bannerList = getTVDbBanners(id);
-        
-        // find fanarts
+
+        // find fanart
         for (Banner banner : bannerList.getFanartList()) {
             if (banner.getBannerType2() == BannerType.FanartHD) {
                 // HD fanart
@@ -307,16 +302,16 @@ public class TheTVDbArtworkScanner implements
         }
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Season {}-{}: Found {} HD fanarts", id, hdDTOs.size());
-            LOG.debug("Season {}-{}: Found {} SD fanarts", id, sdDTOs.size());
+            LOG.debug("Season {}-{}: Found {} HD fanart", id, hdDTOs.size());
+            LOG.debug("Season {}-{}: Found {} SD fanart", id, sdDTOs.size());
         }
-        
+
         List<ArtworkDetailDTO> returnDTOs = null;
-        if (hdDTOs.size()>0) {
-            LOG.debug("Season {}-{}: Using HD fanarts", id, season);
+        if (hdDTOs.size() > 0) {
+            LOG.debug("Season {}-{}: Using HD fanart", id, season);
             returnDTOs = hdDTOs;
-        } else if (sdDTOs.size()>0) {
-            LOG.debug("Season {}-{}: No HD fanarts found; using SD fanarts", id, season);
+        } else if (sdDTOs.size() > 0) {
+            LOG.debug("Season {}-{}: No HD fanart found; using SD fanart", id, season);
             returnDTOs = sdDTOs;
         } else {
             String url = this.getTVDbSeries(id).getFanart();
@@ -335,10 +330,11 @@ public class TheTVDbArtworkScanner implements
 
         if (banner.getRating() != null) {
             try {
-                dto.setRating((int)(banner.getRating() * 10));
-            } catch (Exception ignore) {}
+                dto.setRating((int) (banner.getRating() * 10));
+            } catch (Exception ignore) {
+            }
         }
-        
+
         return dto;
     }
 
@@ -353,7 +349,7 @@ public class TheTVDbArtworkScanner implements
         if (StringUtils.isBlank(id)) {
             return null;
         }
-        
+
         List<ArtworkDetailDTO> dtos;
         if (season < 0) {
             // series
@@ -364,7 +360,7 @@ public class TheTVDbArtworkScanner implements
         }
         return dtos;
     }
-    
+
     private List<ArtworkDetailDTO> getSeriesBanners(String id) {
         return null;
     }
@@ -372,7 +368,7 @@ public class TheTVDbArtworkScanner implements
     private List<ArtworkDetailDTO> getSeasonBanners(String id, int season) {
         return null;
     }
-    
+
     private synchronized Banners getTVDbBanners(String id) {
         Banners banners = bannersCache.get(id);
         if (banners == null) {
@@ -442,16 +438,16 @@ public class TheTVDbArtworkScanner implements
         // per series, not season based
         Series series;
         if (metadata instanceof Series) {
-            series = (Series)metadata;
+            series = (Series) metadata;
         } else if (metadata instanceof Season) {
-            series = ((Season)metadata).getSeries();
+            series = ((Season) metadata).getSeries();
         } else if (metadata instanceof VideoData) {
-            series = ((VideoData)metadata).getSeason().getSeries();
+            series = ((VideoData) metadata).getSeason().getSeries();
         } else {
             // no valid object for scanning artwork from TheTVDb
             return null;
         }
-        
+
         // get the series id
         return tvdbScanner.getSeriesId(series);
     }
