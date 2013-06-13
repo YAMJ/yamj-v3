@@ -32,9 +32,9 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 public abstract class AbstractMoviePosterScanner implements IMoviePosterScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMoviePosterScanner.class);
-    
+
     @Override
-    public List<ArtworkDetailDTO> getPosters(IMetadata metadata) {
+    public String getId(IMetadata metadata) {
         String id = metadata.getSourceDbId(getScannerName());
         if (StringUtils.isBlank(id)) {
             if (StringUtils.isBlank(metadata.getTitleOriginal())) {
@@ -51,7 +51,13 @@ public abstract class AbstractMoviePosterScanner implements IMoviePosterScanner 
                 metadata.setSourceDbId(getScannerName(), id);
             }
         }
-        
+        return id;
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getPosters(IMetadata metadata) {
+        String id = getId(metadata);
+            
         if (!(StringUtils.isBlank(id) || "-1".equals(id) || "0".equals(id))) {
             return getPosters(id);
         }

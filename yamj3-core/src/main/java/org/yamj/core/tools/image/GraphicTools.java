@@ -54,9 +54,14 @@ public class GraphicTools {
     public static BufferedImage loadJPEGImage(File fileImage) throws IOException, ImageReadException {
         if (fileImage.exists()) {
             JpegReader jr = new JpegReader();
-            return jr.readImage(fileImage);
+            BufferedImage bi = jr.readImage(fileImage);
+            if (bi == null) {
+                // null means: the image is invalid and couldn't be loaded
+                throw new ImageReadException("Image file '" + fileImage.getName() + "' is invalid");
+            } 
+            return bi;
         } else {
-            throw new FileNotFoundException("Image file '" + fileImage.getAbsolutePath() + "' does not exist");
+            throw new FileNotFoundException("Image file '" + fileImage.getName() + "' does not exist");
         }
     }
 

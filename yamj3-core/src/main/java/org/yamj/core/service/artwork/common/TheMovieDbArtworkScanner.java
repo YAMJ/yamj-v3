@@ -139,7 +139,8 @@ public class TheMovieDbArtworkScanner implements
         return null;
     }
 
-    private String getId(IMetadata metadata) {
+    @Override
+    public String getId(IMetadata metadata) {
         // First look to see if we have a TMDb ID as this will make looking the film up easier
         String tmdbID = metadata.getSourceDbId(getScannerName());
         if (StringUtils.isNumeric(tmdbID)) {

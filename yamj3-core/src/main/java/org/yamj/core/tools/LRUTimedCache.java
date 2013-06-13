@@ -70,7 +70,7 @@ public class LRUTimedCache<K,V> {
         });
     }
  
-    public synchronized V put(K key, V value) {
+    public V put(K key, V value) {
         CachedObject cached = new CachedObject(value);
         CachedObject previous = internal.put(key, cached);
         if (previous == null || previous.isTimedOut(this.timeoutInMs)) {
@@ -79,7 +79,7 @@ public class LRUTimedCache<K,V> {
         return previous.value();
     }
  
-    public synchronized V get(K key) {
+    public V get(K key) {
         CachedObject cached = internal.get(key);
         if (cached == null) {
             return null;

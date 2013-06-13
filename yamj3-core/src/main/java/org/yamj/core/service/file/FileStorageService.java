@@ -87,7 +87,7 @@ public class FileStorageService {
         }
     }
 
-    public void storeArtwork(String fileName, BufferedImage bi, ImageFormat imageFormat, int quality) throws IOException {
+    public void storeArtwork(String fileName, BufferedImage bi, ImageFormat imageFormat, int quality) throws Exception {
         LOG.debug("Store {} image: {}", imageFormat, fileName);
         String storageFileName = getStorageName(StorageType.ARTWORK, fileName);
         File outputFile = new File(storageFileName);
@@ -115,9 +115,6 @@ public class FileStorageService {
                 IIOImage image = new IIOImage(bufImage, null, null);
                 writer.write(null, image, iwp);
             }
-        } catch (Exception error) {
-            LOG.debug("Failed saving image: {}", fileName);
-            LOG.warn("Graphics error", error);
         } finally {
             if (writer != null) {
                 writer.dispose();

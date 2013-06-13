@@ -32,6 +32,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.sanselan.ImageReadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +94,7 @@ public class ArtworkProcessorService {
             return;
         }
 
-        // store located back into database
+        // set values in located artwork
         located.setCacheFilename(cacheFilename);
         located.setStatus(StatusType.DONE);
         artworkStorageService.updateArtworkLocated(located);
@@ -102,7 +103,23 @@ public class ArtworkProcessorService {
         List<ArtworkProfile> profiles = artworkStorageService.getPreProcessArtworkProfiles(located);
         for (ArtworkProfile profile : profiles) {
             try {
+                // generate image for a profiles
                 generateImage(located, profile);
+            } catch (ImageReadException error) {
+                LOG.error("Original image for {} is invalid", located);
+                LOG.warn("Image generation error", error);
+                
+                // mark located artwork as invalid
+                try {
+                    located.setStatus(StatusType.INVALID);
+                    artworkStorageService.updateArtworkLocated(located);
+                } catch (Exception ex) {
+                    // just log a warning
+                    LOG.warn("Failed to mark artwork as invalid: " + located, ex);
+                }
+                
+                // no further processing for that located image
+                break;
             } catch (Exception error) {
                 LOG.error("Failed to generate image for {} with profile {}", located, profile.getProfileName());
                 LOG.warn("Image generation error", error);
@@ -113,7 +130,7 @@ public class ArtworkProcessorService {
     private void generateImage(ArtworkLocated located, ArtworkProfile profile) throws Exception {
         LOG.debug("Generate image for {} with profile {}", located, profile.getProfileName());
         BufferedImage imageGraphic = GraphicTools.loadJPEGImage(this.fileStorageService.getFile(StorageType.ARTWORK, located.getCacheFilename()));
-
+        
         // draw the image
         BufferedImage image = drawImage(imageGraphic, profile);
 
@@ -127,13 +144,12 @@ public class ArtworkProcessorService {
             generated.setArtworkProfile(profile);
             generated.setCacheFilename(cacheFilename);
             artworkStorageService.storeArtworkGenerated(generated);
-        } catch (Exception e) {
+        } catch (Exception error) {
             // delete generated file storage element also
             try {
                 fileStorageService.delete(StorageType.ARTWORK, cacheFilename);
             } catch (Exception ignore) {}
-            // throw error
-            throw e;
+            throw error;
         }
     }
    

@@ -25,10 +25,9 @@ package org.yamj.core.service.artwork.poster;
 import java.util.List;
 import org.yamj.core.database.model.IMetadata;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.core.service.artwork.IArtworkScanner;
 
-public interface IPosterScanner {
-
-    String getScannerName();
+public interface IPosterScanner extends IArtworkScanner {
 
     List<ArtworkDetailDTO> getPosters(IMetadata metadata);
 }
