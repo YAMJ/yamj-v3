@@ -132,13 +132,11 @@ public class TheTVDbArtworkScanner implements
             }
         }
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Series {}: Found {} posters for language '{}'", id, langDTOs.size(), DEFAULT_LANGUAGE);
-            if (StringUtils.isNotBlank(ALTERNATE_LANGUAGE)) {
-                LOG.debug("Series {}: Found {} posters for alternate language '{}'", id, altLangDTOs.size(), ALTERNATE_LANGUAGE);
-            }
-            LOG.debug("Series {}: Found {} posters without language", id, noLangDTOs.size());
+        LOG.debug("Series {}: Found {} posters for language '{}'", id, langDTOs.size(), DEFAULT_LANGUAGE);
+        if (StringUtils.isNotBlank(ALTERNATE_LANGUAGE)) {
+            LOG.debug("Series {}: Found {} posters for alternate language '{}'", id, altLangDTOs.size(), ALTERNATE_LANGUAGE);
         }
+        LOG.debug("Series {}: Found {} posters without language", id, noLangDTOs.size());
 
         List<ArtworkDetailDTO> returnDTOs = null;
         if (langDTOs.size() > 0) {
@@ -183,13 +181,11 @@ public class TheTVDbArtworkScanner implements
             }
         }
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Season {}-{}: Found {} posters for language '{}'", id, season, langDTOs.size(), DEFAULT_LANGUAGE);
-            if (StringUtils.isNotBlank(ALTERNATE_LANGUAGE)) {
-                LOG.debug("Season {}-{}: Found {} posters for alternate language '{}'", id, season, altLangDTOs.size(), ALTERNATE_LANGUAGE);
-            }
-            LOG.debug("Season {}-{}: Found {} posters without language", id, season, noLangDTOs.size());
+        LOG.debug("Season {}-{}: Found {} posters for language '{}'", id, season, langDTOs.size(), DEFAULT_LANGUAGE);
+        if (StringUtils.isNotBlank(ALTERNATE_LANGUAGE)) {
+            LOG.debug("Season {}-{}: Found {} posters for alternate language '{}'", id, season, altLangDTOs.size(), ALTERNATE_LANGUAGE);
         }
+        LOG.debug("Season {}-{}: Found {} posters without language", id, season, noLangDTOs.size());
 
         List<ArtworkDetailDTO> returnDTOs = null;
         if (langDTOs.size() > 0) {
@@ -301,10 +297,8 @@ public class TheTVDbArtworkScanner implements
             }
         }
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Season {}-{}: Found {} HD fanart", id, hdDTOs.size());
-            LOG.debug("Season {}-{}: Found {} SD fanart", id, sdDTOs.size());
-        }
+        LOG.debug("Season {}-{}: Found {} HD fanart", id, hdDTOs.size());
+        LOG.debug("Season {}-{}: Found {} SD fanart", id, sdDTOs.size());
 
         List<ArtworkDetailDTO> returnDTOs = null;
         if (hdDTOs.size() > 0) {

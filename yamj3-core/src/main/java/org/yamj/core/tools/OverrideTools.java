@@ -115,9 +115,7 @@ public final class OverrideTools {
      */
     private static void putVideodataPriorities(OverrideFlag overrideFlag, String sources) {
         List<String> priorities = resolvePriorities(sources);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(overrideFlag.name() + " (VideoData) priorities " + priorities.toString());
-        }
+        LOG.debug(overrideFlag.name() + " (VideoData) priorities " + priorities.toString());
         VIDEODATA_PRIORITIES.put(overrideFlag, priorities);
     }
 
@@ -129,9 +127,7 @@ public final class OverrideTools {
      */
     private static void putSeasonPriorities(OverrideFlag overrideFlag, String sources) {
         List<String> priorities = resolvePriorities(sources);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(overrideFlag.name() + " (Season) priorities " + priorities.toString());
-        }
+        LOG.debug(overrideFlag.name() + " (Season) priorities " + priorities.toString());
         SEASON_PRIORITIES.put(overrideFlag, priorities);
     }
 
@@ -143,9 +139,7 @@ public final class OverrideTools {
      */
     private static void putSeriesPriorities(OverrideFlag overrideFlag, String sources) {
         List<String> priorities = resolvePriorities(sources);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(overrideFlag.name() + " (Series) priorities " + priorities.toString());
-        }
+        LOG.debug(overrideFlag.name() + " (Series) priorities " + priorities.toString());
         SERIES_PRIORITIES.put(overrideFlag, priorities);
     }
 
