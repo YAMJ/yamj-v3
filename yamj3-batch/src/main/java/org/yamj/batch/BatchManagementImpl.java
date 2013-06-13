@@ -80,25 +80,25 @@ public class BatchManagementImpl implements BatchManagement {
                 stageDirectory.addStageFile(stageFile);
 
                 stageFile = new StageFileDTO();
-                stageFile.setFileName("James Bond - Skyfall.dvd.mkv");
-                stageFile.setFileDate(System.currentTimeMillis());
-                stageFile.setFileSize(12344165L);
-                stageDirectory.addStageFile(stageFile);
-
-                stageFile = new StageFileDTO();
-                stageFile.setFileName("CSI S01E01.avi");
+                stageFile.setFileName("Game of Thrones.S03E01.avi");
                 stageFile.setFileDate(System.currentTimeMillis());
                 stageFile.setFileSize(1234L);
                 stageDirectory.addStageFile(stageFile);
 
                 stageFile = new StageFileDTO();
-                stageFile.setFileName("CSI S01E02.avi");
+                stageFile.setFileName("Game of Thrones.S03E02.avi");
                 stageFile.setFileDate(System.currentTimeMillis());
                 stageFile.setFileSize(1235L);
                 stageDirectory.addStageFile(stageFile);
 
                 stageFile = new StageFileDTO();
-                stageFile.setFileName("CSI S01E03E04.avi");
+                stageFile.setFileName("Game of Thrones.S03E02..avi");
+                stageFile.setFileDate(System.currentTimeMillis());
+                stageFile.setFileSize(1235L);
+                stageDirectory.addStageFile(stageFile);
+
+                stageFile = new StageFileDTO();
+                stageFile.setFileName("Game of Thrones.S03E03E04.avi");
                 stageFile.setFileDate(System.currentTimeMillis());
                 stageFile.setFileSize(5000L);
                 stageDirectory.addStageFile(stageFile);

@@ -38,12 +38,11 @@ import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.ArtworkStorageService;
-import org.yamj.core.service.artwork.fanart.IFanartScanner;
 import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
 import org.yamj.core.service.artwork.fanart.ITvShowFanartScanner;
 import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
-import org.yamj.core.service.artwork.poster.IPosterScanner;
 import org.yamj.core.service.artwork.poster.ITvShowPosterScanner;
+import org.yamj.core.service.artwork.tv.ITvShowBannerScanner;
 
 @Service("artworkScannerService")
 public class ArtworkScannerService {
@@ -53,10 +52,19 @@ public class ArtworkScannerService {
     private static List<String> FANART_MOVIE_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.fanart.movie.priorities", "tmdb").toLowerCase().split(","));
     private static List<String> POSTER_TVSHOW_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.poster.tvshow.priorities", "tvdb").toLowerCase().split(","));
     private static List<String> FANART_TVSHOW_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.fanart.tvshow.priorities", "tvdb").toLowerCase().split(","));
+    private static List<String> BANNER_TVSHOW_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.banner.tvshow.priorities", "tvdb").toLowerCase().split(","));
+    private static int POSTER_MOVIE_MAXRESULTS = PropertyTools.getIntProperty("artwork.scanner.poster.movie.maxResults", 5);
+    private static int FANART_MOVIE_MAXRESULTS = PropertyTools.getIntProperty("artwork.scanner.fanart.movie.maxResults", 5);
+    private static int POSTER_TVSHOW_MAXRESULTS = PropertyTools.getIntProperty("artwork.scanner.poster.tvshow.maxResults", 5);
+    private static int FANART_TVSHOW_MAXRESULTS = PropertyTools.getIntProperty("artwork.scanner.poster.tvshow.maxResults", 5);
+    private static int BANNER_TVSHOW_MAXRESULTS = PropertyTools.getIntProperty("artwork.scanner.banner.tvshow.maxResults", 5);
+
     private HashMap<String, IMoviePosterScanner> registeredMoviePosterScanner = new HashMap<String, IMoviePosterScanner>();
     private HashMap<String, ITvShowPosterScanner> registeredTvShowPosterScanner = new HashMap<String, ITvShowPosterScanner>();
     private HashMap<String, IMovieFanartScanner> registeredMovieFanartScanner = new HashMap<String, IMovieFanartScanner>();
     private HashMap<String, ITvShowFanartScanner> registeredTvShowFanartScanner = new HashMap<String, ITvShowFanartScanner>();
+    private HashMap<String, ITvShowBannerScanner> registeredTvShowBannerScanner = new HashMap<String, ITvShowBannerScanner>();
+
     @Autowired
     private ArtworkStorageService artworkStorageService;
 
@@ -78,6 +86,11 @@ public class ArtworkScannerService {
     public void registerTvShowFanartScanner(ITvShowFanartScanner fanartScanner) {
         LOG.info("Registered TV show fanart scanner: {}", fanartScanner.getScannerName().toLowerCase());
         registeredTvShowFanartScanner.put(fanartScanner.getScannerName().toLowerCase(), fanartScanner);
+    }
+
+    public void registerTvShowBannerScanner(ITvShowBannerScanner bannerScanner) {
+        LOG.info("Registered TV show banner scanner: {}", bannerScanner.getScannerName().toLowerCase());
+        registeredTvShowBannerScanner.put(bannerScanner.getScannerName().toLowerCase(), bannerScanner);
     }
 
     public void scanArtwork(QueueDTO queueElement) {
@@ -102,6 +115,12 @@ public class ArtworkScannerService {
             if (CollectionUtils.isEmpty(located)) {
                 located = this.scanFanartOnline(artwork);
             }
+        } else if (ArtworkType.BANNER == artwork.getArtworkType() && artwork.getVideoData() == null) {
+            // banner only for season and series
+            located = this.scanBannerLocal(artwork);
+            if (CollectionUtils.isEmpty(located)) {
+                located = this.scanBannerOnline(artwork);
+            }
         } else {
             // Don't throw an exception here, just a debug message for now
             LOG.debug("Artwork scan not implemented for {}", artwork);
@@ -109,12 +128,6 @@ public class ArtworkScannerService {
 
         // storage
         try {
-            if (CollectionUtils.isEmpty(located)) {
-                artwork.setStatus(StatusType.NOTFOUND);
-            } else {
-                artwork.setStatus(StatusType.DONE);
-            }
-
             artworkStorageService.updateArtwork(artwork, located);
         } catch (Exception error) {
             // NOTE: status will not be changed
@@ -131,17 +144,17 @@ public class ArtworkScannerService {
     }
 
     private List<ArtworkLocated> scanPosterOnline(Artwork artwork) {
-        LOG.trace("Scan online for poster: {}", artwork);
+        LOG.debug("Scan online for poster: {}", artwork);
 
         List<ArtworkDetailDTO> posters = null;
 
-        if (artwork.getVideoData() != null) {
+        if (artwork.getMetadata().isMovie()) {
             // CASE: movie poster scan
             for (String prio : POSTER_MOVIE_PRIORITIES) {
-                IPosterScanner scanner = registeredMoviePosterScanner.get(prio);
+                IMoviePosterScanner scanner = registeredMoviePosterScanner.get(prio);
                 if (scanner != null) {
                     LOG.debug("Use {} scanner for {}", scanner.getScannerName(), artwork);  
-                    posters= scanner.getPosters(artwork.getVideoData());
+                    posters= scanner.getPosters(artwork.getMetadata());
                     if (CollectionUtils.isNotEmpty(posters)) {
                         break;
                     }
@@ -149,17 +162,24 @@ public class ArtworkScannerService {
                     LOG.warn("Desired movie poster scanner {} not registerd", prio);
                 }
             }
+
+            if (CollectionUtils.isEmpty(posters)) {
+                LOG.info("No movie poster found for: {}", artwork);
+                return null;
+            }
+
+            if (POSTER_MOVIE_MAXRESULTS > 0 && posters.size() > POSTER_MOVIE_MAXRESULTS) {
+                LOG.info("Limited movie posters to {} where retrieved {}: {}", POSTER_MOVIE_MAXRESULTS, posters.size(), artwork);
+                posters = posters.subList(0, POSTER_MOVIE_MAXRESULTS);
+            }
+
         } else {
             // CASE: TV show poster scan
             for (String prio : POSTER_TVSHOW_PRIORITIES) {
-                IPosterScanner scanner = registeredTvShowPosterScanner.get(prio);
+                ITvShowPosterScanner scanner = registeredTvShowPosterScanner.get(prio);
                 if (scanner != null) {
                     LOG.debug("Use {} scanner for {}", scanner.getScannerName(), artwork);
-                    if (artwork.getSeason() != null) {
-                        posters = scanner.getPosters(artwork.getSeason());
-                    } else {
-                        posters = scanner.getPosters(artwork.getSeries());
-                    }
+                    posters= scanner.getPosters(artwork.getMetadata());
                     if (CollectionUtils.isNotEmpty(posters)) {
                         break;
                     }
@@ -167,11 +187,18 @@ public class ArtworkScannerService {
                     LOG.warn("Desired TV show poster scanner {} not registerd", prio);
                 }
             }
+
+            if (CollectionUtils.isEmpty(posters)) {
+                LOG.info("No TV show poster found for: {}", artwork);
+                return null;
+            }
+
+            if (POSTER_TVSHOW_MAXRESULTS > 0 && posters.size() > POSTER_TVSHOW_MAXRESULTS) {
+                LOG.info("Limited TV show posters to {} where retrieved {}: {}", POSTER_TVSHOW_MAXRESULTS, posters.size(), artwork);
+                posters = posters.subList(0, POSTER_TVSHOW_MAXRESULTS);
+            }
         }
         
-        if (CollectionUtils.isEmpty(posters)) {
-            return null;
-        }
         return createLocatedArtworks(artwork, posters);
     }
 
@@ -183,17 +210,17 @@ public class ArtworkScannerService {
     }
 
     private List<ArtworkLocated> scanFanartOnline(Artwork artwork) {
-        LOG.trace("Scan online for fanart: {}", artwork);
+        LOG.debug("Scan online for fanart: {}", artwork);
 
         List<ArtworkDetailDTO> fanarts = null;
 
-        if (artwork.getVideoData() != null) {
+        if (artwork.getMetadata().isMovie()) {
             // CASE: movie fanart
             for (String prio : FANART_MOVIE_PRIORITIES) {
-                IFanartScanner scanner = registeredMovieFanartScanner.get(prio);
+                IMovieFanartScanner scanner = registeredMovieFanartScanner.get(prio);
                 if (scanner != null) {
                     LOG.debug("Use {} scanner for {}", scanner.getScannerName(), artwork);  
-                    fanarts = scanner.getFanarts(artwork.getVideoData());
+                    fanarts = scanner.getFanarts(artwork.getMetadata());
                     if (CollectionUtils.isNotEmpty(fanarts)) {
                         break;
                     }
@@ -201,31 +228,78 @@ public class ArtworkScannerService {
                     LOG.warn("Desired movie fanart scanner {} not registerd", prio);
                 }
             }
+
+            if (CollectionUtils.isEmpty(fanarts)) {
+                LOG.info("No movie fanart found for: {}", artwork);
+                return null;
+            }
+
+            if (FANART_MOVIE_MAXRESULTS > 0 && fanarts.size() > FANART_MOVIE_MAXRESULTS) {
+                LOG.info("Limited movie fanarts to {} where retrieved {}: {}", FANART_MOVIE_MAXRESULTS, fanarts.size(), artwork);
+                fanarts = fanarts.subList(0, FANART_MOVIE_MAXRESULTS);
+            }
         } else {
             // CASE: TV show poster scan
             for (String prio : FANART_TVSHOW_PRIORITIES) {
-                IFanartScanner scanner = registeredTvShowFanartScanner.get(prio);
+                ITvShowFanartScanner scanner = registeredTvShowFanartScanner.get(prio);
                 if (scanner != null) {
                     LOG.debug("Use {} scanner for {}", scanner.getScannerName(), artwork);  
-                    if (artwork.getSeason() != null) {
-                        fanarts = scanner.getFanarts(artwork.getSeason());
-                    } else {
-                        fanarts = scanner.getFanarts(artwork.getSeries());
-                    }
-                    if (CollectionUtils.isNotEmpty(fanarts)) {
-                        break;
-                    }
+                    fanarts = scanner.getFanarts(artwork.getMetadata());
                 } else {
                     LOG.warn("Desired TV show fanart scanner {} not registerd", prio);
                 }
             }
+
+            if (CollectionUtils.isEmpty(fanarts)) {
+                LOG.info("No TV show fanarts found for: {}", artwork);
+                return null;
+            }
+
+            if (FANART_TVSHOW_MAXRESULTS > 0 && fanarts.size() > FANART_TVSHOW_MAXRESULTS) {
+                LOG.info("Limited TV show fanart to {} where retrieved {}: {}", FANART_TVSHOW_MAXRESULTS, fanarts.size(), artwork);
+                fanarts = fanarts.subList(0, FANART_TVSHOW_MAXRESULTS);
+            }
         }
         
-        if (CollectionUtils.isEmpty(fanarts)) {
-            LOG.debug("No artwork found for: {}", artwork);
+        return createLocatedArtworks(artwork, fanarts);
+    }
+
+    private List<ArtworkLocated> scanBannerLocal(Artwork artwork) {
+        LOG.trace("Scan local for TV show banner: {}", artwork);
+
+        // TODO local scan
+        return null;
+    }
+
+    private List<ArtworkLocated> scanBannerOnline(Artwork artwork) {
+        LOG.debug("Scan online for TV show banner: {}", artwork);
+
+        List<ArtworkDetailDTO> banners = null;
+
+        for (String prio : BANNER_TVSHOW_PRIORITIES) {
+            ITvShowBannerScanner scanner = registeredTvShowBannerScanner.get(prio);
+            if (scanner != null) {
+                LOG.debug("Use {} scanner for {}", scanner.getScannerName(), artwork);  
+                banners = scanner.getBanners(artwork.getMetadata());
+                if (CollectionUtils.isNotEmpty(banners)) {
+                    break;
+                }
+            } else {
+                LOG.warn("Desired TV show banner scanner {} not registerd", prio);
+            }
+        }
+        
+        if (CollectionUtils.isEmpty(banners)) {
+            LOG.info("No TV show banner found for: {}", artwork);
             return null;
         }
-        return createLocatedArtworks(artwork, fanarts);
+        
+        if (BANNER_TVSHOW_MAXRESULTS > 0 && banners.size() > BANNER_TVSHOW_MAXRESULTS) {
+            LOG.info("Limited TV show banners to {} where retrieved {}: {}", BANNER_TVSHOW_MAXRESULTS, banners.size(), artwork);
+            banners = banners.subList(0, BANNER_TVSHOW_MAXRESULTS);
+        }
+        
+        return createLocatedArtworks(artwork, banners);
     }
 
     private List<ArtworkLocated> createLocatedArtworks(Artwork artwork, List<ArtworkDetailDTO> dtos) {

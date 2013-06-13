@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.service;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import org.yamj.core.database.model.type.ArtworkCategory;
 import org.yamj.core.database.model.type.ArtworkType;
 
@@ -80,7 +82,7 @@ public class ArtworkStorageService {
 
         ArtworkType artworkType = located.getArtwork().getArtworkType();
         if (ArtworkType.PHOTO == artworkType) {
-            // nothing
+            // no own category
         } else if (ArtworkType.VIDEOIMAGE == artworkType) {
             category = ArtworkCategory.EPISODE;
         } else if (ArtworkType.BANNER == artworkType) {
@@ -108,9 +110,29 @@ public class ArtworkStorageService {
     }
 
     @Transactional
-    public void updateArtwork(Artwork artwork, List<ArtworkLocated> located) {
-        // TODO update of existing artwork needed?
-        this.artworkDao.storeAll(located);
+    public void updateArtwork(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
+        
+        if (CollectionUtils.isEmpty(artwork.getArtworkLocated())) {
+            // no located artwork presents; just store all
+            this.artworkDao.storeAll(locatedArtworks);
+        } else {
+            for (ArtworkLocated located : locatedArtworks) {
+                if (!artwork.getArtworkLocated().contains(located)) {
+                    // just store if not contained before
+                    // otheri
+                    this.artworkDao.saveEntity(located);
+                }
+            }
+        }
+        
+        // set status of artwork
+        if (CollectionUtils.isEmpty(locatedArtworks) && CollectionUtils.isEmpty(artwork.getArtworkLocated())) {
+            artwork.setStatus(StatusType.NOTFOUND);
+        } else {
+            artwork.setStatus(StatusType.DONE);
+        }
+        
+        // update artwork in database
         this.artworkDao.updateEntity(artwork);
     }
 
@@ -135,8 +157,9 @@ public class ArtworkStorageService {
         final StringBuilder sb = new StringBuilder();
         sb.append("from Artwork art ");
         sb.append("left outer join fetch art.videoData ");
-        sb.append("left outer join fetch art.season sea ");
-        sb.append("left outer join fetch art.series ser ");
+        sb.append("left outer join fetch art.season ");
+        sb.append("left outer join fetch art.series ");
+        sb.append("left outer join fetch art.artworkLocated ");
         sb.append("where art.id = :id");
 
         @SuppressWarnings("unchecked")
@@ -210,7 +233,7 @@ public class ArtworkStorageService {
         ArtworkLocated located = artworkDao.getArtworkLocated(id);
          if (located != null) {
              located.setStatus(StatusType.ERROR);
-            artworkDao.updateEntity(located);
+             artworkDao.updateEntity(located);
         }
     }
 

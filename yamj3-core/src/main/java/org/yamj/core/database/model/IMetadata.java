@@ -36,6 +36,8 @@ public interface IMetadata {
 
     int getYear();
 
+    boolean isMovie();
+    
     int getSeasonNumber();
 
     int getEpisodeNumber();

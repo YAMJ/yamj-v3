@@ -106,6 +106,19 @@ public class ArtworkDao extends HibernateDao {
         return getById(ArtworkLocated.class, id);
     }
 
+    public ArtworkLocated getStoredArtworkLocated(ArtworkLocated located) {
+        Criteria criteria = getSession().createCriteria(ArtworkLocated.class);
+        criteria.add(Restrictions.eq("artwork", located.getArtwork()));
+        if (located.getStageFile() != null) {
+            criteria.add(Restrictions.eq("stageFile", located.getStageFile()));
+        } else {
+            criteria.add(Restrictions.eq("source", located.getSource()));
+            criteria.add(Restrictions.eq("url", located.getUrl()));
+        }
+        criteria.setCacheable(true);
+        return (ArtworkLocated)criteria.uniqueResult();
+    }
+
     @SuppressWarnings("unchecked")
     public List<QueueDTO> getArtworkLocatedQueue(final CharSequence sql, final int maxResults) {
         SQLQuery query = getSession().createSQLQuery(sql.toString());

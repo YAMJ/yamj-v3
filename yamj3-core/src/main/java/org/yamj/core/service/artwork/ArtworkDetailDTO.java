@@ -12,17 +12,6 @@ public class ArtworkDetailDTO {
         this.url = url;
     }
 
-    public ArtworkDetailDTO(String source, String url, String language) {
-        this(source, url);
-        this.language = language;
-    }
-
-    public ArtworkDetailDTO(String source, String url, String language, int rating) {
-        this(source, url);
-        this.language = language;
-        this.rating = rating;
-    }
-
     public String getSource() {
         return source;
     }

@@ -156,7 +156,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
-        final int prime = 17;
+        final int prime = 7;
         int result = 1;
         result = prime * result + (this.fileName == null ? 0 : this.fileName.hashCode());
         result = prime * result + (this.stageDirectory == null ? 0 : this.stageDirectory.hashCode());
@@ -175,11 +175,15 @@ public class StageFile extends AbstractAuditable implements Serializable {
             return false;
         }
         StageFile castOther = (StageFile) other;
-
+        // first check the id
+        if ((this.getId() > 0) && (castOther.getId() > 0)) {
+            return this.getId() == castOther.getId();
+        }
+        // check file name
         if (!StringUtils.equals(this.fileName, castOther.fileName)) {
             return false;
         }
-
+        // check stage directory
         if (this.stageDirectory == null && castOther.stageDirectory == null) {
             return true;
         }

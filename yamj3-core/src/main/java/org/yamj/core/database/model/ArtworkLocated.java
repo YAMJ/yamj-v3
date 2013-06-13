@@ -44,15 +44,18 @@ import org.yamj.core.hibernate.usertypes.EnumStringUserType;
 })
 
 @Entity
-@Table(name = "artwork_located")
+@Table(name = "artwork_located",
+    uniqueConstraints= @UniqueConstraint(name="UIX_ARTWORKLOCATED_NATURALID", columnNames={"artwork_id", "stagefile_id", "source", "url"})
+)
 public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -981494909436217076L;
 
-    @Index(name = "IX_ARTWORKLOCATED_STATUS")
-    @Type(type = "statusType")
-    @Column(name = "status", nullable = false, length = 30)
-    private StatusType status;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_ARTWORKLOCATED_ARTWORK")
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "artwork_id", nullable = false)
+    private Artwork artwork;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORKLOCATED_STAGEFILE")
@@ -60,44 +63,45 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @JoinColumn(name = "stagefile_id")
     private StageFile stageFile;
 
+    @Index(name = "IX_ARTWORKLOCATED_DOWNLOAD")
     @Column(name = "source", length=50)
     private String source;
 
+    @Index(name = "IX_ARTWORKLOCATED_DOWNLOAD")
     @Column(name = "url", length=255)
     private String url;
 
-    @Column(name = "language", length=30)
-    private String language;
+    @Index(name = "IX_ARTWORKLOCATED_STATUS")
+    @Type(type = "statusType")
+    @Column(name = "status", nullable = false, length = 30)
+    private StatusType status;
 
-    @Column(name = "rating", nullable=false)
-    private int rating = -1;
-    
     @Column(name = "width", nullable = false)
     private int width = -1;
     
     @Column(name = "height", nullable = false)
     private int height = -1;
 
+    @Column(name = "language", length=30)
+    private String language;
+
+    @Column(name = "rating", nullable=false)
+    private int rating = -1;
+
     @Column(name = "cache_filename",length = 200)
     private String cacheFilename;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_ARTWORKLOCATED_ARTWORK")
-    @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "artwork_id")
-    private Artwork artwork;
     
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "artworkLocated")
     private List<ArtworkGenerated> generatedArtworks = new ArrayList<ArtworkGenerated>(0);
 
     // GETTER and SETTER
 
-    public StatusType getStatus() {
-        return status;
+    public Artwork getArtwork() {
+        return artwork;
     }
 
-    public void setStatus(StatusType status) {
-        this.status = status;
+    public void setArtwork(Artwork artwork) {
+        this.artwork = artwork;
     }
 
     public StageFile getStageFile() {
@@ -124,20 +128,12 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
         this.url = url;
     }
 
-    public String getLanguage() {
-        return language;
+    public StatusType getStatus() {
+        return status;
     }
 
-    public void setLanguage(String language) {
-        this.language = language;
-    }
-
-    public int getRating() {
-        return rating;
-    }
-
-    public void setRating(int rating) {
-        this.rating = rating;
+    public void setStatus(StatusType status) {
+        this.status = status;
     }
 
     public int getWidth() {
@@ -156,6 +152,22 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
         this.height = height;
     }
 
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+    
     public String getCacheFilename() {
         return cacheFilename;
     }
@@ -164,20 +176,77 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
         this.cacheFilename = cacheFilename;
     }
 
-    public Artwork getArtwork() {
-        return artwork;
-    }
-
-    public void setArtwork(Artwork artwork) {
-        this.artwork = artwork;
-    }
-
     public List<ArtworkGenerated> getGeneratedArtworks() {
         return generatedArtworks;
     }
 
     public void setGeneratedArtworks(List<ArtworkGenerated> generatedArtworks) {
         this.generatedArtworks = generatedArtworks;
+    }
+
+    // EQUALITY CHECKS
+    
+    @Override
+    public int hashCode() {
+        final int prime = 7;
+        int result = 1;
+        result = prime * result + (artwork == null ? 0 : artwork.hashCode());
+        result = prime * result + (stageFile == null ? 0 : stageFile.hashCode());
+        result = prime * result + (source == null ? 0 : source.hashCode());
+        result = prime * result + (url == null ? 0 : url.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null) {
+            return false;
+        }
+        if (!(other instanceof ArtworkLocated)) {
+            return false;
+        }
+        ArtworkLocated castOther = (ArtworkLocated) other;
+        // first check the id
+        if ((this.getId() > 0) && (castOther.getId() > 0)) {
+            return this.getId() == castOther.getId();
+        }
+        // check source
+        if (!StringUtils.equals(source, castOther.source)) {
+            return false;
+        }
+        // check URL
+        if (!StringUtils.equals(url, castOther.url)) {
+            return false;
+        }
+        // check artwork
+        if (this.artwork == null && castOther.artwork != null) {
+            return false;
+        }
+        if (this.artwork != null && castOther.artwork == null) {
+            return false;
+        }
+        if (this.artwork != null && castOther.artwork != null) {
+            if (!this.artwork.equals(castOther.artwork)) {
+                return false;
+            }
+        }
+        // check stage file
+        if (this.stageFile == null && castOther.stageFile != null) {
+            return false;
+        }
+        if (this.stageFile != null && castOther.stageFile == null) {
+            return false;
+        }
+        if (this.stageFile != null && castOther.stageFile != null) {
+            if (!this.stageFile.equals(castOther.stageFile)) {
+                return false;
+            }
+        }
+        // all checks passed
+        return true;
     }
 
     @Override
@@ -190,6 +259,8 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
             sb.append(getArtwork().getArtworkType());
         }
         if (StringUtils.isNotBlank(getUrl())) {
+            sb.append(", source=");
+            sb.append(getSource());
             sb.append(", url=");
             sb.append(getUrl());
         } else if (getStageFile() != null) {

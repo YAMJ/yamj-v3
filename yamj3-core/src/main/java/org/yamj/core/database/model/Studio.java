@@ -58,7 +58,7 @@ public class Studio extends AbstractIdentifiable implements Serializable {
     
     @Override
     public int hashCode() {
-        final int prime = 17;
+        final int prime = 7;
         int result = 1;
         result = prime * result + (this.name == null ? 0 : this.name.hashCode());
         return result;

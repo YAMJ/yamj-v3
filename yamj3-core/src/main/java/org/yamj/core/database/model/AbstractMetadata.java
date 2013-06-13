@@ -22,15 +22,15 @@
  */
 package org.yamj.core.database.model;
 
-import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.type.OverrideFlag;
-import org.yamj.core.hibernate.usertypes.EnumStringUserType;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
+import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.type.OverrideFlag;
+import org.yamj.core.hibernate.usertypes.EnumStringUserType;
 
 /**
  * Abstract implementation of an metadata object.
@@ -171,6 +171,12 @@ public abstract class AbstractMetadata extends AbstractAuditable
     public final int getSeasonNumber() {
         if (this instanceof Season) {
             return ((Season) this).getSeason();
+        } else if (this instanceof VideoData) {
+            if (((VideoData) this).getEpisode() <= 0) {
+                return -1;
+            } else {
+                return ((VideoData) this).getSeason().getSeason();
+            }
         }
         return -1;
     }
@@ -183,6 +189,14 @@ public abstract class AbstractMetadata extends AbstractAuditable
         return -1;
     }
 
+    @Override
+    public final boolean isMovie() {
+        if (this instanceof VideoData) {
+            return (((VideoData) this).getEpisode() < 0);
+        }
+        return false;
+    }
+    
     public abstract String getOverrideSource(OverrideFlag overrideFlag);
 
     public abstract void setOverrideFlag(OverrideFlag overrideFlag, String source);

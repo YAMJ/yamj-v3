@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import org.hibernate.Hibernate;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,11 +55,6 @@ public class Artwork extends AbstractAuditable implements Serializable {
     @Column(name = "artwork_type", nullable = false)
     private ArtworkType artworkType;
 
-    @Index(name = "IX_ARTWORK_STATUS")
-    @Type(type = "statusType")
-    @Column(name = "status", nullable = false, length = 30)
-    private StatusType status;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_VIDEODATA")
     @Fetch(FetchMode.SELECT)
@@ -76,8 +73,13 @@ public class Artwork extends AbstractAuditable implements Serializable {
     @JoinColumn(name = "series_id")
     private Series series;
 
+    @Index(name = "IX_ARTWORK_STATUS")
+    @Type(type = "statusType")
+    @Column(name = "status", nullable = false, length = 30)
+    private StatusType status;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "artwork")
-    private List<ArtworkLocated> reservoirs = new ArrayList<ArtworkLocated>(0);
+    private List<ArtworkLocated> artworkLocated = new ArrayList<ArtworkLocated>(0);
 
     // GETTER and SETTER
 
@@ -87,14 +89,6 @@ public class Artwork extends AbstractAuditable implements Serializable {
 
     public void setArtworkType(ArtworkType artworkType) {
         this.artworkType = artworkType;
-    }
-
-    public StatusType getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusType status) {
-        this.status = status;
     }
 
     public VideoData getVideoData() {
@@ -121,6 +115,22 @@ public class Artwork extends AbstractAuditable implements Serializable {
         this.series = series;
     }
 
+    public List<ArtworkLocated> getArtworkLocated() {
+        return artworkLocated;
+    }
+
+    public void setArtworkLocated(List<ArtworkLocated> artworkLocated) {
+        this.artworkLocated = artworkLocated;
+    }
+
+    public StatusType getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusType status) {
+        this.status = status;
+    }
+
     // TRANSIENT METHODS
     
     public IMetadata getMetadata() {
@@ -137,6 +147,78 @@ public class Artwork extends AbstractAuditable implements Serializable {
         return null;
     }
 
+    // EQUALITY CHECKS
+    
+    @Override
+    public int hashCode() {
+        final int prime = 7;
+        int result = 1;
+        result = prime * result + (artworkType == null ? 0 : artworkType.hashCode());
+        result = prime * result + (videoData == null ? 0 : videoData.hashCode());
+        result = prime * result + (season == null ? 0 : season.hashCode());
+        result = prime * result + (season == null ? 0 : season.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null) {
+            return false;
+        }
+        if (!(other instanceof Artwork)) {
+            return false;
+        }
+        Artwork castOther = (Artwork) other;
+        // first check the id
+        if ((this.getId() > 0) && (castOther.getId() > 0)) {
+            return this.getId() == castOther.getId();
+        }
+        // check artwork type
+        if (this.artworkType != castOther.artworkType) {
+            return false;
+        }
+        // check video data
+        if (this.videoData == null && castOther.videoData != null) {
+            return false;
+        }
+        if (this.videoData != null && castOther.videoData == null) {
+            return false;
+        }
+        if (this.videoData != null && castOther.videoData != null) {
+            if (!this.videoData.equals(castOther.videoData)) {
+                return false;
+            }
+        }
+        // check season
+        if (this.season == null && castOther.season != null) {
+            return false;
+        }
+        if (this.season != null && castOther.season == null) {
+            return false;
+        }
+        if (this.season != null && castOther.season != null) {
+            if (!this.season.equals(castOther.season)) {
+                return false;
+            }
+        }
+        // check series
+        if (this.series == null && castOther.series != null) {
+            return false;
+        }
+        if (this.series != null && castOther.series == null) {
+            return false;
+        }
+        if (this.series != null && castOther.series != null) {
+            if (!this.series.equals(castOther.series)) {
+                return false;
+            }
+        }
+        // all checks passed
+        return true;
+    }
 
     @Override
     public String toString() {
@@ -145,13 +227,38 @@ public class Artwork extends AbstractAuditable implements Serializable {
         sb.append(getId());
         sb.append(", type=");
         sb.append(getArtworkType());
-        sb.append(", destination=");
         if (getVideoData() != null) {
-            sb.append("VideoData");
+            if (Hibernate.isInitialized(getVideoData())) {
+                if (getVideoData().getEpisode() < 0) {
+                    sb.append(", movie-id='");
+                    sb.append(getVideoData().getIdentifier());
+                    sb.append("'");
+                } else {
+                    sb.append(", episode-id='");
+                    sb.append(getVideoData().getIdentifier());
+                    sb.append("', episode=");
+                    sb.append(getVideoData().getEpisode());
+                }
+            } else {
+                sb.append(", target=VideoData");
+            }
         } else if (getSeason() != null) {
-            sb.append("Season");
+            if (Hibernate.isInitialized(getSeason())) {
+                sb.append(", season-id='");
+                sb.append(getSeason().getIdentifier());
+                sb.append("', season=");
+                sb.append(getSeason().getSeason());
+            } else {
+                sb.append(", target=Season");
+            }
         } else if (getSeries() != null) {
-            sb.append("Series");
+            if (Hibernate.isInitialized(getSeries())) {
+                sb.append(", series-id='");
+                sb.append(getSeries().getIdentifier());
+                sb.append("'");
+            } else {
+                sb.append(", target=Series");
+            }
         } else {
             sb.append("Unknown");
         }

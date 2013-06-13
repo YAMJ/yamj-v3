@@ -130,7 +130,7 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
     
     @Override
     public int hashCode() {
-        final int prime = 17;
+        final int prime = 7;
         int result = 1;
         result = prime * result + (this.directoryPath == null ? 0 : this.directoryPath.hashCode());
         result = prime * result + (this.library == null ? 0 : this.library.hashCode());
@@ -149,11 +149,15 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
             return false;
         }
         StageDirectory castOther = (StageDirectory) other;
-
+        // first check the id
+        if ((this.getId() > 0) && (castOther.getId() > 0)) {
+            return this.getId() == castOther.getId();
+        }
+        // check the directory path
         if (!StringUtils.equals(this.directoryPath, castOther.directoryPath)) {
             return false;
         }
-
+        // check the library
         if (this.library == null && castOther.library == null) {
             return true;
         }
