@@ -25,8 +25,9 @@ package org.yamj.core.service.plugin;
 import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -149,7 +150,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
         // CAST & CREW
 
-        List<CreditDTO> actors = new ArrayList<CreditDTO>();
+        Set<CreditDTO> actors = new LinkedHashSet<CreditDTO>();
         for (Actor actor : tvdbApi.getActors(id)) {
             actors.add(new CreditDTO(JobType.ACTOR, actor.getName(), actor.getRole()));
         }
@@ -161,7 +162,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         return ScanResult.OK;
     }
 
-    private void scanSeasons(Series series, com.omertron.thetvdbapi.model.Series tvdbSeries, List<CreditDTO> actors) {
+    private void scanSeasons(Series series, com.omertron.thetvdbapi.model.Series tvdbSeries, Set<CreditDTO> actors) {
 
         for (Season season : series.getSeasons()) {
 
@@ -193,7 +194,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         }
     }
 
-    private void scanEpisodes(Season season, List<CreditDTO> actors) {
+    private void scanEpisodes(Season season, Set<CreditDTO> actors) {
         if (CollectionUtils.isEmpty(season.getVideoDatas())) {
             return;
         }

@@ -22,9 +22,10 @@
  */
 package org.yamj.core.database.model.dto;
 
-import org.yamj.core.database.model.type.JobType;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.yamj.core.database.model.type.JobType;
 
 public class CreditDTO {
 
@@ -96,8 +97,40 @@ public class CreditDTO {
         this.sourcedbId = sourcedbId;
     }
 
+    // EQUALITY CHECKS
+
+    @Override
+    public int hashCode() {
+        final int prime = 7;
+        int result = 1;
+        result = prime * result + (this.name == null ? 0 : this.name.hashCode());
+        result = prime * result + (this.jobType == null ? 0 : this.jobType.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null) {
+            return false;
+        }
+        if (!(other instanceof CreditDTO)) {
+            return false;
+        }
+        CreditDTO castOther = (CreditDTO) other;
+        // check job
+        if (this.jobType != castOther.jobType) {
+            return false;
+        }
+        // check name
+        return StringUtils.equals(this.name, castOther.name);
+    }
+
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
+
 }

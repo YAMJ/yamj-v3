@@ -130,7 +130,7 @@ public class VideoData extends AbstractMetadata {
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
 
     @Transient
-    private List<CreditDTO> creditDTOS = new ArrayList<CreditDTO>(0);
+    private Set<CreditDTO> creditDTOS = new LinkedHashSet<CreditDTO>(0);
 
     @Transient
     private Set<String> genreNames = new HashSet<String>(0);
@@ -325,7 +325,7 @@ public class VideoData extends AbstractMetadata {
 
     // TRANSIENTS METHODS
     @JsonIgnore // This is not needed for the API
-    public List<CreditDTO> getCreditDTOS() {
+    public Set<CreditDTO> getCreditDTOS() {
         return creditDTOS;
     }
 
@@ -333,7 +333,7 @@ public class VideoData extends AbstractMetadata {
         this.creditDTOS.add(creditDTO);
     }
 
-    public void addCredditDTOS(List<CreditDTO> creditDTOS) {
+    public void addCredditDTOS(Set<CreditDTO> creditDTOS) {
         this.creditDTOS.addAll(creditDTOS);
     }
 
