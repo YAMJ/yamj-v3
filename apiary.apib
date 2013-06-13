@@ -88,19 +88,32 @@ Get a list of the videos in the database
 ***
 **Optional Parameters**
 
-`search`        : The value to search for
-
-`searchField`   : The field to search in. Default is title.
-
-`match`         : The match method. One of "any" (default), "start", "end" or "exact"
-
-`sort`          : The sort direction either "asc" (default) or "desc"
-
-`sortField`     : The field to sort on. Default is title.
-
-`start`         : Where to start the search from. Default is 1
-
-`max`           : The maximum number of records to return. Default is 0 (all)
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>search</td>
+        <td>The value to search for</td>
+    </tr>
+    <tr>
+        <td>searchField</td>
+        <td>The field to search in. Default is title.</td>
+    <tr>
+        <td>match</td>
+        <td>The match method. One of "any" (default), "start", "end" or "exact"</td>
+    <tr>
+        <td>sort</td>
+        <td>The sort direction either "asc" (default) or "desc"</td>
+    <tr>
+        <td>sortField</td>
+        <td>The field to sort on. Default is title.</td>
+    <tr>
+        <td>start</td>
+        <td>Where to start the search from. Default is 1</td>
+    <tr>
+        <td>max</td>
+        <td>The maximum number of records to return. Default is 0 (all)</td>
+</table>
 
 ***
 GET /api/video/list
@@ -154,19 +167,32 @@ Get a list of the series information in the database
 ***
 **Optional Parameters**
 
-`search`        : The value to search for
-
-`searchField`   : The field to search in. Default is title.
-
-`match`         : The match method. One of "any" (default), "start", "end" or "exact"
-
-`sort`          : The sort direction either "asc" (default) or "desc"
-
-`sortField`     : The field to sort on. Default is title.
-
-`start`         : Where to start the search from. Default is 1
-
-`max`           : The maximum number of records to return. Default is 0 (all)
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>search</td>
+        <td>The value to search for</td>
+    </tr>
+    <tr>
+        <td>searchField</td>
+        <td>The field to search in. Default is title.</td>
+    <tr>
+        <td>match</td>
+        <td>The match method. One of "any" (default), "start", "end" or "exact"</td>
+    <tr>
+        <td>sort</td>
+        <td>The sort direction either "asc" (default) or "desc"</td>
+    <tr>
+        <td>sortField</td>
+        <td>The field to sort on. Default is title.</td>
+    <tr>
+        <td>start</td>
+        <td>Where to start the search from. Default is 1</td>
+    <tr>
+        <td>max</td>
+        <td>The maximum number of records to return. Default is 0 (all)</td>
+</table>
 
 ***
 GET /api/video/series/list
@@ -219,19 +245,32 @@ Get a list of the season information in the database
 ***
 **Optional Parameters**
 
-`search`        : The value to search for
-
-`searchField`   : The field to search in. Default is title.
-
-`match`         : The match method. One of "any" (default), "start", "end" or "exact"
-
-`sort`          : The sort direction either "asc" (default) or "desc"
-
-`sortField`     : The field to sort on. Default is title.
-
-`start`         : Where to start the search from. Default is 1
-
-`max`           : The maximum number of records to return. Default is 0 (all)
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>search</td>
+        <td>The value to search for</td>
+    </tr>
+    <tr>
+        <td>searchField</td>
+        <td>The field to search in. Default is title.</td>
+    <tr>
+        <td>match</td>
+        <td>The match method. One of "any" (default), "start", "end" or "exact"</td>
+    <tr>
+        <td>sort</td>
+        <td>The sort direction either "asc" (default) or "desc"</td>
+    <tr>
+        <td>sortField</td>
+        <td>The field to sort on. Default is title.</td>
+    <tr>
+        <td>start</td>
+        <td>Where to start the search from. Default is 1</td>
+    <tr>
+        <td>max</td>
+        <td>The maximum number of records to return. Default is 0 (all)</td>
+</table>
 
 ***
 GET /api/video/season/list
@@ -272,6 +311,41 @@ GET /api/artwork/{id}
       "newlyCreated":false
    }
 }
+
+
+Get a list of artwork
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>artwork</td>
+        <td>The type of artwork to search for. Can be a comma delimited list.</td>
+    </tr>
+    <tr>
+        <td>type</td>
+        <td>The type of video to search for. Can be one of video, series, season. Must be used in conjunction with the id parameter</td>
+    </tr>
+    <tr>
+        <td>id</td>
+        <td>The id of the video/series/season to search for.</td>
+    </tr>
+    <tr>
+        <td>start</td>
+        <td>Where to start the search from. Default is 1</td>
+    </tr>
+    <tr>
+        <td>max</td>
+        <td>The maximum number of records to return. Default is 0 (all)</td>
+    </tr>
+</table>
+
+GET /api/artwork/list
+< 200
+< Content-Type: application/json
+{}
 
 
 --
@@ -320,10 +394,19 @@ Get information on a single genre
 ***
 **Required Parameters**
 
-`id`        The ID of the genre to get
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the genre to get</td>
+    </tr>
+    <tr>
+        <td>name</td>
+        <td>The name of the genre to get</td>
+    </tr>
+</table>
 
-`name`      The name of the genre to get
-***
 GET /api/genre/{id_or_name}
 < 200
 < Content-Type: application/json
@@ -348,17 +431,31 @@ Get information genres
 ***
 **Optional Parameters**
 
-`search`    The search term to use
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>search</td>
+        <td>The search term to use</td>
+    </tr>
+    <tr>
+        <td>match</td>
+        <td>The match method. Can be one of `any` (default), `start`, `end` or `exact`</td>
+    </tr>
+    <tr>
+        <td>sort</td>
+        <td>Sort the returned results. Can be one of `asc` or `desc`</td>
+    </tr>
+    <tr>
+        <td>start</td>
+        <td>Where to start the list from</td>
+    </tr>
+    <tr>
+        <td>max</td>
+        <td>The maximum number of results to return</td>
+    </tr>
+</table>
 
-`match`     The match method. Can be one of `any` (default), `start`, `end` or `exact`
-
-`sort`      Sort the returned results. Can be one of `asc` or `desc`
-
-`start`     Where to start the list from
-
-`max`       The maximum number of results to return
-
-***
 GET /api/genres
 < 200
 < Content-Type: application/json

@@ -22,7 +22,10 @@
  */
 package org.yamj.core.api.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -51,6 +54,7 @@ public final class Parameters {
     private static final String MATCH_END = "end";
     private static final String MATCH_EXACT = "exact";
     private Map<ParameterType, String> parameters;
+    private static final String DEFAULT_SPLIT = ",|;";
 
     public Parameters() {
         this.parameters = new EnumMap<ParameterType, String>(ParameterType.class);
@@ -184,11 +188,9 @@ public final class Parameters {
      * @param criteria
      */
     public void criteriaMax(Criteria criteria) {
-        if (parameters.containsKey(MAX)) {
-            String max = parameters.get(MAX);
-            if (StringUtils.isNumeric(max)) {
-                criteria.setMaxResults(Integer.parseInt(max));
-            }
+        String max = parameters.get(MAX);
+        if (StringUtils.isNumeric(max)) {
+            criteria.setMaxResults(Integer.parseInt(max));
         }
     }
 
@@ -198,11 +200,9 @@ public final class Parameters {
      * @param criteria
      */
     public void criteriaStart(Criteria criteria) {
-        if (parameters.containsKey(START)) {
-            String start = parameters.get(START);
-            if (StringUtils.isNumeric(start)) {
-                criteria.setFirstResult(Integer.parseInt(start));
-            }
+        String start = parameters.get(START);
+        if (StringUtils.isNumeric(start)) {
+            criteria.setFirstResult(Integer.parseInt(start));
         }
     }
 
@@ -212,31 +212,40 @@ public final class Parameters {
      * @param criteria
      */
     public void criteriaArtworkType(Criteria criteria) {
-        if (parameters.containsKey(ARTWORK_TYPE) && StringUtils.isNotBlank(parameters.get(ARTWORK_TYPE))) {
-            String at = parameters.get(ARTWORK_TYPE);
-            at = ArtworkType.fromString(at).toString();
-            criteria.add(Restrictions.ilike("artwork_type", at, MatchMode.EXACT));
+        String artworkType = parameters.get(ARTWORK_TYPE);
+        if (StringUtils.isNotBlank(artworkType)) {
+            if (StringUtils.containsAny(artworkType, DEFAULT_SPLIT)) {
+                List<ArtworkType> artworkTypeList = new ArrayList<ArtworkType>();
+                for (String at : Arrays.asList(artworkType.split(DEFAULT_SPLIT))) {
+                    artworkTypeList.add(ArtworkType.fromString(at));
+                }
+                LOG.info("Using artwork type list; {}", artworkTypeList);
+                criteria.add(Restrictions.in("artworkType", artworkTypeList));
+            } else {
+                criteria.add(Restrictions.eq("artworkType", ArtworkType.fromString(artworkType)));
+            }
         }
     }
 
     public void criteriaVideoTypeId(Criteria criteria) {
-        String vt = parameters.get(VIDEO_TYPE).toLowerCase();
-        if (StringUtils.isNotBlank(vt)) {
+        String videoType = parameters.get(VIDEO_TYPE);
+        if (StringUtils.isNotBlank(videoType)) {
+            videoType = videoType.toLowerCase();
             String idString = parameters.get(ID);
-            if (StringUtils.isBlank(idString) || !StringUtils.isNumeric(idString)) {
-                LOG.warn("No ID provided for video type '{}' search", vt);
-            } else {
+            if (StringUtils.isNumeric(idString)) {
                 Long id = Long.parseLong(idString);
-                LOG.info("Using type '{}' with ID '{}' for artwork search", vt, id);
-                if (vt.equals("video")) {
+                LOG.info("Using type '{}' with ID '{}' for artwork search", videoType, id);
+                if (videoType.equals("video")) {
                     criteria.add(Restrictions.eq("videoData", id));
-                } else if (vt.equals("series")) {
+                } else if (videoType.equals("series")) {
                     criteria.add(Restrictions.eq("series", id));
-                } else if (vt.equals("season")) {
+                } else if (videoType.equals("season")) {
                     criteria.add(Restrictions.eq("season", id));
                 } else {
-                    LOG.warn("Unknown video type '{}' for video type search", vt);
+                    LOG.warn("Unknown video type '{}' for video type search", videoType);
                 }
+            } else {
+                LOG.warn("No ID provided for video type '{}' search", videoType);
             }
         }
     }
