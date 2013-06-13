@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,11 +51,15 @@ public class ArtworkProcessScheduler {
     private ArtworkStorageService artworkStorageService;
     @Autowired
     private ArtworkProcessorService artworkProcessorService;
+    private boolean messageDone = Boolean.FALSE;    // Have we already printed the message
 
     @Scheduled(initialDelay = 30000, fixedDelay = 60000)
     public void processArtwork() throws Exception {
         if (ARTWORK_PROCESSOR_MAX_THREADS <= 0) {
-            LOG.info("Artwork processing is disabled");
+            if (!messageDone) {
+                messageDone = Boolean.TRUE;
+                LOG.info("Artwork processing is disabled");
+            }
             return;
         }
 

@@ -61,11 +61,17 @@ public class MetadataScheduler {
     private ArtworkStorageService artworkStorageService;
     @Autowired
     private ArtworkScannerService artworkScannerService;
+    private boolean messageArtwork = Boolean.FALSE; // Have we already printed the message
+    private boolean messagePeople = Boolean.FALSE;  // Have we already printed the message
+    private boolean messageMedia = Boolean.FALSE;   // Have we already printed the message
 
     @Scheduled(initialDelay = 5000, fixedDelay = 45000)
     public void scanMediaData() throws Exception {
         if (MEDIA_SCANNER_MAX_THREADS <= 0) {
-            LOG.info("Media data scanning is disabled");
+            if (!messageMedia) {
+                messageMedia = Boolean.TRUE;
+                LOG.info("Media data scanning is disabled");
+            }
             return;
         }
 
@@ -99,7 +105,10 @@ public class MetadataScheduler {
     @Scheduled(initialDelay = 10000, fixedDelay = 45000)
     public void scanPeopleData() throws Exception {
         if (PEOPLE_SCANNER_MAX_THREADS <= 0) {
-            LOG.info("People scanning is disabled");
+            if (!messagePeople) {
+                messagePeople = Boolean.TRUE;
+                LOG.info("People scanning is disabled");
+            }
             return;
         }
 
@@ -134,7 +143,10 @@ public class MetadataScheduler {
     @Scheduled(initialDelay = 15000, fixedDelay = 45000)
     public void scanArtwork() throws Exception {
         if (ARTWORK_SCANNER_MAX_THREADS <= 0) {
-            LOG.info("Artwork scanning is disabled");
+            if (!messageArtwork) {
+                messageArtwork = Boolean.TRUE;
+                LOG.info("Artwork scanning is disabled");
+            }
             return;
         }
 
