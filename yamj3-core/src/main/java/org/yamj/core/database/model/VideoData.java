@@ -133,7 +133,7 @@ public class VideoData extends AbstractMetadata {
     private Set<CreditDTO> creditDTOS = new LinkedHashSet<CreditDTO>(0);
 
     @Transient
-    private Set<String> genreNames = new HashSet<String>(0);
+    private Set<String> genreNames = new LinkedHashSet<String>(0);
 
     // GETTER and SETTER
     public int getPublicationYear() {
