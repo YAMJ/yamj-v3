@@ -101,9 +101,7 @@ public class ArtworkProcessorService {
                 generateImage(located, profile);
             } catch (ImageReadException error) {
                 LOG.warn("Original image is invalid: {}", located);
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Original image is invalid: " + located, error);
-                }
+                LOG.trace("Invalid image error", error);
                 
                 // mark located artwork as invalid
                 located.setStatus(StatusType.INVALID);
@@ -256,9 +254,7 @@ public class ArtworkProcessorService {
                     located.setHeight((int)dimension.getHeight());
                 } catch (Exception error) {
                     LOG.warn("Could not determine image dimension cause invalid image: {}", located);
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Could not determine image dimension cause invalid image: " + located, error);
-                    }
+                    LOG.trace("Invalid image error", error);
                     return Boolean.FALSE;
                 }
             }
