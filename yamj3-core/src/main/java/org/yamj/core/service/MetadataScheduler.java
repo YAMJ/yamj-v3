@@ -47,11 +47,11 @@ import org.yamj.core.service.plugin.PluginMetadataService;
 public class MetadataScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(MetadataScheduler.class);
-    private static final int MEDIA_SCANNER_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.mediascan.maxThreads", 5);
+    private static final int MEDIA_SCANNER_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.mediascan.maxThreads", 1);
     private static final int MEDIA_SCANNER_MAX_RESULTS = PropertyTools.getIntProperty("yamj3.scheduler.mediascan.maxResults", 20);
-    private static final int PEOPLE_SCANNER_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.peoplescan.maxThreads", 5);
-    private static final int PEOPLE_SCANNER_MAX_RESULTS = PropertyTools.getIntProperty("yamj3.scheduler.peoplescan.maxResults", 40);
-    private static final int ARTWORK_SCANNER_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.artworkscan.maxThreads", 3);
+    private static final int PEOPLE_SCANNER_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.peoplescan.maxThreads", 1);
+    private static final int PEOPLE_SCANNER_MAX_RESULTS = PropertyTools.getIntProperty("yamj3.scheduler.peoplescan.maxResults", 50);
+    private static final int ARTWORK_SCANNER_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.artworkscan.maxThreads", 1);
     private static final int ARTWORK_SCANNER_MAX_RESULTS = PropertyTools.getIntProperty("yamj3.scheduler.artworkscan.maxResults", 30);
     @Autowired
     private MetadataStorageService metadataStorageService;
