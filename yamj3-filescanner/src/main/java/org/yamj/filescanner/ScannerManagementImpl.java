@@ -63,6 +63,7 @@ import org.yamj.common.model.YamjInfo;
 import org.yamj.common.tools.StringTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.common.util.KeywordMap;
+import org.yamj.filescanner.model.TimeType;
 
 /**
  * Performs an initial scan of the library location and then updates when changes occur.
@@ -196,12 +197,11 @@ public class ScannerManagementImpl implements ScannerManagement {
         // Send all libraries to be scanned
         ExitType status = ExitType.SUCCESS;
         for (Library library : libraryCollection.getLibraries()) {
-            library.getStatistics().setTimeStart(System.currentTimeMillis());
+            library.getStatistics().setTime(TimeType.START);
             status = scan(library);
-            library.getStatistics().setTimeEnd(System.currentTimeMillis());
-            LOG.info("{}", library.getStatistics().generateStatistics(Boolean.TRUE));
-            LOG.info("Scanning completed.");
+            library.getStatistics().setTime(TimeType.END);
             library.setScanningComplete(Boolean.TRUE);
+            LOG.info("Scanning completed.");
         }
 
         // Wait for the libraries to be sent
@@ -224,6 +224,12 @@ public class ScannerManagementImpl implements ScannerManagement {
         } while (!allDone);
 
         LOG.info("Completed sending of all libraries.");
+        LOG.info("");
+        LOG.info("Library statistics:");
+        for (Library library : libraryCollection.getLibraries()) {
+            LOG.info("Description: '{}'", library.getDescription());
+            LOG.info("{}", library.getStatistics().generateStatistics(Boolean.TRUE));
+        }
 
         if (watchEnabled) {
             Watcher wd = new Watcher();
@@ -250,8 +256,7 @@ public class ScannerManagementImpl implements ScannerManagement {
             LOG.info("Watching not enabled.");
         }
 
-        LOG.info(
-                "Exiting with status {}", status);
+        LOG.info("Exiting with status {}", status);
 
         return status;
     }
@@ -263,6 +268,8 @@ public class ScannerManagementImpl implements ScannerManagement {
      * @return
      */
     private ExitType scan(Library library) {
+        library.getStatistics().setTime(TimeType.SCANNING_START);
+
         ExitType status = ExitType.SUCCESS;
         File baseDirectory = new File(library.getImportDTO().getBaseDirectory());
         LOG.info("Scanning library '{}'...", baseDirectory.getAbsolutePath());
@@ -274,6 +281,7 @@ public class ScannerManagementImpl implements ScannerManagement {
 
         scanDir(library, baseDirectory);
 
+        library.getStatistics().setTime(TimeType.SCANNING_END);
         return status;
     }
 

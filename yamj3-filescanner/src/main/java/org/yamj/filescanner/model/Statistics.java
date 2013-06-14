@@ -25,7 +25,11 @@ package org.yamj.filescanner.model;
 import org.yamj.common.tools.DateTimeTools;
 import java.util.EnumMap;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.text.WordUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class to store any statistics about the jukebox
@@ -34,7 +38,7 @@ import org.apache.commons.lang3.text.WordUtils;
  */
 public class Statistics {
 
-//    private static final Logger LOG = LoggerFactory.getLogger(Statistics.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Statistics.class);
     // Statistics
     private EnumMap<StatType, Integer> statistics = new EnumMap<StatType, Integer>(StatType.class);
     private EnumMap<TimeType, Long> times = new EnumMap<TimeType, Long>(TimeType.class);
@@ -123,31 +127,26 @@ public class Statistics {
     }
 
     /**
-     * Set the start time of the jukebox processing
-     *
-     * @param timeValue
-     */
-    public void setTimeStart(long timeValue) {
-        setTime(TimeType.START, timeValue);
-    }
-
-    /**
-     * Set the end time of the jukebox processing
-     *
-     * @param timeValue
-     */
-    public void setTimeEnd(long timeValue) {
-        setTime(TimeType.END, timeValue);
-    }
-
-    /**
-     * Set a time for the jukebox processing
+     * Set a time for the processing
      *
      * @param timeType
      * @param timeValue
      */
     public void setTime(TimeType timeType, long timeValue) {
-        times.put(timeType, timeValue);
+        if (times.get(timeType) <= 0L) {
+            times.put(timeType, timeValue);
+        }
+    }
+
+    /**
+     * Set the time for this type to the current time
+     *
+     * @param timeType
+     */
+    public void setTime(TimeType timeType) {
+        if (times.get(timeType) <= 0L) {
+            setTime(timeType, System.currentTimeMillis());
+        }
     }
 
     /**
@@ -235,9 +234,18 @@ public class Statistics {
         // Add the processing time
         String processTime = getProcessingTime();
         if (StringUtils.isNotBlank(processTime)) {
-            statOutput.append("Processing Time = ").append(processTime);
+            statOutput.append("Scanning Time = ").append(processTime).append("\n");
         }
 
+        processTime = getProcessingTime(TimeType.SENDING_START, TimeType.SENDING_END, Boolean.TRUE);
+        if (StringUtils.isNotBlank(processTime)) {
+            statOutput.append("Sending Time = ").append(processTime).append("\n");
+        }
         return statOutput.toString();
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

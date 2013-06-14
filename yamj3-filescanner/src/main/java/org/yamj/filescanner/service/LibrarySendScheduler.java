@@ -63,7 +63,7 @@ public class LibrarySendScheduler {
     @Scheduled(initialDelay = 10000, fixedDelay = 15000)
     public void sendLibraries() {
         if (retryCount.get() > retryMax) {
-            LOG.info("Maximum number of retries ({}) exceeded. No further processing attempted.",retryMax);
+            LOG.info("Maximum number of retries ({}) exceeded. No further processing attempted.", retryMax);
             for (Library library : libraryCollection.getLibraries()) {
                 library.setSendingComplete(Boolean.TRUE);
             }
@@ -74,6 +74,7 @@ public class LibrarySendScheduler {
         LOG.info("There are {} items currently queued to be sent to core.", runningCount.get());
 
         for (Library library : libraryCollection.getLibraries()) {
+            library.getStatistics().setTime(TimeType.SENDING_START);
             LOG.info("  {} has {} directories and the file scanner has {} scanning.",
                     library.getImportDTO().getBaseDirectory(),
                     library.getDirectories().size(),
@@ -117,7 +118,7 @@ public class LibrarySendScheduler {
                 // When we reach this point we should have completed the library sending
                 LOG.info("Sending complete for {}", library.getImportDTO().getBaseDirectory());
                 library.setSendingComplete(Boolean.TRUE);
-                library.getStatistics().setTime(TimeType.SENDING_END, DateTime.now().getMillis());
+                library.getStatistics().setTime(TimeType.SENDING_END);
             } catch (InterruptedException ex) {
                 LOG.info("InterruptedException: {}", ex.getMessage());
             } catch (ExecutionException ex) {
