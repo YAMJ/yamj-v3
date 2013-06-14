@@ -97,7 +97,7 @@ public class StagingService {
         for (StageFileDTO stageFileDTO : stageDirectoryDTO.getStageFiles()) {
             StageFile stageFile = stagingDao.getStageFile(stageFileDTO.getFileName(), stageDirectory);
             if (stageFile == null) {
-
+                // create new stage file entry
                 stageFile = new StageFile();
                 stageFile.setFileName(stageFileDTO.getFileName());
                 stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));
@@ -107,6 +107,7 @@ public class StagingService {
                 stageFile.setStatus(StatusType.NEW);
                 stagingDao.saveEntity(stageFile);
             } else {
+                // mark as updated if file date or size has changed
                 Date newDate = new Date(stageFileDTO.getFileDate());
                 if ((newDate.compareTo(stageFile.getFileDate()) != 0) || (stageFile.getFileSize() != stageFileDTO.getFileSize())) {
                     stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));

@@ -65,7 +65,7 @@ public class MediaImportService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void processVideo(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
-        if (StatusType.NEW.equals(stageFile.getStatus())) {
+        if (stageFile.getMediaFile() == null) {
             LOG.info("Process new video {}-'{}'", stageFile.getId(), stageFile.getFileName());
             processNewVideo(stageFile);
         } else {
