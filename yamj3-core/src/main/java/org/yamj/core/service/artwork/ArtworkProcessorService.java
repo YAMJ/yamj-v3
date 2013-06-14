@@ -100,8 +100,10 @@ public class ArtworkProcessorService {
                 // generate image for a profiles
                 generateImage(located, profile);
             } catch (ImageReadException error) {
-                LOG.error("Original image for {} is invalid", located);
-                LOG.warn("Image generation error", error);
+                LOG.warn("Original image is invalid: {}", located);
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Original image is invalid: " + located, error);
+                }
                 
                 // mark located artwork as invalid
                 located.setStatus(StatusType.INVALID);
@@ -245,7 +247,7 @@ public class ArtworkProcessorService {
                     // get dimension
                     Dimension dimension = GraphicTools.getDimension(located.getUrl());
                     if (dimension.getHeight() <= 0 || dimension.getWidth() <=0) {
-                        LOG.warn("No valid image dimension determined: {}", located.getUrl());
+                        LOG.warn("No valid image dimension determined: {}", located);
                         return Boolean.FALSE;
                     }
     
@@ -253,8 +255,10 @@ public class ArtworkProcessorService {
                     located.setWidth((int)dimension.getWidth());
                     located.setHeight((int)dimension.getHeight());
                 } catch (Exception error) {
-                    LOG.error("Could not determine image dimension: {}", located.getUrl());
-                    LOG.warn("Graphics error", error);
+                    LOG.warn("Could not determine image dimension cause invalid image: {}", located);
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Could not determine image dimension cause invalid image: " + located, error);
+                    }
                     return Boolean.FALSE;
                 }
             }
