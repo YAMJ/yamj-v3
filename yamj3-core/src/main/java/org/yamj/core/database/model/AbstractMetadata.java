@@ -168,32 +168,17 @@ public abstract class AbstractMetadata extends AbstractAuditable
     }
 
     @Override
-    public final int getSeasonNumber() {
-        if (this instanceof Season) {
-            return ((Season) this).getSeason();
-        } else if (this instanceof VideoData) {
-            if (((VideoData) this).getEpisode() <= 0) {
-                return -1;
-            } else {
-                return ((VideoData) this).getSeason().getSeason();
-            }
-        }
+    public int getSeasonNumber() {
         return -1;
     }
 
     @Override
-    public final int getEpisodeNumber() {
-        if (this instanceof VideoData) {
-            return ((VideoData) this).getEpisode();
-        }
+    public int getEpisodeNumber() {
         return -1;
     }
 
     @Override
-    public final boolean isMovie() {
-        if (this instanceof VideoData) {
-            return (((VideoData) this).getEpisode() < 0);
-        }
+    public boolean isMovie() {
         return false;
     }
     

@@ -30,8 +30,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.Iterator;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import org.apache.sanselan.ImageReadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +48,40 @@ public class GraphicTools {
         throw new UnsupportedOperationException("Utility class");
     }
 
+    public static Dimension getDimension(String url) throws IOException {
+        InputStream in = null;
+        ImageInputStream iis = null;
+        try {
+            in = new URL(url).openStream();
+            iis = ImageIO.createImageInputStream(in); 
+            
+            final Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+            if (readers.hasNext()) {
+                ImageReader reader = readers.next();
+                try {
+                    reader.setInput(iis, Boolean.TRUE);
+                    return new Dimension(reader.getWidth(0), reader.getHeight(0));
+                } finally {
+                    try  {
+                        reader.dispose();
+                    } catch (Exception ignore) {}
+                }
+            }
+        } finally {
+            if (iis != null) {
+                try  {
+                    iis.close();
+                } catch (Exception ignore) {}
+            }
+            if (in != null) {
+                try  {
+                    in.close();
+                } catch (Exception ignore) {}
+            }
+        }
+        return new Dimension();
+    }
+    
     /**
      * Load a JPG image from a file
      *

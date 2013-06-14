@@ -43,6 +43,7 @@ import org.yamj.core.service.artwork.fanart.ITvShowFanartScanner;
 import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
 import org.yamj.core.service.artwork.poster.ITvShowPosterScanner;
 import org.yamj.core.service.artwork.tv.ITvShowBannerScanner;
+import org.yamj.core.service.artwork.tv.ITvShowVideoImageScanner;
 
 @Service("artworkScannerService")
 public class ArtworkScannerService {
@@ -53,17 +54,20 @@ public class ArtworkScannerService {
     private static List<String> POSTER_TVSHOW_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.poster.tvshow.priorities", "tvdb").toLowerCase().split(","));
     private static List<String> FANART_TVSHOW_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.fanart.tvshow.priorities", "tvdb").toLowerCase().split(","));
     private static List<String> BANNER_TVSHOW_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.banner.tvshow.priorities", "tvdb").toLowerCase().split(","));
+    private static List<String> VIDEOIMAGE_TVSHOW_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.videoimage.tvshow.priorities", "tvdb").toLowerCase().split(","));
     private static int POSTER_MOVIE_MAXRESULTS = PropertyTools.getIntProperty("artwork.scanner.poster.movie.maxResults", 5);
     private static int FANART_MOVIE_MAXRESULTS = PropertyTools.getIntProperty("artwork.scanner.fanart.movie.maxResults", 5);
     private static int POSTER_TVSHOW_MAXRESULTS = PropertyTools.getIntProperty("artwork.scanner.poster.tvshow.maxResults", 5);
     private static int FANART_TVSHOW_MAXRESULTS = PropertyTools.getIntProperty("artwork.scanner.poster.tvshow.maxResults", 5);
     private static int BANNER_TVSHOW_MAXRESULTS = PropertyTools.getIntProperty("artwork.scanner.banner.tvshow.maxResults", 5);
+    private static int VIDEOIMAGE_TVSHOW_MAXRESULTS = PropertyTools.getIntProperty("artwork.scanner.videoimage.tvshow.maxResults", 2);
 
     private HashMap<String, IMoviePosterScanner> registeredMoviePosterScanner = new HashMap<String, IMoviePosterScanner>();
     private HashMap<String, ITvShowPosterScanner> registeredTvShowPosterScanner = new HashMap<String, ITvShowPosterScanner>();
     private HashMap<String, IMovieFanartScanner> registeredMovieFanartScanner = new HashMap<String, IMovieFanartScanner>();
     private HashMap<String, ITvShowFanartScanner> registeredTvShowFanartScanner = new HashMap<String, ITvShowFanartScanner>();
     private HashMap<String, ITvShowBannerScanner> registeredTvShowBannerScanner = new HashMap<String, ITvShowBannerScanner>();
+    private HashMap<String, ITvShowVideoImageScanner> registeredTvShowVideoImageScanner = new HashMap<String, ITvShowVideoImageScanner>();
 
     @Autowired
     private ArtworkStorageService artworkStorageService;
@@ -93,6 +97,11 @@ public class ArtworkScannerService {
         registeredTvShowBannerScanner.put(bannerScanner.getScannerName().toLowerCase(), bannerScanner);
     }
 
+    public void registerTvShowVideoImageScanner(ITvShowVideoImageScanner videoImageScanner) {
+        LOG.info("Registered TV show episode image scanner: {}", videoImageScanner.getScannerName().toLowerCase());
+        registeredTvShowVideoImageScanner.put(videoImageScanner.getScannerName().toLowerCase(), videoImageScanner);
+    }
+
     public void scanArtwork(QueueDTO queueElement) {
         if (queueElement == null) {
             // nothing to
@@ -115,11 +124,17 @@ public class ArtworkScannerService {
             if (CollectionUtils.isEmpty(located)) {
                 located = this.scanFanartOnline(artwork);
             }
-        } else if (ArtworkType.BANNER == artwork.getArtworkType() && artwork.getVideoData() == null) {
+        } else if (ArtworkType.BANNER == artwork.getArtworkType() && !artwork.getMetadata().isMovie()) {
             // banner only for season and series
             located = this.scanBannerLocal(artwork);
             if (CollectionUtils.isEmpty(located)) {
                 located = this.scanBannerOnline(artwork);
+            }
+        } else if (ArtworkType.VIDEOIMAGE == artwork.getArtworkType() && (artwork.getMetadata().getEpisodeNumber() >= 0)) {
+            // video image only for episodes
+            located = this.scanVideoImageLocal(artwork);
+            if (CollectionUtils.isEmpty(located)) {
+                located = this.scanVideoImageOnline(artwork);
             }
         } else {
             // Don't throw an exception here, just a debug message for now
@@ -300,6 +315,44 @@ public class ArtworkScannerService {
         }
         
         return createLocatedArtworks(artwork, banners);
+    }
+
+    private List<ArtworkLocated> scanVideoImageLocal(Artwork artwork) {
+        LOG.trace("Scan local for TV show episode image: {}", artwork);
+        
+        // TODO local scan
+        return null;
+    }
+
+    private List<ArtworkLocated> scanVideoImageOnline(Artwork artwork) {
+        LOG.debug("Scan online for TV show episode image: {}", artwork);
+
+        List<ArtworkDetailDTO> videoimages = null;
+
+        for (String prio : VIDEOIMAGE_TVSHOW_PRIORITIES) {
+            ITvShowVideoImageScanner scanner = registeredTvShowVideoImageScanner.get(prio);
+            if (scanner != null) {
+                LOG.debug("Use {} scanner for {}", scanner.getScannerName(), artwork);  
+                videoimages = scanner.getVideoImages(artwork.getMetadata());
+                if (CollectionUtils.isNotEmpty(videoimages)) {
+                    break;
+                }
+            } else {
+                LOG.warn("Desired TV show episode image scanner {} not registerd", prio);
+            }
+        }
+        
+        if (CollectionUtils.isEmpty(videoimages)) {
+            LOG.info("No TV show episode image found for: {}", artwork);
+            return null;
+        }
+        
+        if (VIDEOIMAGE_TVSHOW_MAXRESULTS > 0 && videoimages.size() > VIDEOIMAGE_TVSHOW_MAXRESULTS) {
+            LOG.info("Limited TV show banners to {} where retrieved {}: {}", VIDEOIMAGE_TVSHOW_MAXRESULTS, videoimages.size(), artwork);
+            videoimages = videoimages.subList(0, VIDEOIMAGE_TVSHOW_MAXRESULTS);
+        }
+        
+        return createLocatedArtworks(artwork, videoimages);
     }
 
     private List<ArtworkLocated> createLocatedArtworks(Artwork artwork, List<ArtworkDetailDTO> dtos) {

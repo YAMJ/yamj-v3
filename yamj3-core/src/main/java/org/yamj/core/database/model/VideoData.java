@@ -366,6 +366,25 @@ public class VideoData extends AbstractMetadata {
         this.setStatus(StatusType.NOTFOUND);
     }
 
+    @Override
+    public int getSeasonNumber() {
+        if (isMovie()) {
+            return -1;
+        }
+        return getSeason().getSeason();
+    }
+
+    @Override
+    public int getEpisodeNumber() {
+        return episode;
+    }
+
+    @Override
+    public boolean isMovie() {
+        return (episode < 0);
+    }
+
+    
     // EQUALITY CHECKS
     @Override
     public int hashCode() {

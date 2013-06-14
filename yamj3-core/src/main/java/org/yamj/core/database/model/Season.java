@@ -215,6 +215,11 @@ public class Season extends AbstractMetadata {
         this.setStatus(StatusType.NOTFOUND);
     }
 
+    @Override
+    public int getSeasonNumber() {
+        return season;
+    }
+
     // EQUALITY CHECKS
     @Override
     public int hashCode() {

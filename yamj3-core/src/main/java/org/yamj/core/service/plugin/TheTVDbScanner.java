@@ -22,7 +22,6 @@
  */
 package org.yamj.core.service.plugin;
 
-import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
 import java.util.LinkedHashSet;
@@ -30,13 +29,11 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
@@ -49,13 +46,10 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
     public static final String TVDB_SCANNER_ID = "tvdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheTVDbScanner.class);
-    private static final String DEFAULT_LANGUAGE = PropertyTools.getProperty("thetvdb.language", "en");
-    private static final int YEAR_MIN = 1900;
-    private static final int YEAR_MAX = 2050;
     @Autowired
     private PluginMetadataService pluginMetadataService;
     @Autowired
-    private TheTVDBApi tvdbApi;
+    private TheTVDbApiWrapper tvdbApiWrapper;
 
     @Override
     public String getScannerName() {
@@ -81,31 +75,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
     @Override
     public String getSeriesId(String title, int year) {
-        String id = "";
-        if (StringUtils.isNotBlank(title)) {
-            List<com.omertron.thetvdbapi.model.Series> seriesList = tvdbApi.searchSeries(title, DEFAULT_LANGUAGE);
-            if (seriesList != null) {
-                com.omertron.thetvdbapi.model.Series series = null;
-                for (com.omertron.thetvdbapi.model.Series s : seriesList) {
-                    if (s.getFirstAired() != null && !s.getFirstAired().isEmpty() && (year > YEAR_MIN && year < YEAR_MAX)) {
-                        DateTime firstAired = DateTime.parse(s.getFirstAired());
-                        firstAired.getYear();
-                        if (firstAired.getYear() == year) {
-                            series = s;
-                            break;
-                        }
-                    } else {
-                        series = s;
-                        break;
-                    }
-                }
-
-                if (series != null) {
-                    id = series.getId();
-                }
-            }
-        }
-        return id;
+        return tvdbApiWrapper.getSeriesId(title, year);
     }
 
     @Override
@@ -116,7 +86,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             return ScanResult.MISSING_ID;
         }
 
-        com.omertron.thetvdbapi.model.Series tvdbSeries = tvdbApi.getSeries(id, DEFAULT_LANGUAGE);
+        com.omertron.thetvdbapi.model.Series tvdbSeries = tvdbApiWrapper.getSeries(id);
 
         series.setSourceDbId(TVDB_SCANNER_ID, tvdbSeries.getId());
         series.setSourceDbId(ImdbScanner.IMDB_SCANNER_ID, tvdbSeries.getImdbId());
@@ -151,7 +121,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         // CAST & CREW
 
         Set<CreditDTO> actors = new LinkedHashSet<CreditDTO>();
-        for (Actor actor : tvdbApi.getActors(id)) {
+        for (Actor actor : tvdbApiWrapper.getActors(id)) {
             actors.add(new CreditDTO(JobType.ACTOR, actor.getName(), actor.getRole()));
         }
 
@@ -207,7 +177,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         }
 
         String seriesId = season.getSeries().getSourceDbId(TVDB_SCANNER_ID);
-        List<Episode> episodeList = tvdbApi.getSeasonEpisodes(seriesId, season.getSeason(), DEFAULT_LANGUAGE);
+        List<Episode> episodeList = tvdbApiWrapper.getSeasonEpisodes(seriesId, season.getSeason());
 
         for (VideoData videoData : videoDatas) {
 
@@ -238,6 +208,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                     videoData.addCreditDTO(new CreditDTO(JobType.GUEST_STAR, guestStar));
                 }
 
+                
                 // TODO more values
 
                 // mark episode as missing

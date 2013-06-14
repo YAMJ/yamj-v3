@@ -22,15 +22,10 @@
  */
 package org.yamj.core.service.artwork;
 
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.List;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sanselan.ImageReadException;
 import org.slf4j.Logger;
@@ -97,7 +92,6 @@ public class ArtworkProcessorService {
         // set values in located artwork
         located.setCacheFilename(cacheFilename);
         located.setStatus(StatusType.DONE);
-        artworkStorageService.updateArtworkLocated(located);
         
         // after that: try preProcessing of images
         List<ArtworkProfile> profiles = artworkStorageService.getPreProcessArtworkProfiles(located);
@@ -110,13 +104,7 @@ public class ArtworkProcessorService {
                 LOG.warn("Image generation error", error);
                 
                 // mark located artwork as invalid
-                try {
-                    located.setStatus(StatusType.INVALID);
-                    artworkStorageService.updateArtworkLocated(located);
-                } catch (Exception ex) {
-                    // just log a warning
-                    LOG.warn("Failed to mark artwork as invalid: " + located, ex);
-                }
+                located.setStatus(StatusType.INVALID);
                 
                 // no further processing for that located image
                 break;
@@ -125,11 +113,20 @@ public class ArtworkProcessorService {
                 LOG.warn("Image generation error", error);
             }
         }
-    }
+        
+        // update located artwork in database
+        artworkStorageService.updateArtworkLocated(located);
+}
 
     private void generateImage(ArtworkLocated located, ArtworkProfile profile) throws Exception {
         LOG.debug("Generate image for {} with profile {}", located, profile.getProfileName());
         BufferedImage imageGraphic = GraphicTools.loadJPEGImage(this.fileStorageService.getFile(StorageType.ARTWORK, located.getCacheFilename()));
+        
+        // set dimension of original image if not done before
+        if (located.getWidth() <= 0 || located.getHeight() <= 0) {
+            located.setWidth(imageGraphic.getWidth());
+            located.setHeight(imageGraphic.getHeight());
+        }
         
         // draw the image
         BufferedImage image = drawImage(imageGraphic, profile);
@@ -193,7 +190,11 @@ public class ArtworkProcessorService {
         StringBuilder sb = new StringBuilder();
         if (located.getArtwork().getVideoData() != null) {
             sb.append(located.getArtwork().getVideoData().getIdentifier());
-            sb.append(".video.");
+            if (located.getArtwork().getVideoData().isMovie()) {
+                sb.append(".movie.");
+            } else {
+                sb.append(".episode.");
+            }
         } else if (located.getArtwork().getSeason() != null) {
             sb.append(located.getArtwork().getSeason().getIdentifier());
             sb.append(".season.");
@@ -235,32 +236,31 @@ public class ArtworkProcessorService {
         artworkStorageService.errorArtworkLocated(queueElement.getId());
     }
     
-    @SuppressWarnings("rawtypes")
     private boolean checkArtworkQuality(ArtworkLocated located) {
         if (StringUtils.isNotBlank(located.getUrl())) {
-            Iterator readers = ImageIO.getImageReadersBySuffix("jpeg");
-            ImageReader reader = (ImageReader) readers.next();
-            int urlWidth;
-            int urlHeight;
-            try {
-                URL url = new URL(located.getUrl());
-                InputStream in = url.openStream();
-                ImageInputStream iis = ImageIO.createImageInputStream(in);
-                reader.setInput(iis, Boolean.TRUE);
-                urlWidth = reader.getWidth(0);
-                urlHeight = reader.getHeight(0);
-            } catch (IOException error) {
-                LOG.warn("Could not determine dimension of artwork: {}", located.getUrl());
-                LOG.debug("Graphics error", error);
-                return Boolean.FALSE;
+            
+            if (located.getWidth() <= 0 || located.getHeight() <= 0) {
+                // retrieve dimension
+                try {
+                    // get dimension
+                    Dimension dimension = GraphicTools.getDimension(located.getUrl());
+                    if (dimension.getHeight() <= 0 || dimension.getWidth() <=0) {
+                        LOG.warn("No valid image dimension determined: {}", located.getUrl());
+                        return Boolean.FALSE;
+                    }
+    
+                    // set values for later usage
+                    located.setWidth((int)dimension.getWidth());
+                    located.setHeight((int)dimension.getHeight());
+                } catch (Exception error) {
+                    LOG.error("Could not determine image dimension: {}", located.getUrl());
+                    LOG.warn("Graphics error", error);
+                    return Boolean.FALSE;
+                }
             }
-
-            // set values for later usage
-            located.setWidth(urlWidth);
-            located.setHeight(urlHeight);
+            
 
             // TODO: check quality of artwork?
-    
             
             /*
             float urlAspect = (float) urlWidth / (float) urlHeight;
