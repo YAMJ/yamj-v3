@@ -111,7 +111,7 @@ public class ScannerManagementImpl implements ScannerManagement {
 
         List<String> keywordList = processKeywords(fsIgnore, "file");
         if (CollectionUtils.isEmpty(keywordList)) {
-            DIR_IGNORE_FILES = Collections.EMPTY_LIST;
+            DIR_IGNORE_FILES = Collections.emptyList();
         } else {
             DIR_IGNORE_FILES = new ArrayList<Pattern>(keywordList.size());
             for (String keyword : keywordList) {
@@ -153,7 +153,7 @@ public class ScannerManagementImpl implements ScannerManagement {
         if (fsIgnore.containsKey(keyName) && StringUtils.isNotBlank(fsIgnore.get(keyName))) {
             return StringTools.splitList(fsIgnore.get(keyName), DEFAULT_SPLIT);
         } else {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
     }
 
