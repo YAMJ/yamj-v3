@@ -104,14 +104,14 @@ public class CastCrew extends AbstractIdentifiable implements Serializable {
         this.role = role;
     }
 
-    public boolean setJob(JobType jobType, String role) {
+    public boolean setJob(final JobType jobType, final String role) {
         setJobType(jobType);
-        if ((JobType.ACTOR.equals(jobType) || JobType.GUEST_STAR.equals(jobType))
-            && StringUtils.isNotBlank(role)
-            && !StringUtils.equals(getRole(), role))
-        {
-            setRole(role);
-            return true;
+        if ((JobType.ACTOR.equals(jobType) || JobType.GUEST_STAR.equals(jobType)) && StringUtils.isNotBlank(role)) {
+            final String newRole = StringUtils.abbreviate(role, 255);
+            if (!StringUtils.equals(getRole(), newRole)) {
+                setRole(newRole);
+                return true;
+            }
         }
         return false;
     }
