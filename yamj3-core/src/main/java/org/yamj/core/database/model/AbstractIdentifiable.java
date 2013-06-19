@@ -28,8 +28,6 @@ import org.yamj.core.hibernate.Identifiable;
 
 /**
  * Abstract implementation of an identifiable object.
- *
- * @author <a href="mailto:markus@bader-it.de">Markus Bader</a>
  */
 @MappedSuperclass
 public abstract class AbstractIdentifiable implements Identifiable {

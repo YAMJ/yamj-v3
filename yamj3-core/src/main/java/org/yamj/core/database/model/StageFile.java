@@ -22,20 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import org.hibernate.annotations.Index;
-
-import javax.persistence.UniqueConstraint;
-
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.ForeignKey;
-
-import org.yamj.core.database.model.type.FileType;
-import org.yamj.common.type.StatusType;
-import org.yamj.core.hibernate.usertypes.EnumStringUserType;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
@@ -43,18 +29,8 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
-import org.hibernate.annotations.Parameter;
-
-@TypeDefs({
-    @TypeDef(name = "fileType",
-            typeClass = EnumStringUserType.class,
-            parameters = {
-        @Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.FileType")}),
-    @TypeDef(name = "statusType",
-            typeClass = EnumStringUserType.class,
-            parameters = {
-        @Parameter(name = "enumClassName", value = "org.yamj.common.type.StatusType")})
-})
+import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.type.FileType;
 
 @Entity
 @Table(name = "stage_file",
@@ -64,6 +40,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -6247352843375054146L;
 
+    @Index(name = "IX_STAGEFILE_FILENAME")
     @NaturalId(mutable = true)
     @Column(name = "file_name", nullable = false, length = 255)
     private String fileName;
@@ -84,6 +61,9 @@ public class StageFile extends AbstractAuditable implements Serializable {
     @Type(type = "fileType")
     @Column(name = "file_type", nullable = false, length = 30)
     private FileType fileType;
+
+    @Column(name = "full_path", nullable = false, length = 255)
+    private String fullPath;
 
     @Index(name = "IX_STAGEFILE_STATUS")
     @Type(type = "statusType")
@@ -135,6 +115,14 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     public void setFileType(FileType fileType) {
         this.fileType = fileType;
+    }
+
+    public String getFullPath() {
+        return fullPath;
+    }
+
+    public void setFullPath(String fullPath) {
+        this.fullPath = fullPath;
     }
 
     public StatusType getStatus() {

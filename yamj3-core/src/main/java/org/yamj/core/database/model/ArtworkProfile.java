@@ -22,21 +22,15 @@
  */
 package org.yamj.core.database.model;
 
-
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Type;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ImageFormat;
-import org.yamj.core.hibernate.usertypes.EnumStringUserType;
-
-@TypeDefs({
-    @TypeDef(name = "artworkType", typeClass = EnumStringUserType.class,
-            parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ArtworkType")}),
-})
 
 @Entity
 @Table(name = "artwork_profile",

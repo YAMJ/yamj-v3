@@ -20,14 +20,19 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.tools;
+package org.yamj.core.database.model.type;
 
-public final class Constants {
+public enum SubtitleType {
 
-    private Constants() {
-        // do not instantiate this class
+    UNKNOWN,
+    INFILE,
+    EXTERNAL;
+
+    public static SubtitleType fromString(String type) {
+        try {
+            return SubtitleType.valueOf(type.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            return UNKNOWN;
+        }
     }
-    
-    public static final String SPACE_SLASH_SPACE = " / ";
-    public static final String UNKNOWN = "Unknown";
 }

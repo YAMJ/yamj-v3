@@ -104,6 +104,7 @@ public class StagingService {
                 stageFile.setFileSize(stageFileDTO.getFileSize());
                 stageFile.setStageDirectory(stageDirectory);
                 stageFile.setFileType(filenameScanner.determineFileType(stageFileDTO.getFileName()));
+                stageFile.setFullPath(FilenameUtils.concat(stageDirectoryDTO.getPath(), stageFileDTO.getFileName()));
                 stageFile.setStatus(StatusType.NEW);
                 stagingDao.saveEntity(stageFile);
             } else {

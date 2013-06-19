@@ -22,6 +22,13 @@
  */
 package org.yamj.core.database.dao;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.hibernate.SQLQuery;
+import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.dto.QueueDTOComparator;
+
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.hibernate.HibernateDao;
@@ -35,5 +42,30 @@ public class MediaDao extends HibernateDao {
 
     public MediaFile getMediaFile(String fileName) {
         return (MediaFile)getSession().byNaturalId(MediaFile.class).using("fileName", fileName).load();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<QueueDTO> getMediaQueue(final CharSequence sql, final int maxResults) {
+        SQLQuery query = getSession().createSQLQuery(sql.toString());
+        query.setReadOnly(true);
+        query.setCacheable(true);
+        if (maxResults > 0) {
+            query.setMaxResults(maxResults);
+        }
+
+        List<QueueDTO> queueElements = new ArrayList<QueueDTO>();
+        List<Object[]> objects = query.list();
+        for (Object[] object : objects) {
+            QueueDTO queueElement = new QueueDTO();
+            queueElement.setId(convertRowElementToLong(object[0]));
+            queueElement.setDate(convertRowElementToDate(object[2]));
+            if (queueElement.getDate() == null) {
+                queueElement.setDate(convertRowElementToDate(object[1]));
+            }
+            queueElements.add(queueElement);
+        }
+
+        Collections.sort(queueElements, new QueueDTOComparator());
+        return queueElements;
     }
 }

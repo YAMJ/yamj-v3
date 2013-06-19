@@ -22,12 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import javax.persistence.UniqueConstraint;
-
-import org.hibernate.annotations.ForeignKey;
-
-import org.yamj.common.type.StatusType;
-import org.yamj.core.hibernate.usertypes.EnumStringUserType;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,13 +31,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
-
-@TypeDefs({
-    @TypeDef(name = "statusType",
-            typeClass = EnumStringUserType.class,
-            parameters = {
-        @org.hibernate.annotations.Parameter(name = "enumClassName", value = "org.yamj.common.type.StatusType")})
-})
+import org.yamj.common.type.StatusType;
 
 @Entity
 @Table(name = "person",

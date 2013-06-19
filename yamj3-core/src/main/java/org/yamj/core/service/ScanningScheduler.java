@@ -23,32 +23,34 @@
 package org.yamj.core.service;
 
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.ArtworkStorageService;
+import org.yamj.core.database.service.MediaStorageService;
 import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.artwork.ArtworkScannerRunner;
 import org.yamj.core.service.artwork.ArtworkScannerService;
+import org.yamj.core.service.mediainfo.MediaInfoRunner;
+import org.yamj.core.service.mediainfo.MediaInfoService;
 import org.yamj.core.service.plugin.PluginMetadataRunner;
 import org.yamj.core.service.plugin.PluginMetadataService;
 
 @Service
-public class MetadataScheduler {
+public class ScanningScheduler implements InitializingBean {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MetadataScheduler.class);
-    private static final int MEDIA_SCANNER_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.mediascan.maxThreads", 1);
-    private static final int MEDIA_SCANNER_MAX_RESULTS = PropertyTools.getIntProperty("yamj3.scheduler.mediascan.maxResults", 20);
+    private static final Logger LOG = LoggerFactory.getLogger(ScanningScheduler.class);
+    private static final int MEDIAFILE_SCANNER_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.mediafilescan.maxThreads", 1);
+    private static final int MEDIAFILE_SCANNER_MAX_RESULTS = PropertyTools.getIntProperty("yamj3.scheduler.mediafilescan.maxResults", 20);
+    private static final int MEDIADATA_SCANNER_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.mediadatascan.maxThreads", 1);
+    private static final int MEDIADATA_SCANNER_MAX_RESULTS = PropertyTools.getIntProperty("yamj3.scheduler.mediadatascan.maxResults", 20);
     private static final int PEOPLE_SCANNER_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.peoplescan.maxThreads", 1);
     private static final int PEOPLE_SCANNER_MAX_RESULTS = PropertyTools.getIntProperty("yamj3.scheduler.peoplescan.maxResults", 50);
     private static final int ARTWORK_SCANNER_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.artworkscan.maxThreads", 1);
@@ -61,31 +63,44 @@ public class MetadataScheduler {
     private ArtworkStorageService artworkStorageService;
     @Autowired
     private ArtworkScannerService artworkScannerService;
-    private boolean messageArtwork = Boolean.FALSE; // Have we already printed the message
-    private boolean messagePeople = Boolean.FALSE;  // Have we already printed the message
-    private boolean messageMedia = Boolean.FALSE;   // Have we already printed the message
-
+    @Autowired
+    private MediaStorageService mediaStorageService;
+    @Autowired
+    private MediaInfoService mediaInfoService;
+    
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (MEDIADATA_SCANNER_MAX_THREADS <= 0) {
+            LOG.info("Media data scanning is disabled");
+        }
+        if (MEDIAFILE_SCANNER_MAX_THREADS <= 0 || !mediaInfoService.isMediaInfoActivated()) {
+            LOG.info("Media file scanning is disabled");
+        }
+        if (PEOPLE_SCANNER_MAX_THREADS <= 0) {
+            LOG.info("People scanning is disabled");
+        }
+        if (ARTWORK_SCANNER_MAX_THREADS <= 0) {
+            LOG.info("Artwork scanning is disabled");
+        }
+    }
+    
     @Scheduled(initialDelay = 5000, fixedDelay = 45000)
     public void scanMediaData() throws Exception {
-        if (MEDIA_SCANNER_MAX_THREADS <= 0) {
-            if (!messageMedia) {
-                messageMedia = Boolean.TRUE;
-                LOG.info("Media data scanning is disabled");
-            }
+        if (MEDIADATA_SCANNER_MAX_THREADS <= 0) {
             return;
         }
 
-        List<QueueDTO> queueElements = metadataStorageService.getMediaQueueForScanning(MEDIA_SCANNER_MAX_RESULTS);
+        List<QueueDTO> queueElements = metadataStorageService.getMediaQueueForScanning(MEDIADATA_SCANNER_MAX_RESULTS);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.debug("No media data found to scan");
             return;
         }
 
-        LOG.info("Found {} media data objects to process; scan with {} threads", queueElements.size(), MEDIA_SCANNER_MAX_THREADS);
+        LOG.info("Found {} media data objects to process; scan with {} threads", queueElements.size(), MEDIADATA_SCANNER_MAX_THREADS);
         BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
 
-        ExecutorService executor = Executors.newFixedThreadPool(MEDIA_SCANNER_MAX_THREADS);
-        for (int i = 0; i < MEDIA_SCANNER_MAX_THREADS; i++) {
+        ExecutorService executor = Executors.newFixedThreadPool(MEDIADATA_SCANNER_MAX_THREADS);
+        for (int i = 0; i < MEDIADATA_SCANNER_MAX_THREADS; i++) {
             PluginMetadataRunner worker = new PluginMetadataRunner(queue, pluginMetadataService);
             executor.execute(worker);
         }
@@ -102,13 +117,42 @@ public class MetadataScheduler {
         LOG.debug("Finished media data scanning");
     }
 
+    @Scheduled(initialDelay = 5000, fixedDelay = 45000)
+    public void scanMediaFiles() throws Exception {
+        if (MEDIAFILE_SCANNER_MAX_THREADS <= 0 || !mediaInfoService.isMediaInfoActivated()) {
+            return;
+        }
+
+        List<QueueDTO> queueElements = mediaStorageService.getMediaFileQueueForScanning(MEDIAFILE_SCANNER_MAX_RESULTS);
+        if (CollectionUtils.isEmpty(queueElements)) {
+            LOG.debug("No media files found to scan");
+            return;
+        }
+
+        LOG.info("Found {} media files to process; scan with {} threads", queueElements.size(), MEDIAFILE_SCANNER_MAX_THREADS);
+        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
+
+        ExecutorService executor = Executors.newFixedThreadPool(MEDIAFILE_SCANNER_MAX_THREADS);
+        for (int i = 0; i < MEDIAFILE_SCANNER_MAX_THREADS; i++) {
+            MediaInfoRunner worker = new MediaInfoRunner(queue, mediaInfoService);
+            executor.execute(worker);
+        }
+        executor.shutdown();
+
+        // run until all workers have finished
+        while (!executor.isTerminated()) {
+            try {
+                TimeUnit.SECONDS.sleep(5);
+            } catch (InterruptedException ignore) {
+            }
+        }
+
+        LOG.debug("Finished media file scanning");
+    }
+
     @Scheduled(initialDelay = 10000, fixedDelay = 45000)
     public void scanPeopleData() throws Exception {
         if (PEOPLE_SCANNER_MAX_THREADS <= 0) {
-            if (!messagePeople) {
-                messagePeople = Boolean.TRUE;
-                LOG.info("People scanning is disabled");
-            }
             return;
         }
 
@@ -143,10 +187,6 @@ public class MetadataScheduler {
     @Scheduled(initialDelay = 15000, fixedDelay = 45000)
     public void scanArtwork() throws Exception {
         if (ARTWORK_SCANNER_MAX_THREADS <= 0) {
-            if (!messageArtwork) {
-                messageArtwork = Boolean.TRUE;
-                LOG.info("Artwork scanning is disabled");
-            }
             return;
         }
 

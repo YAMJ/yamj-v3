@@ -22,23 +22,13 @@
  */
 package org.yamj.core.database.model;
 
-import javax.persistence.UniqueConstraint;
-
-import org.apache.commons.lang3.StringUtils;
-
-import org.yamj.core.database.model.type.JobType;
-import org.yamj.core.hibernate.usertypes.EnumStringUserType;
 import java.io.Serializable;
 import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
-import org.hibernate.annotations.Parameter;
-
-@TypeDef(name = "jobType",
-        typeClass = EnumStringUserType.class,
-        parameters = {
-    @Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.JobType")})
+import org.yamj.core.database.model.type.JobType;
 
 @Entity
 @Table(name = "cast_crew",

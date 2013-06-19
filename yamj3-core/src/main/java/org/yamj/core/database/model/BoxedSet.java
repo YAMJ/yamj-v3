@@ -22,12 +22,11 @@
  */
 package org.yamj.core.database.model;
 
-import javax.persistence.UniqueConstraint;
-
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NaturalId;
 

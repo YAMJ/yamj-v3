@@ -22,74 +22,73 @@
  */
 package org.yamj.core.database.model;
 
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
-import org.hibernate.annotations.ForeignKey;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.hibernate.usertypes.EnumStringUserType;
-
-@TypeDef(name = "statusType",
-        typeClass = EnumStringUserType.class,
-        parameters = {
-    @Parameter(name = "enumClassName", value = "org.yamj.common.type.StatusType")})
 
 @Entity
 @Table(name = "mediafile",
-    uniqueConstraints= @UniqueConstraint(name="UIX_MEDIAFILE_NATURALID", columnNames={"fileName"})
+    uniqueConstraints= @UniqueConstraint(name="UIX_MEDIAFILE_NATURALID", columnNames={"file_name"})
 )
+@SuppressWarnings("unused")
 public class MediaFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 8411423609119475972L;
     
     @NaturalId
-    @Column(name = "fileName", nullable = false, length = 255)
+    @Column(name = "file_name", nullable = false, length = 255)
     private String fileName;
     
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "file_date")
     private Date fileDate;
     
-    @Column(name = "file_size")
+    @Column(name = "file_size", nullable = false)
     private long fileSize = -1;
     
-    @Column(name = "part")
-    private int part;
+    @Column(name = "part", nullable = false)
+    private int part = -1;
     
     @Column(name = "container", length = 30)
     private String container;
     
     @Column(name = "codec", length = 50)
     private String codec;
-    
-    @Column(name = "bitrate")
+
+    @Column(name = "codec_format", length = 50)
+    private String codecFormat;
+
+    @Column(name = "codec_profile", length = 50)
+    private String codecProfile;
+
+    @Column(name = "bitrate", nullable = false)
     private int bitrate = -1;
+
+    @Column(name = "overall_bitrate", nullable = false)
+    private int overallBitrate = -1;
+
+    @Column(name = "fps", nullable = false)
+    private float fps = -1;
     
-    @Column(name = "fps")
-    private float fps = 60;
-    
-    @Column(name = "width")
+    @Column(name = "width", nullable = false)
     private int width = -1;
     
-    @Column(name = "height")
+    @Column(name = "height", nullable = false)
     private int height = -1;
     
-    @Column(name = "aspect", length = 30)
-    private String aspect;
+    @Column(name = "aspect_ratio", length = 30)
+    private String aspectRatio;
     
-    @Column(name = "runtime")
-    private long runtime;
+    @Column(name = "runtime", nullable = false)
+    private int runtime;
     
     @Column(name = "video_source", length = 30)
     private String videoSource;
@@ -106,6 +105,10 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     
     @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "mediaFile")
     private Set<StageFile> stageFiles = new HashSet<StageFile>(0);
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true,  mappedBy = "mediaFile")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<AudioCodec> audioCodecs = new HashSet<AudioCodec>(0);
 
     // GETTER and SETTER
     public String getFileName() {
@@ -155,6 +158,22 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     public void setCodec(String codec) {
         this.codec = codec;
     }
+    
+    public String getCodecFormat() {
+        return codecFormat;
+    }
+
+    public void setCodecFormat(String codecFormat) {
+        this.codecFormat = codecFormat;
+    }
+
+    public String getCodecProfile() {
+        return codecProfile;
+    }
+
+    public void setCodecProfile(String codecProfile) {
+        this.codecProfile = codecProfile;
+    }
 
     public int getBitrate() {
         return bitrate;
@@ -162,6 +181,14 @@ public class MediaFile extends AbstractAuditable implements Serializable {
 
     public void setBitrate(int bitrate) {
         this.bitrate = bitrate;
+    }
+
+    public int getOverallBitrate() {
+        return overallBitrate;
+    }
+
+    public void setOverallBitrate(int overallBitrate) {
+        this.overallBitrate = overallBitrate;
     }
 
     public float getFps() {
@@ -188,19 +215,19 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         this.height = height;
     }
 
-    public String getAspect() {
-        return aspect;
+    public String getAspectRatio() {
+        return aspectRatio;
     }
 
-    public void setAspect(String aspect) {
-        this.aspect = aspect;
+    public void setAspectRatio(String aspectRatio) {
+        this.aspectRatio = aspectRatio;
     }
 
-    public long getRuntime() {
+    public int getRuntime() {
         return runtime;
     }
 
-    public void setRuntime(long runtime) {
+    public void setRuntime(int runtime) {
         this.runtime = runtime;
     }
 
@@ -224,7 +251,7 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         return videoDatas;
     }
 
-    public void setVideoDatas(Set<VideoData> videoDatas) {
+    private void setVideoDatas(Set<VideoData> videoDatas) {
         this.videoDatas = videoDatas;
     }
 
@@ -236,7 +263,7 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         return stageFiles;
     }
 
-    public void setStageFiles(Set<StageFile> stageFiles) {
+    private void setStageFiles(Set<StageFile> stageFiles) {
         this.stageFiles = stageFiles;
     }
 
@@ -244,7 +271,25 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         this.stageFiles.add(stageFile);
     }
 
+    public Set<AudioCodec> getAudioCodecs() {
+        return audioCodecs;
+    }
+
+    private void setAudioCodecs(Set<AudioCodec> audioCodecs) {
+        this.audioCodecs = audioCodecs;
+    }
+
+    public AudioCodec getAudioCodec(int counter) {
+        for (AudioCodec audioCodec : this.audioCodecs) {
+            if (audioCodec.getCounter() == counter) {
+                return audioCodec;
+            }
+        }
+        return null;
+    }
+
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         final int prime = 7;

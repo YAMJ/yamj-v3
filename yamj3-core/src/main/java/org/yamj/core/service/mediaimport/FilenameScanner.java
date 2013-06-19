@@ -194,7 +194,7 @@ public class FilenameScanner {
         }
 
         // build version keywords pattern
-        for (String token : tokenizeToStringArray(PropertyTools.getProperty("filename.scanner.version.keywords", "remastered,directors cut,extended cut,final cut"), ",;| ")) {
+        for (String token : tokenizeToStringArray(PropertyTools.getProperty("filename.scanner.version.keywords", "directors cut,extended cut,final cut,remastered,extended version,special edition"), ",;| ")) {
             movieVersionPatterns.add(PatternUtils.iwpatt(token.replace(" ", PatternUtils.WORD_DELIMITERS_MATCH_PATTERN.pattern())));
         }
 

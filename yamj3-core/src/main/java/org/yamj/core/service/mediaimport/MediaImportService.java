@@ -112,7 +112,7 @@ public class MediaImportService {
             mediaFile.setStatus(StatusType.NEW);
             mediaFile.addStageFile(stageFile);
             stageFile.setMediaFile(mediaFile);
-
+            
             LOG.debug("Store new media file: '{}'", mediaFile.getFileName());
             mediaDao.saveEntity(mediaFile);
         } else {
@@ -184,6 +184,7 @@ public class MediaImportService {
                             series = new Series();
                             series.setIdentifier(seriesIdentifier);
                             series.setTitle(dto.getTitle(), MEDIA_SOURCE);
+                            series.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                             series.setSourceDbIdMap(dto.getIdMap());
                             series.setStatus(StatusType.NEW);
 
@@ -216,6 +217,7 @@ public class MediaImportService {
                         season.setIdentifier(seasonIdentifier);
                         season.setSeason(dto.getSeason());
                         season.setTitle(dto.getTitle(), MEDIA_SOURCE);
+                        season.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                         season.setSeries(series);
                         season.setStatus(StatusType.NEW);
 

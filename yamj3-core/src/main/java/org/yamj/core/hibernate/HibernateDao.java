@@ -102,7 +102,7 @@ public abstract class HibernateDao {
      * @param entity the entity to delete
      */
     public void deleteEntity(final Object entity) {
-        getSession().save(entity);
+        getSession().delete(entity);
     }
 
     /**

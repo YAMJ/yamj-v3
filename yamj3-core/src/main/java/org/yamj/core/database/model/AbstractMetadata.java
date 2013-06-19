@@ -27,24 +27,14 @@ import javax.persistence.Column;
 import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
-import org.yamj.core.hibernate.usertypes.EnumStringUserType;
 
 /**
  * Abstract implementation of an metadata object.
  */
-@TypeDefs({
-    @TypeDef(name = "overrideFlag",
-            typeClass = EnumStringUserType.class,
-            parameters = {
-        @Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.OverrideFlag")}),
-    @TypeDef(name = "statusType",
-            typeClass = EnumStringUserType.class,
-            parameters = {
-        @Parameter(name = "enumClassName", value = "org.yamj.common.type.StatusType")})
-})
 @MappedSuperclass
 public abstract class AbstractMetadata extends AbstractAuditable
         implements IMetadata, Serializable {

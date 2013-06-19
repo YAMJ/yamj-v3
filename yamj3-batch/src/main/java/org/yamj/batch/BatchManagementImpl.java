@@ -34,11 +34,11 @@ public class BatchManagementImpl implements BatchManagement {
                 ImportDTO importDTO = new ImportDTO();
                 importDTO.setClient("007");
                 importDTO.setPlayerPath("smb://127.0.0.1/test");
-                importDTO.setBaseDirectory("D:\\test\\");
+                importDTO.setBaseDirectory("C:\\movies\\");
 
                 StageDirectoryDTO stageDirectory = new StageDirectoryDTO();
                 stageDirectory.setDate(System.currentTimeMillis());
-                stageDirectory.setPath("D:\\test\\movies\\");
+                stageDirectory.setPath("C:\\movies\\");
                 importDTO.setStageDirectory(stageDirectory);
 
                 // import scanned
@@ -46,7 +46,7 @@ public class BatchManagementImpl implements BatchManagement {
 
                 stageDirectory = new StageDirectoryDTO();
                 stageDirectory.setDate(System.currentTimeMillis());
-                stageDirectory.setPath("D:\\test\\movies\\Action");
+                stageDirectory.setPath("C:\\movies\\Action");
                 importDTO.setStageDirectory(stageDirectory);
 
                 StageFileDTO stageFile = new StageFileDTO();

@@ -22,6 +22,13 @@
  */
 package org.yamj.core.database.model;
 
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.ForeignKey;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -91,6 +98,9 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @Column(name = "cache_filename",length = 200)
     private String cacheFilename;
     
+    @Column(name = "cache_path",length = 255)
+    private String cachePath;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "artworkLocated")
     private List<ArtworkGenerated> generatedArtworks = new ArrayList<ArtworkGenerated>(0);
 
@@ -174,6 +184,14 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     public void setCacheFilename(String cacheFilename) {
         this.cacheFilename = cacheFilename;
+    }
+
+    public String getCachePath() {
+        return cachePath;
+    }
+
+    public void setCachePath(String cachePath) {
+        this.cachePath = cachePath;
     }
 
     public List<ArtworkGenerated> getGeneratedArtworks() {

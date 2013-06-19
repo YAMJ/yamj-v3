@@ -33,9 +33,9 @@ import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.mediaimport.MediaImportService;
 
 @Service
-public class Scheduler {
+public class ImportScheduler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Scheduler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImportScheduler.class);
 
     @Autowired
     private MediaImportService mediaImportService;
