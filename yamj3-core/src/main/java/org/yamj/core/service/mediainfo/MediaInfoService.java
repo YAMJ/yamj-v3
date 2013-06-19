@@ -219,6 +219,8 @@ public class MediaInfoService implements InitializingBean {
         String runtime = getRuntime(infosGeneral, infosVideo);
         if (StringUtils.isNotBlank(runtime)) {
             mediaFile.setRuntime(DateTimeTools.processRuntime(runtime));
+        } else {
+            mediaFile.setRuntime(-1);
         }
 
         // get Info from first video stream only
@@ -227,20 +229,12 @@ public class MediaInfoService implements InitializingBean {
             Map<String, String> infosMainVideo = infosVideo.get(0);
 
             // codec
-            infoValue = infosMainVideo.get("Codec ID");
-            if (StringUtils.isNotBlank(infoValue)) {
-                mediaFile.setCodec(infoValue);
-            }
-            infoValue = infosMainVideo.get("Format");
-            if (StringUtils.isNotBlank(infoValue)) {
-                mediaFile.setCodecFormat(infoValue);
-            }
-            infoValue = infosMainVideo.get("Format profile");
-            if (StringUtils.isNotBlank(infoValue)) {
-                mediaFile.setCodecProfile(infoValue);
-            }
+            mediaFile.setCodec(infosMainVideo.get("Codec ID"));
+            mediaFile.setCodecFormat(infosMainVideo.get("Format"));
+            mediaFile.setCodecProfile(infosMainVideo.get("Format profile"));
             
             // width
+            mediaFile.setWidth(-1);
             try {
                 infoValue = infosMainVideo.get("Width");
                 if (StringUtils.isNumeric(infoValue)) {
@@ -251,6 +245,7 @@ public class MediaInfoService implements InitializingBean {
             }
 
             // height
+            mediaFile.setHeight(-1);
             try {
                 infoValue = infosMainVideo.get("Height");
                 if (StringUtils.isNumeric(infoValue)) {
@@ -280,10 +275,7 @@ public class MediaInfoService implements InitializingBean {
 
             // aspect ratio
             infoValue = infosMainVideo.get("Display aspect ratio");
-            String aspectRatio = aspectRatioTools.cleanAspectRatio(infoValue);
-            if (StringUtils.isNotBlank(aspectRatio)) {
-                mediaFile.setAspectRatio(aspectRatio);
-            }
+            mediaFile.setAspectRatio(aspectRatioTools.cleanAspectRatio(infoValue));
 
             // bit rate
             mediaFile.setBitrate(getBitRate(infosMainVideo));
