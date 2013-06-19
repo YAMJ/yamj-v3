@@ -44,12 +44,13 @@ public class FilenameDTO {
     private String rest;
     private String title = null;
     private int year = -1;
+    private boolean extra = false;
+    private int part = -1;
     private String partTitle = null;
+    private String movieVersion = null;
     private String episodeTitle = null;
     private int season = -1;
     private final List<Integer> episodes = new ArrayList<Integer>();
-    private int part = -1;
-    private boolean extra = false;
     private String audioCodec = null;
     private String videoCodec = null;
     private String container = null;
@@ -130,12 +131,36 @@ public class FilenameDTO {
         this.year = year;
     }
 
+    public boolean isExtra() {
+        return extra;
+    }
+
+    public void setExtra(boolean extra) {
+        this.extra = extra;
+    }
+
+    public int getPart() {
+        return part;
+    }
+
+    public void setPart(int part) {
+        this.part = part;
+    }
+    
     public String getPartTitle() {
         return partTitle;
     }
 
     public void setPartTitle(String partTitle) {
         this.partTitle = partTitle;
+    }
+
+    public String getMovieVersion() {
+        return movieVersion;
+    }
+
+    public void setMovieVersion(String movieVersion) {
+        this.movieVersion = movieVersion;
     }
 
     public int getSeason() {
@@ -146,24 +171,8 @@ public class FilenameDTO {
         this.season = season;
     }
 
-    public int getPart() {
-        return part;
-    }
-
-    public void setPart(int part) {
-        this.part = part;
-    }
-
     public List<Integer> getEpisodes() {
         return episodes;
-    }
-
-    public boolean isExtra() {
-        return extra;
-    }
-
-    public void setExtra(boolean extra) {
-        this.extra = extra;
     }
 
     public String getAudioCodec() {
@@ -283,12 +292,13 @@ public class FilenameDTO {
         StringBuilder sb = new StringBuilder();
         sb.append("[Title=").append(title);
         sb.append("],[Year=").append(year);
+        sb.append("],[Extra=").append(extra);
+        sb.append("],[Part=").append(part);
         sb.append("],[PartTitle=").append(partTitle);
+        sb.append("],[MovieVersion=").append(movieVersion);
         sb.append("],[Season=").append(season);
         sb.append("],[EpisodeCount=").append(episodes.size());
         sb.append("],[EpisodeTitle=").append(episodeTitle);
-        sb.append("],[Part=").append(part);
-        sb.append("],[Extra=").append(extra);
         sb.append("],[AudioCodec=").append(audioCodec);
         sb.append("],[VideoCodec=").append(videoCodec);
         sb.append("],[Container=").append(container);

@@ -153,7 +153,6 @@ public class FilenameScanner {
     private boolean skipEpisodeTitle;
     private boolean useParentRegex;
     private Pattern useParentPattern;
-    @Autowired
     private LanguageTools languageTools;
 
     public FilenameScanner() {
@@ -194,20 +193,25 @@ public class FilenameScanner {
         }
 
         // build version keywords pattern
-        for (String token : tokenizeToStringArray(PropertyTools.getProperty("filename.scanner.version.keywords", "directors cut,extended cut,final cut,remastered,extended version,special edition"), ",;| ")) {
+        for (String token : tokenizeToStringArray(PropertyTools.getProperty("filename.scanner.version.keywords", "director's cut,directors cut,extended cut,final cut,remastered,extended version,special edition"), ",;|")) {
             movieVersionPatterns.add(PatternUtils.iwpatt(token.replace(" ", PatternUtils.WORD_DELIMITERS_MATCH_PATTERN.pattern())));
         }
 
         // build extra keywords pattern
-        for (String token : tokenizeToStringArray(PropertyTools.getProperty("filename.scanner.extra.keywords", "trailer,extra,bonus"), ",;| ")) {
+        for (String token : tokenizeToStringArray(PropertyTools.getProperty("filename.scanner.extra.keywords", "trailer,extra,bonus"), ",;|")) {
             extraPatterns.add(PatternUtils.pattInSBrackets(Pattern.quote(token)));
         }
 
         // set source keywords
-        KeywordMap sourceKeywords = PropertyTools.getKeywordMap("filename.scanner.source.keywords", "HDTV,PDTV,DVDRip,DVDSCR,DSRip,CAM,R5,LINE,HD2DVD,DVD,DVD5,DVD9,HRHDTV,MVCD,VCD,TS,VHSRip,BluRay,HDDVD,D-THEATER,SDTV");
+        KeywordMap sourceKeywords = PropertyTools.getKeywordMap("filename.scanner.source.keywords", "HDTV,PDTV,DVDRip,DVDSCR,DSRip,CAM,R5,LINE,HD2DVD,DVD,DVD5,DVD9,HRHDTV,MVCD,VCD,TS,VHSRip,BluRay,BDRip,HDDVD,D-THEATER,SDTV");
         videoSourceMap.putAll(sourceKeywords.getKeywords(), sourceKeywords);
     }
 
+    @Autowired
+    public void setLanguageTools(LanguageTools languageTools) {
+        this.languageTools = languageTools;
+    }
+    
     public FileType determineFileType(String fileName) {
         try {
             int index = fileName.lastIndexOf('.');
@@ -279,6 +283,10 @@ public class FilenameScanner {
 
         // Remove version info
         for (Pattern pattern : movieVersionPatterns) {
+            Matcher matcher = pattern.matcher(dto.getRest());
+            if (matcher.find()) {
+                dto.setMovieVersion(matcher.group(0));
+            }
             dto.setRest(pattern.matcher(dto.getRest()).replaceAll("./."));
         }
 

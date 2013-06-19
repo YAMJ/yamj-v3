@@ -53,10 +53,19 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     
     @Column(name = "file_size", nullable = false)
     private long fileSize = -1;
-    
+
+    @Column(name = "extra", nullable = false)
+    private boolean extra = false;
+
     @Column(name = "part", nullable = false)
     private int part = -1;
-    
+
+    @Column(name = "part_title", length = 200)
+    private String partTitle;
+
+    @Column(name = "movie_version", length = 200)
+    private String movieVersion;
+
     @Column(name = "container", length = 30)
     private String container;
     
@@ -135,12 +144,36 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         this.fileSize = fileSize;
     }
 
+    public boolean isExtra() {
+        return extra;
+    }
+
+    public void setExtra(boolean extra) {
+        this.extra = extra;
+    }
+
     public int getPart() {
         return part;
     }
 
     public void setPart(int part) {
         this.part = part;
+    }
+
+    public String getPartTitle() {
+        return partTitle;
+    }
+
+    public void setPartTitle(String partTitle) {
+        this.partTitle = partTitle;
+    }
+
+    public String getMovieVersion() {
+        return movieVersion;
+    }
+
+    public void setMovieVersion(String movieVersion) {
+        this.movieVersion = movieVersion;
     }
 
     public String getContainer() {

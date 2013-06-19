@@ -105,7 +105,10 @@ public class MediaImportService {
             mediaFile.setFileDate(stageFile.getFileDate());
             mediaFile.setFileSize(stageFile.getFileSize());
             mediaFile.setContainer(dto.getContainer());
+            mediaFile.setExtra(dto.isExtra());
             mediaFile.setPart(dto.getPart());
+            mediaFile.setPartTitle(dto.getPartTitle());
+            mediaFile.setMovieVersion(dto.getMovieVersion());
             mediaFile.setFps(dto.getFps());
             mediaFile.setCodec(dto.getVideoCodec());
             mediaFile.setVideoSource(dto.getVideoSource());
