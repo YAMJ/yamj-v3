@@ -33,7 +33,7 @@
     <util:properties id="dynamicProperties" location="classpath:/yamj3-core-dynamic.properties" />
     <bean id="configService" class="org.yamj.core.configuration.ConfigService">
         <property name="configDao" ref="configDao"/>
-        <property name="properties" ref="dynamicProperties"/>
+        <property name="coreProperties" ref="dynamicProperties"/>
     </bean>
 
     <import resource="spring/connection.xml"/>

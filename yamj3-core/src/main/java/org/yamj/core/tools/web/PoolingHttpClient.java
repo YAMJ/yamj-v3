@@ -22,7 +22,6 @@
  */
 package org.yamj.core.tools.web;
 
-import org.yamj.common.tools.PropertyTools;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -46,13 +45,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.yamj.api.common.http.DefaultPoolingHttpClient;
+import org.yamj.common.tools.PropertyTools;
 
 public class PoolingHttpClient extends DefaultPoolingHttpClient implements DisposableBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(PoolingHttpClient.class);
+    private final static Charset UTF8_CHARSET = Charset.forName("UTF-8");
     private final Map<String, Integer> groupLimits = new HashMap<String, Integer>();
     private final List<String> routedHosts = new ArrayList<String>();
-
+    
     public PoolingHttpClient() {
         this(null, null);
     }
@@ -107,6 +108,11 @@ public class PoolingHttpClient extends DefaultPoolingHttpClient implements Dispo
             throw new RuntimeException("Unexpected status " + statusCode + " for uri " + httpGet.getURI());
         }
 
+        if (charset == null) {
+            // use UTF8 char set if none charset given
+            return readContent(response, UTF8_CHARSET);
+        }
+        // use given charset
         return readContent(response, charset);
     }
 

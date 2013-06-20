@@ -43,7 +43,7 @@ public class ConfigService implements InitializingBean {
     }
 
     @Required
-    public void setProperties(Properties properties) {
+    public void setCoreProperties(Properties properties) {
         for (Entry<Object,Object> entry : properties.entrySet()) {
             cachedProperties.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
         }
@@ -59,11 +59,11 @@ public class ConfigService implements InitializingBean {
         configDao.storeConfig(cachedProperties);
     }
     
-    public void reloadProperties() {
+    public void reloadCachedProperties() {
         cachedProperties = configDao.readConfig();
     }
     
-    public Map<String,String> getProperties() {
+    public Map<String,String> getCachedProperties() {
         return cachedProperties;
     }
     
