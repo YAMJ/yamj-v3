@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.common.tools.PropertyTools;
+import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.IMetadata;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
@@ -50,7 +50,9 @@ public class TheMovieDbArtworkScanner implements
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbArtworkScanner.class);
     private static final String DEFAULT_POSTER_SIZE = "original";
     private static final String DEFAULT_FANART_SIZE = "original";
-    private static final String DEFAULT_LANGUAGE = PropertyTools.getProperty("themoviedb.language", "en");
+
+    @Autowired
+    private ConfigService configService;
     @Autowired
     private ArtworkScannerService artworkScannerService;
     @Autowired
@@ -94,7 +96,8 @@ public class TheMovieDbArtworkScanner implements
 
         if (StringUtils.isNumeric(id)) {
             try {
-                MovieDb moviedb = tmdbApi.getMovieInfo(Integer.parseInt(id), DEFAULT_LANGUAGE);
+                String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+                MovieDb moviedb = tmdbApi.getMovieInfo(Integer.parseInt(id), defaultLanguage);
                 URL posterURL = tmdbApi.createImageUrl(moviedb.getPosterPath(), DEFAULT_POSTER_SIZE);
                 dtos.add(new ArtworkDetailDTO(getScannerName(), posterURL.toString()));
             } catch (MovieDbException error) {
@@ -111,7 +114,8 @@ public class TheMovieDbArtworkScanner implements
 
         if (StringUtils.isNumeric(id)) {
             try {
-                MovieDb moviedb = tmdbApi.getMovieInfo(Integer.parseInt(id), DEFAULT_LANGUAGE);
+                String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+                MovieDb moviedb = tmdbApi.getMovieInfo(Integer.parseInt(id), defaultLanguage);
                 URL fanartURL = tmdbApi.createImageUrl(moviedb.getBackdropPath(), DEFAULT_FANART_SIZE);
                 dtos.add(new ArtworkDetailDTO(getScannerName(), fanartURL.toString()));
             } catch (MovieDbException error) {
@@ -152,7 +156,8 @@ public class TheMovieDbArtworkScanner implements
         if (StringUtils.isNotBlank(imdbID)) {
             MovieDb moviedb = null;
             try {
-                moviedb = tmdbApi.getMovieInfoImdb(imdbID, DEFAULT_LANGUAGE);
+                String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+                moviedb = tmdbApi.getMovieInfoImdb(imdbID, defaultLanguage);
             } catch (MovieDbException ex) {
                 LOG.warn("Failed to get TMDb ID for {}-{}", imdbID, ex.getMessage());
             }

@@ -1,34 +1,30 @@
 package org.yamj.core.service.plugin;
 
-import java.util.Collections;
-
-import org.joda.time.DateTime;
-
-import org.apache.commons.collections.CollectionUtils;
-
-import com.omertron.thetvdbapi.model.Episode;
-
 import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Banners;
+import com.omertron.thetvdbapi.model.Episode;
 import com.omertron.thetvdbapi.model.Series;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.common.tools.PropertyTools;
+import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.tools.LRUTimedCache;
 
 @Service("tvdbApiWrapper")
 public class TheTVDbApiWrapper {
 
-    private static final String DEFAULT_LANGUAGE = PropertyTools.getProperty("thetvdb.language", "en");
-    private static final String ALTERNATE_LANGUAGE = PropertyTools.getProperty("thetvdb.language.alternate", "");
     private static final int YEAR_MIN = 1900;
     private static final int YEAR_MAX = 2050;
 
+    @Autowired
+    private ConfigService configService;
     @Autowired
     private TheTVDBApi tvdbApi;
 
@@ -69,10 +65,13 @@ public class TheTVDbApiWrapper {
                 // second try cause meanwhile the cache could have been filled
                 series = seriesCache.get(id);
                 if (series == null) {
+                    String defaultLanguage = configService.getProperty("thetvdb.language", "en");
+                    String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
+
                     // retrieve series from TheTVDb
-                    tvdbApi.getSeries(id, DEFAULT_LANGUAGE);
-                    if (series == null && StringUtils.isNotBlank(ALTERNATE_LANGUAGE)) {
-                        series = tvdbApi.getSeries(id, ALTERNATE_LANGUAGE);
+                    tvdbApi.getSeries(id, defaultLanguage);
+                    if (series == null && StringUtils.isNotBlank(altLanguage)) {
+                        series = tvdbApi.getSeries(id, altLanguage);
                     }
                     if (series == null) {
                         // have a valid series object with empty values
@@ -90,9 +89,12 @@ public class TheTVDbApiWrapper {
     public String getSeriesId(String title, int year) {
         String id = "";
         if (StringUtils.isNotBlank(title)) {
-            List<Series> seriesList = tvdbApi.searchSeries(title, DEFAULT_LANGUAGE);
-            if (CollectionUtils.isEmpty(seriesList) && StringUtils.isNotBlank(ALTERNATE_LANGUAGE)) {
-                seriesList = tvdbApi.searchSeries(title, ALTERNATE_LANGUAGE);
+            String defaultLanguage = configService.getProperty("thetvdb.language", "en");
+            String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
+
+            List<Series> seriesList = tvdbApi.searchSeries(title, defaultLanguage);
+            if (CollectionUtils.isEmpty(seriesList) && StringUtils.isNotBlank(altLanguage)) {
+                seriesList = tvdbApi.searchSeries(title, altLanguage);
             }
             
             if (CollectionUtils.isNotEmpty(seriesList)) {
@@ -129,9 +131,12 @@ public class TheTVDbApiWrapper {
         
         List<Episode> episodeList = this.episodesCache.get(key);
         if (episodeList == null) {
-            episodeList = tvdbApi.getSeasonEpisodes(id, season, DEFAULT_LANGUAGE);
-            if (CollectionUtils.isEmpty(episodeList) && StringUtils.isNotBlank(ALTERNATE_LANGUAGE)) {
-                episodeList = tvdbApi.getSeasonEpisodes(id, season, ALTERNATE_LANGUAGE);
+            String defaultLanguage = configService.getProperty("thetvdb.language", "en");
+            String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
+
+            episodeList = tvdbApi.getSeasonEpisodes(id, season, defaultLanguage);
+            if (CollectionUtils.isEmpty(episodeList) && StringUtils.isNotBlank(altLanguage)) {
+                episodeList = tvdbApi.getSeasonEpisodes(id, season, altLanguage);
             }
             if (episodeList == null) {
                 episodeList = Collections.emptyList();

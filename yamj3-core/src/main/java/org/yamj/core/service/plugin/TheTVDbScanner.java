@@ -46,6 +46,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
     public static final String TVDB_SCANNER_ID = "tvdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheTVDbScanner.class);
+    
     @Autowired
     private PluginMetadataService pluginMetadataService;
     @Autowired

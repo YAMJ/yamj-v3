@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.plugin;
 
-import org.yamj.core.tools.OverrideTools;
-
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.model.MovieDb;
@@ -43,22 +41,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.common.tools.PropertyTools;
+import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.tools.OverrideTools;
 
 @Service("tmdbScanner")
 public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, InitializingBean {
 
     public static final String TMDB_SCANNER_ID = "tmdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbScanner.class);
-    private static final String DEFAULT_LANGUAGE = PropertyTools.getProperty("themoviedb.language", "en");
-    private static final boolean INCLUDE_ADULT = PropertyTools.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
-    private static final int SEARCH_MATCH = PropertyTools.getIntProperty("themoviedb.searchMatch", 3);
+    
     @Autowired
     private PluginMetadataService pluginMetadataService;
+    @Autowired
+    private ConfigService configService;
     @Autowired
     private TheMovieDbApi tmdbApi;
 
@@ -78,14 +77,16 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     public String getMovieId(VideoData videoData) {
         String tmdbID = videoData.getSourceDbId(TMDB_SCANNER_ID);
         String imdbID = videoData.getSourceDbId(ImdbScanner.IMDB_SCANNER_ID);
+        String defaultLanguage = configService.getProperty("themoviedb.language", "en");
         MovieDb moviedb = null;
 
+        
         // First look to see if we have a TMDb ID as this will make looking the film up easier
         if (StringUtils.isNotBlank(tmdbID)) {
             // Search based on TMdb ID
             LOG.debug("Using TMDb ID ({}) for {}", tmdbID, videoData.getTitle());
             try {
-                moviedb = tmdbApi.getMovieInfo(Integer.parseInt(tmdbID), DEFAULT_LANGUAGE);
+                moviedb = tmdbApi.getMovieInfo(Integer.parseInt(tmdbID), defaultLanguage);
             } catch (MovieDbException ex) {
                 LOG.debug("Failed to get movie info using TMDB ID: {}, Error: {}", tmdbID, ex.getMessage());
                 moviedb = null;
@@ -96,7 +97,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             // Search based on IMDb ID
             LOG.debug("Using IMDb ID ({}) for {}", imdbID, videoData.getTitle());
             try {
-                moviedb = tmdbApi.getMovieInfoImdb(imdbID, DEFAULT_LANGUAGE);
+                moviedb = tmdbApi.getMovieInfoImdb(imdbID, defaultLanguage);
                 tmdbID = String.valueOf(moviedb.getId());
                 if (StringUtils.isBlank(tmdbID)) {
                     LOG.debug("Failed to get movie info using IMDB ID {} for {}", imdbID, videoData.getTitle());
@@ -124,10 +125,13 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     @Override
     public String getMovieId(String title, int year) {
         MovieDb moviedb = null;
-
+        String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+        boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
+        int searchMatch = configService.getIntProperty("themoviedb.searchMatch", 3);
+        
         try {
             // Search using movie name
-            List<MovieDb> movieList = tmdbApi.searchMovie(title, year, DEFAULT_LANGUAGE, INCLUDE_ADULT, 0).getResults();
+            List<MovieDb> movieList = tmdbApi.searchMovie(title, year, defaultLanguage, includeAdult, 0).getResults();
             LOG.info("Found {} potential matches for {} ({})", movieList.size(), title, year);
             // Iterate over the list until we find a match
             for (MovieDb m : movieList) {
@@ -138,7 +142,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
                     relDate = "";
                 }
                 LOG.debug("Checking " + m.getTitle() + " (" + relDate + ")");
-                if (TheMovieDbApi.compareMovies(m, title, String.valueOf(year), SEARCH_MATCH)) {
+                if (TheMovieDbApi.compareMovies(m, title, String.valueOf(year), searchMatch)) {
                     moviedb = m;
                     break;
                 }
@@ -164,7 +168,6 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
     @Override
     public ScanResult scan(VideoData videoData) {
-//        String tmdbID = videoData.getSourcedbId(TMDB_SCANNER_ID);
         String tmdbID = getMovieId(videoData);
 
         if (StringUtils.isBlank(tmdbID)) {
@@ -177,6 +180,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
     private ScanResult updateVideoData(VideoData videoData) {
         String tmdbID = videoData.getSourceDbId(TMDB_SCANNER_ID);
+        String defaultLanguage = configService.getProperty("themoviedb.language", "en");
         MovieDb moviedb;
 
         if (StringUtils.isBlank(tmdbID)) {
@@ -187,7 +191,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         LOG.info("Getting information for TMDB ID:{}-{}", tmdbID, videoData.getTitle());
 
         try {
-            moviedb = tmdbApi.getMovieInfo(Integer.parseInt(tmdbID), DEFAULT_LANGUAGE);
+            moviedb = tmdbApi.getMovieInfo(Integer.parseInt(tmdbID), defaultLanguage);
         } catch (MovieDbException ex) {
             LOG.error("Failed retrieving TheMovieDb information for {}, error: {}", videoData.getTitle(), ex.getMessage());
             return ScanResult.ERROR;
@@ -307,9 +311,10 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         com.omertron.themoviedbapi.model.Person closestPerson = null;
         int closestMatch = Integer.MAX_VALUE;
         boolean foundPerson = Boolean.FALSE;
+        boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
 
         try {
-            TmdbResultsList<com.omertron.themoviedbapi.model.Person> results = tmdbApi.searchPeople(name, INCLUDE_ADULT, 0);
+            TmdbResultsList<com.omertron.themoviedbapi.model.Person> results = tmdbApi.searchPeople(name, includeAdult, 0);
             LOG.info("{}: Found {} results", name, results.getResults().size());
             for (com.omertron.themoviedbapi.model.Person person : results.getResults()) {
                 if (name.equalsIgnoreCase(person.getName())) {

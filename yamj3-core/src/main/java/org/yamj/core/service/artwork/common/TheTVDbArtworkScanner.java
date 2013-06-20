@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.common.tools.PropertyTools;
+import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.IMetadata;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
@@ -56,10 +56,9 @@ public class TheTVDbArtworkScanner implements
         ITvShowVideoImageScanner, InitializingBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheTVDbArtworkScanner.class);
-    private static final String DEFAULT_LANGUAGE = PropertyTools.getProperty("thetvdb.language", "en");
-    private static final String ALTERNATE_LANGUAGE = PropertyTools.getProperty("thetvdb.language.alternate", "");
-    private static final boolean SEASON_BANNER_FORCE_BLANK = PropertyTools.getBooleanProperty("thetvdb.season.banner.forceBlank", Boolean.FALSE);
-    private static final boolean SEASON_BANNER_ONLY_SERIES = PropertyTools.getBooleanProperty("thetvdb.season.banner.onlySeries", Boolean.FALSE);
+
+    @Autowired
+    private ConfigService configService;
     @Autowired
     private ArtworkScannerService artworkScannerService;
     @Autowired
@@ -117,14 +116,16 @@ public class TheTVDbArtworkScanner implements
         List<ArtworkDetailDTO> noLangDTOs = new ArrayList<ArtworkDetailDTO>(5);
 
         // get series artwork
-        Banners bannerList = tvdbApiWrapper.getBanners(id);
+        final Banners bannerList = tvdbApiWrapper.getBanners(id);
+        final String defaultLanguage = configService.getProperty("thetvdb.language", "en");
+        final String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
 
         // find posters
         for (Banner banner : bannerList.getPosterList()) {
             if (banner.getBannerType2() == BannerType.Poster) {
-                if (banner.getLanguage().equalsIgnoreCase(DEFAULT_LANGUAGE)) {
+                if (banner.getLanguage().equalsIgnoreCase(defaultLanguage)) {
                     langDTOs.add(createArtworDetail(banner));
-                } else if (StringUtils.isNotBlank(ALTERNATE_LANGUAGE) && ALTERNATE_LANGUAGE.equalsIgnoreCase(banner.getLanguage())) {
+                } else if (StringUtils.isNotBlank(altLanguage) && altLanguage.equalsIgnoreCase(banner.getLanguage())) {
                     altLangDTOs.add(createArtworDetail(banner));
                 } else if (StringUtils.isBlank(banner.getLanguage())) {
                     noLangDTOs.add(createArtworDetail(banner));
@@ -132,21 +133,21 @@ public class TheTVDbArtworkScanner implements
             }
         }
 
-        LOG.debug("Series {}: Found {} posters for language '{}'", id, langDTOs.size(), DEFAULT_LANGUAGE);
-        if (StringUtils.isNotBlank(ALTERNATE_LANGUAGE)) {
-            LOG.debug("Series {}: Found {} posters for alternate language '{}'", id, altLangDTOs.size(), ALTERNATE_LANGUAGE);
+        LOG.debug("Series {}: Found {} posters for language '{}'", id, langDTOs.size(), defaultLanguage);
+        if (StringUtils.isNotBlank(altLanguage)) {
+            LOG.debug("Series {}: Found {} posters for alternate language '{}'", id, altLangDTOs.size(), altLanguage);
         }
         LOG.debug("Series {}: Found {} posters without language", id, noLangDTOs.size());
 
         List<ArtworkDetailDTO> returnDTOs = null;
         if (langDTOs.size() > 0) {
-            LOG.info("Series {}: Using posters with language '{}'", id, DEFAULT_LANGUAGE);
+            LOG.info("Series {}: Using posters with language '{}'", id, defaultLanguage);
             returnDTOs = langDTOs;
         } else if (altLangDTOs.size() > 0) {
-            LOG.info("Series {}: No poster found for language '{}', using posters with language '{}'", id, DEFAULT_LANGUAGE, ALTERNATE_LANGUAGE);
+            LOG.info("Series {}: No poster found for language '{}', using posters with language '{}'", id, defaultLanguage, altLanguage);
             returnDTOs = altLangDTOs;
         } else if (noLangDTOs.size() > 0) {
-            LOG.info("Series {}: No poster found for language '{}', using posters with no language", id, DEFAULT_LANGUAGE);
+            LOG.info("Series {}: No poster found for language '{}', using posters with no language", id, defaultLanguage);
             returnDTOs = noLangDTOs;
         } else {
             String url = tvdbApiWrapper.getSeries(id).getPoster();
@@ -166,14 +167,16 @@ public class TheTVDbArtworkScanner implements
         List<ArtworkDetailDTO> noLangDTOs = new ArrayList<ArtworkDetailDTO>(5);
 
         // get series artwork
-        Banners bannerList = tvdbApiWrapper.getBanners(id);
+        final Banners bannerList = tvdbApiWrapper.getBanners(id);
+        final String defaultLanguage = configService.getProperty("thetvdb.language", "en");
+        final String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
 
         // find posters
         for (Banner banner : bannerList.getSeasonList()) {
             if ((banner.getSeason() == season) && (banner.getBannerType2() == BannerType.Season)) {
-                if (banner.getLanguage().equalsIgnoreCase(DEFAULT_LANGUAGE)) {
+                if (banner.getLanguage().equalsIgnoreCase(defaultLanguage)) {
                     langDTOs.add(createArtworDetail(banner));
-                } else if (StringUtils.isNotBlank(ALTERNATE_LANGUAGE) && banner.getLanguage().equalsIgnoreCase(ALTERNATE_LANGUAGE)) {
+                } else if (StringUtils.isNotBlank(altLanguage) && banner.getLanguage().equalsIgnoreCase(altLanguage)) {
                     altLangDTOs.add(createArtworDetail(banner));
                 } else if (StringUtils.isBlank(banner.getLanguage())) {
                     noLangDTOs.add(createArtworDetail(banner));
@@ -181,21 +184,21 @@ public class TheTVDbArtworkScanner implements
             }
         }
 
-        LOG.debug("Season {}-{}: Found {} posters for language '{}'", id, season, langDTOs.size(), DEFAULT_LANGUAGE);
-        if (StringUtils.isNotBlank(ALTERNATE_LANGUAGE)) {
-            LOG.debug("Season {}-{}: Found {} posters for alternate language '{}'", id, season, altLangDTOs.size(), ALTERNATE_LANGUAGE);
+        LOG.debug("Season {}-{}: Found {} posters for language '{}'", id, season, langDTOs.size(), defaultLanguage);
+        if (StringUtils.isNotBlank(altLanguage)) {
+            LOG.debug("Season {}-{}: Found {} posters for alternate language '{}'", id, season, altLangDTOs.size(), altLanguage);
         }
         LOG.debug("Season {}-{}: Found {} posters without language", id, season, noLangDTOs.size());
 
         List<ArtworkDetailDTO> returnDTOs = null;
         if (langDTOs.size() > 0) {
-            LOG.info("Season {}-{}: Using posters with language '{}'", id, season, DEFAULT_LANGUAGE);
+            LOG.info("Season {}-{}: Using posters with language '{}'", id, season, defaultLanguage);
             returnDTOs = langDTOs;
         } else if (altLangDTOs.size() > 0) {
-            LOG.info("Season {}-{}: No poster found for language '{}', using posters with language '{}'", id, season, DEFAULT_LANGUAGE, ALTERNATE_LANGUAGE);
+            LOG.info("Season {}-{}: No poster found for language '{}', using posters with language '{}'", id, season, defaultLanguage, altLanguage);
             returnDTOs = altLangDTOs;
         } else if (noLangDTOs.size() > 0) {
-            LOG.info("Season {}-{}: No poster found for language '{}', using posters with no language", id, season, DEFAULT_LANGUAGE);
+            LOG.info("Season {}-{}: No poster found for language '{}', using posters with no language", id, season, defaultLanguage);
             returnDTOs = noLangDTOs;
         } else if (CollectionUtils.isNotEmpty(bannerList.getPosterList())) {
             LOG.info("Season {}-{}: No poster found by language, using first series poster found", id, season);
@@ -244,7 +247,7 @@ public class TheTVDbArtworkScanner implements
         List<ArtworkDetailDTO> sdDTOs = new ArrayList<ArtworkDetailDTO>(5);
 
         // get series artwork
-        Banners bannerList = tvdbApiWrapper.getBanners(id);
+        final Banners bannerList = tvdbApiWrapper.getBanners(id);
 
         // find fanart
         for (Banner banner : bannerList.getFanartList()) {
@@ -286,7 +289,7 @@ public class TheTVDbArtworkScanner implements
         List<ArtworkDetailDTO> sdDTOs = new ArrayList<ArtworkDetailDTO>(5);
 
         // get series artwork
-        Banners bannerList = tvdbApiWrapper.getBanners(id);
+        final Banners bannerList = tvdbApiWrapper.getBanners(id);
 
         // find fanart
         for (Banner banner : bannerList.getFanartList()) {
@@ -373,14 +376,16 @@ public class TheTVDbArtworkScanner implements
         List<ArtworkDetailDTO> blankDTOs = new ArrayList<ArtworkDetailDTO>(5);
 
         // get series artwork
-        Banners bannerList = tvdbApiWrapper.getBanners(id);
+        final Banners bannerList = tvdbApiWrapper.getBanners(id);
+        final String defaultLanguage = configService.getProperty("thetvdb.language", "en");
+        final String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
 
         // find banners
         for (Banner banner : bannerList.getSeriesList()) {
             if (banner.getBannerType2() == BannerType.Graphical) {
-                if (banner.getLanguage().equalsIgnoreCase(DEFAULT_LANGUAGE)) {
+                if (banner.getLanguage().equalsIgnoreCase(defaultLanguage)) {
                     langDTOs.add(createArtworDetail(banner));
-                } else if (StringUtils.isNotBlank(ALTERNATE_LANGUAGE) && ALTERNATE_LANGUAGE.equalsIgnoreCase(banner.getLanguage())) {
+                } else if (StringUtils.isNotBlank(altLanguage) && altLanguage.equalsIgnoreCase(banner.getLanguage())) {
                     altLangDTOs.add(createArtworDetail(banner));
                 } else if (StringUtils.isBlank(banner.getLanguage())) {
                     noLangDTOs.add(createArtworDetail(banner));
@@ -390,25 +395,25 @@ public class TheTVDbArtworkScanner implements
             }
         }
         
-        LOG.debug("Series {}: Found {} banners for language '{}'", id, langDTOs.size(), DEFAULT_LANGUAGE);
-        if (StringUtils.isNotBlank(ALTERNATE_LANGUAGE)) {
-            LOG.debug("Series {}: Found {} banners for alternate language '{}'", id, altLangDTOs.size(), ALTERNATE_LANGUAGE);
+        LOG.debug("Series {}: Found {} banners for language '{}'", id, langDTOs.size(), defaultLanguage);
+        if (StringUtils.isNotBlank(altLanguage)) {
+            LOG.debug("Series {}: Found {} banners for alternate language '{}'", id, altLangDTOs.size(), altLanguage);
         }
         LOG.debug("Series {}: Found {} banners without language", id, noLangDTOs.size());
         LOG.debug("Series {}: Found {} blank banners", id, blankDTOs.size());
 
         List<ArtworkDetailDTO> returnDTOs = null;
         if (langDTOs.size() > 0) {
-            LOG.info("Series {}: Using banners with language '{}'", id, DEFAULT_LANGUAGE);
+            LOG.info("Series {}: Using banners with language '{}'", id, defaultLanguage);
             returnDTOs = langDTOs;
         } else if (altLangDTOs.size() > 0) {
-            LOG.info("Series {}: No banner found for language '{}', using banners with language '{}'", id, DEFAULT_LANGUAGE, ALTERNATE_LANGUAGE);
+            LOG.info("Series {}: No banner found for language '{}', using banners with language '{}'", id, defaultLanguage, altLanguage);
             returnDTOs = altLangDTOs;
         } else if (noLangDTOs.size() > 0) {
-            LOG.info("Series {}: No banner found for language '{}', using banners with no language", id, DEFAULT_LANGUAGE);
+            LOG.info("Series {}: No banner found for language '{}', using banners with no language", id, defaultLanguage);
             returnDTOs = noLangDTOs;
         } else if (blankDTOs.size() > 0) {
-            LOG.info("Series {}: No banner found for language '{}', using blank banners", id, DEFAULT_LANGUAGE);
+            LOG.info("Series {}: No banner found for language '{}', using blank banners", id, defaultLanguage);
             returnDTOs = blankDTOs;
         } else {
             String url = tvdbApiWrapper.getSeries(id).getBanner();
@@ -432,16 +437,19 @@ public class TheTVDbArtworkScanner implements
         List<ArtworkDetailDTO> blankDTOs = new ArrayList<ArtworkDetailDTO>(5);
 
         // get series artwork
-        Banners bannerList = tvdbApiWrapper.getBanners(id);
+        final Banners bannerList = tvdbApiWrapper.getBanners(id);
+        final String defaultLanguage = configService.getProperty("thetvdb.language", "en");
+        final String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
+        final boolean seasonBannerOnlySeries  = configService.getBooleanProperty("thetvdb.season.banner.onlySeries", Boolean.FALSE);
 
         // series banners
-        if (!SEASON_BANNER_ONLY_SERIES) {
+        if (!seasonBannerOnlySeries) {
             // season banners
             for (Banner banner : bannerList.getSeasonList()) {
                 if (banner.getBannerType2() == BannerType.SeasonWide) {
-                    if (banner.getLanguage().equalsIgnoreCase(DEFAULT_LANGUAGE)) {
+                    if (banner.getLanguage().equalsIgnoreCase(defaultLanguage)) {
                         seasonLangDTOs.add(createArtworDetail(banner));
-                    } else if (StringUtils.isNotBlank(ALTERNATE_LANGUAGE) && ALTERNATE_LANGUAGE.equalsIgnoreCase(banner.getLanguage())) {
+                    } else if (StringUtils.isNotBlank(altLanguage) && altLanguage.equalsIgnoreCase(banner.getLanguage())) {
                         seasonAltLangDTOs.add(createArtworDetail(banner));
                     } else if (StringUtils.isBlank(banner.getLanguage())) {
                         seasonNoLangDTOs.add(createArtworDetail(banner));
@@ -451,9 +459,9 @@ public class TheTVDbArtworkScanner implements
         }
         for (Banner banner : bannerList.getSeasonList()) {
             if (banner.getBannerType2() == BannerType.Graphical) {
-                if (banner.getLanguage().equalsIgnoreCase(DEFAULT_LANGUAGE)) {
+                if (banner.getLanguage().equalsIgnoreCase(defaultLanguage)) {
                     seriesLangDTOs.add(createArtworDetail(banner));
-                } else if (StringUtils.isNotBlank(ALTERNATE_LANGUAGE) && ALTERNATE_LANGUAGE.equalsIgnoreCase(banner.getLanguage())) {
+                } else if (StringUtils.isNotBlank(altLanguage) && altLanguage.equalsIgnoreCase(banner.getLanguage())) {
                     seriesAltLangDTOs.add(createArtworDetail(banner));
                 } else if (StringUtils.isBlank(banner.getLanguage())) {
                     seriesNoLangDTOs.add(createArtworDetail(banner));
@@ -463,45 +471,45 @@ public class TheTVDbArtworkScanner implements
             }
         }
 
-        if (!SEASON_BANNER_ONLY_SERIES) {
-            LOG.debug("Season {}-{}: Found {} season banners for language '{}'", id, season, seasonLangDTOs.size(), DEFAULT_LANGUAGE);
-            if (StringUtils.isNotBlank(ALTERNATE_LANGUAGE)) {
-                LOG.debug("Season {}-{}: Found {} season banners for alternate language '{}'", id, season, seasonAltLangDTOs.size(), ALTERNATE_LANGUAGE);
+        if (!seasonBannerOnlySeries) {
+            LOG.debug("Season {}-{}: Found {} season banners for language '{}'", id, season, seasonLangDTOs.size(), defaultLanguage);
+            if (StringUtils.isNotBlank(altLanguage)) {
+                LOG.debug("Season {}-{}: Found {} season banners for alternate language '{}'", id, season, seasonAltLangDTOs.size(), altLanguage);
             }
             LOG.debug("Season {}-{}: Found {} season banners without language", id, season, seasonNoLangDTOs.size());
         }
-        LOG.debug("Season {}-{}: Found {} series banners for language '{}'", id, season, seasonLangDTOs.size(), DEFAULT_LANGUAGE);
-        if (StringUtils.isNotBlank(ALTERNATE_LANGUAGE)) {
-            LOG.debug("Season {}-{}: Found {} series banners for alternate language '{}'", id, season, seasonAltLangDTOs.size(), ALTERNATE_LANGUAGE);
+        LOG.debug("Season {}-{}: Found {} series banners for language '{}'", id, season, seasonLangDTOs.size(), defaultLanguage);
+        if (StringUtils.isNotBlank(altLanguage)) {
+            LOG.debug("Season {}-{}: Found {} series banners for alternate language '{}'", id, season, seasonAltLangDTOs.size(), altLanguage);
         }
         LOG.debug("Season {}-{}: Found {} series banners without language", id, season, seasonNoLangDTOs.size());
         LOG.debug("season {}-{}: Found {} blank banners", id, season, blankDTOs.size());
         
         
         List<ArtworkDetailDTO> returnDTOs = null;
-        if (SEASON_BANNER_FORCE_BLANK && blankDTOs.size()>0) {
+        if (configService.getBooleanProperty("thetvdb.season.banner.onlySeries", Boolean.FALSE) && blankDTOs.size()>0) {
             LOG.info("Season {}-{}: Using blanks banners", id, season);
             returnDTOs = blankDTOs;
         } else if (seasonLangDTOs.size() > 0) {
-            LOG.info("Season {}-{}: Using season banners with language '{}'", id, season, DEFAULT_LANGUAGE);
+            LOG.info("Season {}-{}: Using season banners with language '{}'", id, season, defaultLanguage);
             returnDTOs = seasonLangDTOs;
         } else if (seasonAltLangDTOs.size() > 0) {
-            LOG.info("Season {}-{}: No season banner found for language '{}', using season banners with language '{}'", id, season, DEFAULT_LANGUAGE, ALTERNATE_LANGUAGE);
+            LOG.info("Season {}-{}: No season banner found for language '{}', using season banners with language '{}'", id, season, defaultLanguage, altLanguage);
             returnDTOs = seasonAltLangDTOs;
         } else if (seasonNoLangDTOs.size() > 0) {
-            LOG.info("Season {}-{}: No season banner found for language '{}', using season banners with no language", id, season, DEFAULT_LANGUAGE);
+            LOG.info("Season {}-{}: No season banner found for language '{}', using season banners with no language", id, season, defaultLanguage);
             returnDTOs = seasonNoLangDTOs;
         } else if (seriesLangDTOs.size() > 0) {
-            LOG.info("Season {}-{}: Using series banners with language '{}'", id, season, DEFAULT_LANGUAGE);
+            LOG.info("Season {}-{}: Using series banners with language '{}'", id, season, defaultLanguage);
             returnDTOs = seriesLangDTOs;
         } else if (seriesAltLangDTOs.size() > 0) {
-            LOG.info("Season {}-{}: No series banner found for language '{}', using series banners with language '{}'", id, season, DEFAULT_LANGUAGE, ALTERNATE_LANGUAGE);
+            LOG.info("Season {}-{}: No series banner found for language '{}', using series banners with language '{}'", id, season, defaultLanguage, altLanguage);
             returnDTOs = seriesAltLangDTOs;
         } else if (seriesNoLangDTOs.size() > 0) {
-            LOG.info("Season {}-{}: No series banner found for language '{}', using series banners with no language", id, season, DEFAULT_LANGUAGE);
+            LOG.info("Season {}-{}: No series banner found for language '{}', using series banners with no language", id, season, defaultLanguage);
             returnDTOs = seriesNoLangDTOs;
         } else if (blankDTOs.size() > 0) {
-            LOG.info("Season {}-{}: No banner found for language '{}', using blank banners", id, season, DEFAULT_LANGUAGE);
+            LOG.info("Season {}-{}: No banner found for language '{}', using blank banners", id, season, defaultLanguage);
             returnDTOs = blankDTOs;
         } else {
             String url = tvdbApiWrapper.getSeries(id).getBanner();

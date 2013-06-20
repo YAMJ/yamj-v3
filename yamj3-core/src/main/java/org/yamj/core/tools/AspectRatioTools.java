@@ -27,32 +27,78 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.common.tools.PropertyTools;
+import org.yamj.core.configuration.ConfigService;
 
 @Service("aspectRatioTools")
-public class AspectRatioTools {
+public class AspectRatioTools implements InitializingBean {
 
-    private List<AspectRatio> aspectList = new ArrayList<AspectRatio>();
-    private int aspectRationPrecision = PropertyTools.getIntProperty("yamj3.aspectratio.precision", 3);
+    @Autowired
+    private ConfigService configService;
+
+    private final List<AspectRatio> aspectList = new ArrayList<AspectRatio>();
     private DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+    
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        // fill aspect list
+        aspectList.add(new AspectRatio("1:1", 1.000f, 1.075f, 1.000f, 1.00f, 1.0f));
+        aspectList.add(new AspectRatio("Movietone", 1.076f, 1.200f, 1.150f, 1.15f, 1.2f));
+        aspectList.add(new AspectRatio("SVGA", 1.201f, 1.292f, 1.250f, 1.25f, 1.3f));
+        aspectList.add(new AspectRatio("SDTV", 1.293f, 1.352f, 1.333f, 1.33f, 1.3f));
+        aspectList.add(new AspectRatio("Academy Ratio", 1.353f, 1.400f, 1.370f, 1.37f, 1.4f));
+        aspectList.add(new AspectRatio("IMAX", 1.401f, 1.465f, 1.430f, 1.43f, 1.4f));
+        aspectList.add(new AspectRatio("VistaVision", 1.466f, 1.510f, 1.500f, 1.50f, 1.5f));
+        aspectList.add(new AspectRatio("Demeny Gaumont", 1.511f, 1.538f, 1.520f, 1.52f, 1.5f));
+        aspectList.add(new AspectRatio("Widescreen", 1.539f, 1.578f, 1.555f, 1.56f, 1.6f));
+        aspectList.add(new AspectRatio("Widescreen PC", 1.579f, 1.633f, 1.600f, 1.60f, 1.6f));
+        aspectList.add(new AspectRatio("15:9", 1.634f, 1.698f, 1.666f, 1.66f, 1.7f));
+        aspectList.add(new AspectRatio("Natural Vision", 1.699f, 1.740f, 1.730f, 1.73f, 1.7f));
+        aspectList.add(new AspectRatio("Widescreen", 1.741f, 1.764f, 1.750f, 1.75f, 1.8f));
+        aspectList.add(new AspectRatio("HDTV (16:9)", 1.765f, 1.814f, 1.777f, 1.77f, 1.8f));
+        aspectList.add(new AspectRatio("Cinema film", 1.815f, 1.925f, 1.850f, 1.85f, 1.9f));
+        aspectList.add(new AspectRatio("SuperScope Univisium", 1.926f, 2.025f, 2.000f, 2.00f, 2.0f));
+        aspectList.add(new AspectRatio("Magnifilm", 2.026f, 2.075f, 2.050f, 2.05f, 2.1f));
+        aspectList.add(new AspectRatio("11:10", 2.076f, 2.115f, 2.100f, 2.10f, 2.1f));
+        aspectList.add(new AspectRatio("Fox Grandeur", 2.116f, 2.155f, 2.130f, 2.13f, 2.1f));
+        aspectList.add(new AspectRatio("Magnifilm", 2.156f, 2.190f, 2.180f, 2.18f, 2.2f));
+        aspectList.add(new AspectRatio("70mm standard", 2.191f, 2.205f, 2.200f, 2.20f, 2.2f));
+        aspectList.add(new AspectRatio("MPEG-2 for 2.20", 2.206f, 2.272f, 2.210f, 2.21f, 2.2f));
+        aspectList.add(new AspectRatio("21:9", 2.273f, 2.342f, 2.333f, 2.33f, 2.3f));
+        aspectList.add(new AspectRatio("CinemaScope", 2.343f, 2.360f, 2.350f, 2.35f, 2.4f));
+        aspectList.add(new AspectRatio("21:9 Cinema Display", 2.361f, 2.380f, 2.370f, 2.37f, 2.4f));
+        aspectList.add(new AspectRatio("Scope", 2.381f, 2.395f, 2.390f, 2.39f, 2.4f));
+        aspectList.add(new AspectRatio("Scope", 2.396f, 2.460f, 2.400f, 2.40f, 2.4f));
+        aspectList.add(new AspectRatio("Panoramico Alberini", 2.461f, 2.535f, 2.520f, 2.52f, 2.5f));
+        aspectList.add(new AspectRatio("Original CinemaScope", 2.536f, 2.555f, 2.550f, 2.55f, 2.6f));
+        aspectList.add(new AspectRatio("Original CinemaScope", 2.556f, 2.575f, 2.560f, 2.56f, 2.6f));
+        aspectList.add(new AspectRatio("Cinerama full", 2.576f, 2.595f, 2.590f, 2.59f, 2.6f));
+        aspectList.add(new AspectRatio("Cinemiracle", 2.596f, 2.633f, 2.600f, 2.60f, 2.6f));
+        aspectList.add(new AspectRatio("Super 16mm", 2.634f, 2.673f, 2.666f, 2.66f, 2.7f));
+        aspectList.add(new AspectRatio("Cinerama", 2.674f, 2.720f, 2.680f, 2.68f, 2.7f));
+        aspectList.add(new AspectRatio("Ultra Panavision 70", 2.721f, 2.825f, 2.760f, 2.76f, 2.8f));
+        aspectList.add(new AspectRatio("Ultra Panavision 70", 2.826f, 2.910f, 2.890f, 2.89f, 2.9f));
+        aspectList.add(new AspectRatio("MGM Camera 65", 2.911f, 2.965f, 2.930f, 2.93f, 2.9f));
+        aspectList.add(new AspectRatio("3:1", 2.966f, 3.500f, 3.000f, 3.00f, 3.0f));
+        aspectList.add(new AspectRatio("PolyVision", 3.501f, 8.000f, 4.000f, 4.00f, 4.0f));
+        aspectList.add(new AspectRatio("Circle Vision 360°", 8.001f, 12.000f, 12.000f, 12.00f, 12.0f));
 
-    public AspectRatioTools() {
-        // Don't create the aspectList if it's already populated
-        if (aspectList == null || aspectList.isEmpty()) {
-            createAspectList();
+        // use the "." as a decimal format separator, ignoring localisation
+        symbols.setDecimalSeparator('.');
+    }
 
-            if (aspectRationPrecision > 3) {
-                aspectRationPrecision = 3;
-            }
 
-            if (aspectRationPrecision < 1) {
-                aspectRationPrecision = 1;
-            }
-
-            // Use the "." as a decimal format separator, ignoring localisation
-            symbols.setDecimalSeparator('.');
+    private int getAspectRatioPrecision() {
+        int aspectRatioPrecision = configService.getIntProperty("yamj3.aspectratio.precision", 3);
+        if (aspectRatioPrecision > 3) {
+            return 3;
         }
+        if (aspectRatioPrecision < 1) {
+            return 1;
+        }
+        return aspectRatioPrecision;
     }
 
     /**
@@ -88,7 +134,7 @@ public class AspectRatioTools {
 
         // Check that we got a return value and then try and format it.
         if (aspectRatioFind != null) {
-            switch (aspectRationPrecision) {
+            switch (getAspectRatioPrecision()) {
                 case 1:
                     newAspectRatio = new DecimalFormat("#.0", symbols).format(aspectRatioFind.getRatio1digit());
                     break;
@@ -155,55 +201,6 @@ public class AspectRatioTools {
         }
 
         return aspectRatioFind;
-    }
-
-    /**
-     * Populate the aspect list with the values These are static values because calculated values give slight wrong
-     * figures
-     *
-     * @param aspectList
-     */
-    private void createAspectList() {
-        aspectList.add(new AspectRatio("1:1", 1.000f, 1.075f, 1.000f, 1.00f, 1.0f));
-        aspectList.add(new AspectRatio("Movietone", 1.076f, 1.200f, 1.150f, 1.15f, 1.2f));
-        aspectList.add(new AspectRatio("SVGA", 1.201f, 1.292f, 1.250f, 1.25f, 1.3f));
-        aspectList.add(new AspectRatio("SDTV", 1.293f, 1.352f, 1.333f, 1.33f, 1.3f));
-        aspectList.add(new AspectRatio("Academy Ratio", 1.353f, 1.400f, 1.370f, 1.37f, 1.4f));
-        aspectList.add(new AspectRatio("IMAX", 1.401f, 1.465f, 1.430f, 1.43f, 1.4f));
-        aspectList.add(new AspectRatio("VistaVision", 1.466f, 1.510f, 1.500f, 1.50f, 1.5f));
-        aspectList.add(new AspectRatio("Demeny Gaumont", 1.511f, 1.538f, 1.520f, 1.52f, 1.5f));
-        aspectList.add(new AspectRatio("Widescreen", 1.539f, 1.578f, 1.555f, 1.56f, 1.6f));
-        aspectList.add(new AspectRatio("Widescreen PC", 1.579f, 1.633f, 1.600f, 1.60f, 1.6f));
-        aspectList.add(new AspectRatio("15:9", 1.634f, 1.698f, 1.666f, 1.66f, 1.7f));
-        aspectList.add(new AspectRatio("Natural Vision", 1.699f, 1.740f, 1.730f, 1.73f, 1.7f));
-        aspectList.add(new AspectRatio("Widescreen", 1.741f, 1.764f, 1.750f, 1.75f, 1.8f));
-        aspectList.add(new AspectRatio("HDTV (16:9)", 1.765f, 1.814f, 1.777f, 1.77f, 1.8f));
-        aspectList.add(new AspectRatio("Cinema film", 1.815f, 1.925f, 1.850f, 1.85f, 1.9f));
-        aspectList.add(new AspectRatio("SuperScope Univisium", 1.926f, 2.025f, 2.000f, 2.00f, 2.0f));
-        aspectList.add(new AspectRatio("Magnifilm", 2.026f, 2.075f, 2.050f, 2.05f, 2.1f));
-        aspectList.add(new AspectRatio("11:10", 2.076f, 2.115f, 2.100f, 2.10f, 2.1f));
-        aspectList.add(new AspectRatio("Fox Grandeur", 2.116f, 2.155f, 2.130f, 2.13f, 2.1f));
-        aspectList.add(new AspectRatio("Magnifilm", 2.156f, 2.190f, 2.180f, 2.18f, 2.2f));
-        aspectList.add(new AspectRatio("70mm standard", 2.191f, 2.205f, 2.200f, 2.20f, 2.2f));
-        aspectList.add(new AspectRatio("MPEG-2 for 2.20", 2.206f, 2.272f, 2.210f, 2.21f, 2.2f));
-        aspectList.add(new AspectRatio("21:9", 2.273f, 2.342f, 2.333f, 2.33f, 2.3f));
-        aspectList.add(new AspectRatio("CinemaScope", 2.343f, 2.360f, 2.350f, 2.35f, 2.4f));
-        aspectList.add(new AspectRatio("21:9 Cinema Display", 2.361f, 2.380f, 2.370f, 2.37f, 2.4f));
-        aspectList.add(new AspectRatio("Scope", 2.381f, 2.395f, 2.390f, 2.39f, 2.4f));
-        aspectList.add(new AspectRatio("Scope", 2.396f, 2.460f, 2.400f, 2.40f, 2.4f));
-        aspectList.add(new AspectRatio("Panoramico Alberini", 2.461f, 2.535f, 2.520f, 2.52f, 2.5f));
-        aspectList.add(new AspectRatio("Original CinemaScope", 2.536f, 2.555f, 2.550f, 2.55f, 2.6f));
-        aspectList.add(new AspectRatio("Original CinemaScope", 2.556f, 2.575f, 2.560f, 2.56f, 2.6f));
-        aspectList.add(new AspectRatio("Cinerama full", 2.576f, 2.595f, 2.590f, 2.59f, 2.6f));
-        aspectList.add(new AspectRatio("Cinemiracle", 2.596f, 2.633f, 2.600f, 2.60f, 2.6f));
-        aspectList.add(new AspectRatio("Super 16mm", 2.634f, 2.673f, 2.666f, 2.66f, 2.7f));
-        aspectList.add(new AspectRatio("Cinerama", 2.674f, 2.720f, 2.680f, 2.68f, 2.7f));
-        aspectList.add(new AspectRatio("Ultra Panavision 70", 2.721f, 2.825f, 2.760f, 2.76f, 2.8f));
-        aspectList.add(new AspectRatio("Ultra Panavision 70", 2.826f, 2.910f, 2.890f, 2.89f, 2.9f));
-        aspectList.add(new AspectRatio("MGM Camera 65", 2.911f, 2.965f, 2.930f, 2.93f, 2.9f));
-        aspectList.add(new AspectRatio("3:1", 2.966f, 3.500f, 3.000f, 3.00f, 3.0f));
-        aspectList.add(new AspectRatio("PolyVision", 3.501f, 8.000f, 4.000f, 4.00f, 4.0f));
-        aspectList.add(new AspectRatio("Circle Vision 360°", 8.001f, 12.000f, 12.000f, 12.00f, 12.0f));
     }
 
     /**
