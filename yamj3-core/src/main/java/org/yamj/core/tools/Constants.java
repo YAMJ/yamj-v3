@@ -29,5 +29,5 @@ public final class Constants {
     }
     
     public static final String SPACE_SLASH_SPACE = " / ";
-    public static final String UNKNOWN = "Unknown";
+    public static final String UNDEFINED = "Undefined";
 }

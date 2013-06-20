@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.MediaDao;
-import org.yamj.core.database.model.AudioCodec;
 import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.database.model.dto.QueueDTO;
 
@@ -63,6 +62,7 @@ public class MediaStorageService {
         final StringBuilder sb = new StringBuilder();
         sb.append("from MediaFile mf ");
         sb.append("left outer join fetch mf.audioCodecs ");
+        sb.append("left outer join fetch mf.subtitles ");
         sb.append("left outer join fetch mf.stageFiles ");
         sb.append("where mf.id = :id" );
 

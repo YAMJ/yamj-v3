@@ -50,6 +50,7 @@ public class FileStorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileStorageService.class);
     private String storagePathArtwork;
+    private String storagePathMediaInfo;
     @Autowired
     private PoolingHttpClient httpClient;
 
@@ -57,6 +58,12 @@ public class FileStorageService {
     public void setStoragePathArtwork(String storagePathArtwork) {
         this.storagePathArtwork = storagePathArtwork;
         LOG.info("Artwork storage path set to '{}'", storagePathArtwork);
+    }
+
+    @Value("${yamj3.file.storage.mediainfo}")
+    public void setStoragePathMediaInfok(String storagePathMediaInfo) {
+        this.storagePathMediaInfo = storagePathMediaInfo;
+        LOG.info("MediaInfo storage path set to '{}'", storagePathMediaInfo);
     }
 
     public boolean exists(StorageType type, String fileName) throws IOException {
@@ -143,6 +150,10 @@ public class FileStorageService {
     private String getStorageName(StorageType type, String fileName) {
         if (StorageType.ARTWORK == type) {
             String hashFilename = FilenameUtils.concat(this.storagePathArtwork, FileTools.createDirHash(fileName));
+            FileTools.makeDirectories(hashFilename);
+            return hashFilename;
+        } else if (StorageType.MEDIAINFO == type) {
+            String hashFilename = FilenameUtils.concat(this.storagePathMediaInfo, FileTools.createDirHash(fileName));
             FileTools.makeDirectories(hashFilename);
             return hashFilename;
         }

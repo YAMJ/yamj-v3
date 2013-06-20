@@ -119,7 +119,12 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<AudioCodec> audioCodecs = new HashSet<AudioCodec>(0);
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true,  mappedBy = "mediaFile")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<Subtitle> subtitles = new HashSet<Subtitle>(0);
+
     // GETTER and SETTER
+    
     public String getFileName() {
         return fileName;
     }
@@ -316,6 +321,23 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         for (AudioCodec audioCodec : this.audioCodecs) {
             if (audioCodec.getCounter() == counter) {
                 return audioCodec;
+            }
+        }
+        return null;
+    }
+
+    public Set<Subtitle> getSubtitles() {
+        return subtitles;
+    }
+
+    private void setSubtitles(Set<Subtitle> subtitles) {
+        this.subtitles = subtitles;
+    }
+
+    public Subtitle getSubtitle(int counter) {
+        for (Subtitle subtitle : this.subtitles) {
+            if (subtitle.getStageFile() == null && subtitle.getCounter() == counter) {
+                return subtitle;
             }
         }
         return null;

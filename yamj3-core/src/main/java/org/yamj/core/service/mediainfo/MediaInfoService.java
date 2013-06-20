@@ -40,6 +40,7 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.AudioCodec;
 import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.Subtitle;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.MediaStorageService;
 import org.yamj.core.tools.AspectRatioTools;
@@ -302,15 +303,40 @@ public class MediaInfoService implements InitializingBean {
             processedAudioCodecs.add(codec);
         }
 
-        // remove unprocessed audio codecs
-        Iterator<AudioCodec> iter = mediaFile.getAudioCodecs().iterator();
-        while (iter.hasNext()) {
-            if (!processedAudioCodecs.contains(iter.next())) {
-                iter.remove();
+        // remove unprocessed internal audio codecs
+        Iterator<AudioCodec> iterAudio = mediaFile.getAudioCodecs().iterator();
+        while (iterAudio.hasNext()) {
+            if (!processedAudioCodecs.contains(iterAudio.next())) {
+                iterAudio.remove();
             }
         }
 
-        // TODO process subtitles
+        // cycle through subtitle streams
+        Set<Subtitle> processedSubtitles = new HashSet<Subtitle>(0);
+        for (int numText = 0; numText < infosText.size(); numText++) {
+            Map<String, String> infosCurrentText = infosText.get(numText);
+            Subtitle subtitle = mediaFile.getSubtitle(numText + 1);
+            if (subtitle == null) {
+                subtitle = new Subtitle();
+                subtitle.setCounter(numText + 1);
+                subtitle.setMediaFile(mediaFile);
+            }
+            
+            boolean processed = parseSubtitle(subtitle, infosCurrentText);
+            if (processed) {
+                mediaFile.getSubtitles().add(subtitle);
+                processedSubtitles.add(subtitle);
+            }
+        }
+
+        // remove unprocessed internal subtitles
+        Iterator<Subtitle> iterSubs = mediaFile.getSubtitles().iterator();
+        while (iterSubs.hasNext()) {
+            Subtitle subtitle = iterSubs.next();
+            if (subtitle.getStageFile() == null && !processedSubtitles.contains(subtitle)) {
+                iterSubs.remove();
+            }
+        }
     }
 
     private void parseAudioCodec(AudioCodec audioCodec, Map<String,String> infosAudio) {
@@ -343,7 +369,7 @@ public class MediaInfoService implements InitializingBean {
         }
 
         // language
-        audioCodec.setLanguage(Constants.UNKNOWN);
+        audioCodec.setLanguage(Constants.UNDEFINED);
         infoValue = infosAudio.get("Language");
         if (StringUtils.isNotBlank(infoValue)) {
             if (infoValue.contains("/")) {
@@ -358,7 +384,47 @@ public class MediaInfoService implements InitializingBean {
             }
         }
     }
-    
+
+    private boolean parseSubtitle(Subtitle subtitle, Map<String,String> infosText) {
+        // format
+        String infoFormat = infosText.get("Format");
+        if (StringUtils.isBlank(infoFormat)) {
+            // use codec instead format
+            infoFormat = infosText.get("Codec");
+        }
+        
+        // language
+        String infoLanguage = infosText.get("Language");
+        if (StringUtils.isNotBlank(infoLanguage)) {
+            if (infoLanguage.contains("/")) {
+                infoLanguage = infoLanguage.substring(0, infoLanguage.indexOf('/')).trim(); // In this case, language are "doubled", just take the first one.
+            }
+            // determine language
+            infoLanguage = languageTools.determineLanguage(infoLanguage);
+        }
+
+        // just use defined formats
+        if ("SRT".equalsIgnoreCase(infoFormat)
+             || "UTF-8".equalsIgnoreCase(infoFormat)
+             || "RLE".equalsIgnoreCase(infoFormat)
+             || "PGS".equalsIgnoreCase(infoFormat)
+             || "ASS".equalsIgnoreCase(infoFormat)
+             || "VobSub".equalsIgnoreCase(infoFormat))
+        {
+            subtitle.setFormat(infoFormat);
+            if (StringUtils.isBlank(infoLanguage)) {
+                subtitle.setLanguage(Constants.UNDEFINED);
+            } else {
+                subtitle.setLanguage(infoLanguage);
+            }
+            return Boolean.TRUE;
+        }
+        
+        
+        LOG.debug("Subtitle format skipped: {}", infoFormat);
+        return Boolean.FALSE;
+    }
+
     public boolean isRarDiskImage(String filename) {
         if (isMediaInfoRar && (rarDiskImages.contains(FilenameUtils.getExtension(filename).toLowerCase()))) {
             return Boolean.TRUE;
