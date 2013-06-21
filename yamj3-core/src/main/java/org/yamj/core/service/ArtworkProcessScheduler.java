@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.yamj.common.tools.PropertyTools;
+import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.service.artwork.ArtworkProcessRunner;
@@ -40,35 +40,41 @@ import org.yamj.core.service.artwork.ArtworkProcessorService;
 public class ArtworkProcessScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkProcessScheduler.class);
-    private static final int ARTWORK_PROCESSOR_MAX_THREADS = PropertyTools.getIntProperty("yamj3.scheduler.artworkprocess.maxThreads", 1);
-    private static final int ARTWORK_PROCESSOR_MAX_RESULTS = PropertyTools.getIntProperty("yamj3.scheduler.artworkprocess.maxResults", 20);
+
+    @Autowired
+    private ConfigService configService;
     @Autowired
     private ArtworkStorageService artworkStorageService;
     @Autowired
     private ArtworkProcessorService artworkProcessorService;
-    private boolean messageDone = Boolean.FALSE;    // Have we already printed the message
+
+    private boolean messageDisabled = Boolean.FALSE;    // Have we already printed the disabled message
 
     @Scheduled(initialDelay = 30000, fixedDelay = 60000)
     public void processArtwork() throws Exception {
-        if (ARTWORK_PROCESSOR_MAX_THREADS <= 0) {
-            if (!messageDone) {
-                messageDone = Boolean.TRUE;
+        int maxThreads = configService.getIntProperty("yamj3.scheduler.artworkprocess.maxThreads", 1);
+        if (maxThreads <= 0) {
+            if (!messageDisabled) {
+                messageDisabled = Boolean.TRUE;
                 LOG.info("Artwork processing is disabled");
             }
             return;
+        } else {
+            messageDisabled = Boolean.FALSE;
         }
 
-        List<QueueDTO> queueElements = artworkStorageService.getArtworLocatedQueue(ARTWORK_PROCESSOR_MAX_RESULTS);
+        int maxResults = configService.getIntProperty("yamj3.scheduler.artworkprocess.maxResults", 20);
+        List<QueueDTO> queueElements = artworkStorageService.getArtworLocatedQueue(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.debug("No artwork found to process");
             return;
         }
 
-        LOG.info("Found {} artwork objects to process; process with {} threads", queueElements.size(), ARTWORK_PROCESSOR_MAX_THREADS);
+        LOG.info("Found {} artwork objects to process; process with {} threads", queueElements.size(), maxThreads);
         BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
 
-        ExecutorService executor = Executors.newFixedThreadPool(ARTWORK_PROCESSOR_MAX_THREADS);
-        for (int i = 0; i < ARTWORK_PROCESSOR_MAX_THREADS; i++) {
+        ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
+        for (int i = 0; i < maxThreads; i++) {
             ArtworkProcessRunner worker = new ArtworkProcessRunner(queue, artworkProcessorService);
             executor.execute(worker);
         }
