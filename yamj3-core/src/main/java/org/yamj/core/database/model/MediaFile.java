@@ -101,6 +101,9 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     
     @Column(name = "video_source", length = 30)
     private String videoSource;
+
+    @Column(name = "episode_count", nullable = false)
+    private int episodeCount = 0;
     
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
@@ -275,6 +278,14 @@ public class MediaFile extends AbstractAuditable implements Serializable {
 
     public void setVideoSource(String videoSource) {
         this.videoSource = videoSource;
+    }
+
+    public int getEpisodeCount() {
+        return episodeCount;
+    }
+
+    public void setEpisodeCount(int episodeCount) {
+        this.episodeCount = episodeCount;
     }
 
     public StatusType getStatus() {

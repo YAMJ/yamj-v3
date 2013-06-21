@@ -112,6 +112,7 @@ public class MediaImportService {
             mediaFile.setFps(dto.getFps());
             mediaFile.setCodec(dto.getVideoCodec());
             mediaFile.setVideoSource(dto.getVideoSource());
+            mediaFile.setEpisodeCount(dto.getEpisodes().size());
             mediaFile.setStatus(StatusType.NEW);
             mediaFile.addStageFile(stageFile);
             stageFile.setMediaFile(mediaFile);
