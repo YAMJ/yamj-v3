@@ -99,7 +99,11 @@ public class TheMovieDbArtworkScanner implements
                 String defaultLanguage = configService.getProperty("themoviedb.language", "en");
                 MovieDb moviedb = tmdbApi.getMovieInfo(Integer.parseInt(id), defaultLanguage);
                 URL posterURL = tmdbApi.createImageUrl(moviedb.getPosterPath(), DEFAULT_POSTER_SIZE);
-                dtos.add(new ArtworkDetailDTO(getScannerName(), posterURL.toString()));
+                if (posterURL == null || posterURL.toString().endsWith("null")) {
+                    LOG.warn("Poster URL is invalid and will not be used: {}", posterURL);
+                } else {
+                    dtos.add(new ArtworkDetailDTO(getScannerName(), posterURL.toString()));
+                }
             } catch (MovieDbException error) {
                 LOG.warn("Failed to get the poster URL for TMDb ID {}", id, error);
             }
@@ -117,7 +121,11 @@ public class TheMovieDbArtworkScanner implements
                 String defaultLanguage = configService.getProperty("themoviedb.language", "en");
                 MovieDb moviedb = tmdbApi.getMovieInfo(Integer.parseInt(id), defaultLanguage);
                 URL fanartURL = tmdbApi.createImageUrl(moviedb.getBackdropPath(), DEFAULT_FANART_SIZE);
-                dtos.add(new ArtworkDetailDTO(getScannerName(), fanartURL.toString()));
+                if (fanartURL == null || fanartURL.toString().endsWith("null")) {
+                    LOG.warn("Fanart URL is invalid and will not be used: {}", fanartURL);
+                } else {
+                    dtos.add(new ArtworkDetailDTO(getScannerName(), fanartURL.toString()));
+                }
             } catch (MovieDbException error) {
                 LOG.warn("Failed to get the fanart URL for TMDb ID {}", id, error);
             }
