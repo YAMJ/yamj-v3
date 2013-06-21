@@ -83,7 +83,8 @@ public class ArtworkController {
             wrapper.setResults(results);
             wrapper.setStatusCheck();
         } catch (QueryException ex) {
-            wrapper.setResults(Collections.EMPTY_LIST);
+            List<Artwork> results = Collections.emptyList();
+            wrapper.setResults(results);
             wrapper.setStatus(new ApiStatus(400, "Error with query"));
             LOG.error("Exception: {}", ex.getMessage());
         }

@@ -24,27 +24,17 @@ package org.yamj.core.database.service;
 
 import java.io.Serializable;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.model.Parameters;
 import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.BoxedSet;
-import org.yamj.core.database.model.Certification;
-import org.yamj.core.database.model.Genre;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 
 @Service("jsonApiStorageService")
 public class JsonApiStorageService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(JsonApiStorageService.class);
     @Autowired
     private CommonDao commonDao;
     @Autowired

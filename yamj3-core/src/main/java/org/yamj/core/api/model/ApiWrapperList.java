@@ -33,7 +33,7 @@ import org.apache.commons.collections.CollectionUtils;
  */
 public final class ApiWrapperList<T> extends ApiWrapperAbstract {
 
-    private List<T> results = Collections.EMPTY_LIST;
+    private List<T> results = Collections.emptyList();
 
     public ApiWrapperList() {
     }

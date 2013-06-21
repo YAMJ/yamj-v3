@@ -90,7 +90,8 @@ public class VideoController {
             wrapper.setResults(results);
             wrapper.setStatusCheck();
         } catch (QueryException ex) {
-            wrapper.setResults(Collections.EMPTY_LIST);
+            List<VideoData> results = Collections.emptyList(); 
+            wrapper.setResults(results);
             wrapper.setStatus(new ApiStatus(400, "Error with query"));
         }
         wrapper.setParameters(p);
@@ -134,7 +135,8 @@ public class VideoController {
             wrapper.setResults(results);
             wrapper.setStatusCheck();
         } catch (QueryException ex) {
-            wrapper.setResults(Collections.EMPTY_LIST);
+            List<Series> results = Collections.emptyList(); 
+            wrapper.setResults(results);
             wrapper.setStatus(new ApiStatus(400, "Error with query"));
         }
         wrapper.setParameters(p);
@@ -178,7 +180,8 @@ public class VideoController {
             wrapper.setResults(results);
             wrapper.setStatusCheck();
         } catch (QueryException ex) {
-            wrapper.setResults(Collections.EMPTY_LIST);
+            List<Season> results = Collections.emptyList(); 
+            wrapper.setResults(results);
             wrapper.setStatus(new ApiStatus(400, "Error with query"));
         }
         wrapper.setParameters(p);
