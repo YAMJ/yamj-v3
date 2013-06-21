@@ -62,7 +62,7 @@ public class ImdbSearchEngine implements InitializingBean {
     private SearchEngineTools searchEngineTools;
 
     static {
-        MATCHES_DATA_PER_SITE.put("us", new ImdbSiteDataDefinition("http://www.imdb.com/", "UTF-8", "Director|Directed by", "Cast", "Release Date", "Runtime", "Aspect Ratio", "Country",
+        MATCHES_DATA_PER_SITE.put("us", new ImdbSiteDataDefinition("http://www.imdb.com/", "ISO-8859-1", "Director|Directed by", "Cast", "Release Date", "Runtime", "Aspect Ratio", "Country",
                 "Company", "Genre", "Quotes", "Plot", "Rated", "Certification", "Original Air Date", "Writer|Writing credits", "Tagline", "original title"));
 
         MATCHES_DATA_PER_SITE.put("fr", new ImdbSiteDataDefinition("http://www.imdb.fr/", "ISO-8859-1", "R&#xE9;alisateur|R&#xE9;alis&#xE9; par", "Ensemble", "Date de sortie", "Dur&#xE9;e", "Aspect Ratio", "Pays",
@@ -147,7 +147,7 @@ public class ImdbSearchEngine implements InitializingBean {
                 sb.append(URLEncoder.encode(personName, imdbSiteDef.getCharset().displayName())).append("&role=").append(movieId);
 
                 LOG.debug("Querying IMDB for '{}'", sb.toString());
-                String xml = httpClient.requestContent(sb.toString());
+                String xml = httpClient.requestContent(sb.toString(), imdbSiteDef.getCharset());
 
                 // Check if this is an exact match (we got a person page instead of a results list)
                 Matcher titlematch = imdbSiteDef.getPersonRegex().matcher(xml);
@@ -243,7 +243,7 @@ public class ImdbSearchEngine implements InitializingBean {
         LOG.debug("Querying IMDb for '{}'", sb.toString());
         String xml;
         try {
-            xml = httpClient.requestContent(sb.toString());
+            xml = httpClient.requestContent(sb.toString(), imdbSiteDef.getCharset());
         } catch (IOException ex) {
             LOG.error("Failed retreiving IMDb Id for '{}'", title, ex);
             return null;
