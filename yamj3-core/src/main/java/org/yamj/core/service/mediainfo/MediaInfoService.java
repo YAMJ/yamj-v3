@@ -26,7 +26,6 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -145,17 +144,14 @@ public class MediaInfoService implements InitializingBean {
 
     public void scanMediaInfo(Long id) {
         MediaFile mediaFile = mediaStorageService.getRequiredMediaFile(id);
-        if (CollectionUtils.isEmpty(mediaFile.getStageFiles())) {
-            LOG.error("No stage files found for media file: {}", mediaFile.getFileName());
+        
+        StageFile stageFile = mediaFile.getVideoFile();
+        if (stageFile == null) {
+            LOG.error("No valid video file found for media file: {}", mediaFile.getFileName());
             mediaFile.setStatus(StatusType.ERROR);
             mediaStorageService.update(mediaFile);
             return;
         }
-        
-        // just use first stage file; cause all stage files have the same name
-        // and therefore are denoting the same file; regardless of the directory
-        // they are placed in
-        StageFile stageFile = mediaFile.getStageFiles().iterator().next();
         
         // check if stage file can be read by MediaInfo
         File file  = new File(stageFile.getFullPath());

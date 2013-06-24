@@ -20,25 +20,23 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.common.type;
+package org.yamj.core.database.model.type;
 
-public enum StatusType {
+public enum RelationType {
 
-    NEW,
-    UPDATED,
-    DELETED,
-    ERROR,
-    PROCESSED,
-    NOTFOUND,
-    INVALID,
-    DUPLICATE,
-    DONE;
-
-    public static StatusType fromString(String type) {
+    UNKNOWN,
+    POSTER,
+    FANART,
+    BANNER,
+    VIDEOIMAGE,
+    NFO,
+    SUBTITLE;
+    
+    public static RelationType fromString(String type) {
         try {
-            return StatusType.valueOf(type.trim().toUpperCase());
+            return RelationType.valueOf(type.trim().toUpperCase());
         } catch (IllegalArgumentException ex) {
-            return NEW;
+            return UNKNOWN;
         }
     }
 }

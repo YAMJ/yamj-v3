@@ -328,6 +328,25 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         this.audioCodecs = audioCodecs;
     }
 
+    public Set<Subtitle> getSubtitles() {
+        return subtitles;
+    }
+
+    private void setSubtitles(Set<Subtitle> subtitles) {
+        this.subtitles = subtitles;
+    }
+
+    // TRANSIENT METHODS
+
+    public StageFile getVideoFile() {
+        for (StageFile stageFile : getStageFiles()) {
+            if (!StatusType.DUPLICATE.equals(stageFile.getStatus())) {
+                return stageFile;
+            }
+        }
+        return null;
+    }
+    
     public AudioCodec getAudioCodec(int counter) {
         for (AudioCodec audioCodec : this.audioCodecs) {
             if (audioCodec.getCounter() == counter) {
@@ -335,14 +354,6 @@ public class MediaFile extends AbstractAuditable implements Serializable {
             }
         }
         return null;
-    }
-
-    public Set<Subtitle> getSubtitles() {
-        return subtitles;
-    }
-
-    private void setSubtitles(Set<Subtitle> subtitles) {
-        this.subtitles = subtitles;
     }
 
     public Subtitle getSubtitle(int counter) {

@@ -75,11 +75,14 @@ public class StagingDao extends HibernateDao {
     }
 
     @SuppressWarnings("unchecked")
-    public List<StageFile> findFiles(String baseFilename, StageDirectory directory, FileType... fileTypes) {
+    public List<StageFile> findFiles(String baseFilename, StageDirectory directory, StatusType[] statusTypes, FileType[] fileTypes) {
         Criteria criteria = getSession().createCriteria(StageFile.class);
         criteria.add(Restrictions.ilike("fileName", baseFilename, MatchMode.START));
         criteria.add(Restrictions.eq("stageDirectory", directory));
         criteria.add(Restrictions.in("fileType", fileTypes));
+        if (statusTypes != null && statusTypes.length > 0) {
+            criteria.add(Restrictions.in("status", statusTypes));
+        }
         criteria.setCacheMode(CacheMode.NORMAL);
         return criteria.list();
     }

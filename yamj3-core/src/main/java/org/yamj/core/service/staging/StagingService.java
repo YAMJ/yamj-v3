@@ -108,12 +108,14 @@ public class StagingService {
                 stageFile.setStatus(StatusType.NEW);
                 stagingDao.saveEntity(stageFile);
             } else {
-                // mark as updated if file date or size has changed
                 Date newDate = new Date(stageFileDTO.getFileDate());
                 if ((newDate.compareTo(stageFile.getFileDate()) != 0) || (stageFile.getFileSize() != stageFileDTO.getFileSize())) {
                     stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));
                     stageFile.setFileSize(stageFileDTO.getFileSize());
-                    stageFile.setStatus(StatusType.UPDATED);
+                    if (!StatusType.DUPLICATE.equals(stageFile.getStatus())) {
+                        // mark as updated if no duplicate
+                        stageFile.setStatus(StatusType.UPDATED);
+                    }
                     stagingDao.updateEntity(stageFile);
                 }
             }
