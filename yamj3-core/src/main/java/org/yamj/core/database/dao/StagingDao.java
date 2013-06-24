@@ -22,8 +22,10 @@
  */
 package org.yamj.core.database.dao;
 
+import java.util.List;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Service;
@@ -70,5 +72,15 @@ public class StagingDao extends HibernateDao {
         criteria.setCacheable(true);
         criteria.setCacheMode(CacheMode.NORMAL);
         return (Long) criteria.uniqueResult();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<StageFile> findFiles(String baseFilename, StageDirectory directory, FileType... fileTypes) {
+        Criteria criteria = getSession().createCriteria(StageFile.class);
+        criteria.add(Restrictions.ilike("fileName", baseFilename, MatchMode.START));
+        criteria.add(Restrictions.eq("stageDirectory", directory));
+        criteria.add(Restrictions.in("fileType", fileTypes));
+        criteria.setCacheMode(CacheMode.NORMAL);
+        return criteria.list();
     }
 }
