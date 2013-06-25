@@ -53,6 +53,13 @@ public class VideoController {
     private JsonApiStorageService jsonApiStorageService;
     private static final String DEFAULT_FIELD = "title";    // Default field to be used in the parameters
 
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    @ResponseBody
+    public void getTest() {
+        LOG.info("This is a test method");
+        
+    }
+
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperSingle<VideoData> getVideoById(@PathVariable String id) {
@@ -90,7 +97,7 @@ public class VideoController {
             wrapper.setResults(results);
             wrapper.setStatusCheck();
         } catch (QueryException ex) {
-            List<VideoData> results = Collections.emptyList(); 
+            List<VideoData> results = Collections.emptyList();
             wrapper.setResults(results);
             wrapper.setStatus(new ApiStatus(400, "Error with query"));
         }
@@ -135,7 +142,7 @@ public class VideoController {
             wrapper.setResults(results);
             wrapper.setStatusCheck();
         } catch (QueryException ex) {
-            List<Series> results = Collections.emptyList(); 
+            List<Series> results = Collections.emptyList();
             wrapper.setResults(results);
             wrapper.setStatus(new ApiStatus(400, "Error with query"));
         }
@@ -180,7 +187,7 @@ public class VideoController {
             wrapper.setResults(results);
             wrapper.setStatusCheck();
         } catch (QueryException ex) {
-            List<Season> results = Collections.emptyList(); 
+            List<Season> results = Collections.emptyList();
             wrapper.setResults(results);
             wrapper.setStatus(new ApiStatus(400, "Error with query"));
         }

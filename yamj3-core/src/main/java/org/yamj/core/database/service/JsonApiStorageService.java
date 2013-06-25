@@ -41,6 +41,23 @@ public class JsonApiStorageService {
     private ArtworkDao artworkDao;
 
     @Transactional(readOnly = true)
+    public <T> T getTestData() {
+        StringBuilder sql = new StringBuilder();
+        sql.append("select vd.id,'MOVIE' as mediatype,vd.create_timestamp,vd.update_timestamp, vd.status");
+        sql.append("from videodata vd");
+        sql.append("where vd.episode<0");
+        sql.append("union");
+        sql.append("select ser.id,'SERIES' as mediatype,ser.create_timestamp,ser.update_timestamp ,ser.status");
+        sql.append("from series ser, season sea, videodata vd");
+        sql.append("where ser.id=sea.series_id");
+        sql.append("and sea.id=vd.season_id");
+
+
+
+        return null;
+    }
+
+    @Transactional(readOnly = true)
     public <T> T getEntityById(Class<T> entityClass, Serializable id) {
         return commonDao.getById(entityClass, id);
     }

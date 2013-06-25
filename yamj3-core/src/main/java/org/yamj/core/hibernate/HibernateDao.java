@@ -44,7 +44,7 @@ public abstract class HibernateDao {
 
     @Autowired
     private SessionFactory sessionFactory;
-    private static final String FIELD_NAME = "name";
+    private static final String DEFAULT_FIELD_NAME = "name";
 
     public void setSessionFactory(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
@@ -127,7 +127,7 @@ public abstract class HibernateDao {
      * @return
      */
     public <T> T getByName(Class<? extends T> entityClass, String name) {
-        return getByField(entityClass, FIELD_NAME, name);
+        return getByField(entityClass, DEFAULT_FIELD_NAME, name);
     }
 
     /**
