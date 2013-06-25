@@ -55,9 +55,9 @@ public class VideoController {
 
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     @ResponseBody
-    public void getTest() {
+    public List getTest() {
         LOG.info("This is a test method");
-        
+        return jsonApiStorageService.getTestData();
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)

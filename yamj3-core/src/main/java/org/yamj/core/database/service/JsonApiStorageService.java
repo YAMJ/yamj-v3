@@ -28,9 +28,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.model.Parameters;
+import org.yamj.core.database.dao.ApiDao;
 import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.type.MetaDataType;
 
 @Service("jsonApiStorageService")
 public class JsonApiStorageService {
@@ -39,22 +41,26 @@ public class JsonApiStorageService {
     private CommonDao commonDao;
     @Autowired
     private ArtworkDao artworkDao;
+    @Autowired
+    private ApiDao apiDao;
 
     @Transactional(readOnly = true)
-    public <T> T getTestData() {
+    public List getTestData() {
         StringBuilder sql = new StringBuilder();
-        sql.append("select vd.id,'MOVIE' as mediatype,vd.create_timestamp,vd.update_timestamp, vd.status");
-        sql.append("from videodata vd");
-        sql.append("where vd.episode<0");
-        sql.append("union");
-        sql.append("select ser.id,'SERIES' as mediatype,ser.create_timestamp,ser.update_timestamp ,ser.status");
-        sql.append("from series ser, season sea, videodata vd");
-        sql.append("where ser.id=sea.series_id");
-        sql.append("and sea.id=vd.season_id");
+        sql.append("SELECT vd.id, '");
+        sql.append(MetaDataType.MOVIE);
+        sql.append("' AS mediatype, vd.create_timestamp, vd.update_timestamp, vd.status ");
+        sql.append("FROM videodata vd ");
+        sql.append("WHERE vd.episode<0 ");
+        sql.append("UNION ");
+        sql.append("SELECT ser.id,'");
+        sql.append(MetaDataType.SERIES);
+        sql.append("' AS mediatype, ser.create_timestamp, ser.update_timestamp, ser.status ");
+        sql.append("FROM series ser, season sea, videodata vd ");
+        sql.append("WHERE ser.id=sea.series_id ");
+        sql.append("AND   sea.id=vd.season_id");
 
-
-
-        return null;
+        return apiDao.getVideoList(sql.toString(), 10);
     }
 
     @Transactional(readOnly = true)

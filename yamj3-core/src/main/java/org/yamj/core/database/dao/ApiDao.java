@@ -22,6 +22,7 @@
  */
 package org.yamj.core.database.dao;
 
+import java.util.List;
 import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Service;
 import org.yamj.core.hibernate.HibernateDao;
@@ -29,12 +30,13 @@ import org.yamj.core.hibernate.HibernateDao;
 @Service("apiDao")
 public class ApiDao extends HibernateDao {
 
-    public void getVideoList(final String sql, final int maxResults) {
+    public List getVideoList(final String sql, final int maxResults) {
         SQLQuery query = getSession().createSQLQuery(sql.toString());
         query.setReadOnly(true);
         query.setCacheable(true);
         if (maxResults > 0) {
             query.setMaxResults(maxResults);
         }
+        return query.list();
     }
 }
