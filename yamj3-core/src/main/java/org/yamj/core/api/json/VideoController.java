@@ -55,9 +55,12 @@ public class VideoController {
 
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     @ResponseBody
-    public List getTest() {
+    public ApiWrapperList<Object> getTest() {
         LOG.info("This is a test method");
-        return jsonApiStorageService.getTestData();
+        ApiWrapperList<Object> wrapper = new ApiWrapperList<Object>();
+        wrapper.setResults(jsonApiStorageService.getTestData());
+        wrapper.setStatusCheck();
+        return wrapper;
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)

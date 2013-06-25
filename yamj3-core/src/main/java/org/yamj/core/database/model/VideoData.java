@@ -366,6 +366,7 @@ public class VideoData extends AbstractMetadata {
         this.setStatus(StatusType.NOTFOUND);
     }
 
+    @JsonIgnore // This is not needed for the API
     @Override
     public int getSeasonNumber() {
         if (isMovie()) {
@@ -384,7 +385,7 @@ public class VideoData extends AbstractMetadata {
         return (episode < 0);
     }
 
-    
+
     // EQUALITY CHECKS
     @Override
     public int hashCode() {

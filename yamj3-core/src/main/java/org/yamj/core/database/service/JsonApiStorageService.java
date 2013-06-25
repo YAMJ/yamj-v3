@@ -45,17 +45,17 @@ public class JsonApiStorageService {
     private ApiDao apiDao;
 
     @Transactional(readOnly = true)
-    public List getTestData() {
+    public List<Object> getTestData() {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT vd.id, '");
         sql.append(MetaDataType.MOVIE);
-        sql.append("' AS mediatype, vd.create_timestamp, vd.update_timestamp, vd.status ");
+        sql.append("' AS mediatype, vd.create_timestamp, vd.update_timestamp, vd.status, vd.title ");
         sql.append("FROM videodata vd ");
         sql.append("WHERE vd.episode<0 ");
         sql.append("UNION ");
         sql.append("SELECT ser.id,'");
         sql.append(MetaDataType.SERIES);
-        sql.append("' AS mediatype, ser.create_timestamp, ser.update_timestamp, ser.status ");
+        sql.append("' AS mediatype, ser.create_timestamp, ser.update_timestamp, ser.status, vd.title ");
         sql.append("FROM series ser, season sea, videodata vd ");
         sql.append("WHERE ser.id=sea.series_id ");
         sql.append("AND   sea.id=vd.season_id");
