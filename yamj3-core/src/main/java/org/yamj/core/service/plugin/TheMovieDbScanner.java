@@ -53,7 +53,8 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
     public static final String TMDB_SCANNER_ID = "tmdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbScanner.class);
-    
+    private static final String FROM_WIKIPEDIA = "From Wikipedia, the free encyclopedia";
+    private static final String WIKIPEDIA_DESCRIPTION_ABOVE = "Description above from the Wikipedia";
     @Autowired
     private PluginMetadataService pluginMetadataService;
     @Autowired
@@ -80,7 +81,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         String defaultLanguage = configService.getProperty("themoviedb.language", "en");
         MovieDb moviedb = null;
 
-        
+
         // First look to see if we have a TMDb ID as this will make looking the film up easier
         if (StringUtils.isNotBlank(tmdbID)) {
             // Search based on TMdb ID
@@ -128,7 +129,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         String defaultLanguage = configService.getProperty("themoviedb.language", "en");
         boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
         int searchMatch = configService.getIntProperty("themoviedb.searchMatch", 3);
-        
+
         try {
             // Search using movie name
             List<MovieDb> movieList = tmdbApi.searchMovie(title, year, defaultLanguage, includeAdult, 0).getResults();
@@ -358,7 +359,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             LOG.debug("Getting information on {}-'{}' from {}", person.getId(), person.getName(), TMDB_SCANNER_ID);
             com.omertron.themoviedbapi.model.Person tmdbPerson = tmdbApi.getPersonInfo(Integer.parseInt(id));
 
-            person.setBiography(tmdbPerson.getBiography());
+            person.setBiography(cleanBiography(tmdbPerson.getBiography()));
             person.setBirthPlace(tmdbPerson.getBirthplace());
             person.setPersonId(ImdbScanner.IMDB_SCANNER_ID, tmdbPerson.getImdbId());
 
@@ -380,6 +381,12 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         return ScanResult.OK;
     }
 
+    /**
+     * Convert string to date
+     *
+     * @param dateToConvert
+     * @return
+     */
     private Date parseDate(String dateToConvert) {
         if (StringUtils.isNotBlank(dateToConvert)) {
             try {
@@ -389,5 +396,31 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             }
         }
         return null;
+    }
+
+    /**
+     * Remove unneeded text from the biography
+     *
+     * @param bio
+     * @return
+     */
+    private String cleanBiography(final String bio) {
+        String newBio = StringUtils.trimToNull(bio);
+
+        int pos = StringUtils.indexOfIgnoreCase(newBio, FROM_WIKIPEDIA);
+        if (pos >= 0) {
+            // We've found the text, so remove it
+            LOG.trace("Removing start wikipedia text from bio");
+            newBio = newBio.substring(pos + FROM_WIKIPEDIA.length() + 1);
+        }
+
+        pos = StringUtils.indexOfIgnoreCase(newBio, WIKIPEDIA_DESCRIPTION_ABOVE);
+        if (pos >= 0) {
+            LOG.trace("Removing end wikipedia text from bio");
+            newBio = newBio.substring(0, pos);
+        }
+
+        newBio = StringUtils.trimToNull(newBio);
+        return newBio;
     }
 }
