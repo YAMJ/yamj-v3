@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.staging;
 
+import org.apache.commons.lang3.StringUtils;
+
 import org.yamj.core.service.mediaimport.FilenameScanner;
 
 import org.yamj.common.dto.ImportDTO;
@@ -95,15 +97,23 @@ public class StagingService {
         }
 
         for (StageFileDTO stageFileDTO : stageDirectoryDTO.getStageFiles()) {
-            StageFile stageFile = stagingDao.getStageFile(stageFileDTO.getFileName(), stageDirectory);
+            String baseName = FilenameUtils.getBaseName(stageFileDTO.getFileName());
+            String extension = FilenameUtils.getExtension(stageFileDTO.getFileName());
+            if (StringUtils.isBlank(baseName) || StringUtils.isBlank(extension)) {
+                // no valid baseName or extension
+                continue;
+            }
+            
+            StageFile stageFile = stagingDao.getStageFile(baseName, extension, stageDirectory);
             if (stageFile == null) {
                 // create new stage file entry
                 stageFile = new StageFile();
-                stageFile.setFileName(stageFileDTO.getFileName());
+                stageFile.setBaseName(baseName);
+                stageFile.setExtension(extension);
                 stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));
                 stageFile.setFileSize(stageFileDTO.getFileSize());
                 stageFile.setStageDirectory(stageDirectory);
-                stageFile.setFileType(filenameScanner.determineFileType(stageFileDTO.getFileName()));
+                stageFile.setFileType(filenameScanner.determineFileType(extension));
                 stageFile.setFullPath(FilenameUtils.concat(stageDirectoryDTO.getPath(), stageFileDTO.getFileName()));
                 stageFile.setStatus(StatusType.NEW);
                 stagingDao.saveEntity(stageFile);

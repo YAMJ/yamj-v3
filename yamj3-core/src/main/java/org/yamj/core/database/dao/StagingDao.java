@@ -22,10 +22,8 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.List;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
-import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Service;
@@ -57,9 +55,10 @@ public class StagingDao extends HibernateDao {
         return getById(StageFile.class, id);
     }
 
-    public StageFile getStageFile(String fileName, StageDirectory stageDirectory) {
+    public StageFile getStageFile(String baseName, String extension, StageDirectory stageDirectory) {
         return (StageFile)getSession().byNaturalId(StageFile.class)
-                .using("fileName", fileName)
+                .using("baseName", baseName)
+                .using("extension", extension)
                 .using("stageDirectory", stageDirectory)
                 .load();
     }
@@ -72,18 +71,5 @@ public class StagingDao extends HibernateDao {
         criteria.setCacheable(true);
         criteria.setCacheMode(CacheMode.NORMAL);
         return (Long) criteria.uniqueResult();
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<StageFile> findFiles(String baseFilename, StageDirectory directory, StatusType[] statusTypes, FileType[] fileTypes) {
-        Criteria criteria = getSession().createCriteria(StageFile.class);
-        criteria.add(Restrictions.ilike("fileName", baseFilename, MatchMode.START));
-        criteria.add(Restrictions.eq("stageDirectory", directory));
-        criteria.add(Restrictions.in("fileType", fileTypes));
-        if (statusTypes != null && statusTypes.length > 0) {
-            criteria.add(Restrictions.in("status", statusTypes));
-        }
-        criteria.setCacheMode(CacheMode.NORMAL);
-        return criteria.list();
     }
 }

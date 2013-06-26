@@ -212,32 +212,28 @@ public class FilenameScanner {
         this.languageTools = languageTools;
     }
     
-    public FileType determineFileType(String fileName) {
+    public FileType determineFileType(final String extension) {
+        String ext = extension.toLowerCase();
+        
         try {
-            int index = fileName.lastIndexOf('.');
-            if (index < 0) {
-                return FileType.UNKNOWN;
-            }
-
-            String extension = fileName.substring(index + 1).toLowerCase();
-
-            if ("nfo".equals(extension)) {
+            if ("nfo".equals(ext)) {
                 return FileType.NFO;
             }
 
-            if (videoExtensions.contains(extension)) {
+            if (videoExtensions.contains(ext)) {
                 return FileType.VIDEO;
             }
 
-            if (subtitleExtensions.contains(extension)) {
+            if (subtitleExtensions.contains(ext)) {
                 return FileType.SUBTITLE;
             }
 
-            if (imageExtensions.contains(extension)) {
+            if (imageExtensions.contains(ext)) {
                 return FileType.IMAGE;
             }
         } catch (Exception error) {
-            LOG.error("Failed to determine file type for: {}", fileName, error);
+            LOG.error("Failed to determine file type for extension {}", extension);
+            LOG.warn("File type detection error", error);
         }
         return FileType.UNKNOWN;
     }

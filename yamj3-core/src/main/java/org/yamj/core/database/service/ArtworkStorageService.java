@@ -221,6 +221,7 @@ public class ArtworkStorageService {
         sb.append("left outer join fetch art.videoData ");
         sb.append("left outer join fetch art.season ");
         sb.append("left outer join fetch art.series ");
+        sb.append("left outer join fetch loc.stageFile ");
         sb.append("where loc.id = :id");
 
         @SuppressWarnings("unchecked")

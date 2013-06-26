@@ -34,22 +34,26 @@ import org.yamj.core.database.model.type.FileType;
 
 @Entity
 @Table(name = "stage_file",
-    uniqueConstraints= @UniqueConstraint(name="UIX_STAGEFILE_NATURALID", columnNames={"file_name", "directory_id"})
+    uniqueConstraints= @UniqueConstraint(name="UIX_STAGEFILE_NATURALID", columnNames={"directory_id", "base_name", "extension"})
 )
 public class StageFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -6247352843375054146L;
-
-    @Index(name = "IX_STAGEFILE_FILENAME")
-    @NaturalId(mutable = true)
-    @Column(name = "file_name", nullable = false, length = 255)
-    private String fileName;
 
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.EAGER)
     @ForeignKey(name = "FK_STAGEFILE_DIRECTORY")
     @JoinColumn(name = "directory_id", nullable = false)
     private StageDirectory stageDirectory;
+
+    @Index(name = "IX_STAGEFILE_BASENAME")
+    @NaturalId(mutable = true)
+    @Column(name = "base_name", nullable = false, length = 255)
+    private String baseName;
+
+    @NaturalId(mutable = true)
+    @Column(name = "extension", nullable = false, length = 30)
+    private String extension;
 
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "file_date", nullable = false)
@@ -78,20 +82,28 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     // GETTER and SETTER
     
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
     public StageDirectory getStageDirectory() {
         return stageDirectory;
     }
 
     public void setStageDirectory(StageDirectory stageDirectory) {
         this.stageDirectory = stageDirectory;
+    }
+    
+    public String getBaseName() {
+        return baseName;
+    }
+
+    public void setBaseName(String baseName) {
+        this.baseName = baseName;
+    }
+
+    public String getExtension() {
+        return extension;
+    }
+
+    public void setExtension(String extension) {
+        this.extension = extension;
     }
 
     public Date getFileDate() {
@@ -142,12 +154,20 @@ public class StageFile extends AbstractAuditable implements Serializable {
         this.mediaFile = mediaFile;
     }
 
+    // TRANSIENT METHODS
+    
+    public String getFileName() {
+        return this.baseName + "." + this.extension;
+    }
+    
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (this.fileName == null ? 0 : this.fileName.hashCode());
+        result = prime * result + (this.extension == null ? 0 : this.extension.hashCode());
+        result = prime * result + (this.baseName == null ? 0 : this.baseName.hashCode());
         result = prime * result + (this.stageDirectory == null ? 0 : this.stageDirectory.hashCode());
         return result;
     }
@@ -168,8 +188,12 @@ public class StageFile extends AbstractAuditable implements Serializable {
         if ((this.getId() > 0) && (castOther.getId() > 0)) {
             return this.getId() == castOther.getId();
         }
-        // check file name
-        if (!StringUtils.equals(this.fileName, castOther.fileName)) {
+        // check extension
+        if (!StringUtils.equals(this.extension, castOther.extension)) {
+            return false;
+        }
+        // check base name
+        if (!StringUtils.equals(this.baseName, castOther.baseName)) {
             return false;
         }
         // check stage directory
@@ -190,8 +214,10 @@ public class StageFile extends AbstractAuditable implements Serializable {
         StringBuilder sb = new StringBuilder();
         sb.append("StageFile [ID=");
         sb.append(getId());
-        sb.append(", fileName=");
-        sb.append(getFileName());
+        sb.append(", baseName=");
+        sb.append(getBaseName());
+        sb.append(", extension=");
+        sb.append(getExtension());
         sb.append(", fileDate=");
         sb.append(getFileDate());
         sb.append(", fileSize=");

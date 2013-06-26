@@ -25,15 +25,10 @@ package org.yamj.core.hibernate;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.CacheMode;
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import org.hibernate.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.yamj.core.api.model.Parameters;
 
@@ -261,10 +256,45 @@ public abstract class HibernateDao {
     }
 
     @SuppressWarnings("rawtypes")
+    protected  void applyNamedParameterToQuery(Query queryObject, String paramName, Object value) throws HibernateException {
+        if (value instanceof Collection) {
+            queryObject.setParameterList(paramName, (Collection) value);
+        } else if (value instanceof Object[]) {
+            queryObject.setParameterList(paramName, (Object[]) value);
+        } else {
+            queryObject.setParameter(paramName, value);
+        }
+    }
+    
+    /**
+     * Find entries by id.
+     * 
+     * @param queryString the query string.
+     * @param id the id
+     * @return list of entities
+     */
+    @SuppressWarnings("rawtypes")
     public List findById(CharSequence queryString, Long id) {
         Query queryObject = getSession().createQuery(queryString.toString());
         queryObject.setCacheable(true);
         queryObject.setParameter("id", id);
         return queryObject.list();
+    }
+
+    /**
+     * Find list of entities by named parameters.
+     * 
+     * @param queryString the query string.
+     * @param params the named parameters
+     * @return list of entities
+     */
+    @SuppressWarnings("rawtypes")
+    public List findByNamedParameters(CharSequence queryString, Map<String,Object> params) {
+        Query query = getSession().createQuery(queryString.toString());
+        query.setCacheable(true);
+        for (Entry<String,Object> param : params.entrySet()) {
+            applyNamedParameterToQuery(query, param.getKey(), param.getValue());
+        }
+        return query.list();
     }
 }

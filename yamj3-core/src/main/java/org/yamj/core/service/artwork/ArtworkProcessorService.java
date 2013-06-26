@@ -75,20 +75,27 @@ public class ArtworkProcessorService {
         String cacheFilename = buildCacheFilename(located);
         LOG.debug("Cache artwork with file name: {}", cacheFilename);
 
+        boolean stored;
         try {
             if (located.getStageFile() != null) {
-                // TODO implement storage of artwork from stage file
-                throw new RuntimeException("Artwork storage of stage file not implemented");
+                stored = fileStorageService.store(StorageType.ARTWORK, cacheFilename, located.getStageFile());
             } else {
-                URL url = new URL(located.getUrl());
-                fileStorageService.store(StorageType.ARTWORK, cacheFilename, url);
+                stored = fileStorageService.store(StorageType.ARTWORK, cacheFilename, new URL(located.getUrl()));
             }
         } catch (Exception error) {
-            LOG.error("Failed to store artwork store artwork in file cache: {}", cacheFilename);
             LOG.warn("Storage error", error);
+            stored = Boolean.FALSE;
             return;
         }
 
+        if (!stored) {
+            LOG.error("Failed to store artwork store artwork in file cache: {}", cacheFilename);
+            // mark located artwork with error
+            located.setStatus(StatusType.ERROR);
+            artworkStorageService.updateArtworkLocated(located);
+            return;
+        }
+        
         // set values in located artwork
         located.setCacheFilename(cacheFilename);
         located.setStatus(StatusType.DONE);

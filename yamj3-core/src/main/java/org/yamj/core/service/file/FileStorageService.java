@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.file;
 
+import org.yamj.core.database.model.StageFile;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -70,13 +72,14 @@ public class FileStorageService {
         return false;
     }
 
-    public void store(StorageType type, String fileName, URL url) throws IOException {
+    public boolean store(StorageType type, String fileName, URL url) throws IOException {
         LOG.debug("Store file {}; source url: {}", fileName, url.toString());
         String storageFileName = getStorageName(type, fileName);
 
         HttpEntity entity = httpClient.requestResource(url);
         if (entity == null) {
-            throw new RuntimeException("Failed to get content from: " + url);
+            LOG.error("Failed to get content from source url: {}", url);
+            return Boolean.FALSE;
         }
 
         OutputStream outputStream = null;
@@ -92,6 +95,16 @@ public class FileStorageService {
                 }
             }
         }
+        
+        return Boolean.TRUE;
+    }
+
+    public boolean store(StorageType type, String fileName, StageFile stageFile) throws IOException {
+        LOG.debug("Store file {}; source file: {}", fileName, stageFile.getFullPath());
+        
+        File src = new File(stageFile.getFullPath());
+        File dst = getFile(type, fileName);
+        return FileTools.copyFile(src, dst);
     }
 
     public void storeArtwork(String fileName, BufferedImage bi, ImageFormat imageFormat, int quality) throws Exception {

@@ -83,6 +83,9 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
 
+    @Column(name = "priority", nullable = false)
+    private int priority = -1;
+    
     @Column(name = "width", nullable = false)
     private int width = -1;
     
@@ -98,9 +101,6 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @Column(name = "cache_filename",length = 200)
     private String cacheFilename;
     
-    @Column(name = "cache_path",length = 255)
-    private String cachePath;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "artworkLocated")
     private List<ArtworkGenerated> generatedArtworks = new ArrayList<ArtworkGenerated>(0);
 
@@ -146,6 +146,14 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
         this.status = status;
     }
 
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
     public int getWidth() {
         return width;
     }
@@ -184,14 +192,6 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     public void setCacheFilename(String cacheFilename) {
         this.cacheFilename = cacheFilename;
-    }
-
-    public String getCachePath() {
-        return cachePath;
-    }
-
-    public void setCachePath(String cachePath) {
-        this.cachePath = cachePath;
     }
 
     public List<ArtworkGenerated> getGeneratedArtworks() {
