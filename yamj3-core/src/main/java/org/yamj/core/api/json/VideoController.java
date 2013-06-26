@@ -53,16 +53,6 @@ public class VideoController {
     private JsonApiStorageService jsonApiStorageService;
     private static final String DEFAULT_FIELD = "title";    // Default field to be used in the parameters
 
-    @RequestMapping(value = "/test", method = RequestMethod.GET)
-    @ResponseBody
-    public ApiWrapperList<Object> getTest() {
-        LOG.info("This is a test method");
-        ApiWrapperList<Object> wrapper = new ApiWrapperList<Object>();
-        wrapper.setResults(jsonApiStorageService.getTestData());
-        wrapper.setStatusCheck();
-        return wrapper;
-    }
-
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperSingle<VideoData> getVideoById(@PathVariable String id) {
