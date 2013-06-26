@@ -23,11 +23,8 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
@@ -78,10 +75,6 @@ public class StageFile extends AbstractAuditable implements Serializable {
     @ForeignKey(name = "FK_STAGEFILE_MEDIAFILE")
     @JoinColumn(name = "mediafile_id")
     private MediaFile mediaFile;
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @JoinColumn(name = "video_file_id")
-    private List<StageFileRelation> relations = new ArrayList<StageFileRelation>(0);
 
     // GETTER and SETTER
     
@@ -147,15 +140,6 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     public void setMediaFile(MediaFile mediaFile) {
         this.mediaFile = mediaFile;
-    }
-
-    public List<StageFileRelation> getRelations() {
-        return relations;
-    }
-
-    @SuppressWarnings("unused")
-    private void setRelations(List<StageFileRelation> relations) {
-        this.relations = relations;
     }
 
     // EQUALITY CHECKS

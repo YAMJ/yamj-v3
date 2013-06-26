@@ -11,9 +11,7 @@
     @TypeDef(name = "jobType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.JobType")}),
     @TypeDef(name = "fileType", typeClass = EnumStringUserType.class,
-        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.FileType")}),
-    @TypeDef(name = "relationType", typeClass = EnumStringUserType.class,
-    parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.RelationType")})
+        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.FileType")})
 })
 package org.yamj.core.database.model;
 

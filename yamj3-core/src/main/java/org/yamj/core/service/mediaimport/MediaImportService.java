@@ -22,9 +22,6 @@
  */
 package org.yamj.core.service.mediaimport;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +37,6 @@ import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
-import org.yamj.core.database.model.type.RelationType;
 
 /**
  * The media import service is a spring-managed service. This will be used by the MediaImportRunner only in order to access other
@@ -72,22 +68,6 @@ public class MediaImportService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void processVideo(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
-        List<StageFileRelation> existingRelations = stageFile.getRelations();
-
-        // process file relations
-        for (StageFileRelation relation : findRelations(stageFile)) {
-            if (existingRelations.indexOf(relation) < 0) {
-                // just store new relations
-                relation.setStatus(StatusType.NEW);
-                stagingDao.saveEntity(relation);
-            }
-
-            // update related file (regardless of previous status)
-            StageFile relatedFile = relation.getStageFileRelationId().getRelatedFile();
-            relatedFile.setStatus(StatusType.DONE);
-            stagingDao.updateEntity(relatedFile);
-        }
-
         if (stageFile.getMediaFile() == null) {
             LOG.info("Process new video {}-'{}'", stageFile.getId(), stageFile.getFileName());
             processNewVideo(stageFile);
@@ -316,11 +296,6 @@ public class MediaImportService {
                 }
             }
         }
-
-        // TODO
-        // - create associations to NFOs
-        // - create local artwork entries
-        // - create set entries
     }
 
     private void processUpdatedMediaFile(StageFile stageFile) {
@@ -345,62 +320,5 @@ public class MediaImportService {
             stageFile.setStatus(StatusType.ERROR);
             stagingDao.updateEntity(stageFile);
         }
-    }
-
-    private List<StageFileRelation> findRelations(StageFile videoFile) {
-        String fanartToken = configService.getProperty("yamj3.artwork.fanartToken", ".fanart");
-        String bannerToken = configService.getProperty("yamj3.artwork.bannerToken", ".banner");
-        String videoimageToken = configService.getProperty("yamj3.artwork.videoimageToken", ".videoimage");
-        
-        List<StageFileRelation> relations = new ArrayList<StageFileRelation>();
-        
-        // PRIO 1: images/NFO/subtitles with same baseFilename within same directory
-        
-        String baseFilename = FilenameUtils.getBaseName(videoFile.getFileName());
-        for (StageFile checkFile : this.stagingDao.findFiles(baseFilename, videoFile.getStageDirectory(), new StatusType[]{StatusType.NEW, StatusType.UPDATED}, new FileType[]{FileType.NFO, FileType.IMAGE, FileType.SUBTITLE})) {
-            String checkFilename = FilenameUtils.removeExtension(checkFile.getFileName());
-            
-            // check for matching associations
-            switch (checkFile.getFileType()) {
-                case IMAGE:
-                    if (checkFilename.equalsIgnoreCase(baseFilename+fanartToken)) {
-                        // exact matching fanart
-                        relations.add(createRelation(videoFile, checkFile, RelationType.FANART, 1));
-                    } else if (checkFilename.equalsIgnoreCase(baseFilename+bannerToken)) {
-                        // exact matching banner
-                        relations.add(createRelation(videoFile, checkFile, RelationType.BANNER, 1));
-                    } else if (StringUtils.startsWithIgnoreCase(checkFilename, baseFilename+videoimageToken)) {
-                        // matching video image
-                        relations.add(createRelation(videoFile, checkFile, RelationType.VIDEOIMAGE, 1));
-                    } else if (checkFilename.equalsIgnoreCase(baseFilename)) {
-                        // matching poster
-                        relations.add(createRelation(videoFile, checkFile, RelationType.POSTER, 1));
-                    }
-                    break;
-                case NFO:
-                    if (checkFilename.equalsIgnoreCase(baseFilename)) {
-                        relations.add(createRelation(videoFile, checkFile, RelationType.NFO, 1));
-                    }
-                    break;
-                case SUBTITLE:
-                    if (checkFilename.equalsIgnoreCase(baseFilename)) {
-                        relations.add(createRelation(videoFile, checkFile, RelationType.SUBTITLE, 1));
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-        
-        // TODO other cases and priorities
-        
-        return relations;
-    }
-
-    private StageFileRelation createRelation(StageFile videoFile, StageFile relatedFile, RelationType relationType, int priority) {
-        StageFileRelation relation = new StageFileRelation(videoFile, relatedFile);
-        relation.setRelationType(relationType);
-        relation.setPriority(priority);
-        return relation;
     }
 }
