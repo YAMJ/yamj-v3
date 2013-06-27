@@ -34,7 +34,7 @@ public abstract class ApiWrapperAbstract {
     private int count = 0;
     private DateTime queryTime = DateTime.now();
     private ApiStatus status = new ApiStatus();
-    private Parameters parameters = new Parameters();
+    private Object parameters = null;
 
     public int getCount() {
         return count;
@@ -48,7 +48,7 @@ public abstract class ApiWrapperAbstract {
         return status;
     }
 
-    public Parameters getParameters() {
+    public Object getParameters() {
         return parameters;
     }
 
@@ -69,7 +69,7 @@ public abstract class ApiWrapperAbstract {
         this.count = count;
     }
 
-    public void setParameters(Parameters parameters) {
+    public void setParameters(Object parameters) {
         this.parameters = parameters;
     }
 }

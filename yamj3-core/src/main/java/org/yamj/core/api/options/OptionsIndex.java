@@ -20,18 +20,23 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api.model;
+package org.yamj.core.api.options;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class OptionsIndex {
+/**
+ * List of the options available for the indexes
+ *
+ * @author stuart.boston
+ */
+public class OptionsIndex extends OptionsAbstract {
 
+    private String type = "ALL";
     private String include = "";
     private String exclude = "";
     private String sortBy = "";
-    private Integer start = -1;
-    private Integer max = -1;
 
     public void setInclude(String include) {
         this.include = include;
@@ -43,14 +48,6 @@ public class OptionsIndex {
 
     public void setSortBy(String sortBy) {
         this.sortBy = sortBy;
-    }
-
-    public void setStart(Integer start) {
-        this.start = start;
-    }
-
-    public void setMax(Integer max) {
-        this.max = max;
     }
 
     public String getInclude() {
@@ -65,16 +62,18 @@ public class OptionsIndex {
         return sortBy;
     }
 
-    public Integer getStart() {
-        return start;
+    public String getType() {
+        return type;
     }
 
-    public Integer getMax() {
-        return max;
+    public void setType(String type) {
+        if (StringUtils.containsIgnoreCase(type, "MOVIE")
+                || StringUtils.containsIgnoreCase(type, "TV")
+                || StringUtils.containsIgnoreCase(type, "ALL")) {
+            this.type = type.toUpperCase();
+        } else {
+            this.type = "ALL";
+        }
     }
 
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
-    }
 }

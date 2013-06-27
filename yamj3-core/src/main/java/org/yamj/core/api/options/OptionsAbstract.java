@@ -20,30 +20,39 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.database.dao;
+package org.yamj.core.api.options;
 
-import java.util.List;
-import org.hibernate.SQLQuery;
-import org.springframework.stereotype.Service;
-import org.yamj.core.api.options.OptionsIndex;
-import org.yamj.core.hibernate.HibernateDao;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
-@Service("apiDao")
-public class ApiDao extends HibernateDao {
+/**
+ * Abstract class for the query options
+ *
+ * @author stuart.boston
+ */
+public abstract class OptionsAbstract {
 
-    public List getVideoList(final String sql, final OptionsIndex options) {
-        SQLQuery query = getSession().createSQLQuery(sql.toString());
-        query.setReadOnly(true);
-        query.setCacheable(true);
+    private Integer start = -1;
+    private Integer max = -1;
 
-        if (options.getStart() > 0) {
-            query.setFirstResult(options.getStart());
-        }
+    public void setStart(Integer start) {
+        this.start = start;
+    }
 
-        if (options.getMax() > 0) {
-            query.setMaxResults(options.getMax());
-        }
+    public void setMax(Integer max) {
+        this.max = max;
+    }
 
-        return query.list();
+    public Integer getStart() {
+        return start;
+    }
+
+    public Integer getMax() {
+        return max;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

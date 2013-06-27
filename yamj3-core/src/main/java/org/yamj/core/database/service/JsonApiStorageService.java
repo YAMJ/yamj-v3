@@ -24,11 +24,13 @@ package org.yamj.core.database.service;
 
 import java.io.Serializable;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.yamj.core.api.model.OptionsIndex;
 import org.yamj.core.api.model.Parameters;
+import org.yamj.core.api.options.OptionsIndex;
 import org.yamj.core.database.dao.ApiDao;
 import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
@@ -38,6 +40,7 @@ import org.yamj.core.database.model.type.MetaDataType;
 @Service("jsonApiStorageService")
 public class JsonApiStorageService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(JsonApiStorageService.class);
     @Autowired
     private CommonDao commonDao;
     @Autowired
@@ -48,20 +51,35 @@ public class JsonApiStorageService {
     @Transactional(readOnly = true)
     public List<Object> getVideoList(OptionsIndex options) {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT vd.id, '");
-        sql.append(MetaDataType.MOVIE);
-        sql.append("' AS video_type, vd.title ");
-        sql.append("FROM videodata vd ");
-        sql.append("WHERE vd.episode<0 ");
-        sql.append("UNION ");
-        sql.append("SELECT ser.id,'");
-        sql.append(MetaDataType.SERIES);
-        sql.append("' AS video_type, ser.title ");
-        sql.append("FROM series ser, season sea, videodata vd ");
-        sql.append("WHERE ser.id = sea.series_id ");
-        sql.append("AND   sea.id = vd.season_id");
 
-        return apiDao.getVideoList(sql.toString(), 10);
+        // Add the movie entries
+        if (options.getType().equals("ALL") || options.getType().equals("MOVIE")) {
+            sql.append("SELECT vd.id, ");
+            sql.append("'").append(MetaDataType.MOVIE).append("' AS video_type, ");
+            sql.append("vd.title, ");
+            sql.append("-1 as season ");
+            sql.append("FROM videodata vd ");
+            sql.append("WHERE vd.episode < 0 ");
+        }
+
+        if (options.getType().equals("ALL")) {
+            sql.append("UNION ");
+        }
+
+        // Add the TV entires
+        if (options.getType().equals("ALL") || options.getType().equals("TV")) {
+            sql.append("SELECT DISTINCT ser.id, ");
+            sql.append("'").append(MetaDataType.SERIES).append("' AS video_type, ");
+            sql.append("ser.title, ");
+            sql.append("sea.season ");
+            sql.append("FROM series ser, season sea, videodata vd ");
+            sql.append("WHERE ser.id = sea.series_id ");
+            sql.append("AND   sea.id = vd.season_id");
+        }
+
+        LOG.info("INDEX SQL: {}", sql);
+
+        return apiDao.getVideoList(sql.toString(), options);
     }
 
     @Transactional(readOnly = true)
