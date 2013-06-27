@@ -22,12 +22,10 @@ public class TheTVDbApiWrapper {
 
     private static final int YEAR_MIN = 1900;
     private static final int YEAR_MAX = 2050;
-
     @Autowired
     private ConfigService configService;
     @Autowired
     private TheTVDBApi tvdbApi;
-
     // make maximal 20 banners objects maximal 30 minutes accessible
     private Lock bannersLock = new ReentrantLock(true);
     private LRUTimedCache<String, Banners> bannersCache = new LRUTimedCache<String, Banners>(20, 1800);
@@ -37,7 +35,6 @@ public class TheTVDbApiWrapper {
     // make maximal 30 episode lists maximal 30 minutes accessible
     private LRUTimedCache<String, List<Episode>> episodesCache = new LRUTimedCache<String, List<Episode>>(30, 1800);
 
-    
     public Banners getBanners(String id) {
         Banners banners = bannersCache.get(id);
         if (banners == null) {
@@ -69,10 +66,11 @@ public class TheTVDbApiWrapper {
                     String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
 
                     // retrieve series from TheTVDb
-                    tvdbApi.getSeries(id, defaultLanguage);
+                    series = tvdbApi.getSeries(id, defaultLanguage);
                     if (series == null && StringUtils.isNotBlank(altLanguage)) {
                         series = tvdbApi.getSeries(id, altLanguage);
                     }
+                    
                     if (series == null) {
                         // have a valid series object with empty values
                         series = new com.omertron.thetvdbapi.model.Series();
@@ -96,7 +94,7 @@ public class TheTVDbApiWrapper {
             if (CollectionUtils.isEmpty(seriesList) && StringUtils.isNotBlank(altLanguage)) {
                 seriesList = tvdbApi.searchSeries(title, altLanguage);
             }
-            
+
             if (CollectionUtils.isNotEmpty(seriesList)) {
                 Series series = null;
                 for (Series s : seriesList) {
@@ -128,7 +126,7 @@ public class TheTVDbApiWrapper {
 
     public List<Episode> getSeasonEpisodes(String id, int season) {
         String key = (id + "###" + season);
-        
+
         List<Episode> episodeList = this.episodesCache.get(key);
         if (episodeList == null) {
             String defaultLanguage = configService.getProperty("thetvdb.language", "en");

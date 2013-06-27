@@ -99,6 +99,15 @@ public class Series extends AbstractMetadata {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
 
+    @ManyToMany
+    @ForeignKey(name = "FK_DATAGENRES_VIDEODATA", inverseName = "FK_DATAGENRES_GENRE")
+    @JoinTable(name = "videodata_genres",
+            joinColumns = {
+        @JoinColumn(name = "data_id")},
+            inverseJoinColumns = {
+        @JoinColumn(name = "genre_id")})
+    private Set<Genre> genres = new HashSet<Genre>(0);
+
     // GETTER and SETTER
     public int getStartYear() {
         return startYear;
@@ -206,6 +215,14 @@ public class Series extends AbstractMetadata {
         }
         Series castOther = (Series) other;
         return StringUtils.equals(this.identifier, castOther.identifier);
+    }
+
+    public Set<Genre> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(Set<Genre> genres) {
+        this.genres = genres;
     }
 
     @Override
