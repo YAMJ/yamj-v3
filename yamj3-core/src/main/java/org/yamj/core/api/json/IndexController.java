@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.model.ApiWrapperList;
+import org.yamj.core.api.model.dto.IndexDTO;
 import org.yamj.core.api.options.OptionsIndex;
 import org.yamj.core.database.service.JsonApiStorageService;
 
@@ -44,11 +45,11 @@ public class IndexController {
 
     @RequestMapping(value = "/video", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<Object> getVideoList(
+    public ApiWrapperList<IndexDTO> getVideoList(
             @ModelAttribute("options") OptionsIndex options) {
         LOG.info("INDEX: Video list - Options: {}", options.toString());
 
-        ApiWrapperList<Object> wrapper = new ApiWrapperList<Object>();
+        ApiWrapperList<IndexDTO> wrapper = new ApiWrapperList<IndexDTO>();
         wrapper.setResults(jsonApiStorageService.getVideoList(options));
         wrapper.setParameters(options);
         wrapper.setStatusCheck();

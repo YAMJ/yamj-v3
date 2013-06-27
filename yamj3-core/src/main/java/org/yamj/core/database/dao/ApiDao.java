@@ -22,16 +22,18 @@
  */
 package org.yamj.core.database.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Service;
+import org.yamj.core.api.model.dto.IndexDTO;
 import org.yamj.core.api.options.OptionsIndex;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Service("apiDao")
 public class ApiDao extends HibernateDao {
 
-    public List getVideoList(final String sql, final OptionsIndex options) {
+    public List<IndexDTO> getVideoList(final String sql, final OptionsIndex options) {
         SQLQuery query = getSession().createSQLQuery(sql.toString());
         query.setReadOnly(true);
         query.setCacheable(true);
@@ -44,6 +46,17 @@ public class ApiDao extends HibernateDao {
             query.setMaxResults(options.getMax());
         }
 
-        return query.list();
+        List<IndexDTO> indexElements = new ArrayList<IndexDTO>();
+        List<Object[]> objects = query.list();
+        for (Object[] object : objects) {
+            IndexDTO indexElement = new IndexDTO();
+            indexElement.setId(convertRowElementToLong(object[0]));
+            indexElement.setVideoType(convertRowElementToString(object[1]));
+            indexElement.setTitle(convertRowElementToString(object[2]));
+            indexElement.setYear(convertRowElementToInteger(object[3]));
+            indexElements.add(indexElement);
+        }
+
+        return indexElements;
     }
 }

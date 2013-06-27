@@ -24,12 +24,15 @@ package org.yamj.core.database.service;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.model.Parameters;
+import org.yamj.core.api.model.dto.IndexDTO;
 import org.yamj.core.api.options.OptionsIndex;
 import org.yamj.core.database.dao.ApiDao;
 import org.yamj.core.database.dao.ArtworkDao;
@@ -49,32 +52,72 @@ public class JsonApiStorageService {
     private ApiDao apiDao;
 
     @Transactional(readOnly = true)
-    public List<Object> getVideoList(OptionsIndex options) {
+    public List<IndexDTO> getVideoList(OptionsIndex options) {
+        Map<String, String> includes = options.getIncludes();
+        Map<String, String> excludes = options.getExcludes();
         StringBuilder sql = new StringBuilder();
 
         // Add the movie entries
         if (options.getType().equals("ALL") || options.getType().equals("MOVIE")) {
-            sql.append("SELECT vd.id, ");
-            sql.append("'").append(MetaDataType.MOVIE).append("' AS video_type, ");
-            sql.append("vd.title, ");
-            sql.append("-1 as season ");
-            sql.append("FROM videodata vd ");
-            sql.append("WHERE vd.episode < 0 ");
+            sql.append("SELECT vd.id");
+            sql.append(", '").append(MetaDataType.MOVIE).append("' AS video_type");
+            sql.append(", vd.title");
+            sql.append(", vd.publication_year");
+            sql.append(" FROM videodata vd");
+            // Add genre tables for include and exclude
+            if (includes.containsKey("genre") || excludes.containsKey("genre")) {
+                sql.append(", videodata_genres vg, genre g");
+            }
+
+            sql.append(" WHERE vd.episode < 0");
+            // Add joins for genres
+            if (includes.containsKey("genre") || excludes.containsKey("genre")) {
+                sql.append("AND vd.id=vg.data_id");
+                sql.append("AND vg.genre_id=g.id");
+                sql.append("AND and g.name='");
+                if (includes.containsKey("genre")) {
+                    sql.append(includes.get("genre"));
+                } else {
+                    sql.append(excludes.get("genre"));
+                }
+                sql.append("'");
+            }
+
+            if (includes.containsKey("year")) {
+                sql.append(" AND vd.publication_year=").append(includes.get("year"));
+            }
+
+            if (excludes.containsKey("year")) {
+                sql.append(" AND vd.publication_year!=").append(includes.get("year"));
+            }
         }
 
         if (options.getType().equals("ALL")) {
-            sql.append("UNION ");
+            sql.append(" UNION ");
         }
 
         // Add the TV entires
         if (options.getType().equals("ALL") || options.getType().equals("TV")) {
-            sql.append("SELECT DISTINCT ser.id, ");
-            sql.append("'").append(MetaDataType.SERIES).append("' AS video_type, ");
-            sql.append("ser.title, ");
-            sql.append("sea.season ");
-            sql.append("FROM series ser, season sea, videodata vd ");
-            sql.append("WHERE ser.id = sea.series_id ");
-            sql.append("AND   sea.id = vd.season_id");
+            sql.append("SELECT ser.id");
+            sql.append(", '").append(MetaDataType.SERIES).append("' AS video_type");
+            sql.append(", ser.title");
+            sql.append(", ser.start_year");
+            sql.append(" FROM series ser ");
+            sql.append(" WHERE 1"); // To make it easier to add the optional include and excludes
+
+            if (includes.containsKey("year")) {
+                sql.append(" AND ser.start_year=").append(includes.get("year"));
+            }
+
+            if (excludes.containsKey("year")) {
+                sql.append(" AND ser.start_year!=").append(includes.get("year"));
+            }
+        }
+
+        if (StringUtils.isNotBlank(options.getSortby())) {
+            sql.append(" ORDER BY ");
+            sql.append(options.getSortby()).append(" ");
+            sql.append(options.getSortdir().toUpperCase());
         }
 
         LOG.info("INDEX SQL: {}", sql);

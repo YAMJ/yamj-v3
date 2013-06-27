@@ -22,9 +22,9 @@
  */
 package org.yamj.core.api.options;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * List of the options available for the indexes
@@ -36,7 +36,8 @@ public class OptionsIndex extends OptionsAbstract {
     private String type = "ALL";
     private String include = "";
     private String exclude = "";
-    private String sortBy = "";
+    private String sortby = "";
+    private String sortdir = "ASC";
 
     public void setInclude(String include) {
         this.include = include;
@@ -46,20 +47,12 @@ public class OptionsIndex extends OptionsAbstract {
         this.exclude = exclude;
     }
 
-    public void setSortBy(String sortBy) {
-        this.sortBy = sortBy;
-    }
-
     public String getInclude() {
         return include;
     }
 
     public String getExclude() {
         return exclude;
-    }
-
-    public String getSortBy() {
-        return sortBy;
     }
 
     public String getType() {
@@ -76,4 +69,44 @@ public class OptionsIndex extends OptionsAbstract {
         }
     }
 
+    public String getSortby() {
+        return sortby;
+    }
+
+    public void setSortby(String sortby) {
+        this.sortby = sortby;
+    }
+
+    public String getSortdir() {
+        return sortdir;
+    }
+
+    public void setSortdir(String sortdir) {
+        this.sortdir = sortdir;
+    }
+
+    /**
+     * Split the include list into a map of values
+     */
+    public Map<String, String> getIncludes() {
+        return splitDashList(include);
+    }
+
+    /**
+     * Split the exclude list into a map of values
+     */
+    public Map<String, String> getExcludes() {
+        return splitDashList(exclude);
+    }
+
+    private Map<String, String> splitDashList(String dashList) {
+        Map<String, String> values = new HashMap<String, String>();
+        for (String inc : StringUtils.split(dashList, ",")) {
+            int pos = inc.indexOf('-');
+            if (pos >= 0) {
+                values.put(inc.substring(0, pos), inc.substring(pos + 1));
+            }
+        }
+        return values;
+    }
 }
