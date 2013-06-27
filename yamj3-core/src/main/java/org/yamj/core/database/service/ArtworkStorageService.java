@@ -22,12 +22,8 @@
  */
 package org.yamj.core.database.service;
 
-import org.apache.commons.collections.CollectionUtils;
-
-import org.yamj.core.database.model.type.ArtworkCategory;
-import org.yamj.core.database.model.type.ArtworkType;
-
 import java.util.List;
+import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +38,8 @@ import org.yamj.core.database.model.ArtworkGenerated;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.model.type.MetaDataType;
 
 @Service("artworkStorageService")
 public class ArtworkStorageService {
@@ -78,30 +76,30 @@ public class ArtworkStorageService {
 
     @Transactional(readOnly = true)
     public List<ArtworkProfile> getPreProcessArtworkProfiles(ArtworkLocated located) {
-        ArtworkCategory category = null;
+        MetaDataType metaDataType = null;
 
         ArtworkType artworkType = located.getArtwork().getArtworkType();
         if (ArtworkType.PHOTO == artworkType) {
             // no own category
         } else if (ArtworkType.VIDEOIMAGE == artworkType) {
-            category = ArtworkCategory.EPISODE;
+            metaDataType = MetaDataType.EPISODE;
         } else if (ArtworkType.BANNER == artworkType) {
             if (located.getArtwork().getSeries() != null) {
-                category = ArtworkCategory.SERIES;
+                metaDataType = MetaDataType.SERIES;
             } else {
-                category = ArtworkCategory.SEASON;
+                metaDataType = MetaDataType.SEASON;
             }
         } else if (ArtworkType.POSTER == artworkType || (ArtworkType.FANART == artworkType)) {
             if (located.getArtwork().getSeries() != null) {
-                category = ArtworkCategory.SERIES;
+                metaDataType = MetaDataType.SERIES;
             } else if (located.getArtwork().getSeason() != null) {
-                category = ArtworkCategory.SEASON;
+                metaDataType = MetaDataType.SEASON;
             } else {
-                category = ArtworkCategory.MOVIE;
+                metaDataType = MetaDataType.MOVIE;
             }
         }
         
-       return this.artworkDao.getPreProcessArtworkProfiles(artworkType, category);
+       return this.artworkDao.getPreProcessArtworkProfiles(artworkType, metaDataType);
     }
     
     @Transactional

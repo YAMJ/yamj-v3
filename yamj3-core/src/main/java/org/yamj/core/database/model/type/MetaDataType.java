@@ -31,6 +31,8 @@ public enum MetaDataType {
 
     MOVIE,
     SERIES,
+    SEASON,
+    EPISODE,
     PERSON;
 
     public static MetaDataType fromString(String type) {

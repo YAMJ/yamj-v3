@@ -321,4 +321,33 @@ public class MediaImportService {
             stagingDao.updateEntity(stageFile);
         }
     }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void processImage(long id) {
+        StageFile stageFile = stagingDao.getStageFile(id);
+        
+        if (stageFile.getBaseName().equalsIgnoreCase("poster") ||
+            stageFile.getBaseName().equalsIgnoreCase("cover") ||
+            stageFile.getBaseName().equalsIgnoreCase("folder"))
+        {
+            // TODO apply poster to all video files in that directory
+            
+        } else if (stageFile.getBaseName().equalsIgnoreCase("fanart") ||
+                stageFile.getBaseName().equalsIgnoreCase("backdrop") ||
+                stageFile.getBaseName().equalsIgnoreCase("background"))
+        {
+            // TODO apply poster to all video files in that directory
+            
+        } else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".fanart") ||
+                StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-fanart"))
+        {
+            // TODO apply fanart to single video
+            
+        } else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".poster") ||
+                StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-poster")) 
+        {
+            // TODO apply poster to single video
+        }
+    }
+        
 }

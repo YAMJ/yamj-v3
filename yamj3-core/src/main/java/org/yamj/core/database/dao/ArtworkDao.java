@@ -36,8 +36,8 @@ import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
-import org.yamj.core.database.model.type.ArtworkCategory;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.model.type.MetaDataType;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Service("artworkDao")
@@ -51,18 +51,18 @@ public class ArtworkDao extends HibernateDao {
     }
 
     @SuppressWarnings("unchecked")
-    public List<ArtworkProfile> getPreProcessArtworkProfiles(ArtworkType artworkType, ArtworkCategory category) {
+    public List<ArtworkProfile> getPreProcessArtworkProfiles(ArtworkType artworkType, MetaDataType metaDataType) {
         Session session = getSession();
         Criteria criteria = session.createCriteria(ArtworkProfile.class);
         criteria.add(Restrictions.eq("artworkType", artworkType));
         criteria.add(Restrictions.eq("preProcess", Boolean.TRUE));
-        if (ArtworkCategory.MOVIE == category) {
+        if (MetaDataType.MOVIE == metaDataType) {
             criteria.add(Restrictions.eq("applyToMovie", Boolean.TRUE));
-        } else if (ArtworkCategory.SERIES == category) {
+        } else if (MetaDataType.SERIES == metaDataType) {
             criteria.add(Restrictions.eq("applyToSeries", Boolean.TRUE));
-        } else if (ArtworkCategory.SEASON == category) {
+        } else if (MetaDataType.SEASON == metaDataType) {
             criteria.add(Restrictions.eq("applyToSeason", Boolean.TRUE));
-        } else if (ArtworkCategory.EPISODE == category) {
+        } else if (MetaDataType.EPISODE == metaDataType) {
             criteria.add(Restrictions.eq("applyToEpisode", Boolean.TRUE));
         }
         return criteria.list();
