@@ -28,7 +28,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.concurrent.ConcurrentUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +52,7 @@ public class LibrarySendScheduler {
     private static final Logger LOG = LoggerFactory.getLogger(LibrarySendScheduler.class);
     private AtomicInteger runningCount = new AtomicInteger(0);
     private AtomicInteger retryCount = new AtomicInteger(0);
-    private static final int retryMax = PropertyTools.getIntProperty("filescanner.send.retry", 5);
+    private static final int RETRY_MAX = PropertyTools.getIntProperty("filescanner.send.retry", 5);
     @Autowired
     private LibraryCollection libraryCollection;
     @Autowired
@@ -62,8 +61,8 @@ public class LibrarySendScheduler {
     @Async
     @Scheduled(initialDelay = 10000, fixedDelay = 15000)
     public void sendLibraries() {
-        if (retryCount.get() > retryMax) {
-            LOG.info("Maximum number of retries ({}) exceeded. No further processing attempted.", retryMax);
+        if (retryCount.get() > RETRY_MAX) {
+            LOG.info("Maximum number of retries ({}) exceeded. No further processing attempted.", RETRY_MAX);
             for (Library library : libraryCollection.getLibraries()) {
                 library.setSendingComplete(Boolean.TRUE);
             }
@@ -82,32 +81,8 @@ public class LibrarySendScheduler {
             try {
                 for (Map.Entry<String, Future<StatusType>> entry : library.getDirectoryStatus().entrySet()) {
                     LOG.info("    {}: {}", entry.getKey(), entry.getValue().isDone() ? entry.getValue().get() : "Being processed");
-                    boolean sendStatus;
-                    if (entry.getValue().isDone()) {
-                        StatusType processingStatus = entry.getValue().get();
-                        if (processingStatus == StatusType.NEW) {
-                            LOG.info("    Sending '{}' to core for processing.", entry.getKey());
-                            sendStatus = sendToCore(library, entry.getKey());
-                        } else if (processingStatus == StatusType.UPDATED) {
-                            LOG.info("    Sending updated '{}' to core for processing.", entry.getKey());
-                            sendStatus = sendToCore(library, entry.getKey());
-                        } else if (processingStatus == StatusType.ERROR) {
-                            LOG.info("    Resending '{}' to core for processing (was in error status).", entry.getKey());
-                            sendStatus = sendToCore(library, entry.getKey());
-                        } else if (processingStatus == StatusType.DONE) {
-                            LOG.info("    Completed: '{}'", entry.getKey());
-                            sendStatus = Boolean.TRUE;
-                        } else {
-                            LOG.warn("    Unknown processing status {} for {}", processingStatus, entry.getKey());
-                            // Assume this is correct, so we don't get stuck
-                            sendStatus = Boolean.TRUE;
-                        }
-                    } else {
-                        LOG.warn("    Still being procesed {}", entry.getKey());
-                        sendStatus = Boolean.FALSE;
-                    }
 
-                    if (!sendStatus) {
+                    if (!checkStatus(library, entry.getValue(), entry.getKey())) {
                         // Make sure this is set to false
                         library.setSendingComplete(Boolean.FALSE);
                         LOG.warn("Failed to send a file. Waiting until next run...");
@@ -125,6 +100,35 @@ public class LibrarySendScheduler {
                 LOG.info("ExecutionException: {}", ex.getMessage());
             }
         }
+    }
+
+    private boolean checkStatus(Library library, Future<StatusType> statusType, String directory) throws InterruptedException, ExecutionException {
+        boolean sendStatus;
+
+        if (statusType.isDone()) {
+            StatusType processingStatus = statusType.get();
+            if (processingStatus == StatusType.NEW) {
+                LOG.info("    Sending '{}' to core for processing.", directory);
+                sendStatus = sendToCore(library, directory);
+            } else if (processingStatus == StatusType.UPDATED) {
+                LOG.info("    Sending updated '{}' to core for processing.", directory);
+                sendStatus = sendToCore(library, directory);
+            } else if (processingStatus == StatusType.ERROR) {
+                LOG.info("    Resending '{}' to core for processing (was in error status).", directory);
+                sendStatus = sendToCore(library, directory);
+            } else if (processingStatus == StatusType.DONE) {
+                LOG.info("    Completed: '{}'", directory);
+                sendStatus = Boolean.TRUE;
+            } else {
+                LOG.warn("    Unknown processing status {} for {}", processingStatus, directory);
+                // Assume this is correct, so we don't get stuck
+                sendStatus = Boolean.TRUE;
+            }
+        } else {
+            LOG.warn("    Still being procesed {}", directory);
+            sendStatus = Boolean.FALSE;
+        }
+        return sendStatus;
     }
 
     /**
