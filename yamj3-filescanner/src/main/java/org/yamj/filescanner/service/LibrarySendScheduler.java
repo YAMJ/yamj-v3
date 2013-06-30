@@ -69,7 +69,7 @@ public class LibrarySendScheduler {
             return;
         }
 
-        LOG.info("There are {} libraries to process, this is attempt {} to complete sending.", libraryCollection.size(), retryCount.incrementAndGet());
+        LOG.info("There are {} libraries to process, there have been {} consecutive failed attempts to send.", libraryCollection.size(), retryCount.get());
         LOG.info("There are {} items currently queued to be sent to core.", runningCount.get());
 
         for (Library library : libraryCollection.getLibraries()) {
@@ -82,10 +82,12 @@ public class LibrarySendScheduler {
                 for (Map.Entry<String, Future<StatusType>> entry : library.getDirectoryStatus().entrySet()) {
                     LOG.info("    {}: {}", entry.getKey(), entry.getValue().isDone() ? entry.getValue().get() : "Being processed");
 
-                    if (!checkStatus(library, entry.getValue(), entry.getKey())) {
+                    if (checkStatus(library, entry.getValue(), entry.getKey())) {
+                        LOG.debug("Sucessfully sent file to server, resetting retry count to 0 from {}.", retryCount.getAndSet(0));
+                    } else {
                         // Make sure this is set to false
                         library.setSendingComplete(Boolean.FALSE);
-                        LOG.warn("Failed to send a file. Waiting until next run...");
+                        LOG.warn("Failed to send a file, this was failed attempt #{}. Waiting until next run...", retryCount.incrementAndGet());
                         return;
                     }
                 }
