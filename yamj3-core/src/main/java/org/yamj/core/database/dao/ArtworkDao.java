@@ -37,7 +37,7 @@ import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.database.model.type.MetaDataType;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Service("artworkDao")

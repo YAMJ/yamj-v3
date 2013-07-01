@@ -499,10 +499,19 @@ Get information on a single certification
 ***
 **Required Parameters**
 
-`id`        The ID of the certificate to get
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the certificate to get</td>
+    </tr>
+    <tr>
+        <td>name</td>
+        <td>The name of the certificate to get</td>
+    </tr>
+</table>
 
-`name`      The name of the certificate to get
-***
 GET /api/certificate/{id_or_name}
 < 200
 < Content-Type: application/json
@@ -513,17 +522,31 @@ Get information certifications
 ***
 **Optional Parameters**
 
-`search`    The search term to use
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>search</td>
+        <td>The search term to use</td>
+    </tr>
+    <tr>
+        <td>match</td>
+        <td>The match method. Can be one of `any` (default), `start`, `end` or `exact`</td>
+    </tr>
+    <tr>
+        <td>sort</td>
+        <td>Sort the returned results. Can be one of `asc` or `desc`</td>
+    </tr>
+    <tr>
+        <td>start</td>
+        <td>Where to start the list from</td>
+    </tr>
+    <tr>
+        <td>max</td>
+        <td>The maximum number of results to return</td>
+    </tr>
+</table>
 
-`match`     The match method. Can be one of `any` (default), `start`, `end` or `exact`
-
-`sort`      Sort the returned results. Can be one of `asc` or `desc`
-
-`start`     Where to start the list from
-
-`max`       The maximum number of results to return
-
-***
 GET /api/certifications
 < 200
 < Content-Type: application/json
@@ -534,10 +557,19 @@ Get information on a single studio
 ***
 **Required Parameters**
 
-`id`        The ID of the studio to get
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the studio to get</td>
+    </tr>
+    <tr>
+        <td>name</td>
+        <td>The name of the studio to get</td>
+    </tr>
+</table>
 
-`name`      The name of the studio to get
-***
 GET /api/studio/{id_or_name}
 < 200
 < Content-Type: application/json
@@ -548,17 +580,31 @@ Get information studios
 ***
 **Optional Parameters**
 
-`search`    The search term to use
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>search</td>
+        <td>The search term to use</td>
+    </tr>
+    <tr>
+        <td>match</td>
+        <td>The match method. Can be one of `any` (default), `start`, `end` or `exact`</td>
+    </tr>
+    <tr>
+        <td>sort</td>
+        <td>Sort the returned results. Can be one of `asc` or `desc`</td>
+    </tr>
+    <tr>
+        <td>start</td>
+        <td>Where to start the list from</td>
+    </tr>
+    <tr>
+        <td>max</td>
+        <td>The maximum number of results to return</td>
+    </tr>
+</table>
 
-`match`     The match method. Can be one of `any` (default), `start`, `end` or `exact`
-
-`sort`      Sort the returned results. Can be one of `asc` or `desc`
-
-`start`     Where to start the list from
-
-`max`       The maximum number of results to return
-
-***
 GET /api/studios
 < 200
 < Content-Type: application/json
@@ -569,10 +615,19 @@ Get information on a single boxed set
 ***
 **Required Parameters**
 
-`id`        The ID of the studio to get
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the boxed set to get</td>
+    </tr>
+    <tr>
+        <td>name</td>
+        <td>The name of the boxed set to get</td>
+    </tr>
+</table>
 
-`name`      The name of the studio to get
-***
 GET /api/boxedset/{id_or_name}
 < 200
 < Content-Type: application/json
@@ -583,22 +638,47 @@ Get information boxed sets
 ***
 **Optional Parameters**
 
-`search`    The search term to use
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>search</td>
+        <td>The search term to use</td>
+    </tr>
+    <tr>
+        <td>match</td>
+        <td>The match method. Can be one of `any` (default), `start`, `end` or `exact`</td>
+    </tr>
+    <tr>
+        <td>sort</td>
+        <td>Sort the returned results. Can be one of `asc` or `desc`</td>
+    </tr>
+    <tr>
+        <td>start</td>
+        <td>Where to start the list from</td>
+    </tr>
+    <tr>
+        <td>max</td>
+        <td>The maximum number of results to return</td>
+    </tr>
+</table>
 
-`match`     The match method. Can be one of `any` (default), `start`, `end` or `exact`
-
-`sort`      Sort the returned results. Can be one of `asc` or `desc`
-
-`start`     Where to start the list from
-
-`max`       The maximum number of results to return
-
-***
 GET /api/boxedsets
 < 200
 < Content-Type: application/json
 {}
 
+
+--
+Index Methods
+This section is for the indexes
+--
+
+None currently defined.
+GET /index/
+< 200
+< Content-Type: text
+{}
 
 --
 System Information
@@ -615,6 +695,18 @@ GET /system
 
 
 Get information on the system
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>addcounts</td>
+        <td>set to 'true' if you want a count of the major objects in the database, such as Movies, People, etc.</td>
+    </tr>
+</table>
+
 GET /system/info
 < 200
 < Content-Type: application/json

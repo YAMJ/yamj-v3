@@ -24,10 +24,13 @@ package org.yamj.core.database.dao;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Service;
+import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.IndexDTO;
 import org.yamj.core.api.options.OptionsIndex;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Service("apiDao")
@@ -58,5 +61,29 @@ public class ApiDao extends HibernateDao {
         }
 
         return indexElements;
+    }
+
+    public CountTimestamp getCountTimestamp(MetaDataType type, String tablename, String clause) {
+        if (StringUtils.isBlank(tablename)) {
+            return null;
+        }
+
+        StringBuilder sql = new StringBuilder("SELECT count(*), MAX(create_timestamp), MAX(update_timestamp), MAX(id) FROM ");
+        sql.append(tablename);
+        if (StringUtils.isNotBlank(clause)) {
+            sql.append(" WHERE ").append(clause);
+        }
+
+        SQLQuery query = getSession().createSQLQuery(sql.toString());
+        query.setReadOnly(true);
+        query.setCacheable(true);
+
+        Object[] result = (Object[]) query.uniqueResult();
+        CountTimestamp ct = new CountTimestamp(type);
+        ct.setCount(convertRowElementToInteger(result[0]));
+        ct.setCreateTimestamp(convertRowElementToDate(result[1]));
+        ct.setUpdateTimestamp(convertRowElementToDate(result[2]));
+        ct.setLastId(convertRowElementToLong(result[3]));
+        return ct;
     }
 }

@@ -24,12 +24,15 @@ package org.yamj.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.lang.management.ManagementFactory;
+import java.util.EnumMap;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.DateTimeTools;
+import org.yamj.common.type.MetaDataType;
 
 /**
  * Provides information on the build of YAMJ<br>
@@ -53,9 +56,11 @@ public class YamjInfo {
     private String osName;
     private String osVersion;
     private DateTime startUpDateTime;
+    private Map<MetaDataType, Long> counts;
 
     @SuppressWarnings("unused")
-    private YamjInfo() {}
+    private YamjInfo() {
+    }
 
     @SuppressWarnings("rawtypes")
     public YamjInfo(Class myClass) {
@@ -80,8 +85,10 @@ public class YamjInfo {
 
         // Times
         this.startUpDateTime = new DateTime(ManagementFactory.getRuntimeMXBean().getStartTime());
-    }
 
+        // Counts
+        this.counts = new EnumMap<MetaDataType, Long>(MetaDataType.class);
+    }
 
     public String getProjectName() {
         return projectName;
@@ -137,14 +144,25 @@ public class YamjInfo {
         return DateTimeTools.convertDateToString(buildDateTime, DateTimeTools.BUILD_FORMAT);
     }
 
-    public String getStartUpTime(){
+    public String getStartUpTime() {
         return DateTimeTools.convertDateToString(startUpDateTime, DateTimeTools.BUILD_FORMAT);
     }
 
     public String getUptime() {
         return DateTimeTools.formatDurationText(ManagementFactory.getRuntimeMXBean().getUptime());
     }
-    //</editor-fold>
+
+    public Map<MetaDataType, Long> getCounts() {
+        return counts;
+    }
+
+    public void setCounts(Map<MetaDataType, Long> counts) {
+        this.counts = counts;
+    }
+
+    public void addCount(MetaDataType type, long count) {
+        this.counts.put(type, count);
+    }
 
     /**
      * Output the header information to the log file

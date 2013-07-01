@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.database.model.type;
+package org.yamj.common.type;
 
 /**
  * The meta data type used for the data scanning in the database

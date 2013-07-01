@@ -22,17 +22,23 @@
  */
 package org.yamj.core.api.json;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.model.ApiWrapperList;
+import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.IndexDTO;
 import org.yamj.core.api.options.OptionsIndex;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
@@ -54,5 +60,25 @@ public class IndexController {
         wrapper.setParameters(options);
         wrapper.setStatusCheck();
         return wrapper;
+    }
+
+    @RequestMapping(value = "/count", method = RequestMethod.GET)
+    @ResponseBody
+    public List<CountTimestamp> getCount(@RequestParam(required = false, defaultValue = "") String type) {
+        List<CountTimestamp> results = new ArrayList<CountTimestamp>();
+        if (type.toLowerCase().indexOf("all") < 0) {
+            for (String stringType : StringUtils.tokenizeToStringArray(type, ",", true, true)) {
+                MetaDataType singleType = MetaDataType.fromString(stringType);
+                LOG.debug("Getting a count of '{}'", singleType.toString());
+                results.add(jsonApiStorageService.getCountTimestamp(singleType));
+            }
+        } else {
+            LOG.debug("Getting a count of all types");
+            for (MetaDataType singleType : MetaDataType.values()) {
+                LOG.debug("  Adding a count of '{}'", singleType.toString());
+                results.add(jsonApiStorageService.getCountTimestamp(singleType));
+            }
+        }
+        return results;
     }
 }

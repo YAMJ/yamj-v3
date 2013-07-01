@@ -23,7 +23,7 @@
 package org.yamj.core.database.model.dto;
 
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.database.model.type.MetaDataType;
+import org.yamj.common.type.MetaDataType;
 import java.util.Date;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;

@@ -39,7 +39,7 @@ import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.type.MetaDataType;
+import org.yamj.common.type.MetaDataType;
 
 @Service("metadataStorageService")
 public class MetadataStorageService {

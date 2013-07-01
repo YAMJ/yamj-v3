@@ -36,7 +36,7 @@ import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.type.MetaDataType;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.service.MetadataStorageService;
 
 @Service("pluginMetadataService")

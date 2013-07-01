@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.Parameters;
 import org.yamj.core.api.model.dto.IndexDTO;
 import org.yamj.core.api.options.OptionsIndex;
@@ -38,7 +39,7 @@ import org.yamj.core.database.dao.ApiDao;
 import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.model.*;
-import org.yamj.core.database.model.type.MetaDataType;
+import org.yamj.common.type.MetaDataType;
 
 @Service("jsonApiStorageService")
 public class JsonApiStorageService {
@@ -128,6 +129,23 @@ public class JsonApiStorageService {
     @Transactional(readOnly = true)
     public <T> T getEntityById(Class<T> entityClass, Serializable id) {
         return commonDao.getById(entityClass, id);
+    }
+
+    @Transactional(readOnly = true)
+    public CountTimestamp getCountTimestamp(MetaDataType type) {
+        CountTimestamp ct = null;
+        if (type.equals(MetaDataType.MOVIE)) {
+            ct = apiDao.getCountTimestamp(type, "videodata", "episode<0");
+        } else if (type.equals(MetaDataType.SERIES)) {
+            ct = apiDao.getCountTimestamp(type, "series", "");
+        } else if (type.equals(MetaDataType.SEASON)) {
+            ct = apiDao.getCountTimestamp(type, "season", "");
+        } else if (type.equals(MetaDataType.EPISODE)) {
+            ct = apiDao.getCountTimestamp(type, "videodata", "episode>=0");
+        } else if (type.equals(MetaDataType.PERSON)) {
+            ct = apiDao.getCountTimestamp(type, "person", "");
+        }
+        return ct;
     }
 
     //<editor-fold defaultstate="collapsed" desc="VideoData Methods">

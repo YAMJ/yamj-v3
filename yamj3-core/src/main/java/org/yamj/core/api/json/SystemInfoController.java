@@ -22,29 +22,46 @@
  */
 package org.yamj.core.api.json;
 
+import org.apache.commons.lang3.BooleanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.common.model.YamjInfo;
+import org.yamj.common.type.MetaDataType;
+import org.yamj.core.api.model.CountTimestamp;
+import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
 @RequestMapping("/system/**")
 public class SystemInfoController {
 
+    @Autowired
+    private JsonApiStorageService jsonApiStorageService;
     private static final YamjInfo YAMJ_INFO = new YamjInfo(SystemInfoController.class);
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     @ResponseBody
     public String getSystemUp() {
-        StringBuilder sb = new StringBuilder("YAMJ v3 is running, uptime ");
+        StringBuilder sb = new StringBuilder("YAMJ v3 is running, uptime is ");
         sb.append(YAMJ_INFO.getUptime());
         return sb.toString();
     }
 
     @RequestMapping(value = "/info", method = RequestMethod.GET)
     @ResponseBody
-    public YamjInfo getYamjInfo() {
+    public YamjInfo getYamjInfo(@RequestParam(required = false, defaultValue = "false") String addcounts) {
+        // Clear the list of counts (in case it is out of date)
+        YAMJ_INFO.getCounts().clear();
+        
+        if (BooleanUtils.toBoolean(addcounts)) {
+            for (MetaDataType singleType : MetaDataType.values()) {
+                CountTimestamp result = jsonApiStorageService.getCountTimestamp(singleType);
+                YAMJ_INFO.addCount(result.getType(), result.getCount());
+            }
+        }
         return YAMJ_INFO;
     }
 }
