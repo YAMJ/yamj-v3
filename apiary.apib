@@ -671,14 +671,81 @@ GET /api/boxedsets
 
 --
 Index Methods
-This section is for the indexes
+This section is for the index API methods
 --
 
-None currently defined.
-GET /index/
+Get an index of videos.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The type of the index to get.<br/>
+        Can be one of 'movie', 'tv' or 'all'</td>
+    </tr>
+</table>
+
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>include</td>
+        <td>Comma delimited list of fields & values to include<br/>
+        Currently 'year' and 'genre' are supported using this format:<br/>
+        include=year-2010,genre-Action
+        </td>
+    </tr>
+    <tr>
+        <td>exclude</td>
+        <td>Comma delimited list of fields & values to exclude<br/>
+        Currently 'year' and 'genre' are supported using this format:<br/>
+        include=year-2010,genre-Action
+        </td>
+    </tr>
+    <tr>
+        <td>sortby</td>
+        <td>The field to sort by. One of the valid output fields.</td>
+    </tr>
+    <tr>
+        <td>sortdir</td>
+        <td>The direction of the sorting, can be 'asc' or 'desc'</td>
+    </tr>
+</table>
+
+GET /index/video
 < 200
-< Content-Type: text
+< Content-Type: application/json
 {}
+
+
+Get counts for various main objects in the database.
+Note: These are currently fixed and are intended for system wide statistics.
+For specific indexes, there will be an option to get the count for that index.
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The type of the count to get.<br/>
+        Can be a comma separated list consisting one or more of:<br/>
+        'all', 'movie', 'series', 'season', 'episode' or 'person'
+</td>
+    </tr>
+</table>
+
+GET /index/count
+< 200
+< Content-Type: application/json
+{}
+
 
 --
 System Information
