@@ -744,7 +744,43 @@ For specific indexes, there will be an option to get the count for that index.
 GET /index/count
 < 200
 < Content-Type: application/json
-{}
+{[
+   {
+      "type":"MOVIE",
+      "count":730,
+      "createTimestamp":1372626565000,
+      "updateTimestamp":1372785055000,
+      "lastId":877
+   },
+   {
+      "type":"SERIES",
+      "count":6,
+      "createTimestamp":1372626159000,
+      "updateTimestamp":1372785325000,
+      "lastId":6
+   },
+   {
+      "type":"SEASON",
+      "count":10,
+      "createTimestamp":1372626160000,
+      "updateTimestamp":1372785325000,
+      "lastId":10
+   },
+   {
+      "type":"EPISODE",
+      "count":147,
+      "createTimestamp":1372626160000,
+      "updateTimestamp":1372785325000,
+      "lastId":549
+   },
+   {
+      "type":"PERSON",
+      "count":9175,
+      "createTimestamp":1372785318000,
+      "updateTimestamp":1372795950000,
+      "lastId":9175
+   }
+]}
 
 
 --
@@ -782,13 +818,20 @@ GET /system/info
    "projectVersion":"3.0-SNAPSHOT",
    "moduleName":"YAMJ3 Core",
    "moduleDescription":"Core of YAMJ project",
-   "buildRevision":"ab9beeb15d",
+   "buildRevision":"a78abfc3c4",
    "processorCores":8,
-   "javaVersion":"1.7.0_21",
+   "javaVersion":"1.7.0_25",
    "osArch":"amd64",
    "osName":"Windows 7",
    "osVersion":"6.1",
-   "startUpTime":"2013-06-08 18:43:22",
-   "buildDate":"2013-06-08 18:43:06",
-   "uptime":"25m02.169s"
+   "counts":{
+      "MOVIE":730,
+      "SERIES":6,
+      "SEASON":10,
+      "EPISODE":147,
+      "PERSON":9175
+   },
+   "uptime":"21m15.046s",
+   "startUpTime":"2013-07-03 18:31:39",
+   "buildDate":"2013-07-03 18:30:51"
 }
