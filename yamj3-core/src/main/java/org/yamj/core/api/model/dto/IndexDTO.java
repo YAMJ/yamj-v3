@@ -35,6 +35,7 @@ public class IndexDTO {
     private String videoType;
     private String title;
     private Integer year;
+    private String identifier;
 
     public long getId() {
         return id;
@@ -66,6 +67,14 @@ public class IndexDTO {
 
     public void setYear(Integer year) {
         this.year = year;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     @Override

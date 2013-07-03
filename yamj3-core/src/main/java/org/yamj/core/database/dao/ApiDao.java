@@ -57,6 +57,7 @@ public class ApiDao extends HibernateDao {
             indexElement.setVideoType(convertRowElementToString(object[1]));
             indexElement.setTitle(convertRowElementToString(object[2]));
             indexElement.setYear(convertRowElementToInteger(object[3]));
+            indexElement.setIdentifier(convertRowElementToString(object[4]));
             indexElements.add(indexElement);
         }
 

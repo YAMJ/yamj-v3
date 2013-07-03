@@ -54,8 +54,8 @@ public class JsonApiStorageService {
 
     @Transactional(readOnly = true)
     public List<IndexDTO> getVideoList(OptionsIndex options) {
-        Map<String, String> includes = options.getIncludes();
-        Map<String, String> excludes = options.getExcludes();
+        Map<String, String> includes = options.splitIncludes();
+        Map<String, String> excludes = options.splitExcludes();
         StringBuilder sql = new StringBuilder();
 
         // Add the movie entries
@@ -64,6 +64,7 @@ public class JsonApiStorageService {
             sql.append(", '").append(MetaDataType.MOVIE).append("' AS video_type");
             sql.append(", vd.title");
             sql.append(", vd.publication_year");
+            sql.append(", vd.identifier");
             sql.append(" FROM videodata vd");
             // Add genre tables for include and exclude
             if (includes.containsKey("genre") || excludes.containsKey("genre")) {
@@ -73,9 +74,9 @@ public class JsonApiStorageService {
             sql.append(" WHERE vd.episode < 0");
             // Add joins for genres
             if (includes.containsKey("genre") || excludes.containsKey("genre")) {
-                sql.append("AND vd.id=vg.data_id");
-                sql.append("AND vg.genre_id=g.id");
-                sql.append("AND and g.name='");
+                sql.append(" AND vd.id=vg.data_id");
+                sql.append(" AND vg.genre_id=g.id");
+                sql.append(" AND g.name='");
                 if (includes.containsKey("genre")) {
                     sql.append(includes.get("genre"));
                 } else {
@@ -103,6 +104,7 @@ public class JsonApiStorageService {
             sql.append(", '").append(MetaDataType.SERIES).append("' AS video_type");
             sql.append(", ser.title");
             sql.append(", ser.start_year");
+            sql.append(", ser.identifier");
             sql.append(" FROM series ser ");
             sql.append(" WHERE 1"); // To make it easier to add the optional include and excludes
 
@@ -121,7 +123,7 @@ public class JsonApiStorageService {
             sql.append(options.getSortdir().toUpperCase());
         }
 
-        LOG.info("INDEX SQL: {}", sql);
+        LOG.debug("INDEX SQL: {}", sql);
 
         return apiDao.getVideoList(sql.toString(), options);
     }

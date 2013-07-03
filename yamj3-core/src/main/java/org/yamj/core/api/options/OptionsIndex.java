@@ -88,14 +88,14 @@ public class OptionsIndex extends OptionsAbstract {
     /**
      * Split the include list into a map of values
      */
-    public Map<String, String> getIncludes() {
+    public Map<String, String> splitIncludes() {
         return splitDashList(include);
     }
 
     /**
      * Split the exclude list into a map of values
      */
-    public Map<String, String> getExcludes() {
+    public Map<String, String> splitExcludes() {
         return splitDashList(exclude);
     }
 
