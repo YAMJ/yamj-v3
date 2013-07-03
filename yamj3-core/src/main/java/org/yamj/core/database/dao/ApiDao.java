@@ -31,26 +31,36 @@ import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.IndexDTO;
 import org.yamj.core.api.options.OptionsIndex;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.core.api.model.ApiWrapperList;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Service("apiDao")
 public class ApiDao extends HibernateDao {
 
-    public List<IndexDTO> getVideoList(final String sql, final OptionsIndex options) {
+    public void getVideoList(final String sql, ApiWrapperList<IndexDTO> wrapper) {
         SQLQuery query = getSession().createSQLQuery(sql.toString());
         query.setReadOnly(true);
         query.setCacheable(true);
 
-        if (options.getStart() > 0) {
-            query.setFirstResult(options.getStart());
-        }
+        // Run the query once to get the maximum returned results
+        List<Object[]> objects = query.list();
+        wrapper.setTotalCount(objects.size());
 
-        if (options.getMax() > 0) {
-            query.setMaxResults(options.getMax());
+        // If there is a start or max set, we will need to re-run the query after setting the options
+        OptionsIndex options = (OptionsIndex) wrapper.getParameters();
+        if (options.getStart() > 0 || options.getMax() > 0) {
+            if (options.getStart() > 0) {
+                query.setFirstResult(options.getStart());
+            }
+
+            if (options.getMax() > 0) {
+                query.setMaxResults(options.getMax());
+            }
+            // This will get the trimmed list
+            objects = query.list();
         }
 
         List<IndexDTO> indexElements = new ArrayList<IndexDTO>();
-        List<Object[]> objects = query.list();
         for (Object[] object : objects) {
             IndexDTO indexElement = new IndexDTO();
             indexElement.setId(convertRowElementToLong(object[0]));
@@ -61,7 +71,9 @@ public class ApiDao extends HibernateDao {
             indexElements.add(indexElement);
         }
 
-        return indexElements;
+        wrapper.setResults(indexElements);
+
+        return;
     }
 
     public CountTimestamp getCountTimestamp(MetaDataType type, String tablename, String clause) {

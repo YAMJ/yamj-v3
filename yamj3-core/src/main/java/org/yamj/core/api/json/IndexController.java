@@ -56,15 +56,15 @@ public class IndexController {
         LOG.info("INDEX: Video list - Options: {}", options.toString());
 
         ApiWrapperList<IndexDTO> wrapper = new ApiWrapperList<IndexDTO>();
-        wrapper.setResults(jsonApiStorageService.getVideoList(options));
         wrapper.setParameters(options);
+        jsonApiStorageService.getVideoList(wrapper);
         wrapper.setStatusCheck();
         return wrapper;
     }
 
     @RequestMapping(value = "/count", method = RequestMethod.GET)
     @ResponseBody
-    public List<CountTimestamp> getCount(@RequestParam(required = false, defaultValue = "") String type) {
+    public List<CountTimestamp> getCount(@RequestParam(required = false, defaultValue = "all") String type) {
         List<CountTimestamp> results = new ArrayList<CountTimestamp>();
         if (type.toLowerCase().indexOf("all") < 0) {
             for (String stringType : StringUtils.tokenizeToStringArray(type, ",", true, true)) {

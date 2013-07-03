@@ -40,6 +40,7 @@ import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.model.*;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.core.api.model.ApiWrapperList;
 
 @Service("jsonApiStorageService")
 public class JsonApiStorageService {
@@ -53,9 +54,11 @@ public class JsonApiStorageService {
     private ApiDao apiDao;
 
     @Transactional(readOnly = true)
-    public List<IndexDTO> getVideoList(OptionsIndex options) {
+    public void getVideoList(ApiWrapperList<IndexDTO> wrapper) {
+        OptionsIndex options = (OptionsIndex) wrapper.getParameters();
         Map<String, String> includes = options.splitIncludes();
         Map<String, String> excludes = options.splitExcludes();
+
         StringBuilder sql = new StringBuilder();
 
         // Add the movie entries
@@ -106,7 +109,7 @@ public class JsonApiStorageService {
             sql.append(", ser.start_year");
             sql.append(", ser.identifier");
             sql.append(" FROM series ser ");
-            sql.append(" WHERE 1"); // To make it easier to add the optional include and excludes
+            sql.append(" WHERE 1=1"); // To make it easier to add the optional include and excludes
 
             if (includes.containsKey("year")) {
                 sql.append(" AND ser.start_year=").append(includes.get("year"));
@@ -123,14 +126,9 @@ public class JsonApiStorageService {
             sql.append(options.getSortdir().toUpperCase());
         }
 
-        LOG.debug("INDEX SQL: {}", sql);
+        LOG.trace("INDEX SQL: {}", sql);
 
-        return apiDao.getVideoList(sql.toString(), options);
-    }
-
-    @Transactional(readOnly = true)
-    public <T> T getEntityById(Class<T> entityClass, Serializable id) {
-        return commonDao.getById(entityClass, id);
+        apiDao.getVideoList(sql.toString(), wrapper);
     }
 
     @Transactional(readOnly = true)
@@ -148,6 +146,11 @@ public class JsonApiStorageService {
             ct = apiDao.getCountTimestamp(type, "person", "");
         }
         return ct;
+    }
+
+    @Transactional(readOnly = true)
+    public <T> T getEntityById(Class<T> entityClass, Serializable id) {
+        return commonDao.getById(entityClass, id);
     }
 
     //<editor-fold defaultstate="collapsed" desc="VideoData Methods">
