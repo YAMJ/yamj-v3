@@ -59,6 +59,7 @@ public final class ApiWrapperList<T> extends ApiWrapperAbstract {
 
     @Override
     public void setStatusCheck() {
+        setQueryEnd();
         if (CollectionUtils.isEmpty(results)) {
             setStatus(new ApiStatus(400, "No records found"));
         } else {

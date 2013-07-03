@@ -54,8 +54,9 @@ public class ArtworkController {
     @ResponseBody
     public ApiWrapperSingle<Artwork> getArtworkById(@PathVariable String id) {
         LOG.info("Getting artwork with ID '{}'", id);
+        ApiWrapperSingle<Artwork> wrapper = new ApiWrapperSingle<Artwork>();
         Artwork artwork = jsonApiStorageService.getEntityById(Artwork.class, Long.parseLong(id));
-        ApiWrapperSingle<Artwork> wrapper = new ApiWrapperSingle<Artwork>(artwork);
+        wrapper.setResult(artwork);
         wrapper.setStatusCheck();
         return wrapper;
     }
@@ -78,6 +79,7 @@ public class ArtworkController {
 
         LOG.info("Getting artwork list with {}", p.toString());
         ApiWrapperList<Artwork> wrapper = new ApiWrapperList<Artwork>();
+        wrapper.setParameters(p);
         try {
             List<Artwork> results = jsonApiStorageService.getArtworkList(p);
             wrapper.setResults(results);
@@ -88,7 +90,6 @@ public class ArtworkController {
             wrapper.setStatus(new ApiStatus(400, "Error with query"));
             LOG.error("Exception: {}", ex.getMessage());
         }
-        wrapper.setParameters(p);
         return wrapper;
     }
 }

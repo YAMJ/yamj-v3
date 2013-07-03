@@ -57,8 +57,9 @@ public class VideoController {
     @ResponseBody
     public ApiWrapperSingle<VideoData> getVideoById(@PathVariable String id) {
         LOG.info("Getting video with ID '{}'", id);
+        ApiWrapperSingle<VideoData> wrapper = new ApiWrapperSingle<VideoData>();
         VideoData videoData = jsonApiStorageService.getEntityById(VideoData.class, Long.parseLong(id));
-        ApiWrapperSingle<VideoData> wrapper = new ApiWrapperSingle<VideoData>(videoData);
+        wrapper.setResult(videoData);
         wrapper.setStatusCheck();
         return wrapper;
     }
@@ -102,8 +103,9 @@ public class VideoController {
     @ResponseBody
     public ApiWrapperSingle<Series> getSeriesById(@PathVariable String id) {
         LOG.info("Getting series with ID '{}'", id);
+        ApiWrapperSingle<Series> wrapper = new ApiWrapperSingle<Series>();
         Series series = jsonApiStorageService.getEntityById(Series.class, Long.parseLong(id));
-        ApiWrapperSingle<Series> wrapper = new ApiWrapperSingle<Series>(series);
+        wrapper.setResult(series);
         wrapper.setStatusCheck();
         return wrapper;
     }
@@ -147,8 +149,9 @@ public class VideoController {
     @ResponseBody
     public ApiWrapperSingle<Season> getSeasonById(@PathVariable String id) {
         LOG.info("Getting season with ID '{}'", id);
+        ApiWrapperSingle<Season> wrapper = new ApiWrapperSingle<Season>();
         Season season = jsonApiStorageService.getEntityById(Season.class, Long.parseLong(id));
-        ApiWrapperSingle<Season> wrapper = new ApiWrapperSingle<Season>(season);
+        wrapper.setResult(season);
         wrapper.setStatusCheck();
         return wrapper;
     }

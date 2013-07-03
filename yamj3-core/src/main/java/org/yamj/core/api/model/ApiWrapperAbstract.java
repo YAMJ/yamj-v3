@@ -32,6 +32,7 @@ import org.yamj.common.tools.DateTimeTools;
 public abstract class ApiWrapperAbstract {
 
     private int count = 0;
+    private long queryDuration = 0L;
     private DateTime queryTime = DateTime.now();
     private ApiStatus status = new ApiStatus();
     private Object parameters = null;
@@ -52,8 +53,20 @@ public abstract class ApiWrapperAbstract {
         return parameters;
     }
 
+    public String getQueryDuration() {
+        StringBuilder dur = new StringBuilder();
+        dur.append(queryDuration);
+        dur.append("ms");
+        return dur.toString();
+    }
+
     public void setQueryTime(DateTime queryTime) {
         this.queryTime = queryTime;
+    }
+
+    public void setQueryEnd() {
+        DateTime duration = DateTime.now().minus(queryTime.getMillis());
+        this.queryDuration = duration.getMillis();
     }
 
     public void setStatus(ApiStatus status) {

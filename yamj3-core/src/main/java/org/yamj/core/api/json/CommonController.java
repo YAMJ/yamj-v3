@@ -56,6 +56,7 @@ public class CommonController {
     @ResponseBody
     public ApiWrapperSingle<Genre> getGenre(@PathVariable String name) {
         Genre genre;
+        ApiWrapperSingle<Genre> wrapper = new ApiWrapperSingle<Genre>();
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting genre with ID '{}'", name);
             genre = jsonApiStorageService.getGenre(Long.parseLong(name));
@@ -63,8 +64,7 @@ public class CommonController {
             LOG.info("Getting genre with name '{}'", name);
             genre = jsonApiStorageService.getGenre(name);
         }
-
-        ApiWrapperSingle<Genre> wrapper = new ApiWrapperSingle<Genre>(genre);
+        wrapper.setResult(genre);
         wrapper.setStatusCheck();
         return wrapper;
     }
@@ -101,6 +101,7 @@ public class CommonController {
     @ResponseBody
     public ApiWrapperSingle<Certification> getCertification(@PathVariable String name) {
         Certification certification;
+        ApiWrapperSingle<Certification> wrapper = new ApiWrapperSingle<Certification>();
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting genre with ID '{}'", name);
             certification = jsonApiStorageService.getCertification(Long.parseLong(name));
@@ -108,8 +109,7 @@ public class CommonController {
             LOG.info("Getting certification '{}'", name);
             certification = jsonApiStorageService.getCertification(name);
         }
-
-        ApiWrapperSingle<Certification> wrapper = new ApiWrapperSingle<Certification>(certification);
+        wrapper.setResult(certification);
         wrapper.setStatusCheck();
         return wrapper;
     }
@@ -147,6 +147,7 @@ public class CommonController {
     @ResponseBody
     public ApiWrapperSingle<Studio> getStudio(@PathVariable String name) {
         Studio studio;
+        ApiWrapperSingle<Studio> wrapper = new ApiWrapperSingle<Studio>();
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting studio with ID '{}'", name);
             studio = jsonApiStorageService.getStudio(Long.parseLong(name));
@@ -154,8 +155,7 @@ public class CommonController {
             LOG.info("Getting studio '{}'", name);
             studio = jsonApiStorageService.getStudio(name);
         }
-
-        ApiWrapperSingle<Studio> wrapper = new ApiWrapperSingle<Studio>(studio);
+        wrapper.setResult(studio);
         wrapper.setStatusCheck();
         return wrapper;
     }
@@ -193,6 +193,7 @@ public class CommonController {
     @ResponseBody
     public ApiWrapperSingle<BoxedSet> getBoxSet(@PathVariable String name) {
         BoxedSet boxedSet;
+        ApiWrapperSingle<BoxedSet> wrapper = new ApiWrapperSingle<BoxedSet>();
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting boxset with ID '{}'", name);
             boxedSet = jsonApiStorageService.getBoxedSet(Long.parseLong(name));
@@ -200,8 +201,7 @@ public class CommonController {
             LOG.info("Getting boxset '{}'", name);
             boxedSet = jsonApiStorageService.getBoxedSet(name);
         }
-
-        ApiWrapperSingle<BoxedSet> wrapper = new ApiWrapperSingle<BoxedSet>(boxedSet);
+        wrapper.setResult(boxedSet);
         wrapper.setStatusCheck();
         return wrapper;
     }

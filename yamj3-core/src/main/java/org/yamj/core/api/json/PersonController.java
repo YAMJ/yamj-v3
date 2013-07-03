@@ -46,8 +46,9 @@ public class PersonController {
     @ResponseBody
     public ApiWrapperSingle<Person> getPersonById(@PathVariable String id) {
         LOG.info("Getting person with ID '{}'", id);
+        ApiWrapperSingle<Person> wrapper = new ApiWrapperSingle<Person>();
         Person person= jsonApiStorageService.getEntityById(Person.class, Long.parseLong(id));
-        ApiWrapperSingle<Person> wrapper = new ApiWrapperSingle<Person>(person);
+        wrapper.setResult(person);
         wrapper.setStatusCheck();
         return wrapper;
     }
