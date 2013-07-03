@@ -34,10 +34,6 @@ public final class ApiWrapperSingle<T> extends ApiWrapperAbstract {
     public ApiWrapperSingle() {
     }
 
-    public ApiWrapperSingle(T result) {
-        setResult(result);
-    }
-
     public T getResult() {
         return result;
     }

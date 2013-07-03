@@ -38,10 +38,6 @@ public final class ApiWrapperList<T> extends ApiWrapperAbstract {
     public ApiWrapperList() {
     }
 
-    public ApiWrapperList(List<T> results) {
-        setResults(results);
-    }
-
     public List<T> getResults() {
         return results;
     }
