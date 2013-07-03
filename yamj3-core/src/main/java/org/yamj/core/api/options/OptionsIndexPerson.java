@@ -22,18 +22,15 @@
  */
 package org.yamj.core.api.options;
 
-import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * List of the options available for the indexes
  *
  * @author stuart.boston
  */
-public class OptionsIndex extends OptionsAbstract {
+public class OptionsIndexPerson extends OptionsAbstract {
 
-    private String type = "ALL";
     private String include = "";
     private String exclude = "";
     private String sortby = "";
@@ -53,20 +50,6 @@ public class OptionsIndex extends OptionsAbstract {
 
     public String getExclude() {
         return exclude;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        if (StringUtils.containsIgnoreCase(type, "MOVIE")
-                || StringUtils.containsIgnoreCase(type, "TV")
-                || StringUtils.containsIgnoreCase(type, "ALL")) {
-            this.type = type.toUpperCase();
-        } else {
-            this.type = "ALL";
-        }
     }
 
     public String getSortby() {
@@ -97,16 +80,5 @@ public class OptionsIndex extends OptionsAbstract {
      */
     public Map<String, String> splitExcludes() {
         return splitDashList(exclude);
-    }
-
-    private Map<String, String> splitDashList(String dashList) {
-        Map<String, String> values = new HashMap<String, String>();
-        for (String inc : StringUtils.split(dashList, ",")) {
-            int pos = inc.indexOf('-');
-            if (pos >= 0) {
-                values.put(inc.substring(0, pos), inc.substring(pos + 1));
-            }
-        }
-        return values;
     }
 }

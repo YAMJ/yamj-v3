@@ -33,14 +33,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.Parameters;
-import org.yamj.core.api.model.dto.IndexDTO;
-import org.yamj.core.api.options.OptionsIndex;
+import org.yamj.core.api.model.dto.IndexVideoDTO;
+import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.core.database.dao.ApiDao;
 import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.model.*;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiWrapperList;
+import org.yamj.core.api.model.dto.IndexPersonDTO;
 
 @Service("jsonApiStorageService")
 public class JsonApiStorageService {
@@ -54,8 +55,14 @@ public class JsonApiStorageService {
     private ApiDao apiDao;
 
     @Transactional(readOnly = true)
-    public void getVideoList(ApiWrapperList<IndexDTO> wrapper) {
-        OptionsIndex options = (OptionsIndex) wrapper.getParameters();
+    public <T> T getEntityById(Class<T> entityClass, Serializable id) {
+        return commonDao.getById(entityClass, id);
+    }
+
+    //<editor-fold defaultstate="collapsed" desc="Index Methods">
+    @Transactional(readOnly = true)
+    public void getVideoList(ApiWrapperList<IndexVideoDTO> wrapper) {
+        OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getParameters();
         Map<String, String> includes = options.splitIncludes();
         Map<String, String> excludes = options.splitExcludes();
 
@@ -149,9 +156,24 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = true)
-    public <T> T getEntityById(Class<T> entityClass, Serializable id) {
-        return commonDao.getById(entityClass, id);
+    public void getPersonList(ApiWrapperList<IndexPersonDTO> wrapper) {
+        StringBuilder sql = new StringBuilder();
+
+        sql.append("SELECT p.id,");
+        sql.append(" p.name,");
+        sql.append(" p.biography, ");
+        sql.append(" p.birth_day, ");
+        sql.append(" p.birth_place, ");
+        sql.append(" p.birth_name, ");
+        sql.append(" p.death_day ");
+        sql.append(" FROM person p");
+        sql.append(" WHERE 1=1");
+
+        LOG.trace("INDEX SQL: {}", sql);
+        apiDao.getPersonList(sql.toString(), wrapper);
+
     }
+    //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="VideoData Methods">
     @Transactional(readOnly = true)

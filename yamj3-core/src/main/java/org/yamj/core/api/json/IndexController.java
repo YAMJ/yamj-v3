@@ -36,9 +36,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.model.ApiWrapperList;
 import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.dto.IndexDTO;
-import org.yamj.core.api.options.OptionsIndex;
+import org.yamj.core.api.model.dto.IndexVideoDTO;
+import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.core.api.model.dto.IndexPersonDTO;
+import org.yamj.core.api.options.OptionsIndexPerson;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
@@ -51,13 +53,26 @@ public class IndexController {
 
     @RequestMapping(value = "/video", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<IndexDTO> getVideoList(
-            @ModelAttribute("options") OptionsIndex options) {
+    public ApiWrapperList<IndexVideoDTO> getVideoList(
+            @ModelAttribute("options") OptionsIndexVideo options) {
         LOG.info("INDEX: Video list - Options: {}", options.toString());
 
-        ApiWrapperList<IndexDTO> wrapper = new ApiWrapperList<IndexDTO>();
+        ApiWrapperList<IndexVideoDTO> wrapper = new ApiWrapperList<IndexVideoDTO>();
         wrapper.setParameters(options);
         jsonApiStorageService.getVideoList(wrapper);
+        wrapper.setStatusCheck();
+        return wrapper;
+    }
+
+    @RequestMapping(value = "/person", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperList<IndexPersonDTO> getPersonList(
+            @ModelAttribute("options") OptionsIndexPerson options) {
+        LOG.info("INDEX: Person list - Options: {}", options.toString());
+
+        ApiWrapperList<IndexPersonDTO> wrapper = new ApiWrapperList<IndexPersonDTO>();
+        wrapper.setParameters(options);
+        jsonApiStorageService.getPersonList(wrapper);
         wrapper.setStatusCheck();
         return wrapper;
     }

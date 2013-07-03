@@ -29,7 +29,7 @@ import org.yamj.common.tools.DateTimeTools;
  *
  * @author Stuart
  */
-public abstract class ApiWrapperAbstract {
+public abstract class ApiWrapperAbstract implements IApiWrapper {
 
     private int count = 0;
     private int totalCount = 0;
@@ -38,22 +38,27 @@ public abstract class ApiWrapperAbstract {
     private ApiStatus status = new ApiStatus();
     private Object parameters = null;
 
+    @Override
     public int getCount() {
         return count;
     }
 
+    @Override
     public String getQueryTime() {
         return DateTimeTools.convertDateToString(queryTime, DateTimeTools.BUILD_FORMAT);
     }
 
+    @Override
     public ApiStatus getStatus() {
         return status;
     }
 
+    @Override
     public Object getParameters() {
         return parameters;
     }
 
+    @Override
     public String getQueryDuration() {
         StringBuilder dur = new StringBuilder();
         dur.append(queryDuration);
@@ -61,19 +66,23 @@ public abstract class ApiWrapperAbstract {
         return dur.toString();
     }
 
+    @Override
     public int getTotalCount() {
         return totalCount;
     }
 
+    @Override
     public void setQueryTime(DateTime queryTime) {
         this.queryTime = queryTime;
     }
 
+    @Override
     public void setQueryEnd() {
         DateTime duration = DateTime.now().minus(queryTime.getMillis());
         this.queryDuration = duration.getMillis();
     }
 
+    @Override
     public void setStatus(ApiStatus status) {
         this.status = status;
     }
@@ -81,16 +90,20 @@ public abstract class ApiWrapperAbstract {
     /**
      * Shorthand method to create a default "OK" status or "FAIL" status
      */
+    @Override
     public abstract void setStatusCheck();
 
-    protected void setCount(int count) {
+    @Override
+    public void setCount(int count) {
         this.count = count;
     }
 
+    @Override
     public void setParameters(Object parameters) {
         this.parameters = parameters;
     }
 
+    @Override
     public void setTotalCount(int totalCount) {
         this.totalCount = totalCount;
     }

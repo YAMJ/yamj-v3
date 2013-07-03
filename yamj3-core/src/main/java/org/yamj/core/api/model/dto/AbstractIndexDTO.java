@@ -29,13 +29,9 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  *
  * @author stuart.boston
  */
-public class IndexDTO {
+public class AbstractIndexDTO {
 
     private Long id;
-    private String videoType;
-    private String title;
-    private Integer year;
-    private String identifier;
 
     public long getId() {
         return id;
@@ -43,38 +39,6 @@ public class IndexDTO {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getVideoType() {
-        return videoType;
-    }
-
-    public void setVideoType(String videoType) {
-        this.videoType = videoType;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
     }
 
     @Override

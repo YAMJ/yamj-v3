@@ -22,6 +22,9 @@
  */
 package org.yamj.core.api.options;
 
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -30,23 +33,27 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  *
  * @author stuart.boston
  */
-public abstract class OptionsAbstract {
+public abstract class OptionsAbstract implements IOptions {
 
     private Integer start = -1;
     private Integer max = -1;
 
+    @Override
     public void setStart(Integer start) {
         this.start = start;
     }
 
+    @Override
     public void setMax(Integer max) {
         this.max = max;
     }
 
+    @Override
     public Integer getStart() {
         return start;
     }
 
+    @Override
     public Integer getMax() {
         return max;
     }
@@ -54,5 +61,16 @@ public abstract class OptionsAbstract {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    }
+
+    protected Map<String, String> splitDashList(String dashList) {
+        Map<String, String> values = new HashMap<String, String>();
+        for (String inc : StringUtils.split(dashList, ",")) {
+            int pos = inc.indexOf('-');
+            if (pos >= 0) {
+                values.put(inc.substring(0, pos), inc.substring(pos + 1));
+            }
+        }
+        return values;
     }
 }
