@@ -47,11 +47,22 @@ public class ArtworkGenerated extends AbstractAuditable implements Serializable 
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "profile_id")
     private ArtworkProfile artworkProfile;
-    
+
     @Column(name = "cache_filename", nullable = false, length = 200)
     private String cacheFilename;
 
+    @Column(name = "cache_dir", nullable = false, length = 50)
+    private String cacheDirectory;
+
     // GETTER and SETTER
+
+    public String getCacheDirectory() {
+        return cacheDirectory;
+    }
+
+    public void setCacheDirectory(String cacheDirectory) {
+        this.cacheDirectory = cacheDirectory;
+    }
 
     public String getCacheFilename() {
         return cacheFilename;

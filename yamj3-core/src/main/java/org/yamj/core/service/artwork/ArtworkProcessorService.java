@@ -24,6 +24,7 @@ package org.yamj.core.service.artwork;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.net.URL;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -41,24 +42,24 @@ import org.yamj.core.database.model.type.ImageFormat;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
+import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.tools.image.GraphicTools;
 
 @Service("artworkProcessorService")
 public class ArtworkProcessorService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkProcessorService.class);
-
     @Autowired
     private ArtworkStorageService artworkStorageService;
-    @Autowired 
+    @Autowired
     private FileStorageService fileStorageService;
-    
+
     public void processArtwork(QueueDTO queueElement) {
         if (queueElement == null) {
-            // nothing to
+            // nothing to do
             return;
         }
-        
+
         ArtworkLocated located = artworkStorageService.getRequiredArtworkLocated(queueElement.getId());
         LOG.debug("Process located artwork: {}", located);
 
@@ -70,7 +71,7 @@ public class ArtworkProcessorService {
             artworkStorageService.updateArtworkLocated(located);
             return;
         }
-        
+
         // store original in file cache
         String cacheFilename = buildCacheFilename(located);
         LOG.debug("Cache artwork with file name: {}", cacheFilename);
@@ -84,7 +85,6 @@ public class ArtworkProcessorService {
             }
         } catch (Exception error) {
             LOG.warn("Storage error", error);
-            stored = Boolean.FALSE;
             return;
         }
 
@@ -95,11 +95,11 @@ public class ArtworkProcessorService {
             artworkStorageService.updateArtworkLocated(located);
             return;
         }
-        
+
         // set values in located artwork
         located.setCacheFilename(cacheFilename);
         located.setStatus(StatusType.DONE);
-        
+
         // after that: try preProcessing of images
         List<ArtworkProfile> profiles = artworkStorageService.getPreProcessArtworkProfiles(located);
         for (ArtworkProfile profile : profiles) {
@@ -109,10 +109,10 @@ public class ArtworkProcessorService {
             } catch (ImageReadException error) {
                 LOG.warn("Original image is invalid: {}", located);
                 LOG.trace("Invalid image error", error);
-                
+
                 // mark located artwork as invalid
                 located.setStatus(StatusType.INVALID);
-                
+
                 // no further processing for that located image
                 break;
             } catch (Exception error) {
@@ -120,21 +120,21 @@ public class ArtworkProcessorService {
                 LOG.warn("Image generation error", error);
             }
         }
-        
+
         // update located artwork in database
         artworkStorageService.updateArtworkLocated(located);
-}
+    }
 
     private void generateImage(ArtworkLocated located, ArtworkProfile profile) throws Exception {
         LOG.debug("Generate image for {} with profile {}", located, profile.getProfileName());
         BufferedImage imageGraphic = GraphicTools.loadJPEGImage(this.fileStorageService.getFile(StorageType.ARTWORK, located.getCacheFilename()));
-        
+
         // set dimension of original image if not done before
         if (located.getWidth() <= 0 || located.getHeight() <= 0) {
             located.setWidth(imageGraphic.getWidth());
             located.setHeight(imageGraphic.getHeight());
         }
-        
+
         // draw the image
         BufferedImage image = drawImage(imageGraphic, profile);
 
@@ -147,16 +147,21 @@ public class ArtworkProcessorService {
             generated.setArtworkLocated(located);
             generated.setArtworkProfile(profile);
             generated.setCacheFilename(cacheFilename);
+            String cacheDirectory = FileTools.createDirHash(cacheFilename);
+            generated.setCacheDirectory(StringUtils.removeEnd(cacheDirectory, File.separator + cacheFilename));
             artworkStorageService.storeArtworkGenerated(generated);
-        } catch (Exception error) {
+        } catch (Exception ex) {
             // delete generated file storage element also
+            LOG.trace("Failed to generate file storage for {}, error: {}", cacheFilename, ex.getMessage());
             try {
                 fileStorageService.delete(StorageType.ARTWORK, cacheFilename);
-            } catch (Exception ignore) {}
-            throw error;
+            } catch (Exception ex2) {
+                LOG.trace("Unable to delete file after exception: ", ex2.getMessage());
+            }
+            throw ex;
         }
     }
-   
+
     private BufferedImage drawImage(BufferedImage imageGraphic, ArtworkProfile profile) {
         BufferedImage bi = imageGraphic;
 
@@ -164,7 +169,7 @@ public class ArtworkProcessorService {
         int origHeight = imageGraphic.getHeight();
         float ratio = profile.getRatio();
         float rcqFactor = profile.getRounderCornerQuality();
-        
+
         boolean skipResize = false;
         if (origWidth < profile.getWidth() && origHeight < profile.getWidth()) {
             //Perhaps better: if (origWidth == imageWidth && origHeight == imageHeight && !addHDLogo && !addLanguage) {
@@ -184,7 +189,7 @@ public class ArtworkProcessorService {
         } else if (!skipResize) {
             bi = GraphicTools.scaleToSize((int) (profile.getWidth() * rcqFactor), (int) (profile.getHeight() * rcqFactor), bi);
         }
-        
+
         // return image
         return bi;
     }
@@ -242,58 +247,58 @@ public class ArtworkProcessorService {
 
         artworkStorageService.errorArtworkLocated(queueElement.getId());
     }
-    
+
     private boolean checkArtworkQuality(ArtworkLocated located) {
         if (StringUtils.isNotBlank(located.getUrl())) {
-            
+
             if (located.getWidth() <= 0 || located.getHeight() <= 0) {
                 // retrieve dimension
                 try {
                     // get dimension
                     Dimension dimension = GraphicTools.getDimension(located.getUrl());
-                    if (dimension.getHeight() <= 0 || dimension.getWidth() <=0) {
+                    if (dimension.getHeight() <= 0 || dimension.getWidth() <= 0) {
                         LOG.warn("No valid image dimension determined: {}", located);
                         return Boolean.FALSE;
                     }
-    
+
                     // set values for later usage
-                    located.setWidth((int)dimension.getWidth());
-                    located.setHeight((int)dimension.getHeight());
+                    located.setWidth((int) dimension.getWidth());
+                    located.setHeight((int) dimension.getHeight());
                 } catch (Exception error) {
                     LOG.warn("Could not determine image dimension cause invalid image: {}", located);
                     LOG.trace("Invalid image error", error);
                     return Boolean.FALSE;
                 }
             }
-            
+
 
             // TODO: check quality of artwork?
-            
-            /*
-            float urlAspect = (float) urlWidth / (float) urlHeight;
-            if (urlAspect > 1.0) {
-                LOG.info("{} rejected: URL is wrong aspect (portrait/landscape)", located);
-                return Boolean.FALSE;
-            }
 
-            // Adjust artwork width / height by the ValidateMatch figure
-            int newArtworkWidth = artworkWidth * (artworkValidateMatch / 100);
-            int newArtworkHeight = artworkHeight * (artworkValidateMatch / 100);
-    
-            if (urlWidth < newArtworkWidth) {
-                logger.debug(LOG_MESSAGE + artworkImage + " rejected: URL width (" + urlWidth + ") is smaller than artwork width (" + newArtworkWidth + ")");
-                return Boolean.FALSE;
-            }
-    
-            if (urlHeight < newArtworkHeight) {
-                logger.debug(LOG_MESSAGE + artworkImage + " rejected: URL height (" + urlHeight + ") is smaller than artwork height (" + newArtworkHeight + ")");
-                return Boolean.FALSE;
-            }
-            */
+            /*
+             float urlAspect = (float) urlWidth / (float) urlHeight;
+             if (urlAspect > 1.0) {
+             LOG.info("{} rejected: URL is wrong aspect (portrait/landscape)", located);
+             return Boolean.FALSE;
+             }
+
+             // Adjust artwork width / height by the ValidateMatch figure
+             int newArtworkWidth = artworkWidth * (artworkValidateMatch / 100);
+             int newArtworkHeight = artworkHeight * (artworkValidateMatch / 100);
+
+             if (urlWidth < newArtworkWidth) {
+             logger.debug(LOG_MESSAGE + artworkImage + " rejected: URL width (" + urlWidth + ") is smaller than artwork width (" + newArtworkWidth + ")");
+             return Boolean.FALSE;
+             }
+
+             if (urlHeight < newArtworkHeight) {
+             logger.debug(LOG_MESSAGE + artworkImage + " rejected: URL height (" + urlHeight + ") is smaller than artwork height (" + newArtworkHeight + ")");
+             return Boolean.FALSE;
+             }
+             */
         } else {
             // TODO: stage file needs no validation??
         }
-        
+
         return Boolean.TRUE;
     }
 }

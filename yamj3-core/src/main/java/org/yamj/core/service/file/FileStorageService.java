@@ -95,13 +95,13 @@ public class FileStorageService {
                 }
             }
         }
-        
+
         return Boolean.TRUE;
     }
 
     public boolean store(StorageType type, String fileName, StageFile stageFile) throws IOException {
         LOG.debug("Store file {}; source file: {}", fileName, stageFile.getFullPath());
-        
+
         File src = new File(stageFile.getFullPath());
         File dst = getFile(type, fileName);
         return FileTools.copyFile(src, dst);
@@ -161,15 +161,17 @@ public class FileStorageService {
     }
 
     private String getStorageName(StorageType type, String fileName) {
+        String hashFilename;
         if (StorageType.ARTWORK == type) {
-            String hashFilename = FilenameUtils.concat(this.storagePathArtwork, FileTools.createDirHash(fileName));
+            hashFilename = FilenameUtils.concat(this.storagePathArtwork, FileTools.createDirHash(fileName));
             FileTools.makeDirectories(hashFilename);
-            return hashFilename;
         } else if (StorageType.MEDIAINFO == type) {
-            String hashFilename = FilenameUtils.concat(this.storagePathMediaInfo, FileTools.createDirHash(fileName));
+            hashFilename = FilenameUtils.concat(this.storagePathMediaInfo, FileTools.createDirHash(fileName));
             FileTools.makeDirectories(hashFilename);
-            return hashFilename;
+        } else {
+            throw new IllegalArgumentException("Unknown storage type " + type);
         }
-        throw new IllegalArgumentException("Unknown storage type " + type);
+        LOG.info("*** Hash Filename: {}", hashFilename);
+        return hashFilename;
     }
 }
