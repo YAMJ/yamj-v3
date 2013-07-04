@@ -171,7 +171,6 @@ public class FileStorageService {
         } else {
             throw new IllegalArgumentException("Unknown storage type " + type);
         }
-        LOG.info("*** Hash Filename: {}", hashFilename);
         return hashFilename;
     }
 }
