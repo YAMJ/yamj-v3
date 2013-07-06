@@ -23,8 +23,8 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -69,7 +69,7 @@ public class Artwork extends AbstractAuditable implements Serializable {
     private StatusType status;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "artwork")
-    private List<ArtworkLocated> artworkLocated = new ArrayList<ArtworkLocated>(0);
+    private Set<ArtworkLocated> artworkLocated = new HashSet<ArtworkLocated>(0);
 
     // GETTER and SETTER
 
@@ -105,11 +105,11 @@ public class Artwork extends AbstractAuditable implements Serializable {
         this.series = series;
     }
 
-    public List<ArtworkLocated> getArtworkLocated() {
+    public Set<ArtworkLocated> getArtworkLocated() {
         return artworkLocated;
     }
 
-    public void setArtworkLocated(List<ArtworkLocated> artworkLocated) {
+    public void setArtworkLocated(Set<ArtworkLocated> artworkLocated) {
         this.artworkLocated = artworkLocated;
     }
 
@@ -122,7 +122,7 @@ public class Artwork extends AbstractAuditable implements Serializable {
     }
 
     // TRANSIENT METHODS
-    
+
     public IMetadata getMetadata() {
         if (getVideoData() != null) {
             return getVideoData();
@@ -133,12 +133,12 @@ public class Artwork extends AbstractAuditable implements Serializable {
         if (getSeries() != null) {
             return getSeries();
         }
-        
+
         return null;
     }
 
     // EQUALITY CHECKS
-    
+
     @Override
     public int hashCode() {
         final int prime = 7;

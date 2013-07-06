@@ -30,8 +30,8 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.ForeignKey;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -85,10 +85,10 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     @Column(name = "priority", nullable = false)
     private int priority = -1;
-    
+
     @Column(name = "width", nullable = false)
     private int width = -1;
-    
+
     @Column(name = "height", nullable = false)
     private int height = -1;
 
@@ -100,9 +100,9 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     @Column(name = "cache_filename",length = 200)
     private String cacheFilename;
-    
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "artworkLocated")
-    private List<ArtworkGenerated> generatedArtworks = new ArrayList<ArtworkGenerated>(0);
+    private Set<ArtworkGenerated> generatedArtworks = new HashSet<ArtworkGenerated>(0);
 
     // GETTER and SETTER
 
@@ -121,7 +121,7 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     public void setStageFile(StageFile stageFile) {
         this.stageFile = stageFile;
     }
-    
+
     public String getSource() {
         return source;
     }
@@ -185,7 +185,7 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     public void setRating(int rating) {
         this.rating = rating;
     }
-    
+
     public String getCacheFilename() {
         return cacheFilename;
     }
@@ -194,16 +194,16 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
         this.cacheFilename = cacheFilename;
     }
 
-    public List<ArtworkGenerated> getGeneratedArtworks() {
+    public Set<ArtworkGenerated> getGeneratedArtworks() {
         return generatedArtworks;
     }
 
-    public void setGeneratedArtworks(List<ArtworkGenerated> generatedArtworks) {
+    public void setGeneratedArtworks(Set<ArtworkGenerated> generatedArtworks) {
         this.generatedArtworks = generatedArtworks;
     }
 
     // EQUALITY CHECKS
-    
+
     @Override
     public int hashCode() {
         final int prime = 7;
