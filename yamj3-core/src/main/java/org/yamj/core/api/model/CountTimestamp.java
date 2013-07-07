@@ -22,6 +22,7 @@
  */
 package org.yamj.core.api.model;
 
+import java.math.BigInteger;
 import java.util.Date;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -40,12 +41,19 @@ public class CountTimestamp {
     private Date updateTimestamp = new Date(0);
     private long lastId = 0;
 
+    public CountTimestamp() {
+    }
+
     public CountTimestamp(MetaDataType type) {
         this.type = type;
     }
 
     public MetaDataType getType() {
         return type;
+    }
+
+    public void setTypeString(String type) {
+        this.type = MetaDataType.fromString(type);
     }
 
     public void setType(MetaDataType type) {
@@ -58,6 +66,10 @@ public class CountTimestamp {
 
     public void setCount(long count) {
         this.count = count;
+    }
+
+    public void setCountBI(BigInteger count) {
+        this.count = count.longValue();
     }
 
     public Date getCreateTimestamp() {
@@ -82,6 +94,10 @@ public class CountTimestamp {
 
     public void setLastId(long lastId) {
         this.lastId = lastId;
+    }
+
+    public void setLastIdBI(BigInteger lastId) {
+        this.lastId = lastId.longValue();
     }
 
     @Override
