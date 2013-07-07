@@ -22,8 +22,8 @@
  */
 package org.yamj.core.api.model;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 
 /**
@@ -33,16 +33,16 @@ import org.apache.commons.collections.CollectionUtils;
  */
 public final class ApiWrapperList<T> extends ApiWrapperAbstract {
 
-    private List<T> results = Collections.emptyList();
+    private Collection<T> results = Collections.emptyList();
 
     public ApiWrapperList() {
     }
 
-    public List<T> getResults() {
+    public Collection<T> getResults() {
         return results;
     }
 
-    public void setResults(List<T> results) {
+    public void setResults(Collection<T> results) {
         this.results = results;
 
         // Add the list's size
