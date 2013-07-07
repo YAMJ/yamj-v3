@@ -74,7 +74,6 @@ public class JsonApiStorageService {
             sql.append(", '").append(MetaDataType.MOVIE).append("' AS video_type");
             sql.append(", vd.title");
             sql.append(", vd.publication_year");
-            sql.append(", vd.identifier");
             sql.append(" FROM videodata vd");
             // Add genre tables for include and exclude
             if (includes.containsKey("genre") || excludes.containsKey("genre")) {
@@ -114,7 +113,6 @@ public class JsonApiStorageService {
             sql.append(", '").append(MetaDataType.SERIES).append("' AS video_type");
             sql.append(", ser.title");
             sql.append(", ser.start_year");
-            sql.append(", ser.identifier");
             sql.append(" FROM series ser ");
             sql.append(" WHERE 1=1"); // To make it easier to add the optional include and excludes
 
