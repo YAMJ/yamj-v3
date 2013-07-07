@@ -22,7 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import javax.persistence.*;
 import org.yamj.core.hibernate.Auditable;
@@ -44,9 +43,6 @@ public abstract class AbstractAuditable implements Auditable, Identifiable {
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "update_timestamp")
     private Date updateTimestamp;
-    @JsonIgnore
-    @Transient
-    private String jsonCallback;
 
     @Override
     public long getId() {
