@@ -22,10 +22,10 @@
  */
 package org.yamj.core.api.model;
 
-import java.math.BigInteger;
 import java.util.Date;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.yamj.common.tools.DateTimeTools;
 import org.yamj.common.type.MetaDataType;
 
 /**
@@ -36,10 +36,12 @@ import org.yamj.common.type.MetaDataType;
 public class CountTimestamp {
 
     private MetaDataType type;
-    private long count = 0;
+    private long count = 0L;
     private Date createTimestamp = new Date(0);
+    private String createTimestampString = "";
     private Date updateTimestamp = new Date(0);
-    private long lastId = 0;
+    private String updateTimestampString = "";
+    private long lastId = 0L;
 
     public CountTimestamp() {
     }
@@ -68,24 +70,30 @@ public class CountTimestamp {
         this.count = count;
     }
 
-    public void setCountBI(BigInteger count) {
-        this.count = count.longValue();
-    }
-
     public Date getCreateTimestamp() {
         return createTimestamp;
     }
 
+    public String getCreateTimestampString() {
+        return createTimestampString;
+    }
+
     public void setCreateTimestamp(Date createTimestamp) {
         this.createTimestamp = createTimestamp;
+        this.createTimestampString = DateTimeTools.convertDateToString(createTimestamp, DateTimeTools.BUILD_FORMAT);
     }
 
     public Date getUpdateTimestamp() {
         return updateTimestamp;
     }
 
+    public String getUpdateTimestampString() {
+        return updateTimestampString;
+    }
+
     public void setUpdateTimestamp(Date updateTimestamp) {
         this.updateTimestamp = updateTimestamp;
+        this.updateTimestampString = DateTimeTools.convertDateToString(updateTimestamp, DateTimeTools.BUILD_FORMAT);
     }
 
     public long getLastId() {
@@ -94,10 +102,6 @@ public class CountTimestamp {
 
     public void setLastId(long lastId) {
         this.lastId = lastId;
-    }
-
-    public void setLastIdBI(BigInteger lastId) {
-        this.lastId = lastId.longValue();
     }
 
     @Override
