@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,6 @@ import org.yamj.common.type.MetaDataType;
 public class MetadataStorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MetadataStorageService.class);
-
     @Autowired
     private CommonDao commonDao;
     @Autowired
@@ -106,7 +106,7 @@ public class MetadataStorageService {
         sb.append("from VideoData vd ");
         sb.append("left outer join fetch vd.genres ");
         sb.append("left outer join fetch vd.credits c ");
-        sb.append("where vd.id = :id" );
+        sb.append("where vd.id = :id");
 
         @SuppressWarnings("unchecked")
         List<VideoData> objects = this.commonDao.findById(sb, id);
@@ -120,7 +120,7 @@ public class MetadataStorageService {
         sb.append("join fetch ser.seasons sea ");
         sb.append("join fetch sea.videoDatas vd ");
         sb.append("left outer join fetch vd.credits c ");
-        sb.append("where ser.id = :id" );
+        sb.append("where ser.id = :id");
 
         @SuppressWarnings("unchecked")
         List<Series> objects = this.commonDao.findById(sb, id);
@@ -242,17 +242,21 @@ public class MetadataStorageService {
                 LOG.debug("Found '{}' in cast table", person.getName());
             }
 
-            if (castCrew == null) {
-                // create new association between person and video
-                castCrew = new CastCrew();
-                castCrew.setPerson(person);
-                castCrew.setJob(dto.getJobType(), dto.getRole());
-                castCrew.setVideoData(videoData);
-                videoData.addCredit(castCrew);
-                metadataDao.saveEntity(castCrew);
-            } else if (castCrew.setJob(castCrew.getJobType(), dto.getRole())) {
-                // updated role
-                metadataDao.updateEntity(castCrew);
+            try {
+                if (castCrew == null) {
+                    // create new association between person and video
+                    castCrew = new CastCrew();
+                    castCrew.setPerson(person);
+                    castCrew.setJob(dto.getJobType(), dto.getRole());
+                    castCrew.setVideoData(videoData);
+                    videoData.addCredit(castCrew);
+                    metadataDao.saveEntity(castCrew);
+                } else if (castCrew.setJob(castCrew.getJobType(), dto.getRole())) {
+                    // updated role
+                    metadataDao.updateEntity(castCrew);
+                }
+            } catch (ConstraintViolationException ex) {
+                LOG.warn("Failed to save/update record for person {}-{}, job '{}', error: {}", person.getId(), person.getName(), dto.getJobType(), ex.getMessage());
             }
         }
     }
