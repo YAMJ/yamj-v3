@@ -22,23 +22,32 @@
  */
 package org.yamj.core.api.model.dto;
 
+import java.util.HashSet;
+import java.util.Set;
+import org.yamj.common.type.MetaDataType;
+
 /**
  *
  * @author stuart.boston
  */
 public class IndexVideoDTO extends AbstractIndexDTO {
 
-    private String videoType;
+    private MetaDataType videoType;
     private String title;
-    private Integer year;
-    private String identifier;
+    private Integer videoYear;
+    private Set<IndexGenreDTO> genres = new HashSet<IndexGenreDTO>();
+    private Set<IndexArtworkDTO> artwork = new HashSet<IndexArtworkDTO>();
 
-    public String getVideoType() {
+    public MetaDataType getVideoType() {
         return videoType;
     }
 
-    public void setVideoType(String videoType) {
+    public void setVideoType(MetaDataType videoType) {
         this.videoType = videoType;
+    }
+
+    public void setVideoTypeString(String videoType) {
+        this.videoType = MetaDataType.fromString(videoType);
     }
 
     public String getTitle() {
@@ -49,19 +58,27 @@ public class IndexVideoDTO extends AbstractIndexDTO {
         this.title = title;
     }
 
-    public Integer getYear() {
-        return year;
+    public Integer getVideoYear() {
+        return videoYear;
     }
 
-    public void setYear(Integer year) {
-        this.year = year;
+    public void setVideoYear(Integer videoYear) {
+        this.videoYear = videoYear;
     }
 
-    public String getIdentifier() {
-        return identifier;
+    public Set<IndexArtworkDTO> getArtwork() {
+        return artwork;
     }
 
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
+    public void setArtwork(Set<IndexArtworkDTO> artwork) {
+        this.artwork = artwork;
+    }
+
+    public Set<IndexGenreDTO> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(Set<IndexGenreDTO> genres) {
+        this.genres = genres;
     }
 }
