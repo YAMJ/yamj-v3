@@ -22,7 +22,9 @@
  */
 package org.yamj.core.api.json;
 
+import java.util.List;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.common.model.YamjInfo;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.CountTimestamp;
+import org.yamj.core.database.model.Configuration;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
@@ -39,7 +42,7 @@ import org.yamj.core.database.service.JsonApiStorageService;
 public class SystemInfoController {
 
     @Autowired
-    private JsonApiStorageService jsonApiStorageService;
+    private JsonApiStorageService jsonApi;
     private static final YamjInfo YAMJ_INFO = new YamjInfo(SystemInfoController.class);
 
     @RequestMapping(value = "", method = RequestMethod.GET)
@@ -55,13 +58,19 @@ public class SystemInfoController {
     public YamjInfo getYamjInfo(@RequestParam(required = false, defaultValue = "false") String addcounts) {
         // Clear the list of counts (in case it is out of date)
         YAMJ_INFO.getCounts().clear();
-        
+
         if (BooleanUtils.toBoolean(addcounts)) {
             for (MetaDataType singleType : MetaDataType.values()) {
-                CountTimestamp result = jsonApiStorageService.getCountTimestamp(singleType);
+                CountTimestamp result = jsonApi.getCountTimestamp(singleType);
                 YAMJ_INFO.addCount(result.getType(), result.getCount());
             }
         }
         return YAMJ_INFO;
+    }
+
+    @RequestMapping(value = "/config", method = RequestMethod.GET)
+    @ResponseBody
+    public List<Configuration> getConfiguration(@RequestParam(required = false, defaultValue = "") String property) {
+        return jsonApi.getConfiguration(property);
     }
 }

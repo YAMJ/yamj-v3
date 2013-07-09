@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.BasicType;
@@ -49,6 +50,7 @@ import org.yamj.core.api.model.dto.IndexArtworkDTO;
 import org.yamj.core.api.model.dto.IndexPersonDTO;
 import org.yamj.core.api.options.IOptions;
 import org.yamj.core.api.options.OptionsIndexVideo;
+import org.yamj.core.database.model.Configuration;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Service("apiDao")
@@ -285,6 +287,24 @@ public class ApiDao extends HibernateDao {
 
         List<IndexPersonDTO> results = executeQueryWithTransform(IndexPersonDTO.class, sql.toString(), wrapper, scalars);
         wrapper.setResults(results);
+    }
+
+    public List<Configuration> getConfiguration(String property) {
+        if (StringUtils.isBlank(property)) {
+            LOG.info("Getting all configuration entries");
+        } else {
+            LOG.info("Getting configuration for {}", property);
+        }
+
+        StringBuilder sbSQL = new StringBuilder("FROM org.yamj.core.database.model.Configuration");
+        if (StringUtils.isNotBlank(property)) {
+            sbSQL.append(" WHERE config_key=").append(property);
+        }
+
+        Query q = getSession().createQuery(sbSQL.toString());
+        List<Configuration> queryResults = q.list();
+
+        return queryResults;
     }
 
     /**

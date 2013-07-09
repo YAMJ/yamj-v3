@@ -56,6 +56,11 @@ public class JsonApiStorageService {
         return commonDao.getById(entityClass, id);
     }
 
+    @Transactional(readOnly = true)
+    public List<Configuration> getConfiguration(String property) {
+        return apiDao.getConfiguration(property);
+    }
+
     //<editor-fold defaultstate="collapsed" desc="Index Methods">
     @Transactional(readOnly = true)
     public void getVideoList(ApiWrapperList<IndexVideoDTO> wrapper) {
