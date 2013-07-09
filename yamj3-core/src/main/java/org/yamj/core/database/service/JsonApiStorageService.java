@@ -24,8 +24,6 @@ package org.yamj.core.database.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.Parameters;
 import org.yamj.core.api.model.dto.IndexVideoDTO;
-import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.core.database.dao.ApiDao;
 import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
@@ -62,78 +59,7 @@ public class JsonApiStorageService {
     //<editor-fold defaultstate="collapsed" desc="Index Methods">
     @Transactional(readOnly = true)
     public void getVideoList(ApiWrapperList<IndexVideoDTO> wrapper) {
-        OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getParameters();
-        Map<String, String> includes = options.splitIncludes();
-        Map<String, String> excludes = options.splitExcludes();
-
-        StringBuilder sql = new StringBuilder();
-
-        // Add the movie entries
-        if (options.getType().equals("ALL") || options.getType().equals("MOVIE")) {
-            sql.append("SELECT vd.id");
-            sql.append(", '").append(MetaDataType.MOVIE).append("' AS video_type");
-            sql.append(", vd.title");
-            sql.append(", vd.publication_year");
-            sql.append(" FROM videodata vd");
-            // Add genre tables for include and exclude
-            if (includes.containsKey("genre") || excludes.containsKey("genre")) {
-                sql.append(", videodata_genres vg, genre g");
-            }
-
-            sql.append(" WHERE vd.episode < 0");
-            // Add joins for genres
-            if (includes.containsKey("genre") || excludes.containsKey("genre")) {
-                sql.append(" AND vd.id=vg.data_id");
-                sql.append(" AND vg.genre_id=g.id");
-                sql.append(" AND g.name='");
-                if (includes.containsKey("genre")) {
-                    sql.append(includes.get("genre"));
-                } else {
-                    sql.append(excludes.get("genre"));
-                }
-                sql.append("'");
-            }
-
-            if (includes.containsKey("year")) {
-                sql.append(" AND vd.publication_year=").append(includes.get("year"));
-            }
-
-            if (excludes.containsKey("year")) {
-                sql.append(" AND vd.publication_year!=").append(includes.get("year"));
-            }
-        }
-
-        if (options.getType().equals("ALL")) {
-            sql.append(" UNION ");
-        }
-
-        // Add the TV entires
-        if (options.getType().equals("ALL") || options.getType().equals("TV")) {
-            sql.append("SELECT ser.id");
-            sql.append(", '").append(MetaDataType.SERIES).append("' AS video_type");
-            sql.append(", ser.title");
-            sql.append(", ser.start_year");
-            sql.append(" FROM series ser ");
-            sql.append(" WHERE 1=1"); // To make it easier to add the optional include and excludes
-
-            if (includes.containsKey("year")) {
-                sql.append(" AND ser.start_year=").append(includes.get("year"));
-            }
-
-            if (excludes.containsKey("year")) {
-                sql.append(" AND ser.start_year!=").append(includes.get("year"));
-            }
-        }
-
-        if (StringUtils.isNotBlank(options.getSortby())) {
-            sql.append(" ORDER BY ");
-            sql.append(options.getSortby()).append(" ");
-            sql.append(options.getSortdir().toUpperCase());
-        }
-
-        LOG.trace("INDEX SQL: {}", sql);
-
-        apiDao.getVideoList(sql.toString(), wrapper);
+        apiDao.getVideoList(wrapper);
     }
 
     @Transactional(readOnly = true)
@@ -155,20 +81,7 @@ public class JsonApiStorageService {
 
     @Transactional(readOnly = true)
     public void getPersonList(ApiWrapperList<IndexPersonDTO> wrapper) {
-        StringBuilder sql = new StringBuilder();
-
-        sql.append("SELECT p.id,");
-        sql.append(" p.name,");
-        sql.append(" p.biography, ");
-        sql.append(" p.birth_day, ");
-        sql.append(" p.birth_place, ");
-        sql.append(" p.birth_name, ");
-        sql.append(" p.death_day ");
-        sql.append(" FROM person p");
-        sql.append(" WHERE 1=1");
-
-        LOG.trace("INDEX SQL: {}", sql);
-        apiDao.getPersonList(sql.toString(), wrapper);
+        apiDao.getPersonList(wrapper);
 
     }
     //</editor-fold>

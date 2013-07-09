@@ -22,9 +22,14 @@
  */
 package org.yamj.core.api.model.dto;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.core.database.model.type.ArtworkType;
 
 /**
  *
@@ -36,12 +41,45 @@ public class IndexVideoDTO extends AbstractIndexDTO {
     private String title;
     private Integer videoYear;
     private Set<IndexGenreDTO> genres = new HashSet<IndexGenreDTO>();
-    private Set<IndexArtworkDTO> artwork = new HashSet<IndexArtworkDTO>();
+    Map<ArtworkType, List<IndexArtworkDTO>> artwork = new EnumMap<ArtworkType, List<IndexArtworkDTO>>(ArtworkType.class);
 
+    public IndexVideoDTO() {
+        for(ArtworkType at: ArtworkType.values()) {
+            artwork.put(at, new ArrayList<IndexArtworkDTO>(0));
+        }
+    }
+
+    //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public MetaDataType getVideoType() {
         return videoType;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public Integer getVideoYear() {
+        return videoYear;
+    }
+
+    public Map<ArtworkType, List<IndexArtworkDTO>> getArtwork() {
+        return artwork;
+    }
+
+    public int getArtworkCount() {
+        return artwork.size();
+    }
+
+    public Set<IndexGenreDTO> getGenres() {
+        return genres;
+    }
+
+    public int getGenreCount() {
+        return genres.size();
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Setter Methods">
     public void setVideoType(MetaDataType videoType) {
         this.videoType = videoType;
     }
@@ -50,35 +88,26 @@ public class IndexVideoDTO extends AbstractIndexDTO {
         this.videoType = MetaDataType.fromString(videoType);
     }
 
-    public String getTitle() {
-        return title;
-    }
-
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public Integer getVideoYear() {
-        return videoYear;
     }
 
     public void setVideoYear(Integer videoYear) {
         this.videoYear = videoYear;
     }
 
-    public Set<IndexArtworkDTO> getArtwork() {
-        return artwork;
-    }
-
-    public void setArtwork(Set<IndexArtworkDTO> artwork) {
-        this.artwork = artwork;
-    }
-
-    public Set<IndexGenreDTO> getGenres() {
-        return genres;
+    public void setArtwork(Set<IndexArtworkDTO> artworkList) {
+        for(IndexArtworkDTO ia:artworkList) {
+            this.artwork.get(ia.getArtworkType()).add(ia);
+        }
     }
 
     public void setGenres(Set<IndexGenreDTO> genres) {
         this.genres = genres;
+    }
+    //</editor-fold>
+
+    public void addArtwork(IndexArtworkDTO newArtwork) {
+        this.artwork.get(newArtwork.getArtworkType()).add(newArtwork);
     }
 }
