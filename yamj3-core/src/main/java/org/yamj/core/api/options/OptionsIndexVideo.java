@@ -22,8 +22,14 @@
  */
 package org.yamj.core.api.options;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
+import org.yamj.core.database.model.type.ArtworkType;
 
 /**
  * List of the options available for the indexes
@@ -37,6 +43,9 @@ public class OptionsIndexVideo extends OptionsAbstract {
     private String exclude = "";
     private String sortby = "";
     private String sortdir = "ASC";
+    private String artwork = "";
+    @JsonIgnore
+    List<String> artworkTypes = new ArrayList<String>();
 
     public void setInclude(String include) {
         this.include = include;
@@ -83,6 +92,41 @@ public class OptionsIndexVideo extends OptionsAbstract {
 
     public void setSortdir(String sortdir) {
         this.sortdir = sortdir;
+    }
+
+    public String getArtwork() {
+        return artwork;
+    }
+
+    public void setArtwork(String artwork) {
+        this.artwork = artwork;
+    }
+
+    /**
+     * Get a list of the artwork types to search for
+     *
+     * @return
+     */
+    public List<String> splitArtwork() {
+        if (CollectionUtils.isEmpty(artworkTypes)) {
+            if (StringUtils.containsIgnoreCase(artwork, "ALL"))  {
+                // Add all the types to the list
+                for(ArtworkType at : ArtworkType.values()) {
+                    artworkTypes.add(at.toString());
+                }
+                // Remove the unknown type
+                artworkTypes.remove(ArtworkType.UNKNOWN.toString());
+            } else {
+                for (String param : StringUtils.split(artwork, ",")) {
+                    // Validate that the string passed is a correct artwork type
+                    ArtworkType at = ArtworkType.fromString(param);
+                    if (at != ArtworkType.UNKNOWN) {
+                        artworkTypes.add(at.toString());
+                    }
+                }
+            }
+        }
+        return artworkTypes;
     }
 
     /**

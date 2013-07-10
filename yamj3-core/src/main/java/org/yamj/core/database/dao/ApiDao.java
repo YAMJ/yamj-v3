@@ -91,9 +91,9 @@ public class ApiDao extends HibernateDao {
             ids.get(single.getVideoType()).add(single.getId());
         }
 
-        LOG.info("Found IDs: {}", ids);
+        LOG.debug("Found IDs: {}", ids);
 
-        generateArtworkList(ids, results);
+        addArtworkList(ids, results, (OptionsIndexVideo) wrapper.getParameters());
 
     }
 
@@ -170,61 +170,67 @@ public class ApiDao extends HibernateDao {
         return sbSQL.toString();
     }
 
-    private String generateArtworkList(Map<MetaDataType, List<Long>> ids, Map<String, IndexVideoDTO> artworkList) {
-        StringBuilder sbSQL = new StringBuilder();
-        boolean hasMovie = CollectionUtils.isNotEmpty(ids.get(MetaDataType.MOVIE));
-        boolean hasSeries = CollectionUtils.isNotEmpty(ids.get(MetaDataType.SERIES));
+    private void addArtworkList(Map<MetaDataType, List<Long>> ids, Map<String, IndexVideoDTO> artworkList, OptionsIndexVideo options) {
+        List<String> artworkRequired = options.splitArtwork();
+        LOG.debug("Artwork required: {}", artworkRequired.toString());
 
-        if (hasMovie) {
-            sbSQL.append("SELECT 'MOVIE' as sourceString, v.id as videoId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
-            sbSQL.append(" FROM videodata v, artwork a");
-            sbSQL.append(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
-            sbSQL.append(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
-            sbSQL.append(" WHERE v.id=a.videodata_id");
-            sbSQL.append(" AND v.episode<0");
-            sbSQL.append(" AND v.id IN (:movielist)");
+        if (CollectionUtils.isNotEmpty(artworkRequired)) {
+            StringBuilder sbSQL = new StringBuilder();
+            boolean hasMovie = CollectionUtils.isNotEmpty(ids.get(MetaDataType.MOVIE));
+            boolean hasSeries = CollectionUtils.isNotEmpty(ids.get(MetaDataType.SERIES));
+
+            if (hasMovie) {
+                sbSQL.append("SELECT 'MOVIE' as sourceString, v.id as videoId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
+                sbSQL.append(" FROM videodata v, artwork a");
+                sbSQL.append(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
+                sbSQL.append(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
+                sbSQL.append(" WHERE v.id=a.videodata_id");
+                sbSQL.append(" AND v.episode<0");
+                sbSQL.append(" AND v.id IN (:movielist)");
+                sbSQL.append(" AND a.artwork_type IN (:artworklist)");
+            }
+
+            if (hasMovie && hasSeries) {
+                sbSQL.append(" UNION");
+            }
+
+            if (hasSeries) {
+                sbSQL.append(" SELECT 'SERIES' as sourceString, s.id as videoId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
+                sbSQL.append(" FROM series s, artwork a");
+                sbSQL.append(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
+                sbSQL.append(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
+                sbSQL.append(" WHERE s.id=a.series_id");
+                sbSQL.append(" AND s.id IN (:serieslist)");
+                sbSQL.append(" AND a.artwork_type IN (:artworklist)");
+            }
+
+            SQLQuery query = getSession().createSQLQuery(sbSQL.toString());
+            query.addScalar("sourceString", StringType.INSTANCE);
+            query.addScalar("videoId", LongType.INSTANCE);
+            query.addScalar("artworkId", LongType.INSTANCE);
+            query.addScalar("locatedId", LongType.INSTANCE);
+            query.addScalar("generatedId", LongType.INSTANCE);
+            query.addScalar("artworkTypeString", StringType.INSTANCE);
+            query.addScalar("cacheDir", StringType.INSTANCE);
+            query.addScalar("cacheFilename", StringType.INSTANCE);
+
+            if (hasMovie) {
+                query.setParameterList("movielist", ids.get(MetaDataType.MOVIE));
+            }
+
+            if (hasSeries) {
+                query.setParameterList("serieslist", ids.get(MetaDataType.SERIES));
+            }
+            query.setParameterList("artworklist", artworkRequired);
+
+            List<IndexArtworkDTO> results = executeQueryWithTransform(IndexArtworkDTO.class, query, null, null);
+
+            LOG.trace("Found {} artworks", results.size());
+            for (IndexArtworkDTO ia : results) {
+                LOG.trace("  {} = {}", ia.Key(), ia.toString());
+                artworkList.get(ia.Key()).addArtwork(ia);
+            }
         }
-
-        if (hasMovie && hasSeries) {
-            sbSQL.append(" UNION");
-        }
-
-        if (hasSeries) {
-            sbSQL.append(" SELECT 'SERIES' as sourceString, s.id as videoId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
-            sbSQL.append(" FROM series s, artwork a");
-            sbSQL.append(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
-            sbSQL.append(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
-            sbSQL.append(" WHERE s.id=a.series_id");
-            sbSQL.append(" AND s.id IN (:serieslist)");
-        }
-
-        SQLQuery query = getSession().createSQLQuery(sbSQL.toString());
-        query.addScalar("sourceString", StringType.INSTANCE);
-        query.addScalar("videoId", LongType.INSTANCE);
-        query.addScalar("artworkId", LongType.INSTANCE);
-        query.addScalar("locatedId", LongType.INSTANCE);
-        query.addScalar("generatedId", LongType.INSTANCE);
-        query.addScalar("artworkTypeString", StringType.INSTANCE);
-        query.addScalar("cacheDir", StringType.INSTANCE);
-        query.addScalar("cacheFilename", StringType.INSTANCE);
-
-        if (hasMovie) {
-            query.setParameterList("movielist", ids.get(MetaDataType.MOVIE));
-        }
-
-        if (hasSeries) {
-            query.setParameterList("serieslist", ids.get(MetaDataType.SERIES));
-        }
-
-        List<IndexArtworkDTO> results = executeQueryWithTransform(IndexArtworkDTO.class, query, null, null);
-
-        LOG.trace("Found {} artworks", results.size());
-        for (IndexArtworkDTO ia : results) {
-            LOG.trace("  {} = {}", ia.Key(), ia.toString());
-            artworkList.get(ia.Key()).addArtwork(ia);
-        }
-
-        return sbSQL.toString();
     }
 
     /**

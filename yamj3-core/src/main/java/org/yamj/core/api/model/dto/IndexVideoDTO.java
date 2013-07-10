@@ -43,12 +43,6 @@ public class IndexVideoDTO extends AbstractIndexDTO {
     private Set<IndexGenreDTO> genres = new HashSet<IndexGenreDTO>();
     Map<ArtworkType, List<IndexArtworkDTO>> artwork = new EnumMap<ArtworkType, List<IndexArtworkDTO>>(ArtworkType.class);
 
-    public IndexVideoDTO() {
-        for(ArtworkType at: ArtworkType.values()) {
-            artwork.put(at, new ArrayList<IndexArtworkDTO>(0));
-        }
-    }
-
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public MetaDataType getVideoType() {
         return videoType;
@@ -67,7 +61,11 @@ public class IndexVideoDTO extends AbstractIndexDTO {
     }
 
     public int getArtworkCount() {
-        return artwork.size();
+        int count = 0;
+        for (Map.Entry<ArtworkType, List<IndexArtworkDTO>> entry : artwork.entrySet()) {
+            count += entry.getValue().size();
+        }
+        return count;
     }
 
     public Set<IndexGenreDTO> getGenres() {
@@ -97,7 +95,7 @@ public class IndexVideoDTO extends AbstractIndexDTO {
     }
 
     public void setArtwork(Set<IndexArtworkDTO> artworkList) {
-        for(IndexArtworkDTO ia:artworkList) {
+        for (IndexArtworkDTO ia : artworkList) {
             this.artwork.get(ia.getArtworkType()).add(ia);
         }
     }
@@ -108,6 +106,10 @@ public class IndexVideoDTO extends AbstractIndexDTO {
     //</editor-fold>
 
     public void addArtwork(IndexArtworkDTO newArtwork) {
+        // Add a blank list if it doesn't already exist
+        if (!artwork.containsKey(newArtwork.getArtworkType())) {
+            artwork.put(newArtwork.getArtworkType(), new ArrayList<IndexArtworkDTO>(1));
+        }
         this.artwork.get(newArtwork.getArtworkType()).add(newArtwork);
     }
 }
