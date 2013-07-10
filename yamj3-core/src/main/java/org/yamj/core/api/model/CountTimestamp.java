@@ -36,12 +36,12 @@ import org.yamj.common.type.MetaDataType;
 public class CountTimestamp {
 
     private MetaDataType type;
-    private long count = 0L;
+    private Long count = 0L;
     private Date createTimestamp = new Date(0);
     private String createTimestampString = "";
     private Date updateTimestamp = new Date(0);
     private String updateTimestampString = "";
-    private long lastId = 0L;
+    private Long lastId = 0L;
 
     public CountTimestamp() {
     }
@@ -62,12 +62,16 @@ public class CountTimestamp {
         this.type = type;
     }
 
-    public long getCount() {
+    public Long getCount() {
         return count;
     }
 
-    public void setCount(long count) {
-        this.count = count;
+    public void setCount(Long count) {
+        if (count == null) {
+            this.count = 0L;
+        } else {
+            this.count = count;
+        }
     }
 
     public Date getCreateTimestamp() {
@@ -100,8 +104,12 @@ public class CountTimestamp {
         return lastId;
     }
 
-    public void setLastId(long lastId) {
-        this.lastId = lastId;
+    public void setLastId(Long lastId) {
+        if (lastId == null) {
+            this.lastId = 0L;
+        } else {
+            this.lastId = lastId;
+        }
     }
 
     @Override
