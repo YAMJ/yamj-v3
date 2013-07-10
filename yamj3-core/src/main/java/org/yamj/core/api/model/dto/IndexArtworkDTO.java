@@ -71,32 +71,48 @@ public class IndexArtworkDTO {
         return videoId;
     }
 
-    public void setVideoId(long videoId) {
-        this.videoId = videoId;
+    public void setVideoId(Long videoId) {
+        if (videoId == null) {
+            this.videoId = 0L;
+        } else {
+            this.videoId = videoId;
+        }
     }
 
     public long getArtworkId() {
         return artworkId;
     }
 
-    public void setArtworkId(long artworkId) {
-        this.artworkId = artworkId;
+    public void setArtworkId(Long artworkId) {
+        if (artworkId == null) {
+            this.artworkId = 0L;
+        } else {
+            this.artworkId = artworkId;
+        }
     }
 
     public long getLocatedId() {
         return locatedId;
     }
 
-    public void setLocatedId(long locatedId) {
-        this.locatedId = locatedId;
+    public void setLocatedId(Long locatedId) {
+        if (locatedId == null) {
+            this.locatedId = 0L;
+        } else {
+            this.locatedId = locatedId;
+        }
     }
 
     public long getGeneratedId() {
         return generatedId;
     }
 
-    public void setGeneratedId(long generatedId) {
-        this.generatedId = generatedId;
+    public void setGeneratedId(Long generatedId) {
+        if (generatedId == null) {
+            this.generatedId = 0L;
+        } else {
+            this.generatedId = generatedId;
+        }
     }
 
     public ArtworkType getArtworkType() {
