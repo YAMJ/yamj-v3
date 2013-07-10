@@ -37,10 +37,10 @@ public class IndexArtworkDTO {
 
     private String key = null;
     private MetaDataType source;
-    private long videoId = 0L;
-    private long artworkId = 0L;
-    private long locatedId = 0L;
-    private long generatedId = 0L;
+    private Long videoId = 0L;
+    private Long artworkId = 0L;
+    private Long locatedId = 0L;
+    private Long generatedId = 0L;
     private ArtworkType artworkType;
     private String cacheDir = "";
     private String cacheFilename = "";

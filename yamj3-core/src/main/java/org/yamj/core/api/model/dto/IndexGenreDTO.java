@@ -28,7 +28,7 @@ package org.yamj.core.api.model.dto;
  */
 public class IndexGenreDTO {
 
-    private long id;
+    private Long id;
     private String name;
 
     public long getId() {
