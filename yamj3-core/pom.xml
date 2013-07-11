@@ -113,9 +113,9 @@
         </dependency>
         <!-- JSP and JSTL SUPPORT -->
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>jstl</artifactId>
-            <version>1.2</version>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-jsp</artifactId>
+            <version>${jetty.version}</version>
             <scope>provided</scope>
         </dependency>
         <!-- DATABASE -->
