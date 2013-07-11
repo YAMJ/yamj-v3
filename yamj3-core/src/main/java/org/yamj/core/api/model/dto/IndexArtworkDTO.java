@@ -132,7 +132,11 @@ public class IndexArtworkDTO {
     }
 
     public void setCacheDir(String cacheDir) {
-        this.cacheDir = cacheDir;
+        if (StringUtils.isBlank(cacheDir)) {
+            this.cacheDir = "";
+        } else {
+            this.cacheDir = cacheDir;
+        }
     }
 
     public String getCacheFilename() {
@@ -140,7 +144,11 @@ public class IndexArtworkDTO {
     }
 
     public void setCacheFilename(String cacheFilename) {
-        this.cacheFilename = cacheFilename;
+        if (StringUtils.isBlank(cacheFilename)) {
+            this.cacheFilename = "";
+        } else {
+            this.cacheFilename = cacheFilename;
+        }
     }
 
     @JsonIgnore
