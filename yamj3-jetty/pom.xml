@@ -65,11 +65,6 @@
         </dependency>
         <dependency>
             <groupId>org.glassfish.web</groupId>
-            <artifactId>javax.el</artifactId>
-            <version>2.2.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.web</groupId>
             <artifactId>javax.servlet.jsp.jstl</artifactId>
             <version>1.2.2</version>
             <exclusions>
