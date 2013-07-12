@@ -29,7 +29,7 @@
         <property name="ignoreResourceNotFound" value="true"/>
     </bean>
 
-    
+
     <util:properties id="dynamicProperties" location="classpath:/yamj3-core-dynamic.properties" />
     <bean id="configService" class="org.yamj.core.configuration.ConfigService">
         <property name="configDao" ref="configDao"/>
@@ -55,11 +55,12 @@
             </bean>
         </mvc:message-converters>
     </mvc:annotation-driven>
+
     <mvc:default-servlet-handler />
 
     <!-- Resolve jsp's -->
     <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="prefix" value="/WEB-INF/pages/"/>
         <property name="suffix" value=".jsp"/>
     </bean>
 
