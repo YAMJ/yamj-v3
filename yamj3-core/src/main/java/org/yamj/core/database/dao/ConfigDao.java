@@ -25,7 +25,9 @@ package org.yamj.core.database.dao;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -47,7 +49,7 @@ public class ConfigDao extends HibernateDao {
         query.setReadOnly(true);
         query.setCacheable(true);
 
-        HashMap<String,String> config = new HashMap<String,String>();
+        HashMap<String, String> config = new HashMap<String, String>();
         List<Object[]> objects = query.list();
         for (Object[] object : objects) {
             String key = convertRowElementToString(object[0]);
@@ -60,7 +62,7 @@ public class ConfigDao extends HibernateDao {
 
     @Transactional
     public void storeConfig(Map<String, String> config) {
-        for (Map.Entry<String,String> entry : config.entrySet()) {
+        for (Map.Entry<String, String> entry : config.entrySet()) {
             storeConfig(entry.getKey(), entry.getValue());
         }
     }
@@ -68,7 +70,7 @@ public class ConfigDao extends HibernateDao {
     @Transactional
     public void storeConfig(String key, String value) {
         Session session = getSession();
-        Configuration config = (Configuration)session.byId(Configuration.class).load(key);
+        Configuration config = (Configuration) session.byId(Configuration.class).load(key);
         if (config != null) {
             if (!StringUtils.equals(value, config.getValue())) {
                 LOG.debug("Update configuration: key='{}', value='{}', oldValue='{}'", key, value, config.getValue());
@@ -83,4 +85,48 @@ public class ConfigDao extends HibernateDao {
             session.save(config);
         }
     }
- }
+
+    @Transactional
+    private List<Configuration> getConfigurationEntries(String property) {
+        if (StringUtils.isBlank(property)) {
+            LOG.info("Getting all configuration entries");
+        } else {
+            LOG.info("Getting configuration for '{}'", property);
+        }
+
+        StringBuilder sbSQL = new StringBuilder("FROM org.yamj.core.database.model.Configuration");
+        if (StringUtils.isNotBlank(property)) {
+            sbSQL.append(" WHERE config_key='").append(property).append("'");
+        }
+
+        Query q = getSession().createQuery(sbSQL.toString());
+        List<Configuration> queryResults = q.list();
+
+        return queryResults;
+    }
+
+    @Transactional
+    public Configuration getConfiguration(String property) {
+        List<Configuration> configList = getConfigurationEntries(property);
+        if (CollectionUtils.isEmpty(configList)) {
+            return new Configuration();
+        } else {
+            return configList.get(0);
+        }
+    }
+
+    @Transactional
+    public List<Configuration> getConfiguration() {
+        return getConfigurationEntries(null);
+    }
+
+    @Transactional
+    public void deleteConfig(String key) {
+        if (StringUtils.isNotBlank(key)) {
+            LOG.debug("Deleting key '{}'", key);
+            Configuration config = getConfiguration(key);
+            getSession().delete(config);
+            LOG.debug("Successfully deleted key '{}'", key);
+        }
+    }
+}

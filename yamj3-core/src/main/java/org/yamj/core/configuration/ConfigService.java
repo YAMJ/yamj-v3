@@ -23,6 +23,7 @@
 package org.yamj.core.configuration;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -30,12 +31,13 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.yamj.core.database.dao.ConfigDao;
+import org.yamj.core.database.model.Configuration;
 
 public class ConfigService implements InitializingBean {
 
     @Autowired
     private ConfigDao configDao;
-    private Map<String,String> cachedProperties = new HashMap<String,String>();
+    private Map<String, String> cachedProperties = new HashMap<String, String>();
 
     @Required
     public void setConfigDao(ConfigDao configDao) {
@@ -44,29 +46,29 @@ public class ConfigService implements InitializingBean {
 
     @Required
     public void setCoreProperties(Properties properties) {
-        for (Entry<Object,Object> entry : properties.entrySet()) {
+        for (Entry<Object, Object> entry : properties.entrySet()) {
             cachedProperties.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
         }
     }
-    
+
     @Override
     public void afterPropertiesSet() throws Exception {
         // get stored properties
-        Map<String,String> dbConfig = configDao.readConfig();
+        Map<String, String> dbConfig = configDao.readConfig();
         // override existing properties with database properties
         cachedProperties.putAll(dbConfig);
         // store back all properties
         configDao.storeConfig(cachedProperties);
     }
-    
+
     public void reloadCachedProperties() {
         cachedProperties = configDao.readConfig();
     }
-    
-    public Map<String,String> getCachedProperties() {
+
+    public Map<String, String> getCachedProperties() {
         return cachedProperties;
     }
-    
+
     public String getProperty(String key) {
         return cachedProperties.get(key);
     }
@@ -145,5 +147,20 @@ public class ConfigService implements InitializingBean {
 
     public void setProperty(String key, float value) {
         setProperty(key, Float.toString(value));
+    }
+
+    public void deleteProperty(String key) {
+        // Delete the config from the database
+        configDao.deleteConfig(key);
+        // delete the config from the cached properties
+        cachedProperties.remove(key);
+    }
+
+    public Configuration getConfiguration(String key) {
+        return configDao.getConfiguration(key);
+    }
+
+    public List<Configuration> getConfiguration() {
+        return configDao.getConfiguration();
     }
 }

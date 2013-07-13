@@ -22,19 +22,22 @@
  */
 package org.yamj.core.api.json;
 
-import java.util.List;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.common.model.YamjInfo;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.core.api.model.ApiWrapperList;
+import org.yamj.core.api.model.ApiWrapperSingle;
 import org.yamj.core.api.model.CountTimestamp;
+import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.Configuration;
 import org.yamj.core.database.service.JsonApiStorageService;
 
@@ -43,9 +46,11 @@ import org.yamj.core.database.service.JsonApiStorageService;
 @Service("systemInfoController")
 public class SystemInfoController {
 
+    private static final YamjInfo YAMJ_INFO = new YamjInfo(SystemInfoController.class);
     @Autowired
     private JsonApiStorageService jsonApi;
-    private static final YamjInfo YAMJ_INFO = new YamjInfo(SystemInfoController.class);
+    @Autowired
+    ConfigService configService;
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     @ResponseBody
@@ -70,9 +75,25 @@ public class SystemInfoController {
         return YAMJ_INFO;
     }
 
+    @RequestMapping(value = "/config/{property}", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperSingle<Configuration> getConfiguration(@PathVariable String property) {
+        ApiWrapperSingle<Configuration> wrapper = new ApiWrapperSingle<Configuration>();
+        if (StringUtils.isBlank(property)) {
+            wrapper.setResult(null);
+        } else {
+            wrapper.setResult(configService.getConfiguration(property));
+        }
+        wrapper.setStatusCheck();
+        return wrapper;
+    }
+
     @RequestMapping(value = "/config", method = RequestMethod.GET)
     @ResponseBody
-    public List<Configuration> getConfiguration(@RequestParam(required = false, defaultValue = "") String property) {
-        return jsonApi.getConfiguration(property);
+    public ApiWrapperList<Configuration> getConfiguration() {
+        ApiWrapperList<Configuration> wrapper = new ApiWrapperList<Configuration>();
+        wrapper.setResults(configService.getConfiguration());
+        wrapper.setStatusCheck();
+        return wrapper;
     }
 }

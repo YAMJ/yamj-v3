@@ -39,6 +39,7 @@ import org.yamj.core.database.model.*;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiWrapperList;
 import org.yamj.core.api.model.dto.IndexPersonDTO;
+import org.yamj.core.configuration.ConfigService;
 
 @Service("jsonApiStorageService")
 public class JsonApiStorageService {
@@ -50,6 +51,8 @@ public class JsonApiStorageService {
     private ArtworkDao artworkDao;
     @Autowired
     private ApiDao apiDao;
+    @Autowired
+    ConfigService configService;
 
     @Transactional(readOnly = true)
     public <T> T getEntityById(Class<T> entityClass, Serializable id) {
@@ -57,8 +60,13 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = true)
-    public List<Configuration> getConfiguration(String property) {
-        return apiDao.getConfiguration(property);
+    public Configuration getConfiguration(String property) {
+        return configService.getConfiguration(property);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Configuration> getConfiguration() {
+        return configService.getConfiguration();
     }
 
     //<editor-fold defaultstate="collapsed" desc="Index Methods">
