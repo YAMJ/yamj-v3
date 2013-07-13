@@ -299,12 +299,12 @@ public class ApiDao extends HibernateDao {
         if (StringUtils.isBlank(property)) {
             LOG.info("Getting all configuration entries");
         } else {
-            LOG.info("Getting configuration for {}", property);
+            LOG.info("Getting configuration for '{}'", property);
         }
 
         StringBuilder sbSQL = new StringBuilder("FROM org.yamj.core.database.model.Configuration");
         if (StringUtils.isNotBlank(property)) {
-            sbSQL.append(" WHERE config_key=").append(property);
+            sbSQL.append(" WHERE config_key='").append(property).append("'");
         }
 
         Query q = getSession().createQuery(sbSQL.toString());
