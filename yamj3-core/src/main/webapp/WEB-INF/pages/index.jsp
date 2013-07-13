@@ -1,8 +1,9 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="yamj-style.css">
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/yamj-style.css">
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>YAMJ v3</title>
     </head>
@@ -12,13 +13,22 @@
             <h1>Yet Another Movie Jukebox</h1>
         </div>
         <br/>
-        <table id="main">
+        <c:if test="${not empty message}">
+            <p>Message: ${message}</p>
+            <br/>
+        </c:if>
+        <table id="headertable">
             <tr>
                 <th colspan="2">Index of Pages</th>
             </tr>
             <tr>
-                <td><a href="system-info.html">System Information</a></td>
+                <!-- There is a bug in netbeans that displays this as an error. Ignore it -->
+                <td><a href="${pageContext.request.contextPath}/system-info.html">System Information</a></td>
                 <td>Display information about the state of the core.</td>
+            </tr>
+            <tr>
+                <td><a href="${pageContext.request.contextPath}/config/list.html">Configuration</a></td>
+                <td>Display information about the configuration.</td>
             </tr>
         </table>
     </body>

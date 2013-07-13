@@ -3,14 +3,14 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/yamj-style.css">
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title id="title">YAMJ v3</title>
-        <link rel="stylesheet" type="text/css" href="yamj-style.css">
     </head>
     <body>
         <h1>${yi.projectName}</h1>
 
-        <table id="main">
+        <table id="headertable">
             <tr>
                 <th colspan="2">System Information</th>
             </tr>
@@ -40,7 +40,7 @@
             </tr>
         </table>
         <br/>
-        <table id="counts">
+        <table id="tablelist">
             <tr>
                 <th colspan="2">Database Object Counts</th>
             </tr>
