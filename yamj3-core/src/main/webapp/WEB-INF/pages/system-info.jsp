@@ -3,7 +3,8 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/yamj-style.css">
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/yamj-style.css">
+        <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico" />
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title id="title">YAMJ v3</title>
     </head>

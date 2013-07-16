@@ -3,13 +3,14 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/yamj-style.css">
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/yamj-style.css">
+        <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico" />
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>YAMJ v3</title>
     </head>
     <body>
         <div id="logo">
-            <img src="/yamj3/YAMJ_Logo_Clear_Black.png">
+            <img src="${pageContext.request.contextPath}/images/yamj-logo.png">
             <h1>Yet Another Movie Jukebox</h1>
         </div>
         <br/>

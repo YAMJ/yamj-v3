@@ -56,11 +56,15 @@
         </mvc:message-converters>
     </mvc:annotation-driven>
 
+    <mvc:resources mapping="/images/**" location="WEB-INF/images/" cache-period="600"/>
+    <mvc:resources mapping="/css/**" location="WEB-INF/css/" cache-period="600"/>
+    <mvc:resources mapping="/favicon.ico" location="WEB-INF/images/favicon.ico" cache-period="600" />
+
     <mvc:default-servlet-handler />
 
     <!-- Resolve jsp's -->
     <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix" value="/WEB-INF/pages/"/>
+        <property name="prefix" value="/WEB-INF/pages/" />
         <property name="suffix" value=".jsp"/>
     </bean>
 
