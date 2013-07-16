@@ -36,6 +36,7 @@
             </includes>
             <excludes>
                 <exclude>*.properties</exclude>
+                <exclude>*.html</exclude>
             </excludes>
         </fileSet>
 
@@ -55,6 +56,15 @@
             <includes>
                 <include>version.txt</include>
                 <include>jetty.cmd</include>
+            </includes>
+        </fileSet>
+
+        <!-- Create the resource directory -->
+        <fileSet>
+            <directory>${basedir}/config</directory>
+            <outputDirectory>resources</outputDirectory>
+            <includes>
+                <include>*.html</include>
             </includes>
         </fileSet>
 

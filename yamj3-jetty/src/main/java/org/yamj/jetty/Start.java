@@ -30,10 +30,15 @@ import org.yamj.common.type.ExitType;
 import static org.yamj.common.type.ExitType.*;
 import java.io.File;
 import java.io.IOException;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.PropertyConfigurator;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
@@ -50,6 +55,7 @@ public class Start {
     private static int yamjPort = 8888;
     private static int yamjShutdownPort = 3000;
     private static boolean yamjStopAtShutdown = Boolean.TRUE;
+    private static final String RESOURCES_DIR = "./resources/";
 
     public static void main(String[] args) {
         // Create the log file name here, so we can change it later (because it's locked
@@ -121,7 +127,19 @@ public class Start {
             WebAppContext webapp = new WebAppContext();
             webapp.setContextPath("/yamj3");
             webapp.setWar(warFile.getCanonicalPath());
-            server.setHandler(webapp);
+
+            // Ensure the 'RESOURCES_DIR' directory is created
+            FileUtils.forceMkdir(new File(RESOURCES_DIR));
+            // Allow the jetty server to serve the artwork files (and any others) from the 'RESOURCES_DIR' directory
+            ResourceHandler resource_handler = new ResourceHandler();
+            resource_handler.setResourceBase(RESOURCES_DIR);
+            resource_handler.setWelcomeFiles(new String[]{"yamj.html", "index.html"});
+            resource_handler.setDirectoriesListed(Boolean.TRUE);
+            LOG.info("Resource base: {}", resource_handler.getResourceBase());
+
+            HandlerList handlers = new HandlerList();
+            handlers.setHandlers(new Handler[]{webapp, resource_handler, new DefaultHandler()});
+            server.setHandler(handlers);
 
             if (server.getThreadPool() instanceof QueuedThreadPool) {
                 ((QueuedThreadPool) server.getThreadPool()).setMaxIdleTimeMs(2000);
