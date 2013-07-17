@@ -52,21 +52,27 @@ public class FileStorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileStorageService.class);
     // This is the base directory to store the resources in. It should NOT be used in the hash of the filename
-    private static final String RESOURCES_DIR = "./resources/";
+    private String storageResourceDir;
     private String storagePathArtwork;
     private String storagePathMediaInfo;
     @Autowired
     private PoolingHttpClient httpClient;
 
+    @Value("${yamj3.file.storage.resources}")
+    public void setStorageResourceDir(String storageResourceDir) {
+        this.storageResourceDir = FilenameUtils.normalize(storageResourceDir, Boolean.TRUE);
+        LOG.info("Resource path set to '{}'", this.storageResourceDir);
+    }
+
     @Value("${yamj3.file.storage.artwork}")
     public void setStoragePathArtwork(String storagePathArtwork) {
-        this.storagePathArtwork = FilenameUtils.concat(RESOURCES_DIR, storagePathArtwork);
+        this.storagePathArtwork = FilenameUtils.normalize(FilenameUtils.concat(storageResourceDir, storagePathArtwork), Boolean.TRUE);
         LOG.info("Artwork storage path set to '{}'", this.storagePathArtwork);
     }
 
     @Value("${yamj3.file.storage.mediainfo}")
-    public void setStoragePathMediaInfok(String storagePathMediaInfo) {
-        this.storagePathMediaInfo = FilenameUtils.concat(RESOURCES_DIR, storagePathMediaInfo);
+    public void setStoragePathMediaInfo(String storagePathMediaInfo) {
+        this.storagePathMediaInfo = FilenameUtils.normalize(FilenameUtils.concat(storageResourceDir, storagePathMediaInfo), Boolean.TRUE);
         LOG.info("MediaInfo storage path set to '{}'", this.storagePathMediaInfo);
     }
 
@@ -157,12 +163,12 @@ public class FileStorageService {
         return file.delete();
     }
 
-    public File getFile(StorageType type, String fileName) throws IOException {
-        String storageName = getStorageName(type, fileName);
+    public File getFile(StorageType type, String filename) throws IOException {
+        String storageName = getStorageName(type, filename);
         return new File(storageName);
     }
 
-    private String getStorageName(StorageType type, String filename) {
+    public String getStorageName(StorageType type, String filename) {
         String hashFilename;
         if (StorageType.ARTWORK == type) {
             hashFilename = FilenameUtils.concat(this.storagePathArtwork, FileTools.createDirHash(filename));
@@ -173,6 +179,21 @@ public class FileStorageService {
         } else {
             throw new IllegalArgumentException("Unknown storage type " + type);
         }
+        return hashFilename;
+    }
+
+    public String getStorageName(StorageType type, String dir, String filename) {
+        String hashFilename = FilenameUtils.concat(dir, filename);
+        if (StorageType.ARTWORK == type) {
+            hashFilename = FilenameUtils.concat(this.storagePathArtwork, hashFilename);
+            FileTools.makeDirectories(hashFilename);
+        } else if (StorageType.MEDIAINFO == type) {
+            hashFilename = FilenameUtils.concat(this.storagePathMediaInfo, hashFilename);
+            FileTools.makeDirectories(hashFilename);
+        } else {
+            throw new IllegalArgumentException("Unknown storage type " + type);
+        }
+
         return hashFilename;
     }
 }

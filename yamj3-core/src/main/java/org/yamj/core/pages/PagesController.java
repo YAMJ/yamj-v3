@@ -40,6 +40,7 @@ public class PagesController {
         return view;
     }
     //</editor-fold>
+
     //<editor-fold defaultstate="collapsed" desc="Configuration Pages">
     @RequestMapping(value = "/config/add")
     public ModelAndView configAddPage() {
