@@ -32,6 +32,8 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.DateTimeTools;
+import org.yamj.common.tools.PropertyTools;
+import org.yamj.common.tools.SystemTools;
 import org.yamj.common.type.MetaDataType;
 
 /**
@@ -57,6 +59,8 @@ public class YamjInfo {
     private String osVersion;
     private DateTime startUpDateTime;
     private Map<MetaDataType, Long> counts;
+    private String databaseName;
+    private String ipAddress;
 
     @SuppressWarnings("unused")
     private YamjInfo() {
@@ -88,6 +92,12 @@ public class YamjInfo {
 
         // Counts
         this.counts = new EnumMap<MetaDataType, Long>(MetaDataType.class);
+
+        // IP Address
+        this.ipAddress = SystemTools.getIpAddress(Boolean.TRUE);
+
+        // Database Url
+        this.databaseName = findDatabaseName();
     }
 
     public String getProjectName() {
@@ -152,6 +162,14 @@ public class YamjInfo {
         return DateTimeTools.formatDurationText(ManagementFactory.getRuntimeMXBean().getUptime());
     }
 
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
     public Map<MetaDataType, Long> getCounts() {
         return counts;
     }
@@ -210,5 +228,13 @@ public class YamjInfo {
         log.info("");
         log.info("Core Start Time : {}", getStartUpTime());
         log.info("Core Uptime     : {}", getUptime());
+    }
+
+    private String findDatabaseName() {
+        String dbUrl = PropertyTools.getProperty("yamj3.database.url", "");
+        if (dbUrl.contains("/")) {
+            dbUrl = dbUrl.substring(dbUrl.lastIndexOf('/') + 1);
+        }
+        return dbUrl;
     }
 }
