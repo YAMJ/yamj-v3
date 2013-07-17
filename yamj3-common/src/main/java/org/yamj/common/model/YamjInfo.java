@@ -59,6 +59,7 @@ public class YamjInfo {
     private String osVersion;
     private DateTime startUpDateTime;
     private Map<MetaDataType, Long> counts;
+    private String databaseIp;
     private String databaseName;
     private String ipAddress;
 
@@ -96,8 +97,8 @@ public class YamjInfo {
         // IP Address
         this.ipAddress = SystemTools.getIpAddress(Boolean.TRUE);
 
-        // Database Url
-        this.databaseName = findDatabaseName();
+        // Database IP & Name
+        findDatabaseInfo();
     }
 
     public String getProjectName() {
@@ -166,6 +167,10 @@ public class YamjInfo {
         return databaseName;
     }
 
+    public String getDatabaseIp() {
+        return databaseIp;
+    }
+
     public String getIpAddress() {
         return ipAddress;
     }
@@ -230,11 +235,17 @@ public class YamjInfo {
         log.info("Core Uptime     : {}", getUptime());
     }
 
-    private String findDatabaseName() {
+    private void findDatabaseInfo() {
         String dbUrl = PropertyTools.getProperty("yamj3.database.url", "");
-        if (dbUrl.contains("/")) {
-            dbUrl = dbUrl.substring(dbUrl.lastIndexOf('/') + 1);
+        if (StringUtils.containsIgnoreCase(dbUrl, "derby")) {
+            this.databaseName = "Derby Embedded";
+            this.databaseIp = "localhost";
+        } else if (dbUrl.contains("/") && StringUtils.containsIgnoreCase(dbUrl, "mysql")) {
+            this.databaseName = dbUrl.substring(dbUrl.lastIndexOf('/') + 1);
+            this.databaseIp = dbUrl.substring(dbUrl.indexOf("//") + 2, dbUrl.lastIndexOf('/'));
+        } else {
+            this.databaseName = "UNKNOWN";
+            this.databaseIp = "UNKNOWN";
         }
-        return dbUrl;
     }
 }

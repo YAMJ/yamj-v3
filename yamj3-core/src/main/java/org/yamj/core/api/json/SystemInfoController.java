@@ -50,7 +50,7 @@ public class SystemInfoController {
     @Autowired
     private JsonApiStorageService jsonApi;
     @Autowired
-    ConfigService configService;
+    private ConfigService configService;
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     @ResponseBody

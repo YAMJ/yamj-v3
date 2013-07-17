@@ -39,6 +39,18 @@
                 <td class="right">Uptime</td>
                 <td>${yi.uptime}</td>
             </tr>
+            <tr>
+                <td class="right">Database Name</td>
+                <td>${yi.databaseName}</td>
+            </tr>
+            <tr>
+                <td class="right">Database IP Address</td>
+                <td>${yi.databaseIp}</td>
+            </tr>
+            <tr>
+                <td class="right">Server IP Address</td>
+                <td>${yi.ipAddress}</td>
+            </tr>
         </table>
         <br/>
         <table id="tablelist">
