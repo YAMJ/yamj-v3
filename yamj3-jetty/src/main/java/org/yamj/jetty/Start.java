@@ -53,7 +53,7 @@ public class Start {
     private static final String WAR_FILE = "yamj3-core-3.0-SNAPSHOT.war";
     private static String yamjHome = ".";
     private static int yamjPort = 8888;
-    private static int yamjShutdownPort = 3000;
+    private static int yamjShutdownTimeout = 5000;
     private static boolean yamjStopAtShutdown = Boolean.TRUE;
     private static final String RESOURCES_DIR = "./resources/";
 
@@ -91,8 +91,8 @@ public class Start {
             yamjHome = parser.getParsedOptionValue("h");
         }
         yamjPort = convertToInt(parser.getParsedOptionValue("p"), yamjPort);
-        yamjShutdownPort = convertToInt(parser.getParsedOptionValue("sp"), yamjShutdownPort);
-        yamjStopAtShutdown = convertToBoolean(parser.getParsedOptionValue("ss"), yamjStopAtShutdown);
+        yamjShutdownTimeout = convertToInt(parser.getParsedOptionValue("t"), yamjShutdownTimeout);
+        yamjStopAtShutdown = convertToBoolean(parser.getParsedOptionValue("s"), yamjStopAtShutdown);
 
         String warFilename = FilenameUtils.concat(yamjHome, WAR_DIR + WAR_FILE);
         File warFile = new File(warFilename);
@@ -106,7 +106,7 @@ public class Start {
             }
             LOG.info("YAMJ Home: '{}'", yamjHome);
             LOG.info("YAMJ Port: {}", yamjPort);
-            LOG.info("YAMJ Shudown Port: {}", yamjShutdownPort);
+            LOG.info("YAMJ Shudown Timeout: {}ms", yamjShutdownTimeout);
             LOG.info("YAMJ {} stop at Shutdown", yamjStopAtShutdown ? "will" : "will not");
             LOG.info("Using war file: {}", warFilename);
             LOG.info("");
@@ -120,7 +120,7 @@ public class Start {
 
         LOG.info("Starting server...");
         Server server = new Server(yamjPort);
-        server.setGracefulShutdown(yamjShutdownPort);
+        server.setGracefulShutdown(yamjShutdownTimeout);
         server.setStopAtShutdown(yamjStopAtShutdown);
 
         try {
@@ -131,14 +131,14 @@ public class Start {
             // Ensure the 'RESOURCES_DIR' directory is created
             FileUtils.forceMkdir(new File(RESOURCES_DIR));
             // Allow the jetty server to serve the artwork files (and any others) from the 'RESOURCES_DIR' directory
-            ResourceHandler resource_handler = new ResourceHandler();
-            resource_handler.setResourceBase(RESOURCES_DIR);
-            resource_handler.setWelcomeFiles(new String[]{"yamj.html", "index.html"});
-            resource_handler.setDirectoriesListed(Boolean.TRUE);
-            LOG.info("Resource base: {}", resource_handler.getResourceBase());
+            ResourceHandler resourceHandler = new ResourceHandler();
+            resourceHandler.setResourceBase(RESOURCES_DIR);
+            resourceHandler.setWelcomeFiles(new String[]{"yamj.html", "index.html"});
+            resourceHandler.setDirectoriesListed(Boolean.TRUE);
+            LOG.info("Resource base: {}", resourceHandler.getResourceBase());
 
             HandlerList handlers = new HandlerList();
-            handlers.setHandlers(new Handler[]{webapp, resource_handler, new DefaultHandler()});
+            handlers.setHandlers(new Handler[]{webapp, resourceHandler, new DefaultHandler()});
             server.setHandler(handlers);
 
             if (server.getThreadPool() instanceof QueuedThreadPool) {
@@ -181,8 +181,8 @@ public class Start {
         CmdLineParser parser = new CmdLineParser();
         parser.addOption(new CmdLineOption("h", "home", "the home directory for jetty, default: '" + yamjHome + "'", false, true));
         parser.addOption(new CmdLineOption("p", "port", "The port for the core server, default: " + yamjPort, false, true));
-        parser.addOption(new CmdLineOption("sp", "shutdown port", "The port to shutdown the server, default: " + yamjShutdownPort, false, true));
-        parser.addOption(new CmdLineOption("ss", "stop shutdown", "Shutdown the server when exiting, default: " + yamjStopAtShutdown, false, false));
+        parser.addOption(new CmdLineOption("t", "shutdown timeout", "The time allowed for the server to gracefully stop, default: " + yamjShutdownTimeout + "ms", false, true));
+        parser.addOption(new CmdLineOption("s", "stop shutdown", "Shutdown the server when exiting, default: " + yamjStopAtShutdown, false, false));
 
         return parser;
     }
