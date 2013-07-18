@@ -48,7 +48,7 @@
                 <td>${yi.databaseIp}</td>
             </tr>
             <tr>
-                <td class="right">Server IP Address</td>
+                <td class="right">YAMJ IP Address</td>
                 <td>${yi.ipAddress}</td>
             </tr>
         </table>
