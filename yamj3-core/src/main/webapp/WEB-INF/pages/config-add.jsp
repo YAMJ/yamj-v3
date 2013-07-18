@@ -4,11 +4,10 @@
 <html>
     <head>
         <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/yamj-style.css">
-        <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico" />
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>YAMJ v3</title>
     </head>
-    <body>
+    <body background="${pageContext.request.contextPath}/images/yamj-configbg.jpg">
         <div id="logo">
             <h1>Yet Another Movie Jukebox</h1>
             <h2>Add Configuration Entry</h2>
@@ -31,5 +30,22 @@
         </form:form>
 
         <p><a href="${pageContext.request.contextPath}/index.html">Home page</a></p>
+        <table class="sysinfo">
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <th>Version: ${yi.projectVersion}</th>
+            <th>Revision: ${yi.buildRevision}</th>
+            <th>Java: ${yi.javaVersion}</th>
+            <th>Build Date: ${yi.buildDate}</th>
+            <th>Start-up Time: ${yi.startUpTime}</th>
+            <th>Uptime: ${yi.uptime}</th>
+        </table>
     </body>
 </html>

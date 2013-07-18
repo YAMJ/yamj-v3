@@ -27,6 +27,8 @@ public class PagesController {
     @RequestMapping(value = {"/", "/index"})
     public ModelAndView displayRoot() {
         ModelAndView view = new ModelAndView("index");
+        YamjInfo yi = sic.getYamjInfo("true");
+        view.addObject("yi", yi);
         return view;
     }
 
@@ -45,6 +47,8 @@ public class PagesController {
     @RequestMapping(value = "/config/add")
     public ModelAndView configAddPage() {
         ModelAndView view = new ModelAndView("config-add");
+        YamjInfo yi = sic.getYamjInfo("true");
+        view.addObject("yi", yi);
         view.addObject("config", new Configuration());
         return view;
     }
@@ -66,6 +70,8 @@ public class PagesController {
         ModelAndView view = new ModelAndView("config-list");
 
         List<Configuration> configList = configService.getConfiguration();
+        YamjInfo yi = sic.getYamjInfo("true");
+        view.addObject("yi", yi);
         view.addObject("configlist", configList);
 
         return view;
@@ -76,6 +82,8 @@ public class PagesController {
         ModelAndView view = new ModelAndView("config-edit");
         Configuration config = configService.getConfiguration(key);
         view.addObject("config", config);
+        YamjInfo yi = sic.getYamjInfo("true");
+        view.addObject("yi", yi);
         return view;
     }
 
