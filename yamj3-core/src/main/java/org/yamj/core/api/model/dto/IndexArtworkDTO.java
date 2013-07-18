@@ -23,6 +23,7 @@
 package org.yamj.core.api.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -44,6 +45,7 @@ public class IndexArtworkDTO {
     private ArtworkType artworkType;
     private String cacheDir = "";
     private String cacheFilename = "";
+    private String filename;
 
     @JsonIgnore
     public String Key() {
@@ -127,6 +129,7 @@ public class IndexArtworkDTO {
         this.artworkType = ArtworkType.fromString(artworkType);
     }
 
+    @JsonIgnore
     public String getCacheDir() {
         return cacheDir;
     }
@@ -139,6 +142,7 @@ public class IndexArtworkDTO {
         }
     }
 
+    @JsonIgnore
     public String getCacheFilename() {
         return cacheFilename;
     }
@@ -149,6 +153,13 @@ public class IndexArtworkDTO {
         } else {
             this.cacheFilename = cacheFilename;
         }
+    }
+
+    public String getFilename() {
+        if (StringUtils.isBlank(this.filename)) {
+            this.filename = FilenameUtils.normalize(FilenameUtils.concat(this.cacheDir, this.cacheFilename), Boolean.TRUE);
+        }
+        return filename;
     }
 
     @JsonIgnore

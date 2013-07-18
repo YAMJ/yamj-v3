@@ -38,6 +38,7 @@ import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.model.*;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiWrapperList;
+import org.yamj.core.api.model.dto.IndexArtworkDTO;
 import org.yamj.core.api.model.dto.IndexPersonDTO;
 import org.yamj.core.configuration.ConfigService;
 
@@ -188,6 +189,11 @@ public class JsonApiStorageService {
     @Transactional(readOnly = true)
     public List<Artwork> getArtworkList(Parameters params) {
         return artworkDao.getArtworkList(params);
+    }
+
+    @Transactional(readOnly = true)
+    public IndexArtworkDTO getArtworkById(Long id) {
+        return apiDao.getArtworkById(id);
     }
     //</editor-fold>
 }

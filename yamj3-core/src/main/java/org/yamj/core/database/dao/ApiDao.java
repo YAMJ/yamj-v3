@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.BasicType;
@@ -50,7 +49,6 @@ import org.yamj.core.api.model.dto.IndexArtworkDTO;
 import org.yamj.core.api.model.dto.IndexPersonDTO;
 import org.yamj.core.api.options.IOptions;
 import org.yamj.core.api.options.OptionsIndexVideo;
-import org.yamj.core.database.model.Configuration;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Service("apiDao")
@@ -230,6 +228,30 @@ public class ApiDao extends HibernateDao {
                 LOG.trace("  {} = {}", ia.Key(), ia.toString());
                 artworkList.get(ia.Key()).addArtwork(ia);
             }
+        }
+    }
+
+    public IndexArtworkDTO getArtworkById(Long id) {
+        StringBuilder sbSQL = new StringBuilder();
+        sbSQL.append("SELECT a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_filename as cacheFilename, ag.cache_dir as cacheDir");
+        sbSQL.append(" FROM artwork a");
+        sbSQL.append(" LEFT JOIN artwork_located al on a.id=al.artwork_id");
+        sbSQL.append(" LEFT JOIN artwork_generated ag on al.id=ag.located_id");
+        sbSQL.append(" WHERE a.id=").append(id);
+
+        Map<String, BasicType> scalars = new HashMap<String, BasicType>();
+        scalars.put("artworkId", LongType.INSTANCE);
+        scalars.put("locatedId", LongType.INSTANCE);
+        scalars.put("generatedId", LongType.INSTANCE);
+        scalars.put("artworkTypeString",StringType.INSTANCE);
+        scalars.put("cacheDir", StringType.INSTANCE);
+        scalars.put("cacheFilename", StringType.INSTANCE);
+
+        List<IndexArtworkDTO> results = executeQueryWithTransform(IndexArtworkDTO.class, sbSQL.toString(), null, scalars);
+        if (results.size() > 0) {
+            return results.get(0);
+        } else {
+            return new IndexArtworkDTO();
         }
     }
 

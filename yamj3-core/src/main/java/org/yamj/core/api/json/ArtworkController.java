@@ -22,6 +22,7 @@
  */
 package org.yamj.core.api.json;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import org.hibernate.QueryException;
@@ -39,6 +40,7 @@ import org.yamj.core.api.model.ApiWrapperList;
 import org.yamj.core.api.model.ApiWrapperSingle;
 import org.yamj.core.api.model.ParameterType;
 import org.yamj.core.api.model.Parameters;
+import org.yamj.core.api.model.dto.IndexArtworkDTO;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.service.JsonApiStorageService;
 
@@ -48,14 +50,14 @@ public class ArtworkController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkController.class);
     @Autowired
-    private JsonApiStorageService jsonApiStorageService;
+    private JsonApiStorageService api;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperSingle<Artwork> getArtworkById(@PathVariable String id) {
         LOG.info("Getting artwork with ID '{}'", id);
         ApiWrapperSingle<Artwork> wrapper = new ApiWrapperSingle<Artwork>();
-        Artwork artwork = jsonApiStorageService.getEntityById(Artwork.class, Long.parseLong(id));
+        Artwork artwork = api.getEntityById(Artwork.class, Long.parseLong(id));
         wrapper.setResult(artwork);
         wrapper.setStatusCheck();
         return wrapper;
@@ -81,7 +83,7 @@ public class ArtworkController {
         ApiWrapperList<Artwork> wrapper = new ApiWrapperList<Artwork>();
         wrapper.setParameters(p);
         try {
-            List<Artwork> results = jsonApiStorageService.getArtworkList(p);
+            List<Artwork> results = api.getArtworkList(p);
             wrapper.setResults(results);
             wrapper.setStatusCheck();
         } catch (QueryException ex) {
@@ -91,5 +93,15 @@ public class ArtworkController {
             LOG.error("Exception: {}", ex.getMessage());
         }
         return wrapper;
+    }
+
+    @RequestMapping(value = "/test/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public IndexArtworkDTO getArtwork(@PathVariable Long id) throws IOException {
+        LOG.info("Attempting to retrieve artwork with id '{}'", id);
+        IndexArtworkDTO artwork = api.getArtworkById(id);
+        LOG.info("Artwork: {}", artwork.toString());
+
+        return artwork;
     }
 }

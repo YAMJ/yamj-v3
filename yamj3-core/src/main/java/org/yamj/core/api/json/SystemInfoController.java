@@ -93,6 +93,7 @@ public class SystemInfoController {
     public ApiWrapperList<Configuration> getConfiguration() {
         ApiWrapperList<Configuration> wrapper = new ApiWrapperList<Configuration>();
         wrapper.setResults(configService.getConfiguration());
+        wrapper.setTotalCount(wrapper.getCount());
         wrapper.setStatusCheck();
         return wrapper;
     }
