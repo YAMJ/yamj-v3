@@ -9,7 +9,7 @@
     </head>
     <body background="${pageContext.request.contextPath}/images/yamj-configbg.jpg">
         <div id="logo">
-            <img src="${pageContext.request.contextPath}/images/YAMJ_Logo_Clear_Black.png">
+            <img src="${pageContext.request.contextPath}/images/yamj-logo.png">
             <h1>Yet Another Movie Jukebox</h1>
         </div>
         <br/>
