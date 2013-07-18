@@ -61,7 +61,9 @@ public class YamjInfo {
     private Map<MetaDataType, Long> counts;
     private String databaseIp;
     private String databaseName;
-    private String ipAddress;
+    private String coreIp;
+    private String corePort = "8888";   // TODO: Get this from jetty!
+    private String baseArtworkUrl;
 
     @SuppressWarnings("unused")
     private YamjInfo() {
@@ -95,10 +97,12 @@ public class YamjInfo {
         this.counts = new EnumMap<MetaDataType, Long>(MetaDataType.class);
 
         // IP Address
-        this.ipAddress = SystemTools.getIpAddress(Boolean.TRUE);
+        this.coreIp = SystemTools.getIpAddress(Boolean.TRUE);
 
         // Database IP & Name
         findDatabaseInfo();
+
+        this.baseArtworkUrl = findBaseArtworkUrl();
     }
 
     public String getProjectName() {
@@ -171,8 +175,16 @@ public class YamjInfo {
         return databaseIp;
     }
 
-    public String getIpAddress() {
-        return ipAddress;
+    public String getCoreIp() {
+        return coreIp;
+    }
+
+    public String getCorePort() {
+        return corePort;
+    }
+
+    public String getBaseArtworkUrl() {
+        return baseArtworkUrl;
     }
 
     public Map<MetaDataType, Long> getCounts() {
@@ -247,5 +259,17 @@ public class YamjInfo {
             this.databaseName = "UNKNOWN";
             this.databaseIp = "UNKNOWN";
         }
+    }
+
+    private String findBaseArtworkUrl() {
+        String storagePath = PropertyTools.getProperty("yamj3.file.storage.artwork", "");
+        StringBuilder sb = new StringBuilder("http://");
+        sb.append(coreIp).append(":").append(corePort);
+        if (StringUtils.isNotBlank(storagePath)) {
+            sb.append("/").append(storagePath);
+        }
+        sb.append("/");
+
+        return sb.toString();
     }
 }

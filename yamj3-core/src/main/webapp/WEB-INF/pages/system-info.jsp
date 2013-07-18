@@ -48,8 +48,12 @@
                 <td>${yi.databaseIp}</td>
             </tr>
             <tr>
-                <td class="right">YAMJ IP Address</td>
-                <td>${yi.ipAddress}</td>
+                <td class="right">Core IP Address / Port</td>
+                <td>${yi.coreIp}:${yi.corePort}</td>
+            </tr>
+            <tr>
+                <td class="right">Base Artwork URL</td>
+                <td>${yi.baseArtworkUrl}</td>
             </tr>
         </table>
         <br/>

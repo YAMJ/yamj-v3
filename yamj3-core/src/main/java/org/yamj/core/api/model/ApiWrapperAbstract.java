@@ -37,6 +37,7 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     private DateTime queryTime = DateTime.now();
     private ApiStatus status = new ApiStatus();
     private Object parameters = null;
+    private String baseArtworkUrl = "";
 
     @Override
     public int getCount() {
@@ -69,6 +70,11 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     @Override
     public int getTotalCount() {
         return totalCount;
+    }
+
+    @Override
+    public String getBaseArtworkUrl() {
+        return baseArtworkUrl;
     }
 
     @Override
@@ -106,5 +112,10 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     @Override
     public void setTotalCount(int totalCount) {
         this.totalCount = totalCount;
+    }
+
+    @Override
+    public void setBaseArtworkUrl(String baseArtworkUrl) {
+        this.baseArtworkUrl = baseArtworkUrl;
     }
 }

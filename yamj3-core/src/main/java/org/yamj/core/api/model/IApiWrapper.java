@@ -42,6 +42,8 @@ public interface IApiWrapper {
 
     int getTotalCount();
 
+    String getBaseArtworkUrl();
+
     void setQueryTime(DateTime queryTime);
 
     void setQueryEnd();
@@ -55,4 +57,6 @@ public interface IApiWrapper {
     void setParameters(Object parameters);
 
     void setTotalCount(int totalCount);
+
+    void setBaseArtworkUrl(String baseArtworkUrl);
 }
