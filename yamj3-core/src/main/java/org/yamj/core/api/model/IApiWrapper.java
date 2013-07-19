@@ -23,12 +23,15 @@
 package org.yamj.core.api.model;
 
 import org.joda.time.DateTime;
+import org.yamj.common.model.YamjInfo;
 
 /**
  *
  * @author stuart.boston
  */
 public interface IApiWrapper {
+
+    void processYamjInfo(YamjInfo yi);
 
     int getCount();
 
@@ -44,6 +47,8 @@ public interface IApiWrapper {
 
     String getBaseArtworkUrl();
 
+    String getBaseMediainfoUrl();
+
     void setQueryTime(DateTime queryTime);
 
     void setQueryEnd();
@@ -57,6 +62,4 @@ public interface IApiWrapper {
     void setParameters(Object parameters);
 
     void setTotalCount(int totalCount);
-
-    void setBaseArtworkUrl(String baseArtworkUrl);
 }

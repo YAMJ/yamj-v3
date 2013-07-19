@@ -23,6 +23,7 @@
 package org.yamj.core.api.model;
 
 import org.joda.time.DateTime;
+import org.yamj.common.model.YamjInfo;
 import org.yamj.common.tools.DateTimeTools;
 
 /**
@@ -38,6 +39,7 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     private ApiStatus status = new ApiStatus();
     private Object parameters = null;
     private String baseArtworkUrl = "";
+    private String baseMediainfoUrl = "";
 
     @Override
     public int getCount() {
@@ -78,6 +80,11 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     }
 
     @Override
+    public String getBaseMediainfoUrl() {
+        return baseMediainfoUrl;
+    }
+
+    @Override
     public void setQueryTime(DateTime queryTime) {
         this.queryTime = queryTime;
     }
@@ -115,7 +122,8 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     }
 
     @Override
-    public void setBaseArtworkUrl(String baseArtworkUrl) {
-        this.baseArtworkUrl = baseArtworkUrl;
+    public final void processYamjInfo(YamjInfo yi) {
+        this.baseArtworkUrl = yi.getBaseArtworkUrl();
+        this.baseArtworkUrl = yi.getBaseMediainfoUrl();
     }
 }

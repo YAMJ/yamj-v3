@@ -64,6 +64,7 @@ public class YamjInfo {
     private String coreIp;
     private String corePort = "8888";   // TODO: Get this from jetty!
     private String baseArtworkUrl;
+    private String baseMediainfoUrl;
 
     @SuppressWarnings("unused")
     private YamjInfo() {
@@ -102,7 +103,8 @@ public class YamjInfo {
         // Database IP & Name
         findDatabaseInfo();
 
-        this.baseArtworkUrl = findBaseArtworkUrl();
+        this.baseArtworkUrl = buildBaseUrl(PropertyTools.getProperty("yamj3.file.storage.artwork", ""));
+        this.baseMediainfoUrl = buildBaseUrl(PropertyTools.getProperty("yamj3.file.storage.mediainfo", ""));
     }
 
     public String getProjectName() {
@@ -187,6 +189,10 @@ public class YamjInfo {
         return baseArtworkUrl;
     }
 
+    public String getBaseMediainfoUrl() {
+        return baseMediainfoUrl;
+    }
+
     public Map<MetaDataType, Long> getCounts() {
         return counts;
     }
@@ -247,6 +253,9 @@ public class YamjInfo {
         log.info("Core Uptime     : {}", getUptime());
     }
 
+    /**
+     * Calculate the database name and IP address from the connection URL
+     */
     private void findDatabaseInfo() {
         String dbUrl = PropertyTools.getProperty("yamj3.database.url", "");
         if (StringUtils.containsIgnoreCase(dbUrl, "derby")) {
@@ -261,15 +270,20 @@ public class YamjInfo {
         }
     }
 
-    private String findBaseArtworkUrl() {
-        String storagePath = PropertyTools.getProperty("yamj3.file.storage.artwork", "");
-        StringBuilder sb = new StringBuilder("http://");
-        sb.append(coreIp).append(":").append(corePort);
-        if (StringUtils.isNotBlank(storagePath)) {
-            sb.append("/").append(storagePath);
+    /**
+     * Create the URL to the web server based on the core IP address and port
+     *
+     * @param additionalPath
+     * @return The generated URL
+     */
+    private String buildBaseUrl(String additionalPath) {
+        StringBuilder sbUrl = new StringBuilder("http://");
+        sbUrl.append(coreIp).append(":").append(corePort);
+        if (StringUtils.isNotBlank(additionalPath)) {
+            sbUrl.append("/").append(additionalPath);
         }
-        sb.append("/");
+        sbUrl.append("/");
 
-        return sb.toString();
+        return sbUrl.toString();
     }
 }

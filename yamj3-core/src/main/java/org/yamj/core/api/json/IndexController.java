@@ -63,7 +63,7 @@ public class IndexController {
         wrapper.setParameters(options);
         jsonApiStorageService.getVideoList(wrapper);
         wrapper.setStatusCheck();
-        wrapper.setBaseArtworkUrl(YAMJ_INFO.getBaseArtworkUrl());
+        wrapper.processYamjInfo(YAMJ_INFO);
         return wrapper;
     }
 
@@ -77,7 +77,7 @@ public class IndexController {
         wrapper.setParameters(options);
         jsonApiStorageService.getPersonList(wrapper);
         wrapper.setStatusCheck();
-        wrapper.setBaseArtworkUrl(YAMJ_INFO.getBaseArtworkUrl());
+        wrapper.processYamjInfo(YAMJ_INFO);
         return wrapper;
     }
 
