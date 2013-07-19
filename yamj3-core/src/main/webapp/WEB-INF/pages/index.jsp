@@ -22,7 +22,6 @@
                 <th colspan="2">Index of Pages</th>
             </tr>
             <tr>
-                <!-- There is a bug in netbeans that displays this as an error. Ignore it -->
                 <td><a href="${pageContext.request.contextPath}/system-info.html">System information</a></td>
                 <td>Display information about the state of the core.</td>
             </tr>
@@ -32,12 +31,21 @@
         </table>
         <table class="sysinfo">
             <tr>
-                <th>Version: ${yi.projectVersion}</th>
-                <th>Revision: ${yi.buildRevision}</th>
-                <th>Java: ${yi.javaVersion}</th>
-                <th>Build Date: ${yi.buildDate}</th>
-                <th>Start-up Time: ${yi.startUpTime}</th>
-                <th>Uptime: ${yi.uptime}</th>
+                <th>Version</th>
+                <th>Revision</th>
+                <th>Java</th>
+                <th>Build Date</th>
+                <th>Start-up Time</th>
+                <th>Uptime</th>
+            </tr>
+            <tr>
+                <td>${yi.projectVersion}</td>
+                <td>${yi.buildRevision}</td>
+                <td>${yi.javaVersion}</td>
+                <td>${yi.buildDate}</td>
+                <td>${yi.startUpTime}</td>
+                <td>${yi.uptime}</td>
+            </tr>
         </table>
     </body>
 </html>

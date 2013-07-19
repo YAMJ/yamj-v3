@@ -52,12 +52,14 @@
         <br>
         <br>
         <br>
-        <th>Version: ${yi.projectVersion}</th>
-        <th>Revision: ${yi.buildRevision}</th>
-        <th>Java: ${yi.javaVersion}</th>
-        <th>Build Date: ${yi.buildDate}</th>
-        <th>Start-up Time: ${yi.startUpTime}</th>
-        <th>Uptime: ${yi.uptime}</th>
+        <tr>
+            <th>Version: ${yi.projectVersion}</th>
+            <th>Revision: ${yi.buildRevision}</th>
+            <th>Java: ${yi.javaVersion}</th>
+            <th>Build Date: ${yi.buildDate}</th>
+            <th>Start-up Time: ${yi.startUpTime}</th>
+            <th>Uptime: ${yi.uptime}</th>
+        </tr>
     </table>
 </td>
 </body>
