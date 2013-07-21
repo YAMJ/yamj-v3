@@ -24,8 +24,11 @@ package org.yamj.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.lang.management.ManagementFactory;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.EnumMap;
 import java.util.Map;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.joda.time.DateTime;
@@ -62,7 +65,7 @@ public class YamjInfo {
     private String databaseIp;
     private String databaseName;
     private String coreIp;
-    private String corePort = "8888";   // TODO: Get this from jetty!
+    private int corePort = 8888;   // TODO: Get this from jetty!
     private String baseArtworkUrl;
     private String baseMediainfoUrl;
 
@@ -181,7 +184,7 @@ public class YamjInfo {
         return coreIp;
     }
 
-    public String getCorePort() {
+    public int getCorePort() {
         return corePort;
     }
 
@@ -277,13 +280,17 @@ public class YamjInfo {
      * @return The generated URL
      */
     private String buildBaseUrl(String additionalPath) {
-        StringBuilder sbUrl = new StringBuilder("http://");
-        sbUrl.append(coreIp).append(":").append(corePort);
-        if (StringUtils.isNotBlank(additionalPath)) {
-            sbUrl.append("/").append(additionalPath);
+        try {
+            StringBuilder path = new StringBuilder("/");
+            path.append(FilenameUtils.normalize(additionalPath, true));
+            if (!path.toString().endsWith("/")) {
+                path.append("/");
+            }
+            URI uri = new URI("http", null, coreIp, corePort, path.toString(), null, null);
+            return uri.toString();
+        } catch (URISyntaxException ex) {
+            LOG.warn("Failed to encode base URL: {}", ex.getMessage());
+            return "";
         }
-        sbUrl.append("/");
-
-        return sbUrl.toString();
     }
 }
