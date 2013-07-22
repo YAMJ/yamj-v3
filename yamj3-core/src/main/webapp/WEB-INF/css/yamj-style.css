@@ -4,7 +4,6 @@ html, #tablelist,#headertable,#logo,#message
     font-family:"Trebuchet MS", Arial, Helvetica, sans-serif;
     border-collapse:collapse;
     width: 100%;
-
 }
 
 #tablelist td, #tablelist th, #headertable td, #headertable th
@@ -46,7 +45,8 @@ html, #tablelist,#headertable,#logo,#message
     background-image:         linear-gradient( #555 /*{table-background-start}*/, #383838 /*{table-background-end}*/);
 }
 
-#tablelist tr:nth-child(odd) {
+#tablelist tr:nth-child(odd)
+{
     color:#000000;
     background-color:#EAF2D3;
 }
@@ -82,7 +82,8 @@ html, #tablelist,#headertable,#logo,#message
     text-align: center;
 }
 
-a:-webkit-any-link {
+a:-webkit-any-link
+{
     color: #2489ce;
     text-decoration: underline;
     cursor: auto;
@@ -90,6 +91,11 @@ a:-webkit-any-link {
 
 .sysinfo
 {
+    border: 1px solid #000 /*{headertable-border}*/;
+    background: #888 /*{table-background-color}*/;
     position: relative;
     top:80px;
+    margin-left:auto;
+    margin-right:auto;
+    padding:5px 5px;
 }
