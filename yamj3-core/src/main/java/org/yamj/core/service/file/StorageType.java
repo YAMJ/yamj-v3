@@ -3,5 +3,6 @@ package org.yamj.core.service.file;
 public enum StorageType {
 
     ARTWORK,
-    MEDIAINFO;
+    MEDIAINFO,
+    SKIN;
 }

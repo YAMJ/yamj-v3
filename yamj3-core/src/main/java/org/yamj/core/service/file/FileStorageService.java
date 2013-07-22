@@ -37,6 +37,7 @@ import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +56,7 @@ public class FileStorageService {
     private String storageResourceDir;
     private String storagePathArtwork;
     private String storagePathMediaInfo;
+    private String storagePathSkin;
     @Autowired
     private PoolingHttpClient httpClient;
 
@@ -74,6 +76,12 @@ public class FileStorageService {
     public void setStoragePathMediaInfo(String storagePathMediaInfo) {
         this.storagePathMediaInfo = FilenameUtils.normalize(FilenameUtils.concat(storageResourceDir, storagePathMediaInfo), Boolean.TRUE);
         LOG.info("MediaInfo storage path set to '{}'", this.storagePathMediaInfo);
+    }
+
+    @Value("${yamj3.file.storage.skins}")
+    public void setStoragePathSkins(String storagePathSkins) {
+        this.storagePathSkin = FilenameUtils.normalize(FilenameUtils.concat(storageResourceDir, storagePathSkins), Boolean.TRUE);
+        LOG.info("Skins storage path set to '{}'", this.storagePathSkin);
     }
 
     public boolean exists(StorageType type, String filename) throws IOException {
@@ -169,31 +177,29 @@ public class FileStorageService {
     }
 
     public String getStorageName(StorageType type, String filename) {
-        String hashFilename;
-        if (StorageType.ARTWORK == type) {
-            hashFilename = FilenameUtils.concat(this.storagePathArtwork, FileTools.createDirHash(filename));
-            FileTools.makeDirectories(hashFilename);
-        } else if (StorageType.MEDIAINFO == type) {
-            hashFilename = FilenameUtils.concat(this.storagePathMediaInfo, FileTools.createDirHash(filename));
-            FileTools.makeDirectories(hashFilename);
-        } else {
-            throw new IllegalArgumentException("Unknown storage type " + type);
-        }
-        return hashFilename;
+        return getStorageName(type, null, filename);
     }
 
-    public String getStorageName(StorageType type, String dir, String filename) {
-        String hashFilename = FilenameUtils.concat(dir, filename);
+    public String getStorageName(StorageType type, final String dir, final String filename) {
+        String hashFilename;
+
+        if (StringUtils.isNotBlank(dir)) {
+            hashFilename = FilenameUtils.concat(dir, filename);
+        } else {
+            hashFilename = filename;
+        }
+
         if (StorageType.ARTWORK == type) {
             hashFilename = FilenameUtils.concat(this.storagePathArtwork, hashFilename);
-            FileTools.makeDirectories(hashFilename);
         } else if (StorageType.MEDIAINFO == type) {
             hashFilename = FilenameUtils.concat(this.storagePathMediaInfo, hashFilename);
-            FileTools.makeDirectories(hashFilename);
+        } else if (StorageType.SKIN == type) {
+            hashFilename = FilenameUtils.concat(this.storagePathSkin, hashFilename);
         } else {
             throw new IllegalArgumentException("Unknown storage type " + type);
         }
 
+        FileTools.makeDirectories(hashFilename);
         return hashFilename;
     }
 }
