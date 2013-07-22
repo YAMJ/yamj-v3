@@ -56,6 +56,8 @@ public class Start {
     private static int yamjShutdownTimeout = 5000;
     private static boolean yamjStopAtShutdown = Boolean.TRUE;
     private static final String RESOURCES_DIR = "./resources/";
+    private static final String SKINS_DIR = "./skins/";
+    private static final String[] DEFAULT_WELCOME_PAGES = {"yamj.html", "index.html"};
 
     public static void main(String[] args) {
         // Create the log file name here, so we can change it later (because it's locked
@@ -131,14 +133,22 @@ public class Start {
             // Ensure the 'RESOURCES_DIR' directory is created
             FileUtils.forceMkdir(new File(RESOURCES_DIR));
             // Allow the jetty server to serve the artwork files (and any others) from the 'RESOURCES_DIR' directory
-            ResourceHandler resourceHandler = new ResourceHandler();
-            resourceHandler.setResourceBase(RESOURCES_DIR);
-            resourceHandler.setWelcomeFiles(new String[]{"yamj.html", "index.html"});
-            resourceHandler.setDirectoriesListed(Boolean.TRUE);
-            LOG.info("Resource base: {}", resourceHandler.getResourceBase());
+            ResourceHandler resourceDirHandler = new ResourceHandler();
+            resourceDirHandler.setResourceBase(RESOURCES_DIR);
+            resourceDirHandler.setWelcomeFiles(DEFAULT_WELCOME_PAGES);
+            resourceDirHandler.setDirectoriesListed(Boolean.TRUE);
+            LOG.info("Resource base: {}", resourceDirHandler.getResourceBase());
+
+            // Ensure the 'SKIN_DIR' directory is created
+            FileUtils.forceMkdir(new File(SKINS_DIR));
+            // Allow the jetty server to serve the skin files from the 'SKINS_DIR' directory
+            ResourceHandler skinDirHandler = new ResourceHandler();
+            skinDirHandler.setResourceBase(SKINS_DIR);
+            skinDirHandler.setDirectoriesListed(Boolean.TRUE);
+            LOG.info("Skins directory: {}", skinDirHandler.getResourceBase());
 
             HandlerList handlers = new HandlerList();
-            handlers.setHandlers(new Handler[]{webapp, resourceHandler, new DefaultHandler()});
+            handlers.setHandlers(new Handler[]{webapp, skinDirHandler, resourceDirHandler, new DefaultHandler()});
             server.setHandler(handlers);
 
             if (server.getThreadPool() instanceof QueuedThreadPool) {

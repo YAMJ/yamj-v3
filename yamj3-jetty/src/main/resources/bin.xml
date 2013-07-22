@@ -59,16 +59,27 @@
             </includes>
         </fileSet>
 
-        <!-- Create the resource directory -->
-        <fileSet>
-            <directory>${basedir}/config</directory>
-            <outputDirectory>resources</outputDirectory>
-            <includes>
-                <include>*.html</include>
-            </includes>
-        </fileSet>
-
     </fileSets>
+
+    <files>
+        <!-- Create the resource directory -->
+        <file>
+            <source>${basedir}/config/resources-yamj.html</source>
+            <outputDirectory>resources</outputDirectory>
+            <destName>yamj3.html</destName>
+        </file>
+        <!-- Create the skins directory -->
+        <file>
+            <source>${basedir}/config/skins-yamj.html</source>
+            <outputDirectory>skins</outputDirectory>
+            <destName>skins.html</destName>
+        </file>
+        <file>
+            <source>${basedir}/config/skins-readme.txt</source>
+            <outputDirectory>skins</outputDirectory>
+            <destName>readme.txt</destName>
+        </file>
+    </files>
 
     <moduleSets>
         <moduleSet>
