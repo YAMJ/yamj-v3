@@ -89,10 +89,23 @@ public class ApiDao extends HibernateDao {
             ids.get(single.getVideoType()).add(single.getId());
         }
 
-        LOG.debug("Found IDs: {}", ids);
+        boolean foundArtworkIds = Boolean.FALSE;    // Check to see that we have artwork to find
+        // Remove any blank entries
+        for (MetaDataType mdt : MetaDataType.values()) {
+            if (CollectionUtils.isEmpty(ids.get(mdt))) {
+                ids.remove(mdt);
+            } else {
+                // We've found an artwork, so we can continue
+                foundArtworkIds = Boolean.TRUE;
+            }
+        }
 
-        addArtworkList(ids, results, (OptionsIndexVideo) wrapper.getParameters());
-
+        if (foundArtworkIds) {
+            LOG.debug("Found artwork to process, IDs: {}", ids);
+            addArtworkList(ids, results, (OptionsIndexVideo) wrapper.getParameters());
+        } else {
+            LOG.debug("No artwork found to process, skipping.");
+        }
     }
 
     private String generateSqlForVideoList(ApiWrapperList<IndexVideoDTO> wrapper) {
@@ -243,16 +256,16 @@ public class ApiDao extends HibernateDao {
         scalars.put("artworkId", LongType.INSTANCE);
         scalars.put("locatedId", LongType.INSTANCE);
         scalars.put("generatedId", LongType.INSTANCE);
-        scalars.put("artworkTypeString",StringType.INSTANCE);
+        scalars.put("artworkTypeString", StringType.INSTANCE);
         scalars.put("cacheDir", StringType.INSTANCE);
         scalars.put("cacheFilename", StringType.INSTANCE);
 
         List<IndexArtworkDTO> results = executeQueryWithTransform(IndexArtworkDTO.class, sbSQL.toString(), null, scalars);
-        if (results.size() > 0) {
-            return results.get(0);
-        } else {
+        if (CollectionUtils.isEmpty(results)) {
             return new IndexArtworkDTO();
         }
+
+        return results.get(0);
     }
 
     /**
@@ -289,6 +302,7 @@ public class ApiDao extends HibernateDao {
         if (CollectionUtils.isEmpty(results)) {
             return new CountTimestamp(type);
         }
+
         return results.get(0);
     }
 
@@ -354,7 +368,11 @@ public class ApiDao extends HibernateDao {
         query.setReadOnly(true);
         query.setCacheable(true);
 
-        // Add a transformation if the class is not "Object"
+        // TODO: Add a transformation if the class is not "Object"
+
+
+
+
         if (T != null && !T.equals(Object[].class)) {
             query.setResultTransformer(Transformers.aliasToBean(T));
         }
