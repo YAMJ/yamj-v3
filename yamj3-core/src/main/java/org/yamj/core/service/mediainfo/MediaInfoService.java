@@ -338,11 +338,19 @@ public class MediaInfoService implements InitializingBean {
     private void parseAudioCodec(AudioCodec audioCodec, Map<String,String> infosAudio) {
         // codec
         String infoValue = infosAudio.get("Codec ID");
-        audioCodec.setCodec(infoValue);
+        if (StringUtils.isBlank(infoValue)) {
+            audioCodec.setCodec(Constants.UNDEFINED);
+        } else {
+            audioCodec.setCodec(infoValue);
+        }
 
         // codec format
         infoValue = infosAudio.get("Format");
-        audioCodec.setCodecFormat(infoValue);
+        if (StringUtils.isBlank(infoValue)) {
+            audioCodec.setCodecFormat(Constants.UNDEFINED);
+        } else {
+            audioCodec.setCodecFormat(infoValue);
+        }
 
         // bit rate
         audioCodec.setBitRate(getBitRate(infosAudio));

@@ -27,10 +27,10 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
     @Column(name = "counter", nullable = false)
     private int counter = -1;
 
-    @Column(name = "codec", nullable = false)
+    @Column(name = "codec", nullable = false, length = 50)
     private String codec;
 
-    @Column(name = "codec_format", nullable = false)
+    @Column(name = "codec_format", nullable = false, length = 50)
     private String codecFormat;
 
     @Column(name = "bitrate", nullable = false)
