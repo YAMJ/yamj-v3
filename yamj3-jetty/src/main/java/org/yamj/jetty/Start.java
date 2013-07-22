@@ -56,7 +56,7 @@ public class Start {
     private static int yamjShutdownTimeout = 5000;
     private static boolean yamjStopAtShutdown = Boolean.TRUE;
     private static final String RESOURCES_DIR = "./resources/";
-    private static final String SKINS_DIR = "./skins/";
+    private static final String SKINS_DIR = "skins/";
     private static final String[] DEFAULT_WELCOME_PAGES = {"yamj.html", "index.html"};
 
     public static void main(String[] args) {
@@ -140,15 +140,12 @@ public class Start {
             LOG.info("Resource base: {}", resourceDirHandler.getResourceBase());
 
             // Ensure the 'SKIN_DIR' directory is created
-            FileUtils.forceMkdir(new File(SKINS_DIR));
-            // Allow the jetty server to serve the skin files from the 'SKINS_DIR' directory
-            ResourceHandler skinDirHandler = new ResourceHandler();
-            skinDirHandler.setResourceBase(SKINS_DIR);
-            skinDirHandler.setDirectoriesListed(Boolean.TRUE);
-            LOG.info("Skins directory: {}", skinDirHandler.getResourceBase());
+            String skinDir = FilenameUtils.concat(RESOURCES_DIR, SKINS_DIR);
+            FileUtils.forceMkdir(new File(skinDir));
+            LOG.info("Skins directory: {}", skinDir);
 
             HandlerList handlers = new HandlerList();
-            handlers.setHandlers(new Handler[]{webapp, skinDirHandler, resourceDirHandler, new DefaultHandler()});
+            handlers.setHandlers(new Handler[]{webapp, resourceDirHandler, new DefaultHandler()});
             server.setHandler(handlers);
 
             if (server.getThreadPool() instanceof QueuedThreadPool) {

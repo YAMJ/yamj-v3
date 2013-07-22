@@ -71,12 +71,12 @@
         <!-- Create the skins directory -->
         <file>
             <source>${basedir}/config/skins-yamj.html</source>
-            <outputDirectory>skins</outputDirectory>
+            <outputDirectory>resources/skins</outputDirectory>
             <destName>skins.html</destName>
         </file>
         <file>
             <source>${basedir}/config/skins-readme.txt</source>
-            <outputDirectory>skins</outputDirectory>
+            <outputDirectory>resources/skins</outputDirectory>
             <destName>readme.txt</destName>
         </file>
     </files>
