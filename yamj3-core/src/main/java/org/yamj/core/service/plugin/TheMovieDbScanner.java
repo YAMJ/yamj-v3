@@ -409,6 +409,8 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             return null;
         }
         
+        newBio = newBio.replaceAll("\\s+", " ");
+        
         int pos = StringUtils.indexOfIgnoreCase(newBio, FROM_WIKIPEDIA);
         if (pos >= 0) {
             // We've found the text, so remove it
@@ -422,6 +424,6 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             newBio = newBio.substring(0, pos);
         }
 
-        return newBio.replaceAll("\\n", " ").trim();
+        return newBio.trim();
     }
 }
