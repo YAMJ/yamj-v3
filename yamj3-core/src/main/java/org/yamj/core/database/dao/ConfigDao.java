@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -87,22 +86,20 @@ public class ConfigDao extends HibernateDao {
     }
 
     @Transactional
-    private List<Configuration> getConfigurationEntries(String property) {
+    @SuppressWarnings("unchecked")
+        private List<Configuration> getConfigurationEntries(String property) {
         if (StringUtils.isBlank(property)) {
             LOG.info("Getting all configuration entries");
         } else {
             LOG.info("Getting configuration for '{}'", property);
         }
 
-        StringBuilder sbSQL = new StringBuilder("FROM org.yamj.core.database.model.Configuration");
+        StringBuilder sbSQL = new StringBuilder("from Configuration");
         if (StringUtils.isNotBlank(property)) {
             sbSQL.append(" WHERE config_key='").append(property).append("'");
         }
 
-        Query q = getSession().createQuery(sbSQL.toString());
-        List<Configuration> queryResults = q.list();
-
-        return queryResults;
+        return getSession().createQuery(sbSQL.toString()).list();
     }
 
     @Transactional

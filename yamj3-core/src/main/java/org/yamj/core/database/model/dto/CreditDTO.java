@@ -45,8 +45,8 @@ public class CreditDTO {
 
     public CreditDTO(JobType jobType, String name, String role) {
         this.jobType = jobType;
-        this.name = name;
-        this.role = role;
+        this.name = StringUtils.trim(name);
+        this.role = StringUtils.trimToNull(role);
     }
 
     public String getName() {
@@ -125,7 +125,7 @@ public class CreditDTO {
             return false;
         }
         // check name
-        return StringUtils.equals(this.name, castOther.name);
+        return StringUtils.equalsIgnoreCase(this.name, castOther.name);
     }
 
     @Override

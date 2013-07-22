@@ -93,15 +93,15 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         series.setSourceDbId(ImdbScanner.IMDB_SCANNER_ID, tvdbSeries.getImdbId());
 
         if (OverrideTools.checkOverwriteTitle(series, TVDB_SCANNER_ID)) {
-            series.setTitle(tvdbSeries.getSeriesName(), TVDB_SCANNER_ID);
+            series.setTitle(StringUtils.trim(tvdbSeries.getSeriesName()), TVDB_SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwritePlot(series, TVDB_SCANNER_ID)) {
-            series.setPlot(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
+            series.setPlot(StringUtils.trim(tvdbSeries.getOverview()), TVDB_SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteOutline(series, TVDB_SCANNER_ID)) {
-            series.setOutline(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
+            series.setOutline(StringUtils.trim(tvdbSeries.getOverview()), TVDB_SCANNER_ID);
         }
 
         // TODO more values
@@ -142,19 +142,19 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
                 // use values from series
                 if (OverrideTools.checkOverwriteTitle(season, TVDB_SCANNER_ID)) {
-                    season.setTitle(tvdbSeries.getSeriesName(), TVDB_SCANNER_ID);
+                    season.setTitle(StringUtils.trim(tvdbSeries.getSeriesName()), TVDB_SCANNER_ID);
                 }
 
                 if (OverrideTools.checkOverwritePlot(season, TVDB_SCANNER_ID)) {
-                    season.setPlot(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
+                    season.setPlot(StringUtils.trim(tvdbSeries.getOverview()), TVDB_SCANNER_ID);
                 }
 
                 if (OverrideTools.checkOverwriteOutline(season, TVDB_SCANNER_ID)) {
-                    season.setOutline(tvdbSeries.getOverview(), TVDB_SCANNER_ID);
+                    season.setOutline(StringUtils.trim(tvdbSeries.getOverview()), TVDB_SCANNER_ID);
                 }
 
                 // TODO common usable format
-                season.setFirstAired(tvdbSeries.getFirstAired());
+                season.setFirstAired(StringUtils.trimToNull(tvdbSeries.getFirstAired()));
 
                 // mark as scanned
                 season.setTvSeasonScanned();
@@ -189,11 +189,11 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             } else {
 
                 if (OverrideTools.checkOverwriteTitle(videoData, TVDB_SCANNER_ID)) {
-                    videoData.setTitle(episode.getEpisodeName(), TVDB_SCANNER_ID);
+                    videoData.setTitle(StringUtils.trim(episode.getEpisodeName()), TVDB_SCANNER_ID);
                 }
 
                 if (OverrideTools.checkOverwritePlot(videoData, TVDB_SCANNER_ID)) {
-                    videoData.setPlot(episode.getOverview(), TVDB_SCANNER_ID);
+                    videoData.setPlot(StringUtils.trim(episode.getOverview()), TVDB_SCANNER_ID);
                 }
 
                 // cast and crew

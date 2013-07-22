@@ -206,7 +206,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                     int firstindex = plotXml.indexOf("gelesen</b></b><br><br>") + 23;
                     int lastindex = plotXml.indexOf("</font>", firstindex);
                     String plot = plotXml.substring(firstindex, lastindex);
-                    plot = plot.replaceAll("<br />", " ");
+                    plot = plot.replaceAll("<br />", " ").trim();
 
                     if (OverrideTools.checkOverwritePlot(videoData, OFDB_SCANNER_ID)) {
                         videoData.setPlot(plot, OFDB_SCANNER_ID);

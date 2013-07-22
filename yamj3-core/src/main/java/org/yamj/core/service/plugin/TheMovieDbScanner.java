@@ -199,20 +199,20 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         }
 
         if (OverrideTools.checkOverwriteTitle(videoData, TMDB_SCANNER_ID)) {
-            videoData.setTitle(moviedb.getTitle(), TMDB_SCANNER_ID);
+            videoData.setTitle(StringUtils.trim(moviedb.getTitle()), TMDB_SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwritePlot(videoData, TMDB_SCANNER_ID)) {
-            videoData.setPlot(moviedb.getOverview(), TMDB_SCANNER_ID);
+            videoData.setPlot(StringUtils.trim(moviedb.getOverview()), TMDB_SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteOutline(videoData, TMDB_SCANNER_ID)) {
-            videoData.setOutline(moviedb.getOverview(), TMDB_SCANNER_ID);
+            videoData.setOutline(StringUtils.trim(moviedb.getOverview()), TMDB_SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteCountry(videoData, TMDB_SCANNER_ID)) {
             for (ProductionCountry country : moviedb.getProductionCountries()) {
-                videoData.setCountry(country.getName(), TMDB_SCANNER_ID);
+                videoData.setCountry(StringUtils.trimToNull(country.getName()), TMDB_SCANNER_ID);
                 break;
             }
         }
@@ -230,7 +230,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             // GENRES
             Set<String> genreNames = new HashSet<String>();
             for (com.omertron.themoviedbapi.model.Genre genre : moviedb.getGenres()) {
-                genreNames.add(genre.getName());
+                genreNames.add(StringUtils.trim(genre.getName()));
             }
             videoData.setGenreNames(genreNames, TMDB_SCANNER_ID);
         }
@@ -242,13 +242,12 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
                 credit = new CreditDTO();
                 credit.setSourcedb(TMDB_SCANNER_ID);
                 credit.setSourcedbId(String.valueOf(person.getId()));
-                credit.setName(person.getName());
-                credit.setRole(person.getCharacter());
+                credit.setName(StringUtils.trim(person.getName()));
+                credit.setRole(StringUtils.trimToNull(person.getCharacter()));
 
                 if (person.getAka() != null && !person.getAka().isEmpty()) {
-                    credit.setAka(person.getAka().get(0));
+                    credit.setAka(StringUtils.trimToNull(person.getAka().get(0)));
                 }
-                credit.setRole(person.getCharacter());
 
                 if (person.getPersonType() == PersonType.CAST) {
                     credit.setJobType(JobType.ACTOR);
@@ -360,8 +359,8 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             com.omertron.themoviedbapi.model.Person tmdbPerson = tmdbApi.getPersonInfo(Integer.parseInt(id));
 
             person.setBiography(cleanBiography(tmdbPerson.getBiography()));
-            person.setBirthPlace(tmdbPerson.getBirthplace());
-            person.setPersonId(ImdbScanner.IMDB_SCANNER_ID, tmdbPerson.getImdbId());
+            person.setBirthPlace(StringUtils.trimToNull(tmdbPerson.getBirthplace()));
+            person.setPersonId(ImdbScanner.IMDB_SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
 
             Date parsedDate = parseDate(tmdbPerson.getBirthday());
             if (parsedDate != null) {
@@ -390,9 +389,9 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     private Date parseDate(String dateToConvert) {
         if (StringUtils.isNotBlank(dateToConvert)) {
             try {
-                return DateUtils.parseDate(dateToConvert, "yyyy-MM-dd");
+                return DateUtils.parseDate(dateToConvert.trim(), "yyyy-MM-dd");
             } catch (ParseException ex) {
-                LOG.warn("Failed to convert date '{}'", dateToConvert);
+                LOG.warn("Failed to convert date '{}'", dateToConvert.trim());
             }
         }
         return null;
@@ -406,7 +405,10 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
      */
     private String cleanBiography(final String bio) {
         String newBio = StringUtils.trimToNull(bio);
-
+        if (newBio == null) {
+            return null;
+        }
+        
         int pos = StringUtils.indexOfIgnoreCase(newBio, FROM_WIKIPEDIA);
         if (pos >= 0) {
             // We've found the text, so remove it
@@ -420,7 +422,6 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             newBio = newBio.substring(0, pos);
         }
 
-        newBio = StringUtils.trimToNull(newBio);
-        return newBio;
+        return newBio.replaceAll("\\n", " ").trim();
     }
 }

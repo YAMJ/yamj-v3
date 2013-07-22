@@ -24,28 +24,25 @@ package org.yamj.core.database.service;
 
 import java.io.Serializable;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.yamj.common.type.MetaDataType;
+import org.yamj.core.api.model.ApiWrapperList;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.Parameters;
+import org.yamj.core.api.model.dto.IndexArtworkDTO;
+import org.yamj.core.api.model.dto.IndexPersonDTO;
 import org.yamj.core.api.model.dto.IndexVideoDTO;
+import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.ApiDao;
 import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.model.*;
-import org.yamj.common.type.MetaDataType;
-import org.yamj.core.api.model.ApiWrapperList;
-import org.yamj.core.api.model.dto.IndexArtworkDTO;
-import org.yamj.core.api.model.dto.IndexPersonDTO;
-import org.yamj.core.configuration.ConfigService;
 
 @Service("jsonApiStorageService")
 public class JsonApiStorageService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(JsonApiStorageService.class);
     @Autowired
     private CommonDao commonDao;
     @Autowired

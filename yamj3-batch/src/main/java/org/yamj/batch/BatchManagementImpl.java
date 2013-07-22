@@ -108,7 +108,13 @@ public class BatchManagementImpl implements BatchManagement {
                 stageFile.setFileDate(System.currentTimeMillis());
                 stageFile.setFileSize(5000L);
                 stageDirectory.addStageFile(stageFile);
-                
+
+                stageFile = new StageFileDTO();
+                stageFile.setFileName("The Possession (2012).mkv");
+                stageFile.setFileDate(System.currentTimeMillis());
+                stageFile.setFileSize(5000L);
+                stageDirectory.addStageFile(stageFile);
+
                 // import scanned
                 fileImportService.importScanned(importDTO);
 
