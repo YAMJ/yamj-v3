@@ -124,6 +124,6 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     @Override
     public final void processYamjInfo(YamjInfo yi) {
         this.baseArtworkUrl = yi.getBaseArtworkUrl();
-        this.baseArtworkUrl = yi.getBaseMediainfoUrl();
+        this.baseMediainfoUrl = yi.getBaseMediainfoUrl();
     }
 }
