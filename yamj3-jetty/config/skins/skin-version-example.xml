@@ -1,0 +1,10 @@
+<skin>
+    <name>Example Skin</name>
+    <version>0.0.1</version>
+    <date>2013-07-23</date>
+    <description>Line 1</description>
+    <description>Line 2</description>
+    <description>Line 3</description>
+    <url>http://Where.to.com/download/this/skin.zip</url>
+    <image>ImageOfTheSkin.jpg</image>
+</skin>

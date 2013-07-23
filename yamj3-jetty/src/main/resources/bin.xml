@@ -22,9 +22,6 @@
         <fileSet>
             <directory>${project.build.directory}/dependencies</directory>
             <outputDirectory>lib</outputDirectory>
-            <excludes>
-                <exclude></exclude>
-            </excludes>
         </fileSet>
 
         <!-- add configuration files -->
@@ -35,6 +32,7 @@
                 <include>**/*</include>
             </includes>
             <excludes>
+                <exclude>skins/</exclude>
                 <exclude>*.properties</exclude>
                 <exclude>*.html</exclude>
             </excludes>
@@ -49,6 +47,18 @@
             </includes>
         </fileSet>
 
+        <!-- Add the resource folder files -->
+        <fileSet>
+            <directory>${basedir}/config/resources</directory>
+            <outputDirectory>resources</outputDirectory>
+        </fileSet>
+
+        <!-- Add the skin information files -->
+        <fileSet>
+            <directory>${basedir}/config/skins</directory>
+            <outputDirectory>resources/skins</outputDirectory>
+        </fileSet>
+
         <!--Add the version -->
         <fileSet>
             <directory>${project.build.directory}</directory>
@@ -60,26 +70,6 @@
         </fileSet>
 
     </fileSets>
-
-    <files>
-        <!-- Create the resource directory -->
-        <file>
-            <source>${basedir}/config/resources-yamj.html</source>
-            <outputDirectory>resources</outputDirectory>
-            <destName>yamj3.html</destName>
-        </file>
-        <!-- Create the skins directory -->
-        <file>
-            <source>${basedir}/config/skins-yamj.html</source>
-            <outputDirectory>resources/skins</outputDirectory>
-            <destName>skins.html</destName>
-        </file>
-        <file>
-            <source>${basedir}/config/skins-readme.txt</source>
-            <outputDirectory>resources/skins</outputDirectory>
-            <destName>readme.txt</destName>
-        </file>
-    </files>
 
     <moduleSets>
         <moduleSet>

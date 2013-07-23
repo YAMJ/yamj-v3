@@ -16,9 +16,12 @@ representation of the skin
 This file should be of the format:
 
 <skin>
-  <name>Skin Name</name>
-  <version>0.0.0</version>
-  <date>01-01-2013</date>
-  <message>This is a description of the skin</message>
-  <message>It can be as many lines as you need</message>
+    <name>Example Skin</name>
+    <version>0.0.1</version>
+    <date>2013-07-23</date>
+    <description>Description line 1</description>
+    <description>Description line 2</description>
+    <description>Description line 3</description>
+    <url>http://Where.to.com/download/this/skin.zip</url>
+    <image>ImageOfTheSkin.jpg</image>
 </skin>
