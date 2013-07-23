@@ -1,6 +1,8 @@
 package org.yamj.core.pages;
 
+import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +14,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.yamj.common.model.YamjInfo;
 import org.yamj.core.api.json.SystemInfoController;
+import org.yamj.core.api.model.Skin;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.Configuration;
+import org.yamj.core.service.file.FileStorageService;
+import org.yamj.core.service.file.StorageType;
 
 @Controller
 public class PagesController {
@@ -23,6 +28,8 @@ public class PagesController {
     SystemInfoController sic;
     @Autowired
     ConfigService configService;
+    @Autowired
+    FileStorageService fileStorageService;
 
     @RequestMapping(value = {"/", "/index"})
     public ModelAndView displayRoot() {
@@ -105,6 +112,38 @@ public class PagesController {
         configService.deleteProperty(key);
         String message = "Config was successfully deleted.";
         view.addObject("message", message);
+        return view;
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Skins Page">
+    @RequestMapping(value = "/skin-info")
+    public ModelAndView skinInfo() {
+        ModelAndView view = new ModelAndView("skin-info", "skin-entity", new Skin());
+        List<String> dirNames = fileStorageService.getDirectoryList(StorageType.SKIN, ".");
+        List<Skin> skins = new ArrayList<Skin>(dirNames.size());
+        for (String dir : dirNames) {
+            Skin skin = new Skin();
+            skin.setPath(dir);
+            skin.setSkinDir(fileStorageService.getStoragePathSkin());
+            skin.readSkinInformation();
+            LOG.info("Skin: {}", skin.toString());
+            skins.add(skin);
+        }
+
+        view.addObject("skins", skins);
+        view.addObject("yi", sic.getYamjInfo("true"));
+        return view;
+    }
+
+    @RequestMapping(value = "/skin-download")
+    public ModelAndView skinDownload(@ModelAttribute Skin skin) {
+        ModelAndView view = new ModelAndView("skin-download");
+        view.addObject("yi", sic.getYamjInfo("true"));
+        view.addObject("skin", skin);
+
+        LOG.info("Skin: {}", skin.toString());
+
         return view;
     }
     //</editor-fold>

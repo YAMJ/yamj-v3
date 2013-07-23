@@ -27,10 +27,13 @@ import org.yamj.core.database.model.StageFile;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
@@ -69,18 +72,27 @@ public class FileStorageService {
     @Value("${yamj3.file.storage.artwork}")
     public void setStoragePathArtwork(String storagePathArtwork) {
         this.storagePathArtwork = FilenameUtils.normalize(FilenameUtils.concat(storageResourceDir, storagePathArtwork), Boolean.TRUE);
+        if (!this.storagePathArtwork.endsWith("/")) {
+            this.storagePathArtwork += "/";
+        }
         LOG.info("Artwork storage path set to '{}'", this.storagePathArtwork);
     }
 
     @Value("${yamj3.file.storage.mediainfo}")
     public void setStoragePathMediaInfo(String storagePathMediaInfo) {
         this.storagePathMediaInfo = FilenameUtils.normalize(FilenameUtils.concat(storageResourceDir, storagePathMediaInfo), Boolean.TRUE);
+        if (!this.storagePathMediaInfo.endsWith("/")) {
+            this.storagePathMediaInfo += "/";
+        }
         LOG.info("MediaInfo storage path set to '{}'", this.storagePathMediaInfo);
     }
 
     @Value("${yamj3.file.storage.skins}")
     public void setStoragePathSkins(String storagePathSkins) {
         this.storagePathSkin = FilenameUtils.normalize(FilenameUtils.concat(storageResourceDir, storagePathSkins), Boolean.TRUE);
+        if (!this.storagePathSkin.endsWith("/")) {
+            this.storagePathSkin += "/";
+        }
         LOG.info("Skins storage path set to '{}'", this.storagePathSkin);
     }
 
@@ -176,6 +188,19 @@ public class FileStorageService {
         return new File(storageName);
     }
 
+    public List<String> getDirectoryList(StorageType type, final String dir) {
+        File path = new File(getStorageName(type, StringUtils.trimToEmpty(dir)));
+
+        String[] directories = path.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return new File(dir, name).isDirectory();
+            }
+        });
+
+        return Arrays.asList(directories);
+    }
+
     public String getStorageName(StorageType type, String filename) {
         return getStorageName(type, null, filename);
     }
@@ -184,9 +209,9 @@ public class FileStorageService {
         String hashFilename;
 
         if (StringUtils.isNotBlank(dir)) {
-            hashFilename = FilenameUtils.concat(dir, filename);
+            hashFilename = FilenameUtils.concat(StringUtils.trimToEmpty(dir), StringUtils.trimToEmpty(filename));
         } else {
-            hashFilename = filename;
+            hashFilename = StringUtils.trimToEmpty(filename);
         }
 
         if (StorageType.ARTWORK == type) {
@@ -201,5 +226,21 @@ public class FileStorageService {
 
         FileTools.makeDirectories(hashFilename);
         return hashFilename;
+    }
+
+    public String getStorageResourceDir() {
+        return storageResourceDir;
+    }
+
+    public String getStoragePathArtwork() {
+        return storagePathArtwork;
+    }
+
+    public String getStoragePathMediaInfo() {
+        return storagePathMediaInfo;
+    }
+
+    public String getStoragePathSkin() {
+        return storagePathSkin;
     }
 }

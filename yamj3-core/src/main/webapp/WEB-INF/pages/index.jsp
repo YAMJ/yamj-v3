@@ -26,8 +26,13 @@
                 <td>Display information about the state of the core.</td>
             </tr>
             <tr>
+                <td><a href="${pageContext.request.contextPath}/skin-info.html">Skins</a></td>
+                <td>Skins information.</td>
+            </tr>
+            <tr>
                 <td><a href="${pageContext.request.contextPath}/config/list.html">Configuration</a></td>
                 <td>Display information about the configuration.</td>
+            </tr>
         </table>
         <table class="sysinfo">
             <tr>
