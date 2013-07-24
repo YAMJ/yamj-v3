@@ -10,35 +10,59 @@
     <body background="${pageContext.request.contextPath}/images/yamj-configbg.jpg">
         <h1>Skin Download Page</h1>
 
-        <table>
+        <c:if test="${not empty message}">
+            <p>Message: ${message}</p>
+            <br/>
+        </c:if>
+        <br>
+        <table style="width: 60%">
             <tbody>
                 <tr>
-                    <th>Skin Name</th>
+                    <th style="width: 30%">Skin Name</th>
+                    <th style="width: 10%">Skin Version</th>
+                    <th style="width: 10%">Skin Date</th>
+                </tr>
+                <tr>
                     <td>${skin.name}</td>
+                    <td>${skin.version}</td>
+                    <td>${skin.skinDate}</td>
                 </tr>
                 <tr>
-                    <th>Image</th>
-                    <td>${skin.image}</td>
+                    <td colspan="3">
+                        <c:choose>
+                            <c:when test="${empty skin.image}">
+                                No Image
+                            </c:when>
+                            <c:otherwise>
+                                <img src="${yi.skinDir}${skin.path}/${skin.image}" width="400"/>
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
                 </tr>
                 <tr>
-                    <th>Skin Description</th>
-                    <td>
+                    <td colspan="3">
                         <c:forEach items="${skin.description}" var="line">
                             ${line}<br>
                         </c:forEach>
                     </td>
                 </tr>
                 <tr>
-                    <th>Path</th>
-                    <td>${skin.path}</td>
+                    <th style="width: 10%">Path</th>
+                    <td style="width: 40%" colspan="2">${skin.path}</td>
                 </tr>
                 <tr>
-                    <th>Source Url</th>
-                    <td>${skin.sourceUrl}</td>
+                    <th style="width: 10%">Source Url</th>
+                    <td style="width: 40%" colspan="2">${skin.sourceUrl}</td>
                 </tr>
             </tbody>
         </table>
 
+        <p><a href="/yamj3/skin-info.html">Skins</a></p>
+        <p><a href="/yamj3/">Home</a></p>
+
+        <br>
+        <br>
+        <br>
         <table class="sysinfo">
             <tr>
                 <th>Version</th>

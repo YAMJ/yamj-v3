@@ -120,6 +120,10 @@ public class Skin {
         this.fileDate = fileDate;
     }
 
+    public String getSkinDir() {
+        return skinDir;
+    }
+
     public void setSkinDir(String skinDir) {
         this.skinDir = skinDir;
     }

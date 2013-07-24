@@ -14,10 +14,11 @@
 
             <table id="tablelist" style="width: 90%; align:center;">
                 <tr>
-                    <th colspan="4">Skin listing</th>
+                    <th colspan="5">Skin listing</th>
                 </tr>
                 <tr>
                     <th style="width:20%">Skin Name</th>
+                    <th style="width:20%">Version</th>
                     <th style="width:10%">Image</th>
                     <th style="width:30%">Skin Description</th>
                     <th style="width:20%">Location</th>
@@ -25,13 +26,14 @@
                 <c:forEach items="${skins}" var="skin">
                     <tr>
                         <td>${skin.name}</td>
+                        <td>${skin.version}</td>
                         <td>
                             <c:choose>
                                 <c:when test="${empty skin.image}">
                                     No Image
                                 </c:when>
                                 <c:otherwise>
-                                    <img src="${yi.skinDir}${skin.path}/${skin.image}" width="100" height="100"/>
+                                    <img src="${yi.skinDir}${skin.path}/${skin.image}" width="100"/>
                                 </c:otherwise>
                             </c:choose>
                         </td>

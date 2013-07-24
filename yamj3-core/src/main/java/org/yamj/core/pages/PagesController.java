@@ -2,7 +2,6 @@ package org.yamj.core.pages;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,9 +140,9 @@ public class PagesController {
         ModelAndView view = new ModelAndView("skin-download");
         view.addObject("yi", sic.getYamjInfo("true"));
         view.addObject("skin", skin);
-
-        LOG.info("Skin: {}", skin.toString());
-
+        skin.setSkinDir(fileStorageService.getStoragePathSkin());
+        String message = fileStorageService.storeSkin(skin);
+        view.addObject("message", message);
         return view;
     }
     //</editor-fold>

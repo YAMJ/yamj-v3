@@ -30,6 +30,7 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -39,6 +40,9 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.FileHeader;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -47,6 +51,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.yamj.core.api.model.Skin;
 import org.yamj.core.database.model.type.ImageFormat;
 import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
@@ -63,6 +68,7 @@ public class FileStorageService {
     @Autowired
     private PoolingHttpClient httpClient;
 
+    //<editor-fold defaultstate="collapsed" desc="Property Setters">
     @Value("${yamj3.file.storage.resources}")
     public void setStorageResourceDir(String storageResourceDir) {
         this.storageResourceDir = FilenameUtils.normalize(storageResourceDir, Boolean.TRUE);
@@ -95,6 +101,7 @@ public class FileStorageService {
         }
         LOG.info("Skins storage path set to '{}'", this.storagePathSkin);
     }
+    //</editor-fold>
 
     public boolean exists(StorageType type, String filename) throws IOException {
         return false;
@@ -175,6 +182,75 @@ public class FileStorageService {
                 }
             }
         }
+    }
+
+    public String storeSkin(Skin skin) {
+        String message = "Skin downloaded OK";
+        LOG.debug("Attempting to store skin URL: '{}'", skin.getSourceUrl());
+        if (StringUtils.isNotBlank(skin.getSourceUrl())) {
+            String filename = FilenameUtils.getName(skin.getSourceUrl()).replaceAll("[^a-zA-Z0-9-_\\.]", "_");
+            LOG.debug("Storage filename is '{}'", filename);
+
+            URL skinUrl;
+            try {
+                skinUrl = new URL(skin.getSourceUrl());
+                boolean downloadResult = store(StorageType.SKIN, filename, skinUrl);
+                LOG.debug("Skin download {}", downloadResult ? "OK" : "Failed");
+
+                if (downloadResult) {
+                    String zipFilename = FilenameUtils.concat(skin.getSkinDir(), filename);
+                    LOG.debug("Unzipping skin file '{}'", zipFilename);
+
+                    try {
+                        ZipFile zf = new ZipFile(zipFilename);
+
+                        // Get a list of the files in the zip
+                        List<FileHeader> fileHeaderList = zf.getFileHeaders();
+                        // Get the first file
+                        String tempFilename = fileHeaderList.get(0).getFileName();
+                        // Get the directory name for the first file
+                        String tempDir = FilenameUtils.getBaseName(FilenameUtils.getPathNoEndSeparator(tempFilename));
+
+                        // If the directory from the zip was empty, use the zip name to unpack to.
+                        String zipTargetDir;
+                        if (StringUtils.isBlank(tempDir)) {
+                            // There's no folder so add the zip filename
+                            zipTargetDir = FilenameUtils.concat(skin.getSkinDir(), zipFilename);
+                            skin.setPath(zipFilename);
+                        } else {
+                            // Use the skin folder plus what's in the zip
+                            zipTargetDir = skin.getSkinDir();    // Default unpack to skin folder
+                            // Set the skin path to the one in the zip file
+                            skin.setPath(tempDir);
+                        }
+
+                        // Unpack the files
+                        zf.extractAll(zipTargetDir);
+                        LOG.info("Unzipped zip file '{}' to '{}'", zipFilename, zipTargetDir);
+
+                        // Update the skin information
+                        skin.readSkinInformation();
+
+                    } catch (ZipException ex) {
+                        LOG.warn("Failed to extract zip file '{}', error: {}", zipFilename, ex.getMessage());
+                        message = "Failed to extract skin from zip file!";
+                    }
+                } else {
+                    message = "Skin download failed. Check log for details.";
+                }
+
+            } catch (MalformedURLException ex) {
+                LOG.warn("Failed to encode URL '{}', error: {}", skin.getSourceUrl(), ex.getMessage());
+                message = "Failed to decode skin URL, please check and try again";
+            } catch (IOException ex) {
+                LOG.warn("Failed to download '{}' from URL '{}', error: {}", filename, skin.getSourceUrl(), ex.getMessage());
+                message = "Failed to download skin zip from URL, error: " + ex.getMessage();
+            }
+        } else {
+            LOG.info("No URL found for skin: {}", skin.toString());
+            message = "No URL found for the skin";
+        }
+        return message;
     }
 
     public boolean delete(StorageType type, String filename) throws IOException {
