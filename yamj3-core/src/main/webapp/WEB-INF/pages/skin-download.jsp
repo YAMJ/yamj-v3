@@ -34,7 +34,9 @@
                                 No Image
                             </c:when>
                             <c:otherwise>
-                                <img src="${yi.skinDir}${skin.path}/${skin.image}" width="400"/>
+                                    <a href="${yi.skinDir}${skin.path}/${skin.image}" target="_blank">
+                                        <img src="${yi.skinDir}${skin.path}/${skin.image}" width="400"/>
+                                    </a>
                             </c:otherwise>
                         </c:choose>
                     </td>

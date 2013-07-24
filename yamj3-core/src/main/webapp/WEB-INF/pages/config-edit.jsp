@@ -34,21 +34,25 @@
         </form:form>
 
         <p><a href="${pageContext.request.contextPath}/index.html">Home page</a></p>
+        <br>
+        <br>
+        <br>
         <table class="sysinfo">
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
             <tr>
-                <th>Version: ${yi.projectVersion}</th>
-                <th>Revision: ${yi.buildRevision}</th>
-                <th>Java: ${yi.javaVersion}</th>
-                <th>Build Date: ${yi.buildDate}</th>
-                <th>Start-up Time: ${yi.startUpTime}</th>
-                <th>Uptime: ${yi.uptime}</th>
+                <th>Version</th>
+                <th>Revision</th>
+                <th>Java</th>
+                <th>Build Date</th>
+                <th>Start-up Time</th>
+                <th>Uptime</th>
+            </tr>
+            <tr>
+                <td>${yi.projectVersion}</td>
+                <td>${yi.buildRevision}</td>
+                <td>${yi.javaVersion}</td>
+                <td>${yi.buildDate}</td>
+                <td>${yi.startUpTime}</td>
+                <td>${yi.uptime}</td>
             </tr>
         </table>
     </body>

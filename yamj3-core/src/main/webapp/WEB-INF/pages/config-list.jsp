@@ -21,9 +21,6 @@
 
         <table id="tablelist">
             <tr>
-                <th colspan="5">Configuration Settings</th>
-            </tr>
-            <tr>
                 <th>Key</th>
                 <th>Value</th>
                 <th>Create Timestamp</th>
@@ -34,10 +31,10 @@
                 <c:forEach items="${configlist}" var="entry" varStatus="row">
                     <tr>
                         <td>${entry.key}</td>
-                        <td>${entry.value}</td>
-                        <td>${entry.createTimestamp}</td>
-                        <td>${entry.updateTimestamp}</td>
-                        <td>
+                        <td class="center">${entry.value}</td>
+                        <td class="center">${entry.createTimestamp}</td>
+                        <td class="center">${entry.updateTimestamp}</td>
+                        <td class="center">
                             <a href="${pageContext.request.contextPath}/config/edit/${entry.key}.html">Edit</a> or
                             <a href="${pageContext.request.contextPath}/config/delete/${entry.key}.html">Delete</a>
                         </td>
@@ -46,21 +43,27 @@
             </tbody>
         </table>
 
-        <p><a href="${pageContext.request.contextPath}/index.html">Home page</a></p></td>
-    <table class="sysinfo">
+        <p><a href="${pageContext.request.contextPath}/index.html">Home page</a></p>
         <br>
         <br>
         <br>
-        <br>
-        <tr>
-            <th>Version: ${yi.projectVersion}</th>
-            <th>Revision: ${yi.buildRevision}</th>
-            <th>Java: ${yi.javaVersion}</th>
-            <th>Build Date: ${yi.buildDate}</th>
-            <th>Start-up Time: ${yi.startUpTime}</th>
-            <th>Uptime: ${yi.uptime}</th>
-        </tr>
-    </table>
-</td>
-</body>
+        <table class="sysinfo">
+            <tr>
+                <th>Version</th>
+                <th>Revision</th>
+                <th>Java</th>
+                <th>Build Date</th>
+                <th>Start-up Time</th>
+                <th>Uptime</th>
+            </tr>
+            <tr>
+                <td>${yi.projectVersion}</td>
+                <td>${yi.buildRevision}</td>
+                <td>${yi.javaVersion}</td>
+                <td>${yi.buildDate}</td>
+                <td>${yi.startUpTime}</td>
+                <td>${yi.uptime}</td>
+            </tr>
+        </table>
+    </body>
 </html>

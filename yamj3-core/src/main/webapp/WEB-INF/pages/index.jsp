@@ -17,21 +17,21 @@
             <p>Message: ${message}</p>
             <br/>
         </c:if>
-        <table id="headertable" align="center">
+        <table id="headertable" style="width: 50%; margin: auto;">
             <tr>
                 <th colspan="2">Index of Pages</th>
             </tr>
             <tr>
-                <td><a href="${pageContext.request.contextPath}/system-info.html">System information</a></td>
-                <td>Display information about the state of the core.</td>
+                <th style="width: 10%"><a href="${pageContext.request.contextPath}/system-info.html">System information</a></td>
+                <td style="width: 30%">Display information about the state of the core.</td>
             </tr>
             <tr>
-                <td><a href="${pageContext.request.contextPath}/skin-info.html">Skins</a></td>
-                <td>Skins information.</td>
+                <th style="width: 10%"><a href="${pageContext.request.contextPath}/skin-info.html">Skins</a></td>
+                <td style="width: 30%">Skins information.</td>
             </tr>
             <tr>
-                <td><a href="${pageContext.request.contextPath}/config/list.html">Configuration</a></td>
-                <td>Display information about the configuration.</td>
+                <th style="width: 10%"><a href="${pageContext.request.contextPath}/config/list.html">Configuration</a></td>
+                <td style="width: 30%">Display information about the configuration.</td>
             </tr>
         </table>
         <table class="sysinfo">
