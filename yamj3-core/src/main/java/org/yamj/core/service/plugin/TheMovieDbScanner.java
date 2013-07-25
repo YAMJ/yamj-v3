@@ -383,15 +383,21 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     /**
      * Convert string to date
      *
+     * if the date is just a year, "-01-01" (1st Jan) will be appended to the date for conversion purposes
      * @param dateToConvert
      * @return
      */
-    private Date parseDate(String dateToConvert) {
-        if (StringUtils.isNotBlank(dateToConvert)) {
+    private Date parseDate(final String dateToConvert) {
+        String dtc = StringUtils.trimToEmpty(dateToConvert);
+        if (StringUtils.isNotBlank(dtc)) {
             try {
-                return DateUtils.parseDate(dateToConvert.trim(), "yyyy-MM-dd");
+                if (dtc.length() == 4) {
+                    // Looks like just the year, so add a default to it for processing.
+                    dtc += "-01-01";
+                }
+                return DateUtils.parseDate(dtc, "yyyy-MM-dd");
             } catch (ParseException ex) {
-                LOG.warn("Failed to convert date '{}'", dateToConvert.trim());
+                LOG.warn("Failed to convert date '{}'", dtc);
             }
         }
         return null;
@@ -408,9 +414,9 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         if (newBio == null) {
             return null;
         }
-        
+
         newBio = newBio.replaceAll("\\s+", " ");
-        
+
         int pos = StringUtils.indexOfIgnoreCase(newBio, FROM_WIKIPEDIA);
         if (pos >= 0) {
             // We've found the text, so remove it
