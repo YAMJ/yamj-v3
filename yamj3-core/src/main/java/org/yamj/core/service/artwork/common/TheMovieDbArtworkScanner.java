@@ -24,7 +24,10 @@ package org.yamj.core.service.artwork.common;
 
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
+import com.omertron.themoviedbapi.model.Artwork;
+import com.omertron.themoviedbapi.model.ArtworkType;
 import com.omertron.themoviedbapi.model.MovieDb;
+import com.omertron.themoviedbapi.results.TmdbResultsList;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +53,6 @@ public class TheMovieDbArtworkScanner implements
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbArtworkScanner.class);
     private static final String DEFAULT_POSTER_SIZE = "original";
     private static final String DEFAULT_FANART_SIZE = "original";
-
     @Autowired
     private ConfigService configService;
     @Autowired
@@ -91,43 +93,51 @@ public class TheMovieDbArtworkScanner implements
 
     @Override
     public List<ArtworkDetailDTO> getPosters(String id) {
-        List<ArtworkDetailDTO> dtos = new ArrayList<ArtworkDetailDTO>();
-        // TODO retrieve more than one poster info
-
-        if (StringUtils.isNumeric(id)) {
-            try {
-                String defaultLanguage = configService.getProperty("themoviedb.language", "en");
-                MovieDb moviedb = tmdbApi.getMovieInfo(Integer.parseInt(id), defaultLanguage);
-                URL posterURL = tmdbApi.createImageUrl(moviedb.getPosterPath(), DEFAULT_POSTER_SIZE);
-                if (posterURL == null || posterURL.toString().endsWith("null")) {
-                    LOG.warn("Poster URL is invalid and will not be used: {}", posterURL);
-                } else {
-                    dtos.add(new ArtworkDetailDTO(getScannerName(), posterURL.toString()));
-                }
-            } catch (MovieDbException error) {
-                LOG.warn("Failed to get the poster URL for TMDb ID {}", id, error);
-            }
-        }
-        return dtos;
+        String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+        return getFilteredArtwork(id, defaultLanguage, ArtworkType.POSTER, DEFAULT_POSTER_SIZE);
     }
 
     @Override
     public List<ArtworkDetailDTO> getFanarts(String id) {
+        String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+        return getFilteredArtwork(id, defaultLanguage, ArtworkType.BACKDROP, DEFAULT_FANART_SIZE);
+    }
+
+    /**
+     * Get a list of the artwork for a movie.
+     *
+     * This will get all the artwork for a specified language and the blank languages as well
+     *
+     * @param id
+     * @param language
+     * @param artworkType
+     * @param artworkSize
+     * @return
+     */
+    private List<ArtworkDetailDTO> getFilteredArtwork(String id, String language, ArtworkType artworkType, String artworkSize) {
         List<ArtworkDetailDTO> dtos = new ArrayList<ArtworkDetailDTO>();
         // TODO retrieve more than one fanart info
 
         if (StringUtils.isNumeric(id)) {
             try {
-                String defaultLanguage = configService.getProperty("themoviedb.language", "en");
-                MovieDb moviedb = tmdbApi.getMovieInfo(Integer.parseInt(id), defaultLanguage);
-                URL fanartURL = tmdbApi.createImageUrl(moviedb.getBackdropPath(), DEFAULT_FANART_SIZE);
-                if (fanartURL == null || fanartURL.toString().endsWith("null")) {
-                    LOG.warn("Fanart URL is invalid and will not be used: {}", fanartURL);
-                } else {
-                    dtos.add(new ArtworkDetailDTO(getScannerName(), fanartURL.toString()));
+                // Use an empty language to get all artwork and then filter it.
+                TmdbResultsList<Artwork> results = tmdbApi.getMovieImages(Integer.parseInt(id), "");
+                List<Artwork> artworkList = results.getResults();
+                for (Artwork artwork : artworkList) {
+                    if (artwork.getArtworkType() == artworkType
+                            && (StringUtils.isBlank(artwork.getLanguage())
+                            || StringUtils.equalsIgnoreCase(artwork.getLanguage(), language))) {
+                        URL artworkURL = tmdbApi.createImageUrl(artwork.getFilePath(), artworkSize);
+                        if (artworkURL == null || artworkURL.toString().endsWith("null")) {
+                            LOG.warn("{} URL is invalid and will not be used: {}", artworkType, artworkURL);
+                        } else {
+                            dtos.add(new ArtworkDetailDTO(getScannerName(), artworkURL.toString()));
+                        }
+                    }
                 }
+                LOG.debug("Found {} {} artworks for TMDB ID '{}' and language '{}'", dtos.size(), artworkType, id, language);
             } catch (MovieDbException error) {
-                LOG.warn("Failed to get the fanart URL for TMDb ID {}", id, error);
+                LOG.warn("Failed to get the {} URL for TMDb ID {}", artworkType, id, error);
             }
         }
         return dtos;
