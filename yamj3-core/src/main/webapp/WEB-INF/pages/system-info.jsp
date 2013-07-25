@@ -10,49 +10,76 @@
     <body background="${pageContext.request.contextPath}/images/yamj-configbg.jpg">
         <div id="logo">
             <h1>${yi.projectName}</h1>
-
-            <table id="headertable" style="width: 30%;">
-                <tr>
-                    <th colspan="2">System Information</th>
-                </tr>
-                <tr>
-                    <td class="right">Version</td>
-                    <td>${yi.projectVersion}</td>
-                </tr>
-                <tr>
-                    <td class="right">Revision</td>
-                    <td>${yi.buildRevision}</td>
-                </tr>
-                <tr>
-                    <td class="right">Java</td>
-                    <td>${yi.javaVersion}</td>
-                </tr>
-                <tr>
-                    <td class="right">Build Date</td>
-                    <td>${yi.buildDate}</td>
-                </tr>
-                <tr>
-                    <td class="right">Start-up Time</td>
-                    <td>${yi.startUpTime}</td>
-                </tr>
-                <tr>
-                    <td class="right">Uptime</td>
-                    <td>${yi.uptime}</td>
-                </tr>
-            </table>
-            <br/>
-            <table id="tablelist" style="width: 30%; align:center;">
-                <tr>
-                    <th colspan="2">Database Object Counts</th>
-                </tr>
-                <c:forEach items="${countlist}" var="entry">
-                    <tr>
-                        <td class="right">${entry.key}</td>
-                        <td>${entry.value}</td>
-                    </tr>
-                </c:forEach>
-            </table>
+            <h2>System Information</h2>
         </div>
+        <table id="headertable" style="width: 40%; margin: auto;">
+            <tr>
+                <th class="right" style="width: 10%">Version</td>
+                <td>${yi.projectVersion}</td>
+            </tr>
+            <tr>
+                <th class="right">Revision</td>
+                <td>${yi.buildRevision}</td>
+            </tr>
+            <tr>
+                <th class="right">Java</td>
+                <td>${yi.javaVersion}</td>
+            </tr>
+            <tr>
+                <th class="right">Build Date</td>
+                <td>${yi.buildDate}</td>
+            </tr>
+            <tr>
+                <th class="right">Start-up Time</td>
+                <td>${yi.startUpTime}</td>
+            </tr>
+            <tr>
+                <th class="right">Uptime</td>
+                <td>${yi.uptime}</td>
+            </tr>
+        </table>
+        <br/>
+        <div id="logo">
+            <h2>Server Information</h2>
+        </div>
+        <table id="headertable" style="width: 50%; margin: auto;">
+            <tr>
+                <th class="right" style="width: 10%">Core IP/Port</th>
+                <td>${yi.coreIp}:${yi.corePort}</td>
+            </tr>
+            <tr>
+                <th class="right">Database IP</th>
+                <td>${yi.databaseIp}</td>
+            </tr>
+            <tr>
+                <th class="right">Database Name</th>
+                <td>${yi.databaseName}</td>
+            </tr>
+            <tr>
+                <th class="right">Artwork Location URL</th>
+                <td><a href="${yi.baseArtworkUrl}">${yi.baseArtworkUrl}</a></td>
+            </tr>
+            <tr>
+                <th class="right">MediaInfo Location URL</th>
+                <td><a href="${yi.baseMediainfoUrl}">${yi.baseMediainfoUrl}</a></td>
+            </tr>
+            <tr>
+                <th class="right">Skins Directory</th>
+                <td><a href="${yi.skinDir}">${yi.skinDir}</a></td>
+            </tr>
+        </table>
+        <br/>
+        <div id="logo">
+            <h2>Database Object Counts</h2>
+        </div>
+        <table id="tablelist" style="width: 20%; margin: auto;;">
+            <c:forEach items="${countlist}" var="entry">
+                <tr>
+                    <th class="right" style="width: 10%">${entry.key}</td>
+                    <td class="center" style="width: 10%">${entry.value}</td>
+                </tr>
+            </c:forEach>
+        </table>
         <p><a href="/yamj3/">Home</a></p>
     </body>
 </html>

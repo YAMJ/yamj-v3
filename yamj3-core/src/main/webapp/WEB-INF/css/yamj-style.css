@@ -24,7 +24,7 @@ html, #tablelist,#headertable,#logo,#message
     background-image:         linear-gradient( #555 /*{table-background-start}*/, #383838 /*{table-background-end}*/);
 }
 
-#tablelist td, #tablelist th, #headertable td, #headertable th
+#tablelist td, #headertable td
 {
     font-size:1em;
     width: 20%;
@@ -33,7 +33,6 @@ html, #tablelist,#headertable,#logo,#message
     padding:4px;
     border: 1px solid                          #000 /*{headertable-border}*/;
     background:                                #444 /*{a-bhover-background-color}*/;
-    font-weight: bold;
     color:                                     #fff /*{headertable-color}*/;
     text-shadow: 0 /*{headertable-shadow-x}*/ 1px /*{headertable-shadow-y}*/ 0 /*{headertable-shadow-radius}*/ #111 /*{headertable-shadow-color}*/;
     background-image: -webkit-gradient(linear, left top, left bottom, from( #555 /*{headertable-background-start}*/), to( #383838 /*{headertable-background-end}*/)); /* Saf4+, Chrome */
@@ -50,23 +49,23 @@ html, #tablelist,#headertable,#logo,#message
     background-color:#EAF2D3;
 }
 
-#tablelist td.bold, #headertable td.bold
-{
-    font-weight: bold;
-}
-
-#tablelist td.right, #headertable td.right
-{
-    text-align: right;
-}
-
 #tablelist th.title, #headertable th.title
 {
     font-size:1.5em;
     text-shadow: 3px /*{shadow-x}*/ 3px /*{shadow-y}*/ 0 /*{shadow-radius}*/ #111 /*{shadow-color}*/;
 }
 
-#tablelist td.center, #headertable td.center
+#tablelist th.bold, #tablelist td.bold, #headertable th.bold, #headertable td.bold
+{
+    font-weight: bold;
+}
+
+#tablelist th.right, #tablelist td.right, #headertable th.right, #headertable td.right
+{
+    text-align: right;
+}
+
+#tablelist th.center, #tablelist td.center, #headertable th.center, #headertable td.center
 {
     text-align: center;
 }
