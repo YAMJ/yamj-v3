@@ -265,8 +265,7 @@ public class FileStorageService {
     }
 
     public List<String> getDirectoryList(StorageType type, final String dir) {
-        File path = new File(getStorageName(type, StringUtils.trimToEmpty(dir)));
-
+        File path = new File(getStorageDir(type, StringUtils.trimToEmpty(dir)));
         String[] directories = path.list(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
@@ -281,6 +280,20 @@ public class FileStorageService {
         return getStorageName(type, null, filename);
     }
 
+    public String getStorageDir(StorageType type, final String path) {
+        String storageDir;
+        if (StorageType.ARTWORK == type) {
+            storageDir = FilenameUtils.concat(this.storagePathArtwork, path);
+        } else if (StorageType.MEDIAINFO == type) {
+            storageDir = FilenameUtils.concat(this.storagePathMediaInfo, path);
+        } else if (StorageType.SKIN == type) {
+            storageDir = FilenameUtils.concat(this.storagePathSkin, path);
+        } else {
+            throw new IllegalArgumentException("Unknown storage type " + type);
+        }
+        return storageDir;
+    }
+
     public String getStorageName(StorageType type, final String dir, final String filename) {
         String hashFilename = FileTools.createDirHash(StringUtils.trimToEmpty(filename));
 
@@ -288,16 +301,7 @@ public class FileStorageService {
             hashFilename = FilenameUtils.concat(StringUtils.trimToEmpty(dir), hashFilename);
         }
 
-        if (StorageType.ARTWORK == type) {
-            hashFilename = FilenameUtils.concat(this.storagePathArtwork, hashFilename);
-        } else if (StorageType.MEDIAINFO == type) {
-            hashFilename = FilenameUtils.concat(this.storagePathMediaInfo, hashFilename);
-        } else if (StorageType.SKIN == type) {
-            hashFilename = FilenameUtils.concat(this.storagePathSkin, hashFilename);
-        } else {
-            throw new IllegalArgumentException("Unknown storage type " + type);
-        }
-
+        hashFilename = getStorageDir(type, hashFilename);
         FileTools.makeDirectories(hashFilename);
         return hashFilename;
     }
