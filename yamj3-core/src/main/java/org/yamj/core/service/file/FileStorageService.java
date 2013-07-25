@@ -282,12 +282,10 @@ public class FileStorageService {
     }
 
     public String getStorageName(StorageType type, final String dir, final String filename) {
-        String hashFilename;
+        String hashFilename = FileTools.createDirHash(StringUtils.trimToEmpty(filename));
 
         if (StringUtils.isNotBlank(dir)) {
-            hashFilename = FilenameUtils.concat(StringUtils.trimToEmpty(dir), StringUtils.trimToEmpty(filename));
-        } else {
-            hashFilename = StringUtils.trimToEmpty(filename);
+            hashFilename = FilenameUtils.concat(StringUtils.trimToEmpty(dir), hashFilename);
         }
 
         if (StorageType.ARTWORK == type) {
