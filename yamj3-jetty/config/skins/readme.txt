@@ -12,6 +12,9 @@ interface.
 "folder.jpg" should be a image of the skin to provide the user with a visual
 representation of the skin
 
+Remember to add a simple "index.html" file to the folder to point to the first
+page of your skin.
+
 "version.xml" is an XML format file containing the details about the skin.
 This file should be of the format:
 

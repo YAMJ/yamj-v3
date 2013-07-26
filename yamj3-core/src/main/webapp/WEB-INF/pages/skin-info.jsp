@@ -42,7 +42,7 @@
                             ${line}<br>
                         </c:forEach>
                     </td>
-                    <td>${skin.path}</td>
+                    <td><a href="${yi.skinDir}${skin.path}/" target="_blank">${skin.path}</a></td>
                 </tr>
             </c:forEach>
         </table>
