@@ -57,7 +57,7 @@ public class Start {
     private static boolean yamjStopAtShutdown = Boolean.TRUE;
     private static final String RESOURCES_DIR = "./resources/";
     private static final String SKINS_DIR = "skins/";
-    private static final String[] DEFAULT_WELCOME_PAGES = {"yamj.html", "index.html"};
+    private static final String[] DEFAULT_WELCOME_PAGES = {"yamj.html", "yamj3.html", "index.html"};
 
     public static void main(String[] args) {
         // Create the log file name here, so we can change it later (because it's locked
