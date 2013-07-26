@@ -295,7 +295,13 @@ public class FileStorageService {
     }
 
     public String getStorageName(StorageType type, final String dir, final String filename) {
-        String hashFilename = FileTools.createDirHash(StringUtils.trimToEmpty(filename));
+        String hashFilename;
+        if (type == StorageType.SKIN) {
+            // Don't hash the skin filename
+            hashFilename = filename;
+        } else {
+            hashFilename = FileTools.createDirHash(StringUtils.trimToEmpty(filename));
+        }
 
         if (StringUtils.isNotBlank(dir)) {
             hashFilename = FilenameUtils.concat(StringUtils.trimToEmpty(dir), hashFilename);

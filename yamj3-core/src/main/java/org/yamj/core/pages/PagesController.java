@@ -115,7 +115,7 @@ public class PagesController {
     }
     //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Skins Page">
+    //<editor-fold defaultstate="collapsed" desc="Skins Pages">
     @RequestMapping(value = "/skin-info")
     public ModelAndView skinInfo() {
         ModelAndView view = new ModelAndView("skin-info", "skin-entity", new Skin());
