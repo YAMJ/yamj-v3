@@ -91,7 +91,7 @@ public final class FileScanner {
 
     private static CmdLineParser getCmdLineParser() {
         CmdLineParser parser = new CmdLineParser();
-        parser.addOption(new CmdLineOption("d", "direcctory", "The directory to process", true, true));
+        parser.addOption(new CmdLineOption("d", "direcctory", "The directory to process", false, true));
         parser.addOption(new CmdLineOption("w", "watcher", "Keep watching the directories for changes", false, true));
         parser.addOption(new CmdLineOption("l", "library", "The library file to read", false, true));
         return parser;

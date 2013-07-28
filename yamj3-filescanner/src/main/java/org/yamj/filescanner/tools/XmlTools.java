@@ -22,6 +22,7 @@
  */
 package org.yamj.filescanner.tools;
 
+import com.thoughtworks.xstream.io.StreamException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -67,17 +68,19 @@ public class XmlTools {
             is = new FileInputStream(filename);
             return (T) unmarshaller.unmarshal(new StreamSource(is));
         } catch (FileNotFoundException ex) {
-            LOG.warn("File not found: {}", filename);
+            LOG.warn("File not found '{}'", filename);
         } catch (IOException ex) {
-            LOG.warn("IO exception for: {}, Error: {}", filename, ex.getMessage());
+            LOG.warn("IO exception for '{}', Error: {}", filename, ex.getMessage());
         } catch (XmlMappingException ex) {
-            LOG.warn("XML Mapping error for: {}, Error: {}", filename, ex.getMessage());
+            LOG.warn("XML Mapping error for '{}', Error: {}", filename, ex.getMessage());
+        } catch (StreamException ex) {
+            LOG.warn("Stream exception for '{}', Error {}", filename, ex.getMessage());
         } finally {
             if (is != null) {
                 try {
                     is.close();
                 } catch (IOException ex) {
-                    LOG.warn("Failed to close library file: {}, Error: {}", filename, ex.getMessage());
+                    LOG.warn("Failed to close library file '{}', Error: {}", filename, ex.getMessage());
                 }
             }
         }
@@ -97,6 +100,7 @@ public class XmlTools {
         try {
             os = new FileOutputStream(filename);
             marshaller.marshal(objectToSave, new StreamResult(os));
+            LOG.info("Saving completed");
         } catch (FileNotFoundException ex) {
             LOG.warn("File not found: {}", filename);
         } catch (IOException ex) {
@@ -112,6 +116,6 @@ public class XmlTools {
                 }
             }
         }
-        LOG.info("Saving completed");
+        LOG.info("Failed to save '{}'. Please check it for errors", filename);
     }
 }
