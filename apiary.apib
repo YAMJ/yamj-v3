@@ -457,6 +457,55 @@ GET /api/genre/{id_or_name}
 }
 
 
+Get information on the genres associated with a filename
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>filename</td>
+        <td>The filename to get the list of genres for</td>
+    </tr>
+</table>
+
+GET /api/genre
+< 200
+< Content-Type: application/json
+{
+   "count":4,
+   "totalCount":4,
+   "queryDuration":"78ms",
+   "queryTime":"2013-07-29 21:51:24",
+   "status":{
+      "status":200,
+      "message":"OK"
+   },
+   "parameters":null,
+   "baseArtworkUrl":"",
+   "baseMediainfoUrl":"",
+   "results":[
+      {
+         "id":1,
+         "name":"Science Fiction"
+      },
+      {
+         "id":2,
+         "name":"Adventure"
+      },
+      {
+         "id":3,
+         "name":"Action"
+      },
+      {
+         "id":4,
+         "name":"Thriller"
+      }
+   ]
+}
+
+
 Get information genres
 ***
 **Optional Parameters**

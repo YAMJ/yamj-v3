@@ -23,7 +23,6 @@
 package org.yamj.core.database.dao;
 
 import java.util.List;
-import org.hibernate.type.BasicType;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
 import org.springframework.stereotype.Service;
