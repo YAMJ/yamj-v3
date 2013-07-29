@@ -129,6 +129,11 @@ public class JsonApiStorageService {
     public List<Genre> getGenres(Parameters params) {
         return commonDao.getList(Genre.class, params);
     }
+
+    @Transactional(readOnly = true)
+    public List<Genre> getGenreFilename(ApiWrapperList<Genre> wrapper, String filename) {
+        return commonDao.getGenreFilename(wrapper, filename);
+    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Certification Methods">
@@ -184,13 +189,19 @@ public class JsonApiStorageService {
 
     //<editor-fold defaultstate="collapsed" desc="Artwork Methods">
     @Transactional(readOnly = true)
-    public List<Artwork> getArtworkList(Parameters params) {
-        return artworkDao.getArtworkList(params);
+    public List<Artwork> getArtworkListOld(Parameters params) {
+        return artworkDao.getArtworkListOld(params);
     }
 
     @Transactional(readOnly = true)
     public IndexArtworkDTO getArtworkById(Long id) {
         return apiDao.getArtworkById(id);
     }
+
+    @Transactional(readOnly = true)
+    public List<IndexArtworkDTO> getArtworkList(ApiWrapperList<IndexArtworkDTO> wrapper) {
+        return apiDao.getArtworkList(wrapper);
+    }
+
     //</editor-fold>
 }

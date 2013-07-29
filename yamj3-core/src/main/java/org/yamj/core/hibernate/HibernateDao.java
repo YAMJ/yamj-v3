@@ -29,8 +29,13 @@ import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.*;
+import org.hibernate.transform.Transformers;
+import org.hibernate.type.BasicType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.yamj.core.api.model.IApiWrapper;
 import org.yamj.core.api.model.Parameters;
+import org.yamj.core.api.model.SqlScalars;
+import org.yamj.core.api.options.IOptions;
 
 /**
  * Hibernate DAO implementation
@@ -65,7 +70,7 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings("rawtypes")
     public void storeAll(final Collection entities) {
-        if (entities != null && entities.size()>0) {
+        if (entities != null && entities.size() > 0) {
             Session session = getSession();
             for (Object entity : entities) {
                 session.saveOrUpdate(entity);
@@ -256,7 +261,7 @@ public abstract class HibernateDao {
     }
 
     @SuppressWarnings("rawtypes")
-    protected  void applyNamedParameterToQuery(Query queryObject, String paramName, Object value) throws HibernateException {
+    protected void applyNamedParameterToQuery(Query queryObject, String paramName, Object value) throws HibernateException {
         if (value instanceof Collection) {
             queryObject.setParameterList(paramName, (Collection) value);
         } else if (value instanceof Object[]) {
@@ -265,10 +270,10 @@ public abstract class HibernateDao {
             queryObject.setParameter(paramName, value);
         }
     }
-    
+
     /**
      * Find entries by id.
-     * 
+     *
      * @param queryString the query string.
      * @param id the id
      * @return list of entities
@@ -283,18 +288,83 @@ public abstract class HibernateDao {
 
     /**
      * Find list of entities by named parameters.
-     * 
+     *
      * @param queryString the query string.
      * @param params the named parameters
      * @return list of entities
      */
     @SuppressWarnings("rawtypes")
-    public List findByNamedParameters(CharSequence queryString, Map<String,Object> params) {
+    public List findByNamedParameters(CharSequence queryString, Map<String, Object> params) {
         Query query = getSession().createQuery(queryString.toString());
         query.setCacheable(true);
-        for (Entry<String,Object> param : params.entrySet()) {
+        for (Entry<String, Object> param : params.entrySet()) {
             applyNamedParameterToQuery(query, param.getKey(), param.getValue());
         }
         return query.list();
+    }
+
+    /**
+     * Execute a query return the results.
+     *
+     * Puts the total count returned from the query into the wrapper
+     *
+     * @param sql
+     * @param wrapper
+     * @return
+     */
+    public List<Object[]> executeQuery(String sql, IApiWrapper wrapper) {
+        SqlScalars ss = new SqlScalars(sql);
+        return executeQueryWithTransform(Object[].class, ss, wrapper);
+    }
+
+    /**
+     * Execute a query return the results
+     *
+     * Gets the options from the wrapper for start and max Puts the total count returned from the query into the wrapper
+     *
+     * @param T The class to return the transformed results of.
+     * @param sql
+     * @param wrapper
+     * @param scalars
+     * @return
+     */
+    public <T> List<T> executeQueryWithTransform(Class T, SqlScalars sqlScalars, IApiWrapper wrapper) {
+        SQLQuery query = sqlScalars.createSqlQuery(getSession());
+        query.setReadOnly(true);
+        query.setCacheable(true);
+
+        // TODO: Add a transformation if the class is not "Object"
+
+        if (T != null && !T.equals(Object[].class)) {
+            query.setResultTransformer(Transformers.aliasToBean(T));
+        }
+
+        // Add the scalars to the query
+        sqlScalars.populateScalars(query);
+
+        List<T> queryResults = query.list();
+
+        // If the wrapper is populated, then run the query to get the maximum results
+        if (wrapper != null) {
+            wrapper.setTotalCount(queryResults.size());
+
+            // If there is a start or max set, we will need to re-run the query after setting the options
+            IOptions options = (IOptions) wrapper.getParameters();
+            if (options != null) {
+                if (options.getStart() > 0 || options.getMax() > 0) {
+                    if (options.getStart() > 0) {
+                        query.setFirstResult(options.getStart());
+                    }
+
+                    if (options.getMax() > 0) {
+                        query.setMaxResults(options.getMax());
+                    }
+                    // This will get the trimmed list
+                    queryResults = query.list();
+                }
+            }
+        }
+
+        return queryResults;
     }
 }

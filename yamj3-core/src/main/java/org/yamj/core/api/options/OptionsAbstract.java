@@ -22,7 +22,10 @@
  */
 package org.yamj.core.api.options;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -35,6 +38,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  */
 public abstract class OptionsAbstract implements IOptions {
 
+    private static final String DEFAULT_SPLIT = ",|;";  // Used for splitting strings
     private Integer start = -1;
     private Integer max = -1;
 
@@ -63,6 +67,12 @@ public abstract class OptionsAbstract implements IOptions {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
+    /**
+     * Split a comma separated list of "key-value" items into a Map
+     *
+     * @param dashList
+     * @return
+     */
     protected Map<String, String> splitDashList(String dashList) {
         Map<String, String> values = new HashMap<String, String>();
         for (String inc : StringUtils.split(dashList, ",")) {
@@ -72,5 +82,14 @@ public abstract class OptionsAbstract implements IOptions {
             }
         }
         return values;
+    }
+
+    /**
+     * Split a list using the default split characters of ",|;"
+     * @param list
+     * @return
+     */
+    protected List<String> splitList(String list) {
+        return Arrays.asList(StringUtils.split(list, DEFAULT_SPLIT));
     }
 }

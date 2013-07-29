@@ -57,8 +57,21 @@ public class CommonController {
     public String markWatched(
             @RequestParam(required = true, defaultValue = "") String filename,
             @RequestParam(required = false, defaultValue = "-1") Integer amount) {
-        LOG.info("Received watched command for '{}' to value '{}'", filename, amount);
+        int percentage = (amount == -1 ? 100 : amount);
+        LOG.info("Received watched command for '{}' to value '{}' {}", filename, percentage, (amount == -1 ? "(defaulted)" : ""));
+        // TODO: Add write to database command
         return null;
+    }
+
+    @RequestMapping(value = "/genre")
+    @ResponseBody
+    public ApiWrapperList<Genre> getGenreFilename(@RequestParam(required = true, defaultValue = "") String filename) {
+        LOG.info("Getting genres for filename '{}'", filename);
+        ApiWrapperList<Genre> wrapper = new ApiWrapperList<Genre>();
+        List<Genre> genres = jsonApiStorageService.getGenreFilename(wrapper, filename);
+        wrapper.setResults(genres);
+        wrapper.setStatusCheck();
+        return wrapper;
     }
 
     @RequestMapping(value = "/genre/{name}", method = RequestMethod.GET)

@@ -23,8 +23,13 @@
 package org.yamj.core.database.dao;
 
 import java.util.List;
+import org.hibernate.type.BasicType;
+import org.hibernate.type.LongType;
+import org.hibernate.type.StringType;
 import org.springframework.stereotype.Service;
+import org.yamj.core.api.model.ApiWrapperList;
 import org.yamj.core.api.model.Parameters;
+import org.yamj.core.api.model.SqlScalars;
 import org.yamj.core.database.model.*;
 import org.yamj.core.hibernate.HibernateDao;
 
@@ -37,6 +42,24 @@ public class CommonDao extends HibernateDao {
 
     public List<Genre> getGenres(Parameters params) {
         return getList(Genre.class, params);
+    }
+
+    public List<Genre> getGenreFilename(ApiWrapperList<Genre> wrapper,String filename){
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT g.id, g.name");
+        sqlScalars.addToSql("FROM mediafile m, mediafile_videodata mv, videodata v, videodata_genres vg, genre g");
+        sqlScalars.addToSql("WHERE m.id=mv.mediafile_id");
+        sqlScalars.addToSql("AND mv.videodata_id=v.id");
+        sqlScalars.addToSql("AND v.id = vg.data_id");
+        sqlScalars.addToSql("AND vg.genre_id=g.id");
+        sqlScalars.addToSql("AND m.file_name=:filename");
+
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+
+        sqlScalars.addParameter("filename", filename);
+
+        return executeQueryWithTransform(Genre.class, sqlScalars, wrapper);
     }
 
     public Certification getCertification(String name) {
