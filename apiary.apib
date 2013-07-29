@@ -390,6 +390,36 @@ GET /api/person/{id}
 Other
 --
 
+Mark a video file as watched with an optional percentage
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>filename</td>
+        <td>The filename of the video to mark as watched</td>
+    </tr>
+</table>
+
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>watched</td>
+        <td>A percentage value that the video has been watched</td>
+    </tr>
+</table>
+
+GET /api/watched
+< 200
+< Content-Type: application/json
+{}
+
+
 Get information on a single genre
 ***
 **Required Parameters**
