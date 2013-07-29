@@ -22,63 +22,52 @@
  */
 package org.yamj.core.api.options;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * List of the options available for the indexes
  *
  * @author stuart.boston
  */
-public class OptionsIndexPerson extends OptionsAbstract {
+public class OptionsIndexArtwork extends OptionsAbstract {
 
-    private String include = "";
-    private String exclude = "";
-    private String sortby = "";
-    private String sortdir = "ASC";
+    private List<String> artwork = new ArrayList<String>();
+    private List<String> video = new ArrayList<String>();
+    private Long id;
 
-    public void setInclude(String include) {
-        this.include = include;
+    public OptionsIndexArtwork() {
     }
 
-    public void setExclude(String exclude) {
-        this.exclude = exclude;
+    public OptionsIndexArtwork(Long id) {
+        this.id = id;
     }
 
-    public String getInclude() {
-        return include;
+    public List<String> getArtwork() {
+        return artwork;
     }
 
-    public String getExclude() {
-        return exclude;
+    public void setArtwork(List<String> artwork) {
+        this.artwork = artwork;
     }
 
-    public String getSortby() {
-        return sortby;
+    public void setArtwork(String artworkList) {
+        this.artwork = splitList(artworkList);
     }
 
-    public void setSortby(String sortby) {
-        this.sortby = sortby;
+    public List<String> getVideo() {
+        return video;
     }
 
-    public String getSortdir() {
-        return sortdir;
+    public void setVideo(String videoList) {
+        this.video = splitList(videoList);
     }
 
-    public void setSortdir(String sortdir) {
-        this.sortdir = sortdir;
+    public Long getId() {
+        return id;
     }
 
-    /**
-     * Split the include list into a map of values
-     */
-    public Map<String, String> splitIncludes() {
-        return splitDashList(include);
-    }
-
-    /**
-     * Split the exclude list into a map of values
-     */
-    public Map<String, String> splitExcludes() {
-        return splitDashList(exclude);
+    public void setId(Long id) {
+        this.id = id;
     }
 }

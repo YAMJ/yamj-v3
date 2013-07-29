@@ -30,17 +30,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.yamj.common.model.YamjInfo;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.ApiWrapperList;
 import org.yamj.core.api.model.ApiWrapperSingle;
 import org.yamj.core.api.model.ParameterType;
 import org.yamj.core.api.model.Parameters;
 import org.yamj.core.api.model.dto.IndexArtworkDTO;
+import org.yamj.core.api.options.OptionsIndexArtwork;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.service.JsonApiStorageService;
 
@@ -49,6 +52,7 @@ import org.yamj.core.database.service.JsonApiStorageService;
 public class ArtworkController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkController.class);
+    private static final YamjInfo YAMJ_INFO = new YamjInfo(ArtworkController.class);
     @Autowired
     private JsonApiStorageService api;
 
@@ -65,7 +69,7 @@ public class ArtworkController {
 
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<Artwork> getSeriesList(
+    public ApiWrapperList<Artwork> getArtworkListOld(
             @RequestParam(required = false, defaultValue = "") String artwork,
             @RequestParam(required = false, defaultValue = "") String type,
             @RequestParam(required = false, defaultValue = "-1") Integer id,
@@ -83,7 +87,7 @@ public class ArtworkController {
         ApiWrapperList<Artwork> wrapper = new ApiWrapperList<Artwork>();
         wrapper.setParameters(p);
         try {
-            List<Artwork> results = api.getArtworkList(p);
+            List<Artwork> results = api.getArtworkListOld(p);
             wrapper.setResults(results);
             wrapper.setStatusCheck();
         } catch (QueryException ex) {
@@ -97,11 +101,30 @@ public class ArtworkController {
 
     @RequestMapping(value = "/test/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public IndexArtworkDTO getArtwork(@PathVariable Long id) throws IOException {
+    public ApiWrapperSingle<IndexArtworkDTO> getArtwork(@PathVariable Long id) throws IOException {
+        ApiWrapperSingle<IndexArtworkDTO> wrapper = new ApiWrapperSingle<IndexArtworkDTO>();
+
         LOG.info("Attempting to retrieve artwork with id '{}'", id);
         IndexArtworkDTO artwork = api.getArtworkById(id);
         LOG.info("Artwork: {}", artwork.toString());
 
-        return artwork;
+        // Add the result to the wrapper
+        wrapper.setResult(artwork);
+        wrapper.setStatusCheck();
+
+        return wrapper;
+    }
+
+    @RequestMapping(value = "/test/list", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperList<IndexArtworkDTO> getArtworkList(@ModelAttribute("options") OptionsIndexArtwork options) {
+        LOG.info("INDEX: Artwork list - Options: {}", options.toString());
+        ApiWrapperList<IndexArtworkDTO> wrapper = new ApiWrapperList<IndexArtworkDTO>();
+        wrapper.setParameters(options);
+        wrapper.setResults(api.getArtworkList(wrapper));
+        wrapper.setStatusCheck();
+        wrapper.processYamjInfo(YAMJ_INFO);
+
+        return wrapper;
     }
 }

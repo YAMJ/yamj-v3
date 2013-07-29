@@ -29,9 +29,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.SQLQuery;
-import org.hibernate.transform.Transformers;
-import org.hibernate.type.BasicType;
 import org.hibernate.type.DateType;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.LongType;
@@ -44,10 +41,10 @@ import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.IndexVideoDTO;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiWrapperList;
-import org.yamj.core.api.model.IApiWrapper;
+import org.yamj.core.api.model.SqlScalars;
 import org.yamj.core.api.model.dto.IndexArtworkDTO;
 import org.yamj.core.api.model.dto.IndexPersonDTO;
-import org.yamj.core.api.options.IOptions;
+import org.yamj.core.api.options.OptionsIndexArtwork;
 import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.core.hibernate.HibernateDao;
 
@@ -63,15 +60,14 @@ public class ApiDao extends HibernateDao {
      * @param wrapper
      */
     public void getVideoList(ApiWrapperList<IndexVideoDTO> wrapper) {
-        String sql = generateSqlForVideoList(wrapper);
+        SqlScalars sqlScalars = new SqlScalars(generateSqlForVideoList(wrapper));
 
-        Map<String, BasicType> scalars = new HashMap<String, BasicType>();
-        scalars.put("id", LongType.INSTANCE);
-        scalars.put("videoTypeString", StringType.INSTANCE);
-        scalars.put("title", StringType.INSTANCE);
-        scalars.put("videoYear", IntegerType.INSTANCE);
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("videoTypeString", StringType.INSTANCE);
+        sqlScalars.addScalar("title", StringType.INSTANCE);
+        sqlScalars.addScalar("videoYear", IntegerType.INSTANCE);
 
-        List<IndexVideoDTO> queryResults = executeQueryWithTransform(IndexVideoDTO.class, sql.toString(), wrapper, scalars);
+        List<IndexVideoDTO> queryResults = executeQueryWithTransform(IndexVideoDTO.class, sqlScalars, wrapper);
         wrapper.setResults(queryResults);
 
         // Create and populate the ID list
@@ -102,7 +98,7 @@ public class ApiDao extends HibernateDao {
 
         if (foundArtworkIds) {
             LOG.debug("Found artwork to process, IDs: {}", ids);
-            addArtworkList(ids, results, (OptionsIndexVideo) wrapper.getParameters());
+            addArtworks(ids, results, (OptionsIndexVideo) wrapper.getParameters());
         } else {
             LOG.debug("No artwork found to process, skipping.");
         }
@@ -181,60 +177,66 @@ public class ApiDao extends HibernateDao {
         return sbSQL.toString();
     }
 
-    private void addArtworkList(Map<MetaDataType, List<Long>> ids, Map<String, IndexVideoDTO> artworkList, OptionsIndexVideo options) {
+    /**
+     * Search the list of IDs for artwork and add to the artworkList.
+     *
+     * @param ids
+     * @param artworkList
+     * @param options
+     */
+    private void addArtworks(Map<MetaDataType, List<Long>> ids, Map<String, IndexVideoDTO> artworkList, OptionsIndexVideo options) {
         List<String> artworkRequired = options.splitArtwork();
         LOG.debug("Artwork required: {}", artworkRequired.toString());
 
         if (CollectionUtils.isNotEmpty(artworkRequired)) {
-            StringBuilder sbSQL = new StringBuilder();
+            SqlScalars sqlScalars = new SqlScalars();
             boolean hasMovie = CollectionUtils.isNotEmpty(ids.get(MetaDataType.MOVIE));
             boolean hasSeries = CollectionUtils.isNotEmpty(ids.get(MetaDataType.SERIES));
 
             if (hasMovie) {
-                sbSQL.append("SELECT 'MOVIE' as sourceString, v.id as videoId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
-                sbSQL.append(" FROM videodata v, artwork a");
-                sbSQL.append(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
-                sbSQL.append(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
-                sbSQL.append(" WHERE v.id=a.videodata_id");
-                sbSQL.append(" AND v.episode<0");
-                sbSQL.append(" AND v.id IN (:movielist)");
-                sbSQL.append(" AND a.artwork_type IN (:artworklist)");
+                sqlScalars.addToSql("SELECT 'MOVIE' as sourceString, v.id as videoId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
+                sqlScalars.addToSql(" FROM videodata v, artwork a");
+                sqlScalars.addToSql(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
+                sqlScalars.addToSql(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
+                sqlScalars.addToSql(" WHERE v.id=a.videodata_id");
+                sqlScalars.addToSql(" AND v.episode<0");
+                sqlScalars.addToSql(" AND v.id IN (:movielist)");
+                sqlScalars.addToSql(" AND a.artwork_type IN (:artworklist)");
             }
 
             if (hasMovie && hasSeries) {
-                sbSQL.append(" UNION");
+                sqlScalars.addToSql(" UNION");
             }
 
             if (hasSeries) {
-                sbSQL.append(" SELECT 'SERIES' as sourceString, s.id as videoId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
-                sbSQL.append(" FROM series s, artwork a");
-                sbSQL.append(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
-                sbSQL.append(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
-                sbSQL.append(" WHERE s.id=a.series_id");
-                sbSQL.append(" AND s.id IN (:serieslist)");
-                sbSQL.append(" AND a.artwork_type IN (:artworklist)");
+                sqlScalars.addToSql(" SELECT 'SERIES' as sourceString, s.id as videoId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
+                sqlScalars.addToSql(" FROM series s, artwork a");
+                sqlScalars.addToSql(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
+                sqlScalars.addToSql(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
+                sqlScalars.addToSql(" WHERE s.id=a.series_id");
+                sqlScalars.addToSql(" AND s.id IN (:serieslist)");
+                sqlScalars.addToSql(" AND a.artwork_type IN (:artworklist)");
             }
 
-            SQLQuery query = getSession().createSQLQuery(sbSQL.toString());
-            query.addScalar("sourceString", StringType.INSTANCE);
-            query.addScalar("videoId", LongType.INSTANCE);
-            query.addScalar("artworkId", LongType.INSTANCE);
-            query.addScalar("locatedId", LongType.INSTANCE);
-            query.addScalar("generatedId", LongType.INSTANCE);
-            query.addScalar("artworkTypeString", StringType.INSTANCE);
-            query.addScalar("cacheDir", StringType.INSTANCE);
-            query.addScalar("cacheFilename", StringType.INSTANCE);
+            sqlScalars.addScalar("sourceString", StringType.INSTANCE);
+            sqlScalars.addScalar("videoId", LongType.INSTANCE);
+            sqlScalars.addScalar("artworkId", LongType.INSTANCE);
+            sqlScalars.addScalar("locatedId", LongType.INSTANCE);
+            sqlScalars.addScalar("generatedId", LongType.INSTANCE);
+            sqlScalars.addScalar("artworkTypeString", StringType.INSTANCE);
+            sqlScalars.addScalar("cacheDir", StringType.INSTANCE);
+            sqlScalars.addScalar("cacheFilename", StringType.INSTANCE);
 
             if (hasMovie) {
-                query.setParameterList("movielist", ids.get(MetaDataType.MOVIE));
+                sqlScalars.addParameterList("movielist", ids.get(MetaDataType.MOVIE));
             }
 
             if (hasSeries) {
-                query.setParameterList("serieslist", ids.get(MetaDataType.SERIES));
+                sqlScalars.addParameterList("serieslist", ids.get(MetaDataType.SERIES));
             }
-            query.setParameterList("artworklist", artworkRequired);
+            sqlScalars.addParameterList("artworklist", artworkRequired);
 
-            List<IndexArtworkDTO> results = executeQueryWithTransform(IndexArtworkDTO.class, query, null, null);
+            List<IndexArtworkDTO> results = executeQueryWithTransform(IndexArtworkDTO.class, sqlScalars, null);
 
             LOG.trace("Found {} artworks", results.size());
             for (IndexArtworkDTO ia : results) {
@@ -242,30 +244,6 @@ public class ApiDao extends HibernateDao {
                 artworkList.get(ia.Key()).addArtwork(ia);
             }
         }
-    }
-
-    public IndexArtworkDTO getArtworkById(Long id) {
-        StringBuilder sbSQL = new StringBuilder();
-        sbSQL.append("SELECT a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_filename as cacheFilename, ag.cache_dir as cacheDir");
-        sbSQL.append(" FROM artwork a");
-        sbSQL.append(" LEFT JOIN artwork_located al on a.id=al.artwork_id");
-        sbSQL.append(" LEFT JOIN artwork_generated ag on al.id=ag.located_id");
-        sbSQL.append(" WHERE a.id=").append(id);
-
-        Map<String, BasicType> scalars = new HashMap<String, BasicType>();
-        scalars.put("artworkId", LongType.INSTANCE);
-        scalars.put("locatedId", LongType.INSTANCE);
-        scalars.put("generatedId", LongType.INSTANCE);
-        scalars.put("artworkTypeString", StringType.INSTANCE);
-        scalars.put("cacheDir", StringType.INSTANCE);
-        scalars.put("cacheFilename", StringType.INSTANCE);
-
-        List<IndexArtworkDTO> results = executeQueryWithTransform(IndexArtworkDTO.class, sbSQL.toString(), null, scalars);
-        if (CollectionUtils.isEmpty(results)) {
-            return new IndexArtworkDTO();
-        }
-
-        return results.get(0);
     }
 
     /**
@@ -291,14 +269,15 @@ public class ApiDao extends HibernateDao {
             sql.append(" WHERE ").append(clause);
         }
 
-        Map<String, BasicType> scalars = new HashMap<String, BasicType>();
-        scalars.put("typeString", StringType.INSTANCE);
-        scalars.put("count", LongType.INSTANCE);
-        scalars.put("createTimestamp", TimestampType.INSTANCE);
-        scalars.put("updateTimestamp", TimestampType.INSTANCE);
-        scalars.put("lastId", LongType.INSTANCE);
+        SqlScalars sqlScalars = new SqlScalars(sql);
 
-        List<CountTimestamp> results = executeQueryWithTransform(CountTimestamp.class, sql.toString(), null, scalars);
+        sqlScalars.addScalar("typeString", StringType.INSTANCE);
+        sqlScalars.addScalar("count", LongType.INSTANCE);
+        sqlScalars.addScalar("createTimestamp", TimestampType.INSTANCE);
+        sqlScalars.addScalar("updateTimestamp", TimestampType.INSTANCE);
+        sqlScalars.addScalar("lastId", LongType.INSTANCE);
+
+        List<CountTimestamp> results = executeQueryWithTransform(CountTimestamp.class, sqlScalars, null);
         if (CollectionUtils.isEmpty(results)) {
             return new CountTimestamp(type);
         }
@@ -307,106 +286,84 @@ public class ApiDao extends HibernateDao {
     }
 
     public void getPersonList(ApiWrapperList<IndexPersonDTO> wrapper) {
-        StringBuilder sql = new StringBuilder();
-
+        SqlScalars sqlScalars = new SqlScalars();
         // Make sure to set the alias for the files for the Transformation into the class
-        sql.append("SELECT p.id,");
-        sql.append(" p.name,");
-        sql.append(" p.biography, ");
-        sql.append(" p.birth_day as birthDay, ");
-        sql.append(" p.birth_place as birthPlace, ");
-        sql.append(" p.birth_name as birthName, ");
-        sql.append(" p.death_day as deathDay ");
-        sql.append(" FROM person p");
-        sql.append(" WHERE 1=1");
+        sqlScalars.addToSql("SELECT p.id,");
+        sqlScalars.addToSql(" p.name,");
+        sqlScalars.addToSql(" p.biography, ");
+        sqlScalars.addToSql(" p.birth_day as birthDay, ");
+        sqlScalars.addToSql(" p.birth_place as birthPlace, ");
+        sqlScalars.addToSql(" p.birth_name as birthName, ");
+        sqlScalars.addToSql(" p.death_day as deathDay ");
+        sqlScalars.addToSql(" FROM person p");
+        sqlScalars.addToSql(" WHERE 1=1");
 
-        Map<String, BasicType> scalars = new HashMap<String, BasicType>();
-        scalars.put("id", LongType.INSTANCE);
-        scalars.put("birthDay", DateType.INSTANCE);
-        scalars.put("birthPlace", DateType.INSTANCE);
-        scalars.put("birthName", StringType.INSTANCE);
-        scalars.put("deathDay", DateType.INSTANCE);
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("birthDay", DateType.INSTANCE);
+        sqlScalars.addScalar("birthPlace", DateType.INSTANCE);
+        sqlScalars.addScalar("birthName", StringType.INSTANCE);
+        sqlScalars.addScalar("deathDay", DateType.INSTANCE);
 
-        List<IndexPersonDTO> results = executeQueryWithTransform(IndexPersonDTO.class, sql.toString(), wrapper, scalars);
+        List<IndexPersonDTO> results = executeQueryWithTransform(IndexPersonDTO.class, sqlScalars, wrapper);
         wrapper.setResults(results);
     }
 
-    /**
-     * Execute a query return the results.
-     *
-     * Puts the total count returned from the query into the wrapper
-     *
-     * @param sql
-     * @param wrapper
-     * @return
-     */
-    private List<Object[]> executeQuery(String sql, IApiWrapper wrapper) {
-        return executeQueryWithTransform(Object[].class, sql, wrapper, null);
-    }
+    //<editor-fold defaultstate="collapsed" desc="Artwork Methods">
+    public IndexArtworkDTO getArtworkById(Long id) {
+        SqlScalars sqlScalars = getSqlArtwork(new OptionsIndexArtwork(id));
 
-    private <T> List<T> executeQueryWithTransform(Class T, String sql, IApiWrapper wrapper) {
-        return executeQueryWithTransform(T, sql, wrapper, null);
-    }
-
-    private <T> List<T> executeQueryWithTransform(Class T, String sql, IApiWrapper wrapper, Map<String, BasicType> scalars) {
-        SQLQuery query = getSession().createSQLQuery(sql);
-        return executeQueryWithTransform(T, query, wrapper, scalars);
-    }
-
-    /**
-     * Execute a query return the results
-     *
-     * Puts the total count returned from the query into the wrapper
-     *
-     * @param T The class to return the transformed results of.
-     * @param sql
-     * @param wrapper
-     * @param scalars
-     * @return
-     */
-    private <T> List<T> executeQueryWithTransform(Class T, SQLQuery query, IApiWrapper wrapper, Map<String, BasicType> scalars) {
-        query.setReadOnly(true);
-        query.setCacheable(true);
-
-        // TODO: Add a transformation if the class is not "Object"
-
-
-
-
-        if (T != null && !T.equals(Object[].class)) {
-            query.setResultTransformer(Transformers.aliasToBean(T));
+        List<IndexArtworkDTO> results = executeQueryWithTransform(IndexArtworkDTO.class, sqlScalars, null);
+        if (CollectionUtils.isEmpty(results)) {
+            return new IndexArtworkDTO();
         }
 
-        // Add any required scalars
-        if (scalars != null && !scalars.isEmpty()) {
-            for (Map.Entry<String, BasicType> entry : scalars.entrySet()) {
-                if (entry.getValue() == null) {
-                    query.addScalar(entry.getKey());
-                } else {
-                    query.addScalar(entry.getKey(), entry.getValue());
-                }
+        return results.get(0);
+    }
+
+    public List<IndexArtworkDTO> getArtworkList(ApiWrapperList<IndexArtworkDTO> wrapper) {
+        SqlScalars sqlScalars = getSqlArtwork((OptionsIndexArtwork) wrapper.getParameters());
+        return executeQueryWithTransform(IndexArtworkDTO.class, sqlScalars, wrapper);
+    }
+
+    private SqlScalars getSqlArtwork(OptionsIndexArtwork options) {
+        SqlScalars sqlScalars = new SqlScalars();
+
+        sqlScalars.addToSql("SELECT a.id as artworkId,");
+        sqlScalars.addToSql(" al.id as locatedId,");
+        sqlScalars.addToSql(" ag.id as generatedId,");
+        sqlScalars.addToSql(" a.artwork_type as artworkTypeString,");
+        sqlScalars.addToSql(" ag.cache_filename as cacheFilename,");
+        sqlScalars.addToSql(" ag.cache_dir as cacheDir");
+        sqlScalars.addToSql(" FROM artwork a");
+        sqlScalars.addToSql(" LEFT JOIN artwork_located al on a.id=al.artwork_id");
+        sqlScalars.addToSql(" LEFT JOIN artwork_generated ag on al.id=ag.located_id");
+        sqlScalars.addToSql(" WHERE 1=1"); // Make appending restrictions easier
+        if (options != null) {
+            if (options.getId() > 0L) {
+                sqlScalars.addToSql(" AND a.id=:id");
+                sqlScalars.addParameter("id", options.getId());
             }
-        }
 
-        List<T> queryResults = query.list();
-        if (wrapper != null) {
-            wrapper.setTotalCount(queryResults.size());
-
-            // If there is a start or max set, we will need to re-run the query after setting the options
-            IOptions options = (IOptions) wrapper.getParameters();
-            if (options.getStart() > 0 || options.getMax() > 0) {
-                if (options.getStart() > 0) {
-                    query.setFirstResult(options.getStart());
-                }
-
-                if (options.getMax() > 0) {
-                    query.setMaxResults(options.getMax());
-                }
-                // This will get the trimmed list
-                queryResults = query.list();
+            if (CollectionUtils.isNotEmpty(options.getArtwork())) {
+                sqlScalars.addToSql(" AND a.artwork_type IN (:artworklist)");
+                sqlScalars.addParameterList("artworklist", options.getArtwork());
             }
+
+            if (CollectionUtils.isNotEmpty(options.getVideo())) {
+                sqlScalars.addParameterList("videolist", options.getVideo());
+            }
+
         }
 
-        return queryResults;
+        // Add the scalars
+        sqlScalars.addScalar("artworkId", LongType.INSTANCE);
+        sqlScalars.addScalar("locatedId", LongType.INSTANCE);
+        sqlScalars.addScalar("generatedId", LongType.INSTANCE);
+        sqlScalars.addScalar("artworkTypeString", StringType.INSTANCE);
+        sqlScalars.addScalar("cacheDir", StringType.INSTANCE);
+        sqlScalars.addScalar("cacheFilename", StringType.INSTANCE);
+
+        return sqlScalars;
     }
+    //</editor-fold>
 }

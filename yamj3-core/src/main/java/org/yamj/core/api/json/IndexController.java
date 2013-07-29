@@ -49,7 +49,7 @@ import org.yamj.core.database.service.JsonApiStorageService;
 public class IndexController {
 
     private static final Logger LOG = LoggerFactory.getLogger(IndexController.class);
-    private static final YamjInfo YAMJ_INFO = new YamjInfo(SystemInfoController.class);
+    private static final YamjInfo YAMJ_INFO = new YamjInfo(IndexController.class);
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
 

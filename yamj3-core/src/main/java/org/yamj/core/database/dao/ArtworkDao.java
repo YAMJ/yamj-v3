@@ -72,7 +72,7 @@ public class ArtworkDao extends HibernateDao {
         return getById(Artwork.class, id);
     }
 
-    public List<Artwork> getArtworkList(Parameters params) {
+    public List<Artwork> getArtworkListOld(Parameters params) {
         return getList(Artwork.class, params);
     }
 
