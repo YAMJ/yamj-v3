@@ -52,6 +52,15 @@ public class CommonController {
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
 
+    @RequestMapping(value = "/watched", method = RequestMethod.GET)
+    @ResponseBody
+    public String markWatched(
+            @RequestParam(required = true, defaultValue = "") String filename,
+            @RequestParam(required = false, defaultValue = "-1") Integer amount) {
+        LOG.info("Received watched command for '{}' to value '{}'", filename, amount);
+        return null;
+    }
+
     @RequestMapping(value = "/genre/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperSingle<Genre> getGenre(@PathVariable String name) {
