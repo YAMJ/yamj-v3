@@ -22,7 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import org.yamj.core.hibernate.Identifiable;
 
@@ -36,9 +35,6 @@ public abstract class AbstractIdentifiable implements Identifiable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
-    @JsonIgnore
-    @Transient
-    private String jsonCallback;
 
     @Override
     public long getId() {
