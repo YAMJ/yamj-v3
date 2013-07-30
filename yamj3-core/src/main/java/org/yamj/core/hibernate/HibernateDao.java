@@ -30,7 +30,6 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.*;
 import org.hibernate.transform.Transformers;
-import org.hibernate.type.BasicType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.yamj.core.api.model.IApiWrapper;
 import org.yamj.core.api.model.Parameters;

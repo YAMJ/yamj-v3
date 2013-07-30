@@ -38,7 +38,7 @@ public class IndexArtworkDTO {
 
     private String key = null;
     private MetaDataType source;
-    private Long videoId = 0L;
+    private Long videoId = 0L;  // This is a generic ID used for MOVIE, SERIES or SEASON
     private Long artworkId = 0L;
     private Long locatedId = 0L;
     private Long generatedId = 0L;
@@ -47,17 +47,59 @@ public class IndexArtworkDTO {
     private String cacheFilename = "";
     private String filename;
 
-    @JsonIgnore
-    public String Key() {
-        if (StringUtils.isBlank(key)) {
-            this.key = makeKey(source, videoId);
-        }
-        return key;
-    }
-
-    @JsonIgnore
     public MetaDataType getSource() {
         return source;
+    }
+
+    public long getVideoId() {
+        return videoId;
+    }
+
+    public long getArtworkId() {
+        return artworkId;
+    }
+
+    public long getLocatedId() {
+        return locatedId;
+    }
+
+    public long getGeneratedId() {
+        return generatedId;
+    }
+
+    public ArtworkType getArtworkType() {
+        return artworkType;
+    }
+
+    /**
+     * This is the cache directory from the database.
+     *
+     * It will not be output directly, it will be part of the "filename"
+     *
+     * @return
+     */
+    @JsonIgnore
+    public String getCacheDir() {
+        return cacheDir;
+    }
+
+    /**
+     * This is the cache filename from the database.
+     *
+     * It will not be output directly, it will be part of the "filename"
+     *
+     * @return
+     */
+    @JsonIgnore
+    public String getCacheFilename() {
+        return cacheFilename;
+    }
+
+    public String getFilename() {
+        if (StringUtils.isBlank(this.filename)) {
+            this.filename = FilenameUtils.normalize(FilenameUtils.concat(this.cacheDir, this.cacheFilename), Boolean.TRUE);
+        }
+        return filename;
     }
 
     public void setSource(MetaDataType source) {
@@ -68,21 +110,12 @@ public class IndexArtworkDTO {
         this.source = MetaDataType.fromString(source);
     }
 
-    @JsonIgnore
-    public long getVideoId() {
-        return videoId;
-    }
-
     public void setVideoId(Long videoId) {
         if (videoId == null) {
             this.videoId = 0L;
         } else {
             this.videoId = videoId;
         }
-    }
-
-    public long getArtworkId() {
-        return artworkId;
     }
 
     public void setArtworkId(Long artworkId) {
@@ -93,20 +126,12 @@ public class IndexArtworkDTO {
         }
     }
 
-    public long getLocatedId() {
-        return locatedId;
-    }
-
     public void setLocatedId(Long locatedId) {
         if (locatedId == null) {
             this.locatedId = 0L;
         } else {
             this.locatedId = locatedId;
         }
-    }
-
-    public long getGeneratedId() {
-        return generatedId;
     }
 
     public void setGeneratedId(Long generatedId) {
@@ -117,21 +142,12 @@ public class IndexArtworkDTO {
         }
     }
 
-    public ArtworkType getArtworkType() {
-        return artworkType;
-    }
-
     public void setArtworkType(ArtworkType artworkType) {
         this.artworkType = artworkType;
     }
 
     public void setArtworkTypeString(String artworkType) {
         this.artworkType = ArtworkType.fromString(artworkType);
-    }
-
-    @JsonIgnore
-    public String getCacheDir() {
-        return cacheDir;
     }
 
     public void setCacheDir(String cacheDir) {
@@ -142,11 +158,6 @@ public class IndexArtworkDTO {
         }
     }
 
-    @JsonIgnore
-    public String getCacheFilename() {
-        return cacheFilename;
-    }
-
     public void setCacheFilename(String cacheFilename) {
         if (StringUtils.isBlank(cacheFilename)) {
             this.cacheFilename = "";
@@ -155,11 +166,58 @@ public class IndexArtworkDTO {
         }
     }
 
-    public String getFilename() {
-        if (StringUtils.isBlank(this.filename)) {
-            this.filename = FilenameUtils.normalize(FilenameUtils.concat(this.cacheDir, this.cacheFilename), Boolean.TRUE);
+    /**
+     * Set the videodata ID.
+     *
+     * This will be populated to the videoId with the source of "MOVIE"
+     *
+     * @param videodataId
+     */
+    public void setVideodataId(Long videodataId) {
+        // Only set if the id is not null
+        if (videodataId != null) {
+            this.videoId = videodataId;
+            this.source = MetaDataType.MOVIE;
         }
-        return filename;
+    }
+
+    /**
+     * Set the series ID.
+     *
+     * This will be populated to the videoId with the source of "SERIES"
+     *
+     * @param seriesId
+     */
+    public void setSeriesId(Long seriesId) {
+        // Only set if the id is not null
+        if (seriesId != null) {
+            this.videoId = seriesId;
+            this.source = MetaDataType.SERIES;
+        }
+    }
+
+    /**
+     * Set the season ID.
+     *
+     * This will be populated to the videoId with the source of "SEASON"
+     *
+     * @param videodataId
+     */
+    public void setSeasonId(Long seasonId) {
+        // Only set if the id is not null
+        if (seasonId != null) {
+            this.videoId = seasonId;
+            this.source = MetaDataType.SEASON;
+        }
+    }
+
+    //<editor-fold defaultstate="collapsed" desc="Artwork Key methods">
+    @JsonIgnore
+    public String Key() {
+        if (StringUtils.isBlank(key)) {
+            this.key = makeKey(source, videoId);
+        }
+        return key;
     }
 
     @JsonIgnore
@@ -175,6 +233,7 @@ public class IndexArtworkDTO {
         key.append(id);
         return key.toString();
     }
+    //</editor-fold>
 
     @Override
     public String toString() {

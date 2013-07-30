@@ -23,7 +23,6 @@
 package org.yamj.core.api.model;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.hibernate.SQLQuery;
