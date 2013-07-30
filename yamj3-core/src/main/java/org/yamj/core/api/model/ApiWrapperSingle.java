@@ -46,6 +46,7 @@ public final class ApiWrapperSingle<T> extends ApiWrapperAbstract {
             setCount(0);
         } else {
             setCount(1);
+            setTotalCount(1);
         }
     }
 
