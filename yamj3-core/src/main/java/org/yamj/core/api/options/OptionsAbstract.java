@@ -22,7 +22,7 @@
  */
 package org.yamj.core.api.options;
 
-import java.util.ArrayList;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +41,14 @@ public abstract class OptionsAbstract implements IOptions {
     private static final String DEFAULT_SPLIT = ",|;";  // Used for splitting strings
     private Integer start = -1;
     private Integer max = -1;
+    @JsonIgnore
+    private Integer page = -1;
+    @JsonIgnore
+    private Integer line = -1;
+    @JsonIgnore
+    private Integer perpage = -1;
+    @JsonIgnore
+    private Integer perline = -1;
 
     @Override
     public void setStart(Integer start) {
@@ -52,14 +60,62 @@ public abstract class OptionsAbstract implements IOptions {
         this.max = max;
     }
 
+    public void setPage(Integer page) {
+        this.page = page;
+    }
+
+    public void setLine(Integer line) {
+        this.line = line;
+    }
+
+    public void setPerpage(Integer perpage) {
+        this.perpage = perpage;
+    }
+
+    public void setPerline(Integer perline) {
+        this.perline = perline;
+    }
+
     @Override
     public Integer getStart() {
-        return start;
+        int value = start;
+        if (start < 0 && page >= 0) {
+            // Calculate the start page
+            value = (page > 0 ? page - 1 : 0) * perpage;
+            // Add the start line (if required)
+            value += (line > 0 ? line - 1 : 0) * perline;
+        }
+        return value;
     }
 
     @Override
     public Integer getMax() {
-        return max;
+        int value = max;
+        // Check to see if one of the "pers" is set
+        if (max < 0 && (perpage > 0 || perline > 0)) {
+            if (line > 0) {
+                value = perline;
+            } else {
+                value = perpage;
+            }
+        }
+        return value;
+    }
+
+    public Integer getPage() {
+        return page;
+    }
+
+    public Integer getLine() {
+        return line;
+    }
+
+    public Integer getPerpage() {
+        return perpage;
+    }
+
+    public Integer getPerline() {
+        return perline;
     }
 
     @Override
@@ -86,6 +142,7 @@ public abstract class OptionsAbstract implements IOptions {
 
     /**
      * Split a list using the default split characters of ",|;"
+     *
      * @param list
      * @return
      */
