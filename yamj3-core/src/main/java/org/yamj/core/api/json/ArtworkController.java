@@ -111,6 +111,7 @@ public class ArtworkController {
         // Add the result to the wrapper
         wrapper.setResult(artwork);
         wrapper.setStatusCheck();
+        wrapper.processYamjInfo(YAMJ_INFO);
 
         return wrapper;
     }

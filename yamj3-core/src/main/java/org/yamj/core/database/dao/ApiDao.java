@@ -328,12 +328,15 @@ public class ApiDao extends HibernateDao {
     private SqlScalars getSqlArtwork(OptionsIndexArtwork options) {
         SqlScalars sqlScalars = new SqlScalars();
 
-        sqlScalars.addToSql("SELECT a.id as artworkId,");
-        sqlScalars.addToSql(" al.id as locatedId,");
-        sqlScalars.addToSql(" ag.id as generatedId,");
-        sqlScalars.addToSql(" a.artwork_type as artworkTypeString,");
-        sqlScalars.addToSql(" ag.cache_filename as cacheFilename,");
-        sqlScalars.addToSql(" ag.cache_dir as cacheDir");
+        sqlScalars.addToSql("SELECT a.id AS artworkId,");
+        sqlScalars.addToSql(" al.id AS locatedId,");
+        sqlScalars.addToSql(" ag.id AS generatedId,");
+        sqlScalars.addToSql(" a.season_id AS seasonId,");
+        sqlScalars.addToSql(" a.series_id AS seriesId,");
+        sqlScalars.addToSql(" a.videodata_id AS videodataId,");
+        sqlScalars.addToSql(" a.artwork_type AS artworkTypeString,");
+        sqlScalars.addToSql(" ag.cache_filename AS cacheFilename,");
+        sqlScalars.addToSql(" ag.cache_dir AS cacheDir");
         sqlScalars.addToSql(" FROM artwork a");
         sqlScalars.addToSql(" LEFT JOIN artwork_located al on a.id=al.artwork_id");
         sqlScalars.addToSql(" LEFT JOIN artwork_generated ag on al.id=ag.located_id");
@@ -359,6 +362,9 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("artworkId", LongType.INSTANCE);
         sqlScalars.addScalar("locatedId", LongType.INSTANCE);
         sqlScalars.addScalar("generatedId", LongType.INSTANCE);
+        sqlScalars.addScalar("seasonId", LongType.INSTANCE);
+        sqlScalars.addScalar("seriesId", LongType.INSTANCE);
+        sqlScalars.addScalar("videodataId", LongType.INSTANCE);
         sqlScalars.addScalar("artworkTypeString", StringType.INSTANCE);
         sqlScalars.addScalar("cacheDir", StringType.INSTANCE);
         sqlScalars.addScalar("cacheFilename", StringType.INSTANCE);
