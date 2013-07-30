@@ -34,7 +34,7 @@ public class OptionsIndexArtwork extends OptionsAbstract {
 
     private List<String> artwork = new ArrayList<String>();
     private List<String> video = new ArrayList<String>();
-    private Long id;
+    private Long id = -1L;
 
     public OptionsIndexArtwork() {
     }
