@@ -62,7 +62,7 @@ public class MediaInfoService implements InitializingBean {
     private List<String> execMediaInfo = new ArrayList<String>();
     private boolean isMediaInfoRar = Boolean.FALSE;
     private boolean isActivated = Boolean.TRUE;
-    private static final List<String> rarDiskImages = new ArrayList<String>();
+    private static final List<String> RAR_DISK_IMAGES = new ArrayList<String>();
 
     @Autowired
     private MediaStorageService mediaStorageService;
@@ -70,7 +70,7 @@ public class MediaInfoService implements InitializingBean {
     private AspectRatioTools aspectRatioTools;
     @Autowired
     private LanguageTools languageTools;
-    
+
     @Override
     public void afterPropertiesSet() {
         String OS_NAME = System.getProperty("os.name");
@@ -78,7 +78,7 @@ public class MediaInfoService implements InitializingBean {
         LOG.debug("Operating System Version: {}", System.getProperty("os.version"));
         LOG.debug("Operating System Type   : {}", System.getProperty("os.arch"));
         LOG.debug("Media Info Path         : {}", MEDIAINFO_PATH);
-        
+
         File mediaInfoFile;
         if (OS_NAME.contains("Windows")) {
             mediaInfoFile = new File(MEDIAINFO_PATH.getAbsolutePath() + File.separator + MI_RAR_FILENAME_WINDOWS);
@@ -125,14 +125,14 @@ public class MediaInfoService implements InitializingBean {
 
         // Add a list of supported extensions
         for (String ext : PropertyTools.getProperty("mediainfo.rar.diskExtensions", "iso,img,rar,001").split(",")) {
-            rarDiskImages.add(ext.toLowerCase());
+            RAR_DISK_IMAGES.add(ext.toLowerCase());
         }
     }
 
     public boolean isMediaInfoActivated() {
         return isActivated;
     }
-    
+
     public void processingError(QueueDTO queueElement) {
         if (queueElement == null) {
             // nothing to
@@ -144,7 +144,7 @@ public class MediaInfoService implements InitializingBean {
 
     public void scanMediaInfo(Long id) {
         MediaFile mediaFile = mediaStorageService.getRequiredMediaFile(id);
-        
+
         StageFile stageFile = mediaFile.getVideoFile();
         if (stageFile == null) {
             LOG.error("No valid video file found for media file: {}", mediaFile.getFileName());
@@ -152,7 +152,7 @@ public class MediaInfoService implements InitializingBean {
             mediaStorageService.update(mediaFile);
             return;
         }
-        
+
         // check if stage file can be read by MediaInfo
         File file  = new File(stageFile.getFullPath());
         boolean scanned = false;
@@ -169,11 +169,11 @@ public class MediaInfoService implements InitializingBean {
                 List<Map<String, String>> infosVideo = new ArrayList<Map<String, String>>();
                 List<Map<String, String>> infosAudio = new ArrayList<Map<String, String>>();
                 List<Map<String, String>> infosText = new ArrayList<Map<String, String>>();
-        
+
                 parseMediaInfo(is, infosGeneral, infosVideo, infosAudio, infosText);
-        
+
                 updateMediaFile(mediaFile, infosGeneral, infosVideo, infosAudio, infosText);
-    
+
                 scanned = true;
             } catch (IOException error) {
                 LOG.error("Failed reading mediainfo output: {}", stageFile);
@@ -188,7 +188,7 @@ public class MediaInfoService implements InitializingBean {
                 }
             }
         }
-        
+
         if (scanned) {
             mediaFile.setStatus(StatusType.DONE);
         } else {
@@ -196,7 +196,7 @@ public class MediaInfoService implements InitializingBean {
         }
         mediaStorageService.updateMediaFile(mediaFile);
     }
-    
+
     private void updateMediaFile(MediaFile mediaFile, Map<String, String> infosGeneral, List<Map<String, String>> infosVideo,
             List<Map<String, String>> infosAudio, List<Map<String, String>> infosText) {
 
@@ -229,7 +229,7 @@ public class MediaInfoService implements InitializingBean {
             mediaFile.setCodec(infosMainVideo.get("Codec ID"));
             mediaFile.setCodecFormat(infosMainVideo.get("Format"));
             mediaFile.setCodecProfile(infosMainVideo.get("Format profile"));
-            
+
             // width
             mediaFile.setWidth(-1);
             try {
@@ -276,7 +276,7 @@ public class MediaInfoService implements InitializingBean {
 
             // bit rate
             mediaFile.setBitrate(getBitRate(infosMainVideo));
-            
+
             // check 3D video source,
             infoValue = infosMainVideo.get("MultiView_Count");
             if ("2".equals(infoValue)) {
@@ -317,7 +317,7 @@ public class MediaInfoService implements InitializingBean {
                 subtitle.setCounter(numText + 1);
                 subtitle.setMediaFile(mediaFile);
             }
-            
+
             boolean processed = parseSubtitle(subtitle, infosCurrentText);
             if (processed) {
                 mediaFile.getSubtitles().add(subtitle);
@@ -396,7 +396,7 @@ public class MediaInfoService implements InitializingBean {
             // use codec instead format
             infoFormat = infosText.get("Codec");
         }
-        
+
         // language
         String infoLanguage = infosText.get("Language");
         if (StringUtils.isNotBlank(infoLanguage)) {
@@ -423,14 +423,14 @@ public class MediaInfoService implements InitializingBean {
             }
             return Boolean.TRUE;
         }
-        
-        
+
+
         LOG.debug("Subtitle format skipped: {}", infoFormat);
         return Boolean.FALSE;
     }
 
     public boolean isRarDiskImage(String filename) {
-        if (isMediaInfoRar && (rarDiskImages.contains(FilenameUtils.getExtension(filename).toLowerCase()))) {
+        if (isMediaInfoRar && (RAR_DISK_IMAGES.contains(FilenameUtils.getExtension(filename).toLowerCase()))) {
             return Boolean.TRUE;
         }
         return Boolean.FALSE;
@@ -478,7 +478,7 @@ public class MediaInfoService implements InitializingBean {
         }
         return -1;
     }
-    
+
     private InputStream createInputStream(String movieFilePath) throws IOException {
         // Create the command line
         List<String> commandMedia = new ArrayList<String>(execMediaInfo);
@@ -492,7 +492,7 @@ public class MediaInfoService implements InitializingBean {
         Process p = pb.start();
         return p.getInputStream();
     }
-    
+
     /**
      * Read the input skipping any blank lines
      *
@@ -527,7 +527,7 @@ public class MediaInfoService implements InitializingBean {
             // Create a fake one for General, we got only one, but to use the same algo we must create this one.
             String generalKey[] = {"General", "Géneral", "* Général"};
             matches.put(generalKey[0], new ArrayList<Map<String, String>>());
-            matches.put(generalKey[1], matches.get(generalKey[0])); 
+            matches.put(generalKey[1], matches.get(generalKey[0]));
             matches.put(generalKey[2], matches.get(generalKey[0]));
             matches.put("Video", infosVideo);
             matches.put("Vidéo", matches.get("Video"));

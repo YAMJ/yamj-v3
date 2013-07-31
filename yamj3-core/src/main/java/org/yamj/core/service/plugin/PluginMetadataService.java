@@ -49,9 +49,9 @@ public class PluginMetadataService {
     public static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.alternate", "");
     private static final String PERSON_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.person", "tmdb");
     // locks for calling database methods synchronized
-    private static final ReentrantLock storeGenreLock = new ReentrantLock();
-    private static final ReentrantLock storePersonLock = new ReentrantLock();
-    
+    private static final ReentrantLock STORE_GENRE_LOCK = new ReentrantLock();
+    private static final ReentrantLock STORE_PERSON_LOCK = new ReentrantLock();
+
     @Autowired
     private MetadataStorageService metadataStorageService;
 
@@ -99,7 +99,7 @@ public class PluginMetadataService {
 
             if (movieScanner != null) {
                 LOG.debug("Alternate scanning movie data for '{}' using {}", videoData.getTitle(), MOVIE_SCANNER_ALT);
-                
+
                 try {
                     movieScanner.scan(videoData);
                 } catch (Exception error) {
@@ -157,13 +157,13 @@ public class PluginMetadataService {
 
         // alternate scanning if main scanner failed
         // TODO enable alter scanning if requested
-        
+
         if (!ScanResult.OK.equals(scanResult)) {
             seriesScanner = registeredSeriesScanner.get(SERIES_SCANNER_ALT);
 
             if (seriesScanner != null) {
                 LOG.debug("Alternate scanning series data for '{}' using {}", series.getTitle(), SERIES_SCANNER_ALT);
-                
+
                 try {
                     seriesScanner.scan(series);
                 } catch (Exception error) {
@@ -186,7 +186,7 @@ public class PluginMetadataService {
             // exit if associated entities couldn't be stored
             return;
         }
-        
+
         // update data in database
         try {
             if (ScanResult.OK.equals(scanResult)) {
@@ -210,10 +210,10 @@ public class PluginMetadataService {
 
     private boolean storeAssociatedEntities(VideoData videoData) {
         boolean result = true;
-        
+
         // store genres
         for (String genreName : videoData.getGenreNames()) {
-            storeGenreLock.lock();
+            STORE_GENRE_LOCK.lock();
             try {
                 metadataStorageService.storeGenre(genreName);
             } catch (Exception error) {
@@ -221,13 +221,13 @@ public class PluginMetadataService {
                 LOG.warn("Storage error", error);
                 result = false;
             } finally {
-                storeGenreLock.unlock();
+                STORE_GENRE_LOCK.unlock();
             }
         }
-        
+
         // store persons
         for (CreditDTO creditDTO : videoData.getCreditDTOS()) {
-            storePersonLock.lock();
+            STORE_PERSON_LOCK.lock();
             try {
                 metadataStorageService.storePerson(creditDTO);
             } catch (Exception error) {
@@ -235,13 +235,13 @@ public class PluginMetadataService {
                 LOG.warn("Storage error", error);
                 result = false;
             } finally {
-                storePersonLock.unlock();
+                STORE_PERSON_LOCK.unlock();
             }
         }
-        
+
         return result;
     }
-    
+
     /**
      * Scan the data site for information on the person
      */
