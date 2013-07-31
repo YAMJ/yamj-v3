@@ -29,17 +29,36 @@ package org.yamj.common.type;
  */
 public enum MetaDataType {
 
+    /**
+     * This is a movie
+     */
     MOVIE,
+    /**
+     * This is a TV Series
+     */
     SERIES,
+    /**
+     * This is a season of a TV series
+     */
     SEASON,
+    /**
+     * This is an episode of a TV season
+     */
     EPISODE,
-    PERSON;
+    /**
+     * This is a person, an actor or crew member
+     */
+    PERSON,
+    /**
+     * The type is unknown
+     */
+    UNKNOWN;
 
     public static MetaDataType fromString(String type) {
         try {
             return MetaDataType.valueOf(type.trim().toUpperCase());
         } catch (IllegalArgumentException ex) {
-            return MOVIE;
+            return UNKNOWN;
         }
     }
 }
