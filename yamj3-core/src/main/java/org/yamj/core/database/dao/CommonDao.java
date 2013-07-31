@@ -43,7 +43,7 @@ public class CommonDao extends HibernateDao {
         return getList(Genre.class, params);
     }
 
-    public List<Genre> getGenreFilename(ApiWrapperList<Genre> wrapper,String filename){
+    public List<Genre> getGenreFilename(ApiWrapperList<Genre> wrapper, String filename) {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT g.id, g.name");
         sqlScalars.addToSql("FROM mediafile m, mediafile_videodata mv, videodata v, videodata_genres vg, genre g");
@@ -83,15 +83,5 @@ public class CommonDao extends HibernateDao {
 
     public List<Studio> getStudios(Parameters params) {
         return getList(Studio.class, params);
-    }
-
-    public List<VideoData> getVideoList(Parameters params) {
-        return getList(VideoData.class, params);
-    }
-    public List<Series> getSeriesList(Parameters params) {
-        return getList(Series.class, params);
-    }
-    public List<Season> getSeasonList(Parameters params) {
-        return getList(Season.class, params);
     }
 }

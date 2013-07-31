@@ -24,10 +24,14 @@ package org.yamj.core.api.options;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
 
 /**
@@ -37,14 +41,17 @@ import org.yamj.core.database.model.type.ArtworkType;
  */
 public class OptionsIndexVideo extends OptionsAbstract {
 
-    private String type = "ALL";
+    private String type = "";
     private String include = "";
     private String exclude = "";
     private String sortby = "";
     private String sortdir = "ASC";
     private String artwork = "";
+    private Long id = -1L;
     @JsonIgnore
     List<String> artworkTypes = new ArrayList<String>();
+    @JsonIgnore
+    List<MetaDataType> videoTypes = new ArrayList<MetaDataType>();
 
     public void setInclude(String include) {
         this.include = include;
@@ -67,13 +74,8 @@ public class OptionsIndexVideo extends OptionsAbstract {
     }
 
     public void setType(String type) {
-        if (StringUtils.containsIgnoreCase(type, "MOVIE")
-                || StringUtils.containsIgnoreCase(type, "TV")
-                || StringUtils.containsIgnoreCase(type, "ALL")) {
-            this.type = type.toUpperCase();
-        } else {
-            this.type = "ALL";
-        }
+        this.type = type.toUpperCase();
+        this.videoTypes.clear();
     }
 
     public String getSortby() {
@@ -98,6 +100,15 @@ public class OptionsIndexVideo extends OptionsAbstract {
 
     public void setArtwork(String artwork) {
         this.artwork = artwork.toUpperCase();
+        this.artworkTypes.clear();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     /**
@@ -107,9 +118,9 @@ public class OptionsIndexVideo extends OptionsAbstract {
      */
     public List<String> splitArtwork() {
         if (CollectionUtils.isEmpty(artworkTypes)) {
-            if (StringUtils.containsIgnoreCase(artwork, "ALL"))  {
+            if (StringUtils.containsIgnoreCase(artwork, "ALL")) {
                 // Add all the types to the list
-                for(ArtworkType at : ArtworkType.values()) {
+                for (ArtworkType at : ArtworkType.values()) {
                     artworkTypes.add(at.toString());
                 }
                 // Remove the unknown type
@@ -125,6 +136,29 @@ public class OptionsIndexVideo extends OptionsAbstract {
             }
         }
         return artworkTypes;
+    }
+
+    /**
+     * Get a list of the video types to search for
+     * @return
+     */
+    public List<MetaDataType> splitTypes() {
+        if (CollectionUtils.isEmpty(videoTypes)) {
+            if (StringUtils.containsIgnoreCase(type, "ALL") || StringUtils.isEmpty(type)) {
+                videoTypes.add(MetaDataType.MOVIE);
+                videoTypes.add(MetaDataType.SERIES);
+                videoTypes.add(MetaDataType.SEASON);
+            } else {
+                for (String param : StringUtils.split(type, ",")) {
+                    // Validate that the string passed is a correct artwork type
+                    MetaDataType mdt = MetaDataType.fromString(param);
+                    if (mdt != MetaDataType.UNKNOWN) {
+                        videoTypes.add(mdt);
+                    }
+                }
+            }
+        }
+        return videoTypes;
     }
 
     /**

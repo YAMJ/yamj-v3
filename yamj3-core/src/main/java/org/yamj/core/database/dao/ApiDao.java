@@ -65,113 +65,224 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("videoTypeString", StringType.INSTANCE);
         sqlScalars.addScalar("title", StringType.INSTANCE);
+        sqlScalars.addScalar("originalTitle", StringType.INSTANCE);
         sqlScalars.addScalar("videoYear", IntegerType.INSTANCE);
+        sqlScalars.addScalar("firstAired", StringType.INSTANCE);
 
         List<IndexVideoDTO> queryResults = executeQueryWithTransform(IndexVideoDTO.class, sqlScalars, wrapper);
         wrapper.setResults(queryResults);
 
-        // Create and populate the ID list
-        Map<MetaDataType, List<Long>> ids = new EnumMap<MetaDataType, List<Long>>(MetaDataType.class);
-        for (MetaDataType mdt : MetaDataType.values()) {
-            ids.put(mdt, new ArrayList());
-        }
+        if (CollectionUtils.isNotEmpty(queryResults)) {
+            OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getParameters();
+            if (CollectionUtils.isNotEmpty(options.splitArtwork())) {
+                // Create and populate the ID list
+                Map<MetaDataType, List<Long>> ids = new EnumMap<MetaDataType, List<Long>>(MetaDataType.class);
+                for (MetaDataType mdt : MetaDataType.values()) {
+                    ids.put(mdt, new ArrayList());
+                }
 
-        Map<String, IndexVideoDTO> results = new HashMap<String, IndexVideoDTO>();
+                Map<String, IndexVideoDTO> results = new HashMap<String, IndexVideoDTO>();
 
-        for (IndexVideoDTO single : queryResults) {
-            // Add the item to the map for further processing
-            results.put(IndexArtworkDTO.makeKey(single), single);
-            // Add the ID to the list
-            ids.get(single.getVideoType()).add(single.getId());
-        }
+                for (IndexVideoDTO single : queryResults) {
+                    // Add the item to the map for further processing
+                    results.put(IndexArtworkDTO.makeKey(single), single);
+                    // Add the ID to the list
+                    ids.get(single.getVideoType()).add(single.getId());
+                }
 
-        boolean foundArtworkIds = Boolean.FALSE;    // Check to see that we have artwork to find
-        // Remove any blank entries
-        for (MetaDataType mdt : MetaDataType.values()) {
-            if (CollectionUtils.isEmpty(ids.get(mdt))) {
-                ids.remove(mdt);
+                boolean foundArtworkIds = Boolean.FALSE;    // Check to see that we have artwork to find
+                // Remove any blank entries
+                for (MetaDataType mdt : MetaDataType.values()) {
+                    if (CollectionUtils.isEmpty(ids.get(mdt))) {
+                        ids.remove(mdt);
+                    } else {
+                        // We've found an artwork, so we can continue
+                        foundArtworkIds = Boolean.TRUE;
+                    }
+                }
+
+                if (foundArtworkIds) {
+                    LOG.debug("Found artwork to process, IDs: {}", ids);
+                    addArtworks(ids, results, options);
+                } else {
+                    LOG.debug("No artwork found to process, skipping.");
+                }
             } else {
-                // We've found an artwork, so we can continue
-                foundArtworkIds = Boolean.TRUE;
+                LOG.debug("Artwork not required, skipping.");
             }
-        }
-
-        if (foundArtworkIds) {
-            LOG.debug("Found artwork to process, IDs: {}", ids);
-            addArtworks(ids, results, (OptionsIndexVideo) wrapper.getParameters());
-        } else {
-            LOG.debug("No artwork found to process, skipping.");
+        }else{
+            LOG.debug("No results found to process.");
         }
     }
 
+    /**
+     * Generate the SQL for the video list
+     *
+     * Note: In this method MetaDataType.UNKNOWN will return all types
+     *
+     * @param wrapper
+     * @return
+     */
     private String generateSqlForVideoList(ApiWrapperList<IndexVideoDTO> wrapper) {
         OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getParameters();
         Map<String, String> includes = options.splitIncludes();
         Map<String, String> excludes = options.splitExcludes();
 
+        List<MetaDataType> mdt = options.splitTypes();
+        LOG.debug("Getting video list for types: {}", mdt.toString());
+
+        boolean hasMovie = mdt.contains(MetaDataType.MOVIE);
+        boolean hasSeries = mdt.contains(MetaDataType.SERIES);
+        boolean hasSeason = mdt.contains(MetaDataType.SEASON);
+
         StringBuilder sbSQL = new StringBuilder();
 
         // Add the movie entries
-        if (options.getType().equals("ALL") || options.getType().equals("MOVIE")) {
-            sbSQL.append("SELECT vd.id");
-            sbSQL.append(", '").append(MetaDataType.MOVIE).append("' AS videoTypeString");
-            sbSQL.append(", vd.title");
-            sbSQL.append(", vd.publication_year as videoYear");
-            sbSQL.append(" FROM videodata vd");
-            // Add genre tables for include and exclude
-            if (includes.containsKey("genre") || excludes.containsKey("genre")) {
-                sbSQL.append(", videodata_genres vg, genre g");
-            }
-
-            sbSQL.append(" WHERE vd.episode < 0");
-            // Add joins for genres
-            if (includes.containsKey("genre") || excludes.containsKey("genre")) {
-                sbSQL.append(" AND vd.id=vg.data_id");
-                sbSQL.append(" AND vg.genre_id=g.id");
-                sbSQL.append(" AND g.name='");
-                if (includes.containsKey("genre")) {
-                    sbSQL.append(includes.get("genre"));
-                } else {
-                    sbSQL.append(excludes.get("genre"));
-                }
-                sbSQL.append("'");
-            }
-
-            if (includes.containsKey("year")) {
-                sbSQL.append(" AND vd.publication_year=").append(includes.get("year"));
-            }
-
-            if (excludes.containsKey("year")) {
-                sbSQL.append(" AND vd.publication_year!=").append(includes.get("year"));
-            }
+        if (hasMovie) {
+            sbSQL.append(generateSqlForVideo(options, includes, excludes));
         }
 
-        if (options.getType().equals("ALL")) {
+        if (hasMovie && hasSeries) {
             sbSQL.append(" UNION ");
         }
 
-        // Add the TV entires
-        if (options.getType().equals("ALL") || options.getType().equals("TV")) {
-            sbSQL.append("SELECT ser.id");
-            sbSQL.append(", '").append(MetaDataType.SERIES).append("' AS videoTypeString");
-            sbSQL.append(", ser.title");
-            sbSQL.append(", ser.start_year as videoYear");
-            sbSQL.append(" FROM series ser ");
-            sbSQL.append(" WHERE 1=1"); // To make it easier to add the optional include and excludes
+        // Add the TV series entires
+        if (hasSeries) {
+            sbSQL.append(generateSqlForSeries(options, includes, excludes));
+        }
 
-            if (includes.containsKey("year")) {
-                sbSQL.append(" AND ser.start_year=").append(includes.get("year"));
-            }
+        if ((hasMovie || hasSeries) && hasSeason) {
+            sbSQL.append(" UNION ");
+        }
 
-            if (excludes.containsKey("year")) {
-                sbSQL.append(" AND ser.start_year!=").append(includes.get("year"));
-            }
+        // Add the TV season entires
+        if (hasSeason) {
+            sbSQL.append(generateSqlForSeason(options, includes, excludes));
         }
 
         if (StringUtils.isNotBlank(options.getSortby())) {
             sbSQL.append(" ORDER BY ");
             sbSQL.append(options.getSortby()).append(" ");
             sbSQL.append(options.getSortdir().toUpperCase());
+        }
+
+        return sbSQL.toString();
+    }
+
+    /**
+     * Create the SQL fragment for the selection of movies
+     *
+     * @param options
+     * @param includes
+     * @param excludes
+     * @return
+     */
+    private String generateSqlForVideo(OptionsIndexVideo options, Map<String, String> includes, Map<String, String> excludes) {
+        StringBuilder sbSQL = new StringBuilder();
+
+        sbSQL.append("SELECT vd.id");
+        sbSQL.append(", '").append(MetaDataType.MOVIE).append("' AS videoTypeString");
+        sbSQL.append(", vd.title");
+        sbSQL.append(", vd.title_original AS originalTitle");
+        sbSQL.append(", vd.publication_year AS videoYear");
+        sbSQL.append(", '-1' AS firstAired");
+        sbSQL.append(" FROM videodata vd");
+        // Add genre tables for include and exclude
+        if (includes.containsKey("genre") || excludes.containsKey("genre")) {
+            sbSQL.append(", videodata_genres vg, genre g");
+        }
+
+        sbSQL.append(" WHERE vd.episode < 0");
+        if (options.getId() > 0L) {
+            sbSQL.append(" AND vd.id=").append(options.getId());
+        }
+        // Add joins for genres
+        if (includes.containsKey("genre") || excludes.containsKey("genre")) {
+            sbSQL.append(" AND vd.id=vg.data_id");
+            sbSQL.append(" AND vg.genre_id=g.id");
+            sbSQL.append(" AND g.name='");
+            if (includes.containsKey("genre")) {
+                sbSQL.append(includes.get("genre"));
+            } else {
+                sbSQL.append(excludes.get("genre"));
+            }
+            sbSQL.append("'");
+        }
+
+        if (includes.containsKey("year")) {
+            sbSQL.append(" AND vd.publication_year=").append(includes.get("year"));
+        }
+
+        if (excludes.containsKey("year")) {
+            sbSQL.append(" AND vd.publication_year!=").append(includes.get("year"));
+        }
+
+        return sbSQL.toString();
+    }
+
+    /**
+     * Create the SQL fragment for the selection of series
+     *
+     * @param options
+     * @param includes
+     * @param excludes
+     * @return
+     */
+    private String generateSqlForSeries(OptionsIndexVideo options, Map<String, String> includes, Map<String, String> excludes) {
+        StringBuilder sbSQL = new StringBuilder();
+
+        sbSQL.append("SELECT ser.id");
+        sbSQL.append(", '").append(MetaDataType.SERIES).append("' AS videoTypeString");
+        sbSQL.append(", ser.title");
+        sbSQL.append(", ser.title_original AS originalTitle");
+        sbSQL.append(", ser.start_year AS videoYear");
+        sbSQL.append(", '-1' AS firstAired");
+        sbSQL.append(" FROM series ser ");
+        sbSQL.append(" WHERE 1=1"); // To make it easier to add the optional include and excludes
+        if (options.getId() > 0L) {
+            sbSQL.append(" AND ser.id=").append(options.getId());
+        }
+
+        if (includes.containsKey("year")) {
+            sbSQL.append(" AND ser.start_year=").append(includes.get("year"));
+        }
+
+        if (excludes.containsKey("year")) {
+            sbSQL.append(" AND ser.start_year!=").append(includes.get("year"));
+        }
+
+        return sbSQL.toString();
+    }
+
+    /**
+     * Create the SQL fragment for the selection of seasons
+     *
+     * @param options
+     * @param includes
+     * @param excludes
+     * @return
+     */
+    private String generateSqlForSeason(OptionsIndexVideo options, Map<String, String> includes, Map<String, String> excludes) {
+        StringBuilder sbSQL = new StringBuilder();
+
+        sbSQL.append("SELECT sea.id");
+        sbSQL.append(", '").append(MetaDataType.SEASON).append("' AS videoTypeString");
+        sbSQL.append(", sea.title");
+        sbSQL.append(", sea.title_original AS originalTitle");
+        sbSQL.append(", -1 as videoYear");
+        sbSQL.append(", sea.first_aired AS firstAired");
+        sbSQL.append(" FROM season sea");
+        sbSQL.append(" WHERE 1=1"); // To make it easier to add the optional include and excludes
+        if (options.getId() > 0L) {
+            sbSQL.append(" AND sea.id=").append(options.getId());
+        }
+
+        if (includes.containsKey("year")) {
+            sbSQL.append(" AND sea.first_aired LIKE '").append(includes.get("year")).append("%'");
+        }
+
+        if (excludes.containsKey("year")) {
+            sbSQL.append(" AND sea.first_aired NOT LIKE '").append(includes.get("year")).append("%'");
         }
 
         return sbSQL.toString();
@@ -192,6 +303,7 @@ public class ApiDao extends HibernateDao {
             SqlScalars sqlScalars = new SqlScalars();
             boolean hasMovie = CollectionUtils.isNotEmpty(ids.get(MetaDataType.MOVIE));
             boolean hasSeries = CollectionUtils.isNotEmpty(ids.get(MetaDataType.SERIES));
+            boolean hasSeason = CollectionUtils.isNotEmpty(ids.get(MetaDataType.SEASON));
 
             if (hasMovie) {
                 sqlScalars.addToSql("SELECT 'MOVIE' as sourceString, v.id as videoId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
@@ -218,6 +330,20 @@ public class ApiDao extends HibernateDao {
                 sqlScalars.addToSql(" AND a.artwork_type IN (:artworklist)");
             }
 
+            if ((hasMovie || hasSeries) && hasSeason) {
+                sqlScalars.addToSql(" UNION");
+            }
+
+            if (hasSeason) {
+                sqlScalars.addToSql(" SELECT 'SEASON' as sourceString, s.id as videoId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
+                sqlScalars.addToSql(" FROM season s, artwork a");
+                sqlScalars.addToSql(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
+                sqlScalars.addToSql(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
+                sqlScalars.addToSql(" WHERE s.id=a.series_id");
+                sqlScalars.addToSql(" AND s.id IN (:seasonlist)");
+                sqlScalars.addToSql(" AND a.artwork_type IN (:artworklist)");
+            }
+
             sqlScalars.addScalar("sourceString", StringType.INSTANCE);
             sqlScalars.addScalar("videoId", LongType.INSTANCE);
             sqlScalars.addScalar("artworkId", LongType.INSTANCE);
@@ -234,6 +360,11 @@ public class ApiDao extends HibernateDao {
             if (hasSeries) {
                 sqlScalars.addParameterList("serieslist", ids.get(MetaDataType.SERIES));
             }
+
+            if (hasSeason) {
+                sqlScalars.addParameterList("seasonlist", ids.get(MetaDataType.SEASON));
+            }
+
             sqlScalars.addParameterList("artworklist", artworkRequired);
 
             List<IndexArtworkDTO> results = executeQueryWithTransform(IndexArtworkDTO.class, sqlScalars, null);

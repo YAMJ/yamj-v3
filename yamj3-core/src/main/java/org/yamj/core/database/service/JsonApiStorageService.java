@@ -97,21 +97,7 @@ public class JsonApiStorageService {
     }
     //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="VideoData Methods">
-    @Transactional(readOnly = true)
-    public List<VideoData> getVideoList(Parameters params) {
-        return commonDao.getVideoList(params);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Series> getSeriesList(Parameters params) {
-        return commonDao.getSeriesList(params);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Season> getSeasonList(Parameters params) {
-        return commonDao.getSeasonList(params);
-    }
+    //<editor-fold defaultstate="collapsed" desc="Video Methods">
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Genre Methods">

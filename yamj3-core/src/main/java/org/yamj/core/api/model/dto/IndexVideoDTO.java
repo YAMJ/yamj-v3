@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
 
@@ -39,6 +40,7 @@ public class IndexVideoDTO extends AbstractIndexDTO {
 
     private MetaDataType videoType;
     private String title;
+    private String originalTitle;
     private Integer videoYear;
     private Set<IndexGenreDTO> genres = new HashSet<IndexGenreDTO>();
     Map<ArtworkType, List<IndexArtworkDTO>> artwork = new EnumMap<ArtworkType, List<IndexArtworkDTO>>(ArtworkType.class);
@@ -50,6 +52,10 @@ public class IndexVideoDTO extends AbstractIndexDTO {
 
     public String getTitle() {
         return title;
+    }
+
+    public String getOriginalTitle() {
+        return originalTitle;
     }
 
     public Integer getVideoYear() {
@@ -90,8 +96,21 @@ public class IndexVideoDTO extends AbstractIndexDTO {
         this.title = title;
     }
 
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
+    }
+
     public void setVideoYear(Integer videoYear) {
         this.videoYear = videoYear;
+    }
+
+    public void setFirstAired(String firstAired) {
+        if(StringUtils.isNotBlank(firstAired) && firstAired.length()>=4) {
+            String year = firstAired.substring(0, 4);
+            if(StringUtils.isNumeric(year)) {
+                setVideoYear(Integer.parseInt(year));
+            }
+        }
     }
 
     public void setArtwork(Set<IndexArtworkDTO> artworkList) {

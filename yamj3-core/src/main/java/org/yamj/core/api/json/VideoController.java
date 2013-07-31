@@ -22,26 +22,22 @@
  */
 package org.yamj.core.api.json;
 
-import java.util.Collections;
-import java.util.List;
-import org.hibernate.QueryException;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.yamj.core.api.model.ApiStatus;
+import org.yamj.core.api.model.dto.IndexVideoDTO;
+import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
-import org.yamj.core.api.model.ParameterType;
-import org.yamj.core.api.model.Parameters;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
@@ -51,143 +47,62 @@ public class VideoController {
     private static final Logger LOG = LoggerFactory.getLogger(VideoController.class);
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
-    private static final String DEFAULT_FIELD = "title";    // Default field to be used in the parameters
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/movie/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperSingle<VideoData> getVideoById(@PathVariable String id) {
-        LOG.info("Getting video with ID '{}'", id);
-        ApiWrapperSingle<VideoData> wrapper = new ApiWrapperSingle<VideoData>();
-        VideoData videoData = jsonApiStorageService.getEntityById(VideoData.class, Long.parseLong(id));
-        wrapper.setResult(videoData);
-        wrapper.setStatusCheck();
-        return wrapper;
-    }
+    public ApiWrapperList<IndexVideoDTO> getVideoById(@PathVariable String id,
+            @ModelAttribute("options") OptionsIndexVideo options) {
+        ApiWrapperList<IndexVideoDTO> wrapper = new ApiWrapperList<IndexVideoDTO>();
+        // Add the ID to the options
+        options.setId(NumberUtils.toLong(id));
+        // Set the type to movie
+        options.setType("MOVIE");
+        wrapper.setParameters(options);
 
-    @RequestMapping(value = "/list", method = RequestMethod.GET)
-    @ResponseBody
-    public ApiWrapperList<VideoData> getVideoList(
-            @RequestParam(required = false, defaultValue = "") String search,
-            @RequestParam(required = false, defaultValue = DEFAULT_FIELD) String searchField,
-            @RequestParam(required = false, defaultValue = "") String match,
-            @RequestParam(required = false, defaultValue = "asc") String sort,
-            @RequestParam(required = false, defaultValue = DEFAULT_FIELD) String sortField,
-            @RequestParam(required = false, defaultValue = "-1") Integer start,
-            @RequestParam(required = false, defaultValue = "-1") Integer max) {
-
-        Parameters p = new Parameters();
-        p.add(ParameterType.SEARCH, search);
-        p.add(ParameterType.SEARCH_FIELD, searchField);
-        p.add(ParameterType.MATCHMODE, match);
-        p.add(ParameterType.SORT, sort);
-        p.add(ParameterType.SORT_FIELD, sortField);
-        p.add(ParameterType.START, start);
-        p.add(ParameterType.MAX, max);
-
-        LOG.info("Getting video list with {}", p.toString());
-        ApiWrapperList<VideoData> wrapper = new ApiWrapperList<VideoData>();
-        try {
-            List<VideoData> results = jsonApiStorageService.getVideoList(p);
-            wrapper.setResults(results);
-            wrapper.setStatusCheck();
-        } catch (QueryException ex) {
-            List<VideoData> results = Collections.emptyList();
-            wrapper.setResults(results);
-            wrapper.setStatus(new ApiStatus(400, "Error with query"));
+        if (options.getId() > 0L) {
+            LOG.info("Getting video with ID '{}'", options.getId());
+//            VideoData videoData = jsonApiStorageService.getEntityById(VideoData.class, Long.parseLong(id));
+            jsonApiStorageService.getVideoList(wrapper);
         }
-        wrapper.setParameters(p);
+        wrapper.setStatusCheck();
         return wrapper;
     }
 
     @RequestMapping(value = "/series/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperSingle<Series> getSeriesById(@PathVariable String id) {
-        LOG.info("Getting series with ID '{}'", id);
-        ApiWrapperSingle<Series> wrapper = new ApiWrapperSingle<Series>();
-        Series series = jsonApiStorageService.getEntityById(Series.class, Long.parseLong(id));
-        wrapper.setResult(series);
-        wrapper.setStatusCheck();
-        return wrapper;
-    }
+    public ApiWrapperList<IndexVideoDTO> getSeriesById(@PathVariable String id,
+            @ModelAttribute("options") OptionsIndexVideo options) {
+        ApiWrapperList<IndexVideoDTO> wrapper = new ApiWrapperList<IndexVideoDTO>();
+        // Add the ID to the options
+        options.setId(NumberUtils.toLong(id));
+        // Set the type to movie
+        options.setType("SERIES");
+        wrapper.setParameters(options);
 
-    @RequestMapping(value = "/series/list", method = RequestMethod.GET)
-    @ResponseBody
-    public ApiWrapperList<Series> getSeriesList(
-            @RequestParam(required = false, defaultValue = "") String search,
-            @RequestParam(required = false, defaultValue = DEFAULT_FIELD) String searchField,
-            @RequestParam(required = false, defaultValue = "") String match,
-            @RequestParam(required = false, defaultValue = "asc") String sort,
-            @RequestParam(required = false, defaultValue = DEFAULT_FIELD) String sortField,
-            @RequestParam(required = false, defaultValue = "-1") Integer start,
-            @RequestParam(required = false, defaultValue = "-1") Integer max) {
-
-        Parameters p = new Parameters();
-        p.add(ParameterType.SEARCH, search);
-        p.add(ParameterType.SEARCH_FIELD, searchField);
-        p.add(ParameterType.MATCHMODE, match);
-        p.add(ParameterType.SORT, sort);
-        p.add(ParameterType.SORT_FIELD, sortField);
-        p.add(ParameterType.START, start);
-        p.add(ParameterType.MAX, max);
-
-        LOG.info("Getting series list with {}", p.toString());
-        ApiWrapperList<Series> wrapper = new ApiWrapperList<Series>();
-        try {
-            List<Series> results = jsonApiStorageService.getSeriesList(p);
-            wrapper.setResults(results);
-            wrapper.setStatusCheck();
-        } catch (QueryException ex) {
-            List<Series> results = Collections.emptyList();
-            wrapper.setResults(results);
-            wrapper.setStatus(new ApiStatus(400, "Error with query"));
+        if (options.getId() > 0L) {
+            LOG.info("Getting series with ID '{}'", options.getId());
+            jsonApiStorageService.getVideoList(wrapper);
         }
-        wrapper.setParameters(p);
+        wrapper.setStatusCheck();
         return wrapper;
     }
 
     @RequestMapping(value = "/season/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperSingle<Season> getSeasonById(@PathVariable String id) {
-        LOG.info("Getting season with ID '{}'", id);
-        ApiWrapperSingle<Season> wrapper = new ApiWrapperSingle<Season>();
-        Season season = jsonApiStorageService.getEntityById(Season.class, Long.parseLong(id));
-        wrapper.setResult(season);
-        wrapper.setStatusCheck();
-        return wrapper;
-    }
+    public ApiWrapperList<IndexVideoDTO> getSeasonById(@PathVariable String id,
+            @ModelAttribute("options") OptionsIndexVideo options) {
+        ApiWrapperList<IndexVideoDTO> wrapper = new ApiWrapperList<IndexVideoDTO>();
+        // Add the ID to the options
+        options.setId(NumberUtils.toLong(id));
+        // Set the type to movie
+        options.setType("SEASON");
+        wrapper.setParameters(options);
 
-    @RequestMapping(value = "/season/list", method = RequestMethod.GET)
-    @ResponseBody
-    public ApiWrapperList<Season> getSeasonList(
-            @RequestParam(required = false, defaultValue = "") String search,
-            @RequestParam(required = false, defaultValue = DEFAULT_FIELD) String searchField,
-            @RequestParam(required = false, defaultValue = "") String match,
-            @RequestParam(required = false, defaultValue = "asc") String sort,
-            @RequestParam(required = false, defaultValue = DEFAULT_FIELD) String sortField,
-            @RequestParam(required = false, defaultValue = "-1") Integer start,
-            @RequestParam(required = false, defaultValue = "-1") Integer max) {
-
-        Parameters p = new Parameters();
-        p.add(ParameterType.SEARCH, search);
-        p.add(ParameterType.SEARCH_FIELD, searchField);
-        p.add(ParameterType.MATCHMODE, match);
-        p.add(ParameterType.SORT, sort);
-        p.add(ParameterType.SORT_FIELD, sortField);
-        p.add(ParameterType.START, start);
-        p.add(ParameterType.MAX, max);
-
-        LOG.info("Getting series list with {}", p.toString());
-        ApiWrapperList<Season> wrapper = new ApiWrapperList<Season>();
-        try {
-            List<Season> results = jsonApiStorageService.getSeasonList(p);
-            wrapper.setResults(results);
-            wrapper.setStatusCheck();
-        } catch (QueryException ex) {
-            List<Season> results = Collections.emptyList();
-            wrapper.setResults(results);
-            wrapper.setStatus(new ApiStatus(400, "Error with query"));
+        if (options.getId() > 0L) {
+            LOG.info("Getting season with ID '{}'", options.getId());
+            jsonApiStorageService.getVideoList(wrapper);
         }
-        wrapper.setParameters(p);
+        wrapper.setStatusCheck();
         return wrapper;
     }
 }
