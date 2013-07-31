@@ -20,43 +20,46 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api.model;
+package org.yamj.core.api.wrapper;
 
-import org.joda.time.DateTime;
+import org.yamj.core.api.model.ApiStatus;
 
 /**
+ * Default wrapper for a list returned from the API
  *
  * @author stuart.boston
  */
-public interface IApiWrapper {
+public final class ApiWrapperSingle<T> extends ApiWrapperAbstract {
 
-    int getCount();
+    private T result = null;
 
-    String getQueryTime();
+    public ApiWrapperSingle() {
+        super();
+    }
 
-    ApiStatus getStatus();
+    public T getResult() {
+        return result;
+    }
 
-    Object getParameters();
+    public void setResult(T result) {
+        this.result = result;
 
-    String getQueryDuration();
+        // Set the count
+        if (result == null) {
+            setCount(0);
+        } else {
+            setCount(1);
+            setTotalCount(1);
+        }
+    }
 
-    int getTotalCount();
-
-    String getBaseArtworkUrl();
-
-    String getBaseMediainfoUrl();
-
-    void setQueryTime(DateTime queryTime);
-
-    void setQueryEnd();
-
-    void setStatus(ApiStatus status);
-
-    void setStatusCheck();
-
-    void setCount(int count);
-
-    void setParameters(Object parameters);
-
-    void setTotalCount(int totalCount);
+    @Override
+    public void setStatusCheck() {
+        setQueryEnd();
+        if (result == null) {
+            setStatus(new ApiStatus(400, "No record found"));
+        } else {
+            setStatus(new ApiStatus(200, "OK"));
+        }
+    }
 }

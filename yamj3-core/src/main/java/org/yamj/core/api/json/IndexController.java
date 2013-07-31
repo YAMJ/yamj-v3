@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.yamj.core.api.model.ApiWrapperList;
+import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.IndexVideoDTO;
 import org.yamj.core.api.options.OptionsIndexVideo;

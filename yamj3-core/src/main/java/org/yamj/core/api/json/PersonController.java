@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.yamj.core.api.model.ApiWrapperSingle;
+import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.service.JsonApiStorageService;
 

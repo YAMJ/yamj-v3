@@ -40,7 +40,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.IndexVideoDTO;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.core.api.model.ApiWrapperList;
+import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.SqlScalars;
 import org.yamj.core.api.model.dto.IndexArtworkDTO;
 import org.yamj.core.api.model.dto.IndexPersonDTO;

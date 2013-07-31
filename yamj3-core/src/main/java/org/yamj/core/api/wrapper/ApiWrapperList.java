@@ -20,11 +20,12 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api.model;
+package org.yamj.core.api.wrapper;
 
 import java.util.Collection;
 import java.util.Collections;
 import org.apache.commons.collections.CollectionUtils;
+import org.yamj.core.api.model.ApiStatus;
 
 /**
  * Default wrapper for a list returned from the API

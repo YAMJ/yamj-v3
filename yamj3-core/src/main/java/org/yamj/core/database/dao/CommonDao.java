@@ -26,7 +26,7 @@ import java.util.List;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
 import org.springframework.stereotype.Service;
-import org.yamj.core.api.model.ApiWrapperList;
+import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.Parameters;
 import org.yamj.core.api.model.SqlScalars;
 import org.yamj.core.database.model.*;

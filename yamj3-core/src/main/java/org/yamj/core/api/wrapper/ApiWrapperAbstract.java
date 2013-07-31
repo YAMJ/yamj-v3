@@ -20,11 +20,12 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api.model;
+package org.yamj.core.api.wrapper;
 
 import org.joda.time.DateTime;
 import org.yamj.common.model.YamjInfo;
 import org.yamj.common.tools.DateTimeTools;
+import org.yamj.core.api.model.ApiStatus;
 
 /**
  *
