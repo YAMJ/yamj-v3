@@ -30,7 +30,6 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Service;
-import org.yamj.core.api.model.Parameters;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
@@ -70,10 +69,6 @@ public class ArtworkDao extends HibernateDao {
 
     public Artwork getArtwork(Long id) {
         return getById(Artwork.class, id);
-    }
-
-    public List<Artwork> getArtworkListOld(Parameters params) {
-        return getList(Artwork.class, params);
     }
 
     @SuppressWarnings("unchecked")

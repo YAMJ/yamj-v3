@@ -5,18 +5,16 @@ HOST: http://localhost/yamj3/
 ---
 ## Information on the API in use by YAMJ
 
-A basic API has been implemented using JSON.
+This is the API for YAMJ.
 
-This is the first pass of an API and therefore is subject to change and update as necessary as the data model changes.
+Please log an issue on the GitHub Issue list if you find any problems, or want to request and additional API or change to an API.
 
-Currently the API reflects the underlying model as used in the core, so there are things in there that are probably not needed and others that are missing.
 
-All comments can be written in (support [Markdown](http://daringfireball.net/projects/markdown/syntax) syntax)
 ***
 The API can be called using the following base URL:
 `http://{CORE_IP}/yamj3/`
 
-`{CORE_IP}` is the address of where your jetty install is running, usually you can use `localhost`.
+`{CORE_IP}` is the address of where your jetty install is running, usually you can use `localhost`, but you can also look in the system info page on the YAMJ web pages.
 
 ## JSON & JSONP
 If you require JSONP formatted data, you can call the URL and append the following:
@@ -24,10 +22,26 @@ If you require JSONP formatted data, you can call the URL and append the followi
     .json?callback={function}
 **Example**
 
-    http://localhost/yamj3/video/1.json?callback={function}
+    http://localhost:8888/yamj3/api/video/1.json?callback={function}
+## Using the API documentation
+
+The documentation describes the way that the API can be called, along with an example of the data returned.
+
+The URL provided is the base URL for calling that particular API.
+
+Next will be listed some required parameters, all of which must be provided for the API to work.
+
+Optional parameters can be provided, if required, to modify the results returned.
+
+### Adding parameters to the URL
+The first parameter that you add to the URL must be preceded by `?`, each subsequent parameter is preceded by `&`
+
+**Example**
+
+    http://localhost:8888/yamj3/api/video/list?start=0&max=5
+This adds the `start=0` parameter first and then `max=5` second. The `=` separates the parameter name from the value.
 
 ---
-
 
 --
 Video Methods
@@ -284,34 +298,44 @@ Artwork
 --
 
 Get information on the artwork
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>This is the ID of the artwork to fetch.<br>
+        It will retrieve all the artwork generated for that ID</td>
+    </tr>
+</table>
+
 GET /api/artwork/{id}
 < 200
 < Content-Type: application/json
 {
    "count":1,
-   "queryTime":"2013-06-08 19:02:24",
+   "totalCount":1,
+   "queryDuration":"6ms",
+   "queryTime":"2013-07-31 09:12:07",
    "status":{
       "status":200,
       "message":"OK"
    },
-   "parameters":{
-      "parameters":{}
-   },
+   "parameters":null,
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
    "result":{
-      "id":1,
-      "createTimestamp":1370707288000,
-      "updateTimestamp":1370707367000,
-      "artworkType":"POSTER",
-      "status":"PROCESSED",
-      "url":"http://d3gtl9l2a4fn1j.cloudfront.net/t/p/original/sw959V58ueAypVgKQysCArdCQeW.jpg",
-      "stageFile":null,
-      "videoData":null,
-      "season":null,
-      "series":null,
-      "newlyCreated":false
+      "source":"SEASON",
+      "videoId":1,
+      "artworkId":5,
+      "locatedId":21,
+      "generatedId":21,
+      "artworkType":"FANART",
+      "filename":"g/ga/Game of Thrones_0000_001.season.fanart.21.default-fanart.jpg"
    }
 }
-
 
 Get a list of artwork
 ***
@@ -322,11 +346,12 @@ Get a list of artwork
     <col width="80%">
     <tr>
         <td>artwork</td>
-        <td>The type of artwork to search for. Can be a comma delimited list.</td>
+        <td>The type of artwork to search for. Can be a comma delimited list of any of the artwork types.</td>
     </tr>
     <tr>
-        <td>type</td>
-        <td>The type of video to search for. Can be one of video, series, season. Must be used in conjunction with the id parameter</td>
+        <td>video</td>
+        <td>The type of video to search for. Can be one of video, series, season. <br>
+        Can be used in conjunction with the id parameter to narrow the artwork list to a specific video.</td>
     </tr>
     <tr>
         <td>id</td>
@@ -334,7 +359,7 @@ Get a list of artwork
     </tr>
     <tr>
         <td>start</td>
-        <td>Where to start the search from. Default is 1</td>
+        <td>Where to start the search from. Default is 0 (beginning)</td>
     </tr>
     <tr>
         <td>max</td>
@@ -345,7 +370,72 @@ Get a list of artwork
 GET /api/artwork/list
 < 200
 < Content-Type: application/json
-{}
+{
+   "count":5,
+   "totalCount":199,
+   "queryDuration":"63ms",
+   "queryTime":"2013-07-31 09:09:50",
+   "status":{
+      "status":200,
+      "message":"OK"
+   },
+   "parameters":{
+      "start":-1,
+      "max":5,
+      "artwork":[],
+      "video":[],
+      "id":-1
+   },
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "results":[
+      {
+         "source":"SERIES",
+         "videoId":1,
+         "artworkId":1,
+         "locatedId":1,
+         "generatedId":1,
+         "artworkType":"POSTER",
+         "filename":"g/ga/Game of Thrones_0000.series.poster.1.default-poster.jpg"
+      },
+      {
+         "source":"SERIES",
+         "videoId":1,
+         "artworkId":1,
+         "locatedId":2,
+         "generatedId":2,
+         "artworkType":"POSTER",
+         "filename":"g/ga/Game of Thrones_0000.series.poster.2.default-poster.jpg"
+      },
+      {
+         "source":"SERIES",
+         "videoId":1,
+         "artworkId":1,
+         "locatedId":3,
+         "generatedId":3,
+         "artworkType":"POSTER",
+         "filename":"g/ga/Game of Thrones_0000.series.poster.3.default-poster.jpg"
+      },
+      {
+         "source":"SERIES",
+         "videoId":1,
+         "artworkId":1,
+         "locatedId":4,
+         "generatedId":4,
+         "artworkType":"POSTER",
+         "filename":"g/ga/Game of Thrones_0000.series.poster.4.default-poster.jpg"
+      },
+      {
+         "source":"SERIES",
+         "videoId":1,
+         "artworkId":1,
+         "locatedId":5,
+         "generatedId":5,
+         "artworkType":"POSTER",
+         "filename":"g/ga/Game of Thrones_0000.series.poster.5.default-poster.jpg"
+      }
+   ]
+}
 
 
 --

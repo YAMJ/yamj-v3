@@ -23,9 +23,6 @@
 package org.yamj.core.api.json;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import org.hibernate.QueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,16 +31,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.ApiWrapperList;
 import org.yamj.core.api.model.ApiWrapperSingle;
-import org.yamj.core.api.model.ParameterType;
-import org.yamj.core.api.model.Parameters;
 import org.yamj.core.api.model.dto.IndexArtworkDTO;
 import org.yamj.core.api.options.OptionsIndexArtwork;
-import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
@@ -55,49 +47,6 @@ public class ArtworkController {
     private JsonApiStorageService api;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    @ResponseBody
-    public ApiWrapperSingle<Artwork> getArtworkById(@PathVariable String id) {
-        LOG.info("Getting artwork with ID '{}'", id);
-        ApiWrapperSingle<Artwork> wrapper = new ApiWrapperSingle<Artwork>();
-        Artwork artwork = api.getEntityById(Artwork.class, Long.parseLong(id));
-        wrapper.setResult(artwork);
-        wrapper.setStatusCheck();
-        return wrapper;
-    }
-
-    @RequestMapping(value = "/list", method = RequestMethod.GET)
-    @ResponseBody
-    public ApiWrapperList<Artwork> getArtworkListOld(
-            @RequestParam(required = false, defaultValue = "") String artwork,
-            @RequestParam(required = false, defaultValue = "") String type,
-            @RequestParam(required = false, defaultValue = "-1") Integer id,
-            @RequestParam(required = false, defaultValue = "-1") Integer start,
-            @RequestParam(required = false, defaultValue = "-1") Integer max) {
-
-        Parameters p = new Parameters();
-        p.add(ParameterType.ARTWORK_TYPE, artwork);
-        p.add(ParameterType.VIDEO_TYPE, type);
-        p.add(ParameterType.ID, id);
-        p.add(ParameterType.START, start);
-        p.add(ParameterType.MAX, max);
-
-        LOG.info("Getting artwork list with {}", p.toString());
-        ApiWrapperList<Artwork> wrapper = new ApiWrapperList<Artwork>();
-        wrapper.setParameters(p);
-        try {
-            List<Artwork> results = api.getArtworkListOld(p);
-            wrapper.setResults(results);
-            wrapper.setStatusCheck();
-        } catch (QueryException ex) {
-            List<Artwork> results = Collections.emptyList();
-            wrapper.setResults(results);
-            wrapper.setStatus(new ApiStatus(400, "Error with query"));
-            LOG.error("Exception: {}", ex.getMessage());
-        }
-        return wrapper;
-    }
-
-    @RequestMapping(value = "/test/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperSingle<IndexArtworkDTO> getArtwork(@PathVariable Long id) throws IOException {
         ApiWrapperSingle<IndexArtworkDTO> wrapper = new ApiWrapperSingle<IndexArtworkDTO>();
@@ -113,7 +62,7 @@ public class ArtworkController {
         return wrapper;
     }
 
-    @RequestMapping(value = "/test/list", method = RequestMethod.GET)
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperList<IndexArtworkDTO> getArtworkList(@ModelAttribute("options") OptionsIndexArtwork options) {
         LOG.info("INDEX: Artwork list - Options: {}", options.toString());

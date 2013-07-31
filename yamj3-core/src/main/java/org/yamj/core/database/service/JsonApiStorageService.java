@@ -189,11 +189,6 @@ public class JsonApiStorageService {
 
     //<editor-fold defaultstate="collapsed" desc="Artwork Methods">
     @Transactional(readOnly = true)
-    public List<Artwork> getArtworkListOld(Parameters params) {
-        return artworkDao.getArtworkListOld(params);
-    }
-
-    @Transactional(readOnly = true)
     public IndexArtworkDTO getArtworkById(Long id) {
         return apiDao.getArtworkById(id);
     }
