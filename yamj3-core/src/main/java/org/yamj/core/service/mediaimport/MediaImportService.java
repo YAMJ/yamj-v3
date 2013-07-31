@@ -48,7 +48,6 @@ public class MediaImportService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MediaImportService.class);
     private static final String MEDIA_SOURCE = "filename";
-    
     @Autowired
     private StagingDao stagingDao;
     @Autowired
@@ -82,24 +81,24 @@ public class MediaImportService {
         // scan filename for informations
         FilenameDTO dto = new FilenameDTO(stageFile);
         filenameScanner.scan(dto);
-        LOG.debug("Scanned filename {}-'{}': title='{}', year={}", 
+        LOG.debug("Scanned filename {}-'{}': title='{}', year={}",
                 stageFile.getId(), stageFile.getFileName(), dto.getTitle(), dto.getYear());
-        
+
         if (StringUtils.isBlank(dto.getTitle()) && (dto.getYear() > 0)) {
             if (dto.getYear() > 0) {
                 LOG.warn("No valid title scanned from '{}', year will be used as title", stageFile.getFileName());
                 dto.setTitle(String.valueOf(dto.getYear()));
                 dto.setYear(-1);
             } else {
-                LOG.error("No valid title and year could be scanned from filename '{}'", stageFile.getFileName()); 
+                LOG.error("No valid title and year could be scanned from filename '{}'", stageFile.getFileName());
                 stageFile.setStatus(StatusType.ERROR);
                 mediaDao.updateEntity(stageFile);
                 return;
             }
         }
-        
+
         // MEDIA FILE
-        
+
         MediaFile mediaFile = mediaDao.getMediaFile(stageFile.getFileName());
         if (mediaFile != null) {
             LOG.warn("Media file for '{}' already present for new stage file", stageFile.getFileName());
@@ -111,7 +110,7 @@ public class MediaImportService {
             // mark as duplicate and return
             stageFile.setStatus(StatusType.DUPLICATE);
             stagingDao.updateEntity(stageFile);
-            
+
             return;
         }
 
@@ -133,7 +132,7 @@ public class MediaImportService {
         mediaFile.setStatus(StatusType.NEW);
         mediaFile.addStageFile(stageFile);
         stageFile.setMediaFile(mediaFile);
-        
+
         LOG.debug("Store new media file: '{}'", mediaFile.getFileName());
         mediaDao.saveEntity(mediaFile);
 
@@ -141,7 +140,7 @@ public class MediaImportService {
         stagingDao.updateEntity(stageFile);
 
         // METADATA OBJECTS
-        
+
         if (dto.isMovie()) {
             // VIDEO DATA for movies
 
@@ -325,29 +324,25 @@ public class MediaImportService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void processImage(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
-        
-        if (stageFile.getBaseName().equalsIgnoreCase("poster") ||
-            stageFile.getBaseName().equalsIgnoreCase("cover") ||
-            stageFile.getBaseName().equalsIgnoreCase("folder"))
-        {
+
+        if (stageFile.getBaseName().equalsIgnoreCase("poster")
+                || stageFile.getBaseName().equalsIgnoreCase("cover")
+                || stageFile.getBaseName().equalsIgnoreCase("folder")) {
             // TODO apply poster to all video files in that directory
-            
-        } else if (stageFile.getBaseName().equalsIgnoreCase("fanart") ||
-                stageFile.getBaseName().equalsIgnoreCase("backdrop") ||
-                stageFile.getBaseName().equalsIgnoreCase("background"))
-        {
-            // TODO apply poster to all video files in that directory
-            
-        } else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".fanart") ||
-                StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-fanart"))
-        {
-            // TODO apply fanart to single video
-            
-        } else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".poster") ||
-                StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-poster")) 
-        {
+            LOG.trace("Generic poster found: {}", stageFile.getBaseName());
+        } else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".poster")
+                || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-poster")) {
             // TODO apply poster to single video
+            LOG.trace("Poster found: {}", stageFile.getBaseName());
+        } else if (stageFile.getBaseName().equalsIgnoreCase("fanart")
+                || stageFile.getBaseName().equalsIgnoreCase("backdrop")
+                || stageFile.getBaseName().equalsIgnoreCase("background")) {
+            // TODO apply fanart to all video files in that directory
+            LOG.trace("Generic fanart found: {}", stageFile.getBaseName());
+        } else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".fanart")
+                || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-fanart")) {
+            // TODO apply fanart to single video
+            LOG.trace("Fanart found: {}", stageFile.getBaseName());
         }
     }
-        
 }

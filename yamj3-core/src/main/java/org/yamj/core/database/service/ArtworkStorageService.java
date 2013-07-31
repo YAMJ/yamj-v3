@@ -45,23 +45,22 @@ import org.yamj.common.type.MetaDataType;
 public class ArtworkStorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkStorageService.class);
-
     @Autowired
     private ArtworkDao artworkDao;
 
     @Transactional
-    public void storeArtworkProfile(ArtworkProfile newProfile) { 
+    public void storeArtworkProfile(ArtworkProfile newProfile) {
         ArtworkProfile profile = artworkDao.getArtworkProfile(newProfile.getProfileName(), newProfile.getArtworkType());
         if (profile == null) {
             this.artworkDao.saveEntity(newProfile);
             LOG.info("Stored new artwork profile {}", newProfile);
-        } else {           
+        } else {
             // TODO what to do if profile changes in size and height?
-            
+
             if (profile.hasRelevantChanges(newProfile)) {
                 LOG.warn("Artwork profile update with relevant changes: {}", profile.getProfileName());
             }
-            
+
             profile.setHeight(newProfile.getHeight());
             profile.setWidth(newProfile.getWidth());
             profile.setApplyToMovie(newProfile.isApplyToMovie());
@@ -80,7 +79,9 @@ public class ArtworkStorageService {
 
         ArtworkType artworkType = located.getArtwork().getArtworkType();
         if (ArtworkType.PHOTO == artworkType) {
-            // no own category
+            // Setting the MetaDataType to PERSON
+            // Does not have it's own category at this time.
+            metaDataType = MetaDataType.PERSON;
         } else if (ArtworkType.VIDEOIMAGE == artworkType) {
             metaDataType = MetaDataType.EPISODE;
         } else if (ArtworkType.BANNER == artworkType) {
@@ -98,10 +99,10 @@ public class ArtworkStorageService {
                 metaDataType = MetaDataType.MOVIE;
             }
         }
-        
-       return this.artworkDao.getPreProcessArtworkProfiles(artworkType, metaDataType);
+
+        return this.artworkDao.getPreProcessArtworkProfiles(artworkType, metaDataType);
     }
-    
+
     @Transactional
     public void saveArtwork(Artwork artwork) {
         this.artworkDao.saveEntity(artwork);
@@ -109,7 +110,7 @@ public class ArtworkStorageService {
 
     @Transactional
     public void updateArtwork(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
-        
+
         if (CollectionUtils.isEmpty(artwork.getArtworkLocated())) {
             // no located artwork presents; just store all
             this.artworkDao.storeAll(locatedArtworks);
@@ -122,14 +123,14 @@ public class ArtworkStorageService {
                 }
             }
         }
-        
+
         // set status of artwork
         if (CollectionUtils.isEmpty(locatedArtworks) && CollectionUtils.isEmpty(artwork.getArtworkLocated())) {
             artwork.setStatus(StatusType.NOTFOUND);
         } else {
             artwork.setStatus(StatusType.DONE);
         }
-        
+
         // update artwork in database
         this.artworkDao.updateEntity(artwork);
     }
@@ -191,11 +192,11 @@ public class ArtworkStorageService {
             artworkDao.saveEntity(located);
         }
     }
-    
+
     @Transactional
     public void errorArtwork(Long id) {
-         Artwork artwork = artworkDao.getArtwork(id);
-         if (artwork != null) {
+        Artwork artwork = artworkDao.getArtwork(id);
+        if (artwork != null) {
             artwork.setStatus(StatusType.ERROR);
             artworkDao.updateEntity(artwork);
         }
@@ -230,9 +231,9 @@ public class ArtworkStorageService {
     @Transactional
     public void errorArtworkLocated(Long id) {
         ArtworkLocated located = artworkDao.getArtworkLocated(id);
-         if (located != null) {
-             located.setStatus(StatusType.ERROR);
-             artworkDao.updateEntity(located);
+        if (located != null) {
+            located.setStatus(StatusType.ERROR);
+            artworkDao.updateEntity(located);
         }
     }
 

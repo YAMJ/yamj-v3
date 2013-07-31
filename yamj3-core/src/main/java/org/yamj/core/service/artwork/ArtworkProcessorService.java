@@ -297,6 +297,7 @@ public class ArtworkProcessorService {
              */
         } else {
             // TODO: stage file needs no validation??
+            LOG.trace("Located URL was blank for {}", located.toString());
         }
 
         return Boolean.TRUE;
