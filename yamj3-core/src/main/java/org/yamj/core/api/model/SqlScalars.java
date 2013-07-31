@@ -25,6 +25,7 @@ package org.yamj.core.api.model;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.type.BasicType;
@@ -105,7 +106,7 @@ public final class SqlScalars {
      * @return
      */
     public String getSql() {
-        return sql.toString();
+        return StringUtils.normalizeSpace(sql.toString());
     }
 
     /**
@@ -116,7 +117,7 @@ public final class SqlScalars {
      */
     public SQLQuery createSqlQuery(Session session) {
         if (this.query == null) {
-            this.query = session.createSQLQuery(sql.toString());
+            this.query = session.createSQLQuery(getSql());
             // Add parameters
             if (!CollectionUtils.isEmpty(parameters)) {
                 for (Map.Entry<String, Object> entry : parameters.entrySet()) {

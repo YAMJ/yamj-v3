@@ -59,6 +59,10 @@ public class OptionsIndexArtwork extends OptionsAbstract {
         return video;
     }
 
+    public void setVideo(List<String> videoList) {
+        this.video = videoList;
+    }
+
     public void setVideo(String videoList) {
         this.video = splitList(videoList);
     }

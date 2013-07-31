@@ -70,7 +70,6 @@ public class OptionsIndexVideo extends OptionsAbstract {
         if (StringUtils.containsIgnoreCase(type, "MOVIE")
                 || StringUtils.containsIgnoreCase(type, "TV")
                 || StringUtils.containsIgnoreCase(type, "ALL")) {
-
             this.type = type.toUpperCase();
         } else {
             this.type = "ALL";
@@ -98,7 +97,7 @@ public class OptionsIndexVideo extends OptionsAbstract {
     }
 
     public void setArtwork(String artwork) {
-        this.artwork = artwork;
+        this.artwork = artwork.toUpperCase();
     }
 
     /**

@@ -353,9 +353,27 @@ public class ApiDao extends HibernateDao {
             }
 
             if (CollectionUtils.isNotEmpty(options.getVideo())) {
-                sqlScalars.addParameterList("videolist", options.getVideo());
+                StringBuilder sb = new StringBuilder("AND (");
+                boolean first = Boolean.TRUE;
+                for (String type : options.getVideo()) {
+                    MetaDataType mdt = MetaDataType.fromString(type);
+                    LOG.info("Type: {}, MDT: {}, first: {}", type, mdt, first);
+                    if (first) {
+                        first = Boolean.FALSE;
+                    } else {
+                        sb.append(" OR");
+                    }
+                    if (mdt == MetaDataType.MOVIE) {
+                        sb.append(" videodata_id IS NOT NULL");
+                    } else if (mdt == MetaDataType.SERIES) {
+                        sb.append(" series_id IS NOT NULL");
+                    } else if (mdt == MetaDataType.SEASON) {
+                        sb.append(" season_id IS NOT NULL");
+                    }
+                }
+                sb.append(")");
+                sqlScalars.addToSql(sb.toString());
             }
-
         }
 
         // Add the scalars
