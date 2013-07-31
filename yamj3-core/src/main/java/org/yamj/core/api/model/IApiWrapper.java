@@ -23,15 +23,12 @@
 package org.yamj.core.api.model;
 
 import org.joda.time.DateTime;
-import org.yamj.common.model.YamjInfo;
 
 /**
  *
  * @author stuart.boston
  */
 public interface IApiWrapper {
-
-    void processYamjInfo(YamjInfo yi);
 
     int getCount();
 

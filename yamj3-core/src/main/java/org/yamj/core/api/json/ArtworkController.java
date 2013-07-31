@@ -36,7 +36,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.yamj.common.model.YamjInfo;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.ApiWrapperList;
 import org.yamj.core.api.model.ApiWrapperSingle;
@@ -52,7 +51,6 @@ import org.yamj.core.database.service.JsonApiStorageService;
 public class ArtworkController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkController.class);
-    private static final YamjInfo YAMJ_INFO = new YamjInfo(ArtworkController.class);
     @Autowired
     private JsonApiStorageService api;
 
@@ -111,7 +109,6 @@ public class ArtworkController {
         // Add the result to the wrapper
         wrapper.setResult(artwork);
         wrapper.setStatusCheck();
-        wrapper.processYamjInfo(YAMJ_INFO);
 
         return wrapper;
     }
@@ -124,7 +121,6 @@ public class ArtworkController {
         wrapper.setParameters(options);
         wrapper.setResults(api.getArtworkList(wrapper));
         wrapper.setStatusCheck();
-        wrapper.processYamjInfo(YAMJ_INFO);
 
         return wrapper;
     }

@@ -36,6 +36,7 @@ public final class ApiWrapperList<T> extends ApiWrapperAbstract {
     private Collection<T> results = Collections.emptyList();
 
     public ApiWrapperList() {
+        super();
     }
 
     public Collection<T> getResults() {

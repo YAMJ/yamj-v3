@@ -65,7 +65,7 @@ public class YamjInfo {
     private String databaseIp;
     private String databaseName;
     private String coreIp;
-    private int corePort = 8888;   // TODO: Get this from jetty!
+    private int corePort;
     private String baseArtworkUrl;
     private String baseMediainfoUrl;
     private String skinDir;
@@ -104,6 +104,9 @@ public class YamjInfo {
         // IP Address
         this.coreIp = SystemTools.getIpAddress(Boolean.TRUE);
 
+        // Core Port
+        this.corePort = 8888;   // TODO: Get this from jetty!
+        
         // Database IP & Name
         findDatabaseInfo();
 

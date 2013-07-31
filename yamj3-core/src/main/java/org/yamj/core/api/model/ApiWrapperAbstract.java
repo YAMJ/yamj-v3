@@ -41,6 +41,12 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     private String baseArtworkUrl = "";
     private String baseMediainfoUrl = "";
 
+    public ApiWrapperAbstract() {
+        YamjInfo yi = new YamjInfo(ApiWrapperAbstract.class);
+        baseArtworkUrl = yi.getBaseArtworkUrl();
+        baseMediainfoUrl = yi.getBaseMediainfoUrl();
+    }
+
     @Override
     public int getCount() {
         return count;
@@ -119,11 +125,5 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     @Override
     public void setTotalCount(int totalCount) {
         this.totalCount = totalCount;
-    }
-
-    @Override
-    public final void processYamjInfo(YamjInfo yi) {
-        this.baseArtworkUrl = yi.getBaseArtworkUrl();
-        this.baseMediainfoUrl = yi.getBaseMediainfoUrl();
     }
 }

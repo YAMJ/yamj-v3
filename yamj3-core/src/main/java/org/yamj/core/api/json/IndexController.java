@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.yamj.common.model.YamjInfo;
 import org.yamj.core.api.model.ApiWrapperList;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.IndexVideoDTO;
@@ -49,7 +48,6 @@ import org.yamj.core.database.service.JsonApiStorageService;
 public class IndexController {
 
     private static final Logger LOG = LoggerFactory.getLogger(IndexController.class);
-    private static final YamjInfo YAMJ_INFO = new YamjInfo(IndexController.class);
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
 
@@ -57,13 +55,12 @@ public class IndexController {
     @ResponseBody
     public ApiWrapperList<IndexVideoDTO> getVideoList(
             @ModelAttribute("options") OptionsIndexVideo options) {
-        LOG.info("INDEX: Video list - Options: {}", options.toString());
+        LOG.debug("INDEX: Video list - Options: {}", options.toString());
 
         ApiWrapperList<IndexVideoDTO> wrapper = new ApiWrapperList<IndexVideoDTO>();
         wrapper.setParameters(options);
         jsonApiStorageService.getVideoList(wrapper);
         wrapper.setStatusCheck();
-        wrapper.processYamjInfo(YAMJ_INFO);
         return wrapper;
     }
 
@@ -71,13 +68,12 @@ public class IndexController {
     @ResponseBody
     public ApiWrapperList<IndexPersonDTO> getPersonList(
             @ModelAttribute("options") OptionsIndexPerson options) {
-        LOG.info("INDEX: Person list - Options: {}", options.toString());
+        LOG.debug("INDEX: Person list - Options: {}", options.toString());
 
         ApiWrapperList<IndexPersonDTO> wrapper = new ApiWrapperList<IndexPersonDTO>();
         wrapper.setParameters(options);
         jsonApiStorageService.getPersonList(wrapper);
         wrapper.setStatusCheck();
-        wrapper.processYamjInfo(YAMJ_INFO);
         return wrapper;
     }
 

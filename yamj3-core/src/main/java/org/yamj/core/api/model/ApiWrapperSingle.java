@@ -32,6 +32,7 @@ public final class ApiWrapperSingle<T> extends ApiWrapperAbstract {
     private T result = null;
 
     public ApiWrapperSingle() {
+        super();
     }
 
     public T getResult() {
