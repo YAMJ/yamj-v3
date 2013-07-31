@@ -50,10 +50,10 @@ import org.yamj.common.tools.PropertyTools;
 public class PoolingHttpClient extends DefaultPoolingHttpClient implements DisposableBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(PoolingHttpClient.class);
-    private final static Charset UTF8_CHARSET = Charset.forName("UTF-8");
+    private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
     private final Map<String, Integer> groupLimits = new HashMap<String, Integer>();
     private final List<String> routedHosts = new ArrayList<String>();
-    
+
     public PoolingHttpClient() {
         this(null, null);
     }
