@@ -162,9 +162,7 @@ GET /index/video
          "title":"Game of Thrones",
          "originalTitle":"Game of Thrones",
          "videoYear":2011,
-         "genres":[
-
-         ],
+         "genres":[],
          "artwork":{
             "POSTER":[
                {
@@ -208,14 +206,15 @@ For specific indexes, there will be an option to get the count for that index.
         <td>The type of the count to get.<br/>
         Can be a comma separated list consisting one or more of:<br/>
         'all', 'movie', 'series', 'season', 'episode' or 'person'
-</td>
+        </td>
     </tr>
 </table>
 
 GET /index/count
 < 200
 < Content-Type: application/json
-{[
+{
+    [
    {
       "type":"MOVIE",
       "count":730,
@@ -251,7 +250,8 @@ GET /index/count
       "updateTimestamp":1372795950000,
       "lastId":9175
    }
-]}
+]
+}
 
 
 --
@@ -354,7 +354,7 @@ Retrieve information on the series
     </tr>
 </table>
 
-GET /api/season/{id}
+GET /api/video/series/{id}
 < 200
 < Content-Type: application/json
 {
@@ -421,7 +421,7 @@ Retrieve information on the season
     </tr>
 </table>
 
-GET /api/season/{id}
+GET /api/video/season/{id}
 < 200
 < Content-Type: application/json
 {
