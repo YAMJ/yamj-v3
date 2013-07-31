@@ -55,6 +55,7 @@
             <includes>
                 <include>version.txt</include>
                 <include>filescanner.cmd</include>
+                <include>filescanner.sh</include>
             </includes>
         </fileSet>
 

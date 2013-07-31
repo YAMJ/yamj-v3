@@ -183,15 +183,13 @@
                         <configuration>
                             <target>
                                 <property name="batch_file" value="${project.build.directory}/jetty.cmd" />
-                                <property name="title_1"    value="# ${project.name}${line.separator}" />
-                                <property name="title_2"    value="# ${project.description}${line.separator}" />
-                                <property name="title_3"    value="# Version: ${project.version}${line.separator}" />
-                                <property name="title_4"    value="# Git-SHA: ${buildNumber}${line.separator}" />
+                                <property name="title_1"    value="REM ${project.name}${line.separator}" />
+                                <property name="title_2"    value="REM ${project.description}${line.separator}" />
+                                <property name="title_3"    value="REM Version: ${project.version}${line.separator}" />
+                                <property name="title_4"    value="REM Git-SHA: ${buildNumber}${line.separator}" />
                                 <property name="line_1"     value="@echo off${line.separator}" />
                                 <property name="line_2"     value="cls${line.separator}" />
                                 <property name="line_3"     value="java -classpath .;lib/* org.yamj.jetty.Start %*${line.separator}" />
-                                <property name="line_4"     value="pause${line.separator}" />
-                                <echo>Writing batch file: ${batch_file}</echo>
                                 <echo file="${batch_file}" append="false">${line_1}</echo>
                                 <echo file="${batch_file}" append="true">${title_1}</echo>
                                 <echo file="${batch_file}" append="true">${title_2}</echo>
@@ -199,7 +197,33 @@
                                 <echo file="${batch_file}" append="true">${title_4}</echo>
                                 <echo file="${batch_file}" append="true">${line_2}</echo>
                                 <echo file="${batch_file}" append="true">${line_3}</echo>
-                                <echo file="${batch_file}" append="true">${line_4}</echo>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>create-shell-file</id>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <target>
+                                <property name="shell_file" value="${project.build.directory}/jetty.sh" />
+                                <property name="title_1"    value="# ${project.name}${line.separator}" />
+                                <property name="title_2"    value="# ${project.description}${line.separator}" />
+                                <property name="title_3"    value="# Version: ${project.version}${line.separator}" />
+                                <property name="title_4"    value="# Git-SHA: ${buildNumber}${line.separator}" />
+                                <property name="line_1"     value="#!/bin/sh${line.separator}" />
+                                <property name="line_2"     value="clear${line.separator}" />
+                                <property name="line_3"     value="java -classpath .:./lib/* org.yamj.jetty.Start $@${line.separator}" />
+                                <echo>Writing shell file: ${shell_file}</echo>
+                                <echo file="${shell_file}" append="false">${line_1}</echo>
+                                <echo file="${shell_file}" append="true">${title_1}</echo>
+                                <echo file="${shell_file}" append="true">${title_2}</echo>
+                                <echo file="${shell_file}" append="true">${title_3}</echo>
+                                <echo file="${shell_file}" append="true">${title_4}</echo>
+                                <echo file="${shell_file}" append="true">${line_2}</echo>
+                                <echo file="${shell_file}" append="true">${line_3}</echo>
                             </target>
                         </configuration>
                         <goals>
