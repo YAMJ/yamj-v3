@@ -44,253 +44,422 @@ This adds the `start=0` parameter first and then `max=5` second. The `=` separat
 ---
 
 --
+Index Methods
+This section is for the index API methods
+--
+
+Get an index of videos.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The list of video types to get.<br/>
+            Can be one or more of: 'ALL', 'MOVIE', 'SERIES' or 'SEASON'.<br/>
+            Leave this option blank to return all types</td>
+    </tr>
+</table>
+
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>include</td>
+        <td>Comma delimited list of fields & values to include<br/>
+        Currently 'year' and 'genre' are supported using this format:<br/>
+        include=year-2010,genre-Action
+        </td>
+    </tr>
+    <tr>
+        <td>exclude</td>
+        <td>Comma delimited list of fields & values to exclude<br/>
+        Currently 'year' and 'genre' are supported using this format:<br/>
+        include=year-2010,genre-Action
+        </td>
+    </tr>
+    <tr>
+        <td>sortby</td>
+        <td>The field to sort by. One of the valid output fields.</td>
+    </tr>
+    <tr>
+        <td>sortdir</td>
+        <td>The direction of the sorting, can be 'asc' or 'desc'</td>
+    </tr>
+    <tr>
+        <td>artwork</td>
+        <td>The list of artwork types to get for the videos.<br/>
+            Can be one or more of: 'ALL', 'POSTER', 'FANART', 'BANNER', 'VIDEOIMAGE', etc.<br/>
+            Leave this option blank to return no artwork</td>
+    </tr>
+</table>
+
+GET /index/video
+< 200
+< Content-Type: application/json
+{
+   "count":2,
+   "totalCount":13,
+   "queryDuration":"107ms",
+   "queryTime":"2013-07-31 16:18:12",
+   "status":{
+      "status":200,
+      "message":"OK"
+   },
+   "parameters":{
+      "start":-1,
+      "max":2,
+      "type":"",
+      "include":"",
+      "exclude":"",
+      "sortby":"",
+      "sortdir":"ASC",
+      "artwork":"POSTER",
+      "id":-1
+   },
+   "baseArtworkUrl":"http://141.196.102.114:8888/artwork/",
+   "baseMediainfoUrl":"http://141.196.102.114:8888/mediainfo/",
+   "results":[
+      {
+         "id":1,
+         "videoType":"SEASON",
+         "title":"Game of Thrones",
+         "originalTitle":"Game of Thrones",
+         "videoYear":2011,
+         "genres":[],
+         "artwork":{
+            "POSTER":[
+               {
+                  "source":"SEASON",
+                  "videoId":1,
+                  "artworkId":1,
+                  "locatedId":1,
+                  "generatedId":1,
+                  "artworkType":"POSTER",
+                  "filename":"g/ga/Game of Thrones_0000.series.poster.1.default-poster.jpg"
+               },
+               {
+                  "source":"SEASON",
+                  "videoId":1,
+                  "artworkId":1,
+                  "locatedId":2,
+                  "generatedId":2,
+                  "artworkType":"POSTER",
+                  "filename":"g/ga/Game of Thrones_0000.series.poster.2.default-poster.jpg"
+               }
+            ]
+         },
+         "artworkCount":2,
+         "genreCount":0
+      },
+      {
+         "id":1,
+         "videoType":"SERIES",
+         "title":"Game of Thrones",
+         "originalTitle":"Game of Thrones",
+         "videoYear":2011,
+         "genres":[
+
+         ],
+         "artwork":{
+            "POSTER":[
+               {
+                  "source":"SERIES",
+                  "videoId":1,
+                  "artworkId":1,
+                  "locatedId":1,
+                  "generatedId":1,
+                  "artworkType":"POSTER",
+                  "filename":"g/ga/Game of Thrones_0000.series.poster.1.default-poster.jpg"
+               },
+               {
+                  "source":"SERIES",
+                  "videoId":1,
+                  "artworkId":1,
+                  "locatedId":2,
+                  "generatedId":2,
+                  "artworkType":"POSTER",
+                  "filename":"g/ga/Game of Thrones_0000.series.poster.2.default-poster.jpg"
+               }
+            ]
+         },
+         "artworkCount":2,
+         "genreCount":0
+      }
+   ]
+}
+
+
+Get counts for various main objects in the database.
+Note: These are currently fixed and are intended for system wide statistics.
+For specific indexes, there will be an option to get the count for that index.
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The type of the count to get.<br/>
+        Can be a comma separated list consisting one or more of:<br/>
+        'all', 'movie', 'series', 'season', 'episode' or 'person'
+</td>
+    </tr>
+</table>
+
+GET /index/count
+< 200
+< Content-Type: application/json
+{[
+   {
+      "type":"MOVIE",
+      "count":730,
+      "createTimestamp":1372626565000,
+      "updateTimestamp":1372785055000,
+      "lastId":877
+   },
+   {
+      "type":"SERIES",
+      "count":6,
+      "createTimestamp":1372626159000,
+      "updateTimestamp":1372785325000,
+      "lastId":6
+   },
+   {
+      "type":"SEASON",
+      "count":10,
+      "createTimestamp":1372626160000,
+      "updateTimestamp":1372785325000,
+      "lastId":10
+   },
+   {
+      "type":"EPISODE",
+      "count":147,
+      "createTimestamp":1372626160000,
+      "updateTimestamp":1372785325000,
+      "lastId":549
+   },
+   {
+      "type":"PERSON",
+      "count":9175,
+      "createTimestamp":1372785318000,
+      "updateTimestamp":1372795950000,
+      "lastId":9175
+   }
+]}
+
+
+--
 Video Methods
 These methods get information on the videos in the database
 --
 
 Retrieve information on the video
-GET /api/video/{id}
-< 200
-< Content-Type: application/json
-{
-   "count":1,
-   "queryTime":"2013-06-08 18:46:25",
-   "status":{
-      "status":200,
-      "message":"OK"
-   },
-   "parameters":{
-      "parameters":{}
-   },
-   "result":{
-      "id":1,
-      "createTimestamp":1370707288000,
-      "updateTimestamp":1370707298000,
-      "identifier":"Death at a Funeral_2007",
-      "title":"Death at a Funeral",
-      "titleOriginal":"Death at a Funeral",
-      "plot":"Chaos ensues when a man tries to expose a dark secret regarding a recently deceased patriarch of a dysfunctional British family.",
-      "outline":"Chaos ensues when a man tries to expose a dark secret regarding a recently deceased patriarch of a dysfunctional British family.",
-      "status":"DONE",
-      "episode":-1,
-      "publicationYear":2007,
-      "releaseDate":null,
-      "topRank":-1,
-      "tagline":null,
-      "quote":null,
-      "country":"United Kingdom",
-      "ratings":{},
-      "genres":null,
-      "season":null,
-      "mediaFiles":null,
-      "credits":null,
-      "artworks":null,
-      "genreNames":[],
-      "moviedbIdMap":{
-         "tmdb":"2196"
-      },
-      "scannableTvEpisode":false,
-      "year":2007,
-      "seasonNumber":-1,
-      "episodeNumber":-1,
-      "newlyCreated":false
-   }
-}
-
-
-Get a list of the videos in the database
 ***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The id of the mocie to get.<br/>
+            Note: This is specific to the video type, so Movie ID 1 is not the same as Season ID 1</td>
+    </tr>
+</table>
+
 **Optional Parameters**
 
 <table width="100%">
     <col width="20%">
     <col width="80%">
     <tr>
-        <td>search</td>
-        <td>The value to search for</td>
+        <td>artwork</td>
+        <td>The list of artwork types to get for the video.<br/>
+            Can be one or more of: 'ALL', 'POSTER', 'FANART', 'BANNER', 'VIDEOIMAGE', etc.<br/>
+            Leave this option blank to return no artwork</td>
     </tr>
-    <tr>
-        <td>searchField</td>
-        <td>The field to search in. Default is title.</td>
-    <tr>
-        <td>match</td>
-        <td>The match method. One of "any" (default), "start", "end" or "exact"</td>
-    <tr>
-        <td>sort</td>
-        <td>The sort direction either "asc" (default) or "desc"</td>
-    <tr>
-        <td>sortField</td>
-        <td>The field to sort on. Default is title.</td>
-    <tr>
-        <td>start</td>
-        <td>Where to start the search from. Default is 0 (beginning)</td>
-    <tr>
-        <td>max</td>
-        <td>The maximum number of records to return. Default is 0 (all)</td>
 </table>
 
-***
-GET /api/video/list
+GET /api/video/movie/{id}
 < 200
 < Content-Type: application/json
-{}
+{
+   "count":1,
+   "totalCount":1,
+   "queryDuration":"8ms",
+   "queryTime":"2013-07-31 16:23:37",
+   "status":{
+      "status":200,
+      "message":"OK"
+   },
+   "parameters":{
+      "start":-1,
+      "max":-1,
+      "type":"MOVIE",
+      "include":"",
+      "exclude":"",
+      "sortby":"",
+      "sortdir":"ASC",
+      "artwork":"",
+      "id":34
+   },
+   "baseArtworkUrl":"http://141.196.102.114:8888/artwork/",
+   "baseMediainfoUrl":"http://141.196.102.114:8888/mediainfo/",
+   "results":[
+      {
+         "id":34,
+         "videoType":"MOVIE",
+         "title":"I, Robot",
+         "originalTitle":"I Robot",
+         "videoYear":2004,
+         "genres":[],
+         "artwork":{},
+         "artworkCount":0,
+         "genreCount":0
+      }
+   ]
+}
 
 
 Retrieve information on the series
-GET /api/series/{id}
-< 200
-< Content-Type: application/json
-{
-   "count":1,
-   "queryTime":"2013-06-08 12:26:51",
-   "status":{
-      "status":200,
-      "message":"OK"
-   },
-   "parameters":{
-      "parameters":{}
-   },
-   "result":{
-      "id":5,
-      "createTimestamp":1370690809000,
-      "updateTimestamp":null,
-      "identifier":"Supernatural_0000",
-      "title":"Supernatural",
-      "titleOriginal":null,
-      "plot":null,
-      "outline":null,
-      "status":"NEW",
-      "startYear":-1,
-      "endYear":-1,
-      "ratings":{},
-      "overrideFlags":{
-         "TITLE":"filename"
-      },
-      "seasons":null,
-      "artworks":null,
-      "moviedbIdMap":{},
-      "year":-1,
-      "seasonNumber":-1,
-      "episodeNumber":-1,
-      "newlyCreated":false
-   }
-}
-
-
-Get a list of the series information in the database
 ***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The id of the series to get.<br/>
+            Note: This is specific to the video type, so Movie ID 1 is not the same as Season ID 1</td>
+    </tr>
+</table>
+
 **Optional Parameters**
 
 <table width="100%">
     <col width="20%">
     <col width="80%">
     <tr>
-        <td>search</td>
-        <td>The value to search for</td>
+        <td>artwork</td>
+        <td>The list of artwork types to get for the video.<br/>
+            Can be one or more of: 'ALL', 'POSTER', 'FANART', 'BANNER', 'VIDEOIMAGE', etc.<br/>
+            Leave this option blank to return no artwork</td>
     </tr>
-    <tr>
-        <td>searchField</td>
-        <td>The field to search in. Default is title.</td>
-    <tr>
-        <td>match</td>
-        <td>The match method. One of "any" (default), "start", "end" or "exact"</td>
-    <tr>
-        <td>sort</td>
-        <td>The sort direction either "asc" (default) or "desc"</td>
-    <tr>
-        <td>sortField</td>
-        <td>The field to sort on. Default is title.</td>
-    <tr>
-        <td>start</td>
-        <td>Where to start the search from. Default is 0 (beginning)</td>
-    <tr>
-        <td>max</td>
-        <td>The maximum number of records to return. Default is 0 (all)</td>
 </table>
 
-***
-GET /api/video/series/list
-< 200
-< Content-Type: application/json
-{}
-
-
-Retrieve information on the season
 GET /api/season/{id}
 < 200
 < Content-Type: application/json
 {
    "count":1,
-   "queryTime":"2013-06-08 18:44:08",
+   "totalCount":1,
+   "queryDuration":"7ms",
+   "queryTime":"2013-07-31 16:29:10",
    "status":{
       "status":200,
       "message":"OK"
    },
    "parameters":{
-      "parameters":{}
+      "start":-1,
+      "max":-1,
+      "type":"SERIES",
+      "include":"",
+      "exclude":"",
+      "sortby":"",
+      "sortdir":"ASC",
+      "artwork":"",
+      "id":1
    },
-   "result":{
-      "id":1,
-      "createTimestamp":1370707289000,
-      "updateTimestamp":1370707344000,
-      "identifier":"Chuck_0000_001",
-      "title":"Chuck",
-      "titleOriginal":null,
-      "plot":"Chuck Bartowski, ace computer geek at Buy More, is not in his right mind. That's a good thing. Ever since he unwittingly downloaded stolen government secrets into his brain, action, excitement and a cool secret-agent girlfriend have entered his life. It's a bad thing, too. Because now Chuck is in danger 24/7.",
-      "outline":"Chuck Bartowski, ace computer geek at Buy More, is not in his right mind. That's a good thing. Ever since he unwittingly downloaded stolen government secrets into his brain, action, excitement and a cool secret-agent girlfriend have entered his life. It's a bad thing, too. Because now Chuck is in danger 24/7.",
-      "status":"DONE",
-      "season":1,
-      "firstAired":"2007-09-24",
-      "sourcedbIdMap":{},
-      "ratings":{},
-      "series":null,
-      "videoDatas":null,
-      "artworks":null,
-      "scannableTvSeason":false,
-      "year":-1,
-      "seasonNumber":1,
-      "episodeNumber":-1,
-      "newlyCreated":false
-   }
+   "baseArtworkUrl":"http://141.196.102.114:8888/artwork/",
+   "baseMediainfoUrl":"http://141.196.102.114:8888/mediainfo/",
+   "results":[
+      {
+         "id":1,
+         "videoType":"SERIES",
+         "title":"Game of Thrones",
+         "originalTitle":"Game of Thrones",
+         "videoYear":2011,
+         "genres":[],
+         "artwork":{},
+         "artworkCount":0,
+         "genreCount":0
+      }
+   ]
 }
 
-
-Get a list of the season information in the database
+Retrieve information on the season
 ***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The id of the season to get.<br/>
+            Note: This is specific to the video type, so Movie ID 1 is not the same as Season ID 1</td>
+    </tr>
+</table>
+
 **Optional Parameters**
 
 <table width="100%">
     <col width="20%">
     <col width="80%">
     <tr>
-        <td>search</td>
-        <td>The value to search for</td>
+        <td>artwork</td>
+        <td>The list of artwork types to get for the video.<br/>
+            Can be one or more of: 'ALL', 'POSTER', 'FANART', 'BANNER', 'VIDEOIMAGE', etc.<br/>
+            Leave this option blank to return no artwork</td>
     </tr>
-    <tr>
-        <td>searchField</td>
-        <td>The field to search in. Default is title.</td>
-    <tr>
-        <td>match</td>
-        <td>The match method. One of "any" (default), "start", "end" or "exact"</td>
-    <tr>
-        <td>sort</td>
-        <td>The sort direction either "asc" (default) or "desc"</td>
-    <tr>
-        <td>sortField</td>
-        <td>The field to sort on. Default is title.</td>
-    <tr>
-        <td>start</td>
-        <td>Where to start the search from. Default is 0 (beginning)</td>
-    <tr>
-        <td>max</td>
-        <td>The maximum number of records to return. Default is 0 (all)</td>
 </table>
 
-***
-GET /api/video/season/list
+GET /api/season/{id}
 < 200
 < Content-Type: application/json
-{}
+{
+   "count":1,
+   "totalCount":1,
+   "queryDuration":"5ms",
+   "queryTime":"2013-07-31 16:28:54",
+   "status":{
+      "status":200,
+      "message":"OK"
+   },
+   "parameters":{
+      "start":-1,
+      "max":-1,
+      "type":"SEASON",
+      "include":"",
+      "exclude":"",
+      "sortby":"",
+      "sortdir":"ASC",
+      "artwork":"",
+      "id":1
+   },
+   "baseArtworkUrl":"http://141.196.102.114:8888/artwork/",
+   "baseMediainfoUrl":"http://141.196.102.114:8888/mediainfo/",
+   "results":[
+      {
+         "id":1,
+         "videoType":"SEASON",
+         "title":"Game of Thrones",
+         "originalTitle":"Game of Thrones",
+         "videoYear":2011,
+         "genres":[],
+         "artwork":{},
+         "artworkCount":0,
+         "genreCount":0
+      }
+   ]
+}
 
 
 --
@@ -836,126 +1005,6 @@ GET /api/boxedsets
 < 200
 < Content-Type: application/json
 {}
-
-
---
-Index Methods
-This section is for the index API methods
---
-
-Get an index of videos.
-***
-**Required Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>type</td>
-        <td>The type of the index to get.<br/>
-        Can be one of 'movie', 'tv' or 'all'</td>
-    </tr>
-</table>
-
-**Optional Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>include</td>
-        <td>Comma delimited list of fields & values to include<br/>
-        Currently 'year' and 'genre' are supported using this format:<br/>
-        include=year-2010,genre-Action
-        </td>
-    </tr>
-    <tr>
-        <td>exclude</td>
-        <td>Comma delimited list of fields & values to exclude<br/>
-        Currently 'year' and 'genre' are supported using this format:<br/>
-        include=year-2010,genre-Action
-        </td>
-    </tr>
-    <tr>
-        <td>sortby</td>
-        <td>The field to sort by. One of the valid output fields.</td>
-    </tr>
-    <tr>
-        <td>sortdir</td>
-        <td>The direction of the sorting, can be 'asc' or 'desc'</td>
-    </tr>
-    <tr>
-        <td>artwork</td>
-        <td>The list of artwork types to get for the videos.<br/>
-            Can be one or more of: 'ALL', 'POSTER', 'FANART', 'BANNER', 'VIDEOIMAGE', etc.<br/>
-            Leave this option blank to return no artwork</td>
-    </tr>
-</table>
-
-GET /index/video
-< 200
-< Content-Type: application/json
-{}
-
-
-Get counts for various main objects in the database.
-Note: These are currently fixed and are intended for system wide statistics.
-For specific indexes, there will be an option to get the count for that index.
-***
-**Optional Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>type</td>
-        <td>The type of the count to get.<br/>
-        Can be a comma separated list consisting one or more of:<br/>
-        'all', 'movie', 'series', 'season', 'episode' or 'person'
-</td>
-    </tr>
-</table>
-
-GET /index/count
-< 200
-< Content-Type: application/json
-{[
-   {
-      "type":"MOVIE",
-      "count":730,
-      "createTimestamp":1372626565000,
-      "updateTimestamp":1372785055000,
-      "lastId":877
-   },
-   {
-      "type":"SERIES",
-      "count":6,
-      "createTimestamp":1372626159000,
-      "updateTimestamp":1372785325000,
-      "lastId":6
-   },
-   {
-      "type":"SEASON",
-      "count":10,
-      "createTimestamp":1372626160000,
-      "updateTimestamp":1372785325000,
-      "lastId":10
-   },
-   {
-      "type":"EPISODE",
-      "count":147,
-      "createTimestamp":1372626160000,
-      "updateTimestamp":1372785325000,
-      "lastId":549
-   },
-   {
-      "type":"PERSON",
-      "count":9175,
-      "createTimestamp":1372785318000,
-      "updateTimestamp":1372795950000,
-      "lastId":9175
-   }
-]}
 
 
 --
