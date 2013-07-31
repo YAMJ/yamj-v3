@@ -24,6 +24,8 @@ package org.yamj.core.api.json;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
@@ -46,6 +48,7 @@ import org.yamj.core.database.service.JsonApiStorageService;
 @Service("systemInfoController")
 public class SystemInfoController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(SystemInfoController.class);
     private static final YamjInfo YAMJ_INFO = new YamjInfo(SystemInfoController.class);
     @Autowired
     private JsonApiStorageService jsonApi;
@@ -68,8 +71,16 @@ public class SystemInfoController {
 
         if (BooleanUtils.toBoolean(addcounts)) {
             for (MetaDataType singleType : MetaDataType.values()) {
+                if (singleType == MetaDataType.UNKNOWN) {
+                    continue;
+                }
+
                 CountTimestamp result = jsonApi.getCountTimestamp(singleType);
-                YAMJ_INFO.addCount(result.getType(), result.getCount());
+                if (result == null) {
+                    LOG.warn("There was an error getting the count for {}", singleType.toString());
+                } else {
+                    YAMJ_INFO.addCount(result.getType(), result.getCount());
+                }
             }
         }
         return YAMJ_INFO;

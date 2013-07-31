@@ -36,7 +36,6 @@ import org.yamj.core.api.model.dto.IndexPersonDTO;
 import org.yamj.core.api.model.dto.IndexVideoDTO;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.ApiDao;
-import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.model.*;
 
@@ -45,8 +44,6 @@ public class JsonApiStorageService {
 
     @Autowired
     private CommonDao commonDao;
-    @Autowired
-    private ArtworkDao artworkDao;
     @Autowired
     private ApiDao apiDao;
     @Autowired
@@ -95,9 +92,6 @@ public class JsonApiStorageService {
         apiDao.getPersonList(wrapper);
 
     }
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="Video Methods">
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Genre Methods">
@@ -183,6 +177,5 @@ public class JsonApiStorageService {
     public List<IndexArtworkDTO> getArtworkList(ApiWrapperList<IndexArtworkDTO> wrapper) {
         return apiDao.getArtworkList(wrapper);
     }
-
     //</editor-fold>
 }
