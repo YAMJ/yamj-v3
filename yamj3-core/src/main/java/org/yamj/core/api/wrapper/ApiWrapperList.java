@@ -50,8 +50,12 @@ public final class ApiWrapperList<T> extends ApiWrapperAbstract {
         // Add the list's size
         if (CollectionUtils.isNotEmpty(results)) {
             setCount(results.size());
+            if (getCount() > getTotalCount()) {
+                setTotalCount(getCount());
+            }
         } else {
             setCount(0);
+            setTotalCount(0);
         }
     }
 
