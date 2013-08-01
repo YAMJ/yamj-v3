@@ -45,7 +45,7 @@ public class Person extends AbstractAuditable implements Serializable {
     @Column(name = "name", nullable = false, length = 255)
     private String name;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @Temporal(value = TemporalType.DATE)
     @Column(name = "birth_day")
     private Date birthDay;
 
@@ -55,7 +55,7 @@ public class Person extends AbstractAuditable implements Serializable {
     @Column(name = "birth_name", length = 255)
     private String birthName;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @Temporal(value = TemporalType.DATE)
     @Column(name = "death_day")
     private Date deathDay;
 
