@@ -20,21 +20,19 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api.model;
+package org.yamj.core.api.options;
 
 /**
  *
- * @author Stuart
+ * @author stuart.boston
  */
-public enum ParameterType {
-    SEARCH,
-    SEARCH_FIELD,
-    MATCHMODE,
-    SORT,
-    SORT_FIELD,
-    START,
-    MAX,
-    ARTWORK_TYPE,
-    VIDEO_TYPE,
-    ID
+public interface IOptions {
+
+    void setStart(Integer start);
+
+    void setMax(Integer max);
+
+    Integer getStart();
+
+    Integer getMax();
 }
