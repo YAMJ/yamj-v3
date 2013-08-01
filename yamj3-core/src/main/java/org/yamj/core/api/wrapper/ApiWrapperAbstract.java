@@ -39,7 +39,6 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     private long queryDuration = 0L;
     private DateTime queryTime = DateTime.now();
     private ApiStatus status = new ApiStatus();
-    private Object parameters = null;
     private IOptions options = null;
     private String baseArtworkUrl = "";
     private String baseMediainfoUrl = "";
@@ -63,11 +62,6 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     @Override
     public ApiStatus getStatus() {
         return status;
-    }
-
-    @Override
-    public Object getParameters() {
-        return parameters;
     }
 
     @Override
@@ -138,11 +132,6 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     @Override
     public void setCount(int count) {
         this.count = count;
-    }
-
-    @Override
-    public void setParameters(Object parameters) {
-        this.parameters = parameters;
     }
 
     @Override

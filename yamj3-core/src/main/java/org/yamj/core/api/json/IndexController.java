@@ -58,7 +58,7 @@ public class IndexController {
         LOG.debug("INDEX: Video list - Options: {}", options.toString());
 
         ApiWrapperList<IndexVideoDTO> wrapper = new ApiWrapperList<IndexVideoDTO>();
-        wrapper.setParameters(options);
+        wrapper.setOptions(options);
         jsonApiStorageService.getVideoList(wrapper);
         wrapper.setStatusCheck();
         return wrapper;

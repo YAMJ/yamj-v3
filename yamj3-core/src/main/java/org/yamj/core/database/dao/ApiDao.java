@@ -75,7 +75,7 @@ public class ApiDao extends HibernateDao {
         wrapper.setResults(queryResults);
 
         if (CollectionUtils.isNotEmpty(queryResults)) {
-            OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getParameters();
+            OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getOptions();
             if (CollectionUtils.isNotEmpty(options.splitArtwork())) {
                 // Create and populate the ID list
                 Map<MetaDataType, List<Long>> ids = new EnumMap<MetaDataType, List<Long>>(MetaDataType.class);
@@ -126,7 +126,7 @@ public class ApiDao extends HibernateDao {
      * @return
      */
     private String generateSqlForVideoList(ApiWrapperList<IndexVideoDTO> wrapper) {
-        OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getParameters();
+        OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getOptions();
         Map<String, String> includes = options.splitIncludes();
         Map<String, String> excludes = options.splitExcludes();
 
@@ -431,6 +431,7 @@ public class ApiDao extends HibernateDao {
 
     /**
      * Get a single person using the ID in the wrapper options.
+     *
      * @param wrapper
      */
     public void getPerson(ApiWrapperSingle<IndexPersonDTO> wrapper) {
@@ -460,11 +461,8 @@ public class ApiDao extends HibernateDao {
         } else {
             sqlScalars.addToSql(" WHERE 1=1");
         }
-        if(StringUtils.isNotBlank(options.getSortby())) {
-            sqlScalars.addToSql(" ORDER BY ");
-            sqlScalars.addToSql(options.getSortby());
-            sqlScalars.addToSql(options.getSortdir());  // Space is added
-        }
+        // This will default to blank if there's no sort required
+        sqlScalars.addToSql(options.getSortString());
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
@@ -490,7 +488,7 @@ public class ApiDao extends HibernateDao {
     }
 
     public List<IndexArtworkDTO> getArtworkList(ApiWrapperList<IndexArtworkDTO> wrapper) {
-        SqlScalars sqlScalars = getSqlArtwork((OptionsIndexArtwork) wrapper.getParameters());
+        SqlScalars sqlScalars = getSqlArtwork((OptionsIndexArtwork) wrapper.getOptions());
         return executeQueryWithTransform(IndexArtworkDTO.class, sqlScalars, wrapper);
     }
 

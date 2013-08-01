@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -36,8 +37,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
-import org.yamj.core.api.model.ParameterType;
-import org.yamj.core.api.model.Parameters;
+import org.yamj.core.api.model.dto.IndexGenreDTO;
+import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Genre;
@@ -52,6 +53,7 @@ public class CommonController {
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
 
+    //<editor-fold defaultstate="collapsed" desc="Watched Methods">
     @RequestMapping(value = "/watched", method = RequestMethod.GET)
     @ResponseBody
     public ApiStatus markWatched(
@@ -62,7 +64,9 @@ public class CommonController {
         // TODO: Add write to database command
         return new ApiStatus(200, "Watch command successful");
     }
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Genre Methods">
     @RequestMapping(value = "/genre")
     @ResponseBody
     public ApiWrapperList<Genre> getGenreFilename(@RequestParam(required = true, defaultValue = "") String filename) {
@@ -93,32 +97,19 @@ public class CommonController {
 
     @RequestMapping(value = "/genres", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<Genre> getGenres(
-            @RequestParam(required = false, defaultValue = "") String search,
-            @RequestParam(required = false, defaultValue = "") String match,
-            @RequestParam(required = false, defaultValue = "") String sort,
-            @RequestParam(required = false, defaultValue = "name") String field,
-            @RequestParam(required = false, defaultValue = "-1") Integer start,
-            @RequestParam(required = false, defaultValue = "-1") Integer max) {
+    public ApiWrapperList<IndexGenreDTO> getGenres(@ModelAttribute("options") OptionsId options) {
+        LOG.info("Getting genre list with {}", options.toString());
 
-        Parameters p = new Parameters();
-        p.add(ParameterType.SEARCH, search);
-        p.add(ParameterType.MATCHMODE, match);
-        p.add(ParameterType.SORT, sort);
-        p.add(ParameterType.SORT_FIELD, field);
-        p.add(ParameterType.START, start);
-        p.add(ParameterType.MAX, max);
-
-        LOG.info("Getting genre list with {}", p.toString());
-
-        ApiWrapperList<Genre> wrapper = new ApiWrapperList<Genre>();
-        List<Genre> results = jsonApiStorageService.getGenres(p);
+        ApiWrapperList<IndexGenreDTO> wrapper = new ApiWrapperList<IndexGenreDTO>();
+        wrapper.setOptions(options);
+        List<IndexGenreDTO> results = jsonApiStorageService.getGenres(wrapper);
         wrapper.setResults(results);
-        wrapper.setParameters(p);
         wrapper.setStatusCheck();
         return wrapper;
     }
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Certification Methods">
     @RequestMapping(value = "/certification/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperSingle<Certification> getCertification(@PathVariable String name) {
@@ -138,33 +129,20 @@ public class CommonController {
 
     @RequestMapping(value = "/certifications", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<Certification> getCertifications(
-            @RequestParam(required = false, defaultValue = "") String search,
-            @RequestParam(required = false, defaultValue = "") String match,
-            @RequestParam(required = false, defaultValue = "") String sort,
-            @RequestParam(required = false, defaultValue = "certification_text") String field,
-            @RequestParam(required = false, defaultValue = "-1") Integer start,
-            @RequestParam(required = false, defaultValue = "-1") Integer max) {
-
-        Parameters p = new Parameters();
-        p.add(ParameterType.SEARCH, search);
-        p.add(ParameterType.MATCHMODE, match);
-        p.add(ParameterType.SORT, sort);
-        p.add(ParameterType.SORT_FIELD, field);
-        p.add(ParameterType.START, start);
-        p.add(ParameterType.MAX, max);
-
-        LOG.info("Getting certification list with {}", p.toString());
+    public ApiWrapperList<Certification> getCertifications(@ModelAttribute("options") OptionsId options) {
+        LOG.info("Getting certification list with {}", options.toString());
 
         ApiWrapperList<Certification> wrapper = new ApiWrapperList<Certification>();
-        List<Certification> results = jsonApiStorageService.getCertifications(p);
+        wrapper.setOptions(options);
+        List<Certification> results = jsonApiStorageService.getCertifications(wrapper);
         wrapper.setResults(results);
-        wrapper.setParameters(p);
         wrapper.setStatus(new ApiStatus(200, "OK"));
 
         return wrapper;
     }
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Studio Methods">
     @RequestMapping(value = "/studio/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperSingle<Studio> getStudio(@PathVariable String name) {
@@ -184,33 +162,20 @@ public class CommonController {
 
     @RequestMapping(value = "/studios", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<Studio> getStudios(
-            @RequestParam(required = false, defaultValue = "") String search,
-            @RequestParam(required = false, defaultValue = "") String match,
-            @RequestParam(required = false, defaultValue = "") String sort,
-            @RequestParam(required = false, defaultValue = "certification_text") String field,
-            @RequestParam(required = false, defaultValue = "-1") Integer start,
-            @RequestParam(required = false, defaultValue = "-1") Integer max) {
-
-        Parameters p = new Parameters();
-        p.add(ParameterType.SEARCH, search);
-        p.add(ParameterType.MATCHMODE, match);
-        p.add(ParameterType.SORT, sort);
-        p.add(ParameterType.SORT_FIELD, field);
-        p.add(ParameterType.START, start);
-        p.add(ParameterType.MAX, max);
-
-        LOG.info("Getting studio list with {}", p.toString());
+    public ApiWrapperList<Studio> getStudios(@ModelAttribute("options") OptionsId options) {
+        LOG.info("Getting studio list with {}", options.toString());
 
         ApiWrapperList<Studio> wrapper = new ApiWrapperList<Studio>();
-        List<Studio> results = jsonApiStorageService.getStudios(p);
+        wrapper.setOptions(options);
+        List<Studio> results = jsonApiStorageService.getStudios(wrapper);
         wrapper.setResults(results);
-        wrapper.setParameters(p);
         wrapper.setStatus(new ApiStatus(200, "OK"));
 
         return wrapper;
     }
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Boxed-Set Methods">
     @RequestMapping(value = "/boxedset/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperSingle<BoxedSet> getBoxSet(@PathVariable String name) {
@@ -230,30 +195,16 @@ public class CommonController {
 
     @RequestMapping(value = "/boxedsets", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<BoxedSet> getBoxSets(
-            @RequestParam(required = false, defaultValue = "") String search,
-            @RequestParam(required = false, defaultValue = "") String match,
-            @RequestParam(required = false, defaultValue = "") String sort,
-            @RequestParam(required = false, defaultValue = "name") String field,
-            @RequestParam(required = false, defaultValue = "-1") Integer start,
-            @RequestParam(required = false, defaultValue = "-1") Integer max) {
-
-        Parameters p = new Parameters();
-        p.add(ParameterType.SEARCH, search);
-        p.add(ParameterType.MATCHMODE, match);
-        p.add(ParameterType.SORT, sort);
-        p.add(ParameterType.SORT_FIELD, field);
-        p.add(ParameterType.START, start);
-        p.add(ParameterType.MAX, max);
-
-        LOG.info("Getting boxset list with {}", p.toString());
+    public ApiWrapperList<BoxedSet> getBoxSets(@ModelAttribute("options") OptionsId options) {
+        LOG.info("Getting boxset list with {}", options.toString());
 
         ApiWrapperList<BoxedSet> wrapper = new ApiWrapperList<BoxedSet>();
-        List<BoxedSet> results = jsonApiStorageService.getBoxedSets(p);
+        wrapper.setOptions(options);
+        List<BoxedSet> results = jsonApiStorageService.getBoxedSets(wrapper);
         wrapper.setResults(results);
-        wrapper.setParameters(p);
         wrapper.setStatus(new ApiStatus(200, "OK"));
 
         return wrapper;
     }
+    //</editor-fold>
 }

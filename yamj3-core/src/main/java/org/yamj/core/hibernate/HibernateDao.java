@@ -31,7 +31,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.*;
 import org.hibernate.transform.Transformers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.yamj.core.api.model.Parameters;
 import org.yamj.core.api.model.SqlScalars;
 import org.yamj.core.api.options.IOptions;
 import org.yamj.core.api.wrapper.IApiWrapper;
@@ -140,25 +139,6 @@ public abstract class HibernateDao {
     @SuppressWarnings("unchecked")
     public <T> T getByField(Class<? extends T> entityClass, String field, String name) {
         return (T) getSession().byNaturalId(entityClass).using(field, name).load();
-    }
-
-    /**
-     * Build up the list from the passed class and parameters
-     *
-     * @param <T> The type of the expected list
-     * @param entityClass the class of the list
-     * @param params the parameters (from the Controller
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public <T> List<T> getList(Class<? extends T> entityClass, Parameters params) {
-        Criteria criteria = getSession().createCriteria(entityClass);
-        params.criteriaAddAll(criteria);
-
-        criteria.setCacheable(Boolean.TRUE);
-        criteria.setCacheMode(CacheMode.NORMAL);
-
-        return criteria.list();
     }
 
     /**

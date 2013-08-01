@@ -26,13 +26,19 @@ package org.yamj.core.api.options;
  *
  * @author stuart.boston
  */
-public interface IOptions {
+public interface IOptionsSearch {
 
-    void setStart(Integer start);
+    void setField(String field);
 
-    void setMax(Integer max);
+    void setSearch(String search);
 
-    Integer getStart();
+    void setMode(String mode);
 
-    Integer getMax();
+    String getField();
+
+    String getSearch();
+
+    String getMode();
+
+    String getSearchString(boolean addWhere);
 }

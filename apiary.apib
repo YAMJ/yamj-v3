@@ -3,7 +3,7 @@ HOST: http://localhost/yamj3/
 --- YAMJ v3 ---
 
 ---
-## Information on the API in use by YAMJ
+# Information on the API in use by YAMJ
 
 This is the API for YAMJ.
 
@@ -41,7 +41,9 @@ The first parameter that you add to the URL must be preceded by `?`, each subseq
     http://localhost:8888/yamj3/api/video/list?start=0&max=5
 This adds the `start=0` parameter first and then `max=5` second. The `=` separates the parameter name from the value.
 
-## Using paging for results
+***
+
+# Using paging for results
 
 In most methods of the API you can use paging parameters to control the amount of data received back and effectively page through the results.
 
@@ -97,6 +99,79 @@ Methods that can use paging will be marked in the documentation.
 
 **Only one of these methods should be used**
 
+***
+
+# Sorting the results
+If the API method supports it, the results can be sorted using a simple asceding or descending sort.
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>sortby</td>
+        <td>The field to sort on.<br>
+        This is the name of the field in the database.</td>
+    </tr>
+    <tr>
+        <td>sortdir</td>
+        <td>The direction of the sorting. Can be either 'ASC' or 'DESC'</td>
+    </tr>
+</table>
+
+__Example__: `http://localhost:8888/yamj3/api/genres?sortby=name&sortdir=desc`
+
+***
+
+# Searching the results
+If the API method supports it, the results can be searched on a specific field of the results.
+This will limit the results returned to those matching that criteria.
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>field</td>
+        <td>The name of the field to search on<br>
+        This is the name of the field in the database.</td>
+    </tr>
+    <tr>
+        <td>search</td>
+        <td>The text to search for.<br>
+        Should be appropriate for the field being searched on.<br>
+        Searching on text for a numeric field will return no results!</td>
+    </tr>
+    <tr>
+        <td>mode</td>
+        <td>The mode of the search, i.e. where should the text be searched for in the field?<br>
+        Can be one of:<br>
+        <table width="100%">
+            <col width="15%">
+            <col width="85%">
+            <tr>
+                <td>ANY</td>
+                <td>This is the default and will match anywhere in the field</td>
+            </tr>
+            <tr>
+                <td>START</td>
+                <td>Match only at the start of the field</td>
+            </tr>
+            <tr>
+                <td>END</td>
+                <td>Match only at the end of the field</td>
+            </tr>
+            <tr>
+                <td>EXACT</td>
+                <td>Match the whole field exactly</td>
+            </tr>
+        </table>
+        </td>
+    </tr>
+</table>
+
+__Example__: `http://localhost:8888/yamj3/api/genres?field=name&search=a`
+
+__Note__: The search is case ___insensitive___.
+
+***
+
 ---
 
 --
@@ -139,14 +214,6 @@ Get an index of videos.
         </td>
     </tr>
     <tr>
-        <td>sortby</td>
-        <td>The field to sort by. One of the valid output fields.</td>
-    </tr>
-    <tr>
-        <td>sortdir</td>
-        <td>The direction of the sorting, can be 'asc' or 'desc'</td>
-    </tr>
-    <tr>
         <td>artwork</td>
         <td>The list of artwork types to get for the videos.<br/>
             Can be one or more of: 'ALL', 'POSTER', 'FANART', 'BANNER', 'VIDEOIMAGE', etc.<br/>
@@ -155,6 +222,10 @@ Get an index of videos.
     <tr>
         <td>PAGING</td>
         <td>See above for the explanation on paging parameters</td>
+    </tr>
+    <tr>
+        <td>SORTING</td>
+        <td>See above for the explanation on sorting parameters</td>
     </tr>
 </table>
 
@@ -260,19 +331,15 @@ Get an index of people.
     <col width="20%">
     <col width="80%">
     <tr>
-        <td>sortby</td>
-        <td>The field to sort by. One of the valid output fields.</td>
-    </tr>
-    <tr>
-        <td>sortdir</td>
-        <td>The direction of the sorting, can be 'asc' or 'desc'</td>
+        <td>SORTING</td>
+        <td>See above for the explanation on sorting parameters</td>
     </tr>
     <tr>
         <td>PAGING</td>
         <td>See above for the explanation on paging parameters</td>
     </tr>
 </table>
-**Example:** `http://localhost:8888/yamj3/api/index/person?max=3`
+__Example__: `http://localhost:8888/yamj3/api/index/person?max=3`
 
 GET /api/index/person
 < 200
@@ -340,8 +407,9 @@ For specific indexes, there will be an option to get the count for that index.
     <tr>
         <td>type</td>
         <td>The type of the count to get.<br/>
-        Can be a comma separated list consisting one or more of:<br/>
-        'all', 'movie', 'series', 'season', 'episode' or 'person'
+        Can be a comma separated list consisting one or more of:<br>
+        'all', 'movie', 'series', 'season', 'episode' or 'person'<br>
+        If left blank, will default to 'all'
         </td>
     </tr>
 </table>
@@ -758,7 +826,7 @@ Get information on the person
         <td>This is the ID of the person to fetch.</td>
     </tr>
 </table>
-**Example:** `http://localhost:8888/yamj3/api/person/1`
+__Example__: `http://localhost:8888/yamj3/api/person/1`
 
 GET /api/person/{id}
 < 200
@@ -878,6 +946,8 @@ Get information on the genres associated with a filename
     </tr>
 </table>
 
+__Example__: `http://localhost:8888/yamj3/api/genre?filename=Avatar%20(2009).avi`
+
 GET /api/genre
 < 200
 < Content-Type: application/json
@@ -922,24 +992,12 @@ Get information genres
     <col width="20%">
     <col width="80%">
     <tr>
-        <td>search</td>
-        <td>The search term to use</td>
+        <td>SEARCHING</td>
+        <td>See above for the explanation on searching parameters</td>
     </tr>
     <tr>
-        <td>match</td>
-        <td>The match method. Can be one of `any` (default), `start`, `end` or `exact`</td>
-    </tr>
-    <tr>
-        <td>sort</td>
-        <td>Sort the returned results. Can be one of `asc` or `desc`</td>
-    </tr>
-    <tr>
-        <td>start</td>
-        <td>Where to start the list from</td>
-    </tr>
-    <tr>
-        <td>max</td>
-        <td>The maximum number of results to return</td>
+        <td>SORTING</td>
+        <td>See above for the explanation on sorting parameters</td>
     </tr>
 </table>
 

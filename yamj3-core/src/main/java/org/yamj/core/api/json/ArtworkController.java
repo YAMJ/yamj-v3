@@ -67,7 +67,7 @@ public class ArtworkController {
     public ApiWrapperList<IndexArtworkDTO> getArtworkList(@ModelAttribute("options") OptionsIndexArtwork options) {
         LOG.info("INDEX: Artwork list - Options: {}", options.toString());
         ApiWrapperList<IndexArtworkDTO> wrapper = new ApiWrapperList<IndexArtworkDTO>();
-        wrapper.setParameters(options);
+        wrapper.setOptions(options);
         wrapper.setResults(api.getArtworkList(wrapper));
         wrapper.setStatusCheck();
 

@@ -38,8 +38,6 @@ public interface IApiWrapper {
 
     ApiStatus getStatus();
 
-    Object getParameters();
-
     IOptions getOptions();
 
     String getQueryDuration();
@@ -61,8 +59,6 @@ public interface IApiWrapper {
     void setStatusCheck(ApiStatus status);
 
     void setCount(int count);
-
-    void setParameters(Object parameters);
 
     void setOptions(IOptions options);
 

@@ -57,11 +57,10 @@ public class VideoController {
         options.setId(NumberUtils.toLong(id));
         // Set the type to movie
         options.setType("MOVIE");
-        wrapper.setParameters(options);
+        wrapper.setOptions(options);
 
         if (options.getId() > 0L) {
             LOG.info("Getting video with ID '{}'", options.getId());
-//            VideoData videoData = jsonApiStorageService.getEntityById(VideoData.class, Long.parseLong(id));
             jsonApiStorageService.getVideoList(wrapper);
         }
         wrapper.setStatusCheck();
@@ -77,7 +76,7 @@ public class VideoController {
         options.setId(NumberUtils.toLong(id));
         // Set the type to movie
         options.setType("SERIES");
-        wrapper.setParameters(options);
+        wrapper.setOptions(options);
 
         if (options.getId() > 0L) {
             LOG.info("Getting series with ID '{}'", options.getId());
@@ -96,7 +95,7 @@ public class VideoController {
         options.setId(NumberUtils.toLong(id));
         // Set the type to movie
         options.setType("SEASON");
-        wrapper.setParameters(options);
+        wrapper.setOptions(options);
 
         if (options.getId() > 0L) {
             LOG.info("Getting season with ID '{}'", options.getId());

@@ -26,13 +26,15 @@ package org.yamj.core.api.options;
  *
  * @author stuart.boston
  */
-public interface IOptions {
+public interface IOptionsSort {
 
-    void setStart(Integer start);
+    void setSortby(String sortby);
 
-    void setMax(Integer max);
+    void setSortdir(String sortdir);
 
-    Integer getStart();
+    String getSortby();
 
-    Integer getMax();
+    String getSortdir();
+
+    String getSortString();
 }

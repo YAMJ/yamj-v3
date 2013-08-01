@@ -23,130 +23,171 @@
 package org.yamj.core.api.options;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Abstract class for the query options
  *
  * @author stuart.boston
  */
-public abstract class OptionsAbstract implements IOptions {
+public abstract class OptionsAbstractSortSearch extends OptionsAbstract implements IOptionsSort, IOptionsSearch {
 
-    private static final String DEFAULT_SPLIT = ",|;";  // Used for splitting strings
-    private Integer start = -1;
-    private Integer max = -1;
-    @JsonIgnore
-    private Integer page = -1;
-    @JsonIgnore
-    private Integer line = -1;
-    @JsonIgnore
-    private Integer perpage = -1;
-    @JsonIgnore
-    private Integer perline = -1;
+    private String sortby = "";
+    private String sortdir = "ASC";
+    private String field = "";
+    private String search = "";
+    private String mode = "";
 
+    //<editor-fold defaultstate="collapsed" desc="Sort Setters/Getters">
+    /**
+     * Get field to sort on
+     *
+     * @return
+     */
     @Override
-    public void setStart(Integer start) {
-        this.start = start;
+    public String getSortby() {
+        return sortby;
     }
 
+    /**
+     * Set field to sort on
+     *
+     * @param sortby
+     */
     @Override
-    public void setMax(Integer max) {
-        this.max = max;
+    public void setSortby(String sortby) {
+        this.sortby = sortby;
     }
 
-    public void setPage(Integer page) {
-        this.page = page;
-    }
-
-    public void setLine(Integer line) {
-        this.line = line;
-    }
-
-    public void setPerpage(Integer perpage) {
-        this.perpage = perpage;
-    }
-
-    public void setPerline(Integer perline) {
-        this.perline = perline;
-    }
-
+    /**
+     * Get the sort direction
+     *
+     * @return
+     */
     @Override
-    public Integer getStart() {
-        int value = start;
-        if (start < 0 && page >= 0) {
-            // Calculate the start page
-            value = (page > 0 ? page - 1 : 0) * perpage;
-            // Add the start line (if required)
-            value += (line > 0 ? line - 1 : 0) * perline;
+    public String getSortdir() {
+        return sortdir;
+    }
+
+    /**
+     * Set the sort direction
+     *
+     * @param sortdir
+     */
+    @Override
+    public void setSortdir(String sortdir) {
+        this.sortdir = sortdir;
+    }
+
+    /**
+     * Get the sort string to append to the SQL statement
+     *
+     * @return
+     */
+    @JsonIgnore
+    @Override
+    public String getSortString() {
+        StringBuilder sb = new StringBuilder();
+        if (StringUtils.isNotBlank(sortby)) {
+            sb.append(" ORDER BY ").append(sortby);
+            sb.append(" ").append(sortdir);
         }
-        return value;
+        return sb.toString();
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Search Setters/Getters">
+    /**
+     * Get the field to search on
+     *
+     * @return
+     */
+    @Override
+    public String getField() {
+        return field;
     }
 
+    /**
+     * Set the field to search on
+     *
+     * @param field
+     */
     @Override
-    public Integer getMax() {
-        int value = max;
-        // Check to see if one of the "pers" is set
-        if (max < 0 && (perpage > 0 || perline > 0)) {
-            if (line > 0) {
-                value = perline;
+    public void setField(String field) {
+        this.field = field;
+    }
+
+    /**
+     * Get the search term to use
+     *
+     * @return
+     */
+    @Override
+    public String getSearch() {
+        return search;
+    }
+
+    /**
+     * Set the search term
+     *
+     * @param search
+     */
+    @Override
+    public void setSearch(String search) {
+        this.search = search;
+    }
+
+    /**
+     * Get the match mode
+     *
+     * @return
+     */
+    @Override
+    public String getMode() {
+        return mode;
+    }
+
+    /**
+     * Set the match mode
+     *
+     * @param mode
+     */
+    @Override
+    public void setMode(String mode) {
+        this.mode = mode;
+    }
+
+    /**
+     * Get the search string to append to the SQL statement.
+     *
+     * @param addWhere Add "WHERE" to the statement (true) or "AND" (false)
+     * @return
+     */
+    @JsonIgnore
+    @Override
+    public String getSearchString(boolean addWhere) {
+        StringBuilder sb = new StringBuilder();
+        if (StringUtils.isNotBlank(field) && StringUtils.isNotBlank(search)) {
+            if (addWhere) {
+                sb.append(" WHERE ");
             } else {
-                value = perpage;
+                sb.append(" AND ");
             }
-        }
-        return value;
-    }
+            sb.append(field).append(" LIKE '");
 
-    public Integer getPage() {
-        return page;
-    }
-
-    public Integer getLine() {
-        return line;
-    }
-
-    public Integer getPerpage() {
-        return perpage;
-    }
-
-    public Integer getPerline() {
-        return perline;
-    }
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
-    }
-
-    /**
-     * Split a comma separated list of "key-value" items into a Map
-     *
-     * @param dashList
-     * @return
-     */
-    protected Map<String, String> splitDashList(String dashList) {
-        Map<String, String> values = new HashMap<String, String>();
-        for (String inc : StringUtils.split(dashList, ",")) {
-            int pos = inc.indexOf('-');
-            if (pos >= 0) {
-                values.put(inc.substring(0, pos), inc.substring(pos + 1));
+            if (StringUtils.equalsIgnoreCase("START", mode)) {
+                sb.append(search).append("%");
+            } else if (StringUtils.equalsIgnoreCase("END", mode)) {
+                sb.append("%").append(search);
+            } else if (StringUtils.equalsIgnoreCase("EXACT", mode)) {
+                sb.append(search);
+            } else {
+                // Default to ANY
+                sb.append("%").append(search).append("%");
             }
+            sb.append("'");
         }
-        return values;
+        return sb.toString();
     }
-
-    /**
-     * Split a list using the default split characters of ",|;"
-     *
-     * @param list
-     * @return
-     */
-    protected List<String> splitList(String list) {
-        return Arrays.asList(StringUtils.split(list, DEFAULT_SPLIT));
-    }
+    //</editor-fold>
 }

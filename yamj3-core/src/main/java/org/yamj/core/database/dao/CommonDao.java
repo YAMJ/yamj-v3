@@ -27,8 +27,9 @@ import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
 import org.springframework.stereotype.Service;
 import org.yamj.core.api.wrapper.ApiWrapperList;
-import org.yamj.core.api.model.Parameters;
 import org.yamj.core.api.model.SqlScalars;
+import org.yamj.core.api.model.dto.IndexGenreDTO;
+import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.database.model.*;
 import org.yamj.core.hibernate.HibernateDao;
 
@@ -39,8 +40,18 @@ public class CommonDao extends HibernateDao {
         return getByName(Genre.class, name);
     }
 
-    public List<Genre> getGenres(Parameters params) {
-        return getList(Genre.class, params);
+    public List<IndexGenreDTO> getGenres(ApiWrapperList<IndexGenreDTO> wrapper) {
+        OptionsId options = (OptionsId) wrapper.getOptions();
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT id, name");
+        sqlScalars.addToSql("FROM genre");
+        sqlScalars.addToSql(options.getSearchString(true));
+        sqlScalars.addToSql(options.getSortString());
+
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+
+        return executeQueryWithTransform(IndexGenreDTO.class, sqlScalars, wrapper);
     }
 
     public List<Genre> getGenreFilename(ApiWrapperList<Genre> wrapper, String filename) {
@@ -65,23 +76,54 @@ public class CommonDao extends HibernateDao {
         return getByName(Certification.class, name);
     }
 
-    public List<Certification> getCertifications(Parameters params) {
-        return getList(Certification.class, params);
+    public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
+        OptionsId options = (OptionsId) wrapper.getOptions();
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT id, certification_text AS certification, country");
+        sqlScalars.addToSql("FROM certification");
+        sqlScalars.addToSql(options.getSearchString(true));
+        sqlScalars.addToSql(options.getSortString());
+
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("certification", StringType.INSTANCE);
+        sqlScalars.addScalar("country", StringType.INSTANCE);
+
+        return executeQueryWithTransform(Certification.class, sqlScalars, wrapper);
     }
 
     public BoxedSet getBoxedSet(String name) {
         return getByName(BoxedSet.class, name);
     }
 
-    public List<BoxedSet> getBoxedSets(Parameters params) {
-        return getList(BoxedSet.class, params);
+    public List<BoxedSet> getBoxedSets(ApiWrapperList<BoxedSet> wrapper) {
+        OptionsId options = (OptionsId) wrapper.getOptions();
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT id, name");
+        sqlScalars.addToSql("FROM boxed_set");
+        sqlScalars.addToSql(options.getSearchString(true));
+        sqlScalars.addToSql(options.getSortString());
+
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+
+        return executeQueryWithTransform(BoxedSet.class, sqlScalars, wrapper);
     }
 
     public Studio getStudio(String name) {
         return getByName(Studio.class, name);
     }
 
-    public List<Studio> getStudios(Parameters params) {
-        return getList(Studio.class, params);
+    public List<Studio> getStudios(ApiWrapperList<Studio> wrapper) {
+        OptionsId options = (OptionsId) wrapper.getOptions();
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT id, name");
+        sqlScalars.addToSql("FROM studio");
+        sqlScalars.addToSql(options.getSearchString(true));
+        sqlScalars.addToSql(options.getSortString());
+
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+
+        return executeQueryWithTransform(Studio.class, sqlScalars, wrapper);
     }
 }

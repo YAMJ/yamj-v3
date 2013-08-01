@@ -30,8 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.Parameters;
 import org.yamj.core.api.model.dto.IndexArtworkDTO;
+import org.yamj.core.api.model.dto.IndexGenreDTO;
 import org.yamj.core.api.model.dto.IndexPersonDTO;
 import org.yamj.core.api.model.dto.IndexVideoDTO;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
@@ -113,8 +113,8 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = true)
-    public List<Genre> getGenres(Parameters params) {
-        return commonDao.getList(Genre.class, params);
+    public List<IndexGenreDTO> getGenres(ApiWrapperList<IndexGenreDTO> wrapper) {
+        return commonDao.getGenres(wrapper);
     }
 
     @Transactional(readOnly = true)
@@ -135,8 +135,8 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = true)
-    public List<Certification> getCertifications(Parameters params) {
-        return commonDao.getList(Certification.class, params);
+    public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
+        return commonDao.getCertifications(wrapper);
     }
     //</editor-fold>
 
@@ -152,8 +152,8 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = true)
-    public List<BoxedSet> getBoxedSets(Parameters params) {
-        return commonDao.getList(BoxedSet.class, params);
+    public List<BoxedSet> getBoxedSets(ApiWrapperList<BoxedSet> wrapper) {
+        return commonDao.getBoxedSets(wrapper);
     }
     //</editor-fold>
 
@@ -169,8 +169,8 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = true)
-    public List<Studio> getStudios(Parameters params) {
-        return commonDao.getList(Studio.class, params);
+    public List<Studio> getStudios(ApiWrapperList<Studio> wrapper) {
+        return commonDao.getStudios(wrapper);
     }
     //</editor-fold>
 

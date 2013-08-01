@@ -27,27 +27,9 @@ package org.yamj.core.api.options;
  *
  * @author stuart.boston
  */
-public class OptionsIndexPerson extends OptionsAbstract {
+public class OptionsId extends OptionsAbstractSortSearch {
 
-    private String sortby = "";
-    private String sortdir = "ASC";
     private Long id = -1L;
-
-    public String getSortby() {
-        return sortby;
-    }
-
-    public void setSortby(String sortby) {
-        this.sortby = sortby;
-    }
-
-    public String getSortdir() {
-        return sortdir;
-    }
-
-    public void setSortdir(String sortdir) {
-        this.sortdir = sortdir;
-    }
 
     public Long getId() {
         return id;
