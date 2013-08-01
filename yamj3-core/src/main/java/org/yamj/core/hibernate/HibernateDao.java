@@ -348,7 +348,7 @@ public abstract class HibernateDao {
             wrapper.setTotalCount(queryResults.size());
 
             // If there is a start or max set, we will need to re-run the query after setting the options
-            IOptions options = (IOptions) wrapper.getParameters();
+            IOptions options = wrapper.getOptions();
             if (options != null) {
                 if (options.getStart() > 0 || options.getMax() > 0) {
                     if (options.getStart() > 0) {

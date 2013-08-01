@@ -70,6 +70,7 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
         return parameters;
     }
 
+    @Override
     public IOptions getOptions() {
         return options;
     }
@@ -144,6 +145,7 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
         this.parameters = parameters;
     }
 
+    @Override
     public void setOptions(IOptions options) {
         this.options = options;
     }

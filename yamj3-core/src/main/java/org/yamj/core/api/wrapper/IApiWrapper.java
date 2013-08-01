@@ -24,6 +24,7 @@ package org.yamj.core.api.wrapper;
 
 import org.joda.time.DateTime;
 import org.yamj.core.api.model.ApiStatus;
+import org.yamj.core.api.options.IOptions;
 
 /**
  *
@@ -38,6 +39,8 @@ public interface IApiWrapper {
     ApiStatus getStatus();
 
     Object getParameters();
+
+    IOptions getOptions();
 
     String getQueryDuration();
 
@@ -60,6 +63,8 @@ public interface IApiWrapper {
     void setCount(int count);
 
     void setParameters(Object parameters);
+
+    void setOptions(IOptions options);
 
     void setTotalCount(int totalCount);
 }
