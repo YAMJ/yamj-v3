@@ -41,6 +41,62 @@ The first parameter that you add to the URL must be preceded by `?`, each subseq
     http://localhost:8888/yamj3/api/video/list?start=0&max=5
 This adds the `start=0` parameter first and then `max=5` second. The `=` separates the parameter name from the value.
 
+## Using paging for results
+
+In most methods of the API you can use paging parameters to control the amount of data received back and effectively page through the results.
+
+There are two ways to do this. The first way is to use the `start` and `max` parameters:
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>start</td>
+        <td>Where to start the result list from. Default is 0, the beginning</td>
+    </tr>
+    <tr>
+        <td>max</td>
+        <td>Maximum number of results to return. <br>
+        Note: The actual number of results returned may be less than the max parameter, indicating that you are at the end of the result list</td>
+    </tr>
+</table>
+
+An alternative way to page through the results is using the `page`, `line`, `perpage` & `perline` parameters.
+This way of paging through the results assumes that you know the layout of a "page" for the skin.
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>page</td>
+        <td>The page number of the results that are wanted.</td>
+    </tr>
+    <tr>
+        <td>line</td>
+        <td>The line number on the page for the results that are wanted</td>
+    </tr>
+    <tr>
+        <td>perpage</td>
+        <td>How many entries per page</td>
+    </tr>
+    <tr>
+        <td>perline</td>
+        <td>How many entries per line</td>
+    </tr>
+</table>
+
+These are translated into `start` and `max` using the following methodology:
+
+    start = ( (page - 1) * perpage ) + ( (line - 1) * perline )
+
+    if line is set (i.e. >0)
+        max = perline
+    else
+        max = perpage
+    otherwise
+        max = default (no limit)
+Methods that can use paging will be marked in the documentation.
+
+**Only one of these methods should be used**
+
 ---
 
 --
@@ -95,6 +151,10 @@ Get an index of videos.
         <td>The list of artwork types to get for the videos.<br/>
             Can be one or more of: 'ALL', 'POSTER', 'FANART', 'BANNER', 'VIDEOIMAGE', etc.<br/>
             Leave this option blank to return no artwork</td>
+    </tr>
+    <tr>
+        <td>PAGING</td>
+        <td>See above for the explanation on paging parameters</td>
     </tr>
 </table>
 
@@ -268,7 +328,7 @@ Retrieve information on the video
     <col width="80%">
     <tr>
         <td>id</td>
-        <td>The id of the mocie to get.<br/>
+        <td>The id of the movie to get.<br/>
             Note: This is specific to the video type, so Movie ID 1 is not the same as Season ID 1</td>
     </tr>
 </table>
