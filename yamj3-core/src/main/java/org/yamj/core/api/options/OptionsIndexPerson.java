@@ -22,8 +22,6 @@
  */
 package org.yamj.core.api.options;
 
-import java.util.Map;
-
 /**
  * List of the options available for the indexes
  *
@@ -31,26 +29,9 @@ import java.util.Map;
  */
 public class OptionsIndexPerson extends OptionsAbstract {
 
-    private String include = "";
-    private String exclude = "";
     private String sortby = "";
     private String sortdir = "ASC";
-
-    public void setInclude(String include) {
-        this.include = include;
-    }
-
-    public void setExclude(String exclude) {
-        this.exclude = exclude;
-    }
-
-    public String getInclude() {
-        return include;
-    }
-
-    public String getExclude() {
-        return exclude;
-    }
+    private Long id = -1L;
 
     public String getSortby() {
         return sortby;
@@ -68,17 +49,11 @@ public class OptionsIndexPerson extends OptionsAbstract {
         this.sortdir = sortdir;
     }
 
-    /**
-     * Split the include list into a map of values
-     */
-    public Map<String, String> splitIncludes() {
-        return splitDashList(include);
+    public Long getId() {
+        return id;
     }
 
-    /**
-     * Split the exclude list into a map of values
-     */
-    public Map<String, String> splitExcludes() {
-        return splitDashList(exclude);
+    public void setId(Long id) {
+        this.id = id;
     }
 }

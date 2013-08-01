@@ -34,6 +34,7 @@ import org.yamj.core.api.model.Parameters;
 import org.yamj.core.api.model.dto.IndexArtworkDTO;
 import org.yamj.core.api.model.dto.IndexPersonDTO;
 import org.yamj.core.api.model.dto.IndexVideoDTO;
+import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.ApiDao;
 import org.yamj.core.database.dao.CommonDao;
@@ -90,7 +91,13 @@ public class JsonApiStorageService {
     @Transactional(readOnly = true)
     public void getPersonList(ApiWrapperList<IndexPersonDTO> wrapper) {
         apiDao.getPersonList(wrapper);
+    }
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Person Methods">
+    @Transactional(readOnly = true)
+    public void getPerson(ApiWrapperSingle<IndexPersonDTO> wrapper) {
+        apiDao.getPerson(wrapper);
     }
     //</editor-fold>
 

@@ -71,7 +71,7 @@ public class IndexController {
         LOG.debug("INDEX: Person list - Options: {}", options.toString());
 
         ApiWrapperList<IndexPersonDTO> wrapper = new ApiWrapperList<IndexPersonDTO>();
-        wrapper.setParameters(options);
+        wrapper.setOptions(options);
         jsonApiStorageService.getPersonList(wrapper);
         wrapper.setStatusCheck();
         return wrapper;

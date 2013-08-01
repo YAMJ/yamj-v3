@@ -45,7 +45,9 @@ import org.yamj.core.api.model.SqlScalars;
 import org.yamj.core.api.model.dto.IndexArtworkDTO;
 import org.yamj.core.api.model.dto.IndexPersonDTO;
 import org.yamj.core.api.options.OptionsIndexArtwork;
+import org.yamj.core.api.options.OptionsIndexPerson;
 import org.yamj.core.api.options.OptionsIndexVideo;
+import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Service("apiDao")
@@ -110,7 +112,7 @@ public class ApiDao extends HibernateDao {
             } else {
                 LOG.debug("Artwork not required, skipping.");
             }
-        }else{
+        } else {
             LOG.debug("No results found to process.");
         }
     }
@@ -416,7 +418,32 @@ public class ApiDao extends HibernateDao {
         return results.get(0);
     }
 
+    /**
+     * Get a list of the people
+     *
+     * @param wrapper
+     */
     public void getPersonList(ApiWrapperList<IndexPersonDTO> wrapper) {
+        SqlScalars sqlScalars = generateSqlForPerson((OptionsIndexPerson) wrapper.getOptions());
+        List<IndexPersonDTO> results = executeQueryWithTransform(IndexPersonDTO.class, sqlScalars, wrapper);
+        wrapper.setResults(results);
+    }
+
+    /**
+     * Get a single person using the ID in the wrapper options.
+     * @param wrapper
+     */
+    public void getPerson(ApiWrapperSingle<IndexPersonDTO> wrapper) {
+        SqlScalars sqlScalars = generateSqlForPerson((OptionsIndexPerson) wrapper.getOptions());
+        List<IndexPersonDTO> results = executeQueryWithTransform(IndexPersonDTO.class, sqlScalars, wrapper);
+        if (CollectionUtils.isNotEmpty(results)) {
+            wrapper.setResult(results.get(0));
+        } else {
+            wrapper.setResult(null);
+        }
+    }
+
+    private SqlScalars generateSqlForPerson(OptionsIndexPerson options) {
         SqlScalars sqlScalars = new SqlScalars();
         // Make sure to set the alias for the files for the Transformation into the class
         sqlScalars.addToSql("SELECT p.id,");
@@ -427,16 +454,27 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql(" p.birth_name as birthName, ");
         sqlScalars.addToSql(" p.death_day as deathDay ");
         sqlScalars.addToSql(" FROM person p");
-        sqlScalars.addToSql(" WHERE 1=1");
+        if (options.getId() > 0L) {
+            sqlScalars.addToSql(" WHERE id=:id");
+            sqlScalars.addParameter("id", options.getId());
+        } else {
+            sqlScalars.addToSql(" WHERE 1=1");
+        }
+        if(StringUtils.isNotBlank(options.getSortby())) {
+            sqlScalars.addToSql(" ORDER BY ");
+            sqlScalars.addToSql(options.getSortby());
+            sqlScalars.addToSql(options.getSortdir());  // Space is added
+        }
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar("biography", StringType.INSTANCE);
         sqlScalars.addScalar("birthDay", DateType.INSTANCE);
-        sqlScalars.addScalar("birthPlace", DateType.INSTANCE);
+        sqlScalars.addScalar("birthPlace", StringType.INSTANCE);
         sqlScalars.addScalar("birthName", StringType.INSTANCE);
         sqlScalars.addScalar("deathDay", DateType.INSTANCE);
 
-        List<IndexPersonDTO> results = executeQueryWithTransform(IndexPersonDTO.class, sqlScalars, wrapper);
-        wrapper.setResults(results);
+        return sqlScalars;
     }
 
     //<editor-fold defaultstate="collapsed" desc="Artwork Methods">

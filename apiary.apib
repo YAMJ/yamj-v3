@@ -158,7 +158,7 @@ Get an index of videos.
     </tr>
 </table>
 
-GET /index/video
+GET /api/index/video
 < 200
 < Content-Type: application/json
 {
@@ -252,6 +252,82 @@ GET /index/video
 }
 
 
+Get an index of people.
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>sortby</td>
+        <td>The field to sort by. One of the valid output fields.</td>
+    </tr>
+    <tr>
+        <td>sortdir</td>
+        <td>The direction of the sorting, can be 'asc' or 'desc'</td>
+    </tr>
+    <tr>
+        <td>PAGING</td>
+        <td>See above for the explanation on paging parameters</td>
+    </tr>
+</table>
+**Example:** `http://localhost:8888/yamj3/api/index/person?max=3`
+
+GET /api/index/person
+< 200
+< Content-Type: application/json
+{
+   "count":3,
+   "totalCount":110,
+   "queryDuration":"31ms",
+   "queryTime":"2013-08-01 10:56:42",
+   "status":{
+      "status":200,
+      "message":"OK"
+   },
+   "parameters":null,
+   "options":{
+      "start":-1,
+      "max":3,
+      "sortby":"",
+      "sortdir":"ASC",
+      "id":-1
+   },
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "results":[
+      {
+         "id":1,
+         "name":"Zachary Levi",
+         "biography":"Zachary Levi Pugh (born September 29, 1980), better known by his stage name Zachary Levi, ...",
+         "birthDay":"1980-09-29",
+         "birthPlace":"Lake Charles, Louisiana, USA",
+         "birthName":null,
+         "deathDay":null
+      },
+      {
+         "id":2,
+         "name":"Yvonne Strahovski",
+         "biography":"Yvonne Strahovski (born Strzechowski on 30 July 1982) is an Australian actress. Born in Australia ...",
+         "birthDay":"1982-07-30",
+         "birthPlace":"Sydney, Australia",
+         "birthName":null,
+         "deathDay":null
+      },
+      {
+         "id":3,
+         "name":"Joshua Gomez",
+         "biography":"Joshua Eli Gomez (born November 20, 1975, in Bayonne, New Jersey) is an American actor ...",
+         "birthDay":"1975-11-20",
+         "birthPlace":"Bayonne, New Jersey, USA",
+         "birthName":null,
+         "deathDay":null
+      }
+   ]
+}
+
+
 Get counts for various main objects in the database.
 Note: These are currently fixed and are intended for system wide statistics.
 For specific indexes, there will be an option to get the count for that index.
@@ -270,7 +346,7 @@ For specific indexes, there will be an option to get the count for that index.
     </tr>
 </table>
 
-GET /index/count
+GET /api/index/count
 < 200
 < Content-Type: application/json
 {
@@ -672,35 +748,48 @@ Person
 --
 
 Get information on the person
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>This is the ID of the person to fetch.</td>
+    </tr>
+</table>
+**Example:** `http://localhost:8888/yamj3/api/person/1`
+
 GET /api/person/{id}
 < 200
 < Content-Type: application/json
 {
    "count":1,
-   "queryTime":"2013-06-08 19:03:39",
+   "totalCount":1,
+   "queryDuration":"15ms",
+   "queryTime":"2013-08-01 11:08:58",
    "status":{
       "status":200,
       "message":"OK"
    },
-   "parameters":{
-      "parameters":{}
+   "parameters":null,
+   "options":{
+      "start":-1,
+      "max":-1,
+      "sortby":"",
+      "sortdir":"ASC",
+      "id":1
    },
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
    "result":{
       "id":1,
-      "createTimestamp":1370707298000,
-      "updateTimestamp":1370707348000,
-      "name":"Matthew Macfadyen",
-      "birthDay":151196400000,
-      "birthPlace":"Great Yarmouth, Norfolk, England, UK",
+      "name":"Zachary Levi",
+      "biography":"Zachary Levi Pugh (born September 29, 1980), better known by his stage name Zachary Levi ...",
+      "birthDay":"1980-09-29",
+      "birthPlace":"Lake Charles, Louisiana, USA",
       "birthName":null,
-      "deathDay":null,
-      "biography":"From Wikipedia, the free encyclopedia\n\nDavid Matthew Macfadyen (born 17 October 1974) is an English actor, known for his role as MI5 intelligence officer Tom Quinn in the BBC television drama series Spooks (also known as MI-5) and for starring as Fitzwilliam Darcy in the 2005 film version of Pride and Prejudice.\n\nDescription above from the Wikipedia article Matthew Macfayden, licensed under CC-BY-SA, full list of contributors on Wikipedia.\nâ€‹",
-      "status":"DONE",
-      "personIdMap":{
-         "tmdb":"15576",
-         "imdb":"nm0532193"
-      },
-      "newlyCreated":false
+      "deathDay":null
    }
 }
 

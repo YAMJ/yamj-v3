@@ -22,6 +22,7 @@
  */
 package org.yamj.core.api.json;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.yamj.core.api.model.ApiStatus;
+import org.yamj.core.api.model.dto.IndexPersonDTO;
+import org.yamj.core.api.options.OptionsIndexPerson;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
-import org.yamj.core.database.model.Person;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
@@ -44,12 +47,24 @@ public class PersonController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperSingle<Person> getPersonById(@PathVariable String id) {
-        LOG.info("Getting person with ID '{}'", id);
-        ApiWrapperSingle<Person> wrapper = new ApiWrapperSingle<Person>();
-        Person person= jsonApiStorageService.getEntityById(Person.class, Long.parseLong(id));
-        wrapper.setResult(person);
-        wrapper.setStatusCheck();
+    public ApiWrapperSingle<IndexPersonDTO> getPersonById(@PathVariable String id) {
+        ApiWrapperSingle<IndexPersonDTO> wrapper = new ApiWrapperSingle<IndexPersonDTO>();
+        if (StringUtils.isNumeric(id)) {
+            LOG.info("Getting person with ID '{}'", id);
+
+            OptionsIndexPerson options = new OptionsIndexPerson();
+            options.setId(Long.parseLong(id));
+            wrapper.setOptions(options);
+
+            jsonApiStorageService.getPerson(wrapper);
+            wrapper.setStatusCheck();
+        } else {
+            wrapper.setResult(null);
+            wrapper.setStatusCheck(new ApiStatus(410, "Not a valid ID"));
+        }
         return wrapper;
     }
+
+    // Search by name
+    // search by movie
 }
