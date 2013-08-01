@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.model.ApiStatus;
-import org.yamj.core.api.model.dto.IndexPersonDTO;
+import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.options.OptionsIndexPerson;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -47,8 +47,8 @@ public class PersonController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperSingle<IndexPersonDTO> getPersonById(@PathVariable String id) {
-        ApiWrapperSingle<IndexPersonDTO> wrapper = new ApiWrapperSingle<IndexPersonDTO>();
+    public ApiWrapperSingle<ApiPersonDTO> getPersonById(@PathVariable String id) {
+        ApiWrapperSingle<ApiPersonDTO> wrapper = new ApiWrapperSingle<ApiPersonDTO>();
         if (StringUtils.isNumeric(id)) {
             LOG.info("Getting person with ID '{}'", id);
 

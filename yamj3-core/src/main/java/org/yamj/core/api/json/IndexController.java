@@ -36,10 +36,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.dto.IndexVideoDTO;
+import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.core.api.model.dto.IndexPersonDTO;
+import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.options.OptionsIndexPerson;
 import org.yamj.core.database.service.JsonApiStorageService;
 
@@ -53,11 +53,11 @@ public class IndexController {
 
     @RequestMapping(value = "/video", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<IndexVideoDTO> getVideoList(
+    public ApiWrapperList<ApiVideoDTO> getVideoList(
             @ModelAttribute("options") OptionsIndexVideo options) {
         LOG.debug("INDEX: Video list - Options: {}", options.toString());
 
-        ApiWrapperList<IndexVideoDTO> wrapper = new ApiWrapperList<IndexVideoDTO>();
+        ApiWrapperList<ApiVideoDTO> wrapper = new ApiWrapperList<ApiVideoDTO>();
         wrapper.setOptions(options);
         jsonApiStorageService.getVideoList(wrapper);
         wrapper.setStatusCheck();
@@ -66,11 +66,11 @@ public class IndexController {
 
     @RequestMapping(value = "/person", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<IndexPersonDTO> getPersonList(
+    public ApiWrapperList<ApiPersonDTO> getPersonList(
             @ModelAttribute("options") OptionsIndexPerson options) {
         LOG.debug("INDEX: Person list - Options: {}", options.toString());
 
-        ApiWrapperList<IndexPersonDTO> wrapper = new ApiWrapperList<IndexPersonDTO>();
+        ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<ApiPersonDTO>();
         wrapper.setOptions(options);
         jsonApiStorageService.getPersonList(wrapper);
         wrapper.setStatusCheck();

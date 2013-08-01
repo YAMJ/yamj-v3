@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
-import org.yamj.core.api.model.dto.IndexGenreDTO;
+import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.database.model.Certification;
@@ -97,12 +97,12 @@ public class CommonController {
 
     @RequestMapping(value = "/genres", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<IndexGenreDTO> getGenres(@ModelAttribute("options") OptionsId options) {
+    public ApiWrapperList<ApiGenreDTO> getGenres(@ModelAttribute("options") OptionsId options) {
         LOG.info("Getting genre list with {}", options.toString());
 
-        ApiWrapperList<IndexGenreDTO> wrapper = new ApiWrapperList<IndexGenreDTO>();
+        ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<ApiGenreDTO>();
         wrapper.setOptions(options);
-        List<IndexGenreDTO> results = jsonApiStorageService.getGenres(wrapper);
+        List<ApiGenreDTO> results = jsonApiStorageService.getGenres(wrapper);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
         return wrapper;

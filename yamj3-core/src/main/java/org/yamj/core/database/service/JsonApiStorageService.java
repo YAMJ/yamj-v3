@@ -30,10 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.dto.IndexArtworkDTO;
-import org.yamj.core.api.model.dto.IndexGenreDTO;
-import org.yamj.core.api.model.dto.IndexPersonDTO;
-import org.yamj.core.api.model.dto.IndexVideoDTO;
+import org.yamj.core.api.model.dto.ApiArtworkDTO;
+import org.yamj.core.api.model.dto.ApiGenreDTO;
+import org.yamj.core.api.model.dto.ApiPersonDTO;
+import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.ApiDao;
@@ -67,7 +67,7 @@ public class JsonApiStorageService {
 
     //<editor-fold defaultstate="collapsed" desc="Index Methods">
     @Transactional(readOnly = true)
-    public void getVideoList(ApiWrapperList<IndexVideoDTO> wrapper) {
+    public void getVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
         apiDao.getVideoList(wrapper);
     }
 
@@ -89,14 +89,14 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = true)
-    public void getPersonList(ApiWrapperList<IndexPersonDTO> wrapper) {
+    public void getPersonList(ApiWrapperList<ApiPersonDTO> wrapper) {
         apiDao.getPersonList(wrapper);
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Person Methods">
     @Transactional(readOnly = true)
-    public void getPerson(ApiWrapperSingle<IndexPersonDTO> wrapper) {
+    public void getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
         apiDao.getPerson(wrapper);
     }
     //</editor-fold>
@@ -113,7 +113,7 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = true)
-    public List<IndexGenreDTO> getGenres(ApiWrapperList<IndexGenreDTO> wrapper) {
+    public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper) {
         return commonDao.getGenres(wrapper);
     }
 
@@ -176,12 +176,12 @@ public class JsonApiStorageService {
 
     //<editor-fold defaultstate="collapsed" desc="Artwork Methods">
     @Transactional(readOnly = true)
-    public IndexArtworkDTO getArtworkById(Long id) {
+    public ApiArtworkDTO getArtworkById(Long id) {
         return apiDao.getArtworkById(id);
     }
 
     @Transactional(readOnly = true)
-    public List<IndexArtworkDTO> getArtworkList(ApiWrapperList<IndexArtworkDTO> wrapper) {
+    public List<ApiArtworkDTO> getArtworkList(ApiWrapperList<ApiArtworkDTO> wrapper) {
         return apiDao.getArtworkList(wrapper);
     }
     //</editor-fold>

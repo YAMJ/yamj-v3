@@ -22,18 +22,16 @@
  */
 package org.yamj.core.api.model.dto;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
 /**
  *
- * @author stuart.boston
+ * @author Stuart
  */
-public class AbstractIndexDTO {
+public class ApiGenreDTO {
 
     private Long id;
+    private String name;
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -41,8 +39,11 @@ public class AbstractIndexDTO {
         this.id = id;
     }
 
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

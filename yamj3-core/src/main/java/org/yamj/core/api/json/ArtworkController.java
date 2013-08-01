@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
-import org.yamj.core.api.model.dto.IndexArtworkDTO;
+import org.yamj.core.api.model.dto.ApiArtworkDTO;
 import org.yamj.core.api.options.OptionsIndexArtwork;
 import org.yamj.core.database.service.JsonApiStorageService;
 
@@ -48,11 +48,11 @@ public class ArtworkController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperSingle<IndexArtworkDTO> getArtwork(@PathVariable Long id) throws IOException {
-        ApiWrapperSingle<IndexArtworkDTO> wrapper = new ApiWrapperSingle<IndexArtworkDTO>();
+    public ApiWrapperSingle<ApiArtworkDTO> getArtwork(@PathVariable Long id) throws IOException {
+        ApiWrapperSingle<ApiArtworkDTO> wrapper = new ApiWrapperSingle<ApiArtworkDTO>();
 
         LOG.info("Attempting to retrieve artwork with id '{}'", id);
-        IndexArtworkDTO artwork = api.getArtworkById(id);
+        ApiArtworkDTO artwork = api.getArtworkById(id);
         LOG.info("Artwork: {}", artwork.toString());
 
         // Add the result to the wrapper
@@ -64,9 +64,9 @@ public class ArtworkController {
 
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<IndexArtworkDTO> getArtworkList(@ModelAttribute("options") OptionsIndexArtwork options) {
+    public ApiWrapperList<ApiArtworkDTO> getArtworkList(@ModelAttribute("options") OptionsIndexArtwork options) {
         LOG.info("INDEX: Artwork list - Options: {}", options.toString());
-        ApiWrapperList<IndexArtworkDTO> wrapper = new ApiWrapperList<IndexArtworkDTO>();
+        ApiWrapperList<ApiArtworkDTO> wrapper = new ApiWrapperList<ApiArtworkDTO>();
         wrapper.setOptions(options);
         wrapper.setResults(api.getArtworkList(wrapper));
         wrapper.setStatusCheck();

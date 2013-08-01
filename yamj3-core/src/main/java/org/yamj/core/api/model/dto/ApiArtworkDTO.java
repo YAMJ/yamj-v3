@@ -34,7 +34,7 @@ import org.yamj.core.database.model.type.ArtworkType;
  *
  * @author Stuart
  */
-public class IndexArtworkDTO {
+public class ApiArtworkDTO {
 
     private String key = null;
     private MetaDataType source;
@@ -221,7 +221,7 @@ public class IndexArtworkDTO {
     }
 
     @JsonIgnore
-    public static String makeKey(IndexVideoDTO master) {
+    public static String makeKey(ApiVideoDTO master) {
         return makeKey(master.getVideoType(), master.getId());
     }
 

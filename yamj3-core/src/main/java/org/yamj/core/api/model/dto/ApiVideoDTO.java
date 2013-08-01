@@ -36,14 +36,14 @@ import org.yamj.core.database.model.type.ArtworkType;
  *
  * @author stuart.boston
  */
-public class IndexVideoDTO extends AbstractIndexDTO {
+public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     private MetaDataType videoType;
     private String title;
     private String originalTitle;
     private Integer videoYear;
-    private Set<IndexGenreDTO> genres = new HashSet<IndexGenreDTO>();
-    Map<ArtworkType, List<IndexArtworkDTO>> artwork = new EnumMap<ArtworkType, List<IndexArtworkDTO>>(ArtworkType.class);
+    private Set<ApiGenreDTO> genres = new HashSet<ApiGenreDTO>();
+    Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
 
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public MetaDataType getVideoType() {
@@ -62,19 +62,19 @@ public class IndexVideoDTO extends AbstractIndexDTO {
         return videoYear;
     }
 
-    public Map<ArtworkType, List<IndexArtworkDTO>> getArtwork() {
+    public Map<ArtworkType, List<ApiArtworkDTO>> getArtwork() {
         return artwork;
     }
 
     public int getArtworkCount() {
         int count = 0;
-        for (Map.Entry<ArtworkType, List<IndexArtworkDTO>> entry : artwork.entrySet()) {
+        for (Map.Entry<ArtworkType, List<ApiArtworkDTO>> entry : artwork.entrySet()) {
             count += entry.getValue().size();
         }
         return count;
     }
 
-    public Set<IndexGenreDTO> getGenres() {
+    public Set<ApiGenreDTO> getGenres() {
         return genres;
     }
 
@@ -113,21 +113,21 @@ public class IndexVideoDTO extends AbstractIndexDTO {
         }
     }
 
-    public void setArtwork(Set<IndexArtworkDTO> artworkList) {
-        for (IndexArtworkDTO ia : artworkList) {
+    public void setArtwork(Set<ApiArtworkDTO> artworkList) {
+        for (ApiArtworkDTO ia : artworkList) {
             this.artwork.get(ia.getArtworkType()).add(ia);
         }
     }
 
-    public void setGenres(Set<IndexGenreDTO> genres) {
+    public void setGenres(Set<ApiGenreDTO> genres) {
         this.genres = genres;
     }
     //</editor-fold>
 
-    public void addArtwork(IndexArtworkDTO newArtwork) {
+    public void addArtwork(ApiArtworkDTO newArtwork) {
         // Add a blank list if it doesn't already exist
         if (!artwork.containsKey(newArtwork.getArtworkType())) {
-            artwork.put(newArtwork.getArtworkType(), new ArrayList<IndexArtworkDTO>(1));
+            artwork.put(newArtwork.getArtworkType(), new ArrayList<ApiArtworkDTO>(1));
         }
         this.artwork.get(newArtwork.getArtworkType()).add(newArtwork);
     }

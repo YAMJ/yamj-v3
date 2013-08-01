@@ -38,12 +38,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.dto.IndexVideoDTO;
+import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.SqlScalars;
-import org.yamj.core.api.model.dto.IndexArtworkDTO;
-import org.yamj.core.api.model.dto.IndexPersonDTO;
+import org.yamj.core.api.model.dto.ApiArtworkDTO;
+import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.options.OptionsIndexArtwork;
 import org.yamj.core.api.options.OptionsIndexPerson;
 import org.yamj.core.api.options.OptionsIndexVideo;
@@ -61,7 +61,7 @@ public class ApiDao extends HibernateDao {
      * @param sqlString
      * @param wrapper
      */
-    public void getVideoList(ApiWrapperList<IndexVideoDTO> wrapper) {
+    public void getVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
         SqlScalars sqlScalars = new SqlScalars(generateSqlForVideoList(wrapper));
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
@@ -71,7 +71,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("videoYear", IntegerType.INSTANCE);
         sqlScalars.addScalar("firstAired", StringType.INSTANCE);
 
-        List<IndexVideoDTO> queryResults = executeQueryWithTransform(IndexVideoDTO.class, sqlScalars, wrapper);
+        List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
         wrapper.setResults(queryResults);
 
         if (CollectionUtils.isNotEmpty(queryResults)) {
@@ -83,11 +83,11 @@ public class ApiDao extends HibernateDao {
                     ids.put(mdt, new ArrayList());
                 }
 
-                Map<String, IndexVideoDTO> results = new HashMap<String, IndexVideoDTO>();
+                Map<String, ApiVideoDTO> results = new HashMap<String, ApiVideoDTO>();
 
-                for (IndexVideoDTO single : queryResults) {
+                for (ApiVideoDTO single : queryResults) {
                     // Add the item to the map for further processing
-                    results.put(IndexArtworkDTO.makeKey(single), single);
+                    results.put(ApiArtworkDTO.makeKey(single), single);
                     // Add the ID to the list
                     ids.get(single.getVideoType()).add(single.getId());
                 }
@@ -125,7 +125,7 @@ public class ApiDao extends HibernateDao {
      * @param wrapper
      * @return
      */
-    private String generateSqlForVideoList(ApiWrapperList<IndexVideoDTO> wrapper) {
+    private String generateSqlForVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
         OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getOptions();
         Map<String, String> includes = options.splitIncludes();
         Map<String, String> excludes = options.splitExcludes();
@@ -297,7 +297,7 @@ public class ApiDao extends HibernateDao {
      * @param artworkList
      * @param options
      */
-    private void addArtworks(Map<MetaDataType, List<Long>> ids, Map<String, IndexVideoDTO> artworkList, OptionsIndexVideo options) {
+    private void addArtworks(Map<MetaDataType, List<Long>> ids, Map<String, ApiVideoDTO> artworkList, OptionsIndexVideo options) {
         List<String> artworkRequired = options.splitArtwork();
         LOG.debug("Artwork required: {}", artworkRequired.toString());
 
@@ -369,10 +369,10 @@ public class ApiDao extends HibernateDao {
 
             sqlScalars.addParameterList("artworklist", artworkRequired);
 
-            List<IndexArtworkDTO> results = executeQueryWithTransform(IndexArtworkDTO.class, sqlScalars, null);
+            List<ApiArtworkDTO> results = executeQueryWithTransform(ApiArtworkDTO.class, sqlScalars, null);
 
             LOG.trace("Found {} artworks", results.size());
-            for (IndexArtworkDTO ia : results) {
+            for (ApiArtworkDTO ia : results) {
                 LOG.trace("  {} = {}", ia.Key(), ia.toString());
                 artworkList.get(ia.Key()).addArtwork(ia);
             }
@@ -423,9 +423,9 @@ public class ApiDao extends HibernateDao {
      *
      * @param wrapper
      */
-    public void getPersonList(ApiWrapperList<IndexPersonDTO> wrapper) {
+    public void getPersonList(ApiWrapperList<ApiPersonDTO> wrapper) {
         SqlScalars sqlScalars = generateSqlForPerson((OptionsIndexPerson) wrapper.getOptions());
-        List<IndexPersonDTO> results = executeQueryWithTransform(IndexPersonDTO.class, sqlScalars, wrapper);
+        List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
         wrapper.setResults(results);
     }
 
@@ -434,9 +434,9 @@ public class ApiDao extends HibernateDao {
      *
      * @param wrapper
      */
-    public void getPerson(ApiWrapperSingle<IndexPersonDTO> wrapper) {
+    public void getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
         SqlScalars sqlScalars = generateSqlForPerson((OptionsIndexPerson) wrapper.getOptions());
-        List<IndexPersonDTO> results = executeQueryWithTransform(IndexPersonDTO.class, sqlScalars, wrapper);
+        List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
         if (CollectionUtils.isNotEmpty(results)) {
             wrapper.setResult(results.get(0));
         } else {
@@ -476,20 +476,20 @@ public class ApiDao extends HibernateDao {
     }
 
     //<editor-fold defaultstate="collapsed" desc="Artwork Methods">
-    public IndexArtworkDTO getArtworkById(Long id) {
+    public ApiArtworkDTO getArtworkById(Long id) {
         SqlScalars sqlScalars = getSqlArtwork(new OptionsIndexArtwork(id));
 
-        List<IndexArtworkDTO> results = executeQueryWithTransform(IndexArtworkDTO.class, sqlScalars, null);
+        List<ApiArtworkDTO> results = executeQueryWithTransform(ApiArtworkDTO.class, sqlScalars, null);
         if (CollectionUtils.isEmpty(results)) {
-            return new IndexArtworkDTO();
+            return new ApiArtworkDTO();
         }
 
         return results.get(0);
     }
 
-    public List<IndexArtworkDTO> getArtworkList(ApiWrapperList<IndexArtworkDTO> wrapper) {
+    public List<ApiArtworkDTO> getArtworkList(ApiWrapperList<ApiArtworkDTO> wrapper) {
         SqlScalars sqlScalars = getSqlArtwork((OptionsIndexArtwork) wrapper.getOptions());
-        return executeQueryWithTransform(IndexArtworkDTO.class, sqlScalars, wrapper);
+        return executeQueryWithTransform(ApiArtworkDTO.class, sqlScalars, wrapper);
     }
 
     private SqlScalars getSqlArtwork(OptionsIndexArtwork options) {

@@ -32,12 +32,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.yamj.core.api.model.dto.IndexVideoDTO;
+import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.core.api.wrapper.ApiWrapperList;
-import org.yamj.core.api.wrapper.ApiWrapperSingle;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
@@ -50,9 +47,9 @@ public class VideoController {
 
     @RequestMapping(value = "/movie/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<IndexVideoDTO> getVideoById(@PathVariable String id,
+    public ApiWrapperList<ApiVideoDTO> getVideoById(@PathVariable String id,
             @ModelAttribute("options") OptionsIndexVideo options) {
-        ApiWrapperList<IndexVideoDTO> wrapper = new ApiWrapperList<IndexVideoDTO>();
+        ApiWrapperList<ApiVideoDTO> wrapper = new ApiWrapperList<ApiVideoDTO>();
         // Add the ID to the options
         options.setId(NumberUtils.toLong(id));
         // Set the type to movie
@@ -69,9 +66,9 @@ public class VideoController {
 
     @RequestMapping(value = "/series/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<IndexVideoDTO> getSeriesById(@PathVariable String id,
+    public ApiWrapperList<ApiVideoDTO> getSeriesById(@PathVariable String id,
             @ModelAttribute("options") OptionsIndexVideo options) {
-        ApiWrapperList<IndexVideoDTO> wrapper = new ApiWrapperList<IndexVideoDTO>();
+        ApiWrapperList<ApiVideoDTO> wrapper = new ApiWrapperList<ApiVideoDTO>();
         // Add the ID to the options
         options.setId(NumberUtils.toLong(id));
         // Set the type to movie
@@ -88,9 +85,9 @@ public class VideoController {
 
     @RequestMapping(value = "/season/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<IndexVideoDTO> getSeasonById(@PathVariable String id,
+    public ApiWrapperList<ApiVideoDTO> getSeasonById(@PathVariable String id,
             @ModelAttribute("options") OptionsIndexVideo options) {
-        ApiWrapperList<IndexVideoDTO> wrapper = new ApiWrapperList<IndexVideoDTO>();
+        ApiWrapperList<ApiVideoDTO> wrapper = new ApiWrapperList<ApiVideoDTO>();
         // Add the ID to the options
         options.setId(NumberUtils.toLong(id));
         // Set the type to movie

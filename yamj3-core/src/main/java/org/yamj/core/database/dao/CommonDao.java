@@ -28,7 +28,7 @@ import org.hibernate.type.StringType;
 import org.springframework.stereotype.Service;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.SqlScalars;
-import org.yamj.core.api.model.dto.IndexGenreDTO;
+import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.database.model.*;
 import org.yamj.core.hibernate.HibernateDao;
@@ -40,7 +40,7 @@ public class CommonDao extends HibernateDao {
         return getByName(Genre.class, name);
     }
 
-    public List<IndexGenreDTO> getGenres(ApiWrapperList<IndexGenreDTO> wrapper) {
+    public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper) {
         OptionsId options = (OptionsId) wrapper.getOptions();
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT id, name");
@@ -51,7 +51,7 @@ public class CommonDao extends HibernateDao {
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
 
-        return executeQueryWithTransform(IndexGenreDTO.class, sqlScalars, wrapper);
+        return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
     }
 
     public List<Genre> getGenreFilename(ApiWrapperList<Genre> wrapper, String filename) {

@@ -28,7 +28,7 @@ import java.util.Date;
  *
  * @author stuart.boston
  */
-public class IndexPersonDTO extends AbstractIndexDTO {
+public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
 
     private String name;
     private String biography;
