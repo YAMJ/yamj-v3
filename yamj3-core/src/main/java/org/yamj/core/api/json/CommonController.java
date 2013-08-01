@@ -54,13 +54,13 @@ public class CommonController {
 
     @RequestMapping(value = "/watched", method = RequestMethod.GET)
     @ResponseBody
-    public String markWatched(
+    public ApiStatus markWatched(
             @RequestParam(required = true, defaultValue = "") String filename,
             @RequestParam(required = false, defaultValue = "-1") Integer amount) {
         int percentage = (amount == -1 ? 100 : amount);
         LOG.info("Received watched command for '{}' to value '{}' {}", filename, percentage, (amount == -1 ? "(defaulted)" : ""));
         // TODO: Add write to database command
-        return null;
+        return new ApiStatus(200, "Watch command successful");
     }
 
     @RequestMapping(value = "/genre")
