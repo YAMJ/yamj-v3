@@ -55,6 +55,8 @@ public interface IApiWrapper {
 
     void setStatusCheck();
 
+    void setStatusCheck(ApiStatus status);
+
     void setCount(int count);
 
     void setParameters(Object parameters);

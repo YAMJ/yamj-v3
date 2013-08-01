@@ -26,6 +26,7 @@ import org.joda.time.DateTime;
 import org.yamj.common.model.YamjInfo;
 import org.yamj.common.tools.DateTimeTools;
 import org.yamj.core.api.model.ApiStatus;
+import org.yamj.core.api.options.IOptions;
 
 /**
  *
@@ -39,6 +40,7 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     private DateTime queryTime = DateTime.now();
     private ApiStatus status = new ApiStatus();
     private Object parameters = null;
+    private IOptions options = null;
     private String baseArtworkUrl = "";
     private String baseMediainfoUrl = "";
 
@@ -66,6 +68,10 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     @Override
     public Object getParameters() {
         return parameters;
+    }
+
+    public IOptions getOptions() {
+        return options;
     }
 
     @Override
@@ -109,9 +115,24 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
 
     /**
      * Shorthand method to create a default "OK" status or "FAIL" status
+     *
+     * Also marks the end of the query
      */
     @Override
     public abstract void setStatusCheck();
+
+    /**
+     * Set the status to a specific value
+     *
+     * Also marks the end of the query
+     *
+     * @param status
+     */
+    @Override
+    public void setStatusCheck(ApiStatus status) {
+        setQueryEnd();
+        setStatus(status);
+    }
 
     @Override
     public void setCount(int count) {
@@ -121,6 +142,10 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     @Override
     public void setParameters(Object parameters) {
         this.parameters = parameters;
+    }
+
+    public void setOptions(IOptions options) {
+        this.options = options;
     }
 
     @Override
