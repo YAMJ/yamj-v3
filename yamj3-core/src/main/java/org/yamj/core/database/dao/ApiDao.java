@@ -505,8 +505,8 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql(" ag.cache_filename AS cacheFilename,");
         sqlScalars.addToSql(" ag.cache_dir AS cacheDir");
         sqlScalars.addToSql(" FROM artwork a");
-        sqlScalars.addToSql(" LEFT JOIN artwork_located al on a.id=al.artwork_id");
-        sqlScalars.addToSql(" LEFT JOIN artwork_generated ag on al.id=ag.located_id");
+        sqlScalars.addToSql(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
+        sqlScalars.addToSql(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
         sqlScalars.addToSql(" WHERE 1=1"); // Make appending restrictions easier
         if (options != null) {
             if (options.getId() > 0L) {
@@ -524,7 +524,6 @@ public class ApiDao extends HibernateDao {
                 boolean first = Boolean.TRUE;
                 for (String type : options.getVideo()) {
                     MetaDataType mdt = MetaDataType.fromString(type);
-                    LOG.info("Type: {}, MDT: {}, first: {}", type, mdt, first);
                     if (first) {
                         first = Boolean.FALSE;
                     } else {

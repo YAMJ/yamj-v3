@@ -144,10 +144,13 @@ public class ApiArtworkDTO {
 
     public void setArtworkType(ArtworkType artworkType) {
         this.artworkType = artworkType;
+        if (artworkType == ArtworkType.VIDEOIMAGE) {
+            setSource(MetaDataType.EPISODE);
+        }
     }
 
     public void setArtworkTypeString(String artworkType) {
-        this.artworkType = ArtworkType.fromString(artworkType);
+        setArtworkType(ArtworkType.fromString(artworkType));
     }
 
     public void setCacheDir(String cacheDir) {
@@ -177,7 +180,10 @@ public class ApiArtworkDTO {
         // Only set if the id is not null
         if (videodataId != null) {
             this.videoId = videodataId;
-            this.source = MetaDataType.MOVIE;
+            // Only overwrite the source if it is null
+            if (this.source == null) {
+                this.source = MetaDataType.MOVIE;
+            }
         }
     }
 
