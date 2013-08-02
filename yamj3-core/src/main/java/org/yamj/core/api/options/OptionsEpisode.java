@@ -20,29 +20,31 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api.model.dto;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+package org.yamj.core.api.options;
 
 /**
+ * List of the options available for the indexes
  *
  * @author stuart.boston
  */
-public class AbstractApiIdentifiableDTO {
+public class OptionsEpisode extends OptionsAbstract {
 
-    private Long id = -1L;
+    private Long series = -1L;
+    private Long season = -1L;
 
-    public long getId() {
-        return id;
+    public Long getSeries() {
+        return series;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Long getSeason() {
+        return season;
     }
 
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    public void setSeries(Long series) {
+        this.series = series;
+    }
+
+    public void setSeason(Long season) {
+        this.season = season;
     }
 }

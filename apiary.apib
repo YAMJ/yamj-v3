@@ -666,6 +666,92 @@ GET /api/video/season/{id}
 }
 
 
+Retrieve information on the season
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>series</td>
+        <td>The ID of the series to get.<br>
+        Leave blank to get all series.</td>
+    </tr>
+    <tr>
+        <td>season</td>
+        <td>The season number from the series to get.<br>
+        Leave blank to get all seasons.</td>
+    </tr>
+</table>
+
+GET /api/video/episode?series={}&season={}
+< 200
+< Content-Type: application/json
+{
+   "count":6,
+   "totalCount":6,
+   "queryDuration":"0ms",
+   "queryTime":"2013-08-02 10:55:09",
+   "status":{
+      "status":100,
+      "message":"Unknown status"
+   },
+   "options":{
+      "start":-1,
+      "max":-1,
+      "series":1,
+      "season":2
+   },
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "results":[
+      {
+         "seriesId":1,
+         "season":2,
+         "episode":1,
+         "title":"Chuck Versus the First Date",
+         "videoimage":"c/ch/Chuck_0000_002_001.episode.videoimage.52.default-videoimage.jpg"
+      },
+      {
+         "seriesId":1,
+         "season":2,
+         "episode":2,
+         "title":"Chuck Versus the Seduction",
+         "videoimage":"c/ch/Chuck_0000_002_002.episode.videoimage.53.default-videoimage.jpg"
+      },
+      {
+         "seriesId":1,
+         "season":2,
+         "episode":3,
+         "title":"Chuck Versus the Break-Up",
+         "videoimage":"c/ch/Chuck_0000_002_003.episode.videoimage.54.default-videoimage.jpg"
+      },
+      {
+         "seriesId":1,
+         "season":2,
+         "episode":4,
+         "title":"Chuck Versus the Cougars",
+         "videoimage":"c/ch/Chuck_0000_002_004.episode.videoimage.55.default-videoimage.jpg"
+      },
+      {
+         "seriesId":1,
+         "season":2,
+         "episode":5,
+         "title":"Chuck Versus Tom Sawyer",
+         "videoimage":"c/ch/Chuck_0000_002_005.episode.videoimage.56.default-videoimage.jpg"
+      },
+      {
+         "seriesId":1,
+         "season":2,
+         "episode":6,
+         "title":"Chuck Versus the Ex",
+         "videoimage":"c/ch/Chuck_0000_002_006.episode.videoimage.57.default-videoimage.jpg"
+      }
+   ]
+}
+
+
 --
 Artwork
 --

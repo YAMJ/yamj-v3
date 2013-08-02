@@ -32,7 +32,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.yamj.core.api.model.dto.ApiEpisodeDTO;
 import org.yamj.core.api.model.dto.ApiVideoDTO;
+import org.yamj.core.api.options.OptionsEpisode;
 import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -45,6 +47,15 @@ public class VideoController {
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
 
+    /**
+     * Get information on a movie
+     *
+     * TODO: Allow genres to be added to the returned data
+     *
+     * @param id
+     * @param options
+     * @return
+     */
     @RequestMapping(value = "/movie/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperList<ApiVideoDTO> getVideoById(@PathVariable String id,
@@ -64,6 +75,15 @@ public class VideoController {
         return wrapper;
     }
 
+    /**
+     * Get information on a series
+     *
+     * TODO: Get associate seasons for the series
+     *
+     * @param id
+     * @param options
+     * @return
+     */
     @RequestMapping(value = "/series/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperList<ApiVideoDTO> getSeriesById(@PathVariable String id,
@@ -83,6 +103,15 @@ public class VideoController {
         return wrapper;
     }
 
+    /**
+     * Get information on a series
+     *
+     * TODO: Add episodes to the season
+     *
+     * @param id
+     * @param options
+     * @return
+     */
     @RequestMapping(value = "/season/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperList<ApiVideoDTO> getSeasonById(@PathVariable String id,
@@ -100,5 +129,28 @@ public class VideoController {
         }
         wrapper.setStatusCheck();
         return wrapper;
+    }
+
+    @RequestMapping(value = "/episodes")
+    @ResponseBody
+    public ApiWrapperList<ApiEpisodeDTO> getEpisodes(@ModelAttribute("options") OptionsEpisode options) {
+        LOG.info("Getting episodes for series '{}', season '{}'",
+                options.getSeries() < 0L ? "All" : options.getSeries(),
+                options.getSeason() < 0L ? "All" : options.getSeason());
+
+        ApiWrapperList<ApiEpisodeDTO> wrapper = new ApiWrapperList<ApiEpisodeDTO>();
+        wrapper.setOptions(options);
+        jsonApiStorageService.getEpisodeList(wrapper);
+        return wrapper;
+
+        /*
+         SELECT ser.id AS SeriesId, sea.id AS SeasonId, ser.title AS SeriesTitle,
+         sea.season, vid.episode, vid.title as EpisodeTitle
+         FROM season sea, series ser, videodata vid
+         WHERE sea.series_id=ser.id
+         AND vid.season_id=sea.id
+         ORDER by SeriesId, season, episode
+         */
+
     }
 }

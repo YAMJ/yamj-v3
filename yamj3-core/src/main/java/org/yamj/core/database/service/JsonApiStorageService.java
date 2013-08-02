@@ -31,6 +31,7 @@ import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
+import org.yamj.core.api.model.dto.ApiEpisodeDTO;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.model.dto.ApiVideoDTO;
@@ -185,4 +186,9 @@ public class JsonApiStorageService {
         return apiDao.getArtworkList(wrapper);
     }
     //</editor-fold>
+
+    @Transactional(readOnly = true)
+    public void getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
+        apiDao.getEpisodeList(wrapper);
+    }
 }

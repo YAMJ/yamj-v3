@@ -43,7 +43,9 @@ import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.SqlScalars;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
+import org.yamj.core.api.model.dto.ApiEpisodeDTO;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
+import org.yamj.core.api.options.OptionsEpisode;
 import org.yamj.core.api.options.OptionsIndexArtwork;
 import org.yamj.core.api.options.OptionsIndexPerson;
 import org.yamj.core.api.options.OptionsIndexVideo;
@@ -556,4 +558,37 @@ public class ApiDao extends HibernateDao {
         return sqlScalars;
     }
     //</editor-fold>
+
+    public void getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
+        OptionsEpisode options = (OptionsEpisode) wrapper.getOptions();
+        SqlScalars sqlScalars = new SqlScalars();
+
+        sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.season, vid.episode, vid.title, ");
+        sqlScalars.addToSql("ag.cache_filename AS cacheFilename, ag.cache_dir AS cacheDir");
+        sqlScalars.addToSql("FROM season sea, series ser, videodata vid, artwork a");
+        sqlScalars.addToSql("LEFT JOIN artwork_located al ON a.id=al.artwork_id");
+        sqlScalars.addToSql("LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
+        sqlScalars.addToSql("WHERE sea.series_id=ser.id");
+        sqlScalars.addToSql("AND vid.season_id=sea.id");
+        sqlScalars.addToSql("AND a.videodata_id=vid.id");
+        if (options.getSeries() > 0L) {
+            sqlScalars.addToSql("AND ser.id=:seriesid");
+            sqlScalars.addParameter("seriesid", options.getSeries());
+            if (options.getSeason() > 0L) {
+                sqlScalars.addToSql("AND sea.id=:seasonid");
+                sqlScalars.addParameter("seasonid", options.getSeason());
+            }
+        }
+        sqlScalars.addToSql("ORDER BY seriesId, season, episode");
+
+        sqlScalars.addScalar("seriesId", LongType.INSTANCE);
+        sqlScalars.addScalar("season", LongType.INSTANCE);
+        sqlScalars.addScalar("episode", LongType.INSTANCE);
+        sqlScalars.addScalar("title", StringType.INSTANCE);
+        sqlScalars.addScalar("cacheFilename", StringType.INSTANCE);
+        sqlScalars.addScalar("cacheDir", StringType.INSTANCE);
+
+        List<ApiEpisodeDTO> results = executeQueryWithTransform(ApiEpisodeDTO.class, sqlScalars, wrapper);
+        wrapper.setResults(results);
+    }
 }
