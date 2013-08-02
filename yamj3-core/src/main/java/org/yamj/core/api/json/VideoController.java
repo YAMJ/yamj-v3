@@ -37,6 +37,7 @@ import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.core.api.options.OptionsEpisode;
 import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.core.api.wrapper.ApiWrapperList;
+import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
@@ -58,9 +59,9 @@ public class VideoController {
      */
     @RequestMapping(value = "/movie/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<ApiVideoDTO> getVideoById(@PathVariable String id,
+    public ApiWrapperSingle<ApiVideoDTO> getVideoById(@PathVariable String id,
             @ModelAttribute("options") OptionsIndexVideo options) {
-        ApiWrapperList<ApiVideoDTO> wrapper = new ApiWrapperList<ApiVideoDTO>();
+        ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<ApiVideoDTO>();
         // Add the ID to the options
         options.setId(NumberUtils.toLong(id));
         // Set the type to movie
@@ -69,7 +70,7 @@ public class VideoController {
 
         if (options.getId() > 0L) {
             LOG.info("Getting video with ID '{}'", options.getId());
-            jsonApiStorageService.getVideoList(wrapper);
+            jsonApiStorageService.getMovie(wrapper);
         }
         wrapper.setStatusCheck();
         return wrapper;

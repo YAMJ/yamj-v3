@@ -44,12 +44,14 @@ import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.SqlScalars;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
 import org.yamj.core.api.model.dto.ApiEpisodeDTO;
+import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.options.OptionsEpisode;
 import org.yamj.core.api.options.OptionsIndexArtwork;
 import org.yamj.core.api.options.OptionsIndexPerson;
 import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Service("apiDao")
@@ -343,7 +345,7 @@ public class ApiDao extends HibernateDao {
                 sqlScalars.addToSql(" FROM season s, artwork a");
                 sqlScalars.addToSql(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
                 sqlScalars.addToSql(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
-                sqlScalars.addToSql(" WHERE s.id=a.series_id");
+                sqlScalars.addToSql(" WHERE s.id=a.season_id");
                 sqlScalars.addToSql(" AND s.id IN (:seasonlist)");
                 sqlScalars.addToSql(" AND a.artwork_type IN (:artworklist)");
             }
@@ -590,5 +592,123 @@ public class ApiDao extends HibernateDao {
 
         List<ApiEpisodeDTO> results = executeQueryWithTransform(ApiEpisodeDTO.class, sqlScalars, wrapper);
         wrapper.setResults(results);
+    }
+
+    public void getMovie(ApiWrapperSingle<ApiVideoDTO> wrapper) {
+        OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getOptions();
+        Map<String, String> includes = options.splitIncludes();
+        Map<String, String> excludes = options.splitExcludes();
+
+        SqlScalars sqlScalars = new SqlScalars(generateSqlForVideo(options, includes, excludes));
+
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("videoTypeString", StringType.INSTANCE);
+        sqlScalars.addScalar("title", StringType.INSTANCE);
+        sqlScalars.addScalar("originalTitle", StringType.INSTANCE);
+        sqlScalars.addScalar("videoYear", IntegerType.INSTANCE);
+        sqlScalars.addScalar("firstAired", StringType.INSTANCE);
+
+        List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
+        if (CollectionUtils.isNotEmpty(queryResults)) {
+            ApiVideoDTO video = queryResults.get(0);
+            video.setGenres(getGenresForId(MetaDataType.MOVIE, options.getId()));
+
+            List<ApiArtworkDTO> artwork=getArtworkForId(MetaDataType.MOVIE, options.getId());
+            if(artwork==null) {
+                LOG.warn("NULL Artwork returned");
+            }
+            video.setArtwork(artwork);
+            wrapper.setResult(video);
+        } else {
+            wrapper.setResult(null);
+        }
+    }
+
+    /**
+     * Get a list of the Genres for a give video ID
+     *
+     * @param type
+     * @param id
+     * @return
+     */
+    public List<ApiGenreDTO> getGenresForId(MetaDataType type, Long id) {
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT g.id, g.name");
+        sqlScalars.addToSql("FROM videodata_genres vg, genre g");
+        if (type == MetaDataType.SERIES) {
+            sqlScalars.addToSql(", series v");
+        } else if (type == MetaDataType.SEASON) {
+            sqlScalars.addToSql(", season v");
+        } else {
+            // Default to Movie
+            sqlScalars.addToSql(", videodata v");
+        }
+        sqlScalars.addToSql("WHERE vg.genre_id=g.id");
+        sqlScalars.addToSql("AND vg.data_id=:id");
+        sqlScalars.addToSql("AND v.id=vg.data_id");
+
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+
+        sqlScalars.addParameter("id", id);
+
+        return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, null);
+
+    }
+
+    public List<ApiArtworkDTO> getArtworkForId(MetaDataType type, Long id) {
+        List<String> artworkRequired = new ArrayList<String>();
+        for (ArtworkType at : ArtworkType.values()) {
+            artworkRequired.add(at.toString());
+        }
+        // Remove the unknown type
+        artworkRequired.remove(ArtworkType.UNKNOWN.toString());
+
+        return getArtworkForId(type, id, artworkRequired);
+    }
+
+    public List<ApiArtworkDTO> getArtworkForId(MetaDataType type, Long id, List<String> artworkRequired) {
+        LOG.debug("Artwork required for ID '{}' is {}", id, artworkRequired);
+        StringBuilder sbSQL = new StringBuilder();
+        sbSQL.append("SELECT '").append(type.toString()).append("' as sourceString, ");
+        sbSQL.append(" v.id as videoId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, ");
+        sbSQL.append(" a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename ");
+        if (type == MetaDataType.MOVIE) {
+            sbSQL.append("FROM videodata v ");
+        } else if (type == MetaDataType.SERIES) {
+            sbSQL.append("FROM series v ");
+        } else if (type == MetaDataType.SEASON) {
+            sbSQL.append("FROM season v ");
+        }
+        sbSQL.append(", artwork a");    // Artwork must be last for the LEFT JOIN
+        sbSQL.append(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
+        sbSQL.append(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
+        if (type == MetaDataType.MOVIE) {
+            sbSQL.append(" WHERE v.id=a.videodata_id");
+            sbSQL.append(" AND v.episode<0");
+        } else if (type == MetaDataType.SERIES) {
+            sbSQL.append(" WHERE v.id=a.series_id");
+        } else if (type == MetaDataType.SEASON) {
+            sbSQL.append(" WHERE v.id=a.season_id");
+        }
+        sbSQL.append(" AND v.id=:id");
+        sbSQL.append(" AND a.artwork_type IN (:artworklist)");
+
+        SqlScalars sqlScalars = new SqlScalars(sbSQL);
+        LOG.info("getArtworkForId: {}", sqlScalars.getSql());
+
+        sqlScalars.addScalar("sourceString", StringType.INSTANCE);
+        sqlScalars.addScalar("videoId", LongType.INSTANCE);
+        sqlScalars.addScalar("artworkId", LongType.INSTANCE);
+        sqlScalars.addScalar("locatedId", LongType.INSTANCE);
+        sqlScalars.addScalar("generatedId", LongType.INSTANCE);
+        sqlScalars.addScalar("artworkTypeString", StringType.INSTANCE);
+        sqlScalars.addScalar("cacheDir", StringType.INSTANCE);
+        sqlScalars.addScalar("cacheFilename", StringType.INSTANCE);
+
+        sqlScalars.addParameter("id", id);
+        sqlScalars.addParameterList("artworklist", artworkRequired);
+
+        return executeQueryWithTransform(ApiArtworkDTO.class, sqlScalars, null);
     }
 }

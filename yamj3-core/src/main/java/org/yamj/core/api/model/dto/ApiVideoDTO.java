@@ -24,10 +24,8 @@ package org.yamj.core.api.model.dto;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -42,7 +40,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private String title;
     private String originalTitle;
     private Integer videoYear;
-    private Set<ApiGenreDTO> genres = new HashSet<ApiGenreDTO>();
+    private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
     Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
 
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
@@ -74,7 +72,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         return count;
     }
 
-    public Set<ApiGenreDTO> getGenres() {
+    public List<ApiGenreDTO> getGenres() {
         return genres;
     }
 
@@ -105,21 +103,21 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     }
 
     public void setFirstAired(String firstAired) {
-        if(StringUtils.isNotBlank(firstAired) && firstAired.length()>=4) {
+        if (StringUtils.isNotBlank(firstAired) && firstAired.length() >= 4) {
             String year = firstAired.substring(0, 4);
-            if(StringUtils.isNumeric(year)) {
+            if (StringUtils.isNumeric(year)) {
                 setVideoYear(Integer.parseInt(year));
             }
         }
     }
 
-    public void setArtwork(Set<ApiArtworkDTO> artworkList) {
+    public void setArtwork(List<ApiArtworkDTO> artworkList) {
         for (ApiArtworkDTO ia : artworkList) {
-            this.artwork.get(ia.getArtworkType()).add(ia);
+            addArtwork(ia);
         }
     }
 
-    public void setGenres(Set<ApiGenreDTO> genres) {
+    public void setGenres(List<ApiGenreDTO> genres) {
         this.genres = genres;
     }
     //</editor-fold>

@@ -191,4 +191,9 @@ public class JsonApiStorageService {
     public void getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
         apiDao.getEpisodeList(wrapper);
     }
+
+    @Transactional(readOnly = true)
+    public void getMovie(ApiWrapperSingle<ApiVideoDTO> wrapper) {
+        apiDao.getMovie(wrapper);
+    }
 }
