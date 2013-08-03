@@ -33,6 +33,10 @@
                 <th style="width: 10%"><a href="${pageContext.request.contextPath}/config/list.html">Configuration</a></td>
                 <td style="width: 30%">Display information about the configuration.</td>
             </tr>
+            <tr>
+                <th style="width: 10%"><a href="${pageContext.request.contextPath}/count/job.html">Job List</a></td>
+                <td style="width: 30%">List of jobs in the database.</td>
+            </tr>
         </table>
         <table class="sysinfo">
             <tr>

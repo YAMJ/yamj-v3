@@ -1,5 +1,6 @@
 package org.yamj.core.pages;
 
+import java.awt.image.IndexColorModel;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.yamj.common.model.YamjInfo;
+import org.yamj.core.api.json.IndexController;
 import org.yamj.core.api.json.SystemInfoController;
 import org.yamj.core.api.model.Skin;
 import org.yamj.core.configuration.ConfigService;
@@ -29,6 +31,8 @@ public class PagesController {
     ConfigService configService;
     @Autowired
     FileStorageService fileStorageService;
+    @Autowired
+    IndexController index;
 
     @RequestMapping(value = {"/", "/index"})
     public ModelAndView displayRoot() {
@@ -48,6 +52,15 @@ public class PagesController {
         return view;
     }
     //</editor-fold>
+
+    @RequestMapping(value = "/count/job")
+    public ModelAndView displayCountJob() {
+        ModelAndView view = new ModelAndView("count-job");
+        YamjInfo yi = sic.getYamjInfo("false");
+        view.addObject("yi", yi);
+        view.addObject("countlist", index.getJobs("all"));
+        return view;
+    }
 
     //<editor-fold defaultstate="collapsed" desc="Configuration Pages">
     @RequestMapping(value = "/config/add")
