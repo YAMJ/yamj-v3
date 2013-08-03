@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
@@ -195,5 +196,10 @@ public class JsonApiStorageService {
     @Transactional(readOnly = true)
     public void getMovie(ApiWrapperSingle<ApiVideoDTO> wrapper) {
         apiDao.getMovie(wrapper);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CountGeneric> getJobCount(List<String> requiredJobs) {
+        return apiDao.getJobCount(requiredJobs);
     }
 }

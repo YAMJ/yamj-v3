@@ -466,6 +466,82 @@ GET /api/index/count
 }
 
 
+Get a list of jobs and their associated counts.
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>job</td>
+        <td>A comma separated list of the jobs to get counts for.
+        If left blank, will default to 'all'
+        </td>
+    </tr>
+</table>
+
+GET /api/index/count
+< 200
+< Content-Type: application/json
+{
+[
+   {
+      "item":"ACTOR",
+      "count":11693
+   },
+   {
+      "item":"ART",
+      "count":606
+   },
+   {
+      "item":"CAMERA",
+      "count":358
+   },
+   {
+      "item":"COSTUME_MAKEUP",
+      "count":215
+   },
+   {
+      "item":"CREW",
+      "count":223
+   },
+   {
+      "item":"DIRECTOR",
+      "count":843
+   },
+   {
+      "item":"EDITING",
+      "count":509
+   },
+   {
+      "item":"EFFECTS",
+      "count":132
+   },
+   {
+      "item":"GUEST_STAR",
+      "count":360
+   },
+   {
+      "item":"LIGHTING",
+      "count":19
+   },
+   {
+      "item":"PRODUCER",
+      "count":2400
+   },
+   {
+      "item":"SOUND",
+      "count":569
+   },
+   {
+      "item":"WRITER",
+      "count":1532
+   }
+]
+}
+
+
 --
 Video Methods
 These methods get information on the videos in the database

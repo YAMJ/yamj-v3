@@ -23,12 +23,13 @@
 package org.yamj.core.api.json;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,6 +40,7 @@ import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.options.OptionsIndexPerson;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -82,7 +84,7 @@ public class IndexController {
     public List<CountTimestamp> getCount(@RequestParam(required = false, defaultValue = "all") String type) {
         List<CountTimestamp> results = new ArrayList<CountTimestamp>();
         if (type.toLowerCase().indexOf("all") < 0) {
-            for (String stringType : StringUtils.tokenizeToStringArray(type, ",", true, true)) {
+            for (String stringType : StringUtils.split(type, ",")) {
                 MetaDataType singleType = MetaDataType.fromString(stringType);
                 LOG.debug("Getting a count of '{}'", singleType.toString());
                 results.add(jsonApiStorageService.getCountTimestamp(singleType));
@@ -93,6 +95,20 @@ public class IndexController {
                 LOG.debug("  Adding a count of '{}'", singleType.toString());
                 results.add(jsonApiStorageService.getCountTimestamp(singleType));
             }
+        }
+        return results;
+    }
+
+    @RequestMapping(value = "/jobs")
+    @ResponseBody
+    public List<CountGeneric> getJobs(@RequestParam(required = false, defaultValue = "all") String job) {
+        List<CountGeneric> results;
+
+        if (StringUtils.isNotBlank(job) && job.toLowerCase().indexOf("all") < 0) {
+            List<String> requiredJobs = Arrays.asList(StringUtils.split(job, ","));
+            results = jsonApiStorageService.getJobCount(requiredJobs);
+        } else {
+            results = jsonApiStorageService.getJobCount(null);
         }
         return results;
     }

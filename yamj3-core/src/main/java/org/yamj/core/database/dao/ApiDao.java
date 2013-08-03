@@ -40,6 +40,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.SqlScalars;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
@@ -465,7 +466,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql(" p.birth_name AS birthName, ");
         sqlScalars.addToSql(" p.death_day AS deathDay ");
         sqlScalars.addToSql(" FROM person p");
-        if(StringUtils.isNotBlank(options.getJob())){
+        if (StringUtils.isNotBlank(options.getJob())) {
             sqlScalars.addToSql(", cast_crew c");
         }
         if (options.getId() > 0L) {
@@ -474,7 +475,7 @@ public class ApiDao extends HibernateDao {
         } else {
             sqlScalars.addToSql(" WHERE 1=1");
         }
-        if(StringUtils.isNotBlank(options.getJob())){
+        if (StringUtils.isNotBlank(options.getJob())) {
             sqlScalars.addToSql(" AND p.id=c.person_id");
             sqlScalars.addToSql(" AND c.job IN (:joblist)");
             sqlScalars.addParameterList("joblist", options.getJobList());
@@ -740,5 +741,23 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addParameterList("artworklist", artworkRequired);
 
         return executeQueryWithTransform(ApiArtworkDTO.class, sqlScalars, null);
+    }
+
+    public List<CountGeneric> getJobCount(List<String> requiredJobs) {
+        LOG.info("getJobCount: Required Jobs: {}", (requiredJobs == null ? "all" : requiredJobs));
+        SqlScalars sqlScalars = new SqlScalars();
+
+        sqlScalars.addToSql("SELECT job AS item, COUNT(*) AS count");
+        sqlScalars.addToSql("FROM  cast_crew");
+        if (CollectionUtils.isNotEmpty(requiredJobs)) {
+            sqlScalars.addToSql("WHERE job IN (:joblist)");
+            sqlScalars.addParameterList("joblist", requiredJobs);
+        }
+        sqlScalars.addToSql("GROUP BY job");
+
+        sqlScalars.addScalar("item", StringType.INSTANCE);
+        sqlScalars.addScalar("count", LongType.INSTANCE);
+
+        return executeQueryWithTransform(CountGeneric.class, sqlScalars, null);
     }
 }
