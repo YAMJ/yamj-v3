@@ -125,6 +125,13 @@ public class ScannerManagementImpl implements ScannerManagement {
             }
         }
 
+        keywordList = processKeywords(fsIgnore, "dir");
+        if (!CollectionUtils.isEmpty(keywordList)) {
+            for (String keyword : keywordList) {
+                DIR_EXCLUSIONS.put(keyword.toLowerCase(), null);
+            }
+        }
+
         keywordList = processKeywords(fsIgnore, "video");
         if (!keywordList.isEmpty()) {
             DIR_EXCLUSIONS.put(".no_video.yamj", keywordList);
@@ -302,6 +309,9 @@ public class ScannerManagementImpl implements ScannerManagement {
             // Don't scan BLURAY or DVD structures
             LOG.info("Skipping directory '{}' as its a {} type", directory.getAbsolutePath(), dirType);
             library.getStatistics().increment(dirType == DirectoryType.BLURAY ? StatType.BLURAY : StatType.DVD);
+            stageDir = null;
+        } else if (DIR_EXCLUSIONS.containsKey(directory.getName().toLowerCase())) {
+            LOG.info("Skipping directory '{}' as its in the exclusion list.",directory.getAbsolutePath());
             stageDir = null;
         } else {
             try {
