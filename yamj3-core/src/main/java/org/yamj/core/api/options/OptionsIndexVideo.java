@@ -36,13 +36,11 @@ import org.yamj.core.database.model.type.ArtworkType;
  *
  * @author stuart.boston
  */
-public class OptionsIndexVideo extends OptionsAbstract {
+public class OptionsIndexVideo extends OptionsAbstractSortSearch {
 
     private String type = "";
     private String include = "";
     private String exclude = "";
-    private String sortby = "";
-    private String sortdir = "ASC";
     private String artwork = "";
     private Long id = -1L;
     @JsonIgnore
@@ -73,22 +71,6 @@ public class OptionsIndexVideo extends OptionsAbstract {
     public void setType(String type) {
         this.type = type.toUpperCase();
         this.videoTypes.clear();
-    }
-
-    public String getSortby() {
-        return sortby;
-    }
-
-    public void setSortby(String sortby) {
-        this.sortby = sortby;
-    }
-
-    public String getSortdir() {
-        return sortdir;
-    }
-
-    public void setSortdir(String sortdir) {
-        this.sortdir = sortdir;
     }
 
     public String getArtwork() {

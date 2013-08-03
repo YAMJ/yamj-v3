@@ -22,54 +22,10 @@
  */
 package org.yamj.core.api.options;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * List of the options available for the indexes
  *
  * @author stuart.boston
  */
-public class OptionsIndexPerson extends OptionsAbstract implements IOptionsSort {
-
-    private String sortby = "";
-    private String sortdir = "ASC";
-    private Long id = -1L;
-
-    @Override
-    public String getSortby() {
-        return sortby;
-    }
-
-    @Override
-    public void setSortby(String sortby) {
-        this.sortby = sortby;
-    }
-
-    @Override
-    public String getSortdir() {
-        return sortdir;
-    }
-
-    @Override
-    public void setSortdir(String sortdir) {
-        this.sortdir = sortdir;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    @Override
-    public String getSortString() {
-        StringBuilder sb = new StringBuilder();
-        if (StringUtils.isNotBlank(sortby)) {
-            sb.append(" ORDER BY ").append(sortby);
-            sb.append(" ").append(sortdir);
-        }
-        return sb.toString();
-    }
+public class OptionsIndexPerson extends OptionsId {
 }

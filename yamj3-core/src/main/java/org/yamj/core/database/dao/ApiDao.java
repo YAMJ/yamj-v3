@@ -166,11 +166,8 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(generateSqlForSeason(options, includes, excludes));
         }
 
-        if (StringUtils.isNotBlank(options.getSortby())) {
-            sbSQL.append(" ORDER BY ");
-            sbSQL.append(options.getSortby()).append(" ");
-            sbSQL.append(options.getSortdir().toUpperCase());
-        }
+        // Add the sort string, this will be empty if there is no sort required
+        sbSQL.append(options.getSortString());
 
         return sbSQL.toString();
     }
@@ -223,6 +220,9 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" AND vd.publication_year!=").append(includes.get("year"));
         }
 
+        // Add the search string, this will be empty if there is no search required
+        sbSQL.append(options.getSearchString(false));
+
         return sbSQL.toString();
     }
 
@@ -257,6 +257,9 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" AND ser.start_year!=").append(includes.get("year"));
         }
 
+        // Add the search string, this will be empty if there is no search required
+        sbSQL.append(options.getSearchString(false));
+
         return sbSQL.toString();
     }
 
@@ -290,6 +293,9 @@ public class ApiDao extends HibernateDao {
         if (excludes.containsKey("year")) {
             sbSQL.append(" AND sea.first_aired NOT LIKE '").append(includes.get("year")).append("%'");
         }
+
+        // Add the search string, this will be empty if there is no search required
+        sbSQL.append(options.getSearchString(false));
 
         return sbSQL.toString();
     }
@@ -459,11 +465,11 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql(" p.birth_name as birthName, ");
         sqlScalars.addToSql(" p.death_day as deathDay ");
         sqlScalars.addToSql(" FROM person p");
+        // Add the search string as the "WHERE"
+        sqlScalars.addToSql(options.getSearchString(true));
         if (options.getId() > 0L) {
-            sqlScalars.addToSql(" WHERE id=:id");
+            sqlScalars.addToSql(" AND id=:id");
             sqlScalars.addParameter("id", options.getId());
-        } else {
-            sqlScalars.addToSql(" WHERE 1=1");
         }
         // This will default to blank if there's no sort required
         sqlScalars.addToSql(options.getSortString());
@@ -613,8 +619,8 @@ public class ApiDao extends HibernateDao {
             ApiVideoDTO video = queryResults.get(0);
             video.setGenres(getGenresForId(MetaDataType.MOVIE, options.getId()));
 
-            List<ApiArtworkDTO> artwork=getArtworkForId(MetaDataType.MOVIE, options.getId());
-            if(artwork==null) {
+            List<ApiArtworkDTO> artwork = getArtworkForId(MetaDataType.MOVIE, options.getId());
+            if (artwork == null) {
                 LOG.warn("NULL Artwork returned");
             }
             video.setArtwork(artwork);
@@ -656,6 +662,13 @@ public class ApiDao extends HibernateDao {
 
     }
 
+    /**
+     * Get a list of all artwork available for a video ID
+     *
+     * @param type
+     * @param id
+     * @return
+     */
     public List<ApiArtworkDTO> getArtworkForId(MetaDataType type, Long id) {
         List<String> artworkRequired = new ArrayList<String>();
         for (ArtworkType at : ArtworkType.values()) {
@@ -667,6 +680,14 @@ public class ApiDao extends HibernateDao {
         return getArtworkForId(type, id, artworkRequired);
     }
 
+    /**
+     * Get a select list of artwork available for a video ID
+     *
+     * @param type
+     * @param id
+     * @param artworkRequired
+     * @return
+     */
     public List<ApiArtworkDTO> getArtworkForId(MetaDataType type, Long id, List<String> artworkRequired) {
         LOG.debug("Artwork required for ID '{}' is {}", id, artworkRequired);
         StringBuilder sbSQL = new StringBuilder();
@@ -695,7 +716,6 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(" AND a.artwork_type IN (:artworklist)");
 
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
-        LOG.info("getArtworkForId: {}", sqlScalars.getSql());
 
         sqlScalars.addScalar("sourceString", StringType.INSTANCE);
         sqlScalars.addScalar("videoId", LongType.INSTANCE);

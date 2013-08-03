@@ -112,8 +112,8 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     }
 
     public void setArtwork(List<ApiArtworkDTO> artworkList) {
-        for (ApiArtworkDTO ia : artworkList) {
-            addArtwork(ia);
+        for (ApiArtworkDTO aadto : artworkList) {
+            addArtwork(aadto);
         }
     }
 
