@@ -457,20 +457,30 @@ public class ApiDao extends HibernateDao {
     private SqlScalars generateSqlForPerson(OptionsIndexPerson options) {
         SqlScalars sqlScalars = new SqlScalars();
         // Make sure to set the alias for the files for the Transformation into the class
-        sqlScalars.addToSql("SELECT p.id,");
+        sqlScalars.addToSql("SELECT DISTINCT p.id,");
         sqlScalars.addToSql(" p.name,");
         sqlScalars.addToSql(" p.biography, ");
-        sqlScalars.addToSql(" p.birth_day as birthDay, ");
-        sqlScalars.addToSql(" p.birth_place as birthPlace, ");
-        sqlScalars.addToSql(" p.birth_name as birthName, ");
-        sqlScalars.addToSql(" p.death_day as deathDay ");
+        sqlScalars.addToSql(" p.birth_day AS birthDay, ");
+        sqlScalars.addToSql(" p.birth_place AS birthPlace, ");
+        sqlScalars.addToSql(" p.birth_name AS birthName, ");
+        sqlScalars.addToSql(" p.death_day AS deathDay ");
         sqlScalars.addToSql(" FROM person p");
-        // Add the search string as the "WHERE"
-        sqlScalars.addToSql(options.getSearchString(true));
-        if (options.getId() > 0L) {
-            sqlScalars.addToSql(" AND id=:id");
-            sqlScalars.addParameter("id", options.getId());
+        if(StringUtils.isNotBlank(options.getJob())){
+            sqlScalars.addToSql(", cast_crew c");
         }
+        if (options.getId() > 0L) {
+            sqlScalars.addToSql(" WHERE id=:id");
+            sqlScalars.addParameter("id", options.getId());
+        } else {
+            sqlScalars.addToSql(" WHERE 1=1");
+        }
+        if(StringUtils.isNotBlank(options.getJob())){
+            sqlScalars.addToSql(" AND p.id=c.person_id");
+            sqlScalars.addToSql(" AND c.job IN (:joblist)");
+            sqlScalars.addParameterList("joblist", options.getJobList());
+        }
+        // Add the search string
+        sqlScalars.addToSql(options.getSearchString(Boolean.FALSE));
         // This will default to blank if there's no sort required
         sqlScalars.addToSql(options.getSortString());
 

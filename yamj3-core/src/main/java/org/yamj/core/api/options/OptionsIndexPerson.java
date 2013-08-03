@@ -22,10 +22,28 @@
  */
 package org.yamj.core.api.options;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.List;
+
 /**
  * List of the options available for the indexes
  *
  * @author stuart.boston
  */
 public class OptionsIndexPerson extends OptionsId {
+
+    private String job="";
+
+    public String getJob() {
+        return job;
+    }
+
+    public void setJob(String job) {
+        this.job = job;
+    }
+
+    @JsonIgnore
+    public List<String> getJobList() {
+        return splitList(job);
+    }
 }
