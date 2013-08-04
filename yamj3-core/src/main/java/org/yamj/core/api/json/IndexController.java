@@ -83,19 +83,25 @@ public class IndexController {
     @ResponseBody
     public List<CountTimestamp> getCount(@RequestParam(required = false, defaultValue = "all") String type) {
         List<CountTimestamp> results = new ArrayList<CountTimestamp>();
+        List<MetaDataType> requiredTypes = new ArrayList<MetaDataType>();
+
         if (type.toLowerCase().indexOf("all") < 0) {
             for (String stringType : StringUtils.split(type, ",")) {
-                MetaDataType singleType = MetaDataType.fromString(stringType);
-                LOG.debug("Getting a count of '{}'", singleType.toString());
-                results.add(jsonApiStorageService.getCountTimestamp(singleType));
+                requiredTypes.add(MetaDataType.fromString(stringType));
             }
         } else {
             LOG.debug("Getting a count of all types");
-            for (MetaDataType singleType : MetaDataType.values()) {
-                LOG.debug("  Adding a count of '{}'", singleType.toString());
-                results.add(jsonApiStorageService.getCountTimestamp(singleType));
+            requiredTypes = Arrays.asList(MetaDataType.values());
+        }
+
+        for (MetaDataType singleType : requiredTypes) {
+            LOG.debug("Getting a count of '{}'", singleType.toString());
+            CountTimestamp result = jsonApiStorageService.getCountTimestamp(singleType);
+            if (result != null) {
+                results.add(result);
             }
         }
+
         return results;
     }
 
