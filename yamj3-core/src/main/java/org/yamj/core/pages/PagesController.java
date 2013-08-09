@@ -1,7 +1,8 @@
 package org.yamj.core.pages;
 
-import java.awt.image.IndexColorModel;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +90,12 @@ public class PagesController {
         ModelAndView view = new ModelAndView("config-list");
 
         List<Configuration> configList = configService.getConfiguration();
+        Collections.sort(configList, new Comparator<Configuration>() {
+            @Override
+            public int compare(Configuration o1, Configuration o2){
+                return o1.getKey().compareTo(o2.getKey());
+            }
+        });
         YamjInfo yi = sic.getYamjInfo("true");
         view.addObject("yi", yi);
         view.addObject("configlist", configList);
