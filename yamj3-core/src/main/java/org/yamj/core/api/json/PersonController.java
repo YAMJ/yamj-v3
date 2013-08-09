@@ -67,4 +67,12 @@ public class PersonController {
 
     // Search by name
     // search by movie
+
+    /* List of people with count of jobs
+    select p.id,p.name,c.job, count(*)
+    from person p, cast_crew c
+    where p.id=c.person_id
+    group by p.id,c.job
+    order by p.id
+    */
 }

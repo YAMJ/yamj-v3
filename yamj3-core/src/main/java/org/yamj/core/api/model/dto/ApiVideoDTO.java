@@ -42,6 +42,12 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private Integer videoYear;
     private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
     Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
+    private String outline;
+    private String plot;
+    private String country;
+    private String quote;
+    private String tagline;
+    private String topRank;
 
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public MetaDataType getVideoType() {
@@ -78,6 +84,30 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public int getGenreCount() {
         return genres.size();
+    }
+
+    public String getOutline() {
+        return outline;
+    }
+
+    public String getPlot() {
+        return plot;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public String getQuote() {
+        return quote;
+    }
+
+    public String getTagline() {
+        return tagline;
+    }
+
+    public String getTopRank() {
+        return topRank;
     }
     //</editor-fold>
 
@@ -119,6 +149,30 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public void setGenres(List<ApiGenreDTO> genres) {
         this.genres = genres;
+    }
+
+    public void setOutline(String outline) {
+        this.outline = outline;
+    }
+
+    public void setPlot(String plot) {
+        this.plot = plot;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public void setQuote(String quote) {
+        this.quote = quote;
+    }
+
+    public void setTagline(String tagline) {
+        this.tagline = tagline;
+    }
+
+    public void setTopRank(String topRank) {
+        this.topRank = topRank;
     }
     //</editor-fold>
 

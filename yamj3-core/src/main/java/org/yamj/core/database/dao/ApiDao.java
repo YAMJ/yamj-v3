@@ -23,6 +23,7 @@
 package org.yamj.core.database.dao;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -146,7 +147,7 @@ public class ApiDao extends HibernateDao {
 
         // Add the movie entries
         if (hasMovie) {
-            sbSQL.append(generateSqlForVideo(options, includes, excludes));
+            sbSQL.append(generateSqlForVideo(options, includes, excludes, null));
         }
 
         if (hasMovie && hasSeries) {
@@ -181,7 +182,10 @@ public class ApiDao extends HibernateDao {
      * @param excludes
      * @return
      */
-    private String generateSqlForVideo(OptionsIndexVideo options, Map<String, String> includes, Map<String, String> excludes) {
+    private String generateSqlForVideo(OptionsIndexVideo options, Map<String, String> includes, Map<String, String> excludes, List<String> addColumns) {
+        if (addColumns == null) {
+            addColumns = Collections.emptyList();
+        }
         StringBuilder sbSQL = new StringBuilder();
 
         sbSQL.append("SELECT vd.id");
@@ -189,6 +193,26 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", vd.title");
         sbSQL.append(", vd.title_original AS originalTitle");
         sbSQL.append(", vd.publication_year AS videoYear");
+        if(CollectionUtils.isNotEmpty(addColumns)) {
+            if(addColumns.contains("plot")) {
+                sbSQL.append(", vd.plot");
+            }
+            if(addColumns.contains("outline")) {
+                sbSQL.append(", vd.outline");
+            }
+            if(addColumns.contains("country")) {
+                sbSQL.append(", vd.country");
+            }
+            if(addColumns.contains("quote")) {
+                sbSQL.append(", vd.quote");
+            }
+            if(addColumns.contains("tagline")) {
+                sbSQL.append(", vd.tagline");
+            }
+            if(addColumns.contains("top_rank")) {
+                sbSQL.append(", vd.top_rank as topRank");
+            }
+        }
         sbSQL.append(", '-1' AS firstAired");
         sbSQL.append(" FROM videodata vd");
         // Add genre tables for include and exclude
@@ -616,7 +640,11 @@ public class ApiDao extends HibernateDao {
         Map<String, String> includes = options.splitIncludes();
         Map<String, String> excludes = options.splitExcludes();
 
-        SqlScalars sqlScalars = new SqlScalars(generateSqlForVideo(options, includes, excludes));
+        List<String> addColumns = new ArrayList<String>();
+        addColumns.add("plot");
+        addColumns.add("outline");
+
+        SqlScalars sqlScalars = new SqlScalars(generateSqlForVideo(options, includes, excludes, addColumns));
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("videoTypeString", StringType.INSTANCE);
@@ -624,6 +652,9 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("originalTitle", StringType.INSTANCE);
         sqlScalars.addScalar("videoYear", IntegerType.INSTANCE);
         sqlScalars.addScalar("firstAired", StringType.INSTANCE);
+        // AddColumns
+        sqlScalars.addScalar("plot", StringType.INSTANCE);
+        sqlScalars.addScalar("outline", StringType.INSTANCE);
 
         List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
         if (CollectionUtils.isNotEmpty(queryResults)) {
