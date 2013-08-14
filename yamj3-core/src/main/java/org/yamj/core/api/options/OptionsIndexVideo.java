@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.core.api.model.DataItem;
 import org.yamj.core.database.model.type.ArtworkType;
 
 /**
@@ -43,10 +44,13 @@ public class OptionsIndexVideo extends OptionsAbstractSortSearch {
     private String exclude = "";
     private String artwork = "";
     private Long id = -1L;
+    private String dataitems = "";
     @JsonIgnore
     List<String> artworkTypes = new ArrayList<String>();
     @JsonIgnore
     List<MetaDataType> videoTypes = new ArrayList<MetaDataType>();
+    @JsonIgnore
+    List<DataItem> dataitemList = new ArrayList<DataItem>();
 
     public void setInclude(String include) {
         this.include = include;
@@ -80,6 +84,15 @@ public class OptionsIndexVideo extends OptionsAbstractSortSearch {
     public void setArtwork(String artwork) {
         this.artwork = artwork.toUpperCase();
         this.artworkTypes.clear();
+    }
+
+    public String getDataitems() {
+        return dataitems;
+    }
+
+    public void setDataitems(String dataitems) {
+        this.dataitems = dataitems;
+        dataitemList.clear();
     }
 
     public Long getId() {
@@ -119,6 +132,7 @@ public class OptionsIndexVideo extends OptionsAbstractSortSearch {
 
     /**
      * Get a list of the video types to search for
+     *
      * @return
      */
     public List<MetaDataType> splitTypes() {
@@ -152,5 +166,22 @@ public class OptionsIndexVideo extends OptionsAbstractSortSearch {
      */
     public Map<String, String> splitExcludes() {
         return splitDashList(exclude);
+    }
+
+    /**
+     * Split the additionalDataItems into a list of DataItems
+     *
+     * @return
+     */
+    public List<DataItem> splitDataitems() {
+        if (CollectionUtils.isEmpty(dataitemList)) {
+            for (String item : StringUtils.split(dataitems, ",")) {
+                DataItem di = DataItem.fromString(item);
+                if (di != DataItem.UNKNOWN) {
+                    dataitemList.add(di);
+                }
+            }
+        }
+        return dataitemList;
     }
 }

@@ -23,7 +23,6 @@
 package org.yamj.core.database.dao;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +41,8 @@ import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.CountGeneric;
+import org.yamj.core.api.model.DataItem;
+import org.yamj.core.api.model.DataItemTools;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.SqlScalars;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
@@ -156,7 +157,7 @@ public class ApiDao extends HibernateDao {
 
         // Add the TV series entires
         if (hasSeries) {
-            sbSQL.append(generateSqlForSeries(options, includes, excludes));
+            sbSQL.append(generateSqlForSeries(options, includes, excludes, null));
         }
 
         if ((hasMovie || hasSeries) && hasSeason) {
@@ -165,7 +166,7 @@ public class ApiDao extends HibernateDao {
 
         // Add the TV season entires
         if (hasSeason) {
-            sbSQL.append(generateSqlForSeason(options, includes, excludes));
+            sbSQL.append(generateSqlForSeason(options, includes, excludes, null));
         }
 
         // Add the sort string, this will be empty if there is no sort required
@@ -182,10 +183,7 @@ public class ApiDao extends HibernateDao {
      * @param excludes
      * @return
      */
-    private String generateSqlForVideo(OptionsIndexVideo options, Map<String, String> includes, Map<String, String> excludes, List<String> addColumns) {
-        if (addColumns == null) {
-            addColumns = Collections.emptyList();
-        }
+    private String generateSqlForVideo(OptionsIndexVideo options, Map<String, String> includes, Map<String, String> excludes, List<DataItem> dataItems) {
         StringBuilder sbSQL = new StringBuilder();
 
         sbSQL.append("SELECT vd.id");
@@ -193,27 +191,8 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", vd.title");
         sbSQL.append(", vd.title_original AS originalTitle");
         sbSQL.append(", vd.publication_year AS videoYear");
-        if(CollectionUtils.isNotEmpty(addColumns)) {
-            if(addColumns.contains("plot")) {
-                sbSQL.append(", vd.plot");
-            }
-            if(addColumns.contains("outline")) {
-                sbSQL.append(", vd.outline");
-            }
-            if(addColumns.contains("country")) {
-                sbSQL.append(", vd.country");
-            }
-            if(addColumns.contains("quote")) {
-                sbSQL.append(", vd.quote");
-            }
-            if(addColumns.contains("tagline")) {
-                sbSQL.append(", vd.tagline");
-            }
-            if(addColumns.contains("top_rank")) {
-                sbSQL.append(", vd.top_rank as topRank");
-            }
-        }
         sbSQL.append(", '-1' AS firstAired");
+        sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "vd"));
         sbSQL.append(" FROM videodata vd");
         // Add genre tables for include and exclude
         if (includes.containsKey("genre") || excludes.containsKey("genre")) {
@@ -248,6 +227,7 @@ public class ApiDao extends HibernateDao {
         // Add the search string, this will be empty if there is no search required
         sbSQL.append(options.getSearchString(false));
 
+        LOG.debug("SQL: {}", sbSQL);
         return sbSQL.toString();
     }
 
@@ -259,7 +239,7 @@ public class ApiDao extends HibernateDao {
      * @param excludes
      * @return
      */
-    private String generateSqlForSeries(OptionsIndexVideo options, Map<String, String> includes, Map<String, String> excludes) {
+    private String generateSqlForSeries(OptionsIndexVideo options, Map<String, String> includes, Map<String, String> excludes, List<DataItem> dataItems) {
         StringBuilder sbSQL = new StringBuilder();
 
         sbSQL.append("SELECT ser.id");
@@ -268,6 +248,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", ser.title_original AS originalTitle");
         sbSQL.append(", ser.start_year AS videoYear");
         sbSQL.append(", '-1' AS firstAired");
+        sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "ser"));
         sbSQL.append(" FROM series ser ");
         sbSQL.append(" WHERE 1=1"); // To make it easier to add the optional include and excludes
         if (options.getId() > 0L) {
@@ -296,7 +277,7 @@ public class ApiDao extends HibernateDao {
      * @param excludes
      * @return
      */
-    private String generateSqlForSeason(OptionsIndexVideo options, Map<String, String> includes, Map<String, String> excludes) {
+    private String generateSqlForSeason(OptionsIndexVideo options, Map<String, String> includes, Map<String, String> excludes, List<DataItem> dataItems) {
         StringBuilder sbSQL = new StringBuilder();
 
         sbSQL.append("SELECT sea.id");
@@ -305,6 +286,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", sea.title_original AS originalTitle");
         sbSQL.append(", -1 as videoYear");
         sbSQL.append(", sea.first_aired AS firstAired");
+        sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "sea"));
         sbSQL.append(" FROM season sea");
         sbSQL.append(" WHERE 1=1"); // To make it easier to add the optional include and excludes
         if (options.getId() > 0L) {
@@ -640,11 +622,10 @@ public class ApiDao extends HibernateDao {
         Map<String, String> includes = options.splitIncludes();
         Map<String, String> excludes = options.splitExcludes();
 
-        List<String> addColumns = new ArrayList<String>();
-        addColumns.add("plot");
-        addColumns.add("outline");
+        List<DataItem> dataItems = options.splitDataitems();
+        LOG.debug("Getting additional data items: {} ", dataItems.toString());
 
-        SqlScalars sqlScalars = new SqlScalars(generateSqlForVideo(options, includes, excludes, addColumns));
+        SqlScalars sqlScalars = new SqlScalars(generateSqlForVideo(options, includes, excludes, dataItems));
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("videoTypeString", StringType.INSTANCE);
@@ -652,20 +633,26 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("originalTitle", StringType.INSTANCE);
         sqlScalars.addScalar("videoYear", IntegerType.INSTANCE);
         sqlScalars.addScalar("firstAired", StringType.INSTANCE);
-        // AddColumns
-        sqlScalars.addScalar("plot", StringType.INSTANCE);
-        sqlScalars.addScalar("outline", StringType.INSTANCE);
+        // Add Scalars for additional data item columns
+        DataItemTools.addDataItemScalars(sqlScalars, dataItems);
 
         List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
+        LOG.debug("Found {} results for ID '{}'", queryResults.size(), options.getId());
         if (CollectionUtils.isNotEmpty(queryResults)) {
             ApiVideoDTO video = queryResults.get(0);
-            video.setGenres(getGenresForId(MetaDataType.MOVIE, options.getId()));
-
-            List<ApiArtworkDTO> artwork = getArtworkForId(MetaDataType.MOVIE, options.getId());
-            if (artwork == null) {
-                LOG.warn("NULL Artwork returned");
+            if (dataItems.contains(DataItem.GENRE)) {
+                LOG.debug("Adding genres");
+                video.setGenres(getGenresForId(MetaDataType.MOVIE, options.getId()));
             }
-            video.setArtwork(artwork);
+
+            if (dataItems.contains(DataItem.ARTWORK)) {
+                LOG.debug("Adding artwork");
+                List<ApiArtworkDTO> artwork = getArtworkForId(MetaDataType.MOVIE, options.getId());
+                if (artwork == null) {
+                    LOG.warn("NULL Artwork returned");
+                }
+                video.setArtwork(artwork);
+            }
             wrapper.setResult(video);
         } else {
             wrapper.setResult(null);

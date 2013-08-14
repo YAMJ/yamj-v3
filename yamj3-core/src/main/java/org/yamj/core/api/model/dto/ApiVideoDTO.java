@@ -47,7 +47,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private String country;
     private String quote;
     private String tagline;
-    private String topRank;
+    private Long topRank;
 
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public MetaDataType getVideoType() {
@@ -106,7 +106,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         return tagline;
     }
 
-    public String getTopRank() {
+    public Long getTopRank() {
         return topRank;
     }
     //</editor-fold>
@@ -171,7 +171,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         this.tagline = tagline;
     }
 
-    public void setTopRank(String topRank) {
+    public void setTopRank(Long topRank) {
         this.topRank = topRank;
     }
     //</editor-fold>

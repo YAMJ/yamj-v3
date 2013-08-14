@@ -1,0 +1,83 @@
+/*
+ *      Copyright (c) 2004-2013 YAMJ Members
+ *      https://github.com/organizations/YAMJ/teams
+ *
+ *      This file is part of the Yet Another Media Jukebox (YAMJ).
+ *
+ *      The YAMJ is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      any later version.
+ *
+ *      YAMJ is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with the YAMJ.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Web: https://github.com/YAMJ/yamj-v3
+ *
+ */
+package org.yamj.core.api.model;
+
+import java.util.List;
+import org.apache.commons.collections.CollectionUtils;
+import org.hibernate.type.LongType;
+import org.hibernate.type.StringType;
+
+/**
+ *
+ * @author Stuart
+ */
+public class DataItemTools {
+
+    /**
+     * Create a fragment of SQL from the list of data items
+     *
+     * @param dataItems
+     * @param tablePrefix
+     * @return
+     */
+    public static StringBuilder addSqlDataItems(List<DataItem> dataItems, String tablePrefix) {
+        StringBuilder sbSQL = new StringBuilder();
+
+        if (CollectionUtils.isNotEmpty(dataItems)) {
+            for (DataItem item : dataItems) {
+                if (item.isNotColumn()) {
+                    // This is not a specific SQL statement and is not needed
+                    continue;
+                }
+                if (item == DataItem.TOP_RANK) {
+                    sbSQL.append(", ").append(tablePrefix).append(".top_rank as topRank");
+                    continue;
+                }
+                // Default approach
+                sbSQL.append(", ").append(tablePrefix).append(".").append(item.toString().toLowerCase());
+            }
+        }
+        return sbSQL;
+    }
+
+    /**
+     * Add scalars for the data items
+     *
+     * @param sqlScalars
+     * @param dataItems
+     */
+    public static void addDataItemScalars(SqlScalars sqlScalars, List<DataItem> dataItems) {
+        for (DataItem item : dataItems) {
+            if (item.isNotColumn()) {
+                // This is not a specific scalar and is not needed
+                continue;
+            }
+            if (item == DataItem.TOP_RANK) {
+                sqlScalars.addScalar("topRank", LongType.INSTANCE);
+                continue;
+            }
+            // This is the default approach
+            sqlScalars.addScalar(item.toString().toLowerCase(), StringType.INSTANCE);
+        }
+    }
+}
