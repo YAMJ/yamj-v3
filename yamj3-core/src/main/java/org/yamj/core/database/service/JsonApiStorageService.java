@@ -101,6 +101,11 @@ public class JsonApiStorageService {
     public void getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
         apiDao.getPerson(wrapper);
     }
+
+    @Transactional(readOnly = true)
+    public void getPersonListByMovie(ApiWrapperList<ApiPersonDTO> wrapper) {
+        apiDao.getPersonMovieList(wrapper);
+    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Genre Methods">

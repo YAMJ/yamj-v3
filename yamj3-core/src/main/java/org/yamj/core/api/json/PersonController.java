@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.options.OptionsIndexPerson;
+import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
 
@@ -65,14 +67,29 @@ public class PersonController {
         return wrapper;
     }
 
+    @RequestMapping(value = "/movie", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperList<ApiPersonDTO> getPersonListByMovie(@ModelAttribute("options") OptionsIndexPerson options) {
+        ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<ApiPersonDTO>();
+
+        if (options.getId() > 0L) {
+            LOG.info("Getting person list for movie with ID '{}'", options.getId());
+            wrapper.setOptions(options);
+            jsonApiStorageService.getPersonListByMovie(wrapper);
+            wrapper.setStatusCheck();
+        } else {
+            wrapper.setResults(null);
+            wrapper.setStatusCheck(new ApiStatus(410, "Not a valid ID"));
+        }
+        return wrapper;
+    }
     // Search by name
-    // search by movie
 
     /* List of people with count of jobs
-    select p.id,p.name,c.job, count(*)
-    from person p, cast_crew c
-    where p.id=c.person_id
-    group by p.id,c.job
-    order by p.id
-    */
+     select p.id,p.name,c.job, count(*)
+     from person p, cast_crew c
+     where p.id=c.person_id
+     group by p.id,c.job
+     order by p.id
+     */
 }

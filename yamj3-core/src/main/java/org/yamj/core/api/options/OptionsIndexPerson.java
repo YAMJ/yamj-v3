@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class OptionsIndexPerson extends OptionsId {
 
-    private String job="";
+    private String job = "";
 
     public String getJob() {
         return job;

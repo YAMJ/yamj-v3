@@ -461,6 +461,56 @@ public class ApiDao extends HibernateDao {
         }
     }
 
+    public void getPersonMovieList(ApiWrapperList<ApiPersonDTO> wrapper) {
+        SqlScalars sqlScalars = generateSqlForMoviePerson((OptionsIndexPerson) wrapper.getOptions());
+        List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
+        wrapper.setResults(results);
+    }
+
+    private SqlScalars generateSqlForMoviePerson(OptionsIndexPerson options) {
+        SqlScalars sqlScalars = new SqlScalars();
+
+        sqlScalars.addToSql("SELECT DISTINCT p.id,");
+        sqlScalars.addToSql(" p.name,");
+        sqlScalars.addToSql(" p.biography, ");
+        sqlScalars.addToSql(" p.birth_day AS birthDay, ");
+        sqlScalars.addToSql(" p.birth_place AS birthPlace, ");
+        sqlScalars.addToSql(" p.birth_name AS birthName, ");
+        sqlScalars.addToSql(" p.death_day AS deathDay, ");
+        sqlScalars.addToSql(" c.job, ");
+        sqlScalars.addToSql(" c.role ");
+        sqlScalars.addToSql(" FROM person p, cast_crew c");
+
+        sqlScalars.addToSql(" WHERE p.id=c.person_id");
+        // TODO: Split by series/season/episode
+        sqlScalars.addToSql(" AND c.videodata_id=:id");
+
+        if (StringUtils.isNotBlank(options.getJob())) {
+            sqlScalars.addToSql(" AND c.job IN (:joblist)");
+            sqlScalars.addParameterList("joblist", options.getJobList());
+        }
+
+        // Add the search string
+        sqlScalars.addToSql(options.getSearchString(Boolean.FALSE));
+        // This will default to blank if there's no sort required
+        sqlScalars.addToSql(options.getSortString());
+
+        // Add the ID
+        sqlScalars.addParameter("id", options.getId());
+
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar("biography", StringType.INSTANCE);
+        sqlScalars.addScalar("birthDay", DateType.INSTANCE);
+        sqlScalars.addScalar("birthPlace", StringType.INSTANCE);
+        sqlScalars.addScalar("birthName", StringType.INSTANCE);
+        sqlScalars.addScalar("deathDay", DateType.INSTANCE);
+        sqlScalars.addScalar("job", StringType.INSTANCE);
+        sqlScalars.addScalar("role", StringType.INSTANCE);
+
+        return sqlScalars;
+    }
+
     private SqlScalars generateSqlForPerson(OptionsIndexPerson options) {
         SqlScalars sqlScalars = new SqlScalars();
         // Make sure to set the alias for the files for the Transformation into the class

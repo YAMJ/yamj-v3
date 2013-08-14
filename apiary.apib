@@ -986,6 +986,7 @@ Person
 --
 
 Get information on the person
+
 **Required Parameters**
 
 <table width="100%">
@@ -1031,6 +1032,93 @@ GET /api/person/{id}
    }
 }
 
+
+Get a list of cast and crew for a video
+
+**Required Parameters**
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>This is the ID of the video to get the list for.</td>
+    </tr>
+</table>
+
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>job</td>
+        <td>Comma separated list of jobs to restrict the list to.</td>
+    </tr>
+    <tr>
+        <td>PAGING</td>
+        <td>See above for the explanation on paging parameters</td>
+    </tr>
+    <tr>
+        <td>SEARCHING</td>
+        <td>See above for the explanation on searching parameters</td>
+    </tr>
+    <tr>
+        <td>SORTING</td>
+        <td>See above for the explanation on sorting parameters</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/person/movie?id=1&job=actor`
+
+GET /api/person/movie
+< 200
+< Content-Type: application/json
+{
+   "count":2,
+   "totalCount":51,
+   "queryDuration":"42ms",
+   "queryTime":"2013-08-14 21:53:11",
+   "status":{
+      "status":200,
+      "message":"OK"
+   },
+   "options":{
+      "start":-1,
+      "max":2,
+      "sortby":"",
+      "sortdir":"ASC",
+      "field":"",
+      "search":"",
+      "mode":"",
+      "id":1,
+      "job":""
+   },
+   "baseArtworkUrl":"http://192.168.0.12:8888/Artwork/",
+   "baseMediainfoUrl":"http://192.168.0.12:8888/mi/",
+   "results":[
+      {
+         "id":1,
+         "name":"Viggo Mortensen",
+         "biography":"Viggo Peter Mortensen, Jr. (born October 20, 1958) ...",
+         "birthDay":"1958-10-20",
+         "birthPlace":"New York City, New York, USA",
+         "birthName":null,
+         "deathDay":null,
+         "job":"ACTOR",
+         "role":"Sigmund Freud"
+      },
+      {
+         "id":2,
+         "name":"Keira Knightley",
+         "biography":"Keira Christina Knightley (born 26 March 1985) is an English actress...",
+         "birthDay":"1985-03-26",
+         "birthPlace":"London, United Kingdom",
+         "birthName":null,
+         "deathDay":null,
+         "job":"ACTOR",
+         "role":"Sabina Spielrein"
+      }
+   ]
+}
 
 --
 Other

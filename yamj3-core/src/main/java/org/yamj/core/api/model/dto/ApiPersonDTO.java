@@ -36,6 +36,8 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     private String birthPlace;
     private String birthName;
     private Date deathDay;
+    private String job = "";
+    private String role = "";
 
     public String getBiography() {
         return biography;
@@ -83,5 +85,21 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
 
     public void setDeathDay(Date deathDay) {
         this.deathDay = deathDay;
+    }
+
+    public String getJob() {
+        return job;
+    }
+
+    public void setJob(String job) {
+        this.job = job;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }
