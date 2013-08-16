@@ -68,6 +68,7 @@ public class YamjInfo {
     private int corePort;
     private String baseArtworkUrl;
     private String baseMediainfoUrl;
+    private String basePhotoUrl;
     private String skinDir;
 
     @SuppressWarnings("unused")
@@ -106,12 +107,13 @@ public class YamjInfo {
 
         // Core Port
         this.corePort = 8888;   // TODO: Get this from jetty!
-        
+
         // Database IP & Name
         findDatabaseInfo();
 
         this.baseArtworkUrl = buildBaseUrl(PropertyTools.getProperty("yamj3.file.storage.artwork", ""));
         this.baseMediainfoUrl = buildBaseUrl(PropertyTools.getProperty("yamj3.file.storage.mediainfo", ""));
+        this.basePhotoUrl = buildBaseUrl(PropertyTools.getProperty("yamj3.file.storage.photo", ""));
         this.skinDir = buildBaseUrl(PropertyTools.getProperty("yamj3.file.storage.skins", "./skins/"));
     }
 
@@ -199,6 +201,10 @@ public class YamjInfo {
 
     public String getBaseMediainfoUrl() {
         return baseMediainfoUrl;
+    }
+
+    public String getBasePhotoUrl() {
+        return basePhotoUrl;
     }
 
     public String getSkinDir() {

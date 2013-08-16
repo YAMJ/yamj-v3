@@ -48,6 +48,8 @@ public interface IApiWrapper {
 
     String getBaseMediainfoUrl();
 
+    String getBasePhotoUrl();
+
     void setQueryTime(DateTime queryTime);
 
     void setQueryEnd();

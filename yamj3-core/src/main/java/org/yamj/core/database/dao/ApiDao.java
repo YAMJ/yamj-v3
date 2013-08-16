@@ -23,6 +23,7 @@
 package org.yamj.core.database.dao;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -452,10 +453,19 @@ public class ApiDao extends HibernateDao {
      * @param wrapper
      */
     public void getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
-        SqlScalars sqlScalars = generateSqlForPerson((OptionsIndexPerson) wrapper.getOptions());
+        OptionsIndexPerson options = (OptionsIndexPerson) wrapper.getOptions();
+        SqlScalars sqlScalars = generateSqlForPerson(options);
         List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
         if (CollectionUtils.isNotEmpty(results)) {
-            wrapper.setResult(results.get(0));
+            ApiPersonDTO person = results.get(0);
+            if (options.splitDataitems().contains(DataItem.ARTWORK)) {
+                LOG.info("Adding photo for {}", person.getName());
+                // Add the artwork
+                List<ApiArtworkDTO> artwork = getArtworkForId(MetaDataType.PERSON, person.getId(), Arrays.asList("PHOTO"));
+                LOG.info("Found {} artworks", artwork.size());
+                person.setArtwork(artwork);
+            }
+            wrapper.setResult(person);
         } else {
             wrapper.setResult(null);
         }
@@ -514,10 +524,14 @@ public class ApiDao extends HibernateDao {
 
     private SqlScalars generateSqlForPerson(OptionsIndexPerson options) {
         SqlScalars sqlScalars = new SqlScalars();
+        List<DataItem> dataitems = options.splitDataitems();
         // Make sure to set the alias for the files for the Transformation into the class
         sqlScalars.addToSql("SELECT DISTINCT p.id,");
         sqlScalars.addToSql(" p.name,");
-        sqlScalars.addToSql(" p.biography, ");
+        if (dataitems.contains(DataItem.BIOGRAPHY)) {
+            sqlScalars.addToSql(" p.biography, ");
+            sqlScalars.addScalar("biography", StringType.INSTANCE);
+        }
         sqlScalars.addToSql(" p.birth_day AS birthDay, ");
         sqlScalars.addToSql(" p.birth_place AS birthPlace, ");
         sqlScalars.addToSql(" p.birth_name AS birthName, ");
@@ -544,7 +558,6 @@ public class ApiDao extends HibernateDao {
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
-        sqlScalars.addScalar("biography", StringType.INSTANCE);
         sqlScalars.addScalar("birthDay", DateType.INSTANCE);
         sqlScalars.addScalar("birthPlace", StringType.INSTANCE);
         sqlScalars.addScalar("birthName", StringType.INSTANCE);
@@ -780,6 +793,8 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("FROM series v ");
         } else if (type == MetaDataType.SEASON) {
             sbSQL.append("FROM season v ");
+        } else if (type == MetaDataType.PERSON) {
+            sbSQL.append("FROM person v");
         }
         sbSQL.append(", artwork a");    // Artwork must be last for the LEFT JOIN
         sbSQL.append(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
@@ -791,6 +806,8 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" WHERE v.id=a.series_id");
         } else if (type == MetaDataType.SEASON) {
             sbSQL.append(" WHERE v.id=a.season_id");
+        } else if (type == MetaDataType.PERSON) {
+            sbSQL.append(" WHERE v.id=a.person_id");
         }
         sbSQL.append(" AND v.id=:id");
         sbSQL.append(" AND a.artwork_type IN (:artworklist)");

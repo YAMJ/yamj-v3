@@ -997,9 +997,21 @@ Get information on the person
         <td>This is the ID of the person to fetch.</td>
     </tr>
 </table>
+
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>dataitems</td>
+        <td>This is a list of additional data items to append to add to the results.<br>
+        Valid options are: artwork, biography</td>
+    </tr>
+</table>
 __Example__: `http://localhost:8888/yamj3/api/person/1`
 
-GET /api/person/{id}
+GET /api/person
 < 200
 < Content-Type: application/json
 {

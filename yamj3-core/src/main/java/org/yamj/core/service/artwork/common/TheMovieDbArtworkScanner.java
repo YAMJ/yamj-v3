@@ -240,6 +240,11 @@ public class TheMovieDbArtworkScanner implements
         if (StringUtils.isNotBlank(id)) {
             return id;
         }
+
+        if (StringUtils.isBlank(person.getName())) {
+            return null;
+        }
+
         try {
             TmdbResultsList<com.omertron.themoviedbapi.model.Person> results = tmdbApi.searchPeople(person.getName(), Boolean.FALSE, -1);
             if (CollectionUtils.isEmpty(results.getResults())) {

@@ -37,6 +37,7 @@ public enum DataItem {
     QUOTE(true),
     TAGLINE(true),
     TOP_RANK(true),
+    BIOGRAPHY(true),
     UNKNOWN(false);
     private boolean column; // Is the DataItem a column or a collection (e.g. artwork, genres, etc)
 

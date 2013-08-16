@@ -22,13 +22,11 @@
  */
 package org.yamj.core.api.json;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -49,15 +47,11 @@ public class PersonController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperSingle<ApiPersonDTO> getPersonById(@PathVariable String id) {
+    public ApiWrapperSingle<ApiPersonDTO> getPersonById(@ModelAttribute("options") OptionsIndexPerson options) {
         ApiWrapperSingle<ApiPersonDTO> wrapper = new ApiWrapperSingle<ApiPersonDTO>();
-        if (StringUtils.isNumeric(id)) {
-            LOG.info("Getting person with ID '{}'", id);
-
-            OptionsIndexPerson options = new OptionsIndexPerson();
-            options.setId(Long.parseLong(id));
+        if (options.getId() > 0) {
+            LOG.info("Getting person with ID '{}'", options.getId());
             wrapper.setOptions(options);
-
             jsonApiStorageService.getPerson(wrapper);
             wrapper.setStatusCheck();
         } else {
