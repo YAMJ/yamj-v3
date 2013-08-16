@@ -30,6 +30,7 @@ import com.omertron.themoviedbapi.model.MovieDb;
 import com.omertron.themoviedbapi.results.TmdbResultsList;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -37,22 +38,28 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.IMetadata;
+import org.yamj.core.database.model.Person;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
+import org.yamj.core.service.artwork.photo.IPhotoScanner;
 import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
 import org.yamj.core.service.plugin.ImdbScanner;
 import org.yamj.core.service.plugin.TheMovieDbScanner;
 
 @Service("tmdbArtworkScanner")
 public class TheMovieDbArtworkScanner implements
-        IMoviePosterScanner, IMovieFanartScanner, InitializingBean {
+        IMoviePosterScanner, IMovieFanartScanner, IPhotoScanner, InitializingBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbArtworkScanner.class);
     private static final String DEFAULT_POSTER_SIZE = "original";
     private static final String DEFAULT_FANART_SIZE = "original";
+    private static final String DEFAULT_PHOTO_SIZE = "original";
+    private static final String LANGUAGE_NONE = "";
+    private static final String LANGUAGE_EN = "en";
     @Autowired
     private ConfigService configService;
     @Autowired
@@ -72,6 +79,7 @@ public class TheMovieDbArtworkScanner implements
         // register this scanner
         artworkScannerService.registerMoviePosterScanner(this);
         artworkScannerService.registerMovieFanartScanner(this);
+        artworkScannerService.registerPhotoScanner(this);
     }
 
     @Override
@@ -93,7 +101,7 @@ public class TheMovieDbArtworkScanner implements
 
     @Override
     public List<ArtworkDetailDTO> getPosters(String id) {
-        String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+        String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
         return getFilteredArtwork(id, defaultLanguage, ArtworkType.POSTER, DEFAULT_POSTER_SIZE);
     }
 
@@ -116,12 +124,17 @@ public class TheMovieDbArtworkScanner implements
      */
     private List<ArtworkDetailDTO> getFilteredArtwork(String id, String language, ArtworkType artworkType, String artworkSize) {
         List<ArtworkDetailDTO> dtos = new ArrayList<ArtworkDetailDTO>();
-        // TODO retrieve more than one fanart info
-
         if (StringUtils.isNumeric(id)) {
+            int tmdbId = Integer.parseInt(id);
             try {
                 // Use an empty language to get all artwork and then filter it.
-                TmdbResultsList<Artwork> results = tmdbApi.getMovieImages(Integer.parseInt(id), "");
+                TmdbResultsList<Artwork> results;
+                if (artworkType == ArtworkType.PROFILE) {
+                    results = tmdbApi.getPersonImages(tmdbId);
+                } else {
+                    results = tmdbApi.getMovieImages(tmdbId, LANGUAGE_NONE);
+                }
+
                 List<Artwork> artworkList = results.getResults();
                 for (Artwork artwork : artworkList) {
                     if (artwork.getArtworkType() == artworkType
@@ -135,7 +148,7 @@ public class TheMovieDbArtworkScanner implements
                         }
                     }
                 }
-                LOG.debug("Found {} {} artworks for TMDB ID '{}' and language '{}'", dtos.size(), artworkType, id, language);
+                LOG.debug("Found {} {} artworks for TMDB ID '{}' and language '{}'", dtos.size(), artworkType, tmdbId, language);
             } catch (MovieDbException error) {
                 LOG.warn("Failed to get the {} URL for TMDb ID {}", artworkType, id, error);
             }
@@ -200,4 +213,72 @@ public class TheMovieDbArtworkScanner implements
         LOG.warn("No TMDb id found for movie");
         return null;
     }
+
+    //<editor-fold defaultstate="collapsed" desc="Photo Scanner Methods">
+    /**
+     * Get the person ID from the name
+     *
+     * @param name
+     * @return
+     */
+    @Override
+    public String getPersonId(String name) {
+        Person person = new Person();
+        person.setName(name);
+        return getPersonId(person);
+    }
+
+    /**
+     * Get the person ID from the person object
+     *
+     * @param person
+     * @return
+     */
+    @Override
+    public String getPersonId(Person person) {
+        String id = person.getPersonId(getScannerName());
+        if (StringUtils.isNotBlank(id)) {
+            return id;
+        }
+        try {
+            TmdbResultsList<com.omertron.themoviedbapi.model.Person> results = tmdbApi.searchPeople(person.getName(), Boolean.FALSE, -1);
+            if (CollectionUtils.isEmpty(results.getResults())) {
+                return null;
+            }
+
+            com.omertron.themoviedbapi.model.Person tmdbPerson = results.getResults().get(0);
+            String tmdbId = Integer.toString(tmdbPerson.getId());
+            String imdbId = tmdbPerson.getImdbId();
+            person.setPersonId(getScannerName(), tmdbId);
+            person.setPersonId(ImdbScanner.IMDB_SCANNER_ID, imdbId);
+            LOG.debug("Found IDs for {} - TMDB: '{}', IMDB: '{}'", person.getName(), tmdbId, imdbId);
+            return Integer.toString(tmdbPerson.getId());
+        } catch (MovieDbException ex) {
+            LOG.warn("Failed to get ID for {} from {}, error: {}", person.getName(), getScannerName(), ex.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getPhotos(final String name) {
+        String tmdbId;
+        // Check to see if we were passed the ID and not a name
+        if (StringUtils.isNumeric(name)) {
+            tmdbId = name;
+        } else {
+            tmdbId = getPersonId(name);
+        }
+
+        if (StringUtils.isNotBlank(tmdbId)) {
+            return getPhotos(Integer.parseInt(tmdbId));
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getPhotos(Integer id) {
+        return getFilteredArtwork(Integer.toString(id), LANGUAGE_NONE, ArtworkType.PROFILE, DEFAULT_PHOTO_SIZE);
+    }
+    //</editor-fold>
 }

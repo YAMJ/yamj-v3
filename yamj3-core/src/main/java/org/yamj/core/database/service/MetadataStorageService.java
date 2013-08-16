@@ -287,4 +287,18 @@ public class MetadataStorageService {
             metadataDao.updateEntity(person);
         }
     }
+
+    @Transactional
+    public void saveArtwork(Artwork artwork) {
+        if (artwork != null) {
+            metadataDao.saveEntity(artwork);
+        }
+    }
+
+    @Transactional
+    public void updateArtwork(Artwork artwork) {
+        if (artwork != null) {
+            metadataDao.updateEntity(artwork);
+        }
+    }
 }

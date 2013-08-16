@@ -64,6 +64,7 @@ public class FileStorageService {
     private String storageResourceDir;
     private String storagePathArtwork;
     private String storagePathMediaInfo;
+    private String storagePathPhoto;
     private String storagePathSkin;
     @Autowired
     private PoolingHttpClient httpClient;
@@ -91,6 +92,15 @@ public class FileStorageService {
             this.storagePathMediaInfo += "/";
         }
         LOG.info("MediaInfo storage path set to '{}'", this.storagePathMediaInfo);
+    }
+
+    @Value("${yamj3.file.storage.photo}")
+    public void setStoragePathPhoto(String storagePathPhoto) {
+        this.storagePathPhoto = FilenameUtils.normalize(FilenameUtils.concat(storageResourceDir, storagePathPhoto), Boolean.TRUE);
+        if (!this.storagePathPhoto.endsWith("/")) {
+            this.storagePathPhoto += "/";
+        }
+        LOG.info("Photo storage path set to '{}'", this.storagePathPhoto);
     }
 
     @Value("${yamj3.file.storage.skins}")
@@ -142,9 +152,9 @@ public class FileStorageService {
         return FileTools.copyFile(src, dst);
     }
 
-    public void storeArtwork(String filename, BufferedImage bi, ImageFormat imageFormat, int quality) throws Exception {
-        LOG.debug("Store {} image: {}", imageFormat, filename);
-        String storageFileName = getStorageName(StorageType.ARTWORK, filename);
+    public void storeImage(String filename, StorageType type, BufferedImage bi, ImageFormat imageFormat, int quality) throws Exception {
+        LOG.debug("Store {} {} image: {}", type, imageFormat, filename);
+        String storageFileName = getStorageName(type, filename);
         File outputFile = new File(storageFileName);
 
         ImageWriter writer = null;
@@ -284,6 +294,8 @@ public class FileStorageService {
         String storageDir;
         if (StorageType.ARTWORK == type) {
             storageDir = FilenameUtils.concat(this.storagePathArtwork, path);
+        } else if (StorageType.PHOTO == type) {
+            storageDir = FilenameUtils.concat(this.storagePathPhoto, path);
         } else if (StorageType.MEDIAINFO == type) {
             storageDir = FilenameUtils.concat(this.storagePathMediaInfo, path);
         } else if (StorageType.SKIN == type) {
@@ -318,6 +330,10 @@ public class FileStorageService {
 
     public String getStoragePathArtwork() {
         return storagePathArtwork;
+    }
+
+    public String getStoragePathPhoto() {
+        return storagePathPhoto;
     }
 
     public String getStoragePathMediaInfo() {

@@ -84,6 +84,7 @@ public class ArtworkInitialization implements InitializingBean {
                 artworkProfile.setApplyToSeries(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToSeries", Boolean.FALSE));
                 artworkProfile.setApplyToSeason(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToSeason", Boolean.FALSE));
                 artworkProfile.setApplyToEpisode(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToEpisode", Boolean.FALSE));
+                artworkProfile.setApplyToPerson(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToPerson", Boolean.FALSE));
                 artworkProfile.setPreProcess(PropertyTools.getBooleanProperty("artwork.profile." + name + ".preProcess", Boolean.FALSE));
 
                 try {

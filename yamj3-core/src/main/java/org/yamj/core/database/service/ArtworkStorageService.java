@@ -158,6 +158,7 @@ public class ArtworkStorageService {
         sb.append("LEFT OUTER JOIN FETCH art.season ");
         sb.append("LEFT OUTER JOIN FETCH art.series ");
         sb.append("LEFT OUTER JOIN FETCH art.artworkLocated ");
+        sb.append("LEFT OUTER JOIN FETCH art.person ");
         sb.append("WHERE art.id = :id");
 
         @SuppressWarnings("unchecked")
@@ -219,6 +220,7 @@ public class ArtworkStorageService {
         sb.append("LEFT OUTER JOIN FETCH art.videoData ");
         sb.append("LEFT OUTER JOIN FETCH art.season ");
         sb.append("LEFT OUTER JOIN FETCH art.series ");
+        sb.append("LEFT OUTER JOIN FETCH art.person ");
         sb.append("LEFT OUTER JOIN FETCH loc.stageFile ");
         sb.append("WHERE loc.id = :id");
 

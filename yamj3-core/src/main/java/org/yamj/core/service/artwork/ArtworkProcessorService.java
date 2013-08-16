@@ -38,6 +38,7 @@ import org.yamj.core.database.model.ArtworkGenerated;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ImageFormat;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.service.file.FileStorageService;
@@ -61,6 +62,12 @@ public class ArtworkProcessorService {
         }
 
         ArtworkLocated located = artworkStorageService.getRequiredArtworkLocated(queueElement.getId());
+        StorageType storageType;
+        if (located.getArtwork().getArtworkType() == ArtworkType.PHOTO) {
+            storageType = StorageType.PHOTO;
+        } else {
+            storageType = StorageType.ARTWORK;
+        }
         LOG.debug("Process located artwork: {}", located);
 
         // validate artwork
@@ -79,9 +86,9 @@ public class ArtworkProcessorService {
         boolean stored;
         try {
             if (located.getStageFile() != null) {
-                stored = fileStorageService.store(StorageType.ARTWORK, cacheFilename, located.getStageFile());
+                stored = fileStorageService.store(storageType, cacheFilename, located.getStageFile());
             } else {
-                stored = fileStorageService.store(StorageType.ARTWORK, cacheFilename, new URL(located.getUrl()));
+                stored = fileStorageService.store(storageType, cacheFilename, new URL(located.getUrl()));
             }
         } catch (Exception error) {
             LOG.warn("Storage error", error);
@@ -126,8 +133,15 @@ public class ArtworkProcessorService {
     }
 
     private void generateImage(ArtworkLocated located, ArtworkProfile profile) throws Exception {
+        StorageType storageType;
+        if (located.getArtwork().getArtworkType() == ArtworkType.PHOTO) {
+            storageType = StorageType.PHOTO;
+        } else {
+            storageType = StorageType.ARTWORK;
+        }
+
         LOG.debug("Generate image for {} with profile {}", located, profile.getProfileName());
-        BufferedImage imageGraphic = GraphicTools.loadJPEGImage(this.fileStorageService.getFile(StorageType.ARTWORK, located.getCacheFilename()));
+        BufferedImage imageGraphic = GraphicTools.loadJPEGImage(this.fileStorageService.getFile(storageType, located.getCacheFilename()));
 
         // set dimension of original image if not done before
         if (located.getWidth() <= 0 || located.getHeight() <= 0) {
@@ -140,7 +154,7 @@ public class ArtworkProcessorService {
 
         // store image on stage system
         String cacheFilename = buildCacheFilename(located, profile);
-        fileStorageService.storeArtwork(cacheFilename, image, profile.getImageFormat(), profile.getQuality());
+        fileStorageService.storeImage(cacheFilename, storageType, image, profile.getImageFormat(), profile.getQuality());
 
         try {
             ArtworkGenerated generated = new ArtworkGenerated();
@@ -154,7 +168,7 @@ public class ArtworkProcessorService {
             // delete generated file storage element also
             LOG.trace("Failed to generate file storage for {}, error: {}", cacheFilename, ex.getMessage());
             try {
-                fileStorageService.delete(StorageType.ARTWORK, cacheFilename);
+                fileStorageService.delete(storageType, cacheFilename);
             } catch (Exception ex2) {
                 LOG.trace("Unable to delete file after exception: ", ex2.getMessage());
             }
@@ -213,6 +227,9 @@ public class ArtworkProcessorService {
         } else if (located.getArtwork().getSeries() != null) {
             sb.append(located.getArtwork().getSeries().getIdentifier());
             sb.append(".series.");
+        } else if (located.getArtwork().getPerson() != null) {
+            sb.append(located.getArtwork().getPerson().getName());
+            sb.append(".person.");
         } else {
             sb.append("unknown_");
             sb.append(located.getArtwork().getId());

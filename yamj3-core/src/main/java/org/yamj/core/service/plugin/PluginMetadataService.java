@@ -37,6 +37,8 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.MetadataStorageService;
 
 @Service("pluginMetadataService")
@@ -51,10 +53,8 @@ public class PluginMetadataService {
     // locks for calling database methods synchronized
     private static final ReentrantLock STORE_GENRE_LOCK = new ReentrantLock();
     private static final ReentrantLock STORE_PERSON_LOCK = new ReentrantLock();
-
     @Autowired
     private MetadataStorageService metadataStorageService;
-
     private HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<String, IMovieScanner>();
     private HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<String, ISeriesScanner>();
     private HashMap<String, IPersonScanner> registeredPersonScanner = new HashMap<String, IPersonScanner>();
@@ -77,7 +77,7 @@ public class PluginMetadataService {
     public void scanMovie(Long id) {
         IMovieScanner movieScanner = registeredMovieScanner.get(MOVIE_SCANNER);
         if (movieScanner == null) {
-            throw new RuntimeException("Movie scanner '" + MOVIE_SCANNER  + "' not registered");
+            throw new RuntimeException("Movie scanner '" + MOVIE_SCANNER + "' not registered");
         }
 
         VideoData videoData = metadataStorageService.getRequiredVideoData(id);
@@ -120,7 +120,7 @@ public class PluginMetadataService {
             if (ScanResult.OK.equals(scanResult)) {
                 LOG.debug("Movie {}-'{}', scanned OK", id, videoData.getTitle());
                 videoData.setStatus(StatusType.DONE);
-            } else if (ScanResult.MISSING_ID.equals(scanResult)){
+            } else if (ScanResult.MISSING_ID.equals(scanResult)) {
                 LOG.warn("Movie {}-'{}', not found", id, videoData.getTitle());
                 videoData.setStatus(StatusType.NOTFOUND);
             } else {
@@ -139,7 +139,7 @@ public class PluginMetadataService {
     public void scanSeries(Long id) {
         ISeriesScanner seriesScanner = registeredSeriesScanner.get(SERIES_SCANNER);
         if (seriesScanner == null) {
-            throw new RuntimeException("Series scanner '" + SERIES_SCANNER  + "' not registered");
+            throw new RuntimeException("Series scanner '" + SERIES_SCANNER + "' not registered");
         }
 
         Series series = metadataStorageService.getRequiredSeries(id);
@@ -248,7 +248,7 @@ public class PluginMetadataService {
     public void scanPerson(Long id) {
         IPersonScanner personScanner = registeredPersonScanner.get(PERSON_SCANNER);
         if (personScanner == null) {
-            throw new RuntimeException("Person scanner '" + PERSON_SCANNER  + "' not registered");
+            throw new RuntimeException("Person scanner '" + PERSON_SCANNER + "' not registered");
         }
 
         Person person = metadataStorageService.getRequiredPerson(id);
@@ -279,6 +279,14 @@ public class PluginMetadataService {
         try {
             LOG.debug("Update person in database: {}-'{}'", person.getId(), person.getName());
             metadataStorageService.updatePerson(person);
+
+            // Create photo artwork
+            Artwork photo = new Artwork();
+            photo.setArtworkType(ArtworkType.PHOTO);
+            photo.setStatus(StatusType.NEW);
+            photo.setPerson(person);
+            metadataStorageService.saveArtwork(photo);
+
         } catch (Exception error) {
             // NOTE: status will not be changed
             LOG.error("Failed storing person {}-'{}'", id, person.getName());

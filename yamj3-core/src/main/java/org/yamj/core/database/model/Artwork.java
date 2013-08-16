@@ -39,40 +39,38 @@ import org.yamj.core.database.model.type.ArtworkType;
 public class Artwork extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -981494909436217076L;
-
     @Index(name = "IX_ARTWORK_TYPE")
     @Type(type = "artworkType")
     @Column(name = "artwork_type", nullable = false)
     private ArtworkType artworkType;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_VIDEODATA")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "videodata_id")
     private VideoData videoData;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_SEASON")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "season_id")
     private Season season;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_SERIES")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "series_id")
     private Series series;
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_ARTWORK_PHOTO")
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "person_id")
+    private Person person;
     @Index(name = "IX_ARTWORK_STATUS")
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "artwork")
     private Set<ArtworkLocated> artworkLocated = new HashSet<ArtworkLocated>(0);
 
     // GETTER and SETTER
-
     public ArtworkType getArtworkType() {
         return artworkType;
     }
@@ -105,6 +103,14 @@ public class Artwork extends AbstractAuditable implements Serializable {
         this.series = series;
     }
 
+    public Person getPerson() {
+        return person;
+    }
+
+    public void setPerson(Person person) {
+        this.person = person;
+    }
+
     public Set<ArtworkLocated> getArtworkLocated() {
         return artworkLocated;
     }
@@ -122,14 +128,15 @@ public class Artwork extends AbstractAuditable implements Serializable {
     }
 
     // TRANSIENT METHODS
-
     public IMetadata getMetadata() {
         if (getVideoData() != null) {
             return getVideoData();
         }
+
         if (getSeason() != null) {
-            return getSeason() ;
+            return getSeason();
         }
+
         if (getSeries() != null) {
             return getSeries();
         }
@@ -138,7 +145,6 @@ public class Artwork extends AbstractAuditable implements Serializable {
     }
 
     // EQUALITY CHECKS
-
     @Override
     public int hashCode() {
         final int prime = 7;
@@ -206,6 +212,18 @@ public class Artwork extends AbstractAuditable implements Serializable {
                 return false;
             }
         }
+        // check person photo
+        if (this.person == null && castOther.person != null) {
+            return false;
+        }
+        if (this.person != null && castOther.person == null) {
+            return false;
+        }
+        if (this.person != null && castOther.person != null) {
+            if (!this.person.equals(castOther.person)) {
+                return false;
+            }
+        }
         // all checks passed
         return true;
     }
@@ -248,6 +266,14 @@ public class Artwork extends AbstractAuditable implements Serializable {
                 sb.append("'");
             } else {
                 sb.append(", target=Series");
+            }
+        } else if (getPerson() != null) {
+            if (Hibernate.isInitialized(getPerson())) {
+                sb.append(", person-id='");
+                sb.append(getPerson().getId());
+                sb.append("'");
+            } else {
+                sb.append(", target=Person");
             }
         } else {
             sb.append("Unknown");

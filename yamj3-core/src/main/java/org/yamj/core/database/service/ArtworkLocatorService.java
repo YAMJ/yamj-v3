@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.ArtworkDao;
+import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.StageDirectory;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.VideoData;
@@ -50,7 +51,7 @@ public class ArtworkLocatorService {
         if (CollectionUtils.isEmpty(videoFiles)) {
             return null;
         }
-        
+
         // build search maps
         Set<StageDirectory> directories = new HashSet<StageDirectory>();
         Set<String> artworkNames = new HashSet<String>();
@@ -103,12 +104,12 @@ public class ArtworkLocatorService {
         sb.append("join m.videoDatas v ");
         sb.append("where v.id=:videoDataId ");
         sb.append("and f.status != :duplicate " );
-       
+
         final Map<String,Object> params = new HashMap<String,Object>();
         params.put("videoDataId", videoData.getId());
         params.put("duplicate", StatusType.DUPLICATE);
 
-        return artworkDao.findByNamedParameters(sb, params); 
+        return artworkDao.findByNamedParameters(sb, params);
     }
 
     @SuppressWarnings("unchecked")
@@ -118,12 +119,17 @@ public class ArtworkLocatorService {
         sb.append("where f.stageDirectory in (:directories) ");
         sb.append("and f.fileType = :fileType ");
         sb.append("and lower(f.baseName) in (:artworkNames) ");
-        
+
         final Map<String,Object> params = new HashMap<String,Object>();
         params.put("directories", directories);
         params.put("fileType", FileType.IMAGE);
         params.put("artworkNames", artworkNames);
 
-        return artworkDao.findByNamedParameters(sb, params); 
+        return artworkDao.findByNamedParameters(sb, params);
+    }
+
+    public List<StageFile> getPhotos(Person person) {
+        // TODO: Scan for staged local files
+        return Collections.emptyList();
     }
 }
