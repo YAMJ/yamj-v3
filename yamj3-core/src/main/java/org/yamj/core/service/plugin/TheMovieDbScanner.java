@@ -28,6 +28,7 @@ import com.omertron.themoviedbapi.model.MovieDb;
 import com.omertron.themoviedbapi.model.PersonType;
 import com.omertron.themoviedbapi.model.ProductionCountry;
 import com.omertron.themoviedbapi.results.TmdbResultsList;
+import java.net.URL;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashSet;
@@ -361,6 +362,10 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             person.setBiography(cleanBiography(tmdbPerson.getBiography()));
             person.setBirthPlace(StringUtils.trimToNull(tmdbPerson.getBirthplace()));
             person.setPersonId(ImdbScanner.IMDB_SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
+            URL url = tmdbApi.createImageUrl(tmdbPerson.getProfilePath(), "original");
+            if (url != null) {
+                person.setProfilePicture(url.toString());
+            }
 
             Date parsedDate = parseDate(tmdbPerson.getBirthday());
             if (parsedDate != null) {
@@ -384,6 +389,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
      * Convert string to date
      *
      * if the date is just a year, "-01-01" (1st Jan) will be appended to the date for conversion purposes
+     *
      * @param dateToConvert
      * @return
      */

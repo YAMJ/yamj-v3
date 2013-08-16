@@ -67,6 +67,7 @@ public class ArtworkStorageService {
             profile.setApplyToSeries(newProfile.isApplyToSeries());
             profile.setApplyToSeason(newProfile.isApplyToSeason());
             profile.setApplyToEpisode(newProfile.isApplyToEpisode());
+            profile.setApplyToPerson(newProfile.isApplyToPerson());
             profile.setPreProcess(newProfile.isPreProcess());
             this.artworkDao.saveEntity(profile);
             LOG.info("Updated artwork profile {}", profile);
@@ -79,8 +80,6 @@ public class ArtworkStorageService {
 
         ArtworkType artworkType = located.getArtwork().getArtworkType();
         if (ArtworkType.PHOTO == artworkType) {
-            // Setting the MetaDataType to PERSON
-            // Does not have it's own category at this time.
             metaDataType = MetaDataType.PERSON;
         } else if (ArtworkType.VIDEOIMAGE == artworkType) {
             metaDataType = MetaDataType.EPISODE;
@@ -138,15 +137,15 @@ public class ArtworkStorageService {
     @Transactional(readOnly = true)
     public List<QueueDTO> getArtworkQueueForScanning(final int maxResults) {
         final StringBuilder sql = new StringBuilder();
-        sql.append("select distinct art.id,art.artwork_type,art.create_timestamp,art.update_timestamp ");
-        sql.append("from artwork art ");
-        sql.append("left outer join videodata vd on vd.id=art.videodata_id ");
-        sql.append("left outer join season sea on sea.id=art.season_id ");
-        sql.append("left outer join series ser on ser.id=art.series_id ");
-        sql.append("where art.status = 'NEW' ");
-        sql.append("and (vd.status is null or vd.status='DONE') ");
-        sql.append("and (sea.status is null or sea.status='DONE') ");
-        sql.append("and (ser.status is null or ser.status='DONE') ");
+        sql.append("SELECT DISTINCT art.id,art.artwork_type,art.create_timestamp,art.update_timestamp ");
+        sql.append("FROM artwork art ");
+        sql.append("LEFT OUTER JOIN videodata vd ON vd.id=art.videodata_id ");
+        sql.append("LEFT OUTER JOIN season sea ON sea.id=art.season_id ");
+        sql.append("LEFT OUTER JOIN series ser ON ser.id=art.series_id ");
+        sql.append("WHERE art.status = 'NEW' ");
+        sql.append("AND (vd.status is null OR vd.status='DONE') ");
+        sql.append("AND (sea.status is null OR sea.status='DONE') ");
+        sql.append("AND (ser.status is null OR ser.status='DONE') ");
 
         return artworkDao.getArtworkQueue(sql, maxResults);
     }
@@ -154,12 +153,12 @@ public class ArtworkStorageService {
     @Transactional(readOnly = true)
     public Artwork getRequiredArtwork(Long id) {
         final StringBuilder sb = new StringBuilder();
-        sb.append("from Artwork art ");
-        sb.append("left outer join fetch art.videoData ");
-        sb.append("left outer join fetch art.season ");
-        sb.append("left outer join fetch art.series ");
-        sb.append("left outer join fetch art.artworkLocated ");
-        sb.append("where art.id = :id");
+        sb.append("FROM Artwork art ");
+        sb.append("LEFT OUTER JOIN FETCH art.videoData ");
+        sb.append("LEFT OUTER JOIN FETCH art.season ");
+        sb.append("LEFT OUTER JOIN FETCH art.series ");
+        sb.append("LEFT OUTER JOIN FETCH art.artworkLocated ");
+        sb.append("WHERE art.id = :id");
 
         @SuppressWarnings("unchecked")
         List<Artwork> objects = this.artworkDao.findById(sb, id);
@@ -205,9 +204,9 @@ public class ArtworkStorageService {
     @Transactional(readOnly = true)
     public List<QueueDTO> getArtworLocatedQueue(final int maxResults) {
         final StringBuilder sql = new StringBuilder();
-        sql.append("select distinct loc.id,loc.create_timestamp,loc.update_timestamp ");
-        sql.append("from artwork_located loc ");
-        sql.append("where loc.status = 'NEW' ");
+        sql.append("SELECT DISTINCT loc.id, loc.create_timestamp, loc.update_timestamp ");
+        sql.append("FROM artwork_located loc ");
+        sql.append("WHERE loc.status = 'NEW' ");
 
         return artworkDao.getArtworkLocatedQueue(sql, maxResults);
     }
@@ -215,13 +214,13 @@ public class ArtworkStorageService {
     @Transactional(readOnly = true)
     public ArtworkLocated getRequiredArtworkLocated(Long id) {
         final StringBuilder sb = new StringBuilder();
-        sb.append("from ArtworkLocated loc ");
-        sb.append("join fetch loc.artwork art ");
-        sb.append("left outer join fetch art.videoData ");
-        sb.append("left outer join fetch art.season ");
-        sb.append("left outer join fetch art.series ");
-        sb.append("left outer join fetch loc.stageFile ");
-        sb.append("where loc.id = :id");
+        sb.append("FROM ArtworkLocated loc ");
+        sb.append("JOIN FETCH loc.artwork art ");
+        sb.append("LEFT OUTER JOIN FETCH art.videoData ");
+        sb.append("LEFT OUTER JOIN FETCH art.season ");
+        sb.append("LEFT OUTER JOIN FETCH art.series ");
+        sb.append("LEFT OUTER JOIN FETCH loc.stageFile ");
+        sb.append("WHERE loc.id = :id");
 
         @SuppressWarnings("unchecked")
         List<ArtworkLocated> objects = this.artworkDao.findById(sb, id);

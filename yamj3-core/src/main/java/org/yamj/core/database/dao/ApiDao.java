@@ -463,6 +463,7 @@ public class ApiDao extends HibernateDao {
 
     public void getPersonMovieList(ApiWrapperList<ApiPersonDTO> wrapper) {
         SqlScalars sqlScalars = generateSqlForMoviePerson((OptionsIndexPerson) wrapper.getOptions());
+        LOG.debug("SQL: {}", sqlScalars.getSql());
         List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
         wrapper.setResults(results);
     }

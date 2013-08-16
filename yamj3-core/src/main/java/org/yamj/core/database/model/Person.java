@@ -76,6 +76,9 @@ public class Person extends AbstractAuditable implements Serializable {
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
 
+    @Column(name="profile_picture", nullable=true,length=255)
+    private String profilePicture;
+
     // GETTER and SETTER
 
     public String getName() {
@@ -156,6 +159,14 @@ public class Person extends AbstractAuditable implements Serializable {
 
     public void setStatus(StatusType status) {
         this.status = status;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
     }
 
     // EQUALITY CHECKS
