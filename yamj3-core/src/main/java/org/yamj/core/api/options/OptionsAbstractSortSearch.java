@@ -23,7 +23,11 @@
 package org.yamj.core.api.options;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
+import org.yamj.core.api.model.DataItem;
 
 /**
  * Abstract class for the query options
@@ -37,6 +41,9 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     private String field = "";
     private String search = "";
     private String mode = "";
+    private List<String> dataitems = new ArrayList<String>();
+    @JsonIgnore
+    List<DataItem> dataitemList = new ArrayList<DataItem>();
 
     //<editor-fold defaultstate="collapsed" desc="Sort Setters/Getters">
     /**
@@ -188,6 +195,34 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
             sb.append("'");
         }
         return sb.toString();
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="DataItem Methods">
+    public List<String> getDataitems() {
+        return dataitems;
+    }
+
+    public void setDataitems(List<String> dataitems) {
+        this.dataitems = dataitems;
+        dataitemList.clear();
+    }
+
+    /**
+     * Split the additionalDataItems into a list of DataItems
+     *
+     * @return
+     */
+    public List<DataItem> splitDataitems() {
+        if (CollectionUtils.isEmpty(dataitemList)) {
+            for (String item : dataitems) {
+                DataItem di = DataItem.fromString(item);
+                if (di != DataItem.UNKNOWN) {
+                    dataitemList.add(di);
+                }
+            }
+        }
+        return dataitemList;
     }
     //</editor-fold>
 }

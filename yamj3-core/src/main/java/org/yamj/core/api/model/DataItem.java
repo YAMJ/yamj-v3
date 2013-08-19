@@ -53,9 +53,10 @@ public enum DataItem {
         return !isColumn();
     }
 
-    public static DataItem fromString(String column) {
+    public static DataItem fromString(String item) {
         try {
-            return DataItem.valueOf(column.trim().toUpperCase());
+            String cleanItem = item.trim().toUpperCase();
+            return DataItem.valueOf(cleanItem);
         } catch (IllegalArgumentException ex) {
             return UNKNOWN;
         }

@@ -501,9 +501,9 @@ public class ApiDao extends HibernateDao {
         // TODO: Split by series/season/episode
         sqlScalars.addToSql(" AND c.videodata_id=:id");
 
-        if (StringUtils.isNotBlank(options.getJob())) {
+        if(CollectionUtils.isNotEmpty(options.getJob())) {
             sqlScalars.addToSql(" AND c.job IN (:joblist)");
-            sqlScalars.addParameterList("joblist", options.getJobList());
+            sqlScalars.addParameterList("joblist", options.getJob());
         }
 
         // Add the search string
@@ -542,7 +542,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql(" p.birth_name AS birthName, ");
         sqlScalars.addToSql(" p.death_day AS deathDay ");
         sqlScalars.addToSql(" FROM person p");
-        if (StringUtils.isNotBlank(options.getJob())) {
+        if (CollectionUtils.isNotEmpty(options.getJob())) {
             sqlScalars.addToSql(", cast_crew c");
         }
         if (options.getId() > 0L) {
@@ -551,10 +551,10 @@ public class ApiDao extends HibernateDao {
         } else {
             sqlScalars.addToSql(" WHERE 1=1");
         }
-        if (StringUtils.isNotBlank(options.getJob())) {
+        if (CollectionUtils.isNotEmpty(options.getJob())) {
             sqlScalars.addToSql(" AND p.id=c.person_id");
             sqlScalars.addToSql(" AND c.job IN (:joblist)");
-            sqlScalars.addParameterList("joblist", options.getJobList());
+            sqlScalars.addParameterList("joblist", options.getJob());
         }
         // Add the search string
         sqlScalars.addToSql(options.getSearchString(Boolean.FALSE));
