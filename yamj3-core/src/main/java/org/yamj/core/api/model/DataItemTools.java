@@ -26,12 +26,16 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Stuart
  */
 public class DataItemTools {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DataItemTools.class);
 
     /**
      * Create a fragment of SQL from the list of data items
@@ -44,6 +48,7 @@ public class DataItemTools {
         StringBuilder sbSQL = new StringBuilder();
 
         if (CollectionUtils.isNotEmpty(dataItems)) {
+            LOG.trace("Adding dataitems {} to table prefix {}", dataItems, tablePrefix);
             for (DataItem item : dataItems) {
                 if (item.isNotColumn()) {
                     // This is not a specific SQL statement and is not needed
@@ -56,7 +61,10 @@ public class DataItemTools {
                 // Default approach
                 sbSQL.append(", ").append(tablePrefix).append(".").append(item.toString().toLowerCase());
             }
+        } else {
+            LOG.trace("No dataitems to add to table prefix {}", tablePrefix);
         }
+        LOG.trace("Added '{}' to SQL statement", sbSQL);
         return sbSQL;
     }
 

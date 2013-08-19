@@ -71,6 +71,7 @@ public class ApiDao extends HibernateDao {
      */
     public void getVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
         SqlScalars sqlScalars = new SqlScalars(generateSqlForVideoList(wrapper));
+        OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getOptions();
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("videoTypeString", StringType.INSTANCE);
@@ -78,12 +79,12 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("originalTitle", StringType.INSTANCE);
         sqlScalars.addScalar("videoYear", IntegerType.INSTANCE);
         sqlScalars.addScalar("firstAired", StringType.INSTANCE);
+        DataItemTools.addDataItemScalars(sqlScalars, options.splitDataitems());
 
         List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
         wrapper.setResults(queryResults);
 
         if (CollectionUtils.isNotEmpty(queryResults)) {
-            OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getOptions();
             if (CollectionUtils.isNotEmpty(options.splitArtwork())) {
                 // Create and populate the ID list
                 Map<MetaDataType, List<Long>> ids = new EnumMap<MetaDataType, List<Long>>(MetaDataType.class);
@@ -137,9 +138,13 @@ public class ApiDao extends HibernateDao {
         OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getOptions();
         Map<String, String> includes = options.splitIncludes();
         Map<String, String> excludes = options.splitExcludes();
+        List<DataItem> dataItems = options.splitDataitems();
 
         List<MetaDataType> mdt = options.splitTypes();
         LOG.debug("Getting video list for types: {}", mdt.toString());
+        if (CollectionUtils.isNotEmpty(dataItems)) {
+            LOG.debug("Additional data items requested: {}", dataItems.toString());
+        }
 
         boolean hasMovie = mdt.contains(MetaDataType.MOVIE);
         boolean hasSeries = mdt.contains(MetaDataType.SERIES);
@@ -149,25 +154,25 @@ public class ApiDao extends HibernateDao {
 
         // Add the movie entries
         if (hasMovie) {
-            sbSQL.append(generateSqlForVideo(options, includes, excludes, null));
+            sbSQL.append(generateSqlForVideo(options, includes, excludes, dataItems));
         }
 
         if (hasMovie && hasSeries) {
-            sbSQL.append(" UNION ");
+            sbSQL.append(" UNION ALL ");
         }
 
         // Add the TV series entires
         if (hasSeries) {
-            sbSQL.append(generateSqlForSeries(options, includes, excludes, null));
+            sbSQL.append(generateSqlForSeries(options, includes, excludes, dataItems));
         }
 
         if ((hasMovie || hasSeries) && hasSeason) {
-            sbSQL.append(" UNION ");
+            sbSQL.append(" UNION ALL ");
         }
 
         // Add the TV season entires
         if (hasSeason) {
-            sbSQL.append(generateSqlForSeason(options, includes, excludes, null));
+            sbSQL.append(generateSqlForSeason(options, includes, excludes, dataItems));
         }
 
         // Add the sort string, this will be empty if there is no sort required
@@ -481,7 +486,7 @@ public class ApiDao extends HibernateDao {
     private SqlScalars generateSqlForMoviePerson(OptionsIndexPerson options) {
         SqlScalars sqlScalars = new SqlScalars();
 
-        sqlScalars.addToSql("SELECT DISTINCT p.id,");
+        sqlScalars.addToSql("SELECT p.id,");
         sqlScalars.addToSql(" p.name,");
         sqlScalars.addToSql(" p.biography, ");
         sqlScalars.addToSql(" p.birth_day AS birthDay, ");
