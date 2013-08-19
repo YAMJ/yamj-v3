@@ -22,12 +22,8 @@
  */
 package org.yamj.core.api.options;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
-import org.yamj.core.api.model.DataItem;
 
 /**
  * List of the options available for the indexes
@@ -36,47 +32,13 @@ import org.yamj.core.api.model.DataItem;
  */
 public class OptionsIndexPerson extends OptionsId {
 
-    private String job = "";
-    private String dataitems = "";
-    @JsonIgnore
-    List<DataItem> dataitemList = new ArrayList<DataItem>();
+    private List<String> job = new ArrayList<String>();
 
-    public String getJob() {
+    public List<String> getJob() {
         return job;
     }
 
-    public void setJob(String job) {
+    public void setJob(List<String> job) {
         this.job = job;
-    }
-
-    @JsonIgnore
-    public List<String> getJobList() {
-        return splitList(job);
-    }
-
-    public String getDataitems() {
-        return dataitems;
-    }
-
-    public void setDataitems(String dataitems) {
-        this.dataitems = dataitems;
-        dataitemList.clear();
-    }
-
-    /**
-     * Split the additionalDataItems into a list of DataItems
-     *
-     * @return
-     */
-    public List<DataItem> splitDataitems() {
-        if (CollectionUtils.isEmpty(dataitemList)) {
-            for (String item : StringUtils.split(dataitems, ",")) {
-                DataItem di = DataItem.fromString(item);
-                if (di != DataItem.UNKNOWN) {
-                    dataitemList.add(di);
-                }
-            }
-        }
-        return dataitemList;
     }
 }
