@@ -476,32 +476,44 @@ public class ApiDao extends HibernateDao {
         }
     }
 
-    public void getPersonMovieList(ApiWrapperList<ApiPersonDTO> wrapper) {
-        SqlScalars sqlScalars = generateSqlForMoviePerson((OptionsIndexPerson) wrapper.getOptions());
-        LOG.debug("SQL: {}", sqlScalars.getSql());
+    public void getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {
+        SqlScalars sqlScalars = generateSqlForVideoPerson(metaDataType, (OptionsIndexPerson) wrapper.getOptions());
         List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
         wrapper.setResults(results);
     }
 
-    private SqlScalars generateSqlForMoviePerson(OptionsIndexPerson options) {
+    private SqlScalars generateSqlForVideoPerson(MetaDataType metaDataType, OptionsIndexPerson options) {
         SqlScalars sqlScalars = new SqlScalars();
 
         sqlScalars.addToSql("SELECT p.id,");
         sqlScalars.addToSql(" p.name,");
-        sqlScalars.addToSql(" p.biography, ");
-        sqlScalars.addToSql(" p.birth_day AS birthDay, ");
-        sqlScalars.addToSql(" p.birth_place AS birthPlace, ");
-        sqlScalars.addToSql(" p.birth_name AS birthName, ");
-        sqlScalars.addToSql(" p.death_day AS deathDay, ");
-        sqlScalars.addToSql(" c.job, ");
-        sqlScalars.addToSql(" c.role ");
+        sqlScalars.addToSql(" p.biography,");
+        sqlScalars.addToSql(" p.birth_day AS birthDay,");
+        sqlScalars.addToSql(" p.birth_place AS birthPlace,");
+        sqlScalars.addToSql(" p.birth_name AS birthName,");
+        sqlScalars.addToSql(" p.death_day AS deathDay,");
+        sqlScalars.addToSql(" c.job,");
+        sqlScalars.addToSql(" c.role");
         sqlScalars.addToSql(" FROM person p, cast_crew c");
 
         sqlScalars.addToSql(" WHERE p.id=c.person_id");
-        // TODO: Split by series/season/episode
-        sqlScalars.addToSql(" AND c.videodata_id=:id");
 
-        if(CollectionUtils.isNotEmpty(options.getJob())) {
+        // TODO: Split by series/season/episode
+        if (metaDataType == MetaDataType.MOVIE) {
+            sqlScalars.addToSql(" AND c.videodata_id=:id");
+        } else if (metaDataType == MetaDataType.SERIES) {
+            sqlScalars.addToSql("AND c.videodata_id IN");
+            sqlScalars.addToSql(" (SELECT DISTINCT v.id FROM season s, videodata v");
+            sqlScalars.addToSql(" WHERE s.series_id = :id AND s.id = v.season_id)");
+        } else if (metaDataType == MetaDataType.SEASON) {
+        } else if (metaDataType == MetaDataType.EPISODE) {
+            sqlScalars.addToSql(" AND c.videodata_id=:id");
+        } else {
+            throw new UnsupportedOperationException("Person list by '" + metaDataType.toString() + "' not supported.");
+        }
+
+
+        if (CollectionUtils.isNotEmpty(options.getJob())) {
             sqlScalars.addToSql(" AND c.job IN (:joblist)");
             sqlScalars.addParameterList("joblist", options.getJob());
         }
@@ -524,6 +536,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("job", StringType.INSTANCE);
         sqlScalars.addScalar("role", StringType.INSTANCE);
 
+        LOG.debug("SQL ForVideoPerson: {}", sqlScalars.getSql());
         return sqlScalars;
     }
 
@@ -686,15 +699,27 @@ public class ApiDao extends HibernateDao {
         wrapper.setResults(results);
     }
 
-    public void getMovie(ApiWrapperSingle<ApiVideoDTO> wrapper) {
+    public void getSingleVideo(ApiWrapperSingle<ApiVideoDTO> wrapper) {
         OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getOptions();
         Map<String, String> includes = options.splitIncludes();
         Map<String, String> excludes = options.splitExcludes();
+        MetaDataType type = MetaDataType.fromString(options.getType());
 
         List<DataItem> dataItems = options.splitDataitems();
         LOG.debug("Getting additional data items: {} ", dataItems.toString());
 
-        SqlScalars sqlScalars = new SqlScalars(generateSqlForVideo(options, includes, excludes, dataItems));
+        String sql;
+        if (type == MetaDataType.MOVIE) {
+            sql = generateSqlForVideo(options, includes, excludes, dataItems);
+        } else if (type == MetaDataType.SERIES) {
+            sql = generateSqlForSeries(options, includes, excludes, dataItems);
+        } else if (type == MetaDataType.SEASON) {
+            sql = generateSqlForSeason(options, includes, excludes, dataItems);
+        } else {
+            throw new UnsupportedOperationException("Unable to process type '" + type + "' (Original: '" + options.getType() + "')");
+        }
+
+        SqlScalars sqlScalars = new SqlScalars(sql);
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("videoTypeString", StringType.INSTANCE);
@@ -716,10 +741,13 @@ public class ApiDao extends HibernateDao {
 
             if (dataItems.contains(DataItem.ARTWORK)) {
                 LOG.debug("Adding artwork");
-                List<ApiArtworkDTO> artwork = getArtworkForId(MetaDataType.MOVIE, options.getId());
-                if (artwork == null) {
-                    LOG.warn("NULL Artwork returned");
+                List<ApiArtworkDTO> artwork;
+                if (CollectionUtils.isNotEmpty(options.splitArtwork())) {
+                    artwork = getArtworkForId(MetaDataType.MOVIE, options.getId(), options.splitArtwork());
+                } else {
+                    artwork = getArtworkForId(MetaDataType.MOVIE, options.getId());
                 }
+
                 video.setArtwork(artwork);
             }
             wrapper.setResult(video);

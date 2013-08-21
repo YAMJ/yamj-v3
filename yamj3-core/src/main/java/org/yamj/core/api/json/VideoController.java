@@ -70,7 +70,7 @@ public class VideoController {
 
         if (options.getId() > 0L) {
             LOG.info("Getting video with ID '{}'", options.getId());
-            jsonApiStorageService.getMovie(wrapper);
+            jsonApiStorageService.getSingleVideo(wrapper);
         }
         wrapper.setStatusCheck();
         return wrapper;
@@ -87,9 +87,9 @@ public class VideoController {
      */
     @RequestMapping(value = "/series/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<ApiVideoDTO> getSeriesById(@PathVariable String id,
+    public ApiWrapperSingle<ApiVideoDTO> getSeriesById(@PathVariable String id,
             @ModelAttribute("options") OptionsIndexVideo options) {
-        ApiWrapperList<ApiVideoDTO> wrapper = new ApiWrapperList<ApiVideoDTO>();
+        ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<ApiVideoDTO>();
         // Add the ID to the options
         options.setId(NumberUtils.toLong(id));
         // Set the type to movie
@@ -98,7 +98,7 @@ public class VideoController {
 
         if (options.getId() > 0L) {
             LOG.info("Getting series with ID '{}'", options.getId());
-            jsonApiStorageService.getVideoList(wrapper);
+            jsonApiStorageService.getSingleVideo(wrapper);
         }
         wrapper.setStatusCheck();
         return wrapper;
@@ -115,9 +115,9 @@ public class VideoController {
      */
     @RequestMapping(value = "/season/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<ApiVideoDTO> getSeasonById(@PathVariable String id,
+    public ApiWrapperSingle<ApiVideoDTO> getSeasonById(@PathVariable String id,
             @ModelAttribute("options") OptionsIndexVideo options) {
-        ApiWrapperList<ApiVideoDTO> wrapper = new ApiWrapperList<ApiVideoDTO>();
+        ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<ApiVideoDTO>();
         // Add the ID to the options
         options.setId(NumberUtils.toLong(id));
         // Set the type to movie
@@ -126,7 +126,7 @@ public class VideoController {
 
         if (options.getId() > 0L) {
             LOG.info("Getting season with ID '{}'", options.getId());
-            jsonApiStorageService.getVideoList(wrapper);
+            jsonApiStorageService.getSingleVideo(wrapper);
         }
         wrapper.setStatusCheck();
         return wrapper;

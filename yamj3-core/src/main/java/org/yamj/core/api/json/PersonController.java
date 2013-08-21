@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.options.OptionsIndexPerson;
@@ -69,7 +70,7 @@ public class PersonController {
         if (options.getId() > 0L) {
             LOG.info("Getting person list for movie with ID '{}'", options.getId());
             wrapper.setOptions(options);
-            jsonApiStorageService.getPersonListByMovie(wrapper);
+            jsonApiStorageService.getPersonListByVideoType(MetaDataType.MOVIE, wrapper);
             wrapper.setStatusCheck();
         } else {
             wrapper.setResults(null);
@@ -77,7 +78,24 @@ public class PersonController {
         }
         return wrapper;
     }
-    // Search by name
+
+    @RequestMapping(value = "/series", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperList<ApiPersonDTO> getPersonListBySeries(@ModelAttribute("options") OptionsIndexPerson options) {
+        ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<ApiPersonDTO>();
+
+        if (options.getId() > 0L) {
+            LOG.info("Getting person list for movie with ID '{}'", options.getId());
+            wrapper.setOptions(options);
+            jsonApiStorageService.getPersonListByVideoType(MetaDataType.SERIES, wrapper);
+            wrapper.setStatusCheck();
+        } else {
+            wrapper.setResults(null);
+            wrapper.setStatusCheck(new ApiStatus(410, "Not a valid ID"));
+        }
+        return wrapper;
+    }
+// Search by name
 
     /* List of people with count of jobs
      select p.id,p.name,c.job, count(*)

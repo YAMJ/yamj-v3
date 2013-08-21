@@ -103,8 +103,8 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = true)
-    public void getPersonListByMovie(ApiWrapperList<ApiPersonDTO> wrapper) {
-        apiDao.getPersonMovieList(wrapper);
+    public void getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {
+        apiDao.getPersonListByVideoType(metaDataType, wrapper);
     }
     //</editor-fold>
 
@@ -199,8 +199,8 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = true)
-    public void getMovie(ApiWrapperSingle<ApiVideoDTO> wrapper) {
-        apiDao.getMovie(wrapper);
+    public void getSingleVideo(ApiWrapperSingle<ApiVideoDTO> wrapper) {
+        apiDao.getSingleVideo(wrapper);
     }
 
     @Transactional(readOnly = true)
