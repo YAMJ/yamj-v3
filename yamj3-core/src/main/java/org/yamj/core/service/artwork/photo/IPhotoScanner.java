@@ -23,7 +23,6 @@
 package org.yamj.core.service.artwork.photo;
 
 import java.util.List;
-import org.yamj.core.database.model.IMetadata;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.IArtworkScanner;
