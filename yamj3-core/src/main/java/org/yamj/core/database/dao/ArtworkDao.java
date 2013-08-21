@@ -63,6 +63,8 @@ public class ArtworkDao extends HibernateDao {
             criteria.add(Restrictions.eq("applyToSeason", Boolean.TRUE));
         } else if (MetaDataType.EPISODE == metaDataType) {
             criteria.add(Restrictions.eq("applyToEpisode", Boolean.TRUE));
+        } else if (MetaDataType.PERSON == metaDataType) {
+            criteria.add(Restrictions.eq("applyToPhoto", Boolean.TRUE));
         }
         return criteria.list();
     }
@@ -111,7 +113,7 @@ public class ArtworkDao extends HibernateDao {
             criteria.add(Restrictions.eq("url", located.getUrl()));
         }
         criteria.setCacheable(true);
-        return (ArtworkLocated)criteria.uniqueResult();
+        return (ArtworkLocated) criteria.uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
