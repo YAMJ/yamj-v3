@@ -64,7 +64,7 @@ public class ArtworkDao extends HibernateDao {
         } else if (MetaDataType.EPISODE == metaDataType) {
             criteria.add(Restrictions.eq("applyToEpisode", Boolean.TRUE));
         } else if (MetaDataType.PERSON == metaDataType) {
-            criteria.add(Restrictions.eq("applyToPhoto", Boolean.TRUE));
+            criteria.add(Restrictions.eq("applyToPerson", Boolean.TRUE));
         }
         return criteria.list();
     }
