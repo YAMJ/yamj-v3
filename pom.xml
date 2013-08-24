@@ -65,7 +65,7 @@
         <hibernate.version>4.2.2.Final</hibernate.version>
         <spring.version>3.2.4.RELEASE</spring.version>
         <org.slf4j.version>1.7.5</org.slf4j.version>
-        <jackson.version>2.2.3</jackson.version>
+        <jackson.version>2.2.2</jackson.version>
         <jetty.version>8.1.12.v20130726</jetty.version>
     </properties>
 
@@ -199,12 +199,12 @@
                 <artifactId>slf4j-log4j12</artifactId>
                 <version>${org.slf4j.version}</version>
             </dependency>
-            <!-- COMMON -->
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
                 <version>1.2.17</version>
             </dependency>
+            <!-- COMMON -->
             <dependency>
                 <groupId>commons-collections</groupId>
                 <artifactId>commons-collections</artifactId>
