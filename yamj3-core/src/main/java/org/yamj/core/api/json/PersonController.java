@@ -85,7 +85,7 @@ public class PersonController {
         ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<ApiPersonDTO>();
 
         if (options.getId() > 0L) {
-            LOG.info("Getting person list for movie with ID '{}'", options.getId());
+            LOG.info("Getting person list for series with ID '{}'", options.getId());
             wrapper.setOptions(options);
             jsonApiStorageService.getPersonListByVideoType(MetaDataType.SERIES, wrapper);
             wrapper.setStatusCheck();
