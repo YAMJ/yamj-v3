@@ -379,18 +379,18 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addScalar("cacheFilename", StringType.INSTANCE);
 
             if (hasMovie) {
-                sqlScalars.addParameterList("movielist", ids.get(MetaDataType.MOVIE));
+                sqlScalars.addParameters("movielist", ids.get(MetaDataType.MOVIE));
             }
 
             if (hasSeries) {
-                sqlScalars.addParameterList("serieslist", ids.get(MetaDataType.SERIES));
+                sqlScalars.addParameters("serieslist", ids.get(MetaDataType.SERIES));
             }
 
             if (hasSeason) {
-                sqlScalars.addParameterList("seasonlist", ids.get(MetaDataType.SEASON));
+                sqlScalars.addParameters("seasonlist", ids.get(MetaDataType.SEASON));
             }
 
-            sqlScalars.addParameterList("artworklist", artworkRequired);
+            sqlScalars.addParameters("artworklist", artworkRequired);
 
             List<ApiArtworkDTO> results = executeQueryWithTransform(ApiArtworkDTO.class, sqlScalars, null);
 
@@ -515,7 +515,7 @@ public class ApiDao extends HibernateDao {
 
         if (CollectionUtils.isNotEmpty(options.getJob())) {
             sqlScalars.addToSql(" AND c.job IN (:joblist)");
-            sqlScalars.addParameterList("joblist", options.getJob());
+            sqlScalars.addParameters("joblist", options.getJob());
         }
 
         // Add the search string
@@ -524,7 +524,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql(options.getSortString());
 
         // Add the ID
-        sqlScalars.addParameter("id", options.getId());
+        sqlScalars.addParameters("id", options.getId());
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
@@ -560,14 +560,14 @@ public class ApiDao extends HibernateDao {
         }
         if (options.getId() > 0L) {
             sqlScalars.addToSql(" WHERE id=:id");
-            sqlScalars.addParameter("id", options.getId());
+            sqlScalars.addParameters("id", options.getId());
         } else {
             sqlScalars.addToSql(" WHERE 1=1");
         }
         if (CollectionUtils.isNotEmpty(options.getJob())) {
             sqlScalars.addToSql(" AND p.id=c.person_id");
             sqlScalars.addToSql(" AND c.job IN (:joblist)");
-            sqlScalars.addParameterList("joblist", options.getJob());
+            sqlScalars.addParameters("joblist", options.getJob());
         }
         // Add the search string
         sqlScalars.addToSql(options.getSearchString(Boolean.FALSE));
@@ -620,12 +620,12 @@ public class ApiDao extends HibernateDao {
         if (options != null) {
             if (options.getId() > 0L) {
                 sqlScalars.addToSql(" AND a.id=:id");
-                sqlScalars.addParameter("id", options.getId());
+                sqlScalars.addParameters("id", options.getId());
             }
 
             if (CollectionUtils.isNotEmpty(options.getArtwork())) {
                 sqlScalars.addToSql(" AND a.artwork_type IN (:artworklist)");
-                sqlScalars.addParameterList("artworklist", options.getArtwork());
+                sqlScalars.addParameters("artworklist", options.getArtwork());
             }
 
             if (CollectionUtils.isNotEmpty(options.getVideo())) {
@@ -680,10 +680,10 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("AND a.videodata_id=vid.id");
         if (options.getSeries() > 0L) {
             sqlScalars.addToSql("AND ser.id=:seriesid");
-            sqlScalars.addParameter("seriesid", options.getSeries());
+            sqlScalars.addParameters("seriesid", options.getSeries());
             if (options.getSeason() > 0L) {
                 sqlScalars.addToSql("AND sea.id=:seasonid");
-                sqlScalars.addParameter("seasonid", options.getSeason());
+                sqlScalars.addParameters("seasonid", options.getSeason());
             }
         }
         sqlScalars.addToSql("ORDER BY seriesId, season, episode");
@@ -782,7 +782,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
 
-        sqlScalars.addParameter("id", id);
+        sqlScalars.addParameters("id", id);
 
         return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, null);
 
@@ -814,8 +814,8 @@ public class ApiDao extends HibernateDao {
      * @param artworkRequired
      * @return
      */
-    public List<ApiArtworkDTO> getArtworkForId(MetaDataType type, Long id, List<String> artworkRequired) {
-        LOG.debug("Artwork required for ID '{}' is {}", id, artworkRequired);
+    public List<ApiArtworkDTO> getArtworkForId(MetaDataType type, Object id, List<String> artworkRequired) {
+        LOG.debug("Artwork required for ID '{}' is {}", (Long) id, artworkRequired);
         StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("SELECT '").append(type.toString()).append("' as sourceString, ");
         sbSQL.append(" v.id as videoId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, ");
@@ -842,7 +842,7 @@ public class ApiDao extends HibernateDao {
         } else if (type == MetaDataType.PERSON) {
             sbSQL.append(" WHERE v.id=a.person_id");
         }
-        sbSQL.append(" AND v.id=:id");
+        sbSQL.append(" AND v.id IN (:id)");
         sbSQL.append(" AND a.artwork_type IN (:artworklist)");
 
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
@@ -856,8 +856,8 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("cacheDir", StringType.INSTANCE);
         sqlScalars.addScalar("cacheFilename", StringType.INSTANCE);
 
-        sqlScalars.addParameter("id", id);
-        sqlScalars.addParameterList("artworklist", artworkRequired);
+        sqlScalars.addParameters("id", id);
+        sqlScalars.addParameters("artworklist", artworkRequired);
 
         return executeQueryWithTransform(ApiArtworkDTO.class, sqlScalars, null);
     }
@@ -870,7 +870,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("FROM  cast_crew");
         if (CollectionUtils.isNotEmpty(requiredJobs)) {
             sqlScalars.addToSql("WHERE job IN (:joblist)");
-            sqlScalars.addParameterList("joblist", requiredJobs);
+            sqlScalars.addParameters("joblist", requiredJobs);
         }
         sqlScalars.addToSql("GROUP BY job");
 

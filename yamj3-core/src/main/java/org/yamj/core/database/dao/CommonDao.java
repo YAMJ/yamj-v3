@@ -67,7 +67,7 @@ public class CommonDao extends HibernateDao {
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
 
-        sqlScalars.addParameter("filename", filename);
+        sqlScalars.addParameters("filename", filename);
 
         return executeQueryWithTransform(Genre.class, sqlScalars, wrapper);
     }

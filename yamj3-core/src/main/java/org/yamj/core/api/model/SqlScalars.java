@@ -29,7 +29,6 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.type.BasicType;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Builds a SQL statement and holds the scalars for the statement
@@ -40,21 +39,18 @@ public final class SqlScalars {
 
     private StringBuilder sql;
     private Map<String, BasicType> scalars;
-    private Map<String, Collection> parameterList;
     private Map<String, Object> parameters;
     private SQLQuery query = null;
 
     public SqlScalars() {
         this.sql = new StringBuilder();
         this.scalars = new HashMap<String, BasicType>();
-        this.parameterList = new HashMap<String, Collection>();
         this.parameters = new HashMap<String, Object>();
     }
 
     public SqlScalars(StringBuilder sql) {
         this.sql = sql;
         this.scalars = new HashMap<String, BasicType>();
-        this.parameterList = new HashMap<String, Collection>();
         this.parameters = new HashMap<String, Object>();
     }
 
@@ -119,28 +115,29 @@ public final class SqlScalars {
         if (this.query == null) {
             this.query = session.createSQLQuery(getSql());
             // Add parameters
-            if (!CollectionUtils.isEmpty(parameters)) {
+            if (parameters != null) {
                 for (Map.Entry<String, Object> entry : parameters.entrySet()) {
-                    query.setParameter(entry.getKey(), entry.getValue());
+                    if (entry.getValue() instanceof Collection) {
+                        query.setParameterList(entry.getKey(), (Collection) entry.getValue());
+                    } else if (entry.getValue() instanceof Object[]) {
+                        query.setParameterList(entry.getKey(), (Object[]) entry.getValue());
+                    } else {
+                        query.setParameter(entry.getKey(), entry.getValue());
+                    }
                 }
             }
-
-            if (!CollectionUtils.isEmpty(parameterList)) {
-                for (Map.Entry<String, Collection> entry : parameterList.entrySet()) {
-                    query.setParameterList(entry.getKey(), entry.getValue());
-                }
-            }
-
         }
         return this.query;
     }
 
-    public void addParameterList(String param, Collection values) {
-        this.parameterList.put(param, values);
-    }
-
-    public void addParameter(String key, Object value) {
-        this.parameters.put(key, value);
+    /**
+     * Add a parameter to the query
+     *
+     * @param param
+     * @param value
+     */
+    public void addParameters(String param, Object value) {
+        this.parameters.put(param, value);
     }
 
     /**
@@ -193,7 +190,7 @@ public final class SqlScalars {
      * @param query
      */
     public void populateScalars(SQLQuery query) {
-        if (!CollectionUtils.isEmpty(scalars)) {
+        if (scalars != null && scalars.size() > 0) {
             for (Map.Entry<String, BasicType> entry : scalars.entrySet()) {
                 if (entry.getValue() == null) {
                     // Use the default scalar for that entry
