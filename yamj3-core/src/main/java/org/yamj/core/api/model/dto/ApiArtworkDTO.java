@@ -38,7 +38,7 @@ public class ApiArtworkDTO {
 
     private String key = null;
     private MetaDataType source;
-    private Long videoId = 0L;  // This is a generic ID used for MOVIE, SERIES or SEASON
+    private Long sourceId = 0L;  // This is a generic ID used for MOVIE, SERIES, SEASON or PERSON
     private Long artworkId = 0L;
     private Long locatedId = 0L;
     private Long generatedId = 0L;
@@ -51,8 +51,8 @@ public class ApiArtworkDTO {
         return source;
     }
 
-    public long getVideoId() {
-        return videoId;
+    public long getSourceId() {
+        return sourceId;
     }
 
     public long getArtworkId() {
@@ -110,11 +110,11 @@ public class ApiArtworkDTO {
         this.source = MetaDataType.fromString(source);
     }
 
-    public void setVideoId(Long videoId) {
-        if (videoId == null) {
-            this.videoId = 0L;
+    public void setSourceId(Long sourceId) {
+        if (sourceId == null) {
+            this.sourceId = 0L;
         } else {
-            this.videoId = videoId;
+            this.sourceId = sourceId;
         }
     }
 
@@ -172,14 +172,14 @@ public class ApiArtworkDTO {
     /**
      * Set the videodata ID.
      *
-     * This will be populated to the videoId with the source of "MOVIE"
+     * This will be populated to the sourceId with the source of "MOVIE"
      *
      * @param videodataId
      */
     public void setVideodataId(Long videodataId) {
         // Only set if the id is not null
         if (videodataId != null) {
-            this.videoId = videodataId;
+            this.sourceId = videodataId;
             // Only overwrite the source if it is null
             if (this.source == null) {
                 this.source = MetaDataType.MOVIE;
@@ -190,14 +190,14 @@ public class ApiArtworkDTO {
     /**
      * Set the series ID.
      *
-     * This will be populated to the videoId with the source of "SERIES"
+     * This will be populated to the sourceId with the source of "SERIES"
      *
      * @param seriesId
      */
     public void setSeriesId(Long seriesId) {
         // Only set if the id is not null
         if (seriesId != null) {
-            this.videoId = seriesId;
+            this.sourceId = seriesId;
             this.source = MetaDataType.SERIES;
         }
     }
@@ -205,15 +205,30 @@ public class ApiArtworkDTO {
     /**
      * Set the season ID.
      *
-     * This will be populated to the videoId with the source of "SEASON"
+     * This will be populated to the sourceId with the source of "SEASON"
      *
      * @param videodataId
      */
     public void setSeasonId(Long seasonId) {
         // Only set if the id is not null
         if (seasonId != null) {
-            this.videoId = seasonId;
+            this.sourceId = seasonId;
             this.source = MetaDataType.SEASON;
+        }
+    }
+
+    /**
+     * Set the person ID
+     *
+     * This will be populated to the sourceId with the source of "PERSON"
+     *
+     * @param personId
+     */
+    public void setPersonId(Long personId) {
+        // Only set if the id is not null
+        if (personId != null) {
+            this.sourceId = personId;
+            this.source = MetaDataType.PERSON;
         }
     }
 
@@ -221,7 +236,7 @@ public class ApiArtworkDTO {
     @JsonIgnore
     public String Key() {
         if (StringUtils.isBlank(key)) {
-            this.key = makeKey(source, videoId);
+            this.key = makeKey(source, sourceId);
         }
         return key;
     }
