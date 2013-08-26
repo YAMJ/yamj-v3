@@ -482,12 +482,14 @@ public class ApiDao extends HibernateDao {
 
     public void getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {
         OptionsIndexPerson options = (OptionsIndexPerson) wrapper.getOptions();
+        LOG.info("Getting person list for {} with ID '{}'", metaDataType, options.getId());
+
         SqlScalars sqlScalars = generateSqlForVideoPerson(metaDataType, options);
         List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
-        LOG.info("Found {} results for video type {} with id '{}'", results.size(), metaDataType, options.getId());
+        LOG.info("Found {} results for {} with id '{}'", results.size(), metaDataType, options.getId());
 
         if (options.splitDataitems().contains(DataItem.ARTWORK)) {
-            LOG.info("Looking for person artwork for video type {} with id '{}'", metaDataType, options.getId());
+            LOG.info("Looking for person artwork for {} with id '{}'", metaDataType, options.getId());
             List<Long> personIds = new ArrayList<Long>();
             for (ApiPersonDTO p : results) {
                 personIds.add(p.getId());
@@ -500,7 +502,7 @@ public class ApiDao extends HibernateDao {
                 }
             }
         } else {
-            LOG.info("No artwork requested for video type {} with id '{}'", metaDataType, options.getId());
+            LOG.info("No artwork requested for {} with id '{}'", metaDataType, options.getId());
         }
 
         wrapper.setResults(results);
@@ -519,7 +521,6 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql(" c.job,");
         sqlScalars.addToSql(" c.role");
         sqlScalars.addToSql(" FROM person p, cast_crew c");
-
         sqlScalars.addToSql(" WHERE p.id=c.person_id");
 
         // TODO: Split by series/season/episode
@@ -535,7 +536,6 @@ public class ApiDao extends HibernateDao {
         } else {
             throw new UnsupportedOperationException("Person list by '" + metaDataType.toString() + "' not supported.");
         }
-
 
         if (CollectionUtils.isNotEmpty(options.getJob())) {
             sqlScalars.addToSql(" AND c.job IN (:joblist)");
@@ -742,6 +742,7 @@ public class ApiDao extends HibernateDao {
         } else {
             throw new UnsupportedOperationException("Unable to process type '" + type + "' (Original: '" + options.getType() + "')");
         }
+        LOG.debug("SQL for {}-{}: {}", type, options.getId(), sql);
 
         SqlScalars sqlScalars = new SqlScalars(sql);
 
@@ -767,9 +768,9 @@ public class ApiDao extends HibernateDao {
                 LOG.debug("Adding artwork");
                 Map<Long, List<ApiArtworkDTO>> artworkList;
                 if (CollectionUtils.isNotEmpty(options.splitArtwork())) {
-                    artworkList = getArtworkForId(MetaDataType.MOVIE, options.getId(), options.splitArtwork());
+                    artworkList = getArtworkForId(type, options.getId(), options.splitArtwork());
                 } else {
-                    artworkList = getArtworkForId(MetaDataType.MOVIE, options.getId());
+                    artworkList = getArtworkForId(type, options.getId());
                 }
 
                 if (artworkList.containsKey(options.getId())) {
