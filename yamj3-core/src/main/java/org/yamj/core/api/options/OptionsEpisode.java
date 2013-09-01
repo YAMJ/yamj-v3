@@ -29,19 +29,28 @@ package org.yamj.core.api.options;
  */
 public class OptionsEpisode extends OptionsAbstract {
 
-    private Long series = -1L;
+    private Long seriesid = -1L;
+    private Long seasonid = -1L;
     private Long season = -1L;
 
-    public Long getSeries() {
-        return series;
+    public Long getSeriesid() {
+        return seriesid;
+    }
+
+    public void setSeriesid(Long seriesid) {
+        this.seriesid = seriesid;
+    }
+
+    public Long getSeasonid() {
+        return seasonid;
+    }
+
+    public void setSeasonid(Long seasonid) {
+        this.seasonid = seasonid;
     }
 
     public Long getSeason() {
         return season;
-    }
-
-    public void setSeries(Long series) {
-        this.series = series;
     }
 
     public void setSeason(Long season) {

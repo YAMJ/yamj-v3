@@ -135,8 +135,9 @@ public class VideoController {
     @RequestMapping(value = "/episodes")
     @ResponseBody
     public ApiWrapperList<ApiEpisodeDTO> getEpisodes(@ModelAttribute("options") OptionsEpisode options) {
-        LOG.info("Getting episodes for series '{}', season '{}'",
-                options.getSeries() < 0L ? "All" : options.getSeries(),
+        LOG.info("Getting episodes for seriesId '{}', seasonId '{}', season '{}'",
+                options.getSeriesid()< 0L ? "All" : options.getSeriesid(),
+                options.getSeasonid()< 0L ? "All" : options.getSeasonid(),
                 options.getSeason() < 0L ? "All" : options.getSeason());
 
         ApiWrapperList<ApiEpisodeDTO> wrapper = new ApiWrapperList<ApiEpisodeDTO>();

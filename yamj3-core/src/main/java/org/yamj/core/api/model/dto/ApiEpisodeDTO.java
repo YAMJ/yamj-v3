@@ -33,6 +33,7 @@ import org.apache.commons.lang.StringUtils;
 public class ApiEpisodeDTO {
 
     private Long seriesId;
+    private Long seasonId;
     private Long season;
     private Long episode;
     private String title;
@@ -45,6 +46,10 @@ public class ApiEpisodeDTO {
     //<editor-fold defaultstate="collapsed" desc="Setter Methods">
     public void setSeriesId(Long seriesId) {
         this.seriesId = seriesId;
+    }
+
+    public void setSeasonId(Long seasonId) {
+        this.seasonId = seasonId;
     }
 
     public void setSeason(Long season) {
@@ -71,6 +76,10 @@ public class ApiEpisodeDTO {
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public Long getSeriesId() {
         return seriesId;
+    }
+
+    public Long getSeasonId() {
+        return seasonId;
     }
 
     public Long getSeason() {

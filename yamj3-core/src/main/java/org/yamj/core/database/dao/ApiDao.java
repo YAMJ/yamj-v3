@@ -694,7 +694,7 @@ public class ApiDao extends HibernateDao {
         OptionsEpisode options = (OptionsEpisode) wrapper.getOptions();
         SqlScalars sqlScalars = new SqlScalars();
 
-        sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.season, vid.episode, vid.title, ");
+        sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.id AS seasonId, sea.season, vid.episode, vid.title,");
         sqlScalars.addToSql("ag.cache_filename AS cacheFilename, ag.cache_dir AS cacheDir");
         sqlScalars.addToSql("FROM season sea, series ser, videodata vid, artwork a");
         sqlScalars.addToSql("LEFT JOIN artwork_located al ON a.id=al.artwork_id");
@@ -702,17 +702,22 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("WHERE sea.series_id=ser.id");
         sqlScalars.addToSql("AND vid.season_id=sea.id");
         sqlScalars.addToSql("AND a.videodata_id=vid.id");
-        if (options.getSeries() > 0L) {
+        if (options.getSeriesid() > 0L) {
             sqlScalars.addToSql("AND ser.id=:seriesid");
-            sqlScalars.addParameters("seriesid", options.getSeries());
+            sqlScalars.addParameters("seriesid", options.getSeriesid());
             if (options.getSeason() > 0L) {
-                sqlScalars.addToSql("AND sea.id=:seasonid");
-                sqlScalars.addParameters("seasonid", options.getSeason());
+                sqlScalars.addToSql("AND sea.season=:season");
+                sqlScalars.addParameters("season", options.getSeason());
             }
+        }
+        if (options.getSeasonid() > 0L) {
+            sqlScalars.addToSql("AND sea.id=:seasonid");
+            sqlScalars.addParameters("seasonid", options.getSeasonid());
         }
         sqlScalars.addToSql("ORDER BY seriesId, season, episode");
 
         sqlScalars.addScalar("seriesId", LongType.INSTANCE);
+        sqlScalars.addScalar("seasonId", LongType.INSTANCE);
         sqlScalars.addScalar("season", LongType.INSTANCE);
         sqlScalars.addScalar("episode", LongType.INSTANCE);
         sqlScalars.addScalar("title", StringType.INSTANCE);
