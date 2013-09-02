@@ -136,23 +136,13 @@ public class VideoController {
     @ResponseBody
     public ApiWrapperList<ApiEpisodeDTO> getEpisodes(@ModelAttribute("options") OptionsEpisode options) {
         LOG.info("Getting episodes for seriesId '{}', seasonId '{}', season '{}'",
-                options.getSeriesid()< 0L ? "All" : options.getSeriesid(),
-                options.getSeasonid()< 0L ? "All" : options.getSeasonid(),
+                options.getSeriesid() < 0L ? "All" : options.getSeriesid(),
+                options.getSeasonid() < 0L ? "All" : options.getSeasonid(),
                 options.getSeason() < 0L ? "All" : options.getSeason());
 
         ApiWrapperList<ApiEpisodeDTO> wrapper = new ApiWrapperList<ApiEpisodeDTO>();
         wrapper.setOptions(options);
         jsonApiStorageService.getEpisodeList(wrapper);
         return wrapper;
-
-        /*
-         SELECT ser.id AS SeriesId, sea.id AS SeasonId, ser.title AS SeriesTitle,
-         sea.season, vid.episode, vid.title as EpisodeTitle
-         FROM season sea, series ser, videodata vid
-         WHERE sea.series_id=ser.id
-         AND vid.season_id=sea.id
-         ORDER by SeriesId, season, episode
-         */
-
     }
 }

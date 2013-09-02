@@ -79,6 +79,9 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("originalTitle", StringType.INSTANCE);
         sqlScalars.addScalar("videoYear", IntegerType.INSTANCE);
         sqlScalars.addScalar("firstAired", StringType.INSTANCE);
+        sqlScalars.addScalar("seriesId",LongType.INSTANCE);
+        sqlScalars.addScalar("seasonId",LongType.INSTANCE);
+        sqlScalars.addScalar("season",LongType.INSTANCE);
         DataItemTools.addDataItemScalars(sqlScalars, options.splitDataitems());
 
         List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
@@ -198,6 +201,9 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", vd.title_original AS originalTitle");
         sbSQL.append(", vd.publication_year AS videoYear");
         sbSQL.append(", '-1' AS firstAired");
+        sbSQL.append(", '-1' AS seriesId");
+        sbSQL.append(", '-1' AS seasonId");
+        sbSQL.append(", '-1' AS season");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "vd"));
         sbSQL.append(" FROM videodata vd");
         // Add genre tables for include and exclude
@@ -254,6 +260,9 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", ser.title_original AS originalTitle");
         sbSQL.append(", ser.start_year AS videoYear");
         sbSQL.append(", '-1' AS firstAired");
+        sbSQL.append(", ser.id AS seriesId");
+        sbSQL.append(", '-1' AS seasonId");
+        sbSQL.append(", '-1' AS season");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "ser"));
         sbSQL.append(" FROM series ser ");
         sbSQL.append(" WHERE 1=1"); // To make it easier to add the optional include and excludes
@@ -292,6 +301,9 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", sea.title_original AS originalTitle");
         sbSQL.append(", -1 as videoYear");
         sbSQL.append(", sea.first_aired AS firstAired");
+        sbSQL.append(", sea.series_id AS seriesId");
+        sbSQL.append(", sea.id AS seasonId");
+        sbSQL.append(", sea.season AS season");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "sea"));
         sbSQL.append(" FROM season sea");
         sbSQL.append(" WHERE 1=1"); // To make it easier to add the optional include and excludes
@@ -757,6 +769,9 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("originalTitle", StringType.INSTANCE);
         sqlScalars.addScalar("videoYear", IntegerType.INSTANCE);
         sqlScalars.addScalar("firstAired", StringType.INSTANCE);
+        sqlScalars.addScalar("seriesId",LongType.INSTANCE);
+        sqlScalars.addScalar("seasonId",LongType.INSTANCE);
+        sqlScalars.addScalar("season",LongType.INSTANCE);
         // Add Scalars for additional data item columns
         DataItemTools.addDataItemScalars(sqlScalars, dataItems);
 

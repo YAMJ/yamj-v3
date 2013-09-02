@@ -48,6 +48,9 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private String quote;
     private String tagline;
     private Long topRank;
+    private Long seriesId = -1L;
+    private Long seasonId = -1L;
+    private Long season = -1L;
 
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public MetaDataType getVideoType() {
@@ -108,6 +111,18 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public Long getTopRank() {
         return topRank;
+    }
+
+    public Long getSeriesId() {
+        return seriesId;
+    }
+
+    public Long getSeasonId() {
+        return seasonId;
+    }
+
+    public Long getSeason() {
+        return season;
     }
     //</editor-fold>
 
@@ -173,6 +188,18 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public void setTopRank(Long topRank) {
         this.topRank = topRank;
+    }
+
+    public void setSeriesId(Long seriesId) {
+        this.seriesId = seriesId;
+    }
+
+    public void setSeasonId(Long seasonId) {
+        this.seasonId = seasonId;
+    }
+
+    public void setSeason(Long season) {
+        this.season = season;
     }
     //</editor-fold>
 
