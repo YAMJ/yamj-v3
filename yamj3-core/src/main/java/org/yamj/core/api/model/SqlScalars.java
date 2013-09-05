@@ -143,8 +143,10 @@ public final class SqlScalars {
     /**
      * Clear the SQL
      */
-    public void clearSql() {
+    public void clear() {
         sql = new StringBuilder();
+        parameters.clear();
+        scalars.clear();
     }
 
     /**

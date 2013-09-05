@@ -47,9 +47,11 @@ import org.yamj.core.api.model.DataItemTools;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.SqlScalars;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
+import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
 import org.yamj.core.api.model.dto.ApiEpisodeDTO;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
+import org.yamj.core.api.model.dto.ApiSeasonInfoDTO;
 import org.yamj.core.api.options.OptionsEpisode;
 import org.yamj.core.api.options.OptionsIndexArtwork;
 import org.yamj.core.api.options.OptionsIndexPerson;
@@ -79,9 +81,9 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("originalTitle", StringType.INSTANCE);
         sqlScalars.addScalar("videoYear", IntegerType.INSTANCE);
         sqlScalars.addScalar("firstAired", StringType.INSTANCE);
-        sqlScalars.addScalar("seriesId",LongType.INSTANCE);
-        sqlScalars.addScalar("seasonId",LongType.INSTANCE);
-        sqlScalars.addScalar("season",LongType.INSTANCE);
+        sqlScalars.addScalar("seriesId", LongType.INSTANCE);
+        sqlScalars.addScalar("seasonId", LongType.INSTANCE);
+        sqlScalars.addScalar("season", LongType.INSTANCE);
         DataItemTools.addDataItemScalars(sqlScalars, options.splitDataitems());
 
         List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
@@ -769,9 +771,9 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("originalTitle", StringType.INSTANCE);
         sqlScalars.addScalar("videoYear", IntegerType.INSTANCE);
         sqlScalars.addScalar("firstAired", StringType.INSTANCE);
-        sqlScalars.addScalar("seriesId",LongType.INSTANCE);
-        sqlScalars.addScalar("seasonId",LongType.INSTANCE);
-        sqlScalars.addScalar("season",LongType.INSTANCE);
+        sqlScalars.addScalar("seriesId", LongType.INSTANCE);
+        sqlScalars.addScalar("seasonId", LongType.INSTANCE);
+        sqlScalars.addScalar("season", LongType.INSTANCE);
         // Add Scalars for additional data item columns
         DataItemTools.addDataItemScalars(sqlScalars, dataItems);
 
@@ -936,5 +938,53 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("count", LongType.INSTANCE);
 
         return executeQueryWithTransform(CountGeneric.class, sqlScalars, null);
+    }
+
+    public List<ApiSeriesInfoDTO> getSeasonList(Long id) {
+        LOG.info("Getting series information for seriesId '{}'", id);
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT s.id AS seriesId, title, start_year AS year");
+        sqlScalars.addToSql("FROM series s");
+        sqlScalars.addToSql("WHERE id=:id");
+        sqlScalars.addToSql("ORDER BY id");
+        sqlScalars.addParameters("id", id);
+
+        sqlScalars.addScalar("seriesId", LongType.INSTANCE);
+        sqlScalars.addScalar("title", StringType.INSTANCE);
+        sqlScalars.addScalar("year", IntegerType.INSTANCE);
+
+        List<ApiSeriesInfoDTO> seriesResults = executeQueryWithTransform(ApiSeriesInfoDTO.class, sqlScalars, null);
+        for (ApiSeriesInfoDTO series : seriesResults) {
+            Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.SERIES, id);
+            for (ApiArtworkDTO artwork : artworkList.get(id)) {
+                series.addArtwork(artwork);
+                series.setSeasonList(getSeasonInfo(id));
+            }
+        }
+
+        return seriesResults;
+    }
+
+    private List<ApiSeasonInfoDTO> getSeasonInfo(Long seriesId) {
+        LOG.info("Getting season information for seriesId '{}'", seriesId);
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT s.series_id AS seriesId, s.id AS seasonId, s.season, title");
+        sqlScalars.addToSql("FROM season s");
+        sqlScalars.addToSql("WHERE series_id=:id");
+        sqlScalars.addParameters("id", seriesId);
+
+        sqlScalars.addScalar("seriesId", LongType.INSTANCE);
+        sqlScalars.addScalar("seasonId", LongType.INSTANCE);
+        sqlScalars.addScalar("season", IntegerType.INSTANCE);
+        sqlScalars.addScalar("title", StringType.INSTANCE);
+
+        List<ApiSeasonInfoDTO> seasonResults = executeQueryWithTransform(ApiSeasonInfoDTO.class, sqlScalars, null);
+        for (ApiSeasonInfoDTO season : seasonResults) {
+            Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.SEASON, seriesId);
+            for (ApiArtworkDTO artwork : artworkList.get(seriesId)) {
+                season.addArtwork(artwork);
+            }
+        }
+        return seasonResults;
     }
 }

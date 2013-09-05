@@ -22,6 +22,7 @@
  */
 package org.yamj.core.api.json;
 
+import java.util.List;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.model.dto.ApiEpisodeDTO;
+import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
 import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.core.api.options.OptionsEpisode;
 import org.yamj.core.api.options.OptionsIndexVideo;
@@ -128,6 +130,19 @@ public class VideoController {
             LOG.info("Getting season with ID '{}'", options.getId());
             jsonApiStorageService.getSingleVideo(wrapper);
         }
+        wrapper.setStatusCheck();
+        return wrapper;
+    }
+
+    @RequestMapping(value = "/seriesinfo/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperList<ApiSeriesInfoDTO> getSeriesInfo(@PathVariable Long id) {
+        ApiWrapperList<ApiSeriesInfoDTO> wrapper = new ApiWrapperList<ApiSeriesInfoDTO>();
+
+        LOG.info("Getting season list for ID '{}'", id);
+        List<ApiSeriesInfoDTO> results = jsonApiStorageService.getSeasonList(id);
+        wrapper.setResults(results);
+
         wrapper.setStatusCheck();
         return wrapper;
     }

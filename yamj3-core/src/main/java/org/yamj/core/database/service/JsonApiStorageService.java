@@ -35,6 +35,7 @@ import org.yamj.core.api.model.dto.ApiArtworkDTO;
 import org.yamj.core.api.model.dto.ApiEpisodeDTO;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
+import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
 import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.configuration.ConfigService;
@@ -206,5 +207,10 @@ public class JsonApiStorageService {
     @Transactional(readOnly = true)
     public List<CountGeneric> getJobCount(List<String> requiredJobs) {
         return apiDao.getJobCount(requiredJobs);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ApiSeriesInfoDTO> getSeasonList(Long id) {
+        return apiDao.getSeasonList(id);
     }
 }
