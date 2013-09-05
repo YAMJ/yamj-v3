@@ -36,13 +36,12 @@ import org.yamj.core.database.model.type.ArtworkType;
  *
  * @author stuart.boston
  */
-public class OptionsIndexVideo extends OptionsAbstractSortSearch {
+public class OptionsIndexVideo extends OptionsId {
 
     private String type = "";
     private String include = "";
     private String exclude = "";
     private String artwork = "";
-    private Long id = -1L;
     @JsonIgnore
     List<String> artworkTypes = new ArrayList<String>();
     @JsonIgnore
@@ -80,14 +79,6 @@ public class OptionsIndexVideo extends OptionsAbstractSortSearch {
     public void setArtwork(String artwork) {
         this.artwork = artwork.toUpperCase();
         this.artworkTypes.clear();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     /**

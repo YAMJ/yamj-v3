@@ -26,7 +26,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 import org.yamj.core.api.model.DataItem;
 
 /**
@@ -205,7 +204,17 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
 
     public void setDataitems(List<String> dataitems) {
         this.dataitems = dataitems;
+        genarateDataItemsList();
+    }
+
+    private void genarateDataItemsList() {
         dataitemList.clear();
+        for (String item : dataitems) {
+            DataItem di = DataItem.fromString(item);
+            if (di != DataItem.UNKNOWN) {
+                dataitemList.add(di);
+            }
+        }
     }
 
     /**
@@ -214,15 +223,11 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
      * @return
      */
     public List<DataItem> splitDataitems() {
-        if (CollectionUtils.isEmpty(dataitemList)) {
-            for (String item : dataitems) {
-                DataItem di = DataItem.fromString(item);
-                if (di != DataItem.UNKNOWN) {
-                    dataitemList.add(di);
-                }
-            }
-        }
         return dataitemList;
+    }
+
+    public boolean hasDataItem(DataItem di) {
+        return dataitemList.contains(di);
     }
     //</editor-fold>
 }
