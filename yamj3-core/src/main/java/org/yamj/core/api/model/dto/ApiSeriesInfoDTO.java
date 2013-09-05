@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import org.yamj.core.database.model.type.ArtworkType;
 
-public class ApiSeriesInfoDTO {
+public class ApiSeriesInfoDTO extends AbstractApiDTO{
 
     private Long seriesId;
     private String title;

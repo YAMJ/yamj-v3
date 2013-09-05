@@ -22,19 +22,17 @@
  */
 package org.yamj.core.api.model.dto;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 /**
  *
  * @author stuart.boston
  */
-public class AbstractApiIdentifiableDTO extends AbstractApiDTO {
+public class AbstractApiDTO {
 
-    private Long id = -1L;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }
