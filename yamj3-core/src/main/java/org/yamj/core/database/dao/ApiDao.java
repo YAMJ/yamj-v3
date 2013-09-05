@@ -957,16 +957,17 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("title", StringType.INSTANCE);
         sqlScalars.addScalar("seriesYear", IntegerType.INSTANCE);
 
-        List<ApiSeriesInfoDTO> seriesResults = executeQueryWithTransform(ApiSeriesInfoDTO.class, sqlScalars, null);
+        List<ApiSeriesInfoDTO> seriesResults = executeQueryWithTransform(ApiSeriesInfoDTO.class, sqlScalars, wrapper);
+        LOG.debug("Found {} series for SeriesId '{}'", seriesResults.size(), id);
 
-        if (options.hasDataItem(DataItem.ARTWORK)) {
-            for (ApiSeriesInfoDTO series : seriesResults) {
+        for (ApiSeriesInfoDTO series : seriesResults) {
+            if (options.hasDataItem(DataItem.ARTWORK)) {
                 Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.SERIES, id, options.getArtworkTypes());
                 for (ApiArtworkDTO artwork : artworkList.get(id)) {
                     series.addArtwork(artwork);
-                    series.setSeasonList(getSeasonInfo(options));
                 }
             }
+            series.setSeasonList(getSeasonInfo(options));
         }
         wrapper.setResults(seriesResults);
     }
@@ -974,7 +975,7 @@ public class ApiDao extends HibernateDao {
     private List<ApiSeasonInfoDTO> getSeasonInfo(OptionsIdArtwork options) {
         Long seriesId = options.getId();
 
-        LOG.info("Getting season information for seriesId '{}'", seriesId);
+        LOG.debug("Getting season information for seriesId '{}'", seriesId);
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT s.series_id AS seriesId, s.id AS seasonId, s.season, title");
         sqlScalars.addToSql("FROM season s");
@@ -987,6 +988,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("title", StringType.INSTANCE);
 
         List<ApiSeasonInfoDTO> seasonResults = executeQueryWithTransform(ApiSeasonInfoDTO.class, sqlScalars, null);
+        LOG.debug("Found {} seasons for SeriesId '{}'", seasonResults.size(), seriesId);
 
         if (options.hasDataItem(DataItem.ARTWORK)) {
             for (ApiSeasonInfoDTO season : seasonResults) {

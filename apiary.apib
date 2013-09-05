@@ -615,6 +615,242 @@ GET /api/video/movie/{id}
 }
 
 
+Retrieve information on a specific series.
+
+Will get all the seasons associated with the series
+
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The id of the series to get.</td>
+    </tr>
+</table>
+
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>dataitems</td>
+        <td>This is a list of additional data items to append to add to the results.<br/>
+            Valid options are: artwork</td>
+    </tr>
+    <tr>
+        <td>artwork</td>
+        <td>The list of artwork types to get for the list.<br/>
+            Can be one or more of: 'ALL', 'POSTER', 'FANART', 'BANNER', 'VIDEOIMAGE', etc.<br/>
+            Note: This is used in conjunction with the dataitem "artwork".</td>
+    </tr>
+</table>
+
+GET /api/video/seriesinfo
+< 200
+< Content-Type: application/json
+{
+   "count":1,
+   "totalCount":1,
+   "queryDuration":"149ms",
+   "queryTime":"2013-09-05 13:15:05",
+   "status":{
+      "status":200,
+      "message":"OK"
+   },
+   "options":{
+      "start":-1,
+      "max":-1,
+      "sortby":"",
+      "sortdir":"ASC",
+      "field":"",
+      "search":"",
+      "mode":"",
+      "dataitems":[
+         "artwork"
+      ],
+      "id":1,
+      "artwork":"POSTER"
+   },
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
+   "results":[
+      {
+         "seriesId":1,
+         "title":"Chuck",
+         "year":2007,
+         "seasonList":[
+            {
+               "seriesId":1,
+               "seasonId":1,
+               "season":1,
+               "title":"Chuck",
+               "artwork":{
+                  "POSTER":[
+                     {
+                        "source":"SEASON",
+                        "sourceId":1,
+                        "artworkId":46,
+                        "locatedId":58,
+                        "generatedId":58,
+                        "artworkType":"POSTER",
+                        "filename":"c/ch/Chuck_0000_001.season.poster.58.default-poster.jpg"
+                     },
+                     {
+                        "source":"SEASON",
+                        "sourceId":1,
+                        "artworkId":46,
+                        "locatedId":59,
+                        "generatedId":59,
+                        "artworkType":"POSTER",
+                        "filename":"c/ch/Chuck_0000_001.season.poster.59.default-poster.jpg"
+                     },
+                     {
+                        "source":"SEASON",
+                        "sourceId":1,
+                        "artworkId":46,
+                        "locatedId":60,
+                        "generatedId":60,
+                        "artworkType":"POSTER",
+                        "filename":"c/ch/Chuck_0000_001.season.poster.60.default-poster.jpg"
+                     },
+                     {
+                        "source":"SEASON",
+                        "sourceId":1,
+                        "artworkId":46,
+                        "locatedId":61,
+                        "generatedId":61,
+                        "artworkType":"POSTER",
+                        "filename":"c/ch/Chuck_0000_001.season.poster.61.default-poster.jpg"
+                     },
+                     {
+                        "source":"SEASON",
+                        "sourceId":1,
+                        "artworkId":46,
+                        "locatedId":62,
+                        "generatedId":62,
+                        "artworkType":"POSTER",
+                        "filename":"c/ch/Chuck_0000_001.season.poster.62.default-poster.jpg"
+                     }
+                  ]
+               },
+               "artworkCount":5
+            },
+            {
+               "seriesId":1,
+               "seasonId":2,
+               "season":2,
+               "title":"Chuck",
+               "artwork":{
+                  "POSTER":[
+                     {
+                        "source":"SEASON",
+                        "sourceId":1,
+                        "artworkId":46,
+                        "locatedId":58,
+                        "generatedId":58,
+                        "artworkType":"POSTER",
+                        "filename":"c/ch/Chuck_0000_001.season.poster.58.default-poster.jpg"
+                     },
+                     {
+                        "source":"SEASON",
+                        "sourceId":1,
+                        "artworkId":46,
+                        "locatedId":59,
+                        "generatedId":59,
+                        "artworkType":"POSTER",
+                        "filename":"c/ch/Chuck_0000_001.season.poster.59.default-poster.jpg"
+                     },
+                     {
+                        "source":"SEASON",
+                        "sourceId":1,
+                        "artworkId":46,
+                        "locatedId":60,
+                        "generatedId":60,
+                        "artworkType":"POSTER",
+                        "filename":"c/ch/Chuck_0000_001.season.poster.60.default-poster.jpg"
+                     },
+                     {
+                        "source":"SEASON",
+                        "sourceId":1,
+                        "artworkId":46,
+                        "locatedId":61,
+                        "generatedId":61,
+                        "artworkType":"POSTER",
+                        "filename":"c/ch/Chuck_0000_001.season.poster.61.default-poster.jpg"
+                     },
+                     {
+                        "source":"SEASON",
+                        "sourceId":1,
+                        "artworkId":46,
+                        "locatedId":62,
+                        "generatedId":62,
+                        "artworkType":"POSTER",
+                        "filename":"c/ch/Chuck_0000_001.season.poster.62.default-poster.jpg"
+                     }
+                  ]
+               },
+               "artworkCount":5
+            }
+         ],
+         "artwork":{
+            "POSTER":[
+               {
+                  "source":"SERIES",
+                  "sourceId":1,
+                  "artworkId":43,
+                  "locatedId":43,
+                  "generatedId":43,
+                  "artworkType":"POSTER",
+                  "filename":"c/ch/Chuck_0000.series.poster.43.default-poster.jpg"
+               },
+               {
+                  "source":"SERIES",
+                  "sourceId":1,
+                  "artworkId":43,
+                  "locatedId":44,
+                  "generatedId":44,
+                  "artworkType":"POSTER",
+                  "filename":"c/ch/Chuck_0000.series.poster.44.default-poster.jpg"
+               },
+               {
+                  "source":"SERIES",
+                  "sourceId":1,
+                  "artworkId":43,
+                  "locatedId":45,
+                  "generatedId":45,
+                  "artworkType":"POSTER",
+                  "filename":"c/ch/Chuck_0000.series.poster.45.default-poster.jpg"
+               },
+               {
+                  "source":"SERIES",
+                  "sourceId":1,
+                  "artworkId":43,
+                  "locatedId":46,
+                  "generatedId":46,
+                  "artworkType":"POSTER",
+                  "filename":"c/ch/Chuck_0000.series.poster.46.default-poster.jpg"
+               },
+               {
+                  "source":"SERIES",
+                  "sourceId":1,
+                  "artworkId":43,
+                  "locatedId":47,
+                  "generatedId":47,
+                  "artworkType":"POSTER",
+                  "filename":"c/ch/Chuck_0000.series.poster.47.default-poster.jpg"
+               }
+            ]
+         },
+         "artworkCount":5
+      }
+   ]
+}
+
 Retrieve information on the series
 ***
 **Required Parameters**
