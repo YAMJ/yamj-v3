@@ -141,7 +141,21 @@ public class ArtworkProcessorService {
         }
 
         LOG.debug("Generate image for {} with profile {}", located, profile.getProfileName());
-        BufferedImage imageGraphic = GraphicTools.loadJPEGImage(this.fileStorageService.getFile(storageType, located.getCacheFilename()));
+        BufferedImage imageGraphic = null;
+        try {
+            imageGraphic = GraphicTools.loadJPEGImage(this.fileStorageService.getFile(storageType, located.getCacheFilename()));
+        } catch (OutOfMemoryError ex) {
+            LOG.error("Failed to load/transform image '{}' due to memory constraints", located.getCacheFilename());
+        }
+
+        if (imageGraphic == null) {
+            LOG.error("Error processing image '{}', not processed further.", located.getCacheFilename());
+            // Mark the image as unprocessable
+            located.setStatus(StatusType.ERROR);
+            artworkStorageService.updateArtworkLocated(located);
+            // quit
+            return;
+        }
 
         // set dimension of original image if not done before
         if (located.getWidth() <= 0 || located.getHeight() <= 0) {
