@@ -53,6 +53,7 @@ import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.model.dto.ApiSeasonInfoDTO;
 import org.yamj.core.api.options.OptionsEpisode;
+import org.yamj.core.api.options.OptionsIdArtwork;
 import org.yamj.core.api.options.OptionsIndexArtwork;
 import org.yamj.core.api.options.OptionsIndexPerson;
 import org.yamj.core.api.options.OptionsIndexVideo;
@@ -90,7 +91,7 @@ public class ApiDao extends HibernateDao {
         wrapper.setResults(queryResults);
 
         if (CollectionUtils.isNotEmpty(queryResults)) {
-            if (CollectionUtils.isNotEmpty(options.splitArtwork())) {
+            if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
                 // Create and populate the ID list
                 Map<MetaDataType, List<Long>> ids = new EnumMap<MetaDataType, List<Long>>(MetaDataType.class);
                 for (MetaDataType mdt : MetaDataType.values()) {
@@ -335,7 +336,7 @@ public class ApiDao extends HibernateDao {
      * @param options
      */
     private void addArtworks(Map<MetaDataType, List<Long>> ids, Map<String, ApiVideoDTO> artworkList, OptionsIndexVideo options) {
-        List<String> artworkRequired = options.splitArtwork();
+        List<String> artworkRequired = options.getArtworkTypes();
         LOG.debug("Artwork required: {}", artworkRequired.toString());
 
         if (CollectionUtils.isNotEmpty(artworkRequired)) {
@@ -789,8 +790,8 @@ public class ApiDao extends HibernateDao {
             if (dataItems.contains(DataItem.ARTWORK)) {
                 LOG.debug("Adding artwork");
                 Map<Long, List<ApiArtworkDTO>> artworkList;
-                if (CollectionUtils.isNotEmpty(options.splitArtwork())) {
-                    artworkList = getArtworkForId(type, options.getId(), options.splitArtwork());
+                if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
+                    artworkList = getArtworkForId(type, options.getId(), options.getArtworkTypes());
                 } else {
                     artworkList = getArtworkForId(type, options.getId());
                 }
@@ -940,32 +941,39 @@ public class ApiDao extends HibernateDao {
         return executeQueryWithTransform(CountGeneric.class, sqlScalars, null);
     }
 
-    public List<ApiSeriesInfoDTO> getSeasonList(Long id) {
+    public void getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper) {
+        OptionsIdArtwork options = (OptionsIdArtwork) wrapper.getOptions();
+        Long id = options.getId();
         LOG.info("Getting series information for seriesId '{}'", id);
+
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT s.id AS seriesId, title, start_year AS year");
+        sqlScalars.addToSql("SELECT s.id AS seriesId, title, start_year AS seriesYear");
         sqlScalars.addToSql("FROM series s");
         sqlScalars.addToSql("WHERE id=:id");
         sqlScalars.addToSql("ORDER BY id");
-        sqlScalars.addParameters("id", id);
+        sqlScalars.addParameters("id", options.getId());
 
         sqlScalars.addScalar("seriesId", LongType.INSTANCE);
         sqlScalars.addScalar("title", StringType.INSTANCE);
-        sqlScalars.addScalar("year", IntegerType.INSTANCE);
+        sqlScalars.addScalar("seriesYear", IntegerType.INSTANCE);
 
         List<ApiSeriesInfoDTO> seriesResults = executeQueryWithTransform(ApiSeriesInfoDTO.class, sqlScalars, null);
-        for (ApiSeriesInfoDTO series : seriesResults) {
-            Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.SERIES, id);
-            for (ApiArtworkDTO artwork : artworkList.get(id)) {
-                series.addArtwork(artwork);
-                series.setSeasonList(getSeasonInfo(id));
+
+        if (options.hasDataItem(DataItem.ARTWORK)) {
+            for (ApiSeriesInfoDTO series : seriesResults) {
+                Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.SERIES, id, options.getArtworkTypes());
+                for (ApiArtworkDTO artwork : artworkList.get(id)) {
+                    series.addArtwork(artwork);
+                    series.setSeasonList(getSeasonInfo(options));
+                }
             }
         }
-
-        return seriesResults;
+        wrapper.setResults(seriesResults);
     }
 
-    private List<ApiSeasonInfoDTO> getSeasonInfo(Long seriesId) {
+    private List<ApiSeasonInfoDTO> getSeasonInfo(OptionsIdArtwork options) {
+        Long seriesId = options.getId();
+
         LOG.info("Getting season information for seriesId '{}'", seriesId);
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT s.series_id AS seriesId, s.id AS seasonId, s.season, title");
@@ -979,12 +987,16 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("title", StringType.INSTANCE);
 
         List<ApiSeasonInfoDTO> seasonResults = executeQueryWithTransform(ApiSeasonInfoDTO.class, sqlScalars, null);
-        for (ApiSeasonInfoDTO season : seasonResults) {
-            Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.SEASON, seriesId);
-            for (ApiArtworkDTO artwork : artworkList.get(seriesId)) {
-                season.addArtwork(artwork);
+
+        if (options.hasDataItem(DataItem.ARTWORK)) {
+            for (ApiSeasonInfoDTO season : seasonResults) {
+                Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.SEASON, seriesId, options.getArtworkTypes());
+                for (ApiArtworkDTO artwork : artworkList.get(seriesId)) {
+                    season.addArtwork(artwork);
+                }
             }
         }
+
         return seasonResults;
     }
 }

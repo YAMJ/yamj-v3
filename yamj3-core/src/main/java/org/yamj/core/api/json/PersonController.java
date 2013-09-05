@@ -73,7 +73,7 @@ public class PersonController {
             wrapper.setStatusCheck();
         } else {
             wrapper.setResults(null);
-            wrapper.setStatusCheck(new ApiStatus(410, "Not a valid ID"));
+            wrapper.setStatusInvalidId();
         }
         return wrapper;
     }

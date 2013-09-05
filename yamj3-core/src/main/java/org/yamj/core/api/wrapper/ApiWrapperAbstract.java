@@ -136,6 +136,13 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
         setStatus(status);
     }
 
+    /**
+     * Set the status of the query to Invalid ID
+     */
+    public void setStatusInvalidId() {
+        setStatusCheck(new ApiStatus(410, "Not a valid ID"));
+    }
+
     @Override
     public void setCount(int count) {
         this.count = count;

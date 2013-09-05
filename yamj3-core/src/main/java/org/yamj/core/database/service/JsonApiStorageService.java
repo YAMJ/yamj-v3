@@ -210,7 +210,7 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = true)
-    public List<ApiSeriesInfoDTO> getSeasonList(Long id) {
-        return apiDao.getSeasonList(id);
+    public void getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper) {
+        apiDao.getSeriesInfo(wrapper);
     }
 }

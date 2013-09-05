@@ -22,7 +22,7 @@
  */
 package org.yamj.core.api.json;
 
-import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +33,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.yamj.core.api.model.DataItem;
 import org.yamj.core.api.model.dto.ApiEpisodeDTO;
 import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
 import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.core.api.options.OptionsEpisode;
+import org.yamj.core.api.options.OptionsIdArtwork;
 import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
@@ -134,16 +136,22 @@ public class VideoController {
         return wrapper;
     }
 
-    @RequestMapping(value = "/seriesinfo/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/seriesinfo", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<ApiSeriesInfoDTO> getSeriesInfo(@PathVariable Long id) {
+    public ApiWrapperList<ApiSeriesInfoDTO> getSeriesInfo(@ModelAttribute("options") OptionsIdArtwork options) {
         ApiWrapperList<ApiSeriesInfoDTO> wrapper = new ApiWrapperList<ApiSeriesInfoDTO>();
+        wrapper.setOptions(options);
 
-        LOG.info("Getting season list for ID '{}'", id);
-        List<ApiSeriesInfoDTO> results = jsonApiStorageService.getSeasonList(id);
-        wrapper.setResults(results);
-
-        wrapper.setStatusCheck();
+        if (options.getId() > 0L) {
+            LOG.info("Getting series info for SeriesID '{}'", options.getId());
+            if (options.hasDataItem(DataItem.ARTWORK) && StringUtils.isBlank(options.getArtwork())) {
+                options.setArtwork("all");
+            }
+            jsonApiStorageService.getSeriesInfo(wrapper);
+            wrapper.setStatusCheck();
+        } else {
+            wrapper.setStatusInvalidId();
+        }
         return wrapper;
     }
 

@@ -72,6 +72,10 @@ public class ApiSeriesInfoDTO {
         this.year = seriesYear;
     }
 
+    public void setSeriesYear(Integer seriesYear) {
+        this.year = seriesYear;
+    }
+
     public void setArtwork(Map<ArtworkType, List<ApiArtworkDTO>> artwork) {
         this.artwork = artwork;
     }
