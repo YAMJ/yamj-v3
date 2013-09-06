@@ -71,7 +71,7 @@ public class TheMovieDbArtworkScanner implements
 
     @Override
     public String getScannerName() {
-        return TheMovieDbScanner.TMDB_SCANNER_ID;
+        return TheMovieDbScanner.SCANNER_ID;
     }
 
     @Override
@@ -183,7 +183,7 @@ public class TheMovieDbArtworkScanner implements
         }
 
         // Search based on IMDb ID
-        String imdbID = metadata.getSourceDbId(ImdbScanner.IMDB_SCANNER_ID);
+        String imdbID = metadata.getSourceDbId(ImdbScanner.SCANNER_ID);
         if (StringUtils.isNotBlank(imdbID)) {
             MovieDb moviedb = null;
             try {
@@ -255,7 +255,7 @@ public class TheMovieDbArtworkScanner implements
             String tmdbId = Integer.toString(tmdbPerson.getId());
             String imdbId = tmdbPerson.getImdbId();
             person.setPersonId(getScannerName(), tmdbId);
-            person.setPersonId(ImdbScanner.IMDB_SCANNER_ID, imdbId);
+            person.setPersonId(ImdbScanner.SCANNER_ID, imdbId);
             LOG.debug("Found IDs for {} - TMDB: '{}', IMDB: '{}'", person.getName(), tmdbId, imdbId);
             return Integer.toString(tmdbPerson.getId());
         } catch (MovieDbException ex) {

@@ -51,7 +51,7 @@ import org.yamj.core.tools.OverrideTools;
 @Service("tmdbScanner")
 public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, InitializingBean {
 
-    public static final String TMDB_SCANNER_ID = "tmdb";
+    public static final String SCANNER_ID = "tmdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbScanner.class);
     private static final String FROM_WIKIPEDIA = "From Wikipedia, the free encyclopedia";
     private static final String WIKIPEDIA_DESCRIPTION_ABOVE = "Description above from the Wikipedia";
@@ -64,7 +64,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
     @Override
     public String getScannerName() {
-        return TMDB_SCANNER_ID;
+        return SCANNER_ID;
     }
 
     @Override
@@ -76,8 +76,8 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
     @Override
     public String getMovieId(VideoData videoData) {
-        String tmdbID = videoData.getSourceDbId(TMDB_SCANNER_ID);
-        String imdbID = videoData.getSourceDbId(ImdbScanner.IMDB_SCANNER_ID);
+        String tmdbID = videoData.getSourceDbId(SCANNER_ID);
+        String imdbID = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
         String defaultLanguage = configService.getProperty("themoviedb.language", "en");
         MovieDb moviedb = null;
 
@@ -116,7 +116,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
         if (StringUtils.isNotBlank(tmdbID)) {
             LOG.info("Found TMDB ID: {}", tmdbID);
-            videoData.setSourceDbId(TMDB_SCANNER_ID, tmdbID);
+            videoData.setSourceDbId(SCANNER_ID, tmdbID);
         } else {
             LOG.info("No TMDB ID found for ", videoData.getTitle());
         }
@@ -180,7 +180,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     }
 
     private ScanResult updateVideoData(VideoData videoData) {
-        String tmdbID = videoData.getSourceDbId(TMDB_SCANNER_ID);
+        String tmdbID = videoData.getSourceDbId(SCANNER_ID);
         String defaultLanguage = configService.getProperty("themoviedb.language", "en");
         MovieDb moviedb;
 
@@ -198,41 +198,41 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             return ScanResult.ERROR;
         }
 
-        if (OverrideTools.checkOverwriteTitle(videoData, TMDB_SCANNER_ID)) {
-            videoData.setTitle(StringUtils.trim(moviedb.getTitle()), TMDB_SCANNER_ID);
+        if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
+            videoData.setTitle(StringUtils.trim(moviedb.getTitle()), SCANNER_ID);
         }
 
-        if (OverrideTools.checkOverwritePlot(videoData, TMDB_SCANNER_ID)) {
-            videoData.setPlot(StringUtils.trim(moviedb.getOverview()), TMDB_SCANNER_ID);
+        if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
+            videoData.setPlot(StringUtils.trim(moviedb.getOverview()), SCANNER_ID);
         }
 
-        if (OverrideTools.checkOverwriteOutline(videoData, TMDB_SCANNER_ID)) {
-            videoData.setOutline(StringUtils.trim(moviedb.getOverview()), TMDB_SCANNER_ID);
+        if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
+            videoData.setOutline(StringUtils.trim(moviedb.getOverview()), SCANNER_ID);
         }
 
-        if (OverrideTools.checkOverwriteCountry(videoData, TMDB_SCANNER_ID)) {
+        if (OverrideTools.checkOverwriteCountry(videoData, SCANNER_ID)) {
             for (ProductionCountry country : moviedb.getProductionCountries()) {
-                videoData.setCountry(StringUtils.trimToNull(country.getName()), TMDB_SCANNER_ID);
+                videoData.setCountry(StringUtils.trimToNull(country.getName()), SCANNER_ID);
                 break;
             }
         }
 
-        if (OverrideTools.checkOverwriteYear(videoData, TMDB_SCANNER_ID)) {
+        if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID)) {
             String year = moviedb.getReleaseDate();
             // Check if this is the default year and skip it
             if (StringUtils.isNotBlank(year) && !"1900-01-01".equals(year)) {
                 year = (new DateTime(year)).toString("yyyy");
-                videoData.setPublicationYear(Integer.parseInt(year), TMDB_SCANNER_ID);
+                videoData.setPublicationYear(Integer.parseInt(year), SCANNER_ID);
             }
         }
 
-        if (OverrideTools.checkOverwriteGenres(videoData, TMDB_SCANNER_ID)) {
+        if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
             // GENRES
             Set<String> genreNames = new HashSet<String>();
             for (com.omertron.themoviedbapi.model.Genre genre : moviedb.getGenres()) {
                 genreNames.add(StringUtils.trim(genre.getName()));
             }
-            videoData.setGenreNames(genreNames, TMDB_SCANNER_ID);
+            videoData.setGenreNames(genreNames, SCANNER_ID);
         }
 
         // CAST & CREW
@@ -240,7 +240,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             CreditDTO credit;
             for (com.omertron.themoviedbapi.model.Person person : tmdbApi.getMovieCasts(Integer.parseInt(tmdbID)).getResults()) {
                 credit = new CreditDTO();
-                credit.setSourcedb(TMDB_SCANNER_ID);
+                credit.setSourcedb(SCANNER_ID);
                 credit.setSourcedbId(String.valueOf(person.getId()));
                 credit.setName(StringUtils.trim(person.getName()));
                 credit.setRole(StringUtils.trimToNull(person.getCharacter()));
@@ -294,7 +294,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
     @Override
     public String getPersonId(Person person) {
-        String id = person.getPersonId(TMDB_SCANNER_ID);
+        String id = person.getPersonId(SCANNER_ID);
         if (StringUtils.isNotBlank(id)) {
             return id;
         } else if (StringUtils.isNotBlank(person.getName())) {
@@ -342,7 +342,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
                 LOG.debug("{}: No match found", name);
             }
         } catch (MovieDbException ex) {
-            LOG.warn("Failed to get information on '{}' from {}, error: {}", name, TMDB_SCANNER_ID, ex.getMessage());
+            LOG.warn("Failed to get information on '{}' from {}, error: {}", name, SCANNER_ID, ex.getMessage());
         }
         return id;
     }
@@ -355,12 +355,12 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         }
 
         try {
-            LOG.debug("Getting information on {}-'{}' from {}", person.getId(), person.getName(), TMDB_SCANNER_ID);
+            LOG.debug("Getting information on {}-'{}' from {}", person.getId(), person.getName(), SCANNER_ID);
             com.omertron.themoviedbapi.model.Person tmdbPerson = tmdbApi.getPersonInfo(Integer.parseInt(id));
 
             person.setBiography(cleanBiography(tmdbPerson.getBiography()));
             person.setBirthPlace(StringUtils.trimToNull(tmdbPerson.getBirthplace()));
-            person.setPersonId(ImdbScanner.IMDB_SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
+            person.setPersonId(ImdbScanner.SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
 
             Date parsedDate = parseDate(tmdbPerson.getBirthday());
             if (parsedDate != null) {

@@ -68,7 +68,7 @@ public class TheTVDbArtworkScanner implements
 
     @Override
     public String getScannerName() {
-        return TheTVDbScanner.TVDB_SCANNER_ID;
+        return TheTVDbScanner.SCANNER_ID;
     }
 
     @Override

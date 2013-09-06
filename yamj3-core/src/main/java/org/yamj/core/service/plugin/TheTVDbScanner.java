@@ -44,7 +44,7 @@ import org.yamj.core.tools.OverrideTools;
 @Service("tvdbScanner")
 public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
-    public static final String TVDB_SCANNER_ID = "tvdb";
+    public static final String SCANNER_ID = "tvdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheTVDbScanner.class);
     
     @Autowired
@@ -54,7 +54,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
     @Override
     public String getScannerName() {
-        return TVDB_SCANNER_ID;
+        return SCANNER_ID;
     }
 
     @Override
@@ -65,7 +65,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
     @Override
     public String getSeriesId(Series series) {
-        String id = series.getSourceDbId(TVDB_SCANNER_ID);
+        String id = series.getSourceDbId(SCANNER_ID);
 
         if (StringUtils.isBlank(id)) {
             return getSeriesId(series.getTitle(), series.getStartYear());
@@ -89,26 +89,26 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
         com.omertron.thetvdbapi.model.Series tvdbSeries = tvdbApiWrapper.getSeries(id);
 
-        series.setSourceDbId(TVDB_SCANNER_ID, tvdbSeries.getId());
-        series.setSourceDbId(ImdbScanner.IMDB_SCANNER_ID, tvdbSeries.getImdbId());
+        series.setSourceDbId(SCANNER_ID, tvdbSeries.getId());
+        series.setSourceDbId(ImdbScanner.SCANNER_ID, tvdbSeries.getImdbId());
 
-        if (OverrideTools.checkOverwriteTitle(series, TVDB_SCANNER_ID)) {
-            series.setTitle(StringUtils.trim(tvdbSeries.getSeriesName()), TVDB_SCANNER_ID);
+        if (OverrideTools.checkOverwriteTitle(series, SCANNER_ID)) {
+            series.setTitle(StringUtils.trim(tvdbSeries.getSeriesName()), SCANNER_ID);
         }
 
-        if (OverrideTools.checkOverwritePlot(series, TVDB_SCANNER_ID)) {
-            series.setPlot(StringUtils.trim(tvdbSeries.getOverview()), TVDB_SCANNER_ID);
+        if (OverrideTools.checkOverwritePlot(series, SCANNER_ID)) {
+            series.setPlot(StringUtils.trim(tvdbSeries.getOverview()), SCANNER_ID);
         }
 
-        if (OverrideTools.checkOverwriteOutline(series, TVDB_SCANNER_ID)) {
-            series.setOutline(StringUtils.trim(tvdbSeries.getOverview()), TVDB_SCANNER_ID);
+        if (OverrideTools.checkOverwriteOutline(series, SCANNER_ID)) {
+            series.setOutline(StringUtils.trim(tvdbSeries.getOverview()), SCANNER_ID);
         }
 
         // TODO more values
 
         if (StringUtils.isNumeric(tvdbSeries.getRating())) {
             try {
-                series.addRating(TVDB_SCANNER_ID, (int) (Float.parseFloat(tvdbSeries.getRating()) * 10));
+                series.addRating(SCANNER_ID, (int) (Float.parseFloat(tvdbSeries.getRating()) * 10));
             } catch (NumberFormatException nfe) {
                 LOG.warn("Failed to convert TVDB rating '{}' to an integer, error: {}", tvdbSeries.getRating(), nfe.getMessage());
             }
@@ -141,16 +141,16 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             if (season.isScannableTvSeason()) {
 
                 // use values from series
-                if (OverrideTools.checkOverwriteTitle(season, TVDB_SCANNER_ID)) {
-                    season.setTitle(StringUtils.trim(tvdbSeries.getSeriesName()), TVDB_SCANNER_ID);
+                if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
+                    season.setTitle(StringUtils.trim(tvdbSeries.getSeriesName()), SCANNER_ID);
                 }
 
-                if (OverrideTools.checkOverwritePlot(season, TVDB_SCANNER_ID)) {
-                    season.setPlot(StringUtils.trim(tvdbSeries.getOverview()), TVDB_SCANNER_ID);
+                if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
+                    season.setPlot(StringUtils.trim(tvdbSeries.getOverview()), SCANNER_ID);
                 }
 
-                if (OverrideTools.checkOverwriteOutline(season, TVDB_SCANNER_ID)) {
-                    season.setOutline(StringUtils.trim(tvdbSeries.getOverview()), TVDB_SCANNER_ID);
+                if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
+                    season.setOutline(StringUtils.trim(tvdbSeries.getOverview()), SCANNER_ID);
                 }
 
                 // TODO common usable format
@@ -177,7 +177,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             return;
         }
 
-        String seriesId = season.getSeries().getSourceDbId(TVDB_SCANNER_ID);
+        String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
         List<Episode> episodeList = tvdbApiWrapper.getSeasonEpisodes(seriesId, season.getSeason());
 
         for (VideoData videoData : videoDatas) {
@@ -188,12 +188,12 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                 videoData.setTvEpisodeNotFound();
             } else {
 
-                if (OverrideTools.checkOverwriteTitle(videoData, TVDB_SCANNER_ID)) {
-                    videoData.setTitle(StringUtils.trim(episode.getEpisodeName()), TVDB_SCANNER_ID);
+                if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
+                    videoData.setTitle(StringUtils.trim(episode.getEpisodeName()), SCANNER_ID);
                 }
 
-                if (OverrideTools.checkOverwritePlot(videoData, TVDB_SCANNER_ID)) {
-                    videoData.setPlot(StringUtils.trim(episode.getOverview()), TVDB_SCANNER_ID);
+                if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
+                    videoData.setPlot(StringUtils.trim(episode.getOverview()), SCANNER_ID);
                 }
 
                 // cast and crew

@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 @Service("imdbScanner")
 public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingBean {
 
-    public static final String IMDB_SCANNER_ID = "imdb";
+    public static final String SCANNER_ID = "imdb";
     private static final Logger LOG = LoggerFactory.getLogger(ImdbScanner.class);
     @Autowired
     private PoolingHttpClient httpClient;
@@ -46,7 +46,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
 
     @Override
     public String getScannerName() {
-        return IMDB_SCANNER_ID;
+        return SCANNER_ID;
     }
 
     @Override
@@ -58,21 +58,21 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
 
     @Override
     public String getMovieId(VideoData videoData) {
-        String imdbId = videoData.getSourceDbId(IMDB_SCANNER_ID);
+        String imdbId = videoData.getSourceDbId(SCANNER_ID);
         if (StringUtils.isBlank(imdbId)) {
             imdbId = getMovieId(videoData.getTitle(), videoData.getPublicationYear());
-            videoData.setSourceDbId(IMDB_SCANNER_ID, imdbId);
+            videoData.setSourceDbId(SCANNER_ID, imdbId);
         }
         return imdbId;
     }
 
     @Override
     public String getSeriesId(Series series) {
-        String imdbId = series.getSourceDbId(IMDB_SCANNER_ID);
+        String imdbId = series.getSourceDbId(SCANNER_ID);
         if (StringUtils.isBlank(imdbId)) {
             int year = -1; // TODO: get form firsAired value
             imdbId = getSeriesId(series.getTitle(), year);
-            series.setSourceDbId(IMDB_SCANNER_ID, imdbId);
+            series.setSourceDbId(SCANNER_ID, imdbId);
         }
         return imdbId;
     }
