@@ -980,6 +980,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("SELECT s.series_id AS seriesId, s.id AS seasonId, s.season, title");
         sqlScalars.addToSql("FROM season s");
         sqlScalars.addToSql("WHERE series_id=:id");
+        sqlScalars.addToSql("ORDER BY series_id, season");
         sqlScalars.addParameters("id", seriesId);
 
         sqlScalars.addScalar("seriesId", LongType.INSTANCE);
