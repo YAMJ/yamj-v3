@@ -230,7 +230,8 @@ public class ScannerManagementImpl implements ScannerManagement {
             }
         } while (!allDone);
 
-        LOG.info("Completed sending of all libraries.");
+        LOG.info(StringUtils.repeat("*", 50));
+        LOG.info("Completed initial sending of all libraries ({} total).",libraryCollection.size());
         LOG.info("");
         LOG.info("Library statistics:");
         for (Library library : libraryCollection.getLibraries()) {
