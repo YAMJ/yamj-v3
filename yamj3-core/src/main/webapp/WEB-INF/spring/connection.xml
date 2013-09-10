@@ -26,4 +26,9 @@
         <constructor-arg index="1" ref="poolingHttpClient"/>
     </bean>
 
+    <bean id="fanarttvApi" class="com.omertron.fanarttvapi.FanartTvApi">
+        <constructor-arg index="0" value="${APIKEY.fanarttv}"/>
+        <constructor-arg index="1" ref="poolingHttpClient"/>
+    </bean>
+
 </beans>

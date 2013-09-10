@@ -152,6 +152,11 @@
             <artifactId>thetvdbapi</artifactId>
             <version>1.6-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.omertron</groupId>
+            <artifactId>fanarttvapi</artifactId>
+            <version>1.5-SNAPSHOT</version>
+        </dependency>
         <!--JACKSON JSON-->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
