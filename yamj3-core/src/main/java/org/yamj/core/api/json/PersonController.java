@@ -57,7 +57,7 @@ public class PersonController {
             wrapper.setStatusCheck();
         } else {
             wrapper.setResult(null);
-            wrapper.setStatusCheck(new ApiStatus(410, "Not a valid ID"));
+            wrapper.setStatusInvalidId();
         }
         return wrapper;
     }
@@ -65,31 +65,38 @@ public class PersonController {
     @RequestMapping(value = "/movie", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperList<ApiPersonDTO> getPersonListByMovie(@ModelAttribute("options") OptionsIndexPerson options) {
-        ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<ApiPersonDTO>();
-
-        if (options.getId() > 0L) {
-            wrapper.setOptions(options);
-            jsonApiStorageService.getPersonListByVideoType(MetaDataType.MOVIE, wrapper);
-            wrapper.setStatusCheck();
-        } else {
-            wrapper.setResults(null);
-            wrapper.setStatusInvalidId();
-        }
-        return wrapper;
+        return getPersonListByVideo(MetaDataType.MOVIE, options);
     }
 
     @RequestMapping(value = "/series", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperList<ApiPersonDTO> getPersonListBySeries(@ModelAttribute("options") OptionsIndexPerson options) {
+        return getPersonListByVideo(MetaDataType.SERIES, options);
+    }
+
+    @RequestMapping(value = "/season", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperList<ApiPersonDTO> getPersonListBySeason(@ModelAttribute("options") OptionsIndexPerson options) {
+        return getPersonListByVideo(MetaDataType.SEASON, options);
+    }
+
+    @RequestMapping(value = "/episode", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperList<ApiPersonDTO> getPersonListByEpisode(@ModelAttribute("options") OptionsIndexPerson options) {
+        return getPersonListByVideo(MetaDataType.EPISODE, options);
+    }
+
+    private ApiWrapperList<ApiPersonDTO> getPersonListByVideo(MetaDataType metaDataType, OptionsIndexPerson options) {
         ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<ApiPersonDTO>();
 
         if (options.getId() > 0L) {
+            LOG.info("Getting person list for {} with ID '{}'", metaDataType, options.getId());
             wrapper.setOptions(options);
-            jsonApiStorageService.getPersonListByVideoType(MetaDataType.SERIES, wrapper);
+            jsonApiStorageService.getPersonListByVideoType(metaDataType, wrapper);
             wrapper.setStatusCheck();
         } else {
             wrapper.setResults(null);
-            wrapper.setStatusCheck(new ApiStatus(410, "Not a valid ID"));
+            wrapper.setStatusInvalidId();
         }
         return wrapper;
     }

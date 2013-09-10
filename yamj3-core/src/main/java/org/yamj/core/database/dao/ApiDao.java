@@ -523,12 +523,22 @@ public class ApiDao extends HibernateDao {
         wrapper.setResults(results);
     }
 
+    /**
+     * Generates a list of people in a video
+     *
+     * @param metaDataType
+     * @param options
+     * @return
+     */
     private SqlScalars generateSqlForVideoPerson(MetaDataType metaDataType, OptionsIndexPerson options) {
         SqlScalars sqlScalars = new SqlScalars();
 
         sqlScalars.addToSql("SELECT p.id,");
         sqlScalars.addToSql(" p.name,");
-        sqlScalars.addToSql(" p.biography,");
+        if (options.hasDataItem(DataItem.BIOGRAPHY)) {
+            sqlScalars.addToSql(" p.biography,");
+            sqlScalars.addScalar("biography", StringType.INSTANCE);
+        }
         sqlScalars.addToSql(" p.birth_day AS birthDay,");
         sqlScalars.addToSql(" p.birth_place AS birthPlace,");
         sqlScalars.addToSql(" p.birth_name AS birthName,");
@@ -546,6 +556,9 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql(" (SELECT DISTINCT v.id FROM season s, videodata v");
             sqlScalars.addToSql(" WHERE s.series_id = :id AND s.id = v.season_id)");
         } else if (metaDataType == MetaDataType.SEASON) {
+            sqlScalars.addToSql("AND c.videodata_id IN");
+            sqlScalars.addToSql(" (SELECT DISTINCT v.id FROM season s, videodata v");
+            sqlScalars.addToSql(" WHERE s.id = :id AND s.id = v.season_id)");
         } else if (metaDataType == MetaDataType.EPISODE) {
             sqlScalars.addToSql(" AND c.videodata_id=:id");
         } else {
@@ -567,7 +580,6 @@ public class ApiDao extends HibernateDao {
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
-        sqlScalars.addScalar("biography", StringType.INSTANCE);
         sqlScalars.addScalar("birthDay", DateType.INSTANCE);
         sqlScalars.addScalar("birthPlace", StringType.INSTANCE);
         sqlScalars.addScalar("birthName", StringType.INSTANCE);
@@ -579,6 +591,12 @@ public class ApiDao extends HibernateDao {
         return sqlScalars;
     }
 
+    /**
+     * Generate the SQL for the information about a person
+     *
+     * @param options
+     * @return
+     */
     private SqlScalars generateSqlForPerson(OptionsIndexPerson options) {
         SqlScalars sqlScalars = new SqlScalars();
         List<DataItem> dataitems = options.splitDataitems();
@@ -865,7 +883,7 @@ public class ApiDao extends HibernateDao {
      * @return
      */
     public Map<Long, List<ApiArtworkDTO>> getArtworkForId(MetaDataType type, Object id, List<String> artworkRequired) {
-        LOG.debug("Artwork required for ID '{}' is {}", id, artworkRequired);
+        LOG.debug("Artwork required for {} ID '{}' is {}", type, id, artworkRequired);
         StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("SELECT '").append(type.toString()).append("' as sourceString, ");
         sbSQL.append(" v.id as sourceId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, ");

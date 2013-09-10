@@ -1286,7 +1286,7 @@ GET /api/person
 }
 
 
-Get a list of cast and crew for a video
+Get a list of cast and crew for a movie
 
 **Required Parameters**
 <table width="100%">
@@ -1294,7 +1294,7 @@ Get a list of cast and crew for a video
     <col width="80%">
     <tr>
         <td>id</td>
-        <td>This is the ID of the video to get the list for.</td>
+        <td>This is the ID of the movie to get the list for.</td>
     </tr>
 </table>
 
@@ -1306,6 +1306,11 @@ Get a list of cast and crew for a video
     <tr>
         <td>job</td>
         <td>Comma separated list of jobs to restrict the list to.</td>
+    </tr>
+    <tr>
+        <td>dataitems</td>
+        <td>Comma separated list of additional data items to add to the results.<br>
+            Valid items are: artwork, biography.</td>
     </tr>
     <tr>
         <td>PAGING</td>
@@ -1320,16 +1325,16 @@ Get a list of cast and crew for a video
         <td>See above for the explanation on sorting parameters</td>
     </tr>
 </table>
-__Example__: `http://localhost:8888/yamj3/api/person/movie?id=1&job=actor`
+__Example__: `http://localhost:8888/yamj3/api/person/movie?id=1&job=actor&max=2`
 
 GET /api/person/movie
 < 200
 < Content-Type: application/json
 {
    "count":2,
-   "totalCount":51,
-   "queryDuration":"42ms",
-   "queryTime":"2013-08-14 21:53:11",
+   "totalCount":29,
+   "queryDuration":"459ms",
+   "queryTime":"2013-09-10 14:56:38",
    "status":{
       "status":200,
       "message":"OK"
@@ -1342,36 +1347,336 @@ GET /api/person/movie
       "field":"",
       "search":"",
       "mode":"",
+      "dataitems":[],
       "id":1,
-      "job":""
+      "job":[
+         "actor"
+      ]
    },
-   "baseArtworkUrl":"http://192.168.0.12:8888/Artwork/",
-   "baseMediainfoUrl":"http://192.168.0.12:8888/mi/",
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
    "results":[
       {
          "id":1,
-         "name":"Viggo Mortensen",
-         "biography":"Viggo Peter Mortensen, Jr. (born October 20, 1958) ...",
-         "birthDay":"1958-10-20",
-         "birthPlace":"New York City, New York, USA",
+         "name":"Chris Pine",
+         "biography":"Christopher Whitelaw \"Chris\" Pine (born August 26, 1980) is an American actor. He has appeared in the romantic comedies The Princess Diaries 2: Royal Engagement (2004) and Just My Luck (2006), as well as the action films Smokin' Aces (2007) and Unstoppable (2010). In 2009, he portrayed James T. Kirk in the film Star Trek.",
+         "birthDay":"1980-08-26",
+         "birthPlace":"Los Angeles, California, USA",
          "birthName":null,
          "deathDay":null,
          "job":"ACTOR",
-         "role":"Sigmund Freud"
+         "role":"Kirk",
+         "artwork":[]
       },
       {
          "id":2,
-         "name":"Keira Knightley",
-         "biography":"Keira Christina Knightley (born 26 March 1985) is an English actress...",
-         "birthDay":"1985-03-26",
-         "birthPlace":"London, United Kingdom",
+         "name":"Zachary Quinto",
+         "biography":"Zachary Quinto is a american actor best known for his roles as the evil Sylar on TV's Heroes and as Spock in the Star Trek Reboot.  In 1999 Quinto graduated from Carnegie Melon's School of Drama, afterwards beginning his career as a television actor.  In 2003, he landed a recurring role on 24, appearing as a computer specialist working for CTU. Later, in 2006, he began working on Heroes, playing the evil serial killer Sylar.   In 2009 he played Spock in Star Trek, a role which he was lauded for bringing his own spin to a decades old character and a role he is set to reprise in the second film in the new series.   Like his costar Chris Pine, Zachary has taken some time to perform on stage, performing in various productions including Shakespeare's Much Ado About Nothing.  Quinto is signed up to play George Gershwin in the Steven Spielberg directed Biopic about the composer. ",
+         "birthDay":"1977-06-02",
+         "birthPlace":"Pittsburgh, Pennsylvania, USA",
          "birthName":null,
          "deathDay":null,
          "job":"ACTOR",
-         "role":"Sabina Spielrein"
+         "role":"Spock",
+         "artwork":[]
       }
    ]
 }
+
+
+Get a list of cast and crew for a series
+
+**Required Parameters**
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>This is the ID of the series to get the list for.</td>
+    </tr>
+</table>
+
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>job</td>
+        <td>Comma separated list of jobs to restrict the list to.</td>
+    </tr>
+    <tr>
+        <td>dataitems</td>
+        <td>Comma separated list of additional data items to add to the results.<br>
+            Valid items are: artwork, biography.</td>
+    </tr>
+    <tr>
+        <td>PAGING</td>
+        <td>See above for the explanation on paging parameters</td>
+    </tr>
+    <tr>
+        <td>SEARCHING</td>
+        <td>See above for the explanation on searching parameters</td>
+    </tr>
+    <tr>
+        <td>SORTING</td>
+        <td>See above for the explanation on sorting parameters</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/person/series?id=2&job=actor&max=2`
+
+GET /api/person/series
+< 200
+< Content-Type: application/json
+{
+   "count":2,
+   "totalCount":318,
+   "queryDuration":"681ms",
+   "queryTime":"2013-09-10 15:00:51",
+   "status":{
+      "status":200,
+      "message":"OK"
+   },
+   "options":{
+      "start":-1,
+      "max":2,
+      "sortby":"",
+      "sortdir":"ASC",
+      "field":"",
+      "search":"",
+      "mode":"",
+      "dataitems":[],
+      "id":2,
+      "job":[
+         "actor"
+      ]
+   },
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
+   "results":[
+      {
+         "id":143,
+         "name":"Natalie Dormer",
+         "biography":"Natalie Dormer (born 11 February 1982 in Reading, Berkshire, England, UK) is an English actress. She is best known for her roles in Casanova as Victoria and as the ill-fated Tudor queen, Anne Boleyn in the Showtime series The Tudors. She is also a descendant of the family of Jane Dormer.",
+         "birthDay":"1982-02-11",
+         "birthPlace":"Reading, UK",
+         "birthName":null,
+         "deathDay":null,
+         "job":"ACTOR",
+         "role":"Margaery Tyrell",
+         "artwork":[]
+      },
+      {
+         "id":144,
+         "name":"Emilia Clarke",
+         "biography":"Emilia Clarke (born 1987/1988) is an English actress. She is best known for the role of Daenerys Targaryen in the HBO cable television medieval-fantasy series Game of Thrones.",
+         "birthDay":null,
+         "birthPlace":"London, UK",
+         "birthName":null,
+         "deathDay":null,
+         "job":"ACTOR",
+         "role":"Daenerys Targaryen",
+         "artwork":[]
+      }
+   ]
+}
+
+Get a list of cast and crew for a season
+
+**Required Parameters**
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>This is the ID of the season to get the list for.</td>
+    </tr>
+</table>
+
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>job</td>
+        <td>Comma separated list of jobs to restrict the list to.</td>
+    </tr>
+    <tr>
+        <td>dataitems</td>
+        <td>Comma separated list of additional data items to add to the results.<br>
+            Valid items are: artwork, biography.</td>
+    </tr>
+    <tr>
+        <td>PAGING</td>
+        <td>See above for the explanation on paging parameters</td>
+    </tr>
+    <tr>
+        <td>SEARCHING</td>
+        <td>See above for the explanation on searching parameters</td>
+    </tr>
+    <tr>
+        <td>SORTING</td>
+        <td>See above for the explanation on sorting parameters</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/person/season?id=3&job=actor&max=2&start=3`
+
+GET /api/person/season
+< 200
+< Content-Type: application/json
+{
+   "count":2,
+   "totalCount":106,
+   "queryDuration":"544ms",
+   "queryTime":"2013-09-10 15:02:28",
+   "status":{
+      "status":200,
+      "message":"OK"
+   },
+   "options":{
+      "start":3,
+      "max":2,
+      "sortby":"",
+      "sortdir":"ASC",
+      "field":"",
+      "search":"",
+      "mode":"",
+      "dataitems":[],
+      "id":3,
+      "job":[
+         "actor"
+      ]
+   },
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
+   "results":[
+      {
+         "id":146,
+         "name":"Lena Headey",
+         "biography":"  Lena Headey (born 3 October 1973) is an English actress known for playing Sarah Connor on Fox's Terminator: The Sarah Connor Chronicles, as well as appearing in such films as The Remains of the Day, Possession, Imagine Me and You, The Brothers Grimm, The Broken, 300 and The Red Baron.",
+         "birthDay":"1973-10-03",
+         "birthPlace":"Bermuda",
+         "birthName":null,
+         "deathDay":null,
+         "job":"ACTOR",
+         "role":"Cersei Lannister",
+         "artwork":[]
+      },
+      {
+         "id":147,
+         "name":"Sean Bean",
+         "biography":"Shaun Mark \"Sean\" Bean (born 17 April 1959) is an English film and stage actor. Bean is best known for starring roles in the films Lord of the Rings: The Fellowship of the Ring, GoldenEye, Patriot Games, Troy, National Treasure and Silent Hill, as well as the television series Sharpe. Bean has also acted in a number of television productions, most recent being HBO's Game of Thrones, as well as performing voice work for computer games and television adverts.",
+         "birthDay":"1959-04-17",
+         "birthPlace":"Sheffield, South Yorkshire, England, UK",
+         "birthName":null,
+         "deathDay":null,
+         "job":"ACTOR",
+         "role":"Eddard \"Ned\" Stark",
+         "artwork":[]
+      }
+   ]
+}
+
+Get a list of cast and crew for an episode
+
+**Required Parameters**
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>This is the ID of the episode to get the list for.</td>
+    </tr>
+</table>
+
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>job</td>
+        <td>Comma separated list of jobs to restrict the list to.</td>
+    </tr>
+    <tr>
+        <td>dataitems</td>
+        <td>Comma separated list of additional data items to add to the results.<br>
+            Valid items are: artwork, biography.</td>
+    </tr>
+    <tr>
+        <td>PAGING</td>
+        <td>See above for the explanation on paging parameters</td>
+    </tr>
+    <tr>
+        <td>SEARCHING</td>
+        <td>See above for the explanation on searching parameters</td>
+    </tr>
+    <tr>
+        <td>SORTING</td>
+        <td>See above for the explanation on sorting parameters</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/person/episode?id=1&job=actor&max=2`
+
+GET /api/person/episode
+< 200
+< Content-Type: application/json
+{
+   "count":2,
+   "totalCount":35,
+   "queryDuration":"402ms",
+   "queryTime":"2013-09-10 15:04:04",
+   "status":{
+      "status":200,
+      "message":"OK"
+   },
+   "options":{
+      "start":-1,
+      "max":2,
+      "sortby":"",
+      "sortdir":"ASC",
+      "field":"",
+      "search":"",
+      "mode":"",
+      "dataitems":[],
+      "id":22,
+      "job":[]
+   },
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
+   "results":[
+      {
+         "id":233,
+         "name":"Hayden Panettiere",
+         "biography":"Hayden Leslie Panettiere (born August 21, 1989) is an American actress and singer. She came to professional prominence at the age of 10 with her portrayal of Sheryl Yoast in Disney's Remember the Titans, although for five years before that, Panettiere had held roles in two soap operas. She portrayed Sarah Roberts on One Life to Live (1994–1997), and Lizzie Spaulding on Guiding Light (1996–2000). Panettiere reached a wider audience with her starring role as cheerleader Claire Bennet on the NBC television series Heroes.",
+         "birthDay":"1989-08-21",
+         "birthPlace":"Palisades, New York, USA",
+         "birthName":null,
+         "deathDay":null,
+         "job":"ACTOR",
+         "role":"Claire Bennet",
+         "artwork":[]
+      },
+      {
+         "id":234,
+         "name":"Milo Ventimiglia",
+         "biography":"Milo Anthony Ventimiglia (born July 8, 1977) is an American television actor best known for his role of Peter Petrelli on the TV series Heroes. Ventimiglia was first noticed by fans during his three year stint on the WB series Gilmore Girls, playing Rory Gilmore's boyfriend Jess Mariano from 2001 until his final guest appearance in 2006. After his own WB series The Bedford Diaries, a recurring role as Meg Pryor's love interest on NBC's American Dreams, and playing Rocky Balboa's son in the sixth and final installment of the Rocky series, Rocky Balboa, Ventimiglia's big break came in 2006 when he received the part of nurse-turned-superhero Peter Petrelli for four seasons on NBC's Heroes.",
+         "birthDay":"1977-07-08",
+         "birthPlace":"Anaheim, California, USA",
+         "birthName":null,
+         "deathDay":null,
+         "job":"ACTOR",
+         "role":"Peter Petrelli",
+         "artwork":[]
+      }
+   ]
+}
+
 
 --
 Other
