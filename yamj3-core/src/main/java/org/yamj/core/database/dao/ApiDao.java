@@ -993,7 +993,7 @@ public class ApiDao extends HibernateDao {
 
         if (options.hasDataItem(DataItem.ARTWORK)) {
             for (ApiSeasonInfoDTO season : seasonResults) {
-                Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.SEASON, seriesId, options.getArtworkTypes());
+                Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.SEASON, season.getSeasonId(), options.getArtworkTypes());
                 for (ApiArtworkDTO artwork : artworkList.get(seriesId)) {
                     season.addArtwork(artwork);
                 }
