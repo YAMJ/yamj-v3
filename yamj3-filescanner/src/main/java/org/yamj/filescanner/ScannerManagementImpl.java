@@ -175,7 +175,6 @@ public class ScannerManagementImpl implements ScannerManagement {
         checkGitHubStatus();
         libraryCollection.setDefaultClient(DEFAULT_CLIENT);
         libraryCollection.setDefaultPlayerPath(DEFAULT_PLAYER_PATH);
-        libraryCollection.setDefaultWatch(DEFAULT_WATCH_STATE);
         pingCore.check(0, 0);   // Do a quick check of the status of the connection
 
         String directoryProperty = parser.getParsedOptionValue("d");

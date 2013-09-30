@@ -27,13 +27,13 @@ public class PagesController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PagesController.class);
     @Autowired
-    SystemInfoController sic;
+    private SystemInfoController sic;
     @Autowired
-    ConfigService configService;
+    private ConfigService configService;
     @Autowired
-    FileStorageService fileStorageService;
+    private FileStorageService fileStorageService;
     @Autowired
-    IndexController index;
+    private IndexController index;
 
     @RequestMapping(value = {"/", "/index"})
     public ModelAndView displayRoot() {
@@ -92,7 +92,7 @@ public class PagesController {
         List<Configuration> configList = configService.getConfiguration();
         Collections.sort(configList, new Comparator<Configuration>() {
             @Override
-            public int compare(Configuration o1, Configuration o2){
+            public int compare(Configuration o1, Configuration o2) {
                 return o1.getKey().compareTo(o2.getKey());
             }
         });

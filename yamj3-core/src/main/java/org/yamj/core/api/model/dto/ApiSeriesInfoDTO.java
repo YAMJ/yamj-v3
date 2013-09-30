@@ -28,13 +28,13 @@ import java.util.List;
 import java.util.Map;
 import org.yamj.core.database.model.type.ArtworkType;
 
-public class ApiSeriesInfoDTO extends AbstractApiDTO{
+public class ApiSeriesInfoDTO extends AbstractApiDTO {
 
     private Long seriesId;
     private String title;
     private Integer year;
     private List<ApiSeasonInfoDTO> seasonList;
-    Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
+    private Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
 
     public Long getSeriesId() {
         return seriesId;

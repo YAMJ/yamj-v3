@@ -26,7 +26,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 import org.yamj.core.database.model.type.ArtworkType;
 
 /**
@@ -38,7 +37,7 @@ public class OptionsIdArtwork extends OptionsId {
 
     private String artwork = "";
     @JsonIgnore
-    List<String> artworkTypes = new ArrayList<String>();
+    private List<String> artworkTypes = new ArrayList<String>();
 
     public String getArtwork() {
         return artwork;

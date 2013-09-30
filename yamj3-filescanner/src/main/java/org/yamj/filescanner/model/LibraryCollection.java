@@ -41,7 +41,6 @@ public class LibraryCollection implements Serializable {
     private List<Library> libraries;
     private String defaultPlayerPath = "";
     private String defaultClient = "";
-    private boolean defaultWatch = Boolean.FALSE;
     // Spring
     @Resource(name = "xmlTools")
     private XmlTools xmlTools;
@@ -196,10 +195,6 @@ public class LibraryCollection implements Serializable {
 
     public void setDefaultPlayerPath(String defaultPlayerPath) {
         this.defaultPlayerPath = defaultPlayerPath;
-    }
-
-    public void setDefaultWatch(boolean defaultWatch) {
-        this.defaultWatch = defaultWatch;
     }
 
     public String getDefaultClient() {

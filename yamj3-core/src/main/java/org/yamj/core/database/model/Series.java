@@ -57,13 +57,10 @@ import org.yamj.core.database.model.type.OverrideFlag;
 public class Series extends AbstractMetadata {
 
     private static final long serialVersionUID = 1L;
-
     @Column(name = "start_year")
     private int startYear = -1;
-
     @Column(name = "end_year")
     private int endYear = -1;
-
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_ids", joinColumns =
             @JoinColumn(name = "series_id"))
@@ -72,7 +69,6 @@ public class Series extends AbstractMetadata {
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
-
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_ratings", joinColumns =
             @JoinColumn(name = "series_id"))
@@ -81,7 +77,6 @@ public class Series extends AbstractMetadata {
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", length = 30, nullable = false)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
-
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_override", joinColumns =
             @JoinColumn(name = "series_id"))
@@ -92,10 +87,8 @@ public class Series extends AbstractMetadata {
             @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
     private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
     private Set<Season> seasons = new HashSet<Season>(0);
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
 
@@ -189,7 +182,7 @@ public class Series extends AbstractMetadata {
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (this.identifier == null ? 0 : this.identifier.hashCode());
+        result = prime * result + (getIdentifier() == null ? 0 : getIdentifier().hashCode());
         return result;
     }
 
@@ -205,7 +198,7 @@ public class Series extends AbstractMetadata {
             return false;
         }
         Series castOther = (Series) other;
-        return StringUtils.equals(this.identifier, castOther.identifier);
+        return StringUtils.equals(getIdentifier(), castOther.getIdentifier());
     }
 
     @Override

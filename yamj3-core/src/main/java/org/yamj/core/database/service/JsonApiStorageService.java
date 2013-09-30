@@ -51,7 +51,7 @@ public class JsonApiStorageService {
     @Autowired
     private ApiDao apiDao;
     @Autowired
-    ConfigService configService;
+    private ConfigService configService;
 
     @Transactional(readOnly = true)
     public <T> T getEntityById(Class<T> entityClass, Serializable id) {

@@ -161,6 +161,22 @@ public final class CmdLineOption {
     }
 
     /**
+     * Ensure hashcode is created for the object.
+     *
+     * @return
+     */
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 23 * hash + (this.optionName != null ? this.optionName.hashCode() : 0);
+        hash = 23 * hash + (this.optionParameterName != null ? this.optionParameterName.hashCode() : 0);
+        hash = 23 * hash + (this.description != null ? this.description.hashCode() : 0);
+        hash = 23 * hash + (this.isRequired ? 1 : 0);
+        hash = 23 * hash + (this.needsValue ? 1 : 0);
+        return hash;
+    }
+
+    /**
      * Add an excluded option.
      *
      * @param excludedOption the excluded option

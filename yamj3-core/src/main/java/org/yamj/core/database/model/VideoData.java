@@ -48,31 +48,23 @@ import org.yamj.core.database.model.type.OverrideFlag;
 public class VideoData extends AbstractMetadata {
 
     private static final long serialVersionUID = 1L;
-
     @Column(name = "episode", nullable = false)
     private int episode = -1;
-
     @Index(name = "IX_VIDEODATA_PUBLICATIONYEAR")
     @Column(name = "publication_year", nullable = false)
     private int publicationYear = -1;
-
     @Column(name = "release_date", length = 10)
     private String releaseDate;
-
     @Column(name = "top_rank", nullable = false)
     private int topRank = -1;
-
     @Lob
     @Column(name = "tagline", length = 25000)
     private String tagline;
-
     @Lob
     @Column(name = "quote", length = 25000)
     private String quote;
-
     @Column(name = "country", length = 100)
     private String country;
-
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_ids", joinColumns =
             @JoinColumn(name = "videodata_id"))
@@ -81,7 +73,6 @@ public class VideoData extends AbstractMetadata {
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
-
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_ratings", joinColumns =
             @JoinColumn(name = "videodata_id"))
@@ -90,7 +81,6 @@ public class VideoData extends AbstractMetadata {
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", length = 30, nullable = false)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
-
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_override", joinColumns =
             @JoinColumn(name = "videodata_id"))
@@ -101,7 +91,6 @@ public class VideoData extends AbstractMetadata {
             @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
     private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
-
     @ManyToMany
     @ForeignKey(name = "FK_DATAGENRES_VIDEODATA", inverseName = "FK_DATAGENRES_GENRE")
     @JoinTable(name = "videodata_genres",
@@ -110,28 +99,22 @@ public class VideoData extends AbstractMetadata {
             inverseJoinColumns = {
         @JoinColumn(name = "genre_id")})
     private Set<Genre> genres = new HashSet<Genre>(0);
-
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_VIDEODATA_SEASON")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "season_id")
     private Season season;
-
     @ManyToMany(mappedBy = "videoDatas")
     @ForeignKey(name = "FK_REL_VIDEODATA_MEDIAFILE")
     private Set<MediaFile> mediaFiles = new HashSet<MediaFile>(0);
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @OrderColumn(name = "ordering", nullable = false)
     @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false)
     private List<CastCrew> credits = new ArrayList<CastCrew>(0);
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
-
     @Transient
     private Set<CreditDTO> creditDTOS = new LinkedHashSet<CreditDTO>(0);
-
     @Transient
     private Set<String> genreNames = new LinkedHashSet<String>(0);
 
@@ -140,7 +123,7 @@ public class VideoData extends AbstractMetadata {
         return publicationYear;
     }
 
-    private void setPublicationYear(int publicationYear) {
+    public void setPublicationYear(int publicationYear) {
         this.publicationYear = publicationYear;
     }
 
@@ -163,7 +146,7 @@ public class VideoData extends AbstractMetadata {
         return releaseDate;
     }
 
-    private void setReleaseDate(String releaseDate) {
+    public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
     }
 
@@ -186,7 +169,7 @@ public class VideoData extends AbstractMetadata {
         return tagline;
     }
 
-    private void setTagline(String tagline) {
+    public void setTagline(String tagline) {
         this.tagline = tagline;
     }
 
@@ -201,7 +184,7 @@ public class VideoData extends AbstractMetadata {
         return quote;
     }
 
-    private void setQuote(String quote) {
+    public void setQuote(String quote) {
         this.quote = quote;
     }
 
@@ -216,7 +199,7 @@ public class VideoData extends AbstractMetadata {
         return country;
     }
 
-    private void setCountry(String country) {
+    public void setCountry(String country) {
         this.country = country;
     }
 
@@ -385,13 +368,12 @@ public class VideoData extends AbstractMetadata {
         return (episode < 0);
     }
 
-
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (this.identifier == null ? 0 : this.identifier.hashCode());
+        result = prime * result + (getIdentifier() == null ? 0 : getIdentifier().hashCode());
         return result;
     }
 
@@ -407,7 +389,7 @@ public class VideoData extends AbstractMetadata {
             return false;
         }
         VideoData castOther = (VideoData) other;
-        return StringUtils.equals(this.identifier, castOther.identifier);
+        return StringUtils.equals(getIdentifier(), castOther.getIdentifier());
     }
 
     @Override

@@ -41,7 +41,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private String originalTitle;
     private Integer videoYear;
     private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
-    Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
+    private Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
     private String outline;
     private String plot;
     private String country;

@@ -40,8 +40,8 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     private Date deathDay;
     private String job = "";
     private String role = "";
-    List<ApiArtworkDTO> artwork = new ArrayList<ApiArtworkDTO>(0);
-    List<ApiFilmographyDTO> filmography = new ArrayList<ApiFilmographyDTO>(0);
+    private List<ApiArtworkDTO> artwork = new ArrayList<ApiArtworkDTO>(0);
+    private List<ApiFilmographyDTO> filmography = new ArrayList<ApiFilmographyDTO>(0);
 
     public String getBiography() {
         return biography;

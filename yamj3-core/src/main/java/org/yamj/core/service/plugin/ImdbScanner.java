@@ -24,7 +24,6 @@ package org.yamj.core.service.plugin;
 
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.tools.web.PoolingHttpClient;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +36,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
 
     public static final String SCANNER_ID = "imdb";
     private static final Logger LOG = LoggerFactory.getLogger(ImdbScanner.class);
-    @Autowired
-    private PoolingHttpClient httpClient;
+//    @Autowired
+//    private PoolingHttpClient httpClient;
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
     @Autowired

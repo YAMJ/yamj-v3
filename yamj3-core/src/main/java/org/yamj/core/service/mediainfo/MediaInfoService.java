@@ -58,7 +58,7 @@ public class MediaInfoService implements InitializingBean {
     private static final String MI_FILENAME_LINUX = "mediainfo";
     private static final String MI_RAR_FILENAME_LINUX = "mediainfo-rar";
     // media info settings
-    private static File MEDIAINFO_PATH = new File(PropertyTools.getProperty("mediainfo.home", "./mediaInfo/"));
+    private static File mediaInfoPath = new File(PropertyTools.getProperty("mediainfo.home", "./mediaInfo/"));
     private List<String> execMediaInfo = new ArrayList<String>();
     private boolean isMediaInfoRar = Boolean.FALSE;
     private boolean isActivated = Boolean.TRUE;
@@ -77,23 +77,23 @@ public class MediaInfoService implements InitializingBean {
         LOG.debug("Operating System Name   : {}", OS_NAME);
         LOG.debug("Operating System Version: {}", System.getProperty("os.version"));
         LOG.debug("Operating System Type   : {}", System.getProperty("os.arch"));
-        LOG.debug("Media Info Path         : {}", MEDIAINFO_PATH);
+        LOG.debug("Media Info Path         : {}", mediaInfoPath);
 
         File mediaInfoFile;
         if (OS_NAME.contains("Windows")) {
-            mediaInfoFile = new File(MEDIAINFO_PATH.getAbsolutePath() + File.separator + MI_RAR_FILENAME_WINDOWS);
+            mediaInfoFile = new File(mediaInfoPath.getAbsolutePath() + File.separator + MI_RAR_FILENAME_WINDOWS);
             if (!mediaInfoFile.exists()) {
                 //  fall back to the normal filename
-                mediaInfoFile = new File(MEDIAINFO_PATH.getAbsolutePath() + File.separator + MI_FILENAME_WINDOWS);
+                mediaInfoFile = new File(mediaInfoPath.getAbsolutePath() + File.separator + MI_FILENAME_WINDOWS);
             } else {
                 // enable the extra mediainfo-rar features
                 isMediaInfoRar = Boolean.TRUE;
             }
         } else {
-            mediaInfoFile = new File(MEDIAINFO_PATH.getAbsolutePath() + File.separator + MI_RAR_FILENAME_LINUX);
+            mediaInfoFile = new File(mediaInfoPath.getAbsolutePath() + File.separator + MI_RAR_FILENAME_LINUX);
             if (!mediaInfoFile.exists()) {
                 // Fall back to the normal filename
-                mediaInfoFile = new File(MEDIAINFO_PATH.getAbsolutePath() + File.separator + MI_FILENAME_LINUX);
+                mediaInfoFile = new File(mediaInfoPath.getAbsolutePath() + File.separator + MI_FILENAME_LINUX);
             } else {
                 // enable the extra mediainfo-rar features
                 isMediaInfoRar = Boolean.TRUE;
@@ -487,7 +487,7 @@ public class MediaInfoService implements InitializingBean {
         ProcessBuilder pb = new ProcessBuilder(commandMedia);
 
         // set up the working directory.
-        pb.directory(MEDIAINFO_PATH);
+        pb.directory(mediaInfoPath);
 
         Process p = pb.start();
         return p.getInputStream();

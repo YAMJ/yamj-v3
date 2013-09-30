@@ -30,7 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.MediaDao;
 import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.dao.StagingDao;
@@ -56,8 +55,8 @@ public class MediaImportService {
     private MetadataDao metadataDao;
     @Autowired
     private FilenameScanner filenameScanner;
-    @Autowired
-    private ConfigService configService;
+//    @Autowired
+//    private ConfigService configService;
 
     @Transactional(readOnly = true)
     public Long getNextStageFileId(final FileType fileType, final StatusType... statusTypes) {

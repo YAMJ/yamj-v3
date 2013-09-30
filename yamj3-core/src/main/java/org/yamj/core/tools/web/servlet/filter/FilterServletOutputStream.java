@@ -62,4 +62,8 @@ public class FilterServletOutputStream extends ServletOutputStream {
     public void setWriteListener(WriteListener wl) {
         this.writeListener = wl;
     }
+
+    public WriteListener getWriteListener() {
+        return writeListener;
+    }
 }

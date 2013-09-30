@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.options.OptionsIndexPerson;
 import org.yamj.core.api.wrapper.ApiWrapperList;

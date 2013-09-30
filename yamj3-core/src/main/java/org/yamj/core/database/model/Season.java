@@ -225,7 +225,7 @@ public class Season extends AbstractMetadata {
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (this.identifier == null ? 0 : this.identifier.hashCode());
+        result = prime * result + (getIdentifier() == null ? 0 : getIdentifier().hashCode());
         return result;
     }
 
@@ -241,7 +241,7 @@ public class Season extends AbstractMetadata {
             return false;
         }
         Season castOther = (Season) other;
-        return StringUtils.equals(this.identifier, castOther.identifier);
+        return StringUtils.equals(getIdentifier(), castOther.getIdentifier());
     }
 
     @Override

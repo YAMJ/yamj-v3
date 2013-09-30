@@ -28,8 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.text.WordUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Class to store any statistics about the jukebox
@@ -38,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Statistics {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Statistics.class);
+//    private static final Logger LOG = LoggerFactory.getLogger(Statistics.class);
     // Statistics
     private EnumMap<StatType, Integer> statistics = new EnumMap<StatType, Integer>(StatType.class);
     private EnumMap<TimeType, Long> times = new EnumMap<TimeType, Long>(TimeType.class);

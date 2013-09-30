@@ -41,7 +41,7 @@ public class OptionsIndexVideo extends OptionsIdArtwork {
     private String include = "";
     private String exclude = "";
     @JsonIgnore
-    List<MetaDataType> videoTypes = new ArrayList<MetaDataType>();
+    private List<MetaDataType> videoTypes = new ArrayList<MetaDataType>();
 
     public void setInclude(String include) {
         this.include = include;
