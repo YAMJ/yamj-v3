@@ -46,6 +46,7 @@ import org.yamj.core.api.model.DataItem;
 import org.yamj.core.api.model.DataItemTools;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.SqlScalars;
+import org.yamj.core.api.model.dto.AbstractApiIdentifiableDTO;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
 import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
 import org.yamj.core.api.model.dto.ApiEpisodeDTO;
@@ -462,8 +463,22 @@ public class ApiDao extends HibernateDao {
      * @param wrapper
      */
     public void getPersonList(ApiWrapperList<ApiPersonDTO> wrapper) {
-        SqlScalars sqlScalars = generateSqlForPerson((OptionsIndexPerson) wrapper.getOptions());
+        OptionsIndexPerson options = (OptionsIndexPerson) wrapper.getOptions();
+        SqlScalars sqlScalars = generateSqlForPerson(options);
         List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
+        if (CollectionUtils.isNotEmpty(results)) {
+            if (options.hasDataItem(DataItem.ARTWORK)) {
+                LOG.info("Adding photos");
+                // Get the artwork associated with the IDs in the results
+                Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, generateIdList(results), Arrays.asList("PHOTO"));
+                for (ApiPersonDTO p : results) {
+                    if (artworkList.containsKey(p.getId())) {
+                        p.setArtwork(artworkList.get(p.getId()));
+                    }
+                }
+            }
+        }
+
         wrapper.setResults(results);
     }
 
@@ -478,7 +493,7 @@ public class ApiDao extends HibernateDao {
         List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
         if (CollectionUtils.isNotEmpty(results)) {
             ApiPersonDTO person = results.get(0);
-            if (options.splitDataitems().contains(DataItem.ARTWORK)) {
+            if (options.hasDataItem(DataItem.ARTWORK)) {
                 LOG.info("Adding photo for {}", person.getName());
                 // Add the artwork
                 Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, person.getId(), Arrays.asList("PHOTO"));
@@ -489,10 +504,57 @@ public class ApiDao extends HibernateDao {
                     LOG.info("No artwork found for Person ID '{}'", options.getId());
                 }
             }
+
+            if (options.hasDataItem(DataItem.FILMOGRAPHY)) {
+                LOG.info("Adding filmograpgy for {}", person.getName());
+                LOG.warn("Not implemented yet!");
+            }
+
             wrapper.setResult(person);
         } else {
             wrapper.setResult(null);
         }
+    }
+
+    private void getFilmographyForPerson(Object id) {
+        SqlScalars sqlScalars = new SqlScalars();
+
+        sqlScalars.addToSql("SELECT " + MetaDataType.MOVIE + " AS videoType,");
+        sqlScalars.addToSql("c.job, c.role, c.videodata_id AS videoId,");
+        sqlScalars.addToSql("v.title AS videoTitle, v.publication_year as videoYear,");
+        sqlScalars.addToSql("-1 AS seasonId, -1 AS season, -1 AS episode");
+        sqlScalars.addToSql("FROM person p, cast_crew c, videodata v");
+        sqlScalars.addToSql("WHERE p.id=c.person_id");
+        sqlScalars.addToSql("AND c.videodata_id = v.id");
+        sqlScalars.addToSql("AND v.episode<0");
+        sqlScalars.addToSql("AND p.id IN (:id)");
+        sqlScalars.addToSql("");
+        sqlScalars.addToSql("");
+
+
+        /*
+         Select p.id, p.name, "MOVIE" as type,
+         c.job, c.role, c.videodata_id as data_id,
+         v.title as title, v.publication_year as year, -1 as season, -1 as episode
+         from person p, cast_crew c, videodata v
+         where p.id=c.person_id
+         and c.videodata_id = v.id
+         and p.id=2
+         and v.episode<0
+         UNION ALL
+         Select p.id, p.name, "SEASON" as type,
+         c.job, c.role, s.id as data_id,
+         v.title_original as title, LEFT(s.first_aired,4) as year, s.season, v.episode
+         from person p, cast_crew c, videodata v, season s
+         where p.id=c.person_id
+         and c.videodata_id = v.id
+         and v.season_id=s.id
+         and p.id=2
+         and v.episode>=0
+         ORDER by type, data_id, season, episode
+         */
+
+
     }
 
     public void getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {
@@ -503,14 +565,10 @@ public class ApiDao extends HibernateDao {
         List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
         LOG.info("Found {} results for {} with id '{}'", results.size(), metaDataType, options.getId());
 
-        if (options.splitDataitems().contains(DataItem.ARTWORK)) {
+        if (options.hasDataItem(DataItem.ARTWORK)) {
             LOG.info("Looking for person artwork for {} with id '{}'", metaDataType, options.getId());
-            List<Long> personIds = new ArrayList<Long>();
-            for (ApiPersonDTO p : results) {
-                personIds.add(p.getId());
-            }
 
-            Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, personIds, Arrays.asList("PHOTO"));
+            Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, generateIdList(results), Arrays.asList("PHOTO"));
             for (ApiPersonDTO person : results) {
                 if (artworkList.containsKey(person.getId())) {
                     person.setArtwork(artworkList.get(person.getId()));
@@ -885,9 +943,9 @@ public class ApiDao extends HibernateDao {
     public Map<Long, List<ApiArtworkDTO>> getArtworkForId(MetaDataType type, Object id, List<String> artworkRequired) {
         LOG.debug("Artwork required for {} ID '{}' is {}", type, id, artworkRequired);
         StringBuilder sbSQL = new StringBuilder();
-        sbSQL.append("SELECT '").append(type.toString()).append("' as sourceString, ");
-        sbSQL.append(" v.id as sourceId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, ");
-        sbSQL.append(" a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename ");
+        sbSQL.append("SELECT '").append(type.toString()).append("' AS sourceString,");
+        sbSQL.append(" v.id AS sourceId, a.id AS artworkId, al.id AS locatedId, ag.id AS generatedId,");
+        sbSQL.append(" a.artwork_type AS artworkTypeString, ag.cache_dir AS cacheDir, ag.cache_filename AS cacheFilename ");
         if (type == MetaDataType.MOVIE) {
             sbSQL.append("FROM videodata v ");
         } else if (type == MetaDataType.SERIES) {
@@ -914,6 +972,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(" AND a.artwork_type IN (:artworklist)");
 
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
+        LOG.info("Artwork SQL: {}", sqlScalars.getSql());
 
         sqlScalars.addScalar("sourceString", StringType.INSTANCE);
         sqlScalars.addScalar("sourceId", LongType.INSTANCE);
@@ -1012,12 +1071,50 @@ public class ApiDao extends HibernateDao {
         if (options.hasDataItem(DataItem.ARTWORK)) {
             for (ApiSeasonInfoDTO season : seasonResults) {
                 Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.SEASON, season.getSeasonId(), options.getArtworkTypes());
-                for (ApiArtworkDTO artwork : artworkList.get(seriesId)) {
-                    season.addArtwork(artwork);
+                if (artworkList == null || !artworkList.containsKey(seriesId) || CollectionUtils.isEmpty(artworkList.get(seriesId))) {
+                    LOG.debug("No artwork found for seriesId '{}' season {}", seriesId, season.getSeason());
+                } else {
+                    for (ApiArtworkDTO artwork : artworkList.get(season.getSeasonId())) {
+                        season.addArtwork(artwork);
+                    }
                 }
             }
         }
 
         return seasonResults;
     }
+
+    //<editor-fold defaultstate="collapsed" desc="Utility Functions">
+    /**
+     * Takes a list and generates a map of the ID and item
+     *
+     * @param idList
+     * @return
+     */
+    private <T extends AbstractApiIdentifiableDTO> Map<Long, T> generateIdMap(List<T> idList) {
+        Map<Long, T> results = new HashMap<Long, T>(idList.size());
+
+        for (T idSingle : idList) {
+            results.put(idSingle.getId(), idSingle);
+        }
+
+        return results;
+    }
+
+    /**
+     * Generate a list of the IDs from a list
+     *
+     * @param idList
+     * @return
+     */
+    private <T extends AbstractApiIdentifiableDTO> List<Long> generateIdList(List<T> idList) {
+        List<Long> results = new ArrayList<Long>(idList.size());
+
+        for (T idSingle : idList) {
+            results.add(idSingle.getId());
+        }
+
+        return results;
+    }
+    //</editor-fold>
 }

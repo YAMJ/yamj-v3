@@ -41,6 +41,7 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     private String job = "";
     private String role = "";
     List<ApiArtworkDTO> artwork = new ArrayList<ApiArtworkDTO>(0);
+    List<ApiFilmographyDTO> filmography = new ArrayList<ApiFilmographyDTO>(0);
 
     public String getBiography() {
         return biography;
@@ -116,5 +117,17 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
 
     public void addArtwrok(ApiArtworkDTO artwork) {
         this.artwork.add(artwork);
+    }
+
+    public List<ApiFilmographyDTO> getFilmography() {
+        return filmography;
+    }
+
+    public void setFilmography(List<ApiFilmographyDTO> filmography) {
+        this.filmography = filmography;
+    }
+
+    public void addFilmography(ApiFilmographyDTO film) {
+        this.filmography.add(film);
     }
 }
