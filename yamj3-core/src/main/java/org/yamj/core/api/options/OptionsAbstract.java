@@ -49,6 +49,7 @@ public abstract class OptionsAbstract implements IOptions {
     private Integer perpage = -1;
     @JsonIgnore
     private Integer perline = -1;
+    private String language;
 
     @Override
     public void setStart(Integer start) {
@@ -74,6 +75,11 @@ public abstract class OptionsAbstract implements IOptions {
 
     public void setPerline(Integer perline) {
         this.perline = perline;
+    }
+
+    @Override
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
     @Override
@@ -116,6 +122,11 @@ public abstract class OptionsAbstract implements IOptions {
 
     public Integer getPerline() {
         return perline;
+    }
+
+    @Override
+    public String getLanguage() {
+        return language;
     }
 
     @Override

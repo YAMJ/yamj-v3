@@ -23,6 +23,7 @@
 package org.yamj.core.api.options;
 
 /**
+ * Options interface to specify the options that are available for all option models
  *
  * @author stuart.boston
  */
@@ -32,7 +33,11 @@ public interface IOptions {
 
     void setMax(Integer max);
 
+    void setLanguage(String language);
+
     Integer getStart();
 
     Integer getMax();
+
+    String getLanguage();
 }

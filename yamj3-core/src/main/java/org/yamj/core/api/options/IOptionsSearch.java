@@ -23,6 +23,7 @@
 package org.yamj.core.api.options;
 
 /**
+ * Interface to specify search option fields
  *
  * @author stuart.boston
  */
