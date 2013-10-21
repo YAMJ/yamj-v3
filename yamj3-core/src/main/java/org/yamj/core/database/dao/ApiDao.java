@@ -70,7 +70,6 @@ public class ApiDao extends HibernateDao {
     /**
      * Generate the query and load the results into the wrapper
      *
-     * @param sqlString
      * @param wrapper
      */
     public void getVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
@@ -786,9 +785,11 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.id AS seasonId, sea.season, vid.episode, vid.title,");
         if (options.hasDataItem(DataItem.OUTLINE)) {
             sqlScalars.addToSql("vid.outline,");
+            sqlScalars.addScalar("outline", StringType.INSTANCE);
         }
         if (options.hasDataItem(DataItem.PLOT)) {
             sqlScalars.addToSql("vid.plot,");
+            sqlScalars.addScalar("plot", StringType.INSTANCE);
         }
         sqlScalars.addToSql("ag.cache_filename AS cacheFilename, ag.cache_dir AS cacheDir");
         sqlScalars.addToSql("FROM season sea, series ser, videodata vid, artwork a");
@@ -816,12 +817,6 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("season", LongType.INSTANCE);
         sqlScalars.addScalar("episode", LongType.INSTANCE);
         sqlScalars.addScalar("title", StringType.INSTANCE);
-        if (options.hasDataItem(DataItem.OUTLINE)) {
-            sqlScalars.addScalar("outline", StringType.INSTANCE);
-        }
-        if (options.hasDataItem(DataItem.PLOT)) {
-            sqlScalars.addScalar("plot", StringType.INSTANCE);
-        }
         sqlScalars.addScalar("cacheFilename", StringType.INSTANCE);
         sqlScalars.addScalar("cacheDir", StringType.INSTANCE);
 

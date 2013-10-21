@@ -37,7 +37,7 @@ public class OptionsIdArtwork extends OptionsId {
 
     private String artwork = "";
     @JsonIgnore
-    private List<String> artworkTypes = new ArrayList<String>();
+    private final List<String> artworkTypes = new ArrayList<String>();
 
     public String getArtwork() {
         return artwork;

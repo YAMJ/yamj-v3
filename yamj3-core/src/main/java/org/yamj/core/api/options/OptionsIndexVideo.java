@@ -41,7 +41,7 @@ public class OptionsIndexVideo extends OptionsIdArtwork {
     private String include = "";
     private String exclude = "";
     @JsonIgnore
-    private List<MetaDataType> videoTypes = new ArrayList<MetaDataType>();
+    private final List<MetaDataType> videoTypes = new ArrayList<MetaDataType>();
 
     public void setInclude(String include) {
         this.include = include;
@@ -94,6 +94,8 @@ public class OptionsIndexVideo extends OptionsIdArtwork {
 
     /**
      * Split the include list into a map of values
+     *
+     * @return
      */
     public Map<String, String> splitIncludes() {
         return splitDashList(include);
@@ -101,6 +103,8 @@ public class OptionsIndexVideo extends OptionsIdArtwork {
 
     /**
      * Split the exclude list into a map of values
+     *
+     * @return
      */
     public Map<String, String> splitExcludes() {
         return splitDashList(exclude);
