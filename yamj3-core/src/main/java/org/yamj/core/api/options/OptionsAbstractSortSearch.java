@@ -42,7 +42,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     private String mode = "";
     private List<String> dataitems = new ArrayList<String>();
     @JsonIgnore
-    private List<DataItem> dataitemList = new ArrayList<DataItem>();
+    private final List<DataItem> dataitemList = new ArrayList<DataItem>();
 
     //<editor-fold defaultstate="collapsed" desc="Sort Setters/Getters">
     /**

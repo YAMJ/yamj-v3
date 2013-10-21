@@ -37,6 +37,8 @@ public class ApiEpisodeDTO {
     private Long season;
     private Long episode;
     private String title;
+    private String outline = "";
+    private String plot = "";
     @JsonIgnore
     private String cacheFilename;
     @JsonIgnore
@@ -62,6 +64,14 @@ public class ApiEpisodeDTO {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public void setOutline(String outline) {
+        this.outline = outline;
+    }
+
+    public void setPlot(String plot) {
+        this.plot = plot;
     }
 
     public void setCacheFilename(String cacheFilename) {
@@ -92,6 +102,14 @@ public class ApiEpisodeDTO {
 
     public String getTitle() {
         return title;
+    }
+
+    public String getOutline() {
+        return outline;
+    }
+
+    public String getPlot() {
+        return plot;
     }
 
     public String getVideoimage() {

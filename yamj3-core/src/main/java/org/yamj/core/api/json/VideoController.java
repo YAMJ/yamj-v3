@@ -166,6 +166,7 @@ public class VideoController {
         ApiWrapperList<ApiEpisodeDTO> wrapper = new ApiWrapperList<ApiEpisodeDTO>();
         wrapper.setOptions(options);
         jsonApiStorageService.getEpisodeList(wrapper);
+        wrapper.setStatusCheck();
         return wrapper;
     }
 }

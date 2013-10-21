@@ -553,8 +553,6 @@ public class ApiDao extends HibernateDao {
          and v.episode>=0
          ORDER by type, data_id, season, episode
          */
-
-
     }
 
     public void getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {
@@ -786,6 +784,12 @@ public class ApiDao extends HibernateDao {
         SqlScalars sqlScalars = new SqlScalars();
 
         sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.id AS seasonId, sea.season, vid.episode, vid.title,");
+        if (options.hasDataItem(DataItem.OUTLINE)) {
+            sqlScalars.addToSql("vid.outline,");
+        }
+        if (options.hasDataItem(DataItem.PLOT)) {
+            sqlScalars.addToSql("vid.plot,");
+        }
         sqlScalars.addToSql("ag.cache_filename AS cacheFilename, ag.cache_dir AS cacheDir");
         sqlScalars.addToSql("FROM season sea, series ser, videodata vid, artwork a");
         sqlScalars.addToSql("LEFT JOIN artwork_located al ON a.id=al.artwork_id");
@@ -812,6 +816,12 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("season", LongType.INSTANCE);
         sqlScalars.addScalar("episode", LongType.INSTANCE);
         sqlScalars.addScalar("title", StringType.INSTANCE);
+        if (options.hasDataItem(DataItem.OUTLINE)) {
+            sqlScalars.addScalar("outline", StringType.INSTANCE);
+        }
+        if (options.hasDataItem(DataItem.PLOT)) {
+            sqlScalars.addScalar("plot", StringType.INSTANCE);
+        }
         sqlScalars.addScalar("cacheFilename", StringType.INSTANCE);
         sqlScalars.addScalar("cacheDir", StringType.INSTANCE);
 

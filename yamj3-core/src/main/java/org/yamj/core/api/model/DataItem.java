@@ -40,7 +40,7 @@ public enum DataItem {
     BIOGRAPHY(true),
     FILMOGRAPHY(false),
     UNKNOWN(false);
-    private boolean column; // Is the DataItem a column or a collection (e.g. artwork, genres, etc)
+    private final boolean column; // Is the DataItem a column or a collection (e.g. artwork, genres, etc)
 
     DataItem(boolean isColumn) {
         this.column = isColumn;

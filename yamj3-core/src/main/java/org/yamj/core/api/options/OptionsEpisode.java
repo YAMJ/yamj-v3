@@ -27,7 +27,7 @@ package org.yamj.core.api.options;
  *
  * @author stuart.boston
  */
-public class OptionsEpisode extends OptionsAbstract {
+public class OptionsEpisode extends OptionsAbstractSortSearch {
 
     private Long seriesid = -1L;
     private Long seasonid = -1L;
