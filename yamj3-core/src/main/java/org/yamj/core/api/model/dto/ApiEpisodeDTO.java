@@ -32,11 +32,12 @@ import org.apache.commons.lang.StringUtils;
  */
 public class ApiEpisodeDTO {
 
-    private Long seriesId;
-    private Long seasonId;
-    private Long season;
-    private Long episode;
-    private String title;
+    private Long seriesId = -1L;
+    private Long seasonId = -1L;
+    private Long season = -1L;
+    private Long episode = -1L;
+    private Long episodeId = -1L;
+    private String title = "";
     private String outline = "";
     private String plot = "";
     @JsonIgnore
@@ -60,6 +61,10 @@ public class ApiEpisodeDTO {
 
     public void setEpisode(Long episode) {
         this.episode = episode;
+    }
+
+    public void setEpisodeId(Long episodeId) {
+        this.episodeId = episodeId;
     }
 
     public void setTitle(String title) {
@@ -98,6 +103,10 @@ public class ApiEpisodeDTO {
 
     public Long getEpisode() {
         return episode;
+    }
+
+    public Long getEpisodeId() {
+        return episodeId;
     }
 
     public String getTitle() {

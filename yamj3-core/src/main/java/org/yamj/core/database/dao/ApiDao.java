@@ -782,7 +782,7 @@ public class ApiDao extends HibernateDao {
         OptionsEpisode options = (OptionsEpisode) wrapper.getOptions();
         SqlScalars sqlScalars = new SqlScalars();
 
-        sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.id AS seasonId, sea.season, vid.episode, vid.title,");
+        sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.id AS seasonId, sea.season, vid.episode, vid.id as episodeId, vid.title,");
         if (options.hasDataItem(DataItem.OUTLINE)) {
             sqlScalars.addToSql("vid.outline,");
             sqlScalars.addScalar("outline", StringType.INSTANCE);
@@ -816,6 +816,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("seasonId", LongType.INSTANCE);
         sqlScalars.addScalar("season", LongType.INSTANCE);
         sqlScalars.addScalar("episode", LongType.INSTANCE);
+        sqlScalars.addScalar("episodeId", LongType.INSTANCE);
         sqlScalars.addScalar("title", StringType.INSTANCE);
         sqlScalars.addScalar("cacheFilename", StringType.INSTANCE);
         sqlScalars.addScalar("cacheDir", StringType.INSTANCE);
