@@ -41,7 +41,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private String originalTitle;
     private Integer videoYear;
     private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
-    private Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
+    private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
     private String outline;
     private String plot;
     private String country;
@@ -51,6 +51,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private Long seriesId = -1L;
     private Long seasonId = -1L;
     private Long season = -1L;
+    private Long episode = -1L;
 
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public MetaDataType getVideoType() {
@@ -123,6 +124,10 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public Long getSeason() {
         return season;
+    }
+
+    public Long getEpisode() {
+        return episode;
     }
     //</editor-fold>
 
@@ -200,6 +205,10 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public void setSeason(Long season) {
         this.season = season;
+    }
+
+    public void setEpisode(Long episode) {
+        this.episode = episode;
     }
     //</editor-fold>
 

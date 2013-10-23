@@ -66,6 +66,8 @@ import org.yamj.core.hibernate.HibernateDao;
 public class ApiDao extends HibernateDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiDao.class);
+    private static final String YEAR = "year";
+    private static final String GENRE = "genre";
 
     /**
      * Generate the query and load the results into the wrapper
@@ -85,6 +87,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("seriesId", LongType.INSTANCE);
         sqlScalars.addScalar("seasonId", LongType.INSTANCE);
         sqlScalars.addScalar("season", LongType.INSTANCE);
+        sqlScalars.addScalar("episode", LongType.INSTANCE);
         DataItemTools.addDataItemScalars(sqlScalars, options.splitDataitems());
 
         List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
@@ -155,12 +158,13 @@ public class ApiDao extends HibernateDao {
         boolean hasMovie = mdt.contains(MetaDataType.MOVIE);
         boolean hasSeries = mdt.contains(MetaDataType.SERIES);
         boolean hasSeason = mdt.contains(MetaDataType.SEASON);
+        boolean hasEpisode = mdt.contains(MetaDataType.EPISODE);
 
         StringBuilder sbSQL = new StringBuilder();
 
         // Add the movie entries
         if (hasMovie) {
-            sbSQL.append(generateSqlForVideo(options, includes, excludes, dataItems));
+            sbSQL.append(generateSqlForVideo(true, options, includes, excludes, dataItems));
         }
 
         if (hasMovie && hasSeries) {
@@ -181,9 +185,19 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(generateSqlForSeason(options, includes, excludes, dataItems));
         }
 
+        if ((hasMovie || hasSeries || hasSeason) && hasEpisode) {
+            sbSQL.append(" UNION ALL ");
+        }
+
+        // Add the TV episode entries
+        if (hasEpisode) {
+            sbSQL.append(generateSqlForVideo(false, options, includes, excludes, dataItems));
+        }
+
         // Add the sort string, this will be empty if there is no sort required
         sbSQL.append(options.getSortString());
 
+        LOG.trace("SqlForVideoList: {}", sbSQL);
         return sbSQL.toString();
     }
 
@@ -195,48 +209,57 @@ public class ApiDao extends HibernateDao {
      * @param excludes
      * @return
      */
-    private String generateSqlForVideo(OptionsIndexVideo options, Map<String, String> includes, Map<String, String> excludes, List<DataItem> dataItems) {
+    private String generateSqlForVideo(boolean isMovie, OptionsIndexVideo options, Map<String, String> includes, Map<String, String> excludes, List<DataItem> dataItems) {
         StringBuilder sbSQL = new StringBuilder();
 
         sbSQL.append("SELECT vd.id");
-        sbSQL.append(", '").append(MetaDataType.MOVIE).append("' AS videoTypeString");
+        if (isMovie) {
+            sbSQL.append(", '").append(MetaDataType.MOVIE).append("' AS videoTypeString");
+        } else {
+            sbSQL.append(", '").append(MetaDataType.EPISODE).append("' AS videoTypeString");
+        }
         sbSQL.append(", vd.title");
         sbSQL.append(", vd.title_original AS originalTitle");
         sbSQL.append(", vd.publication_year AS videoYear");
         sbSQL.append(", '-1' AS firstAired");
         sbSQL.append(", '-1' AS seriesId");
-        sbSQL.append(", '-1' AS seasonId");
+        sbSQL.append(", vd.season_id AS seasonId");
         sbSQL.append(", '-1' AS season");
+        sbSQL.append(", vd.episode AS episode");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "vd"));
         sbSQL.append(" FROM videodata vd");
         // Add genre tables for include and exclude
-        if (includes.containsKey("genre") || excludes.containsKey("genre")) {
+        if (includes.containsKey(GENRE) || excludes.containsKey(GENRE)) {
             sbSQL.append(", videodata_genres vg, genre g");
         }
 
-        sbSQL.append(" WHERE vd.episode < 0");
+        if (isMovie) {
+            sbSQL.append(" WHERE vd.episode < 0");
+        } else {
+            sbSQL.append(" WHERE vd.episode > -1");
+        }
         if (options.getId() > 0L) {
             sbSQL.append(" AND vd.id=").append(options.getId());
         }
         // Add joins for genres
-        if (includes.containsKey("genre") || excludes.containsKey("genre")) {
+        if (includes.containsKey(GENRE) || excludes.containsKey(GENRE)) {
             sbSQL.append(" AND vd.id=vg.data_id");
             sbSQL.append(" AND vg.genre_id=g.id");
             sbSQL.append(" AND g.name='");
-            if (includes.containsKey("genre")) {
-                sbSQL.append(includes.get("genre"));
+            if (includes.containsKey(GENRE)) {
+                sbSQL.append(includes.get(GENRE));
             } else {
-                sbSQL.append(excludes.get("genre"));
+                sbSQL.append(excludes.get(GENRE));
             }
             sbSQL.append("'");
         }
 
-        if (includes.containsKey("year")) {
-            sbSQL.append(" AND vd.publication_year=").append(includes.get("year"));
+        if (includes.containsKey(YEAR)) {
+            sbSQL.append(" AND vd.publication_year=").append(includes.get(YEAR));
         }
 
-        if (excludes.containsKey("year")) {
-            sbSQL.append(" AND vd.publication_year!=").append(includes.get("year"));
+        if (excludes.containsKey(YEAR)) {
+            sbSQL.append(" AND vd.publication_year!=").append(includes.get(YEAR));
         }
 
         // Add the search string, this will be empty if there is no search required
@@ -266,6 +289,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", ser.id AS seriesId");
         sbSQL.append(", '-1' AS seasonId");
         sbSQL.append(", '-1' AS season");
+        sbSQL.append(", '-1' AS episode");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "ser"));
         sbSQL.append(" FROM series ser ");
         sbSQL.append(" WHERE 1=1"); // To make it easier to add the optional include and excludes
@@ -273,12 +297,12 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" AND ser.id=").append(options.getId());
         }
 
-        if (includes.containsKey("year")) {
-            sbSQL.append(" AND ser.start_year=").append(includes.get("year"));
+        if (includes.containsKey(YEAR)) {
+            sbSQL.append(" AND ser.start_year=").append(includes.get(YEAR));
         }
 
-        if (excludes.containsKey("year")) {
-            sbSQL.append(" AND ser.start_year!=").append(includes.get("year"));
+        if (excludes.containsKey(YEAR)) {
+            sbSQL.append(" AND ser.start_year!=").append(includes.get(YEAR));
         }
 
         // Add the search string, this will be empty if there is no search required
@@ -307,6 +331,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", sea.series_id AS seriesId");
         sbSQL.append(", sea.id AS seasonId");
         sbSQL.append(", sea.season AS season");
+        sbSQL.append(", '-1' AS episode");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "sea"));
         sbSQL.append(" FROM season sea");
         sbSQL.append(" WHERE 1=1"); // To make it easier to add the optional include and excludes
@@ -314,12 +339,12 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" AND sea.id=").append(options.getId());
         }
 
-        if (includes.containsKey("year")) {
-            sbSQL.append(" AND sea.first_aired LIKE '").append(includes.get("year")).append("%'");
+        if (includes.containsKey(YEAR)) {
+            sbSQL.append(" AND sea.first_aired LIKE '").append(includes.get(YEAR)).append("%'");
         }
 
-        if (excludes.containsKey("year")) {
-            sbSQL.append(" AND sea.first_aired NOT LIKE '").append(includes.get("year")).append("%'");
+        if (excludes.containsKey(YEAR)) {
+            sbSQL.append(" AND sea.first_aired NOT LIKE '").append(includes.get(YEAR)).append("%'");
         }
 
         // Add the search string, this will be empty if there is no search required
@@ -344,6 +369,7 @@ public class ApiDao extends HibernateDao {
             boolean hasMovie = CollectionUtils.isNotEmpty(ids.get(MetaDataType.MOVIE));
             boolean hasSeries = CollectionUtils.isNotEmpty(ids.get(MetaDataType.SERIES));
             boolean hasSeason = CollectionUtils.isNotEmpty(ids.get(MetaDataType.SEASON));
+            boolean hasEpisode = CollectionUtils.isNotEmpty(ids.get(MetaDataType.EPISODE));
 
             if (hasMovie) {
                 sqlScalars.addToSql("SELECT 'MOVIE' as sourceString, v.id as sourceId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
@@ -384,6 +410,21 @@ public class ApiDao extends HibernateDao {
                 sqlScalars.addToSql(" AND a.artwork_type IN (:artworklist)");
             }
 
+            if ((hasMovie || hasSeries || hasSeason) && hasEpisode) {
+                sqlScalars.addToSql(" UNION");
+            }
+
+            if (hasEpisode) {
+                sqlScalars.addToSql("SELECT 'EPISODE' as sourceString, v.id as sourceId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
+                sqlScalars.addToSql(" FROM videodata v, artwork a");
+                sqlScalars.addToSql(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
+                sqlScalars.addToSql(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
+                sqlScalars.addToSql(" WHERE v.id=a.videodata_id");
+                sqlScalars.addToSql(" AND v.episode>-1");
+                sqlScalars.addToSql(" AND v.id IN (:episodelist)");
+                sqlScalars.addToSql(" AND a.artwork_type IN (:artworklist)");
+            }
+
             sqlScalars.addScalar("sourceString", StringType.INSTANCE);
             sqlScalars.addScalar("sourceId", LongType.INSTANCE);
             sqlScalars.addScalar("artworkId", LongType.INSTANCE);
@@ -403,6 +444,10 @@ public class ApiDao extends HibernateDao {
 
             if (hasSeason) {
                 sqlScalars.addParameters("seasonlist", ids.get(MetaDataType.SEASON));
+            }
+
+            if (hasEpisode) {
+                sqlScalars.addParameters("episodelist", ids.get(MetaDataType.EPISODE));
             }
 
             sqlScalars.addParameters("artworklist", artworkRequired);
@@ -836,7 +881,7 @@ public class ApiDao extends HibernateDao {
 
         String sql;
         if (type == MetaDataType.MOVIE) {
-            sql = generateSqlForVideo(options, includes, excludes, dataItems);
+            sql = generateSqlForVideo(true, options, includes, excludes, dataItems);
         } else if (type == MetaDataType.SERIES) {
             sql = generateSqlForSeries(options, includes, excludes, dataItems);
         } else if (type == MetaDataType.SEASON) {
