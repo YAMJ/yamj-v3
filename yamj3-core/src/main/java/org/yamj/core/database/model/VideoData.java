@@ -38,13 +38,13 @@ import org.yamj.core.database.model.type.OverrideFlag;
 @SuppressWarnings("unused")
 @Entity
 @Table(name = "videodata",
-        uniqueConstraints =
-        @UniqueConstraint(name = "UIX_VIDEODATA_NATURALID", columnNames = {"identifier"}))
+        uniqueConstraints
+        = @UniqueConstraint(name = "UIX_VIDEODATA_NATURALID", columnNames = {"identifier"}))
 @org.hibernate.annotations.Table(appliesTo = "videodata",
         indexes = {
-    @Index(name = "IX_VIDEODATA_TITLE", columnNames = {"title"}),
-    @Index(name = "IX_VIDEODATA_STATUS", columnNames = {"status"})
-})
+            @Index(name = "IX_VIDEODATA_TITLE", columnNames = {"title"}),
+            @Index(name = "IX_VIDEODATA_STATUS", columnNames = {"status"})
+        })
 public class VideoData extends AbstractMetadata {
 
     private static final long serialVersionUID = 1L;
@@ -66,38 +66,38 @@ public class VideoData extends AbstractMetadata {
     @Column(name = "country", length = 100)
     private String country;
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "videodata_ids", joinColumns =
-            @JoinColumn(name = "videodata_id"))
+    @JoinTable(name = "videodata_ids", joinColumns
+            = @JoinColumn(name = "videodata_id"))
     @ForeignKey(name = "FK_VIDEODATA_SOURCEIDS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "videodata_ratings", joinColumns =
-            @JoinColumn(name = "videodata_id"))
+    @JoinTable(name = "videodata_ratings", joinColumns
+            = @JoinColumn(name = "videodata_id"))
     @ForeignKey(name = "FK_VIDEODATA_RATINGS")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", length = 30, nullable = false)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "videodata_override", joinColumns =
-            @JoinColumn(name = "videodata_id"))
+    @JoinTable(name = "videodata_override", joinColumns
+            = @JoinColumn(name = "videodata_id"))
     @ForeignKey(name = "FK_VIDEODATA_OVERRIDE")
     @Fetch(value = FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
-    @MapKeyType(value =
-            @Type(type = "overrideFlag"))
+    @MapKeyType(value
+            = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
     private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
     @ManyToMany
     @ForeignKey(name = "FK_DATAGENRES_VIDEODATA", inverseName = "FK_DATAGENRES_GENRE")
     @JoinTable(name = "videodata_genres",
             joinColumns = {
-        @JoinColumn(name = "data_id")},
+                @JoinColumn(name = "data_id")},
             inverseJoinColumns = {
-        @JoinColumn(name = "genre_id")})
+                @JoinColumn(name = "genre_id")})
     private Set<Genre> genres = new HashSet<Genre>(0);
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_VIDEODATA_SEASON")
