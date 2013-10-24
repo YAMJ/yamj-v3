@@ -27,13 +27,20 @@ public class TheTVDbApiWrapper {
     @Autowired
     private TheTVDBApi tvdbApi;
     // make maximal 20 banners objects maximal 30 minutes accessible
-    private Lock bannersLock = new ReentrantLock(true);
-    private LRUTimedCache<String, Banners> bannersCache = new LRUTimedCache<String, Banners>(20, 1800);
+    private final Lock bannersLock = new ReentrantLock(true);
+    private final LRUTimedCache<String, Banners> bannersCache = new LRUTimedCache<String, Banners>(20, 1800);
     // make maximal 50 series objects maximal 30 minutes accessible
-    private Lock seriesLock = new ReentrantLock(true);
-    private LRUTimedCache<String, Series> seriesCache = new LRUTimedCache<String, Series>(50, 1800);
+    private final Lock seriesLock = new ReentrantLock(true);
+    private final LRUTimedCache<String, Series> seriesCache = new LRUTimedCache<String, Series>(50, 1800);
     // make maximal 30 episode lists maximal 30 minutes accessible
-    private LRUTimedCache<String, List<Episode>> episodesCache = new LRUTimedCache<String, List<Episode>>(30, 1800);
+    private final LRUTimedCache<String, List<Episode>> episodesCache = new LRUTimedCache<String, List<Episode>>(30, 1800);
+    private final String defaultLanguage;
+    private final String altLanguage;
+
+    public TheTVDbApiWrapper() {
+        defaultLanguage = configService.getProperty("thetvdb.language", "en");
+        altLanguage = configService.getProperty("thetvdb.language.alternate", "");
+    }
 
     public Banners getBanners(String id) {
         Banners banners = bannersCache.get(id);
@@ -62,15 +69,12 @@ public class TheTVDbApiWrapper {
                 // second try cause meanwhile the cache could have been filled
                 series = seriesCache.get(id);
                 if (series == null) {
-                    String defaultLanguage = configService.getProperty("thetvdb.language", "en");
-                    String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
-
                     // retrieve series from TheTVDb
                     series = tvdbApi.getSeries(id, defaultLanguage);
                     if (series == null && StringUtils.isNotBlank(altLanguage)) {
                         series = tvdbApi.getSeries(id, altLanguage);
                     }
-                    
+
                     if (series == null) {
                         // have a valid series object with empty values
                         series = new com.omertron.thetvdbapi.model.Series();
@@ -87,9 +91,6 @@ public class TheTVDbApiWrapper {
     public String getSeriesId(String title, int year) {
         String id = "";
         if (StringUtils.isNotBlank(title)) {
-            String defaultLanguage = configService.getProperty("thetvdb.language", "en");
-            String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
-
             List<Series> seriesList = tvdbApi.searchSeries(title, defaultLanguage);
             if (CollectionUtils.isEmpty(seriesList) && StringUtils.isNotBlank(altLanguage)) {
                 seriesList = tvdbApi.searchSeries(title, altLanguage);
@@ -129,9 +130,6 @@ public class TheTVDbApiWrapper {
 
         List<Episode> episodeList = this.episodesCache.get(key);
         if (episodeList == null) {
-            String defaultLanguage = configService.getProperty("thetvdb.language", "en");
-            String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
-
             episodeList = tvdbApi.getSeasonEpisodes(id, season, defaultLanguage);
             if (CollectionUtils.isEmpty(episodeList) && StringUtils.isNotBlank(altLanguage)) {
                 episodeList = tvdbApi.getSeasonEpisodes(id, season, altLanguage);
