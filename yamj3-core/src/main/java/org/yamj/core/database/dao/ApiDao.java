@@ -633,7 +633,7 @@ public class ApiDao extends HibernateDao {
     private SqlScalars generateSqlForVideoPerson(MetaDataType metaDataType, OptionsIndexPerson options) {
         SqlScalars sqlScalars = new SqlScalars();
 
-        sqlScalars.addToSql("SELECT p.id,");
+        sqlScalars.addToSql("SELECT DISTINCT p.id,");
         sqlScalars.addToSql(" p.name,");
         if (options.hasDataItem(DataItem.BIOGRAPHY)) {
             sqlScalars.addToSql(" p.biography,");
