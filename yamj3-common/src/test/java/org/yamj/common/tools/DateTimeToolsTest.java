@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
 
 public class DateTimeToolsTest {
 
-    private static Calendar cal = Calendar.getInstance();
+    private static final Calendar cal = Calendar.getInstance();
     private static Date dateJava;
     private static DateTime dateTime;
     // Expected results
