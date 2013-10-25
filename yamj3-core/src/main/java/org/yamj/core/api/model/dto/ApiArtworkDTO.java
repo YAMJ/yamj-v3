@@ -34,11 +34,11 @@ import org.yamj.core.database.model.type.ArtworkType;
  *
  * @author Stuart
  */
-public class ApiArtworkDTO {
+public class ApiArtworkDTO extends AbstractApiIdentifiableDTO {
 
+    // The ID (from AbstractApiIdentifiableDTO) is a generic ID used for MOVIE, SERIES, SEASON or PERSON
     private String key = null;
     private MetaDataType source;
-    private Long sourceId = 0L;  // This is a generic ID used for MOVIE, SERIES, SEASON or PERSON
     private Long artworkId = 0L;
     private Long locatedId = 0L;
     private Long generatedId = 0L;
@@ -49,10 +49,6 @@ public class ApiArtworkDTO {
 
     public MetaDataType getSource() {
         return source;
-    }
-
-    public long getSourceId() {
-        return sourceId;
     }
 
     public long getArtworkId() {
@@ -112,9 +108,9 @@ public class ApiArtworkDTO {
 
     public void setSourceId(Long sourceId) {
         if (sourceId == null) {
-            this.sourceId = 0L;
+            setId(0L);
         } else {
-            this.sourceId = sourceId;
+            setId(sourceId);
         }
     }
 
@@ -179,7 +175,7 @@ public class ApiArtworkDTO {
     public void setVideodataId(Long videodataId) {
         // Only set if the id is not null
         if (videodataId != null) {
-            this.sourceId = videodataId;
+            setId(videodataId);
             // Only overwrite the source if it is null
             if (this.source == null) {
                 this.source = MetaDataType.MOVIE;
@@ -197,7 +193,7 @@ public class ApiArtworkDTO {
     public void setSeriesId(Long seriesId) {
         // Only set if the id is not null
         if (seriesId != null) {
-            this.sourceId = seriesId;
+            setId(seriesId);
             this.source = MetaDataType.SERIES;
         }
     }
@@ -207,12 +203,12 @@ public class ApiArtworkDTO {
      *
      * This will be populated to the sourceId with the source of "SEASON"
      *
-     * @param videodataId
+     * @param seasonId
      */
     public void setSeasonId(Long seasonId) {
         // Only set if the id is not null
         if (seasonId != null) {
-            this.sourceId = seasonId;
+            setId(seasonId);
             this.source = MetaDataType.SEASON;
         }
     }
@@ -227,7 +223,7 @@ public class ApiArtworkDTO {
     public void setPersonId(Long personId) {
         // Only set if the id is not null
         if (personId != null) {
-            this.sourceId = personId;
+            setId(personId);
             this.source = MetaDataType.PERSON;
         }
     }
@@ -236,7 +232,7 @@ public class ApiArtworkDTO {
     @JsonIgnore
     public String Key() {
         if (StringUtils.isBlank(key)) {
-            this.key = makeKey(source, sourceId);
+            this.key = makeKey(source, getId());
         }
         return key;
     }

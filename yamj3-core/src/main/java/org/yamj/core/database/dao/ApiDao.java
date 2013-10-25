@@ -607,7 +607,7 @@ public class ApiDao extends HibernateDao {
         List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
         LOG.info("Found {} results for {} with id '{}'", results.size(), metaDataType, options.getId());
 
-        if (options.hasDataItem(DataItem.ARTWORK)) {
+        if (options.hasDataItem(DataItem.ARTWORK) && results.size() > 0) {
             LOG.info("Looking for person artwork for {} with id '{}'", metaDataType, options.getId());
 
             Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, generateIdList(results), Arrays.asList("PHOTO"));
@@ -617,7 +617,7 @@ public class ApiDao extends HibernateDao {
                 }
             }
         } else {
-            LOG.info("No artwork requested for {} with id '{}'", metaDataType, options.getId());
+            LOG.info("No artwork found/requested for {} with id '{}'", metaDataType, options.getId());
         }
 
         wrapper.setResults(results);
@@ -1038,16 +1038,9 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addParameters("artworklist", artworkRequired);
 
         List<ApiArtworkDTO> results = executeQueryWithTransform(ApiArtworkDTO.class, sqlScalars, null);
-        Map<Long, List<ApiArtworkDTO>> artworkList = new HashMap<Long, List<ApiArtworkDTO>>();
-        for (ApiArtworkDTO artwork : results) {
-            Long sourceId = artwork.getSourceId();
-            if (artworkList.containsKey(sourceId)) {
-                artworkList.get(sourceId).add(artwork);
-            } else {
-                // ID didn't exist so add a new list
-                artworkList.put(sourceId, new ArrayList<ApiArtworkDTO>(Arrays.asList(artwork)));
-            }
-        }
+
+        Map<Long, List<ApiArtworkDTO>> artworkList = generateIdMapList(results);
+
         return artworkList;
     }
 
@@ -1147,6 +1140,29 @@ public class ApiDao extends HibernateDao {
 
         for (T idSingle : idList) {
             results.put(idSingle.getId(), idSingle);
+        }
+
+        return results;
+    }
+
+    /**
+     * Take a list and generate a map of the ID and a list of the items for that ID
+     *
+     * @param <T> Source type
+     * @param idList List of the source type
+     * @return
+     */
+    private <T extends AbstractApiIdentifiableDTO> Map<Long, List<T>> generateIdMapList(List<T> idList) {
+        Map<Long, List<T>> results = new HashMap<Long, List<T>>();
+
+        for (T idSingle : idList) {
+            Long sourceId = idSingle.getId();
+            if (results.containsKey(sourceId)) {
+                results.get(sourceId).add(idSingle);
+            } else {
+                // ID didn't exist so add a new list
+                results.put(sourceId, new ArrayList<T>(Arrays.asList(idSingle)));
+            }
         }
 
         return results;
