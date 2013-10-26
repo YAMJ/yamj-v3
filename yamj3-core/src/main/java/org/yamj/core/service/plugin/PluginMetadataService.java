@@ -55,9 +55,9 @@ public class PluginMetadataService {
     private static final ReentrantLock STORE_PERSON_LOCK = new ReentrantLock();
     @Autowired
     private MetadataStorageService metadataStorageService;
-    private HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<String, IMovieScanner>();
-    private HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<String, ISeriesScanner>();
-    private HashMap<String, IPersonScanner> registeredPersonScanner = new HashMap<String, IPersonScanner>();
+    private final HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<String, IMovieScanner>();
+    private final HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<String, ISeriesScanner>();
+    private final HashMap<String, IPersonScanner> registeredPersonScanner = new HashMap<String, IPersonScanner>();
 
     public void registerMovieScanner(IMovieScanner movieScanner) {
         LOG.info("Registered movie scanner: {}", movieScanner.getScannerName().toLowerCase());
@@ -244,6 +244,7 @@ public class PluginMetadataService {
 
     /**
      * Scan the data site for information on the person
+     * @param id
      */
     public void scanPerson(Long id) {
         IPersonScanner personScanner = registeredPersonScanner.get(PERSON_SCANNER);

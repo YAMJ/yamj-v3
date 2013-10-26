@@ -133,6 +133,7 @@ public abstract class HibernateDao {
      *
      * @param <T>
      * @param entityClass
+     * @param field
      * @param name
      * @return
      */
@@ -301,10 +302,10 @@ public abstract class HibernateDao {
      *
      * Gets the options from the wrapper for start and max Puts the total count returned from the query into the wrapper
      *
+     * @param <T>
      * @param T The class to return the transformed results of.
-     * @param sql
+     * @param sqlScalars
      * @param wrapper
-     * @param scalars
      * @return
      */
     public <T> List<T> executeQueryWithTransform(Class T, SqlScalars sqlScalars, IApiWrapper wrapper) {

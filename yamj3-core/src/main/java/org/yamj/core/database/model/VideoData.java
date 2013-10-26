@@ -114,7 +114,7 @@ public class VideoData extends AbstractMetadata {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
     @Transient
-    private Set<CreditDTO> creditDTOS = new LinkedHashSet<CreditDTO>(0);
+    private final Set<CreditDTO> creditDTOS = new LinkedHashSet<CreditDTO>(0);
     @Transient
     private Set<String> genreNames = new LinkedHashSet<String>(0);
 
