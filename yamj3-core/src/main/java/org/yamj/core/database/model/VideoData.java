@@ -45,7 +45,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
             @Index(name = "IX_VIDEODATA_TITLE", columnNames = {"title"}),
             @Index(name = "IX_VIDEODATA_STATUS", columnNames = {"status"})
         })
-public class VideoData extends AbstractMetadata {
+public class VideoData extends AbstractMetadata implements IDataGenres, IDataCredits {
 
     private static final long serialVersionUID = 1L;
     @Column(name = "episode", nullable = false)
@@ -258,10 +258,22 @@ public class VideoData extends AbstractMetadata {
         return overrideFlags.get(overrideFlag);
     }
 
+    /**
+     * Get the genres
+     *
+     * @return
+     */
+    @Override
     public Set<Genre> getGenres() {
         return genres;
     }
 
+    /**
+     * Set the genres
+     *
+     * @param genres
+     */
+    @Override
     public void setGenres(Set<Genre> genres) {
         this.genres = genres;
     }
@@ -308,22 +320,42 @@ public class VideoData extends AbstractMetadata {
 
     // TRANSIENTS METHODS
     @JsonIgnore // This is not needed for the API
+    @Override
     public Set<CreditDTO> getCreditDTOS() {
         return creditDTOS;
     }
 
+    @Override
     public void addCreditDTO(CreditDTO creditDTO) {
         this.creditDTOS.add(creditDTO);
     }
 
-    public void addCredditDTOS(Set<CreditDTO> creditDTOS) {
+    @Override
+    public void addCreditDTOS(Set<CreditDTO> creditDTOS) {
         this.creditDTOS.addAll(creditDTOS);
     }
 
+    /**
+     * Get the string representation of the genres
+     *
+     * Usually populated from the source site
+     *
+     * @return
+     */
+    @Override
     public Set<String> getGenreNames() {
         return genreNames;
     }
 
+    /**
+     * Set the string representation of the genres
+     *
+     * Usually populated from the source site
+     *
+     * @param genreNames
+     * @param source
+     */
+    @Override
     public void setGenreNames(Set<String> genreNames, String source) {
         if (CollectionUtils.isNotEmpty(genreNames)) {
             this.genreNames = genreNames;

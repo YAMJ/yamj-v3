@@ -12,6 +12,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import org.yamj.core.tools.LRUTimedCache;
 @Service("tvdbApiWrapper")
 public class TheTVDbApiWrapper implements InitializingBean {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TheTVDbApiWrapper.class);
     private static final int YEAR_MIN = 1900;
     private static final int YEAR_MAX = 2050;
     @Autowired
@@ -66,6 +69,12 @@ public class TheTVDbApiWrapper implements InitializingBean {
         return banners;
     }
 
+    /**
+     * Get series information using the ID
+     *
+     * @param id
+     * @return
+     */
     public Series getSeries(String id) {
         Series series = seriesCache.get(id);
         if (series == null) {
@@ -93,34 +102,49 @@ public class TheTVDbApiWrapper implements InitializingBean {
         return series;
     }
 
+    /**
+     * Get the Series ID by title and year
+     *
+     * @param title
+     * @param year
+     * @return
+     */
     public String getSeriesId(String title, int year) {
         String id = "";
         if (StringUtils.isNotBlank(title)) {
-            List<Series> seriesList = tvdbApi.searchSeries(title, defaultLanguage);
-            if (CollectionUtils.isEmpty(seriesList) && StringUtils.isNotBlank(altLanguage)) {
-                seriesList = tvdbApi.searchSeries(title, altLanguage);
-            }
+            seriesLock.lock();
+            try {
+                boolean usedDefault = true;
+                List<Series> seriesList = tvdbApi.searchSeries(title, defaultLanguage);
+                if (CollectionUtils.isEmpty(seriesList) && StringUtils.isNotBlank(altLanguage)) {
+                    seriesList = tvdbApi.searchSeries(title, altLanguage);
+                    usedDefault = false;
+                }
 
-            if (CollectionUtils.isNotEmpty(seriesList)) {
-                Series series = null;
-                for (Series s : seriesList) {
-                    if (s.getFirstAired() != null && !s.getFirstAired().isEmpty() && (year > YEAR_MIN && year < YEAR_MAX)) {
-                        DateTime firstAired = DateTime.parse(s.getFirstAired());
-                        firstAired.getYear();
-                        if (firstAired.getYear() == year) {
+                if (CollectionUtils.isNotEmpty(seriesList)) {
+                    Series series = null;
+                    for (Series s : seriesList) {
+                        if (s.getFirstAired() != null && !s.getFirstAired().isEmpty() && (year > YEAR_MIN && year < YEAR_MAX)) {
+                            DateTime firstAired = DateTime.parse(s.getFirstAired());
+                            firstAired.getYear();
+                            if (firstAired.getYear() == year) {
+                                series = s;
+                                break;
+                            }
+                        } else {
                             series = s;
                             break;
                         }
-                    } else {
-                        series = s;
-                        break;
+                    }
+
+                    if (series != null) {
+                        id = series.getId();
+                        Series saved = tvdbApi.getSeries(id, (usedDefault ? defaultLanguage : altLanguage));
+                        this.seriesCache.put(id, saved);
                     }
                 }
-
-                if (series != null) {
-                    id = series.getId();
-                    this.seriesCache.put(id, series);
-                }
+            } finally {
+                seriesLock.unlock();
             }
         }
         return id;

@@ -37,7 +37,10 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.core.database.model.AbstractMetadata;
 import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.IDataCredits;
+import org.yamj.core.database.model.IDataGenres;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.MetadataStorageService;
 
@@ -59,21 +62,41 @@ public class PluginMetadataService {
     private final HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<String, ISeriesScanner>();
     private final HashMap<String, IPersonScanner> registeredPersonScanner = new HashMap<String, IPersonScanner>();
 
+    /**
+     * Register a movie scanner
+     *
+     * @param movieScanner
+     */
     public void registerMovieScanner(IMovieScanner movieScanner) {
         LOG.info("Registered movie scanner: {}", movieScanner.getScannerName().toLowerCase());
         registeredMovieScanner.put(movieScanner.getScannerName().toLowerCase(), movieScanner);
     }
 
+    /**
+     * Register TV series scanner
+     *
+     * @param seriesScanner
+     */
     public void registerSeriesScanner(ISeriesScanner seriesScanner) {
         LOG.info("Registered series scanner: {}", seriesScanner.getScannerName().toLowerCase());
         registeredSeriesScanner.put(seriesScanner.getScannerName().toLowerCase(), seriesScanner);
     }
 
+    /**
+     * Register person scanner
+     *
+     * @param personScanner
+     */
     public void registerPersonScanner(IPersonScanner personScanner) {
         LOG.info("Registered person scanner: {}", personScanner.getScannerName().toLowerCase());
         registeredPersonScanner.put(personScanner.getScannerName().toLowerCase(), personScanner);
     }
 
+    /**
+     * Scan a movie
+     *
+     * @param id
+     */
     public void scanMovie(Long id) {
         IMovieScanner movieScanner = registeredMovieScanner.get(MOVIE_SCANNER);
         if (movieScanner == null) {
@@ -136,6 +159,11 @@ public class PluginMetadataService {
         }
     }
 
+    /**
+     * Scan a TV Series
+     *
+     * @param id
+     */
     public void scanSeries(Long id) {
         ISeriesScanner seriesScanner = registeredSeriesScanner.get(SERIES_SCANNER);
         if (seriesScanner == null) {
@@ -157,7 +185,6 @@ public class PluginMetadataService {
 
         // alternate scanning if main scanner failed
         // TODO enable alter scanning if requested
-
         if (!ScanResult.OK.equals(scanResult)) {
             seriesScanner = registeredSeriesScanner.get(SERIES_SCANNER_ALT);
 
@@ -173,15 +200,19 @@ public class PluginMetadataService {
             }
         }
 
-        // store associated entities
-        boolean result = true;
-        for (Season season : series.getSeasons()) {
-            for (VideoData videoData : season.getVideoDatas()) {
-                if (!storeAssociatedEntities(videoData)) {
-                    result = false;
+        // store associated entities for each season
+        boolean result = storeAssociatedEntities(series);
+
+        if (result) {
+            for (Season season : series.getSeasons()) {
+                for (VideoData videoData : season.getVideoDatas()) {
+                    if (!storeAssociatedEntities(videoData)) {
+                        result = false;
+                    }
                 }
             }
         }
+
         if (!result) {
             // exit if associated entities couldn't be stored
             return;
@@ -208,11 +239,37 @@ public class PluginMetadataService {
         }
     }
 
-    private boolean storeAssociatedEntities(VideoData videoData) {
+    /**
+     * Store entities associated with the object
+     *
+     * @param entityObject
+     * @return
+     */
+    private boolean storeAssociatedEntities(AbstractMetadata entityObject) {
         boolean result = true;
 
         // store genres
-        for (String genreName : videoData.getGenreNames()) {
+        if (entityObject instanceof IDataGenres) {
+            result = result && storeEntitiesGenre((IDataGenres) entityObject);
+        }
+
+        // store persons
+        if (entityObject instanceof IDataCredits) {
+            result = result && storeEntitiesCredits((IDataCredits) entityObject);
+        }
+
+        return result;
+    }
+
+    /**
+     * Store genres to the database
+     *
+     * @param genreObject
+     * @return
+     */
+    private boolean storeEntitiesGenre(IDataGenres genreObject) {
+        boolean result = true;
+        for (String genreName : genreObject.getGenreNames()) {
             STORE_GENRE_LOCK.lock();
             try {
                 metadataStorageService.storeGenre(genreName);
@@ -224,9 +281,18 @@ public class PluginMetadataService {
                 STORE_GENRE_LOCK.unlock();
             }
         }
+        return result;
+    }
 
-        // store persons
-        for (CreditDTO creditDTO : videoData.getCreditDTOS()) {
+    /**
+     * Store persons to the database
+     *
+     * @param creditObject
+     * @return
+     */
+    private boolean storeEntitiesCredits(IDataCredits creditObject) {
+        boolean result = true;
+        for (CreditDTO creditDTO : creditObject.getCreditDTOS()) {
             STORE_PERSON_LOCK.lock();
             try {
                 metadataStorageService.storePerson(creditDTO);
@@ -244,6 +310,7 @@ public class PluginMetadataService {
 
     /**
      * Scan the data site for information on the person
+     *
      * @param id
      */
     public void scanPerson(Long id) {

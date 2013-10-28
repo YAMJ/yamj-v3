@@ -23,6 +23,7 @@
 package org.yamj.core.service.plugin;
 
 import javax.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.junit.After;
@@ -133,7 +134,8 @@ public class TheTVDbScannerTest extends AbstractJUnit4SpringContextTests {
         assertEquals("Wrong ScanResult returned", ScanResult.OK, result);
         assertEquals("Wrong series ID returned", "70726", series.getSourceDbId(PLUGIN_ID));
         assertEquals("Wrong title", "Babylon 5", series.getTitle());
-        
+        assertFalse("No Genres found", series.getGenreNames().isEmpty());
+
     }
 
 }

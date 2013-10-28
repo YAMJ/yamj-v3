@@ -185,6 +185,9 @@ public class MetadataStorageService {
         // update entity
         metadataDao.updateEntity(series);
 
+        // update genres
+        updateGenres(series);
+
         // update underlying seasons and episodes
         for (Season season : series.getSeasons()) {
             if (StatusType.PROCESSED.equals(season.getStatus())) {
@@ -200,6 +203,11 @@ public class MetadataStorageService {
         }
     }
 
+    /**
+     * Update genres for VideoData from the database
+     *
+     * @param videoData
+     */
     private void updateGenres(VideoData videoData) {
         if (CollectionUtils.isEmpty(videoData.getGenreNames())) {
             return;
@@ -215,6 +223,31 @@ public class MetadataStorageService {
         videoData.setGenres(genres);
     }
 
+    /**
+     * Update genres for Series from the database
+     *
+     * @param series
+     */
+    private void updateGenres(Series series) {
+        if (CollectionUtils.isEmpty(series.getGenreNames())) {
+            return;
+        }
+
+        Set<Genre> genres = new LinkedHashSet<Genre>();
+        for (String genreName : series.getGenreNames()) {
+            Genre genre = commonDao.getByName(Genre.class, genreName);
+            if (genre != null) {
+                genres.add(genre);
+            }
+        }
+        series.setGenres(genres);
+    }
+
+    /**
+     * Update cast and crew to the database
+     *
+     * @param videoData
+     */
     private void updateCastCrew(VideoData videoData) {
         for (CreditDTO dto : videoData.getCreditDTOS()) {
             Person person = null;

@@ -32,9 +32,9 @@ import org.yamj.core.database.model.dto.CreditDTO;
  */
 public interface IDataCredits {
 
-    public Set<CreditDTO> getCreditDTOS();
+    Set<CreditDTO> getCreditDTOS();
 
-    public void addCreditDTO(CreditDTO creditDTO);
+    void addCreditDTO(CreditDTO creditDTO);
 
-    public void addCreditDTOS(Set<CreditDTO> creditDTOS);
+    void addCreditDTOS(Set<CreditDTO> creditDTOS);
 }

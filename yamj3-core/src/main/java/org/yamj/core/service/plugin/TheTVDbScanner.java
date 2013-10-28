@@ -24,6 +24,7 @@ package org.yamj.core.service.plugin;
 
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,7 +47,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
     public static final String SCANNER_ID = "tvdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheTVDbScanner.class);
-    
+
     @Autowired
     private PluginMetadataService pluginMetadataService;
     @Autowired
@@ -104,8 +105,10 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             series.setOutline(StringUtils.trim(tvdbSeries.getOverview()), SCANNER_ID);
         }
 
-        // TODO more values
+        // Add the genres
+        series.setGenreNames(new HashSet<String>(tvdbSeries.getGenres()), SCANNER_ID);
 
+        // TODO more values
         if (StringUtils.isNumeric(tvdbSeries.getRating())) {
             try {
                 series.addRating(SCANNER_ID, (int) (Float.parseFloat(tvdbSeries.getRating()) * 10));
@@ -120,14 +123,12 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         }
 
         // CAST & CREW
-
         Set<CreditDTO> actors = new LinkedHashSet<CreditDTO>();
         for (Actor actor : tvdbApiWrapper.getActors(id)) {
             actors.add(new CreditDTO(JobType.ACTOR, actor.getName(), actor.getRole()));
         }
 
         // SCAN SEASONS
-
         this.scanSeasons(series, tvdbSeries, actors);
 
         return ScanResult.OK;
@@ -197,7 +198,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                 }
 
                 // cast and crew
-                videoData.addCredditDTOS(actors);
+                videoData.addCreditDTOS(actors);
 
                 for (String director : episode.getDirectors()) {
                     videoData.addCreditDTO(new CreditDTO(JobType.DIRECTOR, director));
@@ -209,9 +210,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                     videoData.addCreditDTO(new CreditDTO(JobType.GUEST_STAR, guestStar));
                 }
 
-                
                 // TODO more values
-
                 // mark episode as missing
                 videoData.setTvEpisodeScanned();
             }

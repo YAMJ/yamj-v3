@@ -314,7 +314,6 @@ public abstract class HibernateDao {
         query.setCacheable(true);
 
         // TODO: Add a transformation if the class is not "Object"
-
         if (T != null && !T.equals(Object[].class)) {
             query.setResultTransformer(Transformers.aliasToBean(T));
         }

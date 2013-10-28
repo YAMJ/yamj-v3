@@ -65,6 +65,8 @@ public final class OverrideTools {
         // genres
         sources = PropertyTools.getProperty("priority.videodata.genres", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
         putVideodataPriorities(OverrideFlag.GENRES, sources);
+        sources = PropertyTools.getProperty("priority.series.genres", "nfo,plugin_series,plugin_movie,alternate_series,alternate_movie");
+        putSeriesPriorities(OverrideFlag.GENRES, sources);
         // original title
         sources = PropertyTools.getProperty("priority.videodata.originaltitle", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
         putVideodataPriorities(OverrideFlag.ORIGINALTITLE, sources);
