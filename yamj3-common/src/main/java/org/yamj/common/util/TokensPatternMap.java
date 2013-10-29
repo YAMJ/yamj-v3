@@ -28,7 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public abstract class TokensPatternMap extends HashMap<String, Pattern> {
 
-	private static final long serialVersionUID = 2239121205124537392L;
+    private static final long serialVersionUID = 2239121205124537392L;
 
     /**
      * Generate pattern using tokens from given string.
