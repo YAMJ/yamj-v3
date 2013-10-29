@@ -9,7 +9,7 @@
 
     <!-- Main Project Information -->
     <name>Yet Another Movie Jukebox</name>
-    <description>The YAMJ project v3</description>
+    <description>YAMJ project v3</description>
     <artifactId>yamj3</artifactId>
     <packaging>pom</packaging>
 
