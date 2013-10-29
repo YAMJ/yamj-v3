@@ -89,7 +89,7 @@ public class PagesController {
     public ModelAndView configList() {
         ModelAndView view = new ModelAndView("config-list");
 
-        List<Configuration> configList = configService.getConfiguration();
+        List<Configuration> configList = configService.getConfiguration("");
         Collections.sort(configList, new Comparator<Configuration>() {
             @Override
             public int compare(Configuration o1, Configuration o2) {
@@ -106,8 +106,10 @@ public class PagesController {
     @RequestMapping(value = "/config/edit/{key}", method = RequestMethod.GET)
     public ModelAndView configEditPage(@PathVariable String key) {
         ModelAndView view = new ModelAndView("config-edit");
-        Configuration config = configService.getConfiguration(key);
-        view.addObject("config", config);
+        List<Configuration> configList = configService.getConfiguration(key);
+        if (!configList.isEmpty()) {
+            view.addObject("config", configList.get(0));
+        }
         YamjInfo yi = sic.getYamjInfo("true");
         view.addObject("yi", yi);
         return view;

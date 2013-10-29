@@ -25,7 +25,6 @@ package org.yamj.core.database.dao;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -33,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.yamj.core.api.options.OptionsConfig;
 import org.yamj.core.database.model.Configuration;
 import org.yamj.core.hibernate.HibernateDao;
 
@@ -87,43 +87,44 @@ public class ConfigDao extends HibernateDao {
 
     @Transactional
     @SuppressWarnings("unchecked")
-        private List<Configuration> getConfigurationEntries(String property) {
-        if (StringUtils.isBlank(property)) {
-            LOG.info("Getting all configuration entries");
+    public List<Configuration> getConfigurationEntries(OptionsConfig options) {
+        StringBuilder sbSQL = new StringBuilder("from Configuration");
+
+        if (StringUtils.isBlank(options.getConfig())) {
+            LOG.debug("Getting all configuration entries");
         } else {
-            LOG.info("Getting configuration for '{}'", property);
+            LOG.debug("Getting configuration for '{}'", options.getConfig());
         }
 
-        StringBuilder sbSQL = new StringBuilder("from Configuration");
-        if (StringUtils.isNotBlank(property)) {
-            sbSQL.append(" WHERE config_key='").append(property).append("'");
-        }
+        sbSQL.append(options.getSearchString(true));
+        sbSQL.append(options.getSortString());
 
         return getSession().createQuery(sbSQL.toString()).list();
     }
 
     @Transactional
-    public Configuration getConfiguration(String property) {
-        List<Configuration> configList = getConfigurationEntries(property);
-        if (CollectionUtils.isEmpty(configList)) {
-            return new Configuration();
-        } else {
-            return configList.get(0);
-        }
+    public List<Configuration> getConfigurationEntries(String key) {
+        OptionsConfig options = new OptionsConfig();
+        options.setConfig(key);
+        // Make the search exact
+        options.setMode("EXACT");
+        return getConfigurationEntries(options);
     }
 
-    @Transactional
-    public List<Configuration> getConfiguration() {
-        return getConfigurationEntries(null);
-    }
-
+    /**
+     * Delete keys from the database
+     *
+     * @param key
+     */
     @Transactional
     public void deleteConfig(String key) {
         if (StringUtils.isNotBlank(key)) {
-            LOG.debug("Deleting key '{}'", key);
-            Configuration config = getConfiguration(key);
-            getSession().delete(config);
-            LOG.debug("Successfully deleted key '{}'", key);
+            List<Configuration> configList = getConfigurationEntries(key);
+            for (Configuration config : configList) {
+                LOG.debug("Deleting key '{}'", key);
+                getSession().delete(config);
+            }
+            LOG.debug("Successfully deleted all keys for '{}'", key);
         }
     }
 }

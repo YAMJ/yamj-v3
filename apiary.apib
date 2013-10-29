@@ -2106,3 +2106,78 @@ GET /system/info
    "startUpTime":"2013-07-03 18:31:39",
    "buildDate":"2013-07-03 18:30:51"
 }
+
+
+Get information on the configuration settings
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>config</td>
+        <td>The specific configuration entry to get information on.<br/>
+        Note: This is a short cut to using the search parameters. <br/>
+        It is the equivalent of '?search={config}&field=config_key&mode=exact'
+        </td>
+    </tr>
+    <tr>
+        <td>SEARCHING</td>
+        <td>See above for the explanation on searching parameters</td>
+    </tr>
+    <tr>
+        <td>SORTING</td>
+        <td>See above for the explanation on sorting parameters</td>
+    </tr>
+</table>
+
+__Example__: `http://localhost:8888/yamj3/system/config?config=language&mode=any`
+
+GET /system/config
+< 200
+< Content-Type: application/json
+{
+   "count":3,
+   "totalCount":3,
+   "queryDuration":"449ms",
+   "queryTime":"2013-10-29 11:28:15",
+   "status":{
+      "status":200,
+      "message":"OK"
+   },
+   "options":{
+      "start":-1,
+      "max":-1,
+      "language":null,
+      "sortby":"",
+      "sortdir":"ASC",
+      "field":"config_key",
+      "search":"language",
+      "mode":"any",
+      "dataitems":[]
+   },
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
+   "results":[
+      {
+         "key":"thetvdb.language.alternate",
+         "value":"",
+         "createTimestamp":1382959495000,
+         "updateTimestamp":null
+      },
+      {
+         "key":"themoviedb.language",
+         "value":"en",
+         "createTimestamp":1382959495000,
+         "updateTimestamp":null
+      },
+      {
+         "key":"thetvdb.language",
+         "value":"en",
+         "createTimestamp":1382959496000,
+         "updateTimestamp":null
+      }
+   ]
+}

@@ -59,13 +59,8 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = true)
-    public Configuration getConfiguration(String property) {
+    public List<Configuration> getConfiguration(String property) {
         return configService.getConfiguration(property);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Configuration> getConfiguration() {
-        return configService.getConfiguration();
     }
 
     //<editor-fold defaultstate="collapsed" desc="Index Methods">

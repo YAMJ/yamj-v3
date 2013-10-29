@@ -30,6 +30,7 @@ import java.util.Properties;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
+import org.yamj.core.api.options.OptionsConfig;
 import org.yamj.core.database.dao.ConfigDao;
 import org.yamj.core.database.model.Configuration;
 
@@ -156,11 +157,23 @@ public class ConfigService implements InitializingBean {
         cachedProperties.remove(key);
     }
 
-    public Configuration getConfiguration(String key) {
-        return configDao.getConfiguration(key);
+    /**
+     * Get a list of the configuration entries for "key"
+     *
+     * @param key Can be blank/null or specific key
+     * @return
+     */
+    public List<Configuration> getConfiguration(String key) {
+        return configDao.getConfigurationEntries(key);
     }
 
-    public List<Configuration> getConfiguration() {
-        return configDao.getConfiguration();
+    /**
+     * Get a list of the configuration entries based on the options
+     *
+     * @param options
+     * @return
+     */
+    public List<Configuration> getConfiguration(OptionsConfig options) {
+        return configDao.getConfigurationEntries(options);
     }
 }
