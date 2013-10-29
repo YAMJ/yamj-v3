@@ -53,8 +53,8 @@ public class GraphicTools {
         ImageInputStream iis = null;
         try {
             in = new URL(url).openStream();
-            iis = ImageIO.createImageInputStream(in); 
-            
+            iis = ImageIO.createImageInputStream(in);
+
             final Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
             if (readers.hasNext()) {
                 ImageReader reader = readers.next();
@@ -62,32 +62,38 @@ public class GraphicTools {
                     reader.setInput(iis, Boolean.TRUE);
                     return new Dimension(reader.getWidth(0), reader.getHeight(0));
                 } finally {
-                    try  {
+                    try {
                         reader.dispose();
-                    } catch (Exception ignore) {}
+                    } catch (Exception ignore) {
+                    }
                 }
             }
         } finally {
             if (iis != null) {
-                try  {
+                try {
                     iis.close();
-                } catch (Exception ignore) {}
+                } catch (IOException ex) {
+                    LOG.trace("Failed to close stream: {}", ex.getMessage(), ex);
+                }
             }
             if (in != null) {
-                try  {
+                try {
                     in.close();
-                } catch (Exception ignore) {}
+                } catch (IOException ex) {
+                    LOG.trace("Failed to close stream: {}", ex.getMessage(), ex);
+                }
             }
         }
         return new Dimension();
     }
-    
+
     /**
      * Load a JPG image from a file
      *
      * @param fileImage
      * @return
      * @throws IOException
+     * @throws org.apache.sanselan.ImageReadException
      */
     public static BufferedImage loadJPEGImage(File fileImage) throws IOException, ImageReadException {
         if (fileImage.exists()) {
@@ -96,7 +102,7 @@ public class GraphicTools {
             if (bi == null) {
                 // null means: the image is invalid and couldn't be loaded
                 throw new ImageReadException("Image file '" + fileImage.getName() + "' is invalid");
-            } 
+            }
             return bi;
         } else {
             throw new FileNotFoundException("Image file '" + fileImage.getName() + "' does not exist");
@@ -283,7 +289,6 @@ public class GraphicTools {
 //        reflectionEnd = (PropertiesUtil.getFloatProperty(graphicType + ".reflectionEnd", 100.0f) / 100) * reflectionHeightAbsolute;
 //        opacityStart = PropertiesUtil.getFloatProperty(graphicType + ".opacityStart", 30.0f) / 100;
 //        opacityEnd = PropertiesUtil.getFloatProperty(graphicType + ".opacityEnd", 100.0f) / 100;
-
         reflectionStart = 0.0f * reflectionHeightAbsolute;
         reflectionEnd = 100.0f * reflectionHeightAbsolute;
         opacityStart = 30.0f / 100;
@@ -363,7 +368,6 @@ public class GraphicTools {
 //        } catch (NumberFormatException nfe) {
 //            logger.error(LOG_MESSAGE + "NumberFormatException " + nfe.getMessage() + " in property " + graphicType + ".perspectiveBottom");
 //        }
-
         int top3d = (int) (h * perspectiveTop / 100);
         int bot3d = (int) (h * perspectiveBottom / 100);
 

@@ -55,27 +55,27 @@ import org.yamj.core.service.artwork.tv.ITvShowVideoImageScanner;
 public class ArtworkScannerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkScannerService.class);
-    private static List<String> posterMoviePriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.poster.movie.priorities", "tmdb").toLowerCase().split(","));
-    private static List<String> fanartMoviePriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.fanart.movie.priorities", "tmdb").toLowerCase().split(","));
-    private static List<String> posterTvshowPriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.poster.tvshow.priorities", "tvdb").toLowerCase().split(","));
-    private static List<String> fanartTvshowPriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.fanart.tvshow.priorities", "tvdb").toLowerCase().split(","));
-    private static List<String> bannerTvshowPriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.banner.tvshow.priorities", "tvdb").toLowerCase().split(","));
-    private static List<String> videoimageTvshowPriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.videoimage.tvshow.priorities", "tvdb").toLowerCase().split(","));
-    private static List<String> photoPriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.photo.priorities", "tmdb").toLowerCase().split(","));
-    private static int posterMovieMaxResults = PropertyTools.getIntProperty("artwork.scanner.poster.movie.maxResults", 5);
-    private static int fanartMovieMaxResults = PropertyTools.getIntProperty("artwork.scanner.fanart.movie.maxResults", 5);
-    private static int posterTvshowMaxResults = PropertyTools.getIntProperty("artwork.scanner.poster.tvshow.maxResults", 5);
-    private static int fanartTvshowMaxResults = PropertyTools.getIntProperty("artwork.scanner.poster.tvshow.maxResults", 5);
-    private static int bannerTvshowMaxResults = PropertyTools.getIntProperty("artwork.scanner.banner.tvshow.maxResults", 5);
-    private static int videoimageTvshowMaxResults = PropertyTools.getIntProperty("artwork.scanner.videoimage.tvshow.maxResults", 2);
-    private static int photoMaxResults = PropertyTools.getIntProperty("artwork.scanner.photo.maxResults", 1);
-    private HashMap<String, IMoviePosterScanner> registeredMoviePosterScanner = new HashMap<String, IMoviePosterScanner>();
-    private HashMap<String, ITvShowPosterScanner> registeredTvShowPosterScanner = new HashMap<String, ITvShowPosterScanner>();
-    private HashMap<String, IMovieFanartScanner> registeredMovieFanartScanner = new HashMap<String, IMovieFanartScanner>();
-    private HashMap<String, ITvShowFanartScanner> registeredTvShowFanartScanner = new HashMap<String, ITvShowFanartScanner>();
-    private HashMap<String, ITvShowBannerScanner> registeredTvShowBannerScanner = new HashMap<String, ITvShowBannerScanner>();
-    private HashMap<String, ITvShowVideoImageScanner> registeredTvShowVideoImageScanner = new HashMap<String, ITvShowVideoImageScanner>();
-    private HashMap<String, IPhotoScanner> registeredPhotoScanner = new HashMap<String, IPhotoScanner>();
+    private static final List<String> posterMoviePriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.poster.movie.priorities", "tmdb").toLowerCase().split(","));
+    private static final List<String> fanartMoviePriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.fanart.movie.priorities", "tmdb").toLowerCase().split(","));
+    private static final List<String> posterTvshowPriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.poster.tvshow.priorities", "tvdb").toLowerCase().split(","));
+    private static final List<String> fanartTvshowPriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.fanart.tvshow.priorities", "tvdb").toLowerCase().split(","));
+    private static final List<String> bannerTvshowPriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.banner.tvshow.priorities", "tvdb").toLowerCase().split(","));
+    private static final List<String> videoimageTvshowPriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.videoimage.tvshow.priorities", "tvdb").toLowerCase().split(","));
+    private static final List<String> photoPriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.photo.priorities", "tmdb").toLowerCase().split(","));
+    private static final int posterMovieMaxResults = PropertyTools.getIntProperty("artwork.scanner.poster.movie.maxResults", 5);
+    private static final int fanartMovieMaxResults = PropertyTools.getIntProperty("artwork.scanner.fanart.movie.maxResults", 5);
+    private static final int posterTvshowMaxResults = PropertyTools.getIntProperty("artwork.scanner.poster.tvshow.maxResults", 5);
+    private static final int fanartTvshowMaxResults = PropertyTools.getIntProperty("artwork.scanner.poster.tvshow.maxResults", 5);
+    private static final int bannerTvshowMaxResults = PropertyTools.getIntProperty("artwork.scanner.banner.tvshow.maxResults", 5);
+    private static final int videoimageTvshowMaxResults = PropertyTools.getIntProperty("artwork.scanner.videoimage.tvshow.maxResults", 2);
+    private static final int photoMaxResults = PropertyTools.getIntProperty("artwork.scanner.photo.maxResults", 1);
+    private final HashMap<String, IMoviePosterScanner> registeredMoviePosterScanner = new HashMap<String, IMoviePosterScanner>();
+    private final HashMap<String, ITvShowPosterScanner> registeredTvShowPosterScanner = new HashMap<String, ITvShowPosterScanner>();
+    private final HashMap<String, IMovieFanartScanner> registeredMovieFanartScanner = new HashMap<String, IMovieFanartScanner>();
+    private final HashMap<String, ITvShowFanartScanner> registeredTvShowFanartScanner = new HashMap<String, ITvShowFanartScanner>();
+    private final HashMap<String, ITvShowBannerScanner> registeredTvShowBannerScanner = new HashMap<String, ITvShowBannerScanner>();
+    private final HashMap<String, ITvShowVideoImageScanner> registeredTvShowVideoImageScanner = new HashMap<String, ITvShowVideoImageScanner>();
+    private final HashMap<String, IPhotoScanner> registeredPhotoScanner = new HashMap<String, IPhotoScanner>();
     @Autowired
     private ArtworkLocatorService artworkLocatorService;
     @Autowired
@@ -203,7 +203,7 @@ public class ArtworkScannerService {
                 }
             }
 
-            if (CollectionUtils.isEmpty(posters)) {
+            if (CollectionUtils.isEmpty(posters) || posters == null) {
                 LOG.info("No movie poster found for: {}", artwork);
                 return null;
             }
@@ -227,7 +227,7 @@ public class ArtworkScannerService {
                 }
             }
 
-            if (CollectionUtils.isEmpty(posters)) {
+            if (CollectionUtils.isEmpty(posters) || posters == null) {
                 LOG.info("No TV show poster found for: {}", artwork);
                 return null;
             }
@@ -274,7 +274,7 @@ public class ArtworkScannerService {
                 }
             }
 
-            if (CollectionUtils.isEmpty(fanarts)) {
+            if (CollectionUtils.isEmpty(fanarts) || fanarts == null) {
                 LOG.info("No movie fanart found for: {}", artwork);
                 return null;
             }
@@ -295,7 +295,7 @@ public class ArtworkScannerService {
                 }
             }
 
-            if (CollectionUtils.isEmpty(fanarts)) {
+            if (CollectionUtils.isEmpty(fanarts) || fanarts == null) {
                 LOG.info("No TV show fanarts found for: {}", artwork);
                 return null;
             }
@@ -334,7 +334,7 @@ public class ArtworkScannerService {
             }
         }
 
-        if (CollectionUtils.isEmpty(banners)) {
+        if (CollectionUtils.isEmpty(banners) || banners == null) {
             LOG.info("No TV show banner found for: {}", artwork);
             return null;
         }
@@ -372,7 +372,7 @@ public class ArtworkScannerService {
             }
         }
 
-        if (CollectionUtils.isEmpty(videoimages)) {
+        if (CollectionUtils.isEmpty(videoimages) || videoimages == null) {
             LOG.info("No TV show episode image found for: {}", artwork);
             return null;
         }
@@ -423,7 +423,7 @@ public class ArtworkScannerService {
             }
         }
 
-        if (CollectionUtils.isEmpty(photos)) {
+        if (CollectionUtils.isEmpty(photos) || photos == null) {
             LOG.info("No photos found for: {}", artwork);
             return null;
         }

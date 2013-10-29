@@ -135,8 +135,8 @@ public class FileStorageService {
             if (outputStream != null) {
                 try {
                     outputStream.close();
-                } catch (Exception ignore) {
-                    // ignore this error
+                } catch (IOException ex) {
+                    LOG.trace("Failed to close stream: {}", ex.getMessage(), ex);
                 }
             }
         }
@@ -187,8 +187,8 @@ public class FileStorageService {
             if (output != null) {
                 try {
                     output.close();
-                } catch (Exception ignore) {
-                    // ignore this error
+                } catch (IOException ex) {
+                    LOG.trace("Failed to close stream: {}", ex.getMessage(), ex);
                 }
             }
         }

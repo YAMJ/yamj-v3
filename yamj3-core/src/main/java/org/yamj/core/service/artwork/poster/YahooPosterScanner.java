@@ -22,6 +22,7 @@
  */
 package org.yamj.core.service.artwork.poster;
 
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -37,8 +38,8 @@ import org.yamj.core.tools.web.PoolingHttpClient;
 
 @Service("yahooPosterScanner")
 public class YahooPosterScanner extends AbstractMoviePosterScanner
-    implements InitializingBean
-{
+        implements InitializingBean {
+
     private static final Logger LOG = LoggerFactory.getLogger(YahooPosterScanner.class);
 
     @Autowired
@@ -65,29 +66,28 @@ public class YahooPosterScanner extends AbstractMoviePosterScanner
     @Override
     public List<ArtworkDetailDTO> getPosters(String title, int year) {
         List<ArtworkDetailDTO> dtos = new ArrayList<ArtworkDetailDTO>();
-        
+
         try {
             StringBuilder sb = new StringBuilder("http://fr.images.search.yahoo.com/search/images?p=");
             sb.append(URLEncoder.encode(title, "UTF-8"));
             sb.append("+poster&fr=&ei=utf-8&js=1&x=wrt");
 
             String xml = httpClient.requestContent(sb.toString());
-            
+
             // TODO scan more posters at once
-            
             int beginIndex = xml.indexOf("imgurl=");
             if (beginIndex > 0) {
                 int endIndex = xml.indexOf("rurl=", beginIndex);
                 if (endIndex > 0) {
-                    String url = URLDecoder.decode(xml.substring(beginIndex + 7, endIndex-1), "UTF-8");
+                    String url = URLDecoder.decode(xml.substring(beginIndex + 7, endIndex - 1), "UTF-8");
                     dtos.add(new ArtworkDetailDTO(getScannerName(), url));
                 } else {
                     String url = URLDecoder.decode(xml.substring(beginIndex + 7), "UTF-8");
                     dtos.add(new ArtworkDetailDTO(getScannerName(), url));
                 }
             }
-        } catch (Exception error) {
-            LOG.error("Failed retreiving poster URL from yahoo images : " + title, error);
+        } catch (IOException error) {
+            LOG.error("Failed retreiving poster URL from yahoo images : {}", title, error);
         }
 
         return dtos;

@@ -163,7 +163,7 @@ public class ImdbSearchEngine implements InitializingBean {
             }
 
             return getImdbPersonId(personName);
-        } catch (Exception error) {
+        } catch (IOException error) {
             LOG.error("Failed retreiving IMDb Id for person '{}'", personName, error);
             return null;
         }

@@ -130,7 +130,7 @@ public class FilenameScanner {
             }
         }
     };
-    private TokensPatternMap videoSourceMap = new TokensPatternMap() {
+    private final TokensPatternMap videoSourceMap = new TokensPatternMap() {
         private static final long serialVersionUID = 4166458100829813911L;
 
         @Override
@@ -146,11 +146,11 @@ public class FilenameScanner {
     private Collection<String> videoExtensions = new HashSet<String>();
     private Collection<String> subtitleExtensions = new HashSet<String>();
     private Collection<String> imageExtensions = new HashSet<String>();
-    private Collection<Pattern> skipPatterns = new ArrayList<Pattern>();
-    private Collection<Pattern> movieVersionPatterns = new ArrayList<Pattern>();
-    private Collection<Pattern> extraPatterns = new ArrayList<Pattern>();
-    private boolean languageDetection;
-    private boolean skipEpisodeTitle;
+    private final Collection<Pattern> skipPatterns = new ArrayList<Pattern>();
+    private final Collection<Pattern> movieVersionPatterns = new ArrayList<Pattern>();
+    private final Collection<Pattern> extraPatterns = new ArrayList<Pattern>();
+    private final boolean languageDetection;
+    private final boolean skipEpisodeTitle;
     private boolean useParentRegex;
     private Pattern useParentPattern;
     private LanguageTools languageTools;
@@ -211,10 +211,10 @@ public class FilenameScanner {
     public void setLanguageTools(LanguageTools languageTools) {
         this.languageTools = languageTools;
     }
-    
+
     public FileType determineFileType(final String extension) {
         String ext = extension.toLowerCase();
-        
+
         try {
             if ("nfo".equals(ext)) {
                 return FileType.NFO;

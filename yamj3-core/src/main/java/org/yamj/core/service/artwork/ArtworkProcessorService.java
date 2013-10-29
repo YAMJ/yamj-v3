@@ -25,6 +25,7 @@ package org.yamj.core.service.artwork;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -90,8 +91,8 @@ public class ArtworkProcessorService {
             } else {
                 stored = fileStorageService.store(storageType, cacheFilename, new URL(located.getUrl()));
             }
-        } catch (Exception error) {
-            LOG.warn("Storage error", error);
+        } catch (IOException error) {
+            LOG.warn("Storage error: {}", error.getMessage(), error);
             return;
         }
 
@@ -183,8 +184,8 @@ public class ArtworkProcessorService {
             LOG.trace("Failed to generate file storage for {}, error: {}", cacheFilename, ex.getMessage());
             try {
                 fileStorageService.delete(storageType, cacheFilename);
-            } catch (Exception ex2) {
-                LOG.trace("Unable to delete file after exception: ", ex2.getMessage());
+            } catch (IOException ex2) {
+                LOG.trace("Unable to delete file after exception: {}", ex2.getMessage(), ex);
             }
             throw ex;
         }
@@ -295,13 +296,12 @@ public class ArtworkProcessorService {
                     // set values for later usage
                     located.setWidth((int) dimension.getWidth());
                     located.setHeight((int) dimension.getHeight());
-                } catch (Exception error) {
+                } catch (IOException ex) {
                     LOG.warn("Could not determine image dimension cause invalid image: {}", located);
-                    LOG.trace("Invalid image error", error);
+                    LOG.trace("Invalid image error", ex);
                     return Boolean.FALSE;
                 }
             }
-
 
             // TODO: check quality of artwork?
 

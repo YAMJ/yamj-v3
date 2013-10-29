@@ -57,7 +57,7 @@ public class FilenameDTO {
     private int fps = -1;
     private String hdResolution = null;
     private String videoSource = null;
-    private Map<String, String> idMap = new HashMap<String, String>(2);
+    private final Map<String, String> idMap = new HashMap<String, String>(2);
 
     public FilenameDTO(StageFile stageFile) {
         this.name = stageFile.getFileName();
@@ -146,7 +146,7 @@ public class FilenameDTO {
     public void setPart(int part) {
         this.part = part;
     }
-    
+
     public String getPartTitle() {
         return partTitle;
     }

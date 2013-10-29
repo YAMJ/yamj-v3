@@ -111,6 +111,9 @@ public class LanguageTools {
 
     /**
      * Decode the language tag passed in, into standard YAMJ language code
+     *
+     * @param language
+     * @return
      */
     public String determineLanguage(String language) {
         for (Map.Entry<String, Pattern> e : strictLanguageMap.entrySet()) {
@@ -124,6 +127,9 @@ public class LanguageTools {
 
     /**
      * Get the list of loose languages associated with a language
+     *
+     * @param language
+     * @return
      */
     public String getLanguageList(String language) {
         if (looseLanguageMap.containsKey(language)) {

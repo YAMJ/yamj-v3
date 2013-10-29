@@ -158,9 +158,6 @@ public class Skin {
         } catch (ConfigurationException error) {
             LOG.error("Failed reading version information file '{}'", SKIN_VERSION_FILENAME);
             LOG.warn(SystemTools.getStackTrace(error));
-        } catch (Exception error) {
-            LOG.error("Failed processing version information file '{}'", SKIN_VERSION_FILENAME);
-            LOG.warn(SystemTools.getStackTrace(error));
         }
     }
 

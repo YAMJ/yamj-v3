@@ -120,6 +120,9 @@ public final class StringTools {
 
     /**
      * Format the file size
+     *
+     * @param fileSize
+     * @return
      */
     public static String formatFileSize(long fileSize) {
 
@@ -247,21 +250,17 @@ public final class StringTools {
     }
 
     public static int toYear(String string) {
-        if (StringUtils.isBlank(string)) {
-            return -1;
-        }
-        if (!StringUtils.isNumeric(string)) {
-            return -1;
-        }
+        int year;
 
-        try {
-            int year = Integer.parseInt(string);
-            if (year > 0) {
-                return year;
+        if (StringUtils.isNotBlank(string) && StringUtils.isNumeric(string)) {
+            try {
+                year = Integer.parseInt(string);
+            } catch (NumberFormatException ex) {
+                year = -1;
             }
-        } catch (Exception ignore) {
-            // ignore this error
+        } else {
+            year = -1;
         }
-        return -1;
+        return year;
     }
 }

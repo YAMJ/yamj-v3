@@ -70,7 +70,6 @@ public class JpegReader {
      * @param file
      * @return
      * @throws IOException
-     * @throws ImageReadException
      */
     public BufferedImage readImage(File file) throws IOException {
         colorType = COLOR_TYPE_RGB;
@@ -106,8 +105,8 @@ public class JpegReader {
 
         try {
             stream.close();
-        } catch (Exception error) {
-            // ignore this error;
+        } catch (IOException ex) {
+            LOG.trace("Failed to close stream: {}", ex.getMessage(), ex);
         }
 
         return image;

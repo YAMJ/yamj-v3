@@ -40,7 +40,7 @@ public class AspectRatioTools implements InitializingBean {
 
     private final List<AspectRatio> aspectList = new ArrayList<AspectRatio>();
     private DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-    
+
     @Override
     public void afterPropertiesSet() throws Exception {
         // fill aspect list
@@ -88,7 +88,6 @@ public class AspectRatioTools implements InitializingBean {
         // use the "." as a decimal format separator, ignoring localisation
         symbols.setDecimalSeparator('.');
     }
-
 
     private int getAspectRatioPrecision() {
         int aspectRatioPrecision = configService.getIntProperty("yamj3.aspectratio.precision", 3);
@@ -188,7 +187,7 @@ public class AspectRatioTools implements InitializingBean {
         }
 
         if (!found) {
-            if (ratioValue > aspectRatioFind.getMaxFloat()) {
+            if (aspectRatioFind != null && ratioValue > aspectRatioFind.getMaxFloat()) {
                 // Too big! Use last value
                 return aspectRatioFind;
             } else if (ratioValue < aspectList.get(0).getMinFloat()) {
@@ -250,11 +249,7 @@ public class AspectRatioTools implements InitializingBean {
          * @return
          */
         public boolean testAspectRatio(float ratioValue) {
-            if (ratioValue >= this.minFloat && ratioValue <= this.maxFloat) {
-                return true;
-            } else {
-                return false;
-            }
+            return (ratioValue >= this.minFloat && ratioValue <= this.maxFloat);
         }
 
         public String getRatioName() {

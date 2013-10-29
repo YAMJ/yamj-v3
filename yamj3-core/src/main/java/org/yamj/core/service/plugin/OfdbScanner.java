@@ -22,6 +22,7 @@
  */
 package org.yamj.core.service.plugin;
 
+import java.io.IOException;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
@@ -112,7 +113,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                 return sb.toString();
             }
 
-        } catch (Exception error) {
+        } catch (IOException error) {
             LOG.error("Failed retreiving OFDb url for IMDb id '{}'", imdbId, error);
         }
         return null;
@@ -149,7 +150,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
             sb.append(xml.substring(beginIndex + 6, xml.indexOf("\"", beginIndex + 10)));
             return sb.toString();
 
-        } catch (Exception error) {
+        } catch (IOException error) {
             LOG.error("Failed retrieving OFDb url for title '{}'", title, error);
         }
         return null;
@@ -215,7 +216,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                     if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
                         videoData.setOutline(plot, SCANNER_ID);
                     }
-                } catch (Exception error) {
+                } catch (IOException error) {
                     LOG.error("Failed retrieving plot '{}'", ofdbUrl, error);
                     scanResult = ScanResult.ERROR;
                 }
@@ -282,7 +283,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                     }
                 }
             }
-        } catch (Exception error) {
+        } catch (IOException error) {
             LOG.error("Failed retrieving meta data '{}'", ofdbUrl, error);
             scanResult = ScanResult.ERROR;
         }

@@ -58,8 +58,8 @@ public class MediaInfoService implements InitializingBean {
     private static final String MI_FILENAME_LINUX = "mediainfo";
     private static final String MI_RAR_FILENAME_LINUX = "mediainfo-rar";
     // media info settings
-    private static File mediaInfoPath = new File(PropertyTools.getProperty("mediainfo.home", "./mediaInfo/"));
-    private List<String> execMediaInfo = new ArrayList<String>();
+    private static final File MEDIAINFO_PATH = new File(PropertyTools.getProperty("mediainfo.home", "./mediaInfo/"));
+    private final List<String> execMediaInfo = new ArrayList<String>();
     private boolean isMediaInfoRar = Boolean.FALSE;
     private boolean isActivated = Boolean.TRUE;
     private static final List<String> RAR_DISK_IMAGES = new ArrayList<String>();
@@ -77,23 +77,23 @@ public class MediaInfoService implements InitializingBean {
         LOG.debug("Operating System Name   : {}", OS_NAME);
         LOG.debug("Operating System Version: {}", System.getProperty("os.version"));
         LOG.debug("Operating System Type   : {}", System.getProperty("os.arch"));
-        LOG.debug("Media Info Path         : {}", mediaInfoPath);
+        LOG.debug("Media Info Path         : {}", MEDIAINFO_PATH);
 
         File mediaInfoFile;
         if (OS_NAME.contains("Windows")) {
-            mediaInfoFile = new File(mediaInfoPath.getAbsolutePath() + File.separator + MI_RAR_FILENAME_WINDOWS);
+            mediaInfoFile = new File(MEDIAINFO_PATH.getAbsolutePath() + File.separator + MI_RAR_FILENAME_WINDOWS);
             if (!mediaInfoFile.exists()) {
                 //  fall back to the normal filename
-                mediaInfoFile = new File(mediaInfoPath.getAbsolutePath() + File.separator + MI_FILENAME_WINDOWS);
+                mediaInfoFile = new File(MEDIAINFO_PATH.getAbsolutePath() + File.separator + MI_FILENAME_WINDOWS);
             } else {
                 // enable the extra mediainfo-rar features
                 isMediaInfoRar = Boolean.TRUE;
             }
         } else {
-            mediaInfoFile = new File(mediaInfoPath.getAbsolutePath() + File.separator + MI_RAR_FILENAME_LINUX);
+            mediaInfoFile = new File(MEDIAINFO_PATH.getAbsolutePath() + File.separator + MI_RAR_FILENAME_LINUX);
             if (!mediaInfoFile.exists()) {
                 // Fall back to the normal filename
-                mediaInfoFile = new File(mediaInfoPath.getAbsolutePath() + File.separator + MI_FILENAME_LINUX);
+                mediaInfoFile = new File(MEDIAINFO_PATH.getAbsolutePath() + File.separator + MI_FILENAME_LINUX);
             } else {
                 // enable the extra mediainfo-rar features
                 isMediaInfoRar = Boolean.TRUE;
@@ -154,7 +154,7 @@ public class MediaInfoService implements InitializingBean {
         }
 
         // check if stage file can be read by MediaInfo
-        File file  = new File(stageFile.getFullPath());
+        File file = new File(stageFile.getFullPath());
         boolean scanned = false;
         if (!file.exists()) {
             LOG.warn("Media file not found: {}", stageFile.getFullPath());
@@ -182,8 +182,8 @@ public class MediaInfoService implements InitializingBean {
                 if (is != null) {
                     try {
                         is.close();
-                    } catch (Exception ignore) {
-                        // ignore this error
+                    } catch (IOException ex) {
+                        LOG.trace("Failed to close stream: {}", ex.getMessage(), ex);
                     }
                 }
             }
@@ -237,8 +237,8 @@ public class MediaInfoService implements InitializingBean {
                 if (StringUtils.isNumeric(infoValue)) {
                     mediaFile.setWidth(Integer.parseInt(infoValue));
                 }
-            } catch (Exception error) {
-                LOG.trace("Failed to parse width: " + infoValue, error);
+            } catch (NumberFormatException error) {
+                LOG.trace("Failed to parse width: {}", infoValue, error);
             }
 
             // height
@@ -248,8 +248,8 @@ public class MediaInfoService implements InitializingBean {
                 if (StringUtils.isNumeric(infoValue)) {
                     mediaFile.setHeight(Integer.parseInt(infoValue));
                 }
-            } catch (Exception error) {
-                LOG.trace("Failed to parse height: " + infoValue, error);
+            } catch (NumberFormatException ex) {
+                LOG.trace("Failed to parse height: {}", infoValue, ex);
             }
 
             // frame rate
@@ -265,8 +265,8 @@ public class MediaInfoService implements InitializingBean {
                         infoValue = infoValue.substring(0, inxDiv);
                     }
                     mediaFile.setFps(Float.parseFloat(infoValue));
-                } catch (Exception error) {
-                    LOG.debug("Failed to parse frame rate: " + infoValue, error);
+                } catch (NumberFormatException error) {
+                    LOG.debug("Failed to parse frame rate: {}", infoValue, error);
                 }
             }
 
@@ -335,7 +335,7 @@ public class MediaInfoService implements InitializingBean {
         }
     }
 
-    private void parseAudioCodec(AudioCodec audioCodec, Map<String,String> infosAudio) {
+    private void parseAudioCodec(AudioCodec audioCodec, Map<String, String> infosAudio) {
         // codec
         String infoValue = infosAudio.get("Codec ID");
         if (StringUtils.isBlank(infoValue)) {
@@ -367,8 +367,8 @@ public class MediaInfoService implements InitializingBean {
                 if (codecMatch.matches()) {
                     audioCodec.setChannels(Integer.parseInt(codecMatch.group(1)));
                 }
-            } catch (Exception error) {
-                LOG.trace("Failed to parse channels: " + infoValue, error);
+            } catch (NumberFormatException ex) {
+                LOG.trace("Failed to parse channels: {}", infoValue, ex);
             }
         }
 
@@ -389,7 +389,7 @@ public class MediaInfoService implements InitializingBean {
         }
     }
 
-    private boolean parseSubtitle(Subtitle subtitle, Map<String,String> infosText) {
+    private boolean parseSubtitle(Subtitle subtitle, Map<String, String> infosText) {
         // format
         String infoFormat = infosText.get("Format");
         if (StringUtils.isBlank(infoFormat)) {
@@ -409,12 +409,11 @@ public class MediaInfoService implements InitializingBean {
 
         // just use defined formats
         if ("SRT".equalsIgnoreCase(infoFormat)
-             || "UTF-8".equalsIgnoreCase(infoFormat)
-             || "RLE".equalsIgnoreCase(infoFormat)
-             || "PGS".equalsIgnoreCase(infoFormat)
-             || "ASS".equalsIgnoreCase(infoFormat)
-             || "VobSub".equalsIgnoreCase(infoFormat))
-        {
+                || "UTF-8".equalsIgnoreCase(infoFormat)
+                || "RLE".equalsIgnoreCase(infoFormat)
+                || "PGS".equalsIgnoreCase(infoFormat)
+                || "ASS".equalsIgnoreCase(infoFormat)
+                || "VobSub".equalsIgnoreCase(infoFormat)) {
             subtitle.setFormat(infoFormat);
             if (StringUtils.isBlank(infoLanguage)) {
                 subtitle.setLanguage(Constants.UNDEFINED);
@@ -423,7 +422,6 @@ public class MediaInfoService implements InitializingBean {
             }
             return Boolean.TRUE;
         }
-
 
         LOG.debug("Subtitle format skipped: {}", infoFormat);
         return Boolean.FALSE;
@@ -456,7 +454,7 @@ public class MediaInfoService implements InitializingBean {
         return runtimeValue;
     }
 
-    public int getBitRate(Map<String,String> infos) {
+    public int getBitRate(Map<String, String> infos) {
         String bitRateValue = infos.get("Bit rate");
         if (StringUtils.isBlank(bitRateValue)) {
             bitRateValue = infos.get("Nominal bit rate");
@@ -469,11 +467,11 @@ public class MediaInfoService implements InitializingBean {
             if (bitRateValue.indexOf(Constants.SPACE_SLASH_SPACE) > -1) {
                 bitRateValue = bitRateValue.substring(0, bitRateValue.indexOf(Constants.SPACE_SLASH_SPACE));
             }
-            try  {
+            try {
                 bitRateValue = bitRateValue.substring(0, bitRateValue.length() - 3);
                 return Integer.parseInt(bitRateValue);
-            } catch (Exception error) {
-                LOG.trace("Failed to parse bit rate: " + bitRateValue, error);
+            } catch (NumberFormatException ex) {
+                LOG.trace("Failed to parse bit rate: {}", bitRateValue, ex);
             }
         }
         return -1;
@@ -487,7 +485,7 @@ public class MediaInfoService implements InitializingBean {
         ProcessBuilder pb = new ProcessBuilder(commandMedia);
 
         // set up the working directory.
-        pb.directory(mediaInfoPath);
+        pb.directory(MEDIAINFO_PATH);
 
         Process p = pb.start();
         return p.getInputStream();
@@ -563,8 +561,8 @@ public class MediaInfoService implements InitializingBean {
 
             // Setting General Info - Beware of lose data if infosGeneral already have some ...
             try {
-                for (int i = 0; i < generalKey.length; i++) {
-                    List<Map<String, String>> arrayList = matches.get(generalKey[i]);
+                for (String generalKey1 : generalKey) {
+                    List<Map<String, String>> arrayList = matches.get(generalKey1);
                     if (arrayList.size() > 0) {
                         Map<String, String> datas = arrayList.get(0);
                         if (datas.size() > 0) {

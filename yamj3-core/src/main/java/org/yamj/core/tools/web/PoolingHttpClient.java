@@ -82,7 +82,7 @@ public class PoolingHttpClient extends DefaultPoolingHttpClient implements Dispo
             try {
                 Pattern.compile(group);
                 groupLimits.put(group, Integer.parseInt(matcher.group(2)));
-            } catch (Exception error) {
+            } catch (NumberFormatException error) {
                 LOG.debug("Rule '{}' is not valid regexp, ignored", group);
             }
         }

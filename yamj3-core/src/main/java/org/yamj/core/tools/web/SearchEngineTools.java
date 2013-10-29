@@ -22,6 +22,7 @@
  */
 package org.yamj.core.tools.web;
 
+import java.io.IOException;
 import org.yamj.common.tools.PropertyTools;
 import java.net.URLEncoder;
 import java.util.Arrays;
@@ -41,7 +42,7 @@ public class SearchEngineTools {
     private String googleHost = "www.google.com";
     private String yahooHost = "search.yahoo.com";
     private String bingHost = "www.bing.com";
-    private String blekkoHost = "www.blekko.com";
+    private final String blekkoHost = "www.blekko.com";
     private String lycosHost = "search.lycos.com";
     // Literals
     private static final String HTTP = "http://";
@@ -180,7 +181,7 @@ public class SearchEngineTools {
             if (beginIndex != -1) {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
             }
-        } catch (Exception error) {
+        } catch (IOException error) {
             LOG.error("Failed retrieving link url by google search {}", title, error);
         }
         return null;
@@ -220,7 +221,7 @@ public class SearchEngineTools {
                     return "http:" + link;
                 }
             }
-        } catch (Exception error) {
+        } catch (IOException error) {
             LOG.error("Failed retrieving link url by yahoo search '{}'", title, error);
         }
         return null;
@@ -257,7 +258,7 @@ public class SearchEngineTools {
             if (beginIndex != -1) {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
             }
-        } catch (Exception error) {
+        } catch (IOException error) {
             LOG.error("Failed retrieving link url by bing search {}", title, error);
         }
         return null;
@@ -289,7 +290,7 @@ public class SearchEngineTools {
             if (beginIndex != -1) {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
             }
-        } catch (Exception error) {
+        } catch (IOException error) {
             LOG.error("Failed retrieving link url by bing search {}", title, error);
         }
         return null;
@@ -329,7 +330,7 @@ public class SearchEngineTools {
             if (beginIndex != -1) {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
             }
-        } catch (Exception error) {
+        } catch (IOException error) {
             LOG.error("Failed retrieving link url by lycos search {}", title, error);
         }
         return null;
