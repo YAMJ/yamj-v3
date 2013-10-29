@@ -24,6 +24,7 @@ package org.yamj.core.api.json;
 
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,8 +60,17 @@ public class CommonController {
     public ApiStatus markWatched(
             @RequestParam(required = true, defaultValue = "") String filename,
             @RequestParam(required = false, defaultValue = "-1") Integer amount) {
-        int percentage = (amount == -1 ? 100 : amount);
-        LOG.info("Received watched command for '{}' to value '{}' {}", filename, percentage, (amount == -1 ? "(defaulted)" : ""));
+
+        int percentage;
+        if (amount < 0) {
+            percentage = 0;
+        } else if (amount > 100) {
+            percentage = 100;
+        } else {
+            percentage = amount;
+        }
+
+        LOG.info("Received watched command for '{}' to value '{}'", filename, percentage);
         // TODO: Add write to database command
         return new ApiStatus(200, "Watch command successful");
     }
