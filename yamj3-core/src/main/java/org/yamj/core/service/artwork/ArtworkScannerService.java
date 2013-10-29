@@ -43,6 +43,7 @@ import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.ArtworkLocatorService;
 import org.yamj.core.database.service.ArtworkStorageService;
+import org.yamj.core.service.artwork.common.TheMovieDbArtworkScanner;
 import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
 import org.yamj.core.service.artwork.fanart.ITvShowFanartScanner;
 import org.yamj.core.service.artwork.photo.IPhotoScanner;
@@ -50,25 +51,29 @@ import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
 import org.yamj.core.service.artwork.poster.ITvShowPosterScanner;
 import org.yamj.core.service.artwork.tv.ITvShowBannerScanner;
 import org.yamj.core.service.artwork.tv.ITvShowVideoImageScanner;
+import org.yamj.core.service.plugin.TheMovieDbScanner;
+import org.yamj.core.service.plugin.TheTVDbScanner;
 
 @Service("artworkScannerService")
 public class ArtworkScannerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkScannerService.class);
-    private static final List<String> posterMoviePriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.poster.movie.priorities", "tmdb").toLowerCase().split(","));
-    private static final List<String> fanartMoviePriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.fanart.movie.priorities", "tmdb").toLowerCase().split(","));
-    private static final List<String> posterTvshowPriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.poster.tvshow.priorities", "tvdb").toLowerCase().split(","));
-    private static final List<String> fanartTvshowPriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.fanart.tvshow.priorities", "tvdb").toLowerCase().split(","));
-    private static final List<String> bannerTvshowPriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.banner.tvshow.priorities", "tvdb").toLowerCase().split(","));
-    private static final List<String> videoimageTvshowPriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.videoimage.tvshow.priorities", "tvdb").toLowerCase().split(","));
-    private static final List<String> photoPriorities = Arrays.asList(PropertyTools.getProperty("artwork.scanner.photo.priorities", "tmdb").toLowerCase().split(","));
-    private static final int posterMovieMaxResults = PropertyTools.getIntProperty("artwork.scanner.poster.movie.maxResults", 5);
-    private static final int fanartMovieMaxResults = PropertyTools.getIntProperty("artwork.scanner.fanart.movie.maxResults", 5);
-    private static final int posterTvshowMaxResults = PropertyTools.getIntProperty("artwork.scanner.poster.tvshow.maxResults", 5);
-    private static final int fanartTvshowMaxResults = PropertyTools.getIntProperty("artwork.scanner.poster.tvshow.maxResults", 5);
-    private static final int bannerTvshowMaxResults = PropertyTools.getIntProperty("artwork.scanner.banner.tvshow.maxResults", 5);
-    private static final int videoimageTvshowMaxResults = PropertyTools.getIntProperty("artwork.scanner.videoimage.tvshow.maxResults", 2);
-    private static final int photoMaxResults = PropertyTools.getIntProperty("artwork.scanner.photo.maxResults", 1);
+    private static final String TMDB = TheMovieDbScanner.SCANNER_ID;
+    private static final String TVDB = TheTVDbScanner.SCANNER_ID;
+    private static final List<String> POSTER_MOVIE_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.poster.movie.priorities", TMDB).toLowerCase().split(","));
+    private static final List<String> FANART_MOVIE_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.fanart.movie.priorities", TMDB).toLowerCase().split(","));
+    private static final List<String> POSTER_TVSHOW_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.poster.tvshow.priorities", TVDB).toLowerCase().split(","));
+    private static final List<String> FANART_TVSHOW_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.fanart.tvshow.priorities", TVDB).toLowerCase().split(","));
+    private static final List<String> BANNER_TVSHOW_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.banner.tvshow.priorities", TVDB).toLowerCase().split(","));
+    private static final List<String> VIDEOIMAGE_TVSHOW_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.videoimage.tvshow.priorities", TVDB).toLowerCase().split(","));
+    private static final List<String> PHOTO_PRIORITIES = Arrays.asList(PropertyTools.getProperty("artwork.scanner.photo.priorities", TMDB).toLowerCase().split(","));
+    private static final int POSTER_MOVIE_MAX_RESULTS = PropertyTools.getIntProperty("artwork.scanner.poster.movie.maxResults", 5);
+    private static final int FANART_MOVIE_MAX_RESULTS = PropertyTools.getIntProperty("artwork.scanner.fanart.movie.maxResults", 5);
+    private static final int POSTER_TVSHOW_MAX_RESULTS = PropertyTools.getIntProperty("artwork.scanner.poster.tvshow.maxResults", 5);
+    private static final int FANART_TVSHOW_MAX_RESULTS = PropertyTools.getIntProperty("artwork.scanner.poster.tvshow.maxResults", 5);
+    private static final int BANNER_TVSHOW_MAX_RESULTS = PropertyTools.getIntProperty("artwork.scanner.banner.tvshow.maxResults", 5);
+    private static final int VIDEOIMAGE_TVSHOW_MAX_RESULTS = PropertyTools.getIntProperty("artwork.scanner.videoimage.tvshow.maxResults", 2);
+    private static final int PHOTO_MAX_RESULTS = PropertyTools.getIntProperty("artwork.scanner.photo.maxResults", 1);
     private final HashMap<String, IMoviePosterScanner> registeredMoviePosterScanner = new HashMap<String, IMoviePosterScanner>();
     private final HashMap<String, ITvShowPosterScanner> registeredTvShowPosterScanner = new HashMap<String, ITvShowPosterScanner>();
     private final HashMap<String, IMovieFanartScanner> registeredMovieFanartScanner = new HashMap<String, IMovieFanartScanner>();
@@ -80,6 +85,8 @@ public class ArtworkScannerService {
     private ArtworkLocatorService artworkLocatorService;
     @Autowired
     private ArtworkStorageService artworkStorageService;
+    // Literals
+    private static final String USE_SCANNER_FOR = "Use {} scanner for {}";
 
     public void registerMoviePosterScanner(IMoviePosterScanner posterScanner) {
         LOG.info("Registered movie poster scanner: {}", posterScanner.getScannerName().toLowerCase());
@@ -190,10 +197,10 @@ public class ArtworkScannerService {
 
         if (artwork.getMetadata().isMovie()) {
             // CASE: movie poster scan
-            for (String prio : posterMoviePriorities) {
+            for (String prio : POSTER_MOVIE_PRIORITIES) {
                 IMoviePosterScanner scanner = registeredMoviePosterScanner.get(prio);
                 if (scanner != null) {
-                    LOG.debug("Use {} scanner for {}", scanner.getScannerName(), artwork);
+                    LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                     posters = scanner.getPosters(artwork.getMetadata());
                     if (CollectionUtils.isNotEmpty(posters)) {
                         break;
@@ -208,16 +215,16 @@ public class ArtworkScannerService {
                 return null;
             }
 
-            if (posterMovieMaxResults > 0 && posters.size() > posterMovieMaxResults) {
-                LOG.info("Limited movie posters to {}, actually retrieved {} for {}", posterMovieMaxResults, posters.size(), artwork);
-                posters = posters.subList(0, posterMovieMaxResults);
+            if (POSTER_MOVIE_MAX_RESULTS > 0 && posters.size() > POSTER_MOVIE_MAX_RESULTS) {
+                LOG.info("Limited movie posters to {}, actually retrieved {} for {}", POSTER_MOVIE_MAX_RESULTS, posters.size(), artwork);
+                posters = posters.subList(0, POSTER_MOVIE_MAX_RESULTS);
             }
         } else {
             // CASE: TV show poster scan
-            for (String prio : posterTvshowPriorities) {
+            for (String prio : POSTER_TVSHOW_PRIORITIES) {
                 ITvShowPosterScanner scanner = registeredTvShowPosterScanner.get(prio);
                 if (scanner != null) {
-                    LOG.debug("Use {} scanner for {}", scanner.getScannerName(), artwork);
+                    LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                     posters = scanner.getPosters(artwork.getMetadata());
                     if (CollectionUtils.isNotEmpty(posters)) {
                         break;
@@ -232,9 +239,9 @@ public class ArtworkScannerService {
                 return null;
             }
 
-            if (posterTvshowMaxResults > 0 && posters.size() > posterTvshowMaxResults) {
-                LOG.info("Limited TV show posters to {}, actually retrieved {} for {}", posterTvshowMaxResults, posters.size(), artwork);
-                posters = posters.subList(0, posterTvshowMaxResults);
+            if (POSTER_TVSHOW_MAX_RESULTS > 0 && posters.size() > POSTER_TVSHOW_MAX_RESULTS) {
+                LOG.info("Limited TV show posters to {}, actually retrieved {} for {}", POSTER_TVSHOW_MAX_RESULTS, posters.size(), artwork);
+                posters = posters.subList(0, POSTER_TVSHOW_MAX_RESULTS);
             }
         }
 
@@ -261,10 +268,10 @@ public class ArtworkScannerService {
 
         if (artwork.getMetadata().isMovie()) {
             // CASE: movie fanart
-            for (String prio : fanartMoviePriorities) {
+            for (String prio : FANART_MOVIE_PRIORITIES) {
                 IMovieFanartScanner scanner = registeredMovieFanartScanner.get(prio);
                 if (scanner != null) {
-                    LOG.debug("Use {} scanner for {}", scanner.getScannerName(), artwork);
+                    LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                     fanarts = scanner.getFanarts(artwork.getMetadata());
                     if (CollectionUtils.isNotEmpty(fanarts)) {
                         break;
@@ -279,16 +286,16 @@ public class ArtworkScannerService {
                 return null;
             }
 
-            if (fanartMovieMaxResults > 0 && fanarts.size() > fanartMovieMaxResults) {
-                LOG.info("Limited movie fanarts to {}, actually retrieved {} for {}", fanartMovieMaxResults, fanarts.size(), artwork);
-                fanarts = fanarts.subList(0, fanartMovieMaxResults);
+            if (FANART_MOVIE_MAX_RESULTS > 0 && fanarts.size() > FANART_MOVIE_MAX_RESULTS) {
+                LOG.info("Limited movie fanarts to {}, actually retrieved {} for {}", FANART_MOVIE_MAX_RESULTS, fanarts.size(), artwork);
+                fanarts = fanarts.subList(0, FANART_MOVIE_MAX_RESULTS);
             }
         } else {
             // CASE: TV show poster scan
-            for (String prio : fanartTvshowPriorities) {
+            for (String prio : FANART_TVSHOW_PRIORITIES) {
                 ITvShowFanartScanner scanner = registeredTvShowFanartScanner.get(prio);
                 if (scanner != null) {
-                    LOG.debug("Use {} scanner for {}", scanner.getScannerName(), artwork);
+                    LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                     fanarts = scanner.getFanarts(artwork.getMetadata());
                 } else {
                     LOG.warn("Desired TV show fanart scanner {} not registerd", prio);
@@ -300,9 +307,9 @@ public class ArtworkScannerService {
                 return null;
             }
 
-            if (fanartTvshowMaxResults > 0 && fanarts.size() > fanartTvshowMaxResults) {
-                LOG.info("Limited TV show fanart to {}, actually retrieved {} for {}", fanartTvshowMaxResults, fanarts.size(), artwork);
-                fanarts = fanarts.subList(0, fanartTvshowMaxResults);
+            if (FANART_TVSHOW_MAX_RESULTS > 0 && fanarts.size() > FANART_TVSHOW_MAX_RESULTS) {
+                LOG.info("Limited TV show fanart to {}, actually retrieved {} for {}", FANART_TVSHOW_MAX_RESULTS, fanarts.size(), artwork);
+                fanarts = fanarts.subList(0, FANART_TVSHOW_MAX_RESULTS);
             }
         }
 
@@ -321,10 +328,10 @@ public class ArtworkScannerService {
 
         List<ArtworkDetailDTO> banners = null;
 
-        for (String prio : bannerTvshowPriorities) {
+        for (String prio : BANNER_TVSHOW_PRIORITIES) {
             ITvShowBannerScanner scanner = registeredTvShowBannerScanner.get(prio);
             if (scanner != null) {
-                LOG.debug("Use {} scanner for {}", scanner.getScannerName(), artwork);
+                LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                 banners = scanner.getBanners(artwork.getMetadata());
                 if (CollectionUtils.isNotEmpty(banners)) {
                     break;
@@ -339,9 +346,9 @@ public class ArtworkScannerService {
             return null;
         }
 
-        if (bannerTvshowMaxResults > 0 && banners.size() > bannerTvshowMaxResults) {
-            LOG.info("Limited TV show banners to {}, actually retrieved {} for {}", bannerTvshowMaxResults, banners.size(), artwork);
-            banners = banners.subList(0, bannerTvshowMaxResults);
+        if (BANNER_TVSHOW_MAX_RESULTS > 0 && banners.size() > BANNER_TVSHOW_MAX_RESULTS) {
+            LOG.info("Limited TV show banners to {}, actually retrieved {} for {}", BANNER_TVSHOW_MAX_RESULTS, banners.size(), artwork);
+            banners = banners.subList(0, BANNER_TVSHOW_MAX_RESULTS);
         }
 
         return createLocatedArtworksOnline(artwork, banners);
@@ -359,10 +366,10 @@ public class ArtworkScannerService {
 
         List<ArtworkDetailDTO> videoimages = null;
 
-        for (String prio : videoimageTvshowPriorities) {
+        for (String prio : VIDEOIMAGE_TVSHOW_PRIORITIES) {
             ITvShowVideoImageScanner scanner = registeredTvShowVideoImageScanner.get(prio);
             if (scanner != null) {
-                LOG.debug("Use {} scanner for {}", scanner.getScannerName(), artwork);
+                LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                 videoimages = scanner.getVideoImages(artwork.getMetadata());
                 if (CollectionUtils.isNotEmpty(videoimages)) {
                     break;
@@ -377,9 +384,9 @@ public class ArtworkScannerService {
             return null;
         }
 
-        if (videoimageTvshowMaxResults > 0 && videoimages.size() > videoimageTvshowMaxResults) {
-            LOG.info("Limited Video Images to {}, actually retrieved {} for {}", videoimageTvshowMaxResults, videoimages.size(), artwork);
-            videoimages = videoimages.subList(0, videoimageTvshowMaxResults);
+        if (VIDEOIMAGE_TVSHOW_MAX_RESULTS > 0 && videoimages.size() > VIDEOIMAGE_TVSHOW_MAX_RESULTS) {
+            LOG.info("Limited Video Images to {}, actually retrieved {} for {}", VIDEOIMAGE_TVSHOW_MAX_RESULTS, videoimages.size(), artwork);
+            videoimages = videoimages.subList(0, VIDEOIMAGE_TVSHOW_MAX_RESULTS);
         }
 
         return createLocatedArtworksOnline(artwork, videoimages);
@@ -396,10 +403,10 @@ public class ArtworkScannerService {
 
         List<ArtworkDetailDTO> photos = null;
 
-        for (String prio : photoPriorities) {
+        for (String prio : PHOTO_PRIORITIES) {
             IPhotoScanner scanner = registeredPhotoScanner.get(prio);
             if (scanner != null) {
-                LOG.debug("Use {} scanner for {}", scanner.getScannerName(), artwork);
+                LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                 Person person = artwork.getPerson();
                 if (person == null) {
                     LOG.warn("No associated person found for artwork: {}", artwork);
@@ -428,9 +435,9 @@ public class ArtworkScannerService {
             return null;
         }
 
-        if (photoMaxResults > 0 && photos.size() > photoMaxResults) {
-            LOG.info("Limited photos to {}, actually retrieved {} for {}", photoMaxResults, photos.size(), artwork);
-            photos = photos.subList(0, photoMaxResults);
+        if (PHOTO_MAX_RESULTS > 0 && photos.size() > PHOTO_MAX_RESULTS) {
+            LOG.info("Limited photos to {}, actually retrieved {} for {}", PHOTO_MAX_RESULTS, photos.size(), artwork);
+            photos = photos.subList(0, PHOTO_MAX_RESULTS);
         }
 
         return createLocatedArtworksOnline(artwork, photos);

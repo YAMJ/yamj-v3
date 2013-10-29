@@ -55,57 +55,59 @@ public final class OverrideTools {
     private static final Map<OverrideFlag, List<String>> VIDEODATA_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
     private static final Map<OverrideFlag, List<String>> SEASON_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
     private static final Map<OverrideFlag, List<String>> SERIES_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
+    private static final String DEFAULT_PLUGIN_MOVIE_SERIES = "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series";
+    private static final String DEFAULT_PLUGIN_SERIES = "nfo,plugin_series,alternate_series";
 
     static {
         String sources;
 
         // country
-        sources = PropertyTools.getProperty("priority.videodata.country", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.country", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.COUNTRY, sources);
         // genres
-        sources = PropertyTools.getProperty("priority.videodata.genres", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.genres", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.GENRES, sources);
-        sources = PropertyTools.getProperty("priority.series.genres", "nfo,plugin_series,plugin_movie,alternate_series,alternate_movie");
+        sources = PropertyTools.getProperty("priority.series.genres", DEFAULT_PLUGIN_SERIES);
         putSeriesPriorities(OverrideFlag.GENRES, sources);
         // original title
-        sources = PropertyTools.getProperty("priority.videodata.originaltitle", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.originaltitle", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.ORIGINALTITLE, sources);
-        sources = PropertyTools.getProperty("priority.season.originaltitle", "nfo,plugin_series,alternate_series");
-        putSeasonPriorities(OverrideFlag.ORIGINALTITLE, sources);
-        sources = PropertyTools.getProperty("priority.series.originaltitle", "nfo,plugin_series,alternate_series");
+        sources = PropertyTools.getProperty("priority.series.originaltitle", DEFAULT_PLUGIN_SERIES);
         putSeriesPriorities(OverrideFlag.ORIGINALTITLE, sources);
+        sources = PropertyTools.getProperty("priority.season.originaltitle", DEFAULT_PLUGIN_SERIES);
+        putSeasonPriorities(OverrideFlag.ORIGINALTITLE, sources);
         // outline
-        sources = PropertyTools.getProperty("priority.videodata.outline", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.outline", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.OUTLINE, sources);
-        sources = PropertyTools.getProperty("priority.season.outline", "nfo,plugin_series,alternate_series");
-        putSeasonPriorities(OverrideFlag.OUTLINE, sources);
-        sources = PropertyTools.getProperty("priority.series.outline", "nfo,plugin_series,alternate_series");
+        sources = PropertyTools.getProperty("priority.series.outline", DEFAULT_PLUGIN_SERIES);
         putSeriesPriorities(OverrideFlag.OUTLINE, sources);
+        sources = PropertyTools.getProperty("priority.season.outline", DEFAULT_PLUGIN_SERIES);
+        putSeasonPriorities(OverrideFlag.OUTLINE, sources);
         // plot
-        sources = PropertyTools.getProperty("priority.videodata.plot", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.plot", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.PLOT, sources);
-        sources = PropertyTools.getProperty("priority.season.plot", "nfo,plugin_series,alternate_series");
-        putSeasonPriorities(OverrideFlag.PLOT, sources);
-        sources = PropertyTools.getProperty("priority.series.plot", "nfo,plugin_series,alternate_series");
+        sources = PropertyTools.getProperty("priority.series.plot", DEFAULT_PLUGIN_SERIES);
         putSeriesPriorities(OverrideFlag.PLOT, sources);
+        sources = PropertyTools.getProperty("priority.season.plot", DEFAULT_PLUGIN_SERIES);
+        putSeasonPriorities(OverrideFlag.PLOT, sources);
         // quote
-        sources = PropertyTools.getProperty("priority.videodata.quote", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.quote", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.QUOTE, sources);
         // releasedate
-        sources = PropertyTools.getProperty("priority.videodata.releasedate", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.releasedate", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.RELEASEDATE, sources);
         // tagline
-        sources = PropertyTools.getProperty("priority.videodata.tagline", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.tagline", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.TAGLINE, sources);
         // title
         sources = PropertyTools.getProperty("priority.videodata.title", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series,filename");
         putVideodataPriorities(OverrideFlag.TITLE, sources);
-        sources = PropertyTools.getProperty("priority.season.title", "nfo,plugin_series,alternate_series,filename");
-        putSeasonPriorities(OverrideFlag.TITLE, sources);
         sources = PropertyTools.getProperty("priority.series.title", "nfo,plugin_series,alternate_series,filename");
         putSeriesPriorities(OverrideFlag.TITLE, sources);
+        sources = PropertyTools.getProperty("priority.season.title", "nfo,plugin_series,alternate_series,filename");
+        putSeasonPriorities(OverrideFlag.TITLE, sources);
         // year
-        sources = PropertyTools.getProperty("priority.videodata.year", "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series");
+        sources = PropertyTools.getProperty("priority.videodata.year", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.YEAR, sources);
     }
 

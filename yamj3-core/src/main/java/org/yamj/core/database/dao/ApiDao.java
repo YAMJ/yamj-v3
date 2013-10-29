@@ -83,6 +83,10 @@ public class ApiDao extends HibernateDao {
     private static final String SQL_UNION_ALL = " UNION ALL ";
     private static final String SQL_AS_VIDEO_TYPE_STRING = "' AS videoTypeString";
     private static final String SQL_WHERE_1_EQ_1 = " WHERE 1=1";
+    private static final String SQL_COMMA_SPACE_QUOTE = ", '";
+    private static final String SQL_ARTWORK_TYPE_IN_ARTWORKLIST = " AND a.artwork_type IN (:artworklist)";
+    private static final String SQL_LEFT_JOIN_ARTWORK_GENERATED = " LEFT JOIN artwork_generated ag ON al.id=ag.located_id";
+    private static final String SQL_LEFT_JOIN_ARTWORK_LOCATED = " LEFT JOIN artwork_located al ON a.id=al.artwork_id";
 
     /**
      * Generate the query and load the results into the wrapper
@@ -228,9 +232,9 @@ public class ApiDao extends HibernateDao {
 
         sbSQL.append("SELECT vd.id");
         if (isMovie) {
-            sbSQL.append(", '").append(MetaDataType.MOVIE).append(SQL_AS_VIDEO_TYPE_STRING);
+            sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.MOVIE).append(SQL_AS_VIDEO_TYPE_STRING);
         } else {
-            sbSQL.append(", '").append(MetaDataType.EPISODE).append(SQL_AS_VIDEO_TYPE_STRING);
+            sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.EPISODE).append(SQL_AS_VIDEO_TYPE_STRING);
         }
         sbSQL.append(", vd.title");
         sbSQL.append(", vd.title_original AS originalTitle");
@@ -295,7 +299,7 @@ public class ApiDao extends HibernateDao {
         StringBuilder sbSQL = new StringBuilder();
 
         sbSQL.append("SELECT ser.id");
-        sbSQL.append(", '").append(MetaDataType.SERIES).append(SQL_AS_VIDEO_TYPE_STRING);
+        sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.SERIES).append(SQL_AS_VIDEO_TYPE_STRING);
         sbSQL.append(", ser.title");
         sbSQL.append(", ser.title_original AS originalTitle");
         sbSQL.append(", ser.start_year AS videoYear");
@@ -337,7 +341,7 @@ public class ApiDao extends HibernateDao {
         StringBuilder sbSQL = new StringBuilder();
 
         sbSQL.append("SELECT sea.id");
-        sbSQL.append(", '").append(MetaDataType.SEASON).append(SQL_AS_VIDEO_TYPE_STRING);
+        sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.SEASON).append(SQL_AS_VIDEO_TYPE_STRING);
         sbSQL.append(", sea.title");
         sbSQL.append(", sea.title_original AS originalTitle");
         sbSQL.append(", -1 as videoYear");
@@ -388,12 +392,12 @@ public class ApiDao extends HibernateDao {
             if (hasMovie) {
                 sqlScalars.addToSql("SELECT 'MOVIE' as sourceString, v.id as sourceId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
                 sqlScalars.addToSql(" FROM videodata v, artwork a");
-                sqlScalars.addToSql(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
-                sqlScalars.addToSql(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
+                sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
+                sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
                 sqlScalars.addToSql(" WHERE v.id=a.videodata_id");
                 sqlScalars.addToSql(" AND v.episode<0");
                 sqlScalars.addToSql(" AND v.id IN (:movielist)");
-                sqlScalars.addToSql(" AND a.artwork_type IN (:artworklist)");
+                sqlScalars.addToSql(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
             }
 
             if (hasMovie && hasSeries) {
@@ -403,11 +407,11 @@ public class ApiDao extends HibernateDao {
             if (hasSeries) {
                 sqlScalars.addToSql(" SELECT 'SERIES' as sourceString, s.id as sourceId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
                 sqlScalars.addToSql(" FROM series s, artwork a");
-                sqlScalars.addToSql(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
-                sqlScalars.addToSql(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
+                sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
+                sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
                 sqlScalars.addToSql(" WHERE s.id=a.series_id");
                 sqlScalars.addToSql(" AND s.id IN (:serieslist)");
-                sqlScalars.addToSql(" AND a.artwork_type IN (:artworklist)");
+                sqlScalars.addToSql(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
             }
 
             if ((hasMovie || hasSeries) && hasSeason) {
@@ -417,11 +421,11 @@ public class ApiDao extends HibernateDao {
             if (hasSeason) {
                 sqlScalars.addToSql(" SELECT 'SEASON' as sourceString, s.id as sourceId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
                 sqlScalars.addToSql(" FROM season s, artwork a");
-                sqlScalars.addToSql(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
-                sqlScalars.addToSql(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
+                sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
+                sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
                 sqlScalars.addToSql(" WHERE s.id=a.season_id");
                 sqlScalars.addToSql(" AND s.id IN (:seasonlist)");
-                sqlScalars.addToSql(" AND a.artwork_type IN (:artworklist)");
+                sqlScalars.addToSql(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
             }
 
             if ((hasMovie || hasSeries || hasSeason) && hasEpisode) {
@@ -431,12 +435,12 @@ public class ApiDao extends HibernateDao {
             if (hasEpisode) {
                 sqlScalars.addToSql("SELECT 'EPISODE' as sourceString, v.id as sourceId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
                 sqlScalars.addToSql(" FROM videodata v, artwork a");
-                sqlScalars.addToSql(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
-                sqlScalars.addToSql(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
+                sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
+                sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
                 sqlScalars.addToSql(" WHERE v.id=a.videodata_id");
                 sqlScalars.addToSql(" AND v.episode>-1");
                 sqlScalars.addToSql(" AND v.id IN (:episodelist)");
-                sqlScalars.addToSql(" AND a.artwork_type IN (:artworklist)");
+                sqlScalars.addToSql(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
             }
 
             sqlScalars.addScalar("sourceString", StringType.INSTANCE);
@@ -785,8 +789,8 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql(" ag.cache_filename AS cacheFilename,");
         sqlScalars.addToSql(" ag.cache_dir AS cacheDir");
         sqlScalars.addToSql(" FROM artwork a");
-        sqlScalars.addToSql(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
-        sqlScalars.addToSql(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
+        sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
+        sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
         sqlScalars.addToSql(SQL_WHERE_1_EQ_1); // Make appending restrictions easier
         if (options != null) {
             if (options.getId() > 0L) {
@@ -795,7 +799,7 @@ public class ApiDao extends HibernateDao {
             }
 
             if (CollectionUtils.isNotEmpty(options.getArtwork())) {
-                sqlScalars.addToSql(" AND a.artwork_type IN (:artworklist)");
+                sqlScalars.addToSql(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
                 sqlScalars.addParameters("artworklist", options.getArtwork());
             }
 
@@ -1021,8 +1025,8 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("FROM person v");
         }
         sbSQL.append(", artwork a");    // Artwork must be last for the LEFT JOIN
-        sbSQL.append(" LEFT JOIN artwork_located al ON a.id=al.artwork_id");
-        sbSQL.append(" LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
+        sbSQL.append(SQL_LEFT_JOIN_ARTWORK_LOCATED);
+        sbSQL.append(SQL_LEFT_JOIN_ARTWORK_GENERATED);
         if (type == MetaDataType.MOVIE) {
             sbSQL.append(" WHERE v.id=a.videodata_id");
             sbSQL.append(" AND v.episode<0");
@@ -1034,7 +1038,7 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" WHERE v.id=a.person_id");
         }
         sbSQL.append(" AND v.id IN (:id)");
-        sbSQL.append(" AND a.artwork_type IN (:artworklist)");
+        sbSQL.append(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
 
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
         LOG.info("Artwork SQL: {}", sqlScalars.getSql());

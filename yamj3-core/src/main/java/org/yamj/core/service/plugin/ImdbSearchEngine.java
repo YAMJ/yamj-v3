@@ -60,26 +60,33 @@ public class ImdbSearchEngine implements InitializingBean {
     private boolean searchVariable;
     private ImdbSiteDataDefinition imdbSiteDef;
     private SearchEngineTools searchEngineTools;
+    private static final String ISO_8859_1 = "ISO-8859-1";
+    private static final String QUOTES = "Quotes";
+    private static final String TAGLINES = "Taglines";
+    private static final String HTML_SLASH_QUOTE = "/\"";
+    private static final String ASPECT_RATIO = "Aspect Ratio";
+    private static final String ORIGINAL_TITLE = "original title";
+    private static final String RATED = "Rated";
 
     static {
-        MATCHES_DATA_PER_SITE.put("us", new ImdbSiteDataDefinition("http://www.imdb.com/", "ISO-8859-1", "Director|Directed by", "Cast", "Release Date", "Runtime", "Aspect Ratio", "Country",
-                "Company", "Genre", "Quotes", "Plot", "Rated", "Certification", "Original Air Date", "Writer|Writing credits", "Tagline", "original title"));
+        MATCHES_DATA_PER_SITE.put("us", new ImdbSiteDataDefinition("http://www.imdb.com/", ISO_8859_1, "Director|Directed by", "Cast", "Release Date", "Runtime", ASPECT_RATIO, "Country",
+                "Company", "Genre", QUOTES, "Plot", RATED, "Certification", "Original Air Date", "Writer|Writing credits", "Tagline", ORIGINAL_TITLE));
 
-        MATCHES_DATA_PER_SITE.put("fr", new ImdbSiteDataDefinition("http://www.imdb.fr/", "ISO-8859-1", "R&#xE9;alisateur|R&#xE9;alis&#xE9; par", "Ensemble", "Date de sortie", "Dur&#xE9;e", "Aspect Ratio", "Pays",
-                "Soci&#xE9;t&#xE9;", "Genre", "Citation", "Intrigue", "Rated", "Classification", "Date de sortie", "Sc&#xE9;naristes|Sc&#xE9;naristes", "Taglines", "original title"));
+        MATCHES_DATA_PER_SITE.put("fr", new ImdbSiteDataDefinition("http://www.imdb.fr/", ISO_8859_1, "R&#xE9;alisateur|R&#xE9;alis&#xE9; par", "Ensemble", "Date de sortie", "Dur&#xE9;e", ASPECT_RATIO, "Pays",
+                "Soci&#xE9;t&#xE9;", "Genre", "Citation", "Intrigue", RATED, "Classification", "Date de sortie", "Sc&#xE9;naristes|Sc&#xE9;naristes", TAGLINES, ORIGINAL_TITLE));
 
-        MATCHES_DATA_PER_SITE.put("es", new ImdbSiteDataDefinition("http://www.imdb.es/", "ISO-8859-1", "Director|Dirigida por", "Reparto", "Fecha de Estreno", "Duraci&#xF3;n", "Relaci&#xF3;n de Aspecto", "Pa&#xED;s",
-                "Compa&#xF1;&#xED;a", "G&#xE9;nero", "Quotes", "Trama", "Rated", "Clasificaci&#xF3;n", "Fecha de Estreno", "Escritores|Cr&#xE9;ditos del gui&#xF3;n", "Taglines", "original title"));
+        MATCHES_DATA_PER_SITE.put("es", new ImdbSiteDataDefinition("http://www.imdb.es/", ISO_8859_1, "Director|Dirigida por", "Reparto", "Fecha de Estreno", "Duraci&#xF3;n", "Relaci&#xF3;n de Aspecto", "Pa&#xED;s",
+                "Compa&#xF1;&#xED;a", "G&#xE9;nero", QUOTES, "Trama", RATED, "Clasificaci&#xF3;n", "Fecha de Estreno", "Escritores|Cr&#xE9;ditos del gui&#xF3;n", TAGLINES, ORIGINAL_TITLE));
 
-        MATCHES_DATA_PER_SITE.put("de", new ImdbSiteDataDefinition("http://www.imdb.de/", "ISO-8859-1", "Regisseur|Regie", "Besetzung", "Premierendatum", "L&#xE4;nge", "Seitenverh&#xE4;ltnis", "Land",
-                "Firma", "Genre", "Nutzerkommentare", "Handlung", "Rated", "Altersfreigabe", "Premierendatum", "Guionista|Buch", "Taglines", "Originaltitel"));
+        MATCHES_DATA_PER_SITE.put("de", new ImdbSiteDataDefinition("http://www.imdb.de/", ISO_8859_1, "Regisseur|Regie", "Besetzung", "Premierendatum", "L&#xE4;nge", "Seitenverh&#xE4;ltnis", "Land",
+                "Firma", "Genre", "Nutzerkommentare", "Handlung", RATED, "Altersfreigabe", "Premierendatum", "Guionista|Buch", TAGLINES, "Originaltitel"));
 
-        MATCHES_DATA_PER_SITE.put("it", new ImdbSiteDataDefinition("http://www.imdb.it/", "ISO-8859-1", "Regista|Registi|Regia di", "Cast", "Data di uscita", "Durata", "Aspect Ratio",
-                "Nazionalit&#xE0;", "Compagnia", "Genere", "Quotes", "Trama", "Rated", "Divieti", "Data di uscita", "Sceneggiatore|Scritto da", "Taglines", "original title"));
+        MATCHES_DATA_PER_SITE.put("it", new ImdbSiteDataDefinition("http://www.imdb.it/", ISO_8859_1, "Regista|Registi|Regia di", "Cast", "Data di uscita", "Durata", ASPECT_RATIO,
+                "Nazionalit&#xE0;", "Compagnia", "Genere", QUOTES, "Trama", RATED, "Divieti", "Data di uscita", "Sceneggiatore|Scritto da", TAGLINES, ORIGINAL_TITLE));
 
-        MATCHES_DATA_PER_SITE.put("pt", new ImdbSiteDataDefinition("http://www.imdb.pt/", "UTF-8", "Diretor|Dirigido por", "Elenco", "Data de Lan&#xE7;amento", "Dura&#xE7;&#xE3;o", "Aspect Ratio",
-                "Pa&#xED;s", "Companhia", "G&#xEA;nero", "Quotes", "Argumento", "Rated", "Certifica&#xE7;&#xE3;o", "Data de Lan&#xE7;amento",
-                "Roteirista|Cr&#xE9;ditos como roteirista", "Taglines", "original title"));
+        MATCHES_DATA_PER_SITE.put("pt", new ImdbSiteDataDefinition("http://www.imdb.pt/", "UTF-8", "Diretor|Dirigido por", "Elenco", "Data de Lan&#xE7;amento", "Dura&#xE7;&#xE3;o", ASPECT_RATIO,
+                "Pa&#xED;s", "Companhia", "G&#xEA;nero", QUOTES, "Argumento", RATED, "Certifica&#xE7;&#xE3;o", "Data de Lan&#xE7;amento",
+                "Roteirista|Cr&#xE9;ditos como roteirista", TAGLINES, ORIGINAL_TITLE));
     }
 
     @Override
@@ -156,7 +163,7 @@ public class ImdbSearchEngine implements InitializingBean {
                     return titlematch.group(1);
                 }
 
-                String firstPersonId = HTMLTools.extractTag(HTMLTools.extractTag(xml, "<tr class=\"even detailed\">", "</tr>"), "<a href=\"/name/", "/\"");
+                String firstPersonId = HTMLTools.extractTag(HTMLTools.extractTag(xml, "<tr class=\"even detailed\">", "</tr>"), "<a href=\"/name/", HTML_SLASH_QUOTE);
                 if (StringUtils.isNotBlank(firstPersonId)) {
                     return firstPersonId;
                 }
@@ -198,7 +205,7 @@ public class ImdbSearchEngine implements InitializingBean {
             } else {
                 index = beginIndex + 6;
             }
-            StringTokenizer st = new StringTokenizer(url.substring(index), "/\"");
+            StringTokenizer st = new StringTokenizer(url.substring(index), HTML_SLASH_QUOTE);
             imdbId = st.nextToken();
         }
 
@@ -334,12 +341,12 @@ public class ImdbSearchEngine implements InitializingBean {
 
         // alternate search for person ID
         if (objectType.equals(OBJECT_PERSON)) {
-            String firstPersonId = HTMLTools.extractTag(HTMLTools.extractTag(xml, "<table><tr> <td valign=\"top\">", "</td></tr></table>"), "<a href=\"/name/", "/\"");
+            String firstPersonId = HTMLTools.extractTag(HTMLTools.extractTag(xml, "<table><tr> <td valign=\"top\">", "</td></tr></table>"), "<a href=\"/name/", HTML_SLASH_QUOTE);
             if (StringUtils.isBlank(firstPersonId)) {
                 // alternate approach
                 int beginIndex = xml.indexOf("<a href=\"/name/nm");
                 if (beginIndex > -1) {
-                    StringTokenizer st = new StringTokenizer(xml.substring(beginIndex + 15), "/\"");
+                    StringTokenizer st = new StringTokenizer(xml.substring(beginIndex + 15), HTML_SLASH_QUOTE);
                     firstPersonId = st.nextToken();
                 }
             }

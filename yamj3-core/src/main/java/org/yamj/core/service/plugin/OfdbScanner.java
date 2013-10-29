@@ -52,6 +52,10 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     @Autowired
     private PluginMetadataService pluginMetadataService;
     private SearchEngineTools searchEngineTools;
+    private static final String HTML_FONT = "</font>";
+    private static final String HTML_TABLE_END = "</table>";
+    private static final String HTML_TR_START = "<tr";
+    private static final String HTML_TR_END = "</tr>";
 
     @Override
     public String getScannerName() {
@@ -205,7 +209,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                     String plotXml = httpClient.requestContent("http://www.ofdb.de/plot/" + plotMarker);
 
                     int firstindex = plotXml.indexOf("gelesen</b></b><br><br>") + 23;
-                    int lastindex = plotXml.indexOf("</font>", firstindex);
+                    int lastindex = plotXml.indexOf(HTML_FONT, firstindex);
                     String plot = plotXml.substring(firstindex, lastindex);
                     plot = plot.replaceAll("<br />", " ").trim();
 
@@ -229,16 +233,16 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                 String detailXml = httpClient.requestContent(detailUrl);
 
                 // resolve for additional informations
-                List<String> tags = HTMLTools.extractHtmlTags(detailXml, "<!-- Rechte Spalte -->", "</table>", "<tr", "</tr>");
+                List<String> tags = HTMLTools.extractHtmlTags(detailXml, "<!-- Rechte Spalte -->", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
 
                 for (String tag : tags) {
                     if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID) && tag.contains("Originaltitel")) {
-                        String scraped = HTMLTools.removeHtmlTags(HTMLTools.extractTag(tag, "class=\"Daten\">", "</font>")).trim();
+                        String scraped = HTMLTools.removeHtmlTags(HTMLTools.extractTag(tag, "class=\"Daten\">", HTML_FONT)).trim();
                         videoData.setTitleOriginal(scraped, SCANNER_ID);
                     }
 
                     if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID) && tag.contains("Erscheinungsjahr")) {
-                        String scraped = HTMLTools.removeHtmlTags(HTMLTools.extractTag(tag, "class=\"Daten\">", "</font>")).trim();
+                        String scraped = HTMLTools.removeHtmlTags(HTMLTools.extractTag(tag, "class=\"Daten\">", HTML_FONT)).trim();
                         videoData.setPublicationYear(StringTools.toYear(scraped), SCANNER_ID);
                     }
 
@@ -263,21 +267,21 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                 // CAST and CREW
 
                 if (detailXml.contains("<i>Regie</i>")) {
-                    tags = HTMLTools.extractHtmlTags(detailXml, "<i>Regie</i>", "</table>", "<tr", "</tr>");
+                    tags = HTMLTools.extractHtmlTags(detailXml, "<i>Regie</i>", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
                     for (String tag : tags) {
                         videoData.addCreditDTO(new CreditDTO(JobType.DIRECTOR, extractName(tag)));
                     }
                 }
 
                 if (detailXml.contains("<i>Drehbuchautor(in)</i>")) {
-                    tags = HTMLTools.extractHtmlTags(detailXml, "<i>Drehbuchautor(in)</i>", "</table>", "<tr", "</tr>");
+                    tags = HTMLTools.extractHtmlTags(detailXml, "<i>Drehbuchautor(in)</i>", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
                     for (String tag : tags) {
                         videoData.addCreditDTO(new CreditDTO(JobType.WRITER, extractName(tag)));
                     }
                 }
 
                 if (detailXml.contains("<i>Darsteller</i>")) {
-                    tags = HTMLTools.extractHtmlTags(detailXml, "<i>Darsteller</i>", "</table>", "<tr", "</tr>");
+                    tags = HTMLTools.extractHtmlTags(detailXml, "<i>Darsteller</i>", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
                     for (String tag : tags) {
                         videoData.addCreditDTO(new CreditDTO(JobType.ACTOR, extractName(tag), extractRole(tag)));
                     }
@@ -291,7 +295,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     }
 
     private String extractName(String tag) {
-        String name = HTMLTools.extractTag(tag, "class=\"Daten\">", "</font>");
+        String name = HTMLTools.extractTag(tag, "class=\"Daten\">", HTML_FONT);
         int akaIndex = name.indexOf("als <i>");
         if (akaIndex > 0) {
             name = name.substring(0, akaIndex);
@@ -300,7 +304,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     }
 
     private String extractRole(String tag) {
-        String role = HTMLTools.extractTag(tag, "class=\"Normal\">", "</font>");
+        String role = HTMLTools.extractTag(tag, "class=\"Normal\">", HTML_FONT);
         role = HTMLTools.removeHtmlTags(role);
         if (role.startsWith("... ")) {
             role = role.substring(4);
