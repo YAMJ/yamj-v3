@@ -43,6 +43,12 @@ public class SearchEngineTools {
     private String bingHost = "www.bing.com";
     private String blekkoHost = "www.blekko.com";
     private String lycosHost = "search.lycos.com";
+    // Literals
+    private static final String HTTP = "http://";
+    private static final String UTF8 = "UTF-8";
+    private static final String SITE = "+site%3A";
+    private static final String PAREN_RIGHT = "%29";
+    private static final String PAREN_LEFT = "+%28";
 
     public SearchEngineTools(PoolingHttpClient httpClient) {
         this(httpClient, "us");
@@ -147,7 +153,7 @@ public class SearchEngineTools {
         LOG.debug("Searching '{}' on google; site={}", title, site);
 
         try {
-            StringBuilder sb = new StringBuilder("http://");
+            StringBuilder sb = new StringBuilder(HTTP);
             sb.append(googleHost);
             sb.append("/search?");
             if (language != null) {
@@ -156,21 +162,21 @@ public class SearchEngineTools {
                 sb.append("&");
             }
             sb.append("q=");
-            sb.append(URLEncoder.encode(title, "UTF-8"));
+            sb.append(URLEncoder.encode(title, UTF8));
             if (year > 0) {
-                sb.append("+%28");
+                sb.append(PAREN_LEFT);
                 sb.append(year);
-                sb.append("%29");
+                sb.append(PAREN_RIGHT);
             }
-            sb.append("+site%3A");
+            sb.append(SITE);
             sb.append(site);
             if (additional != null) {
                 sb.append("+");
-                sb.append(URLEncoder.encode(additional, "UTF-8"));
+                sb.append(URLEncoder.encode(additional, UTF8));
             }
             String xml = httpClient.requestContent(sb.toString());
 
-            int beginIndex = xml.indexOf("http://" + site + searchSuffix);
+            int beginIndex = xml.indexOf(HTTP + site + searchSuffix);
             if (beginIndex != -1) {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
             }
@@ -184,7 +190,7 @@ public class SearchEngineTools {
         LOG.debug("Searching '{}' on yahoo; site={}", title, site);
 
         try {
-            StringBuilder sb = new StringBuilder("http://");
+            StringBuilder sb = new StringBuilder(HTTP);
             sb.append(yahooHost);
             sb.append("/search?vc=");
             if (country != null) {
@@ -192,17 +198,17 @@ public class SearchEngineTools {
                 sb.append("&rd=r2");
             }
             sb.append("&ei=UTF-8&p=");
-            sb.append(URLEncoder.encode(title, "UTF-8"));
+            sb.append(URLEncoder.encode(title, UTF8));
             if (year > 0) {
-                sb.append("+%28");
+                sb.append(PAREN_LEFT);
                 sb.append(year);
-                sb.append("%29");
+                sb.append(PAREN_RIGHT);
             }
-            sb.append("+site%3A");
+            sb.append(SITE);
             sb.append(site);
             if (additional != null) {
                 sb.append("+");
-                sb.append(URLEncoder.encode(additional, "UTF-8"));
+                sb.append(URLEncoder.encode(additional, UTF8));
             }
 
             String xml = httpClient.requestContent(sb.toString());
@@ -224,20 +230,20 @@ public class SearchEngineTools {
         LOG.debug("Searching '{}' on bing; site={}", title, site);
 
         try {
-            StringBuilder sb = new StringBuilder("http://");
+            StringBuilder sb = new StringBuilder(HTTP);
             sb.append(bingHost);
             sb.append("/search?q=");
-            sb.append(URLEncoder.encode(title, "UTF-8"));
+            sb.append(URLEncoder.encode(title, UTF8));
             if (year > 0) {
-                sb.append("+%28");
+                sb.append(PAREN_LEFT);
                 sb.append(year);
-                sb.append("%29");
+                sb.append(PAREN_RIGHT);
             }
-            sb.append("+site%3A");
+            sb.append(SITE);
             sb.append(site);
             if (additional != null) {
                 sb.append("+");
-                sb.append(URLEncoder.encode(additional, "UTF-8"));
+                sb.append(URLEncoder.encode(additional, UTF8));
             }
             if (country != null) {
                 sb.append("&cc=");
@@ -247,7 +253,7 @@ public class SearchEngineTools {
 
             String xml = httpClient.requestContent(sb.toString());
 
-            int beginIndex = xml.indexOf("http://" + site + searchSuffix);
+            int beginIndex = xml.indexOf(HTTP + site + searchSuffix);
             if (beginIndex != -1) {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
             }
@@ -261,25 +267,25 @@ public class SearchEngineTools {
         LOG.debug("Searching '{}' on blekko; site={}", title, site);
 
         try {
-            StringBuilder sb = new StringBuilder("http://");
+            StringBuilder sb = new StringBuilder(HTTP);
             sb.append(blekkoHost);
             sb.append("/ws/?q=");
-            sb.append(URLEncoder.encode(title, "UTF-8"));
+            sb.append(URLEncoder.encode(title, UTF8));
             if (year > 0) {
-                sb.append("+%28");
+                sb.append(PAREN_LEFT);
                 sb.append(year);
-                sb.append("%29");
+                sb.append(PAREN_RIGHT);
             }
-            sb.append("+site%3A");
+            sb.append(SITE);
             sb.append(site);
             if (additional != null) {
                 sb.append("+");
-                sb.append(URLEncoder.encode(additional, "UTF-8"));
+                sb.append(URLEncoder.encode(additional, UTF8));
             }
 
             String xml = httpClient.requestContent(sb.toString());
 
-            int beginIndex = xml.indexOf("http://" + site + searchSuffix);
+            int beginIndex = xml.indexOf(HTTP + site + searchSuffix);
             if (beginIndex != -1) {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
             }
@@ -293,7 +299,7 @@ public class SearchEngineTools {
         LOG.debug("Searching '{}' on lycos; site={}", title, site);
 
         try {
-            StringBuilder sb = new StringBuilder("http://");
+            StringBuilder sb = new StringBuilder(HTTP);
             sb.append(lycosHost);
             if ("it".equalsIgnoreCase(country)) {
                 sb.append("/?tab=web&Search=Cerca&searchArea=loc&query=");
@@ -304,22 +310,22 @@ public class SearchEngineTools {
             } else {
                 sb.append("/web/?q=");
             }
-            sb.append(URLEncoder.encode(title, "UTF-8"));
+            sb.append(URLEncoder.encode(title, UTF8));
             if (year > 0) {
-                sb.append("+%28");
+                sb.append(PAREN_LEFT);
                 sb.append(year);
-                sb.append("%29");
+                sb.append(PAREN_RIGHT);
             }
-            sb.append("+site%3A");
+            sb.append(SITE);
             sb.append(site);
             if (additional != null) {
                 sb.append("+");
-                sb.append(URLEncoder.encode(additional, "UTF-8"));
+                sb.append(URLEncoder.encode(additional, UTF8));
             }
 
             String xml = httpClient.requestContent(sb.toString());
 
-            int beginIndex = xml.indexOf("http://" + site + searchSuffix);
+            int beginIndex = xml.indexOf(HTTP + site + searchSuffix);
             if (beginIndex != -1) {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
             }
