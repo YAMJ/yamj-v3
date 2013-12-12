@@ -62,10 +62,10 @@
         <distribution.format>zip</distribution.format>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <hibernate.version>4.2.6.Final</hibernate.version>
-        <spring.version>3.2.4.RELEASE</spring.version>
+        <hibernate.version>4.2.7.Final</hibernate.version>
+        <spring.version>3.2.5.RELEASE</spring.version>
         <org.slf4j.version>1.7.5</org.slf4j.version>
-        <jackson.version>2.2.3</jackson.version>
+        <jackson.version>2.3.0</jackson.version>
         <jetty.version>8.1.13.v20130916</jetty.version>
     </properties>
 
@@ -223,7 +223,7 @@
             <dependency>
                 <groupId>commons-configuration</groupId>
                 <artifactId>commons-configuration</artifactId>
-                <version>1.9</version>
+                <version>1.10</version>
             </dependency>
             <dependency>
                 <groupId>joda-time</groupId>
