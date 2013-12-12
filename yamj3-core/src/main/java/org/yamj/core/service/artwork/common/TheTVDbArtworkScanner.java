@@ -122,7 +122,7 @@ public class TheTVDbArtworkScanner implements
 
         // find posters
         for (Banner banner : bannerList.getPosterList()) {
-            if (banner.getBannerType2() == BannerType.Poster) {
+            if (banner.getBannerType2() == BannerType.POSTER) {
                 if (banner.getLanguage().equalsIgnoreCase(defaultLanguage)) {
                     langDTOs.add(createArtworDetail(banner));
                 } else if (StringUtils.isNotBlank(altLanguage) && altLanguage.equalsIgnoreCase(banner.getLanguage())) {
@@ -173,7 +173,7 @@ public class TheTVDbArtworkScanner implements
 
         // find posters
         for (Banner banner : bannerList.getSeasonList()) {
-            if ((banner.getSeason() == season) && (banner.getBannerType2() == BannerType.Season)) {
+            if ((banner.getSeason() == season) && (banner.getBannerType2() == BannerType.SEASON)) {
                 if (banner.getLanguage().equalsIgnoreCase(defaultLanguage)) {
                     langDTOs.add(createArtworDetail(banner));
                 } else if (StringUtils.isNotBlank(altLanguage) && banner.getLanguage().equalsIgnoreCase(altLanguage)) {
@@ -251,7 +251,7 @@ public class TheTVDbArtworkScanner implements
 
         // find fanart
         for (Banner banner : bannerList.getFanartList()) {
-            if (banner.getBannerType2() == BannerType.FanartHD) {
+            if (banner.getBannerType2() == BannerType.FANART_HD) {
                 // HD fanart
                 hdDTOs.add(createArtworDetail(banner));
             } else {
@@ -293,7 +293,7 @@ public class TheTVDbArtworkScanner implements
 
         // find fanart
         for (Banner banner : bannerList.getFanartList()) {
-            if (banner.getBannerType2() == BannerType.FanartHD) {
+            if (banner.getBannerType2() == BannerType.FANART_HD) {
                 // HD fanart
                 hdDTOs.add(createArtworDetail(banner));
             } else {
@@ -382,7 +382,7 @@ public class TheTVDbArtworkScanner implements
 
         // find banners
         for (Banner banner : bannerList.getSeriesList()) {
-            if (banner.getBannerType2() == BannerType.Graphical) {
+            if (banner.getBannerType2() == BannerType.GRAPHICAL) {
                 if (banner.getLanguage().equalsIgnoreCase(defaultLanguage)) {
                     langDTOs.add(createArtworDetail(banner));
                 } else if (StringUtils.isNotBlank(altLanguage) && altLanguage.equalsIgnoreCase(banner.getLanguage())) {
@@ -390,7 +390,7 @@ public class TheTVDbArtworkScanner implements
                 } else if (StringUtils.isBlank(banner.getLanguage())) {
                     noLangDTOs.add(createArtworDetail(banner));
                 }
-            } else if (banner.getBannerType2() == BannerType.Blank) {
+            } else if (banner.getBannerType2() == BannerType.BLANK) {
                 blankDTOs.add(createArtworDetail(banner));
             }
         }
@@ -446,7 +446,7 @@ public class TheTVDbArtworkScanner implements
         if (!seasonBannerOnlySeries) {
             // season banners
             for (Banner banner : bannerList.getSeasonList()) {
-                if (banner.getBannerType2() == BannerType.SeasonWide) {
+                if (banner.getBannerType2() == BannerType.SEASONWIDE) {
                     if (banner.getLanguage().equalsIgnoreCase(defaultLanguage)) {
                         seasonLangDTOs.add(createArtworDetail(banner));
                     } else if (StringUtils.isNotBlank(altLanguage) && altLanguage.equalsIgnoreCase(banner.getLanguage())) {
@@ -458,7 +458,7 @@ public class TheTVDbArtworkScanner implements
             }
         }
         for (Banner banner : bannerList.getSeasonList()) {
-            if (banner.getBannerType2() == BannerType.Graphical) {
+            if (banner.getBannerType2() == BannerType.GRAPHICAL) {
                 if (banner.getLanguage().equalsIgnoreCase(defaultLanguage)) {
                     seriesLangDTOs.add(createArtworDetail(banner));
                 } else if (StringUtils.isNotBlank(altLanguage) && altLanguage.equalsIgnoreCase(banner.getLanguage())) {
@@ -466,7 +466,7 @@ public class TheTVDbArtworkScanner implements
                 } else if (StringUtils.isBlank(banner.getLanguage())) {
                     seriesNoLangDTOs.add(createArtworDetail(banner));
                 }
-            } else if (banner.getBannerType2() == BannerType.Blank) {
+            } else if (banner.getBannerType2() == BannerType.BLANK) {
                 blankDTOs.add(createArtworDetail(banner));
             }
         }
