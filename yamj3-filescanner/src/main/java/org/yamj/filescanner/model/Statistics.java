@@ -36,10 +36,9 @@ import org.apache.commons.lang3.text.WordUtils;
  */
 public class Statistics {
 
-//    private static final Logger LOG = LoggerFactory.getLogger(Statistics.class);
     // Statistics
-    private EnumMap<StatType, Integer> statistics = new EnumMap<StatType, Integer>(StatType.class);
-    private EnumMap<TimeType, Long> times = new EnumMap<TimeType, Long>(TimeType.class);
+    private final EnumMap<StatType, Integer> statistics = new EnumMap<StatType, Integer>(StatType.class);
+    private final EnumMap<TimeType, Long> times = new EnumMap<TimeType, Long>(TimeType.class);
 
     public Statistics() {
         // Initialise the statistic values
@@ -152,6 +151,7 @@ public class Statistics {
      *
      * @param timeStart
      * @param timeEnd
+     * @param useColon
      * @return
      */
     public String getProcessingTime(TimeType timeStart, TimeType timeEnd, boolean useColon) {
@@ -181,7 +181,7 @@ public class Statistics {
      * Get a formatted string of the time type
      *
      * @param timeType
-     * @param timeFormat
+     * @param useColon
      * @return
      */
     public String getTime(TimeType timeType, boolean useColon) {
@@ -215,6 +215,7 @@ public class Statistics {
      * Output the jukebox statistics
      *
      * @param skipZero Skip zero values from the output
+     * @return
      */
     public String generateStatistics(Boolean skipZero) {
         StringBuilder statOutput = new StringBuilder("Jukebox Statistics:\n");

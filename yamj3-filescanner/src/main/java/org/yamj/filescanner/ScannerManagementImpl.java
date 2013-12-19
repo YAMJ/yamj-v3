@@ -196,10 +196,6 @@ public class ScannerManagementImpl implements ScannerManagement {
             return ExitType.NO_DIRECTORY;
         }
 
-//        String saveFilename="myLibrary.xml";
-//        LOG.info("Saving library to: {}",saveFilename);
-//        libraryCollection.saveLibraryFile(saveFilename);
-
         // Send all libraries to be scanned
         ExitType status = ExitType.SUCCESS;
         for (Library library : libraryCollection.getLibraries()) {

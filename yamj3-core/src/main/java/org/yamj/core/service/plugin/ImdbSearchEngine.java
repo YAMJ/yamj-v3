@@ -310,7 +310,6 @@ public class ImdbSearchEngine implements InitializingBean {
         }
 
         for (String searchResult : HTMLTools.extractTags(xml, "<table class=\"findList\">", "</table>", "<td class=\"result_text\">", "</td>", false)) {
-            // LOGGER.debug(LOG_MESSAGE + "Check  : '" + searchResult + "'");
             boolean foundMatch = false;
             if (SEARCH_FIRST.equalsIgnoreCase(searchMatch)) {
                 // first result matches
@@ -327,12 +326,10 @@ public class ImdbSearchEngine implements InitializingBean {
             }
 
             if (foundMatch) {
-                // LOGGER.debug(LOG_MESSAGE + "Title match  : '" + searchResult + "'");
                 return HTMLTools.extractTag(searchResult, "<a href=\"" + (objectType.equals(OBJECT_MOVIE) ? "/title/" : "/name/"), "/");
             } else {
                 for (String otherResult : HTMLTools.extractTags(searchResult, "</';\">", "</p>", "<p class=\"find-aka\">", "</em>", false)) {
                     if (otherResult.toLowerCase().indexOf("\"" + searchName + "\"") != -1) {
-                        // LOGGER.debug(LOG_MESSAGE + "Other title match: '" + otherResult + "'");
                         return HTMLTools.extractTag(searchResult, "/images/b.gif?link=" + (objectType.equals(OBJECT_MOVIE) ? "/title/" : "/name/"), "/';\">");
                     }
                 }

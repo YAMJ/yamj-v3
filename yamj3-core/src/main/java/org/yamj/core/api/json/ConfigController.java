@@ -113,7 +113,7 @@ public class ConfigController {
             LOG.info("Updating config '{}' with value '{}'", key, value);
             configService.setProperty(key, value);
             status.setStatus(200);
-            status.setMessage("Successfully updated '" + key + "' with value '" + value + "'");
+            status.setMessage("Successfully updated '" + key + "' to value '" + value + "'");
         } else {
             status.setStatus(400);
             status.setMessage("Invalid key/value specified, configuration not updated");

@@ -55,8 +55,6 @@ public class MediaImportService {
     private MetadataDao metadataDao;
     @Autowired
     private FilenameScanner filenameScanner;
-//    @Autowired
-//    private ConfigService configService;
 
     @Transactional(readOnly = true)
     public Long getNextStageFileId(final FileType fileType, final StatusType... statusTypes) {

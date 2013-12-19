@@ -304,28 +304,6 @@ public class ArtworkProcessorService {
             }
 
             // TODO: check quality of artwork?
-
-            /*
-             float urlAspect = (float) urlWidth / (float) urlHeight;
-             if (urlAspect > 1.0) {
-             LOG.info("{} rejected: URL is wrong aspect (portrait/landscape)", located);
-             return Boolean.FALSE;
-             }
-
-             // Adjust artwork width / height by the ValidateMatch figure
-             int newArtworkWidth = artworkWidth * (artworkValidateMatch / 100);
-             int newArtworkHeight = artworkHeight * (artworkValidateMatch / 100);
-
-             if (urlWidth < newArtworkWidth) {
-             logger.debug(LOG_MESSAGE + artworkImage + " rejected: URL width (" + urlWidth + ") is smaller than artwork width (" + newArtworkWidth + ")");
-             return Boolean.FALSE;
-             }
-
-             if (urlHeight < newArtworkHeight) {
-             logger.debug(LOG_MESSAGE + artworkImage + " rejected: URL height (" + urlHeight + ") is smaller than artwork height (" + newArtworkHeight + ")");
-             return Boolean.FALSE;
-             }
-             */
         } else {
             // TODO: stage file needs no validation??
             LOG.trace("Located URL was blank for {}", located.toString());

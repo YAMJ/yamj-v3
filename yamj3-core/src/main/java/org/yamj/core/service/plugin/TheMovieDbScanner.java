@@ -147,13 +147,6 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
                     moviedb = m;
                     break;
                 }
-
-                // See if the original title is different and then compare it too
-//                if (!movie.getTitle().equals(movie.getOriginalTitle())
-//                        && TheMovieDbApi.compareMovies(m, movie.getOriginalTitle(), Integer.toString(movieYear))) {
-//                    moviedb = m;
-//                    break;
-//                }
             }
         } catch (MovieDbException ex) {
             LOG.debug("Failed to get movie info for {}, error: {}", title, ex.getMessage());

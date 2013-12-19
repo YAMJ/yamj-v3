@@ -154,7 +154,6 @@ public class GraphicTools {
 
         Image temp1 = imgSrc.getScaledInstance(tempWidth, tempHeight, Image.SCALE_SMOOTH);
         BufferedImage bi = new BufferedImage(nMaxWidth, nMaxHeight, BufferedImage.TYPE_INT_ARGB);
-        //bi.getGraphics().drawImage(temp1, 0, y, null);
         bi.createGraphics().drawImage(temp1, 0, y, null);
         return bi;
     }
@@ -175,7 +174,7 @@ public class GraphicTools {
     }
 
     public static BufferedImage scaleToSizeBestFit(int nMaxWidth, int nMaxHeight, BufferedImage imgSrc) {
-        /* determine thumbnail size from WIDTH and HEIGHT */
+        // determine thumbnail size from WIDTH and HEIGHT
         int imageWidth = imgSrc.getWidth(null);
         int imageHeight = imgSrc.getHeight(null);
 
@@ -192,7 +191,7 @@ public class GraphicTools {
     }
 
     public static BufferedImage scaleToSizeNormalized(int nMaxWidth, int nMaxHeight, BufferedImage imgSrc) {
-        /* determine thumbnail size from WIDTH and HEIGHT */
+        // determine thumbnail size from WIDTH and HEIGHT
         int imageWidth = imgSrc.getWidth(null);
         int imageHeight = imgSrc.getHeight(null);
 
@@ -257,8 +256,8 @@ public class GraphicTools {
         int avatarWidth = avatar.getWidth();
         int avatarHeight = avatar.getHeight();
 
-        // read from artwork profile
-        float reflectionHeight = 12.5f; //PropertiesUtil.getFloatProperty(graphicType + ".reflectionHeight", 12.5f);
+        // TODO: read from artwork profile
+        float reflectionHeight = 12.5f;
 
         BufferedImage gradient = createGradientMask(avatarWidth, avatarHeight, reflectionHeight, graphicType);
         BufferedImage buffer = createReflection(avatar, avatarWidth, avatarHeight, reflectionHeight);
@@ -285,10 +284,6 @@ public class GraphicTools {
         float reflectionHeightAbsolute = avatarHeight * (reflectionHeight / 100);
 
         // TODO read from artwork profile
-//        reflectionStart = (PropertiesUtil.getFloatProperty(graphicType + ".reflectionStart", 0.0f) / 100) * reflectionHeightAbsolute;
-//        reflectionEnd = (PropertiesUtil.getFloatProperty(graphicType + ".reflectionEnd", 100.0f) / 100) * reflectionHeightAbsolute;
-//        opacityStart = PropertiesUtil.getFloatProperty(graphicType + ".opacityStart", 30.0f) / 100;
-//        opacityEnd = PropertiesUtil.getFloatProperty(graphicType + ".opacityEnd", 100.0f) / 100;
         reflectionStart = 0.0f * reflectionHeightAbsolute;
         reflectionEnd = 100.0f * reflectionHeightAbsolute;
         opacityStart = 30.0f / 100;
@@ -357,17 +352,6 @@ public class GraphicTools {
         float perspectiveBottom = 3f;
 
         // TODO read from artwork profile
-//        try {
-//            perspectiveTop = Float.valueOf(PropertiesUtil.getProperty(graphicType + ".perspectiveTop", "3"));
-//        } catch (NumberFormatException nfe) {
-//            logger.error(LOG_MESSAGE + "NumberFormatException " + nfe.getMessage() + " in property " + graphicType + ".perspectiveTop");
-//        }
-//
-//        try {
-//            perspectiveBottom = Float.valueOf(PropertiesUtil.getProperty(graphicType + ".perspectiveBottom", "3"));
-//        } catch (NumberFormatException nfe) {
-//            logger.error(LOG_MESSAGE + "NumberFormatException " + nfe.getMessage() + " in property " + graphicType + ".perspectiveBottom");
-//        }
         int top3d = (int) (h * perspectiveTop / 100);
         int bot3d = (int) (h * perspectiveBottom / 100);
 

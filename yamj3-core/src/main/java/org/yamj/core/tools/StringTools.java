@@ -49,7 +49,6 @@ public final class StringTools {
     static {
         // Populate the charReplacementMap
         String temp = PropertyTools.getProperty("indexing.character.replacement", "");
-        //String temp = PropertiesUtil.getProperty("mjb.charset.filename.translate", "");
         StringTokenizer tokenizer = new StringTokenizer(temp, ",");
         while (tokenizer.hasMoreTokens()) {
             String token = tokenizer.nextToken();

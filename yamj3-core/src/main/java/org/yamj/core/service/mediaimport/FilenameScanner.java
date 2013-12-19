@@ -307,7 +307,6 @@ public class FilenameScanner {
         {
             final Matcher matcher = TV_PATTERN.matcher(dto.getRest());
             if (matcher.find()) {
-                // logger.finest("It's a TV Show: " + group0);
                 dto.setRest(cutMatch(dto.getRest(), matcher, "./TVSHOW/."));
 
                 final Matcher smatcher = SEASON_PATTERN.matcher(matcher.group(0));
