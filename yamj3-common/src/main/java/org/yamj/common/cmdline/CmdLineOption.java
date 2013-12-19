@@ -335,7 +335,7 @@ public final class CmdLineOption {
      */
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("-");
         sb.append(this.optionName);
         sb.append(" ");
@@ -358,7 +358,7 @@ public final class CmdLineOption {
      * @return the string representation
      */
     public String toString(final CmdLineParser caller) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(this.isRequired ? "<" : "[");
         sb.append("-");
         sb.append(this.optionName);

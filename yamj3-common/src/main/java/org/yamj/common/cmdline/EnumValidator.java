@@ -44,6 +44,9 @@ public class EnumValidator extends OptionValidator {
     /**
      * Validate an option.
      *
+     * @param cmdlineParser
+     * @param parsedOption
+     * @throws org.yamj.common.cmdline.CmdLineException
      * @see OptionValidator#validate(CmdLineParser, ParsedOption)
      */
     @Override
@@ -72,7 +75,7 @@ public class EnumValidator extends OptionValidator {
      * @return string representation of allowed values
      */
     public String getAllowedValuesList() {
-        final StringBuffer sb = new StringBuffer();
+        final StringBuilder sb = new StringBuilder();
         for (int i = 0; this.allowedValues != null && i < this.allowedValues.length; i++) {
             sb.append(this.allowedValues[i]);
             if (i + 1 < this.allowedValues.length) {

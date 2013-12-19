@@ -28,6 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -464,15 +465,15 @@ public class MediaInfoService implements InitializingBean {
 
     private int getBitRate(String bitRateValue) {
         if (StringUtils.isNotBlank(bitRateValue)) {
+            String tmp;
             if (bitRateValue.indexOf(Constants.SPACE_SLASH_SPACE) > -1) {
-                bitRateValue = bitRateValue.substring(0, bitRateValue.indexOf(Constants.SPACE_SLASH_SPACE));
+                tmp = bitRateValue.substring(0, bitRateValue.indexOf(Constants.SPACE_SLASH_SPACE));
+            } else {
+                tmp = bitRateValue;
             }
-            try {
-                bitRateValue = bitRateValue.substring(0, bitRateValue.length() - 3);
-                return Integer.parseInt(bitRateValue);
-            } catch (NumberFormatException ex) {
-                LOG.trace("Failed to parse bit rate: {}", bitRateValue, ex);
-            }
+
+            tmp = tmp.substring(0, tmp.length() - 3);
+            return NumberUtils.toInt(tmp, -1);
         }
         return -1;
     }

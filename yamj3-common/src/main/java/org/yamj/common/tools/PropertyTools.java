@@ -30,6 +30,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -79,8 +80,9 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
      * @return
      */
     public static boolean getBooleanProperty(String key, boolean defaultValue) {
-        String property = PROPERTIES.getProperty(key);
-        if (property != null) {
+        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(key));
+
+        if (StringUtils.isNotBlank(property)) {
             return Boolean.parseBoolean(property.trim());
         }
         return defaultValue;
@@ -94,14 +96,8 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
      * @return
      */
     public static int getIntProperty(String key, int defaultValue) {
-        String property = PROPERTIES.getProperty(key);
-        if (property != null) {
-            try {
-                return Integer.parseInt(property.trim());
-            } catch (NumberFormatException nfe) {
-            }
-        }
-        return defaultValue;
+        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(key));
+        return NumberUtils.toInt(property, defaultValue);
     }
 
     /**
@@ -112,14 +108,8 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
      * @return
      */
     public static long getLongProperty(String key, long defaultValue) {
-        String property = PROPERTIES.getProperty(key);
-        if (property != null) {
-            try {
-                return Long.parseLong(property.trim());
-            } catch (NumberFormatException nfe) {
-            }
-        }
-        return defaultValue;
+        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(key));
+        return NumberUtils.toLong(property, defaultValue);
     }
 
     /**
@@ -130,19 +120,13 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
      * @return
      */
     public static float getFloatProperty(String key, float defaultValue) {
-        String property = PROPERTIES.getProperty(key);
-        if (property != null) {
-            try {
-                return Float.parseFloat(property.trim());
-            } catch (NumberFormatException nfe) {
-            }
-        }
-        return defaultValue;
+        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(key));
+        return NumberUtils.toFloat(property, defaultValue);
     }
 
     public static String getReplacedProperty(String newKey, String oldKey, String defaultValue) {
-        String property = PROPERTIES.getProperty(oldKey);
-        if (property == null) {
+        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(oldKey));
+        if (StringUtils.isBlank(property)) {
             property = PROPERTIES.getProperty(newKey, defaultValue);
         } else {
             LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
@@ -151,64 +135,50 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
     }
 
     public static boolean getReplacedBooleanProperty(String newKey, String oldKey, boolean defaultValue) {
-        String property = PROPERTIES.getProperty(oldKey);
-        if (property == null) {
-            property = PROPERTIES.getProperty(newKey);
+        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(oldKey));
+        if (StringUtils.isBlank(property)) {
+            property = StringUtils.trimToEmpty(PROPERTIES.getProperty(newKey));
         } else {
             LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
         }
-        if (property != null) {
+
+        if (StringUtils.isNotBlank(property)) {
             return Boolean.parseBoolean(property.trim());
         }
         return defaultValue;
     }
 
     public static int getReplacedIntProperty(String newKey, String oldKey, int defaultValue) {
-        String property = PROPERTIES.getProperty(oldKey);
-        if (property == null) {
+        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(oldKey));
+        if (StringUtils.isBlank(property)) {
             property = PROPERTIES.getProperty(newKey);
         } else {
             LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
         }
-        if (property != null) {
-            try {
-                return Integer.parseInt(property.trim());
-            } catch (NumberFormatException nfe) {
-            }
-        }
-        return defaultValue;
+
+        return NumberUtils.toInt(PROPERTIES.getProperty(property), defaultValue);
     }
 
     public static long getReplacedLongProperty(String newKey, String oldKey, long defaultValue) {
-        String property = PROPERTIES.getProperty(oldKey);
-        if (property == null) {
+        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(oldKey));
+        if (StringUtils.isBlank(property)) {
             property = PROPERTIES.getProperty(newKey);
         } else {
             LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
         }
-        if (property != null) {
-            try {
-                return Long.parseLong(property.trim());
-            } catch (NumberFormatException nfe) {
-            }
-        }
-        return defaultValue;
+
+        return NumberUtils.toLong(PROPERTIES.getProperty(property), defaultValue);
     }
 
     public static float getReplacedFloatProperty(String newKey, String oldKey, float defaultValue) {
-        String property = PROPERTIES.getProperty(oldKey);
-        if (property == null) {
+        String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(oldKey));
+        if (StringUtils.isBlank(property)) {
             property = PROPERTIES.getProperty(newKey);
         } else {
             LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
         }
-        if (property != null) {
-            try {
-                return Float.parseFloat(property.trim());
-            } catch (NumberFormatException nfe) {
-            }
-        }
-        return defaultValue;
+
+        return NumberUtils.toFloat(PROPERTIES.getProperty(property), defaultValue);
     }
 
     public static Set<Entry<Object, Object>> getEntrySet() {
@@ -240,6 +210,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
      * my.languages.FR=French
      *
      * @param prefix Key for keywords list and prefix for value searching.
+     * @param defaultValue
      * @return Ordered keyword list and map.
      */
     public static KeywordMap getKeywordMap(String prefix, String defaultValue) {

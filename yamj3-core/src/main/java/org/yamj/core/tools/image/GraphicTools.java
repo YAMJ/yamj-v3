@@ -40,7 +40,7 @@ import org.apache.sanselan.ImageReadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GraphicTools {
+public final class GraphicTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(GraphicTools.class);
 

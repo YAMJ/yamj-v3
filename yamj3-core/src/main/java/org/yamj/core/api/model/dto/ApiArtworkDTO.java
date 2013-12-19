@@ -228,9 +228,9 @@ public class ApiArtworkDTO extends AbstractApiIdentifiableDTO {
         }
     }
 
-    //<editor-fold defaultstate="collapsed" desc="Artwork Key methods">
+    //<editor-fold defaultstate="collapsed" desc="Artwork key methods">
     @JsonIgnore
-    public String Key() {
+    public String key() {
         if (StringUtils.isBlank(key)) {
             this.key = makeKey(source, getId());
         }

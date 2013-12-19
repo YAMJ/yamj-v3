@@ -71,6 +71,7 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
     private Class<Enum> enumClass;
 
     /**
+     * @param parameters
      * @see ParameterizedType#setParameterValues(Properties)
      */
     @Override
@@ -85,7 +86,7 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
     }
 
     /**
-     * @see UserType#returnedClass()
+     * @return @see UserType#returnedClass()
      */
     @Override
     @SuppressWarnings("rawtypes")
@@ -94,7 +95,7 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
     }
 
     /**
-     * @see UserType#sqlTypes()
+     * @return @see UserType#sqlTypes()
      */
     @Override
     public int[] sqlTypes() {
@@ -102,6 +103,10 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
     }
 
     /**
+     * @param original
+     * @param owner
+     * @param target
+     * @return
      * @see UserType#replace(Object, Object, Object)
      */
     @Override
@@ -110,6 +115,9 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
     }
 
     /**
+     * @param cached
+     * @param owner
+     * @return
      * @see UserType#assemble(Serializable, Object)
      */
     @Override
@@ -118,6 +126,8 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
     }
 
     /**
+     * @param value
+     * @return
      * @see UserType#disassemble(Object)
      */
     @Override
@@ -127,6 +137,8 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
     }
 
     /**
+     * @param value
+     * @return
      * @see UserType#deepCopy(Object)
      */
     @Override
@@ -135,14 +147,19 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
     }
 
     /**
+     * @param x
+     * @param y
+     * @return
      * @see UserType#equals(Object, Object)
      */
     @Override
     public boolean equals(final Object x, final Object y) throws HibernateException {
-        return x == y;
+        return x.equals(y);
     }
 
     /**
+     * @param x
+     * @return
      * @see UserType#hashCode(Object)
      */
     @Override
@@ -151,6 +168,8 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
     }
 
     /**
+     * @return
+     *
      * @see UserType#isMutable()
      */
     @Override
@@ -159,12 +178,18 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
     }
 
     /**
+     * @param rs
+     * @param names
+     * @param session
+     * @param owner
+     * @return
+     * @throws java.sql.SQLException
      * @see UserType#nullSafeGet(ResultSet, String[], SessionImplementor, Object)
      */
     @Override
     @SuppressWarnings("unchecked")
-    public Object nullSafeGet(final ResultSet rs, final String[] names, final SessionImplementor session, final Object owner) throws HibernateException,
-            SQLException {
+    public Object nullSafeGet(final ResultSet rs, final String[] names, final SessionImplementor session, final Object owner)
+            throws HibernateException, SQLException {
         int ordinal = rs.getInt(names[0]);
 
         // don't know if we are guaranteed to get the ordinals
@@ -173,12 +198,17 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
     }
 
     /**
+     * @param st
+     * @param value
+     * @param index
+     * @param session
+     * @throws java.sql.SQLException
      * @see UserType#nullSafeSet(PreparedStatement, Object, int, SessionImplementor)
      */
     @Override
     @SuppressWarnings("rawtypes")
-    public void nullSafeSet(final PreparedStatement st, final Object value, final int index, final SessionImplementor session) throws HibernateException,
-            SQLException {
+    public void nullSafeSet(final PreparedStatement st, final Object value, final int index, final SessionImplementor session)
+            throws HibernateException, SQLException {
         if (value == null) {
             st.setNull(index, Types.INTEGER);
         } else {
@@ -187,6 +217,8 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
     }
 
     /**
+     * @param xmlValue
+     * @return
      * @see EnhancedUserType#fromXMLString(String)
      */
     @Override
@@ -196,15 +228,19 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
     }
 
     /**
+     * @param value
+     * @return
      * @see EnhancedUserType#objectToSQLString(Object)
      */
     @Override
     @SuppressWarnings("rawtypes")
     public String objectToSQLString(final Object value) {
-        return new StringBuffer(((Enum) value).ordinal()).toString();
+        return new StringBuilder(((Enum) value).ordinal()).toString();
     }
 
     /**
+     * @param value
+     * @return
      * @see EnhancedUserType#toXMLString(Object)
      */
     @Override

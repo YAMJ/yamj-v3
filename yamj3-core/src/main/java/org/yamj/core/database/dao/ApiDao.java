@@ -474,8 +474,8 @@ public class ApiDao extends HibernateDao {
 
             LOG.trace("Found {} artworks", results.size());
             for (ApiArtworkDTO ia : results) {
-                LOG.trace("  {} = {}", ia.Key(), ia.toString());
-                artworkList.get(ia.Key()).addArtwork(ia);
+                LOG.trace("  {} = {}", ia.key(), ia.toString());
+                artworkList.get(ia.key()).addArtwork(ia);
             }
         }
     }

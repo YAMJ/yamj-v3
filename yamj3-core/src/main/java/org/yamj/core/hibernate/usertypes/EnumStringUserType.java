@@ -55,6 +55,8 @@ import org.hibernate.usertype.UserType;
  *   &lt;property name='suit' type='suit'/&gt;
  * &lt;/class&gt;
  * </code>
+ *
+ * @param <E>
  */
 public class EnumStringUserType<E extends Enum<E>> implements UserType, ParameterizedType {
 
@@ -69,6 +71,7 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
     private Class<Enum> enumClass;
 
     /**
+     * @param parameters
      * @see ParameterizedType#setParameterValues(Properties)
      */
     @Override
@@ -83,7 +86,7 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
     }
 
     /**
-     * @see UserType#returnedClass()
+     * @return @see UserType#returnedClass()
      */
     @Override
     @SuppressWarnings("rawtypes")
@@ -92,7 +95,7 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
     }
 
     /**
-     * @see UserType#sqlTypes()
+     * @return @see UserType#sqlTypes()
      */
     @Override
     public int[] sqlTypes() {
@@ -100,6 +103,10 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
     }
 
     /**
+     * @param original
+     * @param target
+     * @param owner
+     * @return
      * @see UserType#replace(Object, Object, Object)
      */
     @Override
@@ -108,6 +115,9 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
     }
 
     /**
+     * @param cached
+     * @param owner
+     * @return
      * @see UserType#assemble(Serializable, Object)
      */
     @Override
@@ -116,6 +126,8 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
     }
 
     /**
+     * @param value
+     * @return
      * @see UserType#disassemble(Object)
      */
     @Override
@@ -124,6 +136,8 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
     }
 
     /**
+     * @param value
+     * @return
      * @see UserType#deepCopy(Object)
      */
     @Override
@@ -132,20 +146,27 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
     }
 
     /**
+     * @param x
+     * @param y
+     * @return
      * @see UserType#equals(Object, Object)
      */
     @Override
     public boolean equals(final Object x, final Object y) throws HibernateException {
-        if (x == y) {
-            return true;
-        }
         if (null == x || null == y) {
             return false;
         }
+
+        if (x.equals(y)) {
+            return true;
+        }
+
         return x.equals(y);
     }
 
     /**
+     * @param x
+     * @return
      * @see UserType#hashCode(Object)
      */
     @Override
@@ -154,6 +175,7 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
     }
 
     /**
+     * @return
      * @see UserType#isMutable()
      */
     @Override
@@ -162,12 +184,18 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
     }
 
     /**
+     * @param rs
+     * @param names
+     * @param owner
+     * @param session
+     * @return
+     * @throws java.sql.SQLException
      * @see UserType#nullSafeGet(ResultSet, String[], SessionImplementor, Object)
      */
     @Override
     @SuppressWarnings("unchecked")
-    public Object nullSafeGet(final ResultSet rs, final String[] names, final SessionImplementor session, final Object owner) throws HibernateException,
-            SQLException {
+    public Object nullSafeGet(final ResultSet rs, final String[] names, final SessionImplementor session, final Object owner)
+            throws HibernateException, SQLException {
         String name = rs.getString(names[0]);
         Enum<?> result = null;
         if (!rs.wasNull()) {
@@ -177,12 +205,17 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
     }
 
     /**
+     * @param st
+     * @param value
+     * @param index
+     * @param session
+     * @throws java.sql.SQLException
      * @see UserType#nullSafeSet(PreparedStatement, Object, int, SessionImplementor)
      */
     @Override
     @SuppressWarnings("rawtypes")
-    public void nullSafeSet(final PreparedStatement st, final Object value, final int index, final SessionImplementor session) throws HibernateException,
-            SQLException {
+    public void nullSafeSet(final PreparedStatement st, final Object value, final int index, final SessionImplementor session)
+            throws HibernateException, SQLException {
         if (null == value) {
             st.setNull(index, Types.VARCHAR);
         } else {
