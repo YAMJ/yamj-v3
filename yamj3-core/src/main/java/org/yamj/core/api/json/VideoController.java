@@ -23,13 +23,11 @@
 package org.yamj.core.api.json;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -57,17 +55,13 @@ public class VideoController {
      *
      * TODO: Allow genres to be added to the returned data
      *
-     * @param id
      * @param options
      * @return
      */
     @RequestMapping(value = "/movie/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperSingle<ApiVideoDTO> getVideoById(@PathVariable String id,
-            @ModelAttribute("options") OptionsIndexVideo options) {
+    public ApiWrapperSingle<ApiVideoDTO> getVideoById(@ModelAttribute("options") OptionsIndexVideo options) {
         ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<ApiVideoDTO>();
-        // Add the ID to the options
-        options.setId(NumberUtils.toLong(id));
         // Set the type to movie
         options.setType("MOVIE");
         wrapper.setOptions(options);
@@ -85,17 +79,13 @@ public class VideoController {
      *
      * TODO: Get associate seasons for the series
      *
-     * @param id
      * @param options
      * @return
      */
     @RequestMapping(value = "/series/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperSingle<ApiVideoDTO> getSeriesById(@PathVariable String id,
-            @ModelAttribute("options") OptionsIndexVideo options) {
+    public ApiWrapperSingle<ApiVideoDTO> getSeriesById(@ModelAttribute("options") OptionsIndexVideo options) {
         ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<ApiVideoDTO>();
-        // Add the ID to the options
-        options.setId(NumberUtils.toLong(id));
         // Set the type to movie
         options.setType("SERIES");
         wrapper.setOptions(options);
@@ -113,17 +103,13 @@ public class VideoController {
      *
      * TODO: Add episodes to the season
      *
-     * @param id
      * @param options
      * @return
      */
     @RequestMapping(value = "/season/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperSingle<ApiVideoDTO> getSeasonById(@PathVariable String id,
-            @ModelAttribute("options") OptionsIndexVideo options) {
+    public ApiWrapperSingle<ApiVideoDTO> getSeasonById(@ModelAttribute("options") OptionsIndexVideo options) {
         ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<ApiVideoDTO>();
-        // Add the ID to the options
-        options.setId(NumberUtils.toLong(id));
         // Set the type to movie
         options.setType("SEASON");
         wrapper.setOptions(options);

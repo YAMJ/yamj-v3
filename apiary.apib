@@ -2055,6 +2055,167 @@ GET /api/boxedsets
 
 
 --
+Configuration
+This API is for the retrieval and update of the configuration entries.
+--
+
+Get information on the configuration settings
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>config</td>
+        <td>The specific configuration entry to get information on.<br/>
+        Note: This is a short cut to using the search parameters. <br/>
+        It is the equivalent of '?search={config}&field=config_key&mode=exact'
+        </td>
+    </tr>
+    <tr>
+        <td>SEARCHING</td>
+        <td>See above for the explanation on searching parameters</td>
+    </tr>
+    <tr>
+        <td>SORTING</td>
+        <td>See above for the explanation on sorting parameters</td>
+    </tr>
+</table>
+
+__Example__: `http://localhost:8888/yamj3/api/config/list?config=language&mode=any`
+
+GET /api/config/list
+< 200
+< Content-Type: application/json
+{
+   "count":3,
+   "totalCount":3,
+   "queryDuration":"449ms",
+   "queryTime":"2013-10-29 11:28:15",
+   "status":{
+      "status":200,
+      "message":"OK"
+   },
+   "options":{
+      "start":-1,
+      "max":-1,
+      "language":null,
+      "sortby":"",
+      "sortdir":"ASC",
+      "field":"config_key",
+      "search":"language",
+      "mode":"any",
+      "dataitems":[]
+   },
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
+   "results":[
+      {
+         "key":"thetvdb.language.alternate",
+         "value":"",
+         "createTimestamp":1382959495000,
+         "updateTimestamp":null
+      },
+      {
+         "key":"themoviedb.language",
+         "value":"en",
+         "createTimestamp":1382959495000,
+         "updateTimestamp":null
+      },
+      {
+         "key":"thetvdb.language",
+         "value":"en",
+         "createTimestamp":1382959496000,
+         "updateTimestamp":null
+      }
+   ]
+}
+--
+
+Add a new configuration entry
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>key</td>
+        <td>The property key to set.<br/>
+        This should not contain spaces, words should be delimited by periods (.)</td>
+    </tr>
+    <tr>
+        <td>value</td>
+        <td>The value of the property to set.</td>
+    </tr>
+</table>
+
+__Example__: `http://localhost:8888/yamj3/api/config/add?key=skin.language&value=en`
+
+GET /api/config/add
+< 200
+< Content-Type: application/json
+{
+    status: 200,
+    message: "Successfully added 'skin.language' with value 'en'"
+}
+--
+
+Update a configuration entry
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>key</td>
+        <td>The property key to update.</td>
+    </tr>
+    <tr>
+        <td>value</td>
+        <td>The new value of the property to set.</td>
+    </tr>
+</table>
+
+__Example__: `http://localhost:8888/yamj3/api/config/update?key=skin.language&value=en`
+
+GET /api/config/update
+< 200
+< Content-Type: application/json
+{
+    status: 200,
+    message: "Successfully updated 'skin.language' with value 'en'"
+}
+--
+
+Delete a configuration entry
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>key</td>
+        <td>The property key to delete.</td>
+    </tr>
+</table>
+
+__Example__: `http://localhost:8888/yamj3/api/config/delete?key=skin.language`
+
+GET /api/config/delete
+< 200
+< Content-Type: application/json
+{
+    status: 200,
+    message: "Successfully deleted 'skin.language'"
+}
+
+
+--
 System Information
 This API returns information about the state of the YAMJ Core.
 --
@@ -2105,79 +2266,4 @@ GET /system/info
    "uptime":"21m15.046s",
    "startUpTime":"2013-07-03 18:31:39",
    "buildDate":"2013-07-03 18:30:51"
-}
-
-
-Get information on the configuration settings
-***
-**Optional Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>config</td>
-        <td>The specific configuration entry to get information on.<br/>
-        Note: This is a short cut to using the search parameters. <br/>
-        It is the equivalent of '?search={config}&field=config_key&mode=exact'
-        </td>
-    </tr>
-    <tr>
-        <td>SEARCHING</td>
-        <td>See above for the explanation on searching parameters</td>
-    </tr>
-    <tr>
-        <td>SORTING</td>
-        <td>See above for the explanation on sorting parameters</td>
-    </tr>
-</table>
-
-__Example__: `http://localhost:8888/yamj3/system/config?config=language&mode=any`
-
-GET /system/config
-< 200
-< Content-Type: application/json
-{
-   "count":3,
-   "totalCount":3,
-   "queryDuration":"449ms",
-   "queryTime":"2013-10-29 11:28:15",
-   "status":{
-      "status":200,
-      "message":"OK"
-   },
-   "options":{
-      "start":-1,
-      "max":-1,
-      "language":null,
-      "sortby":"",
-      "sortdir":"ASC",
-      "field":"config_key",
-      "search":"language",
-      "mode":"any",
-      "dataitems":[]
-   },
-   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
-   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
-   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
-   "results":[
-      {
-         "key":"thetvdb.language.alternate",
-         "value":"",
-         "createTimestamp":1382959495000,
-         "updateTimestamp":null
-      },
-      {
-         "key":"themoviedb.language",
-         "value":"en",
-         "createTimestamp":1382959495000,
-         "updateTimestamp":null
-      },
-      {
-         "key":"thetvdb.language",
-         "value":"en",
-         "createTimestamp":1382959496000,
-         "updateTimestamp":null
-      }
-   ]
 }

@@ -35,10 +35,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.model.ApiStatus;
-import org.yamj.core.api.wrapper.ApiWrapperList;
-import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.options.OptionsId;
+import org.yamj.core.api.wrapper.ApiWrapperList;
+import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Genre;
@@ -187,7 +187,7 @@ public class CommonController {
     //<editor-fold defaultstate="collapsed" desc="Boxed-Set Methods">
     @RequestMapping(value = "/boxedset/{name}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperSingle<BoxedSet> getBoxSet(@PathVariable String name) {
+    public ApiWrapperSingle<BoxedSet> getBoxSet(@PathVariable("name") String name) {
         BoxedSet boxedSet;
         ApiWrapperSingle<BoxedSet> wrapper = new ApiWrapperSingle<BoxedSet>();
         if (StringUtils.isNumeric(name)) {
