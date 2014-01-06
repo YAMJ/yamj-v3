@@ -49,7 +49,7 @@ public class ConfigController {
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperList<Configuration> configList(@ModelAttribute("options") OptionsConfig options) {
-        if (org.apache.commons.lang.StringUtils.isBlank(options.getConfig())) {
+        if (StringUtils.isBlank(options.getConfig())) {
             LOG.info("Getting all configuration entries");
         } else {
             LOG.info("Getting configuration properties for '{}'", options.getConfig());
@@ -74,7 +74,7 @@ public class ConfigController {
             @RequestParam(required = true, defaultValue = "") String value) {
 
         ApiStatus status = new ApiStatus();
-        if (org.apache.commons.lang.StringUtils.isNotBlank(key) && org.apache.commons.lang.StringUtils.isNotBlank(value)) {
+        if (StringUtils.isNotBlank(key) && StringUtils.isNotBlank(value)) {
             LOG.info("Storing config '{}' with value '{}'", key, value);
             configService.setProperty(key, value);
             status.setStatus(200);
@@ -91,7 +91,7 @@ public class ConfigController {
     public ApiStatus configDelete(
             @RequestParam(required = true, defaultValue = "") String key) {
         ApiStatus status = new ApiStatus();
-        if (org.apache.commons.lang.StringUtils.isNotBlank(key)) {
+        if (StringUtils.isNotBlank(key)) {
             LOG.info("Deleting config '{}'", key);
             configService.deleteProperty(key);
             status.setStatus(200);
@@ -109,7 +109,7 @@ public class ConfigController {
             @RequestParam(required = true, defaultValue = "") String key,
             @RequestParam(required = true, defaultValue = "") String value) {
         ApiStatus status = new ApiStatus();
-        if (org.apache.commons.lang.StringUtils.isNotBlank(key) && org.apache.commons.lang.StringUtils.isNotBlank(value)) {
+        if (StringUtils.isNotBlank(key) && StringUtils.isNotBlank(value)) {
             LOG.info("Updating config '{}' with value '{}'", key, value);
             configService.setProperty(key, value);
             status.setStatus(200);

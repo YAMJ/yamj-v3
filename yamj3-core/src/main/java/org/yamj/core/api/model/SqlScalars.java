@@ -25,7 +25,7 @@ package org.yamj.core.api.model;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.type.BasicType;
@@ -177,7 +177,7 @@ public final class SqlScalars {
     }
 
     /**
-     * Add a scalart with type
+     * Add a scalar with type
      *
      * @param scalar
      * @param type
