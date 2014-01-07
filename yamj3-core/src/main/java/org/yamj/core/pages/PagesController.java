@@ -17,8 +17,11 @@ import org.yamj.common.model.YamjInfo;
 import org.yamj.core.api.json.IndexController;
 import org.yamj.core.api.json.SystemInfoController;
 import org.yamj.core.api.model.Skin;
+import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.Configuration;
+import org.yamj.core.database.model.PlayerPath;
+import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
 
@@ -34,6 +37,8 @@ public class PagesController {
     private FileStorageService fileStorageService;
     @Autowired
     private IndexController index;
+    @Autowired
+    private JsonApiStorageService jsonApi;
 
     @RequestMapping(value = {"/", "/index"})
     public ModelAndView displayRoot() {
@@ -132,6 +137,76 @@ public class PagesController {
         LOG.info("Deleting config for '{}'", key);
         configService.deleteProperty(key);
         String message = "Config was successfully deleted.";
+        view.addObject("message", message);
+        return view;
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Player Path Pages">
+    @RequestMapping(value = "/player/add")
+    public ModelAndView playerAddPage() {
+        ModelAndView view = new ModelAndView("player-add");
+        YamjInfo yi = sic.getYamjInfo("true");
+        view.addObject("yi", yi);
+        view.addObject("player", new PlayerPath());
+        return view;
+    }
+
+    @RequestMapping(value = "/player/add/process")
+    public ModelAndView playerAdd(@ModelAttribute PlayerPath player) {
+
+        ModelAndView view = new ModelAndView("redirect:/player/list");
+        LOG.info("Adding player: {}", player.toString());
+        jsonApi.setPlayer(player);
+        String message = "Player was successfully added.";
+        view.addObject("message", message);
+
+        return view;
+    }
+
+    @RequestMapping(value = "/player/list")
+    public ModelAndView playerList() {
+        ModelAndView view = new ModelAndView("player-list");
+
+        OptionsPlayer options = new OptionsPlayer();
+
+        List<PlayerPath> playerList = jsonApi.getPlayer(options);
+        YamjInfo yi = sic.getYamjInfo("true");
+        view.addObject("yi", yi);
+        view.addObject("playerlist", playerList);
+
+        return view;
+    }
+
+    @RequestMapping(value = "/player/edit/{name}", method = RequestMethod.GET)
+    public ModelAndView playerEditPage(@PathVariable String name) {
+        ModelAndView view = new ModelAndView("player-edit");
+        List<PlayerPath> playerList = jsonApi.getPlayer(name);
+        if (!playerList.isEmpty()) {
+            view.addObject("player", playerList.get(0));
+        }
+        YamjInfo yi = sic.getYamjInfo("true");
+        view.addObject("yi", yi);
+        return view;
+    }
+
+    @RequestMapping(value = "/player/edit/{name}", method = RequestMethod.POST)
+    public ModelAndView playerEditUpdate(@ModelAttribute("player") PlayerPath player, @PathVariable String name) {
+        ModelAndView view = new ModelAndView("redirect:/player/list");
+        LOG.info("Updating player: {}", player.toString());
+        jsonApi.setPlayer(player);
+        String message = "Player was successfully edited.";
+        view.addObject("message", message);
+        return view;
+    }
+
+    @RequestMapping(value = "/player/delete/{name}", method = RequestMethod.GET)
+    public ModelAndView playerDelete(@PathVariable String name) {
+        ModelAndView view = new ModelAndView("redirect:/player/list");
+
+        LOG.info("Deleting player '{}'", name);
+        jsonApi.deletePlayer(name);
+        String message = "Player was successfully deleted.";
         view.addObject("message", message);
         return view;
     }

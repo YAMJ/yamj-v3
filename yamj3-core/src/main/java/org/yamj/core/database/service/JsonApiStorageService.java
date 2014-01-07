@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.CountGeneric;
-import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
 import org.yamj.core.api.model.dto.ApiEpisodeDTO;
@@ -37,11 +36,19 @@ import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
 import org.yamj.core.api.model.dto.ApiVideoDTO;
+import org.yamj.core.api.options.OptionsPlayer;
+import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.ApiDao;
 import org.yamj.core.database.dao.CommonDao;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.dao.PlayerDao;
+import org.yamj.core.database.model.BoxedSet;
+import org.yamj.core.database.model.Certification;
+import org.yamj.core.database.model.Configuration;
+import org.yamj.core.database.model.Genre;
+import org.yamj.core.database.model.PlayerPath;
+import org.yamj.core.database.model.Studio;
 
 @Service("jsonApiStorageService")
 public class JsonApiStorageService {
@@ -52,6 +59,8 @@ public class JsonApiStorageService {
     private ApiDao apiDao;
     @Autowired
     private ConfigService configService;
+    @Autowired
+    private PlayerDao playerDao;
 
     @Transactional(readOnly = true)
     public <T> T getEntityById(Class<T> entityClass, Serializable id) {
@@ -208,4 +217,31 @@ public class JsonApiStorageService {
     public void getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper) {
         apiDao.getSeriesInfo(wrapper);
     }
+
+    // Player methods
+    @Transactional(readOnly = true)
+    public List<PlayerPath> getPlayer(ApiWrapperList<PlayerPath> wrapper) {
+        return getPlayer((OptionsPlayer) wrapper.getOptions());
+    }
+
+    @Transactional(readOnly = true)
+    public List<PlayerPath> getPlayer(OptionsPlayer options) {
+        return playerDao.getPlayerEntries(options);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PlayerPath> getPlayer(String playerName) {
+        return playerDao.getPlayerEntries(playerName);
+    }
+
+    @Transactional(readOnly = false)
+    public void setPlayer(PlayerPath player) {
+        playerDao.storePlayer(player);
+    }
+
+    @Transactional(readOnly = false)
+    public void deletePlayer(String playerName) {
+        playerDao.deletePlayer(playerName);
+    }
+
 }
