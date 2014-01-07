@@ -10,18 +10,22 @@
     <body background="${pageContext.request.contextPath}/images/yamj-configbg.jpg">
         <div id="logo">
             <h1>Yet Another Movie Jukebox</h1>
-            <h2>Add Configuration Entry</h2>
+            <h2>Add Player Path Entry</h2>
         </div>
-        <p id="message">Enter the property configuration key and value</p>
-        <form:form method="POST" commandName="config" action="${pageContext.request.contextPath}/config/add/process.html">
+        <p id="message">Enter the player information</p>
+        <form:form method="POST" commandName="player" action="${pageContext.request.contextPath}/player/add/process.html">
             <table id="headertable">
                 <tr>
-                    <td class="right">Key:</td>
-                    <td><form:input path="key"></form:input></td>
+                    <td class="right">Player Name:</td>
+                    <td><form:input path="name"></form:input></td>
                     </tr>
                     <tr>
-                        <td class="right">Value:</td>
-                        <td><form:input path="value"></form:input></td>
+                        <td class="right">Path Prefix:</td>
+                        <td><form:input path="pathPrefix"></form:input></td>
+                    </tr>
+                    <tr>
+                        <td class="right">Path Suffix:</td>
+                        <td><form:input path="pathSuffix"></form:input></td>
                     </tr>
                     <tr>
                         <td colspan="2" class="center"><input value="Add" type="submit"></td>
