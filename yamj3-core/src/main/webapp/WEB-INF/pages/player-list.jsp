@@ -24,6 +24,7 @@
                 <th>Player Name</th>
                 <th>Path Prefix</th>
                 <th>Path Suffix</th>
+                <th>Actions</th>
             </tr>
             <tbody>
                 <c:forEach items="${playerlist}" var="entry" varStatus="row">

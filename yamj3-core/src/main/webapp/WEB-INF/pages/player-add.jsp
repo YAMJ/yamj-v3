@@ -14,18 +14,18 @@
         </div>
         <p id="message">Enter the player information</p>
         <form:form method="POST" commandName="player" action="${pageContext.request.contextPath}/player/add/process.html">
-            <table id="headertable">
+            <table id="headertable" style="width:75%;">
                 <tr>
                     <td class="right">Player Name:</td>
-                    <td><form:input path="name"></form:input></td>
+                    <td><form:input size="100" path="name"></form:input></td>
                     </tr>
                     <tr>
-                        <td class="right">Path Prefix:</td>
-                        <td><form:input path="pathPrefix"></form:input></td>
+                        <td style="width:25%" class="right">Path Prefix:</td>
+                        <td style="width:75%"><form:input size="100" path="pathPrefix"></form:input></td>
                     </tr>
                     <tr>
-                        <td class="right">Path Suffix:</td>
-                        <td><form:input path="pathSuffix"></form:input></td>
+                        <td style="width:25%" class="right">Path Suffix:</td>
+                        <td style="width:75%"><form:input size="100" path="pathSuffix"></form:input></td>
                     </tr>
                     <tr>
                         <td colspan="2" class="center"><input value="Add" type="submit"></td>

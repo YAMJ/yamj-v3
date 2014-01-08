@@ -26,7 +26,6 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.NaturalId;
@@ -91,6 +90,7 @@ public class PlayerPath extends AbstractIdentifiable implements Serializable {
         if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
             return false;
         }
+        
         if ((this.pathPrefix == null) ? (other.pathPrefix != null) : !this.pathPrefix.equals(other.pathPrefix)) {
             return false;
         }

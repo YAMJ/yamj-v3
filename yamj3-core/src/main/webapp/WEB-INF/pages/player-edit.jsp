@@ -14,25 +14,30 @@
         </div>
         <p id="message">Enter the new value required</p>
         <form:form method="POST" commandName="player" action="${pageContext.request.contextPath}/player/edit/${player.name}.html">
-            <table id="headertable" style="width:30%;">
+            <table id="headertable" style="width:75%;">
                 <tr>
                     <td class="right">Player Name:</td>
-                    <td>${player.name}</td>
+                    <td colspan="2" class="center">${player.name}</td>
                 </tr>
                 <tr>
-                    <td class="right">Path Prefix:</td>
-                    <td>Current: ${player.pathPrefix}</td>
+                    <td class="center">Path Data</td>
+                    <td class="center">Current</td>
+                    <td class="center">New</td>
+                </tr>
+                <tr>
+                    <td class="right">Prefix:</td>
+                    <td>${player.pathPrefix}</td>
                     <td><form:input path="pathPrefix"></form:input></td>
                 </tr>
                 <tr>
-                        <td class="right">Path Suffix:</td>
-                        <td>Current: ${player.pathSuffix}</td>
+                    <td class="right">Suffix:</td>
+                    <td>${player.pathSuffix}</td>
                     <td><form:input path="pathSuffix"></form:input></td>
                 </tr>
                 <tr>
-                    <td colspan="2" class="center"><input value="Update" type="submit"></td>
+                    <td colspan="3" class="center"><input value="Update" type="submit"></td>
                 </tr>
-            </table>
+                </table>
         </form:form>
 
         <p><a href="${pageContext.request.contextPath}/index.html">Home page</a></p>
