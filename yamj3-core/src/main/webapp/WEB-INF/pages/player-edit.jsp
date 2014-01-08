@@ -27,12 +27,12 @@
                 <tr>
                     <td class="right">Prefix:</td>
                     <td>${player.pathPrefix}</td>
-                    <td><form:input path="pathPrefix"></form:input></td>
+                    <td><form:input path="pathPrefix" size="100"></form:input></td>
                 </tr>
                 <tr>
                     <td class="right">Suffix:</td>
                     <td>${player.pathSuffix}</td>
-                    <td><form:input path="pathSuffix"></form:input></td>
+                    <td><form:input path="pathSuffix" size="100"></form:input></td>
                 </tr>
                 <tr>
                     <td colspan="3" class="center"><input value="Update" type="submit"></td>
