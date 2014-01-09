@@ -20,12 +20,12 @@
                     <td><form:input size="100" path="name"></form:input></td>
                     </tr>
                     <tr>
-                        <td style="width:25%" class="right">Path Prefix:</td>
-                        <td style="width:75%"><form:input size="100" path="pathPrefix"></form:input></td>
+                        <td style="width:25%" class="right">IP/Device:</td>
+                        <td style="width:75%"><form:input size="50" path="ipDevice"></form:input></td>
                     </tr>
                     <tr>
-                        <td style="width:25%" class="right">Path Suffix:</td>
-                        <td style="width:75%"><form:input size="100" path="pathSuffix"></form:input></td>
+                        <td style="width:25%" class="right">Storage Path</td>
+                        <td style="width:75%"><form:input size="100" path="storagePath"></form:input></td>
                     </tr>
                     <tr>
                         <td colspan="2" class="center"><input value="Add" type="submit"></td>

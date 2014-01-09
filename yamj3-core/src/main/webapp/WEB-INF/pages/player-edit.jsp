@@ -20,19 +20,19 @@
                     <td colspan="2" class="center">${player.name}</td>
                 </tr>
                 <tr>
-                    <td class="center">Path Data</td>
+                    <td class="center">Player Data</td>
                     <td class="center">Current</td>
                     <td class="center">New</td>
                 </tr>
                 <tr>
-                    <td class="right">Prefix:</td>
-                    <td>${player.pathPrefix}</td>
-                    <td><form:input path="pathPrefix" size="100"></form:input></td>
+                    <td class="right">IP/Device:</td>
+                    <td>${player.ipDevice}</td>
+                    <td><form:input path="ipDevice" size="50"></form:input></td>
                 </tr>
                 <tr>
-                    <td class="right">Suffix:</td>
-                    <td>${player.pathSuffix}</td>
-                    <td><form:input path="pathSuffix" size="100"></form:input></td>
+                    <td class="right">Storage Path:</td>
+                    <td>${player.storagePath}</td>
+                    <td><form:input path="storagePath" size="100"></form:input></td>
                 </tr>
                 <tr>
                     <td colspan="3" class="center"><input value="Update" type="submit"></td>

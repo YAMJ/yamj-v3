@@ -66,16 +66,16 @@ public class PlayerController {
     @ResponseBody
     public ApiStatus playerAdd(
             @RequestParam(required = true, defaultValue = "") String name,
-            @RequestParam(required = true, defaultValue = "") String prefix,
-            @RequestParam(required = false, defaultValue = "") String suffix) {
+            @RequestParam(required = true, defaultValue = "") String ipDevice,
+            @RequestParam(required = true, defaultValue = "") String storagePath) {
 
         ApiStatus status = new ApiStatus();
-        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(prefix)) {
+        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(ipDevice) && StringUtils.isNotBlank(storagePath)) {
             LOG.info("Storing player '{}'", name);
             PlayerPath pp = new PlayerPath();
             pp.setName(name);
-            pp.setPathPrefix(prefix);
-            pp.setPathSuffix(suffix);
+            pp.setIpDevice(ipDevice);
+            pp.setStoragePath(storagePath);
             api.setPlayer(pp);
             status.setStatus(200);
             status.setMessage("Successfully added '" + name + "'");
@@ -107,15 +107,15 @@ public class PlayerController {
     @ResponseBody
     public ApiStatus playerUpdate(
             @RequestParam(required = true, defaultValue = "") String name,
-            @RequestParam(required = true, defaultValue = "") String prefix,
-            @RequestParam(required = false, defaultValue = "") String suffix) {
+            @RequestParam(required = true, defaultValue = "") String ipDevice,
+            @RequestParam(required = true, defaultValue = "") String storagePath) {
         ApiStatus status = new ApiStatus();
-        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(prefix)) {
+        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(ipDevice) && StringUtils.isNotBlank(storagePath)) {
             LOG.info("Updating player '{}'", name);
             PlayerPath pp = new PlayerPath();
             pp.setName(name);
-            pp.setPathPrefix(prefix);
-            pp.setPathSuffix(suffix);
+            pp.setIpDevice(ipDevice);
+            pp.setStoragePath(storagePath);
             api.setPlayer(pp);
             status.setStatus(200);
             status.setMessage("Successfully updated '" + name + "'");

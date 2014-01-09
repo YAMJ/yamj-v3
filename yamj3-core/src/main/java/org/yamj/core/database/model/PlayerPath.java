@@ -34,15 +34,15 @@ import org.hibernate.annotations.NaturalId;
 @Table(name = "player_path")
 public class PlayerPath extends AbstractIdentifiable implements Serializable {
 
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 4L;
 
     @NaturalId(mutable = true)
     @Column(name = "name", nullable = false, length = 200)
     private String name;
-    @Column(name = "path_prefix", nullable = false, length = 255)
-    private String pathPrefix;
-    @Column(name = "path_suffix", nullable = true, length = 255)
-    private String pathSuffix;
+    @Column(name = "ip_device", nullable = false, length = 50)
+    private String ipDevice;
+    @Column(name = "storage_path", nullable = false, length = 255)
+    private String storagePath;
 
     // GETTERS and SETTERS
     public String getName() {
@@ -53,28 +53,28 @@ public class PlayerPath extends AbstractIdentifiable implements Serializable {
         this.name = name;
     }
 
-    public String getPathPrefix() {
-        return pathPrefix;
+    public String getIpDevice() {
+        return ipDevice;
     }
 
-    public void setPathPrefix(String pathPrefix) {
-        this.pathPrefix = pathPrefix;
+    public void setIpDevice(String ipDevice) {
+        this.ipDevice = ipDevice;
     }
 
-    public String getPathSuffix() {
-        return pathSuffix;
+    public String getStoragePath() {
+        return storagePath;
     }
 
-    public void setPathSuffix(String pathSuffix) {
-        this.pathSuffix = pathSuffix;
+    public void setStoragePath(String storagePath) {
+        this.storagePath = storagePath;
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 89 * hash + (this.name != null ? this.name.hashCode() : 0);
-        hash = 89 * hash + (this.pathPrefix != null ? this.pathPrefix.hashCode() : 0);
-        hash = 89 * hash + (this.pathSuffix != null ? this.pathSuffix.hashCode() : 0);
+        hash = 23 * hash + (this.name != null ? this.name.hashCode() : 0);
+        hash = 23 * hash + (this.ipDevice != null ? this.ipDevice.hashCode() : 0);
+        hash = 23 * hash + (this.storagePath != null ? this.storagePath.hashCode() : 0);
         return hash;
     }
 
@@ -90,14 +90,10 @@ public class PlayerPath extends AbstractIdentifiable implements Serializable {
         if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
             return false;
         }
-        
-        if ((this.pathPrefix == null) ? (other.pathPrefix != null) : !this.pathPrefix.equals(other.pathPrefix)) {
+        if ((this.ipDevice == null) ? (other.ipDevice != null) : !this.ipDevice.equals(other.ipDevice)) {
             return false;
         }
-        if ((this.pathSuffix == null) ? (other.pathSuffix != null) : !this.pathSuffix.equals(other.pathSuffix)) {
-            return false;
-        }
-        return true;
+        return !((this.storagePath == null) ? (other.storagePath != null) : !this.storagePath.equals(other.storagePath));
     }
 
     @Override

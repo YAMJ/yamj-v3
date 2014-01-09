@@ -55,8 +55,8 @@ public class PlayerDao extends HibernateDao {
         if (existingPlayer != null) {
             // Player already exists
             LOG.debug("Updating player information: '{}'", player.getName());
-            existingPlayer.setPathPrefix(player.getPathPrefix());
-            existingPlayer.setPathSuffix(player.getPathSuffix());
+            existingPlayer.setIpDevice(player.getIpDevice());
+            existingPlayer.setStoragePath(player.getStoragePath());
             updateEntity(existingPlayer);
         } else {
             LOG.debug("Storing new player: '{}'", player.getName());
@@ -69,15 +69,15 @@ public class PlayerDao extends HibernateDao {
     public List<PlayerPath> getPlayerEntries(OptionsPlayer options) {
         SqlScalars sqlScalars = new SqlScalars();
 
-        sqlScalars.addToSql("SELECT name, path_prefix AS pathPrefix, path_suffix AS pathSuffix");
+        sqlScalars.addToSql("SELECT name, ip_device AS ipDevice, storage_path AS storagePath");
         sqlScalars.addToSql("FROM player_path");
         // TODO: Add where clause
         sqlScalars.addToSql(options.getSearchString(true));
         sqlScalars.addToSql(options.getSortString());
 
         sqlScalars.addScalar("name", StringType.INSTANCE);
-        sqlScalars.addScalar("pathPrefix", StringType.INSTANCE);
-        sqlScalars.addScalar("pathSuffix", StringType.INSTANCE);
+        sqlScalars.addScalar("ipDevice", StringType.INSTANCE);
+        sqlScalars.addScalar("storagePath", StringType.INSTANCE);
 
         List<PlayerPath> players = executeQueryWithTransform(PlayerPath.class, sqlScalars, null);
         return players;

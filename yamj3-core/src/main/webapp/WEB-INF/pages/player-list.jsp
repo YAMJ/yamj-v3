@@ -22,16 +22,16 @@
         <table id="tablelist">
             <tr>
                 <th>Player Name</th>
-                <th>Path Prefix</th>
-                <th>Path Suffix</th>
+                <th>IP/Device</th>
+                <th>Storage Path</th>
                 <th>Actions</th>
             </tr>
             <tbody>
                 <c:forEach items="${playerlist}" var="entry" varStatus="row">
                     <tr>
                         <td>${entry.name}</td>
-                        <td>${entry.pathPrefix}</td>
-                        <td>${entry.pathSuffix}</td>
+                        <td>${entry.ipDevice}</td>
+                        <td>${entry.storagePath}</td>
                         <td class="center">
                             <a href="${pageContext.request.contextPath}/player/edit/${entry.name}.html">Edit</a> or
                             <a href="${pageContext.request.contextPath}/player/delete/${entry.name}.html">Delete</a>
