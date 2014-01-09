@@ -16,6 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.yamj.common.model.YamjInfo;
 import org.yamj.core.api.json.IndexController;
 import org.yamj.core.api.json.SystemInfoController;
+import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.Skin;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.configuration.ConfigService;
@@ -64,7 +65,17 @@ public class PagesController {
         ModelAndView view = new ModelAndView("count-job");
         YamjInfo yi = sic.getYamjInfo("false");
         view.addObject("yi", yi);
-        view.addObject("countlist", index.getJobs("all"));
+
+        List<CountGeneric> jobList = index.getJobs("all");
+        // Add some wording if there is an empty list
+        if(jobList.isEmpty()) {
+            CountGeneric noJobs=new CountGeneric();
+            noJobs.setItem("No jobs found!");
+            noJobs.setCount(0L);
+            jobList.add(noJobs);
+        }
+
+        view.addObject("countlist", jobList);
         return view;
     }
 
