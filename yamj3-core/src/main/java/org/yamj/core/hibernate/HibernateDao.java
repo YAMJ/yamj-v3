@@ -31,7 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.*;
 import org.hibernate.transform.Transformers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.yamj.core.api.model.SqlScalars;
+import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.options.IOptions;
 import org.yamj.core.api.wrapper.IApiWrapper;
 

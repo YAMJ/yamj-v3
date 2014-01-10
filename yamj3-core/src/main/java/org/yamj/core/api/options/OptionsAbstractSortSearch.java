@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.yamj.core.api.model.DataItem;
+import org.yamj.core.api.model.builder.DataItem;
 
 /**
  * Abstract class for the query options

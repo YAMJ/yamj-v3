@@ -27,7 +27,7 @@ import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
 import org.springframework.stereotype.Service;
 import org.yamj.core.api.wrapper.ApiWrapperList;
-import org.yamj.core.api.model.SqlScalars;
+import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.database.model.*;

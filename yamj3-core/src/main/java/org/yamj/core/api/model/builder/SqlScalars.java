@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api.model;
+package org.yamj.core.api.model.builder;
 
 import java.util.Collection;
 import java.util.HashMap;

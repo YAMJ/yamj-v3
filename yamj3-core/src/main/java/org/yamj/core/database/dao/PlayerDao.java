@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.yamj.core.api.model.SqlScalars;
+import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.database.model.PlayerPath;
 import org.yamj.core.hibernate.HibernateDao;

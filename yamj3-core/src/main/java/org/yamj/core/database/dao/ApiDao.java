@@ -38,26 +38,26 @@ import org.hibernate.type.TimestampType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.CountGeneric;
-import org.yamj.core.api.model.DataItem;
-import org.yamj.core.api.model.DataItemTools;
-import org.yamj.core.api.wrapper.ApiWrapperList;
-import org.yamj.core.api.model.SqlScalars;
+import org.yamj.core.api.model.CountTimestamp;
+import org.yamj.core.api.model.builder.DataItem;
+import org.yamj.core.api.model.builder.DataItemTools;
+import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.model.dto.AbstractApiIdentifiableDTO;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
-import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
 import org.yamj.core.api.model.dto.ApiEpisodeDTO;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.model.dto.ApiSeasonInfoDTO;
+import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
+import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.core.api.options.OptionsEpisode;
 import org.yamj.core.api.options.OptionsIdArtwork;
 import org.yamj.core.api.options.OptionsIndexArtwork;
 import org.yamj.core.api.options.OptionsIndexPerson;
 import org.yamj.core.api.options.OptionsIndexVideo;
+import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
@@ -74,6 +74,7 @@ public class ApiDao extends HibernateDao {
     private static final String SEASON = "season";
     private static final String SEASON_ID = "seasonId";
     private static final String SERIES_ID = "seriesId";
+    private static final String SERIES_YEAR = "seriesYear";
     private static final String FIRST_AIRED = "firstAired";
     private static final String VIDEO_YEAR = "videoYear";
     private static final String ORIGINAL_TITLE = "originalTitle";
@@ -1094,7 +1095,7 @@ public class ApiDao extends HibernateDao {
 
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(TITLE, StringType.INSTANCE);
-        sqlScalars.addScalar("seriesYear", IntegerType.INSTANCE);
+        sqlScalars.addScalar(SERIES_YEAR, IntegerType.INSTANCE);
 
         List<ApiSeriesInfoDTO> seriesResults = executeQueryWithTransform(ApiSeriesInfoDTO.class, sqlScalars, wrapper);
         LOG.debug("Found {} series for SeriesId '{}'", seriesResults.size(), id);
@@ -1145,6 +1146,51 @@ public class ApiDao extends HibernateDao {
 
         return seasonResults;
     }
+
+    //<editor-fold defaultstate="collapsed" desc="Statistics">
+    /*
+     Statistics functions to go in here:
+     - Count of movies, series and seasons.
+     - Series with most seasons (longest running)
+     - Earliest movie/series
+     - Latest movie/series
+     - Most popular actors
+     - Most popular writers
+     - Most popular directors
+     - Most popular producers
+     */
+    /**
+     *
+     */
+    public void statMovieCount() {
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT s.id AS seriesId, title, start_year AS seriesYear");
+        sqlScalars.addToSql("FROM series s");
+
+        sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
+        sqlScalars.addScalar(TITLE, StringType.INSTANCE);
+        sqlScalars.addScalar(SERIES_YEAR, IntegerType.INSTANCE);
+
+        // Get the results
+        List<ApiSeriesInfoDTO> seriesResults = executeQueryWithTransform(ApiSeriesInfoDTO.class, sqlScalars, null);
+        if (!seriesResults.isEmpty()) {
+            // Set the default oldest and newest
+            ApiSeriesInfoDTO oldest = seriesResults.get(0);
+            ApiSeriesInfoDTO newest = seriesResults.get(0);
+
+            for (ApiSeriesInfoDTO series : seriesResults) {
+                if (series.getYear() > newest.getYear()) {
+                    newest = series;
+                }
+                if (series.getYear() < oldest.getYear()) {
+                    oldest = series;
+                }
+            }
+        }
+
+        // Process the results into statistics
+    }
+    //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Utility Functions">
     /**

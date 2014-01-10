@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.yamj.core.api.model.DataItem;
+import org.yamj.core.api.model.builder.DataItem;
 import org.yamj.core.api.model.dto.ApiEpisodeDTO;
 import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
 import org.yamj.core.api.model.dto.ApiVideoDTO;
