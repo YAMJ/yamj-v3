@@ -24,6 +24,7 @@ package org.yamj.core.database.dao;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -942,43 +943,36 @@ public class ApiDao extends HibernateDao {
      * @return
      */
     public List<ApiFileDTO> getFilesForId(MetaDataType type, Long id) {
-        String selectClause = "";
-        String fromClause = "";
-        List<String> whereClause = new ArrayList<String>();
-
-        if (type == MetaDataType.MOVIE) {
-            selectClause = "-1 AS season, -1 AS episode";
-            whereClause.add("AND mediafile_id=:id");
-        } else if (type == MetaDataType.SERIES) {
-            selectClause = "s.season, vd.episode";
-            fromClause = ", season s, videodata vd";
-            whereClause.add("AND s.series_id=:id");
-            whereClause.add("AND s.id = vd.season_id");
-            whereClause.add("AND sf.id=vd.id");
-        } else if (type == MetaDataType.SEASON) {
-            selectClause = "s.season, vd.episode";
-            fromClause = ", season s, videodata vd";
-            whereClause.add("AND s.id=:id");
-            whereClause.add("AND s.id = vd.season_id");
-            whereClause.add("AND sf.id=vd.id");
-        } else if (type == MetaDataType.EPISODE) {
-            selectClause = "s.season AS season, vd.episode AS episode";
-            fromClause = ", videodata vd, season s";
-            whereClause.add("AND vd.id = sf.mediafile_id");
-            whereClause.add("AND s.id=vd.season_id");
-            whereClause.add("AND mediafile_id=:id");
-        }
-
         // Build the SQL statement
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT sf.mediafile_id AS id, sf.full_path AS filename,");
-        sqlScalars.addToSql(selectClause);
-        sqlScalars.addToSql("FROM stage_file sf");
-        sqlScalars.addToSql(fromClause);
-        sqlScalars.addToSql("WHERE file_type='" + FileType.VIDEO.toString() + "'");
-        for (String clause : whereClause) {
-            sqlScalars.addToSql(clause);
+
+        if (type == MetaDataType.MOVIE) {
+            sqlScalars.addToSql("SELECT sf.mediafile_id AS id, sf.full_path AS filename,-1 AS season, -1 AS episode");
+            sqlScalars.addToSql("FROM videodata vd, mediafile_videodata mv, stage_file sf");
+            sqlScalars.addToSql("WHERE file_type='" + FileType.VIDEO.toString() + "'");
+            sqlScalars.addToSql("AND vd.id=:id");
+            sqlScalars.addToSql("AND vd.id=mv.videodata_id");
+            sqlScalars.addToSql("AND mv.mediafile_id=sf.mediafile_id");
+        } else if (type == MetaDataType.SERIES) {
+            sqlScalars.addToSql("SELECT sf.mediafile_id AS id, sf.full_path AS filename, s.season, vd.episode");
+            sqlScalars.addToSql("FROM stage_file sf, season s, videodata vd, mediafile_videodata mv");
+            sqlScalars.addToSql("WHERE file_type='" + FileType.VIDEO.toString() + "'");
+            sqlScalars.addToSql("AND s.series_id=:id");
+            sqlScalars.addToSql("AND s.id = vd.season_id");
+            sqlScalars.addToSql("AND vd.id=mv.videodata_id");
+            sqlScalars.addToSql("AND mv.mediafile_id=sf.mediafile_id");
+        } else if (type == MetaDataType.SEASON) {
+            sqlScalars.addToSql("SELECT sf.mediafile_id AS id, sf.full_path AS filename, s.season, vd.episode");
+            sqlScalars.addToSql("FROM stage_file sf, season s, videodata vd, mediafile_videodata mv");
+            sqlScalars.addToSql("WHERE file_type='" + FileType.VIDEO.toString() + "'");
+            sqlScalars.addToSql("AND s.id=:id");
+            sqlScalars.addToSql("AND s.id = vd.season_id");
+            sqlScalars.addToSql("AND vd.id=mv.videodata_id");
+            sqlScalars.addToSql("AND mv.mediafile_id=sf.mediafile_id");
+        } else if (type == MetaDataType.EPISODE) {
+            return Collections.emptyList();
         }
+
         LOG.debug("getFilesForId ({}-{}) SQL: {}", type, id, sqlScalars.getSql());
 
         sqlScalars.addScalar(ID, LongType.INSTANCE);
