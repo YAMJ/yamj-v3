@@ -226,6 +226,7 @@ public class YamjInfo {
     /**
      * Output the header information to the log file
      *
+     * @param log
      */
     public void printHeader(Logger log) {
         if (StringUtils.isNotBlank(projectName)) {
