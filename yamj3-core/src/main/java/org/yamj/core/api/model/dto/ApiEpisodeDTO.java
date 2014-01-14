@@ -40,6 +40,7 @@ public class ApiEpisodeDTO {
     private String title = "";
     private String outline = "";
     private String plot = "";
+    private String filename = "";
     @JsonIgnore
     private String cacheFilename;
     @JsonIgnore
@@ -86,6 +87,10 @@ public class ApiEpisodeDTO {
     public void setCacheDir(String cacheDir) {
         this.cacheDir = cacheDir;
     }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
@@ -126,6 +131,10 @@ public class ApiEpisodeDTO {
             this.videoimage = FilenameUtils.normalize(FilenameUtils.concat(this.cacheDir, this.cacheFilename), Boolean.TRUE);
         }
         return videoimage;
+    }
+
+    public String getFilename() {
+        return filename;
     }
     //</editor-fold>
 }

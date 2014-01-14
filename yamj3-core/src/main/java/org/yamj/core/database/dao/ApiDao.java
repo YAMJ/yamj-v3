@@ -47,6 +47,7 @@ import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.model.dto.AbstractApiIdentifiableDTO;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
 import org.yamj.core.api.model.dto.ApiEpisodeDTO;
+import org.yamj.core.api.model.dto.ApiFileDTO;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.model.dto.ApiSeasonInfoDTO;
@@ -60,6 +61,7 @@ import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Service("apiDao")
@@ -71,6 +73,7 @@ public class ApiDao extends HibernateDao {
     private static final String GENRE = "genre";
     private static final String TITLE = "title";
     private static final String EPISODE = "episode";
+    private static final String SERIES = "series";
     private static final String SEASON = "season";
     private static final String SEASON_ID = "seasonId";
     private static final String SERIES_ID = "seriesId";
@@ -482,45 +485,6 @@ public class ApiDao extends HibernateDao {
     }
 
     /**
-     * Get a single Count and Timestamp
-     *
-     * @param type
-     * @param tablename
-     * @param clause
-     * @return
-     */
-    public CountTimestamp getCountTimestamp(MetaDataType type, String tablename, String clause) {
-        if (StringUtils.isBlank(tablename)) {
-            return null;
-        }
-
-        StringBuilder sql = new StringBuilder("SELECT '").append(type).append("' as typeString, ");
-        sql.append("count(*) as count, ");
-        sql.append("MAX(create_timestamp) as createTimestamp, ");
-        sql.append("MAX(update_timestamp) as updateTimestamp, ");
-        sql.append("MAX(id) as lastId ");
-        sql.append("FROM ").append(tablename);
-        if (StringUtils.isNotBlank(clause)) {
-            sql.append(" WHERE ").append(clause);
-        }
-
-        SqlScalars sqlScalars = new SqlScalars(sql);
-
-        sqlScalars.addScalar("typeString", StringType.INSTANCE);
-        sqlScalars.addScalar("count", LongType.INSTANCE);
-        sqlScalars.addScalar("createTimestamp", TimestampType.INSTANCE);
-        sqlScalars.addScalar("updateTimestamp", TimestampType.INSTANCE);
-        sqlScalars.addScalar("lastId", LongType.INSTANCE);
-
-        List<CountTimestamp> results = executeQueryWithTransform(CountTimestamp.class, sqlScalars, null);
-        if (CollectionUtils.isEmpty(results)) {
-            return new CountTimestamp(type);
-        }
-
-        return results.get(0);
-    }
-
-    /**
      * Get a list of the people
      *
      * @param wrapper
@@ -855,8 +819,16 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("vid.plot,");
             sqlScalars.addScalar("plot", StringType.INSTANCE);
         }
+        if (options.hasDataItem(DataItem.FILES)) {
+            sqlScalars.addToSql("sf.full_path AS filename,");
+            sqlScalars.addScalar("filename", StringType.INSTANCE);
+        }
         sqlScalars.addToSql("ag.cache_filename AS cacheFilename, ag.cache_dir AS cacheDir");
-        sqlScalars.addToSql("FROM season sea, series ser, videodata vid, artwork a");
+        sqlScalars.addToSql("FROM season sea, series ser, videodata vid");
+        if (options.hasDataItem(DataItem.FILES)) {
+            sqlScalars.addToSql(", stage_file sf");
+        }
+        sqlScalars.addToSql(", artwork a");
         sqlScalars.addToSql("LEFT JOIN artwork_located al ON a.id=al.artwork_id");
         sqlScalars.addToSql("LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
         sqlScalars.addToSql("WHERE sea.series_id=ser.id");
@@ -874,7 +846,11 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("AND sea.id=:seasonid");
             sqlScalars.addParameters("seasonid", options.getSeasonid());
         }
+        if (options.hasDataItem(DataItem.FILES)) {
+            sqlScalars.addToSql("AND sf.mediafile_id=vid.id");
+        }
         sqlScalars.addToSql("ORDER BY seriesId, season, episode");
+        LOG.debug("getEpisodeList SQL: {}", sqlScalars.getSql());
 
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON_ID, LongType.INSTANCE);
@@ -946,10 +922,73 @@ public class ApiDao extends HibernateDao {
                     video.setArtwork(artworkList.get(options.getId()));
                 }
             }
+
+            if (dataItems.contains(DataItem.FILES)) {
+                LOG.debug("Adding files");
+                video.setFiles(getFilesForId(type, options.getId()));
+            }
+
             wrapper.setResult(video);
         } else {
             wrapper.setResult(null);
         }
+    }
+
+    /**
+     * Get a list of the files associated with a video ID.
+     *
+     * @param type
+     * @param id
+     * @return
+     */
+    public List<ApiFileDTO> getFilesForId(MetaDataType type, Long id) {
+        String selectClause = "";
+        String fromClause = "";
+        List<String> whereClause = new ArrayList<String>();
+
+        if (type == MetaDataType.MOVIE) {
+            selectClause = "-1 AS season, -1 AS episode";
+            whereClause.add("AND mediafile_id=:id");
+        } else if (type == MetaDataType.SERIES) {
+            selectClause = "s.season, v.episode";
+            fromClause = ", season s, videodata vd";
+            whereClause.add("AND s.series_id=:id");
+            whereClause.add("AND s.id = vd.season_id");
+            whereClause.add("AND sf.id=vd.id");
+        } else if (type == MetaDataType.SEASON) {
+            selectClause = "s.season, v.episode";
+            fromClause = ", season s, videodata vd";
+            whereClause.add("AND s.id=:id");
+            whereClause.add("AND s.id = vd.season_id");
+            whereClause.add("AND sf.id=vd.id");
+        } else if (type == MetaDataType.EPISODE) {
+            selectClause = "s.season AS season, vd.episode AS episode";
+            fromClause = ", videodata vd, season s";
+            whereClause.add("AND vd.id = sf.mediafile_id");
+            whereClause.add("AND s.id=vd.season_id");
+            whereClause.add("AND mediafile_id=:id");
+        }
+
+        // Build the SQL statement
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT sf.mediafile_id AS id, sf.full_path AS filename,");
+        sqlScalars.addToSql(selectClause);
+        sqlScalars.addToSql("FROM stage_file sf");
+        sqlScalars.addToSql(fromClause);
+        sqlScalars.addToSql("WHERE file_type='" + FileType.VIDEO.toString() + "'");
+        for (String clause : whereClause) {
+            sqlScalars.addToSql(clause);
+        }
+        LOG.debug("getFilesForId ({}-{}) SQL: {}", type, id, sqlScalars.getSql());
+
+        sqlScalars.addScalar(ID, LongType.INSTANCE);
+        sqlScalars.addScalar("filename", StringType.INSTANCE);
+        sqlScalars.addScalar(SEASON, LongType.INSTANCE);
+        sqlScalars.addScalar(EPISODE, LongType.INSTANCE);
+
+        sqlScalars.addParameters(ID, id);
+
+        return executeQueryWithTransform(ApiFileDTO.class, sqlScalars, null);
     }
 
     /**
@@ -1063,24 +1102,6 @@ public class ApiDao extends HibernateDao {
         return artworkList;
     }
 
-    public List<CountGeneric> getJobCount(List<String> requiredJobs) {
-        LOG.info("getJobCount: Required Jobs: {}", (requiredJobs == null ? "all" : requiredJobs));
-        SqlScalars sqlScalars = new SqlScalars();
-
-        sqlScalars.addToSql("SELECT job AS item, COUNT(*) AS count");
-        sqlScalars.addToSql("FROM  cast_crew");
-        if (CollectionUtils.isNotEmpty(requiredJobs)) {
-            sqlScalars.addToSql("WHERE job IN (:joblist)");
-            sqlScalars.addParameters("joblist", requiredJobs);
-        }
-        sqlScalars.addToSql("GROUP BY job");
-
-        sqlScalars.addScalar("item", StringType.INSTANCE);
-        sqlScalars.addScalar("count", LongType.INSTANCE);
-
-        return executeQueryWithTransform(CountGeneric.class, sqlScalars, null);
-    }
-
     public void getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper) {
         OptionsIdArtwork options = (OptionsIdArtwork) wrapper.getOptions();
         Long id = options.getId();
@@ -1160,9 +1181,72 @@ public class ApiDao extends HibernateDao {
      - Most popular producers
      */
     /**
+     * Get a single Count and Timestamp
+     *
+     * @param type
+     * @param tablename
+     * @param clause
+     * @return
+     */
+    public CountTimestamp getCountTimestamp(MetaDataType type, String tablename, String clause) {
+        if (StringUtils.isBlank(tablename)) {
+            return null;
+        }
+
+        StringBuilder sql = new StringBuilder("SELECT '").append(type).append("' as typeString, ");
+        sql.append("count(*) as count, ");
+        sql.append("MAX(create_timestamp) as createTimestamp, ");
+        sql.append("MAX(update_timestamp) as updateTimestamp, ");
+        sql.append("MAX(id) as lastId ");
+        sql.append("FROM ").append(tablename);
+        if (StringUtils.isNotBlank(clause)) {
+            sql.append(" WHERE ").append(clause);
+        }
+
+        SqlScalars sqlScalars = new SqlScalars(sql);
+
+        sqlScalars.addScalar("typeString", StringType.INSTANCE);
+        sqlScalars.addScalar("count", LongType.INSTANCE);
+        sqlScalars.addScalar("createTimestamp", TimestampType.INSTANCE);
+        sqlScalars.addScalar("updateTimestamp", TimestampType.INSTANCE);
+        sqlScalars.addScalar("lastId", LongType.INSTANCE);
+
+        List<CountTimestamp> results = executeQueryWithTransform(CountTimestamp.class, sqlScalars, null);
+        if (CollectionUtils.isEmpty(results)) {
+            return new CountTimestamp(type);
+        }
+
+        return results.get(0);
+    }
+
+    /**
+     * Get a count of the jobs along with a count
+     *
+     * @param requiredJobs
+     * @return
+     */
+    public List<CountGeneric> getJobCount(List<String> requiredJobs) {
+        LOG.info("getJobCount: Required Jobs: {}", (requiredJobs == null ? "all" : requiredJobs));
+        SqlScalars sqlScalars = new SqlScalars();
+
+        sqlScalars.addToSql("SELECT job AS item, COUNT(*) AS count");
+        sqlScalars.addToSql("FROM  cast_crew");
+        if (CollectionUtils.isNotEmpty(requiredJobs)) {
+            sqlScalars.addToSql("WHERE job IN (:joblist)");
+            sqlScalars.addParameters("joblist", requiredJobs);
+        }
+        sqlScalars.addToSql("GROUP BY job");
+
+        sqlScalars.addScalar("item", StringType.INSTANCE);
+        sqlScalars.addScalar("count", LongType.INSTANCE);
+
+        return executeQueryWithTransform(CountGeneric.class, sqlScalars, null);
+    }
+
+    /**
      *
      */
-    public void statMovieCount() {
+    public void statSeriesCount() {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT s.id AS seriesId, title, start_year AS seriesYear");
         sqlScalars.addToSql("FROM series s");
