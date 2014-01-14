@@ -22,6 +22,8 @@
  */
 package org.yamj.core.api.model.dto;
 
+import org.apache.commons.io.FilenameUtils;
+
 /**
  * Information on the physical file for the API
  *
@@ -38,7 +40,7 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
     }
 
     public void setFilename(String filename) {
-        this.filename = filename;
+        this.filename = FilenameUtils.separatorsToUnix(filename);
     }
 
     public Long getSeason() {
