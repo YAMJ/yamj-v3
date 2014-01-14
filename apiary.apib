@@ -558,7 +558,7 @@ Video Methods
 These methods get information on the videos in the database
 --
 
-Retrieve information on the video
+Retrieve information on the video.
 ***
 **Required Parameters**
 
@@ -578,12 +578,18 @@ Retrieve information on the video
     <col width="20%">
     <col width="80%">
     <tr>
+        <td>dataitems</td>
+        <td>This is a list of additional data items to append to add to the results.<br/>
+            Valid options are: artwork, files, genre</td>
+    </tr>
+    <tr>
         <td>artwork</td>
         <td>The list of artwork types to get for the video.<br/>
             Can be one or more of: 'ALL', 'POSTER', 'FANART', 'BANNER', 'VIDEOIMAGE', etc.<br/>
             Leave this option blank to return no artwork</td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/video/movie/2?dataitems=artwork,files,genre&artwork=all`
 
 GET /api/video/movie/{id}
 < 200
@@ -591,40 +597,105 @@ GET /api/video/movie/{id}
 {
    "count":1,
    "totalCount":1,
-   "queryDuration":"8ms",
-   "queryTime":"2013-07-31 16:23:37",
+   "queryDuration":"496ms",
+   "queryTime":"2014-01-14 15:16:48",
    "status":{
       "status":200,
       "message":"OK"
    },
-   "parameters":{
+   "options":{
       "start":-1,
       "max":-1,
-      "type":"MOVIE",
-      "include":"",
-      "exclude":"",
+      "language":null,
       "sortby":"",
       "sortdir":"ASC",
-      "artwork":"",
-      "id":34
+      "field":"",
+      "search":"",
+      "mode":"",
+      "dataitems":[
+         "artwork",
+         "files",
+         "genre"
+      ],
+      "id":2,
+      "artwork":"ALL",
+      "type":"MOVIE",
+      "include":"",
+      "exclude":""
    },
-   "baseArtworkUrl":"http://141.196.102.114:8888/artwork/",
-   "baseMediainfoUrl":"http://141.196.102.114:8888/mediainfo/",
-   "results":[
-      {
-         "id":34,
-         "videoType":"MOVIE",
-         "title":"I, Robot",
-         "originalTitle":"I Robot",
-         "videoYear":2004,
-         "genres":[],
-         "artwork":{},
-         "artworkCount":0,
-         "genreCount":0
-      }
-   ]
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
+   "result":{
+      "id":2,
+      "videoType":"MOVIE",
+      "title":"Avatar",
+      "originalTitle":"Avatar",
+      "videoYear":2009,
+      "genres":[
+         {
+            "id":1,
+            "name":"Adventure"
+         },
+         {
+            "id":2,
+            "name":"Action"
+         },
+         {
+            "id":4,
+            "name":"Science Fiction"
+         },
+         {
+            "id":5,
+            "name":"Fantasy"
+         }
+      ],
+      "artwork":{
+         "POSTER":[
+            {
+               "id":2,
+               "source":"MOVIE",
+               "artworkId":8,
+               "locatedId":0,
+               "generatedId":0,
+               "artworkType":"POSTER",
+               "filename":""
+            }
+         ],
+         "FANART":[
+            {
+               "id":2,
+               "source":"MOVIE",
+               "artworkId":9,
+               "locatedId":0,
+               "generatedId":0,
+               "artworkType":"FANART",
+               "filename":""
+            }
+         ]
+      },
+      "files":[
+         {
+            "id":2,
+            "filename":"C:\\Projects\\YAMJv3\\testdir\\Avatar (2009).avi",
+            "season":-1,
+            "episode":-1
+         }
+      ],
+      "outline":null,
+      "plot":null,
+      "country":null,
+      "quote":null,
+      "tagline":null,
+      "topRank":null,
+      "seriesId":-1,
+      "seasonId":null,
+      "season":-1,
+      "episode":-1,
+      "artworkCount":2,
+      "genreCount":4
+   }
 }
-
 
 Retrieve information on a specific series.
 
@@ -862,7 +933,7 @@ GET /api/video/seriesinfo
    ]
 }
 
-Retrieve information on the series
+Retrieve information on a series
 ***
 **Required Parameters**
 
@@ -882,12 +953,18 @@ Retrieve information on the series
     <col width="20%">
     <col width="80%">
     <tr>
+        <td>dataitems</td>
+        <td>This is a list of additional data items to append to add to the results.<br/>
+            Valid options are: artwork, files, genre</td>
+    </tr>
+    <tr>
         <td>artwork</td>
         <td>The list of artwork types to get for the video.<br/>
             Can be one or more of: 'ALL', 'POSTER', 'FANART', 'BANNER', 'VIDEOIMAGE', etc.<br/>
             Leave this option blank to return no artwork</td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/video/series/3?dataitems=files,artwork,plot,outline&artwork=all`
 
 GET /api/video/series/{id}
 < 200
@@ -895,38 +972,129 @@ GET /api/video/series/{id}
 {
    "count":1,
    "totalCount":1,
-   "queryDuration":"7ms",
-   "queryTime":"2013-07-31 16:29:10",
+   "queryDuration":"427ms",
+   "queryTime":"2014-01-14 15:47:59",
    "status":{
       "status":200,
       "message":"OK"
    },
-   "parameters":{
+   "options":{
       "start":-1,
       "max":-1,
-      "type":"SERIES",
-      "include":"",
-      "exclude":"",
+      "language":null,
       "sortby":"",
       "sortdir":"ASC",
+      "field":"",
+      "search":"",
+      "mode":"",
+      "dataitems":[
+         "files",
+         "artwork",
+         "plot",
+         "outline"
+      ],
+      "id":3,
       "artwork":"",
-      "id":1
+      "type":"SERIES",
+      "include":"",
+      "exclude":""
    },
-   "baseArtworkUrl":"http://141.196.102.114:8888/artwork/",
-   "baseMediainfoUrl":"http://141.196.102.114:8888/mediainfo/",
-   "results":[
-      {
-         "id":1,
-         "videoType":"SERIES",
-         "title":"Game of Thrones",
-         "originalTitle":"Game of Thrones",
-         "videoYear":2011,
-         "genres":[],
-         "artwork":{},
-         "artworkCount":0,
-         "genreCount":0
-      }
-   ]
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
+   "result":{
+      "id":3,
+      "videoType":"SERIES",
+      "title":"Lost",
+      "originalTitle":"Lost",
+      "videoYear":2004,
+      "genres":[],
+      "artwork":{
+         "POSTER":[
+            {
+               "id":3,
+               "source":"SERIES",
+               "artworkId":17,
+               "locatedId":84,
+               "generatedId":82,
+               "artworkType":"POSTER",
+               "filename":"l/lo/Lost_0000.series.poster.84.default-poster.jpg"
+            }
+         ],
+         "BANNER":[
+            {
+               "id":3,
+               "source":"SERIES",
+               "artworkId":19,
+               "locatedId":77,
+               "generatedId":75,
+               "artworkType":"BANNER",
+               "filename":"l/lo/Lost_0000.series.banner.77.default-banner.jpg"
+            }
+         ],
+         "FANART":[
+            {
+               "id":3,
+               "source":"SERIES",
+               "artworkId":18,
+               "locatedId":75,
+               "generatedId":79,
+               "artworkType":"FANART",
+               "filename":"l/lo/Lost_0000.series.fanart.75.default-fanart.jpg"
+            }
+         ]
+      },
+      "files":[
+         {
+            "id":4,
+            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S02E01.avi",
+            "season":2,
+            "episode":1
+         },
+         {
+            "id":8,
+            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S02E02.avi",
+            "season":2,
+            "episode":2
+         },
+         {
+            "id":9,
+            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S02E03.avi",
+            "season":2,
+            "episode":3
+         },
+         {
+            "id":5,
+            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S01E01.avi",
+            "season":1,
+            "episode":1
+         },
+         {
+            "id":6,
+            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S01E02.avi",
+            "season":1,
+            "episode":2
+         },
+         {
+            "id":7,
+            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S01E03.avi",
+            "season":1,
+            "episode":3
+         }
+      ],
+      "outline":"After their plane, Oceanic Air flight 815, tore apart whilst thousands of miles off course, the survivors find themselves on a mysterious deserted island where they soon find out they are not alone.",
+      "plot":"After their plane, Oceanic Air flight 815, tore apart whilst thousands of miles off course, the survivors find themselves on a mysterious deserted island where they soon find out they are not alone.",
+      "country":null,
+      "quote":null,
+      "tagline":null,
+      "topRank":null,
+      "seriesId":3,
+      "seasonId":-1,
+      "season":-1,
+      "episode":-1,
+      "genreCount":0,
+      "artworkCount":3
+   }
 }
 
 Retrieve information on the season
@@ -949,12 +1117,18 @@ Retrieve information on the season
     <col width="20%">
     <col width="80%">
     <tr>
+        <td>dataitems</td>
+        <td>This is a list of additional data items to append to add to the results.<br/>
+            Valid options are: artwork, files, genre</td>
+    </tr>
+    <tr>
         <td>artwork</td>
         <td>The list of artwork types to get for the video.<br/>
             Can be one or more of: 'ALL', 'POSTER', 'FANART', 'BANNER', 'VIDEOIMAGE', etc.<br/>
             Leave this option blank to return no artwork</td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/video/season/4?dataitems=files,artwork,plot,outline&artwork=all`
 
 GET /api/video/season/{id}
 < 200
@@ -962,38 +1136,111 @@ GET /api/video/season/{id}
 {
    "count":1,
    "totalCount":1,
-   "queryDuration":"5ms",
-   "queryTime":"2013-07-31 16:28:54",
+   "queryDuration":"421ms",
+   "queryTime":"2014-01-14 15:54:20",
    "status":{
       "status":200,
       "message":"OK"
    },
-   "parameters":{
+   "options":{
       "start":-1,
       "max":-1,
-      "type":"SEASON",
-      "include":"",
-      "exclude":"",
+      "language":null,
       "sortby":"",
       "sortdir":"ASC",
-      "artwork":"",
-      "id":1
+      "field":"",
+      "search":"",
+      "mode":"",
+      "dataitems":[
+         "files",
+         "artwork",
+         "plot",
+         "outline"
+      ],
+      "id":4,
+      "artwork":"ALL",
+      "type":"SEASON",
+      "include":"",
+      "exclude":""
    },
-   "baseArtworkUrl":"http://141.196.102.114:8888/artwork/",
-   "baseMediainfoUrl":"http://141.196.102.114:8888/mediainfo/",
-   "results":[
-      {
-         "id":1,
-         "videoType":"SEASON",
-         "title":"Game of Thrones",
-         "originalTitle":"Game of Thrones",
-         "videoYear":2011,
-         "genres":[],
-         "artwork":{},
-         "artworkCount":0,
-         "genreCount":0
-      }
-   ]
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
+   "result":{
+      "id":4,
+      "videoType":"SEASON",
+      "title":"Lost",
+      "originalTitle":"Lost",
+      "videoYear":2004,
+      "genres":[],
+      "artwork":{
+         "POSTER":[
+            {
+               "id":4,
+               "source":"SEASON",
+               "artworkId":24,
+               "locatedId":97,
+               "generatedId":94,
+               "artworkType":"POSTER",
+               "filename":"l/lo/Lost_0000_001.season.poster.97.default-poster.jpg"
+            }
+         ],
+         "BANNER":[
+            {
+               "id":4,
+               "source":"SEASON",
+               "artworkId":26,
+               "locatedId":111,
+               "generatedId":107,
+               "artworkType":"BANNER",
+               "filename":"l/lo/Lost_0000_001.season.banner.111.default-banner.jpg"
+            }
+         ],
+         "FANART":[
+            {
+               "id":4,
+               "source":"SEASON",
+               "artworkId":25,
+               "locatedId":102,
+               "generatedId":103,
+               "artworkType":"FANART",
+               "filename":"l/lo/Lost_0000_001.season.fanart.102.default-fanart.jpg"
+            }
+         ]
+      },
+      "files":[
+         {
+            "id":5,
+            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S01E01.avi",
+            "season":1,
+            "episode":1
+         },
+         {
+            "id":6,
+            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S01E02.avi",
+            "season":1,
+            "episode":2
+         },
+         {
+            "id":7,
+            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S01E03.avi",
+            "season":1,
+            "episode":3
+         }
+      ],
+      "outline":"After their plane, Oceanic Air flight 815, tore apart whilst thousands of miles off course, the survivors find themselves on a mysterious deserted island where they soon find out they are not alone.",
+      "plot":"After their plane, Oceanic Air flight 815, tore apart whilst thousands of miles off course, the survivors find themselves on a mysterious deserted island where they soon find out they are not alone.",
+      "country":null,
+      "quote":null,
+      "tagline":null,
+      "topRank":null,
+      "seriesId":3,
+      "seasonId":4,
+      "season":1,
+      "episode":-1,
+      "genreCount":0,
+      "artworkCount":3
+   }
 }
 
 
@@ -1022,7 +1269,7 @@ Retrieve information on the TV episodes
     <tr>
         <td>dataitems</td>
         <td>This is a list of additional data items to append to add to the results.<br/>
-            Valid options are: outline & plot</td>
+            Valid options are: outline, plot, files</td>
     </tr>
     <tr>
         <td>SEARCHING</td>
@@ -1033,6 +1280,7 @@ Retrieve information on the TV episodes
         <td>See above for the explanation on sorting parameters</td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/video/episodes?dataitems=files,artwork,outline,plot&seriesid=3&artwork=all`
 
 GET /api/video/episodes?series={}&season={}
 < 200
@@ -1040,62 +1288,106 @@ GET /api/video/episodes?series={}&season={}
 {
    "count":6,
    "totalCount":6,
-   "queryDuration":"0ms",
-   "queryTime":"2013-08-02 10:55:09",
+   "queryDuration":"492ms",
+   "queryTime":"2014-01-14 15:39:03",
    "status":{
-      "status":100,
-      "message":"Unknown status"
+      "status":200,
+      "message":"OK"
    },
    "options":{
       "start":-1,
       "max":-1,
-      "series":1,
-      "season":2
+      "language":null,
+      "sortby":"",
+      "sortdir":"ASC",
+      "field":"",
+      "search":"",
+      "mode":"",
+      "dataitems":[
+         "files",
+         "artwork",
+         "outline",
+         "plot"
+      ],
+      "seriesid":3,
+      "seasonid":-1,
+      "season":-1
    },
    "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
    "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
    "results":[
       {
-         "seriesId":1,
+         "seriesId":3,
+         "seasonId":4,
+         "season":1,
+         "episode":1,
+         "episodeId":5,
+         "title":"Pilot (1)",
+         "outline":null,
+         "plot":"Stripped of everything, the 48 survivors scavenge what they can from the plane for their survival.",
+         "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S01E01.avi",
+         "videoimage":"l/lo/Lost_0000_001_001.episode.videoimage.115.default-videoimage.jpg"
+      },
+      {
+         "seriesId":3,
+         "seasonId":4,
+         "season":1,
+         "episode":2,
+         "episodeId":6,
+         "title":"Pilot (2)",
+         "outline":null,
+         "plot":"Having escaped the \"creature\" and retrieved the plane transceiver, a group of the survivors travel to higher ground.",
+         "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S01E02.avi",
+         "videoimage":"l/lo/Lost_0000_001_002.episode.videoimage.117.default-videoimage.jpg"
+      },
+      {
+         "seriesId":3,
+         "seasonId":4,
+         "season":1,
+         "episode":3,
+         "episodeId":7,
+         "title":"Tabula Rasa",
+         "outline":null,
+         "plot":"Jack and Hurley discover an alarming secret about Kate, as the marshal's life hangs in the balance.",
+         "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S01E03.avi",
+         "videoimage":"l/lo/Lost_0000_001_003.episode.videoimage.116.default-videoimage.jpg"
+      },
+      {
+         "seriesId":3,
+         "seasonId":3,
          "season":2,
          "episode":1,
-         "title":"Chuck Versus the First Date",
-         "videoimage":"c/ch/Chuck_0000_002_001.episode.videoimage.52.default-videoimage.jpg"
+         "episodeId":4,
+         "title":"Man of Science, Man of Faith",
+         "outline":null,
+         "plot":"Jack, Locke and Kate explore the mysterious hatch but Jack decides to wait before going down into the hatch.",
+         "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S02E01.avi",
+         "videoimage":"l/lo/Lost_0000_002_001.episode.videoimage.108.default-videoimage.jpg"
       },
       {
-         "seriesId":1,
+         "seriesId":3,
+         "seasonId":3,
          "season":2,
          "episode":2,
-         "title":"Chuck Versus the Seduction",
-         "videoimage":"c/ch/Chuck_0000_002_002.episode.videoimage.53.default-videoimage.jpg"
+         "episodeId":8,
+         "title":"Adrift",
+         "outline":null,
+         "plot":"With the abduction of Walt fresh on their minds, their raft destroyed, and Jin missing, Michael and Sawyer fight for their lives.",
+         "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S02E02.avi",
+         "videoimage":"l/lo/Lost_0000_002_002.episode.videoimage.114.default-videoimage.jpg"
       },
       {
-         "seriesId":1,
+         "seriesId":3,
+         "seasonId":3,
          "season":2,
          "episode":3,
-         "title":"Chuck Versus the Break-Up",
-         "videoimage":"c/ch/Chuck_0000_002_003.episode.videoimage.54.default-videoimage.jpg"
-      },
-      {
-         "seriesId":1,
-         "season":2,
-         "episode":4,
-         "title":"Chuck Versus the Cougars",
-         "videoimage":"c/ch/Chuck_0000_002_004.episode.videoimage.55.default-videoimage.jpg"
-      },
-      {
-         "seriesId":1,
-         "season":2,
-         "episode":5,
-         "title":"Chuck Versus Tom Sawyer",
-         "videoimage":"c/ch/Chuck_0000_002_005.episode.videoimage.56.default-videoimage.jpg"
-      },
-      {
-         "seriesId":1,
-         "season":2,
-         "episode":6,
-         "title":"Chuck Versus the Ex",
-         "videoimage":"c/ch/Chuck_0000_002_006.episode.videoimage.57.default-videoimage.jpg"
+         "episodeId":9,
+         "title":"Orientation",
+         "outline":null,
+         "plot":"Jack, Locke and Kate learn more secrets about the hatch.",
+         "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S02E03.avi",
+         "videoimage":"l/lo/Lost_0000_002_003.episode.videoimage.118.default-videoimage.jpg"
       }
    ]
 }

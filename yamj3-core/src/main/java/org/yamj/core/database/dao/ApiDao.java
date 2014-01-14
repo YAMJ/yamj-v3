@@ -950,13 +950,13 @@ public class ApiDao extends HibernateDao {
             selectClause = "-1 AS season, -1 AS episode";
             whereClause.add("AND mediafile_id=:id");
         } else if (type == MetaDataType.SERIES) {
-            selectClause = "s.season, v.episode";
+            selectClause = "s.season, vd.episode";
             fromClause = ", season s, videodata vd";
             whereClause.add("AND s.series_id=:id");
             whereClause.add("AND s.id = vd.season_id");
             whereClause.add("AND sf.id=vd.id");
         } else if (type == MetaDataType.SEASON) {
-            selectClause = "s.season, v.episode";
+            selectClause = "s.season, vd.episode";
             fromClause = ", season s, videodata vd";
             whereClause.add("AND s.id=:id");
             whereClause.add("AND s.id = vd.season_id");
