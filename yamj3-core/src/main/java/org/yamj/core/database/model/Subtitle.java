@@ -1,14 +1,38 @@
+/*
+ *      Copyright (c) 2004-2014 YAMJ Members
+ *      https://github.com/organizations/YAMJ/teams
+ *
+ *      This file is part of the Yet Another Media Jukebox (YAMJ).
+ *
+ *      YAMJ is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      any later version.
+ *
+ *      YAMJ is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with YAMJ.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Web: https://github.com/YAMJ/yamj-v3
+ *
+ */
 package org.yamj.core.database.model;
 
+import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-
-import java.io.Serializable;
-import javax.persistence.*;
-import org.hibernate.Hibernate;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.OnDelete;
@@ -21,14 +45,14 @@ import org.hibernate.annotations.OnDeleteAction;
 public class Subtitle extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -6279878819525772005L;
-    
+
     @NaturalId
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "mediafile_id", nullable = false)
     @ForeignKey(name = "FK_SUBTITLE_MEDIAFILE")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private MediaFile mediaFile;
-    
+
     @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_SUBITLE_STAGEFILE")
@@ -42,7 +66,7 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
 
     @Column(name = "format", nullable = false)
     private String format;
-    
+
     @Column(name = "language")
     private String language;
 
@@ -86,10 +110,10 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
     public void setLanguage(String language) {
         this.language = language;
     }
-    
-    
+
+
     // EQUALITY CHECKS
-    
+
     @Override
     public int hashCode() {
         final int prime = 7;

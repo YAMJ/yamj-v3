@@ -1,13 +1,35 @@
+/*
+ *      Copyright (c) 2004-2014 YAMJ Members
+ *      https://github.com/organizations/YAMJ/teams
+ *
+ *      This file is part of the Yet Another Media Jukebox (YAMJ).
+ *
+ *      YAMJ is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      any later version.
+ *
+ *      YAMJ is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with YAMJ.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Web: https://github.com/YAMJ/yamj-v3
+ *
+ */
 package org.yamj.batch;
 
-import org.yamj.common.cmdline.CmdLineException;
-import org.yamj.common.cmdline.CmdLineOption;
-import org.yamj.common.cmdline.CmdLineParser;
 import org.apache.log4j.BasicConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.yamj.common.cmdline.CmdLineException;
+import org.yamj.common.cmdline.CmdLineOption;
+import org.yamj.common.cmdline.CmdLineParser;
 import org.yamj.common.model.YamjInfo;
 
 public class YAMJBatch {

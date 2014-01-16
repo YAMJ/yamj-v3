@@ -1,5 +1,5 @@
 /*
- *      Copyright (c) 2004-2013 YAMJ Members
+ *      Copyright (c) 2004-2014 YAMJ Members
  *      https://github.com/organizations/YAMJ/teams
  *
  *      This file is part of the Yet Another Media Jukebox (YAMJ).
