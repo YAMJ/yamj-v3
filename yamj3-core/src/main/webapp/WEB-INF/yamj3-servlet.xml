@@ -55,9 +55,12 @@
         </mvc:message-converters>
     </mvc:annotation-driven>
 
-    <mvc:resources mapping="/images/**" location="WEB-INF/images/" cache-period="600"/>
-    <mvc:resources mapping="/css/**" location="WEB-INF/css/" cache-period="600"/>
-    <mvc:resources mapping="/favicon.ico" location="WEB-INF/images/favicon.ico" cache-period="600" />
+    <mvc:resources mapping="/images/**" location="WEB-INF/images/" cache-period="60"/>
+    <mvc:resources mapping="/css/**" location="WEB-INF/css/" cache-period="60"/>
+    <mvc:resources mapping="/favicon.ico" location="WEB-INF/images/favicon.ico" cache-period="60" />
+    <mvc:resources mapping="/fonts/**" location="WEB-INF/fonts/" cache-period="60"/>
+    <mvc:resources mapping="/less/**" location="WEB-INF/less/" cache-period="60"/>
+    <mvc:resources mapping="/scss/**" location="WEB-INF/scss/" cache-period="60"/>
 
     <mvc:default-servlet-handler />
 

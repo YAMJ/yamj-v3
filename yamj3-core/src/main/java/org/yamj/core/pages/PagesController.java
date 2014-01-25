@@ -71,6 +71,14 @@ public class PagesController {
         return view;
     }
 
+    @RequestMapping(value = "/test/{name}")
+    public ModelAndView displayTest(@PathVariable String name) {
+        ModelAndView view = new ModelAndView("test-" + name);
+        YamjInfo yi = sic.getYamjInfo("true");
+        view.addObject("yi", yi);
+        return view;
+    }
+
     //<editor-fold defaultstate="collapsed" desc="System Info Page">
     @RequestMapping(value = "/system-info")
     public ModelAndView displaySystemInfo() {
@@ -90,8 +98,8 @@ public class PagesController {
 
         List<CountGeneric> jobList = index.getJobs("all");
         // Add some wording if there is an empty list
-        if(jobList.isEmpty()) {
-            CountGeneric noJobs=new CountGeneric();
+        if (jobList.isEmpty()) {
+            CountGeneric noJobs = new CountGeneric();
             noJobs.setItem("No jobs found!");
             noJobs.setCount(0L);
             jobList.add(noJobs);
