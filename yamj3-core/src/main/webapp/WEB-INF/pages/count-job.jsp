@@ -15,7 +15,7 @@
         <table id="tablelist" style="width: 20%; margin: auto;;">
             <c:forEach items="${countlist}" var="entry">
                 <tr>
-                    <th class="right" style="width: 10%">${entry.item}</td>
+                    <th class="right" style="width: 10%">${entry.item}</th>
                     <td class="center" style="width: 10%">${entry.count}</td>
                 </tr>
             </c:forEach>

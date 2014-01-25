@@ -14,27 +14,27 @@
         </div>
         <table id="headertable" style="width: 40%; margin: auto;">
             <tr>
-                <th class="right" style="width: 10%">Version</td>
+                <th class="right" style="width: 10%">Version</th>
                 <td>${yi.projectVersion}</td>
             </tr>
             <tr>
-                <th class="right">Revision</td>
+                <th class="right">Revision</th>
                 <td>${yi.buildRevision}</td>
             </tr>
             <tr>
-                <th class="right">Java</td>
+                <th class="right">Java</th>
                 <td>${yi.javaVersion}</td>
             </tr>
             <tr>
-                <th class="right">Build Date</td>
+                <th class="right">Build Date</th>
                 <td>${yi.buildDate}</td>
             </tr>
             <tr>
-                <th class="right">Start-up Time</td>
+                <th class="right">Start-up Time</th>
                 <td>${yi.startUpTime}</td>
             </tr>
             <tr>
-                <th class="right">Uptime</td>
+                <th class="right">Uptime</th>
                 <td>${yi.uptime}</td>
             </tr>
         </table>
@@ -75,7 +75,7 @@
         <table id="tablelist" style="width: 20%; margin: auto;;">
             <c:forEach items="${countlist}" var="entry">
                 <tr>
-                    <th class="right" style="width: 10%">${entry.key}</td>
+                    <th class="right" style="width: 10%">${entry.key}</th>
                     <td class="center" style="width: 10%">${entry.value}</td>
                 </tr>
             </c:forEach>
