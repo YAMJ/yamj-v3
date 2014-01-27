@@ -99,7 +99,7 @@ public class VideoController {
     }
 
     /**
-     * Get information on a series
+     * Get information on a season
      *
      * TODO: Add episodes to the season
      *
@@ -122,6 +122,12 @@ public class VideoController {
         return wrapper;
     }
 
+    /**
+     * Get information on a series
+     *
+     * @param options
+     * @return
+     */
     @RequestMapping(value = "/seriesinfo", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperList<ApiSeriesInfoDTO> getSeriesInfo(@ModelAttribute("options") OptionsIdArtwork options) {

@@ -89,7 +89,7 @@ public class ApiEpisodeDTO {
     }
 
     public void setFilename(String filename) {
-        this.filename = filename;
+        this.filename = FilenameUtils.separatorsToUnix(filename);
     }
     //</editor-fold>
 

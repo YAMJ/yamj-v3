@@ -811,7 +811,7 @@ public class ApiDao extends HibernateDao {
         OptionsEpisode options = (OptionsEpisode) wrapper.getOptions();
         SqlScalars sqlScalars = new SqlScalars();
 
-        sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.id AS seasonId, sea.season, vid.episode, vid.id as episodeId, vid.title,");
+        sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.id AS seasonId, sea.season, vid.episode, vid.id AS episodeId, vid.title,");
         if (options.hasDataItem(DataItem.OUTLINE)) {
             sqlScalars.addToSql("vid.outline,");
             sqlScalars.addScalar("outline", StringType.INSTANCE);
@@ -827,7 +827,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("ag.cache_filename AS cacheFilename, ag.cache_dir AS cacheDir");
         sqlScalars.addToSql("FROM season sea, series ser, videodata vid");
         if (options.hasDataItem(DataItem.FILES)) {
-            sqlScalars.addToSql(", stage_file sf");
+            sqlScalars.addToSql(", mediafile_videodata mv, stage_file sf");
         }
         sqlScalars.addToSql(", artwork a");
         sqlScalars.addToSql("LEFT JOIN artwork_located al ON a.id=al.artwork_id");
@@ -849,6 +849,8 @@ public class ApiDao extends HibernateDao {
         }
         if (options.hasDataItem(DataItem.FILES)) {
             sqlScalars.addToSql("AND sf.mediafile_id=vid.id");
+            sqlScalars.addToSql("AND vid.id = mv.videodata_id");
+            sqlScalars.addToSql("AND mv.mediafile_id = sf.mediafile_id");
         }
         sqlScalars.addToSql("ORDER BY seriesId, season, episode");
         LOG.debug("getEpisodeList SQL: {}", sqlScalars.getSql());
