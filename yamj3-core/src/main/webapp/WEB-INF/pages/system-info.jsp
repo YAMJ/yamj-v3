@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <title>YAMJ v3</title>
         <!--Import the header details-->
         <c:import url="template.jsp">
             <c:param name="sectionName" value="HEAD" />
@@ -15,7 +16,7 @@
         </c:import>
 
         <div id="logo">
-            <h2>Server Information</h2>
+            <h2>System Information</h2>
         </div>
         <table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
             <tr>

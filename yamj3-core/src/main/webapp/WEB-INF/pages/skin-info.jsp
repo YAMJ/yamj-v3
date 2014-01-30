@@ -4,6 +4,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <title>YAMJ v3</title>
         <!--Import the header details-->
         <c:import url="template.jsp">
             <c:param name="sectionName" value="HEAD" />
@@ -38,7 +39,7 @@
                             </c:when>
                             <c:otherwise>
                                 <a href="${yi.skinDir}${skin.path}/${skin.image}" target="_blank">
-                                    <img src="${yi.skinDir}${skin.path}/${skin.image}" width="200"/>
+                                    <img alt="Skin image" src="${yi.skinDir}${skin.path}/${skin.image}" width="200"/>
                                 </a>
                             </c:otherwise>
                         </c:choose>
@@ -52,7 +53,7 @@
                     <td class="center">
                         <c:choose>
                             <c:when test="${empty skin.supportUrl}">
-                                No support URL
+                                No URL
                             </c:when>
                             <c:otherwise>
                                 <a href="${skin.supportUrl}" target="_blank">Click here</a>

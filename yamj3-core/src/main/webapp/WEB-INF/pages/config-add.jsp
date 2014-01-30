@@ -4,6 +4,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <title>YAMJ v3</title>
         <!--Import the header details-->
         <c:import url="template.jsp">
             <c:param name="sectionName" value="HEAD" />
@@ -30,7 +31,7 @@
                         <td><form:input path="value"></form:input></td>
                     </tr>
                     <tr>
-                        <td colspan="2" class="center"><input value="Add" type="submit"></td>
+                        <td colspan="2" class="center"><input value="Add Config" type="submit" class="btn default"></td>
                     </tr>
                 </table>
         </form:form>

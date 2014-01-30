@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <title>YAMJ v3</title>
         <!--Import the header details-->
         <c:import url="template.jsp">
             <c:param name="sectionName" value="HEAD" />
@@ -16,7 +17,7 @@
 
         <div id="logo">
             <h2>Configuration Entries</h2>
-            <p><a href="${pageContext.request.contextPath}/config/add.html">Add new configuration</a></p>
+            <p><a href="${pageContext.request.contextPath}/config/add.html" class="btn info">Add new configuration &raquo;</a></p>
         </div>
         <c:if test="${not empty message}">
             <br/>
@@ -24,7 +25,7 @@
             <br/>
         </c:if>
 
-        <table id="tablelist">
+        <table id="headertable" class="hero-unit" style="width: 90%; margin: auto;">
             <tr>
                 <th>Key</th>
                 <th>Value</th>

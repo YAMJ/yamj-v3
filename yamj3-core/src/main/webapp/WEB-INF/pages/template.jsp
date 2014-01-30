@@ -9,14 +9,13 @@
             <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome.min.css">
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
-            <title>YAMJ v3</title>
         </c:when>
         <c:when test="${param.sectionName == 'NAV'}">
             <!-- START header fixed navigation-->
             <div class="topbar">
                 <div class="topbar-inner">
                     <div class="container-fluid">
-                        <a class="brand" href="index.jsp"><img alt="" src="${pageContext.request.contextPath}/images/YAMJ-logo-120-white-reflectv3.png"></a>
+                        <a href="/" class="brand"><img alt="YAMJ Logo" src="${pageContext.request.contextPath}/images/YAMJ-logo-120-white-reflectv3.png"></a>
                         <ul class="nav">
                             <li><a href="/"><i class="fa fa-home fa-2x"></i> Home</a></li>
                             <li><a href="${pageContext.request.contextPath}/skin-info.html"><i class="fa fa-ticket fa-2x"></i> Skins</a></li>
@@ -36,14 +35,14 @@
             <!-- START Footer -->
             <br/>
             <br/>
-            <table class="footer">
+            <table class="footer" style="margin: auto;">
                 <tr>
-                    <td>Yet Another Movie Jukebox</td>
-                    <th>Revision</th>
-                    <th>Java</th>
-                    <th>Build Date</th>
-                    <th>Start-up Time</th>
-                    <th>Uptime</th>
+                    <td style="width:20%">Yet Another Movie Jukebox</td>
+                    <th style="width:10%">Revision</th>
+                    <th style="width:10%">Java</th>
+                    <th style="width:15%">Build Date</th>
+                    <th style="width:15%">Start-up Time</th>
+                    <th style="width:10%">Uptime</th>
                 </tr>
                 <tr>
                     <td>${yi.projectVersion}</td>

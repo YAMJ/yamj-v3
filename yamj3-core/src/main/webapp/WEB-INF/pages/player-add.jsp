@@ -4,6 +4,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <title>YAMJ v3</title>
         <!--Import the header details-->
         <c:import url="template.jsp">
             <c:param name="sectionName" value="HEAD" />
@@ -20,7 +21,7 @@
         </div>
         <p id="message" class="center">Enter the player information</p>
         <form:form method="POST" commandName="player" action="${pageContext.request.contextPath}/player/add/process.html">
-            <table id="headertable" class="hero-unit" style="width:75%; margin:auto;">
+            <table id="headertable" class="hero-unit" style="width:95%; margin:auto;">
                 <tr>
                     <td style="width:25%" class="right">Player Name:</td>
                     <td style="width:75%"><form:input size="100" path="name"></form:input></td>

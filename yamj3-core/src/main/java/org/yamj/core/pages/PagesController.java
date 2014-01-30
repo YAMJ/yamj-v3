@@ -71,6 +71,12 @@ public class PagesController {
         return view;
     }
 
+    /**
+     * For testing pages
+     *
+     * @param name
+     * @return
+     */
     @RequestMapping(value = "/test/{name}")
     public ModelAndView displayTest(@PathVariable String name) {
         ModelAndView view = new ModelAndView("test-" + name);
@@ -260,6 +266,10 @@ public class PagesController {
         List<String> dirNames = fileStorageService.getDirectoryList(StorageType.SKIN, ".");
         List<Skin> skins = new ArrayList<Skin>(dirNames.size());
         for (String dir : dirNames) {
+            // Skip directories that start with "."
+            if (dir.startsWith(".")) {
+                continue;
+            }
             Skin skin = new Skin();
             skin.setPath(dir);
             skin.setSkinDir(fileStorageService.getStoragePathSkin());

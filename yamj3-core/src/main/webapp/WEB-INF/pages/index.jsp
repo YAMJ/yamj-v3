@@ -1,11 +1,10 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<!--/%@include file="test-header.jsp" %-->
-<!--/%@include page="test-footer.jsp.html" %-->
 
 <!DOCTYPE html>
 <html>
     <head>
+        <title>YAMJ v3</title>
         <!--Import the header details-->
         <c:import url="template.jsp">
             <c:param name="sectionName" value="HEAD" />
@@ -23,7 +22,7 @@
                     <h1>Hello, YAMJ User</h1>
                     <p>The place to configure your YAMJ V3 jukebox.</p>
                     <p>For help and support visit the NMT forums.</p>
-                    <a class="btn info small">YAMJ help &raquo;</a>
+                    <!--<a class="btn info small">YAMJ help &raquo;</a>-->
                 </td>
             </tr>
         </table>
