@@ -49,6 +49,7 @@ public class Skin {
     private String image = "";
     private String version = "";
     private String skinDate = "";
+    private String supportUrl="";
     private Long fileDate = 0L;
     private String skinDir = "";
 
@@ -128,6 +129,14 @@ public class Skin {
         this.skinDir = skinDir;
     }
 
+    public String getSupportUrl() {
+        return supportUrl;
+    }
+
+    public void setSupportUrl(String supportUrl) {
+        this.supportUrl = supportUrl;
+    }
+
     /**
      * Read the skin information from skinVersionFilename in the skin directory
      */
@@ -155,6 +164,7 @@ public class Skin {
             setSourceUrl(xmlConfig.getString("url"));
             setImage(xmlConfig.getString("image"));
             setFileDate(xmlFile.lastModified());
+            setSupportUrl(xmlConfig.getString("supportUrl"));
         } catch (ConfigurationException error) {
             LOG.error("Failed reading version information file '{}'", SKIN_VERSION_FILENAME);
             LOG.warn(SystemTools.getStackTrace(error));

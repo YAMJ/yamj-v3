@@ -54,8 +54,12 @@
                 <td style="width: 40%" colspan="2">${skin.path}</td>
             </tr>
             <tr>
-                <th style="width: 10%">Source Url</th>
+                <th style="width: 10%">Source URL</th>
                 <td style="width: 40%" colspan="2">${skin.sourceUrl}</td>
+            </tr>
+            <tr>
+                <th style="width: 10%">Support URL</th>
+                <td style="width: 40%" colspan="2">${skin.supportUrl}</td>
             </tr>
         </table>
 

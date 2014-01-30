@@ -21,10 +21,11 @@
         <table id="tablelist" class="hero-unit" style="width: 90%; margin: auto;">
             <tr>
                 <th style="width:10%">Skin Name</th>
-                <th style="width:10%">Version</th>
-                <th style="width:20%">Image</th>
+                <th style="width:5%" >Version</th>
+                <th style="width:15%">Image</th>
                 <th style="width:30%">Skin Description</th>
                 <th style="width:20%">Location</th>
+                <th style="width:10%">Support</th>
             </tr>
             <c:forEach items="${skins}" var="skin">
                 <tr>
@@ -48,6 +49,16 @@
                         </c:forEach>
                     </td>
                     <td><a href="${yi.skinDir}${skin.path}/" target="_blank">${skin.path}</a></td>
+                    <td class="center">
+                        <c:choose>
+                            <c:when test="${empty skin.supportUrl}">
+                                No support URL
+                            </c:when>
+                            <c:otherwise>
+                                <a href="${skin.supportUrl}" target="_blank">Click here</a>
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
                 </tr>
             </c:forEach>
         </table>
