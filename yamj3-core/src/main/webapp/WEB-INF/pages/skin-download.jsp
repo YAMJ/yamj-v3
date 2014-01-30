@@ -3,86 +3,65 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/yamj-style.css">
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title id="title">YAMJ v3</title>
+        <!--Import the header details-->
+        <c:import url="template.jsp">
+            <c:param name="sectionName" value="HEAD" />
+        </c:import>
     </head>
-    <body background="${pageContext.request.contextPath}/images/yamj-configbg.jpg">
-        <h1>Skin Download Page</h1>
+    <body>
+        <!--Import the navigation header-->
+        <c:import url="template.jsp">
+            <c:param name="sectionName" value="NAV" />
+        </c:import>
 
-        <c:if test="${not empty message}">
-            <p>Message: ${message}</p>
-            <br/>
-        </c:if>
-        <br>
-        <table style="width: 60%">
-            <tbody>
-                <tr>
-                    <th style="width: 30%">Skin Name</th>
-                    <th style="width: 10%">Skin Version</th>
-                    <th style="width: 10%">Skin Date</th>
-                </tr>
-                <tr>
-                    <td>${skin.name}</td>
-                    <td>${skin.version}</td>
-                    <td>${skin.skinDate}</td>
-                </tr>
-                <tr>
-                    <td colspan="3">
-                        <c:choose>
-                            <c:when test="${empty skin.image}">
-                                No Image
-                            </c:when>
-                            <c:otherwise>
-                                    <a href="${yi.skinDir}${skin.path}/${skin.image}" target="_blank">
-                                        <img src="${yi.skinDir}${skin.path}/${skin.image}" width="400"/>
-                                    </a>
-                            </c:otherwise>
-                        </c:choose>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="3">
-                        <c:forEach items="${skin.description}" var="line">
-                            ${line}<br>
-                        </c:forEach>
-                    </td>
-                </tr>
-                <tr>
-                    <th style="width: 10%">Path</th>
-                    <td style="width: 40%" colspan="2">${skin.path}</td>
-                </tr>
-                <tr>
-                    <th style="width: 10%">Source Url</th>
-                    <td style="width: 40%" colspan="2">${skin.sourceUrl}</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <p><a href="/yamj3/skin-info.html">Skins</a></p>
-        <p><a href="/yamj3/">Home</a></p>
-
-        <br>
-        <br>
-        <br>
-        <table class="sysinfo">
+        <div id="logo">
+            <h2>Skin Download Page</h2>
+        </div>
+        <table class="headertable" style="width: 90%; margin:auto;">
             <tr>
-                <th>Version</th>
-                <th>Revision</th>
-                <th>Java</th>
-                <th>Build Date</th>
-                <th>Start-up Time</th>
-                <th>Uptime</th>
+                <th style="width: 30%">Skin Name</th>
+                <th style="width: 10%">Skin Version</th>
+                <th style="width: 10%">Skin Date</th>
             </tr>
             <tr>
-                <td>${yi.projectVersion}</td>
-                <td>${yi.buildRevision}</td>
-                <td>${yi.javaVersion}</td>
-                <td>${yi.buildDate}</td>
-                <td>${yi.startUpTime}</td>
-                <td>${yi.uptime}</td>
+                <td>${skin.name}</td>
+                <td>${skin.version}</td>
+                <td>${skin.skinDate}</td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <c:choose>
+                        <c:when test="${empty skin.image}">
+                            No Image
+                        </c:when>
+                        <c:otherwise>
+                            <a href="${yi.skinDir}${skin.path}/${skin.image}" target="_blank">
+                                <img src="${yi.skinDir}${skin.path}/${skin.image}" width="400"/>
+                            </a>
+                        </c:otherwise>
+                    </c:choose>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <c:forEach items="${skin.description}" var="line">
+                        ${line}<br>
+                    </c:forEach>
+                </td>
+            </tr>
+            <tr>
+                <th style="width: 10%">Path</th>
+                <td style="width: 40%" colspan="2">${skin.path}</td>
+            </tr>
+            <tr>
+                <th style="width: 10%">Source Url</th>
+                <td style="width: 40%" colspan="2">${skin.sourceUrl}</td>
             </tr>
         </table>
 
+        <!-- Import the footer -->
+        <c:import url="template.jsp">
+            <c:param name="sectionName" value="FOOTER" />
+        </c:import>
     </body>
 </html>

@@ -3,83 +3,62 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/yamj-style.css">
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title id="title">YAMJ v3</title>
+        <!--Import the header details-->
+        <c:import url="template.jsp">
+            <c:param name="sectionName" value="HEAD" />
+        </c:import>
     </head>
-    <body background="${pageContext.request.contextPath}/images/yamj-configbg.jpg">
-        <div id="logo">
-            <h1>${yi.projectName}</h1>
-            <h2>System Information</h2>
-        </div>
-        <table id="headertable" style="width: 40%; margin: auto;">
-            <tr>
-                <th class="right" style="width: 10%">Version</th>
-                <td>${yi.projectVersion}</td>
-            </tr>
-            <tr>
-                <th class="right">Revision</th>
-                <td>${yi.buildRevision}</td>
-            </tr>
-            <tr>
-                <th class="right">Java</th>
-                <td>${yi.javaVersion}</td>
-            </tr>
-            <tr>
-                <th class="right">Build Date</th>
-                <td>${yi.buildDate}</td>
-            </tr>
-            <tr>
-                <th class="right">Start-up Time</th>
-                <td>${yi.startUpTime}</td>
-            </tr>
-            <tr>
-                <th class="right">Uptime</th>
-                <td>${yi.uptime}</td>
-            </tr>
-        </table>
-        <br/>
+    <body>
+        <!--Import the navigation header-->
+        <c:import url="template.jsp">
+            <c:param name="sectionName" value="NAV" />
+        </c:import>
+
         <div id="logo">
             <h2>Server Information</h2>
         </div>
-        <table id="headertable" style="width: 50%; margin: auto;">
+        <table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
             <tr>
-                <th class="right" style="width: 10%">Core IP/Port</th>
-                <td>${yi.coreIp}:${yi.corePort}</td>
+                <th class="left" style="width: 20%">Core IP/Port</th>
+                <td class="left" style="width: 20%">${yi.coreIp}:${yi.corePort}</td>
             </tr>
             <tr>
-                <th class="right">Database IP</th>
-                <td>${yi.databaseIp}</td>
+                <th class="left" style="width: 20%">Database IP</th>
+                <td class="left" style="width: 20%">${yi.databaseIp}</td>
             </tr>
             <tr>
-                <th class="right">Database Name</th>
-                <td>${yi.databaseName}</td>
+                <th class="left" style="width: 20%">Database Name</th>
+                <td class="left" style="width: 20%">${yi.databaseName}</td>
             </tr>
             <tr>
-                <th class="right">Artwork Location URL</th>
-                <td><a href="${yi.baseArtworkUrl}">${yi.baseArtworkUrl}</a></td>
+                <th class="left" style="width: 20%">Artwork Location URL</th>
+                <td class="left" style="width: 20%"><a href="${yi.baseArtworkUrl}">${yi.baseArtworkUrl}</a></td>
             </tr>
             <tr>
-                <th class="right">MediaInfo Location URL</th>
-                <td><a href="${yi.baseMediainfoUrl}">${yi.baseMediainfoUrl}</a></td>
+                <th class="left" style="width: 20%">MediaInfo Location URL</th>
+                <td class="left" style="width: 20%"><a href="${yi.baseMediainfoUrl}">${yi.baseMediainfoUrl}</a></td>
             </tr>
             <tr>
-                <th class="right">Skins Directory</th>
-                <td><a href="${yi.skinDir}">${yi.skinDir}</a></td>
+                <th class="left" style="width: 20%">Skins Directory</th>
+                <td class="left" style="width: 20%"><a href="${yi.skinDir}">${yi.skinDir}</a></td>
             </tr>
         </table>
         <br/>
         <div id="logo">
             <h2>Database Object Counts</h2>
         </div>
-        <table id="tablelist" style="width: 20%; margin: auto;;">
+        <table id="headertable" class="hero-unit" style="width: 50%; margin: auto;">
             <c:forEach items="${countlist}" var="entry">
                 <tr>
-                    <th class="right" style="width: 10%">${entry.key}</th>
-                    <td class="center" style="width: 10%">${entry.value}</td>
+                    <th class="left" style="width: 20%">${entry.key}</th>
+                    <td class="center" style="width: 20%">${entry.value}</td>
                 </tr>
             </c:forEach>
         </table>
-        <p><a href="/yamj3/">Home</a></p>
+
+        <!-- Import the footer -->
+        <c:import url="template.jsp">
+            <c:param name="sectionName" value="FOOTER" />
+        </c:import>
     </body>
 </html>

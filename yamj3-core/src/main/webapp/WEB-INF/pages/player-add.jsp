@@ -1,23 +1,29 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/yamj-style.css">
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>YAMJ v3</title>
+        <!--Import the header details-->
+        <c:import url="template.jsp">
+            <c:param name="sectionName" value="HEAD" />
+        </c:import>
     </head>
-    <body background="${pageContext.request.contextPath}/images/yamj-configbg.jpg">
+    <body>
+        <!--Import the navigation header-->
+        <c:import url="template.jsp">
+            <c:param name="sectionName" value="NAV" />
+        </c:import>
+
         <div id="logo">
-            <h1>Yet Another Movie Jukebox</h1>
             <h2>Add Player Path Entry</h2>
         </div>
-        <p id="message">Enter the player information</p>
+        <p id="message" class="center">Enter the player information</p>
         <form:form method="POST" commandName="player" action="${pageContext.request.contextPath}/player/add/process.html">
-            <table id="headertable" style="width:75%;">
+            <table id="headertable" class="hero-unit" style="width:75%; margin:auto;">
                 <tr>
-                    <td class="right">Player Name:</td>
-                    <td><form:input size="100" path="name"></form:input></td>
+                    <td style="width:25%" class="right">Player Name:</td>
+                    <td style="width:75%"><form:input size="100" path="name"></form:input></td>
                     </tr>
                     <tr>
                         <td style="width:25%" class="right">IP/Device:</td>
@@ -28,32 +34,14 @@
                         <td style="width:75%"><form:input size="100" path="storagePath"></form:input></td>
                     </tr>
                     <tr>
-                        <td colspan="2" class="center"><input value="Add" type="submit"></td>
+                        <td colspan="2" class="center"><input value="Add Player" type="submit" class="btn default"></td>
                     </tr>
                 </table>
         </form:form>
 
-        <p><a href="${pageContext.request.contextPath}/index.html">Home page</a></p>
-        <br>
-        <br>
-        <br>
-        <table class="sysinfo">
-            <tr>
-                <th>Version</th>
-                <th>Revision</th>
-                <th>Java</th>
-                <th>Build Date</th>
-                <th>Start-up Time</th>
-                <th>Uptime</th>
-            </tr>
-            <tr>
-                <td>${yi.projectVersion}</td>
-                <td>${yi.buildRevision}</td>
-                <td>${yi.javaVersion}</td>
-                <td>${yi.buildDate}</td>
-                <td>${yi.startUpTime}</td>
-                <td>${yi.uptime}</td>
-            </tr>
-        </table>
+        <!-- Import the footer -->
+        <c:import url="template.jsp">
+            <c:param name="sectionName" value="FOOTER" />
+        </c:import>
     </body>
 </html>
