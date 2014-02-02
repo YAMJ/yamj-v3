@@ -22,6 +22,8 @@
  */
 package org.yamj.core.api.json;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +48,12 @@ public class PlayerController {
     @Autowired
     private JsonApiStorageService api;
 
+    /**
+     * Get a list of the players
+     *
+     * @param options
+     * @return
+     */
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperList<PlayerPath> playerList(@ModelAttribute("player") OptionsPlayer options) {
@@ -62,6 +70,14 @@ public class PlayerController {
         return wrapper;
     }
 
+    /**
+     * Add a new player
+     *
+     * @param name
+     * @param ipDevice
+     * @param storagePath
+     * @return
+     */
     @RequestMapping(value = "/add", method = RequestMethod.GET)
     @ResponseBody
     public ApiStatus playerAdd(
@@ -86,6 +102,12 @@ public class PlayerController {
         return status;
     }
 
+    /**
+     * Delete a player
+     *
+     * @param player
+     * @return
+     */
     @RequestMapping(value = "/delete", method = RequestMethod.GET)
     @ResponseBody
     public ApiStatus playerDelete(
@@ -103,6 +125,14 @@ public class PlayerController {
         return status;
     }
 
+    /**
+     * Update a player
+     *
+     * @param name
+     * @param ipDevice
+     * @param storagePath
+     * @return
+     */
     @RequestMapping(value = "/update", method = RequestMethod.GET)
     @ResponseBody
     public ApiStatus playerUpdate(
@@ -124,6 +154,11 @@ public class PlayerController {
             status.setMessage("Invalid player information specified, player not updated");
         }
         return status;
+    }
+
+    public void playerScan() {
+        List<String> playerIPs = new ArrayList<String>();
+
     }
 
 }
