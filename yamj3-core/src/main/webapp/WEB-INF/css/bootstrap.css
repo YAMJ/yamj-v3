@@ -223,7 +223,7 @@ body {
 }
 .container-fluid > .sidebar {
     position: absolute;
-    top: 50;
+    top: 50px;
     left: 20px;
     width: 220px;
     color: #111111;
@@ -689,7 +689,7 @@ textarea {
 .uneditable-input {
     background-color: #ffffff;
     display: block;
-    border-color: #;
+    /*border-color: #;*/
     -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.025);
     -moz-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.025);
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.025);

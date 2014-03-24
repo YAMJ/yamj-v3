@@ -37,7 +37,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
-import org.yamj.core.database.model.PlayerPath;
+import org.yamj.core.database.model.PlayerPathOld;
+import org.yamj.core.database.model.player.PlayerInfo;
+import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
@@ -56,8 +58,8 @@ public class PlayerController {
      */
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<PlayerPath> playerList(@ModelAttribute("player") OptionsPlayer options) {
-        ApiWrapperList<PlayerPath> wrapper = new ApiWrapperList<PlayerPath>();
+    public ApiWrapperList<PlayerPathOld> playerList(@ModelAttribute("player") OptionsPlayer options) {
+        ApiWrapperList<PlayerPathOld> wrapper = new ApiWrapperList<PlayerPathOld>();
 
         // If not mode is specified, make it exact
         if (StringUtils.isBlank(options.getMode())) {
@@ -88,7 +90,7 @@ public class PlayerController {
         ApiStatus status = new ApiStatus();
         if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(ipDevice) && StringUtils.isNotBlank(storagePath)) {
             LOG.info("Storing player '{}'", name);
-            PlayerPath pp = new PlayerPath();
+            PlayerPathOld pp = new PlayerPathOld();
             pp.setName(name);
             pp.setIpDevice(ipDevice);
             pp.setStoragePath(storagePath);
@@ -142,7 +144,7 @@ public class PlayerController {
         ApiStatus status = new ApiStatus();
         if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(ipDevice) && StringUtils.isNotBlank(storagePath)) {
             LOG.info("Updating player '{}'", name);
-            PlayerPath pp = new PlayerPath();
+            PlayerPathOld pp = new PlayerPathOld();
             pp.setName(name);
             pp.setIpDevice(ipDevice);
             pp.setStoragePath(storagePath);
@@ -156,9 +158,37 @@ public class PlayerController {
         return status;
     }
 
+    @RequestMapping(value = "/scan", method = RequestMethod.GET)
+    @ResponseBody
     public void playerScan() {
-        List<String> playerIPs = new ArrayList<String>();
+        List<PlayerInfo> players = getDummyPlayers(2, 3);
 
+        for (PlayerInfo player : players) {
+            LOG.info("Storing player: {}", player);
+            api.storePlayer(player);
+        }
+        LOG.info("Player storage completed");
+    }
+
+    private List<PlayerInfo> getDummyPlayers(int playerCount, int pathCount) {
+        List<PlayerInfo> players = new ArrayList<PlayerInfo>();
+
+        for (int loopPlayer = 1; loopPlayer <= playerCount; loopPlayer++) {
+            PlayerInfo p = new PlayerInfo();
+            p.setIpAddress("192.168.0." + loopPlayer);
+            p.setName("PCH-C200-" + loopPlayer);
+
+            for (int loopPath = 1; loopPath <= pathCount; loopPath++) {
+                PlayerPath pp = new PlayerPath();
+                pp.setDeviceName("samba");
+                pp.setDevicePath("http://some.path/" + loopPlayer + "-" + loopPath + "/");
+                pp.setDeviceType("network");
+                p.addPath(pp);
+            }
+            players.add(p);
+        }
+
+        return players;
     }
 
 }

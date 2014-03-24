@@ -43,7 +43,8 @@ import org.yamj.core.api.model.Skin;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.Configuration;
-import org.yamj.core.database.model.PlayerPath;
+import org.yamj.core.database.model.PlayerPathOld;
+import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
@@ -195,12 +196,12 @@ public class PagesController {
         ModelAndView view = new ModelAndView("player-add");
         YamjInfo yi = sic.getYamjInfo("true");
         view.addObject("yi", yi);
-        view.addObject("player", new PlayerPath());
+        view.addObject("player", new PlayerPathOld());
         return view;
     }
 
     @RequestMapping(value = "/player/add/process")
-    public ModelAndView playerAdd(@ModelAttribute PlayerPath player) {
+    public ModelAndView playerAdd(@ModelAttribute PlayerPathOld player) {
 
         ModelAndView view = new ModelAndView("redirect:/player/list");
         LOG.info("Adding player: {}", player.toString());
@@ -217,7 +218,7 @@ public class PagesController {
 
         OptionsPlayer options = new OptionsPlayer();
 
-        List<PlayerPath> playerList = jsonApi.getPlayer(options);
+        List<PlayerPathOld> playerList = jsonApi.getPlayer(options);
         YamjInfo yi = sic.getYamjInfo("true");
         view.addObject("yi", yi);
         view.addObject("playerlist", playerList);
@@ -228,7 +229,7 @@ public class PagesController {
     @RequestMapping(value = "/player/edit/{name}", method = RequestMethod.GET)
     public ModelAndView playerEditPage(@PathVariable String name) {
         ModelAndView view = new ModelAndView("player-edit");
-        List<PlayerPath> playerList = jsonApi.getPlayer(name);
+        List<PlayerPathOld> playerList = jsonApi.getPlayer(name);
         if (!playerList.isEmpty()) {
             view.addObject("player", playerList.get(0));
         }
@@ -238,7 +239,7 @@ public class PagesController {
     }
 
     @RequestMapping(value = "/player/edit/{name}", method = RequestMethod.POST)
-    public ModelAndView playerEditUpdate(@ModelAttribute("player") PlayerPath player, @PathVariable String name) {
+    public ModelAndView playerEditUpdate(@ModelAttribute("player") PlayerPathOld player, @PathVariable String name) {
         ModelAndView view = new ModelAndView("redirect:/player/list");
         LOG.info("Updating player: {}", player.toString());
         jsonApi.setPlayer(player);
@@ -255,6 +256,28 @@ public class PagesController {
         jsonApi.deletePlayer(name);
         String message = "Player was successfully deleted.";
         view.addObject("message", message);
+        return view;
+    }
+
+    @RequestMapping(value = "/player/scan", method = RequestMethod.GET)
+    public ModelAndView playerScan(ModelAndView view) {
+        LOG.info("Player Scan");
+        return view;
+    }
+
+    @RequestMapping(value = "/player/scan", method = RequestMethod.POST)
+    public ModelAndView playerScanned() {
+        LOG.info("Player Scanning...");
+        ModelAndView view = new ModelAndView("player-scan");
+
+        OptionsPlayer options = new OptionsPlayer();
+
+        List<PlayerInfo> playerList = jsonApi.getPlayerInfo(options);
+
+        YamjInfo yi = sic.getYamjInfo("true");
+        view.addObject("yi", yi);
+        view.addObject("playerlist", playerList);
+
         return view;
     }
     //</editor-fold>

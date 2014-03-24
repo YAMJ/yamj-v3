@@ -47,8 +47,9 @@ import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Configuration;
 import org.yamj.core.database.model.Genre;
-import org.yamj.core.database.model.PlayerPath;
+import org.yamj.core.database.model.PlayerPathOld;
 import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.player.PlayerInfo;
 
 @Service("jsonApiStorageService")
 public class JsonApiStorageService {
@@ -220,22 +221,22 @@ public class JsonApiStorageService {
 
     // Player methods
     @Transactional(readOnly = true)
-    public List<PlayerPath> getPlayer(ApiWrapperList<PlayerPath> wrapper) {
+    public List<PlayerPathOld> getPlayer(ApiWrapperList<PlayerPathOld> wrapper) {
         return getPlayer((OptionsPlayer) wrapper.getOptions());
     }
 
     @Transactional(readOnly = true)
-    public List<PlayerPath> getPlayer(OptionsPlayer options) {
+    public List<PlayerPathOld> getPlayer(OptionsPlayer options) {
         return playerDao.getPlayerEntries(options);
     }
 
     @Transactional(readOnly = true)
-    public List<PlayerPath> getPlayer(String playerName) {
+    public List<PlayerPathOld> getPlayer(String playerName) {
         return playerDao.getPlayerEntries(playerName);
     }
 
     @Transactional(readOnly = false)
-    public void setPlayer(PlayerPath player) {
+    public void setPlayer(PlayerPathOld player) {
         playerDao.storePlayer(player);
     }
 
@@ -244,4 +245,13 @@ public class JsonApiStorageService {
         playerDao.deletePlayer(playerName);
     }
 
+    @Transactional(readOnly = false)
+    public void storePlayer(PlayerInfo player) {
+        playerDao.storePlayer(player);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PlayerInfo> getPlayerInfo(OptionsPlayer options) {
+        return playerDao.getPlayerInfo(options);
+    }
 }

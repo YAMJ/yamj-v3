@@ -24,6 +24,8 @@ package org.yamj.core.database.dao;
 
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.type.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +33,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.options.OptionsPlayer;
-import org.yamj.core.database.model.PlayerPath;
+import org.yamj.core.database.model.PlayerPathOld;
+import org.yamj.core.database.model.player.PlayerInfo;
+import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Service("playerDao")
@@ -40,17 +44,17 @@ public class PlayerDao extends HibernateDao {
     private static final Logger LOG = LoggerFactory.getLogger(PlayerDao.class);
 
     @Transactional
-    public void storePlayer(List<PlayerPath> playerList) {
-        for (PlayerPath player : playerList) {
+    public void storePlayer(List<PlayerPathOld> playerList) {
+        for (PlayerPathOld player : playerList) {
             storePlayer(player);
         }
     }
 
     @Transactional
-    public void storePlayer(PlayerPath player) {
+    public void storePlayer(PlayerPathOld player) {
 
         LOG.debug("Checking for existing information on player '{}'", player.getName());
-        PlayerPath existingPlayer = getByName(PlayerPath.class, player.getName());
+        PlayerPathOld existingPlayer = getByName(PlayerPathOld.class, player.getName());
 
         if (existingPlayer != null) {
             // Player already exists
@@ -65,8 +69,37 @@ public class PlayerDao extends HibernateDao {
     }
 
     @Transactional
+    public void storePlayer(PlayerInfo player) {
+        LOG.debug("Checking for existing information on player '{}'", player.getName());
+        PlayerInfo existingPlayer = getByName(PlayerInfo.class, player.getName());
+
+        if (existingPlayer != null) {
+            // Player already exists
+            LOG.debug("Updating player information: '{}'", player.getName());
+            existingPlayer.setIpAddress(player.getIpAddress());
+            existingPlayer.clearPaths();
+            for(PlayerPath path:player.getPaths()) {
+                existingPlayer.addPath(path);
+            }
+
+            updateEntity(existingPlayer);
+        } else {
+            LOG.debug("Storing new player: '{}'", player.getName());
+            storeEntity(player);
+        }
+    }
+
+    @Transactional
     @SuppressWarnings("unchecked")
-    public List<PlayerPath> getPlayerEntries(OptionsPlayer options) {
+    public List<PlayerInfo> getPlayerInfo(OptionsPlayer options) {
+        Session session = getSession();
+        Criteria criteria = session.createCriteria(PlayerInfo.class);
+        return criteria.list();
+    }
+
+    @Transactional
+    @SuppressWarnings("unchecked")
+    public List<PlayerPathOld> getPlayerEntries(OptionsPlayer options) {
         SqlScalars sqlScalars = new SqlScalars();
 
         sqlScalars.addToSql("SELECT name, ip_device AS ipDevice, storage_path AS storagePath");
@@ -79,12 +112,12 @@ public class PlayerDao extends HibernateDao {
         sqlScalars.addScalar("ipDevice", StringType.INSTANCE);
         sqlScalars.addScalar("storagePath", StringType.INSTANCE);
 
-        List<PlayerPath> players = executeQueryWithTransform(PlayerPath.class, sqlScalars, null);
+        List<PlayerPathOld> players = executeQueryWithTransform(PlayerPathOld.class, sqlScalars, null);
         return players;
     }
 
     @Transactional
-    public List<PlayerPath> getPlayerEntries(String player) {
+    public List<PlayerPathOld> getPlayerEntries(String player) {
         OptionsPlayer options = new OptionsPlayer();
         options.setPlayer(player);
         // Make the search exact
@@ -100,7 +133,7 @@ public class PlayerDao extends HibernateDao {
     @Transactional
     public void deletePlayer(String name) {
         if (StringUtils.isNotBlank(name)) {
-            PlayerPath player = getByName(PlayerPath.class, name);
+            PlayerPathOld player = getByName(PlayerPathOld.class, name);
             LOG.debug("Deleting player '{}'", player.toString());
             deleteEntity(player);
             LOG.debug("Successfully deleted '{}'", name);

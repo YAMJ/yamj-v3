@@ -24,8 +24,6 @@ package org.yamj.core.tools.player;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.omertron.examples.model.player.PlayerInfo;
-import com.omertron.examples.model.player.PlayerPath;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -42,6 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.CommonHttpClient;
 import org.yamj.api.common.http.DefaultPoolingHttpClient;
+import org.yamj.core.database.model.player.PlayerInfo;
+import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.tools.player.davidbox.DavidBoxPlayerPath;
 import org.yamj.core.tools.player.davidbox.DavidBoxWrapper;
 
@@ -243,8 +243,8 @@ public final class PlayerTools {
                 if (wrapper.getResponse().getFileList() != null) {
                     for (DavidBoxPlayerPath db : wrapper.getResponse().getFileList()) {
                         PlayerPath path = new PlayerPath();
-                        path.setName(db.getName());
-                        path.setPath(db.getPath());
+                        path.setDeviceName(db.getName());
+                        path.setDevicePath(db.getPath());
                         path.setDeviceType(db.getDeviceType());
                         paths.add(path);
                         LOG.debug("Found path for '{}': {}", addr, path.toString());

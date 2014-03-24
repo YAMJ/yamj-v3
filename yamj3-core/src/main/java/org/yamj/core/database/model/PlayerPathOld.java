@@ -24,15 +24,13 @@ package org.yamj.core.database.model;
 
 import java.io.Serializable;
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.NaturalId;
 
-@Entity
-@Table(name = "player_path")
-public class PlayerPath extends AbstractIdentifiable implements Serializable {
+//@Entity
+//@Table(name = "player_path_old")
+public class PlayerPathOld extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 4L;
 
@@ -86,7 +84,7 @@ public class PlayerPath extends AbstractIdentifiable implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final PlayerPath other = (PlayerPath) obj;
+        final PlayerPathOld other = (PlayerPathOld) obj;
         if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
             return false;
         }

@@ -31,6 +31,7 @@ import org.yamj.core.api.model.ApiStatus;
  * Default wrapper for a list returned from the API
  *
  * @author stuart.boston
+ * @param <T>
  */
 public final class ApiWrapperList<T> extends ApiWrapperAbstract {
 

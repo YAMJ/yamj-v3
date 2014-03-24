@@ -17,28 +17,31 @@
         </c:import>
 
         <div id="logo">
-            <h2>Add Player Path Entry</h2>
+            <h2>Scan For Players</h2>
         </div>
-        <p id="message" class="center">Enter the player information</p>
-        <form:form method="POST" commandName="player" action="${pageContext.request.contextPath}/player/add/process.html">
-            <table id="headertable" class="hero-unit" style="width:95%; margin:auto;">
+
+        <c:if test="${empty players}">
+            <form action="PlayerServlet" method="get">
+                <input type="hidden" name="listallplayers" value="1"/><br/>
+                <input type="submit" value="Show all players"/>
+            </form>
+        </c:if>
+        <c:if test="${!empty players}">
+            <table id="tablelist">
                 <tr>
-                    <td style="width:25%" class="right">Player Name:</td>
-                    <td style="width:75%"><form:input size="100" path="name"></form:input></td>
-                    </tr>
-                    <tr>
-                        <td style="width:25%" class="right">IP/Device:</td>
-                        <td style="width:75%"><form:input size="50" path="ipDevice"></form:input></td>
-                    </tr>
-                    <tr>
-                        <td style="width:25%" class="right">Storage Path</td>
-                        <td style="width:75%"><form:input size="100" path="storagePath"></form:input></td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="center"><input value="Add Player" type="submit" class="btn default"></td>
-                    </tr>
-                </table>
-        </form:form>
+                    <th>Player Name</th>
+                    <th>IP Address</th>
+                </tr>
+                <tbody>
+                    <c:forEach items="${playerlist}" var="entry" varStatus="row">
+                        <tr>
+                            <td>${entry.name}</td>
+                            <td>${entry.ipAddress}</td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
+        </c:if>
 
         <!-- Import the footer -->
         <c:import url="template.jsp">
