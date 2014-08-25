@@ -107,7 +107,7 @@ public class TheMovieDbArtworkScanner implements
 
     @Override
     public List<ArtworkDetailDTO> getFanarts(String id) {
-        String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+        String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
         return getFilteredArtwork(id, defaultLanguage, ArtworkType.BACKDROP, DEFAULT_FANART_SIZE);
     }
 
