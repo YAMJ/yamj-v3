@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.artwork.common;
 
+import org.yamj.core.service.artwork.ArtworkTools;
+
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.model.Artwork;
@@ -144,7 +146,9 @@ public class TheMovieDbArtworkScanner implements
                         if (artworkURL == null || artworkURL.toString().endsWith("null")) {
                             LOG.warn("{} URL is invalid and will not be used: {}", artworkType, artworkURL);
                         } else {
-                            dtos.add(new ArtworkDetailDTO(getScannerName(), artworkURL.toString()));
+                            String url = artworkURL.toString();
+                            String hashCode = ArtworkTools.getSimpleHashCode(url);
+                            dtos.add(new ArtworkDetailDTO(getScannerName(), url, hashCode));
                         }
                     }
                 }
@@ -155,7 +159,7 @@ public class TheMovieDbArtworkScanner implements
         }
         return dtos;
     }
-
+    
     @Override
     public List<ArtworkDetailDTO> getPosters(IMetadata metadata) {
         String id = getId(metadata);

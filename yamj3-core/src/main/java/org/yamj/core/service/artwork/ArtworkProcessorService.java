@@ -229,6 +229,8 @@ public class ArtworkProcessorService {
 
     private String buildCacheFilename(ArtworkLocated located, ArtworkProfile artworkProfile) {
         StringBuilder sb = new StringBuilder();
+        
+        // 1. video name
         if (located.getArtwork().getVideoData() != null) {
             sb.append(located.getArtwork().getVideoData().getIdentifier());
             if (located.getArtwork().getVideoData().isMovie()) {
@@ -250,10 +252,20 @@ public class ArtworkProcessorService {
             sb.append(located.getArtwork().getId());
             sb.append(".");
         }
+        
+        // 2. artwork type
         sb.append(located.getArtwork().getArtworkType().toString().toLowerCase());
         sb.append(".");
-        sb.append(located.getId());
+        
+        // 3. hash code
+        if (StringUtils.isBlank(located.getHashCode())) {
+            sb.append(located.getId());
+        } else {
+            sb.append(located.getHashCode());
+        }
         sb.append(".");
+
+        // 4. profile and suffix
         if (artworkProfile == null) {
             // it's the original image
             sb.append("original");
@@ -268,6 +280,7 @@ public class ArtworkProcessorService {
                 sb.append(".jpg");
             }
         }
+        
         return sb.toString();
     }
 

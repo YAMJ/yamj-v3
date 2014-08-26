@@ -26,12 +26,18 @@ public class ArtworkDetailDTO {
 
     private final String source;
     private final String url;
+    private final String hashCode;
     private String language = null;
     private int rating = -1;
 
     public ArtworkDetailDTO(String source, String url) {
+        this(source, url, null);
+    }
+
+    public ArtworkDetailDTO(String source, String url, String hashCode) {
         this.source = source;
         this.url = url;
+        this.hashCode = hashCode;
     }
 
     public String getSource() {
@@ -40,6 +46,10 @@ public class ArtworkDetailDTO {
 
     public String getUrl() {
         return url;
+    }
+
+    public String getHashCode() {
+        return hashCode;
     }
 
     public String getLanguage() {
@@ -65,6 +75,8 @@ public class ArtworkDetailDTO {
         sb.append(getSource());
         sb.append(", url=");
         sb.append(getUrl());
+        sb.append(", hashCode=");
+        sb.append(getHashCode());
         sb.append(", language=");
         sb.append(getLanguage());
         sb.append(", rating=");

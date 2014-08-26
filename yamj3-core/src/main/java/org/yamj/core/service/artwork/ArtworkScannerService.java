@@ -453,6 +453,7 @@ public class ArtworkScannerService {
             loc.setArtwork(artwork);
             loc.setSource(dto.getSource());
             loc.setUrl(dto.getUrl());
+            loc.setHashCode(dto.getHashCode());
             loc.setLanguage(dto.getLanguage());
             loc.setRating(dto.getRating());
             loc.setStatus(StatusType.NEW);

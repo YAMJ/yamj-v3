@@ -83,6 +83,9 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
 
+    @Column(name = "hash_code", length = 100)
+    private String hashCode;
+
     @Column(name = "priority", nullable = false)
     private int priority = -1;
 
@@ -98,7 +101,7 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @Column(name = "rating", nullable=false)
     private int rating = -1;
 
-    @Column(name = "cache_filename",length = 200)
+    @Column(name = "cache_filename",length = 255)
     private String cacheFilename;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "artworkLocated")
@@ -144,6 +147,14 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     public void setStatus(StatusType status) {
         this.status = status;
+    }
+
+    public String getHashCode() {
+        return hashCode;
+    }
+
+    public void setHashCode(String hashCode) {
+        this.hashCode = hashCode;
     }
 
     public int getPriority() {
