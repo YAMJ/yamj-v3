@@ -100,6 +100,25 @@ public class MetadataStorageService {
         return metadataDao.getMetadataQueue(sql, maxResults);
     }
 
+    /**
+     * NOTE: Only movies at the moment.
+     */
+    @Transactional(readOnly = true)
+    public List<QueueDTO> getNfoQueueForScanning(final int maxResults) {
+        final StringBuilder sql = new StringBuilder();
+        sql.append("select vd.id,'");
+        sql.append(MetaDataType.MOVIE);
+        sql.append("' as mediatype,vd.create_timestamp,vd.update_timestamp ");
+        sql.append("from videodata vd ");
+        sql.append("where vd.status = '");
+        sql.append(StatusType.NFO_SCAN.name());
+        sql.append("' and vd.episode<0 ");
+
+        // TODO ready queues for episodes, season, and series
+        
+        return metadataDao.getMetadataQueue(sql, maxResults);
+    }
+
     @Transactional(readOnly = true)
     public VideoData getRequiredVideoData(Long id) {
         final StringBuilder sb = new StringBuilder();
@@ -134,7 +153,7 @@ public class MetadataStorageService {
     }
 
     @Transactional
-    public void storeGenre(String genreName) {
+    public synchronized void storeGenre(String genreName) {
         Genre genre = commonDao.getGenre(genreName);
         if (genre == null) {
             // create new person
@@ -145,7 +164,7 @@ public class MetadataStorageService {
     }
 
     @Transactional
-    public void storePerson(CreditDTO dto) {
+    public synchronized void storePerson(CreditDTO dto) {
         Person person = metadataDao.getPerson(dto.getName());
         if (person == null) {
             // create new person

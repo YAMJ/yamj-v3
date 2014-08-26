@@ -23,24 +23,16 @@
 package org.yamj.core.service.plugin;
 
 import java.util.HashMap;
-import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.common.type.MetaDataType;
-import org.yamj.core.database.model.AbstractMetadata;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.IDataCredits;
-import org.yamj.core.database.model.IDataGenres;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.MetadataStorageService;
 
@@ -53,14 +45,13 @@ public class PluginMetadataService {
     public static final String SERIES_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.series", "tvdb");
     public static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.alternate", "");
     private static final String PERSON_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.person", "tmdb");
-    // locks for calling database methods synchronized
-    private static final ReentrantLock STORE_GENRE_LOCK = new ReentrantLock();
-    private static final ReentrantLock STORE_PERSON_LOCK = new ReentrantLock();
-    @Autowired
-    private MetadataStorageService metadataStorageService;
+    
     private final HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<String, IMovieScanner>();
     private final HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<String, ISeriesScanner>();
     private final HashMap<String, IPersonScanner> registeredPersonScanner = new HashMap<String, IPersonScanner>();
+
+    @Autowired
+    private MetadataStorageService metadataStorageService;
 
     /**
      * Register a movie scanner
@@ -270,15 +261,12 @@ public class PluginMetadataService {
     private boolean storeEntitiesGenre(IDataGenres genreObject) {
         boolean result = true;
         for (String genreName : genreObject.getGenreNames()) {
-            STORE_GENRE_LOCK.lock();
             try {
                 metadataStorageService.storeGenre(genreName);
             } catch (Exception error) {
                 LOG.error("Failed to store genre '{}'", genreName);
                 LOG.warn("Storage error", error);
                 result = false;
-            } finally {
-                STORE_GENRE_LOCK.unlock();
             }
         }
         return result;
@@ -293,15 +281,12 @@ public class PluginMetadataService {
     private boolean storeEntitiesCredits(IDataCredits creditObject) {
         boolean result = true;
         for (CreditDTO creditDTO : creditObject.getCreditDTOS()) {
-            STORE_PERSON_LOCK.lock();
             try {
                 metadataStorageService.storePerson(creditDTO);
             } catch (Exception error) {
                 LOG.error("Failed to store person '{}'", creditDTO.getName());
                 LOG.warn("Storage error", error);
                 result = false;
-            } finally {
-                STORE_PERSON_LOCK.unlock();
             }
         }
 
