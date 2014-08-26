@@ -51,21 +51,27 @@ public class FilenameScannerTest extends TestCase {
     }
     
     @Test
-    public void testFilenameMovieVersion() {
+    public void testFilenameMovieVersion_1() {
         String fileName = "Skrek (Director's Cut).bdrip.mkv";
         FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
         scanner.scan(dto);
         System.err.println(dto);
-        
     }
 
+    @Test
+    public void testFilenameMovieVersion_2() {
+        String fileName = "Avatar (2009) (Extended).sdtv.mkv";
+        FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
+        scanner.scan(dto);
+        System.err.println(dto);
+    }
+    
     @Test
     public void testFilenameExtra() {
         String fileName = "Skrek 2 [EXTRA Shrek 2 3D].bdrip.mkv";
         FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
         scanner.scan(dto);
         System.err.println(dto);
-        
     }
 
     @Test
@@ -74,7 +80,6 @@ public class FilenameScannerTest extends TestCase {
         FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
         scanner.scan(dto);
         System.err.println(dto);
-        
     }
 
     @Test
@@ -83,6 +88,5 @@ public class FilenameScannerTest extends TestCase {
         FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
         scanner.scan(dto);
         System.err.println(dto);
-        
     }
 }
