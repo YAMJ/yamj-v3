@@ -22,18 +22,18 @@
  */
 package org.yamj.core.tools;
 
-import org.yamj.common.tools.PropertyTools;
 import java.io.File;
 import java.text.BreakIterator;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
+import org.yamj.common.tools.PropertyTools;
 
 public final class StringTools {
 
     private static final Pattern CLEAN_STRING_PATTERN = Pattern.compile("[^a-zA-Z0-9]");
-    // Number formatting
     private static final long KB = 1024;
     private static final long MB = KB * KB;
     private static final long GB = KB * KB * KB;
@@ -41,6 +41,7 @@ public final class StringTools {
     private static final DecimalFormat FILESIZE_FORMAT_1 = new DecimalFormat("0.#");
     private static final DecimalFormat FILESIZE_FORMAT_2 = new DecimalFormat("0.##");
     private static final Map<Character, Character> CHAR_REPLACEMENT_MAP = new HashMap<Character, Character>();
+    private static final String MPPA_RATED = "Rated";
 
     private StringTools() {
         throw new UnsupportedOperationException("Utility class");
@@ -261,5 +262,33 @@ public final class StringTools {
             year = -1;
         }
         return year;
+    }
+
+    /**
+     * Get the certification from the MPAA string
+     *
+     * @param mpaaCertification
+     * @return
+     */
+    public static String processMpaaCertification(String mpaaCertification) {
+        return processMpaaCertification(MPPA_RATED, mpaaCertification);
+    }
+
+    /**
+     * Get the certification from the MPAA rating string
+     *
+     * @param mpaaRated
+     * @param mpaaCertification
+     * @return
+     */
+    public static String processMpaaCertification(String mpaaRated, String mpaaCertification) {
+        // Strip out the "Rated " and extra words at the end of the MPAA certification
+        Pattern mpaaPattern = Pattern.compile("(?:" + (StringUtils.isNotBlank(mpaaRated) ? mpaaRated : MPPA_RATED) + "\\s)?(.*?)(?:($|\\s).*?)");
+        Matcher m = mpaaPattern.matcher(mpaaCertification);
+        if (m.find()) {
+            return m.group(1).trim();
+        } else {
+            return mpaaCertification.trim();
+        }
     }
 }

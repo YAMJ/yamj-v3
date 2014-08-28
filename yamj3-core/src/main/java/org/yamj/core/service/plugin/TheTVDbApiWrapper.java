@@ -34,8 +34,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,31 +43,28 @@ import org.yamj.core.tools.LRUTimedCache;
 @Service("tvdbApiWrapper")
 public class TheTVDbApiWrapper implements InitializingBean {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TheTVDbApiWrapper.class);
     private static final int YEAR_MIN = 1900;
     private static final int YEAR_MAX = 2050;
-    @Autowired
-    private ConfigService configService;
-    @Autowired
-    private TheTVDBApi tvdbApi;
-    // make maximal 20 banners objects maximal 30 minutes accessible
+    private final Lock seriesLock = new ReentrantLock(true);
     private final Lock bannersLock = new ReentrantLock(true);
+    // make maximal 20 banners objects maximal 30 minutes accessible
     private final LRUTimedCache<String, Banners> bannersCache = new LRUTimedCache<String, Banners>(20, 1800);
     // make maximal 50 series objects maximal 30 minutes accessible
-    private final Lock seriesLock = new ReentrantLock(true);
     private final LRUTimedCache<String, Series> seriesCache = new LRUTimedCache<String, Series>(50, 1800);
     // make maximal 30 episode lists maximal 30 minutes accessible
     private final LRUTimedCache<String, List<Episode>> episodesCache = new LRUTimedCache<String, List<Episode>>(30, 1800);
     private String defaultLanguage;
     private String altLanguage;
 
+    @Autowired
+    private ConfigService configService;
+    @Autowired
+    private TheTVDBApi tvdbApi;
+
     @Override
     public void afterPropertiesSet() throws Exception {
         defaultLanguage = configService.getProperty("thetvdb.language", "en");
         altLanguage = configService.getProperty("thetvdb.language.alternate", "");
-    }
-
-    public TheTVDbApiWrapper() {
     }
 
     public Banners getBanners(String id) {

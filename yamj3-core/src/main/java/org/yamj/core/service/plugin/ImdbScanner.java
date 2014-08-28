@@ -88,6 +88,10 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
 
     @Override
     public ScanResult scan(VideoData videoData) {
+        if (videoData.isSkippedOnlineScan(SCANNER_ID)) {
+            return ScanResult.SKIPPED;
+        }
+
         String imdbId = getMovieId(videoData);
         if (StringUtils.isBlank(imdbId)) {
             LOG.debug("IMDb id not available : {}", videoData.getTitle());
@@ -100,6 +104,10 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
 
     @Override
     public ScanResult scan(Series series) {
+        if (series.isSkippedOnlineScan(SCANNER_ID)) {
+            return ScanResult.SKIPPED;
+        }
+        
         String imdbId = getSeriesId(series);
         if (StringUtils.isBlank(imdbId)) {
             LOG.debug("IMDb id not available: {}", series.getTitle());

@@ -116,6 +116,11 @@ public class Season extends AbstractMetadata {
         this.firstAired = firstAired;
     }
 
+    @Override
+    public String getSkipOnlineScans() {
+        return null;
+    }
+
     public Map<String, String> getSourceDbIdMap() {
         return sourceDbIdMap;
     }

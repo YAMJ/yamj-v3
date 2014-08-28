@@ -22,6 +22,9 @@
  */
 package org.yamj.core.database.model;
 
+import javax.persistence.Column;
+import javax.persistence.Lob;
+
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
@@ -73,6 +76,10 @@ public class StageFile extends AbstractAuditable implements Serializable {
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
+
+    @Lob
+    @Column(name = "content")
+    private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Fetch(FetchMode.SELECT)
@@ -144,6 +151,14 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     public void setStatus(StatusType status) {
         this.status = status;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public MediaFile getMediaFile() {

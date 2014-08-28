@@ -82,6 +82,10 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
     @Override
     public ScanResult scan(Series series) {
+        if (series.isSkippedOnlineScan(SCANNER_ID)) {
+            return ScanResult.SKIPPED;
+        }
+
         String id = getSeriesId(series);
 
         if (StringUtils.isBlank(id)) {

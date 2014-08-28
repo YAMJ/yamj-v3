@@ -35,7 +35,6 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.OverrideFlag;
 
-@SuppressWarnings("unused")
 @Entity
 @Table(name = "videodata",
         uniqueConstraints
@@ -65,6 +64,8 @@ public class VideoData extends AbstractMetadata implements IDataGenres, IDataCre
     private String quote;
     @Column(name = "country", length = 100)
     private String country;
+    @Column(name = "skip_online_scans", length=255)
+    private String skipOnlineScans;
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_ids", joinColumns
             = @JoinColumn(name = "videodata_id"))
@@ -210,6 +211,7 @@ public class VideoData extends AbstractMetadata implements IDataGenres, IDataCre
         }
     }
 
+    
     public Map<String, String> getSourceDbIdMap() {
         return sourceDbIdMap;
     }
@@ -221,6 +223,15 @@ public class VideoData extends AbstractMetadata implements IDataGenres, IDataCre
 
     public void setSourceDbIdMap(Map<String, String> sourceDbIdMap) {
         this.sourceDbIdMap = sourceDbIdMap;
+    }
+
+    @Override
+    public String getSkipOnlineScans() {
+        return skipOnlineScans;
+    }
+
+    public void setSkipOnlineScans(String skipOnlineScans) {
+        this.skipOnlineScans = skipOnlineScans;
     }
 
     @Override

@@ -39,6 +39,8 @@ import org.yamj.core.service.artwork.ArtworkScannerRunner;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.mediainfo.MediaInfoRunner;
 import org.yamj.core.service.mediainfo.MediaInfoService;
+import org.yamj.core.service.nfo.NfoScannerRunner;
+import org.yamj.core.service.nfo.NfoScannerService;
 import org.yamj.core.service.plugin.PluginMetadataRunner;
 import org.yamj.core.service.plugin.PluginMetadataService;
 
@@ -61,11 +63,14 @@ public class ScanningScheduler {
     private MediaStorageService mediaStorageService;
     @Autowired
     private MediaInfoService mediaInfoService;
+    @Autowired
+    private NfoScannerService nfoScannerService;
     
     private boolean messageDisabledMediaData = Boolean.FALSE;    // Have we already printed the disabled message
     private boolean messageDisabledMediaFiles = Boolean.FALSE;   // Have we already printed the disabled message
     private boolean messageDisabledPeople = Boolean.FALSE;       // Have we already printed the disabled message
     private boolean messageDisabledArtwork = Boolean.FALSE;      // Have we already printed the disabled message
+    private boolean messageDisabledNfo = Boolean.FALSE;          // Have we already printed the disabled message
 
     @Scheduled(initialDelay = 5000, fixedDelay = 45000)
     public void scanMediaData() throws Exception {
@@ -149,7 +154,7 @@ public class ScanningScheduler {
         LOG.debug("Finished media file scanning");
     }
 
-    @Scheduled(initialDelay = 10000, fixedDelay = 45000)
+   // @Scheduled(initialDelay = 10000, fixedDelay = 45000)
     public void scanPeopleData() throws Exception {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.peoplescan.maxThreads", 1);
         if (maxThreads <= 0) {
@@ -230,5 +235,46 @@ public class ScanningScheduler {
         }
 
         LOG.debug("Finished artwork scanning");
+    }
+
+    @Scheduled(initialDelay = 15000, fixedDelay = 45000)
+    public void scanNfo() throws Exception {
+        int maxThreads = configService.getIntProperty("yamj3.scheduler.nfoscan.maxThreads", 1);
+        if (maxThreads <= 0) {
+            if (!messageDisabledNfo) {
+                messageDisabledNfo = Boolean.TRUE;
+                LOG.info("NFO scanning is disabled");
+            }
+            return;
+        } else {
+            messageDisabledNfo = Boolean.FALSE;
+        }
+
+        int maxResults = configService.getIntProperty("yamj3.scheduler.nfoscan.maxResults", 20);
+        List<QueueDTO> queueElements = metadataStorageService.getNfoQueueForScanning(maxResults);
+        if (CollectionUtils.isEmpty(queueElements)) {
+            LOG.debug("No media data found for nfo scan");
+            return;
+        }
+
+        LOG.info("Found {} media objects for nfo scan; scan with {} threads", queueElements.size(), maxThreads);
+        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
+
+        ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
+        for (int i = 0; i < maxThreads; i++) {
+            NfoScannerRunner worker = new NfoScannerRunner(queue, nfoScannerService);
+            executor.execute(worker);
+        }
+        executor.shutdown();
+
+        // run until all workers have finished
+        while (!executor.isTerminated()) {
+            try {
+                TimeUnit.SECONDS.sleep(5);
+            } catch (InterruptedException ignore) {
+            }
+        }
+
+        LOG.debug("Finished nfo scanning");
     }
 }

@@ -47,15 +47,16 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
 
     private static final String SCANNER_ID = "ofdb";
     private static final Logger LOG = LoggerFactory.getLogger(OfdbScanner.class);
+    private static final String HTML_FONT = "</font>";
+    private static final String HTML_TABLE_END = "</table>";
+    private static final String HTML_TR_START = "<tr";
+    private static final String HTML_TR_END = "</tr>";
+
     @Autowired
     private PoolingHttpClient httpClient;
     @Autowired
     private PluginMetadataService pluginMetadataService;
     private SearchEngineTools searchEngineTools;
-    private static final String HTML_FONT = "</font>";
-    private static final String HTML_TABLE_END = "</table>";
-    private static final String HTML_TR_START = "<tr";
-    private static final String HTML_TR_END = "</tr>";
 
     @Override
     public String getScannerName() {
@@ -162,6 +163,10 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
 
     @Override
     public ScanResult scan(VideoData videoData) {
+        if (videoData.isSkippedOnlineScan(SCANNER_ID)) {
+            return ScanResult.SKIPPED;
+        }
+        
         String ofdbUrl = getMovieId(videoData);
 
         if (StringUtils.isBlank(ofdbUrl)) {

@@ -42,7 +42,7 @@ public class SearchEngineTools {
     private String googleHost = "www.google.com";
     private String yahooHost = "search.yahoo.com";
     private String bingHost = "www.bing.com";
-    private static final String BLEKKO_HOST = "www.blekko.com";
+    private String blekkoHost = "www.blekko.com";
     private String lycosHost = "search.lycos.com";
     // Literals
     private static final String HTTP = "http://";
@@ -269,7 +269,7 @@ public class SearchEngineTools {
 
         try {
             StringBuilder sb = new StringBuilder(HTTP);
-            sb.append(BLEKKO_HOST);
+            sb.append(blekkoHost);
             sb.append("/ws/?q=");
             sb.append(URLEncoder.encode(title, UTF8));
             if (year > 0) {

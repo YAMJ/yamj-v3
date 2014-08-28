@@ -215,6 +215,7 @@ public class FileStorageService {
                         ZipFile zf = new ZipFile(zipFilename);
 
                         // Get a list of the files in the zip
+                        @SuppressWarnings("unchecked")
                         List<FileHeader> fileHeaderList = zf.getFileHeaders();
                         // Get the first file
                         String tempFilename = fileHeaderList.get(0).getFileName();

@@ -22,24 +22,23 @@
  */
 package org.yamj.core.service.staging;
 
-import org.apache.commons.lang3.StringUtils;
-
-import org.yamj.core.service.mediaimport.FilenameScanner;
-
-import org.yamj.common.dto.ImportDTO;
-import org.yamj.common.dto.StageDirectoryDTO;
-import org.yamj.common.dto.StageFileDTO;
-import org.yamj.core.database.dao.StagingDao;
-import org.yamj.core.database.model.Library;
-import org.yamj.core.database.model.StageDirectory;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.common.type.StatusType;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.yamj.common.dto.ImportDTO;
+import org.yamj.common.dto.StageDirectoryDTO;
+import org.yamj.common.dto.StageFileDTO;
+import org.yamj.common.type.StatusType;
+import org.yamj.core.database.dao.StagingDao;
+import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.service.mediaimport.FilenameScanner;
 
 @Service("stagingService")
 public class StagingService {
@@ -110,18 +109,22 @@ public class StagingService {
                 stageFile = new StageFile();
                 stageFile.setBaseName(baseName);
                 stageFile.setExtension(extension);
-                stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));
-                stageFile.setFileSize(stageFileDTO.getFileSize());
                 stageFile.setStageDirectory(stageDirectory);
                 stageFile.setFileType(filenameScanner.determineFileType(extension));
                 stageFile.setFullPath(FilenameUtils.concat(stageDirectoryDTO.getPath(), stageFileDTO.getFileName()));
+
+                // set changeable values in stage file
+                setChangeableValues(stageFile, stageFileDTO);
+
                 stageFile.setStatus(StatusType.NEW);
                 stagingDao.saveEntity(stageFile);
             } else {
                 Date newDate = new Date(stageFileDTO.getFileDate());
                 if ((newDate.compareTo(stageFile.getFileDate()) != 0) || (stageFile.getFileSize() != stageFileDTO.getFileSize())) {
-                    stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));
-                    stageFile.setFileSize(stageFileDTO.getFileSize());
+
+                    // set changeable values in stage file
+                    setChangeableValues(stageFile, stageFileDTO);
+                    
                     if (!StatusType.DUPLICATE.equals(stageFile.getStatus())) {
                         // mark as updated if no duplicate
                         stageFile.setStatus(StatusType.UPDATED);
@@ -130,5 +133,31 @@ public class StagingService {
                 }
             }
         }
+    }
+    
+    private void setChangeableValues(StageFile stageFile, StageFileDTO stageFileDTO) {
+        stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));
+        stageFile.setFileSize(stageFileDTO.getFileSize());
+
+        if (FileType.VIDEO.equals(stageFile.getFileType())) {
+            // media info scan
+            stageFile.setContent(stageFileDTO.getContent());
+        } else if (FileType.NFO.equals(stageFile.getFileType())) {
+            // NFO xml
+            stageFile.setContent(stageFileDTO.getContent());
+        }
+    }
+
+
+    @Transactional
+    public List<StageFile> getValidNFOFiles(VideoData videoData) {
+        // read nfo files for movies
+        return this.stagingDao.getValidNFOFilesForVideo(videoData.getId());
+    }
+
+    @Transactional
+    public List<StageFile> getValidNFOFiles(Series series) {
+        // TODO read NFO files for series
+        return Collections.emptyList();
     }
 }

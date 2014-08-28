@@ -38,11 +38,13 @@ import org.slf4j.LoggerFactory;
 public final class StageFileDTO implements Serializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(StageFileDTO.class);
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 1088965998133678951L;
+
     private String fileName;
     private long fileSize;
     private long fileDate;
-
+    private String content;
+    
     public StageFileDTO() {
     }
 
@@ -82,6 +84,14 @@ public final class StageFileDTO implements Serializable {
             LOG.warn("File '{}' has a date greater than now, using current date", fileName);
             this.fileDate = DateTime.now().getMillis();
         }
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     @Override

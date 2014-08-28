@@ -27,5 +27,6 @@ public enum ScanResult {
     MISSING_ID,
     TYPE_CHANGE,
     ERROR,
+    SKIPPED,
     OK;
 }

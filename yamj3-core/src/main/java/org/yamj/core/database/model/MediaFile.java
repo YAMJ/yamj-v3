@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import org.yamj.core.database.model.type.FileType;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
@@ -340,7 +342,9 @@ public class MediaFile extends AbstractAuditable implements Serializable {
 
     public StageFile getVideoFile() {
         for (StageFile stageFile : getStageFiles()) {
-            if (!StatusType.DUPLICATE.equals(stageFile.getStatus())) {
+            if (FileType.VIDEO.equals(stageFile.getFileType())
+                && !StatusType.DUPLICATE.equals(stageFile.getStatus())) 
+            {
                 return stageFile;
             }
         }

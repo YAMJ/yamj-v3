@@ -26,6 +26,8 @@ import org.yamj.common.type.StatusType;
 
 public interface IMetadata {
 
+    boolean isSkippedOnlineScan(String sourceDb);
+    
     String getSourceDbId(String sourceDb);
 
     void setSourceDbId(String sourceDb, String id);

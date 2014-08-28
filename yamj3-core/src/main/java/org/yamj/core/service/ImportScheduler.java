@@ -51,11 +51,30 @@ public class ImportScheduler {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.VIDEO, StatusType.NEW, StatusType.UPDATED);
                 if (id != null) {
-                    LOG.debug("Process stage file: {}", id);
+                    LOG.debug("Process video stage file: {}", id);
                     mediaImportService.processVideo(id);
                 }
             } catch (Exception error) {
-                LOG.error("Failed to process stage file {}", id);
+                LOG.error("Failed to process video stage file {}", id);
+                LOG.warn("Staging error", error);
+                try {
+                    mediaImportService.processingError(id);
+                } catch (Exception ignore) {
+                }
+            }
+        } while (id != null);
+
+        // PROCESS NFOS
+        do {
+            try {
+                // find next stage file to process
+                id = mediaImportService.getNextStageFileId(FileType.NFO, StatusType.NEW, StatusType.UPDATED);
+                if (id != null) {
+                    LOG.debug("Process stage nfo file: {}", id);
+                    mediaImportService.processNfo(id);
+                }
+            } catch (Exception error) {
+                LOG.error("Failed to process nfo stage file {}", id);
                 LOG.warn("Staging error", error);
                 try {
                     mediaImportService.processingError(id);
@@ -65,8 +84,6 @@ public class ImportScheduler {
         } while (id != null);
 
         // PROCESS IMAGES
-
-        // PROCESS NFOS
 
         // PROCESS SUBTITLES
 

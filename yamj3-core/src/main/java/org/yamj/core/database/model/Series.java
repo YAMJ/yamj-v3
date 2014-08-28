@@ -23,28 +23,14 @@
 package org.yamj.core.database.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-
-import org.hibernate.annotations.MapKeyType;
-import org.hibernate.annotations.Type;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.ForeignKey;
-import org.hibernate.annotations.Index;
+import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.OverrideFlag;
 
 @Entity
@@ -63,6 +49,8 @@ public class Series extends AbstractMetadata implements IDataGenres {
     private int startYear = -1;
     @Column(name = "end_year")
     private int endYear = -1;
+    @Column(name = "skip_online_scans", length=255)
+    private String skipOnlineScans;
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_ids", joinColumns
             = @JoinColumn(name = "series_id"))
@@ -119,6 +107,15 @@ public class Series extends AbstractMetadata implements IDataGenres {
 
     public void setEndYear(int endYear) {
         this.endYear = endYear;
+    }
+
+    @Override
+    public String getSkipOnlineScans() {
+        return skipOnlineScans;
+    }
+
+    public void setSkipOnlineScans(String skipOnlineScans) {
+        this.skipOnlineScans = skipOnlineScans;
     }
 
     public Map<String, String> getSourceDbIdMap() {

@@ -319,6 +319,68 @@ public class MediaImportService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
+    public void processNfo(long id) {
+        StageFile stageFile = stagingDao.getStageFile(id);
+        if (stageFile.getMediaFile() == null) {
+            LOG.info("Process new nfo {}-'{}'", stageFile.getId(), stageFile.getFileName());
+            processNewNFO(stageFile);
+        } else {
+            // just update media file
+            LOG.info("Process updated video {}-'{}'", stageFile.getId(), stageFile.getFileName());
+            processUpdatedNFO(stageFile);
+        }
+    }
+
+    private void processNewNFO(StageFile stageFile) {
+        
+        // case 1: search in same directory with same name
+        MediaFile mediaFile = this.stagingDao.findMediaFile(FileType.VIDEO, stageFile.getBaseName(), stageFile.getStageDirectory());
+        if (mediaFile != null) {
+            // update meta-data for NFO scan
+            this.updateNFOScan(mediaFile);
+            
+            // add stage file to media
+            mediaFile.addStageFile(stageFile);
+            stagingDao.updateEntity(mediaFile);
+            
+            // get 
+            stageFile.setMediaFile(mediaFile);
+            stageFile.setStatus(StatusType.DONE);
+            stagingDao.updateEntity(stageFile);
+            
+            return;
+        }
+        
+        // TODO more cases
+        
+        stageFile.setStatus(StatusType.INVALID);
+        stagingDao.updateEntity(stageFile);
+    }
+
+    private void processUpdatedNFO(StageFile stageFile) {
+        // update meta-data for NFO scan
+        this.updateNFOScan(stageFile.getMediaFile());
+        
+        stageFile.setStatus(StatusType.DONE);
+        stagingDao.updateEntity(stageFile);
+    }
+
+    private void updateNFOScan(MediaFile mediaFile) {
+        for (VideoData videoData: mediaFile.getVideoDatas()) {
+            if (videoData.isMovie()) {
+                // mark video data for NFO scan
+                videoData.setStatus(StatusType.NFO_SCAN);
+                stagingDao.updateEntity(videoData);
+            } else {
+                Series series = videoData.getSeason().getSeries();
+                // mark series data for NFO scan
+                series.setStatus(StatusType.NFO_SCAN);
+                stagingDao.updateEntity(series);
+            }
+        }
+    }
+    
+    @Transactional(propagation = Propagation.REQUIRED)
     public void processImage(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
 

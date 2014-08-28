@@ -162,6 +162,10 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
     @Override
     public ScanResult scan(VideoData videoData) {
+        if (videoData.isSkippedOnlineScan(SCANNER_ID)) {
+            return ScanResult.SKIPPED;
+        }
+        
         String tmdbID = getMovieId(videoData);
 
         if (StringUtils.isBlank(tmdbID)) {

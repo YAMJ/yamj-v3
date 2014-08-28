@@ -26,6 +26,7 @@ import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,9 @@ public class FileTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileTools.class);
     private static final int BUFF_SIZE = 16 * 1024;
+    private static final String DEFAULT_CHARSET = "UTF-8";
     private static Lock mkdirsLock = new ReentrantLock();
+    
     /**
      * One buffer for each thread to allow threaded copies
      */
@@ -264,5 +267,37 @@ public class FileTools {
      */
     public static String createDirHash(final File file) {
         return createDirHash(file.getName());
+    }
+
+    /**
+     * Read a file and return it as a string using default encoding
+     *
+     * @param file
+     * @return the file content
+     */
+    public static String readFileToString(File file) {
+        return readFileToString(file, DEFAULT_CHARSET);
+    }
+
+    /**
+     * Read a file and return it as a string
+     *
+     * @param file
+     * @param encoding
+     * @return the file content
+     */
+    public static String readFileToString(File file, String encoding) {
+        String data = "";
+        if (file == null) {
+            LOG.error("Failed reading file, file is null");
+        } else {
+            try {
+                data = FileUtils.readFileToString(file, encoding);
+            } catch (Exception ex) {
+                LOG.error("Failed reading file {}", file.getName());
+                LOG.error("Error", ex);
+            }
+        }
+        return data;
     }
 }

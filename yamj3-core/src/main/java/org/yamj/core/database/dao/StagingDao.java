@@ -22,15 +22,17 @@
  */
 package org.yamj.core.database.dao;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.Library;
-import org.yamj.core.database.model.StageDirectory;
-import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.hibernate.HibernateDao;
 
@@ -71,5 +73,45 @@ public class StagingDao extends HibernateDao {
         criteria.setCacheable(true);
         criteria.setCacheMode(CacheMode.NORMAL);
         return (Long) criteria.uniqueResult();
+    }
+    
+    public MediaFile findMediaFile(FileType fileType, String baseName, StageDirectory stageDirectory) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("SELECT distinct mf ");
+        sb.append("FROM MediaFile mf ");
+        sb.append("JOIN mf.stageFiles sf ");
+        sb.append("WHERE sf.fileType=:fileType ");
+        sb.append("AND sf.baseName=:baseName ");
+        sb.append("AND sf.stageDirectory=:stageDirectory ");
+        
+        Query query = getSession().createQuery(sb.toString());
+        query.setParameter("fileType", fileType);
+        query.setParameter("baseName", baseName);
+        query.setParameter("stageDirectory", stageDirectory);
+        return (MediaFile)query.uniqueResult();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public List<StageFile> getValidNFOFilesForVideo(long id) {
+        // TODO sort the priority
+        
+        StringBuffer sb = new StringBuffer();
+        sb.append("SELECT distinct sf FROM StageFile sf ");
+        sb.append("JOIN sf.mediaFile mf ");
+        sb.append("JOIN mf.videoDatas vd ");
+        sb.append("WHERE vd.id=:videoDataId ");
+        sb.append("AND sf.fileType=:fileType ");
+        sb.append("AND sf.status in (:statusSet) ");
+        
+        Set<StatusType> statusSet = new HashSet<StatusType>();
+        statusSet.add(StatusType.NEW);
+        statusSet.add(StatusType.UPDATED);
+        statusSet.add(StatusType.DONE);
+        
+        Query query = getSession().createQuery(sb.toString());
+        query.setParameter("videoDataId", id);
+        query.setParameter("fileType", FileType.NFO);
+        query.setParameterList("statusSet", statusSet);
+        return query.list();
     }
 }

@@ -61,6 +61,31 @@ public abstract class AbstractMetadata extends AbstractAuditable
     private StatusType status;
 
     // GETTER and SETTER
+    
+    abstract String getSkipOnlineScans();
+
+    @Override
+    public final boolean isSkippedOnlineScan(String sourceDb) {
+        String skipped = getSkipOnlineScans();
+        if (StringUtils.isBlank(skipped)) {
+            // nothing to skip
+            return false;
+        }
+        
+        if ("all".equalsIgnoreCase(skipped)) {
+            // all online scans are skipped
+            return true;
+        }
+       
+        if (StringUtils.containsIgnoreCase(skipped, sourceDb)) {
+            // skipped for explicit source
+            return true;
+        }
+        
+        // nothing skipped
+        return false;
+    }
+
     public String getIdentifier() {
         return identifier;
     }
