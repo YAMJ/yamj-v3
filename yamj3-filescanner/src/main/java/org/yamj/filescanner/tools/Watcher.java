@@ -36,9 +36,11 @@ public class Watcher {
     private final WatchService watcher = FileSystems.getDefault().newWatchService();
     private final Map<WatchKey, Path> keys = new HashMap<WatchKey, Path>();
     private boolean trace = Boolean.FALSE;
+    @SuppressWarnings("rawtypes")
     private static final WatchEvent.Kind[] STANDARD_EVENTS = {ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE};
     private boolean watchEnabled = Boolean.TRUE;    // keep watching the directories
 
+    @SuppressWarnings("unchecked")
     private static <T> WatchEvent<T> cast(WatchEvent<?> event) {
         return (WatchEvent<T>) event;
     }
@@ -143,6 +145,7 @@ public class Watcher {
             }
 
             for (WatchEvent<?> event : key.pollEvents()) {
+                @SuppressWarnings("rawtypes")
                 WatchEvent.Kind kind = event.kind();
 
                 // TBD - provide example of how OVERFLOW event is handled

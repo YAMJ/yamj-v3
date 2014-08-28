@@ -59,6 +59,7 @@ public class XmlTools {
      * @param clazz
      * @return
      */
+    @SuppressWarnings("unchecked")
     public <T> T read(String filename, Class<T> clazz) {
         LOG.debug("Reading filename '{}' of type {}", filename, clazz.getSimpleName());
 
