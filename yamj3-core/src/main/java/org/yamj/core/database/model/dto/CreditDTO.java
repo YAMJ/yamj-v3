@@ -35,7 +35,8 @@ public class CreditDTO {
     private String aka;
     private String sourcedb;
     private String sourcedbId;
-
+    private String photoURL;
+    
     public CreditDTO() {
     }
 
@@ -54,7 +55,9 @@ public class CreditDTO {
     }
 
     public void setName(String name) {
-        this.name = name;
+        if (StringUtils.isNotBlank(name)) {
+            this.name = name.trim();
+        }
     }
 
     public JobType getJobType() {
@@ -70,7 +73,9 @@ public class CreditDTO {
     }
 
     public void setRole(String role) {
-        this.role = role;
+        if (StringUtils.isNotBlank(role)) {
+            this.role = role.trim();
+        }
     }
 
     public String getAka() {
@@ -78,7 +83,9 @@ public class CreditDTO {
     }
 
     public void setAka(String aka) {
-        this.aka = aka;
+        if (StringUtils.isNotBlank(aka)) {
+            this.aka = aka.trim();
+        }
     }
 
     public String getSourcedb() {
@@ -97,7 +104,15 @@ public class CreditDTO {
         this.sourcedbId = sourcedbId;
     }
 
-    // EQUALITY CHECKS
+    public String getPhotoURL() {
+        return photoURL;
+    }
+
+    public void setPhotoURL(String photoURL) {
+        if (StringUtils.isNotBlank(photoURL)) {
+            this.photoURL = photoURL.trim();
+        }
+    }
 
     @Override
     public int hashCode() {

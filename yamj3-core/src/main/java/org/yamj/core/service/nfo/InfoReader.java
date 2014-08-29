@@ -22,8 +22,13 @@
  */
 package org.yamj.core.service.nfo;
 
+
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +37,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.yamj.common.tools.DateTimeTools;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.service.file.tools.FileTools;
@@ -42,7 +48,7 @@ import org.yamj.core.tools.StringTools;
 import org.yamj.core.tools.xml.DOMHelper;
 
 /**
- * Class to read the NFO files
+ * Service to read the NFO files
  */
 @Service("infoReader")
 public final class InfoReader {
@@ -62,22 +68,21 @@ public final class InfoReader {
      * @param nfoText
      * @param dto
      */
-    public void readNfoFile(StageFile stageFile, InfoDTO  dto) {
+    public void readNfoFile(StageFile stageFile, InfoDTO  dto) throws Exception {
         String nfoFilename = stageFile.getFileName();
 
         String nfoContent;
         if (StringUtils.isBlank(stageFile.getContent())) {
             // try to read content from file
             File nfoFile = new File(stageFile.getFullPath());
-            nfoContent = FileTools.readFileToString(nfoFile);
+            nfoContent = FileUtils.readFileToString(nfoFile, FileTools.DEFAULT_CHARSET);
         } else {
             // get delivered content
             nfoContent = stageFile.getContent();
         }
         
         if (StringUtils.isBlank(nfoContent)) {
-            LOG.warn("NFO could not be read {}", nfoFilename);
-            return;
+            throw new RuntimeException("NFO could not be read: " + nfoFilename);
         }
         
         boolean parsedNfo = Boolean.FALSE;   // was the NFO XML parsed correctly or at all
@@ -210,8 +215,8 @@ public final class InfoReader {
             }
         }
 
-        // TODO parse sets
-        //parseSets(eCommon.getElementsByTagName("set"), movie);
+        // parse sets
+        parseSets(eCommon.getElementsByTagName("set"), dto);
 
         // parse rating
         int rating = parseRating(DOMHelper.getValueFromElement(eCommon, "rating"));
@@ -245,29 +250,33 @@ public final class InfoReader {
         value = DOMHelper.getValueFromElement(eCommon, "company");
         dto.setCompany(value);
 
+        // parse genres
+        parseGenres(eCommon.getElementsByTagName("genre"), dto);
+
+        // premiered / release date
+        movieDate(DOMHelper.getValueFromElement(eCommon, "premiered"), dto, nfoFilename);
+        movieDate(DOMHelper.getValueFromElement(eCommon, "releasedate"), dto, nfoFilename);
+
+
         /* TODO
-        if (OverrideTools.checkOverwriteGenres(movie, NFO_PLUGIN_ID)) {
-            List<String> newGenres = new ArrayList<String>();
-            parseGenres(eCommon.getElementsByTagName("genre"), newGenres);
-            movie.setGenres(newGenres, NFO_PLUGIN_ID);
-        }
-
-        // Premiered & Release Date
-        movieDate(movie, DOMHelper.getValueFromElement(eCommon, "premiered"));
-        movieDate(movie, DOMHelper.getValueFromElement(eCommon, "releasedate"));
-
-
         if (OverrideTools.checkOverwriteCountry(movie, NFO_PLUGIN_ID)) {
             movie.setCountries(DOMHelper.getValueFromElement(eCommon, "country"), NFO_PLUGIN_ID);
         }
-
-        if (OverrideTools.checkOverwriteTop250(movie, NFO_PLUGIN_ID)) {
-            movie.setTop250(DOMHelper.getValueFromElement(eCommon, "top250"), NFO_PLUGIN_ID);
+        */
+        
+        // parse Top250
+        value = DOMHelper.getValueFromElement(eCommon, "top250");
+        if (StringUtils.isNumeric(value)) {
+            try {
+                dto.setTop250(Integer.parseInt(value));
+            } catch (Exception e) {
+                // ignore this error
+            }
         }
-
-        // Director and Writers
-        if (!SKIP_NFO_CREW) {
-            parseDirectors(eCommon.getElementsByTagName("director"), movie);
+        
+        // director and writers
+        if (!this.configService.getBooleanProperty("nfo.skip.crew", false)) {
+            parseDirectors(eCommon.getElementsByTagName("director"), dto);
             
             List<Node> writerNodes = new ArrayList<Node>();
             // get writers list
@@ -291,40 +300,31 @@ public final class InfoReader {
                 }
             }
             // parse writers
-            parseWriters(writerNodes, movie);
+            parseWriters(writerNodes, dto);
         }
 
-        // Actors
-        if (!SKIP_NFO_CAST) {
-            parseActors(eCommon.getElementsByTagName("actor"), movie);
+        // parse actors
+        if (!this.configService.getBooleanProperty("nfo.skip.cast", false)) {
+            parseActors(eCommon.getElementsByTagName("actor"), dto);
         }
-
-        // FPS
-        float tmpFps = NumberUtils.toFloat(DOMHelper.getValueFromElement(eCommon, "fps"), -1F);
-        if (tmpFps > -1F) {
-            movie.setFps(tmpFps, NFO_PLUGIN_ID);
-        }
-
-        // VideoSource: Issue 506 - Even though it's not strictly XBMC standard
-        if (OverrideTools.checkOverwriteVideoSource(movie, NFO_PLUGIN_ID)) {
-            // Issue 2531: Try the alternative "videoSource"
-            movie.setVideoSource(DOMHelper.getValueFromElement(eCommon, "videosource", "videoSource"), NFO_PLUGIN_ID);
-        }
-
-        // Video Output
-        String tempString = DOMHelper.getValueFromElement(eCommon, "videooutput");
-        movie.setVideoOutput(tempString, NFO_PLUGIN_ID);
-
-        // Parse the video info
-        parseFileInfo(movie, DOMHelper.getElementByName(eCommon, "fileinfo"));
         
-        */
-
-        /* Parse the episode details
-        if (movie.isTVShow()) {
-            parseAllEpisodeDetails(movie, xmlDoc.getElementsByTagName(TYPE_EPISODE));
+        // parse artwork URLs
+        if (!this.configService.getBooleanProperty("nfo.skip.posterURL", true)) {
+            dto.setPosterURL(DOMHelper.getValueFromElement(eCommon, "thumb"));
         }
-        */
+        if (!this.configService.getBooleanProperty("nfo.skip.fanartURL", true)) {
+            dto.setFanartURL(DOMHelper.getValueFromElement(eCommon, "fanart"));
+        }
+
+        // parse trailer
+        if (!this.configService.getBooleanProperty("nfo.skip.trailerURL", false)) {
+            parseTrailers(eCommon.getElementsByTagName("trailer"), dto);
+        }
+        
+        // parse all episodes
+        if (dto.isTvShow()) {
+            parseAllEpisodeDetails(dto, xmlDoc.getElementsByTagName(DOMHelper.TYPE_EPISODE));
+        }
     }
 
     /**
@@ -502,246 +502,14 @@ public final class InfoReader {
         }
     }
 
-    // still TODO
-    
-    /**
-     * Parse the FileInfo section
-     *
-     * @param movie
-     * @param eFileInfo
-    private static void parseFileInfo(Movie movie, Element eFileInfo) {
-        if (eFileInfo == null) {
-            return;
-        }
-
-        if (OverrideTools.checkOverwriteContainer(movie, NFO_PLUGIN_ID)) {
-            String container = DOMHelper.getValueFromElement(eFileInfo, "container");
-            movie.setContainer(container, NFO_PLUGIN_ID);
-        }
-
-        Element eStreamDetails = DOMHelper.getElementByName(eFileInfo, "streamdetails");
-
-        if (eStreamDetails == null) {
-            return;
-        }
-
-        // Video
-        NodeList nlStreams = eStreamDetails.getElementsByTagName("video");
-        Node nStreams;
-        for (int looper = 0; looper < nlStreams.getLength(); looper++) {
-            nStreams = nlStreams.item(looper);
-            if (nStreams.getNodeType() == Node.ELEMENT_NODE) {
-                Element eStreams = (Element) nStreams;
-
-                String temp = DOMHelper.getValueFromElement(eStreams, "codec");
-                if (isValidString(temp)) {
-                    Codec videoCodec = new Codec(CodecType.VIDEO);
-                    videoCodec.setCodecSource(CodecSource.NFO);
-                    videoCodec.setCodec(temp);
-                    movie.addCodec(videoCodec);
-                }
-
-                if (OverrideTools.checkOverwriteAspectRatio(movie, NFO_PLUGIN_ID)) {
-                    temp = DOMHelper.getValueFromElement(eStreams, "aspect");
-                    movie.setAspectRatio(ASPECT_TOOLS.cleanAspectRatio(temp), NFO_PLUGIN_ID);
-                }
-
-                if (OverrideTools.checkOverwriteResolution(movie, NFO_PLUGIN_ID)) {
-                    movie.setResolution(DOMHelper.getValueFromElement(eStreams, "width"), DOMHelper.getValueFromElement(eStreams, "height"), NFO_PLUGIN_ID);
-                }
-            }
-        } // End of VIDEO
-
-        // Audio
-        nlStreams = eStreamDetails.getElementsByTagName("audio");
-
-        for (int looper = 0; looper < nlStreams.getLength(); looper++) {
-            nStreams = nlStreams.item(looper);
-            if (nStreams.getNodeType() == Node.ELEMENT_NODE) {
-                Element eStreams = (Element) nStreams;
-
-                String aCodec = DOMHelper.getValueFromElement(eStreams, "codec").trim();
-                String aLanguage = DOMHelper.getValueFromElement(eStreams, "language");
-                String aChannels = DOMHelper.getValueFromElement(eStreams, "channels");
-
-                // If the codec is lowercase, covert it to uppercase, otherwise leave it alone
-                if (StringUtils.isAllLowerCase(aCodec)) {
-                    aCodec = aCodec.toUpperCase();
-                }
-
-                if (StringTools.isValidString(aLanguage)) {
-                    aLanguage = MovieFilenameScanner.determineLanguage(aLanguage);
-                }
-
-                Codec audioCodec = new Codec(CodecType.AUDIO, aCodec);
-                audioCodec.setCodecSource(CodecSource.NFO);
-                audioCodec.setCodecLanguage(aLanguage);
-                audioCodec.setCodecChannels(aChannels);
-                movie.addCodec(audioCodec);
-            }
-        } // End of AUDIO
-
-        // Update the language
-        if (OverrideTools.checkOverwriteLanguage(movie, NFO_PLUGIN_ID)) {
-            Set<String> langs = new HashSet<String>();
-            // Process the languages and remove any duplicates
-            for (Codec codec : movie.getCodecs()) {
-                if (codec.getCodecType() == CodecType.AUDIO) {
-                    langs.add(codec.getCodecLanguage());
-                }
-            }
-
-            // Remove UNKNOWN if it is NOT the only entry
-            if (langs.contains(Movie.UNKNOWN) && langs.size() > 1) {
-                langs.remove(Movie.UNKNOWN);
-            } else if (langs.isEmpty()) {
-                // Add the language as UNKNOWN by default.
-                langs.add(Movie.UNKNOWN);
-            }
-
-            // Build the language string
-            StringBuilder movieLanguage = new StringBuilder();
-            for (String lang : langs) {
-                if (movieLanguage.length() > 0) {
-                    movieLanguage.append(LANGUAGE_DELIMITER);
-                }
-                movieLanguage.append(lang);
-            }
-            movie.setLanguage(movieLanguage.toString(), NFO_PLUGIN_ID);
-        }
-
-        // Subtitles
-        List<String> subtitles = new ArrayList<String>();
-        nlStreams = eStreamDetails.getElementsByTagName("subtitle");
-        for (int looper = 0; looper < nlStreams.getLength(); looper++) {
-            nStreams = nlStreams.item(looper);
-            if (nStreams.getNodeType() == Node.ELEMENT_NODE) {
-                Element eStreams = (Element) nStreams;
-                subtitles.add(DOMHelper.getValueFromElement(eStreams, "language"));
-            }
-        }
-        SubtitleTools.setMovieSubtitles(movie, subtitles);
-    }
-    */
-
-    /**
-     * Process all the Episode Details
-     *
-     * @param movie
-     * @param nlEpisodeDetails
-    private static void parseAllEpisodeDetails(Movie movie, NodeList nlEpisodeDetails) {
-        Node nEpisodeDetails;
-        for (int looper = 0; looper < nlEpisodeDetails.getLength(); looper++) {
-            nEpisodeDetails = nlEpisodeDetails.item(looper);
-            if (nEpisodeDetails.getNodeType() == Node.ELEMENT_NODE) {
-                Element eEpisodeDetail = (Element) nEpisodeDetails;
-                parseSingleEpisodeDetail(eEpisodeDetail).updateMovie(movie);
-            }
-        }
-    }
-    */
-
-    /**
-     * Parse a single episode detail element
-     *
-     * @param movie
-     * @param eEpisodeDetails
-     * @return
-    private static EpisodeDetail parseSingleEpisodeDetail(Element eEpisodeDetails) {
-        EpisodeDetail epDetail = new EpisodeDetail();
-        if (eEpisodeDetails == null) {
-            return epDetail;
-        }
-
-        epDetail.setTitle(DOMHelper.getValueFromElement(eEpisodeDetails, "title"));
-
-        String tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "season");
-        if (StringUtils.isNumeric(tempValue)) {
-            epDetail.setSeason(Integer.parseInt(tempValue));
-        }
-
-        tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "episode");
-        if (StringUtils.isNumeric(tempValue)) {
-            epDetail.setEpisode(Integer.parseInt(tempValue));
-        }
-
-        epDetail.setPlot(DOMHelper.getValueFromElement(eEpisodeDetails, "plot"));
-
-        tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "rating");
-        int rating = parseRating(tempValue);
-        if (rating > -1) {
-            // Looks like a valid rating
-            epDetail.setRating(String.valueOf(rating));
-        }
-
-        tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "aired");
-        if (isValidString(tempValue)) {
-            try {
-                epDetail.setFirstAired(DateTimeTools.convertDateToString(new DateTime(tempValue)));
-            } catch (Exception ignore) {
-                // Set the aired date if there is an exception
-                epDetail.setFirstAired(tempValue);
-            }
-        }
-
-        epDetail.setAirsAfterSeason(DOMHelper.getValueFromElement(eEpisodeDetails, "airsafterseason", "airsAfterSeason"));
-        epDetail.setAirsBeforeSeason(DOMHelper.getValueFromElement(eEpisodeDetails, "airsbeforeseason", "airsBeforeSeason"));
-        epDetail.setAirsBeforeEpisode(DOMHelper.getValueFromElement(eEpisodeDetails, "airsbeforeepisode", "airsBeforeEpisode"));
-
-        return epDetail;
-    }
-    */
-
-    /**
-     * Convert the date string to a date and update the movie object
-     *
-     * @param movie
-     * @param dateString
-     * @param parseDate
-    public static void movieDate(Movie movie, final String dateString) {
-        DateTimeConfigBuilder.newInstance().setDmyOrder(false);
-
-        String parseDate = StringUtils.normalizeSpace(dateString);
-        if (StringTools.isValidString(parseDate)) {
-            try {
-                DateTime dateTime;
-                if (parseDate.length() == 4 && StringUtils.isNumeric(parseDate)) {
-                    // Warn the user
-                    LOG.debug(LOG_MESSAGE + "Partial date detected in premiered field of NFO for " + movie.getBaseFilename());
-                    // Assume just the year an append "-01-01" to the end
-                    dateTime = new DateTime(parseDate + "-01-01");
-                } else {
-                    dateTime = new DateTime(parseDate);
-                }
-
-                if (OverrideTools.checkOverwriteReleaseDate(movie, NFO_PLUGIN_ID)) {
-                    movie.setReleaseDate(DateTimeTools.convertDateToString(dateTime), NFO_PLUGIN_ID);
-                }
-
-                if (OverrideTools.checkOverwriteYear(movie, NFO_PLUGIN_ID)) {
-                    movie.setYear(dateTime.toString("yyyy"), NFO_PLUGIN_ID);
-                }
-            } catch (Exception ex) {
-                LOG.warn(LOG_MESSAGE + "Failed parsing NFO file for movie: " + movie.getBaseFilename() + ". Please fix or remove it.");
-                LOG.warn(LOG_MESSAGE + "premiered or releasedate does not contain a valid date: " + parseDate);
-                LOG.warn(LOG_MESSAGE + SystemTools.getStackTrace(ex));
-
-                if (OverrideTools.checkOverwriteReleaseDate(movie, NFO_PLUGIN_ID)) {
-                    movie.setReleaseDate(parseDate, NFO_PLUGIN_ID);
-                }
-            }
-        }
-    }
-     */
-
     /**
      * Parse Genres from the XML NFO file
-     *
      * Caters for multiple genres on the same line and multiple lines.
      *
      * @param nlElements
-     * @param movie
-    private static void parseGenres(NodeList nlElements, List<String> newGenres) {
+     * @param dto
+    */
+    private void parseGenres(NodeList nlElements, InfoDTO dto) {
         Node nElements;
         for (int looper = 0; looper < nlElements.getLength(); looper++) {
             nElements = nlElements.item(looper);
@@ -749,39 +517,132 @@ public final class InfoReader {
                 Element eGenre = (Element) nElements;
                 NodeList nlNames = eGenre.getElementsByTagName("name");
                 if ((nlNames != null) && (nlNames.getLength() > 0)) {
-                    parseGenres(nlNames, newGenres);
-                } else {
-                    newGenres.addAll(StringTools.splitList(eGenre.getTextContent(), SPLIT_GENRE));
+                    parseGenres(nlNames, dto);
+                } else if (eGenre.getTextContent() != null) {
+                    for (String genre : eGenre.getTextContent().split(SPLIT_GENRE)) {
+                        dto.adGenre(genre);
+                    }
                 }
             }
         }
     }
-    */
 
     /**
-     * Parse Actors from the XML NFO file.
+     * Convert the date string to a date and update the movie object
+     *
+     * @param movie
+     * @param dateString
+     * @param parseDate
+     */
+    public void movieDate(final String dateString, InfoDTO dto, String nfoFilename) {
+
+        String parseDate = StringUtils.normalizeSpace(dateString);
+        if (StringUtils.isNotBlank(parseDate)) {
+            try {
+                DateTime dateTime;
+                if (parseDate.length() == 4 && StringUtils.isNumeric(parseDate)) {
+                    // warn the user
+                    LOG.info("Partial date detected in premiered field of NFO {}", nfoFilename);
+                    // Assume just the year an append "-01-01" to the end
+                    dateTime = new DateTime(parseDate + "-01-01");
+                } else {
+                    dateTime = new DateTime(parseDate);
+                }
+
+                // set release date
+                dto.setReleaseDate(DateTimeTools.convertDateToString(dateTime));
+                // also set the year
+                dto.setYear(dateTime.toString("yyyy"));
+            } catch (Exception ex) {
+                LOG.warn("premiered or releasedate does not contain a valid date: " + parseDate);
+                LOG.error("Error", ex);
+
+                // just set the release date
+                dto.setReleaseDate(parseDate);
+            }
+        }
+    }
+
+    /**
+     * Parse Sets from the XML NFO file
      *
      * @param nlElements
-     * @param movie
-    private static void parseActors(NodeList nlElements, Movie movie) {
+     * @param dto
+     */
+    private void parseSets(NodeList nlElements, InfoDTO dto) {
+        Node nElements;
+        for (int looper = 0; looper < nlElements.getLength(); looper++) {
+            nElements = nlElements.item(looper);
+            if (nElements.getNodeType() == Node.ELEMENT_NODE) {
+                Element eId = (Element) nElements;
+
+                String setOrder = eId.getAttribute("order");
+                if (StringUtils.isNumeric(setOrder)) {
+                    dto.addSet(eId.getTextContent(), Integer.parseInt(setOrder));
+                } else {
+                    dto.addSet(eId.getTextContent());
+                }
+            }
+        }
+    }
+
+    /**
+     * Parse directors from the XML NFO file
+     *
+     * @param nlElements
+     * @param dto
+     */
+    private void parseDirectors(NodeList nlElements, InfoDTO dto) {
         // check if we have a node
         if (nlElements == null || nlElements.getLength() == 0) {
             return;
         }
 
-        // check if we should override
-        boolean overrideActors = OverrideTools.checkOverwriteActors(movie, NFO_PLUGIN_ID);
-        boolean overridePeopleActors = OverrideTools.checkOverwritePeopleActors(movie, NFO_PLUGIN_ID);
-        if (!overrideActors && !overridePeopleActors) {
-            // nothing to do if nothing should be overridden
+        Node nElements;
+        for (int looper = 0; looper < nlElements.getLength(); looper++) {
+            nElements = nlElements.item(looper);
+            if (nElements.getNodeType() == Node.ELEMENT_NODE) {
+                Element eDirector = (Element) nElements;
+                dto.addDirector(eDirector.getTextContent());
+            }
+        }
+    }
+
+    /**
+     * Parse writers from the XML NFO file
+     *
+     * @param nlElements
+     * @param dto
+     */
+    private void parseWriters(List<Node> nlWriters, InfoDTO dto) {
+        // check if we have nodes
+        if (nlWriters == null || nlWriters.isEmpty()) {
             return;
         }
 
-        // count for already set actors
-        int count = 0;
-        // flag to indicate if cast must be cleared
-        boolean clearCast = Boolean.TRUE;
-        boolean clearPeopleCast = Boolean.TRUE;
+        for (Node nWriter : nlWriters) {
+            NodeList nlChilds = ((Element)nWriter).getChildNodes();
+            Node nChilds;
+            for (int looper = 0; looper < nlChilds.getLength(); looper++) {
+                nChilds = nlChilds.item(looper);
+                if (nChilds.getNodeType() == Node.TEXT_NODE) {
+                    dto.addWriter(nChilds.getNodeValue());
+                }
+            }
+        }
+    }
+
+    /**
+     * Parse Actors from the XML NFO file.
+     *
+     * @param nlElements
+     * @param dto
+     */
+    private void parseActors(NodeList nlElements, InfoDTO dto) {
+        // check if we have a node
+        if (nlElements == null || nlElements.getLength() == 0) {
+            return;
+        }
 
         for (int actorLoop = 0; actorLoop < nlElements.getLength(); actorLoop++) {
             // Get all the name/role/thumb nodes
@@ -789,9 +650,9 @@ public final class InfoReader {
             NodeList nlCast = nActors.getChildNodes();
             Node nElement;
 
-            String aName = Movie.UNKNOWN;
-            String aRole = Movie.UNKNOWN;
-            String aThumb = Movie.UNKNOWN;
+            String aName = null;
+            String aRole = null;
+            String aThumb = null;
             Boolean firstActor = Boolean.TRUE;
 
             if (nlCast.getLength() > 1) {
@@ -803,32 +664,11 @@ public final class InfoReader {
                             if (firstActor) {
                                 firstActor = Boolean.FALSE;
                             } else {
-
-                                if (overrideActors) {
-                                    // clear cast if not already done
-                                    if (clearCast) {
-                                        movie.clearCast();
-                                        clearCast = Boolean.FALSE;
-                                    }
-                                    // add actor
-                                    movie.addActor(aName, NFO_PLUGIN_ID);
-                                }
-
-                                if (overridePeopleActors && (count < MAX_COUNT_ACTOR)) {
-                                    // clear people cast if not already done
-                                    if (clearPeopleCast) {
-                                        movie.clearPeopleCast();
-                                        clearPeopleCast = Boolean.FALSE;
-                                    }
-                                    // add actor
-                                    if (movie.addActor(Movie.UNKNOWN, aName, aRole, aThumb, Movie.UNKNOWN, NFO_PLUGIN_ID)) {
-                                        count++;
-                                    }
-                                }
+                                dto.addActor(aName, aRole, aThumb);
                             }
                             aName = eCast.getTextContent();
-                            aRole = Movie.UNKNOWN;
-                            aThumb = Movie.UNKNOWN;
+                            aRole = null;
+                            aThumb = null;
                         } else if (eCast.getNodeName().equalsIgnoreCase("role") && StringUtils.isNotBlank(eCast.getTextContent())) {
                             aRole = eCast.getTextContent();
                         } else if (eCast.getNodeName().equalsIgnoreCase("thumb") && StringUtils.isNotBlank(eCast.getTextContent())) {
@@ -843,154 +683,89 @@ public final class InfoReader {
                 aName = nActors.getTextContent();
             }
 
-            if (overrideActors) {
-                // clear cast if not already done
-                if (clearCast) {
-                    movie.clearCast();
-                    clearCast = Boolean.FALSE;
-                }
-                // add actor
-                movie.addActor(aName, NFO_PLUGIN_ID);
-            }
-
-            if (overridePeopleActors && (count < MAX_COUNT_ACTOR)) {
-                // clear people cast if not already done
-                if (clearPeopleCast) {
-                    movie.clearPeopleCast();
-                    clearPeopleCast = Boolean.FALSE;
-                }
-                // add actor
-                if (movie.addActor(Movie.UNKNOWN, aName, aRole, aThumb, Movie.UNKNOWN, NFO_PLUGIN_ID)) {
-                    count++;
-                }
-            }
+            // after all add the last scraped actor
+            dto.addActor(aName, aRole, aThumb);
         }
     }
-    */
-
-    /**
-     * Parse Writers from the XML NFO file
-     *
-     * @param nlElements
-     * @param movie
-    private static void parseWriters(List<Node> nlWriters, Movie movie) {
-        // check if we have nodes
-        if (nlWriters == null || nlWriters.isEmpty()) {
-            return;
-        }
-
-        // check if we should override
-        boolean overrideWriters = OverrideTools.checkOverwriteWriters(movie, NFO_PLUGIN_ID);
-        boolean overridePeopleWriters = OverrideTools.checkOverwritePeopleWriters(movie, NFO_PLUGIN_ID);
-        if (!overrideWriters && !overridePeopleWriters) {
-            // nothing to do if nothing should be overridden
-            return;
-        }
-
-        Set<String> newWriters = new LinkedHashSet<String>();
-        for (Node nWriter : nlWriters) {
-            NodeList nlChilds = ((Element)nWriter).getChildNodes();
-            Node nChilds;
-            for (int looper = 0; looper < nlChilds.getLength(); looper++) {
-                nChilds = nlChilds.item(looper);
-                if (nChilds.getNodeType() == Node.TEXT_NODE) {
-                    newWriters.add(nChilds.getNodeValue());
-                }
-            }
-        }
-
-        if (overrideWriters) {
-            movie.setWriters(newWriters, NFO_PLUGIN_ID);
-        }
-        if (overridePeopleWriters) {
-            movie.setPeopleWriters(newWriters, NFO_PLUGIN_ID);
-        }
-    }
-    */
-
-    /**
-     * Parse Directors from the XML NFO file
-     *
-     * @param nlElements
-     * @param movie
-    private static void parseDirectors(NodeList nlElements, Movie movie) {
-        // check if we have a node
-        if (nlElements == null || nlElements.getLength() == 0) {
-            return;
-        }
-
-        // check if we should override
-        boolean overrideDirectors = OverrideTools.checkOverwriteDirectors(movie, NFO_PLUGIN_ID);
-        boolean overridePeopleDirectors = OverrideTools.checkOverwritePeopleDirectors(movie, NFO_PLUGIN_ID);
-        if (!overrideDirectors && !overridePeopleDirectors) {
-            // nothing to do if nothing should be overridden
-            return;
-        }
-
-        List<String> newDirectors = new ArrayList<String>();
-        Node nElements;
-        for (int looper = 0; looper < nlElements.getLength(); looper++) {
-            nElements = nlElements.item(looper);
-            if (nElements.getNodeType() == Node.ELEMENT_NODE) {
-                Element eDirector = (Element) nElements;
-                newDirectors.add(eDirector.getTextContent());
-            }
-        }
-
-        if (overrideDirectors) {
-            movie.setDirectors(newDirectors, NFO_PLUGIN_ID);
-        }
-
-        if (overridePeopleDirectors) {
-            movie.setPeopleDirectors(newDirectors, NFO_PLUGIN_ID);
-        }
-    }
-     */
 
     /**
      * Parse Trailers from the XML NFO file
      *
      * @param nlElements
-     * @param movie
-    private static void parseTrailers(NodeList nlElements, Movie movie) {
+     * @param dto
+     */
+    private void parseTrailers(NodeList nlElements, InfoDTO dto) {
         Node nElements;
         for (int looper = 0; looper < nlElements.getLength(); looper++) {
             nElements = nlElements.item(looper);
             if (nElements.getNodeType() == Node.ELEMENT_NODE) {
                 Element eTrailer = (Element) nElements;
-
-                String trailer = eTrailer.getTextContent().trim();
-                if (!trailer.isEmpty()) {
-                    ExtraFile ef = new ExtraFile();
-                    ef.setNewFile(Boolean.FALSE);
-                    ef.setFilename(trailer);
-                    movie.addExtraFile(ef);
-                }
+                dto.addTrailerURL(eTrailer.getTextContent());
             }
         }
     }
-    */
-    
+
     /**
-     * Parse Sets from the XML NFO file
+     * Process all the Episode Details
      *
-     * @param nlElements
-     * @param movie
-    private static void parseSets(NodeList nlElements, Movie movie) {
-        Node nElements;
-        for (int looper = 0; looper < nlElements.getLength(); looper++) {
-            nElements = nlElements.item(looper);
-            if (nElements.getNodeType() == Node.ELEMENT_NODE) {
-                Element eId = (Element) nElements;
-
-                String setOrder = eId.getAttribute("order");
-                if (StringUtils.isNumeric(setOrder)) {
-                    movie.addSet(eId.getTextContent(), Integer.parseInt(setOrder));
-                } else {
-                    movie.addSet(eId.getTextContent());
-                }
+     * @param dto
+     * @param nlEpisodeDetails
+     */
+    private void parseAllEpisodeDetails(InfoDTO dto, NodeList nlEpisodeDetails) {
+        Node nEpisodeDetails;
+        for (int looper = 0; looper < nlEpisodeDetails.getLength(); looper++) {
+            nEpisodeDetails = nlEpisodeDetails.item(looper);
+            if (nEpisodeDetails.getNodeType() == Node.ELEMENT_NODE) {
+                Element eEpisodeDetail = (Element) nEpisodeDetails;
+                InfoEpisodeDTO episodeDTO = parseSingleEpisodeDetail(eEpisodeDetail);
+                dto.addEpisode(episodeDTO);
             }
         }
     }
-    */
+
+    /**
+     * Parse a single episode detail element
+     *
+     * @param eEpisodeDetails
+     * @return
+     */
+    private InfoEpisodeDTO parseSingleEpisodeDetail(Element eEpisodeDetails) {
+        if (eEpisodeDetails == null) {
+            return null;
+        }
+        InfoEpisodeDTO episodeDTO = new InfoEpisodeDTO();
+        
+        episodeDTO.setTitle(DOMHelper.getValueFromElement(eEpisodeDetails, "title"));
+
+        String tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "season");
+        if (StringUtils.isNumeric(tempValue)) {
+            episodeDTO.setSeason(Integer.parseInt(tempValue));
+        }
+
+        tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "episode");
+        if (StringUtils.isNumeric(tempValue)) {
+            episodeDTO.setEpisode(Integer.parseInt(tempValue));
+        }
+
+        episodeDTO.setPlot(DOMHelper.getValueFromElement(eEpisodeDetails, "plot"));
+
+        tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "rating");
+        episodeDTO.setRating(parseRating(tempValue));
+
+        tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "aired");
+        if (StringUtils.isNotBlank(tempValue)) {
+            try {
+                episodeDTO.setFirstAired(DateTimeTools.convertDateToString(new DateTime(tempValue)));
+            } catch (Exception ignore) {
+                // Set the aired date if there is an exception
+                episodeDTO.setFirstAired(tempValue);
+            }
+        }
+
+        episodeDTO.setAirsAfterSeason(DOMHelper.getValueFromElement(eEpisodeDetails, "airsafterseason", "airsAfterSeason"));
+        episodeDTO.setAirsBeforeSeason(DOMHelper.getValueFromElement(eEpisodeDetails, "airsbeforeseason", "airsBeforeSeason"));
+        episodeDTO.setAirsBeforeEpisode(DOMHelper.getValueFromElement(eEpisodeDetails, "airsbeforeepisode", "airsBeforeEpisode"));
+
+        return episodeDTO;
+    }
 }

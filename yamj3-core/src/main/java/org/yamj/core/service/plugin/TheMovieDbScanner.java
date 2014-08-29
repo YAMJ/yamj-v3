@@ -239,11 +239,11 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
                 credit = new CreditDTO();
                 credit.setSourcedb(SCANNER_ID);
                 credit.setSourcedbId(String.valueOf(person.getId()));
-                credit.setName(StringUtils.trim(person.getName()));
-                credit.setRole(StringUtils.trimToNull(person.getCharacter()));
+                credit.setName(person.getName());
+                credit.setRole(person.getCharacter());
 
                 if (person.getAka() != null && !person.getAka().isEmpty()) {
-                    credit.setAka(StringUtils.trimToNull(person.getAka().get(0)));
+                    credit.setAka(person.getAka().get(0));
                 }
 
                 if (person.getPersonType() == PersonType.CAST) {

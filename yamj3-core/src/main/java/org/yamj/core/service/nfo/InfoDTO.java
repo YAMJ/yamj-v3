@@ -22,8 +22,11 @@
  */
 package org.yamj.core.service.nfo;
 
+import org.yamj.core.database.model.dto.CreditDTO;
+
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
+import org.yamj.core.database.model.type.JobType;
 
 public final class InfoDTO {
 
@@ -31,11 +34,18 @@ public final class InfoDTO {
     private boolean tvShow = false;
     private List<String> skipOnlineScans = new ArrayList<String>();
     private Map<String, String> ids = new HashMap<String, String>();
+    private Map<String, Integer> sets = new HashMap<String, Integer>();
+    private Set<CreditDTO> credits = new LinkedHashSet<CreditDTO>();
+    private Set<String> genres = new LinkedHashSet<String>();
+    private Set<String> trailerURLs= new HashSet<String>();
+    private Set<InfoEpisodeDTO> episodes = new HashSet<InfoEpisodeDTO>();
     private String title;
     private String titleOriginal;
     private String titleSort;
     private int year;
+    private String releaseDate;
     private int rating;
+    private int top250;
     private String runtime;
     private String certification;
     private String plot;
@@ -43,8 +53,9 @@ public final class InfoDTO {
     private String tagline;
     private String quote;
     private String company;
-    private Set<String> genres = new HashSet<String>();
-
+    private String posterURL;
+    private String fanartURL;
+    
     public InfoDTO() {
         this(false);
     }
@@ -145,6 +156,17 @@ public final class InfoDTO {
             }
         }
     }
+    
+    public String getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        if (StringUtils.isNotBlank(releaseDate)) {
+            this.releaseDate = releaseDate;
+            this.changed = true;
+        }
+    }
 
     public int getRating() {
         return rating;
@@ -153,6 +175,17 @@ public final class InfoDTO {
     public void setRating(int rating) {
         if (rating >= 0) {
             this.rating = rating;
+            this.changed = true;
+        }
+    }
+
+    public int getTop250() {
+        return top250;
+    }
+
+    public void setTop250(int top250) {
+        if (top250 >= 0) {
+            this.top250 = top250;
             this.changed = true;
         }
     }
@@ -240,8 +273,100 @@ public final class InfoDTO {
 
     public void adGenre(String genre) {
         if (StringUtils.isNotBlank(genre)) {
-            this.genres.add(genre);
+            this.genres.add(genre.trim());
             this.changed = true;
         }
+    }
+
+    public Map<String, Integer> getSets() {
+        return sets;
+    }
+
+    public void addSet(String setName) {
+        this.addSet(setName, null);
+    }
+
+    public void addSet(String setName, Integer order) {
+        if (StringUtils.isNotBlank(setName)) {
+            this.sets.put(setName, order);
+            this.changed = true;
+        }
+    }
+
+    public String getPosterURL() {
+        return posterURL;
+    }
+
+    public void setPosterURL(String posterURL) {
+        if (StringUtils.isNotBlank(posterURL)) {
+            this.posterURL = posterURL;
+            this.changed = true;
+        }
+    }
+
+    public String getFanartURL() {
+        return fanartURL;
+    }
+
+    public void setFanartURL(String fanartURL) {
+        if (StringUtils.isNotBlank(fanartURL)) {
+            this.fanartURL = fanartURL;
+            this.changed = true;
+        }
+    }
+
+    public Set<CreditDTO> getCredits() {
+        return credits;
+    }
+
+    public void addDirector(String director) {
+        if (StringUtils.isNotBlank(director)) {
+            this.credits.add(new CreditDTO(JobType.DIRECTOR, director.trim()));
+            this.changed = true;
+        }
+    }
+
+    public void addWriter(String writer) {
+        if (StringUtils.isNotBlank(writer)) {
+            this.credits.add(new CreditDTO(JobType.WRITER, writer.trim()));
+            this.changed = true;
+        }
+    }
+
+    public void addActor(String actor, String role, String photoURL) {
+        if (StringUtils.isNotBlank(actor)) {
+            CreditDTO credit = new CreditDTO(JobType.ACTOR, actor.trim());
+            credit.setRole(role);
+            credit.setPhotoURL(photoURL);
+            this.credits.add(credit);
+            this.changed = true;
+        }
+    }
+
+    public Set<String> getTrailerURLs() {
+        return trailerURLs;
+    }
+
+    public void addTrailerURL(String trailerURL) {
+        if (StringUtils.isNotBlank(trailerURL)) {
+            this.trailerURLs.add(trailerURL.trim());
+            this.changed = true;
+        }
+    }
+    
+    public void addEpisode(InfoEpisodeDTO episodeDTO) {
+        if (episodeDTO != null && episodeDTO.isValid()) {
+            this.episodes.add(episodeDTO);
+            this.changed = true;
+        }
+    }
+    
+    public InfoEpisodeDTO getEpisode(int season, int episode) {
+        for (InfoEpisodeDTO dto : this.episodes) {
+            if (dto.isSameEpisode(season, episode)) {
+                return dto;
+            }
+        }
+        return null;
     }
 }

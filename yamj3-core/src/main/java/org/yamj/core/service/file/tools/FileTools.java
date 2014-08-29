@@ -35,7 +35,7 @@ public class FileTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileTools.class);
     private static final int BUFF_SIZE = 16 * 1024;
-    private static final String DEFAULT_CHARSET = "UTF-8";
+    public static final String DEFAULT_CHARSET = "UTF-8";
     private static Lock mkdirsLock = new ReentrantLock();
     
     /**

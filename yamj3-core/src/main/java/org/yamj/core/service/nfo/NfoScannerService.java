@@ -81,12 +81,14 @@ public class NfoScannerService {
 
             // reset skip online scans
             videoData.setSkipOnlineScans(infoDTO.getSkipOnlineScans());
+            // set top 250
+            videoData.setTopRank(infoDTO.getTop250());
 
             if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
                 videoData.setTitle(infoDTO.getTitle(), SCANNER_ID);
             }
             if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID)) {
-                videoData.setTitleOriginal(infoDTO.getTitle(), SCANNER_ID);
+                videoData.setTitleOriginal(infoDTO.getTitleOriginal(), SCANNER_ID);
             }
             if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID)) {
                 videoData.setPublicationYear(infoDTO.getYear(), SCANNER_ID);
@@ -103,12 +105,16 @@ public class NfoScannerService {
             if (OverrideTools.checkOverwriteQuote(videoData, SCANNER_ID)) {
                 videoData.setQuote(infoDTO.getQuote(), SCANNER_ID);
             }
-            // TODO more values
+            if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
+                videoData.setGenreNames(infoDTO.getGenres(), SCANNER_ID);
+            }
+            // set credit DTOs for update in database
+            videoData.setCreditDTOS(infoDTO.getCredits());
         }
         
-        // mark video data as updated (so online scan can be done)
+        // mark video data as updated (online scan can be done)
         videoData.setStatus(StatusType.UPDATED);
-        this.metadataStorageService.update(videoData);
+        this.metadataStorageService.updateVideoData(videoData);
     }
 
     public void processingError(QueueDTO queueElement) {
