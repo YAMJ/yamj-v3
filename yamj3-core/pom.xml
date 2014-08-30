@@ -92,6 +92,11 @@
             <artifactId>sanselan</artifactId>
             <version>0.97-incubator</version>
         </dependency>
+        <dependency>
+            <groupId>org.pojava</groupId>
+            <artifactId>pojava</artifactId>
+            <version>3.0.2</version>
+        </dependency>        
         <!--APACHE COMMONS-->
         <dependency>
             <groupId>org.apache.commons</groupId>

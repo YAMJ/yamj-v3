@@ -31,6 +31,7 @@ import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
+import org.yamj.core.database.model.type.StepType;
 
 /**
  * Abstract implementation of an metadata object.
@@ -59,6 +60,9 @@ public abstract class AbstractMetadata extends AbstractAuditable
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
+    @Type(type = "stepType")
+    @Column(name = "step", nullable = false, length = 30)
+    private StepType step;
 
     // GETTER and SETTER
     
@@ -157,12 +161,36 @@ public abstract class AbstractMetadata extends AbstractAuditable
     }
 
     @Override
-    public StatusType getStatus() {
+    public final StatusType getStatus() {
         return status;
     }
-
-    public void setStatus(StatusType status) {
+    
+    public final void setStatus(StatusType status) {
         this.status = status;
+    }
+
+    public final StepType getStep() {
+        return step;
+    }
+
+    public final void setStep(StepType step) {
+        this.step = step;
+    }
+
+    public void setNextStep(StepType step) {
+        if (StepType.NFO.equals(step)) {
+            this.step = StepType.ONLINE;
+            this.status = StatusType.UPDATED;
+        } else {
+            this.step = StepType.SCANNED;
+            if (StatusType.NEW.equals(this.status)) {
+                this.status = StatusType.DONE;
+            } else if (StatusType.UPDATED.equals(this.status)) {
+                this.status = StatusType.DONE;
+            } else if (StatusType.WAIT.equals(this.status)) {
+                this.status = StatusType.DONE;
+            }
+        }
     }
 
     @Override

@@ -28,11 +28,9 @@ public enum StatusType {
     UPDATED,        // updated record
     DELETED,        // deleted record
     ERROR,          // something went wrong
-    PROCESSED,      // has been processed
     NOTFOUND,       // something hasn't been found
     INVALID,        // invalid record
     DUPLICATE,      // duplicate record
-    NFO_SCAN,       // NFO exists and should be scanned
     WAIT,           // waiting state
     DONE;           // all is done
     

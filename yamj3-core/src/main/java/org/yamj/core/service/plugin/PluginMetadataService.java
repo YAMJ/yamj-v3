@@ -134,6 +134,9 @@ public class PluginMetadataService {
             if (ScanResult.OK.equals(scanResult)) {
                 LOG.debug("Movie {}-'{}', scanned OK", id, videoData.getTitle());
                 videoData.setStatus(StatusType.DONE);
+            } else if (ScanResult.SKIPPED.equals(scanResult)) {
+                LOG.warn("Movie {}-'{}', skipped", id, videoData.getTitle());
+                videoData.setStatus(StatusType.DONE);
             } else if (ScanResult.MISSING_ID.equals(scanResult)) {
                 LOG.warn("Movie {}-'{}', not found", id, videoData.getTitle());
                 videoData.setStatus(StatusType.NOTFOUND);

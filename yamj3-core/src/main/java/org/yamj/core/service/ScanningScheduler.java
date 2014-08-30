@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service;
 
+import org.yamj.core.database.model.type.StepType;
+
 import java.util.List;
 import java.util.concurrent.*;
 import org.apache.commons.collections.CollectionUtils;
@@ -86,7 +88,7 @@ public class ScanningScheduler {
         }
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.mediadatascan.maxResults", 20);
-        List<QueueDTO> queueElements = metadataStorageService.getMediaQueueForScanning(maxResults);
+        List<QueueDTO> queueElements = metadataStorageService.getMediaQueueForScanning(maxResults, StepType.ONLINE);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.debug("No media data found to scan");
             return;
@@ -251,7 +253,7 @@ public class ScanningScheduler {
         }
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.nfoscan.maxResults", 20);
-        List<QueueDTO> queueElements = metadataStorageService.getNfoQueueForScanning(maxResults);
+        List<QueueDTO> queueElements = metadataStorageService.getMediaQueueForScanning(maxResults, StepType.NFO);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.debug("No media data found for nfo scan");
             return;

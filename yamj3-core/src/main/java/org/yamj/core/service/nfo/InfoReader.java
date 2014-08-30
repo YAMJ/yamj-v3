@@ -22,9 +22,11 @@
  */
 package org.yamj.core.service.nfo;
 
+import org.yamj.core.service.tools.ServiceDateTimeTools;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -71,18 +73,18 @@ public final class InfoReader {
     public void readNfoFile(StageFile stageFile, InfoDTO  dto) throws Exception {
         String nfoFilename = stageFile.getFileName();
 
-        String nfoContent;
-        if (StringUtils.isBlank(stageFile.getContent())) {
-            // try to read content from file
-            File nfoFile = new File(stageFile.getFullPath());
+        File nfoFile = new File(stageFile.getFullPath());
+        String nfoContent = null;
+        try {
             nfoContent = FileUtils.readFileToString(nfoFile, FileTools.DEFAULT_CHARSET);
-        } else {
-            // get delivered content
+        } catch (Exception e) {
+            LOG.warn("NFO file '{}' is not readable; try stage file content", nfoFilename);
+            nfoFile = null;
             nfoContent = stageFile.getContent();
         }
         
         if (StringUtils.isBlank(nfoContent)) {
-            throw new RuntimeException("NFO could not be read: " + nfoFilename);
+            throw new RuntimeException("No content for reading NFO: " + nfoFilename);
         }
         
         boolean parsedNfo = Boolean.FALSE;   // was the NFO XML parsed correctly or at all
@@ -96,7 +98,7 @@ public final class InfoReader {
 
         // If the file has XML tags in it, try reading it as a pure XML file
         if (hasXml) {
-            parsedNfo = this.readXmlNfo(nfoContent, nfoFilename, dto);
+            parsedNfo = this.readXmlNfo(nfoFile, nfoContent, nfoFilename, dto);
         }
 
         // If it has XML in it, but didn't parse correctly, try splitting it out
@@ -116,13 +118,13 @@ public final class InfoReader {
 
                 // Send text to be read
                 String nfoTrimmed = StringUtils.substring(nfoContent, start, end);
-                parsedNfo = readXmlNfo(nfoTrimmed, nfoFilename, dto);
+                parsedNfo = readXmlNfo(null, nfoTrimmed, nfoFilename, dto);
             }
         }
 
         // If the XML wasn't found or parsed correctly, then fall back to the old method
         if (parsedNfo) {
-            LOG.debug("Successfully scanned {} as XML format", nfoFilename);
+            LOG.trace("Successfully scanned {} as XML format", nfoFilename);
         } else {
             throw new RuntimeException("Failed to scan " + nfoFilename + " as XML format");
         }
@@ -148,11 +150,16 @@ public final class InfoReader {
      * @param dto
      * @return
      */
-    private boolean readXmlNfo(final String nfoContent, final String nfoFilename, InfoDTO dto) {
+    private boolean readXmlNfo(final File nfoFile, final String nfoContent, final String nfoFilename, InfoDTO dto) {
         Document xmlDoc;
 
         try {
-            xmlDoc = DOMHelper.getDocFromString(nfoContent);
+            if (nfoFile == null) {
+                // Assume we're using the string
+                xmlDoc = DOMHelper.getDocFromString(nfoContent);
+            } else {
+                xmlDoc = DOMHelper.getDocFromFile(nfoFile);
+            }
         } catch (Exception ex) {
             LOG.error("Failed parsing NFO file: {}", nfoFilename);
             LOG.error("Error", ex);
@@ -535,31 +542,10 @@ public final class InfoReader {
      * @param parseDate
      */
     public void movieDate(final String dateString, InfoDTO dto, String nfoFilename) {
-
-        String parseDate = StringUtils.normalizeSpace(dateString);
-        if (StringUtils.isNotBlank(parseDate)) {
-            try {
-                DateTime dateTime;
-                if (parseDate.length() == 4 && StringUtils.isNumeric(parseDate)) {
-                    // warn the user
-                    LOG.info("Partial date detected in premiered field of NFO {}", nfoFilename);
-                    // Assume just the year an append "-01-01" to the end
-                    dateTime = new DateTime(parseDate + "-01-01");
-                } else {
-                    dateTime = new DateTime(parseDate);
-                }
-
-                // set release date
-                dto.setReleaseDate(DateTimeTools.convertDateToString(dateTime));
-                // also set the year
-                dto.setYear(dateTime.toString("yyyy"));
-            } catch (Exception ex) {
-                LOG.warn("premiered or releasedate does not contain a valid date: " + parseDate);
-                LOG.error("Error", ex);
-
-                // just set the release date
-                dto.setReleaseDate(parseDate);
-            }
+        Date releaseDate = ServiceDateTimeTools.parseToDate(dateString);
+        if (releaseDate != null) {
+            dto.setReleaseDate(releaseDate);
+            dto.setYear(ServiceDateTimeTools.extractYearAsString(releaseDate));
         }
     }
 

@@ -22,19 +22,19 @@
  */
 package org.yamj.core.service.plugin;
 
+import org.yamj.core.service.tools.ServiceDateTimeTools;
+
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.model.MovieDb;
 import com.omertron.themoviedbapi.model.PersonType;
 import com.omertron.themoviedbapi.model.ProductionCountry;
 import com.omertron.themoviedbapi.results.TmdbResultsList;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -355,16 +355,16 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             LOG.debug("Getting information on {}-'{}' from {}", person.getId(), person.getName(), SCANNER_ID);
             com.omertron.themoviedbapi.model.Person tmdbPerson = tmdbApi.getPersonInfo(Integer.parseInt(id));
 
-            person.setBiography(cleanBiography(tmdbPerson.getBiography()));
-            person.setBirthPlace(StringUtils.trimToNull(tmdbPerson.getBirthplace()));
             person.setPersonId(ImdbScanner.SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
+            person.setBirthPlace(StringUtils.trimToNull(tmdbPerson.getBirthplace()));
+            person.setBiography(cleanBiography(tmdbPerson.getBiography()));
 
-            Date parsedDate = parseDate(tmdbPerson.getBirthday());
+            Date parsedDate = ServiceDateTimeTools.parseToDate(tmdbPerson.getBirthday());
             if (parsedDate != null) {
                 person.setBirthDay(parsedDate);
             }
-
-            parsedDate = parseDate(tmdbPerson.getDeathday());
+            
+            parsedDate = ServiceDateTimeTools.parseToDate(tmdbPerson.getDeathday());
             if (parsedDate != null) {
                 person.setDeathDay(parsedDate);
             }
@@ -375,30 +375,6 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
         LOG.debug("Successfully processed person: {}-'{}'", id, person.getName());
         return ScanResult.OK;
-    }
-
-    /**
-     * Convert string to date
-     *
-     * if the date is just a year, "-01-01" (1st Jan) will be appended to the date for conversion purposes
-     *
-     * @param dateToConvert
-     * @return
-     */
-    private Date parseDate(final String dateToConvert) {
-        String dtc = StringUtils.trimToEmpty(dateToConvert);
-        if (StringUtils.isNotBlank(dtc)) {
-            try {
-                if (dtc.length() == 4) {
-                    // Looks like just the year, so add a default to it for processing.
-                    dtc += "-01-01";
-                }
-                return DateUtils.parseDate(dtc, "yyyy-MM-dd");
-            } catch (ParseException ex) {
-                LOG.warn("Failed to convert date '{}'", dtc);
-            }
-        }
-        return null;
     }
 
     /**

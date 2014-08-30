@@ -52,8 +52,9 @@ public class VideoData extends AbstractMetadata implements IDataGenres, IDataCre
     @Index(name = "IX_VIDEODATA_PUBLICATIONYEAR")
     @Column(name = "publication_year", nullable = false)
     private int publicationYear = -1;
-    @Column(name = "release_date", length = 10)
-    private String releaseDate;
+    @Temporal(value = TemporalType.DATE)
+    @Column(name = "release_date")
+    private Date releaseDate;
     @Column(name = "top_rank", nullable = false)
     private int topRank = -1;
     @Lob
@@ -143,16 +144,16 @@ public class VideoData extends AbstractMetadata implements IDataGenres, IDataCre
         this.episode = episode;
     }
 
-    public String getReleaseDate() {
+    public Date getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(String releaseDate) {
+    public void setReleaseDate(Date releaseDate) {
         this.releaseDate = releaseDate;
     }
 
-    public void setReleaseDate(String releaseDate, String source) {
-        if (StringUtils.isNotBlank(releaseDate)) {
+    public void setReleaseDate(Date releaseDate, String source) {
+        if (releaseDate != null) {
             this.releaseDate = releaseDate;
             setOverrideFlag(OverrideFlag.RELEASEDATE, source);
         }
@@ -262,7 +263,7 @@ public class VideoData extends AbstractMetadata implements IDataGenres, IDataCre
 
     @Override
     public void setOverrideFlag(OverrideFlag overrideFlag, String source) {
-        this.overrideFlags.put(overrideFlag, source);
+        this.overrideFlags.put(overrideFlag, source.toLowerCase());
     }
 
     @JsonIgnore // This is not needed for the API
@@ -391,7 +392,7 @@ public class VideoData extends AbstractMetadata implements IDataGenres, IDataCre
     }
 
     public void setTvEpisodeScanned() {
-        this.setStatus(StatusType.PROCESSED);
+        this.setStatus(StatusType.WAIT);
     }
 
     public void setTvEpisodeNotFound() {

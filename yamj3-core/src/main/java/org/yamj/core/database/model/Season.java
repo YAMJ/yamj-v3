@@ -160,7 +160,7 @@ public class Season extends AbstractMetadata {
 
     @Override
     public void setOverrideFlag(OverrideFlag overrideFlag, String source) {
-        this.overrideFlags.put(overrideFlag, source);
+        this.overrideFlags.put(overrideFlag, source.toLowerCase());
     }
 
     @JsonIgnore // This is not needed for the API
@@ -213,7 +213,7 @@ public class Season extends AbstractMetadata {
     }
 
     public void setTvSeasonScanned() {
-        this.setStatus(StatusType.PROCESSED);
+        this.setStatus(StatusType.WAIT);
     }
 
     public void setTvSeasonNotFound() {

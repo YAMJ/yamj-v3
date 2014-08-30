@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.mediaimport;
 
+import org.yamj.core.database.model.type.StepType;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,6 +155,7 @@ public class MediaImportService {
                 videoData.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                 videoData.setPublicationYear(dto.getYear(), MEDIA_SOURCE);
                 videoData.setStatus(StatusType.NEW);
+                videoData.setStep(StepType.ONLINE);
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);
 
@@ -201,7 +204,7 @@ public class MediaImportService {
                             series.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                             series.setSourceDbIdMap(dto.getIdMap());
                             series.setStatus(StatusType.NEW);
-
+                            series.setStep(StepType.ONLINE);
                             LOG.debug("Store new series: '{}'", series.getTitle());
                             metadataDao.saveEntity(series);
 
@@ -234,7 +237,8 @@ public class MediaImportService {
                         season.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                         season.setSeries(series);
                         season.setStatus(StatusType.NEW);
-
+                        season.setStep(StepType.ONLINE);
+                        
                         LOG.debug("Store new seaon: '{}' - Season {}", season.getTitle(), season.getSeason());
                         metadataDao.saveEntity(season);
 
@@ -270,6 +274,7 @@ public class MediaImportService {
                         videoData.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                     }
                     videoData.setStatus(StatusType.NEW);
+                    videoData.setStep(StepType.ONLINE);
                     videoData.setSeason(season);
                     videoData.setEpisode(episode);
                     mediaFile.addVideoData(videoData);
@@ -369,12 +374,14 @@ public class MediaImportService {
         for (VideoData videoData: mediaFile.getVideoDatas()) {
             if (videoData.isMovie()) {
                 // mark video data for NFO scan
-                videoData.setStatus(StatusType.NFO_SCAN);
+                videoData.setStatus(StatusType.UPDATED);
+                videoData.setStep(StepType.NFO);
                 stagingDao.updateEntity(videoData);
             } else {
                 Series series = videoData.getSeason().getSeries();
                 // mark series data for NFO scan
-                series.setStatus(StatusType.NFO_SCAN);
+                series.setStatus(StatusType.UPDATED);
+                series.setStep(StepType.NFO);
                 stagingDao.updateEntity(series);
             }
         }

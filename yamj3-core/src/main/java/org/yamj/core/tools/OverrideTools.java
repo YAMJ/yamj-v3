@@ -355,7 +355,7 @@ public final class OverrideTools {
         if (skipCheck(videoData, OverrideFlag.RELEASEDATE, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (StringUtils.isBlank(videoData.getReleaseDate())) {
+        } else if (videoData.getReleaseDate() == null) {
             return Boolean.TRUE;
         }
         return checkOverwrite(videoData, OverrideFlag.RELEASEDATE, source);

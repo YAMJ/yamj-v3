@@ -161,7 +161,7 @@ public class Series extends AbstractMetadata implements IDataGenres {
 
     @Override
     public void setOverrideFlag(OverrideFlag overrideFlag, String source) {
-        this.overrideFlags.put(overrideFlag, source);
+        this.overrideFlags.put(overrideFlag, source.toLowerCase());
     }
 
     @JsonIgnore // This is not needed for the API

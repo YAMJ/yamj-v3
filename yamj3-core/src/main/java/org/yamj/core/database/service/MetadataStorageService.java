@@ -41,6 +41,7 @@ import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.type.StepType;
 
 @Service("metadataStorageService")
 public class MetadataStorageService {
@@ -62,21 +63,25 @@ public class MetadataStorageService {
     }
 
     @Transactional(readOnly = true)
-    public List<QueueDTO> getMediaQueueForScanning(final int maxResults) {
+    public List<QueueDTO> getMediaQueueForScanning(final int maxResults, StepType step) {
         final StringBuilder sql = new StringBuilder();
         sql.append("select vd.id,'");
         sql.append(MetaDataType.MOVIE);
         sql.append("' as mediatype,vd.create_timestamp,vd.update_timestamp ");
         sql.append("from videodata vd ");
         sql.append("where vd.status in ('NEW','UPDATED') ");
-        sql.append("and vd.episode<0 ");
+        sql.append("and vd.step='");
+        sql.append(step.name());
+        sql.append("' and vd.episode<0 ");
         sql.append("union ");
         sql.append("select ser.id,'");
         sql.append(MetaDataType.SERIES);
         sql.append("' as mediatype,ser.create_timestamp,ser.update_timestamp ");
         sql.append("from series ser, season sea, videodata vd ");
         sql.append("where ser.id=sea.series_id ");
-        sql.append("and sea.id=vd.season_id ");
+        sql.append("and ser.step='");
+        sql.append(step.name());
+        sql.append("' and sea.id=vd.season_id ");
         sql.append("and (ser.status in ('NEW','UPDATED') ");
         sql.append(" or  (ser.status='DONE' and sea.status in ('NEW','UPDATED')) ");
         sql.append(" or  (ser.status='DONE' and vd.status in  ('NEW','UPDATED'))) ");
@@ -91,31 +96,8 @@ public class MetadataStorageService {
         sql.append(MetaDataType.PERSON);
         sql.append("' as mediatype, create_timestamp, update_timestamp ");
         sql.append("from person ");
-        sql.append("where status in ('");
-        sql.append(StatusType.NEW);
-        sql.append("','");
-        sql.append(StatusType.UPDATED);
-        sql.append("') ");
+        sql.append("where status in ('NEW','UPDATED') ");
 
-        return metadataDao.getMetadataQueue(sql, maxResults);
-    }
-
-    /**
-     * NOTE: Only movies at the moment.
-     */
-    @Transactional(readOnly = true)
-    public List<QueueDTO> getNfoQueueForScanning(final int maxResults) {
-        final StringBuilder sql = new StringBuilder();
-        sql.append("select vd.id,'");
-        sql.append(MetaDataType.MOVIE);
-        sql.append("' as mediatype,vd.create_timestamp,vd.update_timestamp ");
-        sql.append("from videodata vd ");
-        sql.append("where vd.status = '");
-        sql.append(StatusType.NFO_SCAN.name());
-        sql.append("' and vd.episode<0 ");
-
-        // TODO ready queues for episodes, season, and series
-        
         return metadataDao.getMetadataQueue(sql, maxResults);
     }
 
@@ -189,6 +171,14 @@ public class MetadataStorageService {
 
     @Transactional
     public void updateVideoData(VideoData videoData) {
+        StepType actualStep = videoData.getStep();
+        this.updateVideoData(videoData, actualStep);
+    }
+
+    private void updateVideoData(VideoData videoData, StepType actualStep) {
+        // set next step
+        videoData.setNextStep(actualStep);
+        
         // update entity
         metadataDao.updateEntity(videoData);
 
@@ -198,9 +188,14 @@ public class MetadataStorageService {
         // update cast and crew
         updateCastCrew(videoData);
     }
-
+    
     @Transactional
     public void updateSeries(Series series) {
+        // get actual step
+        StepType actualStep = series.getStep(); 
+        // set next step
+        series.setNextStep(actualStep);
+        
         // update entity
         metadataDao.updateEntity(series);
 
@@ -209,15 +204,11 @@ public class MetadataStorageService {
 
         // update underlying seasons and episodes
         for (Season season : series.getSeasons()) {
-            if (StatusType.PROCESSED.equals(season.getStatus())) {
-                season.setStatus(StatusType.DONE);
-                metadataDao.updateEntity(season);
-            }
+            season.setNextStep(actualStep);
+            metadataDao.updateEntity(season);
+
             for (VideoData videoData : season.getVideoDatas()) {
-                if (StatusType.PROCESSED.equals(videoData.getStatus())) {
-                    videoData.setStatus(StatusType.DONE);
-                    updateVideoData(videoData);
-                }
+                updateVideoData(videoData, actualStep);
             }
         }
     }
@@ -268,6 +259,10 @@ public class MetadataStorageService {
      * @param videoData
      */
     private void updateCastCrew(VideoData videoData) {
+        if (CollectionUtils.isEmpty(videoData.getCreditDTOS())) {
+            return;
+        }
+        
         for (CreditDTO dto : videoData.getCreditDTOS()) {
             Person person = null;
             CastCrew castCrew = null;

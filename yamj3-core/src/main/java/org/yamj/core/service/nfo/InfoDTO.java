@@ -43,7 +43,7 @@ public final class InfoDTO {
     private String titleOriginal;
     private String titleSort;
     private int year;
-    private String releaseDate;
+    private Date releaseDate;
     private int rating;
     private int top250;
     private String runtime;
@@ -157,12 +157,12 @@ public final class InfoDTO {
         }
     }
     
-    public String getReleaseDate() {
+    public Date getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(String releaseDate) {
-        if (StringUtils.isNotBlank(releaseDate)) {
+    public void setReleaseDate(Date releaseDate) {
+        if (releaseDate != null) {
             this.releaseDate = releaseDate;
             this.changed = true;
         }

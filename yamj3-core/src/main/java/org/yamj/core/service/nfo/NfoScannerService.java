@@ -38,7 +38,7 @@ import org.yamj.core.tools.OverrideTools;
 @Service("nfoScannerService")
 public class NfoScannerService {
 
-    public static final String SCANNER_ID = "NFO";
+    public static final String SCANNER_ID = "nfo";
     private static final Logger LOG = LoggerFactory.getLogger(NfoScannerService.class);
 
     @Autowired
@@ -55,7 +55,7 @@ public class NfoScannerService {
         }
         
         VideoData videoData = metadataStorageService.getRequiredVideoData(queueElement.getId());
-        LOG.debug("Scanning nfo data for '{}'", videoData.getIdentifier());
+        LOG.info("Scanning NFO data for '{}'", videoData.getIdentifier());
         
         // get the stage files
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(videoData);
@@ -66,7 +66,7 @@ public class NfoScannerService {
         // parse the movie with each NFO
         for (StageFile stageFile : stageFiles) {
             try {
-                LOG.debug("Scan NFO file {}", stageFile.getFileName());
+                LOG.debug("Scan NFO file '{}'", stageFile.getFileName());
                 this.infoReader.readNfoFile(stageFile, infoDTO);
             } catch (Exception ex) {
                 LOG.error("NFO scanning error", ex);
@@ -76,7 +76,7 @@ public class NfoScannerService {
         }
 
         if (infoDTO.isTvShow()) {
-            LOG.warn("NFO's determined TV show for video {}; no changes");
+            LOG.warn("NFO's determined TV show for movie: {}", videoData.getIdentifier());
         } else if (infoDTO.isChanged()) {
 
             // reset skip online scans
@@ -92,6 +92,9 @@ public class NfoScannerService {
             }
             if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID)) {
                 videoData.setPublicationYear(infoDTO.getYear(), SCANNER_ID);
+            }
+            if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
+                videoData.setReleaseDate(infoDTO.getReleaseDate(), SCANNER_ID);
             }
             if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
                 videoData.setPlot(infoDTO.getPlot(), SCANNER_ID);
@@ -112,8 +115,7 @@ public class NfoScannerService {
             videoData.setCreditDTOS(infoDTO.getCredits());
         }
         
-        // mark video data as updated (online scan can be done)
-        videoData.setStatus(StatusType.UPDATED);
+        // update video data
         this.metadataStorageService.updateVideoData(videoData);
     }
 
@@ -123,6 +125,6 @@ public class NfoScannerService {
             return;
         }
 
-        // TODO 
+        // TODO set next step for queue element
     }
 }
