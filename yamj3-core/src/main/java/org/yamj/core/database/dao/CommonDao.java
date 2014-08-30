@@ -26,11 +26,15 @@ import java.util.List;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
 import org.springframework.stereotype.Service;
-import org.yamj.core.api.wrapper.ApiWrapperList;
+import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.options.OptionsId;
-import org.yamj.core.database.model.*;
+import org.yamj.core.api.wrapper.ApiWrapperList;
+import org.yamj.core.database.model.BoxedSet;
+import org.yamj.core.database.model.Certification;
+import org.yamj.core.database.model.Genre;
+import org.yamj.core.database.model.Studio;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Service("commonDao")
@@ -38,6 +42,17 @@ public class CommonDao extends HibernateDao {
 
     public Genre getGenre(String name) {
         return getByName(Genre.class, name);
+    }
+
+    @Transactional
+    public void storeNewGenre(String name) {
+        Genre genre = this.getGenre(name);
+        if (genre == null) {
+            // create new person
+            genre = new Genre();
+            genre.setName(name);
+            this.saveEntity(genre);
+        }
     }
 
     public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper) {

@@ -22,6 +22,9 @@
  */
 package org.yamj.core.database.service;
 
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.VideoData;
+
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -134,31 +137,54 @@ public class MetadataStorageService {
         return metadataDao.getById(Person.class, id);
     }
 
-    @Transactional
-    public synchronized void storeGenre(String genreName) {
-        Genre genre = commonDao.getGenre(genreName);
-        if (genre == null) {
-            // create new person
-            genre = new Genre();
-            genre.setName(genreName);
-            commonDao.saveEntity(genre);
+    /**
+     * Store associated entities, like genres or cast.
+     * 
+     * @param videoData
+     */
+    public void storeAssociatedEntities(VideoData videoData) {
+        
+        // store new genres
+        for (String genreName : videoData.getGenreNames()) {
+            try {
+                this.commonDao.storeNewGenre(genreName);
+            } catch (Exception ex) {
+                LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
+                LOG.trace("Storage error", ex);
+            }
+        }
+
+        // store persons
+        for (CreditDTO creditDTO : videoData.getCreditDTOS()) {
+            try {
+                this.metadataDao.storePerson(creditDTO);
+            } catch (Exception ex) {
+                LOG.error("Failed to store person '{}', error: {}", creditDTO.getName(), ex.getMessage());
+                LOG.trace("Storage error", ex);
+            }
         }
     }
 
-    @Transactional
-    public synchronized void storePerson(CreditDTO dto) {
-        Person person = metadataDao.getPerson(dto.getName());
-        if (person == null) {
-            // create new person
-            person = new Person();
-            person.setName(dto.getName());
-            person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
-            person.setStatus(StatusType.NEW);
-            metadataDao.saveEntity(person);
-        } else {
-            // update person if ID has has been set
-            if (person.setPersonId(dto.getSourcedb(), dto.getSourcedbId())) {
-                metadataDao.updateEntity(person);
+    /**
+     * Store associated entities, like genres or cast.
+     * 
+     * @param series
+     */
+    public void storeAssociatedEntities(Series series) {
+
+        // store new genres
+        for (String genreName : series.getGenreNames()) {
+            try {
+                this.commonDao.storeNewGenre(genreName);
+            } catch (Exception ex) {
+                LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
+                LOG.trace("Storage error", ex);
+            }
+        }
+
+        for (Season season : series.getSeasons()) {
+            for (VideoData videoData : season.getVideoDatas()) {
+                this.storeAssociatedEntities(videoData);
             }
         }
     }
@@ -188,7 +214,19 @@ public class MetadataStorageService {
         // update cast and crew
         updateCastCrew(videoData);
     }
-    
+
+    /**
+     * Set the next step in processing
+     * 
+     * @param videoData
+     */
+    @Transactional
+    public void setNextStep(VideoData videoData) {
+        StepType actualStep = videoData.getStep();
+        videoData.setNextStep(actualStep);
+        metadataDao.updateEntity(videoData);
+    }
+
     @Transactional
     public void updateSeries(Series series) {
         // get actual step
@@ -209,6 +247,29 @@ public class MetadataStorageService {
 
             for (VideoData videoData : season.getVideoDatas()) {
                 updateVideoData(videoData, actualStep);
+            }
+        }
+    }
+
+    /**
+     * Set the next step in processing
+     * 
+     * @param series
+     */
+    @Transactional
+    public void setNextStep(Series series) {
+        StepType actualStep = series.getStep();
+        series.setNextStep(actualStep);
+        metadataDao.updateEntity(series);
+
+        // update underlying seasons and episodes
+        for (Season season : series.getSeasons()) {
+            season.setNextStep(actualStep);
+            metadataDao.updateEntity(season);
+
+            for (VideoData videoData : season.getVideoDatas()) {
+                videoData.setNextStep(actualStep);
+                metadataDao.updateEntity(videoData);
             }
         }
     }
@@ -275,35 +336,36 @@ public class MetadataStorageService {
                 }
             }
 
-            // find person if not found
+            // find person if not found in cast 
             if (person == null) {
                 LOG.info("Attempting to retrieve information on '{}' from database", dto.getName());
                 person = metadataDao.getByName(Person.class, dto.getName());
-                if (person == null) {
-                    // NOTE: person should have been stored before; just be sure
-                    //       to avoid null constraint violation
-                    LOG.warn("Person '{}' not found, skipping", dto.getName());
-                    return;
-                }
             } else {
                 LOG.debug("Found '{}' in cast table", person.getName());
             }
 
-            try {
-                if (castCrew == null) {
-                    // create new association between person and video
-                    castCrew = new CastCrew();
-                    castCrew.setPerson(person);
-                    castCrew.setJob(dto.getJobType(), dto.getRole());
-                    castCrew.setVideoData(videoData);
-                    videoData.addCredit(castCrew);
-                    metadataDao.saveEntity(castCrew);
-                } else if (castCrew.setJob(castCrew.getJobType(), dto.getRole())) {
-                    // updated role
-                    metadataDao.updateEntity(castCrew);
+            if (person == null) {
+                // NOTE: person should have been stored before; just be sure
+                //       to avoid null constraint violation
+                LOG.warn("Person '{}' not found, skipping", dto.getName());
+            } else {
+                
+                try {
+                    if (castCrew == null) {
+                        // create new association between person and video
+                        castCrew = new CastCrew();
+                        castCrew.setPerson(person);
+                        castCrew.setJob(dto.getJobType(), dto.getRole());
+                        castCrew.setVideoData(videoData);
+                        videoData.addCredit(castCrew);
+                        metadataDao.saveEntity(castCrew);
+                    } else if (castCrew.setJob(castCrew.getJobType(), dto.getRole())) {
+                        // updated role
+                        metadataDao.updateEntity(castCrew);
+                    }
+                } catch (ConstraintViolationException ex) {
+                    LOG.warn("Failed to save/update record for person {}-{}, job '{}', error: {}", person.getId(), person.getName(), dto.getJobType(), ex.getMessage());
                 }
-            } catch (ConstraintViolationException ex) {
-                LOG.warn("Failed to save/update record for person {}-{}, job '{}', error: {}", person.getId(), person.getName(), dto.getJobType(), ex.getMessage());
             }
         }
     }

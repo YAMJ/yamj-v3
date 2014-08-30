@@ -42,7 +42,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
             @Index(name = "IX_SERIES_TITLE", columnNames = {"title"}),
             @Index(name = "IX_SERIES_STATUS", columnNames = {"status"})
         })
-public class Series extends AbstractMetadata implements IDataGenres {
+public class Series extends AbstractMetadata {
 
     private static final long serialVersionUID = 1L;
     @Column(name = "start_year")
@@ -191,7 +191,6 @@ public class Series extends AbstractMetadata implements IDataGenres {
      *
      * @return
      */
-    @Override
     public Set<Genre> getGenres() {
         return genres;
     }
@@ -201,7 +200,6 @@ public class Series extends AbstractMetadata implements IDataGenres {
      *
      * @param genres
      */
-    @Override
     public void setGenres(Set<Genre> genres) {
         this.genres = genres;
     }
@@ -213,7 +211,6 @@ public class Series extends AbstractMetadata implements IDataGenres {
      *
      * @return
      */
-    @Override
     public Set<String> getGenreNames() {
         return genreNames;
     }
@@ -226,7 +223,6 @@ public class Series extends AbstractMetadata implements IDataGenres {
      * @param genreNames
      * @param source
      */
-    @Override
     public void setGenreNames(Set<String> genreNames, String source) {
         if (CollectionUtils.isNotEmpty(genreNames)) {
             this.genreNames = genreNames;

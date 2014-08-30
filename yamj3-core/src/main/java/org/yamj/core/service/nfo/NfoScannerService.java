@@ -23,11 +23,14 @@
 package org.yamj.core.service.nfo;
 
 import java.util.List;
+import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.QueueDTO;
@@ -79,11 +82,15 @@ public class NfoScannerService {
             LOG.warn("NFO's determined TV show for movie: {}", videoData.getIdentifier());
         } else if (infoDTO.isChanged()) {
 
+            // set video IDs
+            for (Entry<String,String> entry : infoDTO.getIds().entrySet()) {
+                videoData.setSourceDbId(entry.getKey(), entry.getValue());
+            }
             // reset skip online scans
             videoData.setSkipOnlineScans(infoDTO.getSkipOnlineScans());
             // set top 250
             videoData.setTopRank(infoDTO.getTop250());
-
+            
             if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
                 videoData.setTitle(infoDTO.getTitle(), SCANNER_ID);
             }
@@ -114,7 +121,10 @@ public class NfoScannerService {
             // set credit DTOs for update in database
             videoData.setCreditDTOS(infoDTO.getCredits());
         }
-        
+
+        // store associated entities
+        this.metadataStorageService.storeAssociatedEntities(videoData);
+
         // update video data
         this.metadataStorageService.updateVideoData(videoData);
     }
@@ -125,6 +135,13 @@ public class NfoScannerService {
             return;
         }
 
-        // TODO set next step for queue element
+        // just set next stage
+        if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
+            VideoData videoData = metadataStorageService.getRequiredVideoData(queueElement.getId());
+            this.metadataStorageService.setNextStep(videoData);
+        } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
+            Series series = metadataStorageService.getRequiredSeries(queueElement.getId());
+            this.metadataStorageService.setNextStep(series);
+        }
     }
 }

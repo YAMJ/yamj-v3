@@ -98,7 +98,6 @@ public class PlayerDao extends HibernateDao {
     }
 
     @Transactional
-    @SuppressWarnings("unchecked")
     public List<PlayerPathOld> getPlayerEntries(OptionsPlayer options) {
         SqlScalars sqlScalars = new SqlScalars();
 

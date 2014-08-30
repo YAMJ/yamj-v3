@@ -118,7 +118,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             LOG.info("Found TMDB ID: {}", tmdbID);
             videoData.setSourceDbId(SCANNER_ID, tmdbID);
         } else {
-            LOG.info("No TMDB ID found for ", videoData.getTitle());
+            LOG.info("No TMDB ID found for {}", videoData.getTitle());
         }
         return tmdbID;
     }

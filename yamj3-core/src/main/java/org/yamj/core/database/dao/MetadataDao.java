@@ -22,6 +22,10 @@
  */
 package org.yamj.core.database.dao;
 
+import org.springframework.transaction.annotation.Transactional;
+import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.dto.CreditDTO;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -78,5 +82,23 @@ public class MetadataDao extends HibernateDao {
     
     public Person getPerson(String name) {
         return getByName(Person.class, name);
+    }
+
+    @Transactional
+    public synchronized void storePerson(CreditDTO dto) {
+        Person person = this.getPerson(dto.getName());
+        if (person == null) {
+            // create new person
+            person = new Person();
+            person.setName(dto.getName());
+            person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
+            person.setStatus(StatusType.NEW);
+            this.saveEntity(person);
+        } else {
+            // update person if ID has has been set
+            if (person.setPersonId(dto.getSourcedb(), dto.getSourcedbId())) {
+                this.updateEntity(person);
+            }
+        }
     }
 }

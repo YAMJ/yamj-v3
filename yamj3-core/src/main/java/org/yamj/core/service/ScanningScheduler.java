@@ -156,7 +156,7 @@ public class ScanningScheduler {
         LOG.debug("Finished media file scanning");
     }
 
-   // @Scheduled(initialDelay = 10000, fixedDelay = 45000)
+    @Scheduled(initialDelay = 10000, fixedDelay = 45000)
     public void scanPeopleData() throws Exception {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.peoplescan.maxThreads", 1);
         if (maxThreads <= 0) {

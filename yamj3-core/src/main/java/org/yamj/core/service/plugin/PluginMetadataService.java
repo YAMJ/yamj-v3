@@ -30,8 +30,10 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.*;
-import org.yamj.core.database.model.dto.CreditDTO;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.MetadataStorageService;
@@ -123,12 +125,6 @@ public class PluginMetadataService {
             }
         }
 
-        // store associated entities
-        if (!storeAssociatedEntities(videoData)) {
-            // exit if associated entities couldn't be stored
-            return;
-        }
-
         // update data in database
         try {
             if (ScanResult.OK.equals(scanResult)) {
@@ -145,6 +141,11 @@ public class PluginMetadataService {
             }
 
             LOG.debug("Update video data in database: {}-'{}'", videoData.getId(), videoData.getTitle());
+            
+            // store associated entities
+            metadataStorageService.storeAssociatedEntities(videoData);
+
+            // update video data in one transaction
             metadataStorageService.updateVideoData(videoData);
         } catch (Exception error) {
             // NOTE: status will not be changed
@@ -194,30 +195,15 @@ public class PluginMetadataService {
             }
         }
 
-        // store associated entities for each season
-        boolean result = storeAssociatedEntities(series);
-
-        if (result) {
-            for (Season season : series.getSeasons()) {
-                for (VideoData videoData : season.getVideoDatas()) {
-                    if (!storeAssociatedEntities(videoData)) {
-                        result = false;
-                    }
-                }
-            }
-        }
-
-        if (!result) {
-            // exit if associated entities couldn't be stored
-            return;
-        }
-
         // update data in database
         try {
             if (ScanResult.OK.equals(scanResult)) {
                 LOG.debug("Series {}-'{}', scanned OK", id, series.getTitle());
                 series.setStatus(StatusType.DONE);
-            } else if (ScanResult.MISSING_ID.equals(scanResult)) {
+            } else if (ScanResult.SKIPPED.equals(scanResult)) {
+                LOG.warn("Series {}-'{}', skipped", id, series.getTitle());
+                series.setStatus(StatusType.DONE);
+           } else if (ScanResult.MISSING_ID.equals(scanResult)) {
                 LOG.warn("Series {}-'{}', not found", id, series.getTitle());
                 series.setStatus(StatusType.NOTFOUND);
             } else {
@@ -225,75 +211,17 @@ public class PluginMetadataService {
             }
 
             LOG.debug("Update series in database: {}-'{}'", series.getId(), series.getTitle());
+
+            // store associated entities
+            metadataStorageService.storeAssociatedEntities(series);
+
+            // update series in one transaction
             metadataStorageService.updateSeries(series);
         } catch (Exception error) {
             // NOTE: status will not be changed
             LOG.error("Failed storing series {}-'{}'", id, series.getTitle());
             LOG.warn("Storage error", error);
         }
-    }
-
-    /**
-     * Store entities associated with the object
-     *
-     * @param entityObject
-     * @return
-     */
-    private boolean storeAssociatedEntities(AbstractMetadata entityObject) {
-        boolean result = true;
-
-        // store genres
-        if (entityObject instanceof IDataGenres) {
-            result = result && storeEntitiesGenre((IDataGenres) entityObject);
-        }
-
-        // store persons
-        if (entityObject instanceof IDataCredits) {
-            result = result && storeEntitiesCredits((IDataCredits) entityObject);
-        }
-
-        return result;
-    }
-
-    /**
-     * Store genres to the database
-     *
-     * @param genreObject
-     * @return
-     */
-    private boolean storeEntitiesGenre(IDataGenres genreObject) {
-        boolean result = true;
-        for (String genreName : genreObject.getGenreNames()) {
-            try {
-                metadataStorageService.storeGenre(genreName);
-            } catch (Exception error) {
-                LOG.error("Failed to store genre '{}'", genreName);
-                LOG.warn("Storage error", error);
-                result = false;
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Store persons to the database
-     *
-     * @param creditObject
-     * @return
-     */
-    private boolean storeEntitiesCredits(IDataCredits creditObject) {
-        boolean result = true;
-        for (CreditDTO creditDTO : creditObject.getCreditDTOS()) {
-            try {
-                metadataStorageService.storePerson(creditDTO);
-            } catch (Exception error) {
-                LOG.error("Failed to store person '{}'", creditDTO.getName());
-                LOG.warn("Storage error", error);
-                result = false;
-            }
-        }
-
-        return result;
     }
 
     /**
@@ -336,7 +264,9 @@ public class PluginMetadataService {
             LOG.debug("Update person in database: {}-'{}'", person.getId(), person.getName());
             metadataStorageService.updatePerson(person);
 
-            // Create photo artwork
+            // TODO check if artwork already exists
+            
+            // create photo artwork
             Artwork photo = new Artwork();
             photo.setArtworkType(ArtworkType.PHOTO);
             photo.setStatus(StatusType.NEW);
