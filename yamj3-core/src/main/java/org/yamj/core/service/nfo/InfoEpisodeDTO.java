@@ -173,10 +173,18 @@ public final class InfoEpisodeDTO {
         sb.append("], [season=").append(season);
         sb.append("], [episode=").append(episode);
         sb.append("], [plot=").append(plot);
-        sb.append("], [firstAired=").append(firstAired);
-        sb.append("], [airsAfterSeason=").append(airsAfterSeason);
-        sb.append("], [airsBeforeSeason=").append(airsBeforeSeason);
-        sb.append("], [airsBeforeEpisode=").append(airsBeforeEpisode);
+        if (firstAired != null) {
+            sb.append("], [firstAired=").append(firstAired);
+        }
+        if (airsAfterSeason != null) {
+            sb.append("], [airsAfterSeason=").append(airsAfterSeason);
+        }
+        if (airsBeforeSeason != null) {
+            sb.append("], [airsBeforeSeason=").append(airsBeforeSeason);
+        }
+        if (airsBeforeEpisode != null) {
+            sb.append("], [airsBeforeEpisode=").append(airsBeforeEpisode);
+        }
         sb.append("], [rating=").append(rating);
         sb.append("]]");
         return sb.toString();
