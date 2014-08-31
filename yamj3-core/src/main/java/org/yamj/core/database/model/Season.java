@@ -22,6 +22,11 @@
  */
 package org.yamj.core.database.model;
 
+import javax.persistence.Column;
+import org.hibernate.annotations.Index;
+
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,14 +60,15 @@ public class Season extends AbstractMetadata {
     @Column(name = "season", nullable = false)
     private int season;
 
-    @Column(name = "first_aired", length = 10)
-    private String firstAired;
+    @Index(name = "IX_SEASON_PUBLICATIONYEAR")
+    @Column(name = "publication_year", nullable = false)
+    private int publicationYear = -1;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "season_ids", joinColumns =
             @JoinColumn(name = "season_id"))
     @ForeignKey(name = "FK_SEASON_SOURCEIDS")
-    @Fetch(value = FetchMode.SELECT)
+    @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
@@ -71,16 +77,16 @@ public class Season extends AbstractMetadata {
     @JoinTable(name = "season_ratings", joinColumns =
             @JoinColumn(name = "season_id"))
     @ForeignKey(name = "FK_SEASON_RATINGS")
-    @Fetch(value = FetchMode.SELECT)
+    @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
-    @Column(name = "rating", length = 30, nullable = false)
+    @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "season_override", joinColumns =
             @JoinColumn(name = "season_id"))
     @ForeignKey(name = "FK_SEASON_OVERRIDE")
-    @Fetch(value = FetchMode.SELECT)
+    @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value =
             @Type(type = "overrideFlag"))
@@ -89,7 +95,7 @@ public class Season extends AbstractMetadata {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_SEASON_SERIES")
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @JoinColumn(name = "series_id", nullable = false)
     private Series series;
 
@@ -108,12 +114,19 @@ public class Season extends AbstractMetadata {
         this.season = season;
     }
 
-    public String getFirstAired() {
-        return firstAired;
+    public int getPublicationYear() {
+        return publicationYear;
     }
 
-    public void setFirstAired(String firstAired) {
-        this.firstAired = firstAired;
+    public void setPublicationYear(int publicationYear) {
+        this.publicationYear = publicationYear;
+    }
+
+    public void setPublicationYear(int publicationYear, String source) {
+        if (publicationYear >= 0) {
+            this.publicationYear = publicationYear;
+            setOverrideFlag(OverrideFlag.YEAR, source);
+        }
     }
 
     @Override
@@ -147,6 +160,12 @@ public class Season extends AbstractMetadata {
 
     public void setRatings(Map<String, Integer> ratings) {
         this.ratings = ratings;
+    }
+
+    public void addRating(String sourceDb, int rating) {
+        if (StringUtils.isNotBlank(sourceDb) && (rating >= 0)) {
+            this.ratings.put(sourceDb, Integer.valueOf(rating));
+        }
     }
 
     @JsonIgnore // This is not needed for the API
@@ -225,7 +244,12 @@ public class Season extends AbstractMetadata {
         return season;
     }
 
-    // EQUALITY CHECKS
+    @Override
+    public Set<Genre> getGenres() {
+        // no genres in season
+        return Collections.emptySet();
+    }
+
     @Override
     public int hashCode() {
         final int prime = 7;

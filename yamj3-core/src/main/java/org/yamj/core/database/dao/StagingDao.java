@@ -114,4 +114,30 @@ public class StagingDao extends HibernateDao {
         query.setParameterList("statusSet", statusSet);
         return query.list();
     }
+
+    @SuppressWarnings("unchecked")
+    public List<StageFile> getValidNFOFilesForSeries(long id) {
+        // TODO sort the priority
+        
+        StringBuffer sb = new StringBuffer();
+        sb.append("SELECT distinct sf FROM StageFile sf ");
+        sb.append("JOIN sf.mediaFile mf ");
+        sb.append("JOIN mf.videoDatas vd ");
+        sb.append("JOIN vd.season sea ");
+        sb.append("JOIN sea.series ser ");
+        sb.append("WHERE ser.id=:seriesId ");
+        sb.append("AND sf.fileType=:fileType ");
+        sb.append("AND sf.status in (:statusSet) ");
+        
+        Set<StatusType> statusSet = new HashSet<StatusType>();
+        statusSet.add(StatusType.NEW);
+        statusSet.add(StatusType.UPDATED);
+        statusSet.add(StatusType.DONE);
+        
+        Query query = getSession().createQuery(sb.toString());
+        query.setParameter("seriesId", id);
+        query.setParameter("fileType", FileType.NFO);
+        query.setParameterList("statusSet", statusSet);
+        return query.list();
+    }
 }

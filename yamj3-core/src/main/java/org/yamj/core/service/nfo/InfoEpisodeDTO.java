@@ -22,6 +22,7 @@
  */
 package org.yamj.core.service.nfo;
 
+import java.util.Date;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -34,7 +35,7 @@ public final class InfoEpisodeDTO {
     private int season = -1;
     private int episode = -1;
     private String plot;
-    private String firstAired;
+    private Date firstAired;
     private String airsAfterSeason;
     private String airsBeforeSeason;
     private String airsBeforeEpisode;
@@ -90,12 +91,12 @@ public final class InfoEpisodeDTO {
         }
     }
 
-    public String getFirstAired() {
+    public Date getFirstAired() {
         return firstAired;
     }
 
-    public void setFirstAired(String firstAired) {
-        if (StringUtils.isNotBlank(firstAired)) {
+    public void setFirstAired(Date firstAired) {
+        if (firstAired != null) {
             this.firstAired = firstAired;
         }
     }

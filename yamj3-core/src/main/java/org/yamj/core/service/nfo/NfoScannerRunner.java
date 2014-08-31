@@ -48,6 +48,8 @@ public class NfoScannerRunner implements Runnable {
             try {
                 if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
                     service.scanMovieNfo(queueElement);
+                } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
+                    service.scanSerieseNfo(queueElement);
                 } else {
                     LOG.error("No valid element for scanning nfo '{}'", queueElement);
                 }

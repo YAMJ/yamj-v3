@@ -71,7 +71,7 @@ public class VideoData extends AbstractMetadata {
     @JoinTable(name = "videodata_ids", joinColumns
             = @JoinColumn(name = "videodata_id"))
     @ForeignKey(name = "FK_VIDEODATA_SOURCEIDS")
-    @Fetch(value = FetchMode.SELECT)
+    @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
@@ -79,15 +79,15 @@ public class VideoData extends AbstractMetadata {
     @JoinTable(name = "videodata_ratings", joinColumns
             = @JoinColumn(name = "videodata_id"))
     @ForeignKey(name = "FK_VIDEODATA_RATINGS")
-    @Fetch(value = FetchMode.SELECT)
+    @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
-    @Column(name = "rating", length = 30, nullable = false)
+    @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_override", joinColumns
             = @JoinColumn(name = "videodata_id"))
     @ForeignKey(name = "FK_VIDEODATA_OVERRIDE")
-    @Fetch(value = FetchMode.SELECT)
+    @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value
             = @Type(type = "overrideFlag"))
@@ -101,9 +101,17 @@ public class VideoData extends AbstractMetadata {
             inverseJoinColumns = {
                 @JoinColumn(name = "genre_id")})
     private Set<Genre> genres = new HashSet<Genre>(0);
+    @ManyToMany
+    @ForeignKey(name = "FK_DATASTUDIOS_VIDEODATA", inverseName = "FK_DATASTUDIOS_GENRE")
+    @JoinTable(name = "videodata_studios",
+            joinColumns = {
+                @JoinColumn(name = "data_id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "studio_id")})
+    private Set<Studio> studios = new HashSet<Studio>(0);
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_VIDEODATA_SEASON")
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @JoinColumn(name = "season_id")
     private Season season;
     @ManyToMany(mappedBy = "videoDatas")
@@ -119,6 +127,8 @@ public class VideoData extends AbstractMetadata {
     private Set<CreditDTO> creditDTOS = new LinkedHashSet<CreditDTO>(0);
     @Transient
     private Set<String> genreNames = new LinkedHashSet<String>(0);
+    @Transient
+    private Set<String> studioNames = new LinkedHashSet<String>(0);
 
     // GETTER and SETTER
     public int getPublicationYear() {
@@ -252,6 +262,12 @@ public class VideoData extends AbstractMetadata {
         this.ratings = ratings;
     }
 
+    public void addRating(String sourceDb, int rating) {
+        if (StringUtils.isNotBlank(sourceDb) && (rating >= 0)) {
+            this.ratings.put(sourceDb, Integer.valueOf(rating));
+        }
+    }
+    
     @JsonIgnore // This is not needed for the API
     public Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
@@ -272,22 +288,21 @@ public class VideoData extends AbstractMetadata {
         return overrideFlags.get(overrideFlag);
     }
 
-    /**
-     * Get the genres
-     *
-     * @return
-     */
+    @Override
     public Set<Genre> getGenres() {
         return genres;
     }
 
-    /**
-     * Set the genres
-     *
-     * @param genres
-     */
     public void setGenres(Set<Genre> genres) {
         this.genres = genres;
+    }
+    
+    public Set<Studio> getStudios() {
+        return studios;
+    }
+
+    public void setStudios(Set<Studio> studios) {
+        this.studios = studios;
     }
 
     public Season getSeason() {
@@ -348,25 +363,10 @@ public class VideoData extends AbstractMetadata {
         this.creditDTOS = creditDTOS;
     }
     
-    /**
-     * Get the string representation of the genres
-     *
-     * Usually populated from the scanner
-     *
-     * @return
-     */
     public Set<String> getGenreNames() {
         return genreNames;
     }
 
-    /**
-     * Set the string representation of the genres
-     *
-     * Usually populated from the scanner
-     *
-     * @param genreNames
-     * @param source
-     */
     public void setGenreNames(Set<String> genreNames, String source) {
         if (CollectionUtils.isNotEmpty(genreNames)) {
             this.genreNames = genreNames;
@@ -374,6 +374,17 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
+    public Set<String> getStudioNames() {
+        return studioNames;
+    }
+
+    public void setStudioNames(Set<String> studioNames, String source) {
+        if (CollectionUtils.isNotEmpty(studioNames)) {
+            this.studioNames = studioNames;
+            setOverrideFlag(OverrideFlag.STUDIOS, source);
+        }
+    }
+    
     // TV CHECKS
     public boolean isScannableTvEpisode() {
         if (StatusType.DONE.equals(this.getStatus())) {

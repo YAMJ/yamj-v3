@@ -96,6 +96,9 @@ public final class OverrideTools {
         // releasedate
         sources = PropertyTools.getProperty("priority.videodata.releasedate", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.RELEASEDATE, sources);
+        // studios
+        sources = PropertyTools.getProperty("priority.videodata.studios", DEFAULT_PLUGIN_MOVIE_SERIES);
+        putVideodataPriorities(OverrideFlag.STUDIOS, sources);
         // tagline
         sources = PropertyTools.getProperty("priority.videodata.tagline", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.TAGLINE, sources);
@@ -291,14 +294,24 @@ public final class OverrideTools {
         return false;
     }
 
-    public static boolean checkOverwriteGenres(VideoData videoData, String source) {
-        if (skipCheck(videoData, OverrideFlag.COUNTRY, source)) {
+    public static boolean checkOverwriteGenres(AbstractMetadata metadata, String source) {
+        if (skipCheck(metadata, OverrideFlag.GENRES, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (CollectionUtils.isEmpty(videoData.getGenres())) {
+        } else if (CollectionUtils.isEmpty(metadata.getGenres())) {
             return Boolean.TRUE;
         }
-        return checkOverwrite(videoData, OverrideFlag.GENRES, source);
+        return checkOverwrite(metadata, OverrideFlag.GENRES, source);
+    }
+
+    public static boolean checkOverwriteStudios(VideoData videoData, String source) {
+        if (skipCheck(videoData, OverrideFlag.STUDIOS, source)) {
+            // skip the check
+            return Boolean.FALSE;
+        } else if (CollectionUtils.isEmpty(videoData.getStudios())) {
+            return Boolean.TRUE;
+        }
+        return checkOverwrite(videoData, OverrideFlag.STUDIOS, source);
     }
 
     public static boolean checkOverwriteCountry(VideoData videoData, String source) {
@@ -381,13 +394,13 @@ public final class OverrideTools {
         return checkOverwrite(metadata, OverrideFlag.TITLE, source);
     }
 
-    public static boolean checkOverwriteYear(VideoData videoData, String source) {
-        if (skipCheck(videoData, OverrideFlag.YEAR, source)) {
+    public static boolean checkOverwriteYear(AbstractMetadata metadata, String source) {
+        if (skipCheck(metadata, OverrideFlag.YEAR, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (0 <= videoData.getPublicationYear()) {
+        } else if (0 <= metadata.getYear()) {
             return Boolean.TRUE;
         }
-        return checkOverwrite(videoData, OverrideFlag.YEAR, source);
+        return checkOverwrite(metadata, OverrideFlag.YEAR, source);
     }
 }

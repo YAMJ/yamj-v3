@@ -108,8 +108,9 @@ public class MetadataStorageService {
     public VideoData getRequiredVideoData(Long id) {
         final StringBuilder sb = new StringBuilder();
         sb.append("from VideoData vd ");
+        sb.append("left outer join fetch vd.credits ");
         sb.append("left outer join fetch vd.genres ");
-        sb.append("left outer join fetch vd.credits c ");
+        sb.append("left outer join fetch vd.studios ");
         sb.append("where vd.id = :id");
 
         @SuppressWarnings("unchecked")
@@ -123,7 +124,10 @@ public class MetadataStorageService {
         sb.append("from Series ser ");
         sb.append("join fetch ser.seasons sea ");
         sb.append("join fetch sea.videoDatas vd ");
-        sb.append("left outer join fetch vd.credits c ");
+        sb.append("left outer join fetch vd.credits ");
+        sb.append("left outer join fetch vd.genres ");
+        sb.append("left outer join fetch vd.studios ");
+        sb.append("left outer join fetch ser.genres ");
         sb.append("where ser.id = :id");
 
         @SuppressWarnings("unchecked")
@@ -150,6 +154,16 @@ public class MetadataStorageService {
                 this.commonDao.storeNewGenre(genreName);
             } catch (Exception ex) {
                 LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
+                LOG.trace("Storage error", ex);
+            }
+        }
+
+        // store new studios
+        for (String studioName : videoData.getStudioNames()) {
+            try {
+                this.commonDao.storeNewStudio(studioName);
+            } catch (Exception ex) {
+                LOG.error("Failed to store studio '{}', error: {}", studioName, ex.getMessage());
                 LOG.trace("Storage error", ex);
             }
         }
@@ -196,12 +210,12 @@ public class MetadataStorageService {
     }
 
     @Transactional
-    public void updateVideoData(VideoData videoData) {
+    public void updateMetaData(VideoData videoData) {
         StepType actualStep = videoData.getStep();
-        this.updateVideoData(videoData, actualStep);
+        this.updateMetaData(videoData, actualStep);
     }
 
-    private void updateVideoData(VideoData videoData, StepType actualStep) {
+    private void updateMetaData(VideoData videoData, StepType actualStep) {
         // set next step
         videoData.setNextStep(actualStep);
         
@@ -210,6 +224,9 @@ public class MetadataStorageService {
 
         // update genres
         updateGenres(videoData);
+
+        // update studios
+        updateStudios(videoData);
 
         // update cast and crew
         updateCastCrew(videoData);
@@ -228,7 +245,7 @@ public class MetadataStorageService {
     }
 
     @Transactional
-    public void updateSeries(Series series) {
+    public void updateMetaData(Series series) {
         // get actual step
         StepType actualStep = series.getStep(); 
         // set next step
@@ -246,7 +263,7 @@ public class MetadataStorageService {
             metadataDao.updateEntity(season);
 
             for (VideoData videoData : season.getVideoDatas()) {
-                updateVideoData(videoData, actualStep);
+                updateMetaData(videoData, actualStep);
             }
         }
     }
@@ -292,6 +309,26 @@ public class MetadataStorageService {
             }
         }
         videoData.setGenres(genres);
+    }
+
+    /**
+     * Update studios for VideoData from the database
+     *
+     * @param videoData
+     */
+    private void updateStudios(VideoData videoData) {
+        if (CollectionUtils.isEmpty(videoData.getStudioNames())) {
+            return;
+        }
+
+        Set<Studio> studios = new LinkedHashSet<Studio>();
+        for (String studioName : videoData.getStudioNames()) {
+            Studio studio = commonDao.getByName(Studio.class, studioName);
+            if (studio != null) {
+                studios.add(studio);
+            }
+        }
+        videoData.setStudios(studios);
     }
 
     /**

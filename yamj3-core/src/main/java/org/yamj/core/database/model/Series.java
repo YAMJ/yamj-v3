@@ -55,7 +55,7 @@ public class Series extends AbstractMetadata {
     @JoinTable(name = "series_ids", joinColumns
             = @JoinColumn(name = "series_id"))
     @ForeignKey(name = "FK_SERIES_SOURCEIDS")
-    @Fetch(value = FetchMode.SELECT)
+    @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
@@ -63,15 +63,15 @@ public class Series extends AbstractMetadata {
     @JoinTable(name = "series_ratings", joinColumns
             = @JoinColumn(name = "series_id"))
     @ForeignKey(name = "FK_SERIES_RATINGS")
-    @Fetch(value = FetchMode.SELECT)
+    @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
-    @Column(name = "rating", length = 30, nullable = false)
+    @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_override", joinColumns
             = @JoinColumn(name = "series_id"))
     @ForeignKey(name = "FK_SERIES_OVERRIDE")
-    @Fetch(value = FetchMode.SELECT)
+    @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value
             = @Type(type = "overrideFlag"))
@@ -101,12 +101,26 @@ public class Series extends AbstractMetadata {
         this.startYear = startYear;
     }
 
+    public void setStartYear(int startYear, String source) {
+        if (startYear >= 0) {
+            this.startYear = startYear;
+            setOverrideFlag(OverrideFlag.YEAR, source);
+        }
+    }
+
     public int getEndYear() {
         return endYear;
     }
 
     public void setEndYear(int endYear) {
         this.endYear = endYear;
+    }
+
+    public void setEndYear(int endYear, String source) {
+        if (endYear >= 0) {
+            this.endYear = endYear;
+            setOverrideFlag(OverrideFlag.YEAR, source);
+        }
     }
 
     @Override
@@ -150,6 +164,12 @@ public class Series extends AbstractMetadata {
         this.ratings.put(source, rating);
     }
 
+    public void addRating(String sourceDb, int rating) {
+        if (StringUtils.isNotBlank(sourceDb) && (rating >= 0)) {
+            this.ratings.put(sourceDb, Integer.valueOf(rating));
+        }
+    }
+
     @JsonIgnore // This is not needed for the API
     public Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
@@ -186,43 +206,19 @@ public class Series extends AbstractMetadata {
         this.artworks = artworks;
     }
 
-    /**
-     * Get the genres
-     *
-     * @return
-     */
+    @Override
     public Set<Genre> getGenres() {
         return genres;
     }
 
-    /**
-     * Set the genres
-     *
-     * @param genres
-     */
     public void setGenres(Set<Genre> genres) {
         this.genres = genres;
     }
 
-    /**
-     * Get the string representation of the genres
-     *
-     * Usually populated from the source site
-     *
-     * @return
-     */
     public Set<String> getGenreNames() {
         return genreNames;
     }
 
-    /**
-     * Set the string representation of the genres
-     *
-     * Usually populated from the source site
-     *
-     * @param genreNames
-     * @param source
-     */
     public void setGenreNames(Set<String> genreNames, String source) {
         if (CollectionUtils.isNotEmpty(genreNames)) {
             this.genreNames = genreNames;
@@ -230,7 +226,6 @@ public class Series extends AbstractMetadata {
         }
     }
 
-    // EQUALITY CHECKS
     @Override
     public int hashCode() {
         final int prime = 7;
@@ -263,7 +258,7 @@ public class Series extends AbstractMetadata {
         sb.append(getIdentifier());
         sb.append(", title=");
         sb.append(getTitle());
-        sb.append(", title=");
+        sb.append(", year=");
         sb.append(getYear());
         sb.append("]");
         return sb.toString();

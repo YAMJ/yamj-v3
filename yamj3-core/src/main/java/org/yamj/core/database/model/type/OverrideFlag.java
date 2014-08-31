@@ -35,6 +35,7 @@ public enum OverrideFlag {
     PLOT,
     QUOTE,
     RELEASEDATE,
+    STUDIOS,
     TAGLINE,
     TITLE,
     YEAR;

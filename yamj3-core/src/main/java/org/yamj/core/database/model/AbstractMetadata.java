@@ -23,6 +23,7 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
@@ -61,7 +62,7 @@ public abstract class AbstractMetadata extends AbstractAuditable
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
     @Type(type = "stepType")
-    @Column(name = "step", nullable = false, length = 30)
+    @Column(name = "step", nullable = false, length = 10)
     private StepType step;
 
     // GETTER and SETTER
@@ -197,10 +198,11 @@ public abstract class AbstractMetadata extends AbstractAuditable
     public final int getYear() {
         if (this instanceof VideoData) {
             return ((VideoData) this).getPublicationYear();
+        } else if (this instanceof Season) {
+            return ((Season) this).getPublicationYear();
         } else if (this instanceof Series) {
             return ((Series) this).getStartYear();
         }
-        // TODO season get year from first aired date
         return -1;
     }
 
@@ -222,4 +224,6 @@ public abstract class AbstractMetadata extends AbstractAuditable
     public abstract String getOverrideSource(OverrideFlag overrideFlag);
 
     public abstract void setOverrideFlag(OverrideFlag overrideFlag, String source);
+    
+    public abstract Set<Genre> getGenres();
 }

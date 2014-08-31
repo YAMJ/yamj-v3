@@ -108,6 +108,12 @@ public class BatchManagementImpl implements BatchManagement {
                 stageDirectory.addStageFile(stageFile);
 
                 stageFile = new StageFileDTO();
+                stageFile.setFileName("Game of Thrones.S03E01.nfo");
+                stageFile.setFileDate(System.currentTimeMillis());
+                stageFile.setFileSize(12L);
+                stageDirectory.addStageFile(stageFile);
+
+                stageFile = new StageFileDTO();
                 stageFile.setFileName("Game of Thrones.S03E02.avi");
                 stageFile.setFileDate(System.currentTimeMillis());
                 stageFile.setFileSize(1235L);

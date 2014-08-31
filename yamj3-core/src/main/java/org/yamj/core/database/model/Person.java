@@ -60,7 +60,7 @@ public class Person extends AbstractAuditable implements Serializable {
     @JoinTable(name = "person_ids", joinColumns =
             @JoinColumn(name = "person_id"))
     @ForeignKey(name = "FK_PERSON_SOURCEIDS")
-    @Fetch(value = FetchMode.SELECT)
+    @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 40)
     private Map<String, String> personIds = new HashMap<String, String>(0);

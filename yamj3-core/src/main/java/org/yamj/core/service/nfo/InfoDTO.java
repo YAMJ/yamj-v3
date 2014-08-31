@@ -369,4 +369,14 @@ public final class InfoDTO {
         }
         return null;
     }
+
+    public Set<InfoEpisodeDTO> getEpisodes(int season) {
+        Set<InfoEpisodeDTO> episodeDTOs = new HashSet<InfoEpisodeDTO>();
+        for (InfoEpisodeDTO dto : this.episodes) {
+            if (dto.getSeason() == season) {
+                episodeDTOs.add(dto);
+            }
+        }
+        return episodeDTOs;
+    }
 }

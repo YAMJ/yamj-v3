@@ -62,6 +62,15 @@ public abstract class HibernateDao {
     }
 
     /**
+     * Merge an entity.
+     *
+     * @param entity the entity to merge
+     */
+    public void mergeEntity(final Object entity) {
+        getSession().merge(entity);
+    }
+
+    /**
      * Store all entities.
      *
      * @param entities the entities to store

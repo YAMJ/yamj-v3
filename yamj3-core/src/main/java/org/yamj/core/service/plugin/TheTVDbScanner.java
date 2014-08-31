@@ -24,10 +24,7 @@ package org.yamj.core.service.plugin;
 
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,6 +37,7 @@ import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.service.tools.ServiceDateTimeTools;
 import org.yamj.core.tools.OverrideTools;
 
 @Service("tvdbScanner")
@@ -121,11 +119,15 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             }
         }
 
-        String faDate = tvdbSeries.getFirstAired();
-        if (StringUtils.isNotBlank(faDate) && (faDate.length() >= 4)) {
-            series.setStartYear(Integer.parseInt(faDate.substring(0, 4)));
+        if (OverrideTools.checkOverwriteYear(series, SCANNER_ID)) {
+            String faDate = tvdbSeries.getFirstAired();
+            if (StringUtils.isNotBlank(faDate) && (faDate.length() >= 4)) {
+                try {
+                    series.setStartYear(Integer.parseInt(faDate.substring(0, 4)), SCANNER_ID);
+                } catch (Exception ignore) {}
+            }
         }
-
+        
         // CAST & CREW
         Set<CreditDTO> actors = new LinkedHashSet<CreditDTO>();
         for (Actor actor : tvdbApiWrapper.getActors(id)) {
@@ -158,8 +160,12 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                     season.setOutline(StringUtils.trim(tvdbSeries.getOverview()), SCANNER_ID);
                 }
 
-                // TODO common usable format
-                season.setFirstAired(StringUtils.trimToNull(tvdbSeries.getFirstAired()));
+                if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
+                    if (StringUtils.isNotBlank(tvdbSeries.getFirstAired())) {
+                        Date parsedDate = ServiceDateTimeTools.parseToDate(tvdbSeries.getFirstAired().trim());
+                        season.setPublicationYear(ServiceDateTimeTools.extractYearAsInt(parsedDate), SCANNER_ID);
+                    }
+                }
 
                 // mark as scanned
                 season.setTvSeasonScanned();
@@ -215,7 +221,8 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                 }
 
                 // TODO more values
-                // mark episode as missing
+                
+                // mark episode as scanned
                 videoData.setTvEpisodeScanned();
             }
         }

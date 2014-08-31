@@ -174,7 +174,21 @@ public final class ServiceDateTimeTools {
         cal.setTime(date);
         return String.valueOf(cal.get(Calendar.YEAR));
     }
-    
+
+    /**
+     * Get the year as integer from given date.
+     * 
+     * @param date
+     * @return 
+     */
+    public static int extractYearAsInt(Date date) {
+        if (date == null) return -1;
+        
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return cal.get(Calendar.YEAR);
+    }
+
     /**
      * Locate a 4 digit year in a date string.
      *

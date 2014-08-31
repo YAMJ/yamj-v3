@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.mediaimport;
 
+import org.hibernate.Hibernate;
+
 import org.yamj.core.database.model.type.StepType;
 
 import org.apache.commons.lang3.StringUtils;
@@ -348,7 +350,7 @@ public class MediaImportService {
             mediaFile.addStageFile(stageFile);
             stagingDao.updateEntity(mediaFile);
             
-            // get 
+            // update stage file
             stageFile.setMediaFile(mediaFile);
             stageFile.setStatus(StatusType.DONE);
             stagingDao.updateEntity(stageFile);

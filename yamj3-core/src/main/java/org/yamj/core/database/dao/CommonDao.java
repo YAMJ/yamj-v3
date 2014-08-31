@@ -48,7 +48,7 @@ public class CommonDao extends HibernateDao {
     public void storeNewGenre(String name) {
         Genre genre = this.getGenre(name);
         if (genre == null) {
-            // create new person
+            // create new genre
             genre = new Genre();
             genre.setName(name);
             this.saveEntity(genre);
@@ -128,6 +128,17 @@ public class CommonDao extends HibernateDao {
         return getByName(Studio.class, name);
     }
 
+    @Transactional
+    public void storeNewStudio(String name) {
+        Studio studio = this.getStudio(name);
+        if (studio == null) {
+            // create new studio
+            studio = new Studio();
+            studio.setName(name);
+            this.saveEntity(studio);
+        }
+    }
+    
     public List<Studio> getStudios(ApiWrapperList<Studio> wrapper) {
         OptionsId options = (OptionsId) wrapper.getOptions();
         SqlScalars sqlScalars = new SqlScalars();

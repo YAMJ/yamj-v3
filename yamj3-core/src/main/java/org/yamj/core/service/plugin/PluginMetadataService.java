@@ -145,8 +145,8 @@ public class PluginMetadataService {
             // store associated entities
             metadataStorageService.storeAssociatedEntities(videoData);
 
-            // update video data in one transaction
-            metadataStorageService.updateVideoData(videoData);
+            // update meta data in one transaction
+            metadataStorageService.updateMetaData(videoData);
         } catch (Exception error) {
             // NOTE: status will not be changed
             LOG.error("Failed storing movie {}-'{}'", id, videoData.getTitle());
@@ -214,9 +214,9 @@ public class PluginMetadataService {
 
             // store associated entities
             metadataStorageService.storeAssociatedEntities(series);
-
-            // update series in one transaction
-            metadataStorageService.updateSeries(series);
+            
+            // update meta data in one transaction
+            metadataStorageService.updateMetaData(series);
         } catch (Exception error) {
             // NOTE: status will not be changed
             LOG.error("Failed storing series {}-'{}'", id, series.getTitle());

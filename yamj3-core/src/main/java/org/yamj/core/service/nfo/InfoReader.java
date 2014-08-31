@@ -22,15 +22,12 @@
  */
 package org.yamj.core.service.nfo;
 
-import org.yamj.core.service.tools.ServiceDateTimeTools;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,13 +36,13 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.yamj.common.tools.DateTimeTools;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.plugin.ImdbScanner;
 import org.yamj.core.service.plugin.TheMovieDbScanner;
 import org.yamj.core.service.plugin.TheTVDbScanner;
+import org.yamj.core.service.tools.ServiceDateTimeTools;
 import org.yamj.core.tools.StringTools;
 import org.yamj.core.tools.xml.DOMHelper;
 
@@ -185,10 +182,10 @@ public final class InfoReader {
         boolean isTV = xmlDoc.getElementsByTagName(DOMHelper.TYPE_TVSHOW).getLength() > 0;
         if (dto.isTvShow() || isTV) {
             nlMovies = xmlDoc.getElementsByTagName(DOMHelper.TYPE_TVSHOW);
-            isTV = Boolean.TRUE;
+            dto.setTvShow(true);
         } else {
             nlMovies = xmlDoc.getElementsByTagName(DOMHelper.TYPE_MOVIE);
-            isTV = Boolean.FALSE;
+            dto.setTvShow(false);
         }
         
         // just one movie per file
@@ -741,11 +738,8 @@ public final class InfoReader {
         tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "aired");
         if (StringUtils.isNotBlank(tempValue)) {
             try {
-                episodeDTO.setFirstAired(DateTimeTools.convertDateToString(new DateTime(tempValue)));
-            } catch (Exception ignore) {
-                // Set the aired date if there is an exception
-                episodeDTO.setFirstAired(tempValue);
-            }
+                episodeDTO.setFirstAired(ServiceDateTimeTools.parseToDate(tempValue.trim()));
+            } catch (Exception ignore) {}
         }
 
         episodeDTO.setAirsAfterSeason(DOMHelper.getValueFromElement(eEpisodeDetails, "airsafterseason", "airsAfterSeason"));
