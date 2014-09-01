@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.*;
 import org.hibernate.transform.Transformers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.options.IOptions;
 import org.yamj.core.api.wrapper.IApiWrapper;
@@ -99,6 +100,7 @@ public abstract class HibernateDao {
      *
      * @param entity the entity to update
      */
+    @Transactional
     public void updateEntity(final Object entity) {
         getSession().update(entity);
     }

@@ -22,31 +22,54 @@
  */
 package org.yamj.core.database.model;
 
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
 import java.io.Serializable;
 import javax.persistence.*;
 import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.NaturalId;
 
 @Entity
-@Table(name = "video_set")
-public class VideoSet extends AbstractIdentifiable implements Serializable {
+@Table(name = "boxed_set_order",
+    uniqueConstraints = {@UniqueConstraint(name = "UIX_BOXEDSET_VIDEODATA", columnNames = {"boxedset_id","videodata_id"}),
+                         @UniqueConstraint(name = "UIX_BOXEDSET_SERIES", columnNames = {"boxedset_id", "series_id"})}
+)
+public class BoxedSetOrder extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -3478878273175067619L;
-    
+        
+    @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_VIDEOSET_VIDEODATA")
-    @JoinColumn(name = "data_id", nullable = false)
-    private VideoData videoData;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_VIDEOSET_BOXEDSET")
+    @ForeignKey(name = "FK_BOXEDSETORDER_BOXEDSET")
     @JoinColumn(name = "boxedset_id", nullable = false)
     private BoxedSet boxedSet;
     
+    @NaturalId
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_BOXEDSETORDER_VIDEODATA")
+    @JoinColumn(name = "videodata_id", nullable = true)
+    private VideoData videoData;
+
+    @NaturalId
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_BOXEDSETORDER_SERIES")
+    @JoinColumn(name = "series_id", nullable = true)
+    private Series series;
+
     @JoinColumn(name = "ordering", nullable = false)
     private int ordering = -1;
 
     // GETTER and SETTER
-    
+
+    public BoxedSet getBoxedSet() {
+        return boxedSet;
+    }
+
+    public void setBoxedSet(BoxedSet boxedSet) {
+        this.boxedSet = boxedSet;
+    }
+
     public VideoData getVideoData() {
         return videoData;
     }
@@ -55,12 +78,12 @@ public class VideoSet extends AbstractIdentifiable implements Serializable {
         this.videoData = videoData;
     }
 
-    public BoxedSet getBoxedSet() {
-        return boxedSet;
+    public Series getSeries() {
+        return series;
     }
 
-    public void setBoxedSet(BoxedSet boxedSet) {
-        this.boxedSet = boxedSet;
+    public void setSeries(Series series) {
+        this.series = series;
     }
 
     public int getOrdering() {

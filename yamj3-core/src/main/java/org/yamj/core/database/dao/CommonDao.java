@@ -22,6 +22,9 @@
  */
 package org.yamj.core.database.dao;
 
+import org.hibernate.Query;
+import org.yamj.core.database.model.type.StepType;
+
 import java.util.List;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
@@ -40,12 +43,21 @@ import org.yamj.core.hibernate.HibernateDao;
 @Service("commonDao")
 public class CommonDao extends HibernateDao {
 
+    @SuppressWarnings("rawtypes")
+    public List findByIdAndStep(CharSequence queryString, Long id, StepType step) {
+        Query queryObject = getSession().createQuery(queryString.toString());
+        queryObject.setCacheable(true);
+        queryObject.setParameter("id", id);
+        queryObject.setParameter("step", step);
+        return queryObject.list();
+    }
+
     public Genre getGenre(String name) {
         return getByName(Genre.class, name);
     }
 
     @Transactional
-    public void storeNewGenre(String name) {
+    public synchronized void storeNewGenre(String name) {
         Genre genre = this.getGenre(name);
         if (genre == null) {
             // create new genre
@@ -110,6 +122,17 @@ public class CommonDao extends HibernateDao {
         return getByName(BoxedSet.class, name);
     }
 
+    @Transactional
+    public synchronized void storeNewBoxedSet(String name) {
+        BoxedSet boxedSet = this.getBoxedSet(name);
+        if (boxedSet == null) {
+            // create new boxed set
+            boxedSet = new BoxedSet();
+            boxedSet.setName(name);
+            this.saveEntity(boxedSet);
+        }
+    }
+
     public List<BoxedSet> getBoxedSets(ApiWrapperList<BoxedSet> wrapper) {
         OptionsId options = (OptionsId) wrapper.getOptions();
         SqlScalars sqlScalars = new SqlScalars();
@@ -129,7 +152,7 @@ public class CommonDao extends HibernateDao {
     }
 
     @Transactional
-    public void storeNewStudio(String name) {
+    public synchronized void storeNewStudio(String name) {
         Studio studio = this.getStudio(name);
         if (studio == null) {
             // create new studio

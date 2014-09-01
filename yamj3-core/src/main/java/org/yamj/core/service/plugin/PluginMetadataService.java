@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.plugin;
 
+import org.yamj.core.database.model.type.StepType;
+
 import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +98,11 @@ public class PluginMetadataService {
             throw new RuntimeException("Movie scanner '" + MOVIE_SCANNER + "' not registered");
         }
 
-        VideoData videoData = metadataStorageService.getRequiredVideoData(id);
+        VideoData videoData = metadataStorageService.getRequiredVideoData(id, StepType.ONLINE);
+        if (videoData == null) {
+            // step doesn't match
+            return;
+        }
         LOG.debug("Scanning movie data for '{}' using {}", videoData.getTitle(), MOVIE_SCANNER);
 
         // scan video data
@@ -165,7 +171,11 @@ public class PluginMetadataService {
             throw new RuntimeException("Series scanner '" + SERIES_SCANNER + "' not registered");
         }
 
-        Series series = metadataStorageService.getRequiredSeries(id);
+        Series series = metadataStorageService.getRequiredSeries(id, StepType.ONLINE);
+        if (series == null) {
+            // step doesn't match
+            return;
+        }
         LOG.debug("Scanning series data for '{}' using {}", series.getTitle(), SERIES_SCANNER);
 
         // scan series

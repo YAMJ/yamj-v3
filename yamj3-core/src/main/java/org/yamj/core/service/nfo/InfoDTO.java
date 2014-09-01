@@ -32,12 +32,12 @@ public final class InfoDTO {
 
     private boolean changed = false;
     private boolean tvShow = false;
-    private List<String> skipOnlineScans = new ArrayList<String>();
-    private Map<String, String> ids = new HashMap<String, String>();
-    private Map<String, Integer> sets = new HashMap<String, Integer>();
-    private Set<CreditDTO> credits = new LinkedHashSet<CreditDTO>();
-    private Set<String> genres = new LinkedHashSet<String>();
-    private Set<String> trailerURLs= new HashSet<String>();
+    private List<String> skipOnlineScans = new ArrayList<String>(0);
+    private Map<String, String> ids = new HashMap<String, String>(2);
+    private Map<String, Integer> setInfos = new HashMap<String, Integer>(2);
+    private Set<CreditDTO> credits = new LinkedHashSet<CreditDTO>(10);
+    private Set<String> genres = new LinkedHashSet<String>(5);
+    private Set<String> trailerURLs= new HashSet<String>(0);
     private Set<InfoEpisodeDTO> episodes = new HashSet<InfoEpisodeDTO>();
     private String title;
     private String titleOriginal;
@@ -278,17 +278,17 @@ public final class InfoDTO {
         }
     }
 
-    public Map<String, Integer> getSets() {
-        return sets;
+    public Map<String, Integer> getSetInfos() {
+        return setInfos;
     }
 
-    public void addSet(String setName) {
-        this.addSet(setName, null);
+    public void addSetInfo(String setName) {
+        this.addSetInfo(setName, null);
     }
 
-    public void addSet(String setName, Integer order) {
+    public void addSetInfo(String setName, Integer order) {
         if (StringUtils.isNotBlank(setName)) {
-            this.sets.put(setName, order);
+            this.setInfos.put(setName, order);
             this.changed = true;
         }
     }

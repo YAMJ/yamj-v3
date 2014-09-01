@@ -36,7 +36,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigService;
+import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.plugin.ImdbScanner;
@@ -59,6 +61,8 @@ public final class InfoReader {
 
     @Autowired
     private ConfigService configService;
+    @Autowired
+    private StagingDao stagingDao;
 
     /**
      * Try and read a NFO file for information
@@ -79,9 +83,16 @@ public final class InfoReader {
             nfoFile = null;
             nfoContent = stageFile.getContent();
         }
-        
+
         if (StringUtils.isBlank(nfoContent)) {
-            throw new RuntimeException("No content for reading NFO: " + nfoFilename);
+            // mark stage file as not found
+            try {
+                stageFile.setStatus(StatusType.NOTFOUND);
+                this.stagingDao.updateEntity(stageFile);
+            } catch (Exception ignore) {}
+            
+            // just return
+            return;
         }
         
         boolean parsedNfo = Boolean.FALSE;   // was the NFO XML parsed correctly or at all
@@ -561,9 +572,9 @@ public final class InfoReader {
 
                 String setOrder = eId.getAttribute("order");
                 if (StringUtils.isNumeric(setOrder)) {
-                    dto.addSet(eId.getTextContent(), Integer.parseInt(setOrder));
+                    dto.addSetInfo(eId.getTextContent(), Integer.parseInt(setOrder));
                 } else {
-                    dto.addSet(eId.getTextContent());
+                    dto.addSetInfo(eId.getTextContent());
                 }
             }
         }

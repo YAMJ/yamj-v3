@@ -39,6 +39,7 @@ import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.type.StepType;
 import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.OverrideTools;
@@ -62,14 +63,18 @@ public class NfoScannerService {
             return;
         }
         
-        VideoData videoData = metadataStorageService.getRequiredVideoData(queueElement.getId());
+        VideoData videoData = metadataStorageService.getRequiredVideoData(queueElement.getId(), StepType.NFO);
+        if (videoData == null) {
+            // step doesn't match
+            return;
+        }       
         LOG.info("Scanning NFO data for movie '{}'", videoData.getIdentifier());
         
         // get the stage files ...
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(videoData);
         // ... and scan all NFOs
         InfoDTO infoDTO = this.scanNFOs(stageFiles, false);
-
+        
         if (infoDTO.isTvShow()) {
             LOG.warn("NFO's determined TV show for movie: {}", videoData.getIdentifier());
         } else if (infoDTO.isChanged()) {
@@ -121,6 +126,9 @@ public class NfoScannerService {
                 }
             }
 
+            // set boxed sets
+            videoData.setSetInfos(infoDTO.getSetInfos());
+            
             // set credit DTOs for update in database
             videoData.setCreditDTOS(infoDTO.getCredits());
         }
@@ -138,7 +146,11 @@ public class NfoScannerService {
             return;
         }
         
-        Series series = metadataStorageService.getRequiredSeries(queueElement.getId());
+        Series series = metadataStorageService.getRequiredSeries(queueElement.getId(), StepType.NFO);
+        if (series == null) {
+            // step doesn't match
+            return;
+        }        
         LOG.info("Scanning NFO data for series '{}'", series.getIdentifier());
         
         // get the stage files ...
@@ -221,8 +233,12 @@ public class NfoScannerService {
                 this.infoReader.readNfoFile(stageFile, infoDTO);
             } catch (Exception ex) {
                 LOG.error("NFO scanning error", ex);
-                stageFile.setStatus(StatusType.ERROR);
-                this.metadataStorageService.update(stageFile);
+
+                try {
+                    // mark stage file as error
+                    stageFile.setStatus(StatusType.ERROR);
+                    this.metadataStorageService.update(stageFile);
+                } catch (Exception ignore) {}
             }
         }
         
@@ -236,11 +252,12 @@ public class NfoScannerService {
         }
 
         // just set next stage
+        // TODO: use bulk update for database updates
         if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
-            VideoData videoData = metadataStorageService.getRequiredVideoData(queueElement.getId());
+            VideoData videoData = metadataStorageService.getRequiredVideoData(queueElement.getId(), StepType.NFO);
             this.metadataStorageService.setNextStep(videoData);
         } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
-            Series series = metadataStorageService.getRequiredSeries(queueElement.getId());
+            Series series = metadataStorageService.getRequiredSeries(queueElement.getId(), StepType.NFO);
             this.metadataStorageService.setNextStep(series);
         }
     }

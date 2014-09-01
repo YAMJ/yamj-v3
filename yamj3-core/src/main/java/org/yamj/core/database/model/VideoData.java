@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import org.apache.commons.collections.MapUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
 import javax.persistence.*;
@@ -128,7 +130,10 @@ public class VideoData extends AbstractMetadata {
     @OrderColumn(name = "ordering", nullable = false)
     @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false)
     private List<CastCrew> credits = new ArrayList<CastCrew>(0);
-    
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
+    private List<BoxedSetOrder> boxedSets = new ArrayList<BoxedSetOrder>(0);
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
     
@@ -140,6 +145,9 @@ public class VideoData extends AbstractMetadata {
     
     @Transient
     private Set<String> studioNames = new LinkedHashSet<String>(0);
+
+    @Transient
+    private Map<String,Integer> setInfos = new HashMap<String,Integer>(0);
 
     // GETTER and SETTER
     
@@ -357,6 +365,18 @@ public class VideoData extends AbstractMetadata {
         this.artworks = artworks;
     }
 
+    public List<BoxedSetOrder> getBoxedSets() {
+        return boxedSets;
+    }
+
+    public void setBoxedSets(List<BoxedSetOrder> boxedSets) {
+        this.boxedSets = boxedSets;
+    }
+
+    public void addBoxedSet(BoxedSetOrder boxedSet) {
+        this.boxedSets.add(boxedSet);
+    }
+    
     // TRANSIENTS METHODS
     @JsonIgnore // This is not needed for the API
     public Set<CreditDTO> getCreditDTOS() {
@@ -396,7 +416,17 @@ public class VideoData extends AbstractMetadata {
             setOverrideFlag(OverrideFlag.STUDIOS, source);
         }
     }
-    
+
+    public Map<String,Integer> getSetInfos() {
+        return setInfos;
+    }
+
+    public void setSetInfos(Map<String,Integer> setInfos) {
+        if (MapUtils.isNotEmpty(setInfos)) {
+            this.setInfos = setInfos;
+        }
+    }
+
     // TV CHECKS
     
     public boolean isScannableTvEpisode() {

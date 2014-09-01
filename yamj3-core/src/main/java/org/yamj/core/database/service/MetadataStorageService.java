@@ -22,13 +22,12 @@
  */
 package org.yamj.core.database.service;
 
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.VideoData;
-
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -105,21 +104,23 @@ public class MetadataStorageService {
     }
 
     @Transactional(readOnly = true)
-    public VideoData getRequiredVideoData(Long id) {
+    public VideoData getRequiredVideoData(Long id, StepType step) {
         final StringBuilder sb = new StringBuilder();
         sb.append("from VideoData vd ");
         sb.append("left outer join fetch vd.credits ");
         sb.append("left outer join fetch vd.genres ");
         sb.append("left outer join fetch vd.studios ");
-        sb.append("where vd.id = :id");
-
+        sb.append("left outer join fetch vd.boxedSets ");
+        sb.append("where vd.id = :id ");
+        sb.append("and vd.step = :step ");
+        
         @SuppressWarnings("unchecked")
-        List<VideoData> objects = this.commonDao.findById(sb, id);
+        List<VideoData> objects = this.commonDao.findByIdAndStep(sb, id, step);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
     @Transactional(readOnly = true)
-    public Series getRequiredSeries(Long id) {
+    public Series getRequiredSeries(Long id, StepType step) {
         final StringBuilder sb = new StringBuilder();
         sb.append("from Series ser ");
         sb.append("join fetch ser.seasons sea ");
@@ -127,11 +128,13 @@ public class MetadataStorageService {
         sb.append("left outer join fetch vd.credits ");
         sb.append("left outer join fetch vd.genres ");
         sb.append("left outer join fetch vd.studios ");
+        sb.append("left outer join fetch vd.boxedSets ");
         sb.append("left outer join fetch ser.genres ");
-        sb.append("where ser.id = :id");
+        sb.append("where ser.id = :id ");
+        sb.append("and ser.step = :step ");
 
         @SuppressWarnings("unchecked")
-        List<Series> objects = this.commonDao.findById(sb, id);
+        List<Series> objects = this.commonDao.findByIdAndStep(sb, id, step);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
 
@@ -148,35 +151,54 @@ public class MetadataStorageService {
      */
     public void storeAssociatedEntities(VideoData videoData) {
         
-        // store new genres
-        for (String genreName : videoData.getGenreNames()) {
-            try {
-                this.commonDao.storeNewGenre(genreName);
-            } catch (Exception ex) {
-                LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
-                LOG.trace("Storage error", ex);
+        if (CollectionUtils.isNotEmpty(videoData.getGenreNames())) {
+            // store new genres
+            for (String genreName : videoData.getGenreNames()) {
+                try {
+                    this.commonDao.storeNewGenre(genreName);
+                } catch (Exception ex) {
+                    LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
+                    LOG.trace("Storage error", ex);
+                }
             }
         }
-
-        // store new studios
-        for (String studioName : videoData.getStudioNames()) {
-            try {
-                this.commonDao.storeNewStudio(studioName);
-            } catch (Exception ex) {
-                LOG.error("Failed to store studio '{}', error: {}", studioName, ex.getMessage());
-                LOG.trace("Storage error", ex);
+        
+        if (CollectionUtils.isNotEmpty(videoData.getStudioNames())) {
+            // store new studios
+            for (String studioName : videoData.getStudioNames()) {
+                try {
+                    this.commonDao.storeNewStudio(studioName);
+                } catch (Exception ex) {
+                    LOG.error("Failed to store studio '{}', error: {}", studioName, ex.getMessage());
+                    LOG.trace("Storage error", ex);
+                }
             }
         }
-
+        
+        if (CollectionUtils.isNotEmpty(videoData.getCreditDTOS())) {
+            // store persons
+            for (CreditDTO creditDTO : videoData.getCreditDTOS()) {
+                try {
+                    this.metadataDao.storePerson(creditDTO);
+                } catch (Exception ex) {
+                    LOG.error("Failed to store person '{}', error: {}", creditDTO.getName(), ex.getMessage());
+                    LOG.trace("Storage error", ex);
+                }
+            }
+        }
+        
         // store persons
-        for (CreditDTO creditDTO : videoData.getCreditDTOS()) {
-            try {
-                this.metadataDao.storePerson(creditDTO);
-            } catch (Exception ex) {
-                LOG.error("Failed to store person '{}', error: {}", creditDTO.getName(), ex.getMessage());
-                LOG.trace("Storage error", ex);
+        if (MapUtils.isNotEmpty(videoData.getSetInfos())) {
+            for (String boxedSetName : videoData.getSetInfos().keySet()) {
+                try {
+                    this.commonDao.storeNewBoxedSet(boxedSetName);
+                } catch (Exception ex) {
+                    LOG.error("Failed to store boxed set '{}', error: {}", boxedSetName, ex.getMessage());
+                    LOG.trace("Storage error", ex);
+                }
             }
         }
+
     }
 
     /**
@@ -186,16 +208,18 @@ public class MetadataStorageService {
      */
     public void storeAssociatedEntities(Series series) {
 
-        // store new genres
-        for (String genreName : series.getGenreNames()) {
-            try {
-                this.commonDao.storeNewGenre(genreName);
-            } catch (Exception ex) {
-                LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
-                LOG.trace("Storage error", ex);
+        if (CollectionUtils.isNotEmpty(series.getGenreNames())) {
+            // store new genres
+            for (String genreName : series.getGenreNames()) {
+                try {
+                    this.commonDao.storeNewGenre(genreName);
+                } catch (Exception ex) {
+                    LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
+                    LOG.trace("Storage error", ex);
+                }
             }
         }
-
+        
         for (Season season : series.getSeasons()) {
             for (VideoData videoData : season.getVideoDatas()) {
                 this.storeAssociatedEntities(videoData);
@@ -230,6 +254,9 @@ public class MetadataStorageService {
 
         // update cast and crew
         updateCastCrew(videoData);
+        
+        // update boxed sets
+        updateBoxedSets(videoData);
     }
 
     /**
@@ -239,6 +266,7 @@ public class MetadataStorageService {
      */
     @Transactional
     public void setNextStep(VideoData videoData) {
+        if (videoData == null) return;
         StepType actualStep = videoData.getStep();
         videoData.setNextStep(actualStep);
         metadataDao.updateEntity(videoData);
@@ -275,6 +303,8 @@ public class MetadataStorageService {
      */
     @Transactional
     public void setNextStep(Series series) {
+        if (series == null) return;
+        
         StepType actualStep = series.getStep();
         series.setNextStep(actualStep);
         metadataDao.updateEntity(series);
@@ -352,6 +382,50 @@ public class MetadataStorageService {
     }
 
     /**
+     * Update boxed sets for Series from the database
+     *
+     * @param series
+     */
+    private void updateBoxedSets(VideoData videoData) {
+        if (MapUtils.isEmpty(videoData.getSetInfos())) {
+            return;
+        }
+
+        for (Entry<String,Integer> entry : videoData.getSetInfos().entrySet()) {
+            
+            BoxedSetOrder boxedSetOrder = null;
+            for (BoxedSetOrder stored : videoData.getBoxedSets()) {
+                if (StringUtils.equalsIgnoreCase(stored.getBoxedSet().getName(), entry.getKey())) {
+                    boxedSetOrder = stored;
+                    break;
+                }
+            }
+            
+            if (boxedSetOrder == null) {
+                // create new videoSet
+                BoxedSet boxedSet = commonDao.getBoxedSet(entry.getKey());
+                if (boxedSet != null) {
+                    boxedSetOrder = new BoxedSetOrder();
+                    boxedSetOrder.setVideoData(videoData);
+                    boxedSetOrder.setBoxedSet(boxedSet);
+                    if (entry.getValue() != null) {
+                        boxedSetOrder.setOrdering(entry.getValue().intValue());
+                    }
+                    videoData.addBoxedSet(boxedSetOrder);
+                    this.commonDao.saveEntity(boxedSetOrder);
+                }
+            } else {
+                if (entry.getValue() == null) {
+                    boxedSetOrder.setOrdering(-1);
+                } else {
+                    boxedSetOrder.setOrdering(entry.getValue().intValue());
+                }
+                this.commonDao.updateEntity(boxedSetOrder);                
+            }
+        }
+    }
+
+    /**
      * Update cast and crew to the database
      *
      * @param videoData
@@ -375,10 +449,7 @@ public class MetadataStorageService {
 
             // find person if not found in cast 
             if (person == null) {
-                LOG.info("Attempting to retrieve information on '{}' from database", dto.getName());
                 person = metadataDao.getByName(Person.class, dto.getName());
-            } else {
-                LOG.debug("Found '{}' in cast table", person.getName());
             }
 
             if (person == null) {

@@ -157,7 +157,7 @@ public class MediaImportService {
                 videoData.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                 videoData.setPublicationYear(dto.getYear(), MEDIA_SOURCE);
                 videoData.setStatus(StatusType.NEW);
-                videoData.setStep(StepType.ONLINE);
+                videoData.setStep(StepType.NFO);
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);
 
@@ -206,7 +206,7 @@ public class MediaImportService {
                             series.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                             series.setSourceDbIdMap(dto.getIdMap());
                             series.setStatus(StatusType.NEW);
-                            series.setStep(StepType.ONLINE);
+                            series.setStep(StepType.NFO);
                             LOG.debug("Store new series: '{}'", series.getTitle());
                             metadataDao.saveEntity(series);
 
@@ -239,7 +239,7 @@ public class MediaImportService {
                         season.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                         season.setSeries(series);
                         season.setStatus(StatusType.NEW);
-                        season.setStep(StepType.ONLINE);
+                        season.setStep(StepType.NFO);
                         
                         LOG.debug("Store new seaon: '{}' - Season {}", season.getTitle(), season.getSeason());
                         metadataDao.saveEntity(season);
@@ -276,7 +276,7 @@ public class MediaImportService {
                         videoData.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                     }
                     videoData.setStatus(StatusType.NEW);
-                    videoData.setStep(StepType.ONLINE);
+                    videoData.setStep(StepType.NFO);
                     videoData.setSeason(season);
                     videoData.setEpisode(episode);
                     mediaFile.addVideoData(videoData);
