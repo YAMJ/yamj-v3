@@ -198,7 +198,7 @@ public class ScanningScheduler {
         LOG.debug("Finished media data scanning");
     }
 
-    //@Scheduled(initialDelay = 20000, fixedDelay = 45000)
+    @Scheduled(initialDelay = 20000, fixedDelay = 45000)
     public void scanPeopleData() throws Exception {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.peoplescan.maxThreads", 1);
         if (maxThreads <= 0) {
@@ -240,7 +240,7 @@ public class ScanningScheduler {
         LOG.debug("Finished people data scanning");
     }
 
-    //@Scheduled(initialDelay = 30000, fixedDelay = 45000)
+    @Scheduled(initialDelay = 30000, fixedDelay = 45000)
     public void scanArtwork() throws Exception {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.artworkscan.maxThreads", 1);
         if (maxThreads <= 0) {
