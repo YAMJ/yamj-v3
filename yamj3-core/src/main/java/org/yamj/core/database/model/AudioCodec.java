@@ -70,6 +70,8 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
     @Column(name = "language")
     private String language;
 
+    // GETTER AND SETTER
+    
     public MediaFile getMediaFile() {
         return mediaFile;
     }

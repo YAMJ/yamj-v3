@@ -42,25 +42,32 @@ public abstract class AbstractMetadata extends AbstractAuditable
         implements IMetadata, Serializable {
 
     private static final long serialVersionUID = -556558470067852056L;
+    
     /**
      * This will be generated from a scanned file name.
      */
     @NaturalId
     @Column(name = "identifier", length = 200, nullable = false)
     private String identifier;
+    
     @Column(name = "title", nullable = false, length = 255)
     private String title;
+    
     @Column(name = "title_original", length = 255)
     private String titleOriginal;
+    
     @Lob
     @Column(name = "plot", length = 50000)
     private String plot;
+    
     @Lob
     @Column(name = "outline", length = 50000)
     private String outline;
+    
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
+    
     @Type(type = "stepType")
     @Column(name = "step", nullable = false, length = 10)
     private StepType step;

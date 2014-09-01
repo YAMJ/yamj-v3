@@ -54,7 +54,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
 })
 public class Season extends AbstractMetadata {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1858640563119637343L;
 
     @Index(name = "IX_SEASON_SEASON")
     @Column(name = "season", nullable = false)
@@ -65,8 +65,7 @@ public class Season extends AbstractMetadata {
     private int publicationYear = -1;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "season_ids", joinColumns =
-            @JoinColumn(name = "season_id"))
+    @JoinTable(name = "season_ids", joinColumns = @JoinColumn(name = "season_id"))
     @ForeignKey(name = "FK_SEASON_SOURCEIDS")
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
@@ -74,8 +73,7 @@ public class Season extends AbstractMetadata {
     private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "season_ratings", joinColumns =
-            @JoinColumn(name = "season_id"))
+    @JoinTable(name = "season_ratings", joinColumns = @JoinColumn(name = "season_id"))
     @ForeignKey(name = "FK_SEASON_RATINGS")
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
@@ -83,13 +81,11 @@ public class Season extends AbstractMetadata {
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "season_override", joinColumns =
-            @JoinColumn(name = "season_id"))
+    @JoinTable(name = "season_override", joinColumns = @JoinColumn(name = "season_id"))
     @ForeignKey(name = "FK_SEASON_OVERRIDE")
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
-    @MapKeyType(value =
-            @Type(type = "overrideFlag"))
+    @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
     private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
 

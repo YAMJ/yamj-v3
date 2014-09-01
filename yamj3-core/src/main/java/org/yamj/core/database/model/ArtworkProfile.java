@@ -34,36 +34,47 @@ import org.yamj.core.database.model.type.ImageFormat;
 
 @Entity
 @Table(name = "artwork_profile",
-        uniqueConstraints =
-        @UniqueConstraint(name = "UIX_ARTWORKPROFILE_NATURALID", columnNames = {"profile_name", "artwork_type"}))
+    uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORKPROFILE_NATURALID", columnNames = {"profile_name", "artwork_type"})
+)
 public class ArtworkProfile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -5178511945599751914L;
+    
     @NaturalId
     @Column(name = "profile_name")
     private String profileName;
+    
     @NaturalId
     @Type(type = "artworkType")
     @Column(name = "artwork_type")
     private ArtworkType artworkType;
+    
     @Column(name = "width", nullable = false)
     private int width = -1;
+    
     @Column(name = "height", nullable = false)
     private int height = -1;
+    
     @Column(name = "apply_to_movie", nullable = false)
     private boolean applyToMovie = false;
+    
     @Column(name = "apply_to_series", nullable = false)
     private boolean applyToSeries = false;
+    
     @Column(name = "apply_to_season", nullable = false)
     private boolean applyToSeason = false;
+    
     @Column(name = "apply_to_episode", nullable = false)
     private boolean applyToEpisode = false;
+    
     @Column(name = "apply_to_person", nullable = false)
     private boolean applyToPerson = false;
+    
     @Column(name = "pre_process", nullable = false)
     private boolean preProcess = false;
 
     // GETTER and SETTER
+    
     public String getProfileName() {
         return profileName;
     }
@@ -174,6 +185,7 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     }
 
     // COMMON METHODS
+    
     public float getRatio() {
         return ((float) getWidth() / (float) getHeight());
     }
@@ -195,6 +207,8 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
         return false;
     }
 
+    // EQUALITY CHECKS
+    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

@@ -22,13 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.ForeignKey;
-
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,16 +32,7 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
-import org.hibernate.annotations.Parameter;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.hibernate.usertypes.EnumStringUserType;
-
-@TypeDefs({
-    @TypeDef(name = "artworkType", typeClass = EnumStringUserType.class,
-            parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ArtworkType")}),
-    @TypeDef(name = "statusType", typeClass = EnumStringUserType.class,
-            parameters = { @Parameter(name = "enumClassName", value = "org.yamj.common.type.StatusType")})
-})
 
 @Entity
 @Table(name = "artwork_located",

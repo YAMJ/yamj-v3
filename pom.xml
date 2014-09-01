@@ -63,10 +63,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <hibernate.version>4.2.7.Final</hibernate.version>
-        <spring.version>3.2.5.RELEASE</spring.version>
+        <spring.version>3.2.10.RELEASE</spring.version>
         <org.slf4j.version>1.7.6</org.slf4j.version>
-        <jackson.version>2.3.2</jackson.version>
-        <jetty.version>8.1.14.v20131031</jetty.version>
+        <jackson.version>2.4.2</jackson.version>
+        <jetty.version>8.1.15.v20140411</jetty.version>
     </properties>
 
     <profiles>

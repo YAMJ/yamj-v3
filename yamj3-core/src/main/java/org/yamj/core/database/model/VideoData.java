@@ -46,91 +46,103 @@ import org.yamj.core.database.model.type.OverrideFlag;
         })
 public class VideoData extends AbstractMetadata {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 885531396557944590L;
+    
     @Column(name = "episode", nullable = false)
     private int episode = -1;
+    
     @Index(name = "IX_VIDEODATA_PUBLICATIONYEAR")
     @Column(name = "publication_year", nullable = false)
     private int publicationYear = -1;
+    
     @Temporal(value = TemporalType.DATE)
     @Column(name = "release_date")
     private Date releaseDate;
+    
     @Column(name = "top_rank", nullable = false)
     private int topRank = -1;
+    
     @Lob
     @Column(name = "tagline", length = 25000)
     private String tagline;
+    
     @Lob
     @Column(name = "quote", length = 25000)
     private String quote;
+    
     @Column(name = "country", length = 100)
     private String country;
+    
     @Column(name = "skip_online_scans", length=255)
     private String skipOnlineScans;
+    
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "videodata_ids", joinColumns
-            = @JoinColumn(name = "videodata_id"))
+    @JoinTable(name = "videodata_ids", joinColumns = @JoinColumn(name = "videodata_id"))
     @ForeignKey(name = "FK_VIDEODATA_SOURCEIDS")
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
+    
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "videodata_ratings", joinColumns
-            = @JoinColumn(name = "videodata_id"))
+    @JoinTable(name = "videodata_ratings", joinColumns = @JoinColumn(name = "videodata_id"))
     @ForeignKey(name = "FK_VIDEODATA_RATINGS")
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
+    
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "videodata_override", joinColumns
-            = @JoinColumn(name = "videodata_id"))
+    @JoinTable(name = "videodata_override", joinColumns = @JoinColumn(name = "videodata_id"))
     @ForeignKey(name = "FK_VIDEODATA_OVERRIDE")
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
-    @MapKeyType(value
-            = @Type(type = "overrideFlag"))
+    @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
     private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
+    
     @ManyToMany
     @ForeignKey(name = "FK_DATAGENRES_VIDEODATA", inverseName = "FK_DATAGENRES_GENRE")
     @JoinTable(name = "videodata_genres",
-            joinColumns = {
-                @JoinColumn(name = "data_id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "genre_id")})
+               joinColumns = @JoinColumn(name = "data_id"),
+               inverseJoinColumns = @JoinColumn(name = "genre_id"))
     private Set<Genre> genres = new HashSet<Genre>(0);
+    
     @ManyToMany
     @ForeignKey(name = "FK_DATASTUDIOS_VIDEODATA", inverseName = "FK_DATASTUDIOS_GENRE")
     @JoinTable(name = "videodata_studios",
-            joinColumns = {
-                @JoinColumn(name = "data_id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "studio_id")})
+               joinColumns = @JoinColumn(name = "data_id"),
+               inverseJoinColumns = @JoinColumn(name = "studio_id"))
     private Set<Studio> studios = new HashSet<Studio>(0);
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_VIDEODATA_SEASON")
     @Fetch(FetchMode.JOIN)
     @JoinColumn(name = "season_id")
     private Season season;
+    
     @ManyToMany(mappedBy = "videoDatas")
-    @ForeignKey(name = "FK_REL_VIDEODATA_MEDIAFILE")
     private Set<MediaFile> mediaFiles = new HashSet<MediaFile>(0);
+    
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @OrderColumn(name = "ordering", nullable = false)
     @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false)
     private List<CastCrew> credits = new ArrayList<CastCrew>(0);
+    
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
+    
     @Transient
     private Set<CreditDTO> creditDTOS = new LinkedHashSet<CreditDTO>(0);
+    
     @Transient
     private Set<String> genreNames = new LinkedHashSet<String>(0);
+    
     @Transient
     private Set<String> studioNames = new LinkedHashSet<String>(0);
 
     // GETTER and SETTER
+    
     public int getPublicationYear() {
         return publicationYear;
     }
@@ -386,6 +398,7 @@ public class VideoData extends AbstractMetadata {
     }
     
     // TV CHECKS
+    
     public boolean isScannableTvEpisode() {
         if (StatusType.DONE.equals(this.getStatus())) {
             return false;
@@ -422,6 +435,8 @@ public class VideoData extends AbstractMetadata {
         return (episode < 0);
     }
 
+    // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         final int prime = 7;

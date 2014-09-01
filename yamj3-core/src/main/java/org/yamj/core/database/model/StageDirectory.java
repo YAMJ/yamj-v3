@@ -27,19 +27,12 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.*;
-import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.Index;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.hibernate.usertypes.EnumStringUserType;
-
-@TypeDef(name = "statusType",
-        typeClass = EnumStringUserType.class,
-        parameters = {
-    @Parameter(name = "enumClassName", value = "org.yamj.common.type.StatusType")})
 
 @Entity
 @Table(name = "stage_directory",

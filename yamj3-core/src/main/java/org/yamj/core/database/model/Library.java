@@ -55,6 +55,7 @@ public class Library extends AbstractIdentifiable implements Serializable {
     private Date lastScanned;
 
     // GETTER and SETTER
+    
     public String getClient() {
         return client;
     }
@@ -88,6 +89,7 @@ public class Library extends AbstractIdentifiable implements Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         final int prime = 7;

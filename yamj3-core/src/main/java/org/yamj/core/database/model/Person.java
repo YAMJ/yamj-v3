@@ -35,41 +35,49 @@ import org.yamj.common.type.StatusType;
 
 @Entity
 @Table(name = "person",
-        uniqueConstraints =
-        @UniqueConstraint(name = "UIX_PERSON_NATURALID", columnNames = {"name"}))
+    uniqueConstraints = @UniqueConstraint(name = "UIX_PERSON_NATURALID", columnNames = {"name"})
+)
 public class Person extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 660066902996412843L;
+    
     @NaturalId(mutable = true)
     @Column(name = "name", nullable = false, length = 255)
     private String name;
+    
     @Temporal(value = TemporalType.DATE)
     @Column(name = "birth_day")
     private Date birthDay;
+    
     @Column(name = "birth_place", length = 255)
     private String birthPlace;
+    
     @Column(name = "birth_name", length = 255)
     private String birthName;
+    
     @Temporal(value = TemporalType.DATE)
     @Column(name = "death_day")
     private Date deathDay;
+    
     @Lob
     @Column(name = "biography", length = 50000)
     private String biography;
+    
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "person_ids", joinColumns =
-            @JoinColumn(name = "person_id"))
+    @JoinTable(name = "person_ids", joinColumns = @JoinColumn(name = "person_id"))
     @ForeignKey(name = "FK_PERSON_SOURCEIDS")
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 40)
     private Map<String, String> personIds = new HashMap<String, String>(0);
+    
     @Index(name = "IX_PERSON_STATUS")
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
 
     // GETTER and SETTER
+    
     public String getName() {
         return name;
     }
@@ -151,6 +159,7 @@ public class Person extends AbstractAuditable implements Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         final int prime = 7;

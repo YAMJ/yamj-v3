@@ -37,13 +37,17 @@ public abstract class AbstractAuditable implements Auditable, Identifiable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
+    
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "create_timestamp", nullable = false, updatable = false)
     private Date createTimestamp;
+    
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "update_timestamp")
     private Date updateTimestamp;
 
+    // GETTER AND SETTER
+    
     @Override
     public long getId() {
         return this.id;
@@ -58,7 +62,6 @@ public abstract class AbstractAuditable implements Auditable, Identifiable {
         return (this.id <= 0);
     }
 
-    // GETTER and SETTER
     public Date getCreateTimestamp() {
         return this.createTimestamp;
     }

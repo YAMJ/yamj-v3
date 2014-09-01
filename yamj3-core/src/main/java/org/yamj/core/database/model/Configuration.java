@@ -32,20 +32,25 @@ import org.yamj.core.hibernate.Auditable;
 @Table(name = "configuration")
 public class Configuration implements Auditable, Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -3985190780763596771L;
+    
     @Id
     @Column(name = "config_key", nullable = false, length = 255)
     private String key;
+    
     @Column(name = "config_value", length = 255)
     private String value;
+    
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "create_timestamp", nullable = false, updatable = false)
     private Date createTimestamp;
+    
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "update_timestamp")
     private Date updateTimestamp;
 
     // GETTER and SETTER
+    
     public String getKey() {
         return key;
     }
@@ -79,6 +84,7 @@ public class Configuration implements Auditable, Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         final int prime = 7;

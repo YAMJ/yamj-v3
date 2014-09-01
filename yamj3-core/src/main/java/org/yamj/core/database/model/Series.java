@@ -44,55 +44,60 @@ import org.yamj.core.database.model.type.OverrideFlag;
         })
 public class Series extends AbstractMetadata {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -5782361288021493423L;
+    
     @Column(name = "start_year")
     private int startYear = -1;
+    
     @Column(name = "end_year")
     private int endYear = -1;
+    
     @Column(name = "skip_online_scans", length=255)
     private String skipOnlineScans;
+    
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "series_ids", joinColumns
-            = @JoinColumn(name = "series_id"))
+    @JoinTable(name = "series_ids", joinColumns = @JoinColumn(name = "series_id"))
     @ForeignKey(name = "FK_SERIES_SOURCEIDS")
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
+    
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "series_ratings", joinColumns
-            = @JoinColumn(name = "series_id"))
+    @JoinTable(name = "series_ratings", joinColumns = @JoinColumn(name = "series_id"))
     @ForeignKey(name = "FK_SERIES_RATINGS")
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
+    
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "series_override", joinColumns
-            = @JoinColumn(name = "series_id"))
+    @JoinTable(name = "series_override", joinColumns = @JoinColumn(name = "series_id"))
     @ForeignKey(name = "FK_SERIES_OVERRIDE")
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
-    @MapKeyType(value
-            = @Type(type = "overrideFlag"))
+    @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
     private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
+    
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
     private Set<Season> seasons = new HashSet<Season>(0);
+    
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
+    
     @ManyToMany
     @ForeignKey(name = "FK_SERIESGENRES_SERIES", inverseName = "FK_SERIESGENRES_GENRE")
     @JoinTable(name = "series_genres",
-            joinColumns = {
-                @JoinColumn(name = "series_id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "genre_id")})
+               joinColumns = { @JoinColumn(name = "series_id")},
+               inverseJoinColumns = { @JoinColumn(name = "genre_id")})
     private Set<Genre> genres = new HashSet<Genre>(0);
+    
     @Transient
     private Set<String> genreNames = new LinkedHashSet<String>(0);
 
     // GETTER and SETTER
+    
     public int getStartYear() {
         return startYear;
     }
@@ -226,6 +231,8 @@ public class Series extends AbstractMetadata {
         }
     }
 
+    // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         final int prime = 7;

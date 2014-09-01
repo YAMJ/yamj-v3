@@ -32,7 +32,7 @@ import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "boxed_set",
-        uniqueConstraints = @UniqueConstraint(name = "UIX_BOXEDSET_NATURALID", columnNames = {"name"})
+    uniqueConstraints = @UniqueConstraint(name = "UIX_BOXEDSET_NATURALID", columnNames = {"name"})
 )
 public class BoxedSet extends AbstractIdentifiable implements Serializable {
 
@@ -43,6 +43,7 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
     private String name;
 
     // GETTER and SETTER
+    
     public String getName() {
         return name;
     }
@@ -52,6 +53,7 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         final int prime = 7;

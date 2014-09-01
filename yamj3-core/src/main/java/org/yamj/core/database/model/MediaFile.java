@@ -22,6 +22,11 @@
  */
 package org.yamj.core.database.model;
 
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import org.hibernate.annotations.ForeignKey;
+
 import org.yamj.core.database.model.type.FileType;
 
 import java.io.Serializable;
@@ -113,10 +118,11 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "mediafile_videodata",
-        joinColumns = {@JoinColumn(name = "mediafile_id")}, inverseJoinColumns = {@JoinColumn(name = "videodata_id")})
-    @ForeignKey(name = "FK_REL_MEDIAFILE_VIDEODATA")
+               joinColumns = {@JoinColumn(name = "mediafile_id")},
+               inverseJoinColumns = {@JoinColumn(name = "videodata_id")})
+    @ForeignKey(name = "FK_REL_MEDIAFILE_VIDEODATA", inverseName = "FK_REL_VIDEODATA_MEDIAFILE")
     private Set<VideoData> videoDatas = new HashSet<VideoData>(0);
-    
+
     @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "mediaFile")
     private Set<StageFile> stageFiles = new HashSet<StageFile>(0);
 
