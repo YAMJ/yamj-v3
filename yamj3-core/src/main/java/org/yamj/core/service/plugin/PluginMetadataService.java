@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.plugin;
 
-import org.yamj.core.database.model.type.StepType;
-
 import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,13 +30,14 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.model.type.StepType;
+import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.database.service.MetadataStorageService;
+import org.yamj.core.tools.ExceptionTools;
 
 @Service("pluginMetadataService")
 public class PluginMetadataService {
@@ -56,7 +55,9 @@ public class PluginMetadataService {
 
     @Autowired
     private MetadataStorageService metadataStorageService;
-
+    @Autowired
+    private ArtworkStorageService artworkStorageService;
+    
     /**
      * Register a movie scanner
      *
@@ -93,16 +94,17 @@ public class PluginMetadataService {
      * @param id
      */
     public void scanMovie(Long id) {
+        VideoData videoData = metadataStorageService.getVideoDataInStep(id, StepType.ONLINE);
+        if (videoData == null) {
+            // step doesn't match
+            return;
+        }
+        
         IMovieScanner movieScanner = registeredMovieScanner.get(MOVIE_SCANNER);
         if (movieScanner == null) {
             throw new RuntimeException("Movie scanner '" + MOVIE_SCANNER + "' not registered");
         }
 
-        VideoData videoData = metadataStorageService.getRequiredVideoData(id, StepType.ONLINE);
-        if (videoData == null) {
-            // step doesn't match
-            return;
-        }
         LOG.debug("Scanning movie data for '{}' using {}", videoData.getTitle(), MOVIE_SCANNER);
 
         // scan video data
@@ -155,8 +157,12 @@ public class PluginMetadataService {
             metadataStorageService.updateMetaData(videoData);
         } catch (Exception error) {
             // NOTE: status will not be changed
-            LOG.error("Failed storing movie {}-'{}'", id, videoData.getTitle());
-            LOG.warn("Storage error", error);
+            LOG.error("Failed storing movie {}-'{}': {}", id, videoData.getTitle(), error.getMessage());
+            
+            // just log error if no locking error
+            if (!ExceptionTools.isLockError(error)) {
+                LOG.warn("Storage error", error);
+            }
         }
     }
 
@@ -166,16 +172,17 @@ public class PluginMetadataService {
      * @param id
      */
     public void scanSeries(Long id) {
+        Series series = metadataStorageService.getSeriesInStep(id, StepType.ONLINE);
+        if (series == null) {
+            // step doesn't match
+            return;
+        }
+
         ISeriesScanner seriesScanner = registeredSeriesScanner.get(SERIES_SCANNER);
         if (seriesScanner == null) {
             throw new RuntimeException("Series scanner '" + SERIES_SCANNER + "' not registered");
         }
 
-        Series series = metadataStorageService.getRequiredSeries(id, StepType.ONLINE);
-        if (series == null) {
-            // step doesn't match
-            return;
-        }
         LOG.debug("Scanning series data for '{}' using {}", series.getTitle(), SERIES_SCANNER);
 
         // scan series
@@ -229,8 +236,12 @@ public class PluginMetadataService {
             metadataStorageService.updateMetaData(series);
         } catch (Exception error) {
             // NOTE: status will not be changed
-            LOG.error("Failed storing series {}-'{}'", id, series.getTitle());
-            LOG.warn("Storage error", error);
+            LOG.error("Failed storing series {}-'{}': {}", id, series.getTitle(), error.getMessage());
+            
+            // just log error if no locking error
+            if (!ExceptionTools.isLockError(error)) {
+                LOG.warn("Storage error", error);
+            }
         }
     }
 
@@ -273,20 +284,14 @@ public class PluginMetadataService {
         try {
             LOG.debug("Update person in database: {}-'{}'", person.getId(), person.getName());
             metadataStorageService.updatePerson(person);
-
-            // TODO check if artwork already exists
-            
-            // create photo artwork
-            Artwork photo = new Artwork();
-            photo.setArtworkType(ArtworkType.PHOTO);
-            photo.setStatus(StatusType.NEW);
-            photo.setPerson(person);
-            metadataStorageService.saveArtwork(photo);
-
         } catch (Exception error) {
             // NOTE: status will not be changed
-            LOG.error("Failed storing person {}-'{}'", id, person.getName());
-            LOG.warn("Storage error", error);
+            LOG.error("Failed storing person {}-'{}': {}", id, person.getName(), error.getMessage());
+            
+            // just log error if no locking error
+            if (!ExceptionTools.isLockError(error)) {
+                LOG.warn("Storage error", error);
+            }
         }
     }
 

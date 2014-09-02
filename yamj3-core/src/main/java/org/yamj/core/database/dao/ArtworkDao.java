@@ -30,13 +30,14 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Service;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
+import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.common.type.MetaDataType;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Service("artworkDao")
@@ -139,5 +140,13 @@ public class ArtworkDao extends HibernateDao {
 
         Collections.sort(queueElements, new QueueDTOComparator());
         return queueElements;
+    }
+
+    public Artwork getArtwork(Person person, ArtworkType artworkType) {
+        Criteria criteria = getSession().createCriteria(Artwork.class);
+        criteria.add(Restrictions.eq("person", person));
+        criteria.add(Restrictions.eq("artworkType", artworkType));
+        criteria.setCacheable(true);
+        return (Artwork) criteria.uniqueResult();
     }
 }

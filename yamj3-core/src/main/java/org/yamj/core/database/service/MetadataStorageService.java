@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.service;
 
+import org.yamj.core.database.model.type.ArtworkType;
+
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -38,6 +40,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.model.*;
@@ -53,6 +56,8 @@ public class MetadataStorageService {
     private CommonDao commonDao;
     @Autowired
     private MetadataDao metadataDao;
+    @Autowired
+    private ArtworkDao artworkDao;
 
     @Transactional
     public void save(Object entity) {
@@ -104,7 +109,7 @@ public class MetadataStorageService {
     }
 
     @Transactional(readOnly = true)
-    public VideoData getRequiredVideoData(Long id, StepType step) {
+    public VideoData getVideoDataInStep(Long id, StepType step) {
         final StringBuilder sb = new StringBuilder();
         sb.append("from VideoData vd ");
         sb.append("left outer join fetch vd.credits ");
@@ -116,11 +121,11 @@ public class MetadataStorageService {
         
         @SuppressWarnings("unchecked")
         List<VideoData> objects = this.commonDao.findByIdAndStep(sb, id, step);
-        return DataAccessUtils.requiredUniqueResult(objects);
+        return DataAccessUtils.uniqueResult(objects);
     }
 
     @Transactional(readOnly = true)
-    public Series getRequiredSeries(Long id, StepType step) {
+    public Series getSeriesInStep(Long id, StepType step) {
         final StringBuilder sb = new StringBuilder();
         sb.append("from Series ser ");
         sb.append("join fetch ser.seasons sea ");
@@ -135,7 +140,7 @@ public class MetadataStorageService {
 
         @SuppressWarnings("unchecked")
         List<Series> objects = this.commonDao.findByIdAndStep(sb, id, step);
-        return DataAccessUtils.requiredUniqueResult(objects);
+        return DataAccessUtils.uniqueResult(objects);
     }
 
     @Transactional(readOnly = true)
@@ -231,6 +236,16 @@ public class MetadataStorageService {
     public void updatePerson(Person person) {
         // update entity
         metadataDao.updateEntity(person);
+        
+        // store artwork
+        Artwork photo = artworkDao.getArtwork(person, ArtworkType.PHOTO);
+        if (photo == null) {
+            photo = new Artwork();
+            photo.setArtworkType(ArtworkType.PHOTO);
+            photo.setPerson(person);
+            photo.setStatus(StatusType.NEW);
+            this.artworkDao.saveEntity(photo);
+        }
     }
 
     @Transactional
@@ -267,6 +282,7 @@ public class MetadataStorageService {
     @Transactional
     public void setNextStep(VideoData videoData) {
         if (videoData == null) return;
+        
         StepType actualStep = videoData.getStep();
         videoData.setNextStep(actualStep);
         metadataDao.updateEntity(videoData);
@@ -502,20 +518,6 @@ public class MetadataStorageService {
         if (person != null) {
             person.setStatus(StatusType.ERROR);
             metadataDao.updateEntity(person);
-        }
-    }
-
-    @Transactional
-    public void saveArtwork(Artwork artwork) {
-        if (artwork != null) {
-            metadataDao.saveEntity(artwork);
-        }
-    }
-
-    @Transactional
-    public void updateArtwork(Artwork artwork) {
-        if (artwork != null) {
-            metadataDao.updateEntity(artwork);
         }
     }
 }

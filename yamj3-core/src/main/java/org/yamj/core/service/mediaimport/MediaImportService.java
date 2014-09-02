@@ -22,10 +22,6 @@
  */
 package org.yamj.core.service.mediaimport;
 
-import org.hibernate.Hibernate;
-
-import org.yamj.core.database.model.type.StepType;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +36,7 @@ import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.database.model.type.StepType;
 
 /**
  * The media import service is a spring-managed service. This will be used by the MediaImportRunner only in order to access other

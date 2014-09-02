@@ -22,7 +22,6 @@
  */
 package org.yamj.core.service;
 
-import org.hibernate.dialect.lock.OptimisticEntityLockException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.mediaimport.MediaImportService;
+import org.yamj.core.tools.ExceptionTools;
 
 @Service
 public class ImportScheduler {
@@ -55,14 +55,16 @@ public class ImportScheduler {
                     LOG.debug("Process video stage file: {}", id);
                     mediaImportService.processVideo(id);
                 }
-            } catch (OptimisticEntityLockException ex) {
-                // ignore this error and retry
             } catch (Exception error) {
-                LOG.error("Failed to process video stage file {}", id);
-                LOG.warn("Staging error", error);
-                try {
-                    mediaImportService.processingError(id);
-                } catch (Exception ignore) {}
+                if (ExceptionTools.isLockError(error)) {
+                    // nothing to do in lock error
+                } else {
+                    LOG.error("Failed to process video stage file {}", id);
+                    LOG.warn("Staging error", error);
+                    try {
+                        mediaImportService.processingError(id);
+                    } catch (Exception ignore) {}
+                }
             }
         } while (id != null);
 
@@ -75,14 +77,16 @@ public class ImportScheduler {
                     LOG.debug("Process stage nfo file: {}", id);
                     mediaImportService.processNfo(id);
                 }
-            } catch (OptimisticEntityLockException ex) {
-                // ignore this error and retry
             } catch (Exception error) {
-                LOG.error("Failed to process nfo stage file {}", id);
-                LOG.warn("Staging error", error);
-                try {
-                    mediaImportService.processingError(id);
-                } catch (Exception ignore) {}
+                if (ExceptionTools.isLockError(error)) {
+                    // nothing to do in lock error
+                } else {
+                    LOG.error("Failed to process nfo stage file {}", id);
+                    LOG.warn("Staging error", error);
+                    try {
+                        mediaImportService.processingError(id);
+                    } catch (Exception ignore) {}
+                }
             }
         } while (id != null);
 

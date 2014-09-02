@@ -63,7 +63,7 @@ public class NfoScannerService {
             return;
         }
         
-        VideoData videoData = metadataStorageService.getRequiredVideoData(queueElement.getId(), StepType.NFO);
+        VideoData videoData = metadataStorageService.getVideoDataInStep(queueElement.getId(), StepType.NFO);
         if (videoData == null) {
             // step doesn't match
             return;
@@ -146,7 +146,7 @@ public class NfoScannerService {
             return;
         }
         
-        Series series = metadataStorageService.getRequiredSeries(queueElement.getId(), StepType.NFO);
+        Series series = metadataStorageService.getSeriesInStep(queueElement.getId(), StepType.NFO);
         if (series == null) {
             // step doesn't match
             return;
@@ -254,10 +254,10 @@ public class NfoScannerService {
         // just set next stage
         // TODO: use bulk update for database updates
         if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
-            VideoData videoData = metadataStorageService.getRequiredVideoData(queueElement.getId(), StepType.NFO);
+            VideoData videoData = metadataStorageService.getVideoDataInStep(queueElement.getId(), StepType.NFO);
             this.metadataStorageService.setNextStep(videoData);
         } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
-            Series series = metadataStorageService.getRequiredSeries(queueElement.getId(), StepType.NFO);
+            Series series = metadataStorageService.getSeriesInStep(queueElement.getId(), StepType.NFO);
             this.metadataStorageService.setNextStep(series);
         }
     }
