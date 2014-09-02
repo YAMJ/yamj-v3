@@ -31,12 +31,17 @@ import org.yamj.core.hibernate.Identifiable;
  * Abstract implementation of an identifiable and auditable object.
  */
 @MappedSuperclass
+@SuppressWarnings("unused")
 public abstract class AbstractAuditable implements Auditable, Identifiable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
+    
+    @Version
+    @Column(name = "lock_no", nullable = false)
+    private int lockNo = 0;
     
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "create_timestamp", nullable = false, updatable = false)
@@ -53,7 +58,6 @@ public abstract class AbstractAuditable implements Auditable, Identifiable {
         return this.id;
     }
 
-    @SuppressWarnings("unused")
     private void setId(long id) {
         this.id = id;
     }
@@ -62,19 +66,27 @@ public abstract class AbstractAuditable implements Auditable, Identifiable {
         return (this.id <= 0);
     }
 
-    public Date getCreateTimestamp() {
+    private Date getCreateTimestamp() {
         return this.createTimestamp;
     }
 
-    public void setCreateTimestamp(final Date createTimestamp) {
+    private void setCreateTimestamp(final Date createTimestamp) {
         this.createTimestamp = createTimestamp;
     }
 
-    public Date getUpdateTimestamp() {
+    private Date getUpdateTimestamp() {
         return this.updateTimestamp;
     }
 
-    public void setUpdateTimestamp(final Date updateTimestamp) {
+    private void setUpdateTimestamp(final Date updateTimestamp) {
         this.updateTimestamp = updateTimestamp;
+    }
+
+    private int getLockNo() {
+        return lockNo;
+    }
+
+    private void setLockNo(int lockNo) {
+        this.lockNo = lockNo;
     }
 }

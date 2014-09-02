@@ -61,9 +61,7 @@ public class PluginMetadataRunner implements Runnable {
                 
                 try {
                     service.processingError(queueElement);
-                } catch (Exception ignore) {
-                    // ignore this error
-                }
+                } catch (Exception ignore) {}
             }
             queueElement = queue.poll();
         }

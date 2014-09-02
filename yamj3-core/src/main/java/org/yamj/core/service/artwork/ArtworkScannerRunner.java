@@ -46,11 +46,10 @@ public class ArtworkScannerRunner implements Runnable {
                 service.scanArtwork(queueElement);
             } catch (Exception error) {
                 LOG.error("Failed to process artwork", error);
+                
                 try {
                     service.processingError(queueElement);
-                } catch (Exception ignore) {
-                    // ignore this error
-                }
+                } catch (Exception ignore) {}
             }
             queueElement = queue.poll();
         }
