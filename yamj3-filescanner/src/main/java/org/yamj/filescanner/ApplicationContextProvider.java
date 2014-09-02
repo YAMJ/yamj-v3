@@ -31,12 +31,13 @@ public class ApplicationContextProvider implements ApplicationContextAware {
     private static ApplicationContext applicationContext = null;
 
     /**
-     * Created during the initialisation of Spring
+     * Created during the initialization of Spring
      *
      * @param applicationContext
      * @throws BeansException
      */
     @Override
+    @SuppressWarnings("static-access")
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         // Assign the ApplicationContext into a static variable
         this.applicationContext = applicationContext;
@@ -67,6 +68,7 @@ public class ApplicationContextProvider implements ApplicationContextAware {
      * @param beanName
      * @return
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> T getBean(Class T, String beanName) throws BeansException {
         return (T) applicationContext.getBean(beanName);
     }

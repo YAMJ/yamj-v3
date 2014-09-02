@@ -98,6 +98,7 @@ public class ApiDao extends HibernateDao {
      *
      * @param wrapper
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void getVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
         SqlScalars sqlScalars = new SqlScalars(generateSqlForVideoList(wrapper));
         OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getOptions();
@@ -544,6 +545,7 @@ public class ApiDao extends HibernateDao {
         }
     }
 
+    @SuppressWarnings("unused")
     private void getFilmographyForPerson(Object id) {
         SqlScalars sqlScalars = new SqlScalars();
 
@@ -1273,12 +1275,14 @@ public class ApiDao extends HibernateDao {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Utility Functions">
+    
     /**
      * Takes a list and generates a map of the ID and item
      *
      * @param idList
      * @return
      */
+    @SuppressWarnings("unused")
     private <T extends AbstractApiIdentifiableDTO> Map<Long, T> generateIdMap(List<T> idList) {
         Map<Long, T> results = new HashMap<Long, T>(idList.size());
 
@@ -1296,6 +1300,7 @@ public class ApiDao extends HibernateDao {
      * @param idList List of the source type
      * @return
      */
+    @SuppressWarnings("unchecked")
     private <T extends AbstractApiIdentifiableDTO> Map<Long, List<T>> generateIdMapList(List<T> idList) {
         Map<Long, List<T>> results = new HashMap<Long, List<T>>();
 

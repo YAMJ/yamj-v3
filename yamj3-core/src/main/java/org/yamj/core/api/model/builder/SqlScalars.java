@@ -111,6 +111,7 @@ public final class SqlScalars {
      * @param session
      * @return
      */
+    @SuppressWarnings("rawtypes")
     public SQLQuery createSqlQuery(Session session) {
         if (this.query == null) {
             this.query = session.createSQLQuery(getSql());

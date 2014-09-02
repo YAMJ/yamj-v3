@@ -35,6 +35,8 @@ import org.springframework.stereotype.Service;
 @Service("libraryFile")
 public class LibraryEntryDTO implements Serializable {
 
+    private static final long serialVersionUID = 1811957207452221890L;
+    
     // Properties
     private String path;
     private String playerpath;

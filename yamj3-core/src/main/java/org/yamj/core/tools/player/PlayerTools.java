@@ -164,12 +164,14 @@ public final class PlayerTools {
         List<String> playerList = new ArrayList<String>();
 
         for (int i = (scanStart < 1 ? 1 : scanStart); i <= (scanEnd > 255 ? 255 : scanEnd); i++) {
+            Socket mySocket = null;
+            
             try {
                 String ipToScan = baseIpAddress + i;
                 LOG.debug("Scanning {}", ipToScan);
-                Socket mySocket = new Socket();
+                
+                mySocket = new Socket();
                 SocketAddress address = new InetSocketAddress(ipToScan, port);
-
                 mySocket.connect(address, timeout);
 
                 out = new PrintWriter(mySocket.getOutputStream(), true);
@@ -187,19 +189,25 @@ public final class PlayerTools {
                 LOG.trace("UnknownHostException: {}", ex.getMessage());
             } catch (IOException ex) {
                 LOG.trace("IOException: {}", ex.getMessage());
+            } finally {
+                if (mySocket != null) {
+                    try {
+                        mySocket.close();
+                    } catch (Exception ignore) {}
+                }
             }
         }
 
         if (in != null) {
             try {
                 in.close();
-            } catch (IOException ex) {
-                LOG.trace("IOException: {}", ex.getMessage());
-            }
+            } catch (Exception ignore) {}
         }
 
         if (out != null) {
-            out.close();
+            try {
+                out.close();
+            } catch (Exception ignore) {}
         }
 
         LOG.info("Found {} players: {}", playerList.size(), playerList.toString());

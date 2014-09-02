@@ -37,7 +37,9 @@ import org.springframework.stereotype.Service;
 @Service("libraryCollection")
 public class LibraryCollection implements Serializable {
 
+    private static final long serialVersionUID = -134476506971169954L;
     private static final Logger LOG = LoggerFactory.getLogger(LibraryCollection.class);
+    
     private List<Library> libraries;
     private String defaultPlayerPath = "";
     private String defaultClient = "";

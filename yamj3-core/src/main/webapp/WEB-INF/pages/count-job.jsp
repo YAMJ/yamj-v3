@@ -16,7 +16,7 @@
         </c:import>
 
         <div id="logo">
-            <h2>Cast & Crew Job List</h2>
+            <h2>Cast &amp; Crew Job List</h2>
         </div>
         <table id="tablelist" style="width: 20%; margin: auto;;">
             <c:forEach items="${countlist}" var="entry">

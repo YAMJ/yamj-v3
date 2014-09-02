@@ -40,6 +40,8 @@ import org.apache.commons.lang3.concurrent.ConcurrentUtils;
  */
 public class Library implements Serializable {
 
+    private static final long serialVersionUID = -7307516287202738381L;
+    
     private boolean watch;
     private String description;
     private Statistics statistics;

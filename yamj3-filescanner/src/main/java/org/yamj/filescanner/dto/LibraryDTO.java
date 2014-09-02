@@ -35,6 +35,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  */
 public class LibraryDTO implements Serializable {
 
+    private static final long serialVersionUID = 6029416002787399037L;
+    
     private List<LibraryEntryDTO> libraries = new ArrayList<LibraryEntryDTO>();
 
     /**
