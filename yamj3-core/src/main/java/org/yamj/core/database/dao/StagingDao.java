@@ -88,6 +88,8 @@ public class StagingDao extends HibernateDao {
         query.setParameter("fileType", fileType);
         query.setParameter("baseName", baseName.toLowerCase());
         query.setParameter("stageDirectory", stageDirectory);
+        query.setCacheable(true);
+        query.setCacheMode(CacheMode.NORMAL);
         return (MediaFile)query.uniqueResult();
     }
     
@@ -111,6 +113,8 @@ public class StagingDao extends HibernateDao {
         query.setParameter("videoDataId", id);
         query.setParameter("fileType", FileType.NFO);
         query.setParameterList("statusSet", statusSet);
+        query.setCacheable(true);
+        query.setCacheMode(CacheMode.NORMAL);
         return query.list();
     }
 
@@ -136,6 +140,8 @@ public class StagingDao extends HibernateDao {
         query.setParameter("seriesId", id);
         query.setParameter("fileType", FileType.NFO);
         query.setParameterList("statusSet", statusSet);
+        query.setCacheable(true);
+        query.setCacheMode(CacheMode.NORMAL);
         return query.list();
     }
 }
