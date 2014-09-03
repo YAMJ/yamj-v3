@@ -113,11 +113,10 @@ public class ArtworkStorageService {
         if (CollectionUtils.isEmpty(artwork.getArtworkLocated())) {
             // no located artwork presents; just store all
             this.artworkDao.storeAll(locatedArtworks);
-        } else {
+        } else if (CollectionUtils.isNotEmpty(locatedArtworks)) {
             for (ArtworkLocated located : locatedArtworks) {
                 if (!artwork.getArtworkLocated().contains(located)) {
                     // just store if not contained before
-                    // otheri
                     this.artworkDao.saveEntity(located);
                 }
             }

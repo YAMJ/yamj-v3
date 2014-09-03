@@ -22,6 +22,8 @@
  */
 package org.yamj.core.configuration;
 
+import java.util.Arrays;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,9 +38,12 @@ import org.yamj.core.database.model.Configuration;
 
 public class ConfigService implements InitializingBean {
 
+    private static final String DEFAULT_SPLITTER = ",";
+    
+    private Map<String, String> cachedProperties = new HashMap<String, String>();
+
     @Autowired
     private ConfigDao configDao;
-    private Map<String, String> cachedProperties = new HashMap<String, String>();
 
     @Required
     public void setConfigDao(ConfigDao configDao) {
@@ -79,6 +84,15 @@ public class ConfigService implements InitializingBean {
         return (value == null ? defaultValue : value);
     }
 
+    public List<String> getPropertyAsList(String key, String defaultValue) {
+        return this.getPropertyAsList(key, defaultValue, DEFAULT_SPLITTER);
+    }
+
+    public List<String> getPropertyAsList(String key, String defaultValue, String splitter) {
+        String props = this.getProperty(key, defaultValue);
+        return Arrays.asList(props.split(splitter));
+    }
+    
     public boolean getBooleanProperty(String key, boolean defaultValue) {
         String value = cachedProperties.get(key);
         if (value != null) {

@@ -22,10 +22,9 @@
  */
 package org.yamj.core.service.artwork.poster;
 
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -33,68 +32,69 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
+import org.yamj.core.service.plugin.ImdbScanner;
+import org.yamj.core.service.plugin.ImdbSearchEngine;
 import org.yamj.core.tools.web.PoolingHttpClient;
 
-@Service("yahooPosterScanner")
-public class YahooPosterScanner extends AbstractMoviePosterScanner
-        implements InitializingBean {
+@Service("imdbPosterScanner")
+public class ImdbPosterScanner extends AbstractMoviePosterScanner implements InitializingBean {
 
-    private static final Logger LOG = LoggerFactory.getLogger(YahooPosterScanner.class);
-
+    private static final Logger LOG = LoggerFactory.getLogger(ImdbPosterScanner.class);
+    
     @Autowired
     private ArtworkScannerService artworkScannerService;
     @Autowired
+    private ImdbSearchEngine imdbSearchEngine;
+    @Autowired
     private PoolingHttpClient httpClient;
-
+    
     @Override
     public String getScannerName() {
-        return "yahoo";
+        return ImdbScanner.SCANNER_ID;
     }
 
     @Override
     public void afterPropertiesSet() {
+        // register this scanner
         artworkScannerService.registerMoviePosterScanner(this);
     }
 
     @Override
     public String getId(String title, int year) {
-        // Yahoo has no ID, so return the title
-        return title;
+        return imdbSearchEngine.getImdbId(title, year, false);
     }
 
     @Override
     public List<ArtworkDetailDTO> getPosters(String title, int year) {
-        List<ArtworkDetailDTO> dtos = new ArrayList<ArtworkDetailDTO>();
-
-        try {
-            StringBuilder sb = new StringBuilder("http://fr.images.search.yahoo.com/search/images?p=");
-            sb.append(URLEncoder.encode(title, "UTF-8"));
-            sb.append("+poster&fr=&ei=utf-8&js=1&x=wrt");
-
-            String xml = httpClient.requestContent(sb.toString());
-
-            // TODO scan more posters at once
-            int beginIndex = xml.indexOf("imgurl=");
-            if (beginIndex > 0) {
-                int endIndex = xml.indexOf("rurl=", beginIndex);
-                if (endIndex > 0) {
-                    String url = URLDecoder.decode(xml.substring(beginIndex + 7, endIndex - 1), "UTF-8");
-                    dtos.add(new ArtworkDetailDTO(getScannerName(), url));
-                } else {
-                    String url = URLDecoder.decode(xml.substring(beginIndex + 7), "UTF-8");
-                    dtos.add(new ArtworkDetailDTO(getScannerName(), url));
-                }
-            }
-        } catch (Exception error) {
-            LOG.error("Failed retrieving poster URL from yahoo images : {}", title);
-            LOG.warn("Scanner error", error);
-        }
-
-        return dtos;
+        String id = this.getId(title, year);
+        return this.getPosters(id);
     }
 
     @Override
     public List<ArtworkDetailDTO> getPosters(String id) {
-        return getPosters(id, -1);
+        List<ArtworkDetailDTO> dtos = new ArrayList<ArtworkDetailDTO>();
+        if (StringUtils.isBlank(id)) {
+            return dtos;
+        }
+
+        try {
+            String xml = this.httpClient.requestContent("http://www.imdb.com/title/" + id);
+            
+            String metaImageString = "<meta property='og:image' content=\"";
+            int beginIndex = xml.indexOf(metaImageString);
+            if (beginIndex > 0) {
+                beginIndex = beginIndex + metaImageString.length();
+                int endIndex =  xml.indexOf("\"", beginIndex);
+                if (endIndex > 0) {
+                    String url = xml.substring(beginIndex, endIndex);
+                    dtos.add(new ArtworkDetailDTO(getScannerName(), url, ArtworkDetailDTO.HashCodeType.PART));
+                }
+            }
+        } catch (Exception error) {
+            LOG.error("Failed retrieving poster URL from imdb images: {}", id);
+            LOG.warn("Scanner error", error);
+        }
+
+        return dtos;
     }
 }

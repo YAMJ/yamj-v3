@@ -1,5 +1,5 @@
 /*
- *      Copyright (c) 2004-2014 YAMJ Members
+ *      Copyright (c) 2004-2013 YAMJ Members
  *      https://github.com/organizations/YAMJ/teams
  *
  *      This file is part of the Yet Another Media Jukebox (YAMJ).
@@ -22,13 +22,10 @@
  */
 package org.yamj.core.service.plugin;
 
-import java.nio.charset.Charset;
 import java.util.regex.Pattern;
-import org.apache.commons.lang3.StringUtils;
 
 public class ImdbSiteDataDefinition {
 
-    private final String site;
     private final String director;
     private final String cast;
     private final String releaseDate;
@@ -45,12 +42,10 @@ public class ImdbSiteDataDefinition {
     private final String writer;
     private final String taglines;
     private final String originalTitle;
-    private final Charset charset;
     private final Pattern personRegex;
     private final Pattern titleRegex;
 
-    public ImdbSiteDataDefinition(String site,
-            String charsetName,
+    public ImdbSiteDataDefinition(
             String director,
             String cast,
             String releaseDate,
@@ -66,8 +61,8 @@ public class ImdbSiteDataDefinition {
             String originalAirDate,
             String writer,
             String taglines,
-            String originalTitle) {
-        this.site = site;
+            String originalTitle)
+    {
         this.director = director;
         this.cast = cast;
         this.releaseDate = releaseDate;
@@ -85,18 +80,8 @@ public class ImdbSiteDataDefinition {
         this.taglines = taglines;
         this.originalTitle = originalTitle;
 
-        if (StringUtils.isBlank(charsetName)) {
-            this.charset = Charset.defaultCharset();
-        } else {
-            this.charset = Charset.forName(charsetName);
-        }
-
-        personRegex = Pattern.compile(Pattern.quote("<link rel=\"canonical\" href=\"" + this.getSite() + "name/(nm\\d+)/\""));
-        titleRegex = Pattern.compile(Pattern.quote("<link rel=\"canonical\" href=\"" + this.getSite() + "title/(tt\\d+)/\""));
-    }
-
-    public final String getSite() {
-        return site;
+        personRegex = Pattern.compile(Pattern.quote("<link rel=\"canonical\" href=\"http://www.imdb.com/name/(nm\\d+)/\""));
+        titleRegex = Pattern.compile(Pattern.quote("<link rel=\"canonical\" href=\"http://www.imdb.com/title/(tt\\d+)/\""));
     }
 
     public String getDirector() {
@@ -161,10 +146,6 @@ public class ImdbSiteDataDefinition {
 
     public String getOriginalTitle() {
         return originalTitle;
-    }
-
-    public Charset getCharset() {
-        return charset;
     }
 
     public Pattern getPersonRegex() {

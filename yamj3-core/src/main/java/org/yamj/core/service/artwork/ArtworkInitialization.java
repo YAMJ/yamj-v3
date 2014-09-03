@@ -45,7 +45,7 @@ public class ArtworkInitialization implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        String[] defaultProfiles = PropertyTools.getProperty("artwork.scanner.default.profiles", "").split(",");
+        String[] defaultProfiles = PropertyTools.getProperty("artwork.profile.init.profiles", "").split(",");
         if (defaultProfiles.length > 0) {
             for (String defaultProfile : defaultProfiles) {
                 String name = defaultProfile;

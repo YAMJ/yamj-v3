@@ -36,8 +36,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
 
     public static final String SCANNER_ID = "imdb";
     private static final Logger LOG = LoggerFactory.getLogger(ImdbScanner.class);
-//    @Autowired
-//    private PoolingHttpClient httpClient;
+
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
     @Autowired

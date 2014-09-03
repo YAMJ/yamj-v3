@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.artwork.common;
 
-import org.yamj.core.service.artwork.ArtworkTools;
-
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.model.Artwork;
@@ -141,14 +139,14 @@ public class TheMovieDbArtworkScanner implements
                 for (Artwork artwork : artworkList) {
                     if (artwork.getArtworkType() == artworkType
                             && (StringUtils.isBlank(artwork.getLanguage())
-                            || StringUtils.equalsIgnoreCase(artwork.getLanguage(), language))) {
+                            || StringUtils.equalsIgnoreCase(artwork.getLanguage(), language)))
+                    {
                         URL artworkURL = tmdbApi.createImageUrl(artwork.getFilePath(), artworkSize);
                         if (artworkURL == null || artworkURL.toString().endsWith("null")) {
                             LOG.warn("{} URL is invalid and will not be used: {}", artworkType, artworkURL);
                         } else {
                             String url = artworkURL.toString();
-                            String hashCode = ArtworkTools.getSimpleHashCode(url);
-                            dtos.add(new ArtworkDetailDTO(getScannerName(), url, hashCode));
+                            dtos.add(new ArtworkDetailDTO(getScannerName(), url, ArtworkDetailDTO.HashCodeType.PART));
                         }
                     }
                 }

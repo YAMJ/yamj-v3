@@ -27,12 +27,12 @@ import org.apache.commons.lang3.StringUtils;
 public class ArtworkTools {
 
     /**
-     * Get the hash code based on the URL.
+     * Get a part of the URL as hash code.
      * 
      * @param url
      * @return the hash code
      */
-    public static String getSimpleHashCode(String url) {
+    public static String getPartialHashCode(String url) {
         String hashCode = null;
         try {
             int index = StringUtils.lastIndexOf(url, "/");
@@ -43,10 +43,7 @@ public class ArtworkTools {
                     hashCode = tmp.substring(0, index);
                 }
             }
-        } catch (Exception e) {
-            // ignore any error
-        }
+        } catch (Exception ignore) {}
         return hashCode;
     }
-
 }
