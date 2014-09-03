@@ -81,6 +81,9 @@ public class StageFile extends AbstractAuditable implements Serializable {
     @Column(name = "content")
     private String content;
 
+    @Column(name = "priority", nullable = false)
+    private int priority = -1;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @Fetch(FetchMode.SELECT)
     @ForeignKey(name = "FK_STAGEFILE_MEDIAFILE")
@@ -159,6 +162,14 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     public void setContent(String content) {
         this.content = content;
+    }
+    
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
     }
 
     public MediaFile getMediaFile() {

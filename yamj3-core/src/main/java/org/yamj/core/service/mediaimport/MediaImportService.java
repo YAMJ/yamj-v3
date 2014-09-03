@@ -137,6 +137,10 @@ public class MediaImportService {
         stageFile.setStatus(StatusType.DONE);
         stagingDao.updateEntity(stageFile);
 
+        // TODO find NFOS
+        
+        // TODO find images
+        
         // METADATA OBJECTS
 
         if (dto.isMovie()) {
@@ -348,6 +352,7 @@ public class MediaImportService {
             stagingDao.updateEntity(mediaFile);
             
             // update stage file
+            stageFile.setPriority(1);
             stageFile.setMediaFile(mediaFile);
             stageFile.setStatus(StatusType.DONE);
             stagingDao.updateEntity(stageFile);
@@ -357,7 +362,8 @@ public class MediaImportService {
         
         // TODO more cases
         
-        stageFile.setStatus(StatusType.INVALID);
+        // just set to done
+        stageFile.setStatus(StatusType.DONE);
         stagingDao.updateEntity(stageFile);
     }
 

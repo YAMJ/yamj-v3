@@ -81,20 +81,18 @@ public class StagingDao extends HibernateDao {
         sb.append("FROM MediaFile mf ");
         sb.append("JOIN mf.stageFiles sf ");
         sb.append("WHERE sf.fileType=:fileType ");
-        sb.append("AND sf.baseName=:baseName ");
+        sb.append("AND lower(sf.baseName)=:baseName ");
         sb.append("AND sf.stageDirectory=:stageDirectory ");
         
         Query query = getSession().createQuery(sb.toString());
         query.setParameter("fileType", fileType);
-        query.setParameter("baseName", baseName);
+        query.setParameter("baseName", baseName.toLowerCase());
         query.setParameter("stageDirectory", stageDirectory);
         return (MediaFile)query.uniqueResult();
     }
     
     @SuppressWarnings("unchecked")
     public List<StageFile> getValidNFOFilesForVideo(long id) {
-        // TODO sort the priority
-        
         StringBuffer sb = new StringBuffer();
         sb.append("SELECT distinct sf FROM StageFile sf ");
         sb.append("JOIN sf.mediaFile mf ");
@@ -102,6 +100,7 @@ public class StagingDao extends HibernateDao {
         sb.append("WHERE vd.id=:videoDataId ");
         sb.append("AND sf.fileType=:fileType ");
         sb.append("AND sf.status in (:statusSet) ");
+        sb.append("ORDER by sf.priority ASC");
         
         Set<StatusType> statusSet = new HashSet<StatusType>();
         statusSet.add(StatusType.NEW);
@@ -117,8 +116,6 @@ public class StagingDao extends HibernateDao {
 
     @SuppressWarnings("unchecked")
     public List<StageFile> getValidNFOFilesForSeries(long id) {
-        // TODO sort the priority
-        
         StringBuffer sb = new StringBuffer();
         sb.append("SELECT distinct sf FROM StageFile sf ");
         sb.append("JOIN sf.mediaFile mf ");
@@ -128,6 +125,7 @@ public class StagingDao extends HibernateDao {
         sb.append("WHERE ser.id=:seriesId ");
         sb.append("AND sf.fileType=:fileType ");
         sb.append("AND sf.status in (:statusSet) ");
+        sb.append("ORDER by sf.priority ASC");
         
         Set<StatusType> statusSet = new HashSet<StatusType>();
         statusSet.add(StatusType.NEW);
