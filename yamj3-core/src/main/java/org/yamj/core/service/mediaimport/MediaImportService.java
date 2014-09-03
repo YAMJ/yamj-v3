@@ -22,6 +22,10 @@
  */
 package org.yamj.core.service.mediaimport;
 
+import org.springframework.util.CollectionUtils;
+
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,14 +69,31 @@ public class MediaImportService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void processVideo(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
+        
         if (stageFile.getMediaFile() == null) {
             LOG.info("Process new video {}-'{}'", stageFile.getId(), stageFile.getFileName());
+            
+            // process new video
             processNewVideo(stageFile);
+            
+            // attach NFO files
+            attachNfoFilesToVideo(stageFile);
+
+            // TODO attach images
         } else {
-            // just update media file
             LOG.info("Process updated video {}-'{}'", stageFile.getId(), stageFile.getFileName());
-            processUpdatedMediaFile(stageFile);
+            
+            // just update media file
+            MediaFile mediaFile = stageFile.getMediaFile();
+            mediaFile.setFileDate(stageFile.getFileDate());
+            mediaFile.setFileSize(stageFile.getFileSize());
+            mediaFile.setStatus(StatusType.UPDATED);
+            mediaDao.updateEntity(mediaFile);
         }
+        
+        // mark stage file as done
+        stageFile.setStatus(StatusType.DONE);
+        stagingDao.updateEntity(stageFile);
     }
 
     private void processNewVideo(StageFile stageFile) {
@@ -103,17 +124,12 @@ public class MediaImportService {
 
             mediaFile.addStageFile(stageFile);
             stageFile.setMediaFile(mediaFile);
-            mediaDao.updateEntity(mediaFile);
-
-            // mark as duplicate and return
             stageFile.setStatus(StatusType.DUPLICATE);
-            stagingDao.updateEntity(stageFile);
-
+            mediaDao.updateEntity(mediaFile);
             return;
         }
-
-        // NEW media file
-        // fill in scanned values
+        
+        // new media file
         mediaFile = new MediaFile();
         mediaFile.setFileName(stageFile.getFileName());
         mediaFile.setFileDate(stageFile.getFileDate());
@@ -133,16 +149,9 @@ public class MediaImportService {
 
         LOG.debug("Store new media file: '{}'", mediaFile.getFileName());
         mediaDao.saveEntity(mediaFile);
-
-        stageFile.setStatus(StatusType.DONE);
-        stagingDao.updateEntity(stageFile);
-
-        // TODO find NFOS
-        
-        // TODO find images
         
         // METADATA OBJECTS
-
+                
         if (dto.isMovie()) {
             // VIDEO DATA for movies
 
@@ -301,16 +310,41 @@ public class MediaImportService {
             }
         }
     }
-
-    private void processUpdatedMediaFile(StageFile stageFile) {
+    
+    
+    private void attachNfoFilesToVideo(StageFile stageFile) {
         MediaFile mediaFile = stageFile.getMediaFile();
-        mediaFile.setFileDate(stageFile.getFileDate());
-        mediaFile.setFileSize(stageFile.getFileSize());
-        mediaFile.setStatus(StatusType.UPDATED);
-        mediaDao.updateEntity(mediaFile);
+        if (mediaFile == null) {
+            return;
+        }
+        
+        Set<StageFile> nfoFiles = new HashSet<StageFile>(3);
+        
+        // case 1: NFO file has same base name in same directory
+        StageFile found = this.stagingDao.findStageFile(FileType.NFO, stageFile.getBaseName(), stageFile.getStageDirectory());
+        if (found != null) {
+            found.setPriority(1);
+            nfoFiles.add(found);
+        }
 
-        stageFile.setStatus(StatusType.DONE);
-        stagingDao.updateEntity(stageFile);
+        // TODO more cases
+
+        if (CollectionUtils.isEmpty(nfoFiles)) {
+            // no NFO files found
+            return;
+            
+        }
+        
+        for (StageFile nfoFile : nfoFiles) {
+            LOG.debug("Found NFO {}-'{}' for video file '{}'", nfoFile.getId(), nfoFile.getFileName(), stageFile.getFileName());
+            // add to media file
+            nfoFile.setMediaFile(mediaFile);
+            mediaFile.addStageFile(nfoFile);
+            this.stagingDao.updateEntity(nfoFile);
+        }
+
+        // update media file
+        this.mediaDao.updateEntity(mediaFile);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -331,21 +365,43 @@ public class MediaImportService {
         StageFile stageFile = stagingDao.getStageFile(id);
         if (stageFile.getMediaFile() == null) {
             LOG.info("Process new nfo {}-'{}'", stageFile.getId(), stageFile.getFileName());
+            
+            // process new NFO
             processNewNFO(stageFile);
         } else {
-            // just update media file
             LOG.info("Process updated video {}-'{}'", stageFile.getId(), stageFile.getFileName());
-            processUpdatedNFO(stageFile);
+            // no updates on stage files to be done if media file found
         }
+
+        // update meta-data for NFO scan
+        for (VideoData videoData: stageFile.getMediaFile().getVideoDatas()) {
+            if (videoData.isMovie()) {
+                videoData.setStatus(StatusType.UPDATED);
+                videoData.setStep(StepType.NFO);
+                stagingDao.updateEntity(videoData);
+                
+                LOG.trace("Mark movie {}-'{}' for NFO scan", videoData.getId(), videoData.getTitle());
+            } else {
+                Series series = videoData.getSeason().getSeries();
+                series.setStatus(StatusType.UPDATED);
+                series.setStep(StepType.NFO);
+                stagingDao.updateEntity(series);
+                
+                LOG.trace("Mark series {}-'{}' for NFO scan", series.getId(), series.getTitle());
+            }
+        }
+
+        // mark stage file as done
+        stageFile.setStatus(StatusType.DONE);
+        stagingDao.updateEntity(stageFile);
     }
 
     private void processNewNFO(StageFile stageFile) {
         
-        // case 1: search in same directory with same name
+        // case 1: Video file has same base name in same directory
         MediaFile mediaFile = this.stagingDao.findMediaFile(FileType.VIDEO, stageFile.getBaseName(), stageFile.getStageDirectory());
         if (mediaFile != null) {
-            // update meta-data for NFO scan
-            this.updateNFOScan(mediaFile);
+            LOG.debug("Found media file  {}-'{}' for nfo file '{}'", mediaFile.getId(), mediaFile.getFileName(), stageFile.getFileName());
             
             // add stage file to media
             mediaFile.addStageFile(stageFile);
@@ -356,40 +412,13 @@ public class MediaImportService {
             stageFile.setMediaFile(mediaFile);
             stageFile.setStatus(StatusType.DONE);
             stagingDao.updateEntity(stageFile);
-            
+
+            // nothing to do anymore
             return;
         }
         
         // TODO more cases
         
-        // just set to done
-        stageFile.setStatus(StatusType.DONE);
-        stagingDao.updateEntity(stageFile);
-    }
-
-    private void processUpdatedNFO(StageFile stageFile) {
-        // update meta-data for NFO scan
-        this.updateNFOScan(stageFile.getMediaFile());
-        
-        stageFile.setStatus(StatusType.DONE);
-        stagingDao.updateEntity(stageFile);
-    }
-
-    private void updateNFOScan(MediaFile mediaFile) {
-        for (VideoData videoData: mediaFile.getVideoDatas()) {
-            if (videoData.isMovie()) {
-                // mark video data for NFO scan
-                videoData.setStatus(StatusType.UPDATED);
-                videoData.setStep(StepType.NFO);
-                stagingDao.updateEntity(videoData);
-            } else {
-                Series series = videoData.getSeason().getSeries();
-                // mark series data for NFO scan
-                series.setStatus(StatusType.UPDATED);
-                series.setStep(StepType.NFO);
-                stagingDao.updateEntity(series);
-            }
-        }
     }
     
     @Transactional(propagation = Propagation.REQUIRED)

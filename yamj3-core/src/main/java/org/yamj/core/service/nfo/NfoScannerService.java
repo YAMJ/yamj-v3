@@ -72,7 +72,7 @@ public class NfoScannerService {
         
         // get the stage files ...
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(videoData);
-        // ... and scan all NFOs
+        // ... and scan all NFOs for movie
         InfoDTO infoDTO = this.scanNFOs(stageFiles, false);
         
         if (infoDTO.isTvShow()) {
@@ -155,7 +155,7 @@ public class NfoScannerService {
         
         // get the stage files ...
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(series);
-        // ... and scan all NFOs
+        // ... and scan all NFOs for TV show
         InfoDTO infoDTO = this.scanNFOs(stageFiles, true);
 
         if (!infoDTO.isTvShow()) {

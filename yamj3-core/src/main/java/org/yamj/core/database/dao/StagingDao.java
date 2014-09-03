@@ -92,7 +92,24 @@ public class StagingDao extends HibernateDao {
         query.setCacheMode(CacheMode.NORMAL);
         return (MediaFile)query.uniqueResult();
     }
-    
+
+    public StageFile findStageFile(FileType fileType, String baseName, StageDirectory stageDirectory) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("SELECT distinct sf ");
+        sb.append("FROM StageFile sf ");
+        sb.append("WHERE sf.fileType=:fileType ");
+        sb.append("AND lower(sf.baseName)=:baseName ");
+        sb.append("AND sf.stageDirectory=:stageDirectory ");
+        
+        Query query = getSession().createQuery(sb.toString());
+        query.setParameter("fileType", fileType);
+        query.setParameter("baseName", baseName.toLowerCase());
+        query.setParameter("stageDirectory", stageDirectory);
+        query.setCacheable(true);
+        query.setCacheMode(CacheMode.NORMAL);
+        return (StageFile)query.uniqueResult();
+    }
+
     @SuppressWarnings("unchecked")
     public List<StageFile> getValidNFOFilesForVideo(long id) {
         StringBuffer sb = new StringBuffer();
@@ -102,7 +119,7 @@ public class StagingDao extends HibernateDao {
         sb.append("WHERE vd.id=:videoDataId ");
         sb.append("AND sf.fileType=:fileType ");
         sb.append("AND sf.status in (:statusSet) ");
-        sb.append("ORDER by sf.priority ASC");
+        sb.append("ORDER by sf.priority DESC");
         
         Set<StatusType> statusSet = new HashSet<StatusType>();
         statusSet.add(StatusType.NEW);
@@ -129,7 +146,7 @@ public class StagingDao extends HibernateDao {
         sb.append("WHERE ser.id=:seriesId ");
         sb.append("AND sf.fileType=:fileType ");
         sb.append("AND sf.status in (:statusSet) ");
-        sb.append("ORDER by sf.priority ASC");
+        sb.append("ORDER by sf.priority DESC");
         
         Set<StatusType> statusSet = new HashSet<StatusType>();
         statusSet.add(StatusType.NEW);

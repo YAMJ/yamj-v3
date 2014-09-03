@@ -36,7 +36,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.StageFile;
@@ -85,14 +84,7 @@ public final class InfoReader {
         }
 
         if (StringUtils.isBlank(nfoContent)) {
-            // mark stage file as not found
-            try {
-                stageFile.setStatus(StatusType.NOTFOUND);
-                this.stagingDao.updateEntity(stageFile);
-            } catch (Exception ignore) {}
-            
-            // just return
-            return;
+            throw new RuntimeException("NFO file " + stageFile.getFileName() + " not readable");
         }
         
         boolean parsedNfo = Boolean.FALSE;   // was the NFO XML parsed correctly or at all
