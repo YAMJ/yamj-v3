@@ -183,9 +183,7 @@ public class MediaInfoService implements InitializingBean {
                 if (is != null) {
                     try {
                         is.close();
-                    } catch (IOException ex) {
-                        LOG.trace("Failed to close stream: {}", ex.getMessage(), ex);
-                    }
+                    } catch (Exception ignore) {}
                 }
             }
         }
@@ -195,6 +193,7 @@ public class MediaInfoService implements InitializingBean {
         } else {
             mediaFile.setStatus(StatusType.ERROR);
         }
+        
         mediaStorageService.updateMediaFile(mediaFile);
     }
 
