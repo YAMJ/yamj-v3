@@ -41,9 +41,10 @@ import org.yamj.core.api.wrapper.IApiWrapper;
  */
 public abstract class HibernateDao {
 
+    private static final String DEFAULT_FIELD_NAME = "name";
+
     @Autowired
     private SessionFactory sessionFactory;
-    private static final String DEFAULT_FIELD_NAME = "name";
 
     public void setSessionFactory(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
@@ -51,6 +52,15 @@ public abstract class HibernateDao {
 
     public Session getSession() {
         return sessionFactory.getCurrentSession();
+    }
+
+    /**
+     * Flush and clear the session.
+     */
+    public void flushAndClear() {
+        Session session = getSession();
+        session.flush();
+        session.clear();
     }
 
     /**

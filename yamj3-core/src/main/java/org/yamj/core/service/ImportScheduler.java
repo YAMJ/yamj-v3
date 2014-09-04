@@ -54,10 +54,11 @@ public class ImportScheduler {
                 if (id != null) {
                     LOG.debug("Process video stage file: {}", id);
                     mediaImportService.processVideo(id);
+                    LOG.info("Processed video stage file: {}", id);
                 }
             } catch (Exception error) {
                 if (ExceptionTools.isLockError(error)) {
-                    // nothing to do in lock error
+                    LOG.warn("Locking error during import of video stage file {}", id);
                 } else {
                     LOG.error("Failed to process video stage file {}", id);
                     LOG.warn("Staging error", error);
@@ -74,12 +75,13 @@ public class ImportScheduler {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.NFO, StatusType.NEW, StatusType.UPDATED);
                 if (id != null) {
-                    LOG.debug("Process stage nfo file: {}", id);
+                    LOG.debug("Process nfo stage file: {}", id);
                     mediaImportService.processNfo(id);
+                    LOG.info("Processed nfo stage file: {}", id);
                 }
             } catch (Exception error) {
                 if (ExceptionTools.isLockError(error)) {
-                    // nothing to do in lock error
+                    LOG.warn("Locking error during import of nfo stage file {}", id);
                 } else {
                     LOG.error("Failed to process nfo stage file {}", id);
                     LOG.warn("Staging error", error);

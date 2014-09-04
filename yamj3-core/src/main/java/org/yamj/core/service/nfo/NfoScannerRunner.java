@@ -54,7 +54,7 @@ public class NfoScannerRunner implements Runnable {
                     LOG.error("No valid element for scanning nfo '{}'", queueElement);
                 }
             } catch (Exception error) {
-                LOG.error("Failed to process nfo {}-{}", queueElement.getId(), queueElement.getMetadataType());
+                LOG.error("Failed nfo scan for {}-{}", queueElement.getId(), queueElement.getMetadataType());
                 LOG.warn("Scanning error", error);
                 
                 try {

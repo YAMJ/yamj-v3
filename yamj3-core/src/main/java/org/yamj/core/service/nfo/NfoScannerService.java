@@ -138,6 +138,8 @@ public class NfoScannerService {
 
         // update video data
         this.metadataStorageService.updateMetaData(videoData);
+        
+        LOG.trace("Scanned NFO data for movie '{}'", videoData.getIdentifier());
     }
 
     public void scanSerieseNfo(QueueDTO queueElement) {

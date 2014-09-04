@@ -22,12 +22,12 @@
  */
 package org.yamj.core.database.model;
 
-import javax.persistence.Column;
-import javax.persistence.Lob;
-
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
@@ -77,12 +77,12 @@ public class StageFile extends AbstractAuditable implements Serializable {
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "stageFile")
+    private List<NfoRelation> nfoRelations = new ArrayList<NfoRelation>(0);
+
     @Lob
     @Column(name = "content")
     private String content;
-
-    @Column(name = "priority", nullable = false)
-    private int priority = -1;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @Fetch(FetchMode.SELECT)
@@ -163,14 +163,6 @@ public class StageFile extends AbstractAuditable implements Serializable {
     public void setContent(String content) {
         this.content = content;
     }
-    
-    public int getPriority() {
-        return priority;
-    }
-
-    public void setPriority(int priority) {
-        this.priority = priority;
-    }
 
     public MediaFile getMediaFile() {
         return mediaFile;
@@ -178,6 +170,18 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     public void setMediaFile(MediaFile mediaFile) {
         this.mediaFile = mediaFile;
+    }
+
+    public List<NfoRelation> getNfoRelations() {
+        return nfoRelations;
+    }
+
+    public void setNfoRelations(List<NfoRelation> nfoRelations) {
+        this.nfoRelations = nfoRelations;
+    }
+
+    public void addNfoRelation(NfoRelation nfoRelation) {
+        this.nfoRelations.add(nfoRelation);
     }
 
     // TRANSIENT METHODS

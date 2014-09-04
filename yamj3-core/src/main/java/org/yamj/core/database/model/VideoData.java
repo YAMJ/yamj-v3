@@ -137,8 +137,12 @@ public class VideoData extends AbstractMetadata {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
     
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
+    private List<NfoRelation> nfoRelations = new ArrayList<NfoRelation>(0);
+    
     @Transient
     private Set<CreditDTO> creditDTOS = new LinkedHashSet<CreditDTO>(0);
+    
     
     @Transient
     private Set<String> genreNames = new LinkedHashSet<String>(0);
@@ -243,7 +247,6 @@ public class VideoData extends AbstractMetadata {
             setOverrideFlag(OverrideFlag.COUNTRY, source);
         }
     }
-
     
     public Map<String, String> getSourceDbIdMap() {
         return sourceDbIdMap;
@@ -377,6 +380,18 @@ public class VideoData extends AbstractMetadata {
         this.boxedSets.add(boxedSet);
     }
     
+    public List<NfoRelation> getNfoRelations() {
+        return nfoRelations;
+    }
+
+    public void setNfoRelations(List<NfoRelation> nfoRelations) {
+        this.nfoRelations = nfoRelations;
+    }
+
+    public void addNfoRelation(NfoRelation nfoRelation) {
+        this.nfoRelations.add(nfoRelation);
+    }
+
     // TRANSIENTS METHODS
     @JsonIgnore // This is not needed for the API
     public Set<CreditDTO> getCreditDTOS() {
