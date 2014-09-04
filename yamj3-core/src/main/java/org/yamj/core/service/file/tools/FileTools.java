@@ -22,6 +22,9 @@
  */
 package org.yamj.core.service.file.tools;
 
+import java.io.File;
+import org.yamj.core.database.model.StageFile;
+
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.locks.Lock;
@@ -299,5 +302,22 @@ public class FileTools {
             }
         }
         return data;
+    }
+
+    public static boolean isFileScannable(StageFile stageFile) {
+        boolean scannable = true;
+
+        if (StringUtils.isBlank(stageFile.getContent())) {
+            // check if NFO file is readable when no content exists
+            try {
+                File file = new File(stageFile.getFullPath());
+                if (!file.exists() || !file.canRead()) {
+                    scannable = false;
+                }
+            } catch (Exception e) {
+                scannable = false;
+            }
+        }
+        return scannable;
     }
 }

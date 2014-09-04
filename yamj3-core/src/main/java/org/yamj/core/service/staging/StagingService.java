@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.staging;
 
+import java.io.File;
+
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.io.FilenameUtils;
@@ -68,8 +70,12 @@ public class StagingService {
 
         StageDirectory stageDirectory = stagingDao.getStageDirectory(normalized, library);
         if (stageDirectory == null) {
+            // used to set the directory name
+            File dirFile = new File(normalized);
+
             stageDirectory = new StageDirectory();
             stageDirectory.setDirectoryPath(normalized);
+            stageDirectory.setDirectoryName(dirFile.getName());
             stageDirectory.setLibrary(library);
             stageDirectory.setStatus(StatusType.NEW);
             stageDirectory.setDirectoryDate(new Date(stageDirectoryDTO.getDate()));
@@ -126,6 +132,7 @@ public class StagingService {
                     
                     if (!StatusType.DUPLICATE.equals(stageFile.getStatus())) {
                         // mark as updated if no duplicate
+                        // Note: duplicate is only relevant for videos with same name
                         stageFile.setStatus(StatusType.UPDATED);
                     }
                     stagingDao.updateEntity(stageFile);
@@ -139,10 +146,10 @@ public class StagingService {
         stageFile.setFileSize(stageFileDTO.getFileSize());
 
         if (FileType.VIDEO.equals(stageFile.getFileType())) {
-            // media info scan
+            // media info scan content
             stageFile.setContent(stageFileDTO.getContent());
         } else if (FileType.NFO.equals(stageFile.getFileType())) {
-            // NFO xml
+            // NFO XML content
             stageFile.setContent(stageFileDTO.getContent());
         }
     }

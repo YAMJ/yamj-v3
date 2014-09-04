@@ -49,6 +49,9 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "directory_date", nullable = false)
     private Date directoryDate;
+
+    @Column(name = "directory_name", nullable = false, length = 100)
+    private String directoryName;
     
     @Index(name = "IX_STAGEDIRECTORY_STATUS")
     @Type(type = "statusType")
@@ -85,6 +88,14 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
 
     public void setDirectoryDate(Date directoryDate) {
         this.directoryDate = directoryDate;
+    }
+
+    public String getDirectoryName() {
+        return directoryName;
+    }
+
+    public void setDirectoryName(String directoryName) {
+        this.directoryName = directoryName;
     }
 
     public StatusType getStatus() {

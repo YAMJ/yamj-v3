@@ -26,13 +26,15 @@ import javax.persistence.OptimisticLockException;
 import org.hibernate.StaleObjectStateException;
 import org.hibernate.StaleStateException;
 import org.hibernate.dialect.lock.OptimisticEntityLockException;
+import org.hibernate.exception.LockAcquisitionException;
+import org.springframework.dao.CannotAcquireLockException;
 
 /**
  * Exception tools
  */
 public class ExceptionTools {
 
-    public static boolean isLockError(Exception e) {
+    public static boolean isLockingError(Exception e) {
         if (e == null) {
             return false;
         }
@@ -61,6 +63,14 @@ public class ExceptionTools {
             return true;
         }
 
+        if (e instanceof CannotAcquireLockException) {
+            return true;
+        }
+
+        if (e instanceof LockAcquisitionException) {
+            return true;
+        }
+        
         return false;
     }
 }

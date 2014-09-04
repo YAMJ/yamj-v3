@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.MediaDao;
 import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.dao.StagingDao;
@@ -41,6 +42,7 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.model.type.StepType;
+import org.yamj.core.service.file.tools.FileTools;
 
 /**
  * The media import service is a spring-managed service. This will be used by the MediaImportRunner only in order to access other
@@ -60,7 +62,9 @@ public class MediaImportService {
     private MetadataDao metadataDao;
     @Autowired
     private FilenameScanner filenameScanner;
-
+    @Autowired
+    private ConfigService configService;
+    
     @Transactional(readOnly = true)
     public Long getNextStageFileId(final FileType fileType, final StatusType... statusTypes) {
         return this.stagingDao.getNextStageFileId(fileType, statusTypes);
@@ -97,6 +101,19 @@ public class MediaImportService {
     }
 
     private void processNewVideo(StageFile stageFile) {
+        
+        // check if same media file already exists
+        MediaFile mediaFile = mediaDao.getMediaFile(stageFile.getFileName());
+        if (mediaFile != null) {
+            LOG.warn("Media file for '{}' already present for new stage file", stageFile.getFileName());
+
+            mediaFile.addStageFile(stageFile);
+            stageFile.setMediaFile(mediaFile);
+            stageFile.setStatus(StatusType.DUPLICATE);
+            mediaDao.updateEntity(mediaFile);
+            return;
+        }
+
         // scan filename for informations
         FilenameDTO dto = new FilenameDTO(stageFile);
         filenameScanner.scan(dto);
@@ -114,19 +131,6 @@ public class MediaImportService {
                 mediaDao.updateEntity(stageFile);
                 return;
             }
-        }
-
-        // MEDIA FILE
-
-        MediaFile mediaFile = mediaDao.getMediaFile(stageFile.getFileName());
-        if (mediaFile != null) {
-            LOG.warn("Media file for '{}' already present for new stage file", stageFile.getFileName());
-
-            mediaFile.addStageFile(stageFile);
-            stageFile.setMediaFile(mediaFile);
-            stageFile.setStatus(StatusType.DUPLICATE);
-            mediaDao.updateEntity(mediaFile);
-            return;
         }
         
         // new media file
@@ -314,21 +318,73 @@ public class MediaImportService {
     
     private void attachNfoFilesToVideo(StageFile stageFile) {
         if (stageFile.getMediaFile() == null) {
+            // video file must be associated to a media file 
+            return;
+        }
+        if (stageFile.getMediaFile().isExtra()) {
+            // media file may not be an extra
             return;
         }
         Set<VideoData> videoDatas = stageFile.getMediaFile().getVideoDatas();
         if (CollectionUtils.isEmpty(videoDatas)) {
+            // videos must exists
             return;
         }
 
-        Map<StageFile,Integer> nfoFiles = new HashMap<StageFile,Integer>();
+        // evaluate if TV show
+        boolean isTvShow = false;
+        for (VideoData videoData : videoDatas) {
+            if (!videoData.isMovie()) {
+                isTvShow = true;
+                break;
+            }
+        }
+
+        // holds the found NFO files with priority
+        Map<StageFile, Integer> nfoFiles = new HashMap<StageFile,Integer>();
+
+        // search name is the base name of the stage file
+        String searchName = stageFile.getBaseName().toLowerCase();
         
-        // case 1: NFO file has same base name in same directory
-        StageFile foundNfoFile = this.stagingDao.findStageFile(FileType.NFO, stageFile.getBaseName(), stageFile.getStageDirectory());
-        if (foundNfoFile != null) {
+        // BDMV and VIDEO_TS folder handling
+        StageDirectory directory = stageFile.getStageDirectory();
+        if (("BDMV".equalsIgnoreCase(directory.getDirectoryName()) ||
+             "VIDEO_TS".equalsIgnoreCase(directory.getDirectoryName())) &&
+             directory.getParentDirectory() != null)
+        {
+            directory = directory.getParentDirectory();
+            // search for name of parent directory
+            searchName = directory.getDirectoryName().toLowerCase();
+        }
+        
+        // case 1: find matching NFO in directory
+        StageFile foundNfoFile = this.stagingDao.findNfoFile(searchName, directory);
+        if (foundNfoFile != null && !nfoFiles.containsKey(foundNfoFile)) {
             nfoFiles.put(foundNfoFile, Integer.valueOf(1));
         }
 
+        if (isTvShow) {
+            // case 2: tvshow.nfo in same directory as video
+            foundNfoFile = this.stagingDao.findNfoFile("tvshow", directory);
+            if (foundNfoFile != null && !nfoFiles.containsKey(foundNfoFile)) {
+                nfoFiles.put(foundNfoFile, Integer.valueOf(2));
+            }
+
+            // case 3: tvshow.nfo in parent directory
+            foundNfoFile = this.stagingDao.findNfoFile("tvshow", directory.getParentDirectory());
+            if (foundNfoFile != null && !nfoFiles.containsKey(foundNfoFile)) {
+                nfoFiles.put(foundNfoFile, Integer.valueOf(3));
+            }
+        }
+        
+        // recurse through all parent directory where NFO file is named as the directory
+        if (this.configService.getBooleanProperty("yamj3.scan.nfo.recursiveDirectories", false)) {
+            // start with counter at 10
+            this.findNfoWithDirectoryName(nfoFiles, directory, 10);
+        } else {
+            LOG.debug("Recursive scan of directories for NFO files is disabled");
+        }
+        
         // TODO more cases
 
         if (MapUtils.isEmpty(nfoFiles)) {
@@ -341,7 +397,8 @@ public class MediaImportService {
             int priority = entry.getValue().intValue();
             
             for (VideoData videoData : videoDatas) {
-                LOG.debug("Found NFO {}-'{}' for video data '{}'", nfoFile.getId(), nfoFile.getFileName(), videoData.getIdentifier());
+                LOG.debug("Found NFO {}-'{}' with priority {} for video data '{}'",
+                                nfoFile.getId(), nfoFile.getFileName(), priority, videoData.getIdentifier());
 
                 NfoRelation nfoRelation = new NfoRelation();
                 nfoRelation.setStageFile(nfoFile);
@@ -352,15 +409,30 @@ public class MediaImportService {
                     videoData.addNfoRelation(nfoRelation);
                     nfoFile.addNfoRelation(nfoRelation);
                     this.mediaDao.saveEntity(nfoRelation);
-                    
-                    LOG.debug("Stored new NFO relation: stageFile={}, videoData={}",
-                                    nfoRelation.getStageFile().getId(),
-                                    nfoRelation.getVideoData().getId());
+
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Stored new NFO relation: stageFile={}, videoData={}",
+                                        nfoRelation.getStageFile().getId(),
+                                        nfoRelation.getVideoData().getId());
+                    }
                 }
             }
         }
     }
 
+    private void findNfoWithDirectoryName(Map<StageFile,Integer> nfoFiles, StageDirectory directory, int counter) {
+        if (directory == null) return;
+        
+        String searchName = directory.getDirectoryName().toLowerCase();
+        StageFile foundNfoFile = this.stagingDao.findNfoFile(searchName, directory);
+        if (foundNfoFile != null && !nfoFiles.containsKey(foundNfoFile)) {
+            nfoFiles.put(foundNfoFile, Integer.valueOf(counter));
+        }
+        
+        // recurse to root directory
+        this.findNfoWithDirectoryName(nfoFiles, directory.getParentDirectory(), (counter + 1));
+    }
+    
     @Transactional(propagation = Propagation.REQUIRED)
     public void processingError(Long id) {
         if (id == null) {
@@ -386,9 +458,19 @@ public class MediaImportService {
             LOG.info("Process updated nfo {}-'{}'", stageFile.getId(), stageFile.getFileName());
         }
 
+        // check if NFO file can be scanned
+        boolean scannable = FileTools.isFileScannable(stageFile);
+        if (!scannable) {
+            LOG.debug("NFO file {}-'{}' is not scannable", stageFile.getId(), stageFile.getFileName());
+            stageFile.setStatus(StatusType.INVALID);
+            stagingDao.updateEntity(stageFile);
+            // nothing to do anymore
+            return;
+        }
+        
         // mark stage file as done
         stageFile.setStatus(StatusType.DONE);
-        stagingDao.updateEntity(stageFile);
+        stagingDao.updateEntity(stageFile);        
         
         // update meta-data for NFO scan
         for (NfoRelation nfoRelation : stageFile.getNfoRelations()) {
@@ -428,21 +510,26 @@ public class MediaImportService {
 
         for (Entry<VideoData,Integer> entry : videoFiles.entrySet()) {
             VideoData videoData = entry.getKey();
-            LOG.debug("Found video data {}-'{}' for nfo file '{}'", videoData.getId(), videoData.getIdentifier(), stageFile.getFileName());
+            int priority = entry.getValue().intValue();
+            
+            LOG.debug("Found video data {}-'{}' for nfo file '{}' with priority {}",
+                            videoData.getId(), videoData.getIdentifier(), stageFile.getFileName(), priority);
 
             NfoRelation nfoRelation = new NfoRelation();
             nfoRelation.setStageFile(stageFile);
             nfoRelation.setVideoData(videoData);
-            nfoRelation.setPriority(entry.getValue().intValue());
+            nfoRelation.setPriority(priority);
 
             if (!stageFile.getNfoRelations().contains(nfoRelation)) {
                 stageFile.addNfoRelation(nfoRelation);
                 videoData.addNfoRelation(nfoRelation);
                 this.mediaDao.saveEntity(nfoRelation);
 
-                LOG.debug("Stored new NFO relation: stageFile={}, videoData={}",
-                                nfoRelation.getStageFile().getId(),
-                                nfoRelation.getVideoData().getId());
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Stored new NFO relation: stageFile={}, videoData={}",
+                                    nfoRelation.getStageFile().getId(),
+                                    nfoRelation.getVideoData().getId());
+                }
             }
         }
     }

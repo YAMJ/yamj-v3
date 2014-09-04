@@ -160,7 +160,7 @@ public class PluginMetadataService {
             LOG.error("Failed storing movie {}-'{}': {}", id, videoData.getTitle(), error.getMessage());
             
             // just log error if no locking error
-            if (!ExceptionTools.isLockError(error)) {
+            if (!ExceptionTools.isLockingError(error)) {
                 LOG.warn("Storage error", error);
             }
         }
@@ -239,7 +239,7 @@ public class PluginMetadataService {
             LOG.error("Failed storing series {}-'{}': {}", id, series.getTitle(), error.getMessage());
             
             // just log error if no locking error
-            if (!ExceptionTools.isLockError(error)) {
+            if (!ExceptionTools.isLockingError(error)) {
                 LOG.warn("Storage error", error);
             }
         }
@@ -289,7 +289,7 @@ public class PluginMetadataService {
             LOG.error("Failed storing person {}-'{}': {}", id, person.getName(), error.getMessage());
             
             // just log error if no locking error
-            if (!ExceptionTools.isLockError(error)) {
+            if (!ExceptionTools.isLockingError(error)) {
                 LOG.warn("Storage error", error);
             }
         }

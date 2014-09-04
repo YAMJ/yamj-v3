@@ -96,17 +96,19 @@ public class StagingDao extends HibernateDao {
         return (List<VideoData>)query.list();
     }
 
-    public StageFile findStageFile(FileType fileType, String baseName, StageDirectory stageDirectory) {
+    public StageFile findNfoFile(String searchName, StageDirectory stageDirectory) {
+        if (stageDirectory == null) return null;
+        
         StringBuffer sb = new StringBuffer();
         sb.append("SELECT distinct sf ");
         sb.append("FROM StageFile sf ");
         sb.append("WHERE sf.fileType=:fileType ");
-        sb.append("AND lower(sf.baseName)=:baseName ");
+        sb.append("AND lower(sf.baseName)=:searchName ");
         sb.append("AND sf.stageDirectory=:stageDirectory ");
         
         Query query = getSession().createQuery(sb.toString());
-        query.setParameter("fileType", fileType);
-        query.setParameter("baseName", baseName.toLowerCase());
+        query.setParameter("fileType", FileType.NFO);
+        query.setParameter("searchName", searchName);
         query.setParameter("stageDirectory", stageDirectory);
         query.setCacheable(true);
         query.setCacheMode(CacheMode.NORMAL);

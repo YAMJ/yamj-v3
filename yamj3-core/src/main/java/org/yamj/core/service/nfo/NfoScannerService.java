@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.nfo;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
@@ -139,7 +141,7 @@ public class NfoScannerService {
         // update video data
         this.metadataStorageService.updateMetaData(videoData);
         
-        LOG.trace("Scanned NFO data for movie '{}'", videoData.getIdentifier());
+        LOG.debug("Scanned NFO data for movie '{}'", videoData.getIdentifier());
     }
 
     public void scanSerieseNfo(QueueDTO queueElement) {
@@ -222,6 +224,8 @@ public class NfoScannerService {
 
         // update Series
         this.metadataStorageService.updateMetaData(series);
+
+        LOG.debug("Scanned NFO data for series '{}'", series.getIdentifier());
     }
 
     private InfoDTO scanNFOs(List<StageFile> stageFiles, boolean tvShow) {
@@ -231,13 +235,13 @@ public class NfoScannerService {
         // parse the movie with each NFO
         for (StageFile stageFile : stageFiles) {
             try {
-                LOG.debug("Scan NFO file '{}'", stageFile.getFileName());
+                LOG.debug("Scan NFO file {}-'{}'", stageFile.getId(), stageFile.getFileName());
                 this.infoReader.readNfoFile(stageFile, infoDTO);
             } catch (Exception ex) {
                 LOG.error("NFO scanning error", ex);
 
                 try {
-                    // mark stage file as error
+                    // mark stage file as invalid
                     stageFile.setStatus(StatusType.ERROR);
                     this.metadataStorageService.update(stageFile);
                 } catch (Exception ignore) {}
@@ -254,7 +258,7 @@ public class NfoScannerService {
         }
 
         // just set next stage
-        // TODO: use bulk update for database updates
+        // TODO use bulk update for database updates
         if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
             VideoData videoData = metadataStorageService.getVideoDataInStep(queueElement.getId(), StepType.NFO);
             this.metadataStorageService.setNextStep(videoData);

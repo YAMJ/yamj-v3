@@ -317,7 +317,6 @@ public class MetadataStorageService {
      * 
      * @param series
      */
-    @Transactional
     public void setNextStep(Series series) {
         if (series == null) return;
         

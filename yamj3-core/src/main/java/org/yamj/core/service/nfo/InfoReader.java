@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.nfo;
 
+import org.yamj.common.type.StatusType;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -78,13 +80,26 @@ public final class InfoReader {
         try {
             nfoContent = FileUtils.readFileToString(nfoFile, FileTools.DEFAULT_CHARSET);
         } catch (Exception e) {
-            LOG.warn("NFO file '{}' is not readable; try stage file content", nfoFilename);
             nfoFile = null;
             nfoContent = stageFile.getContent();
-        }
-
-        if (StringUtils.isBlank(nfoContent)) {
-            throw new RuntimeException("NFO file " + stageFile.getFileName() + " not readable");
+            
+            if (StringUtils.isBlank(nfoContent)) {
+                LOG.warn("NFO file '{}' is not readable", nfoFilename);
+                
+                // set to invalid if status was DONE
+                // Note: NEW and UPDATED should be handled by NFO file process
+                if (StatusType.DONE.equals(stageFile.getStatus())) {
+                    try {
+                        stageFile.setStatus(StatusType.ERROR);
+                        this.stagingDao.updateEntity(stageFile);
+                    } catch (Exception ignore) {}
+                }
+                
+                // nothing to do for this stage file
+                return;
+            }
+            
+            LOG.warn("NFO file '{}' is not readable; try stage file content", nfoFilename);
         }
         
         boolean parsedNfo = Boolean.FALSE;   // was the NFO XML parsed correctly or at all
@@ -464,7 +479,7 @@ public final class InfoReader {
      * @param movie
      */
     private void parseCertification(Element eCommon, InfoDTO dto) {
-        boolean certFromMPAA = this.configService.getBooleanProperty("yamj3.scan.certificationFromMPAA", Boolean.TRUE);
+        boolean certFromMPAA = this.configService.getBooleanProperty("yamj3.scan.certificationFromMPAA", false);
         
         String tempCert;
         if (certFromMPAA) {

@@ -143,6 +143,12 @@ public class BatchManagementImpl implements BatchManagement {
                 stageFile.setFileSize(5000L);
                 stageDirectory.addStageFile(stageFile);
 
+                stageFile = new StageFileDTO();
+                stageFile.setFileName("action.nfo");
+                stageFile.setFileDate(System.currentTimeMillis());
+                stageFile.setFileSize(115L);
+                stageDirectory.addStageFile(stageFile);
+
                 // import scanned
                 fileImportService.importScanned(importDTO);
 

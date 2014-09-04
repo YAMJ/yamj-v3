@@ -22,6 +22,7 @@
  */
 package org.yamj.core.service;
 
+import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,8 @@ import org.yamj.core.tools.ExceptionTools;
 public class ImportScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImportScheduler.class);
-
+    private static final ReentrantLock PROCESS_LOCK = new ReentrantLock();
+    
     @Autowired
     private MediaImportService mediaImportService;
 
@@ -48,6 +50,8 @@ public class ImportScheduler {
 
         // PROCESS VIDEOS
         do {
+            PROCESS_LOCK.lock();
+            
             try {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.VIDEO, StatusType.NEW, StatusType.UPDATED);
@@ -57,8 +61,8 @@ public class ImportScheduler {
                     LOG.info("Processed video stage file: {}", id);
                 }
             } catch (Exception error) {
-                if (ExceptionTools.isLockError(error)) {
-                    LOG.warn("Locking error during import of video stage file {}", id);
+                if (ExceptionTools.isLockingError(error)) {
+                    LOG.warn("Locking error during import of video stage file {}: {}", id, error.getMessage());
                 } else {
                     LOG.error("Failed to process video stage file {}", id);
                     LOG.warn("Staging error", error);
@@ -66,11 +70,15 @@ public class ImportScheduler {
                         mediaImportService.processingError(id);
                     } catch (Exception ignore) {}
                 }
+            } finally {
+                PROCESS_LOCK.unlock();
             }
         } while (id != null);
 
         // PROCESS NFOS
         do {
+            PROCESS_LOCK.lock();
+            
             try {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.NFO, StatusType.NEW, StatusType.UPDATED);
@@ -80,8 +88,8 @@ public class ImportScheduler {
                     LOG.info("Processed nfo stage file: {}", id);
                 }
             } catch (Exception error) {
-                if (ExceptionTools.isLockError(error)) {
-                    LOG.warn("Locking error during import of nfo stage file {}", id);
+                if (ExceptionTools.isLockingError(error)) {
+                    LOG.warn("Locking error during import of nfo stage file {}: {}", id, error.getMessage());
                 } else {
                     LOG.error("Failed to process nfo stage file {}", id);
                     LOG.warn("Staging error", error);
@@ -89,6 +97,8 @@ public class ImportScheduler {
                         mediaImportService.processingError(id);
                     } catch (Exception ignore) {}
                 }
+            } finally {
+                PROCESS_LOCK.unlock();
             }
         } while (id != null);
 
