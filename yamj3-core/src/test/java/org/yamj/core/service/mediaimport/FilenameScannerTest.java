@@ -52,7 +52,7 @@ public class FilenameScannerTest extends TestCase {
     
     @Test
     public void testFilenameMovieVersion_1() {
-        String fileName = "Skrek (Director's Cut).bdrip.mkv";
+        String fileName = "Shrek (Director's Cut).bdrip.mkv";
         FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
         scanner.scan(dto);
         System.err.println(dto);
