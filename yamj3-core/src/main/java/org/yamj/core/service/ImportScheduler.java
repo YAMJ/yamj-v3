@@ -62,10 +62,10 @@ public class ImportScheduler {
                 }
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
-                    LOG.warn("Locking error during import of video stage file {}: {}", id, error.getMessage());
+                    LOG.warn("Locking error during import of video stage file {}", id);
                 } else {
                     LOG.error("Failed to process video stage file {}", id);
-                    LOG.warn("Staging error", error);
+                    LOG.error("Staging error", error);
                     try {
                         mediaImportService.processingError(id);
                     } catch (Exception ignore) {}
@@ -89,7 +89,7 @@ public class ImportScheduler {
                 }
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
-                    LOG.warn("Locking error during import of nfo stage file {}: {}", id, error.getMessage());
+                    LOG.warn("Locking error during import of nfo stage file {}", id);
                 } else {
                     LOG.error("Failed to process nfo stage file {}", id);
                     LOG.warn("Staging error", error);

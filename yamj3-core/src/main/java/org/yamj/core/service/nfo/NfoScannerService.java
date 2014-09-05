@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.nfo;
 
+import org.yamj.core.tools.ExceptionTools;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
@@ -133,13 +135,23 @@ public class NfoScannerService {
             videoData.setCreditDTOS(infoDTO.getCredits());
         }
 
-        // store associated entities
-        this.metadataStorageService.storeAssociatedEntities(videoData);
-
-        // update video data
-        this.metadataStorageService.updateMetaData(videoData);
-        
-        LOG.debug("Scanned NFO data for movie '{}'", videoData.getIdentifier());
+        try {
+            // store associated entities
+            this.metadataStorageService.storeAssociatedEntities(videoData);
+    
+            // update video data
+            this.metadataStorageService.updateMetaData(videoData);
+            
+            LOG.debug("Scanned NFO data for movie '{}'", videoData.getIdentifier());
+        } catch (Exception error) {
+            // NOTE: status will not be changed
+            if (ExceptionTools.isLockingError(error)) {
+                LOG.warn("Locking error while storing movie {}-'{}'", videoData.getId(), videoData.getIdentifier());
+            } else {
+                LOG.error("Failed storing movie {}-'{}'", videoData.getId(), videoData.getIdentifier());
+                LOG.error("Storage error", error);
+            }
+        }
     }
 
     public void scanSerieseNfo(QueueDTO queueElement) {
@@ -217,13 +229,23 @@ public class NfoScannerService {
             }
         }
 
-        // store associated entities
-        this.metadataStorageService.storeAssociatedEntities(series);
-
-        // update Series
-        this.metadataStorageService.updateMetaData(series);
-
-        LOG.debug("Scanned NFO data for series '{}'", series.getIdentifier());
+        try {
+            // store associated entities
+            this.metadataStorageService.storeAssociatedEntities(series);
+    
+            // update Series
+            this.metadataStorageService.updateMetaData(series);
+    
+            LOG.debug("Scanned NFO data for series '{}'", series.getIdentifier());
+        } catch (Exception error) {
+            // NOTE: status will not be changed
+            if (ExceptionTools.isLockingError(error)) {
+                LOG.warn("Locking error while storing series {}-'{}'", series.getId(), series.getIdentifier());
+            } else {
+                LOG.error("Failed storing series {}-'{}'", series.getId(), series.getIdentifier());
+                LOG.error("Storage error", error);
+            }
+        }
     }
 
     private InfoDTO scanNFOs(List<StageFile> stageFiles, boolean tvShow) {

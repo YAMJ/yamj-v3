@@ -157,11 +157,11 @@ public class PluginMetadataService {
             metadataStorageService.updateMetaData(videoData);
         } catch (Exception error) {
             // NOTE: status will not be changed
-            LOG.error("Failed storing movie {}-'{}': {}", id, videoData.getTitle(), error.getMessage());
-            
-            // just log error if no locking error
-            if (!ExceptionTools.isLockingError(error)) {
-                LOG.warn("Storage error", error);
+            if (ExceptionTools.isLockingError(error)) {
+                LOG.warn("Locking error while storing movie {}-'{}'", id, videoData.getTitle());
+            } else {
+                LOG.error("Failed storing movie {}-'{}'", id, videoData.getTitle());
+                LOG.error("Storage error", error);
             }
         }
     }
@@ -236,11 +236,11 @@ public class PluginMetadataService {
             metadataStorageService.updateMetaData(series);
         } catch (Exception error) {
             // NOTE: status will not be changed
-            LOG.error("Failed storing series {}-'{}': {}", id, series.getTitle(), error.getMessage());
-            
-            // just log error if no locking error
-            if (!ExceptionTools.isLockingError(error)) {
-                LOG.warn("Storage error", error);
+            if (ExceptionTools.isLockingError(error)) {
+                LOG.warn("Locking error while storing series {}-'{}'", id, series.getTitle());
+            } else {
+                LOG.error("Failed storing series {}-'{}'", id, series.getTitle());
+                LOG.error("Storage error", error);
             }
         }
     }
@@ -286,11 +286,11 @@ public class PluginMetadataService {
             metadataStorageService.updatePerson(person);
         } catch (Exception error) {
             // NOTE: status will not be changed
-            LOG.error("Failed storing person {}-'{}': {}", id, person.getName(), error.getMessage());
-            
-            // just log error if no locking error
-            if (!ExceptionTools.isLockingError(error)) {
-                LOG.warn("Storage error", error);
+            if (ExceptionTools.isLockingError(error)) {
+                LOG.warn("Locking error while storing person {}-'{}'", id, person.getName());
+            } else {
+                LOG.error("Failed storing person {}-'{}'", id, person.getName());
+                LOG.error("Storage error", error);
             }
         }
     }
