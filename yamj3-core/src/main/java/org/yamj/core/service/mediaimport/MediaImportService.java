@@ -54,6 +54,10 @@ public class MediaImportService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MediaImportService.class);
     private static final String MEDIA_SOURCE = "filename";
+    private static final String TVSHOW_NFO_NAME = "tvshow";
+    private static final String BDMV_FOLDER = "BDMV";
+    private static final String DVD_FOLDER = "VIDEO_TS";
+    
     @Autowired
     private StagingDao stagingDao;
     @Autowired
@@ -84,6 +88,8 @@ public class MediaImportService {
             attachNfoFilesToVideo(stageFile);
 
             // TODO attach images
+            
+            // TODO attach subtitles
         } else {
             LOG.info("Process updated video {}-'{}'", stageFile.getId(), stageFile.getFileName());
             
@@ -315,7 +321,6 @@ public class MediaImportService {
         }
     }
     
-    
     private void attachNfoFilesToVideo(StageFile stageFile) {
         if (stageFile.getMediaFile() == null) {
             // video file must be associated to a media file 
@@ -344,17 +349,15 @@ public class MediaImportService {
         Map<StageFile, Integer> nfoFiles = new HashMap<StageFile,Integer>();
 
         // search name is the base name of the stage file
-        String searchName = stageFile.getBaseName().toLowerCase();
+        String searchName = stageFile.getBaseName();
         
         // BDMV and VIDEO_TS folder handling
         StageDirectory directory = stageFile.getStageDirectory();
-        if (("BDMV".equalsIgnoreCase(directory.getDirectoryName()) ||
-             "VIDEO_TS".equalsIgnoreCase(directory.getDirectoryName())) &&
-             directory.getParentDirectory() != null)
-        {
+        if (this.isBlurayOrDvdFolder(directory)) {
+            // use parent directory for search
             directory = directory.getParentDirectory();
             // search for name of parent directory
-            searchName = directory.getDirectoryName().toLowerCase();
+            searchName = directory.getDirectoryName();
         }
         
         // case 1: find matching NFO in directory
@@ -365,28 +368,24 @@ public class MediaImportService {
 
         if (isTvShow) {
             // case 2: tvshow.nfo in same directory as video
-            foundNfoFile = this.stagingDao.findNfoFile("tvshow", directory);
+            foundNfoFile = this.stagingDao.findNfoFile(TVSHOW_NFO_NAME, directory);
             if (foundNfoFile != null && !nfoFiles.containsKey(foundNfoFile)) {
                 nfoFiles.put(foundNfoFile, Integer.valueOf(2));
             }
 
             // case 3: tvshow.nfo in parent directory
-            foundNfoFile = this.stagingDao.findNfoFile("tvshow", directory.getParentDirectory());
+            foundNfoFile = this.stagingDao.findNfoFile(TVSHOW_NFO_NAME, directory.getParentDirectory());
             if (foundNfoFile != null && !nfoFiles.containsKey(foundNfoFile)) {
                 nfoFiles.put(foundNfoFile, Integer.valueOf(3));
             }
         }
         
-        // recurse through all parent directory where NFO file is named as the directory
-        if (this.configService.getBooleanProperty("yamj3.scan.nfo.recursiveDirectories", false)) {
-            // start with counter at 10
-            this.findNfoWithDirectoryName(nfoFiles, directory, 10);
-        } else {
-            LOG.debug("Recursive scan of directories for NFO files is disabled");
-        }
+        // case 10-n: apply "nfoName = dirName" to all video data
+        // NOTE: 11-n are only applied if recursive scan is enabled
+        boolean recurse = this.configService.getBooleanProperty("yamj3.scan.nfo.recursiveDirectories", false);
+        LOG.trace("Recursive scan of directories is {}", (recurse?"enabled":"disabled"));
+        this.findNfoWithDirectoryName(nfoFiles, stageFile.getStageDirectory(), 10, recurse);
         
-        // TODO more cases
-
         if (MapUtils.isEmpty(nfoFiles)) {
             // no NFO files found
             return;
@@ -420,17 +419,31 @@ public class MediaImportService {
         }
     }
 
-    private void findNfoWithDirectoryName(Map<StageFile,Integer> nfoFiles, StageDirectory directory, int counter) {
+    private void findNfoWithDirectoryName(Map<StageFile,Integer> nfoFiles, StageDirectory directory, int counter, boolean recurse) {
         if (directory == null) return;
         
-        String searchName = directory.getDirectoryName().toLowerCase();
-        StageFile foundNfoFile = this.stagingDao.findNfoFile(searchName, directory);
+        StageFile foundNfoFile = this.stagingDao.findNfoFile(directory.getDirectoryName(), directory);
         if (foundNfoFile != null && !nfoFiles.containsKey(foundNfoFile)) {
             nfoFiles.put(foundNfoFile, Integer.valueOf(counter));
         }
         
-        // recurse to root directory
-        this.findNfoWithDirectoryName(nfoFiles, directory.getParentDirectory(), (counter + 1));
+        if (recurse) {
+            // recurse until parent is null
+            this.findNfoWithDirectoryName(nfoFiles, directory.getParentDirectory(), (counter + 1), recurse);
+        }
+    }
+    
+    private boolean isBlurayOrDvdFolder(StageDirectory directory) {
+        if (directory == null) {
+            return false;
+        }
+        if (BDMV_FOLDER.equalsIgnoreCase(directory.getDirectoryName())) {
+            return true;
+        }
+        if (DVD_FOLDER.equalsIgnoreCase(directory.getDirectoryName())) {
+            return true;
+        }
+        return false;
     }
     
     @Transactional(propagation = Propagation.REQUIRED)
@@ -493,16 +506,8 @@ public class MediaImportService {
     }
 
     private void processNewNFO(StageFile stageFile) {
-        Map<VideoData,Integer> videoFiles = new HashMap<VideoData,Integer>();
-
-        // case 1: Video file has same base name in same directory
-        List<VideoData> videoDatas = this.stagingDao.findVideoDatasForNFO(stageFile.getBaseName(), stageFile.getStageDirectory());
-        for (VideoData videoData : videoDatas) {
-            videoFiles.put(videoData, Integer.valueOf(1));
-        }
-        
-        // TODO more cases
-
+        // find video files for this NFO file
+        Map<VideoData,Integer> videoFiles = this.findVideoFilesForNFO(stageFile);
         if (MapUtils.isEmpty(videoFiles)) {
             // no NFO files found
             return;
@@ -529,6 +534,87 @@ public class MediaImportService {
                     LOG.trace("Stored new NFO relation: stageFile={}, videoData={}",
                                     nfoRelation.getStageFile().getId(),
                                     nfoRelation.getVideoData().getId());
+                }
+            }
+        }
+    }
+    
+    private Map<VideoData,Integer> findVideoFilesForNFO(StageFile stageFile) {
+        Map<VideoData,Integer> videoFiles = new HashMap<VideoData,Integer>();
+        List<VideoData> videoDatas = null;
+        
+        if (stageFile.getBaseName().equalsIgnoreCase(stageFile.getStageDirectory().getDirectoryName())) {
+            if (isBlurayOrDvdFolder(stageFile.getStageDirectory())) {
+                // ignore NFO in BDMV or DVD folder; should be placed in parent directory 
+                return videoFiles;
+            }
+            
+            // case 10: apply to all video data in stage directory
+            videoDatas = this.stagingDao.findVideoDatasForNFO(stageFile.getStageDirectory());
+            this.attachVideoDataToNFO(videoFiles, videoDatas, 10);
+            
+            // get child directories
+            List<StageDirectory> childDirectories = this.stagingDao.getChildDirectories(stageFile.getStageDirectory());
+            if (CollectionUtils.isEmpty(childDirectories)) {
+                return videoFiles;
+            }
+                
+            // filter out bluray and DVD folders from child directories
+            List<StageDirectory> blurayOrDvdFolders = new ArrayList<StageDirectory>();
+            for (StageDirectory directory : childDirectories) {
+                if (this.isBlurayOrDvdFolder(directory)) {
+                    blurayOrDvdFolders.add(directory);
+                }
+            }
+            childDirectories.removeAll(blurayOrDvdFolders);
+
+            // case 1: bluray/DVD handling
+            if (CollectionUtils.isNotEmpty(blurayOrDvdFolders)) {
+                for (StageDirectory folder : blurayOrDvdFolders) {
+                    videoDatas = this.stagingDao.findVideoDatasForNFO(folder);
+                    this.attachVideoDataToNFO(videoFiles, videoDatas, 1);
+                }
+            }
+            
+            
+            if (CollectionUtils.isNotEmpty(childDirectories)) {
+                boolean recurse = this.configService.getBooleanProperty("yamj3.scan.nfo.recursiveDirectories", false);
+                LOG.trace("Recursive scan of directories is {}", (recurse?"enabled":"disabled"));
+                
+                if (recurse) {
+                    // // case 11-n: recursive scanning
+                }
+            }
+            
+        } else if (TVSHOW_NFO_NAME.equals(stageFile.getBaseName())) {
+            // case 2: tvshow.nfo in same directory as video
+            videoDatas = this.stagingDao.findVideoDatasForNFO(stageFile.getStageDirectory());
+            this.attachVideoDataToNFO(videoFiles, videoDatas, 2, true);
+            
+            // case 3: tvshow.nfo in parent directory (so search in child directories)
+            List<StageDirectory> childDirectories = this.stagingDao.getChildDirectories(stageFile.getStageDirectory());
+            videoDatas = this.stagingDao.findVideoDatasForNFO(childDirectories);
+            this.attachVideoDataToNFO(videoFiles, videoDatas, 3, true);
+        } else {
+            // case 1: Video file has same base name in same directory
+            videoDatas = this.stagingDao.findVideoDatasForNFO(stageFile.getBaseName(), stageFile.getStageDirectory());
+            this.attachVideoDataToNFO(videoFiles, videoDatas, 1);
+        }
+        
+        return videoFiles;
+    }
+
+    private void attachVideoDataToNFO(Map<VideoData,Integer> videoFiles, Collection<VideoData> videoDatas, int priority) {
+        this.attachVideoDataToNFO(videoFiles, videoDatas, priority, false);
+    }
+
+    private void attachVideoDataToNFO(Map<VideoData,Integer> videoFiles, Collection<VideoData> videoDatas, int priority, boolean tvShowOnly) {
+        if (CollectionUtils.isNotEmpty(videoDatas)) {
+            for (VideoData videoData : videoDatas) {
+                if (tvShowOnly && videoData.isMovie()) {
+                    // do not apply
+                } else {
+                    videoFiles.put(videoData, Integer.valueOf(priority));
                 }
             }
         }

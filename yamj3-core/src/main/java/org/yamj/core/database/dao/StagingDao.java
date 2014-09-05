@@ -22,6 +22,11 @@
  */
 package org.yamj.core.database.dao;
 
+import java.util.Collections;
+
+import org.springframework.util.CollectionUtils;
+
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -77,20 +82,71 @@ public class StagingDao extends HibernateDao {
     }
     
     @SuppressWarnings("unchecked")
+    public List<StageDirectory> getChildDirectories(StageDirectory stageDirectory) {
+        if (stageDirectory == null) {
+            return Collections.emptyList();
+        }
+
+        Criteria criteria = getSession().createCriteria(StageDirectory.class);
+        criteria.add(Restrictions.eq("parentDirectory", stageDirectory));
+        criteria.setCacheable(true);
+        criteria.setCacheMode(CacheMode.NORMAL);
+        return (List<StageDirectory>)criteria.list();
+    }
+
+    public List<VideoData> findVideoDatasForNFO(StageDirectory stageDirectory) {
+        return this.findVideoDatasForNFO(null, stageDirectory);
+    }
+
+    @SuppressWarnings("unchecked")
     public List<VideoData> findVideoDatasForNFO(String baseName, StageDirectory stageDirectory) {
+        if (stageDirectory == null) {
+            return Collections.emptyList();
+        }
+
         StringBuffer sb = new StringBuffer();
         sb.append("SELECT distinct vd ");
         sb.append("FROM VideoData vd ");
         sb.append("JOIN vd.mediaFiles mf ");
         sb.append("JOIN mf.stageFiles sf ");
         sb.append("WHERE sf.fileType=:fileType ");
-        sb.append("AND lower(sf.baseName)=:baseName ");
+        sb.append("AND mf.extra=:extra ");
+        if (baseName != null) {
+            sb.append("AND lower(sf.baseName)=:baseName ");
+        }
         sb.append("AND sf.stageDirectory=:stageDirectory ");
         
         Query query = getSession().createQuery(sb.toString());
         query.setParameter("fileType", FileType.VIDEO);
-        query.setParameter("baseName", baseName.toLowerCase());
+        query.setBoolean("extra", Boolean.FALSE);
+        if (baseName != null) {
+            query.setString("baseName", baseName.toLowerCase());
+        }
         query.setParameter("stageDirectory", stageDirectory);
+        query.setCacheable(true);
+        query.setCacheMode(CacheMode.NORMAL);
+        return (List<VideoData>)query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<VideoData> findVideoDatasForNFO(Collection<StageDirectory> stageDirectories) {
+        if (CollectionUtils.isEmpty(stageDirectories)) {
+            return Collections.emptyList();
+        }
+        
+        StringBuffer sb = new StringBuffer();
+        sb.append("SELECT distinct vd ");
+        sb.append("FROM VideoData vd ");
+        sb.append("JOIN vd.mediaFiles mf ");
+        sb.append("JOIN mf.stageFiles sf ");
+        sb.append("WHERE sf.fileType=:fileType ");
+        sb.append("AND mf.extra=:extra ");
+        sb.append("AND sf.stageDirectory in (:stageDirectories) ");
+        
+        Query query = getSession().createQuery(sb.toString());
+        query.setParameter("fileType", FileType.VIDEO);
+        query.setBoolean("extra", Boolean.FALSE);
+        query.setParameterList("stageDirectories", stageDirectories);
         query.setCacheable(true);
         query.setCacheMode(CacheMode.NORMAL);
         return (List<VideoData>)query.list();
@@ -108,7 +164,7 @@ public class StagingDao extends HibernateDao {
         
         Query query = getSession().createQuery(sb.toString());
         query.setParameter("fileType", FileType.NFO);
-        query.setParameter("searchName", searchName);
+        query.setString("searchName", searchName.toLowerCase());
         query.setParameter("stageDirectory", stageDirectory);
         query.setCacheable(true);
         query.setCacheMode(CacheMode.NORMAL);
@@ -123,8 +179,8 @@ public class StagingDao extends HibernateDao {
         sb.append("AND nfrel.videodata_id=:videoDataId ");
         
         SQLQuery query = getSession().createSQLQuery(sb.toString());
-        query.setParameter("stageFileId", stageFileId);
-        query.setParameter("videoDataId", videoDataId);
+        query.setLong("stageFileId", stageFileId);
+        query.setLong("videoDataId", videoDataId);
         query.setCacheable(true);
         query.setCacheMode(CacheMode.NORMAL);
         query.addEntity(NfoRelation.class);

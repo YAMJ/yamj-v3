@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.nfo;
 
+import org.yamj.core.tools.ExceptionTools;
+
 import org.yamj.common.type.MetaDataType;
 
 import org.yamj.core.database.model.dto.QueueDTO;
@@ -54,13 +56,15 @@ public class NfoScannerRunner implements Runnable {
                     LOG.error("No valid element for scanning nfo '{}'", queueElement);
                 }
             } catch (Exception error) {
-                LOG.error("Failed nfo scan for {}-{}", queueElement.getId(), queueElement.getMetadataType());
-                LOG.warn("Scanning error", error);
+                LOG.error("Failed nfo scan for {}-{}: {}", queueElement.getId(), queueElement.getMetadataType(), error.getStackTrace());
                 
-                try {
-                    service.processingError(queueElement);
-                } catch (Exception ignore) {
-                    // ignore this error
+                if (!ExceptionTools.isLockingError(error)) {
+                    LOG.warn("Scanning error", error);
+                    try {
+                        service.processingError(queueElement);
+                    } catch (Exception ignore) {
+                        // ignore this error
+                    }
                 }
             }
             queueElement = queue.poll();

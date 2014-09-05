@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.plugin;
 
+import org.yamj.core.tools.ExceptionTools;
+
 import org.yamj.common.type.MetaDataType;
 
 import org.yamj.core.database.model.dto.QueueDTO;
@@ -56,12 +58,14 @@ public class PluginMetadataRunner implements Runnable {
                     LOG.error("No valid element for scanning metadata '{}'", queueElement);
                 }
             } catch (Exception error) {
-                LOG.error("Failed to process meta data {}-{}", queueElement.getId(), queueElement.getMetadataType());
-                LOG.warn("Scanning error", error);
-                
-                try {
-                    service.processingError(queueElement);
-                } catch (Exception ignore) {}
+                LOG.error("Failed to process meta data {}-{}: {}", queueElement.getId(), queueElement.getMetadataType(), error.getMessage());
+
+                if (!ExceptionTools.isLockingError(error)) {
+                    LOG.warn("Scanning error", error);
+                    try {
+                        service.processingError(queueElement);
+                    } catch (Exception ignore) {}
+                }
             }
             queueElement = queue.poll();
         }

@@ -39,11 +39,11 @@ public class ExceptionTools {
             return false;
         }
 
-        if (e instanceof org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException) {
+        if (e instanceof org.springframework.orm.hibernate4.HibernateOptimisticLockingFailureException) {
             return true;
         }
 
-        if (e instanceof org.springframework.orm.hibernate4.HibernateOptimisticLockingFailureException) {
+        if (e instanceof org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException) {
             return true;
         }
 
