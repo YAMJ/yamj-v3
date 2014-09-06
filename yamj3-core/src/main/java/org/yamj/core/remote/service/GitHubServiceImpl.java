@@ -22,22 +22,21 @@
  */
 package org.yamj.core.remote.service;
 
-import org.apache.http.protocol.HTTP;
-
-import org.yamj.common.remote.service.GitHubService;
-import org.yamj.core.tools.web.PoolingHttpClient;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.protocol.HTTP;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.common.remote.service.GitHubService;
 import org.yamj.common.tools.ClassTools;
 import org.yamj.common.tools.DateTimeTools;
+import org.yamj.core.tools.web.PoolingHttpClient;
 
 /**
  * Calls GitHub to determine the last code update
