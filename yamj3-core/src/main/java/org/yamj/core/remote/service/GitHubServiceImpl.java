@@ -22,6 +22,8 @@
  */
 package org.yamj.core.remote.service;
 
+import org.apache.http.protocol.HTTP;
+
 import org.yamj.common.remote.service.GitHubService;
 import org.yamj.core.tools.web.PoolingHttpClient;
 import java.io.IOException;
@@ -49,7 +51,6 @@ public class GitHubServiceImpl implements GitHubService {
     private static final String GH_API = "https://api.github.com/repos/";
     private static final String GH_OWNER = "YAMJ";
     private static final String GH_REPO = "yamj-v3";
-    private static final String USER_AGENT = "User-Agent";
     private static final String ACCEPT = "Accept";
     private static final String GH_USER_AGENT = "GitHubJava/2.1.0";
     private static final String GH_ACCEPT = "application/vnd.github.beta+json";
@@ -78,7 +79,7 @@ public class GitHubServiceImpl implements GitHubService {
 
         try {
             HttpGet httpGet = new HttpGet(url.toString());
-            httpGet.setHeader(USER_AGENT, GH_USER_AGENT);
+            httpGet.setHeader(HTTP.USER_AGENT, GH_USER_AGENT);
             httpGet.addHeader(ACCEPT, GH_ACCEPT);
 
             URL newUrl = new URL(url.toString());
