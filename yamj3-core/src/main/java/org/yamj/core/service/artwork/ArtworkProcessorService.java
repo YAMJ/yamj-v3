@@ -245,7 +245,7 @@ public class ArtworkProcessorService {
             sb.append(located.getArtwork().getSeries().getIdentifier());
             sb.append(".series.");
         } else if (located.getArtwork().getPerson() != null) {
-            sb.append(located.getArtwork().getPerson().getName());
+        	sb.append(FileTools.makeSafeFilename(located.getArtwork().getPerson().getName()));
             sb.append(".person.");
         } else {
             sb.append("unknown_");

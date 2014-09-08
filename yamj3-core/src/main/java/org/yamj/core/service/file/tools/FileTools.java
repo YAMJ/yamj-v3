@@ -22,24 +22,93 @@
  */
 package org.yamj.core.service.file.tools;
 
-import java.io.File;
-import org.yamj.core.database.model.StageFile;
-
 import java.io.*;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.StringTokenizer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamj.common.tools.PropertyTools;
+import org.yamj.core.database.model.StageFile;
 
 public class FileTools {
 
+    public static final String DEFAULT_CHARSET = "UTF-8";
+
     private static final Logger LOG = LoggerFactory.getLogger(FileTools.class);
     private static final int BUFF_SIZE = 16 * 1024;
-    public static final String DEFAULT_CHARSET = "UTF-8";
+    private static final Collection<ReplaceEntry> UNSAFE_CHARS = new ArrayList<ReplaceEntry>();
     private static Lock mkdirsLock = new ReentrantLock();
+
+    static {
+        // What to do if the user specifies a blank encodeEscapeChar? Disable encoding!
+        String encodeEscapeCharString = PropertyTools.getProperty("yamj3.file.filename.encodingEscapeChar", "$");
+        if (encodeEscapeCharString.length() > 0) {
+            // What to do if the user specifies a >1 character long string? I guess just use the first char.
+            final Character ENCODE_ESCAPE_CHAR = encodeEscapeCharString.charAt(0);
+
+            String repChars = PropertyTools.getProperty("yamj3.file.filename.unsafeChars", "<>:\"/\\|?*");
+            for (String repChar : repChars.split("")) {
+                if (repChar.length() > 0) {
+                    char ch = repChar.charAt(0);
+                    // Don't encode characters that are hex digits
+                    // Also, don't encode the escape char -- it is safe by definition!
+                    if (!Character.isDigit(ch) && -1 == "AaBbCcDdEeFf".indexOf(ch) && !ENCODE_ESCAPE_CHAR.equals(ch)) {
+                        String hex = Integer.toHexString(ch).toUpperCase();
+                        UNSAFE_CHARS.add(new ReplaceEntry(repChar, ENCODE_ESCAPE_CHAR + hex));
+                    }
+                }
+            }
+        }
+
+        // parse transliteration map: (source_character [-] transliteration_sequence [,])+
+        StringTokenizer st = new StringTokenizer(PropertyTools.getProperty("yamj3.file.filename.translateChars", ""), ",");
+        while (st.hasMoreElements()) {
+            final String token = st.nextToken();
+            String beforeStr = StringUtils.substringBefore(token, "-");
+            final String character = beforeStr.length() == 1 && (beforeStr.equals("\t") || beforeStr.equals(" ")) ? beforeStr : StringUtils.trimToNull(beforeStr);
+            if (character == null) {
+                // TODO Error message?
+                continue;
+            }
+            String afterStr = StringUtils.substringAfter(token, "-");
+            final String translation = afterStr.length() == 1 && (afterStr.equals("\t") || afterStr.equals(" ")) ? afterStr : StringUtils.trimToNull(afterStr);
+            if (translation == null) {
+                // TODO Error message?
+                // TODO Allow empty transliteration?
+                continue;
+            }
+            UNSAFE_CHARS.add(new ReplaceEntry(character.toUpperCase(), translation.toUpperCase()));
+            UNSAFE_CHARS.add(new ReplaceEntry(character.toLowerCase(), translation.toLowerCase()));
+        }
+    }
+    
+    private static class ReplaceEntry {
+
+        private String oldText, newText;
+        private int oldLength;
+
+        public ReplaceEntry(String oldtext, String newtext) {
+            this.oldText = oldtext;
+            this.newText = newtext;
+            oldLength = oldtext.length();
+        }
+
+        public String check(String filename) {
+            String newFilename = filename;
+            int pos = newFilename.indexOf(oldText, 0);
+            while (pos >= 0) {
+                newFilename = newFilename.substring(0, pos) + newText + newFilename.substring(pos + oldLength);
+                pos = newFilename.indexOf(oldText, pos + oldLength);
+            }
+            return newFilename;
+        }
+    };
     
     /**
      * One buffer for each thread to allow threaded copies
@@ -319,5 +388,19 @@ public class FileTools {
             }
         }
         return scannable;
+    }
+
+    public static String makeSafeFilename(String filename) {
+        String newFilename = filename;
+
+        for (ReplaceEntry rep : UNSAFE_CHARS) {
+            newFilename = rep.check(newFilename);
+        }
+
+        if (!newFilename.equals(filename)) {
+            LOG.debug("Encoded filename string '{}' to '{}'", filename, newFilename);
+        }
+
+        return newFilename;
     }
 }

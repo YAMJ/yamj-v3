@@ -77,7 +77,6 @@ public class StagingService {
             stageDirectory.setDirectoryPath(normalized);
             stageDirectory.setDirectoryName(dirFile.getName());
             stageDirectory.setLibrary(library);
-            stageDirectory.setStatus(StatusType.NEW);
             stageDirectory.setDirectoryDate(new Date(stageDirectoryDTO.getDate()));
 
             // getById parent stage directory
@@ -95,7 +94,6 @@ public class StagingService {
             Date newDate = new Date(stageDirectoryDTO.getDate());
             if (newDate.compareTo(stageDirectory.getDirectoryDate()) != 0) {
                 stageDirectory.setDirectoryDate(new Date(stageDirectoryDTO.getDate()));
-                stageDirectory.setStatus(StatusType.UPDATED);
                 stagingDao.updateEntity(stageDirectory);
             }
         }

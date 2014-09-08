@@ -29,10 +29,7 @@ import java.util.Set;
 import javax.persistence.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.ForeignKey;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.Type;
-import org.yamj.common.type.StatusType;
 
 @Entity
 @Table(name = "stage_directory",
@@ -52,11 +49,6 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
 
     @Column(name = "directory_name", nullable = false, length = 100)
     private String directoryName;
-    
-    @Index(name = "IX_STAGEDIRECTORY_STATUS")
-    @Type(type = "statusType")
-    @Column(name = "status", nullable = false, length = 30)
-    private StatusType status;
     
     @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
@@ -96,14 +88,6 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
 
     public void setDirectoryName(String directoryName) {
         this.directoryName = directoryName;
-    }
-
-    public StatusType getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusType status) {
-        this.status = status;
     }
 
     public Library getLibrary() {
