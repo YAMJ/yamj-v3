@@ -225,6 +225,18 @@ public class MetadataStorageService {
             }
         }
         
+        if (CollectionUtils.isNotEmpty(series.getStudioNames())) {
+            // store new studios
+            for (String studioName : series.getStudioNames()) {
+                try {
+                    this.commonDao.storeNewStudio(studioName);
+                } catch (Exception ex) {
+                    LOG.error("Failed to store studio '{}', error: {}", studioName, ex.getMessage());
+                    LOG.trace("Storage error", ex);
+                }
+            }
+        }
+
         for (Season season : series.getSeasons()) {
             for (VideoData videoData : season.getVideoDatas()) {
                 this.storeAssociatedEntities(videoData);
@@ -301,6 +313,9 @@ public class MetadataStorageService {
         // update genres
         updateGenres(series);
 
+        // update studios
+        updateStudios(series);
+
         // update underlying seasons and episodes
         for (Season season : series.getSeasons()) {
             season.setNextStep(actualStep);
@@ -374,6 +389,26 @@ public class MetadataStorageService {
             }
         }
         videoData.setStudios(studios);
+    }
+
+    /**
+     * Update studios for VideoData from the database
+     *
+     * @param videoData
+     */
+    private void updateStudios(Series series) {
+        if (CollectionUtils.isEmpty(series.getStudioNames())) {
+            return;
+        }
+
+        Set<Studio> studios = new LinkedHashSet<Studio>();
+        for (String studioName : series.getStudioNames()) {
+            Studio studio = commonDao.getByName(Studio.class, studioName);
+            if (studio != null) {
+                studios.add(studio);
+            }
+        }
+        series.setStudios(studios);
     }
 
     /**

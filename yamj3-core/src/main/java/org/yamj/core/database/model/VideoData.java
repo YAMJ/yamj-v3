@@ -111,7 +111,7 @@ public class VideoData extends AbstractMetadata {
     private Set<Genre> genres = new HashSet<Genre>(0);
     
     @ManyToMany
-    @ForeignKey(name = "FK_DATASTUDIOS_VIDEODATA", inverseName = "FK_DATASTUDIOS_GENRE")
+    @ForeignKey(name = "FK_DATASTUDIOS_VIDEODATA", inverseName = "FK_DATASTUDIOS_STUDIO")
     @JoinTable(name = "videodata_studios",
                joinColumns = @JoinColumn(name = "data_id"),
                inverseJoinColumns = @JoinColumn(name = "studio_id"))

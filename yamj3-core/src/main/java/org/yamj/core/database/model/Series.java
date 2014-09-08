@@ -22,6 +22,14 @@
  */
 package org.yamj.core.database.model;
 
+import java.util.LinkedHashSet;
+import javax.persistence.Transient;
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import org.hibernate.annotations.ForeignKey;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
 import javax.persistence.*;
@@ -92,9 +100,19 @@ public class Series extends AbstractMetadata {
                joinColumns = { @JoinColumn(name = "series_id")},
                inverseJoinColumns = { @JoinColumn(name = "genre_id")})
     private Set<Genre> genres = new HashSet<Genre>(0);
-    
+
+    @ManyToMany
+    @ForeignKey(name = "FK_SERIESSTUDIOS_SERIES", inverseName = "FK_SERIESSTUDIOS_STUDIO")
+    @JoinTable(name = "series_studios",
+               joinColumns = @JoinColumn(name = "series_id"),
+               inverseJoinColumns = @JoinColumn(name = "studio_id"))
+    private Set<Studio> studios = new HashSet<Studio>(0);
+
     @Transient
     private Set<String> genreNames = new LinkedHashSet<String>(0);
+    
+    @Transient
+    private Set<String> studioNames = new LinkedHashSet<String>(0);
 
     // GETTER and SETTER
     
@@ -220,6 +238,14 @@ public class Series extends AbstractMetadata {
         this.genres = genres;
     }
 
+    public Set<Studio> getStudios() {
+        return studios;
+    }
+
+    public void setStudios(Set<Studio> studios) {
+        this.studios = studios;
+    }
+
     public Set<String> getGenreNames() {
         return genreNames;
     }
@@ -228,6 +254,17 @@ public class Series extends AbstractMetadata {
         if (CollectionUtils.isNotEmpty(genreNames)) {
             this.genreNames = genreNames;
             setOverrideFlag(OverrideFlag.GENRES, source);
+        }
+    }
+
+    public Set<String> getStudioNames() {
+        return studioNames;
+    }
+
+    public void setStudioNames(Set<String> studioNames, String source) {
+        if (CollectionUtils.isNotEmpty(studioNames)) {
+            this.studioNames = studioNames;
+            setOverrideFlag(OverrideFlag.STUDIOS, source);
         }
     }
 

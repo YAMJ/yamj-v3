@@ -233,4 +233,6 @@ public abstract class AbstractMetadata extends AbstractAuditable
     public abstract void setOverrideFlag(OverrideFlag overrideFlag, String source);
     
     public abstract Set<Genre> getGenres();
+
+    public abstract Set<Studio> getStudios();
 }

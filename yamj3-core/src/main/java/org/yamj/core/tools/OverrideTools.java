@@ -304,14 +304,14 @@ public final class OverrideTools {
         return checkOverwrite(metadata, OverrideFlag.GENRES, source);
     }
 
-    public static boolean checkOverwriteStudios(VideoData videoData, String source) {
-        if (skipCheck(videoData, OverrideFlag.STUDIOS, source)) {
+    public static boolean checkOverwriteStudios(AbstractMetadata metadata, String source) {
+        if (skipCheck(metadata, OverrideFlag.STUDIOS, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (CollectionUtils.isEmpty(videoData.getStudios())) {
+        } else if (CollectionUtils.isEmpty(metadata.getStudios())) {
             return Boolean.TRUE;
         }
-        return checkOverwrite(videoData, OverrideFlag.STUDIOS, source);
+        return checkOverwrite(metadata, OverrideFlag.STUDIOS, source);
     }
 
     public static boolean checkOverwriteCountry(VideoData videoData, String source) {

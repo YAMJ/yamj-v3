@@ -247,6 +247,12 @@ public class Season extends AbstractMetadata {
     }
 
     @Override
+    public Set<Studio> getStudios() {
+        // no studios in season
+        return Collections.emptySet();
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 7;
         int result = 1;

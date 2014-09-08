@@ -22,18 +22,18 @@
  */
 package org.yamj.core.service.plugin;
 
-import org.yamj.core.service.tools.ServiceDateTimeTools;
-
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.model.MovieDb;
 import com.omertron.themoviedbapi.model.PersonType;
+import com.omertron.themoviedbapi.model.ProductionCompany;
 import com.omertron.themoviedbapi.model.ProductionCountry;
 import com.omertron.themoviedbapi.results.TmdbResultsList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -46,6 +46,7 @@ import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.service.tools.ServiceDateTimeTools;
 import org.yamj.core.tools.OverrideTools;
 
 @Service("tmdbScanner")
@@ -207,11 +208,18 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             videoData.setOutline(StringUtils.trim(moviedb.getOverview()), SCANNER_ID);
         }
 
+        if (OverrideTools.checkOverwriteTagline(videoData, SCANNER_ID)) {
+            videoData.setOutline(StringUtils.trim(moviedb.getTagline()), SCANNER_ID);
+        }
+
         if (OverrideTools.checkOverwriteCountry(videoData, SCANNER_ID)) {
-            for (ProductionCountry country : moviedb.getProductionCountries()) {
-                videoData.setCountry(StringUtils.trimToNull(country.getName()), SCANNER_ID);
-                break;
-            }
+        	if (CollectionUtils.isNotEmpty(moviedb.getProductionCountries())) {
+	            for (ProductionCountry country : moviedb.getProductionCountries()) {
+	            	// TODO more countries
+	                videoData.setCountry(StringUtils.trimToNull(country.getName()), SCANNER_ID);
+	                break;
+	            }
+        	}
         }
 
         if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID)) {
@@ -224,12 +232,23 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         }
 
         if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
-            // GENRES
-            Set<String> genreNames = new HashSet<String>();
-            for (com.omertron.themoviedbapi.model.Genre genre : moviedb.getGenres()) {
-                genreNames.add(StringUtils.trim(genre.getName()));
-            }
-            videoData.setGenreNames(genreNames, SCANNER_ID);
+        	if (CollectionUtils.isNotEmpty(moviedb.getGenres())) {
+	            Set<String> genreNames = new HashSet<String>();
+	            for (com.omertron.themoviedbapi.model.Genre genre : moviedb.getGenres()) {
+	                genreNames.add(StringUtils.trim(genre.getName()));
+	            }
+	            videoData.setGenreNames(genreNames, SCANNER_ID);
+        	}
+        }
+
+        if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
+        	if (CollectionUtils.isNotEmpty(moviedb.getProductionCompanies())) {
+        		Set<String> studioNames = new HashSet<String>();
+        		for (ProductionCompany company : moviedb.getProductionCompanies()) {
+        			studioNames.add(StringUtils.trim(company.getName()));
+        		}
+            	videoData.setStudioNames(studioNames, SCANNER_ID);
+        	}
         }
 
         // CAST & CREW

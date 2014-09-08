@@ -107,8 +107,9 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             series.setOutline(StringUtils.trim(tvdbSeries.getOverview()), SCANNER_ID);
         }
 
-        // Add the genres
-        series.setGenreNames(new HashSet<String>(tvdbSeries.getGenres()), SCANNER_ID);
+        if (OverrideTools.checkOverwriteGenres(series, SCANNER_ID)) {
+        	series.setGenreNames(new HashSet<String>(tvdbSeries.getGenres()), SCANNER_ID);
+        }
 
         // TODO more values
         if (StringUtils.isNumeric(tvdbSeries.getRating())) {
@@ -127,7 +128,15 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                 } catch (Exception ignore) {}
             }
         }
-        
+
+        if (OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
+        	String studioName = StringUtils.trimToNull(tvdbSeries.getNetwork());
+        	if (studioName != null) {
+        		Set<String> studioNames = Collections.singleton(studioName);
+        		series.setStudioNames(studioNames, SCANNER_ID);
+        	}
+        }
+
         // CAST & CREW
         Set<CreditDTO> actors = new LinkedHashSet<CreditDTO>();
         for (Actor actor : tvdbApiWrapper.getActors(id)) {
