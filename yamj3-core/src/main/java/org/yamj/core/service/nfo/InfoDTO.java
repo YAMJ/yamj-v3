@@ -22,10 +22,9 @@
  */
 package org.yamj.core.service.nfo;
 
-import org.yamj.core.database.model.dto.CreditDTO;
-
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
+import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 
 public final class InfoDTO {
@@ -378,5 +377,20 @@ public final class InfoDTO {
             }
         }
         return episodeDTOs;
+    }
+    
+    public Date getSeasonYear(int season) {
+        Date yearDate = null;
+        for (InfoEpisodeDTO episodeDTO : this.getEpisodes(season)) {
+            Date parsedDate = episodeDTO.getFirstAired();
+            if (parsedDate != null) {
+                if (yearDate == null) {
+                    yearDate = parsedDate;
+                } else if (parsedDate.before(yearDate)) {
+                    yearDate = parsedDate;
+                }
+            }
+        }
+        return yearDate;
     }
 }

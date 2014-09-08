@@ -111,7 +111,7 @@ public abstract class AbstractMetadata extends AbstractAuditable
         return title;
     }
 
-    protected void setTitle(String title) {
+    private void setTitle(String title) {
         this.title = title;
     }
 
@@ -127,7 +127,7 @@ public abstract class AbstractMetadata extends AbstractAuditable
         return titleOriginal;
     }
 
-    public void setTitleOriginal(String titleOriginal) {
+    private void setTitleOriginal(String titleOriginal) {
         this.titleOriginal = titleOriginal;
     }
 
@@ -142,7 +142,7 @@ public abstract class AbstractMetadata extends AbstractAuditable
         return plot;
     }
 
-    public void setPlot(String plot) {
+    private void setPlot(String plot) {
         this.plot = plot;
     }
 
@@ -157,7 +157,7 @@ public abstract class AbstractMetadata extends AbstractAuditable
         return outline;
     }
 
-    public void setOutline(String outline) {
+    private void setOutline(String outline) {
         this.outline = outline;
     }
 

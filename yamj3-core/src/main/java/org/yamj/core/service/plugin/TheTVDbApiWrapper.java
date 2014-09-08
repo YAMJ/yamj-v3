@@ -34,14 +34,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.tools.LRUTimedCache;
 
 @Service("tvdbApiWrapper")
-public class TheTVDbApiWrapper implements InitializingBean {
+public class TheTVDbApiWrapper {
 
     private static final int YEAR_MIN = 1900;
     private static final int YEAR_MAX = 2050;
@@ -53,19 +52,11 @@ public class TheTVDbApiWrapper implements InitializingBean {
     private final LRUTimedCache<String, Series> seriesCache = new LRUTimedCache<String, Series>(50, 1800);
     // make maximal 30 episode lists maximal 30 minutes accessible
     private final LRUTimedCache<String, List<Episode>> episodesCache = new LRUTimedCache<String, List<Episode>>(30, 1800);
-    private String defaultLanguage;
-    private String altLanguage;
 
     @Autowired
     private ConfigService configService;
     @Autowired
     private TheTVDBApi tvdbApi;
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        defaultLanguage = configService.getProperty("thetvdb.language", "en");
-        altLanguage = configService.getProperty("thetvdb.language.alternate", "");
-    }
 
     public Banners getBanners(String id) {
         Banners banners = bannersCache.get(id);
@@ -97,6 +88,9 @@ public class TheTVDbApiWrapper implements InitializingBean {
         if (series == null) {
             seriesLock.lock();
             try {
+                String defaultLanguage = configService.getProperty("thetvdb.language", "en");
+                String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
+                
                 // second try cause meanwhile the cache could have been filled
                 series = seriesCache.get(id);
                 if (series == null) {
@@ -131,6 +125,9 @@ public class TheTVDbApiWrapper implements InitializingBean {
         if (StringUtils.isNotBlank(title)) {
             seriesLock.lock();
             try {
+                String defaultLanguage = configService.getProperty("thetvdb.language", "en");
+                String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
+                
                 boolean usedDefault = true;
                 List<Series> seriesList = tvdbApi.searchSeries(title, defaultLanguage);
                 if (CollectionUtils.isEmpty(seriesList) && StringUtils.isNotBlank(altLanguage)) {
@@ -176,6 +173,9 @@ public class TheTVDbApiWrapper implements InitializingBean {
 
         List<Episode> episodeList = this.episodesCache.get(key);
         if (episodeList == null) {
+            String defaultLanguage = configService.getProperty("thetvdb.language", "en");
+            String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
+            
             episodeList = tvdbApi.getSeasonEpisodes(id, season, defaultLanguage);
             if (CollectionUtils.isEmpty(episodeList) && StringUtils.isNotBlank(altLanguage)) {
                 episodeList = tvdbApi.getSeasonEpisodes(id, season, altLanguage);

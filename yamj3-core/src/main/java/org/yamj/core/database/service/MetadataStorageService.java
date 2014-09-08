@@ -135,6 +135,7 @@ public class MetadataStorageService {
         sb.append("left outer join fetch vd.studios ");
         sb.append("left outer join fetch vd.boxedSets ");
         sb.append("left outer join fetch ser.genres ");
+        sb.append("left outer join fetch ser.studios ");
         sb.append("where ser.id = :id ");
         sb.append("and ser.step = :step ");
 

@@ -46,6 +46,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
             @Index(name = "IX_VIDEODATA_TITLE", columnNames = {"title"}),
             @Index(name = "IX_VIDEODATA_STATUS", columnNames = {"status"})
         })
+@SuppressWarnings("unused")
 public class VideoData extends AbstractMetadata {
 
     private static final long serialVersionUID = 885531396557944590L;
@@ -159,7 +160,7 @@ public class VideoData extends AbstractMetadata {
         return publicationYear;
     }
 
-    public void setPublicationYear(int publicationYear) {
+    private void setPublicationYear(int publicationYear) {
         this.publicationYear = publicationYear;
     }
 
@@ -182,7 +183,7 @@ public class VideoData extends AbstractMetadata {
         return releaseDate;
     }
 
-    public void setReleaseDate(Date releaseDate) {
+    private void setReleaseDate(Date releaseDate) {
         this.releaseDate = releaseDate;
     }
 
@@ -207,7 +208,7 @@ public class VideoData extends AbstractMetadata {
         return tagline;
     }
 
-    public void setTagline(String tagline) {
+    private void setTagline(String tagline) {
         this.tagline = tagline;
     }
 
@@ -222,7 +223,7 @@ public class VideoData extends AbstractMetadata {
         return quote;
     }
 
-    public void setQuote(String quote) {
+    private void setQuote(String quote) {
         this.quote = quote;
     }
 
@@ -237,7 +238,7 @@ public class VideoData extends AbstractMetadata {
         return country;
     }
 
-    public void setCountry(String country) {
+    private void setCountry(String country) {
         this.country = country;
     }
 
@@ -340,7 +341,7 @@ public class VideoData extends AbstractMetadata {
         return mediaFiles;
     }
 
-    public void setMediaFiles(Set<MediaFile> mediaFiles) {
+    private void setMediaFiles(Set<MediaFile> mediaFiles) {
         this.mediaFiles = mediaFiles;
     }
 
@@ -352,7 +353,7 @@ public class VideoData extends AbstractMetadata {
         return credits;
     }
 
-    public void setCredits(List<CastCrew> credits) {
+    private void setCredits(List<CastCrew> credits) {
         this.credits = credits;
     }
 

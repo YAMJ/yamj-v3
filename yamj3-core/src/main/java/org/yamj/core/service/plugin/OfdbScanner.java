@@ -23,15 +23,6 @@
 package org.yamj.core.service.plugin;
 
 import java.io.IOException;
-import org.yamj.core.database.model.VideoData;
-import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.database.model.type.JobType;
-import org.yamj.core.database.model.type.OverrideFlag;
-import org.yamj.core.tools.OverrideTools;
-import org.yamj.core.tools.StringTools;
-import org.yamj.core.tools.web.HTMLTools;
-import org.yamj.core.tools.web.PoolingHttpClient;
-import org.yamj.core.tools.web.SearchEngineTools;
 import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +32,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.core.configuration.ConfigService;
+import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.dto.CreditDTO;
+import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.database.model.type.OverrideFlag;
+import org.yamj.core.tools.OverrideTools;
+import org.yamj.core.tools.StringTools;
+import org.yamj.core.tools.web.HTMLTools;
+import org.yamj.core.tools.web.PoolingHttpClient;
+import org.yamj.core.tools.web.SearchEngineTools;
 
 @Service("ofdbScanner")
 public class OfdbScanner implements IMovieScanner, InitializingBean {
@@ -52,11 +53,15 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     private static final String HTML_TR_START = "<tr";
     private static final String HTML_TR_END = "</tr>";
 
+    private SearchEngineTools searchEngineTools;
     @Autowired
     private PoolingHttpClient httpClient;
     @Autowired
     private PluginMetadataService pluginMetadataService;
-    private SearchEngineTools searchEngineTools;
+    @Autowired
+    private ImdbSearchEngine imdbSearchEngine;
+    @Autowired
+    private ConfigService configService;
 
     @Override
     public String getScannerName() {
@@ -75,13 +80,24 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     public String getMovieId(VideoData videoData) {
         String ofdbId = videoData.getSourceDbId(SCANNER_ID);
         if (StringUtils.isBlank(ofdbId)) {
-            // find by IMDb id
+            
+            // get and check IMDb id
             String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
+            if (StringUtils.isBlank(imdbId)) {
+                boolean searchImdb = configService.getBooleanProperty("ofdb.search.imdb", false);
+                if (searchImdb) {
+                    // search IMDb id if not present
+                    imdbId = this.imdbSearchEngine.getImdbId(videoData.getTitle(), videoData.getPublicationYear(), false);
+                    videoData.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
+                }
+            }
+            
+            // find by IMDb id
             if (StringUtils.isNotBlank(imdbId)) {
                 // if IMDb id is present then use this
                 ofdbId = getOfdbIdByImdbId(imdbId);
             }
-            if (StringUtils.isBlank(imdbId)) {
+            if (StringUtils.isBlank(ofdbId)) {
                 // try by title and year
                 ofdbId = getMovieId(videoData.getTitle(), videoData.getPublicationYear());
             }
@@ -175,7 +191,16 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
         }
 
         LOG.debug("OFDb url available ({}), updating video data", ofdbUrl);
-        return updateVideoData(videoData, ofdbUrl);
+
+        ScanResult scanResult = updateVideoData(videoData, ofdbUrl);
+        if (ScanResult.OK.equals(scanResult)) {
+            boolean alternate = this.configService.getBooleanProperty("ofdb.scan.alternate", false);
+            if (alternate) {
+                // fall back to alternate scanner
+                scanResult = ScanResult.OK_USE_ALTERNATE;
+            }
+        }
+        return scanResult;
     }
 
     private ScanResult updateVideoData(VideoData videoData, String ofdbUrl) {

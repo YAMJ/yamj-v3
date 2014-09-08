@@ -56,6 +56,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbScanner.class);
     private static final String FROM_WIKIPEDIA = "From Wikipedia, the free encyclopedia";
     private static final String WIKIPEDIA_DESCRIPTION_ABOVE = "Description above from the Wikipedia";
+    
     @Autowired
     private PluginMetadataService pluginMetadataService;
     @Autowired

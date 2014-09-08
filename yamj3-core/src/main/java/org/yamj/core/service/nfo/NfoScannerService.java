@@ -22,12 +22,10 @@
  */
 package org.yamj.core.service.nfo;
 
-import org.yamj.core.tools.ExceptionTools;
+import org.yamj.core.service.tools.ServiceDateTimeTools;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -44,6 +42,7 @@ import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.StepType;
 import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.staging.StagingService;
+import org.yamj.core.tools.ExceptionTools;
 import org.yamj.core.tools.OverrideTools;
 
 @Service("nfoScannerService")
@@ -203,6 +202,22 @@ public class NfoScannerService {
             }
 
             for (Season season : series.getSeasons()) {
+
+                if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
+                    season.setPlot(infoDTO.getPlot(), SCANNER_ID);
+                }
+                if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
+                    season.setOutline(infoDTO.getOutline(), SCANNER_ID);
+                }
+
+                if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
+                    Date seasonYear = infoDTO.getSeasonYear(season.getSeason());
+                    season.setPublicationYear(ServiceDateTimeTools.extractYearAsInt(seasonYear), SCANNER_ID);
+                }
+
+                // mark season as scanned
+                season.setTvSeasonScanned();
+
                 for (VideoData videoData : season.getVideoDatas()) {
                     InfoEpisodeDTO episode = infoDTO.getEpisode(season.getSeason(), videoData.getEpisode());
                     if (episode == null) {
@@ -215,17 +230,20 @@ public class NfoScannerService {
                         if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
                             videoData.setPlot(episode.getPlot(), SCANNER_ID);
                         }
+                        if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
+                            videoData.setOutline(episode.getPlot(), SCANNER_ID);
+                        }
+                        if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
+                            videoData.setReleaseDate(episode.getFirstAired(), SCANNER_ID);
+                        }
                         
-                        // set actors from NFO to all episodes
+                        // set cast and crew from NFO to all episodes
                         videoData.addCreditDTOS(infoDTO.getCredits());
                         
                         // mark episode as scanned
                         videoData.setTvEpisodeScanned();
                     }
                 }
-                
-                // TODO set publication year from lowest firstAired
-                //      of all episodes of that season
             }
         }
 

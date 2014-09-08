@@ -138,6 +138,9 @@ public class PluginMetadataService {
             if (ScanResult.OK.equals(scanResult)) {
                 LOG.debug("Movie {}-'{}', scanned OK", id, videoData.getTitle());
                 videoData.setStatus(StatusType.DONE);
+            } else if (ScanResult.OK_USE_ALTERNATE.equals(scanResult)) {
+                LOG.debug("Movie {}-'{}', scanned OK with alternate fallback", id, videoData.getTitle());
+                videoData.setStatus(StatusType.DONE);
             } else if (ScanResult.SKIPPED.equals(scanResult)) {
                 LOG.warn("Movie {}-'{}', skipped", id, videoData.getTitle());
                 videoData.setStatus(StatusType.DONE);
@@ -217,6 +220,9 @@ public class PluginMetadataService {
             if (ScanResult.OK.equals(scanResult)) {
                 LOG.debug("Series {}-'{}', scanned OK", id, series.getTitle());
                 series.setStatus(StatusType.DONE);
+            } else if (ScanResult.OK_USE_ALTERNATE.equals(scanResult)) {
+                LOG.debug("Series {}-'{}', scanned OK with alternate fallback", id, series.getTitle());
+                series.setStatus(StatusType.DONE);
             } else if (ScanResult.SKIPPED.equals(scanResult)) {
                 LOG.warn("Series {}-'{}', skipped", id, series.getTitle());
                 series.setStatus(StatusType.DONE);
@@ -272,6 +278,9 @@ public class PluginMetadataService {
         // set status
         if (ScanResult.OK.equals(scanResult)) {
             LOG.debug("Person {}-'{}', scanned OK", id, person.getName());
+            person.setStatus(StatusType.DONE);
+        } else if (ScanResult.OK_USE_ALTERNATE.equals(scanResult)) {
+            LOG.debug("Person {}-'{}', scanned OK with alternate fallback", id, person.getName());
             person.setStatus(StatusType.DONE);
         } else if (ScanResult.MISSING_ID.equals(scanResult)) {
             LOG.warn("Person {}-'{}', not found", id, person.getName());

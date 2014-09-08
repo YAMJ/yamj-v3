@@ -170,10 +170,16 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                 }
 
                 if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
-                    if (StringUtils.isNotBlank(tvdbSeries.getFirstAired())) {
-                        Date parsedDate = ServiceDateTimeTools.parseToDate(tvdbSeries.getFirstAired().trim());
-                        season.setPublicationYear(ServiceDateTimeTools.extractYearAsInt(parsedDate), SCANNER_ID);
+                    // get season year from minimal first aired of episodes
+                    String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
+                    Date year = this.getSeasonYear(seriesId, season.getSeasonNumber());
+                    if (year == null) {
+                        // try first aired from series as fall-back
+                        if (StringUtils.isNotBlank(tvdbSeries.getFirstAired())) {
+                            year = ServiceDateTimeTools.parseToDate(tvdbSeries.getFirstAired().trim());
+                        }
                     }
+                    season.setPublicationYear(ServiceDateTimeTools.extractYearAsInt(year), SCANNER_ID);
                 }
 
                 // mark as scanned
@@ -185,6 +191,28 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         }
     }
 
+    private Date getSeasonYear(String seriesId, int season) {
+        List<Episode> episodeList = tvdbApiWrapper.getSeasonEpisodes(seriesId, season);
+        if (CollectionUtils.isEmpty(episodeList)) {
+            return null;
+        }
+        
+        Date yearDate = null;
+        for (Episode episode : episodeList) {
+            if (StringUtils.isNotBlank(episode.getFirstAired())) {
+                Date parsedDate = ServiceDateTimeTools.parseToDate(episode.getFirstAired().trim());
+                if (parsedDate != null) {
+                    if (yearDate == null) {
+                        yearDate = parsedDate;
+                    } else if (parsedDate.before(yearDate)) {
+                        yearDate = parsedDate;
+                    }
+                }
+            }
+        }
+        return yearDate;
+    }
+    
     private void scanEpisodes(Season season, Set<CreditDTO> actors) {
         if (CollectionUtils.isEmpty(season.getVideoDatas())) {
             return;
@@ -216,6 +244,15 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                     videoData.setPlot(StringUtils.trim(episode.getOverview()), SCANNER_ID);
                 }
 
+                if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
+                    videoData.setOutline(StringUtils.trim(episode.getOverview()), SCANNER_ID);
+                }
+
+                if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
+                    Date releaseDate = ServiceDateTimeTools.parseToDate(episode.getFirstAired());
+                    videoData.setReleaseDate(releaseDate, SCANNER_ID);
+                }
+
                 // cast and crew
                 videoData.addCreditDTOS(actors);
 
@@ -229,8 +266,6 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                     videoData.addCreditDTO(new CreditDTO(JobType.GUEST_STAR, guestStar));
                 }
 
-                // TODO more values
-                
                 // mark episode as scanned
                 videoData.setTvEpisodeScanned();
             }

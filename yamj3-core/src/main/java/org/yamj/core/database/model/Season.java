@@ -52,6 +52,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
     @Index(name = "IX_SEASON_TITLE", columnNames = {"title"}),
     @Index(name = "IX_SEASON_STATUS", columnNames = {"status"})
 })
+@SuppressWarnings("unused")
 public class Season extends AbstractMetadata {
 
     private static final long serialVersionUID = 1858640563119637343L;
@@ -114,7 +115,7 @@ public class Season extends AbstractMetadata {
         return publicationYear;
     }
 
-    public void setPublicationYear(int publicationYear) {
+    private void setPublicationYear(int publicationYear) {
         this.publicationYear = publicationYear;
     }
 
@@ -130,7 +131,7 @@ public class Season extends AbstractMetadata {
         return null;
     }
 
-    public Map<String, String> getSourceDbIdMap() {
+    private Map<String, String> getSourceDbIdMap() {
         return sourceDbIdMap;
     }
 
@@ -139,7 +140,7 @@ public class Season extends AbstractMetadata {
         return sourceDbIdMap.get(sourceDb);
     }
 
-    public void setSourceDbIdMap(Map<String, String> sourceDbIdMap) {
+    private void setSourceDbIdMap(Map<String, String> sourceDbIdMap) {
         this.sourceDbIdMap = sourceDbIdMap;
     }
 
@@ -154,7 +155,7 @@ public class Season extends AbstractMetadata {
         return ratings;
     }
 
-    public void setRatings(Map<String, Integer> ratings) {
+    private void setRatings(Map<String, Integer> ratings) {
         this.ratings = ratings;
     }
 
