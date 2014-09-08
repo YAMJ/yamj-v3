@@ -182,17 +182,6 @@ public class ArtworkStorageService {
     }
 
     @Transactional
-    public void storeLocatedArtworks(Artwork artwork, List<String> urls) {
-        for (String url : urls) {
-            ArtworkLocated located = new ArtworkLocated();
-            located.setArtwork(artwork);
-            located.setUrl(url);
-            located.setStatus(StatusType.NEW);
-            artworkDao.saveEntity(located);
-        }
-    }
-
-    @Transactional
     public void errorArtwork(Long id) {
         Artwork artwork = artworkDao.getArtwork(id);
         if (artwork != null) {

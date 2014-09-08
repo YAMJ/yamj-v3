@@ -48,6 +48,7 @@ import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
 import org.yamj.core.service.artwork.poster.ITvShowPosterScanner;
 import org.yamj.core.service.artwork.tv.ITvShowBannerScanner;
 import org.yamj.core.service.artwork.tv.ITvShowVideoImageScanner;
+import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.plugin.TheMovieDbScanner;
 import org.yamj.core.service.plugin.TheTVDbScanner;
 
@@ -538,8 +539,17 @@ public class ArtworkScannerService {
             ArtworkLocated located = new ArtworkLocated();
             located.setArtwork(artwork);
             located.setStageFile(stageFile);
-            located.setStatus(StatusType.NEW);
             located.setPriority(1);
+            
+            int hash = stageFile.getFullPath().hashCode();
+            located.setHashCode(String.valueOf((hash < 0 ? 0 - hash : hash)));
+
+            if (FileTools.isArtworkFileScannable(stageFile)) {
+                located.setStatus(StatusType.NEW);
+            } else {
+                located.setStatus(StatusType.INVALID);
+            }
+            
             locatedArtworks.add(located);
         }
     }

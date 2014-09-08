@@ -390,6 +390,20 @@ public class FileTools {
         return scannable;
     }
 
+    public static boolean isArtworkFileScannable(StageFile stageFile) {
+        boolean scannable = true;
+
+        try {
+            File file = new File(stageFile.getFullPath());
+            if (!file.exists() || !file.canRead()) {
+                scannable = false;
+            }
+        } catch (Exception e) {
+            scannable = false;
+        }
+        return scannable;
+    }
+
     public static String makeSafeFilename(String filename) {
         String newFilename = filename;
 

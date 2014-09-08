@@ -74,8 +74,6 @@ public abstract class AbstractMetadata extends AbstractAuditable
 
     // GETTER and SETTER
     
-    abstract String getSkipOnlineScans();
-
     @Override
     public final boolean isSkippedOnlineScan(String sourceDb) {
         String skipped = getSkipOnlineScans();
@@ -227,6 +225,10 @@ public abstract class AbstractMetadata extends AbstractAuditable
     public boolean isMovie() {
         return false;
     }
+
+    // ABSTRACT DECLARATIONS
+    
+    abstract String getSkipOnlineScans();
 
     public abstract String getOverrideSource(OverrideFlag overrideFlag);
 

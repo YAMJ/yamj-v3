@@ -99,6 +99,8 @@ public final class OverrideTools {
         // studios
         sources = PropertyTools.getProperty("priority.videodata.studios", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.STUDIOS, sources);
+        sources = PropertyTools.getProperty("priority.series.studios", DEFAULT_PLUGIN_SERIES);
+        putVideodataPriorities(OverrideFlag.STUDIOS, sources);
         // tagline
         sources = PropertyTools.getProperty("priority.videodata.tagline", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.TAGLINE, sources);
@@ -111,6 +113,10 @@ public final class OverrideTools {
         putSeasonPriorities(OverrideFlag.TITLE, sources);
         // year
         sources = PropertyTools.getProperty("priority.videodata.year", DEFAULT_PLUGIN_MOVIE_SERIES);
+        putVideodataPriorities(OverrideFlag.YEAR, sources);
+        sources = PropertyTools.getProperty("priority.series.year", DEFAULT_PLUGIN_SERIES);
+        putVideodataPriorities(OverrideFlag.YEAR, sources);
+        sources = PropertyTools.getProperty("priority.season.year", DEFAULT_PLUGIN_SERIES);
         putVideodataPriorities(OverrideFlag.YEAR, sources);
     }
 
@@ -281,11 +287,14 @@ public final class OverrideTools {
                 case TITLE:
                     check = checkOverwriteTitle(metadata, source);
                     break;
+                case YEAR:
+                    check = checkOverwriteYear(metadata, source);
+                    break;
                 default:
                     check = checkOverwrite(metadata, overrideFlag, source);
                     break;
 
-                // TODO until now these checks are enough
+                // until now these checks are enough
             }
             if (check) {
                 return true;
@@ -398,7 +407,7 @@ public final class OverrideTools {
         if (skipCheck(metadata, OverrideFlag.YEAR, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (0 <= metadata.getYear()) {
+        } else if (metadata.getYear() <= 0) {
             return Boolean.TRUE;
         }
         return checkOverwrite(metadata, OverrideFlag.YEAR, source);

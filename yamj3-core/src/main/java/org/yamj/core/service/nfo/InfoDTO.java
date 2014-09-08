@@ -41,7 +41,7 @@ public final class InfoDTO {
     private String title;
     private String titleOriginal;
     private String titleSort;
-    private int year;
+    private int year = -1;
     private Date releaseDate;
     private int rating;
     private int top250;
@@ -150,9 +150,7 @@ public final class InfoDTO {
             try {
                 this.year = Integer.parseInt(year);
                 this.changed = true;
-            } catch (Exception e) {
-                // ignore integer parse error
-            }
+            } catch (Exception ignore) {}
         }
     }
     

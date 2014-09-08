@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -223,12 +222,16 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             }
         }
 
-        if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID)) {
-            String year = moviedb.getReleaseDate();
-            // Check if this is the default year and skip it
-            if (StringUtils.isNotBlank(year) && !"1900-01-01".equals(year)) {
-                year = (new DateTime(year)).toString("yyyy");
-                videoData.setPublicationYear(Integer.parseInt(year), SCANNER_ID);
+        String releaseDateString = moviedb.getReleaseDate();
+        if (StringUtils.isNotBlank(releaseDateString) && !"1900-01-01".equals(releaseDateString)) {
+            Date releaseDate = ServiceDateTimeTools.parseToDate(releaseDateString);
+            if (releaseDate != null) {
+                if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
+                    videoData.setReleaseDate(releaseDate, SCANNER_ID);
+                }
+                if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID)) {
+                    videoData.setPublicationYear(ServiceDateTimeTools.extractYearAsInt(releaseDate), SCANNER_ID);
+                }
             }
         }
 

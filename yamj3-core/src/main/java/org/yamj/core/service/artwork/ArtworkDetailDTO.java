@@ -47,7 +47,8 @@ public class ArtworkDetailDTO {
         
         if (hashCodeType == null || hashCodeType.equals(HashCodeType.SIMPLE)) {
             // hash code of URL
-            this.hashCode = String.valueOf(url.hashCode());
+            int hash = url.hashCode();
+            this.hashCode = String.valueOf((hash < 0 ? 0 - hash : hash));
         } else {
             // hash code is part of the URL
             String hc = ArtworkTools.getPartialHashCode(url);

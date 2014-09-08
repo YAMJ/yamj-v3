@@ -55,7 +55,7 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     private StageFile stageFile;
 
     @Index(name = "IX_ARTWORKLOCATED_DOWNLOAD")
-    @Column(name = "source", length=50)
+    @Column(name = "source", length = 50)
     private String source;
 
     @Index(name = "IX_ARTWORKLOCATED_DOWNLOAD")

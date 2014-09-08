@@ -195,7 +195,7 @@ public final class ServiceDateTimeTools {
      * @param date
      * @return
      */
-    public static int extractYear(String date) {
+    public static int extractYearAsInt(String date) {
         int year = 0;
         Matcher m = YEAR_PATTERN.matcher(date);
         if (m.find()) {
