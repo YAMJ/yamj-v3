@@ -108,7 +108,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         }
 
         if (OverrideTools.checkOverwriteGenres(series, SCANNER_ID)) {
-        	series.setGenreNames(new HashSet<String>(tvdbSeries.getGenres()), SCANNER_ID);
+            series.setGenreNames(new HashSet<String>(tvdbSeries.getGenres()), SCANNER_ID);
         }
 
         // TODO more values
@@ -130,11 +130,11 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         }
 
         if (OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
-        	String studioName = StringUtils.trimToNull(tvdbSeries.getNetwork());
-        	if (studioName != null) {
-        		Set<String> studioNames = Collections.singleton(studioName);
-        		series.setStudioNames(studioNames, SCANNER_ID);
-        	}
+            String studioName = StringUtils.trimToNull(tvdbSeries.getNetwork());
+            if (studioName != null) {
+                Set<String> studioNames = Collections.singleton(studioName);
+                series.setStudioNames(studioNames, SCANNER_ID);
+            }
         }
 
         // CAST & CREW

@@ -213,13 +213,13 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         }
 
         if (OverrideTools.checkOverwriteCountry(videoData, SCANNER_ID)) {
-        	if (CollectionUtils.isNotEmpty(moviedb.getProductionCountries())) {
-	            for (ProductionCountry country : moviedb.getProductionCountries()) {
-	            	// TODO more countries
-	                videoData.setCountry(StringUtils.trimToNull(country.getName()), SCANNER_ID);
-	                break;
-	            }
-        	}
+            if (CollectionUtils.isNotEmpty(moviedb.getProductionCountries())) {
+                for (ProductionCountry country : moviedb.getProductionCountries()) {
+                    // TODO more countries
+                    videoData.setCountry(StringUtils.trimToNull(country.getName()), SCANNER_ID);
+                    break;
+                }
+            }
         }
 
         if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID)) {
@@ -232,23 +232,23 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         }
 
         if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
-        	if (CollectionUtils.isNotEmpty(moviedb.getGenres())) {
-	            Set<String> genreNames = new HashSet<String>();
-	            for (com.omertron.themoviedbapi.model.Genre genre : moviedb.getGenres()) {
-	                genreNames.add(StringUtils.trim(genre.getName()));
-	            }
-	            videoData.setGenreNames(genreNames, SCANNER_ID);
-        	}
+            if (CollectionUtils.isNotEmpty(moviedb.getGenres())) {
+                Set<String> genreNames = new HashSet<String>();
+                for (com.omertron.themoviedbapi.model.Genre genre : moviedb.getGenres()) {
+                    genreNames.add(StringUtils.trim(genre.getName()));
+                }
+                videoData.setGenreNames(genreNames, SCANNER_ID);
+            }
         }
 
         if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
-        	if (CollectionUtils.isNotEmpty(moviedb.getProductionCompanies())) {
-        		Set<String> studioNames = new HashSet<String>();
-        		for (ProductionCompany company : moviedb.getProductionCompanies()) {
-        			studioNames.add(StringUtils.trim(company.getName()));
-        		}
-            	videoData.setStudioNames(studioNames, SCANNER_ID);
-        	}
+            if (CollectionUtils.isNotEmpty(moviedb.getProductionCompanies())) {
+                Set<String> studioNames = new HashSet<String>();
+                for (ProductionCompany company : moviedb.getProductionCompanies()) {
+                    studioNames.add(StringUtils.trim(company.getName()));
+                }
+                videoData.setStudioNames(studioNames, SCANNER_ID);
+            }
         }
 
         // CAST & CREW
