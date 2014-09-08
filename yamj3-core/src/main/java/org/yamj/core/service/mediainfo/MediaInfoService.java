@@ -22,11 +22,23 @@
  */
 package org.yamj.core.service.mediainfo;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -43,6 +55,7 @@ import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.Subtitle;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.MediaStorageService;
+import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.tools.AspectRatioTools;
 import org.yamj.core.tools.Constants;
 import org.yamj.core.tools.LanguageTools;
@@ -71,7 +84,7 @@ public class MediaInfoService implements InitializingBean {
     private AspectRatioTools aspectRatioTools;
     @Autowired
     private LanguageTools languageTools;
-
+    
     @Override
     public void afterPropertiesSet() {
         String OS_NAME = System.getProperty("os.name");
@@ -130,10 +143,6 @@ public class MediaInfoService implements InitializingBean {
         }
     }
 
-    public boolean isMediaInfoActivated() {
-        return isActivated;
-    }
-
     public void processingError(QueueDTO queueElement) {
         if (queueElement == null) {
             // nothing to
@@ -149,42 +158,57 @@ public class MediaInfoService implements InitializingBean {
         StageFile stageFile = mediaFile.getVideoFile();
         if (stageFile == null) {
             LOG.error("No valid video file found for media file: {}", mediaFile.getFileName());
-            mediaFile.setStatus(StatusType.ERROR);
+            mediaFile.setStatus(StatusType.INVALID);
             mediaStorageService.update(mediaFile);
             return;
         }
 
         // check if stage file can be read by MediaInfo
-        File file = new File(stageFile.getFullPath());
+        boolean scannable = FileTools.isFileScannable(stageFile);
+        if (scannable && !this.isActivated) {
+        	LOG.debug("MediaInfo not activate for scanning video file '{}'", stageFile.getFullPath());
+        	mediaFile.setStatus(StatusType.INVALID);
+            mediaStorageService.updateMediaFile(mediaFile);
+        	// nothing to do anymore
+        	return;
+        } else if (!scannable && StringUtils.isBlank(stageFile.getContent())) {
+            LOG.debug("Video file '{}' is not scannable", stageFile.getFullPath());
+        	mediaFile.setStatus(StatusType.INVALID);
+            mediaStorageService.updateMediaFile(mediaFile);
+            // nothing to do anymore
+            return;
+        }
+        
+        LOG.debug("Scanning media file {}", stageFile.getFullPath());
+        InputStream is = null;
         boolean scanned = false;
-        if (!file.exists()) {
-            LOG.warn("Media file not found: {}", stageFile.getFullPath());
-        } else if (!file.canRead()) {
-            LOG.warn("Media file not readable: {}", stageFile.getFullPath());
-        } else {
-            LOG.debug("Scanning media file {}", stageFile.getFullPath());
-            InputStream is = null;
-            try {
-                is = createInputStream(stageFile.getFullPath());
-                Map<String, String> infosGeneral = new HashMap<String, String>();
-                List<Map<String, String>> infosVideo = new ArrayList<Map<String, String>>();
-                List<Map<String, String>> infosAudio = new ArrayList<Map<String, String>>();
-                List<Map<String, String>> infosText = new ArrayList<Map<String, String>>();
+        try {
+        	if (StringUtils.isNotBlank(stageFile.getContent())) {
+        		// read from stored content
+        		is = IOUtils.toInputStream(stageFile.getContent());
+        	} else {
+        		// read from file
+        		is = createInputStream(stageFile.getFullPath());
+        	}
+        	
+            Map<String, String> infosGeneral = new HashMap<String, String>();
+            List<Map<String, String>> infosVideo = new ArrayList<Map<String, String>>();
+            List<Map<String, String>> infosAudio = new ArrayList<Map<String, String>>();
+            List<Map<String, String>> infosText = new ArrayList<Map<String, String>>();
 
-                parseMediaInfo(is, infosGeneral, infosVideo, infosAudio, infosText);
+            parseMediaInfo(is, infosGeneral, infosVideo, infosAudio, infosText);
 
-                updateMediaFile(mediaFile, infosGeneral, infosVideo, infosAudio, infosText);
+            updateMediaFile(mediaFile, infosGeneral, infosVideo, infosAudio, infosText);
 
-                scanned = true;
-            } catch (IOException error) {
-                LOG.error("Failed reading mediainfo output: {}", stageFile);
-                LOG.warn("MediaInfo error", error);
-            } finally {
-                if (is != null) {
-                    try {
-                        is.close();
-                    } catch (Exception ignore) {}
-                }
+            scanned = true;
+        } catch (IOException error) {
+            LOG.error("Failed reading mediainfo output: {}", stageFile);
+            LOG.warn("MediaInfo error", error);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (Exception ignore) {}
             }
         }
 
@@ -413,7 +437,8 @@ public class MediaInfoService implements InitializingBean {
                 || "RLE".equalsIgnoreCase(infoFormat)
                 || "PGS".equalsIgnoreCase(infoFormat)
                 || "ASS".equalsIgnoreCase(infoFormat)
-                || "VobSub".equalsIgnoreCase(infoFormat)) {
+                || "VobSub".equalsIgnoreCase(infoFormat))
+        {
             subtitle.setFormat(infoFormat);
             if (StringUtils.isBlank(infoLanguage)) {
                 subtitle.setLanguage(Constants.UNDEFINED);

@@ -78,7 +78,7 @@ public class ScanningScheduler {
     @Scheduled(initialDelay = 5000, fixedDelay = 45000)
     public void scanMediaFiles() throws Exception {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.mediafilescan.maxThreads", 1);
-        if (maxThreads <= 0 || !mediaInfoService.isMediaInfoActivated()) {
+        if (maxThreads <= 0) {
             if (!messageDisabledMediaFiles) {
                 messageDisabledMediaFiles = Boolean.TRUE;
                 LOG.info("Media file scanning is disabled");
