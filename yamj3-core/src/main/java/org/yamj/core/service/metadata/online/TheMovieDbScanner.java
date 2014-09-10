@@ -256,8 +256,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             CreditDTO credit;
             for (com.omertron.themoviedbapi.model.Person person : tmdbApi.getMovieCasts(Integer.parseInt(tmdbID)).getResults()) {
                 credit = new CreditDTO();
-                credit.setSourcedb(SCANNER_ID);
-                credit.setSourcedbId(String.valueOf(person.getId()));
+                credit.addPersonId(SCANNER_ID, String.valueOf(person.getId()));
                 credit.setName(person.getName());
                 credit.setRole(person.getCharacter());
 
@@ -374,7 +373,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             LOG.debug("Getting information on {}-'{}' from {}", person.getId(), person.getName(), SCANNER_ID);
             com.omertron.themoviedbapi.model.Person tmdbPerson = tmdbApi.getPersonInfo(Integer.parseInt(id));
 
-            person.setPersonId(ImdbScanner.SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
+            person.addPersonId(ImdbScanner.SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
             person.setBirthPlace(StringUtils.trimToNull(tmdbPerson.getBirthplace()));
             person.setBiography(cleanBiography(tmdbPerson.getBiography()));
 

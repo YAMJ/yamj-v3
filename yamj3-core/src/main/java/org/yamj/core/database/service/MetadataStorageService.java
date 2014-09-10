@@ -268,6 +268,9 @@ public class MetadataStorageService {
         
         // update boxed sets
         updateBoxedSets(videoData);
+        
+        // update certifications
+        updateCertifications(videoData);        
     }
 
     @Transactional
@@ -375,9 +378,9 @@ public class MetadataStorageService {
     }
 
     /**
-     * Update boxed sets for Series from the database
+     * Update boxed sets
      *
-     * @param series
+     * @param videoData
      */
     private void updateBoxedSets(VideoData videoData) {
         if (MapUtils.isEmpty(videoData.getSetInfos())) {
@@ -419,7 +422,42 @@ public class MetadataStorageService {
     }
 
     /**
-     * Update cast and crew to the database
+     * Update boxed sets
+     *
+     * @param videoData
+     */
+    private void updateCertifications(VideoData videoData) {
+        if (MapUtils.isEmpty(videoData.getCertificationInfos())) {
+            return;
+        }
+
+        for (Entry<String,String> entry : videoData.getCertificationInfos().entrySet()) {
+            
+            Certification certification = null;
+            for (Certification stored : videoData.getCertifications()) {
+                if (StringUtils.equalsIgnoreCase(stored.getCountry(), entry.getKey())) {
+                    certification = stored;
+                    break;
+                }
+            }
+            
+            if (certification == null) {
+                // create new certification
+                certification = new Certification();
+                certification.setVideoData(videoData);
+                certification.setCountry(entry.getKey());
+                certification.setCertificationText(entry.getValue());
+                videoData.addCertification(certification);
+                this.commonDao.saveEntity(certification);
+            } else {
+                certification.setCertificationText(entry.getValue());
+                this.commonDao.updateEntity(certification);                
+            }
+        }
+    }
+
+    /**
+     * Update cast and crew to the database.
      *
      * @param videoData
      */

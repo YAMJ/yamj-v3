@@ -26,9 +26,11 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
@@ -37,6 +39,7 @@ import org.yamj.common.type.StatusType;
 @Table(name = "person",
     uniqueConstraints = @UniqueConstraint(name = "UIX_PERSON_NATURALID", columnNames = {"name"})
 )
+@SuppressWarnings("unused")
 public class Person extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 660066902996412843L;
@@ -134,15 +137,27 @@ public class Person extends AbstractAuditable implements Serializable {
         }
     }
 
-    public Map<String, String> getPersonIdMap() {
+    private Map<String, String> getPersonIdMap() {
         return personIds;
     }
 
-    public void setPersonIdMap(Map<String, String> personIds) {
+    private void setPersonIdMap(Map<String, String> personIds) {
         this.personIds = personIds;
     }
 
-    public boolean setPersonId(String sourceDb, String personId) {
+    public boolean addPersonIds(Map<String,String> personIdMap) {
+        boolean changed  = false;
+        if (MapUtils.isNotEmpty(personIdMap)) {
+            for (Entry<String,String> entry : personIdMap.entrySet()) {
+                if (this.addPersonId(entry.getKey(), entry.getValue())) {
+                    changed = true;
+                }
+            }
+        }
+        return changed;
+    }
+    
+    public boolean addPersonId(String sourceDb, String personId) {
         if (StringUtils.isBlank(sourceDb) || StringUtils.isBlank(personId)) {
             return false;
         }

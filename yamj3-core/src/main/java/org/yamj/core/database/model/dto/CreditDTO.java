@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model.dto;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -33,9 +35,8 @@ public class CreditDTO {
     private JobType jobType;
     private String role;
     private String aka;
-    private String sourcedb;
-    private String sourcedbId;
     private String photoURL;
+    private Map<String, String> personIdMap = new HashMap<String, String>(0);
     
     public CreditDTO() {
     }
@@ -88,22 +89,6 @@ public class CreditDTO {
         }
     }
 
-    public String getSourcedb() {
-        return sourcedb;
-    }
-
-    public void setSourcedb(String sourcedb) {
-        this.sourcedb = sourcedb;
-    }
-
-    public String getSourcedbId() {
-        return sourcedbId;
-    }
-
-    public void setSourcedbId(String sourcedbId) {
-        this.sourcedbId = sourcedbId;
-    }
-
     public String getPhotoURL() {
         return photoURL;
     }
@@ -114,6 +99,16 @@ public class CreditDTO {
         }
     }
 
+    public Map<String, String> getPersonIdMap() {
+        return personIdMap;
+    }
+
+    public void addPersonId(String sourcedb, String personId) {
+        if (StringUtils.isNotBlank(sourcedb) && StringUtils.isNotBlank(personId)) {
+            this.personIdMap.put(sourcedb.trim(), personId.trim());
+        }
+    }
+ 
     @Override
     public int hashCode() {
         final int prime = 7;

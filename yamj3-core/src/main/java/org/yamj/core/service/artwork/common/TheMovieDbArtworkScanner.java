@@ -257,8 +257,8 @@ public class TheMovieDbArtworkScanner implements
             com.omertron.themoviedbapi.model.Person tmdbPerson = results.getResults().get(0);
             String tmdbId = Integer.toString(tmdbPerson.getId());
             String imdbId = tmdbPerson.getImdbId();
-            person.setPersonId(getScannerName(), tmdbId);
-            person.setPersonId(ImdbScanner.SCANNER_ID, imdbId);
+            person.addPersonId(getScannerName(), tmdbId);
+            person.addPersonId(ImdbScanner.SCANNER_ID, imdbId);
             LOG.debug("Found IDs for {} - TMDB: '{}', IMDB: '{}'", person.getName(), tmdbId, imdbId);
             return Integer.toString(tmdbPerson.getId());
         } catch (MovieDbException ex) {

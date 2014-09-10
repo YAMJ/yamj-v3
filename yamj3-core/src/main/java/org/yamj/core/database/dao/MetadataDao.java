@@ -22,19 +22,18 @@
  */
 package org.yamj.core.database.dao;
 
-import org.springframework.transaction.annotation.Transactional;
-import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.dto.CreditDTO;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
 import org.yamj.core.hibernate.HibernateDao;
@@ -91,12 +90,12 @@ public class MetadataDao extends HibernateDao {
             // create new person
             person = new Person();
             person.setName(dto.getName());
-            person.setPersonId(dto.getSourcedb(), dto.getSourcedbId());
+            person.addPersonIds(dto.getPersonIdMap());
             person.setStatus(StatusType.NEW);
             this.saveEntity(person);
         } else {
             // update person if ID has has been set
-            if (person.setPersonId(dto.getSourcedb(), dto.getSourcedbId())) {
+            if (person.addPersonIds(dto.getPersonIdMap())) {
                 this.updateEntity(person);
             }
         }

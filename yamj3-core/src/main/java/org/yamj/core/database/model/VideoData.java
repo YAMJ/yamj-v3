@@ -22,15 +22,15 @@
  */
 package org.yamj.core.database.model;
 
-import org.apache.commons.collections.MapUtils;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
+import java.util.Map.Entry;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
@@ -136,6 +136,9 @@ public class VideoData extends AbstractMetadata {
     private List<BoxedSetOrder> boxedSets = new ArrayList<BoxedSetOrder>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
+    private List<Certification> certifications = new ArrayList<Certification>(0);
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
     
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
@@ -152,6 +155,9 @@ public class VideoData extends AbstractMetadata {
 
     @Transient
     private Map<String,Integer> setInfos = new HashMap<String,Integer>(0);
+
+    @Transient
+    private Map<String,String> certificationInfos = new HashMap<String,String>(0);
 
     // GETTER and SETTER
     
@@ -277,11 +283,11 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
-    public Map<String, Integer> getRatings() {
+    private Map<String, Integer> getRatings() {
         return ratings;
     }
 
-    public void setRatings(Map<String, Integer> ratings) {
+    private void setRatings(Map<String, Integer> ratings) {
         this.ratings = ratings;
     }
 
@@ -291,12 +297,24 @@ public class VideoData extends AbstractMetadata {
         }
     }
     
+    public List<Certification> getCertifications() {
+        return certifications;
+    }
+
+    private void setCertifications(List<Certification> certifications) {
+        this.certifications = certifications;
+    }
+
+    public void addCertification(Certification certification) {
+        this.certifications.add(certification);
+    }
+
     @JsonIgnore // This is not needed for the API
-    public Map<OverrideFlag, String> getOverrideFlags() {
+    private Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
 
-    public void setOverrideFlags(Map<OverrideFlag, String> overrideFlags) {
+    private void setOverrideFlags(Map<OverrideFlag, String> overrideFlags) {
         this.overrideFlags = overrideFlags;
     }
 
@@ -379,7 +397,7 @@ public class VideoData extends AbstractMetadata {
     public void addBoxedSet(BoxedSetOrder boxedSet) {
         this.boxedSets.add(boxedSet);
     }
-    
+
     public List<NfoRelation> getNfoRelations() {
         return nfoRelations;
     }
@@ -399,15 +417,39 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void addCreditDTO(CreditDTO creditDTO) {
-        this.creditDTOS.add(creditDTO);
+        CreditDTO credit = null;
+        for (CreditDTO stored : this.creditDTOS) {
+            if (stored.equals(creditDTO)) {
+                credit = stored;
+                break;
+            }
+        }
+        if (credit == null) {
+            // just add new credit
+            this.creditDTOS.add(creditDTO);
+        } else {
+            // update values
+            if (StringUtils.isBlank(credit.getAka())) {
+                credit.setAka(creditDTO.getAka());
+            }
+            if (StringUtils.isBlank(credit.getRole())) {
+                credit.setAka(creditDTO.getRole());
+            }
+            if (StringUtils.isBlank(credit.getPhotoURL())) {
+                credit.setAka(creditDTO.getPhotoURL());
+            }
+            if (MapUtils.isNotEmpty(creditDTO.getPersonIdMap())) {
+                for (Entry<String,String> entry : creditDTO.getPersonIdMap().entrySet()) {
+                    credit.addPersonId(entry.getKey(), entry.getValue());
+                }
+            }
+        }
     }
 
     public void addCreditDTOS(Set<CreditDTO> creditDTOS) {
-        this.creditDTOS.addAll(creditDTOS);
-    }
-
-    public void setCreditDTOS(Set<CreditDTO> creditDTOS) {
-        this.creditDTOS = creditDTOS;
+        for (CreditDTO creditDTO : creditDTOS) {
+            this.addCreditDTO(creditDTO);
+        }
     }
     
     public Set<String> getGenreNames() {
@@ -436,9 +478,19 @@ public class VideoData extends AbstractMetadata {
         return setInfos;
     }
 
-    public void setSetInfos(Map<String,Integer> setInfos) {
+    public void addSetInfos(Map<String,Integer> setInfos) {
         if (MapUtils.isNotEmpty(setInfos)) {
-            this.setInfos = setInfos;
+            this.setInfos.putAll(setInfos);
+        }
+    }
+
+    public Map<String,String> getCertificationInfos() {
+        return certificationInfos;
+    }
+
+    public void addCertificationInfos(Map<String,String> certificationInfos) {
+        if (MapUtils.isNotEmpty(certificationInfos)) {
+            this.certificationInfos.putAll(certificationInfos);
         }
     }
 

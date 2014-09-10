@@ -111,9 +111,12 @@ public class NfoScannerService {
                 }
             }
 
-            // set boxed sets
-            videoData.setSetInfos(infoDTO.getSetInfos());
-            
+            // add boxed sets
+            videoData.addSetInfos(infoDTO.getSetInfos());
+
+            // add certifications
+            videoData.addCertificationInfos(infoDTO.getCertificationInfos());
+
             // add credit DTOs for update in database
             videoData.addCreditDTOS(infoDTO.getCredits());
         }

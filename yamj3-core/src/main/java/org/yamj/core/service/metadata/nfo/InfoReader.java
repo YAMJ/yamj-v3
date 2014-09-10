@@ -486,11 +486,12 @@ public final class InfoReader {
             tempCert = DOMHelper.getValueFromElement(eCommon, "mpaa");
             if (StringUtils.isNotBlank(tempCert)) {
                 String mpaa = StringTools.processMpaaCertification(tempCert);
-                dto.setCertification(mpaa);
+                dto.addCertificatioInfo("MPAA", mpaa);
             }
         } else {
             tempCert = DOMHelper.getValueFromElement(eCommon, "certification");
             if (StringUtils.isNotBlank(tempCert)) {
+                String certCountry = null;
                 String preferredCountry = this.configService.getProperty("yamj3.scan.preferredCountry", "USA");
                 int countryPos = tempCert.lastIndexOf(preferredCountry);
                 if (countryPos > 0) {
@@ -507,9 +508,11 @@ public final class InfoReader {
                             tempCert = tempCert.substring(pos + 1);
                         }
                     }
+                    certCountry = preferredCountry;
                 } else if (StringUtils.containsIgnoreCase(tempCert, "Rated")) {
                     // Extract the MPAA rating from the certification
                     tempCert = StringTools.processMpaaCertification(tempCert);
+                    certCountry = "MPAA";
                 } else {
                     // The country wasn't found in the value, so grab the last one
                     int pos = tempCert.lastIndexOf(':');
@@ -517,9 +520,9 @@ public final class InfoReader {
                         // Strip the country code from the rating for certification like "UK:PG-12"
                         tempCert = tempCert.substring(pos + 1);
                     }
+                    // TODO get the country
                 }
-
-                dto.setCertification(tempCert.trim());
+                dto.addCertificatioInfo(certCountry, tempCert);
             }
         }
     }

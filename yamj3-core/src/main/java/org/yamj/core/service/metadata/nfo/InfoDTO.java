@@ -34,6 +34,7 @@ public final class InfoDTO {
     private List<String> skipOnlineScans = new ArrayList<String>(0);
     private Map<String, String> ids = new HashMap<String, String>(2);
     private Map<String, Integer> setInfos = new HashMap<String, Integer>(2);
+    private Map<String, String> certificationInfos = new HashMap<String, String>(1);
     private Set<CreditDTO> credits = new LinkedHashSet<CreditDTO>(10);
     private Set<String> genres = new LinkedHashSet<String>(5);
     private Set<String> trailerURLs= new HashSet<String>(0);
@@ -46,7 +47,6 @@ public final class InfoDTO {
     private int rating;
     private int top250;
     private String runtime;
-    private String certification;
     private String plot;
     private String outline;
     private String tagline;
@@ -198,13 +198,13 @@ public final class InfoDTO {
         }
     }
 
-    public String getCertification() {
-        return certification;
+    public Map<String,String> getCertificationInfos() {
+        return certificationInfos;
     }
 
-    public void setCertification(String certification) {
-        if (StringUtils.isNotBlank(certification)) {
-            this.certification = certification;
+    public void addCertificatioInfo(String country, String certification) {
+        if (StringUtils.isNotBlank(country) && StringUtils.isNotBlank(certification)) {
+            this.certificationInfos.put(country.trim(), certification.trim());
             this.changed = true;
         }
     }
@@ -215,7 +215,7 @@ public final class InfoDTO {
 
     public void setPlot(String plot) {
         if (StringUtils.isNotBlank(plot)) {
-            this.plot = plot;
+            this.plot = plot.trim();
             this.changed = true;
         }
     }
@@ -226,7 +226,7 @@ public final class InfoDTO {
 
     public void setOutline(String outline) {
         if (StringUtils.isNotBlank(outline)) {
-            this.outline = outline;
+            this.outline = outline.trim();
             this.changed = true;
         }
     }
@@ -237,7 +237,7 @@ public final class InfoDTO {
 
     public void setTagline(String tagline) {
         if (StringUtils.isNotBlank(tagline)) {
-            this.tagline = tagline;
+            this.tagline = tagline.trim();
             this.changed = true;
         }
     }
@@ -248,7 +248,7 @@ public final class InfoDTO {
 
     public void setQuote(String quote) {
         if (StringUtils.isNotBlank(quote)) {
-            this.quote = quote;
+            this.quote = quote.trim();
             this.changed = true;
         }
     }
@@ -259,7 +259,7 @@ public final class InfoDTO {
 
     public void setCompany(String company) {
         if (StringUtils.isNotBlank(company)) {
-            this.company = company;
+            this.company = company.trim();
             this.changed = true;
         }
     }

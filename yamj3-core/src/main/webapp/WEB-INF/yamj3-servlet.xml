@@ -23,13 +23,21 @@
         <property name="locations">
             <list>
                 <value>classpath:/yamj3-core-static.properties</value>
-                <value>file:${yamj3.home}/config/yamj3-core.properties</value>
+                <value>file:${yamj3.home}/config/yamj3-core-static.properties</value>
             </list>
         </property>
         <property name="ignoreResourceNotFound" value="true"/>
     </bean>
 
-    <util:properties id="dynamicProperties" location="classpath:/yamj3-core-dynamic.properties" />
+    <bean id="dynamicProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>classpath:/yamj3-core-dynamic.properties</value>
+                <value>file:${yamj3.home}/config/yamj3-core-dynamic.properties</value>
+            </list>
+        </property>
+    </bean>
+
     <bean id="configService" class="org.yamj.core.configuration.ConfigService">
         <property name="configDao" ref="configDao"/>
         <property name="coreProperties" ref="dynamicProperties"/>

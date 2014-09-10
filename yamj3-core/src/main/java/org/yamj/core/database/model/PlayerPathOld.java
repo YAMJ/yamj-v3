@@ -30,6 +30,7 @@ import org.hibernate.annotations.NaturalId;
 
 //@Entity
 //@Table(name = "player_path_old")
+@Deprecated
 public class PlayerPathOld extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 4L;
