@@ -22,6 +22,9 @@
  */
 package org.yamj.core.service.artwork;
 
+import org.yamj.core.service.metadata.online.TheMovieDbScanner;
+import org.yamj.core.service.metadata.online.TheTVDbScanner;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,8 +52,6 @@ import org.yamj.core.service.artwork.poster.ITvShowPosterScanner;
 import org.yamj.core.service.artwork.tv.ITvShowBannerScanner;
 import org.yamj.core.service.artwork.tv.ITvShowVideoImageScanner;
 import org.yamj.core.service.file.tools.FileTools;
-import org.yamj.core.service.plugin.TheMovieDbScanner;
-import org.yamj.core.service.plugin.TheTVDbScanner;
 
 @Service("artworkScannerService")
 public class ArtworkScannerService {

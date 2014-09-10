@@ -23,8 +23,6 @@
 @TypeDefs({
     @TypeDef(name = "statusType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.common.type.StatusType")}),
-    @TypeDef(name = "stepType", typeClass = EnumStringUserType.class,
-        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.StepType")}),
     @TypeDef(name = "artworkType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ArtworkType")}),
     @TypeDef(name = "overrideFlag", typeClass = EnumStringUserType.class,

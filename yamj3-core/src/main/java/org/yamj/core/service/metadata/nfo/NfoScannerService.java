@@ -20,9 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.nfo;
-
-import org.yamj.core.service.tools.ServiceDateTimeTools;
+package org.yamj.core.service.metadata.nfo;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -32,17 +30,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.type.StepType;
-import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.staging.StagingService;
-import org.yamj.core.tools.ExceptionTools;
+import org.yamj.core.service.tools.ServiceDateTimeTools;
 import org.yamj.core.tools.OverrideTools;
 
 @Service("nfoScannerService")
@@ -54,21 +48,9 @@ public class NfoScannerService {
     @Autowired
     private StagingService stagingService;
     @Autowired
-    private MetadataStorageService metadataStorageService;
-    @Autowired
     private InfoReader infoReader;
     
-    public void scanMovieNfo(QueueDTO queueElement) {
-        if (queueElement == null) {
-            // nothing to
-            return;
-        }
-        
-        VideoData videoData = metadataStorageService.getVideoDataInStep(queueElement.getId(), StepType.NFO);
-        if (videoData == null) {
-            // step doesn't match
-            return;
-        }       
+    public void scanMovie(VideoData videoData) {
         LOG.info("Scanning NFO data for movie '{}'", videoData.getIdentifier());
         
         // get the stage files ...
@@ -78,8 +60,10 @@ public class NfoScannerService {
         
         if (infoDTO.isTvShow()) {
             LOG.warn("NFO's determined TV show for movie: {}", videoData.getIdentifier());
-        } else if (infoDTO.isChanged()) {
-
+            return;
+        }
+        
+        if (infoDTO.isChanged()) {
             // set video IDs
             for (Entry<String,String> entry : infoDTO.getIds().entrySet()) {
                 videoData.setSourceDbId(entry.getKey(), entry.getValue());
@@ -130,40 +114,14 @@ public class NfoScannerService {
             // set boxed sets
             videoData.setSetInfos(infoDTO.getSetInfos());
             
-            // set credit DTOs for update in database
-            videoData.setCreditDTOS(infoDTO.getCredits());
-        }
-
-        try {
-            // store associated entities
-            this.metadataStorageService.storeAssociatedEntities(videoData);
-    
-            // update video data
-            this.metadataStorageService.updateMetaData(videoData);
-            
-            LOG.debug("Scanned NFO data for movie '{}'", videoData.getIdentifier());
-        } catch (Exception error) {
-            // NOTE: status will not be changed
-            if (ExceptionTools.isLockingError(error)) {
-                LOG.warn("Locking error while storing movie {}-'{}'", videoData.getId(), videoData.getIdentifier());
-            } else {
-                LOG.error("Failed storing movie {}-'{}'", videoData.getId(), videoData.getIdentifier());
-                LOG.error("Storage error", error);
-            }
-        }
-    }
-
-    public void scanSerieseNfo(QueueDTO queueElement) {
-        if (queueElement == null) {
-            // nothing to
-            return;
+            // add credit DTOs for update in database
+            videoData.addCreditDTOS(infoDTO.getCredits());
         }
         
-        Series series = metadataStorageService.getSeriesInStep(queueElement.getId(), StepType.NFO);
-        if (series == null) {
-            // step doesn't match
-            return;
-        }        
+        LOG.debug("Scanned NFO data for movie '{}'", videoData.getIdentifier());
+    }
+
+    public void scanSeriese(Series series) {
         LOG.info("Scanning NFO data for series '{}'", series.getIdentifier());
         
         // get the stage files ...
@@ -173,7 +131,10 @@ public class NfoScannerService {
 
         if (!infoDTO.isTvShow()) {
             LOG.warn("NFO's determined movie for tv show: {}", series.getIdentifier());
-        } else if (infoDTO.isChanged()) {
+            return;
+        }
+
+        if (infoDTO.isChanged()) {
 
             // set series IDs
             for (Entry<String,String> entry : infoDTO.getIds().entrySet()) {
@@ -247,23 +208,7 @@ public class NfoScannerService {
             }
         }
 
-        try {
-            // store associated entities
-            this.metadataStorageService.storeAssociatedEntities(series);
-    
-            // update Series
-            this.metadataStorageService.updateMetaData(series);
-    
-            LOG.debug("Scanned NFO data for series '{}'", series.getIdentifier());
-        } catch (Exception error) {
-            // NOTE: status will not be changed
-            if (ExceptionTools.isLockingError(error)) {
-                LOG.warn("Locking error while storing series {}-'{}'", series.getId(), series.getIdentifier());
-            } else {
-                LOG.error("Failed storing series {}-'{}'", series.getId(), series.getIdentifier());
-                LOG.error("Storage error", error);
-            }
-        }
+        LOG.debug("Scanned NFO data for series '{}'", series.getIdentifier());
     }
 
     private InfoDTO scanNFOs(List<StageFile> stageFiles, boolean tvShow) {
@@ -277,32 +222,15 @@ public class NfoScannerService {
                 this.infoReader.readNfoFile(stageFile, infoDTO);
             } catch (Exception ex) {
                 LOG.error("NFO scanning error", ex);
-
+                
                 try {
                     // mark stage file as invalid
                     stageFile.setStatus(StatusType.ERROR);
-                    this.metadataStorageService.update(stageFile);
+                    this.stagingService.updateStageFile(stageFile);
                 } catch (Exception ignore) {}
             }
         }
         
         return infoDTO;
-    }
-    
-    public void processingError(QueueDTO queueElement) {
-        if (queueElement == null) {
-            // nothing to
-            return;
-        }
-
-        // just set next stage
-        // TODO use bulk update for database updates
-        if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
-            VideoData videoData = metadataStorageService.getVideoDataInStep(queueElement.getId(), StepType.NFO);
-            this.metadataStorageService.setNextStep(videoData);
-        } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
-            Series series = metadataStorageService.getSeriesInStep(queueElement.getId(), StepType.NFO);
-            this.metadataStorageService.setNextStep(series);
-        }
     }
 }

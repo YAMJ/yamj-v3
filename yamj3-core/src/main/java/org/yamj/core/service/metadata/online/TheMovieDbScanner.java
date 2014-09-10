@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.plugin;
+package org.yamj.core.service.metadata.online;
 
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
@@ -57,7 +57,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     private static final String WIKIPEDIA_DESCRIPTION_ABOVE = "Description above from the Wikipedia";
     
     @Autowired
-    private PluginMetadataService pluginMetadataService;
+    private OnlineScannerService pluginMetadataService;
     @Autowired
     private ConfigService configService;
     @Autowired
@@ -163,10 +163,6 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
     @Override
     public ScanResult scan(VideoData videoData) {
-        if (videoData.isSkippedOnlineScan(SCANNER_ID)) {
-            return ScanResult.SKIPPED;
-        }
-        
         String tmdbID = getMovieId(videoData);
 
         if (StringUtils.isBlank(tmdbID)) {

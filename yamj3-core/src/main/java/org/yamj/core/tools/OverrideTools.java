@@ -22,6 +22,8 @@
  */
 package org.yamj.core.tools;
 
+import org.yamj.core.service.metadata.online.OnlineScannerService;
+
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +35,6 @@ import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.OverrideFlag;
-import org.yamj.core.service.plugin.PluginMetadataService;
 
 /**
  * Holds some override tools.
@@ -48,10 +49,10 @@ public final class OverrideTools {
     private static final String TYPE_PLUGIN_SERIES = "plugin_series";
     private static final String TYPE_ALTERNATE_MOVIE = "alternate_movie";
     private static final String TYPE_ALTERNATE_SERIES = "alternate_series";
-    private static final String PLUGIN_MOVIE = PluginMetadataService.MOVIE_SCANNER;
-    private static final String PLUGIN_MOVIE_ALT = PluginMetadataService.MOVIE_SCANNER_ALT;
-    private static final String PLUGIN_SERIES = PluginMetadataService.SERIES_SCANNER;
-    private static final String PLUGIN_SERIES_ALT = PluginMetadataService.SERIES_SCANNER_ALT;
+    private static final String PLUGIN_MOVIE = OnlineScannerService.MOVIE_SCANNER;
+    private static final String PLUGIN_MOVIE_ALT = OnlineScannerService.MOVIE_SCANNER_ALT;
+    private static final String PLUGIN_SERIES = OnlineScannerService.SERIES_SCANNER;
+    private static final String PLUGIN_SERIES_ALT = OnlineScannerService.SERIES_SCANNER_ALT;
     private static final Map<OverrideFlag, List<String>> VIDEODATA_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
     private static final Map<OverrideFlag, List<String>> SEASON_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
     private static final Map<OverrideFlag, List<String>> SERIES_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
@@ -100,7 +101,7 @@ public final class OverrideTools {
         sources = PropertyTools.getProperty("priority.videodata.studios", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.STUDIOS, sources);
         sources = PropertyTools.getProperty("priority.series.studios", DEFAULT_PLUGIN_SERIES);
-        putVideodataPriorities(OverrideFlag.STUDIOS, sources);
+        putSeriesPriorities(OverrideFlag.STUDIOS, sources);
         // tagline
         sources = PropertyTools.getProperty("priority.videodata.tagline", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.TAGLINE, sources);
@@ -115,9 +116,9 @@ public final class OverrideTools {
         sources = PropertyTools.getProperty("priority.videodata.year", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.YEAR, sources);
         sources = PropertyTools.getProperty("priority.series.year", DEFAULT_PLUGIN_SERIES);
-        putVideodataPriorities(OverrideFlag.YEAR, sources);
+        putSeriesPriorities(OverrideFlag.YEAR, sources);
         sources = PropertyTools.getProperty("priority.season.year", DEFAULT_PLUGIN_SERIES);
-        putVideodataPriorities(OverrideFlag.YEAR, sources);
+        putSeasonPriorities(OverrideFlag.YEAR, sources);
     }
 
     /**

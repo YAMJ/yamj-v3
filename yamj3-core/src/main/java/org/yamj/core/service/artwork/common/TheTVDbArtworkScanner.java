@@ -22,6 +22,9 @@
  */
 package org.yamj.core.service.artwork.common;
 
+import org.yamj.core.service.metadata.online.TheTVDbApiWrapper;
+import org.yamj.core.service.metadata.online.TheTVDbScanner;
+
 import com.omertron.thetvdbapi.model.Banner;
 import com.omertron.thetvdbapi.model.BannerType;
 import com.omertron.thetvdbapi.model.Banners;
@@ -47,8 +50,6 @@ import org.yamj.core.service.artwork.fanart.ITvShowFanartScanner;
 import org.yamj.core.service.artwork.poster.ITvShowPosterScanner;
 import org.yamj.core.service.artwork.tv.ITvShowBannerScanner;
 import org.yamj.core.service.artwork.tv.ITvShowVideoImageScanner;
-import org.yamj.core.service.plugin.TheTVDbApiWrapper;
-import org.yamj.core.service.plugin.TheTVDbScanner;
 
 @Service("tvdbArtworkScanner")
 public class TheTVDbArtworkScanner implements

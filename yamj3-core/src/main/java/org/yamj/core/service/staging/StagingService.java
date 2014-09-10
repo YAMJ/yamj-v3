@@ -23,7 +23,6 @@
 package org.yamj.core.service.staging;
 
 import java.io.File;
-
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.io.FilenameUtils;
@@ -152,7 +151,6 @@ public class StagingService {
         }
     }
 
-
     @Transactional
     public List<StageFile> getValidNFOFiles(VideoData videoData) {
         // read NFO files for movies
@@ -163,5 +161,10 @@ public class StagingService {
     public List<StageFile> getValidNFOFiles(Series series) {
         // read NFO files for series
         return this.stagingDao.getValidNFOFilesForSeries(series.getId());
+    }
+
+    @Transactional
+    public void updateStageFile(StageFile stageFile) {
+        this.stagingDao.updateEntity(stageFile);
     }
 }

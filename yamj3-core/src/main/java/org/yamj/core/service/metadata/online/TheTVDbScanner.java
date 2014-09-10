@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.plugin;
+package org.yamj.core.service.metadata.online;
 
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
@@ -47,7 +47,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
     private static final Logger LOG = LoggerFactory.getLogger(TheTVDbScanner.class);
 
     @Autowired
-    private PluginMetadataService pluginMetadataService;
+    private OnlineScannerService pluginMetadataService;
     @Autowired
     private TheTVDbApiWrapper tvdbApiWrapper;
 
@@ -80,10 +80,6 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
     @Override
     public ScanResult scan(Series series) {
-        if (series.isSkippedOnlineScan(SCANNER_ID)) {
-            return ScanResult.SKIPPED;
-        }
-
         String id = getSeriesId(series);
 
         if (StringUtils.isBlank(id)) {

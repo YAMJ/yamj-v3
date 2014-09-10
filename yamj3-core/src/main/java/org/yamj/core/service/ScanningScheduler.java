@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service;
 
-import org.yamj.core.database.model.type.StepType;
-
 import java.util.List;
 import java.util.concurrent.*;
 import org.apache.commons.collections.CollectionUtils;
@@ -41,10 +39,8 @@ import org.yamj.core.service.artwork.ArtworkScannerRunner;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.mediainfo.MediaInfoRunner;
 import org.yamj.core.service.mediainfo.MediaInfoService;
-import org.yamj.core.service.nfo.NfoScannerRunner;
-import org.yamj.core.service.nfo.NfoScannerService;
-import org.yamj.core.service.plugin.PluginMetadataRunner;
-import org.yamj.core.service.plugin.PluginMetadataService;
+import org.yamj.core.service.metadata.MetadataScannerRunner;
+import org.yamj.core.service.metadata.MetadataScannerService;
 
 @Service
 public class ScanningScheduler {
@@ -56,7 +52,7 @@ public class ScanningScheduler {
     @Autowired
     private MetadataStorageService metadataStorageService;
     @Autowired
-    private PluginMetadataService pluginMetadataService;
+    private MetadataScannerService metadataScannerService;
     @Autowired
     private ArtworkStorageService artworkStorageService;
     @Autowired
@@ -65,14 +61,11 @@ public class ScanningScheduler {
     private MediaStorageService mediaStorageService;
     @Autowired
     private MediaInfoService mediaInfoService;
-    @Autowired
-    private NfoScannerService nfoScannerService;
     
-    private boolean messageDisabledMediaData = Boolean.FALSE;    // Have we already printed the disabled message
     private boolean messageDisabledMediaFiles = Boolean.FALSE;   // Have we already printed the disabled message
+    private boolean messageDisabledMetaData = Boolean.FALSE;     // Have we already printed the disabled message
     private boolean messageDisabledPeople = Boolean.FALSE;       // Have we already printed the disabled message
     private boolean messageDisabledArtwork = Boolean.FALSE;      // Have we already printed the disabled message
-    private boolean messageDisabledNfo = Boolean.FALSE;          // Have we already printed the disabled message
 
 
     @Scheduled(initialDelay = 5000, fixedDelay = 45000)
@@ -116,31 +109,31 @@ public class ScanningScheduler {
     }
 
     @Scheduled(initialDelay = 10000, fixedDelay = 45000)
-    public void scanMediaDataNfo() throws Exception {
-        int maxThreads = configService.getIntProperty("yamj3.scheduler.nfoscan.maxThreads", 1);
+    public void scanMetaData() throws Exception {
+        int maxThreads = configService.getIntProperty("yamj3.scheduler.metadatascan.maxThreads", 1);
         if (maxThreads <= 0) {
-            if (!messageDisabledNfo) {
-                messageDisabledNfo = Boolean.TRUE;
-                LOG.info("NFO scanning is disabled");
+            if (!messageDisabledMetaData) {
+                messageDisabledMetaData = Boolean.TRUE;
+                LOG.info("Metadata scanning is disabled");
             }
             return;
         } else {
-            messageDisabledNfo = Boolean.FALSE;
+            messageDisabledMetaData = Boolean.FALSE;
         }
 
-        int maxResults = configService.getIntProperty("yamj3.scheduler.nfoscan.maxResults", 20);
-        List<QueueDTO> queueElements = metadataStorageService.getMediaQueueForScanning(maxResults, StepType.NFO);
+        int maxResults = configService.getIntProperty("yamj3.scheduler.metadatascan.maxResults", 20);
+        List<QueueDTO> queueElements = metadataStorageService.getMetaDataQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
-            LOG.debug("No media data found for nfo scan");
+            LOG.debug("No metadata found to scan");
             return;
         }
 
-        LOG.info("Found {} media objects for nfo scan; scan with {} threads", queueElements.size(), maxThreads);
+        LOG.info("Found {} metadata objects to process; scan with {} threads", queueElements.size(), maxThreads);
         BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {
-            NfoScannerRunner worker = new NfoScannerRunner(queue, nfoScannerService);
+            MetadataScannerRunner worker = new MetadataScannerRunner(queue, metadataScannerService);
             executor.execute(worker);
         }
         executor.shutdown();
@@ -152,47 +145,7 @@ public class ScanningScheduler {
             } catch (InterruptedException ignore) {}
         }
 
-        LOG.debug("Finished nfo scanning");
-    }
-
-    @Scheduled(initialDelay = 15000, fixedDelay = 45000)
-    public void scanMediaDataOnline() throws Exception {
-        int maxThreads = configService.getIntProperty("yamj3.scheduler.mediadatascan.maxThreads", 1);
-        if (maxThreads <= 0) {
-            if (!messageDisabledMediaData) {
-                messageDisabledMediaData = Boolean.TRUE;
-                LOG.info("Media data scanning is disabled");
-            }
-            return;
-        } else {
-            messageDisabledMediaData = Boolean.FALSE;
-        }
-
-        int maxResults = configService.getIntProperty("yamj3.scheduler.mediadatascan.maxResults", 20);
-        List<QueueDTO> queueElements = metadataStorageService.getMediaQueueForScanning(maxResults, StepType.ONLINE);
-        if (CollectionUtils.isEmpty(queueElements)) {
-            LOG.debug("No media data found for online scan");
-            return;
-        }
-
-        LOG.info("Found {} media data objects to process; scan with {} threads", queueElements.size(), maxThreads);
-        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
-
-        ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
-        for (int i = 0; i < maxThreads; i++) {
-            PluginMetadataRunner worker = new PluginMetadataRunner(queue, pluginMetadataService);
-            executor.execute(worker);
-        }
-        executor.shutdown();
-
-        // run until all workers have finished
-        while (!executor.isTerminated()) {
-            try {
-                TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ignore) {}
-        }
-
-        LOG.debug("Finished media data scanning");
+        LOG.debug("Finished metadata scanning");
     }
 
     @Scheduled(initialDelay = 20000, fixedDelay = 45000)
@@ -220,7 +173,7 @@ public class ScanningScheduler {
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {
-            PluginMetadataRunner worker = new PluginMetadataRunner(queue, pluginMetadataService);
+            MetadataScannerRunner worker = new MetadataScannerRunner(queue, metadataScannerService);
             executor.execute(worker);
         }
         executor.shutdown();

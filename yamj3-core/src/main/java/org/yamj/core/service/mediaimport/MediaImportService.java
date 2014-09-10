@@ -41,7 +41,6 @@ import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
-import org.yamj.core.database.model.type.StepType;
 import org.yamj.core.service.file.tools.FileTools;
 
 /**
@@ -177,7 +176,6 @@ public class MediaImportService {
                 videoData.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                 videoData.setPublicationYear(dto.getYear(), MEDIA_SOURCE);
                 videoData.setStatus(StatusType.NEW);
-                videoData.setStep(StepType.NFO);
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);
 
@@ -226,7 +224,6 @@ public class MediaImportService {
                             series.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                             series.setSourceDbIdMap(dto.getIdMap());
                             series.setStatus(StatusType.NEW);
-                            series.setStep(StepType.NFO);
                             LOG.debug("Store new series: '{}'", series.getTitle());
                             metadataDao.saveEntity(series);
 
@@ -259,7 +256,6 @@ public class MediaImportService {
                         season.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                         season.setSeries(series);
                         season.setStatus(StatusType.NEW);
-                        season.setStep(StepType.NFO);
                         
                         LOG.debug("Store new seaon: '{}' - Season {}", season.getTitle(), season.getSeason());
                         metadataDao.saveEntity(season);
@@ -296,7 +292,6 @@ public class MediaImportService {
                         videoData.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                     }
                     videoData.setStatus(StatusType.NEW);
-                    videoData.setStep(StepType.NFO);
                     videoData.setSeason(season);
                     videoData.setEpisode(episode);
                     mediaFile.addVideoData(videoData);
@@ -364,6 +359,14 @@ public class MediaImportService {
         StageFile foundNfoFile = this.stagingDao.findNfoFile(searchName, directory);
         if (foundNfoFile != null && !nfoFiles.containsKey(foundNfoFile)) {
             nfoFiles.put(foundNfoFile, Integer.valueOf(1));
+            
+            // change status for PRIO-1-NFO
+            if (FileTools.isFileScannable(foundNfoFile)) {
+                foundNfoFile.setStatus(StatusType.DONE);
+            } else {
+                foundNfoFile.setStatus(StatusType.INVALID);
+            }
+            this.stagingDao.updateEntity(stageFile);
         }
 
         if (isTvShow) {
@@ -490,17 +493,22 @@ public class MediaImportService {
             VideoData videoData = nfoRelation.getVideoData();
             if (videoData.isMovie()) {
                 videoData.setStatus(StatusType.UPDATED);
-                videoData.setStep(StepType.NFO);
+                stagingDao.updateEntity(videoData);
+
+                LOG.debug("Marked movied {}-'{}' as updated", videoData.getId(), videoData.getTitle());
+            } else {
+                videoData.setStatus(StatusType.UPDATED);
+                stagingDao.updateEntity(videoData);
+
+                Season season = videoData.getSeason();
+                season.setStatus(StatusType.UPDATED);
                 stagingDao.updateEntity(videoData);
                 
-                LOG.debug("Marked movie {}-'{}' for NFO scan", videoData.getId(), videoData.getTitle());
-            } else {
-                Series series = videoData.getSeason().getSeries();
+                Series series = season.getSeries();
                 series.setStatus(StatusType.UPDATED);
-                series.setStep(StepType.NFO);
                 stagingDao.updateEntity(series);
                 
-                LOG.debug("Marked series {}-'{}' for NFO scan", series.getId(), series.getTitle());
+                LOG.debug("Marked series {}-'{}' as updated", series.getId(), series.getTitle());
             }
         }
     }

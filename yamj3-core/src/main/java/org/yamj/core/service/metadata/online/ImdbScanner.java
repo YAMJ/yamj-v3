@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.plugin;
+package org.yamj.core.service.metadata.online;
 
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
@@ -40,7 +40,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
     @Autowired
-    private PluginMetadataService pluginMetadataService;
+    private OnlineScannerService pluginMetadataService;
 
     @Override
     public String getScannerName() {
@@ -87,10 +87,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
 
     @Override
     public ScanResult scan(VideoData videoData) {
-        if (videoData.isSkippedOnlineScan(SCANNER_ID)) {
-            return ScanResult.SKIPPED;
-        }
-
         String imdbId = getMovieId(videoData);
         if (StringUtils.isBlank(imdbId)) {
             LOG.debug("IMDb id not available : {}", videoData.getTitle());
@@ -103,10 +99,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
 
     @Override
     public ScanResult scan(Series series) {
-        if (series.isSkippedOnlineScan(SCANNER_ID)) {
-            return ScanResult.SKIPPED;
-        }
-        
         String imdbId = getSeriesId(series);
         if (StringUtils.isBlank(imdbId)) {
             LOG.debug("IMDb id not available: {}", series.getTitle());

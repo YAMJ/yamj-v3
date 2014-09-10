@@ -22,9 +22,6 @@
  */
 package org.yamj.core.database.dao;
 
-import org.hibernate.Query;
-import org.yamj.core.database.model.type.StepType;
-
 import java.util.List;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
@@ -42,15 +39,6 @@ import org.yamj.core.hibernate.HibernateDao;
 
 @Service("commonDao")
 public class CommonDao extends HibernateDao {
-
-    @SuppressWarnings("rawtypes")
-    public List findByIdAndStep(CharSequence queryString, Long id, StepType step) {
-        Query queryObject = getSession().createQuery(queryString.toString());
-        queryObject.setCacheable(true);
-        queryObject.setParameter("id", id);
-        queryObject.setParameter("step", step);
-        return queryObject.list();
-    }
 
     public Genre getGenre(String name) {
         return getByName(Genre.class, name);

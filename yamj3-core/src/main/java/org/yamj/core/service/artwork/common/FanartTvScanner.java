@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.artwork.common;
 
+import org.yamj.core.service.metadata.online.TheMovieDbScanner;
+
 import com.omertron.fanarttvapi.FanartTvApi;
 import com.omertron.fanarttvapi.FanartTvException;
 import com.omertron.fanarttvapi.model.FTArtworkType;
@@ -40,7 +42,6 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
 import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
-import org.yamj.core.service.plugin.TheMovieDbScanner;
 
 @Service("fanartTvArtworkScanner")
 public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner, InitializingBean {

@@ -20,10 +20,13 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.nfo;
+package org.yamj.core.service.metadata.nfo;
+
+import org.yamj.core.service.metadata.online.ImdbScanner;
+import org.yamj.core.service.metadata.online.TheMovieDbScanner;
+import org.yamj.core.service.metadata.online.TheTVDbScanner;
 
 import org.yamj.common.type.StatusType;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,9 +45,6 @@ import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.service.file.tools.FileTools;
-import org.yamj.core.service.plugin.ImdbScanner;
-import org.yamj.core.service.plugin.TheMovieDbScanner;
-import org.yamj.core.service.plugin.TheTVDbScanner;
 import org.yamj.core.service.tools.ServiceDateTimeTools;
 import org.yamj.core.tools.StringTools;
 import org.yamj.core.tools.xml.DOMHelper;

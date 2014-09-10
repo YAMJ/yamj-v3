@@ -20,9 +20,9 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.plugin;
+package org.yamj.core.service.metadata.online;
 
-public interface IPluginDatabaseScanner {
+public interface IOnlineScanner {
 
     String getScannerName();
 }

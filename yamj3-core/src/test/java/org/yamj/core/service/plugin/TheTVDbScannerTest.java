@@ -25,6 +25,9 @@ package org.yamj.core.service.plugin;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+import org.yamj.core.service.metadata.online.ScanResult;
+import org.yamj.core.service.metadata.online.TheTVDbScanner;
+
 import javax.annotation.Resource;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;

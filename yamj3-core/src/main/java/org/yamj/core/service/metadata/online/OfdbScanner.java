@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.plugin;
+package org.yamj.core.service.metadata.online;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -57,7 +57,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     @Autowired
     private PoolingHttpClient httpClient;
     @Autowired
-    private PluginMetadataService pluginMetadataService;
+    private OnlineScannerService pluginMetadataService;
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
     @Autowired
@@ -179,10 +179,6 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
 
     @Override
     public ScanResult scan(VideoData videoData) {
-        if (videoData.isSkippedOnlineScan(SCANNER_ID)) {
-            return ScanResult.SKIPPED;
-        }
-        
         String ofdbUrl = getMovieId(videoData);
 
         if (StringUtils.isBlank(ofdbUrl)) {

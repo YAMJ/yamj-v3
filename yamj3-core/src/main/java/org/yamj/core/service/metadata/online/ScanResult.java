@@ -20,15 +20,14 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.plugin;
+package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.database.model.Person;
+public enum ScanResult {
 
-public interface IPersonScanner extends IPluginDatabaseScanner {
-
-    String getPersonId(Person person);
-
-    String getPersonId(String name);
-
-    ScanResult scan(Person person);
+    MISSING_ID,
+    TYPE_CHANGE,
+    ERROR,
+    SKIPPED,
+    OK,
+    OK_USE_ALTERNATE;
 }

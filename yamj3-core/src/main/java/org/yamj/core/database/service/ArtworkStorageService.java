@@ -142,9 +142,9 @@ public class ArtworkStorageService {
         sql.append("LEFT OUTER JOIN season sea ON sea.id=art.season_id ");
         sql.append("LEFT OUTER JOIN series ser ON ser.id=art.series_id ");
         sql.append("WHERE art.status = 'NEW' ");
-        sql.append("AND (vd.step is null OR vd.step='SCANNED') ");
-        sql.append("AND (sea.step is null OR sea.step='SCANNED') ");
-        sql.append("AND (ser.step is null OR ser.step='SCANNED') ");
+        sql.append("AND (vd.status is null OR vd.status='DONE') ");
+        sql.append("AND (sea.status is null OR sea.status='DONE') ");
+        sql.append("AND (ser.status is null OR ser.status='DONE') ");
 
         return artworkDao.getArtworkQueue(sql, maxResults);
     }

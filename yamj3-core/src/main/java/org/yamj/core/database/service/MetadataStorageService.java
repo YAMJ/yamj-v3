@@ -22,8 +22,6 @@
  */
 package org.yamj.core.database.service;
 
-import org.yamj.core.database.model.type.ArtworkType;
-
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -46,7 +44,7 @@ import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.type.StepType;
+import org.yamj.core.database.model.type.ArtworkType;
 
 @Service("metadataStorageService")
 public class MetadataStorageService {
@@ -64,31 +62,22 @@ public class MetadataStorageService {
         this.commonDao.saveEntity(entity);
     }
 
-    @Transactional
-    public void update(Object entity) {
-        this.commonDao.updateEntity(entity);
-    }
-
     @Transactional(readOnly = true)
-    public List<QueueDTO> getMediaQueueForScanning(final int maxResults, StepType step) {
+    public List<QueueDTO> getMetaDataQueueForScanning(final int maxResults) {
         final StringBuilder sql = new StringBuilder();
         sql.append("select vd.id,'");
         sql.append(MetaDataType.MOVIE);
         sql.append("' as mediatype,vd.create_timestamp,vd.update_timestamp ");
         sql.append("from videodata vd ");
         sql.append("where vd.status in ('NEW','UPDATED') ");
-        sql.append("and vd.step='");
-        sql.append(step.name());
-        sql.append("' and vd.episode<0 ");
+        sql.append("and vd.episode<0 ");
         sql.append("union ");
         sql.append("select ser.id,'");
         sql.append(MetaDataType.SERIES);
         sql.append("' as mediatype,ser.create_timestamp,ser.update_timestamp ");
         sql.append("from series ser, season sea, videodata vd ");
         sql.append("where ser.id=sea.series_id ");
-        sql.append("and ser.step='");
-        sql.append(step.name());
-        sql.append("' and sea.id=vd.season_id ");
+        sql.append("and sea.id=vd.season_id ");
         sql.append("and (ser.status in ('NEW','UPDATED') ");
         sql.append(" or  (ser.status='DONE' and sea.status in ('NEW','UPDATED')) ");
         sql.append(" or  (ser.status='DONE' and vd.status in  ('NEW','UPDATED'))) ");
@@ -109,7 +98,7 @@ public class MetadataStorageService {
     }
 
     @Transactional(readOnly = true)
-    public VideoData getVideoDataInStep(Long id, StepType step) {
+    public VideoData getRequiredVideoData(Long id) {
         final StringBuilder sb = new StringBuilder();
         sb.append("from VideoData vd ");
         sb.append("left outer join fetch vd.credits ");
@@ -117,15 +106,14 @@ public class MetadataStorageService {
         sb.append("left outer join fetch vd.studios ");
         sb.append("left outer join fetch vd.boxedSets ");
         sb.append("where vd.id = :id ");
-        sb.append("and vd.step = :step ");
         
         @SuppressWarnings("unchecked")
-        List<VideoData> objects = this.commonDao.findByIdAndStep(sb, id, step);
-        return DataAccessUtils.uniqueResult(objects);
+        List<VideoData> objects = this.commonDao.findById(sb, id);
+        return DataAccessUtils.requiredUniqueResult(objects);
     }
 
     @Transactional(readOnly = true)
-    public Series getSeriesInStep(Long id, StepType step) {
+    public Series getRequiredSeries(Long id) {
         final StringBuilder sb = new StringBuilder();
         sb.append("from Series ser ");
         sb.append("join fetch ser.seasons sea ");
@@ -137,11 +125,10 @@ public class MetadataStorageService {
         sb.append("left outer join fetch ser.genres ");
         sb.append("left outer join fetch ser.studios ");
         sb.append("where ser.id = :id ");
-        sb.append("and ser.step = :step ");
 
         @SuppressWarnings("unchecked")
-        List<Series> objects = this.commonDao.findByIdAndStep(sb, id, step);
-        return DataAccessUtils.uniqueResult(objects);
+        List<Series> objects = this.commonDao.findById(sb, id);
+        return DataAccessUtils.requiredUniqueResult(objects);
     }
 
     @Transactional(readOnly = true)
@@ -263,13 +250,9 @@ public class MetadataStorageService {
 
     @Transactional
     public void updateMetaData(VideoData videoData) {
-        StepType actualStep = videoData.getStep();
-        this.updateMetaData(videoData, actualStep);
-    }
-
-    private void updateMetaData(VideoData videoData, StepType actualStep) {
-        // set next step
-        videoData.setNextStep(actualStep);
+        if (StatusType.WAIT.equals(videoData.getStatus())) {
+            videoData.setStatus(StatusType.DONE);
+        }
         
         // update entity
         metadataDao.updateEntity(videoData);
@@ -287,27 +270,8 @@ public class MetadataStorageService {
         updateBoxedSets(videoData);
     }
 
-    /**
-     * Set the next step in processing
-     * 
-     * @param videoData
-     */
-    @Transactional
-    public void setNextStep(VideoData videoData) {
-        if (videoData == null) return;
-        
-        StepType actualStep = videoData.getStep();
-        videoData.setNextStep(actualStep);
-        metadataDao.updateEntity(videoData);
-    }
-
     @Transactional
     public void updateMetaData(Series series) {
-        // get actual step
-        StepType actualStep = series.getStep(); 
-        // set next step
-        series.setNextStep(actualStep);
-        
         // update entity
         metadataDao.updateEntity(series);
 
@@ -319,35 +283,13 @@ public class MetadataStorageService {
 
         // update underlying seasons and episodes
         for (Season season : series.getSeasons()) {
-            season.setNextStep(actualStep);
-            metadataDao.updateEntity(season);
-
-            for (VideoData videoData : season.getVideoDatas()) {
-                updateMetaData(videoData, actualStep);
+            if (StatusType.WAIT.equals(season.getStatus())) {
+                season.setStatus(StatusType.DONE);
             }
-        }
-    }
-
-    /**
-     * Set the next step in processing
-     * 
-     * @param series
-     */
-    public void setNextStep(Series series) {
-        if (series == null) return;
-        
-        StepType actualStep = series.getStep();
-        series.setNextStep(actualStep);
-        metadataDao.updateEntity(series);
-
-        // update underlying seasons and episodes
-        for (Season season : series.getSeasons()) {
-            season.setNextStep(actualStep);
             metadataDao.updateEntity(season);
 
             for (VideoData videoData : season.getVideoDatas()) {
-                videoData.setNextStep(actualStep);
-                metadataDao.updateEntity(videoData);
+                updateMetaData(videoData);
             }
         }
     }

@@ -26,6 +26,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.yamj.core.service.metadata.online.OfdbScanner;
+
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.VideoData;
 import javax.annotation.Resource;

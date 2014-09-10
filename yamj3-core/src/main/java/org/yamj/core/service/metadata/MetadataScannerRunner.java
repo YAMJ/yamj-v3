@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.plugin;
+package org.yamj.core.service.metadata;
 
 import java.util.concurrent.BlockingQueue;
 import org.slf4j.Logger;
@@ -28,13 +28,14 @@ import org.slf4j.LoggerFactory;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.dto.QueueDTO;
 
-public class PluginMetadataRunner implements Runnable {
+public class MetadataScannerRunner implements Runnable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PluginMetadataRunner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MetadataScannerRunner.class);
+    
     private final BlockingQueue<QueueDTO> queue;
-    private final PluginMetadataService service;
+    private final MetadataScannerService service;
 
-    public PluginMetadataRunner(BlockingQueue<QueueDTO> queue, PluginMetadataService service) {
+    public MetadataScannerRunner(BlockingQueue<QueueDTO> queue, MetadataScannerService service) {
         this.queue = queue;
         this.service = service;
     }
@@ -55,7 +56,7 @@ public class PluginMetadataRunner implements Runnable {
                     LOG.error("No valid element for scanning metadata '{}'", queueElement);
                 }
             } catch (Exception error) {
-                LOG.error("Failed online scan for {}-{}", queueElement.getId(), queueElement.getMetadataType());
+                LOG.error("Failed metadata scan for {}-{}", queueElement.getId(), queueElement.getMetadataType());
                 LOG.error("Scanning error", error);
                 try {
                     service.processingError(queueElement);

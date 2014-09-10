@@ -20,15 +20,15 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.plugin;
+package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.Person;
 
-public interface IMovieScanner extends IPluginDatabaseScanner {
+public interface IPersonScanner extends IOnlineScanner {
 
-    String getMovieId(VideoData videoData);
+    String getPersonId(Person person);
 
-    String getMovieId(String title, int year);
+    String getPersonId(String name);
 
-    ScanResult scan(VideoData videoData);
+    ScanResult scan(Person person);
 }

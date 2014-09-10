@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.nfo;
+package org.yamj.core.service.metadata.nfo;
 
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;

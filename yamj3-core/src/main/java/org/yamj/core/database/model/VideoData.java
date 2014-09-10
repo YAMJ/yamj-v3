@@ -144,7 +144,6 @@ public class VideoData extends AbstractMetadata {
     @Transient
     private Set<CreditDTO> creditDTOS = new LinkedHashSet<CreditDTO>(0);
     
-    
     @Transient
     private Set<String> genreNames = new LinkedHashSet<String>(0);
     

@@ -20,14 +20,15 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.plugin;
+package org.yamj.core.service.metadata.online;
 
-public enum ScanResult {
+import org.yamj.core.database.model.Series;
 
-    MISSING_ID,
-    TYPE_CHANGE,
-    ERROR,
-    SKIPPED,
-    OK,
-    OK_USE_ALTERNATE;
+public interface ISeriesScanner extends IOnlineScanner {
+
+    String getSeriesId(Series series);
+
+    String getSeriesId(String title, int year);
+
+    ScanResult scan(Series series);
 }

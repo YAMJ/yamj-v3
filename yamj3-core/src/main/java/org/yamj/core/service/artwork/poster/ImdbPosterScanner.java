@@ -22,6 +22,9 @@
  */
 package org.yamj.core.service.artwork.poster;
 
+import org.yamj.core.service.metadata.online.ImdbScanner;
+import org.yamj.core.service.metadata.online.ImdbSearchEngine;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -32,8 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
-import org.yamj.core.service.plugin.ImdbScanner;
-import org.yamj.core.service.plugin.ImdbSearchEngine;
 import org.yamj.core.tools.web.PoolingHttpClient;
 
 @Service("imdbPosterScanner")
