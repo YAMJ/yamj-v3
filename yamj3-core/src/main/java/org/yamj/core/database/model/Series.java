@@ -229,7 +229,6 @@ public class Series extends AbstractMetadata {
         this.artworks = artworks;
     }
 
-    @Override
     public Set<Genre> getGenres() {
         return genres;
     }

@@ -22,10 +22,7 @@
  */
 package org.yamj.core.tools;
 
-import org.yamj.core.service.metadata.online.OnlineScannerService;
-
 import java.util.*;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +32,7 @@ import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.OverrideFlag;
+import org.yamj.core.service.metadata.online.OnlineScannerService;
 
 /**
  * Holds some override tools.
@@ -308,8 +306,6 @@ public final class OverrideTools {
         if (skipCheck(metadata, OverrideFlag.GENRES, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (CollectionUtils.isEmpty(metadata.getGenres())) {
-            return Boolean.TRUE;
         }
         return checkOverwrite(metadata, OverrideFlag.GENRES, source);
     }
@@ -318,8 +314,6 @@ public final class OverrideTools {
         if (skipCheck(metadata, OverrideFlag.STUDIOS, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (CollectionUtils.isEmpty(metadata.getStudios())) {
-            return Boolean.TRUE;
         }
         return checkOverwrite(metadata, OverrideFlag.STUDIOS, source);
     }

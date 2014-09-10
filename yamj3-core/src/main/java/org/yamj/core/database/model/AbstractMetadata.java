@@ -23,7 +23,6 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
@@ -204,8 +203,4 @@ public abstract class AbstractMetadata extends AbstractAuditable
     public abstract String getOverrideSource(OverrideFlag overrideFlag);
 
     public abstract void setOverrideFlag(OverrideFlag overrideFlag, String source);
-    
-    public abstract Set<Genre> getGenres();
-
-    public abstract Set<Studio> getStudios();
 }

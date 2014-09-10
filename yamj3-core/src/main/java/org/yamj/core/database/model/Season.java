@@ -22,17 +22,7 @@
  */
 package org.yamj.core.database.model;
 
-import javax.persistence.Column;
-import org.hibernate.annotations.Index;
-
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.ArrayList;
-import java.util.List;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-
 import java.util.*;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
@@ -239,18 +229,6 @@ public class Season extends AbstractMetadata {
     @Override
     public int getSeasonNumber() {
         return season;
-    }
-
-    @Override
-    public Set<Genre> getGenres() {
-        // no genres in season
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Set<Studio> getStudios() {
-        // no studios in season
-        return Collections.emptySet();
     }
 
     @Override
