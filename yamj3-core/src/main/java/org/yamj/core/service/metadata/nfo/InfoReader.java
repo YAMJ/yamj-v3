@@ -494,7 +494,7 @@ public final class InfoReader {
                 String certCountry = null;
                 String preferredCountry = this.configService.getProperty("yamj3.scan.preferredCountry", "USA");
                 int countryPos = tempCert.lastIndexOf(preferredCountry);
-                if (countryPos > 0) {
+                if (countryPos >= 0) {
                     // We've found the country, so extract just that tag
                     tempCert = tempCert.substring(countryPos);
                     int pos = tempCert.indexOf(':');
