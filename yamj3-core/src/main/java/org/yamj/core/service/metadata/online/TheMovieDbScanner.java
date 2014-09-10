@@ -57,7 +57,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     private static final String WIKIPEDIA_DESCRIPTION_ABOVE = "Description above from the Wikipedia";
     
     @Autowired
-    private OnlineScannerService pluginMetadataService;
+    private OnlineScannerService onlineScannerService;
     @Autowired
     private ConfigService configService;
     @Autowired
@@ -71,8 +71,8 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
     @Override
     public void afterPropertiesSet() {
         // register this scanner
-        pluginMetadataService.registerMovieScanner(this);
-        pluginMetadataService.registerPersonScanner(this);
+        onlineScannerService.registerMovieScanner(this);
+        onlineScannerService.registerPersonScanner(this);
     }
 
     @Override

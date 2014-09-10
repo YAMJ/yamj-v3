@@ -47,7 +47,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
     private static final Logger LOG = LoggerFactory.getLogger(TheTVDbScanner.class);
 
     @Autowired
-    private OnlineScannerService pluginMetadataService;
+    private OnlineScannerService onlineScannerService;
     @Autowired
     private TheTVDbApiWrapper tvdbApiWrapper;
 
@@ -59,7 +59,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         // register this scanner
-        pluginMetadataService.registerSeriesScanner(this);
+        onlineScannerService.registerSeriesScanner(this);
     }
 
     @Override

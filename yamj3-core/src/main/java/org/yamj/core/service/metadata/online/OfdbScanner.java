@@ -57,7 +57,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     @Autowired
     private PoolingHttpClient httpClient;
     @Autowired
-    private OnlineScannerService pluginMetadataService;
+    private OnlineScannerService onlineScannerService;
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
     @Autowired
@@ -73,7 +73,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
         searchEngineTools = new SearchEngineTools(httpClient, "de");
 
         // register this scanner
-        pluginMetadataService.registerMovieScanner(this);
+        onlineScannerService.registerMovieScanner(this);
     }
 
     @Override
