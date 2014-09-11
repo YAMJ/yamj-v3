@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.tools;
+package org.yamj.core.service.metadata.tools;
 
 import java.util.Calendar;
 
@@ -33,13 +33,13 @@ import org.pojava.datetime.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class ServiceDateTimeTools {
+public final class MetadataDateTimeTools {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ServiceDateTimeTools.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MetadataDateTimeTools.class);
     private static final Pattern DATE_COUNTRY = Pattern.compile("(.*)(\\s*?\\(\\w*\\))");
     private static final Pattern YEAR_PATTERN = Pattern.compile("(?:.*?)(\\d{4})(?:.*?)");
 
-    private ServiceDateTimeTools() {
+    private MetadataDateTimeTools() {
         throw new UnsupportedOperationException("Class cannot be instantiated");
     }
 
@@ -196,14 +196,21 @@ public final class ServiceDateTimeTools {
      * @return
      */
     public static int extractYearAsInt(String date) {
-        int year = 0;
+        if (StringUtils.isBlank(date))  {
+            return -1;
+        }
+        if (StringUtils.isNumeric(date) && (date.length()==4)) {
+            try {
+                return Integer.parseInt(date);
+            } catch (Exception ignore) {}
+        }
+
+        int year = -1;
         Matcher m = YEAR_PATTERN.matcher(date);
         if (m.find()) {
             year = Integer.valueOf(m.group(1)).intValue();
         }
 
-        // Give up and return 0
         return year;
     }
-
 }

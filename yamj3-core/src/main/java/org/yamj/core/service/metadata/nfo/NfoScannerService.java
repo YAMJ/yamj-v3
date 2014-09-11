@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
+import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
+
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -36,7 +38,6 @@ import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.staging.StagingService;
-import org.yamj.core.service.tools.ServiceDateTimeTools;
 import org.yamj.core.tools.OverrideTools;
 
 @Service("nfoScannerService")
@@ -176,7 +177,7 @@ public class NfoScannerService {
 
                 if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
                     Date seasonYear = infoDTO.getSeasonYear(season.getSeason());
-                    season.setPublicationYear(ServiceDateTimeTools.extractYearAsInt(seasonYear), SCANNER_ID);
+                    season.setPublicationYear(MetadataDateTimeTools.extractYearAsInt(seasonYear), SCANNER_ID);
                 }
 
                 // mark season as scanned

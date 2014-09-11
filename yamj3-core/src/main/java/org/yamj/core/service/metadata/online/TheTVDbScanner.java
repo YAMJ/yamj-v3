@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
+
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
 import java.util.*;
@@ -37,7 +39,6 @@ import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
-import org.yamj.core.service.tools.ServiceDateTimeTools;
 import org.yamj.core.tools.OverrideTools;
 
 @Service("tvdbScanner")
@@ -107,7 +108,6 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             series.setGenreNames(new HashSet<String>(tvdbSeries.getGenres()), SCANNER_ID);
         }
 
-        // TODO more values
         if (StringUtils.isNumeric(tvdbSeries.getRating())) {
             try {
                 series.addRating(SCANNER_ID, (int) (Float.parseFloat(tvdbSeries.getRating()) * 10));
@@ -149,38 +149,34 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
 
         for (Season season : series.getSeasons()) {
 
-            // update season values if not done before
-            if (season.isScannableTvSeason()) {
-
-                // use values from series
-                if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
-                    season.setTitle(StringUtils.trim(tvdbSeries.getSeriesName()), SCANNER_ID);
-                }
-
-                if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
-                    season.setPlot(StringUtils.trim(tvdbSeries.getOverview()), SCANNER_ID);
-                }
-
-                if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
-                    season.setOutline(StringUtils.trim(tvdbSeries.getOverview()), SCANNER_ID);
-                }
-
-                if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
-                    // get season year from minimal first aired of episodes
-                    String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
-                    Date year = this.getSeasonYear(seriesId, season.getSeasonNumber());
-                    if (year == null) {
-                        // try first aired from series as fall-back
-                        if (StringUtils.isNotBlank(tvdbSeries.getFirstAired())) {
-                            year = ServiceDateTimeTools.parseToDate(tvdbSeries.getFirstAired().trim());
-                        }
-                    }
-                    season.setPublicationYear(ServiceDateTimeTools.extractYearAsInt(year), SCANNER_ID);
-                }
-
-                // mark as scanned
-                season.setTvSeasonScanned();
+            // use values from series
+            if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
+                season.setTitle(StringUtils.trim(tvdbSeries.getSeriesName()), SCANNER_ID);
             }
+
+            if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
+                season.setPlot(StringUtils.trim(tvdbSeries.getOverview()), SCANNER_ID);
+            }
+
+            if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
+                season.setOutline(StringUtils.trim(tvdbSeries.getOverview()), SCANNER_ID);
+            }
+
+            if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
+                // get season year from minimal first aired of episodes
+                String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
+                Date year = this.getSeasonYear(seriesId, season.getSeasonNumber());
+                if (year == null) {
+                    // try first aired from series as fall-back
+                    if (StringUtils.isNotBlank(tvdbSeries.getFirstAired())) {
+                        year = MetadataDateTimeTools.parseToDate(tvdbSeries.getFirstAired().trim());
+                    }
+                }
+                season.setPublicationYear(MetadataDateTimeTools.extractYearAsInt(year), SCANNER_ID);
+            }
+
+            // mark as scanned
+            season.setTvSeasonScanned();
 
             // scan episodes
             this.scanEpisodes(season, actors);
@@ -196,7 +192,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         Date yearDate = null;
         for (Episode episode : episodeList) {
             if (StringUtils.isNotBlank(episode.getFirstAired())) {
-                Date parsedDate = ServiceDateTimeTools.parseToDate(episode.getFirstAired().trim());
+                Date parsedDate = MetadataDateTimeTools.parseToDate(episode.getFirstAired().trim());
                 if (parsedDate != null) {
                     if (yearDate == null) {
                         yearDate = parsedDate;
@@ -214,17 +210,10 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             return;
         }
 
-        // get episodes to scan
-        List<VideoData> videoDatas = season.getScannableTvEpisodes();
-        if (CollectionUtils.isEmpty(videoDatas)) {
-            // nothing to do anymore
-            return;
-        }
-
         String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
         List<Episode> episodeList = tvdbApiWrapper.getSeasonEpisodes(seriesId, season.getSeason());
 
-        for (VideoData videoData : videoDatas) {
+        for (VideoData videoData : season.getVideoDatas()) {
 
             Episode episode = this.findEpisode(episodeList, season.getSeason(), videoData.getEpisode());
             if (episode == null) {
@@ -245,7 +234,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                 }
 
                 if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-                    Date releaseDate = ServiceDateTimeTools.parseToDate(episode.getFirstAired());
+                    Date releaseDate = MetadataDateTimeTools.parseToDate(episode.getFirstAired());
                     videoData.setReleaseDate(releaseDate, SCANNER_ID);
                 }
 

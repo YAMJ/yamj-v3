@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
+import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
+
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.dto.CreditDTO;
@@ -146,11 +148,10 @@ public final class InfoDTO {
     }
 
     public void setYear(String year) {
-        if (StringUtils.isNumeric(year) && year.length() == 4) {
-            try {
-                this.year = Integer.parseInt(year);
-                this.changed = true;
-            } catch (Exception ignore) {}
+        int testYear = MetadataDateTimeTools.extractYearAsInt(year);
+        if (testYear > 0)  {
+            this.year = testYear;
+            this.changed = true;
         }
     }
     

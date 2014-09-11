@@ -22,10 +22,11 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
+import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
+
 import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 import org.yamj.core.service.metadata.online.TheTVDbScanner;
-
 import org.yamj.common.type.StatusType;
 import java.io.File;
 import java.util.ArrayList;
@@ -45,7 +46,6 @@ import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.service.file.tools.FileTools;
-import org.yamj.core.service.tools.ServiceDateTimeTools;
 import org.yamj.core.tools.StringTools;
 import org.yamj.core.tools.xml.DOMHelper;
 
@@ -560,10 +560,10 @@ public final class InfoReader {
      * @param parseDate
      */
     public void movieDate(final String dateString, InfoDTO dto, String nfoFilename) {
-        Date releaseDate = ServiceDateTimeTools.parseToDate(dateString);
+        Date releaseDate = MetadataDateTimeTools.parseToDate(dateString);
         if (releaseDate != null) {
             dto.setReleaseDate(releaseDate);
-            dto.setYear(ServiceDateTimeTools.extractYearAsString(releaseDate));
+            dto.setYear(MetadataDateTimeTools.extractYearAsString(releaseDate));
         }
     }
 
@@ -759,7 +759,7 @@ public final class InfoReader {
         tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "aired");
         if (StringUtils.isNotBlank(tempValue)) {
             try {
-                episodeDTO.setFirstAired(ServiceDateTimeTools.parseToDate(tempValue.trim()));
+                episodeDTO.setFirstAired(MetadataDateTimeTools.parseToDate(tempValue.trim()));
             } catch (Exception ignore) {}
         }
 

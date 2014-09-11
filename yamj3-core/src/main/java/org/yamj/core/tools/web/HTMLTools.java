@@ -433,6 +433,10 @@ public final class HTMLTools {
 
     public static List<String> extractHtmlTags(String src, String sectionStart, String sectionEnd, String startTag, String endTag) {
         ArrayList<String> tags = new ArrayList<String>();
+        if (src == null) {
+            return tags;
+        }
+
         int index = src.indexOf(sectionStart);
         if (index == -1) {
             return tags;
@@ -485,6 +489,10 @@ public final class HTMLTools {
     }
 
     public static String extractTag(String src, String findStr, int skip, String separator, boolean checkDirty) {
+        if (src == null) {
+            return StringUtils.EMPTY;
+        }
+
         int beginIndex = src.indexOf(findStr);
 
         String value = StringUtils.EMPTY;
@@ -506,8 +514,11 @@ public final class HTMLTools {
     }
 
     public static String extractTag(String src, String startStr, String endStr) {
+        if (src == null) {
+            return StringUtils.EMPTY;
+        }
+        
         int beginIndex = src.indexOf(startStr);
-
         if (beginIndex < 0) {
             return StringUtils.EMPTY;
         }
@@ -539,6 +550,10 @@ public final class HTMLTools {
 
     public static List<String> extractTags(String src, String sectionStart, String sectionEnd, String startTag, String endTag, boolean forceCloseTag) {
         ArrayList<String> tags = new ArrayList<String>();
+        if (src == null) {
+            return tags;
+        }
+
         int startIndex = src.indexOf(sectionStart);
         if (startIndex == -1) {
             return tags;
@@ -606,10 +621,15 @@ public final class HTMLTools {
      * @return string from html text which is plain text without html tags
      */
     public static String getTextAfterElem(String src, String findStr, int skip, int fromIndex) {
+        if (src == null) {
+            return StringUtils.EMPTY;
+        }
+
         int beginIndex = src.indexOf(findStr, fromIndex);
         if (beginIndex == -1) {
             return StringUtils.EMPTY;
         }
+        
         StringTokenizer st = new StringTokenizer(src.substring(beginIndex + findStr.length()), "<");
         int i = 0;
         while (st.hasMoreElements()) {
@@ -631,6 +651,10 @@ public final class HTMLTools {
     }
 
     public static String replaceHtmlTags(String src, String replacement) {
+        if (src == null) {
+            return StringUtils.EMPTY;
+        }
+
         return src.replaceAll("\\<.*?>", replacement);
     }
 

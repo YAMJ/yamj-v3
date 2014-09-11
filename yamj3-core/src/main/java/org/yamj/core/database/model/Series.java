@@ -125,7 +125,7 @@ public class Series extends AbstractMetadata {
     }
 
     public void setStartYear(int startYear, String source) {
-        if (startYear >= 0) {
+        if (startYear > 0) {
             this.startYear = startYear;
             setOverrideFlag(OverrideFlag.YEAR, source);
         }
@@ -140,7 +140,7 @@ public class Series extends AbstractMetadata {
     }
 
     public void setEndYear(int endYear, String source) {
-        if (endYear >= 0) {
+        if (endYear > 0) {
             this.endYear = endYear;
             setOverrideFlag(OverrideFlag.YEAR, source);
         }

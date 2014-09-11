@@ -31,7 +31,6 @@ public enum StatusType {
     NOTFOUND,       // something hasn't been found
     INVALID,        // invalid record
     DUPLICATE,      // duplicate record
-    WAIT,           // waiting state
     DONE;           // all is done
     
     public static StatusType fromString(String type) {

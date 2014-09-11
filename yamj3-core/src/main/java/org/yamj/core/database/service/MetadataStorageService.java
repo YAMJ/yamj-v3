@@ -250,10 +250,6 @@ public class MetadataStorageService {
 
     @Transactional
     public void updateMetaData(VideoData videoData) {
-        if (StatusType.WAIT.equals(videoData.getStatus())) {
-            videoData.setStatus(StatusType.DONE);
-        }
-        
         // update entity
         metadataDao.updateEntity(videoData);
 
@@ -286,9 +282,6 @@ public class MetadataStorageService {
 
         // update underlying seasons and episodes
         for (Season season : series.getSeasons()) {
-            if (StatusType.WAIT.equals(season.getStatus())) {
-                season.setStatus(StatusType.DONE);
-            }
             metadataDao.updateEntity(season);
 
             for (VideoData videoData : season.getVideoDatas()) {

@@ -200,30 +200,9 @@ public class Season extends AbstractMetadata {
     }
 
     // TV CHECKS
-    @JsonIgnore
-    public List<VideoData> getScannableTvEpisodes() {
-        List<VideoData> episodes = new ArrayList<VideoData>();
-        for (VideoData videoData : getVideoDatas()) {
-            if (videoData.isScannableTvEpisode()) {
-                episodes.add(videoData);
-            }
-        }
-        return episodes;
-    }
-
-    public boolean isScannableTvSeason() {
-        if (StatusType.DONE.equals(this.getStatus())) {
-            return false;
-        }
-        return true;
-    }
 
     public void setTvSeasonScanned() {
-        this.setStatus(StatusType.WAIT);
-    }
-
-    public void setTvSeasonNotFound() {
-        this.setStatus(StatusType.NOTFOUND);
+        this.setStatus(StatusType.DONE);
     }
 
     @Override

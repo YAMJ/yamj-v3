@@ -487,6 +487,12 @@ public class VideoData extends AbstractMetadata {
         return certificationInfos;
     }
 
+    public void addCertificationInfo(String country, String certification) {
+        if (StringUtils.isNotBlank(country) && StringUtils.isNotBlank(certification)) {
+            this.certificationInfos.put(country, certification);
+        }
+    }
+
     public void addCertificationInfos(Map<String,String> certificationInfos) {
         if (MapUtils.isNotEmpty(certificationInfos)) {
             this.certificationInfos.putAll(certificationInfos);
@@ -495,20 +501,15 @@ public class VideoData extends AbstractMetadata {
 
     // TV CHECKS
     
-    public boolean isScannableTvEpisode() {
-        if (StatusType.DONE.equals(this.getStatus())) {
-            return false;
-        } else if (this.getEpisode() < 0) {
-            return false;
-        }
-        return true;
-    }
-
     public void setTvEpisodeScanned() {
-        this.setStatus(StatusType.WAIT);
+        this.setStatus(StatusType.DONE);
     }
 
     public void setTvEpisodeNotFound() {
+        if (StatusType.DONE.equals(this.getStatus())) {
+            // do not reset done
+            return;
+        }
         this.setStatus(StatusType.NOTFOUND);
     }
 

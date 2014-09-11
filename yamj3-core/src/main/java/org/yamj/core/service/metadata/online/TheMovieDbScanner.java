@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
+
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.model.MovieDb;
@@ -45,7 +47,6 @@ import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
-import org.yamj.core.service.tools.ServiceDateTimeTools;
 import org.yamj.core.tools.OverrideTools;
 
 @Service("tmdbScanner")
@@ -220,13 +221,13 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
         String releaseDateString = moviedb.getReleaseDate();
         if (StringUtils.isNotBlank(releaseDateString) && !"1900-01-01".equals(releaseDateString)) {
-            Date releaseDate = ServiceDateTimeTools.parseToDate(releaseDateString);
+            Date releaseDate = MetadataDateTimeTools.parseToDate(releaseDateString);
             if (releaseDate != null) {
                 if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
                     videoData.setReleaseDate(releaseDate, SCANNER_ID);
                 }
                 if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID)) {
-                    videoData.setPublicationYear(ServiceDateTimeTools.extractYearAsInt(releaseDate), SCANNER_ID);
+                    videoData.setPublicationYear(MetadataDateTimeTools.extractYearAsInt(releaseDate), SCANNER_ID);
                 }
             }
         }
@@ -377,12 +378,12 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             person.setBirthPlace(StringUtils.trimToNull(tmdbPerson.getBirthplace()));
             person.setBiography(cleanBiography(tmdbPerson.getBiography()));
 
-            Date parsedDate = ServiceDateTimeTools.parseToDate(tmdbPerson.getBirthday());
+            Date parsedDate = MetadataDateTimeTools.parseToDate(tmdbPerson.getBirthday());
             if (parsedDate != null) {
                 person.setBirthDay(parsedDate);
             }
             
-            parsedDate = ServiceDateTimeTools.parseToDate(tmdbPerson.getDeathday());
+            parsedDate = MetadataDateTimeTools.parseToDate(tmdbPerson.getDeathday());
             if (parsedDate != null) {
                 person.setDeathDay(parsedDate);
             }

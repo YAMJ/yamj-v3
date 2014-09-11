@@ -31,4 +31,10 @@
         <constructor-arg index="1" ref="poolingHttpClient"/>
     </bean>
 
+    <bean id="allocineApi" class="com.moviejukebox.allocine.AllocineApi">
+        <constructor-arg index="0" value="${APIKEY.allocine.partnerKey}"/>
+        <constructor-arg index="1" value="${APIKEY.allocine.secretKey}"/>
+        <constructor-arg index="2" ref="poolingHttpClient"/>
+    </bean>
+
 </beans>
