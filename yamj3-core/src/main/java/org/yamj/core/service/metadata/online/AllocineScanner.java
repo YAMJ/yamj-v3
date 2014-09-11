@@ -150,13 +150,11 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, Initializ
         }
             
         if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-            String plot = StringUtils.trimToNull(HTMLTools.removeHtmlTags(movieInfos.getSynopsis()));
-            videoData.setPlot(plot, SCANNER_ID);
+            videoData.setPlot(movieInfos.getSynopsis(), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-            String outline = StringUtils.trimToNull(HTMLTools.removeHtmlTags(movieInfos.getSynopsisShort()));
-            videoData.setOutline(outline, SCANNER_ID);
+            videoData.setOutline(movieInfos.getSynopsisShort(), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
@@ -290,13 +288,11 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, Initializ
         }
 
         if (OverrideTools.checkOverwritePlot(series, SCANNER_ID)) {
-            String plot = StringUtils.trimToNull(HTMLTools.removeHtmlTags(tvSeriesInfos.getSynopsis()));
-            series.setPlot(plot, SCANNER_ID);
+            series.setPlot(tvSeriesInfos.getSynopsis(), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteOutline(series, SCANNER_ID)) {
-            String outline = StringUtils.trimToNull(HTMLTools.removeHtmlTags(tvSeriesInfos.getSynopsisShort()));
-            series.setOutline(outline, SCANNER_ID);
+            series.setOutline(tvSeriesInfos.getSynopsisShort(), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
@@ -366,7 +362,11 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, Initializ
             }
 
             if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
-                season.setPlot(StringUtils.trim(tvSeriesInfos.getSynopsis()), SCANNER_ID);
+                season.setPlot(tvSeriesInfos.getSynopsis(), SCANNER_ID);
+            }
+
+            if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
+                season.setOutline(tvSeriesInfos.getSynopsisShort(), SCANNER_ID);
             }
 
             if (tvSeasonInfos != null && tvSeasonInfos.isValid()) {
