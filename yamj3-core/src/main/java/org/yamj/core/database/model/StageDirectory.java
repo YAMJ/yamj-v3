@@ -47,7 +47,7 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
     @Column(name = "directory_date", nullable = false)
     private Date directoryDate;
 
-    @Column(name = "directory_name", nullable = false, length = 100)
+    @Column(name = "directory_name", nullable = false, length = 255)
     private String directoryName;
     
     @NaturalId
