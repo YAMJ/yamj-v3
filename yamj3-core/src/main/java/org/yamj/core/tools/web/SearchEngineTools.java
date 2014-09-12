@@ -23,18 +23,29 @@
 package org.yamj.core.tools.web;
 
 import java.io.IOException;
-import org.yamj.common.tools.PropertyTools;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedList;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamj.api.common.http.CommonHttpClient;
+import org.yamj.common.tools.PropertyTools;
 
 public class SearchEngineTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(SearchEngineTools.class);
-    private final PoolingHttpClient httpClient;
+    // Literals
+    private static final String HTTP = "http://";
+    private static final String UTF8 = "UTF-8";
+    private static final String SITE = "+site%3A";
+    private static final String PAREN_RIGHT = "%29";
+    private static final String PAREN_LEFT = "+%28";
+    
+    private final CommonHttpClient httpClient;
+    private final Charset charset;
+    
     private LinkedList<String> searchSites;
     private String country;
     private String searchSuffix = "";
@@ -44,20 +55,23 @@ public class SearchEngineTools {
     private String bingHost = "www.bing.com";
     private String blekkoHost = "www.blekko.com";
     private String lycosHost = "search.lycos.com";
-    // Literals
-    private static final String HTTP = "http://";
-    private static final String UTF8 = "UTF-8";
-    private static final String SITE = "+site%3A";
-    private static final String PAREN_RIGHT = "%29";
-    private static final String PAREN_LEFT = "+%28";
 
-    public SearchEngineTools(PoolingHttpClient httpClient) {
+    public SearchEngineTools(CommonHttpClient httpClient) {
         this(httpClient, "us");
     }
 
-    public SearchEngineTools(PoolingHttpClient httpClient, String country) {
-        this.httpClient = httpClient;
+    public SearchEngineTools(CommonHttpClient httpClient, String country) {
+        this(httpClient, country, (Charset)null);
+    }
+    
+    public SearchEngineTools(CommonHttpClient httpClient, String country, String charset) {
+        this(httpClient, country, Charset.forName(charset));
+    }
 
+    public SearchEngineTools(CommonHttpClient httpClient, String country, Charset charset) {
+        this.httpClient = httpClient;
+        this.charset = charset;
+        
         // sites to search for URLs
         searchSites = new LinkedList<String>();
         searchSites.addAll(Arrays.asList(PropertyTools.getProperty("yamj3.searchengine.sites", "google,yahoo,bing,blekko,lycos").split(",")));
@@ -175,7 +189,7 @@ public class SearchEngineTools {
                 sb.append("+");
                 sb.append(URLEncoder.encode(additional, UTF8));
             }
-            String xml = httpClient.requestContent(sb.toString());
+            String xml = httpClient.requestContent(sb.toString(), charset);
 
             int beginIndex = xml.indexOf(HTTP + site + searchSuffix);
             if (beginIndex != -1) {
@@ -212,7 +226,7 @@ public class SearchEngineTools {
                 sb.append(URLEncoder.encode(additional, UTF8));
             }
 
-            String xml = httpClient.requestContent(sb.toString());
+            String xml = httpClient.requestContent(sb.toString(), charset);
 
             int beginIndex = xml.indexOf("//" + site + searchSuffix);
             if (beginIndex != -1) {
@@ -252,7 +266,7 @@ public class SearchEngineTools {
                 sb.append("&filt=rf");
             }
 
-            String xml = httpClient.requestContent(sb.toString());
+            String xml = httpClient.requestContent(sb.toString(), charset);
 
             int beginIndex = xml.indexOf(HTTP + site + searchSuffix);
             if (beginIndex != -1) {
@@ -284,7 +298,7 @@ public class SearchEngineTools {
                 sb.append(URLEncoder.encode(additional, UTF8));
             }
 
-            String xml = httpClient.requestContent(sb.toString());
+            String xml = httpClient.requestContent(sb.toString(), charset);
 
             int beginIndex = xml.indexOf(HTTP + site + searchSuffix);
             if (beginIndex != -1) {
@@ -324,7 +338,7 @@ public class SearchEngineTools {
                 sb.append(URLEncoder.encode(additional, UTF8));
             }
 
-            String xml = httpClient.requestContent(sb.toString());
+            String xml = httpClient.requestContent(sb.toString(), charset);
 
             int beginIndex = xml.indexOf(HTTP + site + searchSuffix);
             if (beginIndex != -1) {
