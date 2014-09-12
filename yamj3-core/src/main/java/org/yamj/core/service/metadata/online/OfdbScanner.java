@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import java.nio.charset.Charset;
+
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.HashSet;
@@ -53,7 +55,9 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     private static final String HTML_TR_START = "<tr";
     private static final String HTML_TR_END = "</tr>";
 
+    private Charset charset;
     private SearchEngineTools searchEngineTools;
+    
     @Autowired
     private PoolingHttpClient httpClient;
     @Autowired
@@ -70,8 +74,9 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        searchEngineTools = new SearchEngineTools(httpClient, "de");
-
+        charset = Charset.forName("UTF-8");
+        searchEngineTools = new SearchEngineTools(httpClient, "de", charset);
+        
         // register this scanner
         onlineScannerService.registerMovieScanner(this);
     }
@@ -119,7 +124,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
 
     private String getOfdbIdByImdbId(String imdbId) {
         try {
-            String xml = httpClient.requestContent("http://www.ofdb.de/view.php?page=suchergebnis&SText=" + imdbId + "&Kat=IMDb");
+            String xml = httpClient.requestContent("http://www.ofdb.de/view.php?page=suchergebnis&SText=" + imdbId + "&Kat=IMDb", charset);
 
             int beginIndex = xml.indexOf("Ergebnis der Suchanfrage");
             if (beginIndex < 0) {
@@ -154,7 +159,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
             sb.append(year);
             sb.append("&Wo=-&Land=-&Freigabe=-&Cut=A&Indiziert=A&Submit2=Suche+ausf%C3%BChren");
 
-            String xml = httpClient.requestContent(sb.toString());
+            String xml = httpClient.requestContent(sb.toString(), charset);
 
             int beginIndex = xml.indexOf("Liste der gefundenen Fassungen");
             if (beginIndex < 0) {
@@ -203,7 +208,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
         ScanResult scanResult = ScanResult.OK;
 
         try {
-            String xml = httpClient.requestContent(ofdbUrl);
+            String xml = httpClient.requestContent(ofdbUrl, charset);
 
             String title = HTMLTools.extractTag(xml, "<title>OFDb -", "</title>");
             // check for movie type change
@@ -232,7 +237,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
             String plotMarker = HTMLTools.extractTag(xml, "<a href=\"plot/", 0, "\"");
             if (StringUtils.isNotBlank(plotMarker) && OverrideTools.checkOneOverwrite(videoData, SCANNER_ID, OverrideFlag.PLOT, OverrideFlag.OUTLINE)) {
                 try {
-                    String plotXml = httpClient.requestContent("http://www.ofdb.de/plot/" + plotMarker);
+                    String plotXml = httpClient.requestContent("http://www.ofdb.de/plot/" + plotMarker, charset);
 
                     int firstindex = plotXml.indexOf("gelesen</b></b><br><br>") + 23;
                     int lastindex = plotXml.indexOf(HTML_FONT, firstindex);
@@ -256,7 +261,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
             int beginIndex = xml.indexOf("view.php?page=film_detail");
             if (beginIndex != -1) {
                 String detailUrl = "http://www.ofdb.de/" + xml.substring(beginIndex, xml.indexOf('\"', beginIndex));
-                String detailXml = httpClient.requestContent(detailUrl);
+                String detailXml = httpClient.requestContent(detailUrl, charset);
 
                 // resolve for additional informations
                 List<String> tags = HTMLTools.extractHtmlTags(detailXml, "<!-- Rechte Spalte -->", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
