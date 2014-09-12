@@ -405,16 +405,15 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, Initializ
             } else {
 
                 if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
-                    videoData.setTitle(StringUtils.trim(episode.getTitle()), SCANNER_ID);
+                    videoData.setTitle(episode.getTitle(), SCANNER_ID);
                 }
 
                 if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID)) {
-                    videoData.setTitleOriginal(StringUtils.trim(episode.getOriginalTitle()), SCANNER_ID);
+                    videoData.setTitleOriginal(episode.getOriginalTitle(), SCANNER_ID);
                 }
 
                 if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-                    String plot = StringUtils.trimToNull(HTMLTools.removeHtmlTags(episode.getSynopsis()));
-                    videoData.setPlot(plot, SCANNER_ID);
+                    videoData.setPlot(episode.getSynopsis(), SCANNER_ID);
                 }
 
                 if (episode.getCode() > 0) {
