@@ -256,13 +256,13 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         try {
             CreditDTO credit;
             for (com.omertron.themoviedbapi.model.Person person : tmdbApi.getMovieCasts(Integer.parseInt(tmdbID)).getResults()) {
-                credit = new CreditDTO();
+                credit = new CreditDTO(SCANNER_ID);
                 credit.addPersonId(SCANNER_ID, String.valueOf(person.getId()));
                 credit.setName(person.getName());
                 credit.setRole(person.getCharacter());
 
                 if (person.getAka() != null && !person.getAka().isEmpty()) {
-                    credit.setAka(person.getAka().get(0));
+                    credit.setRealName(person.getAka().get(0));
                 }
 
                 if (person.getPersonType() == PersonType.CAST) {
@@ -310,14 +310,14 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
     @Override
     public String getPersonId(Person person) {
-        String id = person.getPersonId(SCANNER_ID);
+        String id = person.getSourceDbId(SCANNER_ID);
         if (StringUtils.isNotBlank(id)) {
             return id;
         } else if (StringUtils.isNotBlank(person.getName())) {
             return getPersonId(person.getName());
         } else {
             LOG.error("No ID or Name found for {}", person.toString());
-            return "";
+            return StringUtils.EMPTY;
         }
     }
 
@@ -374,19 +374,33 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             LOG.debug("Getting information on {}-'{}' from {}", person.getId(), person.getName(), SCANNER_ID);
             com.omertron.themoviedbapi.model.Person tmdbPerson = tmdbApi.getPersonInfo(Integer.parseInt(id));
 
-            person.addPersonId(ImdbScanner.SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
-            person.setBirthPlace(StringUtils.trimToNull(tmdbPerson.getBirthplace()));
-            person.setBiography(cleanBiography(tmdbPerson.getBiography()));
+            person.setSourceDbId(ImdbScanner.SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
 
-            Date parsedDate = MetadataDateTimeTools.parseToDate(tmdbPerson.getBirthday());
-            if (parsedDate != null) {
-                person.setBirthDay(parsedDate);
+            if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {
+                Date parsedDate = MetadataDateTimeTools.parseToDate(tmdbPerson.getBirthday());
+                person.setBirthDay(parsedDate, SCANNER_ID);
             }
-            
-            parsedDate = MetadataDateTimeTools.parseToDate(tmdbPerson.getDeathday());
-            if (parsedDate != null) {
-                person.setDeathDay(parsedDate);
+
+            if (OverrideTools.checkOverwriteBirthPlace(person, SCANNER_ID)) {
+                person.setBirthPlace(StringUtils.trimToNull(tmdbPerson.getBirthplace()), SCANNER_ID);
             }
+
+            if (OverrideTools.checkOverwriteBirthName(person, SCANNER_ID)) {
+                if (CollectionUtils.isNotEmpty(tmdbPerson.getAka())) {
+                    String birthName = tmdbPerson.getAka().get(0);
+                    person.setBirthName(birthName, SCANNER_ID);
+                }
+            }
+
+            if (OverrideTools.checkOverwriteDeathDay(person, SCANNER_ID)) {
+                Date parsedDate = MetadataDateTimeTools.parseToDate(tmdbPerson.getDeathday());
+                person.setDeathDay(parsedDate, SCANNER_ID);
+            }
+
+            if (OverrideTools.checkOverwriteBiography(person, SCANNER_ID)) {
+                person.setBiography(cleanBiography(tmdbPerson.getBiography()), SCANNER_ID);
+            }
+
         } catch (MovieDbException ex) {
             LOG.warn("Failed to get information on {}-'{}', error: {}", id, person.getName(), ex.getMessage());
             return ScanResult.ERROR;

@@ -22,6 +22,13 @@
  */
 package org.yamj.core.database.model;
 
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.EnumMap;
+import javax.persistence.*;
+import org.hibernate.annotations.*;
+import org.yamj.core.database.model.type.OverrideFlag;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,7 +47,7 @@ import org.yamj.common.type.StatusType;
     uniqueConstraints = @UniqueConstraint(name = "UIX_PERSON_NATURALID", columnNames = {"name"})
 )
 @SuppressWarnings("unused")
-public class Person extends AbstractAuditable implements Serializable {
+public class Person extends AbstractAuditable implements IScannable, Serializable {
 
     private static final long serialVersionUID = 660066902996412843L;
     
@@ -61,7 +68,10 @@ public class Person extends AbstractAuditable implements Serializable {
     @Temporal(value = TemporalType.DATE)
     @Column(name = "death_day")
     private Date deathDay;
-    
+
+    @Column(name = "death_place", length = 255)
+    private String deathPlace;
+
     @Lob
     @Column(name = "biography", length = 50000)
     private String biography;
@@ -72,12 +82,24 @@ public class Person extends AbstractAuditable implements Serializable {
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 40)
-    private Map<String, String> personIds = new HashMap<String, String>(0);
+    private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
     
     @Index(name = "IX_PERSON_STATUS")
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @JoinTable(name = "person_override", joinColumns = @JoinColumn(name = "person_id"))
+    @ForeignKey(name = "FK_PERSON_OVERRIDE")
+    @Fetch(FetchMode.SELECT)
+    @MapKeyColumn(name = "flag", length = 30)
+    @MapKeyType(value = @Type(type = "overrideFlag"))
+    @Column(name = "source", length = 30, nullable = false)
+    private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
+
+    @Transient
+    private Map<String,String> photoURLS = new HashMap<String,String>(0);
 
     // GETTER and SETTER
     
@@ -93,76 +115,124 @@ public class Person extends AbstractAuditable implements Serializable {
         return birthDay;
     }
 
-    public void setBirthDay(Date birthDay) {
+    private void setBirthDay(Date birthDay) {
         this.birthDay = birthDay;
+    }
+
+    public void setBirthDay(Date birthDay, String source) {
+        if (birthDay != null) {
+            this.birthDay = birthDay;
+            setOverrideFlag(OverrideFlag.BIRTHDAY, source);
+        }
     }
 
     public String getBirthPlace() {
         return birthPlace;
     }
 
-    public void setBirthPlace(String birthPlace) {
+    private void setBirthPlace(String birthPlace) {
         this.birthPlace = birthPlace;
+    }
+
+    public void setBirthPlace(String birthPlace, String source) {
+        if (StringUtils.isNotBlank(birthPlace)) {
+            this.birthPlace = birthPlace;
+            setOverrideFlag(OverrideFlag.BIRTHPLACE, source);
+        }
     }
 
     public String getBirthName() {
         return birthName;
     }
 
-    public void setBirthName(String birthName) {
+    private void setBirthName(String birthName) {
         this.birthName = birthName;
+    }
+
+    public void setBirthName(String birthName, String source) {
+        if (StringUtils.isNotBlank(birthName)) {
+            this.birthName = birthName;
+            setOverrideFlag(OverrideFlag.BIRTHNAME, source);
+        }
     }
 
     public Date getDeathDay() {
         return deathDay;
     }
 
-    public void setDeathDay(Date deathDay) {
+    private void setDeathDay(Date deathDay) {
         this.deathDay = deathDay;
+    }
+    
+    public void setDeathDay(Date deathDay, String source) {
+        if (deathDay != null) {
+            this.deathDay = deathDay;
+            setOverrideFlag(OverrideFlag.DEATHDAY, source);
+        }
+    }
+
+    public String getDeathPlace() {
+        return deathPlace;
+    }
+
+    private void setDeathPlace(String deathPlace) {
+        this.deathPlace = deathPlace;
+    }
+
+    public void setDeathPlace(String deathPlace, String source) {
+        if (StringUtils.isNotBlank(deathPlace)) {
+            this.deathPlace = deathPlace;
+            setOverrideFlag(OverrideFlag.DEATHPLACE, source);
+        }
     }
 
     public String getBiography() {
         return biography;
     }
 
-    public void setBiography(String biography) {
+    private void setBiography(String biography) {
         this.biography = biography;
     }
 
-    public String getPersonId(String sourcedb) {
-        if (personIds.containsKey(sourcedb)) {
-            return personIds.get(sourcedb);
-        } else {
-            return "";
+    public void setBiography(String biography, String source) {
+        if (StringUtils.isNotBlank(biography)) {
+            this.biography = biography;
+            setOverrideFlag(OverrideFlag.BIOGRAPHY, source);
         }
     }
 
-    private Map<String, String> getPersonIdMap() {
-        return personIds;
+    private Map<String, String> getSourceDbIdMap() {
+        return sourceDbIdMap;
     }
 
-    private void setPersonIdMap(Map<String, String> personIds) {
-        this.personIds = personIds;
+    @Override
+    public String getSourceDbId(String sourceDb) {
+        return sourceDbIdMap.get(sourceDb);
     }
 
-    public boolean addPersonIds(Map<String,String> personIdMap) {
+    private void setSourceDbIdMap(Map<String, String> sourceDbIdMap) {
+        this.sourceDbIdMap = sourceDbIdMap;
+    }
+
+    @Override
+    public boolean setSourceDbId(String sourceDb, String id) {
+        if (StringUtils.isBlank(sourceDb) || StringUtils.isBlank(id)) {
+            return false;
+        }
+        this.sourceDbIdMap.put(sourceDb, id);
+        return true;
+    }
+
+    public boolean setSourceDbIds(Map<String,String> sourceDbIdMap) {
         boolean changed  = false;
-        if (MapUtils.isNotEmpty(personIdMap)) {
-            for (Entry<String,String> entry : personIdMap.entrySet()) {
-                if (this.addPersonId(entry.getKey(), entry.getValue())) {
+        if (MapUtils.isNotEmpty(sourceDbIdMap)) {
+            for (Entry<String,String> entry : sourceDbIdMap.entrySet()) {
+                if (this.setSourceDbId(entry.getKey(), entry.getValue())) {
                     changed = true;
                 }
             }
         }
         return changed;
-    }
-    
-    public boolean addPersonId(String sourceDb, String personId) {
-        if (StringUtils.isBlank(sourceDb) || StringUtils.isBlank(personId)) {
-            return false;
-        }
-        this.personIds.put(sourceDb, personId);
-        return true;
     }
 
     public StatusType getStatus() {
@@ -173,8 +243,40 @@ public class Person extends AbstractAuditable implements Serializable {
         this.status = status;
     }
 
-    // EQUALITY CHECKS
+    @JsonIgnore // This is not needed for the API
+    public Map<OverrideFlag, String> getOverrideFlags() {
+        return overrideFlags;
+    }
+
+    public void setOverrideFlags(Map<OverrideFlag, String> overrideFlags) {
+        this.overrideFlags = overrideFlags;
+    }
+
+    @Override
+    public void setOverrideFlag(OverrideFlag overrideFlag, String source) {
+        this.overrideFlags.put(overrideFlag, source.toLowerCase());
+    }
+
+    @JsonIgnore // This is not needed for the API
+    @Override
+    public String getOverrideSource(OverrideFlag overrideFlag) {
+        return overrideFlags.get(overrideFlag);
+    }
+
+    // TRANSIENT METHODS
     
+    public Map<String, String> getPhotoURLS() {
+        return photoURLS;
+    }
+
+    public void addPhotoURL(String photoURL, String source) {
+        if (StringUtils.isNotBlank(photoURL)) {
+            this.photoURLS.put(photoURL, source);
+        }
+    }
+
+    // EQUALITY CHECKS
+
     @Override
     public int hashCode() {
         final int prime = 7;

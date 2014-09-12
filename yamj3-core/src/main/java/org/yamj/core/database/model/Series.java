@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.LinkedHashSet;
 import javax.persistence.Transient;
 import java.util.HashSet;
@@ -50,6 +52,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
             @Index(name = "IX_SERIES_TITLE", columnNames = {"title"}),
             @Index(name = "IX_SERIES_STATUS", columnNames = {"status"})
         })
+@SuppressWarnings("unused")
 public class Series extends AbstractMetadata {
 
     private static final long serialVersionUID = -5782361288021493423L;
@@ -114,13 +117,19 @@ public class Series extends AbstractMetadata {
     @Transient
     private Set<String> studioNames = new LinkedHashSet<String>(0);
 
+    @Transient
+    private Map<String,String> posterURLS = new HashMap<String,String>(0);
+    
+    @Transient
+    private Map<String,String> fanartURLS = new HashMap<String,String>(0);
+
     // GETTER and SETTER
     
     public int getStartYear() {
         return startYear;
     }
 
-    public void setStartYear(int startYear) {
+    private void setStartYear(int startYear) {
         this.startYear = startYear;
     }
 
@@ -135,7 +144,7 @@ public class Series extends AbstractMetadata {
         return endYear;
     }
 
-    public void setEndYear(int endYear) {
+    private void setEndYear(int endYear) {
         this.endYear = endYear;
     }
 
@@ -155,7 +164,7 @@ public class Series extends AbstractMetadata {
         this.skipOnlineScans = skipOnlineScans;
     }
 
-    public Map<String, String> getSourceDbIdMap() {
+    private Map<String, String> getSourceDbIdMap() {
         return sourceDbIdMap;
     }
 
@@ -169,22 +178,20 @@ public class Series extends AbstractMetadata {
     }
 
     @Override
-    public void setSourceDbId(String sourceDb, String id) {
+    public boolean setSourceDbId(String sourceDb, String id) {
         if (StringUtils.isNotBlank(id)) {
             sourceDbIdMap.put(sourceDb, id);
+            return true;
         }
+        return false;
     }
 
     public Map<String, Integer> getRatings() {
         return ratings;
     }
 
-    public void setRatings(Map<String, Integer> ratings) {
+    private void setRatings(Map<String, Integer> ratings) {
         this.ratings = ratings;
-    }
-
-    public void addRating(String source, Integer rating) {
-        this.ratings.put(source, rating);
     }
 
     public void addRating(String sourceDb, int rating) {
@@ -198,7 +205,7 @@ public class Series extends AbstractMetadata {
         return overrideFlags;
     }
 
-    public void setOverrideFlags(Map<OverrideFlag, String> overrideFlags) {
+    private void setOverrideFlags(Map<OverrideFlag, String> overrideFlags) {
         this.overrideFlags = overrideFlags;
     }
 
@@ -217,7 +224,7 @@ public class Series extends AbstractMetadata {
         return seasons;
     }
 
-    public void setSeasons(Set<Season> seasons) {
+    private void setSeasons(Set<Season> seasons) {
         this.seasons = seasons;
     }
 
@@ -225,7 +232,7 @@ public class Series extends AbstractMetadata {
         return artworks;
     }
 
-    public void setArtworks(List<Artwork> artworks) {
+    private void setArtworks(List<Artwork> artworks) {
         this.artworks = artworks;
     }
 
@@ -245,6 +252,9 @@ public class Series extends AbstractMetadata {
         this.studios = studios;
     }
 
+    // TRANSIENTS METHODS
+    
+    @JsonIgnore // This is not needed for the API
     public Set<String> getGenreNames() {
         return genreNames;
     }
@@ -256,6 +266,7 @@ public class Series extends AbstractMetadata {
         }
     }
 
+    @JsonIgnore // This is not needed for the API
     public Set<String> getStudioNames() {
         return studioNames;
     }
@@ -264,6 +275,28 @@ public class Series extends AbstractMetadata {
         if (CollectionUtils.isNotEmpty(studioNames)) {
             this.studioNames = studioNames;
             setOverrideFlag(OverrideFlag.STUDIOS, source);
+        }
+    }
+
+    @JsonIgnore // This is not needed for the API
+    public Map<String, String> getPosterURLS() {
+        return posterURLS;
+    }
+
+    public void addPosterURL(String posterURL, String source) {
+        if (StringUtils.isNotBlank(posterURL)) {
+            this.posterURLS.put(posterURL, source);
+        }
+    }
+
+    @JsonIgnore // This is not needed for the API
+    public Map<String, String> getFanartURLS() {
+        return fanartURLS;
+    }
+
+    public void addFanartURL(String fanartURL, String source) {
+        if (StringUtils.isNotBlank(fanartURL)) {
+            this.fanartURLS.put(fanartURL, source);
         }
     }
 

@@ -135,10 +135,12 @@ public class Season extends AbstractMetadata {
     }
 
     @Override
-    public void setSourceDbId(String sourceDb, String id) {
+    public boolean setSourceDbId(String sourceDb, String id) {
         if (StringUtils.isNotBlank(id)) {
             sourceDbIdMap.put(sourceDb, id);
+            return true;
         }
+        return false;
     }
 
     public Map<String, Integer> getRatings() {
@@ -156,11 +158,11 @@ public class Season extends AbstractMetadata {
     }
 
     @JsonIgnore // This is not needed for the API
-    public Map<OverrideFlag, String> getOverrideFlags() {
+    private Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
 
-    public void setOverrideFlags(Map<OverrideFlag, String> overrideFlags) {
+    private void setOverrideFlags(Map<OverrideFlag, String> overrideFlags) {
         this.overrideFlags = overrideFlags;
     }
 
@@ -187,7 +189,7 @@ public class Season extends AbstractMetadata {
         return videoDatas;
     }
 
-    public void setVideoDatas(Set<VideoData> videoDatas) {
+    private void setVideoDatas(Set<VideoData> videoDatas) {
         this.videoDatas = videoDatas;
     }
 
@@ -195,7 +197,7 @@ public class Season extends AbstractMetadata {
         return artworks;
     }
 
-    public void setArtworks(List<Artwork> artworks) {
+    private void setArtworks(List<Artwork> artworks) {
         this.artworks = artworks;
     }
 

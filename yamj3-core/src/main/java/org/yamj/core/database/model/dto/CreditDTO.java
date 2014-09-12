@@ -31,24 +31,31 @@ import org.yamj.core.database.model.type.JobType;
 
 public class CreditDTO {
 
+    private final String source;
     private String name;
+    private String realName;
     private JobType jobType;
     private String role;
-    private String aka;
-    private String photoURL;
+    private Map<String,String> photoURLS = new HashMap<String, String>(0);
     private Map<String, String> personIdMap = new HashMap<String, String>(0);
     
-    public CreditDTO() {
+    public CreditDTO(String source) {
+        this.source = source;
     }
 
-    public CreditDTO(JobType jobType, String name) {
-        this(jobType, name, null);
+    public CreditDTO(String source, JobType jobType, String name) {
+        this(source, jobType, name, null);
     }
 
-    public CreditDTO(JobType jobType, String name, String role) {
+    public CreditDTO(String source, JobType jobType, String name, String role) {
+        this.source = source;
         this.jobType = jobType;
         this.name = StringUtils.trim(name);
         this.role = StringUtils.trimToNull(role);
+    }
+
+    public String getSource() {
+        return source;
     }
 
     public String getName() {
@@ -79,23 +86,23 @@ public class CreditDTO {
         }
     }
 
-    public String getAka() {
-        return aka;
+    public String getRealName() {
+        return realName;
     }
 
-    public void setAka(String aka) {
-        if (StringUtils.isNotBlank(aka)) {
-            this.aka = aka.trim();
+    public void setRealName(String realName) {
+        if (StringUtils.isNotBlank(realName)) {
+            this.realName = realName.trim();
         }
     }
 
-    public String getPhotoURL() {
-        return photoURL;
+    public Map<String, String> getPhotoURLS() {
+        return photoURLS;
     }
 
-    public void setPhotoURL(String photoURL) {
+    public void addPhotoURL(String photoURL, String source) {
         if (StringUtils.isNotBlank(photoURL)) {
-            this.photoURL = photoURL.trim();
+            this.photoURLS.put(photoURL, source);
         }
     }
 

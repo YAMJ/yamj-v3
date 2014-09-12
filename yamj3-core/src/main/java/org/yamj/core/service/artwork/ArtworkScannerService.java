@@ -479,7 +479,7 @@ public class ArtworkScannerService {
                 if (person == null) {
                     LOG.warn("No associated person found for artwork: {}", artwork);
                 } else {
-                    String id = person.getPersonId(prio);
+                    String id = person.getSourceDbId(prio);
                     LOG.info("Scanning for person ID: {}-{}", prio, id);
                     if (StringUtils.isNumeric(id)) {
                         photos = scanner.getPhotos(Integer.parseInt(id));

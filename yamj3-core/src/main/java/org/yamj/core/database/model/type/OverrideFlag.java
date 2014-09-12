@@ -38,7 +38,14 @@ public enum OverrideFlag {
     STUDIOS,
     TAGLINE,
     TITLE,
-    YEAR;
+    YEAR,
+    // person specific
+    BIRTHDAY,
+    BIRTHPLACE,
+    BIRTHNAME,
+    DEATHDAY,
+    DEATHPLACE,
+    BIOGRAPHY;
 
     public static OverrideFlag fromString(String overrideFlag) {
         try {

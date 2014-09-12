@@ -120,6 +120,20 @@ public class NfoScannerService {
 
             // add credit DTOs for update in database
             videoData.addCreditDTOS(infoDTO.getCredits());
+            
+            // add poster URLs
+            if (CollectionUtils.isNotEmpty(infoDTO.getPosterURLs())) {
+                for (String posterURL : infoDTO.getPosterURLs()) {
+                    videoData.addPosterURL(posterURL, SCANNER_ID);
+                }
+            }
+
+            // add fanart URLs
+            if (CollectionUtils.isNotEmpty(infoDTO.getFanartURLs())) {
+                for (String fanartURL : infoDTO.getFanartURLs()) {
+                    videoData.addFanartURL(fanartURL, SCANNER_ID);
+                }
+            }
         }
         
         LOG.debug("Scanned NFO data for movie '{}'", videoData.getIdentifier());

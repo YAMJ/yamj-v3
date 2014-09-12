@@ -332,10 +332,10 @@ public final class InfoReader {
         
         // parse artwork URLs
         if (!this.configService.getBooleanProperty("nfo.skip.posterURL", true)) {
-            dto.setPosterURL(DOMHelper.getValueFromElement(eCommon, "thumb"));
+            dto.addPosterURL(DOMHelper.getValueFromElement(eCommon, "thumb"));
         }
         if (!this.configService.getBooleanProperty("nfo.skip.fanartURL", true)) {
-            dto.setFanartURL(DOMHelper.getValueFromElement(eCommon, "fanart"));
+            dto.addFanartURL(DOMHelper.getValueFromElement(eCommon, "fanart"));
         }
 
         // parse trailer

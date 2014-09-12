@@ -199,8 +199,4 @@ public abstract class AbstractMetadata extends AbstractAuditable
     // ABSTRACT DECLARATIONS
     
     abstract String getSkipOnlineScans();
-
-    public abstract String getOverrideSource(OverrideFlag overrideFlag);
-
-    public abstract void setOverrideFlag(OverrideFlag overrideFlag, String source);
 }

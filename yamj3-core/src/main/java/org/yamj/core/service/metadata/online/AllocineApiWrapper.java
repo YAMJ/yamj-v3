@@ -22,8 +22,11 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.moviejukebox.allocine.*;
 import com.moviejukebox.allocine.model.Movie;
+import com.moviejukebox.allocine.model.ShortPerson;
 import com.moviejukebox.allocine.model.TvSeries;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -40,10 +43,13 @@ public class AllocineApiWrapper {
 
     private final Lock searchMoviesLock = new ReentrantLock(true);
     private final Lock searchSeriesLock = new ReentrantLock(true);
+    private final Lock searchPersonLock = new ReentrantLock(true);
     // make maximal 20 seachMovie objects maximal 30 minutes accessible
     private final LRUTimedCache<String, Search> searchMoviesCache = new LRUTimedCache<String, Search>(20, 1800);
     // make maximal 20 seachMovie objects maximal 30 minutes accessible
     private final LRUTimedCache<String, Search> searchSeriesCache = new LRUTimedCache<String, Search>(20, 1800);
+    // make maximal 10 seachPerson objects maximal 30 minutes accessible
+    private final LRUTimedCache<String, Search> searchPersonCache = new LRUTimedCache<String, Search>(10, 1800);
     // make maximal 30 movies maximal 30 minutes accessible
     private final LRUTimedCache<String, MovieInfos> moviesCache = new LRUTimedCache<String, MovieInfos>(30, 1800);
     // make maximal 30 movies maximal 30 minutes accessible
@@ -152,6 +158,51 @@ public class AllocineApiWrapper {
         return null;
     }
 
+    public String getAllocinePersonId(String name) {
+        // get from cache or retrieve online
+        searchPersonLock.lock();
+        Search search;
+        try {
+            search = searchPersonCache.get(name);
+            if (search == null) {
+                search = allocineApi.searchPersons(name);
+                searchPersonCache.put(name, search);
+            }
+        } catch (Exception error) {
+            LOG.error("Failed to search for person infos: " + name, error);
+            return null;
+        } finally {
+            searchPersonLock.unlock();
+        }
+        
+        if (!search.isValid()) {
+            return null;
+        }
+        
+        // find for matching person
+        if (search.getTotalResults() > 1) {
+            for (ShortPerson person : search.getPersons()) {
+                if (person != null) {
+                    // find exact name (ignoring case)
+                    if (StringUtils.equalsIgnoreCase(name, person.getName())) {
+                        return String.valueOf(person.getCode());
+                    }
+                }
+            }
+        }
+        
+        // we don't find a person or there only one result, return the first
+        if (!search.getPersons().isEmpty()) {
+            ShortPerson person = search.getPersons().get(0);
+            if (person != null) {
+                return String.valueOf(person.getCode());
+            }
+        }
+        
+        // no id found
+        return null;
+    }
+
     public MovieInfos getMovieInfos(String allocineId) {
         MovieInfos movieInfos = moviesCache.get(allocineId);
         if (movieInfos == null) {
@@ -203,5 +254,16 @@ public class AllocineApiWrapper {
         }
         
         return tvSeasonInfos;
+    }
+
+    public PersonInfos getPersonInfos(String allocineId) {
+        PersonInfos personInfos = null;
+        try {
+            personInfos = allocineApi.getPersonInfos(allocineId);
+        } catch (Exception error) {
+            LOG.error("Failed retrieving Allocine infos for person: {}", allocineId);
+            LOG.error("Allocine error" , error);
+        }
+        return personInfos;
     }
 }   

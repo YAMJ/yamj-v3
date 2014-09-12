@@ -23,7 +23,6 @@
 package org.yamj.core.service.metadata.nfo;
 
 import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
-
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.dto.CreditDTO;
@@ -39,8 +38,10 @@ public final class InfoDTO {
     private Map<String, String> certificationInfos = new HashMap<String, String>(1);
     private Set<CreditDTO> credits = new LinkedHashSet<CreditDTO>(10);
     private Set<String> genres = new LinkedHashSet<String>(5);
-    private Set<String> trailerURLs= new HashSet<String>(0);
     private Set<InfoEpisodeDTO> episodes = new HashSet<InfoEpisodeDTO>();
+    private Set<String> posterURLs = new HashSet<String>(0);
+    private Set<String> fanartURLs = new HashSet<String>(0);
+    private Set<String> trailerURLs= new HashSet<String>(0);
     private String title;
     private String titleOriginal;
     private String titleSort;
@@ -54,8 +55,6 @@ public final class InfoDTO {
     private String tagline;
     private String quote;
     private String company;
-    private String posterURL;
-    private String fanartURL;
     
     public InfoDTO() {
         this(false);
@@ -291,24 +290,35 @@ public final class InfoDTO {
         }
     }
 
-    public String getPosterURL() {
-        return posterURL;
+    public Set<String> getTrailerURLs() {
+        return trailerURLs;
     }
 
-    public void setPosterURL(String posterURL) {
-        if (StringUtils.isNotBlank(posterURL)) {
-            this.posterURL = posterURL;
+    public void addTrailerURL(String trailerURL) {
+        if (StringUtils.isNotBlank(trailerURL)) {
+            this.trailerURLs.add(trailerURL.trim());
             this.changed = true;
         }
     }
 
-    public String getFanartURL() {
-        return fanartURL;
+    public Set<String> getPosterURLs() {
+        return posterURLs;
     }
 
-    public void setFanartURL(String fanartURL) {
+    public void addPosterURL(String posterURL) {
+        if (StringUtils.isNotBlank(posterURL)) {
+            this.posterURLs.add(posterURL);
+            this.changed = true;
+        }
+    }
+
+    public Set<String> getFanartURLs() {
+        return fanartURLs;
+    }
+
+    public void addFanartURL(String fanartURL) {
         if (StringUtils.isNotBlank(fanartURL)) {
-            this.fanartURL = fanartURL;
+            this.fanartURLs.add(fanartURL);
             this.changed = true;
         }
     }
@@ -319,35 +329,23 @@ public final class InfoDTO {
 
     public void addDirector(String director) {
         if (StringUtils.isNotBlank(director)) {
-            this.credits.add(new CreditDTO(JobType.DIRECTOR, director.trim()));
+            this.credits.add(new CreditDTO(NfoScannerService.SCANNER_ID, JobType.DIRECTOR, director.trim()));
             this.changed = true;
         }
     }
 
     public void addWriter(String writer) {
         if (StringUtils.isNotBlank(writer)) {
-            this.credits.add(new CreditDTO(JobType.WRITER, writer.trim()));
+            this.credits.add(new CreditDTO(NfoScannerService.SCANNER_ID, JobType.WRITER, writer.trim()));
             this.changed = true;
         }
     }
 
     public void addActor(String actor, String role, String photoURL) {
         if (StringUtils.isNotBlank(actor)) {
-            CreditDTO credit = new CreditDTO(JobType.ACTOR, actor.trim());
-            credit.setRole(role);
-            credit.setPhotoURL(photoURL);
+            CreditDTO credit = new CreditDTO(NfoScannerService.SCANNER_ID, JobType.ACTOR, actor.trim(), role);
+            credit.addPhotoURL(photoURL, NfoScannerService.SCANNER_ID);
             this.credits.add(credit);
-            this.changed = true;
-        }
-    }
-
-    public Set<String> getTrailerURLs() {
-        return trailerURLs;
-    }
-
-    public void addTrailerURL(String trailerURL) {
-        if (StringUtils.isNotBlank(trailerURL)) {
-            this.trailerURLs.add(trailerURL.trim());
             this.changed = true;
         }
     }

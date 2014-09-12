@@ -40,7 +40,8 @@ public class OnlineScannerService {
     public static final String MOVIE_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie.alternate", "");
     public static final String SERIES_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.series", "tvdb");
     public static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.alternate", "");
-    private static final String PERSON_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.person", "tmdb");
+    public static final String PERSON_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.person", "tmdb");
+    public static final String PERSON_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.person.alternate", "");
     
     private final HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<String, IMovieScanner>();
     private final HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<String, ISeriesScanner>();
@@ -213,7 +214,7 @@ public class OnlineScannerService {
         IPersonScanner personScanner = registeredPersonScanner.get(PERSON_SCANNER);
         if (personScanner == null) {
             LOG.error("Person scanner '{}' not registered", PERSON_SCANNER);
-            scanResult = ScanResult.ERROR;
+            scanResult = ScanResult.SKIPPED;
         } else {
             LOG.info("Scanning for information on person {}-'{}' using {}", person.getId(), person.getName(), PERSON_SCANNER);
     
@@ -222,14 +223,33 @@ public class OnlineScannerService {
                 scanResult = personScanner.scan(person);
             } catch (Exception error) {
                 scanResult = ScanResult.ERROR;
-                LOG.error("Failed scanning person (ID '{}') data with {} scanner", person.getId(), PERSON_SCANNER);
+                LOG.error("Failed scanning person (ID '{}') data with scanner {} ", person.getId(), PERSON_SCANNER);
                 LOG.warn("Scanning error", error);
             }
         }
         
+        // alternate scanning if main scanner failed or not registered
+        if (!ScanResult.OK.equals(scanResult)) {
+            personScanner = registeredPersonScanner.get(PERSON_SCANNER_ALT);
+
+            if (personScanner != null) {
+                LOG.info("Alternate scanning for information on person {}-'{}' using {}", person.getId(), person.getName(), PERSON_SCANNER_ALT);
+
+                try {
+                    personScanner.scan(person);
+                } catch (Exception error) {
+                    LOG.error("Failed scanning person (ID '{}') data with alternate scanner {}", person.getId(), PERSON_SCANNER_ALT);
+                    LOG.warn("Alternate scanning error", error);
+                }
+            }
+        }
+
         // evaluate status
         if (ScanResult.OK.equals(scanResult)) {
             LOG.debug("Person {}-'{}', scanned OK", person.getId(), person.getName());
+            person.setStatus(StatusType.DONE);
+        } else if (ScanResult.SKIPPED.equals(scanResult)) {
+            LOG.warn("Person {}-'{}', skipped", person.getId(), person.getName());
             person.setStatus(StatusType.DONE);
         } else if (ScanResult.MISSING_ID.equals(scanResult)) {
             LOG.warn("Person {}-'{}', not found", person.getId(), person.getName());

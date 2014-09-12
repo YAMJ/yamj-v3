@@ -27,10 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.PropertyTools;
-import org.yamj.core.database.model.AbstractMetadata;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 
@@ -45,17 +42,23 @@ public final class OverrideTools {
     // handling for set default plugins
     private static final String TYPE_PLUGIN_MOVIE = "plugin_movie";
     private static final String TYPE_PLUGIN_SERIES = "plugin_series";
+    private static final String TYPE_PLUGIN_PERSON = "plugin_person";
     private static final String TYPE_ALTERNATE_MOVIE = "alternate_movie";
     private static final String TYPE_ALTERNATE_SERIES = "alternate_series";
+    private static final String TYPE_ALTERNATE_PERSON = "alternate_person";
     private static final String PLUGIN_MOVIE = OnlineScannerService.MOVIE_SCANNER;
     private static final String PLUGIN_MOVIE_ALT = OnlineScannerService.MOVIE_SCANNER_ALT;
     private static final String PLUGIN_SERIES = OnlineScannerService.SERIES_SCANNER;
     private static final String PLUGIN_SERIES_ALT = OnlineScannerService.SERIES_SCANNER_ALT;
+    private static final String PLUGIN_PERSON = OnlineScannerService.PERSON_SCANNER;
+    private static final String PLUGIN_PERSON_ALT = OnlineScannerService.PERSON_SCANNER_ALT;
     private static final Map<OverrideFlag, List<String>> VIDEODATA_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
     private static final Map<OverrideFlag, List<String>> SEASON_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
     private static final Map<OverrideFlag, List<String>> SERIES_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
+    private static final Map<OverrideFlag, List<String>> PERSON_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
     private static final String DEFAULT_PLUGIN_MOVIE_SERIES = "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series";
     private static final String DEFAULT_PLUGIN_SERIES = "nfo,plugin_series,alternate_series";
+    private static final String DEFAULT_PLUGIN_PERSON = "nfo,plugin_person,alternate_person";
 
     static {
         String sources;
@@ -117,6 +120,20 @@ public final class OverrideTools {
         putSeriesPriorities(OverrideFlag.YEAR, sources);
         sources = PropertyTools.getProperty("priority.season.year", DEFAULT_PLUGIN_SERIES);
         putSeasonPriorities(OverrideFlag.YEAR, sources);
+        
+        // person priorities
+        sources = PropertyTools.getProperty("priority.person.birtday", DEFAULT_PLUGIN_PERSON);
+        putPersonPriorities(OverrideFlag.BIRTHDAY, sources);
+        sources = PropertyTools.getProperty("priority.person.birtplace", DEFAULT_PLUGIN_PERSON);
+        putPersonPriorities(OverrideFlag.BIRTHPLACE, sources);
+        sources = PropertyTools.getProperty("priority.person.birthname", DEFAULT_PLUGIN_PERSON);
+        putPersonPriorities(OverrideFlag.BIRTHNAME, sources);
+        sources = PropertyTools.getProperty("priority.person.deathday", DEFAULT_PLUGIN_PERSON);
+        putPersonPriorities(OverrideFlag.DEATHDAY, sources);
+        sources = PropertyTools.getProperty("priority.person.deathplace", DEFAULT_PLUGIN_PERSON);
+        putPersonPriorities(OverrideFlag.DEATHDAY, sources);
+        sources = PropertyTools.getProperty("priority.person.biography", DEFAULT_PLUGIN_PERSON);
+        putPersonPriorities(OverrideFlag.BIOGRAPHY, sources);
     }
 
     /**
@@ -155,6 +172,18 @@ public final class OverrideTools {
         SERIES_PRIORITIES.put(overrideFlag, priorities);
     }
 
+    /**
+     * Put person priorities into map.
+     *
+     * @param overrideFlag
+     * @param sources
+     */
+    private static void putPersonPriorities(OverrideFlag overrideFlag, String sources) {
+        List<String> priorities = resolvePriorities(sources);
+        LOG.debug(overrideFlag.name() + " (Person) priorities " + priorities.toString());
+        PERSON_PRIORITIES.put(overrideFlag, priorities);
+    }
+
     private static List<String> resolvePriorities(String sources) {
         List<String> priorities;
         if (StringUtils.isBlank(sources)) {
@@ -169,6 +198,10 @@ public final class OverrideTools {
                 // replace pattern with series plugin
                 newSources = newSources.replace(TYPE_PLUGIN_SERIES, PLUGIN_SERIES);
             }
+            if (newSources.contains(TYPE_PLUGIN_PERSON) && !newSources.contains(PLUGIN_PERSON)) {
+                // replace pattern with person plugin
+                newSources = newSources.replace(TYPE_PLUGIN_PERSON, PLUGIN_PERSON);
+            }
 
             if (newSources.contains(TYPE_ALTERNATE_MOVIE) && (StringUtils.isNotBlank(PLUGIN_MOVIE_ALT) && !newSources.contains(PLUGIN_MOVIE_ALT))) {
                 // replace pattern with alternate video plugin
@@ -179,27 +212,35 @@ public final class OverrideTools {
                 // replace pattern with alternate series plugin
                 newSources = newSources.replace(TYPE_ALTERNATE_SERIES, PLUGIN_SERIES_ALT);
             }
+            if (newSources.contains(TYPE_ALTERNATE_PERSON) && !newSources.contains(PLUGIN_PERSON_ALT)) {
+                // replace pattern with alternate person plugin
+                newSources = newSources.replace(TYPE_ALTERNATE_PERSON, PLUGIN_PERSON_ALT);
+            }
 
             priorities = new ArrayList<String>(Arrays.asList(newSources.split(",")));
             priorities.remove(TYPE_PLUGIN_MOVIE);
             priorities.remove(TYPE_PLUGIN_SERIES);
+            priorities.remove(TYPE_PLUGIN_PERSON);
             priorities.remove(TYPE_ALTERNATE_MOVIE);
             priorities.remove(TYPE_ALTERNATE_SERIES);
+            priorities.remove(TYPE_ALTERNATE_PERSON);
         }
         return priorities;
     }
 
-    private static boolean skipCheck(AbstractMetadata metadata, OverrideFlag overrideFlag, String source) {
+    private static boolean skipCheck(IScannable scannable, OverrideFlag overrideFlag, String source) {
         if (SKIP_NOT_IN_LIST) {
 
             int index = -1;
             try {
-                if (metadata instanceof VideoData) {
+                if (scannable instanceof VideoData) {
                     index = VIDEODATA_PRIORITIES.get(overrideFlag).indexOf(source.toLowerCase());
-                } else if (metadata instanceof Season) {
+                } else if (scannable instanceof Season) {
                     index = SEASON_PRIORITIES.get(overrideFlag).indexOf(source.toLowerCase());
-                } else if (metadata instanceof Series) {
+                } else if (scannable instanceof Series) {
                     index = SERIES_PRIORITIES.get(overrideFlag).indexOf(source.toLowerCase());
+                } else if (scannable instanceof Person) {
+                    index = PERSON_PRIORITIES.get(overrideFlag).indexOf(source.toLowerCase());
                 }
             } catch (Exception ignore) {
                 // ignore this error
@@ -222,7 +263,7 @@ public final class OverrideTools {
      * @param metadata the metadata object
      * @return true, if new source has higher property than actual source, else false
      */
-    private static boolean hasHigherPriority(final OverrideFlag overrideFlag, final String actualSource, final String newSource, final AbstractMetadata metadata) {
+    private static boolean hasHigherPriority(final OverrideFlag overrideFlag, final String actualSource, final String newSource, final IScannable scannable) {
         // check sources
         if (StringUtils.isBlank(newSource)) {
             // new source is not valid
@@ -239,12 +280,14 @@ public final class OverrideTools {
 
         // both sources are valid so get priorities
         List<String> priorities;
-        if (metadata instanceof VideoData) {
+        if (scannable instanceof VideoData) {
             priorities = VIDEODATA_PRIORITIES.get(overrideFlag);
-        } else if (metadata instanceof Season) {
+        } else if (scannable instanceof Season) {
             priorities = SEASON_PRIORITIES.get(overrideFlag);
-        } else if (metadata instanceof Series) {
+        } else if (scannable instanceof Series) {
             priorities = SERIES_PRIORITIES.get(overrideFlag);
+        } else if (scannable instanceof Person) {
+            priorities = PERSON_PRIORITIES.get(overrideFlag);
         } else {
             priorities = Collections.emptyList();
         }
@@ -268,9 +311,9 @@ public final class OverrideTools {
         return Boolean.FALSE;
     }
 
-    private static boolean checkOverwrite(AbstractMetadata metadata, OverrideFlag overrideFlag, String source) {
-        String actualSource = metadata.getOverrideSource(overrideFlag);
-        return OverrideTools.hasHigherPriority(overrideFlag, actualSource, source, metadata);
+    private static boolean checkOverwrite(IScannable scannable, OverrideFlag overrideFlag, String source) {
+        String actualSource = scannable.getOverrideSource(overrideFlag);
+        return OverrideTools.hasHigherPriority(overrideFlag, actualSource, source, scannable);
     }
 
     public static boolean checkOneOverwrite(AbstractMetadata metadata, String source, OverrideFlag... overrideFlags) {
@@ -406,5 +449,67 @@ public final class OverrideTools {
             return Boolean.TRUE;
         }
         return checkOverwrite(metadata, OverrideFlag.YEAR, source);
+    }
+    
+    // PERSON OVERRIDE
+    
+    public static boolean checkOverwriteBirthDay(Person person, String source) {
+        if (skipCheck(person, OverrideFlag.BIRTHDAY, source)) {
+            // skip the check
+            return Boolean.FALSE;
+        } else if (person.getBirthDay() == null) {
+            return Boolean.TRUE;
+        }
+        return checkOverwrite(person, OverrideFlag.BIRTHDAY, source);
+    }
+
+    public static boolean checkOverwriteBirthPlace(Person person, String source) {
+        if (skipCheck(person, OverrideFlag.BIRTHPLACE, source)) {
+            // skip the check
+            return Boolean.FALSE;
+        } else if (StringUtils.isBlank(person.getBirthPlace())) {
+            return Boolean.TRUE;
+        }
+        return checkOverwrite(person, OverrideFlag.BIRTHPLACE, source);
+    }
+
+    public static boolean checkOverwriteBirthName(Person person, String source) {
+        if (skipCheck(person, OverrideFlag.BIRTHNAME, source)) {
+            // skip the check
+            return Boolean.FALSE;
+        } else if (StringUtils.isBlank(person.getBirthName())) {
+            return Boolean.TRUE;
+        }
+        return checkOverwrite(person, OverrideFlag.BIRTHNAME, source);
+    }
+
+    public static boolean checkOverwriteDeathDay(Person person, String source) {
+        if (skipCheck(person, OverrideFlag.DEATHDAY, source)) {
+            // skip the check
+            return Boolean.FALSE;
+        } else if (person.getDeathDay() == null) {
+            return Boolean.TRUE;
+        }
+        return checkOverwrite(person, OverrideFlag.DEATHDAY, source);
+    }
+
+    public static boolean checkOverwriteDeathPlace(Person person, String source) {
+        if (skipCheck(person, OverrideFlag.DEATHPLACE, source)) {
+            // skip the check
+            return Boolean.FALSE;
+        } else if (StringUtils.isBlank(person.getDeathPlace())) {
+            return Boolean.TRUE;
+        }
+        return checkOverwrite(person, OverrideFlag.DEATHPLACE, source);
+    }
+
+    public static boolean checkOverwriteBiography(Person person, String source) {
+        if (skipCheck(person, OverrideFlag.BIOGRAPHY, source)) {
+            // skip the check
+            return Boolean.FALSE;
+        } else if (StringUtils.isBlank(person.getBiography())) {
+            return Boolean.TRUE;
+        }
+        return checkOverwrite(person, OverrideFlag.BIOGRAPHY, source);
     }
 }

@@ -22,23 +22,15 @@
  */
 package org.yamj.core.database.model;
 
-import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.type.OverrideFlag;
 
-public interface IMetadata extends IScannable {
+public interface IScannable {
 
-    boolean isSkippedOnlineScan(String sourceDb);
-    
-    String getTitle();
+    String getSourceDbId(String sourceDb);
 
-    String getTitleOriginal();
+    boolean setSourceDbId(String sourceDb, String id);
 
-    int getYear();
+    String getOverrideSource(OverrideFlag overrideFlag);
 
-    boolean isMovie();
-    
-    int getSeasonNumber();
-
-    int getEpisodeNumber();
-
-    StatusType getStatus();
+    void setOverrideFlag(OverrideFlag overrideFlag, String source);
 }

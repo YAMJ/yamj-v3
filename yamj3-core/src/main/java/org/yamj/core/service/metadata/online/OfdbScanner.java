@@ -75,7 +75,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         charset = Charset.forName("UTF-8");
-        searchEngineTools = new SearchEngineTools(httpClient, "de", charset);
+        searchEngineTools = new SearchEngineTools(httpClient, "de");
         
         // register this scanner
         onlineScannerService.registerMovieScanner(this);
@@ -300,21 +300,21 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                 if (detailXml.contains("<i>Regie</i>")) {
                     tags = HTMLTools.extractHtmlTags(detailXml, "<i>Regie</i>", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
                     for (String tag : tags) {
-                        videoData.addCreditDTO(new CreditDTO(JobType.DIRECTOR, extractName(tag)));
+                        videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.DIRECTOR, extractName(tag)));
                     }
                 }
 
                 if (detailXml.contains("<i>Drehbuchautor(in)</i>")) {
                     tags = HTMLTools.extractHtmlTags(detailXml, "<i>Drehbuchautor(in)</i>", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
                     for (String tag : tags) {
-                        videoData.addCreditDTO(new CreditDTO(JobType.WRITER, extractName(tag)));
+                        videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.WRITER, extractName(tag)));
                     }
                 }
 
                 if (detailXml.contains("<i>Darsteller</i>")) {
                     tags = HTMLTools.extractHtmlTags(detailXml, "<i>Darsteller</i>", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
                     for (String tag : tags) {
-                        videoData.addCreditDTO(new CreditDTO(JobType.ACTOR, extractName(tag), extractRole(tag)));
+                        videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.ACTOR, extractName(tag), extractRole(tag)));
                     }
                 }
             }

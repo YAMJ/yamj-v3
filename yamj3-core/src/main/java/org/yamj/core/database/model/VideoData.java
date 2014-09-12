@@ -159,6 +159,12 @@ public class VideoData extends AbstractMetadata {
     @Transient
     private Map<String,String> certificationInfos = new HashMap<String,String>(0);
 
+    @Transient
+    private Map<String,String> posterURLS = new HashMap<String,String>(0);
+    
+    @Transient
+    private Map<String,String> fanartURLS = new HashMap<String,String>(0);
+
     // GETTER and SETTER
     
     public int getPublicationYear() {
@@ -277,10 +283,12 @@ public class VideoData extends AbstractMetadata {
     }
 
     @Override
-    public void setSourceDbId(String sourceDb, String id) {
+    public boolean setSourceDbId(String sourceDb, String id) {
         if (StringUtils.isNotBlank(id)) {
             sourceDbIdMap.put(sourceDb, id);
+            return true;
         }
+        return false;
     }
 
     private Map<String, Integer> getRatings() {
@@ -389,7 +397,7 @@ public class VideoData extends AbstractMetadata {
         return boxedSets;
     }
 
-    public void setBoxedSets(List<BoxedSetOrder> boxedSets) {
+    private void setBoxedSets(List<BoxedSetOrder> boxedSets) {
         this.boxedSets = boxedSets;
     }
 
@@ -410,6 +418,7 @@ public class VideoData extends AbstractMetadata {
     }
 
     // TRANSIENTS METHODS
+    
     @JsonIgnore // This is not needed for the API
     public Set<CreditDTO> getCreditDTOS() {
         return creditDTOS;
@@ -428,14 +437,16 @@ public class VideoData extends AbstractMetadata {
             this.creditDTOS.add(creditDTO);
         } else {
             // update values
-            if (StringUtils.isBlank(credit.getAka())) {
-                credit.setAka(creditDTO.getAka());
-            }
             if (StringUtils.isBlank(credit.getRole())) {
-                credit.setAka(creditDTO.getRole());
+                credit.setRole(creditDTO.getRole());
             }
-            if (StringUtils.isBlank(credit.getPhotoURL())) {
-                credit.setAka(creditDTO.getPhotoURL());
+            if (StringUtils.isBlank(credit.getRealName())) {
+                credit.setRealName(creditDTO.getRealName());
+            }
+            if (MapUtils.isNotEmpty(creditDTO.getPhotoURLS())) {
+                for (Entry<String,String> entry : creditDTO.getPhotoURLS().entrySet()) {
+                    credit.addPhotoURL(entry.getKey(), entry.getValue());
+                }
             }
             if (MapUtils.isNotEmpty(creditDTO.getPersonIdMap())) {
                 for (Entry<String,String> entry : creditDTO.getPersonIdMap().entrySet()) {
@@ -451,6 +462,7 @@ public class VideoData extends AbstractMetadata {
         }
     }
     
+    @JsonIgnore // This is not needed for the API
     public Set<String> getGenreNames() {
         return genreNames;
     }
@@ -462,6 +474,7 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
+    @JsonIgnore // This is not needed for the API
     public Set<String> getStudioNames() {
         return studioNames;
     }
@@ -473,6 +486,7 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
+    @JsonIgnore // This is not needed for the API
     public Map<String,Integer> getSetInfos() {
         return setInfos;
     }
@@ -483,6 +497,7 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
+    @JsonIgnore // This is not needed for the API
     public Map<String,String> getCertificationInfos() {
         return certificationInfos;
     }
@@ -499,8 +514,30 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
+    @JsonIgnore // This is not needed for the API
+    public Map<String, String> getPosterURLS() {
+        return posterURLS;
+    }
+
+    public void addPosterURL(String posterURL, String source) {
+        if (StringUtils.isNotBlank(posterURL)) {
+            this.posterURLS.put(posterURL, source);
+        }
+    }
+
+    @JsonIgnore // This is not needed for the API
+    public Map<String, String> getFanartURLS() {
+        return fanartURLS;
+    }
+
+    public void addFanartURL(String fanartURL, String source) {
+        if (StringUtils.isNotBlank(fanartURL)) {
+            this.fanartURLS.put(fanartURL, source);
+        }
+    }
+
     // TV CHECKS
-    
+
     public void setTvEpisodeScanned() {
         this.setStatus(StatusType.DONE);
     }

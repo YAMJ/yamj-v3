@@ -94,7 +94,7 @@ public class TheTVDbScannerTest extends AbstractJUnit4SpringContextTests {
         LOG.info("getSeriesId");
         Series series = new Series();
         series.setTitle("Chuck", PLUGIN_ID);
-        series.setStartYear(2007);
+        series.setStartYear(2007, PLUGIN_ID);
         String expResult = "80348";
         String result = tvdbScanner.getSeriesId(series);
         assertEquals("Wrong ID returned", expResult, result);

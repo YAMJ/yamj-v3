@@ -136,7 +136,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         // CAST & CREW
         Set<CreditDTO> actors = new LinkedHashSet<CreditDTO>();
         for (Actor actor : tvdbApiWrapper.getActors(id)) {
-            actors.add(new CreditDTO(JobType.ACTOR, actor.getName(), actor.getRole()));
+            actors.add(new CreditDTO(SCANNER_ID, JobType.ACTOR, actor.getName(), actor.getRole()));
         }
 
         // SCAN SEASONS
@@ -242,13 +242,13 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                 videoData.addCreditDTOS(actors);
 
                 for (String director : episode.getDirectors()) {
-                    videoData.addCreditDTO(new CreditDTO(JobType.DIRECTOR, director));
+                    videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.DIRECTOR, director));
                 }
                 for (String writer : episode.getWriters()) {
-                    videoData.addCreditDTO(new CreditDTO(JobType.WRITER, writer));
+                    videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.WRITER, writer));
                 }
                 for (String guestStar : episode.getGuestStars()) {
-                    videoData.addCreditDTO(new CreditDTO(JobType.GUEST_STAR, guestStar));
+                    videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.GUEST_STAR, guestStar));
                 }
 
                 // mark episode as scanned

@@ -22,10 +22,7 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.moviejukebox.allocine.MovieInfos;
-import com.moviejukebox.allocine.MoviePerson;
-import com.moviejukebox.allocine.TvSeasonInfos;
-import com.moviejukebox.allocine.TvSeriesInfos;
+import com.moviejukebox.allocine.*;
 import com.moviejukebox.allocine.model.Episode;
 import java.util.Collections;
 import java.util.Date;
@@ -40,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
@@ -52,7 +50,7 @@ import org.yamj.core.tools.web.PoolingHttpClient;
 import org.yamj.core.tools.web.SearchEngineTools;
 
 @Service("allocineScanner")
-public class AllocineScanner implements IMovieScanner, ISeriesScanner, InitializingBean {
+public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, InitializingBean {
 
     private static final String SCANNER_ID = "allocine";
     private static final Logger LOG = LoggerFactory.getLogger(AllocineScanner.class);
@@ -80,6 +78,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, Initializ
        
         onlineScannerService.registerMovieScanner(this);
         onlineScannerService.registerSeriesScanner(this);
+        onlineScannerService.registerPersonScanner(this);
     }
 
     @Override
@@ -190,32 +189,39 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, Initializ
         videoData.addRating(SCANNER_ID, movieInfos.getUserRating());
 
         for (MoviePerson person : movieInfos.getDirectors()) {
-            CreditDTO creditDTO = new CreditDTO(JobType.DIRECTOR, person.getName());
+            CreditDTO creditDTO = new CreditDTO(SCANNER_ID, JobType.DIRECTOR, person.getName());
             if (person.getCode() > 0 ) {
                 creditDTO.addPersonId(SCANNER_ID, String.valueOf(person.getCode()));
             }
-            creditDTO.setPhotoURL(person.getPhotoURL());
+            creditDTO.addPhotoURL(person.getPhotoURL(), SCANNER_ID);
             videoData.addCreditDTO(creditDTO);
         }
         
         for (MoviePerson person : movieInfos.getWriters()) {
-            CreditDTO creditDTO = new CreditDTO(JobType.WRITER, person.getName());
+            CreditDTO creditDTO = new CreditDTO(SCANNER_ID, JobType.WRITER, person.getName());
             if (person.getCode() > 0 ) {
                 creditDTO.addPersonId(SCANNER_ID, String.valueOf(person.getCode()));
             }
-            creditDTO.setPhotoURL(person.getPhotoURL());
+            creditDTO.addPhotoURL(person.getPhotoURL(), SCANNER_ID);
             videoData.addCreditDTO(creditDTO);
         }
 
         for (MoviePerson person : movieInfos.getActors()) {
-            CreditDTO creditDTO = new CreditDTO(JobType.ACTOR, person.getName(), person.getRole());
+            CreditDTO creditDTO = new CreditDTO(SCANNER_ID, JobType.ACTOR, person.getName(), person.getRole());
             if (person.getCode() > 0) {
                 creditDTO.addPersonId(SCANNER_ID, String.valueOf(person.getCode()));
             }
-            creditDTO.setPhotoURL(person.getPhotoURL());
+            creditDTO.addPhotoURL(person.getPhotoURL(), SCANNER_ID);
             videoData.addCreditDTO(creditDTO);
         }
         
+        // add poster URLs
+        if (CollectionUtils.isNotEmpty(movieInfos.getPosterUrls()))  {
+            for (String posterURL : movieInfos.getPosterUrls()) {
+                videoData.addPosterURL(posterURL, SCANNER_ID);
+            }
+        }
+
         return ScanResult.OK;
     }
 
@@ -251,6 +257,38 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, Initializ
                 searchEngineTools.setSearchSuffix("/ficheserie_gen_cserie");
                 String url = searchEngineTools.searchURL(title, year, "www.allocine.fr/series");
                 allocineId = HTMLTools.extractTag(url, "ficheserie_gen_cserie=", ".html");
+            } finally {
+                searchEngingeLock.unlock();
+            }
+        }
+        
+        return allocineId;
+    }
+
+    @Override
+    public String getPersonId(Person person) {
+        String id = person.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNotBlank(id)) {
+            return id;
+        } else if (StringUtils.isNotBlank(person.getName())) {
+            return getPersonId(person.getName());
+        } else {
+            LOG.error("No ID or Name found for {}", person.toString());
+            return StringUtils.EMPTY;
+        }
+    }
+
+    @Override
+    public String getPersonId(String name) {
+        String allocineId = this.allocineApiWrapper.getAllocinePersonId(name);
+
+        if (StringUtils.isBlank(allocineId)) {
+            // try search engines
+            searchEngingeLock.lock();
+            try {
+                searchEngineTools.setSearchSuffix("/fichepersonne_gen_cpersonne");
+                String url = searchEngineTools.searchURL(name, -1, "www.allocine.fr/personne");
+                allocineId = HTMLTools.extractTag(url, "fichepersonne_gen_cpersonne=", ".html");
             } finally {
                 searchEngingeLock.unlock();
             }
@@ -315,32 +353,39 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, Initializ
         Set<CreditDTO> credits = new HashSet<CreditDTO>();
         
         for (MoviePerson person : tvSeriesInfos.getDirectors()) {
-            CreditDTO creditDTO = new CreditDTO(JobType.DIRECTOR, person.getName());
+            CreditDTO creditDTO = new CreditDTO(SCANNER_ID, JobType.DIRECTOR, person.getName());
             if (person.getCode() > 0 ) {
                 creditDTO.addPersonId(SCANNER_ID, String.valueOf(person.getCode()));
             }
-            creditDTO.setPhotoURL(person.getPhotoURL());
+            creditDTO.addPhotoURL(person.getPhotoURL(), SCANNER_ID);
             credits.add(creditDTO);
         }
         
         for (MoviePerson person : tvSeriesInfos.getWriters()) {
-            CreditDTO creditDTO = new CreditDTO(JobType.WRITER, person.getName());
+            CreditDTO creditDTO = new CreditDTO(SCANNER_ID, JobType.WRITER, person.getName());
             if (person.getCode() > 0 ) {
                 creditDTO.addPersonId(SCANNER_ID, String.valueOf(person.getCode()));
             }
-            creditDTO.setPhotoURL(person.getPhotoURL());
+            creditDTO.addPhotoURL(person.getPhotoURL(), SCANNER_ID);
             credits.add(creditDTO);
         }
 
         for (MoviePerson person : tvSeriesInfos.getActors()) {
             // only lead actors
             if (person.isLeadActor()) {
-                CreditDTO creditDTO = new CreditDTO(JobType.ACTOR, person.getName(), person.getRole());
+                CreditDTO creditDTO = new CreditDTO(SCANNER_ID, JobType.ACTOR, person.getName(), person.getRole());
                 if (person.getCode() > 0) {
                     creditDTO.addPersonId(SCANNER_ID, String.valueOf(person.getCode()));
                 }
-                creditDTO.setPhotoURL(person.getPhotoURL());
+                creditDTO.addPhotoURL(person.getPhotoURL(), SCANNER_ID);
                 credits.add(creditDTO);
+            }
+        }
+
+        // add poster URLs
+        if (CollectionUtils.isNotEmpty(tvSeriesInfos.getPosterUrls()))  {
+            for (String posterURL : tvSeriesInfos.getPosterUrls()) {
+                series.addPosterURL(posterURL, SCANNER_ID);
             }
         }
 
@@ -427,6 +472,53 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, Initializ
                 videoData.setTvEpisodeScanned();
             }
         }
+    }
+
+    @Override
+    public ScanResult scan(Person person) {
+        String allocineId = this.getPersonId(person);
+
+        if (StringUtils.isBlank(allocineId)) {
+            LOG.debug("Allocine id not available '{}'", person.getName());
+            return ScanResult.MISSING_ID;
+        }
+
+        PersonInfos personInfos = this.allocineApiWrapper.getPersonInfos(allocineId);
+        if (personInfos == null || personInfos.isNotValid()) {
+            LOG.error("Can't find informations for person with id {}", allocineId);
+            return ScanResult.ERROR;
+        }
+
+        if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {
+            Date parsedDate = MetadataDateTimeTools.parseToDate(personInfos.getBirthDate());
+            person.setBirthDay(parsedDate, SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteBirthPlace(person, SCANNER_ID)) {
+            person.setBirthPlace(personInfos.getBirthPlace(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteBirthName(person, SCANNER_ID)) {
+            person.setBirthName(personInfos.getRealName(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteDeathDay(person, SCANNER_ID)) {
+            Date parsedDate = MetadataDateTimeTools.parseToDate(personInfos.getDeathDate());
+            person.setDeathDay(parsedDate, SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteDeathPlace(person, SCANNER_ID)) {
+            person.setDeathPlace(personInfos.getDeathPlace(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteBiography(person, SCANNER_ID)) {
+            person.setBiography(personInfos.getBiography(), SCANNER_ID);
+        }
+        
+        // add poster URL
+        person.addPhotoURL(personInfos.getPhotoURL(), SCANNER_ID);
+
+        return ScanResult.OK;
     }
 }
 

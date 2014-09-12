@@ -61,16 +61,8 @@ public class SearchEngineTools {
     }
 
     public SearchEngineTools(CommonHttpClient httpClient, String country) {
-        this(httpClient, country, (Charset)null);
-    }
-    
-    public SearchEngineTools(CommonHttpClient httpClient, String country, String charset) {
-        this(httpClient, country, Charset.forName(charset));
-    }
-
-    public SearchEngineTools(CommonHttpClient httpClient, String country, Charset charset) {
         this.httpClient = httpClient;
-        this.charset = charset;
+        this.charset = Charset.forName("UTF-8");
         
         // sites to search for URLs
         searchSites = new LinkedList<String>();
