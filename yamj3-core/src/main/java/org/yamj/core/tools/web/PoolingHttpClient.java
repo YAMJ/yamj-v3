@@ -22,6 +22,8 @@
  */
 package org.yamj.core.tools.web;
 
+import org.apache.http.protocol.HTTP;
+import org.yamj.api.common.http.UserAgentSelector;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -101,19 +103,33 @@ public class PoolingHttpClient extends DefaultPoolingHttpClient implements Dispo
         // set route (if not set before)
         setRoute(httpGet);
 
-        HttpResponse response = execute(httpGet);
-
-        int statusCode = response.getStatusLine().getStatusCode();
-        if (statusCode != 200) {
-            throw new RuntimeException("Unexpected status " + statusCode + " for uri " + httpGet.getURI());
+        if (randomUserAgent) {
+            httpGet.setHeader(HTTP.USER_AGENT, UserAgentSelector.randomUserAgent());
         }
+        
+        try {
+            HttpResponse response = execute(httpGet);
 
-        if (charset == null) {
-            // use UTF8 char set if none charset given
-            return readContent(response, UTF8_CHARSET);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode != 200) {
+                httpGet.releaseConnection();
+                throw new RuntimeException("Unexpected status " + statusCode + " for uri " + httpGet.getURI());
+            }
+            
+            if (response.getEntity() == null) {
+                httpGet.releaseConnection();
+                throw new RuntimeException("No response for uri " + httpGet.getURI());
+            } else if (charset == null) {
+                // use UTF8 char set if none charset given
+                return readContent(response, UTF8_CHARSET);
+            } else {
+                // use given charset
+                return readContent(response, charset);
+            }
+        } catch (IOException ioe) {
+            httpGet.releaseConnection();
+            throw ioe;
         }
-        // use given charset
-        return readContent(response, charset);
     }
 
     private void setRoute(HttpUriRequest request) throws ClientProtocolException {
