@@ -22,6 +22,7 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import java.util.StringTokenizer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
+import org.yamj.core.service.metadata.nfo.InfoDTO;
 
 @Service("imdbScanner")
 public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingBean {
@@ -93,7 +95,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
             return ScanResult.MISSING_ID;
         }
 
-        // TODO Auto-generated method stub
+        // TODO IMDb movie scanning
         return ScanResult.ERROR;
     }
 
@@ -105,7 +107,50 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
             return ScanResult.MISSING_ID;
         }
 
-        // TODO Auto-generated method stub
+        // TODO IMDb series scanning
         return ScanResult.ERROR;
+    }
+
+    @Override
+    public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
+        return scanImdbID(nfoContent, dto, ignorePresentId);
+    }
+
+    public static boolean scanImdbID(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
+        // if we already have the ID, skip the scanning of the NFO file
+        if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SCANNER_ID))) {
+            return Boolean.TRUE;
+        }
+
+        LOG.trace("Scanning NFO for IMDb ID");
+        
+        try {
+            int beginIndex = nfoContent.indexOf("/tt");
+            if (beginIndex != -1) {
+                StringTokenizer st = new StringTokenizer(nfoContent.substring(beginIndex + 1), "/ \n,:!&Ã©\"'(--Ã¨_Ã§Ã )=$");
+                String sourceId = st.nextToken();
+                LOG.debug("IMDb ID found in NFO: {}", sourceId);
+                dto.addId(SCANNER_ID, sourceId);
+                return Boolean.TRUE;
+            }
+        } catch (Exception ex) {
+            LOG.trace("NFO scanning error", ex);
+        }
+            
+        try {
+            int beginIndex = nfoContent.indexOf("/Title?");
+            if (beginIndex != -1 && beginIndex + 7 < nfoContent.length()) {
+                StringTokenizer st = new StringTokenizer(nfoContent.substring(beginIndex + 7), "/ \n,:!&Ã©\"'(--Ã¨_Ã§Ã )=$");
+                String sourceId = "tt" + st.nextToken();
+                LOG.debug("IMDb ID found in NFO: {}", sourceId);
+                dto.addId(SCANNER_ID, sourceId);
+                return Boolean.TRUE;
+            }
+        } catch (Exception ex) {
+            LOG.trace("NFO scanning error", ex);
+        }
+
+        LOG.debug("No IMDb ID found in NFO");
+        return Boolean.FALSE;
     }
 }

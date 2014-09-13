@@ -36,6 +36,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
  * Abstract implementation of an metadata object.
  */
 @MappedSuperclass
+@SuppressWarnings("unused")
 public abstract class AbstractMetadata extends AbstractAuditable
         implements IMetadata, Serializable {
 
@@ -109,7 +110,7 @@ public abstract class AbstractMetadata extends AbstractAuditable
 
     public void setTitle(String title, String source) {
         if (StringUtils.isNotBlank(title)) {
-            setTitle(title);
+            this.title = title.trim();
             setOverrideFlag(OverrideFlag.TITLE, source);
         }
     }
@@ -125,7 +126,7 @@ public abstract class AbstractMetadata extends AbstractAuditable
 
     public void setTitleOriginal(String titleOriginal, String source) {
         if (StringUtils.isNotBlank(titleOriginal)) {
-            setTitleOriginal(titleOriginal);
+            this.titleOriginal = titleOriginal.trim();
             setOverrideFlag(OverrideFlag.ORIGINALTITLE, source);
         }
     }
@@ -140,7 +141,7 @@ public abstract class AbstractMetadata extends AbstractAuditable
 
     public void setPlot(String plot, String source) {
         if (StringUtils.isNotBlank(plot)) {
-            setPlot(plot);
+            this.plot = plot.trim();
             setOverrideFlag(OverrideFlag.PLOT, source);
         }
     }
@@ -155,7 +156,7 @@ public abstract class AbstractMetadata extends AbstractAuditable
 
     public void setOutline(String outline, String source) {
         if (StringUtils.isNotBlank(outline)) {
-            setOutline(outline);
+            this.outline = outline.trim();
             setOverrideFlag(OverrideFlag.OUTLINE, source);
         }
     }

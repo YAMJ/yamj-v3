@@ -475,8 +475,7 @@ public class MediaImportService {
         }
 
         // check if NFO file can be scanned
-        boolean scannable = FileTools.isFileScannable(stageFile);
-        if (!scannable) {
+        if (!FileTools.isFileScannable(stageFile)) {
             LOG.debug("NFO file {}-'{}' is not scannable", stageFile.getId(), stageFile.getFileName());
             stageFile.setStatus(StatusType.INVALID);
             stagingDao.updateEntity(stageFile);

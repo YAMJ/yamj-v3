@@ -22,15 +22,20 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.common.type.StatusType;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
+import org.yamj.common.type.StatusType;
+import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
+import org.yamj.core.service.metadata.nfo.InfoDTO;
 
 @Service("onlineScannerService")
 public class OnlineScannerService {
@@ -47,6 +52,9 @@ public class OnlineScannerService {
     private final HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<String, ISeriesScanner>();
     private final HashMap<String, IPersonScanner> registeredPersonScanner = new HashMap<String, IPersonScanner>();
 
+    @Autowired
+    private ConfigService configService;
+    
     /**
      * Register a movie scanner
      *
@@ -76,7 +84,7 @@ public class OnlineScannerService {
         LOG.info("Registered person scanner: {}", personScanner.getScannerName().toLowerCase());
         registeredPersonScanner.put(personScanner.getScannerName().toLowerCase(), personScanner);
     }
-
+    
     /**
      * Scan a movie.
      * 
@@ -257,5 +265,42 @@ public class OnlineScannerService {
         } else {
             person.setStatus(StatusType.ERROR);
         }
+    }
+    
+    public boolean scanNFO(String nfoContent, InfoDTO dto) {
+        INfoScanner nfoScanner;
+        if (dto.isTvShow()) {
+            nfoScanner = this.registeredSeriesScanner.get(SERIES_SCANNER);
+        } else {
+            nfoScanner = this.registeredMovieScanner.get(MOVIE_SCANNER);
+        }
+
+        boolean autodetect = this.configService.getBooleanProperty("yamj3.scan.nfo.autodetect.scanner", Boolean.FALSE);
+        boolean ignorePresentId = this.configService.getBooleanProperty("yamj3.scan.nfo.ignore.present.id", Boolean.FALSE);
+
+        boolean foundInfo = false;
+        if (nfoScanner != null) {
+            foundInfo = nfoScanner.scanNFO(nfoContent, dto, ignorePresentId);
+        }
+        
+        if (autodetect && !foundInfo) {
+            Set<INfoScanner> nfoScanners = new HashSet<INfoScanner>();
+            if (dto.isTvShow()) {
+                nfoScanners.addAll(this.registeredSeriesScanner.values());
+            } else {
+                nfoScanners.addAll(this.registeredMovieScanner.values());
+            }
+            
+            for (INfoScanner autodetectScanner : nfoScanners) {
+                foundInfo = autodetectScanner.scanNFO(nfoContent, dto, ignorePresentId);
+                if (foundInfo) {
+                    // set auto-detected scanner
+                    dto.setOnlineScanner(autodetectScanner.getScannerName());
+                    break;
+                }
+            }
+        }
+        
+        return foundInfo;
     }
 }

@@ -22,12 +22,12 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import java.nio.charset.Charset;
-
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.List;
+import java.util.StringTokenizer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +39,7 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.OverrideFlag;
+import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.StringTools;
 import org.yamj.core.tools.web.HTMLTools;
@@ -93,7 +94,10 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
                 if (searchImdb) {
                     // search IMDb id if not present
                     imdbId = this.imdbSearchEngine.getImdbId(videoData.getTitle(), videoData.getPublicationYear(), false);
-                    videoData.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
+                    if (StringUtils.isNotBlank(imdbId)) {
+                        LOG.debug("Found IMDb id {} for movie '{}'", imdbId, videoData.getTitle());
+                        videoData.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
+                    }
                 }
             }
             
@@ -341,5 +345,34 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
             role = role.substring(4);
         }
         return role;
+    }
+
+    @Override
+    public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
+        // if we already have the ID, skip the scanning of the NFO file
+        if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SCANNER_ID))) {
+            return Boolean.TRUE;
+        }
+
+        // scan for IMDb ID
+        ImdbScanner.scanImdbID(nfoContent, dto, ignorePresentId);
+        
+        LOG.trace("Scanning NFO for OFDb url");
+        
+        try {
+            int beginIndex = nfoContent.indexOf("http://www.ofdb.de/film/");
+            if (beginIndex != -1) {
+                StringTokenizer st = new StringTokenizer(nfoContent.substring(beginIndex), " \n\t\r\f!&é\"'(èçà)=$<>");
+                String sourceId = st.nextToken();
+                LOG.debug("OFDb url found in NFO: {}", sourceId);
+                dto.addId(SCANNER_ID, sourceId);
+                return Boolean.TRUE;
+            }
+        } catch (Exception ex) {
+            LOG.trace("NFO scanning error", ex);
+        }
+
+        LOG.debug("No OFDb url found in NFO");
+        return Boolean.FALSE;
     }
 }

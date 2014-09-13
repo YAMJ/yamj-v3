@@ -164,7 +164,7 @@ public class Series extends AbstractMetadata {
         this.skipOnlineScans = skipOnlineScans;
     }
 
-    private Map<String, String> getSourceDbIdMap() {
+    public Map<String, String> getSourceDbIdMap() {
         return sourceDbIdMap;
     }
 
@@ -180,7 +180,7 @@ public class Series extends AbstractMetadata {
     @Override
     public boolean setSourceDbId(String sourceDb, String id) {
         if (StringUtils.isNotBlank(id)) {
-            sourceDbIdMap.put(sourceDb, id);
+            sourceDbIdMap.put(sourceDb, id.trim());
             return true;
         }
         return false;

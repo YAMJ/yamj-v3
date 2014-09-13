@@ -55,10 +55,7 @@ public final class InfoDTO {
     private String tagline;
     private String quote;
     private String company;
-    
-    public InfoDTO() {
-        this(false);
-    }
+    private String onlineScanner;
 
     public InfoDTO(boolean tvShow) {
         this.tvShow = tvShow;
@@ -84,6 +81,12 @@ public final class InfoDTO {
         this.skipOnlineScans.add("all");
     }
 
+    public void setSkipOnlineScans(String skipOnlineScans) {
+        if (StringUtils.isNotBlank(skipOnlineScans)) {
+            this.skipOnlineScans = Arrays.asList(StringUtils.split(skipOnlineScans, ";"));
+        }
+    }
+    
     public String getSkipOnlineScans() {
         if (this.skipOnlineScans.isEmpty()) {
             return null;
@@ -95,9 +98,16 @@ public final class InfoDTO {
         return ids;
     }
 
+    public String getId(String sourceDb) {
+        return ids.get(sourceDb);
+    }
+    
+    public void setIds(Map<String, String> ids) {
+        this.ids = ids;
+    }
+
     public void addId(String sourceDb, String sourceId) {
-        if (StringUtils.isNotBlank(sourceDb)
-                && StringUtils.isNotBlank(sourceId)) {
+        if (StringUtils.isNotBlank(sourceDb) && StringUtils.isNotBlank(sourceId)) {
             if ("-1".equals(sourceId)) {
                 // skip online scan
                 if (!this.skipOnlineScans.contains("all")) {
@@ -105,6 +115,7 @@ public final class InfoDTO {
                 }
             } else {
                 this.ids.put(sourceDb, sourceId);
+                this.skipOnlineScans.remove(sourceDb);
             }
             this.changed = true;
         }
@@ -307,7 +318,7 @@ public final class InfoDTO {
 
     public void addPosterURL(String posterURL) {
         if (StringUtils.isNotBlank(posterURL)) {
-            this.posterURLs.add(posterURL);
+            this.posterURLs.add(posterURL.trim());
             this.changed = true;
         }
     }
@@ -389,5 +400,13 @@ public final class InfoDTO {
             }
         }
         return yearDate;
+    }
+
+    public String getOnlineScanner() {
+        return onlineScanner;
+    }
+
+    public void setOnlineScanner(String onlineScanner) {
+        this.onlineScanner = onlineScanner;
     }
 }

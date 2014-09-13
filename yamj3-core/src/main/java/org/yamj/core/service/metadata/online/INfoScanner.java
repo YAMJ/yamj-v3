@@ -22,13 +22,9 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.service.metadata.nfo.InfoDTO;
 
-public interface IMovieScanner extends INfoScanner {
+public interface INfoScanner extends IOnlineScanner {
 
-    String getMovieId(VideoData videoData);
-
-    String getMovieId(String title, int year);
-
-    ScanResult scan(VideoData videoData);
+    public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId);
 }

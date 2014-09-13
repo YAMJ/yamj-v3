@@ -136,7 +136,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
 
     public void setBirthPlace(String birthPlace, String source) {
         if (StringUtils.isNotBlank(birthPlace)) {
-            this.birthPlace = birthPlace;
+            this.birthPlace = birthPlace.trim();
             setOverrideFlag(OverrideFlag.BIRTHPLACE, source);
         }
     }
@@ -151,7 +151,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
 
     public void setBirthName(String birthName, String source) {
         if (StringUtils.isNotBlank(birthName)) {
-            this.birthName = birthName;
+            this.birthName = birthName.trim();
             setOverrideFlag(OverrideFlag.BIRTHNAME, source);
         }
     }
@@ -181,7 +181,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
 
     public void setDeathPlace(String deathPlace, String source) {
         if (StringUtils.isNotBlank(deathPlace)) {
-            this.deathPlace = deathPlace;
+            this.deathPlace = deathPlace.trim();
             setOverrideFlag(OverrideFlag.DEATHPLACE, source);
         }
     }
@@ -196,7 +196,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
 
     public void setBiography(String biography, String source) {
         if (StringUtils.isNotBlank(biography)) {
-            this.biography = biography;
+            this.biography = biography.trim();
             setOverrideFlag(OverrideFlag.BIOGRAPHY, source);
         }
     }

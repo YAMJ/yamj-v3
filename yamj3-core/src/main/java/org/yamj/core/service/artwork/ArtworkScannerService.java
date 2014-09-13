@@ -22,9 +22,6 @@
  */
 package org.yamj.core.service.artwork;
 
-import org.yamj.core.service.metadata.online.TheMovieDbScanner;
-import org.yamj.core.service.metadata.online.TheTVDbScanner;
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,10 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigService;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.ArtworkLocatorService;
@@ -52,6 +46,8 @@ import org.yamj.core.service.artwork.poster.ITvShowPosterScanner;
 import org.yamj.core.service.artwork.tv.ITvShowBannerScanner;
 import org.yamj.core.service.artwork.tv.ITvShowVideoImageScanner;
 import org.yamj.core.service.file.tools.FileTools;
+import org.yamj.core.service.metadata.online.TheMovieDbScanner;
+import org.yamj.core.service.metadata.online.TheTVDbScanner;
 
 @Service("artworkScannerService")
 public class ArtworkScannerService {
@@ -122,16 +118,18 @@ public class ArtworkScannerService {
         List<ArtworkLocated> locatedArtworks = new LinkedList<ArtworkLocated>();
 
         if (ArtworkType.POSTER == artwork.getArtworkType()) {
+            // banner only for movie, season and series
             this.scanPosterLocal(artwork, locatedArtworks);
             this.scanPosterOnline(artwork, locatedArtworks);
         } else if (ArtworkType.FANART == artwork.getArtworkType()) {
+            // banner only for movie, season and series
             this.scanFanartLocal(artwork, locatedArtworks);
             this.scanFanartOnline(artwork, locatedArtworks);
-        } else if (ArtworkType.BANNER == artwork.getArtworkType() && !artwork.getMetadata().isMovie()) {
+        } else if (ArtworkType.BANNER == artwork.getArtworkType()) {
             // banner only for season and series
             this.scanBannerLocal(artwork, locatedArtworks);
             this.scanBannerOnline(artwork, locatedArtworks);
-        } else if (ArtworkType.VIDEOIMAGE == artwork.getArtworkType() && (artwork.getMetadata().getEpisodeNumber() >= 0)) {
+        } else if (ArtworkType.VIDEOIMAGE == artwork.getArtworkType()) {
             // video image only for episodes
             this.scanVideoImageLocal(artwork, locatedArtworks);
             this.scanVideoImageOnline(artwork, locatedArtworks);
@@ -174,16 +172,16 @@ public class ArtworkScannerService {
         
         if (ArtworkType.POSTER == artwork.getArtworkType() || ArtworkType.FANART == artwork.getArtworkType()) {
             sb.append(".");
-            if (artwork.getMetadata().isMovie()) {
+            if (artwork.getVideoData() != null) {
                 sb.append("movie");
-            } else if (artwork.getMetadata().getSeasonNumber() >= 0) {
+            } else if (artwork.getSeason() != null) {
                 sb.append("tvshow.season");
             } else {
                 sb.append("tvshow.series");
             }
         } else if (ArtworkType.BANNER == artwork.getArtworkType()) {
             sb.append(".");
-            if (artwork.getMetadata().getSeasonNumber() >= 0) {
+            if (artwork.getSeason() != null) {
                 sb.append("tvshow.season");
             } else {
                 sb.append("tvshow.series");
@@ -201,10 +199,14 @@ public class ArtworkScannerService {
 
         List<StageFile> posters = null;
 
-        if (artwork.getMetadata().isMovie()) {
+        if (artwork.getVideoData() != null) {
+            // scan movie poster
             posters = this.artworkLocatorService.getMoviePosters(artwork.getVideoData());
+        } else if (artwork.getSeason() != null) {
+            // TODO scan season poster
+        } else if (artwork.getSeries() != null) {
+            // TODO scan series poster
         }
-        // TODO series/season poster scanning
 
         createLocatedArtworksLocal(artwork, posters, locatedArtworks);
     }
@@ -219,7 +221,7 @@ public class ArtworkScannerService {
 
         List<ArtworkDetailDTO> posters = null;
 
-        if (artwork.getMetadata().isMovie()) {
+        if (artwork.getVideoData() != null) {
             // CASE: movie poster scan
             for (String prio : this.configService.getPropertyAsList("yamj3.artwork.scanner.poster.movie.priorities", TheMovieDbScanner.SCANNER_ID)) {
                 IMoviePosterScanner scanner = registeredMoviePosterScanner.get(prio);
@@ -284,10 +286,14 @@ public class ArtworkScannerService {
 
         List<StageFile> fanarts = null;
 
-        if (artwork.getMetadata().isMovie()) {
+        if (artwork.getVideoData() != null) {
+            // scan movie poster
             fanarts = this.artworkLocatorService.getMovieFanarts(artwork.getVideoData());
+        } else if (artwork.getSeason() != null) {
+            // TODO scan season poster
+        } else if (artwork.getSeries() != null) {
+            // TODO scan series poster
         }
-        // TODO series/season poster scanning
 
         createLocatedArtworksLocal(artwork, fanarts, locatedArtworks);
     }
@@ -539,6 +545,7 @@ public class ArtworkScannerService {
         for (StageFile stageFile : stageFiles) {
             ArtworkLocated located = new ArtworkLocated();
             located.setArtwork(artwork);
+            located.setSource("file");
             located.setStageFile(stageFile);
             located.setPriority(1);
             

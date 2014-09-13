@@ -31,7 +31,6 @@ import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.options.OptionsConfig;
 import org.yamj.core.database.model.Configuration;
 import org.yamj.core.hibernate.HibernateDao;
@@ -41,7 +40,6 @@ public class ConfigDao extends HibernateDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigDao.class);
 
-    @Transactional
     @SuppressWarnings("unchecked")
     public Map<String, String> readConfig() {
         SQLQuery query = getSession().createSQLQuery("select config_key, config_value from configuration");
@@ -59,33 +57,25 @@ public class ConfigDao extends HibernateDao {
         return config;
     }
 
-    @Transactional
     public void storeConfig(Map<String, String> config) {
         for (Map.Entry<String, String> entry : config.entrySet()) {
             storeConfig(entry.getKey(), entry.getValue());
         }
     }
 
-    @Transactional
     public void storeConfig(String key, String value) {
         Session session = getSession();
         Configuration config = (Configuration) session.byId(Configuration.class).load(key);
-        if (config != null) {
-            if (!StringUtils.equals(value, config.getValue())) {
-                LOG.debug("Update configuration: key='{}', value='{}', oldValue='{}'", key, value, config.getValue());
-                config.setValue(value);
-                session.update(config);
-            }
-        } else {
+        if (config == null) {
             LOG.debug("Store new configuration: key='{}', value='{}'", key, value);
             config = new Configuration();
             config.setKey(key);
             config.setValue(value);
             session.save(config);
         }
+        // no update of already stored configuration values
     }
 
-    @Transactional
     @SuppressWarnings("unchecked")
     public List<Configuration> getConfigurationEntries(OptionsConfig options) {
         StringBuilder sbSQL = new StringBuilder("from Configuration");
@@ -102,7 +92,6 @@ public class ConfigDao extends HibernateDao {
         return getSession().createQuery(sbSQL.toString()).list();
     }
 
-    @Transactional
     public List<Configuration> getConfigurationEntries(String key) {
         OptionsConfig options = new OptionsConfig();
         options.setConfig(key);
@@ -116,7 +105,6 @@ public class ConfigDao extends HibernateDao {
      *
      * @param key
      */
-    @Transactional
     public void deleteConfig(String key) {
         if (StringUtils.isNotBlank(key)) {
             List<Configuration> configList = getConfigurationEntries(key);

@@ -177,7 +177,7 @@ public class VideoData extends AbstractMetadata {
 
     public void setPublicationYear(int publicationYear, String source) {
         if (publicationYear > 0) {
-            setPublicationYear(publicationYear);
+            this.publicationYear = publicationYear;
             setOverrideFlag(OverrideFlag.YEAR, source);
         }
     }
@@ -225,7 +225,7 @@ public class VideoData extends AbstractMetadata {
 
     public void setTagline(String tagline, String source) {
         if (StringUtils.isNotBlank(tagline)) {
-            this.tagline = tagline;
+            this.tagline = tagline.trim();
             setOverrideFlag(OverrideFlag.TAGLINE, source);
         }
     }
@@ -240,7 +240,7 @@ public class VideoData extends AbstractMetadata {
 
     public void setQuote(String quote, String source) {
         if (StringUtils.isNotBlank(quote)) {
-            this.quote = quote;
+            this.quote = quote.trim();
             setOverrideFlag(OverrideFlag.QUOTE, source);
         }
     }
@@ -255,7 +255,7 @@ public class VideoData extends AbstractMetadata {
 
     public void setCountry(String country, String source) {
         if (StringUtils.isNotBlank(country)) {
-            setCountry(country);
+            this.country = country.trim();
             setOverrideFlag(OverrideFlag.COUNTRY, source);
         }
     }
@@ -285,7 +285,7 @@ public class VideoData extends AbstractMetadata {
     @Override
     public boolean setSourceDbId(String sourceDb, String id) {
         if (StringUtils.isNotBlank(id)) {
-            sourceDbIdMap.put(sourceDb, id);
+            sourceDbIdMap.put(sourceDb, id.trim());
             return true;
         }
         return false;
@@ -437,10 +437,10 @@ public class VideoData extends AbstractMetadata {
             this.creditDTOS.add(creditDTO);
         } else {
             // update values
-            if (StringUtils.isBlank(credit.getRole())) {
+            if (StringUtils.isEmpty(credit.getRole())) {
                 credit.setRole(creditDTO.getRole());
             }
-            if (StringUtils.isBlank(credit.getRealName())) {
+            if (StringUtils.isEmpty(credit.getRealName())) {
                 credit.setRealName(creditDTO.getRealName());
             }
             if (MapUtils.isNotEmpty(creditDTO.getPhotoURLS())) {
@@ -521,7 +521,7 @@ public class VideoData extends AbstractMetadata {
 
     public void addPosterURL(String posterURL, String source) {
         if (StringUtils.isNotBlank(posterURL)) {
-            this.posterURLS.put(posterURL, source);
+            this.posterURLS.put(posterURL.trim(), source);
         }
     }
 
@@ -532,7 +532,7 @@ public class VideoData extends AbstractMetadata {
 
     public void addFanartURL(String fanartURL, String source) {
         if (StringUtils.isNotBlank(fanartURL)) {
-            this.fanartURLS.put(fanartURL, source);
+            this.fanartURLS.put(fanartURL.trim(), source);
         }
     }
 

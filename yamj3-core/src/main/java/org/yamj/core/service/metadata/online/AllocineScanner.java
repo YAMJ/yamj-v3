@@ -37,12 +37,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.web.HTMLTools;
@@ -64,6 +66,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     private AllocineApiWrapper allocineApiWrapper;
     @Autowired
     private OnlineScannerService onlineScannerService;
+    @Autowired
+    private ConfigService configService; 
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
 
@@ -92,10 +96,13 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         // we also get IMDb id for extra infos
         String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
         if (StringUtils.isBlank(imdbId) && StringUtils.isNotBlank(videoData.getTitleOriginal())) {
-            imdbId = imdbSearchEngine.getImdbId(videoData.getTitleOriginal(), videoData.getYear(), false);
-            if (StringUtils.isNotBlank(imdbId)) {
-                LOG.debug("Found IMDb id {} for movie '{}'", imdbId, videoData.getTitle());
-                videoData.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
+            boolean searchImdb = configService.getBooleanProperty("allocine.search.imdb", false);
+            if (searchImdb) {
+                imdbId = imdbSearchEngine.getImdbId(videoData.getTitleOriginal(), videoData.getYear(), false);
+                if (StringUtils.isNotBlank(imdbId)) {
+                    LOG.debug("Found IMDb id {} for movie '{}'", imdbId, videoData.getTitleOriginal());
+                    videoData.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
+                }
             }
         }
 
@@ -236,10 +243,13 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         // we also get IMDb id for extra infos
         String imdbId = series.getSourceDbId(ImdbScanner.SCANNER_ID);
         if (StringUtils.isBlank(imdbId) && StringUtils.isNotBlank(series.getTitleOriginal())) {
-            imdbId = imdbSearchEngine.getImdbId(series.getTitleOriginal(), series.getYear(), true);
-            if (StringUtils.isNotBlank(imdbId)) {
-                LOG.debug("Found IMDb id {} for series '{}'", imdbId, series.getTitle());
-                series.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
+            boolean searchImdb = configService.getBooleanProperty("allocine.search.imdb", false);
+            if (searchImdb) {
+                imdbId = imdbSearchEngine.getImdbId(series.getTitleOriginal(), series.getYear(), true);
+                if (StringUtils.isNotBlank(imdbId)) {
+                    LOG.debug("Found IMDb id {} for series '{}'", imdbId, series.getTitleOriginal());
+                    series.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
+                }
             }
         }
 
@@ -519,6 +529,41 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         person.addPhotoURL(personInfos.getPhotoURL(), SCANNER_ID);
 
         return ScanResult.OK;
+    }
+
+    @Override
+    public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
+        // if we already have the ID, skip the scanning of the NFO file
+        if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SCANNER_ID))) {
+            return Boolean.TRUE;
+        }
+        
+        // scan for IMDb ID
+        ImdbScanner.scanImdbID(nfoContent, dto, ignorePresentId);
+
+        LOG.trace("Scanning NFO for Allocine ID");
+        
+        // http://www.allocine.fr/...=XXXXX.html
+        try {
+            int beginIndex = StringUtils.indexOfIgnoreCase(nfoContent, "http://www.allocine.fr/");
+            if (beginIndex != -1) {
+                int beginIdIndex = nfoContent.indexOf('=', beginIndex);
+                if (beginIdIndex != -1) {
+                    int endIdIndex = nfoContent.indexOf('.', beginIdIndex);
+                    if (endIdIndex != -1) {
+                        String sourceId = nfoContent.substring(beginIdIndex + 1, endIdIndex);
+                        LOG.debug("Allocine ID found in NFO: {}", sourceId);
+                        dto.addId(SCANNER_ID, sourceId);
+                        return Boolean.TRUE;
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            LOG.trace("NFO scanning error", ex);
+        }
+        
+        LOG.debug("No Allocine ID found in NFO");
+        return Boolean.FALSE;
     }
 }
 

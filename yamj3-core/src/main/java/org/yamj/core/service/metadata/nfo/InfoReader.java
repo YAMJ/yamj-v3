@@ -22,12 +22,6 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
-import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
-
-import org.yamj.core.service.metadata.online.ImdbScanner;
-import org.yamj.core.service.metadata.online.TheMovieDbScanner;
-import org.yamj.core.service.metadata.online.TheTVDbScanner;
-import org.yamj.common.type.StatusType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,10 +36,16 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigService;
-import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.service.file.tools.FileTools;
+import org.yamj.core.service.metadata.online.ImdbScanner;
+import org.yamj.core.service.metadata.online.OnlineScannerService;
+import org.yamj.core.service.metadata.online.TheMovieDbScanner;
+import org.yamj.core.service.metadata.online.TheTVDbScanner;
+import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
+import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.StringTools;
 import org.yamj.core.tools.xml.DOMHelper;
 
@@ -63,7 +63,9 @@ public final class InfoReader {
     @Autowired
     private ConfigService configService;
     @Autowired
-    private StagingDao stagingDao;
+    private StagingService stagingService;
+    @Autowired
+    private OnlineScannerService onlineScannerService;
 
     /**
      * Try and read a NFO file for information
@@ -72,7 +74,7 @@ public final class InfoReader {
      * @param nfoText
      * @param dto
      */
-    public void readNfoFile(StageFile stageFile, InfoDTO  dto) throws Exception {
+    public void readNfoFile(StageFile stageFile, InfoDTO dto) throws Exception {
         String nfoFilename = stageFile.getFileName();
 
         File nfoFile = new File(stageFile.getFullPath());
@@ -85,15 +87,11 @@ public final class InfoReader {
             
             if (StringUtils.isBlank(nfoContent)) {
                 LOG.warn("NFO file '{}' is not readable", nfoFilename);
-                
-                // set to invalid if status was DONE
-                // Note: NEW and UPDATED should be handled by NFO file process
-                if (StatusType.DONE.equals(stageFile.getStatus())) {
-                    try {
-                        stageFile.setStatus(StatusType.ERROR);
-                        this.stagingDao.updateEntity(stageFile);
-                    } catch (Exception ignore) {}
-                }
+
+                try {
+                    stageFile.setStatus(StatusType.INVALID);
+                    this.stagingService.updateStageFile(stageFile);
+                } catch (Exception ignore) {}
                 
                 // nothing to do for this stage file
                 return;
@@ -134,14 +132,31 @@ public final class InfoReader {
                 // Send text to be read
                 String nfoTrimmed = StringUtils.substring(nfoContent, start, end);
                 parsedNfo = readXmlNfo(null, nfoTrimmed, nfoFilename, dto);
+
+                nfoTrimmed = StringUtils.remove(nfoContent, nfoTrimmed);
+                if (parsedNfo && StringUtils.isNotBlank(nfoTrimmed)) {
+                    // we have some text left, so scan that with the text scanner
+                    readTextNfo(nfoTrimmed, dto);
+                }
             }
         }
 
         // If the XML wasn't found or parsed correctly, then fall back to the old method
         if (parsedNfo) {
-            LOG.trace("Successfully scanned {} as XML format", nfoFilename);
+            LOG.debug("Successfully scanned {} as XML format", nfoFilename);
         } else {
-            throw new RuntimeException("Failed to scan " + nfoFilename + " as XML format");
+            // If the XML wasn't found or parsed correctly, then fall back to the old method
+            parsedNfo = readTextNfo(nfoContent, dto);
+            if (parsedNfo) {
+                LOG.debug("Successfully scanned {} as text format", nfoFilename);
+            } else {
+                LOG.warn("Failed to find any information in {}", nfoFilename);
+
+                try {
+                    stageFile.setStatus(StatusType.INVALID);
+                    this.stagingService.updateStageFile(stageFile);
+                } catch (Exception ignore) {}
+            }
         }
     }
 
@@ -176,8 +191,7 @@ public final class InfoReader {
                 xmlDoc = DOMHelper.getDocFromFile(nfoFile);
             }
         } catch (Exception ex) {
-            LOG.error("Failed parsing NFO file: {}", nfoFilename);
-            LOG.error("Error", ex);
+            LOG.error("Failed parsing NFO file: " + nfoFilename, ex);
             return Boolean.FALSE;
         }
 
@@ -768,5 +782,59 @@ public final class InfoReader {
         episodeDTO.setAirsBeforeEpisode(DOMHelper.getValueFromElement(eEpisodeDetails, "airsbeforeepisode", "airsBeforeEpisode"));
 
         return episodeDTO;
+    }
+
+    /**
+     * Scan a text file for information
+     *
+     * @param nfoContent
+     * @param dto
+     * @return
+     */
+    private boolean readTextNfo(String nfoContent, InfoDTO dto) {
+        boolean foundInfo = onlineScannerService.scanNFO(nfoContent, dto);
+        
+        LOG.trace("Scanning NFO for Poster URL");
+        int urlStartIndex = 0;
+        while (urlStartIndex >= 0 && urlStartIndex < nfoContent.length()) {
+            int currentUrlStartIndex = StringUtils.indexOfIgnoreCase(nfoContent, "http://", urlStartIndex);
+            if (currentUrlStartIndex >= 0) {
+                int currentUrlEndIndex = StringUtils.indexOfIgnoreCase(nfoContent, "jpg", currentUrlStartIndex);
+                if (currentUrlEndIndex >= 0) {
+                    int nextUrlStartIndex = StringUtils.indexOfIgnoreCase(nfoContent, "http://", currentUrlStartIndex); 
+                    // look for shortest http://
+                    while ((nextUrlStartIndex != -1) && (nextUrlStartIndex < currentUrlEndIndex + 3)) {
+                        currentUrlStartIndex = nextUrlStartIndex;
+                        nextUrlStartIndex = StringUtils.indexOfIgnoreCase(nfoContent, "http://", currentUrlStartIndex + 1); 
+                    }
+
+                    // Check to see if the URL has <fanart> at the beginning and ignore it if it does (Issue 706)
+                    if ((currentUrlStartIndex < 8)
+                            || (nfoContent.substring(currentUrlStartIndex - 8, currentUrlStartIndex).compareToIgnoreCase("<fanart>") != 0)) {
+                        String foundUrl = nfoContent.substring(currentUrlStartIndex, currentUrlEndIndex + 3);
+
+                        // Check for some invalid characters to see if the URL is valid
+                        if (foundUrl.contains(" ") || foundUrl.contains("*")) {
+                            urlStartIndex = currentUrlStartIndex + 3;
+                        } else {
+                            LOG.debug("Poster URL found in nfo: {} ", foundUrl);
+                            dto.addPosterURL(foundUrl);
+                            urlStartIndex = -1;
+                            foundInfo = Boolean.TRUE;
+                        }
+                    } else {
+                        LOG.debug("Poster URL ignored in NFO because it's a fanart URL");
+                        // Search for the URL again
+                        urlStartIndex = currentUrlStartIndex + 3;
+                    }
+                } else {
+                    urlStartIndex = currentUrlStartIndex + 3;
+                }
+            } else {
+                urlStartIndex = -1;
+            }
+        }
+        
+        return foundInfo;
     }
 }

@@ -22,8 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
-
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
 import java.util.*;
@@ -276,5 +276,62 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
+        // if we already have the ID, skip the scanning of the NFO file
+        if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SCANNER_ID))) {
+            return Boolean.TRUE;
+        }
+    
+        // scan for IMDb ID
+        ImdbScanner.scanImdbID(nfoContent, dto, ignorePresentId);
+
+        LOG.trace("Scanning NFO for TheTVDB ID");
+        
+        // http://www.allocine.fr/...=XXXXX.html
+        try {
+            String compareString = nfoContent.toUpperCase();
+            int idx = compareString.indexOf("THETVDB.COM");
+            if (idx > -1) {
+                int beginIdx = compareString.indexOf("&ID=");
+                int length = 4;
+                if (beginIdx < idx) {
+                    beginIdx = compareString.indexOf("?ID=");
+                }
+                if (beginIdx < idx) {
+                    beginIdx = compareString.indexOf("&SERIESID=");
+                    length = 10;
+                }
+                if (beginIdx < idx) {
+                    beginIdx = compareString.indexOf("?SERIESID=");
+                    length = 10;
+                }
+
+                if (beginIdx > idx) {
+                    int endIdx = compareString.indexOf("&", beginIdx + 1);
+                    String id;
+                    if (endIdx > -1) {
+                        id = compareString.substring(beginIdx + length, endIdx);
+                    } else {
+                        id = compareString.substring(beginIdx + length);
+                    }
+
+                    if (StringUtils.isNotBlank(id)) {
+                        String sourceId = id.trim();
+                        dto.addId(SCANNER_ID, sourceId);
+                        LOG.debug("TheTVDB ID found in NFO: {}", sourceId);
+                        dto.addId(SCANNER_ID, sourceId);
+                        return Boolean.TRUE;
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            LOG.trace("NFO scanning error", ex);
+        }
+        
+        LOG.debug("No TheTVDB ID found in NFO");
+        return Boolean.FALSE;
     }
 }

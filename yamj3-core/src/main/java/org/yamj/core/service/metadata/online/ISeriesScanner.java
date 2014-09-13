@@ -24,7 +24,7 @@ package org.yamj.core.service.metadata.online;
 
 import org.yamj.core.database.model.Series;
 
-public interface ISeriesScanner extends IOnlineScanner {
+public interface ISeriesScanner extends INfoScanner {
 
     String getSeriesId(Series series);
 

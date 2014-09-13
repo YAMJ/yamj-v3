@@ -37,7 +37,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class FilenameDTO {
 
-    private static DecimalFormat paddedFormat = new DecimalFormat("000"); // Issue 190
+    private static DecimalFormat PADDED_FORMAT = new DecimalFormat("000"); // Issue 190
     private final String name;
     private final String parentName;
     private final boolean directory;
@@ -120,7 +120,7 @@ public class FilenameDTO {
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        this.title = StringUtils.trim(title);
     }
 
     public int getYear() {
@@ -152,7 +152,7 @@ public class FilenameDTO {
     }
 
     public void setPartTitle(String partTitle) {
-        this.partTitle = partTitle;
+        this.partTitle = StringUtils.trim(partTitle);
     }
 
     public String getMovieVersion() {
@@ -236,7 +236,7 @@ public class FilenameDTO {
     }
 
     public void setEpisodeTitle(String episodeTitle) {
-        this.episodeTitle = episodeTitle;
+        this.episodeTitle = StringUtils.trim(episodeTitle);
     }
 
     public void setId(String key, String id) {
@@ -259,7 +259,7 @@ public class FilenameDTO {
 
     public String buildIdentifier() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getTitle());
+        sb.append(getTitle().trim());
         sb.append("_");
         sb.append(getYear() > -1 ? getYear() : "0000");
         return sb.toString();
@@ -271,9 +271,9 @@ public class FilenameDTO {
         sb.append("_");
         sb.append(getYear() > -1 ? getYear() : "0000");
         sb.append("_");
-        sb.append(paddedFormat.format(getSeason()));
+        sb.append(PADDED_FORMAT.format(getSeason()));
         sb.append("_");
-        sb.append(paddedFormat.format(episode));
+        sb.append(PADDED_FORMAT.format(episode));
         return sb.toString();
     }
 
@@ -283,7 +283,7 @@ public class FilenameDTO {
         sb.append("_");
         sb.append(getYear() > -1 ? getYear() : "0000");
         sb.append("_");
-        sb.append(paddedFormat.format(getSeason()));
+        sb.append(PADDED_FORMAT.format(getSeason()));
         return sb.toString();
     }
 

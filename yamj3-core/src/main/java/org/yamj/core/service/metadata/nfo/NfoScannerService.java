@@ -52,12 +52,21 @@ public class NfoScannerService {
     private InfoReader infoReader;
     
     public void scanMovie(VideoData videoData) {
+        // get the stage files
+        List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(videoData);
+        if (CollectionUtils.isEmpty(stageFiles)) {
+            return;
+        }
+
         LOG.info("Scanning NFO data for movie '{}'", videoData.getIdentifier());
         
-        // get the stage files ...
-        List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(videoData);
-        // ... and scan all NFOs for movie
-        InfoDTO infoDTO = this.scanNFOs(stageFiles, false);
+        // create an info DTO for movie
+        InfoDTO infoDTO = new InfoDTO(true);
+        infoDTO.setIds(videoData.getSourceDbIdMap());
+        infoDTO.setSkipOnlineScans(videoData.getSkipOnlineScans());
+       
+        // scan the NFOs
+        this.scanNFOs(stageFiles, infoDTO);
         
         if (infoDTO.isTvShow()) {
             LOG.warn("NFO's determined TV show for movie: {}", videoData.getIdentifier());
@@ -140,12 +149,21 @@ public class NfoScannerService {
     }
 
     public void scanSeriese(Series series) {
+        // get the stage files
+        List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(series);
+        if (CollectionUtils.isEmpty(stageFiles)) {
+            return;
+        }
+
         LOG.info("Scanning NFO data for series '{}'", series.getIdentifier());
         
-        // get the stage files ...
-        List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(series);
-        // ... and scan all NFOs for TV show
-        InfoDTO infoDTO = this.scanNFOs(stageFiles, true);
+        // create an info DTO for TV show
+        InfoDTO infoDTO = new InfoDTO(true);
+        infoDTO.setIds(series.getSourceDbIdMap());
+        infoDTO.setSkipOnlineScans(series.getSkipOnlineScans());
+       
+        // scan the NFOs
+        this.scanNFOs(stageFiles, infoDTO);
 
         if (!infoDTO.isTvShow()) {
             LOG.warn("NFO's determined movie for tv show: {}", series.getIdentifier());
@@ -229,10 +247,7 @@ public class NfoScannerService {
         LOG.debug("Scanned NFO data for series '{}'", series.getIdentifier());
     }
 
-    private InfoDTO scanNFOs(List<StageFile> stageFiles, boolean tvShow) {
-        // create a new INFO object
-        InfoDTO infoDTO = new InfoDTO(tvShow);
-
+    private InfoDTO scanNFOs(List<StageFile> stageFiles, InfoDTO infoDTO) {
         // parse the movie with each NFO
         for (StageFile stageFile : stageFiles) {
             try {
@@ -242,7 +257,7 @@ public class NfoScannerService {
                 LOG.error("NFO scanning error", ex);
                 
                 try {
-                    // mark stage file as invalid
+                    // mark stage file with error
                     stageFile.setStatus(StatusType.ERROR);
                     this.stagingService.updateStageFile(stageFile);
                 } catch (Exception ignore) {}

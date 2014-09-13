@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
-
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.model.MovieDb;
@@ -31,10 +29,7 @@ import com.omertron.themoviedbapi.model.PersonType;
 import com.omertron.themoviedbapi.model.ProductionCompany;
 import com.omertron.themoviedbapi.model.ProductionCountry;
 import com.omertron.themoviedbapi.results.TmdbResultsList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -47,6 +42,8 @@ import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.service.metadata.nfo.InfoDTO;
+import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
 import org.yamj.core.tools.OverrideTools;
 
 @Service("tmdbScanner")
@@ -236,7 +233,9 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             if (CollectionUtils.isNotEmpty(moviedb.getGenres())) {
                 Set<String> genreNames = new HashSet<String>();
                 for (com.omertron.themoviedbapi.model.Genre genre : moviedb.getGenres()) {
-                    genreNames.add(StringUtils.trim(genre.getName()));
+                    if (StringUtils.isBlank(genre.getName())) {
+                        genreNames.add(StringUtils.trim(genre.getName()));
+                    }
                 }
                 videoData.setGenreNames(genreNames, SCANNER_ID);
             }
@@ -246,7 +245,9 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             if (CollectionUtils.isNotEmpty(moviedb.getProductionCompanies())) {
                 Set<String> studioNames = new HashSet<String>();
                 for (ProductionCompany company : moviedb.getProductionCompanies()) {
-                    studioNames.add(StringUtils.trim(company.getName()));
+                    if (StringUtils.isBlank(company.getName())) {
+                        studioNames.add(StringUtils.trim(company.getName()));
+                    }
                 }
                 videoData.setStudioNames(studioNames, SCANNER_ID);
             }
@@ -438,5 +439,31 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         }
 
         return newBio.trim();
+    }
+
+    @Override
+    public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
+        // if we already have the ID, skip the scanning of the NFO file
+        if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SCANNER_ID))) {
+            return Boolean.TRUE;
+        }
+        
+        LOG.trace("Scanning NFO for TheMovieDb ID");
+
+        try {
+            int beginIndex = nfoContent.indexOf("/movie/");
+            if (beginIndex != -1) {
+                StringTokenizer st = new StringTokenizer(nfoContent.substring(beginIndex + 7), "/ \n,:!&é\"'(--è_çà)=$");
+                String sourceId = st.nextToken();
+                LOG.debug("Allocine ID found in NFO: {}", sourceId);
+                dto.addId(SCANNER_ID, sourceId);
+                return Boolean.TRUE;
+            }
+        } catch (Exception ex) {
+            LOG.trace("NFO scanning error", ex);
+        }
+        
+        LOG.debug("No TheMovieDb ID found in NFO");
+        return Boolean.FALSE;
     }
 }

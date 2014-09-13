@@ -186,7 +186,7 @@ public final class OverrideTools {
 
     private static List<String> resolvePriorities(String sources) {
         List<String> priorities;
-        if (StringUtils.isBlank(sources)) {
+        if (StringUtils.isEmpty(sources)) {
             priorities = Collections.emptyList();
         } else {
             String newSources = sources.toLowerCase();
@@ -265,11 +265,11 @@ public final class OverrideTools {
      */
     private static boolean hasHigherPriority(final OverrideFlag overrideFlag, final String actualSource, final String newSource, final IScannable scannable) {
         // check sources
-        if (StringUtils.isBlank(newSource)) {
+        if (StringUtils.isEmpty(newSource)) {
             // new source is not valid
             // -> actual source has higher priority
             return Boolean.FALSE;
-        } else if (StringUtils.isBlank(actualSource)) {
+        } else if (StringUtils.isEmpty(actualSource)) {
             // actual source is not valid
             // -> new source has higher priority
             return Boolean.TRUE;
@@ -365,7 +365,7 @@ public final class OverrideTools {
         if (skipCheck(videoData, OverrideFlag.COUNTRY, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (StringUtils.isBlank(videoData.getCountry())) {
+        } else if (StringUtils.isEmpty(videoData.getCountry())) {
             return Boolean.TRUE;
         }
         return checkOverwrite(videoData, OverrideFlag.COUNTRY, source);
@@ -375,7 +375,7 @@ public final class OverrideTools {
         if (skipCheck(metadata, OverrideFlag.ORIGINALTITLE, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (StringUtils.isBlank(metadata.getTitleOriginal())) {
+        } else if (StringUtils.isEmpty(metadata.getTitleOriginal())) {
             return Boolean.TRUE;
         }
         return checkOverwrite(metadata, OverrideFlag.ORIGINALTITLE, source);
@@ -385,7 +385,7 @@ public final class OverrideTools {
         if (skipCheck(metadata, OverrideFlag.OUTLINE, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (StringUtils.isBlank(metadata.getOutline())) {
+        } else if (StringUtils.isEmpty(metadata.getOutline())) {
             return Boolean.TRUE;
         }
         return checkOverwrite(metadata, OverrideFlag.OUTLINE, source);
@@ -395,7 +395,7 @@ public final class OverrideTools {
         if (skipCheck(metadata, OverrideFlag.PLOT, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (StringUtils.isBlank(metadata.getPlot())) {
+        } else if (StringUtils.isEmpty(metadata.getPlot())) {
             return Boolean.TRUE;
         }
         return checkOverwrite(metadata, OverrideFlag.PLOT, source);
@@ -405,7 +405,7 @@ public final class OverrideTools {
         if (skipCheck(videoData, OverrideFlag.QUOTE, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (StringUtils.isBlank(videoData.getQuote())) {
+        } else if (StringUtils.isEmpty(videoData.getQuote())) {
             return Boolean.TRUE;
         }
         return checkOverwrite(videoData, OverrideFlag.QUOTE, source);
@@ -425,7 +425,7 @@ public final class OverrideTools {
         if (skipCheck(videoData, OverrideFlag.TAGLINE, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (StringUtils.isBlank(videoData.getTagline())) {
+        } else if (StringUtils.isEmpty(videoData.getTagline())) {
             return Boolean.TRUE;
         }
         return checkOverwrite(videoData, OverrideFlag.TAGLINE, source);
@@ -435,7 +435,7 @@ public final class OverrideTools {
         if (skipCheck(metadata, OverrideFlag.TITLE, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (StringUtils.isBlank(metadata.getTitle())) {
+        } else if (StringUtils.isEmpty(metadata.getTitle())) {
             return Boolean.TRUE;
         }
         return checkOverwrite(metadata, OverrideFlag.TITLE, source);
@@ -467,7 +467,7 @@ public final class OverrideTools {
         if (skipCheck(person, OverrideFlag.BIRTHPLACE, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (StringUtils.isBlank(person.getBirthPlace())) {
+        } else if (StringUtils.isEmpty(person.getBirthPlace())) {
             return Boolean.TRUE;
         }
         return checkOverwrite(person, OverrideFlag.BIRTHPLACE, source);
@@ -477,7 +477,7 @@ public final class OverrideTools {
         if (skipCheck(person, OverrideFlag.BIRTHNAME, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (StringUtils.isBlank(person.getBirthName())) {
+        } else if (StringUtils.isEmpty(person.getBirthName())) {
             return Boolean.TRUE;
         }
         return checkOverwrite(person, OverrideFlag.BIRTHNAME, source);
@@ -497,7 +497,7 @@ public final class OverrideTools {
         if (skipCheck(person, OverrideFlag.DEATHPLACE, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (StringUtils.isBlank(person.getDeathPlace())) {
+        } else if (StringUtils.isEmpty(person.getDeathPlace())) {
             return Boolean.TRUE;
         }
         return checkOverwrite(person, OverrideFlag.DEATHPLACE, source);
@@ -507,7 +507,7 @@ public final class OverrideTools {
         if (skipCheck(person, OverrideFlag.BIOGRAPHY, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (StringUtils.isBlank(person.getBiography())) {
+        } else if (StringUtils.isEmpty(person.getBiography())) {
             return Boolean.TRUE;
         }
         return checkOverwrite(person, OverrideFlag.BIOGRAPHY, source);

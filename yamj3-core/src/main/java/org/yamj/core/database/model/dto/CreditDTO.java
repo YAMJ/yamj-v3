@@ -51,7 +51,7 @@ public class CreditDTO {
         this.source = source;
         this.jobType = jobType;
         this.name = StringUtils.trim(name);
-        this.role = StringUtils.trimToNull(role);
+        this.role = StringUtils.trim(role);
     }
 
     public String getSource() {
@@ -102,7 +102,7 @@ public class CreditDTO {
 
     public void addPhotoURL(String photoURL, String source) {
         if (StringUtils.isNotBlank(photoURL)) {
-            this.photoURLS.put(photoURL, source);
+            this.photoURLS.put(photoURL.trim(), source);
         }
     }
 
@@ -111,8 +111,8 @@ public class CreditDTO {
     }
 
     public void addPersonId(String sourcedb, String personId) {
-        if (StringUtils.isNotBlank(sourcedb) && StringUtils.isNotBlank(personId)) {
-            this.personIdMap.put(sourcedb.trim(), personId.trim());
+        if (StringUtils.isNotBlank(personId)) {
+            this.personIdMap.put(sourcedb, personId.trim());
         }
     }
  
