@@ -22,8 +22,6 @@
  */
 package org.yamj.core.configuration;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.*;
 import java.util.Map.Entry;
 import org.springframework.beans.factory.InitializingBean;
@@ -138,7 +136,6 @@ public class ConfigService implements InitializingBean {
         return defaultValue;
     }
 
-    @Transactional
     public void setProperty(String key, String value) {
         // first store in database ...
         configDao.storeConfig(key, value);
@@ -146,27 +143,22 @@ public class ConfigService implements InitializingBean {
         cachedProperties.put(key, value);
     }
 
-    @Transactional
     public void setProperty(String key, boolean value) {
         setProperty(key, Boolean.toString(value));
     }
 
-    @Transactional
     public void setProperty(String key, int value) {
         setProperty(key, Integer.toString(value));
     }
 
-    @Transactional
     public void setProperty(String key, long value) {
         setProperty(key, Long.toString(value));
     }
 
-    @Transactional
     public void setProperty(String key, float value) {
         setProperty(key, Float.toString(value));
     }
 
-    @Transactional
     public void deleteProperty(String key) {
         // Delete the config from the database
         configDao.deleteConfig(key);
@@ -180,7 +172,6 @@ public class ConfigService implements InitializingBean {
      * @param key Can be blank/null or specific key
      * @return
      */
-    @Transactional
     public List<Configuration> getConfiguration(String key) {
         return configDao.getConfigurationEntries(key);
     }
@@ -191,7 +182,6 @@ public class ConfigService implements InitializingBean {
      * @param options
      * @return
      */
-    @Transactional
     public List<Configuration> getConfiguration(OptionsConfig options) {
         return configDao.getConfigurationEntries(options);
     }

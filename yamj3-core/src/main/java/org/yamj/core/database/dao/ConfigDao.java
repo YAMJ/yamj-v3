@@ -67,6 +67,7 @@ public class ConfigDao extends HibernateDao {
         }
     }
 
+    @Transactional
     public void storeConfig(String key, String value) {
         Session session = getSession();
         Configuration config = (Configuration) session.byId(Configuration.class).load(key);
@@ -80,6 +81,7 @@ public class ConfigDao extends HibernateDao {
         // no update of already stored configuration values
     }
 
+    @Transactional
     @SuppressWarnings("unchecked")
     public List<Configuration> getConfigurationEntries(OptionsConfig options) {
         StringBuilder sbSQL = new StringBuilder("from Configuration");
@@ -96,6 +98,7 @@ public class ConfigDao extends HibernateDao {
         return getSession().createQuery(sbSQL.toString()).list();
     }
 
+    @Transactional
     public List<Configuration> getConfigurationEntries(String key) {
         OptionsConfig options = new OptionsConfig();
         options.setConfig(key);
@@ -109,6 +112,7 @@ public class ConfigDao extends HibernateDao {
      *
      * @param key
      */
+    @Transactional
     public void deleteConfig(String key) {
         if (StringUtils.isNotBlank(key)) {
             List<Configuration> configList = getConfigurationEntries(key);
