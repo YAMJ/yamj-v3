@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.dao;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,7 @@ public class ConfigDao extends HibernateDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigDao.class);
 
+    @Transactional
     @SuppressWarnings("unchecked")
     public Map<String, String> readConfig() {
         SQLQuery query = getSession().createSQLQuery("select config_key, config_value from configuration");
@@ -57,6 +60,7 @@ public class ConfigDao extends HibernateDao {
         return config;
     }
 
+    @Transactional
     public void storeConfig(Map<String, String> config) {
         for (Map.Entry<String, String> entry : config.entrySet()) {
             storeConfig(entry.getKey(), entry.getValue());

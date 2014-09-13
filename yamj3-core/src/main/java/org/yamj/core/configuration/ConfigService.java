@@ -55,7 +55,6 @@ public class ConfigService implements InitializingBean {
     }
 
     @Override
-    @Transactional
     public void afterPropertiesSet() throws Exception {
         // get stored properties
         Map<String, String> dbConfig = configDao.readConfig();

@@ -56,9 +56,9 @@ public final class OverrideTools {
     private static final Map<OverrideFlag, List<String>> SEASON_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
     private static final Map<OverrideFlag, List<String>> SERIES_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
     private static final Map<OverrideFlag, List<String>> PERSON_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
-    private static final String DEFAULT_PLUGIN_MOVIE_SERIES = "nfo,plugin_movie,plugin_series,alternate_movie,alternate_series";
-    private static final String DEFAULT_PLUGIN_SERIES = "nfo,plugin_series,alternate_series";
-    private static final String DEFAULT_PLUGIN_PERSON = "nfo,plugin_person,alternate_person";
+    private static final String DEFAULT_PLUGIN_MOVIE_SERIES = "api,nfo,plugin_movie,plugin_series,alternate_movie,alternate_series";
+    private static final String DEFAULT_PLUGIN_SERIES = "api,nfo,plugin_series,alternate_series";
+    private static final String DEFAULT_PLUGIN_PERSON = "api,nfo,plugin_person,alternate_person";
 
     static {
         String sources;
