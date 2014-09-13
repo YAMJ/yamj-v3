@@ -22,6 +22,7 @@
  */
 package org.yamj.core.database.model;
 
+import java.util.Date;
 import org.yamj.core.database.model.type.OverrideFlag;
 
 public interface IScannable {
@@ -33,4 +34,6 @@ public interface IScannable {
     String getOverrideSource(OverrideFlag overrideFlag);
 
     void setOverrideFlag(OverrideFlag overrideFlag, String source);
+    
+    Date getLastScanned();
 }

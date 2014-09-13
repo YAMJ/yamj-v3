@@ -22,6 +22,7 @@
  */
 package org.yamj.core.database.service;
 
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -233,8 +234,9 @@ public class MetadataStorageService {
     }
 
     @Transactional
-    public void updatePerson(Person person) {
+    public void updateScannedPerson(Person person) {
         // update entity
+        person.setLastScanned(new Date(System.currentTimeMillis()));
         metadataDao.updateEntity(person);
         
         // store artwork
@@ -249,8 +251,14 @@ public class MetadataStorageService {
     }
 
     @Transactional
-    public void updateMetaData(VideoData videoData) {
+    public void updateScannedMetaData(VideoData videoData) {
+        Date lastScanned = new Date(System.currentTimeMillis());
+        this.updateVideoData(videoData, lastScanned);
+    }
+
+    private void updateVideoData(VideoData videoData, Date lastScanned) {
         // update entity
+        videoData.setLastScanned(lastScanned);
         metadataDao.updateEntity(videoData);
 
         // update genres
@@ -268,10 +276,13 @@ public class MetadataStorageService {
         // update certifications
         updateCertifications(videoData);        
     }
-
+    
     @Transactional
-    public void updateMetaData(Series series) {
+    public void updateScannedMetaData(Series series) {
+        Date lastScanned = new Date(System.currentTimeMillis());
+
         // update entity
+        series.setLastScanned(lastScanned);
         metadataDao.updateEntity(series);
 
         // update genres
@@ -282,10 +293,11 @@ public class MetadataStorageService {
 
         // update underlying seasons and episodes
         for (Season season : series.getSeasons()) {
+            season.setLastScanned(lastScanned);
             metadataDao.updateEntity(season);
 
             for (VideoData videoData : season.getVideoDatas()) {
-                updateMetaData(videoData);
+                updateVideoData(videoData, lastScanned);
             }
         }
     }

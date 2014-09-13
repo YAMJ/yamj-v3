@@ -22,6 +22,10 @@
  */
 package org.yamj.core.database.model;
 
+import java.util.Date;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Lob;
@@ -67,6 +71,10 @@ public abstract class AbstractMetadata extends AbstractAuditable
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
     
+    @Temporal(value = TemporalType.TIMESTAMP)
+    @Column(name = "last_scanned")
+    private Date lastScanned;
+
     // GETTER and SETTER
     
     @Override
@@ -168,6 +176,15 @@ public abstract class AbstractMetadata extends AbstractAuditable
     
     public final void setStatus(StatusType status) {
         this.status = status;
+    }
+
+    @Override
+    public Date getLastScanned() {
+        return lastScanned;
+    }
+
+    public void setLastScanned(Date lastScanned) {
+        this.lastScanned = lastScanned;
     }
 
     @Override

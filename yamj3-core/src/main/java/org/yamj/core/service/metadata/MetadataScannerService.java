@@ -45,7 +45,7 @@ public class MetadataScannerService {
             metadataStorageService.storeAssociatedEntities(videoData);
 
             // update meta data in one transaction
-            metadataStorageService.updateMetaData(videoData);
+            metadataStorageService.updateScannedMetaData(videoData);
 
             LOG.debug("Updated movie in database: {}-'{}'", id, videoData.getTitle());
         } catch (Exception error) {
@@ -78,7 +78,7 @@ public class MetadataScannerService {
             metadataStorageService.storeAssociatedEntities(series);
             
             // update meta data in one transaction
-            metadataStorageService.updateMetaData(series);
+            metadataStorageService.updateScannedMetaData(series);
 
             LOG.debug("Updated series in database: {}-'{}'", id, series.getTitle());
         } catch (Exception error) {
@@ -104,7 +104,8 @@ public class MetadataScannerService {
         this.onlineScannerService.scanPerson(person);
         
         try {
-            metadataStorageService.updatePerson(person);
+            // update person in one transaction
+            metadataStorageService.updateScannedPerson(person);
 
             LOG.debug("Updated person in database: {}-'{}'", id, person.getName());
         } catch (Exception error) {

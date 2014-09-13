@@ -22,8 +22,11 @@
  */
 package org.yamj.core.database.model;
 
-import javax.persistence.Transient;
+import javax.persistence.Column;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
+import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.EnumMap;
 import javax.persistence.*;
@@ -89,6 +92,10 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
 
+    @Temporal(value = TemporalType.TIMESTAMP)
+    @Column(name = "last_scanned")
+    private Date lastScanned;
+    
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "person_override", joinColumns = @JoinColumn(name = "person_id"))
     @ForeignKey(name = "FK_PERSON_OVERRIDE")
@@ -243,6 +250,15 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         this.status = status;
     }
 
+    @Override
+    public Date getLastScanned() {
+        return lastScanned;
+    }
+
+    public void setLastScanned(Date lastScanned) {
+        this.lastScanned = lastScanned;
+    }
+    
     @JsonIgnore // This is not needed for the API
     public Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
