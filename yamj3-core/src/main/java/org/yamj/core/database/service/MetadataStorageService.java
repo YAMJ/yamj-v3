@@ -505,7 +505,7 @@ public class MetadataStorageService {
                         metadataDao.saveEntity(castCrew);
                     } else if (castCrew.setJob(castCrew.getJobType(), dto.getRole())) {
                         // updated role
-                        metadataDao.updateEntity(castCrew);
+                        metadataDao.storeEntity(castCrew);
                     }
                 } catch (ConstraintViolationException ex) {
                     LOG.warn("Failed to save/update record for person {}-{}, job '{}', error: {}", person.getId(), person.getName(), dto.getJobType(), ex.getMessage());
