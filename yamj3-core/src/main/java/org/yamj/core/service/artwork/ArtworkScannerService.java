@@ -159,12 +159,40 @@ public class ArtworkScannerService {
         return this.configService.getBooleanProperty(sb.toString(), Boolean.TRUE);
     }
 
-    private boolean isOnlineScanEnabled(Artwork artwork) {
+    private boolean isOnlineScanEnabled(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
         StringBuffer sb = new StringBuffer();
         sb.append("yamj3.artwork.scan.online.");
         this.addScanArtworkType(artwork, sb);
         
-        return this.configService.getBooleanProperty(sb.toString(), Boolean.TRUE);
+        String value = this.configService.getProperty(sb.toString());
+        if (StringUtils.isBlank(value)) {
+            // default: true
+            return true;
+        }
+        if ("true".equalsIgnoreCase(value.trim())) {
+            return true;
+        }
+        if ("false".equalsIgnoreCase(value.trim())) {
+            return false;
+        }
+         
+        // any other case: check if valid artwork is present
+
+        // check present artworks
+        for (ArtworkLocated located : artwork.getArtworkLocated()) {
+            if (located.isValidStatus()) {
+                return false;
+            }
+        }
+        // check newly scanned artworks (from file: may be new or invalid)
+        for (ArtworkLocated located : locatedArtworks) {
+            if (located.isValidStatus()) {
+                return false;
+            }
+        }
+        
+        // do only scan if no valid files are found
+        return true;
     }
 
     private void addScanArtworkType(Artwork artwork, StringBuffer sb) {
@@ -212,7 +240,7 @@ public class ArtworkScannerService {
     }
 
     private void scanPosterOnline(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
-        if (!this.isOnlineScanEnabled(artwork)) {
+        if (!this.isOnlineScanEnabled(artwork, locatedArtworks)) {
             LOG.trace("Online poster scan disabled: {}", artwork);
             return;
         }
@@ -299,7 +327,7 @@ public class ArtworkScannerService {
     }
 
     private void scanFanartOnline(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
-        if (!this.isOnlineScanEnabled(artwork)) {
+        if (!this.isOnlineScanEnabled(artwork, locatedArtworks)) {
             LOG.trace("Online fanart scan disabled: {}", artwork);
             return;
         }
@@ -372,7 +400,7 @@ public class ArtworkScannerService {
     }
 
     private void scanBannerOnline(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
-        if (!this.isOnlineScanEnabled(artwork)) {
+        if (!this.isOnlineScanEnabled(artwork, locatedArtworks)) {
             LOG.trace("Online banner scan disabled: {}", artwork);
             return;
         }
@@ -420,7 +448,7 @@ public class ArtworkScannerService {
     }
 
     private void scanVideoImageOnline(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
-        if (!this.isOnlineScanEnabled(artwork)) {
+        if (!this.isOnlineScanEnabled(artwork, locatedArtworks)) {
             LOG.trace("Online episode image scan disabled: {}", artwork);
             return;
         }
@@ -468,7 +496,7 @@ public class ArtworkScannerService {
     }
 
     private void scanPhotoOnline(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
-        if (!this.isOnlineScanEnabled(artwork)) {
+        if (!this.isOnlineScanEnabled(artwork, locatedArtworks)) {
             LOG.trace("Online photo scan disabled: {}", artwork);
             return;
         }

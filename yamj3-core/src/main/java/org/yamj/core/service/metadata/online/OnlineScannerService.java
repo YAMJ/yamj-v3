@@ -275,8 +275,8 @@ public class OnlineScannerService {
             nfoScanner = this.registeredMovieScanner.get(MOVIE_SCANNER);
         }
 
-        boolean autodetect = this.configService.getBooleanProperty("yamj3.scan.nfo.autodetect.scanner", Boolean.FALSE);
-        boolean ignorePresentId = this.configService.getBooleanProperty("yamj3.scan.nfo.ignore.present.id", Boolean.FALSE);
+        boolean autodetect = this.configService.getBooleanProperty("nfo.autodetect.scanner", Boolean.FALSE);
+        boolean ignorePresentId = this.configService.getBooleanProperty("nfo.ignore.present.id", Boolean.FALSE);
 
         boolean foundInfo = false;
         if (nfoScanner != null) {

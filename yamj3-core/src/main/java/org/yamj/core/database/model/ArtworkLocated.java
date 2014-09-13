@@ -197,6 +197,24 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
         this.generatedArtworks = generatedArtworks;
     }
 
+    // TRANSIENT METHODS
+    
+    public boolean isValidStatus() {
+        if (status == null) {
+            return false;
+        }
+        if (StatusType.DONE.equals(status)) {
+            return true;
+        }
+        if (StatusType.NEW.equals(status)) {
+            return true;
+        }
+        if (StatusType.UPDATED.equals(status)) {
+            return true;
+        }
+        return false;
+    }
+    
     // EQUALITY CHECKS
 
     @Override
