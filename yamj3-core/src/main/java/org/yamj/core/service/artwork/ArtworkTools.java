@@ -26,13 +26,53 @@ import org.apache.commons.lang3.StringUtils;
 
 public class ArtworkTools {
 
+    public enum HashCodeType {
+        SIMPLE,
+        PART;
+    }
+
+    /**
+     * Get the hash code of an URL.
+     * 
+     * @param url
+     * @param hashCodeType
+     * @return the hash code
+     */
+    public static String getUrlHashCode(String url) {
+        return getUrlHashCode(url, HashCodeType.SIMPLE);
+    }
+
+    /**
+     * Get the hash code of an URL.
+     * 
+     * @param url
+     * @param hashCodeType
+     * @return the hash code
+     */
+    public static String getUrlHashCode(String url, HashCodeType hashCodeType) {
+        if (hashCodeType == null || hashCodeType.equals(HashCodeType.SIMPLE)) {
+            // hash code of URL
+            int hash = url.hashCode();
+            return String.valueOf((hash < 0 ? 0 - hash : hash));
+        }
+        
+        // hash code is part of the URL
+        String hc = ArtworkTools.getPartialHashCode(url);
+        if (StringUtils.isEmpty(hc)) {
+            // may not be empty, so use simple hash code
+            int hash = url.hashCode();
+            return String.valueOf((hash < 0 ? 0 - hash : hash));
+        }
+        return hc;
+    }
+    
     /**
      * Get a part of the URL as hash code.
      * 
      * @param url
      * @return the hash code
      */
-    public static String getPartialHashCode(String url) {
+    private static String getPartialHashCode(String url) {
         String hashCode = null;
         try {
             int index = StringUtils.lastIndexOf(url, "/");

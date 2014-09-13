@@ -35,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.dto.CreditDTO;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
 @Entity
@@ -389,6 +390,15 @@ public class VideoData extends AbstractMetadata {
         return artworks;
     }
 
+    public Artwork getArtwork(ArtworkType artworkType) {
+        for (Artwork artwork : getArtworks()) {
+            if (artworkType.equals(artwork.getArtworkType())) {
+                return artwork;
+            }
+        }
+        return null;
+    }
+    
     public void setArtworks(List<Artwork> artworks) {
         this.artworks = artworks;
     }

@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import org.yamj.core.database.model.type.ArtworkType;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.LinkedHashSet;
@@ -232,6 +234,15 @@ public class Series extends AbstractMetadata {
         return artworks;
     }
 
+    public Artwork getArtwork(ArtworkType artworkType) {
+        for (Artwork artwork : getArtworks()) {
+            if (artworkType.equals(artwork.getArtworkType())) {
+                return artwork;
+            }
+        }
+        return null;
+    }
+    
     private void setArtworks(List<Artwork> artworks) {
         this.artworks = artworks;
     }

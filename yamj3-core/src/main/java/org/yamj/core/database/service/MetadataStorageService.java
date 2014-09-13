@@ -22,11 +22,8 @@
  */
 package org.yamj.core.database.service;
 
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +43,7 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.service.artwork.ArtworkTools;
 
 @Service("metadataStorageService")
 public class MetadataStorageService {
@@ -274,7 +272,10 @@ public class MetadataStorageService {
         updateBoxedSets(videoData);
         
         // update certifications
-        updateCertifications(videoData);        
+        updateCertifications(videoData);
+        
+        // update artwork
+        updateLocatedArtwork(videoData);
     }
     
     @Transactional
@@ -291,6 +292,9 @@ public class MetadataStorageService {
         // update studios
         updateStudios(series);
 
+        // update artwork
+        updateLocatedArtwork(series);
+        
         // update underlying seasons and episodes
         for (Season season : series.getSeasons()) {
             season.setLastScanned(lastScanned);
@@ -513,7 +517,49 @@ public class MetadataStorageService {
             }
         }
     }
+    
+    private void updateLocatedArtwork(VideoData videoData) {
+        if (MapUtils.isNotEmpty(videoData.getPosterURLS())) {
+            Artwork artwork = videoData.getArtwork(ArtworkType.POSTER);
+            updateLocatedArtwork(artwork, videoData.getPosterURLS());
+        }
+        if (MapUtils.isNotEmpty(videoData.getFanartURLS())) {
+            Artwork artwork = videoData.getArtwork(ArtworkType.FANART);
+            updateLocatedArtwork(artwork, videoData.getFanartURLS());
+        }
+    }
 
+    private void updateLocatedArtwork(Series series) {
+        if (MapUtils.isNotEmpty(series.getPosterURLS())) {
+            Artwork artwork = series.getArtwork(ArtworkType.POSTER);
+            updateLocatedArtwork(artwork, series.getPosterURLS());
+        }
+        if (MapUtils.isNotEmpty(series.getFanartURLS())) {
+            Artwork artwork = series.getArtwork(ArtworkType.FANART);
+            updateLocatedArtwork(artwork, series.getFanartURLS());
+        }
+    }
+
+    private void updateLocatedArtwork(Artwork artwork, Map<String,String> urlMap) {
+        for (Entry<String,String> entry : urlMap.entrySet()) {
+            ArtworkLocated located = new ArtworkLocated();
+            located.setArtwork(artwork);
+            located.setSource(entry.getValue());
+            located.setUrl(entry.getKey());
+            located.setHashCode(ArtworkTools.getUrlHashCode(entry.getKey()));
+            located.setPriority(5);
+            located.setStatus(StatusType.NEW);
+            LOG.warn("Update located artwork" + artwork);
+            
+            if (!artwork.getArtworkLocated().contains(located)) {
+                // not present until now
+                artwork.addArtworkLocated(located);
+                artworkDao.saveEntity(located);
+                LOG.warn("stored located artwork" + artwork);
+            }
+        }
+    }
+    
     @Transactional
     public void errorVideoData(Long id) {
         VideoData videoData = metadataDao.getById(VideoData.class, id);

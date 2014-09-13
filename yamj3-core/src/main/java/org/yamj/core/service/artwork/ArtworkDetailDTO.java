@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.artwork;
 
-import org.apache.commons.lang3.StringUtils;
+import org.yamj.core.service.artwork.ArtworkTools.HashCodeType;
 
 public class ArtworkDetailDTO {
 
@@ -32,11 +32,6 @@ public class ArtworkDetailDTO {
     private String language = null;
     private int rating = -1;
 
-    public enum HashCodeType {
-        SIMPLE,
-        PART;
-    }
-    
     public ArtworkDetailDTO(String source, String url) {
         this(source, url, HashCodeType.SIMPLE);
     }
@@ -44,21 +39,7 @@ public class ArtworkDetailDTO {
     public ArtworkDetailDTO(String source, String url, HashCodeType hashCodeType) {
         this.source = source;
         this.url = url;
-        
-        if (hashCodeType == null || hashCodeType.equals(HashCodeType.SIMPLE)) {
-            // hash code of URL
-            int hash = url.hashCode();
-            this.hashCode = String.valueOf((hash < 0 ? 0 - hash : hash));
-        } else {
-            // hash code is part of the URL
-            String hc = ArtworkTools.getPartialHashCode(url);
-            if (StringUtils.isBlank(hc)) {
-                // may not be empty, so use simple hash code
-                this.hashCode = String.valueOf(url.hashCode());
-            } else {
-                this.hashCode = hc;
-            }
-        }
+        this.hashCode = ArtworkTools.getUrlHashCode(url, hashCodeType);
     }
     
     public String getSource() {

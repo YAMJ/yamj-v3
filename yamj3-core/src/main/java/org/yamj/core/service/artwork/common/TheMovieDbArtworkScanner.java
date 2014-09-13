@@ -22,9 +22,6 @@
  */
 package org.yamj.core.service.artwork.common;
 
-import org.yamj.core.service.metadata.online.ImdbScanner;
-import org.yamj.core.service.metadata.online.TheMovieDbScanner;
-
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.model.Artwork;
@@ -47,9 +44,12 @@ import org.yamj.core.database.model.IMetadata;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
+import org.yamj.core.service.artwork.ArtworkTools.HashCodeType;
 import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
 import org.yamj.core.service.artwork.photo.IPhotoScanner;
 import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
+import org.yamj.core.service.metadata.online.ImdbScanner;
+import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 
 @Service("tmdbArtworkScanner")
 public class TheMovieDbArtworkScanner implements
@@ -147,7 +147,7 @@ public class TheMovieDbArtworkScanner implements
                             LOG.warn("{} URL is invalid and will not be used: {}", artworkType, artworkURL);
                         } else {
                             String url = artworkURL.toString();
-                            dtos.add(new ArtworkDetailDTO(getScannerName(), url, ArtworkDetailDTO.HashCodeType.PART));
+                            dtos.add(new ArtworkDetailDTO(getScannerName(), url, HashCodeType.PART));
                         }
                     }
                 }

@@ -117,6 +117,7 @@ public class ArtworkStorageService {
             for (ArtworkLocated located : locatedArtworks) {
                 if (!artwork.getArtworkLocated().contains(located)) {
                     // just store if not contained before
+                    artwork.addArtworkLocated(located);
                     this.artworkDao.saveEntity(located);
                 }
             }

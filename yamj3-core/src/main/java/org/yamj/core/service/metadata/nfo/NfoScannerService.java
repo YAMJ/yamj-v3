@@ -61,7 +61,7 @@ public class NfoScannerService {
         LOG.info("Scanning NFO data for movie '{}'", videoData.getIdentifier());
         
         // create an info DTO for movie
-        InfoDTO infoDTO = new InfoDTO(true);
+        InfoDTO infoDTO = new InfoDTO(false);
         infoDTO.setIds(videoData.getSourceDbIdMap());
         infoDTO.setSkipOnlineScans(videoData.getSkipOnlineScans());
        

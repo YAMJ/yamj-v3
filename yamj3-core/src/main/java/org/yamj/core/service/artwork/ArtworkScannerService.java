@@ -546,8 +546,8 @@ public class ArtworkScannerService {
             ArtworkLocated located = new ArtworkLocated();
             located.setArtwork(artwork);
             located.setSource("file");
-            located.setStageFile(stageFile);
             located.setPriority(1);
+            located.setStageFile(stageFile);
             
             int hash = stageFile.getFullPath().hashCode();
             located.setHashCode(String.valueOf((hash < 0 ? 0 - hash : hash)));

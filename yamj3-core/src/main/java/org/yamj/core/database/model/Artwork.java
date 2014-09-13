@@ -40,29 +40,34 @@ public class Artwork extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -981494909436217076L;
     
+    @NaturalId
     @Index(name = "IX_ARTWORK_TYPE")
     @Type(type = "artworkType")
     @Column(name = "artwork_type", nullable = false)
     private ArtworkType artworkType;
     
+    @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_VIDEODATA")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "videodata_id")
     private VideoData videoData;
     
+    @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_SEASON")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "season_id")
     private Season season;
     
+    @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_SERIES")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "series_id")
     private Series series;
     
+    @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_PHOTO")
     @Fetch(FetchMode.SELECT)
@@ -123,8 +128,8 @@ public class Artwork extends AbstractAuditable implements Serializable {
         return artworkLocated;
     }
 
-    public void setArtworkLocated(Set<ArtworkLocated> artworkLocated) {
-        this.artworkLocated = artworkLocated;
+    public void addArtworkLocated(ArtworkLocated artworkLocated) {
+        this.artworkLocated.add(artworkLocated);
     }
 
     public StatusType getStatus() {

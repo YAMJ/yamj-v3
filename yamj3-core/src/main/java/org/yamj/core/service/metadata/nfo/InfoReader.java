@@ -817,7 +817,7 @@ public final class InfoReader {
                         if (foundUrl.contains(" ") || foundUrl.contains("*")) {
                             urlStartIndex = currentUrlStartIndex + 3;
                         } else {
-                            LOG.debug("Poster URL found in nfo: {} ", foundUrl);
+                            LOG.debug("Poster URL found in NFO: {} ", foundUrl);
                             dto.addPosterURL(foundUrl);
                             urlStartIndex = -1;
                             foundInfo = Boolean.TRUE;
