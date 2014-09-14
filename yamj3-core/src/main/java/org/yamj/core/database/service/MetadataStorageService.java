@@ -549,13 +549,11 @@ public class MetadataStorageService {
             located.setHashCode(ArtworkTools.getUrlHashCode(entry.getKey()));
             located.setPriority(5);
             located.setStatus(StatusType.NEW);
-            LOG.warn("Update located artwork" + artwork);
             
             if (!artwork.getArtworkLocated().contains(located)) {
                 // not present until now
                 artwork.addArtworkLocated(located);
                 artworkDao.saveEntity(located);
-                LOG.warn("stored located artwork" + artwork);
             }
         }
     }
