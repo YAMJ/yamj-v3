@@ -22,6 +22,9 @@
  */
 package org.yamj.core.database.model;
 
+import javax.persistence.UniqueConstraint;
+
+import org.hibernate.annotations.NaturalId;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -35,39 +38,41 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.ArtworkType;
 
 @Entity
-@Table(name = "artwork")
+@Table(name = "artwork",
+    uniqueConstraints= @UniqueConstraint(name="UIX_ARTWORK_NATURALID", columnNames={"artwork_type","videodata_id","season_id","series_id","person_id"})
+)
 public class Artwork extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -981494909436217076L;
-    
-    @NaturalId
+
+    @NaturalId(mutable = true)
     @Index(name = "IX_ARTWORK_TYPE")
     @Type(type = "artworkType")
     @Column(name = "artwork_type", nullable = false)
     private ArtworkType artworkType;
     
-    @NaturalId
+    @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_VIDEODATA")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "videodata_id")
     private VideoData videoData;
     
-    @NaturalId
+    @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_SEASON")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "season_id")
     private Season season;
     
-    @NaturalId
+    @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_SERIES")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "series_id")
     private Series series;
     
-    @NaturalId
+    @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_PHOTO")
     @Fetch(FetchMode.SELECT)
