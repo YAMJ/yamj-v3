@@ -35,7 +35,7 @@ import org.yamj.core.hibernate.Identifiable;
 public abstract class AbstractAuditable implements Auditable, Identifiable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     @Column(name = "id")
     private long id;
     
