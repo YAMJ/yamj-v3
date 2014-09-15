@@ -65,11 +65,11 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
     }
 
     public static String getProperty(String key) {
-        return PROPERTIES.getProperty(key);
+        return StringUtils.trimToNull(PROPERTIES.getProperty(key));
     }
 
     public static String getProperty(String key, String defaultValue) {
-        return PROPERTIES.getProperty(key, defaultValue);
+        return StringUtils.trimToEmpty(PROPERTIES.getProperty(key, defaultValue));
     }
 
     /**
@@ -83,7 +83,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
         String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(key));
 
         if (StringUtils.isNotBlank(property)) {
-            return Boolean.parseBoolean(property.trim());
+            return Boolean.parseBoolean(property);
         }
         return defaultValue;
     }
