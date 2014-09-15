@@ -239,7 +239,7 @@ public class OnlineScannerService {
         }
         
         // alternate scanning if main scanner failed or not registered
-        boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.movie.alternate.always", Boolean.FALSE);
+        boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.person.alternate.always", Boolean.FALSE);
         if (!ScanResult.OK.equals(scanResult) || useAlternate) {
             personScanner = registeredPersonScanner.get(PERSON_SCANNER_ALT);
 
