@@ -115,7 +115,8 @@ public class OnlineScannerService {
         }
         
         // alternate scanning if main scanner failed or not registered
-        if (!ScanResult.OK.equals(scanResult)) {
+        boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.movie.alternate.always", Boolean.FALSE);
+        if (!ScanResult.OK.equals(scanResult) || useAlternate) {
             movieScanner = registeredMovieScanner.get(MOVIE_SCANNER_ALT);
 
             if (movieScanner != null && !videoData.isSkippedOnlineScan(movieScanner.getScannerName())) {
@@ -178,7 +179,8 @@ public class OnlineScannerService {
         }
         
         // alternate scanning if main scanner failed
-        if (!ScanResult.OK.equals(scanResult)) {
+        boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.series.alternate.always", Boolean.FALSE);
+        if (!ScanResult.OK.equals(scanResult) || useAlternate) {
             seriesScanner = registeredSeriesScanner.get(SERIES_SCANNER_ALT);
 
             if (seriesScanner != null && !series.isSkippedOnlineScan(seriesScanner.getScannerName())) {
@@ -237,7 +239,8 @@ public class OnlineScannerService {
         }
         
         // alternate scanning if main scanner failed or not registered
-        if (!ScanResult.OK.equals(scanResult)) {
+        boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.movie.alternate.always", Boolean.FALSE);
+        if (!ScanResult.OK.equals(scanResult) || useAlternate) {
             personScanner = registeredPersonScanner.get(PERSON_SCANNER_ALT);
 
             if (personScanner != null) {

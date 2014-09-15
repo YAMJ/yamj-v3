@@ -196,16 +196,7 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
         }
 
         LOG.debug("OFDb url available ({}), updating video data", ofdbUrl);
-
-        ScanResult scanResult = updateVideoData(videoData, ofdbUrl);
-        if (ScanResult.OK.equals(scanResult)) {
-            boolean alternate = this.configService.getBooleanProperty("ofdb.scan.alternate", false);
-            if (alternate) {
-                // fall back to alternate scanner
-                scanResult = ScanResult.OK_USE_ALTERNATE;
-            }
-        }
-        return scanResult;
+        return updateVideoData(videoData, ofdbUrl);
     }
 
     private ScanResult updateVideoData(VideoData videoData, String ofdbUrl) {
