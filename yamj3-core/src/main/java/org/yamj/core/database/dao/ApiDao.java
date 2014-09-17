@@ -74,7 +74,6 @@ public class ApiDao extends HibernateDao {
     private static final String GENRE = "genre";
     private static final String TITLE = "title";
     private static final String EPISODE = "episode";
-    private static final String SERIES = "series";
     private static final String SEASON = "season";
     private static final String SEASON_ID = "seasonId";
     private static final String SERIES_ID = "seriesId";
@@ -831,9 +830,10 @@ public class ApiDao extends HibernateDao {
         if (options.hasDataItem(DataItem.FILES)) {
             sqlScalars.addToSql(", mediafile_videodata mv, stage_file sf");
         }
+
         sqlScalars.addToSql(", artwork a");
-        sqlScalars.addToSql("LEFT JOIN artwork_located al ON a.id=al.artwork_id");
-        sqlScalars.addToSql("LEFT JOIN artwork_generated ag ON al.id=ag.located_id");
+        sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
+        sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
         sqlScalars.addToSql("WHERE sea.series_id=ser.id");
         sqlScalars.addToSql("AND vid.season_id=sea.id");
         sqlScalars.addToSql("AND a.videodata_id=vid.id");
@@ -850,9 +850,10 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addParameters("seasonid", options.getSeasonid());
         }
         if (options.hasDataItem(DataItem.FILES)) {
-            sqlScalars.addToSql("AND sf.mediafile_id=vid.id");
             sqlScalars.addToSql("AND vid.id = mv.videodata_id");
             sqlScalars.addToSql("AND mv.mediafile_id = sf.mediafile_id");
+            sqlScalars.addToSql("AND sf.status != 'DUPLICATE'");
+            sqlScalars.addToSql("AND sf.file_type = 'VIDEO'");
         }
         sqlScalars.addToSql("ORDER BY seriesId, season, episode");
         LOG.debug("getEpisodeList SQL: {}", sqlScalars.getSql());
@@ -1300,7 +1301,6 @@ public class ApiDao extends HibernateDao {
      * @param idList List of the source type
      * @return
      */
-    @SuppressWarnings("unchecked")
     private <T extends AbstractApiIdentifiableDTO> Map<Long, List<T>> generateIdMapList(List<T> idList) {
         Map<Long, List<T>> results = new HashMap<Long, List<T>>();
 
