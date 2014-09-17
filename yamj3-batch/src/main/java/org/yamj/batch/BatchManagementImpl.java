@@ -102,6 +102,12 @@ public class BatchManagementImpl implements BatchManagement {
                 stageDirectory.addStageFile(stageFile);
 
                 stageFile = new StageFileDTO();
+                stageFile.setFileName("Good bye Lenin.dvd.mkv");
+                stageFile.setFileDate(System.currentTimeMillis());
+                stageFile.setFileSize(4242252L);
+                stageDirectory.addStageFile(stageFile);
+
+                stageFile = new StageFileDTO();
                 stageFile.setFileName("Game of Thrones.S03E01.avi");
                 stageFile.setFileDate(System.currentTimeMillis());
                 stageFile.setFileSize(1234L);
@@ -115,12 +121,6 @@ public class BatchManagementImpl implements BatchManagement {
 
                 stageFile = new StageFileDTO();
                 stageFile.setFileName("Game of Thrones.S03E02.avi");
-                stageFile.setFileDate(System.currentTimeMillis());
-                stageFile.setFileSize(1235L);
-                stageDirectory.addStageFile(stageFile);
-
-                stageFile = new StageFileDTO();
-                stageFile.setFileName("Game of Thrones.S03E02..avi");
                 stageFile.setFileDate(System.currentTimeMillis());
                 stageFile.setFileSize(1235L);
                 stageDirectory.addStageFile(stageFile);
