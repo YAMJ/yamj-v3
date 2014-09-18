@@ -57,7 +57,6 @@ public class ApiDao extends HibernateDao {
     private static final String SEASON_ID = "seasonId";
     private static final String SERIES_ID = "seriesId";
     private static final String SERIES_YEAR = "seriesYear";
-    private static final String FIRST_AIRED = "firstAired";
     private static final String VIDEO_YEAR = "videoYear";
     private static final String ORIGINAL_TITLE = "originalTitle";
     private static final String CACHE_FILENAME = "cacheFilename";
@@ -86,7 +85,6 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(ORIGINAL_TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(VIDEO_YEAR, IntegerType.INSTANCE);
-        sqlScalars.addScalar(FIRST_AIRED, StringType.INSTANCE);
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON, LongType.INSTANCE);
@@ -223,7 +221,6 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", vd.title");
         sbSQL.append(", vd.title_original AS originalTitle");
         sbSQL.append(", vd.publication_year AS videoYear");
-        sbSQL.append(", '-1' AS firstAired");
         sbSQL.append(", '-1' AS seriesId");
         sbSQL.append(", vd.season_id AS seasonId");
         sbSQL.append(", '-1' AS season");
@@ -287,7 +284,6 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", ser.title");
         sbSQL.append(", ser.title_original AS originalTitle");
         sbSQL.append(", ser.start_year AS videoYear");
-        sbSQL.append(", '-1' AS firstAired");
         sbSQL.append(", ser.id AS seriesId");
         sbSQL.append(", '-1' AS seasonId");
         sbSQL.append(", '-1' AS season");
@@ -328,8 +324,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.SEASON).append(SQL_AS_VIDEO_TYPE_STRING);
         sbSQL.append(", sea.title");
         sbSQL.append(", sea.title_original AS originalTitle");
-        sbSQL.append(", -1 as videoYear");
-        sbSQL.append(", sea.first_aired AS firstAired");
+        sbSQL.append(", sea.publication_year as videoYear");
         sbSQL.append(", sea.series_id AS seriesId");
         sbSQL.append(", sea.id AS seasonId");
         sbSQL.append(", sea.season AS season");
@@ -342,11 +337,11 @@ public class ApiDao extends HibernateDao {
         }
 
         if (includes.containsKey(YEAR)) {
-            sbSQL.append(" AND sea.first_aired LIKE '").append(includes.get(YEAR)).append("%'");
+            sbSQL.append(" AND sea.publication_year=").append(includes.get(YEAR));
         }
 
         if (excludes.containsKey(YEAR)) {
-            sbSQL.append(" AND sea.first_aired NOT LIKE '").append(includes.get(YEAR)).append("%'");
+            sbSQL.append(" AND sea.publication_year!=").append(includes.get(YEAR));
         }
 
         // Add the search string, this will be empty if there is no search required
@@ -878,7 +873,6 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(ORIGINAL_TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(VIDEO_YEAR, IntegerType.INSTANCE);
-        sqlScalars.addScalar(FIRST_AIRED, StringType.INSTANCE);
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON, LongType.INSTANCE);
