@@ -41,7 +41,7 @@ import org.yamj.core.hibernate.HibernateDao;
 public class CommonDao extends HibernateDao {
 
     public Genre getGenre(String name) {
-        return getByName(Genre.class, name);
+        return getByNameCaseInsensitive(Genre.class, name);
     }
 
     @Transactional
@@ -87,10 +87,6 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(Genre.class, sqlScalars, wrapper);
     }
 
-    public Certification getCertification(String name) {
-        return getByName(Certification.class, name);
-    }
-
     public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
         OptionsId options = (OptionsId) wrapper.getOptions();
         SqlScalars sqlScalars = new SqlScalars();
@@ -107,7 +103,7 @@ public class CommonDao extends HibernateDao {
     }
 
     public BoxedSet getBoxedSet(String name) {
-        return getByName(BoxedSet.class, name);
+        return getByNameCaseInsensitive(BoxedSet.class, name);
     }
 
     @Transactional
@@ -136,7 +132,7 @@ public class CommonDao extends HibernateDao {
     }
 
     public Studio getStudio(String name) {
-        return getByName(Studio.class, name);
+        return getByNameCaseInsensitive(Studio.class, name);
     }
 
     @Transactional

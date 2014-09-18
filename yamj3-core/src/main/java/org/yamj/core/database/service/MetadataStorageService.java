@@ -27,7 +27,6 @@ import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,11 +54,6 @@ public class MetadataStorageService {
     private MetadataDao metadataDao;
     @Autowired
     private ArtworkDao artworkDao;
-
-    @Transactional
-    public void save(Object entity) {
-        this.commonDao.saveEntity(entity);
-    }
 
     @Transactional(readOnly = true)
     public List<QueueDTO> getMetaDataQueueForScanning(final int maxResults) {
@@ -318,7 +312,7 @@ public class MetadataStorageService {
 
         Set<Genre> genres = new LinkedHashSet<Genre>();
         for (String genreName : videoData.getGenreNames()) {
-            Genre genre = commonDao.getByName(Genre.class, genreName);
+            Genre genre = commonDao.getGenre(genreName);
             if (genre != null) {
                 genres.add(genre);
             }
@@ -338,7 +332,7 @@ public class MetadataStorageService {
 
         Set<Studio> studios = new LinkedHashSet<Studio>();
         for (String studioName : videoData.getStudioNames()) {
-            Studio studio = commonDao.getByName(Studio.class, studioName);
+            Studio studio = commonDao.getStudio(studioName);
             if (studio != null) {
                 studios.add(studio);
             }
@@ -358,7 +352,7 @@ public class MetadataStorageService {
 
         Set<Studio> studios = new LinkedHashSet<Studio>();
         for (String studioName : series.getStudioNames()) {
-            Studio studio = commonDao.getByName(Studio.class, studioName);
+            Studio studio = commonDao.getStudio(studioName);
             if (studio != null) {
                 studios.add(studio);
             }
@@ -378,7 +372,7 @@ public class MetadataStorageService {
 
         Set<Genre> genres = new LinkedHashSet<Genre>();
         for (String genreName : series.getGenreNames()) {
-            Genre genre = commonDao.getByName(Genre.class, genreName);
+            Genre genre = commonDao.getGenre(genreName);
             if (genre != null) {
                 genres.add(genre);
             }
@@ -476,44 +470,29 @@ public class MetadataStorageService {
         }
         
         for (CreditDTO dto : videoData.getCreditDTOS()) {
-            Person person = null;
-            CastCrew castCrew = null;
+            CastCrew castCrew = this.metadataDao.getCastCrew(videoData, dto.getJobType(), dto.getName());
 
-            for (CastCrew credit : videoData.getCredits()) {
-                if ((credit.getJobType() == dto.getJobType()) && StringUtils.equalsIgnoreCase(dto.getName(), credit.getPerson().getName())) {
-                    castCrew = credit;
-                    person = credit.getPerson();
-                    break;
+            if (castCrew == null) {
+                // retrieve person
+                Person person = metadataDao.getPerson(dto.getName());
+                if (person == null) {
+                    LOG.warn("Person '{}' not found, skipping", dto.getName());
+                    // continue with next cast entry
+                    continue;
+                } else {
+                    LOG.trace("Found person '{}' for searched name '{}'", person.getName(), dto.getName());
                 }
-            }
 
-            // find person if not found in cast 
-            if (person == null) {
-                person = metadataDao.getByName(Person.class, dto.getName());
-            }
-
-            if (person == null) {
-                // NOTE: person should have been stored before; just be sure
-                //       to avoid null constraint violation
-                LOG.warn("Person '{}' not found, skipping", dto.getName());
-            } else {
-                
-                try {
-                    if (castCrew == null) {
-                        // create new association between person and video
-                        castCrew = new CastCrew();
-                        castCrew.setPerson(person);
-                        castCrew.setJob(dto.getJobType(), dto.getRole());
-                        castCrew.setVideoData(videoData);
-                        videoData.addCredit(castCrew);
-                        metadataDao.saveEntity(castCrew);
-                    } else if (castCrew.setJob(castCrew.getJobType(), dto.getRole())) {
-                        // updated role
-                        metadataDao.storeEntity(castCrew);
-                    }
-                } catch (ConstraintViolationException ex) {
-                    LOG.warn("Failed to save/update record for person {}-{}, job '{}', error: {}", person.getId(), person.getName(), dto.getJobType(), ex.getMessage());
-                }
+                // create new association between person and video
+                castCrew = new CastCrew();
+                castCrew.setPerson(person);
+                castCrew.setJob(dto.getJobType(), dto.getRole());
+                castCrew.setVideoData(videoData);
+                videoData.addCredit(castCrew);
+                metadataDao.saveEntity(castCrew);
+            } else if (castCrew.setJob(castCrew.getJobType(), dto.getRole())) {
+                // updated role
+                metadataDao.updateEntity(castCrew);
             }
         }
     }
@@ -552,8 +531,8 @@ public class MetadataStorageService {
             
             if (!artwork.getArtworkLocated().contains(located)) {
                 // not present until now
-                artwork.addArtworkLocated(located);
                 artworkDao.saveEntity(located);
+                artwork.addArtworkLocated(located);
             }
         }
     }

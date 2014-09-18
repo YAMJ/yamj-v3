@@ -127,11 +127,16 @@ public class StagingService {
                     // set changeable values in stage file
                     setChangeableValues(stageFile, stageFileDTO);
                     
-                    if (!StatusType.DUPLICATE.equals(stageFile.getStatus())) {
-                        // mark as updated if no duplicate
-                        // Note: duplicate is only relevant for videos with same name
+                    if (StatusType.NEW.equals(stageFile.getStatus())) { 
+                        // leave NEW status as NEW
+                    }  else if (StatusType.DUPLICATE.equals(stageFile.getStatus())) {
+                        // leave DUPLICATE status as DUPLICATE
+                        // Note: duplicate is only set for videos with same name
+                    } else {
+                        // mark stage file as updated
                         stageFile.setStatus(StatusType.UPDATED);
                     }
+                    
                     stagingDao.updateEntity(stageFile);
                 }
             }

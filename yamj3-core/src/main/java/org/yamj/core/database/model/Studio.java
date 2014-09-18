@@ -74,6 +74,6 @@ public class Studio extends AbstractIdentifiable implements Serializable {
             return false;
         }
         Studio castOther = (Studio) other;
-        return StringUtils.equals(this.name, castOther.name);
+        return StringUtils.equalsIgnoreCase(this.name, castOther.name);
     }
 }

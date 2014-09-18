@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.mediaimport;
 
+import org.yamj.core.database.model.ArtworkLocated;
+
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -85,8 +87,6 @@ public class MediaImportService {
 
             // attach NFO files
             attachNfoFilesToVideo(stageFile);
-
-            // TODO attach images
             
             // TODO attach subtitles
         } else {
@@ -408,9 +408,9 @@ public class MediaImportService {
                 nfoRelation.setPriority(priority);
 
                 if (!videoData.getNfoRelations().contains(nfoRelation)) {
+                    this.mediaDao.saveEntity(nfoRelation);
                     videoData.addNfoRelation(nfoRelation);
                     nfoFile.addNfoRelation(nfoRelation);
-                    this.mediaDao.saveEntity(nfoRelation);
 
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("Stored new NFO relation: stageFile={}, videoData={}",
@@ -533,9 +533,9 @@ public class MediaImportService {
             nfoRelation.setPriority(priority);
 
             if (!stageFile.getNfoRelations().contains(nfoRelation)) {
+                this.mediaDao.saveEntity(nfoRelation);
                 stageFile.addNfoRelation(nfoRelation);
                 videoData.addNfoRelation(nfoRelation);
-                this.mediaDao.saveEntity(nfoRelation);
 
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Stored new NFO relation: stageFile={}, videoData={}",
@@ -557,7 +557,7 @@ public class MediaImportService {
             }
             
             // case 10: apply to all video data in stage directory
-            videoDatas = this.stagingDao.findVideoDatasForNFO(stageFile.getStageDirectory());
+            videoDatas = this.stagingDao.findVideoDatas(stageFile.getStageDirectory());
             this.attachVideoDataToNFO(videoFiles, videoDatas, 10);
             
             // get child directories
@@ -578,7 +578,7 @@ public class MediaImportService {
             // case 1: bluray/DVD handling
             if (CollectionUtils.isNotEmpty(blurayOrDvdFolders)) {
                 for (StageDirectory folder : blurayOrDvdFolders) {
-                    videoDatas = this.stagingDao.findVideoDatasForNFO(folder);
+                    videoDatas = this.stagingDao.findVideoDatas(folder);
                     this.attachVideoDataToNFO(videoFiles, videoDatas, 1);
                 }
             }
@@ -595,16 +595,16 @@ public class MediaImportService {
             
         } else if (TVSHOW_NFO_NAME.equals(stageFile.getBaseName())) {
             // case 2: tvshow.nfo in same directory as video
-            videoDatas = this.stagingDao.findVideoDatasForNFO(stageFile.getStageDirectory());
+            videoDatas = this.stagingDao.findVideoDatas(stageFile.getStageDirectory());
             this.attachVideoDataToNFO(videoFiles, videoDatas, 2, true);
             
             // case 3: tvshow.nfo in parent directory (so search in child directories)
             List<StageDirectory> childDirectories = this.stagingDao.getChildDirectories(stageFile.getStageDirectory());
-            videoDatas = this.stagingDao.findVideoDatasForNFO(childDirectories);
+            videoDatas = this.stagingDao.findVideoDatas(childDirectories);
             this.attachVideoDataToNFO(videoFiles, videoDatas, 3, true);
         } else {
             // case 1: Video file has same base name in same directory
-            videoDatas = this.stagingDao.findVideoDatasForNFO(stageFile.getBaseName(), stageFile.getStageDirectory());
+            videoDatas = this.stagingDao.findVideoDatas(stageFile.getBaseName(), stageFile.getStageDirectory());
             this.attachVideoDataToNFO(videoFiles, videoDatas, 1);
         }
         
@@ -630,25 +630,93 @@ public class MediaImportService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void processImage(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
+        if (StatusType.NEW.equals(stageFile.getStatus())) {
+            LOG.info("Process new image {}-'{}'", stageFile.getId(), stageFile.getFileName());
+            
+            // process new image
+            processNewImage(stageFile);
+        } else {
+            LOG.info("Process updated image {}-'{}'", stageFile.getId(), stageFile.getFileName());
+            
+            for (ArtworkLocated located : stageFile.getArtworkLocated()) {
+                // mark located as updated
+                located.setStatus(StatusType.UPDATED);
+                this.mediaDao.updateEntity(located);
+            }
+        }
 
+        // set stage file to done
+        stageFile.setStatus(StatusType.DONE);
+        stagingDao.updateEntity(stageFile);
+    }
+    
+    private void processNewImage(StageFile stageFile) {
+        
+        List<Artwork> artworks;
         if (stageFile.getBaseName().equalsIgnoreCase("poster")
                 || stageFile.getBaseName().equalsIgnoreCase("cover")
-                || stageFile.getBaseName().equalsIgnoreCase("folder")) {
-            // TODO apply poster to all video files in that directory
-            LOG.trace("Generic poster found: {}", stageFile.getBaseName());
-        } else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".poster")
-                || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-poster")) {
-            // TODO apply poster to single video
-            LOG.trace("Poster found: {}", stageFile.getBaseName());
-        } else if (stageFile.getBaseName().equalsIgnoreCase("fanart")
-                || stageFile.getBaseName().equalsIgnoreCase("backdrop")
-                || stageFile.getBaseName().equalsIgnoreCase("background")) {
-            // TODO apply fanart to all video files in that directory
-            LOG.trace("Generic fanart found: {}", stageFile.getBaseName());
-        } else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".fanart")
-                || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-fanart")) {
-            // TODO apply fanart to single video
-            LOG.trace("Fanart found: {}", stageFile.getBaseName());
+                || stageFile.getBaseName().equalsIgnoreCase("folder")) 
+        {
+            LOG.debug("Generic poster found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
+            artworks = this.stagingDao.findMatchingArtworks(ArtworkType.POSTER, stageFile.getStageDirectory());
+        }
+        else if (stageFile.getBaseName().equalsIgnoreCase("fanart")
+                   || stageFile.getBaseName().equalsIgnoreCase("backdrop")
+                   || stageFile.getBaseName().equalsIgnoreCase("background")) 
+        {
+            LOG.debug("Generic fanart found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
+            artworks = this.stagingDao.findMatchingArtworks(ArtworkType.FANART, stageFile.getStageDirectory());
+        }
+        else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".fanart")
+                 || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-fanart")) 
+        {
+            LOG.debug("Fanart found: {}", stageFile.getBaseName());
+
+            String stripped = stageFile.getBaseName().toLowerCase();
+            stripped = StringUtils.substring(stripped, 0, stripped.length()-8);
+            artworks = this.stagingDao.findMatchingArtworks(ArtworkType.FANART, stripped, stageFile.getStageDirectory());
+        }
+        else if (StringUtils.indexOf(stageFile.getBaseName(), ".videoimage") > 0) 
+        {
+            LOG.debug("VideoImage found: {}", stageFile.getBaseName());
+
+            // TODO apply episode image (which may be for just a part) 
+            artworks = Collections.emptyList();
+        }
+        else 
+        {
+            LOG.debug("Poster found: {}", stageFile.getBaseName());
+            artworks = this.stagingDao.findMatchingArtworks(ArtworkType.POSTER, stageFile.getBaseName().toLowerCase(), stageFile.getStageDirectory());
+        }
+
+        // no artworks found so return
+        if (CollectionUtils.isEmpty(artworks)) {
+            return;
+        }
+        
+        // add artwork stage file to artwork
+        for (Artwork artwork : artworks) {
+            ArtworkLocated located = new ArtworkLocated();
+            located.setArtwork(artwork);
+            located.setSource("file");
+            located.setPriority(1);
+            located.setStageFile(stageFile);
+            
+            if (!artwork.getArtworkLocated().contains(artwork)) {
+                
+                int hash = stageFile.getFullPath().hashCode();
+                located.setHashCode(String.valueOf((hash < 0 ? 0 - hash : hash)));
+
+                if (FileTools.isArtworkFileScannable(stageFile)) {
+                    located.setStatus(StatusType.NEW);
+                } else {
+                    located.setStatus(StatusType.INVALID);
+                }
+                
+                this.mediaDao.saveEntity(located);
+                artwork.addArtworkLocated(located);
+            }
         }
     }
+    
 }

@@ -40,8 +40,6 @@ import org.yamj.core.api.wrapper.IApiWrapper;
  */
 public abstract class HibernateDao {
 
-    private static final String DEFAULT_FIELD_NAME = "name";
-
     @Autowired
     private SessionFactory sessionFactory;
 
@@ -143,8 +141,28 @@ public abstract class HibernateDao {
      * @param name
      * @return
      */
-    public <T> T getByName(Class<? extends T> entityClass, String name) {
-        return getByField(entityClass, DEFAULT_FIELD_NAME, name);
+    @SuppressWarnings("unchecked")
+    protected <T> T getByNameCaseInsensitive(Class<? extends T> entityClass, String name) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("from ");
+        sb.append(entityClass.getSimpleName());
+        sb.append(" where lower(name) = :name ");
+        
+        Map<String, Object> params = new HashMap<String,Object>();
+        params.put("name", name.toLowerCase());
+        return (T)this.findUniqueByNamedParameters(sb, params);
+    }
+
+    /**
+     * Get a single object using the name field
+     *
+     * @param <T>
+     * @param entityClass
+     * @param name
+     * @return
+     */
+    protected <T> T getByNameCaseSensitive(Class<? extends T> entityClass, String name) {
+        return getByField(entityClass, "name", name);
     }
 
     /**
@@ -288,18 +306,34 @@ public abstract class HibernateDao {
     /**
      * Find list of entities by named parameters.
      *
-     * @param queryString the query string.
+     * @param queryCharSequence the query string.
      * @param params the named parameters
      * @return list of entities
      */
     @SuppressWarnings("rawtypes")
-    public List findByNamedParameters(CharSequence queryString, Map<String, Object> params) {
-        Query query = getSession().createQuery(queryString.toString());
+    public List findByNamedParameters(CharSequence queryCharSequence, Map<String, Object> params) {
+        Query query = getSession().createQuery(queryCharSequence.toString());
         query.setCacheable(true);
         for (Entry<String, Object> param : params.entrySet()) {
             applyNamedParameterToQuery(query, param.getKey(), param.getValue());
         }
         return query.list();
+    }
+
+    /**
+     * Find unique entity by named parameters.
+     *
+     * @param queryCharSequence the query string.
+     * @param params the named parameters
+     * @return list of entities
+     */
+    public Object findUniqueByNamedParameters(CharSequence queryCharSequence, Map<String, Object> params) {
+        Query query = getSession().createQuery(queryCharSequence.toString());
+        query.setCacheable(true);
+        for (Entry<String, Object> param : params.entrySet()) {
+            applyNamedParameterToQuery(query, param.getKey(), param.getValue());
+        }
+        return query.uniqueResult();
     }
 
     /**

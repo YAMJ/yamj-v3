@@ -28,19 +28,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.BoxedSet;
-import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -114,39 +108,6 @@ public class CommonController {
         List<ApiGenreDTO> results = jsonApiStorageService.getGenres(wrapper);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
-        return wrapper;
-    }
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="Certification Methods">
-    @RequestMapping(value = "/certification/{name}", method = RequestMethod.GET)
-    @ResponseBody
-    public ApiWrapperSingle<Certification> getCertification(@PathVariable String name) {
-        Certification certification;
-        ApiWrapperSingle<Certification> wrapper = new ApiWrapperSingle<Certification>();
-        if (StringUtils.isNumeric(name)) {
-            LOG.info("Getting genre with ID '{}'", name);
-            certification = jsonApiStorageService.getCertification(Long.parseLong(name));
-        } else {
-            LOG.info("Getting certification '{}'", name);
-            certification = jsonApiStorageService.getCertification(name);
-        }
-        wrapper.setResult(certification);
-        wrapper.setStatusCheck();
-        return wrapper;
-    }
-
-    @RequestMapping(value = "/certifications", method = RequestMethod.GET)
-    @ResponseBody
-    public ApiWrapperList<Certification> getCertifications(@ModelAttribute("options") OptionsId options) {
-        LOG.info("Getting certification list with {}", options.toString());
-
-        ApiWrapperList<Certification> wrapper = new ApiWrapperList<Certification>();
-        wrapper.setOptions(options);
-        List<Certification> results = jsonApiStorageService.getCertifications(wrapper);
-        wrapper.setResults(results);
-        wrapper.setStatus(new ApiStatus(200, "OK"));
-
         return wrapper;
     }
     //</editor-fold>

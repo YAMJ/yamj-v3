@@ -74,6 +74,6 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
             return false;
         }
         BoxedSet castOther = (BoxedSet) other;
-        return StringUtils.equals(this.name, castOther.name);
+        return StringUtils.equalsIgnoreCase(this.name, castOther.name);
     }
 }

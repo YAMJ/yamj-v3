@@ -122,7 +122,7 @@ public class JsonApiStorageService {
 
     @Transactional(readOnly = true)
     public Genre getGenre(String name) {
-        return commonDao.getByName(Genre.class, name);
+        return commonDao.getGenre(name);
     }
 
     @Transactional(readOnly = true)
@@ -136,23 +136,6 @@ public class JsonApiStorageService {
     }
     //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Certification Methods">
-    @Transactional(readOnly = true)
-    public Certification getCertification(Serializable id) {
-        return commonDao.getById(Certification.class, id);
-    }
-
-    @Transactional(readOnly = true)
-    public Certification getCertification(String name) {
-        return commonDao.getByName(Certification.class, name);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
-        return commonDao.getCertifications(wrapper);
-    }
-    //</editor-fold>
-
     //<editor-fold defaultstate="collapsed" desc="Boxed Set Methods">
     @Transactional(readOnly = true)
     public BoxedSet getBoxedSet(Serializable id) {
@@ -161,7 +144,7 @@ public class JsonApiStorageService {
 
     @Transactional(readOnly = true)
     public BoxedSet getBoxedSet(String name) {
-        return commonDao.getByName(BoxedSet.class, name);
+        return commonDao.getBoxedSet(name);
     }
 
     @Transactional(readOnly = true)
@@ -178,7 +161,7 @@ public class JsonApiStorageService {
 
     @Transactional(readOnly = true)
     public Studio getStudio(String name) {
-        return commonDao.getByName(Studio.class, name);
+        return commonDao.getStudio(name);
     }
 
     @Transactional(readOnly = true)

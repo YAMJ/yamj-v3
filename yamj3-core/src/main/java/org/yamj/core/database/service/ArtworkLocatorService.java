@@ -30,11 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.dao.ArtworkDao;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.StageDirectory;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.dao.StagingDao;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.FileType;
 
 @Service("artworkLocatorService")
@@ -43,10 +40,10 @@ public class ArtworkLocatorService {
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkLocatorService.class);
 
     @Autowired
-    private ArtworkDao artworkDao;
+    private StagingDao stagingDao;
 
     @Transactional(readOnly = true)
-    public List<StageFile> getMoviePosters(VideoData videoData) {
+    public List<StageFile> getMatchingPosters(VideoData videoData) {
         List<StageFile> videoFiles = findVideoFiles(videoData);
         if (CollectionUtils.isEmpty(videoFiles)) {
             return null;
@@ -54,6 +51,32 @@ public class ArtworkLocatorService {
 
         // build search maps
         Set<StageDirectory> directories = new HashSet<StageDirectory>();
+        Set<String> artworkNames = this.buildPosterSearchMap(videoFiles, directories);
+        
+        // get the posters
+        List<StageFile> posters = findArtworkStageFiles(directories, artworkNames);
+        LOG.debug("Found {} local posters for movie {}", posters.size(), videoData.getIdentifier());
+        return posters;
+    }
+
+    @Transactional(readOnly = true)
+    public List<StageFile> getMatchingPosters(Season season) {
+        List<StageFile> videoFiles = findVideoFiles(season);
+        if (CollectionUtils.isEmpty(videoFiles)) {
+            return null;
+        }
+
+        // build search maps
+        Set<StageDirectory> directories = new HashSet<StageDirectory>();
+        Set<String> artworkNames = this.buildPosterSearchMap(videoFiles, directories);
+        
+        // get the posters
+        List<StageFile> posters = findArtworkStageFiles(directories, artworkNames);
+        LOG.debug("Found {} local posters for season {}", posters.size(), season.getIdentifier());
+        return posters;
+    }
+
+    private Set<String> buildPosterSearchMap(List<StageFile> videoFiles, Set<StageDirectory> directories) {
         Set<String> artworkNames = new HashSet<String>();
         artworkNames.add("poster");
         artworkNames.add("cover");
@@ -64,15 +87,11 @@ public class ArtworkLocatorService {
             artworkNames.add(videoFile.getBaseName().toLowerCase() + ".poster");
             artworkNames.add(videoFile.getBaseName().toLowerCase() + "-poster");
         }
-
-        // get the posters
-        List<StageFile> posters = findArtworkStageFiles(directories, artworkNames);
-        LOG.debug("Found {} local posters for movie {}", posters.size(), videoData);
-        return posters;
+        return artworkNames;
     }
 
     @Transactional(readOnly = true)
-    public List<StageFile> getMovieFanarts(VideoData videoData) {
+    public List<StageFile> getMatchingFanarts(VideoData videoData) {
         List<StageFile> videoFiles = findVideoFiles(videoData);
         if (CollectionUtils.isEmpty(videoFiles)) {
             return null;
@@ -80,6 +99,32 @@ public class ArtworkLocatorService {
 
         // build search maps
         Set<StageDirectory> directories = new HashSet<StageDirectory>();
+        Set<String> artworkNames = this.buildFanartSearchMap(videoFiles, directories);
+
+        // get the fanarts
+        List<StageFile> fanarts = findArtworkStageFiles(directories, artworkNames);
+        LOG.debug("Found {} local fanarts for movie {}", fanarts.size(), videoData.getIdentifier());
+        return fanarts;
+    }
+
+    @Transactional(readOnly = true)
+    public List<StageFile> getMatchingFanarts(Season season) {
+        List<StageFile> videoFiles = findVideoFiles(season);
+        if (CollectionUtils.isEmpty(videoFiles)) {
+            return null;
+        }
+
+        // build search maps
+        Set<StageDirectory> directories = new HashSet<StageDirectory>();
+        Set<String> artworkNames = this.buildFanartSearchMap(videoFiles, directories);
+        
+        // get the fanarts
+        List<StageFile> fanarts = findArtworkStageFiles(directories, artworkNames);
+        LOG.debug("Found {} local fanarts for season {}", fanarts.size(), season.getIdentifier());
+        return fanarts;
+    }
+
+    private Set<String> buildFanartSearchMap(List<StageFile> videoFiles, Set<StageDirectory> directories) {
         Set<String> artworkNames = new HashSet<String>();
         artworkNames.add("fanart");
         artworkNames.add("backdrop");
@@ -89,13 +134,9 @@ public class ArtworkLocatorService {
             artworkNames.add(videoFile.getBaseName().toLowerCase() + ".fanart");
             artworkNames.add(videoFile.getBaseName().toLowerCase() + "-fanart");
         }
-
-        // get the fanarts
-        List<StageFile> fanarts = findArtworkStageFiles(directories, artworkNames);
-        LOG.debug("Found {} local fanarts for movie {}", fanarts.size(), videoData);
-        return fanarts;
+        return artworkNames;
     }
-
+    
     @SuppressWarnings("unchecked")
     private List<StageFile> findVideoFiles(VideoData videoData) {
         final StringBuilder sb = new StringBuilder();
@@ -109,7 +150,24 @@ public class ArtworkLocatorService {
         params.put("videoDataId", videoData.getId());
         params.put("duplicate", StatusType.DUPLICATE);
 
-        return artworkDao.findByNamedParameters(sb, params);
+        return stagingDao.findByNamedParameters(sb, params);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<StageFile> findVideoFiles(Season season) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("select distinct f from StageFile f ");
+        sb.append("join f.mediaFile m ");
+        sb.append("join m.videoDatas v ");
+        sb.append("join v.season sea ");
+        sb.append("where sea.id=:seasonId ");
+        sb.append("and f.status != :duplicate " );
+
+        final Map<String,Object> params = new HashMap<String,Object>();
+        params.put("videoDataId", season.getId());
+        params.put("duplicate", StatusType.DUPLICATE);
+
+        return stagingDao.findByNamedParameters(sb, params);
     }
 
     @SuppressWarnings("unchecked")
@@ -125,7 +183,7 @@ public class ArtworkLocatorService {
         params.put("fileType", FileType.IMAGE);
         params.put("artworkNames", artworkNames);
 
-        return artworkDao.findByNamedParameters(sb, params);
+        return stagingDao.findByNamedParameters(sb, params);
     }
 
     public List<StageFile> getPhotos(Person person) {

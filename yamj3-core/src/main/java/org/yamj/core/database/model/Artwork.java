@@ -41,6 +41,7 @@ import org.yamj.core.database.model.type.ArtworkType;
 @Table(name = "artwork",
     uniqueConstraints= @UniqueConstraint(name="UIX_ARTWORK_NATURALID", columnNames={"artwork_type","videodata_id","season_id","series_id","person_id"})
 )
+@SuppressWarnings("unused")
 public class Artwork extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -981494909436217076L;
@@ -127,6 +128,10 @@ public class Artwork extends AbstractAuditable implements Serializable {
 
     public void setPerson(Person person) {
         this.person = person;
+    }
+
+    private void setArtworkLocated(Set<ArtworkLocated> artworkLocated) {
+        this.artworkLocated = artworkLocated;
     }
 
     public Set<ArtworkLocated> getArtworkLocated() {

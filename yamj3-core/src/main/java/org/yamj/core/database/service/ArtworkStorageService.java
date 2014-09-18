@@ -103,11 +103,6 @@ public class ArtworkStorageService {
     }
 
     @Transactional
-    public void saveArtwork(Artwork artwork) {
-        this.artworkDao.saveEntity(artwork);
-    }
-
-    @Transactional
     public void updateArtwork(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
 
         if (CollectionUtils.isEmpty(artwork.getArtworkLocated())) {

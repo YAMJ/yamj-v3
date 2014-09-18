@@ -39,11 +39,6 @@ public class MediaStorageService {
     private MediaDao mediaDao;
 
     @Transactional
-    public void save(Object entity) {
-        this.mediaDao.saveEntity(entity);
-    }
-
-    @Transactional
     public void update(Object entity) {
         this.mediaDao.updateEntity(entity);
     }

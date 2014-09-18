@@ -80,7 +80,7 @@ public class Genre extends AbstractIdentifiable implements Serializable {
             return false;
         }
         Genre castOther = (Genre) other;
-        return StringUtils.equals(this.name, castOther.name);
+        return StringUtils.equalsIgnoreCase(this.name, castOther.name);
     }
 
     @Override

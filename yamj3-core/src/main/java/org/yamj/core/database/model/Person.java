@@ -313,7 +313,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
             return false;
         }
         Person castOther = (Person) other;
-        return StringUtils.equals(this.name, castOther.name);
+        return StringUtils.equalsIgnoreCase(this.name, castOther.name);
     }
 
     @Override

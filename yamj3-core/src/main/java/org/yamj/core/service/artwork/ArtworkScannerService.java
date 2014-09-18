@@ -229,9 +229,9 @@ public class ArtworkScannerService {
 
         if (artwork.getVideoData() != null) {
             // scan movie poster
-            posters = this.artworkLocatorService.getMoviePosters(artwork.getVideoData());
+            posters = this.artworkLocatorService.getMatchingPosters(artwork.getVideoData());
         } else if (artwork.getSeason() != null) {
-            // TODO scan season poster
+            posters = this.artworkLocatorService.getMatchingPosters(artwork.getSeason());
         } else if (artwork.getSeries() != null) {
             // TODO scan series poster
         }
@@ -316,9 +316,9 @@ public class ArtworkScannerService {
 
         if (artwork.getVideoData() != null) {
             // scan movie poster
-            fanarts = this.artworkLocatorService.getMovieFanarts(artwork.getVideoData());
+            fanarts = this.artworkLocatorService.getMatchingFanarts(artwork.getVideoData());
         } else if (artwork.getSeason() != null) {
-            // TODO scan season poster
+            fanarts = this.artworkLocatorService.getMatchingFanarts(artwork.getSeason());
         } else if (artwork.getSeries() != null) {
             // TODO scan series poster
         }

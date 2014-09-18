@@ -374,7 +374,7 @@ public class VideoData extends AbstractMetadata {
         this.mediaFiles.add(mediaFile);
     }
 
-    public List<CastCrew> getCredits() {
+    private List<CastCrew> getCredits() {
         return credits;
     }
 

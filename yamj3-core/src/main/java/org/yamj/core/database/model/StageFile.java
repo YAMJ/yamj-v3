@@ -22,6 +22,11 @@
  */
 package org.yamj.core.database.model;
 
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,6 +44,7 @@ import org.yamj.core.database.model.type.FileType;
 @Table(name = "stage_file",
     uniqueConstraints= @UniqueConstraint(name="UIX_STAGEFILE_NATURALID", columnNames={"directory_id", "base_name", "extension"})
 )
+@SuppressWarnings("unused")
 public class StageFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -6247352843375054146L;
@@ -79,6 +85,9 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "stageFile")
     private List<NfoRelation> nfoRelations = new ArrayList<NfoRelation>(0);
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "stageFile")
+    private Set<ArtworkLocated> artworkLocated = new HashSet<ArtworkLocated>(0);
 
     @Lob
     @Column(name = "content")
@@ -176,12 +185,24 @@ public class StageFile extends AbstractAuditable implements Serializable {
         return nfoRelations;
     }
 
-    public void setNfoRelations(List<NfoRelation> nfoRelations) {
+    private void setNfoRelations(List<NfoRelation> nfoRelations) {
         this.nfoRelations = nfoRelations;
     }
 
     public void addNfoRelation(NfoRelation nfoRelation) {
         this.nfoRelations.add(nfoRelation);
+    }
+
+    private void setArtworkLocated(Set<ArtworkLocated> artworkLocated) {
+        this.artworkLocated = artworkLocated;
+    }
+
+    public Set<ArtworkLocated> getArtworkLocated() {
+        return artworkLocated;
+    }
+
+    public void addArtworkLocated(ArtworkLocated artworkLocated) {
+        this.artworkLocated.add(artworkLocated);
     }
 
     // TRANSIENT METHODS

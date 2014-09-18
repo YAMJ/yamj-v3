@@ -22,14 +22,7 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.Collections;
-
-import org.springframework.util.CollectionUtils;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -37,8 +30,10 @@ import org.hibernate.SQLQuery;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.hibernate.HibernateDao;
 
@@ -94,12 +89,12 @@ public class StagingDao extends HibernateDao {
         return (List<StageDirectory>)criteria.list();
     }
 
-    public List<VideoData> findVideoDatasForNFO(StageDirectory stageDirectory) {
-        return this.findVideoDatasForNFO(null, stageDirectory);
+    public List<VideoData> findVideoDatas(StageDirectory stageDirectory) {
+        return this.findVideoDatas(null, stageDirectory);
     }
 
     @SuppressWarnings("unchecked")
-    public List<VideoData> findVideoDatasForNFO(String baseName, StageDirectory stageDirectory) {
+    public List<VideoData> findVideoDatas(String baseName, StageDirectory stageDirectory) {
         if (stageDirectory == null) {
             return Collections.emptyList();
         }
@@ -129,7 +124,7 @@ public class StagingDao extends HibernateDao {
     }
 
     @SuppressWarnings("unchecked")
-    public List<VideoData> findVideoDatasForNFO(Collection<StageDirectory> stageDirectories) {
+    public List<VideoData> findVideoDatas(Collection<StageDirectory> stageDirectories) {
         if (CollectionUtils.isEmpty(stageDirectories)) {
             return Collections.emptyList();
         }
@@ -236,6 +231,69 @@ public class StagingDao extends HibernateDao {
         query.setParameter("seriesId", seriesId);
         query.setParameter("fileType", FileType.NFO);
         query.setParameterList("statusSet", statusSet);
+        query.setCacheable(true);
+        query.setCacheMode(CacheMode.NORMAL);
+        return query.list();
+    }
+
+    public List<Artwork> findMatchingArtworks(ArtworkType artworkType, StageDirectory stageDirectory)  {
+        return this.findMatchingArtworks(artworkType, null, stageDirectory);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Artwork> findMatchingArtworks(ArtworkType artworkType, String baseName, StageDirectory stageDirectory)  {
+        StringBuffer sb = new StringBuffer();
+        // for movies
+        sb.append("SELECT distinct a ");
+        sb.append("FROM Artwork a ");
+        sb.append("LEFT OUTER JOIN a.artworkLocated al ");
+        sb.append("JOIN a.videoData vd ");
+        sb.append("JOIN vd.mediaFiles mf ");
+        sb.append("JOIN mf.stageFiles sf ");
+        sb.append("WHERE a.artworkType=:artworkType ");
+        sb.append("AND sf.fileType=:fileType ");
+        sb.append("AND sf.status in (:statusSet) ");
+        sb.append("AND mf.extra=:extra ");
+        sb.append("AND vd.episode < 0 ");
+        if (baseName != null) {
+            sb.append("AND lower(sf.baseName)=:baseName ");
+        }
+        sb.append("AND sf.stageDirectory=:stageDirectory ");
+        sb.append("AND (al is null or al.stageFile is not null) ");
+        sb.append("UNION ");
+        // for season
+        sb.append("SELECT distinct a ");
+        sb.append("FROM Artwork a ");
+        sb.append("LEFT OUTER JOIN a.artworkLocated al ");
+        sb.append("JOIN a.season sea ");
+        sb.append("JOIN sea.videoDatas vd ");
+        sb.append("JOIN vd.mediaFiles mf ");
+        sb.append("JOIN mf.stageFiles sf ");
+        sb.append("WHERE a.artworkType=:artworkType ");
+        sb.append("AND sf.fileType=:fileType ");
+        sb.append("AND sf.status in (:statusSet) ");
+        sb.append("AND mf.extra=:extra ");
+        sb.append("AND vd.episode >= 0 ");
+        if (baseName != null) {
+            sb.append("AND lower(sf.baseName)=:baseName ");
+        }
+        sb.append("AND sf.stageDirectory=:stageDirectory ");
+        sb.append("AND (al is null or al.stageFile is not null) ");
+
+        Set<StatusType> statusSet = new HashSet<StatusType>();
+        statusSet.add(StatusType.NEW);
+        statusSet.add(StatusType.UPDATED);
+        statusSet.add(StatusType.DONE);
+
+        Query query = getSession().createQuery(sb.toString());
+        query.setParameter("artworkType", artworkType);
+        query.setParameter("fileType", FileType.IMAGE);
+        query.setBoolean("extra", Boolean.FALSE);
+        if (baseName != null) {
+            query.setString("baseName", baseName.toLowerCase());
+        }
+        query.setParameterList("statusSet", statusSet);
+        query.setParameter("stageDirectory", stageDirectory);
         query.setCacheable(true);
         query.setCacheMode(CacheMode.NORMAL);
         return query.list();
