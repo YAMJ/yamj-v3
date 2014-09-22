@@ -63,12 +63,12 @@ public class ConfigDao extends HibernateDao {
     @Transactional
     public void storeConfig(Map<String, String> config) {
         for (Map.Entry<String, String> entry : config.entrySet()) {
-            storeConfig(entry.getKey(), entry.getValue());
+            storeConfig(entry.getKey(), entry.getValue(), false);
         }
     }
 
     @Transactional
-    public void storeConfig(String key, String value) {
+    public void storeConfig(String key, String value, boolean updateAllowed) {
         Session session = getSession();
         Configuration config = (Configuration) session.byId(Configuration.class).load(key);
         if (config == null) {
@@ -77,8 +77,10 @@ public class ConfigDao extends HibernateDao {
             config.setKey(key);
             config.setValue(value);
             session.save(config);
+        } else if (updateAllowed) {
+            config.setValue(value);
+            session.update(config);
         }
-        // no update of already stored configuration values
     }
 
     @Transactional

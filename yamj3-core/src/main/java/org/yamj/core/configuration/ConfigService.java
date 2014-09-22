@@ -138,7 +138,7 @@ public class ConfigService implements InitializingBean {
 
     public void setProperty(String key, String value) {
         // first store in database ...
-        configDao.storeConfig(key, value);
+        configDao.storeConfig(key, value, true);
         // ... after that in cached properties
         cachedProperties.put(key, value);
     }
