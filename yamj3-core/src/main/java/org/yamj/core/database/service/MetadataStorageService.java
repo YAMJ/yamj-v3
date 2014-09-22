@@ -73,7 +73,7 @@ public class MetadataStorageService {
         sql.append("and sea.id=vd.season_id ");
         sql.append("and (ser.status in ('NEW','UPDATED') ");
         sql.append(" or  (ser.status='DONE' and sea.status in ('NEW','UPDATED')) ");
-        sql.append(" or  (ser.status='DONE' and vd.status in  ('NEW','UPDATED'))) ");
+        sql.append(" or  (ser.status='DONE' and vd.status in ('NEW','UPDATED'))) ");
 
         return metadataDao.getMetadataQueue(sql, maxResults);
     }

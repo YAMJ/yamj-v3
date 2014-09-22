@@ -637,8 +637,8 @@ select,
     padding: 4px;
     font-size: 13px;
     line-height: 18px;
-    background-color:#ffffff;
-    color: #FFFFFF;
+    background-color:#FFFFFF;
+    color: #000000;
     border: 1px solid #222222;
     -webkit-border-radius: 6px;
     -moz-border-radius: 6px;
