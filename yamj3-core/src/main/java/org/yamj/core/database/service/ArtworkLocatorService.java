@@ -164,7 +164,7 @@ public class ArtworkLocatorService {
         sb.append("and f.status != :duplicate " );
 
         final Map<String,Object> params = new HashMap<String,Object>();
-        params.put("videoDataId", season.getId());
+        params.put("seasonId", season.getId());
         params.put("duplicate", StatusType.DUPLICATE);
 
         return stagingDao.findByNamedParameters(sb, params);
