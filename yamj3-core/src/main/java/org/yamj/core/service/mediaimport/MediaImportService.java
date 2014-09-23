@@ -727,9 +727,8 @@ public class MediaImportService {
             located.setSource("file");
             located.setPriority(1);
             located.setStageFile(stageFile);
-            
-            if (!artwork.getArtworkLocated().contains(artwork)) {
-                
+
+            if (!artwork.getArtworkLocated().contains(located)) {
                 int hash = stageFile.getFullPath().hashCode();
                 located.setHashCode(String.valueOf((hash < 0 ? 0 - hash : hash)));
 
