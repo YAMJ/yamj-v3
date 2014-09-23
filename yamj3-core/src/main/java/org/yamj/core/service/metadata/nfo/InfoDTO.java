@@ -83,7 +83,8 @@ public final class InfoDTO {
 
     public void setSkipOnlineScans(String skipOnlineScans) {
         if (StringUtils.isNotBlank(skipOnlineScans)) {
-            this.skipOnlineScans = Arrays.asList(StringUtils.split(skipOnlineScans, ";"));
+            this.skipOnlineScans.clear();
+            this.skipOnlineScans.addAll(Arrays.asList(StringUtils.split(skipOnlineScans, ";")));
         }
     }
     

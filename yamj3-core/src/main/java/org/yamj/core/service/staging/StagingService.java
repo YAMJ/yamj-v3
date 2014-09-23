@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.staging;
 
+import java.util.Calendar;
+
 import java.io.File;
 import java.util.Date;
 import java.util.List;
@@ -76,7 +78,7 @@ public class StagingService {
             stageDirectory.setDirectoryPath(normalized);
             stageDirectory.setDirectoryName(dirFile.getName());
             stageDirectory.setLibrary(library);
-            stageDirectory.setDirectoryDate(new Date(stageDirectoryDTO.getDate()));
+            stageDirectory.setDirectoryDate(getDateWithoutMilliseconds(stageDirectoryDTO.getDate()));
 
             // getById parent stage directory
             int lastIndex = normalized.lastIndexOf('/');
@@ -90,9 +92,9 @@ public class StagingService {
 
             stagingDao.saveEntity(stageDirectory);
         } else {
-            Date newDate = new Date(stageDirectoryDTO.getDate());
+            Date newDate = getDateWithoutMilliseconds(stageDirectoryDTO.getDate());
             if (newDate.compareTo(stageDirectory.getDirectoryDate()) != 0) {
-                stageDirectory.setDirectoryDate(new Date(stageDirectoryDTO.getDate()));
+                stageDirectory.setDirectoryDate(newDate);
                 stagingDao.updateEntity(stageDirectory);
             }
         }
@@ -121,7 +123,7 @@ public class StagingService {
                 stageFile.setStatus(StatusType.NEW);
                 stagingDao.saveEntity(stageFile);
             } else {
-                Date newDate = new Date(stageFileDTO.getFileDate());
+                Date newDate = getDateWithoutMilliseconds(stageFileDTO.getFileDate());
                 if ((newDate.compareTo(stageFile.getFileDate()) != 0) || (stageFile.getFileSize() != stageFileDTO.getFileSize())) {
 
                     // set changeable values in stage file
@@ -144,7 +146,7 @@ public class StagingService {
     }
     
     private void setChangeableValues(StageFile stageFile, StageFileDTO stageFileDTO) {
-        stageFile.setFileDate(new Date(stageFileDTO.getFileDate()));
+        stageFile.setFileDate(getDateWithoutMilliseconds(stageFileDTO.getFileDate()));
         stageFile.setFileSize(stageFileDTO.getFileSize());
 
         if (FileType.VIDEO.equals(stageFile.getFileType())) {
@@ -156,6 +158,14 @@ public class StagingService {
         }
     }
 
+    private Date getDateWithoutMilliseconds(long millis) {
+        // strip milliseconds cause mostly not stored in database
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(millis);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
+    
+    }
     @Transactional
     public List<StageFile> getValidNFOFiles(VideoData videoData) {
         // read NFO files for movies
