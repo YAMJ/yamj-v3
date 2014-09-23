@@ -630,13 +630,15 @@ public class MediaImportService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void processImage(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
+        boolean found;
         if (StatusType.NEW.equals(stageFile.getStatus())) {
             LOG.info("Process new image {}-'{}'", stageFile.getId(), stageFile.getFileName());
             
             // process new image
-            processNewImage(stageFile);
+            found = processNewImage(stageFile);
         } else {
             LOG.info("Process updated image {}-'{}'", stageFile.getId(), stageFile.getFileName());
+            found = Boolean.TRUE;
             
             for (ArtworkLocated located : stageFile.getArtworkLocated()) {
                 // mark located as updated
@@ -645,12 +647,16 @@ public class MediaImportService {
             }
         }
 
-        // set stage file to done
-        stageFile.setStatus(StatusType.DONE);
+        // update stage file
+        if (found) {
+            stageFile.setStatus(StatusType.DONE);
+        }  else {
+            stageFile.setStatus(StatusType.NOTFOUND);
+        }
         stagingDao.updateEntity(stageFile);
     }
     
-    private void processNewImage(StageFile stageFile) {
+    private boolean processNewImage(StageFile stageFile) {
         
         List<Artwork> artworks;
         if (stageFile.getBaseName().equalsIgnoreCase("poster")
@@ -658,14 +664,14 @@ public class MediaImportService {
                 || stageFile.getBaseName().equalsIgnoreCase("folder")) 
         {
             LOG.debug("Generic poster found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
-            artworks = this.stagingDao.findMatchingArtworks(ArtworkType.POSTER, stageFile.getStageDirectory());
+            artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stageFile.getStageDirectory());
         }
         else if (stageFile.getBaseName().equalsIgnoreCase("fanart")
                    || stageFile.getBaseName().equalsIgnoreCase("backdrop")
                    || stageFile.getBaseName().equalsIgnoreCase("background")) 
         {
             LOG.debug("Generic fanart found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
-            artworks = this.stagingDao.findMatchingArtworks(ArtworkType.FANART, stageFile.getStageDirectory());
+            artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stageFile.getStageDirectory());
         }
         else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".fanart")
                  || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-fanart")) 
@@ -673,8 +679,14 @@ public class MediaImportService {
             LOG.debug("Fanart found: {}", stageFile.getBaseName());
 
             String stripped = stageFile.getBaseName().toLowerCase();
-            stripped = StringUtils.substring(stripped, 0, stripped.length()-8);
-            artworks = this.stagingDao.findMatchingArtworks(ArtworkType.FANART, stripped, stageFile.getStageDirectory());
+            stripped = StringUtils.substring(stripped, 0, stripped.length()-7);
+            
+            if (stageFile.getStageDirectory().getDirectoryName().equalsIgnoreCase(stripped)) {
+                // fanart for whole directory cause same name as directory
+                artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stageFile.getStageDirectory());
+            } else {
+                artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stripped, stageFile.getStageDirectory());
+            }
         }
         else if (StringUtils.indexOf(stageFile.getBaseName(), ".videoimage") > 0) 
         {
@@ -686,12 +698,26 @@ public class MediaImportService {
         else 
         {
             LOG.debug("Poster found: {}", stageFile.getBaseName());
-            artworks = this.stagingDao.findMatchingArtworks(ArtworkType.POSTER, stageFile.getBaseName().toLowerCase(), stageFile.getStageDirectory());
+
+            String stripped = stageFile.getBaseName().toLowerCase();
+            if (StringUtils.endsWith(stripped, ".poster")
+                || StringUtils.endsWith(stripped, "-poster")) 
+            {
+                stripped = StringUtils.substring(stripped, 0, stripped.length()-7);
+            }
+
+            if (stageFile.getStageDirectory().getDirectoryName().equalsIgnoreCase(stripped)) {
+                // poster for whole directory cause same name as directory
+                artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stageFile.getStageDirectory());
+            } else {
+                artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stripped, stageFile.getStageDirectory());
+            }
         }
 
-        // no artworks found so return
+        LOG.debug("Found {} matching artwork entries", artworks.size());
         if (CollectionUtils.isEmpty(artworks)) {
-            return;
+            // no artworks found so return
+            return false;
         }
         
         // add artwork stage file to artwork
@@ -717,6 +743,8 @@ public class MediaImportService {
                 artwork.addArtworkLocated(located);
             }
         }
+        
+        return true;
     }
     
 }

@@ -86,6 +86,12 @@ public class ArtworkLocatorService {
             artworkNames.add(videoFile.getBaseName().toLowerCase());
             artworkNames.add(videoFile.getBaseName().toLowerCase() + ".poster");
             artworkNames.add(videoFile.getBaseName().toLowerCase() + "-poster");
+            
+            // same name as directory
+            String directoryName = videoFile.getStageDirectory().getDirectoryName().toLowerCase();
+            artworkNames.add(directoryName);
+            artworkNames.add(directoryName + ".poster");
+            artworkNames.add(directoryName + "-poster");
         }
         return artworkNames;
     }
@@ -133,6 +139,11 @@ public class ArtworkLocatorService {
             directories.add(videoFile.getStageDirectory());
             artworkNames.add(videoFile.getBaseName().toLowerCase() + ".fanart");
             artworkNames.add(videoFile.getBaseName().toLowerCase() + "-fanart");
+            
+            // same name as directory
+            String directoryName = videoFile.getStageDirectory().getDirectoryName().toLowerCase();
+            artworkNames.add(directoryName + ".fanart");
+            artworkNames.add(directoryName + "-fanart");
         }
         return artworkNames;
     }

@@ -103,6 +103,31 @@ public class ImportScheduler {
         } while (id != null);
 
         // PROCESS IMAGES
+        do {
+            PROCESS_LOCK.lock();
+            
+            try {
+                // find next stage file to process
+                id = mediaImportService.getNextStageFileId(FileType.IMAGE, StatusType.NEW, StatusType.UPDATED);
+                if (id != null) {
+                    LOG.debug("Process image stage file: {}", id);
+                    mediaImportService.processImage(id);
+                    LOG.info("Processed image stage file: {}", id);
+                }
+            } catch (Exception error) {
+                if (ExceptionTools.isLockingError(error)) {
+                    LOG.warn("Locking error during import of image stage file {}", id);
+                } else {
+                    LOG.error("Failed to process image stage file {}", id);
+                    LOG.warn("Staging error", error);
+                    try {
+                        mediaImportService.processingError(id);
+                    } catch (Exception ignore) {}
+                }
+            } finally {
+                PROCESS_LOCK.unlock();
+            }
+        } while (id != null);
 
         // PROCESS SUBTITLES
 

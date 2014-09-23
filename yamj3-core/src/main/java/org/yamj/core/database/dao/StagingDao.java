@@ -236,17 +236,16 @@ public class StagingDao extends HibernateDao {
         return query.list();
     }
 
-    public List<Artwork> findMatchingArtworks(ArtworkType artworkType, StageDirectory stageDirectory)  {
-        return this.findMatchingArtworks(artworkType, null, stageDirectory);
+    public List<Artwork> findMatchingArtworksForVideo(ArtworkType artworkType, StageDirectory stageDirectory)  {
+        return this.findMatchingArtworksForVideo(artworkType, null, stageDirectory);
     }
 
     @SuppressWarnings("unchecked")
-    public List<Artwork> findMatchingArtworks(ArtworkType artworkType, String baseName, StageDirectory stageDirectory)  {
+    public List<Artwork> findMatchingArtworksForVideo(ArtworkType artworkType, String baseName, StageDirectory stageDirectory)  {
         StringBuffer sb = new StringBuffer();
         // for movies
         sb.append("SELECT distinct a ");
         sb.append("FROM Artwork a ");
-        sb.append("LEFT OUTER JOIN a.artworkLocated al ");
         sb.append("JOIN a.videoData vd ");
         sb.append("JOIN vd.mediaFiles mf ");
         sb.append("JOIN mf.stageFiles sf ");
@@ -259,12 +258,10 @@ public class StagingDao extends HibernateDao {
             sb.append("AND lower(sf.baseName)=:baseName ");
         }
         sb.append("AND sf.stageDirectory=:stageDirectory ");
-        sb.append("AND (al is null or al.stageFile is not null) ");
         sb.append("UNION ");
         // for season
         sb.append("SELECT distinct a ");
         sb.append("FROM Artwork a ");
-        sb.append("LEFT OUTER JOIN a.artworkLocated al ");
         sb.append("JOIN a.season sea ");
         sb.append("JOIN sea.videoDatas vd ");
         sb.append("JOIN vd.mediaFiles mf ");
@@ -278,7 +275,6 @@ public class StagingDao extends HibernateDao {
             sb.append("AND lower(sf.baseName)=:baseName ");
         }
         sb.append("AND sf.stageDirectory=:stageDirectory ");
-        sb.append("AND (al is null or al.stageFile is not null) ");
 
         Set<StatusType> statusSet = new HashSet<StatusType>();
         statusSet.add(StatusType.NEW);
@@ -287,10 +283,10 @@ public class StagingDao extends HibernateDao {
 
         Query query = getSession().createQuery(sb.toString());
         query.setParameter("artworkType", artworkType);
-        query.setParameter("fileType", FileType.IMAGE);
+        query.setParameter("fileType", FileType.VIDEO);
         query.setBoolean("extra", Boolean.FALSE);
         if (baseName != null) {
-            query.setString("baseName", baseName.toLowerCase());
+            query.setString("baseName", baseName);
         }
         query.setParameterList("statusSet", statusSet);
         query.setParameter("stageDirectory", stageDirectory);
