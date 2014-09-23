@@ -22,13 +22,14 @@
  */
 package org.yamj.core.service.staging;
 
-import java.util.Calendar;
-
 import java.io.File;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -44,6 +45,8 @@ import org.yamj.core.service.mediaimport.FilenameScanner;
 
 @Service("stagingService")
 public class StagingService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(StagingService.class);
 
     @Autowired
     private StagingDao stagingDao;
@@ -90,11 +93,14 @@ public class StagingService {
                 }
             }
 
+            LOG.debug("New directory: {}", stageDirectory.getDirectoryPath());
             stagingDao.saveEntity(stageDirectory);
         } else {
             Date newDate = getDateWithoutMilliseconds(stageDirectoryDTO.getDate());
             if (newDate.compareTo(stageDirectory.getDirectoryDate()) != 0) {
                 stageDirectory.setDirectoryDate(newDate);
+
+                LOG.debug("Updated directory: {}", stageDirectory.getDirectoryPath());
                 stagingDao.updateEntity(stageDirectory);
             }
         }
@@ -116,11 +122,12 @@ public class StagingService {
                 stageFile.setStageDirectory(stageDirectory);
                 stageFile.setFileType(filenameScanner.determineFileType(extension));
                 stageFile.setFullPath(FilenameUtils.concat(stageDirectoryDTO.getPath(), stageFileDTO.getFileName()));
+                stageFile.setStatus(StatusType.NEW);
 
                 // set changeable values in stage file
                 setChangeableValues(stageFile, stageFileDTO);
-
-                stageFile.setStatus(StatusType.NEW);
+                
+                LOG.debug("New {} file: {}", stageFile.getFileType().name().toLowerCase(), stageFile.getFullPath());
                 stagingDao.saveEntity(stageFile);
             } else {
                 Date newDate = getDateWithoutMilliseconds(stageFileDTO.getFileDate());
@@ -139,6 +146,7 @@ public class StagingService {
                         stageFile.setStatus(StatusType.UPDATED);
                     }
                     
+                    LOG.debug("Updated {} file: {}", stageFile.getFileType().name().toLowerCase(), stageFile.getFullPath());
                     stagingDao.updateEntity(stageFile);
                 }
             }
@@ -164,8 +172,8 @@ public class StagingService {
         cal.setTimeInMillis(millis);
         cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
-    
     }
+    
     @Transactional
     public List<StageFile> getValidNFOFiles(VideoData videoData) {
         // read NFO files for movies
