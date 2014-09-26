@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.mediaimport;
 
-import org.yamj.core.database.model.ArtworkLocated;
-
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -36,7 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.configuration.ConfigService;
+import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.dao.MediaDao;
 import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.dao.StagingDao;
@@ -68,7 +66,7 @@ public class MediaImportService {
     @Autowired
     private FilenameScanner filenameScanner;
     @Autowired
-    private ConfigService configService;
+    private ConfigServiceWrapper configServiceWrapper;
     
     @Transactional(readOnly = true)
     public Long getNextStageFileId(final FileType fileType, final StatusType... statusTypes) {
@@ -385,7 +383,7 @@ public class MediaImportService {
         
         // case 10-n: apply "nfoName = dirName" to all video data
         // NOTE: 11-n are only applied if recursive scan is enabled
-        boolean recurse = this.configService.getBooleanProperty("yamj3.scan.nfo.recursiveDirectories", false);
+        boolean recurse = this.configServiceWrapper.getBooleanProperty("yamj3.scan.nfo.recursiveDirectories", false);
         LOG.trace("Recursive scan of directories is {}", (recurse?"enabled":"disabled"));
         this.findNfoWithDirectoryName(nfoFiles, stageFile.getStageDirectory(), 10, recurse);
         
@@ -585,7 +583,7 @@ public class MediaImportService {
             
             
             if (CollectionUtils.isNotEmpty(childDirectories)) {
-                boolean recurse = this.configService.getBooleanProperty("yamj3.scan.nfo.recursiveDirectories", false);
+                boolean recurse = this.configServiceWrapper.getBooleanProperty("yamj3.scan.nfo.recursiveDirectories", false);
                 LOG.trace("Recursive scan of directories is {}", (recurse?"enabled":"disabled"));
                 
                 if (recurse) {
@@ -722,6 +720,11 @@ public class MediaImportService {
         
         // add artwork stage file to artwork
         for (Artwork artwork : artworks) {
+            if (!configServiceWrapper.isLocalArtworkScanEnabled(artwork)) {
+                LOG.trace("Local artwork scan disabled: {}", artwork);
+                continue;
+            }
+
             ArtworkLocated located = new ArtworkLocated();
             located.setArtwork(artwork);
             located.setSource("file");
