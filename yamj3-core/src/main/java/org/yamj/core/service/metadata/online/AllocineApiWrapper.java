@@ -266,4 +266,15 @@ public class AllocineApiWrapper {
         }
         return personInfos;
     }
+
+    public EpisodeInfos getEpisodeInfos(String allocineId) {
+        EpisodeInfos personInfos = null;
+        try {
+            personInfos = allocineApi.getEpisodeInfos(allocineId);
+        } catch (Exception error) {
+            LOG.error("Failed retrieving Allocine infos for episode: {}", allocineId);
+            LOG.error("Allocine error" , error);
+        }
+        return personInfos;
+    }
 }   
