@@ -22,12 +22,12 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.moviejukebox.allocine.*;
-import com.moviejukebox.allocine.model.Episode;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+
+import com.moviejukebox.allocine.*;
+import com.moviejukebox.allocine.model.CastMember;
+import com.moviejukebox.allocine.model.Episode;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.collections.CollectionUtils;
@@ -359,39 +359,6 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         // allocine rating
         series.addRating(SCANNER_ID, tvSeriesInfos.getUserRating());
 
-        // parse the credits
-        Set<CreditDTO> credits = new HashSet<CreditDTO>();
-        
-        for (MoviePerson person : tvSeriesInfos.getDirectors()) {
-            CreditDTO creditDTO = new CreditDTO(SCANNER_ID, JobType.DIRECTOR, person.getName());
-            if (person.getCode() > 0 ) {
-                creditDTO.addPersonId(SCANNER_ID, String.valueOf(person.getCode()));
-            }
-            creditDTO.addPhotoURL(person.getPhotoURL(), SCANNER_ID);
-            credits.add(creditDTO);
-        }
-        
-        for (MoviePerson person : tvSeriesInfos.getWriters()) {
-            CreditDTO creditDTO = new CreditDTO(SCANNER_ID, JobType.WRITER, person.getName());
-            if (person.getCode() > 0 ) {
-                creditDTO.addPersonId(SCANNER_ID, String.valueOf(person.getCode()));
-            }
-            creditDTO.addPhotoURL(person.getPhotoURL(), SCANNER_ID);
-            credits.add(creditDTO);
-        }
-
-        for (MoviePerson person : tvSeriesInfos.getActors()) {
-            // only lead actors
-            if (person.isLeadActor()) {
-                CreditDTO creditDTO = new CreditDTO(SCANNER_ID, JobType.ACTOR, person.getName(), person.getRole());
-                if (person.getCode() > 0) {
-                    creditDTO.addPersonId(SCANNER_ID, String.valueOf(person.getCode()));
-                }
-                creditDTO.addPhotoURL(person.getPhotoURL(), SCANNER_ID);
-                credits.add(creditDTO);
-            }
-        }
-
         // add poster URLs
         if (CollectionUtils.isNotEmpty(tvSeriesInfos.getPosterUrls()))  {
             for (String posterURL : tvSeriesInfos.getPosterUrls()) {
@@ -400,12 +367,12 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
 
         // SCAN SEASONS
-        this.scanSeasons(series, tvSeriesInfos, credits);
+        this.scanSeasons(series, tvSeriesInfos);
 
         return ScanResult.OK;
     }
 
-    private void scanSeasons(Series series, TvSeriesInfos tvSeriesInfos, Set<CreditDTO> credits) {
+    private void scanSeasons(Series series, TvSeriesInfos tvSeriesInfos) {
 
         for (Season season : series.getSeasons()) {
 
@@ -437,11 +404,11 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             season.setTvSeasonScanned();
 
             // scan episodes
-            this.scanEpisodes(season, tvSeasonInfos, credits);
+            this.scanEpisodes(season, tvSeasonInfos);
         }
     }
 
-    private void scanEpisodes(Season season, TvSeasonInfos tvSeasonInfos, Set<CreditDTO> credits) {
+    private void scanEpisodes(Season season, TvSeasonInfos tvSeasonInfos) {
         if (CollectionUtils.isEmpty(season.getVideoDatas())) {
             return;
         }
@@ -459,29 +426,98 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                 videoData.setTvEpisodeNotFound();
             } else {
 
+                String allocineId = videoData.getSourceDbId(SCANNER_ID);
+                if (episode.getCode() > 0) {
+                    allocineId = String.valueOf(episode.getCode());
+                }
+                videoData.setSourceDbId(SCANNER_ID, allocineId);
+                
+                List<CastMember> castMembers = null;
+                EpisodeInfos episodeInfos = this.allocineApiWrapper.getEpisodeInfos(allocineId);
+                if (episodeInfos == null) {
+                    episodeInfos = new EpisodeInfos();
+                    episodeInfos.setEpisode(episode);
+                    // use members from season
+                    if (tvSeasonInfos.getSeason() != null) {
+                        castMembers = tvSeasonInfos.getSeason().getCastMember();
+                    }
+                } else if (episodeInfos.getEpisode() != null) {
+                    // use members from episode
+                    castMembers = episodeInfos.getEpisode().getCastMember();
+                }
+                
                 if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
-                    videoData.setTitle(episode.getTitle(), SCANNER_ID);
+                    videoData.setTitle(episodeInfos.getTitle(), SCANNER_ID);
                 }
 
                 if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID)) {
-                    videoData.setTitleOriginal(episode.getOriginalTitle(), SCANNER_ID);
+                    videoData.setTitleOriginal(episodeInfos.getOriginalTitle(), SCANNER_ID);
                 }
 
                 if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-                    videoData.setPlot(episode.getSynopsis(), SCANNER_ID);
+                    videoData.setPlot(episodeInfos.getSynopsis(), SCANNER_ID);
                 }
 
-                if (episode.getCode() > 0) {
-                    videoData.setSourceDbId(SCANNER_ID, String.valueOf(episode.getCode()));
+                if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
+                    videoData.setOutline(episodeInfos.getSynopsis(), SCANNER_ID);
                 }
                 
-                //  add all credits
-                videoData.addCreditDTOS(credits);
+                if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
+                    Date releaseDate = MetadataDateTimeTools.parseToDate(episodeInfos.getOriginalBroadcastDate());
+                    videoData.setReleaseDate(releaseDate, SCANNER_ID);
+                }
+                
+                //  add credits
+                videoData.addCreditDTOS(parseCredits(castMembers));
 
                 // mark episode as scanned
                 videoData.setTvEpisodeScanned();
             }
         }
+    }
+
+    private Set<CreditDTO> parseCredits(List<CastMember> castMembers) {
+        Set<CreditDTO> result = new LinkedHashSet<CreditDTO>();
+        
+        if (CollectionUtils.isNotEmpty(castMembers)) {
+            for (CastMember member: castMembers) {
+                if (member.getShortPerson() == null) {
+                    continue;
+                }
+                
+                if (member.isActor() && member.isLeadActor()) {
+                    // only lead actors
+                    CreditDTO credit = new CreditDTO(SCANNER_ID, JobType.ACTOR, member.getShortPerson().getName());
+                    credit.setRole(member.getRole());
+                    if (member.getShortPerson().getCode() > 0) {
+                        credit.addPersonId(SCANNER_ID, String.valueOf(member.getShortPerson().getCode()));
+                    }
+                    if (member.getPicture() != null) {
+                        credit.addPhotoURL(member.getPicture().getHref(), SCANNER_ID);
+                    }
+                    result.add(credit);
+                } else if (member.isDirector()) {
+                    CreditDTO credit = new CreditDTO(SCANNER_ID, JobType.DIRECTOR, member.getShortPerson().getName());
+                    if (member.getShortPerson().getCode() > 0) {
+                        credit.addPersonId(SCANNER_ID, String.valueOf(member.getShortPerson().getCode()));
+                    }
+                    if (member.getPicture() != null) {
+                        credit.addPhotoURL(member.getPicture().getHref(), SCANNER_ID);
+                    }
+                    result.add(credit);
+                } else if (member.isWriter()) {
+                    CreditDTO credit = new CreditDTO(SCANNER_ID, JobType.WRITER, member.getShortPerson().getName());
+                    if (member.getShortPerson().getCode() > 0) {
+                        credit.addPersonId(SCANNER_ID, String.valueOf(member.getShortPerson().getCode()));
+                    }
+                    if (member.getPicture() != null) {
+                        credit.addPhotoURL(member.getPicture().getHref(), SCANNER_ID);
+                    }
+                    result.add(credit);
+                }
+            }
+        }
+        return result;
     }
 
     @Override
