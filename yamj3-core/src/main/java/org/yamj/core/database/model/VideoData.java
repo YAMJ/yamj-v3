@@ -501,6 +501,12 @@ public class VideoData extends AbstractMetadata {
         return setInfos;
     }
 
+    public void addSetInfo(String setName, Integer ordering) {
+        if (StringUtils.isNotBlank(setName)) {
+            this.setInfos.put(setName, ordering);
+        }
+    }
+    
     public void addSetInfos(Map<String,Integer> setInfos) {
         if (MapUtils.isNotEmpty(setInfos)) {
             this.setInfos.putAll(setInfos);

@@ -173,8 +173,8 @@ public class MetadataStorageService {
             }
         }
         
-        // store persons
         if (MapUtils.isNotEmpty(videoData.getSetInfos())) {
+            // store boxed sets
             for (String boxedSetName : videoData.getSetInfos().keySet()) {
                 try {
                     this.commonDao.storeNewBoxedSet(boxedSetName);
@@ -385,7 +385,7 @@ public class MetadataStorageService {
      *
      * @param videoData
      */
-    private void updateBoxedSets(VideoData videoData) {
+    public void updateBoxedSets(VideoData videoData) {
         if (MapUtils.isEmpty(videoData.getSetInfos())) {
             return;
         }

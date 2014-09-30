@@ -41,7 +41,9 @@ import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.file.tools.FileTools;
+import org.yamj.core.service.mediaimport.FilenameDTO.SetDTO;
 
 /**
  * The media import service is a spring-managed service. This will be used by the MediaImportRunner only in order to access other
@@ -67,6 +69,8 @@ public class MediaImportService {
     private FilenameScanner filenameScanner;
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
+    @Autowired
+    private MetadataStorageService metadataStorageService;
     
     @Transactional(readOnly = true)
     public Long getNextStageFileId(final FileType fileType, final StatusType... statusTypes) {
@@ -199,6 +203,20 @@ public class MediaImportService {
                 videoData.addMediaFile(mediaFile);
                 metadataDao.updateEntity(videoData);
             }
+
+            // boxed set handling
+            if (CollectionUtils.isNotEmpty(dto.getSets())) {
+                for (SetDTO set: dto.getSets()) {
+                    // add boxed set to video data
+                    videoData.addSetInfo(set.getTitle(), set.getIndex());
+                }
+
+                // store associated entities (only sets right now)
+                this.metadataStorageService.storeAssociatedEntities(videoData);
+                // updated boxed sets for video data
+                this.metadataStorageService.updateBoxedSets(videoData);
+            }
+
         } else {
             // VIDEO DATA for episodes
             for (Integer episode : dto.getEpisodes()) {

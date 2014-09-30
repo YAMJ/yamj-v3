@@ -348,7 +348,10 @@ public class FilenameScanner {
                 String n = matcher.group(1);
                 Matcher nmatcher = SET_INDEX_PATTERN.matcher(n);
                 if (nmatcher.find()) {
-                    set.setIndex(Integer.parseInt(nmatcher.group(1)));
+                    String sIndex = StringUtils.trim(nmatcher.group(1));
+                    if (StringUtils.isNumeric(sIndex)) {
+                        set.setIndex(Integer.valueOf(sIndex));
+                    }
                     n = cutMatch(n, nmatcher);
                 }
                 set.setTitle(n.trim());
