@@ -25,8 +25,6 @@ package org.yamj.core.service.metadata.online;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,6 +35,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
+import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.tools.web.HTMLTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
 import org.yamj.core.tools.web.SearchEngineTools;
@@ -45,7 +44,6 @@ import org.yamj.core.tools.web.SearchEngineTools;
 public class ImdbSearchEngine implements InitializingBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImdbSearchEngine.class);
-    private static final String DEFAULT_SITE = "us";
     private static final String OBJECT_MOVIE = "movie";
     private static final String OBJECT_PERSON = "person";
     private static final String CATEGORY_MOVIE = "movie";
@@ -53,61 +51,21 @@ public class ImdbSearchEngine implements InitializingBean {
     private static final String CATEGORY_ALL = "all";
     private static final String SEARCH_FIRST = "first";
     private static final String SEARCH_EXACT = "exact";
-    private static final String QUOTES = "Quotes";
-    private static final String TAGLINES = "Taglines";
     private static final String HTML_SLASH_QUOTE = "/\"";
-    private static final String ASPECT_RATIO = "Aspect Ratio";
-    private static final String ORIGINAL_TITLE = "original title";
-    private static final String RATED = "Rated";
-    private static final Map<String, ImdbSiteDataDefinition> MATCHES_DATA_PER_SITE = new HashMap<String, ImdbSiteDataDefinition>();
+    private static final Pattern PERSON_REGEX = Pattern.compile(Pattern.quote("<link rel=\"canonical\" href=\"http://www.imdb.com/name/(nm\\d+)/\""));
+    private static final Pattern TITLE_REGEX = Pattern.compile(Pattern.quote("<link rel=\"canonical\" href=\"http://www.imdb.com/title/(tt\\d+)/\""));
 
-    private String searchMatch;
-    private boolean searchVariable;
-    private ImdbSiteDataDefinition imdbSiteDef;
     private SearchEngineTools searchEngineTools;
 
     @Autowired
     private PoolingHttpClient httpClient;
-
-    static {
-        MATCHES_DATA_PER_SITE.put("us", new ImdbSiteDataDefinition("Director|Directed by", "Cast", "Release Date", "Runtime", ASPECT_RATIO, "Country",
-                "Company", "Genre", QUOTES, "Plot", RATED, "Certification", "Original Air Date", "Writer|Writing credits", "Tagline", ORIGINAL_TITLE));
-
-        MATCHES_DATA_PER_SITE.put("fr", new ImdbSiteDataDefinition("R&#xE9;alisateur|R&#xE9;alis&#xE9; par", "Ensemble", "Date de sortie", "Dur&#xE9;e", ASPECT_RATIO, "Pays",
-                "Soci&#xE9;t&#xE9;", "Genre", "Citation", "Intrigue", RATED, "Classification", "Date de sortie", "Sc&#xE9;naristes|Sc&#xE9;naristes", TAGLINES, ORIGINAL_TITLE));
-
-        MATCHES_DATA_PER_SITE.put("es", new ImdbSiteDataDefinition("Director|Dirigida por", "Reparto", "Fecha de Estreno", "Duraci&#xF3;n", "Relaci&#xF3;n de Aspecto", "Pa&#xED;s",
-                "Compa&#xF1;&#xED;a", "G&#xE9;nero", QUOTES, "Trama", RATED, "Clasificaci&#xF3;n", "Fecha de Estreno", "Escritores|Cr&#xE9;ditos del gui&#xF3;n", TAGLINES, ORIGINAL_TITLE));
-
-        MATCHES_DATA_PER_SITE.put("de", new ImdbSiteDataDefinition("Regisseur|Regie", "Besetzung", "Premierendatum", "L&#xE4;nge", "Seitenverh&#xE4;ltnis", "Land",
-                "Firma", "Genre", "Nutzerkommentare", "Handlung", RATED, "Altersfreigabe", "Premierendatum", "Guionista|Buch", TAGLINES, "Originaltitel"));
-
-        MATCHES_DATA_PER_SITE.put("it", new ImdbSiteDataDefinition("Regista|Registi|Regia di", "Cast", "Data di uscita", "Durata", ASPECT_RATIO,
-                "Nazionalit&#xE0;", "Compagnia", "Genere", QUOTES, "Trama", RATED, "Divieti", "Data di uscita", "Sceneggiatore|Scritto da", TAGLINES, ORIGINAL_TITLE));
-
-        MATCHES_DATA_PER_SITE.put("pt", new ImdbSiteDataDefinition("Diretor|Dirigido por", "Elenco", "Data de Lan&#xE7;amento", "Dura&#xE7;&#xE3;o", ASPECT_RATIO,
-                "Pa&#xED;s", "Companhia", "G&#xEA;nero", QUOTES, "Argumento", RATED, "Certifica&#xE7;&#xE3;o", "Data de Lan&#xE7;amento",
-                "Roteirista|Cr&#xE9;ditos como roteirista", TAGLINES, ORIGINAL_TITLE));
-    }
+    @Autowired
+    private ConfigService configService;
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        searchMatch = PropertyTools.getProperty("imdb.id.search.match", "regular");
-        searchVariable = PropertyTools.getBooleanProperty("imdb.id.search.variable", Boolean.TRUE);
-
-        String site = PropertyTools.getProperty("imdb.site", DEFAULT_SITE);
-        imdbSiteDef = MATCHES_DATA_PER_SITE.get(site);
-        if (imdbSiteDef == null) {
-            LOG.warn("No site definition for '{}' using the default instead '{}'", site, DEFAULT_SITE);
-            site = DEFAULT_SITE;
-            imdbSiteDef = MATCHES_DATA_PER_SITE.get(site);
-        }
-
-        searchEngineTools = new SearchEngineTools(httpClient, site);
-    }
-
-    public ImdbSiteDataDefinition getSiteDef() {
-        return this.imdbSiteDef;
+        String country = PropertyTools.getProperty("yamj3.searchengine.country", "us");
+        searchEngineTools = new SearchEngineTools(httpClient, country);
     }
     
     /**
@@ -162,10 +120,10 @@ public class ImdbSearchEngine implements InitializingBean {
                 String xml = httpClient.requestContent(sb.toString());
 
                 // Check if this is an exact match (we got a person page instead of a results list)
-                Matcher titlematch = imdbSiteDef.getPersonRegex().matcher(xml);
-                if (titlematch.find()) {
-                    LOG.debug("IMDb returned one match '{}'", titlematch.group(1));
-                    return titlematch.group(1);
+                Matcher personMatch = PERSON_REGEX.matcher(xml);
+                if (personMatch.find()) {
+                    LOG.debug("IMDb returned one match '{}'", personMatch.group(1));
+                    return personMatch.group(1);
                 }
 
                 String firstPersonId = HTMLTools.extractTag(HTMLTools.extractTag(xml, "<tr class=\"even detailed\">", "</tr>"), "<a href=\"/name/", HTML_SLASH_QUOTE);
@@ -225,6 +183,9 @@ public class ImdbSearchEngine implements InitializingBean {
      * Retrieve the IMDb matching the specified movie name and year. This routine is base on a IMDb request.
      */
     private String getImdbIdFromImdb(String title, int year, String objectType, String categoryType) {
+        String searchMatch = configService.getProperty("imdb.id.search.match", "regular");
+        boolean searchVariable = configService.getBooleanProperty("imdb.id.search.variable", Boolean.TRUE);
+
         StringBuilder sb = new StringBuilder("http://www.imdb.com/");
         sb.append("find?q=");
         try {
@@ -262,15 +223,17 @@ public class ImdbSearchEngine implements InitializingBean {
         }
 
         // Check if this is an exact match (we got a movie page instead of a results list)
-        Pattern titleregex = imdbSiteDef.getPersonRegex();
+        Pattern titleRegex;
         if (objectType.equals(OBJECT_MOVIE)) {
-            titleregex = imdbSiteDef.getTitleRegex();
+            titleRegex = TITLE_REGEX;
+        } else {
+            titleRegex = PERSON_REGEX;
         }
 
-        Matcher titlematch = titleregex.matcher(xml);
-        if (titlematch.find()) {
-            LOG.debug("IMDb returned one match '{}'", titlematch.group(1));
-            return titlematch.group(1);
+        Matcher titleMatch = titleRegex.matcher(xml);
+        if (titleMatch.find()) {
+            LOG.debug("IMDb returned one match '{}'", titleMatch.group(1));
+            return titleMatch.group(1);
         }
 
         String searchName = HTMLTools.extractTag(HTMLTools.extractTag(xml, ";ttype=ep\">", "\"</a>.</li>"), "<b>", "</b>").toLowerCase();
