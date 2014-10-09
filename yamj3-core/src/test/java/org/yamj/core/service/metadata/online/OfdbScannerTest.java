@@ -59,18 +59,5 @@ public class OfdbScannerTest extends AbstractJUnit4SpringContextTests {
         assertTrue(videoData.getGenreNames().contains("Abenteuer"));
         assertTrue(videoData.getGenreNames().contains("Action"));
         assertTrue(videoData.getGenreNames().contains("Science-Fiction"));
-        
-//        LinkedHashSet<String> testList = new LinkedHashSet<String>();
-//        testList.add("James Cameron");
-//        assertEquals(Arrays.asList(testList.toArray()).toString(), Arrays.asList(Arrays.copyOf(movie.getDirectors().toArray(), 1)).toString());
-//
-//        testList.clear();
-//        testList.add("Sam Worthington");
-//        testList.add("Zoe Saldana");
-//        assertEquals(Arrays.asList(testList.toArray()).toString(), Arrays.asList(Arrays.copyOf(movie.getCast().toArray(), 2)).toString());
-//
-//        testList.clear();
-//        testList.add("James Cameron");
-//        assertEquals(Arrays.asList(testList.toArray()).toString(), Arrays.asList(Arrays.copyOf(movie.getWriters().toArray(), 1)).toString());
     }
 }

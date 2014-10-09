@@ -22,6 +22,9 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.core.database.model.type.JobType;
+
+import org.yamj.core.database.model.dto.CreditDTO;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -213,6 +216,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
             // CERTIFICATIONS
             parseCertifications(videoData, imdbId);
 
+            // CAST and CREW
+            parseCastCrew(videoData, imdbId);
+            
         } catch (Exception ex) {
             LOG.error("Scanning error for IMDb ID " + imdbId, ex);
             return ScanResult.ERROR;
@@ -246,7 +252,32 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
         }
         
         try {
-            // TODO
+            
+            // YEAR
+            if (OverrideTools.checkOverwriteYear(series, SCANNER_ID)) {
+                series.setStartYear(parseYear(xml), SCANNER_ID);
+            }
+
+            // PLOT
+            if (OverrideTools.checkOverwritePlot(series, SCANNER_ID)) {
+                series.setPlot(parsePlot(xml), SCANNER_ID);
+            }
+
+            // OUTLINE
+            if (OverrideTools.checkOverwriteOutline(series, SCANNER_ID)) {
+                series.setOutline(parseOutline(xml), SCANNER_ID);
+            }
+
+            // STUDIOS
+            if (OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
+                series.setStudioNames(parseStudios(imdbId), SCANNER_ID);
+            }
+
+            // GENRES
+            if (OverrideTools.checkOverwriteGenres(series, SCANNER_ID)) {
+                series.setGenreNames(parseGenres(xml), SCANNER_ID);
+            }
+            
         } catch (Exception ex) {
             LOG.error("Scanning error for IMDb ID " + imdbId, ex);
             return ScanResult.ERROR;
@@ -686,6 +717,81 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
             }
         } while (i != -1);
         return map;
+    }
+
+    private void parseCastCrew(VideoData videoData, String imdbId) {
+        try {
+            String xml = httpClient.requestContent(getImdbUrl(imdbId, "fullcredits"), charset);
+            
+            // DIRECTORS
+            for (String directorMatch : "Directed by|Director".split(HTML_SLASH_PIPE)) {
+                if (xml.indexOf(HTML_GT + directorMatch + "&nbsp;</h4>") > 0) {
+                    for (String member : HTMLTools.extractTags(xml, HTML_GT + directorMatch + "&nbsp;</h4>", HTML_TABLE_END, HTML_A_START, HTML_A_END, Boolean.FALSE)) {
+                        int beginIndex = member.indexOf("href=\"/name/");
+                        if (beginIndex > -1) {
+                            String personId = member.substring(beginIndex + 12, member.indexOf("/", beginIndex + 12));
+                            String director = member.substring(member.indexOf(HTML_GT, beginIndex) + 1).trim();
+                            
+                            // add director, but check that there are no invalid characters in the name which may indicate a bad scrape
+                            if (StringUtils.containsNone(director, "<>:/")) {
+                                CreditDTO creditDTO = new CreditDTO(SCANNER_ID);
+                                creditDTO.setJobType(JobType.DIRECTOR);
+                                creditDTO.setName(director);
+                                creditDTO.addPersonId(SCANNER_ID, personId);
+                                videoData.addCreditDTO(creditDTO);
+                            } else {
+                                LOG.debug("Invalid director name found: '{}'", director);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // WRITERS
+            for (String writerMatch : "Writing Credits|Writer".split(HTML_SLASH_PIPE)) {
+                if (StringUtils.indexOfIgnoreCase(xml, HTML_GT + writerMatch) > 0) {
+                    for (String member : HTMLTools.extractTags(xml, HTML_GT + writerMatch, HTML_TABLE_END, HTML_A_START, HTML_A_END, Boolean.FALSE)) {
+                        int beginIndex = member.indexOf("href=\"/name/");
+                        if (beginIndex > -1) {
+                            String personId = member.substring(beginIndex + 12, member.indexOf("/", beginIndex + 12));
+                            String name = StringUtils.trimToEmpty(member.substring(member.indexOf(HTML_GT, beginIndex) + 1));
+                            if (name.indexOf("more credit") == -1) {
+                                CreditDTO creditDTO = new CreditDTO(SCANNER_ID);
+                                creditDTO.setJobType(JobType.WRITER);
+                                creditDTO.setName(name);
+                                creditDTO.addPersonId(SCANNER_ID, personId);
+                                videoData.addCreditDTO(creditDTO);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // CAST 
+            boolean skipFaceless = configService.getBooleanProperty("yamj3.scan.people.skip.faceless", Boolean.FALSE);
+            for (String actorBlock : HTMLTools.extractTags(xml, "<table class=\"cast_list\">", HTML_TABLE_END, "<td class=\"primary_photo\"", "</tr>")) {
+                // skip faceless persons ('loadlate hidden' is present for actors with photos)
+                if (skipFaceless && actorBlock.indexOf("loadlate hidden") == -1) {
+                    continue;
+                }
+
+                int nmPosition = actorBlock.indexOf("/nm");
+                String personId = actorBlock.substring(nmPosition + 1, actorBlock.indexOf("/", nmPosition + 1));
+                String name = HTMLTools.stripTags(HTMLTools.extractTag(actorBlock, "itemprop=\"name\">", HTML_SPAN_END));
+                String character = HTMLTools.stripTags(HTMLTools.extractTag(actorBlock, "<td class=\"character\">", HTML_TD_END));
+
+                CreditDTO creditDTO = new CreditDTO(SCANNER_ID);
+                creditDTO.setJobType(JobType.ACTOR);
+                creditDTO.setName(name);
+                creditDTO.setRole(character);
+                creditDTO.addPersonId(SCANNER_ID, personId);
+                videoData.addCreditDTO(creditDTO);
+            }
+
+        } catch (Exception ex) {
+            LOG.warn("Failed to scan cast crew: " + imdbId, ex);
+        }
+
     }
     
     @Override

@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.dto.CreditDTO;
 
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
 public class ImdbScannerTest extends AbstractJUnit4SpringContextTests {
@@ -56,5 +57,9 @@ public class ImdbScannerTest extends AbstractJUnit4SpringContextTests {
         assertTrue(videoData.getGenreNames().contains("Fantasy"));
         assertTrue(videoData.getStudioNames().contains("Twentieth Century Fox Film Corporation"));
         assertTrue(videoData.getStudioNames().contains("Lightstorm Entertainment"));
+        
+        for (CreditDTO credit : videoData.getCreditDTOS()) {
+            System.err.println(credit.getJobType() +": " + credit.getName());
+        }
    }
 }
