@@ -23,7 +23,7 @@
 package org.yamj.core.service.metadata.online;
 
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
+import org.yamj.core.service.metadata.tools.MetadataTools;
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
 import java.util.*;
@@ -169,10 +169,10 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                 if (year == null) {
                     // try first aired from series as fall-back
                     if (StringUtils.isNotBlank(tvdbSeries.getFirstAired())) {
-                        year = MetadataDateTimeTools.parseToDate(tvdbSeries.getFirstAired().trim());
+                        year = MetadataTools.parseToDate(tvdbSeries.getFirstAired().trim());
                     }
                 }
-                season.setPublicationYear(MetadataDateTimeTools.extractYearAsInt(year), SCANNER_ID);
+                season.setPublicationYear(MetadataTools.extractYearAsInt(year), SCANNER_ID);
             }
 
             // mark as scanned
@@ -192,7 +192,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         Date yearDate = null;
         for (Episode episode : episodeList) {
             if (StringUtils.isNotBlank(episode.getFirstAired())) {
-                Date parsedDate = MetadataDateTimeTools.parseToDate(episode.getFirstAired().trim());
+                Date parsedDate = MetadataTools.parseToDate(episode.getFirstAired().trim());
                 if (parsedDate != null) {
                     if (yearDate == null) {
                         yearDate = parsedDate;
@@ -234,7 +234,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                 }
 
                 if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-                    Date releaseDate = MetadataDateTimeTools.parseToDate(episode.getFirstAired());
+                    Date releaseDate = MetadataTools.parseToDate(episode.getFirstAired());
                     videoData.setReleaseDate(releaseDate, SCANNER_ID);
                 }
 

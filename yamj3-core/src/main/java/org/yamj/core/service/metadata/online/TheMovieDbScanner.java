@@ -43,7 +43,7 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
+import org.yamj.core.service.metadata.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 
 @Service("tmdbScanner")
@@ -218,13 +218,13 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
 
         String releaseDateString = moviedb.getReleaseDate();
         if (StringUtils.isNotBlank(releaseDateString) && !"1900-01-01".equals(releaseDateString)) {
-            Date releaseDate = MetadataDateTimeTools.parseToDate(releaseDateString);
+            Date releaseDate = MetadataTools.parseToDate(releaseDateString);
             if (releaseDate != null) {
                 if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
                     videoData.setReleaseDate(releaseDate, SCANNER_ID);
                 }
                 if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID)) {
-                    videoData.setPublicationYear(MetadataDateTimeTools.extractYearAsInt(releaseDate), SCANNER_ID);
+                    videoData.setPublicationYear(MetadataTools.extractYearAsInt(releaseDate), SCANNER_ID);
                 }
             }
         }
@@ -378,7 +378,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             person.setSourceDbId(ImdbScanner.SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
 
             if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {
-                Date parsedDate = MetadataDateTimeTools.parseToDate(tmdbPerson.getBirthday());
+                Date parsedDate = MetadataTools.parseToDate(tmdbPerson.getBirthday());
                 person.setBirthDay(parsedDate, SCANNER_ID);
             }
 
@@ -394,7 +394,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
             }
 
             if (OverrideTools.checkOverwriteDeathDay(person, SCANNER_ID)) {
-                Date parsedDate = MetadataDateTimeTools.parseToDate(tmdbPerson.getDeathday());
+                Date parsedDate = MetadataTools.parseToDate(tmdbPerson.getDeathday());
                 person.setDeathDay(parsedDate, SCANNER_ID);
             }
 

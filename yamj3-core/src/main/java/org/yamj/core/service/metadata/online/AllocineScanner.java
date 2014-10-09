@@ -45,7 +45,7 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
+import org.yamj.core.service.metadata.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.web.HTMLTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
@@ -164,7 +164,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
 
         if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-            Date releaseDate = MetadataDateTimeTools.parseToDate(movieInfos.getReleaseDate());
+            Date releaseDate = MetadataTools.parseToDate(movieInfos.getReleaseDate());
             videoData.setReleaseDate(releaseDate, SCANNER_ID);
         }
         
@@ -463,7 +463,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                 }
                 
                 if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-                    Date releaseDate = MetadataDateTimeTools.parseToDate(episodeInfos.getOriginalBroadcastDate());
+                    Date releaseDate = MetadataTools.parseToDate(episodeInfos.getOriginalBroadcastDate());
                     videoData.setReleaseDate(releaseDate, SCANNER_ID);
                 }
                 
@@ -536,7 +536,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
 
         if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {
-            Date parsedDate = MetadataDateTimeTools.parseToDate(personInfos.getBirthDate());
+            Date parsedDate = MetadataTools.parseToDate(personInfos.getBirthDate());
             person.setBirthDay(parsedDate, SCANNER_ID);
         }
 
@@ -549,7 +549,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
 
         if (OverrideTools.checkOverwriteDeathDay(person, SCANNER_ID)) {
-            Date parsedDate = MetadataDateTimeTools.parseToDate(personInfos.getDeathDate());
+            Date parsedDate = MetadataTools.parseToDate(personInfos.getDeathDate());
             person.setDeathDay(parsedDate, SCANNER_ID);
         }
 

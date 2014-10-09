@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
-import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
+import org.yamj.core.service.metadata.tools.MetadataTools;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.dto.CreditDTO;
@@ -159,7 +159,7 @@ public final class InfoDTO {
     }
 
     public void setYear(String year) {
-        int testYear = MetadataDateTimeTools.extractYearAsInt(year);
+        int testYear = MetadataTools.extractYearAsInt(year);
         if (testYear > 0)  {
             this.year = testYear;
             this.changed = true;

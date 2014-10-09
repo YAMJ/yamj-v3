@@ -44,7 +44,7 @@ import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 import org.yamj.core.service.metadata.online.TheTVDbScanner;
-import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
+import org.yamj.core.service.metadata.tools.MetadataTools;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.StringTools;
 import org.yamj.core.tools.xml.DOMHelper;
@@ -255,7 +255,7 @@ public final class InfoReader {
         parseSets(eCommon.getElementsByTagName("set"), dto);
 
         // parse rating
-        int rating = parseRating(DOMHelper.getValueFromElement(eCommon, "rating"));
+        int rating = MetadataTools.parseRating(DOMHelper.getValueFromElement(eCommon, "rating"));
         dto.setRating(rating);
 
         // parse runtime
@@ -428,37 +428,6 @@ public final class InfoReader {
     }
 
     /**
-     * Parse the rating from the passed string and normalise it
-     *
-     * @param ratingString
-     * @param movie
-     * @return true if the rating was successfully parsed.
-     */
-    private int parseRating(String ratingString) {
-        if (StringUtils.isBlank(ratingString)) {
-            // Rating isn't valid, so skip it
-            return -1;
-        } else {
-            try {
-                float rating = Float.parseFloat(ratingString);
-                if (rating > 0.0f) {
-                    if (rating <= 10.0f) {
-                        return Math.round(rating * 10f);
-                    } else {
-                        return Math.round(rating * 1f);
-                    }
-                } else {
-                    // Negative or zero, so return zero
-                    return 0;
-                }
-            } catch (NumberFormatException ex) {
-                LOG.trace("Failed to transform rating ", ratingString);
-                return -1;
-            }
-        }
-    }
-    
-    /**
      * Parse Runtime from the XML NFO file
      *
      * @param eCommon
@@ -574,10 +543,10 @@ public final class InfoReader {
      * @param parseDate
      */
     public void movieDate(final String dateString, InfoDTO dto, String nfoFilename) {
-        Date releaseDate = MetadataDateTimeTools.parseToDate(dateString);
+        Date releaseDate = MetadataTools.parseToDate(dateString);
         if (releaseDate != null) {
             dto.setReleaseDate(releaseDate);
-            dto.setYear(MetadataDateTimeTools.extractYearAsString(releaseDate));
+            dto.setYear(MetadataTools.extractYearAsString(releaseDate));
         }
     }
 
@@ -768,12 +737,12 @@ public final class InfoReader {
         episodeDTO.setPlot(DOMHelper.getValueFromElement(eEpisodeDetails, "plot"));
 
         tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "rating");
-        episodeDTO.setRating(parseRating(tempValue));
+        episodeDTO.setRating(MetadataTools.parseRating(tempValue));
 
         tempValue = DOMHelper.getValueFromElement(eEpisodeDetails, "aired");
         if (StringUtils.isNotBlank(tempValue)) {
             try {
-                episodeDTO.setFirstAired(MetadataDateTimeTools.parseToDate(tempValue.trim()));
+                episodeDTO.setFirstAired(MetadataTools.parseToDate(tempValue.trim()));
             } catch (Exception ignore) {}
         }
 

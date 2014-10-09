@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.plugin;
+package org.yamj.core.service.metadata.online;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

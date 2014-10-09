@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
-import org.yamj.core.service.metadata.tools.MetadataDateTimeTools;
+import org.yamj.core.service.metadata.tools.MetadataTools;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -209,7 +209,7 @@ public class NfoScannerService {
 
                 if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
                     Date seasonYear = infoDTO.getSeasonYear(season.getSeason());
-                    season.setPublicationYear(MetadataDateTimeTools.extractYearAsInt(seasonYear), SCANNER_ID);
+                    season.setPublicationYear(MetadataTools.extractYearAsInt(seasonYear), SCANNER_ID);
                 }
 
                 // mark season as scanned

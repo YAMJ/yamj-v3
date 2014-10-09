@@ -23,23 +23,22 @@
 package org.yamj.core.service.metadata.tools;
 
 import java.util.Calendar;
-
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.pojava.datetime.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class MetadataDateTimeTools {
+public final class MetadataTools {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MetadataDateTimeTools.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MetadataTools.class);
     private static final Pattern DATE_COUNTRY = Pattern.compile("(.*)(\\s*?\\(\\w*\\))");
     private static final Pattern YEAR_PATTERN = Pattern.compile("(?:.*?)(\\d{4})(?:.*?)");
 
-    private MetadataDateTimeTools() {
+    private MetadataTools() {
         throw new UnsupportedOperationException("Class cannot be instantiated");
     }
 
@@ -212,5 +211,43 @@ public final class MetadataDateTimeTools {
         }
 
         return year;
+    }
+
+    /**
+     * Parse a string value and convert it into an integer rating
+     *
+     * The rating should be between 0 and 10 inclusive.<br/>
+     * Invalid values or values less than 0 will return -1
+     *
+     * @param rating the converted rating or -1 if there was an error
+     * @return
+     */
+    public static int parseRating(String rating) {
+        if (StringUtils.isBlank(rating)) {
+            // Rating isn't valid, so skip it
+            return -1;
+        }
+        return parseRating(NumberUtils.toFloat(rating.replace(',', '.'), -1));
+    }
+
+    /**
+     * Parse a float rating into an integer
+     *
+     * The rating should be between 0 and 10 inclusive.<br/>
+     * Invalid values or values less than 0 will return -1
+     *
+     * @param rating the converted rating or -1 if there was an error
+     * @return
+     */
+    public static int parseRating(float rating) {
+        if (rating > 0.0f) {
+            if (rating <= 10.0f) {
+                return Math.round(rating * 10f);
+            } else {
+                return Math.round(rating * 1f);
+            }
+        } else {
+            return -1;
+        }
     }
 }
