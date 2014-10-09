@@ -30,6 +30,7 @@ import javax.annotation.Resource;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 
@@ -61,5 +62,17 @@ public class ImdbScannerTest extends AbstractJUnit4SpringContextTests {
         for (CreditDTO credit : videoData.getCreditDTOS()) {
             System.err.println(credit.getJobType() +": " + credit.getName());
         }
-   }
+    }
+
+    @Test
+    public void testPerson() {
+        Person person = new Person();
+        person.setSourceDbId(imdbScanner.getScannerName(), "nm0001352");
+        imdbScanner.scan(person);
+
+        assertEquals("Terence Hill", person.getName());
+        assertEquals("Mario Girotti", person.getBirthName());
+        assertNotNull(person.getBiography());
+        assertEquals("Venice, Veneto, Italy", person.getBirthPlace());
+    }
 }

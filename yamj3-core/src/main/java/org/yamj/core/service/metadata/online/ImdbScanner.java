@@ -22,8 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.type.JobType;
-
 import org.yamj.core.database.model.dto.CreditDTO;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -47,9 +47,10 @@ import org.yamj.core.tools.web.HTMLTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
 
 @Service("imdbScanner")
-public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingBean {
+public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, InitializingBean {
 
     public static final String SCANNER_ID = "imdb";
+    
     private static final Logger LOG = LoggerFactory.getLogger(ImdbScanner.class);
     private static final String HTML_H5_END = ":</h5>";
     private static final String HTML_H5_START = "<h5>";
@@ -57,22 +58,15 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
     private static final String HTML_A_END = "</a>";
     private static final String HTML_A_START = "<a ";
     private static final String HTML_SLASH_PIPE = "\\|";
-    private static final String HTML_SLASH_QUOTE = "/\"";
-    private static final String HTML_QUOTE_GT = "\">";
     private static final String HTML_NAME = "name/";
     private static final String HTML_H4_END = ":</h4>";
     private static final String HTML_SITE_FULL = "http://www.imdb.com/";
     private static final String HTML_TITLE = "title/";
-    private static final String HTML_BREAK = "<br/>";
     private static final String HTML_SPAN_END = "</span>";
     private static final String HTML_TABLE_END = "</table>";
     private static final String HTML_TD_END = "</td>";
     private static final String HTML_GT = ">";
-    // Patterns for the name searching
-    private static final String STRING_PATTERN_NAME = "(?:.*?)/name/(nm\\d+)/(?:.*?)'name'>(.*?)</a>(?:.*?)";
-    private static final String STRING_PATTERN_CHAR = "(?:.*?)/character/(ch\\d+)/(?:.*?)>(.*?)</a>(?:.*)";
-    private static final Pattern PATTERN_PERSON_NAME = Pattern.compile(STRING_PATTERN_NAME, Pattern.CASE_INSENSITIVE);
-    private static final Pattern PATTERN_PERSON_CHAR = Pattern.compile(STRING_PATTERN_CHAR, Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_PERSON_DOB = Pattern.compile("(\\d{1,2})-(\\d{1,2})");
 
     private Charset charset;
 
@@ -97,6 +91,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
         // register this scanner
         onlineScannerService.registerMovieScanner(this);
         onlineScannerService.registerSeriesScanner(this);
+        onlineScannerService.registerPersonScanner(this);
     }
 
     @Override
@@ -113,8 +108,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
     public String getSeriesId(Series series) {
         String imdbId = series.getSourceDbId(SCANNER_ID);
         if (StringUtils.isBlank(imdbId)) {
-            int year = -1; // TODO: get form firsAired value
-            imdbId = getSeriesId(series.getTitle(), year);
+            imdbId = getSeriesId(series.getTitle(), series.getStartYear());
             series.setSourceDbId(SCANNER_ID, imdbId);
         }
         return imdbId;
@@ -223,9 +217,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
             LOG.error("Scanning error for IMDb ID " + imdbId, ex);
             return ScanResult.ERROR;
         }
-
-        // TODO set to OK after finished
-        return ScanResult.ERROR;
+        
+        return ScanResult.OK;
     }
 
     @Override
@@ -836,4 +829,162 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
         LOG.debug("No IMDb ID found in NFO");
         return Boolean.FALSE;
     }
+
+    @Override
+    public String getPersonId(Person person) {
+        String id = person.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNotBlank(id)) {
+            return id;
+        }
+        
+        if (StringUtils.isNotBlank(person.getName())) {
+            id = getPersonId(person.getName());
+            person.setSourceDbId(SCANNER_ID, id);
+        } else {
+            LOG.error("No ID or Name found for {}", person.toString());
+            id = StringUtils.EMPTY;
+        }
+        return id;       
+    }
+
+    @Override
+    public String getPersonId(String name) {
+        return this.imdbSearchEngine.getImdbPersonId(name);
+    }
+
+    @Override
+    public ScanResult scan(Person person) {
+        String imdbId = getPersonId(person);
+        if (StringUtils.isBlank(imdbId)) {
+            LOG.debug("IMDb id not available: {}", person.getName());
+            return ScanResult.MISSING_ID;
+        }
+        
+        try {
+            LOG.info("Getting information for {}  ({})", person.getName(), imdbId);
+
+            String url = HTML_SITE_FULL + HTML_NAME + imdbId + "/";
+            String xml = httpClient.requestContent(url, charset);
+
+            // We can work out if this is the new site by looking for " - IMDb" at the end of the title
+            String title = HTMLTools.extractTag(xml, "<title>");
+            // Check for the new version and correct the title if found.
+            if (title.toLowerCase().endsWith(" - imdb")) {
+                title = title.substring(0, title.length() - 7);
+            }
+            if (title.toLowerCase().startsWith("imdb - ")) {
+                title = title.substring(7);
+            }
+            person.setName(title);
+
+            if (xml.indexOf("id=\"img_primary\"") > -1) {
+                LOG.trace("Looking for image on webpage for {}", person.getName());
+                String photoURL = HTMLTools.extractTag(xml, "id=\"img_primary\"", HTML_TD_END);
+                if (photoURL.indexOf("http://ia.media-imdb.com/images") > -1) {
+                    photoURL = "http://ia.media-imdb.com/images" + HTMLTools.extractTag(photoURL, "src=\"http://ia.media-imdb.com/images", "\"");
+                    if (StringUtils.isNotBlank(photoURL)) {
+                        person.addPhotoURL(photoURL, SCANNER_ID);
+                    }
+                }
+            } else {
+                LOG.trace("No image found on webpage for {}", person.getName());
+            }
+
+            // get personal information
+            url = HTML_SITE_FULL + HTML_NAME + imdbId + "/bio";
+            String bio = httpClient.requestContent(url, charset);
+
+            int endIndex;
+            int beginIndex;
+            
+            
+            if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {
+                beginIndex = bio.indexOf(">Date of Birth</td>");
+                if (beginIndex > -1) {
+                    StringBuilder date = new StringBuilder();
+                    endIndex = bio.indexOf(">Date of Death</td>");
+                    beginIndex = bio.indexOf("birth_monthday=", beginIndex);
+                    if (beginIndex > -1 && (endIndex == -1 || beginIndex < endIndex)) {
+                        Matcher m = PATTERN_PERSON_DOB.matcher(bio.substring(beginIndex + 15, beginIndex + 20));
+                        if (m.find()) {
+                            date.append(m.group(2)).append("-").append(m.group(1));
+                        }
+                    }
+
+                    beginIndex = bio.indexOf("birth_year=", beginIndex);
+                    if (beginIndex > -1 && (endIndex == -1 || beginIndex < endIndex)) {
+                        if (date.length() > 0) {
+                            date.append("-");
+                        }
+                        date.append(bio.substring(beginIndex + 11, beginIndex + 15));
+                    }
+                    
+                    person.setBirthDay(MetadataTools.parseToDate(date.toString()), SCANNER_ID);
+                }
+            }
+            
+            if (OverrideTools.checkOverwriteBirthPlace(person, SCANNER_ID)) {
+                beginIndex = bio.indexOf(">Date of Birth</td>");
+                if (beginIndex > -1) {
+                    beginIndex = bio.indexOf("birth_place=", beginIndex);
+                    String place;
+                    if (beginIndex > -1) {
+                        place = HTMLTools.extractTag(bio, "birth_place=", HTML_A_END);
+                        int start = place.indexOf('>');
+                        if (start > -1 && start < place.length()) {
+                            place = place.substring(start + 1);
+                        }
+                        person.setBirthPlace(place, SCANNER_ID);
+                    }
+                }
+            }
+
+            if (OverrideTools.checkOverwriteDeathDay(person, SCANNER_ID)) {
+                beginIndex = bio.indexOf(">Date of Death</td>");
+                if (beginIndex > -1) {
+                    StringBuilder date = new StringBuilder();
+                    endIndex = bio.indexOf(">Mini Bio (1)</h4>", beginIndex);
+                    beginIndex = bio.indexOf("death_monthday=", beginIndex);
+                    if (beginIndex > -1 && (endIndex == -1 || beginIndex < endIndex)) {
+                        Matcher m = PATTERN_PERSON_DOB.matcher(bio.substring(beginIndex + 15, beginIndex + 20));
+                        if (m.find()) {
+                            date.append(m.group(2));
+                            date.append("-");
+                            date.append(m.group(1));
+                        }
+                    }
+                    beginIndex = bio.indexOf("death_date=", beginIndex);
+                    if (beginIndex > -1 && (endIndex == -1 || beginIndex < endIndex)) {
+                        if (date.length() > 0) {
+                            date.append("-");
+                        }
+                        date.append(bio.substring(beginIndex + 11, beginIndex + 15));
+                    }
+                    person.setDeathDay(MetadataTools.parseToDate(date.toString()), SCANNER_ID);
+                }
+            }
+
+            if (OverrideTools.checkOverwriteBirthName(person, SCANNER_ID)) {
+                beginIndex = bio.indexOf(">Birth Name</td>");
+                if (beginIndex > -1) {
+                    beginIndex += 20;
+                    String name =bio.substring(beginIndex, bio.indexOf(HTML_TD_END, beginIndex));
+                    person.setBirthName(HTMLTools.decodeHtml(name), SCANNER_ID);
+                }
+            }
+
+            if (OverrideTools.checkOverwriteBiography(person, SCANNER_ID)) {
+                if (bio.indexOf(">Mini Bio (1)</h4>") > -1) {
+                    String biography = HTMLTools.extractTag(bio, ">Mini Bio (1)</h4>", "<em>- IMDb Mini Biography");
+                    person.setBiography(HTMLTools.removeHtmlTags(biography), SCANNER_ID);
+                }
+            }
+            
+            return ScanResult.OK;
+        } catch (Exception ex) {
+            LOG.error("Failed to get person from IMDb: " + imdbId, ex);
+            return ScanResult.ERROR;
+        }
+    }
+
 }

@@ -314,12 +314,16 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         String id = person.getSourceDbId(SCANNER_ID);
         if (StringUtils.isNotBlank(id)) {
             return id;
-        } else if (StringUtils.isNotBlank(person.getName())) {
-            return getPersonId(person.getName());
+        }
+        
+        if (StringUtils.isNotBlank(person.getName())) {
+            id = getPersonId(person.getName());
+            person.setSourceDbId(SCANNER_ID, id);
         } else {
             LOG.error("No ID or Name found for {}", person.toString());
-            return StringUtils.EMPTY;
+            id = StringUtils.EMPTY;
         }
+        return id;
     }
 
     @Override
