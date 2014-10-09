@@ -22,7 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.moviejukebox.allocine.model.Movie;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -34,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.common.tools.StringTools;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.AbstractMetadata;
 import org.yamj.core.database.model.Series;
@@ -64,6 +62,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
     private static final String HTML_TITLE = "title/";
     private static final String HTML_BREAK = "<br/>";
     private static final String HTML_SPAN_END = "</span>";
+    private static final String HTML_TABLE_END = "</table>";
+    private static final String HTML_TD_END = "</td>";
     private static final String HTML_GT = ">";
     // Patterns for the name searching
     private static final String STRING_PATTERN_NAME = "(?:.*?)/name/(nm\\d+)/(?:.*?)'name'>(.*?)</a>(?:.*?)";
@@ -148,7 +148,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
         }
 
         // common update
-        ScanResult scanResult = this.updateCommon(videoData, xml);
+        ScanResult scanResult = this.updateCommon(videoData, xml, imdbId);
         if (!ScanResult.OK.equals(scanResult)) {
             return scanResult;
         }
@@ -218,7 +218,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
             return ScanResult.ERROR;
         }
 
-        return ScanResult.OK;
+        // TODO set to OK after finished
+        return ScanResult.ERROR;
     }
 
     @Override
@@ -239,7 +240,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
         }
 
         // common update
-        ScanResult scanResult = this.updateCommon(series, xml);
+        ScanResult scanResult = this.updateCommon(series, xml, imdbId);
         if (!ScanResult.OK.equals(scanResult)) {
             return scanResult;
         }
@@ -251,7 +252,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
             return ScanResult.ERROR;
         }
         
-        return ScanResult.OK;
+        // TODO set to OK after finished
+        return ScanResult.ERROR;
     }
 
     private static String getImdbUrl(String imdbId) {
@@ -266,7 +268,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
         return url;
     }
 
-    private ScanResult updateCommon(AbstractMetadata metadata, String xml) {
+    private ScanResult updateCommon(AbstractMetadata metadata, String xml, String imdbId) {
         String title = HTMLTools.extractTag(xml, "<title>");
         if ((metadata instanceof VideoData) && StringUtils.contains(title, "(TV Series")) {
             return ScanResult.TYPE_CHANGE;
@@ -311,16 +313,142 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
         }
 
         if (OverrideTools.checkOverwriteOriginalTitle(metadata, SCANNER_ID)) {
-            String originalTitle = title;
             if (xml.indexOf("<span class=\"title-extra\">") > -1) {
-                originalTitle = HTMLTools.extractTag(xml, "<span class=\"title-extra\">", "</span>");
+                String originalTitle = HTMLTools.extractTag(xml, "<span class=\"title-extra\">", "</span>");
                 if (originalTitle.indexOf("(original title)") > -1) {
                     originalTitle = originalTitle.replace(" <i>(original title)</i>", "");
-                } else {
-                    originalTitle = title;
                 }
+                metadata.setTitleOriginal(originalTitle, SCANNER_ID);
             }
-            metadata.setTitleOriginal(originalTitle, SCANNER_ID);
+        }
+
+        String releaseInfoXML = null;
+        
+        // RELEASE DATE
+        if (metadata instanceof VideoData) {
+            try {
+                VideoData videoData = (VideoData)metadata; 
+                
+                if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
+                    // load the release page from IMDb
+                    if (releaseInfoXML == null) {
+                        releaseInfoXML = httpClient.requestContent(getImdbUrl(imdbId, "releaseinfo"), charset);
+                    }
+    
+                    String preferredCountry = this.configService.getProperty("yamj3.scan.preferredCountry", "USA");
+                    Pattern pRelease = Pattern.compile("(?:.*?)\\Q" + preferredCountry + "\\E(?:.*?)\\Qrelease_date\">\\E(.*?)(?:<.*?>)(.*?)(?:</a>.*)");
+                    Matcher mRelease = pRelease.matcher(releaseInfoXML);
+        
+                    if (mRelease.find()) {
+                        String strReleaseDate = mRelease.group(1) + " " + mRelease.group(2);
+                        Date releaseDate = MetadataTools.parseToDate(strReleaseDate);
+                        videoData.setReleaseDate(releaseDate, SCANNER_ID);
+                    }
+                }
+            } catch (Exception ignore) {}
+        }
+
+        // ORIGINAL TITLE / AKAS
+
+        // Store the AKA list
+        Map<String, String> akas = null;
+        
+        if (OverrideTools.checkOverwriteOriginalTitle(metadata, SCANNER_ID)) {
+            try {
+                // load the release page from IMDb
+                if (releaseInfoXML == null) {
+                    releaseInfoXML = httpClient.requestContent(getImdbUrl(imdbId, "releaseinfo"), charset);
+                }
+    
+                // The AKAs are stored in the format "title", "country"
+                // therefore we need to look for the preferredCountry and then work backwards
+                if (akas == null) {
+                    // Just extract the AKA section from the page
+                    List<String> akaList = HTMLTools.extractTags(releaseInfoXML, "<a id=\"akas\" name=\"akas\">", HTML_TABLE_END, "<td>", HTML_TD_END, Boolean.FALSE);
+                    akas = buildAkaMap(akaList);
+                }
+    
+                String foundValue = null;
+                for (Map.Entry<String, String> aka : akas.entrySet()) {
+                    if (StringUtils.indexOfIgnoreCase(aka.getKey(), "original title") > 0) {
+                        foundValue = aka.getValue().trim();
+                        break;
+                    }
+                }
+                
+                metadata.setTitleOriginal(foundValue, SCANNER_ID);
+            } catch (Exception ignore) {}
+        }
+
+        // TITLE for preferred country from AKAS
+        boolean akaScrapeTitle = configService.getBooleanProperty("imdb.aka.scrape.title", Boolean.FALSE);
+        if (akaScrapeTitle && OverrideTools.checkOverwriteTitle(metadata, SCANNER_ID)) {
+            try {
+                List<String> akaIgnoreVersions = configService.getPropertyAsList("imdb.aka.ignore.versions", "");
+    
+                String preferredCountry = this.configService.getProperty("yamj3.scan.preferredCountry", "USA");
+                String fallbacks = configService.getProperty("imdb.aka.fallback.countries", "");
+                List<String> akaMatchingCountries;
+                if (StringUtils.isBlank(fallbacks)) {
+                    akaMatchingCountries = Collections.singletonList(preferredCountry);
+                } else {
+                    akaMatchingCountries = Arrays.asList((preferredCountry + "," + fallbacks).split(","));
+                }
+    
+                // load the release page from IMDb
+                if (releaseInfoXML == null) {
+                    releaseInfoXML = httpClient.requestContent(getImdbUrl(imdbId, "releaseinfo"), charset);
+                }
+    
+                // The AKAs are stored in the format "title", "country"
+                // therefore we need to look for the preferredCountry and then work backwards
+                if (akas == null) {
+                    // Just extract the AKA section from the page
+                    List<String> akaList = HTMLTools.extractTags(releaseInfoXML, "<a id=\"akas\" name=\"akas\">", HTML_TABLE_END, "<td>", HTML_TD_END, Boolean.FALSE);
+                    akas = buildAkaMap(akaList);
+                }
+    
+                String foundValue = null;
+                // NOTE: First matching country is the preferred country
+                for (String matchCountry : akaMatchingCountries) {
+    
+                    if (StringUtils.isBlank(matchCountry)) {
+                        // must be a valid country setting
+                        continue;
+                    }
+    
+                    for (Map.Entry<String, String> aka : akas.entrySet()) {
+                        int startIndex = aka.getKey().indexOf(matchCountry);
+                        if (startIndex > -1) {
+                            String extracted = aka.getKey().substring(startIndex);
+                            int endIndex = extracted.indexOf('/');
+                            if (endIndex > -1) {
+                                extracted = extracted.substring(0, endIndex);
+                            }
+    
+                            boolean valid = Boolean.TRUE;
+                            for (String ignore : akaIgnoreVersions) {
+                                if (StringUtils.isNotBlank(ignore) && StringUtils.containsIgnoreCase(extracted, ignore.trim())) {
+                                    valid = Boolean.FALSE;
+                                    break;
+                                }
+                            }
+    
+                            if (valid) {
+                                foundValue = aka.getValue().trim();
+                                break;
+                            }
+                        }
+                    }
+    
+                    if (foundValue != null) {
+                        // we found a title for the country matcher
+                        break;
+                    }
+                }
+                
+                metadata.setTitle(foundValue, SCANNER_ID);
+            } catch (Exception ignore) {}
         }
 
         return ScanResult.OK;
@@ -539,6 +667,27 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, InitializingB
         return HTMLTools.stripTags(value);
     }
 
+    /**
+     * Create a map of the AKA values
+     *
+     * @param list
+     * @return
+     */
+    private static Map<String, String> buildAkaMap(List<String> list) {
+        Map<String, String> map = new LinkedHashMap<String, String>();
+        int i = 0;
+        do {
+            try {
+                String key = list.get(i++);
+                String value = list.get(i++);
+                map.put(key, value);
+            } catch (Exception ignore) {
+                i = -1;
+            }
+        } while (i != -1);
+        return map;
+    }
+    
     @Override
     public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
         return scanImdbID(nfoContent, dto, ignorePresentId);
