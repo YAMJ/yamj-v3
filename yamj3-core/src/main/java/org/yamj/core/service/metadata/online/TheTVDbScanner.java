@@ -175,9 +175,9 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                 season.setPublicationYear(MetadataTools.extractYearAsInt(year), SCANNER_ID);
             }
 
-            // mark as scanned
-            season.setTvSeasonScanned();
-
+            // mark season as done
+            season.setTvSeasonDone();
+            
             // scan episodes
             this.scanEpisodes(season, actors);
         }
@@ -206,7 +206,8 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
     }
     
     private void scanEpisodes(Season season, Set<CreditDTO> actors) {
-        if (CollectionUtils.isEmpty(season.getVideoDatas())) {
+        if (season.isTvEpisodesScanned(SCANNER_ID)) {
+            // nothing to do anymore
             return;
         }
 
@@ -214,12 +215,17 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         List<Episode> episodeList = tvdbApiWrapper.getSeasonEpisodes(seriesId, season.getSeason());
 
         for (VideoData videoData : season.getVideoDatas()) {
-
+            if (videoData.isTvEpisodeDone(SCANNER_ID)) {
+                // nothing to do if already done
+                continue;
+            }
+            
             Episode episode = this.findEpisode(episodeList, season.getSeason(), videoData.getEpisode());
             if (episode == null) {
                 // mark episode as not found
                 videoData.setTvEpisodeNotFound();
             } else {
+                videoData.setSourceDbId(SCANNER_ID, episode.getId());
 
                 if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
                     videoData.setTitle(StringUtils.trim(episode.getEpisodeName()), SCANNER_ID);
@@ -251,8 +257,8 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                     videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.GUEST_STAR, guestStar));
                 }
 
-                // mark episode as scanned
-                videoData.setTvEpisodeScanned();
+                // mark episode as done
+                videoData.setTvEpisodeDone();
             }
         }
     }

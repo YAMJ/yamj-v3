@@ -26,11 +26,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.yamj.core.database.model.Season;
+
 import javax.annotation.Resource;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 
@@ -42,7 +45,7 @@ public class ImdbScannerTest extends AbstractJUnit4SpringContextTests {
     private ImdbScanner imdbScanner;
 
     @Test
-    public void testScan() {
+    public void testMovie() {
         VideoData videoData = new VideoData();
         videoData.setSourceDbId(imdbScanner.getScannerName(), "tt0499549");
         imdbScanner.scan(videoData);
@@ -60,7 +63,45 @@ public class ImdbScannerTest extends AbstractJUnit4SpringContextTests {
         assertTrue(videoData.getStudioNames().contains("Lightstorm Entertainment"));
         
         for (CreditDTO credit : videoData.getCreditDTOS()) {
-            System.err.println(credit.getJobType() +": " + credit.getName());
+            String role = credit.getRole() == null ? "" : " ( " + credit.getRole() + ")";
+            System.err.println(credit.getJobType() +": " + credit.getName() + role);
+        }
+    }
+
+    @Test
+    public void testSeries() {
+        Series series = new Series();
+        series.setSourceDbId(imdbScanner.getScannerName(), "tt0944947");
+        
+        Season season = new Season();
+        season.setSeason(1);
+        season.setSeries(series);
+        series.getSeasons().add(season);
+        
+        VideoData episode1 = new VideoData();
+        episode1.setIdentifier("GOT_1");
+        episode1.setEpisode(1);
+        episode1.setSeason(season);
+        season.getVideoDatas().add(episode1);
+
+        VideoData episode2 = new VideoData();
+        episode2.setIdentifier("GOT_2");
+        episode2.setEpisode(2);
+        episode2.setSeason(season);
+        season.getVideoDatas().add(episode2);
+        
+        imdbScanner.scan(series);
+
+        assertEquals("Game of Thrones - Das Lied von Eis und Feuer", series.getTitle());
+        for (VideoData videoData : season.getVideoDatas()) {
+            assertNotNull(videoData.getTitle());
+            assertNotNull(videoData.getReleaseDate());
+            assertNotNull(videoData.getPlot());
+            
+            for (CreditDTO credit : videoData.getCreditDTOS()) {
+                String role = credit.getRole() == null ? "" : " (" + credit.getRole() + ")";
+                System.err.println(credit.getJobType() +": " + credit.getName() + role);
+            }
         }
     }
 

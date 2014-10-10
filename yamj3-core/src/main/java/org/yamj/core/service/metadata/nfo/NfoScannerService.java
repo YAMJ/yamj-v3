@@ -178,6 +178,8 @@ public class NfoScannerService {
             }
             // reset skip online scans
             series.setSkipOnlineScans(infoDTO.getSkipOnlineScans());
+            // set last scan date
+            series.setLastScanned(new Date(System.currentTimeMillis()));
             
             if (OverrideTools.checkOverwriteTitle(series, SCANNER_ID)) {
                 series.setTitle(infoDTO.getTitle(), SCANNER_ID);
@@ -212,9 +214,9 @@ public class NfoScannerService {
                     season.setPublicationYear(MetadataTools.extractYearAsInt(seasonYear), SCANNER_ID);
                 }
 
-                // mark season as scanned
-                season.setTvSeasonScanned();
-
+                // mark season as done
+                season.setTvSeasonDone();
+                
                 for (VideoData videoData : season.getVideoDatas()) {
                     InfoEpisodeDTO episode = infoDTO.getEpisode(season.getSeason(), videoData.getEpisode());
                     if (episode == null) {
@@ -237,8 +239,8 @@ public class NfoScannerService {
                         // set cast and crew from NFO to all episodes
                         videoData.addCreditDTOS(infoDTO.getCredits());
                         
-                        // mark episode as scanned
-                        videoData.setTvEpisodeScanned();
+                        // mark episode as done
+                        videoData.setTvEpisodeDone();
                     }
                 }
             }

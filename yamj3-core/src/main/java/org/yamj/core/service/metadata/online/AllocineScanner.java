@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import java.util.Date;
-
 import com.moviejukebox.allocine.*;
 import com.moviejukebox.allocine.model.CastMember;
 import com.moviejukebox.allocine.model.Episode;
@@ -400,8 +398,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                 season.setSourceDbId(SCANNER_ID, String.valueOf(tvSeasonInfos.getCode()));
             }
 
-            // mark as scanned
-            season.setTvSeasonScanned();
+            // mark season as done
+            season.setTvSeasonDone();
 
             // scan episodes
             this.scanEpisodes(season, tvSeasonInfos);
@@ -409,11 +407,16 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     }
 
     private void scanEpisodes(Season season, TvSeasonInfos tvSeasonInfos) {
-        if (CollectionUtils.isEmpty(season.getVideoDatas())) {
+        if (season.isTvEpisodesScanned(SCANNER_ID)) {
+            // nothing to do anymore
             return;
         }
 
         for (VideoData videoData : season.getVideoDatas()) {
+            if (videoData.isTvEpisodeDone(SCANNER_ID)) {
+                // nothing to do if already done
+                continue;
+            }
 
             // get the episode
             Episode episode = null;
@@ -459,7 +462,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                 }
 
                 if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-                    videoData.setOutline(episodeInfos.getSynopsis(), SCANNER_ID);
+                    videoData.setOutline(episodeInfos.getSynopsisShort(), SCANNER_ID);
                 }
                 
                 if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
@@ -470,8 +473,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                 //  add credits
                 videoData.addCreditDTOS(parseCredits(castMembers));
 
-                // mark episode as scanned
-                videoData.setTvEpisodeScanned();
+                // mark episode as done
+                videoData.setTvEpisodeDone();
             }
         }
     }

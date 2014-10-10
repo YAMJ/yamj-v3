@@ -22,6 +22,7 @@
  */
 package org.yamj.core.database.model;
 
+import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
 import java.util.Map.Entry;
@@ -554,13 +555,26 @@ public class VideoData extends AbstractMetadata {
 
     // TV CHECKS
 
-    public void setTvEpisodeScanned() {
-        this.setStatus(StatusType.DONE);
+    public boolean isTvEpisodeDone(String sourceDb) {
+        if (StringUtils.isBlank(this.getSourceDbId(sourceDb))) {
+            // not done if episode ID not set
+            return false;
+        }
+        return (StatusType.DONE.equals(this.getStatus()));
+    }
+    
+    public void setTvEpisodeDone() {
+        super.setLastScanned(new Date(System.currentTimeMillis()));
+        this.setStatus(StatusType.TEMP_DONE);
     }
 
     public void setTvEpisodeNotFound() {
+        super.setLastScanned(new Date(System.currentTimeMillis()));
         if (StatusType.DONE.equals(this.getStatus())) {
             // do not reset done
+            return;
+        } else if (StatusType.TEMP_DONE.equals(this.getStatus())) {
+            // do not reset temporary done
             return;
         }
         this.setStatus(StatusType.NOTFOUND);

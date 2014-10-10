@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import org.springframework.util.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
 import javax.persistence.*;
@@ -203,7 +205,21 @@ public class Season extends AbstractMetadata {
 
     // TV CHECKS
 
-    public void setTvSeasonScanned() {
+    public boolean isTvEpisodesScanned(String sourceDb) {
+        if (CollectionUtils.isEmpty(this.getVideoDatas())) {
+            return true;
+        }
+        
+        for (VideoData videoData : this.getVideoDatas()) {
+            if (!videoData.isTvEpisodeDone(sourceDb)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    public void setTvSeasonDone() {
+        super.setLastScanned(new Date(System.currentTimeMillis()));
         this.setStatus(StatusType.DONE);
     }
 
