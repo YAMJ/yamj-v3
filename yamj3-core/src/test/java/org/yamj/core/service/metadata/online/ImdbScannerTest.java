@@ -63,7 +63,7 @@ public class ImdbScannerTest extends AbstractJUnit4SpringContextTests {
         assertTrue(videoData.getStudioNames().contains("Lightstorm Entertainment"));
         
         for (CreditDTO credit : videoData.getCreditDTOS()) {
-            String role = credit.getRole() == null ? "" : " ( " + credit.getRole() + ")";
+            String role = credit.getRole() == null ? "" : " (" + credit.getRole() + ")";
             System.err.println(credit.getJobType() +": " + credit.getName() + role);
         }
     }
@@ -93,6 +93,10 @@ public class ImdbScannerTest extends AbstractJUnit4SpringContextTests {
         imdbScanner.scan(series);
 
         assertEquals("Game of Thrones - Das Lied von Eis und Feuer", series.getTitle());
+        assertEquals("Game of Thrones", series.getTitleOriginal());
+        assertEquals(2011, series.getStartYear());
+        assertEquals(-1, series.getEndYear());
+        
         for (VideoData videoData : season.getVideoDatas()) {
             assertNotNull(videoData.getTitle());
             assertNotNull(videoData.getReleaseDate());
