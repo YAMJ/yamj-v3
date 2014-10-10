@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import java.util.Date;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -132,9 +130,6 @@ public class OnlineScannerService {
                 }
             }
         }
-        
-        // set last scan date
-        videoData.setLastScanned(new Date(System.currentTimeMillis()));
 
         // evaluate scan result
         if (ScanResult.OK.equals(scanResult)) {
@@ -200,9 +195,6 @@ public class OnlineScannerService {
             }
         }
 
-        // set last scan date
-        series.setLastScanned(new Date(System.currentTimeMillis()));
-
         // evaluate scan result
         if (ScanResult.OK.equals(scanResult)) {
             LOG.debug("Series {}-'{}', scanned OK", series.getId(), series.getTitle());
@@ -262,9 +254,6 @@ public class OnlineScannerService {
                 }
             }
         }
-
-        // set last scan date
-        person.setLastScanned(new Date(System.currentTimeMillis()));
 
         // evaluate status
         if (ScanResult.OK.equals(scanResult)) {

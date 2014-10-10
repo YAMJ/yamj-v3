@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.service;
 
+import java.util.Date;
+
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -228,6 +230,7 @@ public class MetadataStorageService {
     @Transactional
     public void updateScannedPerson(Person person) {
         // update entity
+        person.setLastScanned(new Date(System.currentTimeMillis()));
         metadataDao.updateEntity(person);
         
         // store artwork
@@ -249,6 +252,7 @@ public class MetadataStorageService {
         }
         
         // update entity
+        videoData.setLastScanned(new Date(System.currentTimeMillis()));
         metadataDao.updateEntity(videoData);
 
         // update genres
@@ -273,6 +277,7 @@ public class MetadataStorageService {
     @Transactional
     public void updateScannedMetaData(Series series) {
         // update entity
+        series.setLastScanned(new Date(System.currentTimeMillis()));
         metadataDao.updateEntity(series);
 
         // update genres
