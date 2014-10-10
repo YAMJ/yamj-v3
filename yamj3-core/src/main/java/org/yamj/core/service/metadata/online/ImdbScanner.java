@@ -875,8 +875,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             // CAST 
             boolean skipFaceless = configService.getBooleanProperty("yamj3.scan.people.skip.faceless", Boolean.FALSE);
             for (String actorBlock : HTMLTools.extractTags(xml, "<table class=\"cast_list\">", HTML_TABLE_END, "<td class=\"primary_photo\"", "</tr>")) {
-                // skip faceless persons ('loadlate hidden' is present for actors with photos)
-                if (skipFaceless && actorBlock.indexOf("loadlate hidden") == -1) {
+                // skip faceless persons ('loadlate' is present for actors with photos)
+                if (skipFaceless && actorBlock.indexOf("loadlate") == -1) {
                     continue;
                 }
 
@@ -884,9 +884,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 String personId = actorBlock.substring(nmPosition + 1, actorBlock.indexOf("/", nmPosition + 1));
                 String name = HTMLTools.stripTags(HTMLTools.extractTag(actorBlock, "itemprop=\"name\">", HTML_SPAN_END));
                 String character = HTMLTools.stripTags(HTMLTools.extractTag(actorBlock, "<td class=\"character\">", HTML_TD_END));
-                
+
                 if (StringUtils.isNotBlank(name) && StringUtils.indexOf(character, "uncredited") == -1) {
-                    // fix character (as aka)
+                    // fix character (as = alternate name)
                     int idx = StringUtils.indexOf(character, "(as ");
                     if (idx > 0) {
                         character = StringUtils.substring(character, 0, idx);

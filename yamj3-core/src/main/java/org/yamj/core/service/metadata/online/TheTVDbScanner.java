@@ -244,7 +244,7 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
                     videoData.setReleaseDate(releaseDate, SCANNER_ID);
                 }
 
-                // cast and crew
+                // actors
                 videoData.addCreditDTOS(actors);
 
                 for (String director : episode.getDirectors()) {

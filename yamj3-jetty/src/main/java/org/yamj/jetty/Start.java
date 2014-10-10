@@ -48,7 +48,6 @@ import org.yamj.common.model.YamjInfo;
 public class Start {
 
     private static final Logger LOG = LoggerFactory.getLogger(Start.class);
-    private static final String LOG_FILENAME = "yamj-jetty";
     private static final String WAR_DIR = "lib/";
     private static final String WAR_FILE = "yamj3-core-3.0-SNAPSHOT.war";
     private static String yamjHome = ".";
@@ -61,7 +60,6 @@ public class Start {
 
     public static void main(String[] args) {
         // Create the log file name here, so we can change it later (because it's locked
-        System.setProperty("file.name", LOG_FILENAME);
         PropertyConfigurator.configure("config/log4j.properties");
 
         YamjInfo yi = new YamjInfo(Start.class);

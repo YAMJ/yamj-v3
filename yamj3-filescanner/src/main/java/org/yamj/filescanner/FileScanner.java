@@ -22,29 +22,29 @@
  */
 package org.yamj.filescanner;
 
+import static org.yamj.common.type.ExitType.CMDLINE_ERROR;
+import static org.yamj.common.type.ExitType.CONFIG_ERROR;
+import static org.yamj.common.type.ExitType.SUCCESS;
+
 import java.io.File;
 import java.io.IOException;
-import org.yamj.common.cmdline.CmdLineException;
-import org.yamj.common.cmdline.CmdLineOption;
-import org.yamj.common.cmdline.CmdLineParser;
-import org.yamj.common.tools.ClassTools;
-import org.yamj.common.type.ExitType;
-import static org.yamj.common.type.ExitType.*;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.yamj.common.cmdline.CmdLineException;
+import org.yamj.common.cmdline.CmdLineOption;
+import org.yamj.common.cmdline.CmdLineParser;
 import org.yamj.common.model.YamjInfo;
+import org.yamj.common.tools.ClassTools;
+import org.yamj.common.type.ExitType;
 
 public final class FileScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileScanner.class);
-    private static final String LOG_FILENAME = "yamj-filescanner";
 
     public static void main(String[] args) throws IOException {
-        System.setProperty("file.name", LOG_FILENAME);
         PropertyConfigurator.configure("config/log4j.properties");
 
         // Get the current directory
@@ -99,9 +99,10 @@ public final class FileScanner {
 
     private ExitType execute(CmdLineParser parser) {
         ExitType status;
-
+        ClassPathXmlApplicationContext applicationContext = null;
+        
         try {
-            ApplicationContext applicationContext = new ClassPathXmlApplicationContext("yamj3-filescanner.xml");
+            applicationContext = new ClassPathXmlApplicationContext("yamj3-filescanner.xml");
             ScannerManagement scannerManagement = (ScannerManagement) applicationContext.getBean("scannerManagement");
 
             status = scannerManagement.runScanner(parser);
@@ -109,6 +110,12 @@ public final class FileScanner {
             LOG.error("Failed to load scanner configuration");
             ex.printStackTrace(System.err);
             status = CONFIG_ERROR;
+        } finally {
+            if (applicationContext != null) {
+                try {
+                    applicationContext.close();
+                } catch (Exception ignore) {}
+            }
         }
         return status;
     }

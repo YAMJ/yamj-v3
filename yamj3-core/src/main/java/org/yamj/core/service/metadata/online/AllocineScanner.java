@@ -488,9 +488,14 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                     continue;
                 }
                 
-                if (member.isActor() && member.isLeadActor()) {
-                    // only lead actors
-                    CreditDTO credit = new CreditDTO(SCANNER_ID, JobType.ACTOR, member.getShortPerson().getName());
+                if (member.isActor()) {
+                    JobType jobType;
+                    if (member.isLeadActor()) {
+                        jobType = JobType.ACTOR;
+                    } else {
+                        jobType = JobType.GUEST_STAR;
+                    }
+                    CreditDTO credit = new CreditDTO(SCANNER_ID, jobType, member.getShortPerson().getName());
                     credit.setRole(member.getRole());
                     if (member.getShortPerson().getCode() > 0) {
                         credit.addPersonId(SCANNER_ID, String.valueOf(member.getShortPerson().getCode()));
