@@ -59,8 +59,7 @@ public class Start {
     private static final String[] DEFAULT_WELCOME_PAGES = {"yamj.html", "yamj3.html", "index.html"};
 
     public static void main(String[] args) {
-        // Create the log file name here, so we can change it later (because it's locked
-        PropertyConfigurator.configure("config/log4j.properties");
+        PropertyConfigurator.configure("config/log4j-core.properties");
 
         YamjInfo yi = new YamjInfo(Start.class);
         yi.printHeader(LOG);

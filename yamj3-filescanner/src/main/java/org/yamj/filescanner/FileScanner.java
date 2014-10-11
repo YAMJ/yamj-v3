@@ -45,7 +45,7 @@ public final class FileScanner {
     private static final Logger LOG = LoggerFactory.getLogger(FileScanner.class);
 
     public static void main(String[] args) throws IOException {
-        PropertyConfigurator.configure("config/log4j.properties");
+        PropertyConfigurator.configure("config/log4j-filescanner.properties");
 
         // Get the current directory
         String yamjHome = ClassTools.checkSystemProperty("yamj3.home", (new File(".")).getCanonicalPath());
