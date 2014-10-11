@@ -873,7 +873,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             }
             
             // CAST 
-            boolean skipFaceless = configService.getBooleanProperty("yamj3.scan.people.skip.faceless", Boolean.FALSE);
+            boolean skipFaceless = configService.getBooleanProperty("imdb.skip.faceless", Boolean.FALSE);
             for (String actorBlock : HTMLTools.extractTags(xml, "<table class=\"cast_list\">", HTML_TABLE_END, "<td class=\"primary_photo\"", "</tr>")) {
                 // skip faceless persons ('loadlate' is present for actors with photos)
                 if (skipFaceless && actorBlock.indexOf("loadlate") == -1) {

@@ -36,6 +36,7 @@
                 <value>file:${yamj3.home}/config/yamj3-core-dynamic.properties</value>
             </list>
         </property>
+        <property name="ignoreResourceNotFound" value="true"/>
     </bean>
 
     <bean id="configService" class="org.yamj.core.configuration.ConfigService">
