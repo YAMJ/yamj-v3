@@ -24,15 +24,18 @@ package org.yamj.core.configuration;
 
 import java.util.*;
 import java.util.Map.Entry;
-import org.springframework.beans.factory.InitializingBean;
+import javax.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.yamj.core.api.options.OptionsConfig;
 import org.yamj.core.database.dao.ConfigDao;
 import org.yamj.core.database.model.Configuration;
 
-public class ConfigService implements InitializingBean {
+public class ConfigService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigService.class);
     private static final String DEFAULT_SPLITTER = ",";
     
     private Map<String, String> cachedProperties = new HashMap<String, String>();
@@ -52,8 +55,10 @@ public class ConfigService implements InitializingBean {
         }
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void init() throws Exception {
+        LOG.info("Initialize config service");
+        
         // get stored properties
         Map<String, String> dbConfig = configDao.readConfig();
         // override existing properties with database properties

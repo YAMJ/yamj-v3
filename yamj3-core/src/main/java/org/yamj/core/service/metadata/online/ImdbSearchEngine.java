@@ -28,10 +28,10 @@ import java.net.URLEncoder;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
@@ -41,7 +41,7 @@ import org.yamj.core.tools.web.PoolingHttpClient;
 import org.yamj.core.tools.web.SearchEngineTools;
 
 @Service("imdbSearchEngine")
-public class ImdbSearchEngine implements InitializingBean {
+public class ImdbSearchEngine {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImdbSearchEngine.class);
     private static final String OBJECT_MOVIE = "movie";
@@ -62,8 +62,10 @@ public class ImdbSearchEngine implements InitializingBean {
     @Autowired
     private ConfigService configService;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void init() throws Exception {
+        LOG.info("Initialize IMDb search engine");
+        
         String country = PropertyTools.getProperty("yamj3.searchengine.country", "us");
         searchEngineTools = new SearchEngineTools(httpClient, country);
     }

@@ -22,16 +22,14 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.core.service.metadata.tools.MetadataTools;
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
 import java.util.*;
+import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Season;
@@ -39,10 +37,12 @@ import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.service.metadata.nfo.InfoDTO;
+import org.yamj.core.service.metadata.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 
 @Service("tvdbScanner")
-public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
+public class TheTVDbScanner implements ISeriesScanner {
 
     public static final String SCANNER_ID = "tvdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheTVDbScanner.class);
@@ -57,8 +57,10 @@ public class TheTVDbScanner implements ISeriesScanner, InitializingBean {
         return SCANNER_ID;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void init() throws Exception {
+        LOG.info("Initialize TheTVDb scanner");
+        
         // register this scanner
         onlineScannerService.registerSeriesScanner(this);
     }

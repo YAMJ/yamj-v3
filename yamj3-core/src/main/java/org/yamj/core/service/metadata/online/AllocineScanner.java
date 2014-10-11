@@ -28,11 +28,11 @@ import com.moviejukebox.allocine.model.Episode;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigService;
@@ -50,7 +50,7 @@ import org.yamj.core.tools.web.PoolingHttpClient;
 import org.yamj.core.tools.web.SearchEngineTools;
 
 @Service("allocineScanner")
-public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, InitializingBean {
+public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonScanner {
 
     private static final String SCANNER_ID = "allocine";
     private static final Logger LOG = LoggerFactory.getLogger(AllocineScanner.class);
@@ -74,8 +74,10 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         return SCANNER_ID;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void init() throws Exception {
+        LOG.info("Initialize Allocine scanner");
+        
         searchEngineTools = new SearchEngineTools(httpClient, "fr");
        
         onlineScannerService.registerMovieScanner(this);

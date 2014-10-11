@@ -26,9 +26,9 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
@@ -36,8 +36,7 @@ import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.tools.web.PoolingHttpClient;
 
 @Service("yahooPosterScanner")
-public class YahooPosterScanner extends AbstractMoviePosterScanner
-        implements InitializingBean {
+public class YahooPosterScanner extends AbstractMoviePosterScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(YahooPosterScanner.class);
 
@@ -51,8 +50,10 @@ public class YahooPosterScanner extends AbstractMoviePosterScanner
         return "yahoo";
     }
 
-    @Override
-    public void afterPropertiesSet() {
+    @PostConstruct
+    public void init() throws Exception {
+        LOG.info("Initialize Yahoo poster scanner");
+        
         artworkScannerService.registerMoviePosterScanner(this);
     }
 

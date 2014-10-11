@@ -24,10 +24,10 @@ package org.yamj.core.service.artwork.poster;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
@@ -38,7 +38,7 @@ import org.yamj.core.service.metadata.online.ImdbSearchEngine;
 import org.yamj.core.tools.web.PoolingHttpClient;
 
 @Service("imdbPosterScanner")
-public class ImdbPosterScanner extends AbstractMoviePosterScanner implements InitializingBean {
+public class ImdbPosterScanner extends AbstractMoviePosterScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImdbPosterScanner.class);
     
@@ -54,8 +54,10 @@ public class ImdbPosterScanner extends AbstractMoviePosterScanner implements Ini
         return ImdbScanner.SCANNER_ID;
     }
 
-    @Override
-    public void afterPropertiesSet() {
+    @PostConstruct
+    public void init() throws Exception {
+        LOG.info("Initialize IMDb poster scanner");
+        
         // register this scanner
         artworkScannerService.registerMoviePosterScanner(this);
     }

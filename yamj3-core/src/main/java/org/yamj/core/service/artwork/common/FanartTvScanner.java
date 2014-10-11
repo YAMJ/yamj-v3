@@ -22,7 +22,7 @@
  */
 package org.yamj.core.service.artwork.common;
 
-import org.yamj.core.service.metadata.online.TheMovieDbScanner;
+import javax.annotation.PostConstruct;
 
 import com.omertron.fanarttvapi.FanartTvApi;
 import com.omertron.fanarttvapi.FanartTvException;
@@ -34,7 +34,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.IMetadata;
@@ -42,9 +41,10 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
 import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
+import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 
 @Service("fanartTvArtworkScanner")
-public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner, InitializingBean {
+public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(FanartTvScanner.class);
     public static final String SCANNER_ID = "fanarttv";
@@ -55,8 +55,10 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
     @Autowired
     private FanartTvApi fanarttvApi;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void init() throws Exception {
+        LOG.info("Initialize FanartTV artwork scanner");
+
         // register this scanner
         artworkScannerService.registerMoviePosterScanner(this);
         artworkScannerService.registerMovieFanartScanner(this);
@@ -69,7 +71,7 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
 
     @Override
     public String getId(String title, int year) {
-        // Use TheMovieDB scanner to get the ud
+        // Use TheMovieDB scanner to get the id
         return tmdbScanner.getMovieId(title, year);
     }
 

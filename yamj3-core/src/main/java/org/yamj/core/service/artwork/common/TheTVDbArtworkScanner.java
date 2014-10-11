@@ -29,11 +29,11 @@ import com.omertron.thetvdbapi.model.Episode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigService;
@@ -54,7 +54,7 @@ import org.yamj.core.service.metadata.online.TheTVDbScanner;
 @Service("tvdbArtworkScanner")
 public class TheTVDbArtworkScanner implements
         ITvShowPosterScanner, ITvShowFanartScanner, ITvShowBannerScanner,
-        ITvShowVideoImageScanner, InitializingBean {
+        ITvShowVideoImageScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheTVDbArtworkScanner.class);
 
@@ -72,8 +72,10 @@ public class TheTVDbArtworkScanner implements
         return TheTVDbScanner.SCANNER_ID;
     }
 
-    @Override
-    public void afterPropertiesSet() {
+    @PostConstruct
+    public void init() throws Exception {
+        LOG.info("Initialize TheTVDb artwork scanner");
+
         // register this scanner
         artworkScannerService.registerTvShowPosterScanner(this);
         artworkScannerService.registerTvShowFanartScanner(this);

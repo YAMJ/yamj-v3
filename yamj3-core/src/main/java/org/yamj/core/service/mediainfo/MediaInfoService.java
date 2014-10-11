@@ -26,13 +26,13 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.PostConstruct;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.tools.DateTimeTools;
@@ -50,7 +50,7 @@ import org.yamj.core.tools.Constants;
 import org.yamj.core.tools.LanguageTools;
 
 @Service("mediaInfoService")
-public class MediaInfoService implements InitializingBean {
+public class MediaInfoService {
 
     private static final Logger LOG = LoggerFactory.getLogger(LanguageTools.class);
 
@@ -74,8 +74,10 @@ public class MediaInfoService implements InitializingBean {
     @Autowired
     private LanguageTools languageTools;
     
-    @Override
-    public void afterPropertiesSet() {
+    @PostConstruct
+    public void init() throws Exception {
+        LOG.info("Initialize MediaInfo service");
+        
         String OS_NAME = System.getProperty("os.name");
         LOG.debug("Operating System Name   : {}", OS_NAME);
         LOG.debug("Operating System Version: {}", System.getProperty("os.version"));

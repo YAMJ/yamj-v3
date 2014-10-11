@@ -28,10 +28,10 @@ import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigService;
@@ -47,7 +47,7 @@ import org.yamj.core.tools.web.PoolingHttpClient;
 import org.yamj.core.tools.web.SearchEngineTools;
 
 @Service("ofdbScanner")
-public class OfdbScanner implements IMovieScanner, InitializingBean {
+public class OfdbScanner implements IMovieScanner {
 
     private static final String SCANNER_ID = "ofdb";
     private static final Logger LOG = LoggerFactory.getLogger(OfdbScanner.class);
@@ -73,8 +73,10 @@ public class OfdbScanner implements IMovieScanner, InitializingBean {
         return SCANNER_ID;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void init() throws Exception {
+        LOG.info("Initialize OFDb scanner");
+        
         charset = Charset.forName("UTF-8");
         searchEngineTools = new SearchEngineTools(httpClient, "de");
         

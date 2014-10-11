@@ -26,23 +26,29 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.InitializingBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigService;
 
 @Service("aspectRatioTools")
-public class AspectRatioTools implements InitializingBean {
+public class AspectRatioTools {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AspectRatioTools.class);
+    private final List<AspectRatio> aspectList = new ArrayList<AspectRatio>();
+    private DecimalFormatSymbols symbols = new DecimalFormatSymbols();
 
     @Autowired
     private ConfigService configService;
 
-    private final List<AspectRatio> aspectList = new ArrayList<AspectRatio>();
-    private DecimalFormatSymbols symbols = new DecimalFormatSymbols();
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void init() throws Exception {
+        LOG.info("Initialize aspect ratio tools");
+
         // fill aspect list
         aspectList.add(new AspectRatio("1:1", 1.000f, 1.075f, 1.000f, 1.00f, 1.0f));
         aspectList.add(new AspectRatio("Movietone", 1.076f, 1.200f, 1.150f, 1.15f, 1.2f));

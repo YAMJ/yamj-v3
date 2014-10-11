@@ -22,12 +22,12 @@
  */
 package org.yamj.core.service.artwork;
 
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -36,15 +36,17 @@ import org.yamj.core.database.service.ArtworkStorageService;
 /**
  * Just used for initialization of artwork profiles at startup.
  */
-@Service
-public class ArtworkInitialization implements InitializingBean {
+@Component
+public class ArtworkInitialization {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkInitialization.class);
     @Autowired
     private ArtworkStorageService artworkStorageService;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void init() throws Exception {
+        LOG.debug("Initialize artwork profiles");
+        
         String[] defaultProfiles = PropertyTools.getProperty("artwork.profile.init.profiles", "").split(",");
         if (defaultProfiles.length > 0) {
             for (String defaultProfile : defaultProfiles) {

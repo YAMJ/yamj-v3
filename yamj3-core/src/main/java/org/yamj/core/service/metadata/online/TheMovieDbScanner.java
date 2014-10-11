@@ -30,11 +30,11 @@ import com.omertron.themoviedbapi.model.ProductionCompany;
 import com.omertron.themoviedbapi.model.ProductionCountry;
 import com.omertron.themoviedbapi.results.TmdbResultsList;
 import java.util.*;
+import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigService;
@@ -47,7 +47,7 @@ import org.yamj.core.service.metadata.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 
 @Service("tmdbScanner")
-public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, InitializingBean {
+public class TheMovieDbScanner implements IMovieScanner, IPersonScanner {
 
     public static final String SCANNER_ID = "tmdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbScanner.class);
@@ -66,8 +66,10 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, Initial
         return SCANNER_ID;
     }
 
-    @Override
-    public void afterPropertiesSet() {
+    @PostConstruct
+    public void init() throws Exception {
+        LOG.info("Initialize TheMovieDb scanner");
+        
         // register this scanner
         onlineScannerService.registerMovieScanner(this);
         onlineScannerService.registerPersonScanner(this);

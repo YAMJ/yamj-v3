@@ -22,19 +22,18 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.common.tools.StringTools;
-
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.common.tools.StringTools;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
@@ -46,7 +45,7 @@ import org.yamj.core.tools.web.HTMLTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
 
 @Service("imdbScanner")
-public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, InitializingBean {
+public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner {
 
     public static final String SCANNER_ID = "imdb";
     
@@ -83,8 +82,10 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return SCANNER_ID;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void init() throws Exception {
+        LOG.info("Initialize IMDb scanner");
+
         charset = Charset.forName("UTF-8");
         
         // register this scanner

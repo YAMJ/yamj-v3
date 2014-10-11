@@ -32,10 +32,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -53,7 +53,7 @@ import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 
 @Service("tmdbArtworkScanner")
 public class TheMovieDbArtworkScanner implements
-        IMoviePosterScanner, IMovieFanartScanner, IPhotoScanner, InitializingBean {
+        IMoviePosterScanner, IMovieFanartScanner, IPhotoScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbArtworkScanner.class);
     private static final String DEFAULT_POSTER_SIZE = "original";
@@ -75,8 +75,10 @@ public class TheMovieDbArtworkScanner implements
         return TheMovieDbScanner.SCANNER_ID;
     }
 
-    @Override
-    public void afterPropertiesSet() {
+    @PostConstruct
+    public void init() throws Exception {
+        LOG.info("Initialize TheMovieDb artwork scanner");
+
         // register this scanner
         artworkScannerService.registerMoviePosterScanner(this);
         artworkScannerService.registerMovieFanartScanner(this);
