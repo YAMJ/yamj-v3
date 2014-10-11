@@ -26,14 +26,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.hibernate.SQLQuery;
+import org.springframework.stereotype.Repository;
+import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
-
-import org.springframework.stereotype.Service;
-import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.hibernate.HibernateDao;
 
-@Service("mediaDao")
+@Repository("mediaDao")
 public class MediaDao extends HibernateDao {
 
     public MediaFile getMediaFile(Long id) {

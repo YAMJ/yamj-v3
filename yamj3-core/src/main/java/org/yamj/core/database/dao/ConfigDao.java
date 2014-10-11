@@ -22,8 +22,6 @@
  */
 package org.yamj.core.database.dao;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,12 +30,13 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.options.OptionsConfig;
 import org.yamj.core.database.model.Configuration;
 import org.yamj.core.hibernate.HibernateDao;
 
-@Service("configDao")
+@Repository("configDao")
 public class ConfigDao extends HibernateDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigDao.class);

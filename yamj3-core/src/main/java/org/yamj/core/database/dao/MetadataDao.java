@@ -27,7 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.*;
@@ -37,7 +37,7 @@ import org.yamj.core.database.model.dto.QueueDTOComparator;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.hibernate.HibernateDao;
 
-@Service("metadataDao")
+@Repository("metadataDao")
 public class MetadataDao extends HibernateDao {
 
     @SuppressWarnings("unchecked")

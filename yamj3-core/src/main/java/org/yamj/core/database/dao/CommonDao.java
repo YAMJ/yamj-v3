@@ -25,7 +25,7 @@ package org.yamj.core.database.dao;
 import java.util.List;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
@@ -37,7 +37,7 @@ import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.hibernate.HibernateDao;
 
-@Service("commonDao")
+@Repository("commonDao")
 public class CommonDao extends HibernateDao {
 
     public Genre getGenre(String name) {

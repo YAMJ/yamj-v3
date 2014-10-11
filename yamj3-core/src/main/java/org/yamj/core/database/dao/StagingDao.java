@@ -29,7 +29,7 @@ import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.*;
@@ -37,7 +37,7 @@ import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.hibernate.HibernateDao;
 
-@Service("stagingDao")
+@Repository("stagingDao")
 public class StagingDao extends HibernateDao {
 
     public Library getLibrary(String client, String playerPath) {

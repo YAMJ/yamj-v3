@@ -29,7 +29,7 @@ import org.hibernate.Session;
 import org.hibernate.type.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.options.OptionsPlayer;
@@ -38,7 +38,7 @@ import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.hibernate.HibernateDao;
 
-@Service("playerDao")
+@Repository("playerDao")
 public class PlayerDao extends HibernateDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlayerDao.class);
@@ -52,7 +52,7 @@ public class PlayerDao extends HibernateDao {
 
     @Transactional
     public void storePlayer(PlayerPathOld player) {
-
+        
         LOG.debug("Checking for existing information on player '{}'", player.getName());
         PlayerPathOld existingPlayer = getByNameCaseSensitive(PlayerPathOld.class, player.getName());
 

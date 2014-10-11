@@ -29,7 +29,7 @@ import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
@@ -40,7 +40,7 @@ import org.yamj.core.database.model.dto.QueueDTOComparator;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
 
-@Service("artworkDao")
+@Repository("artworkDao")
 public class ArtworkDao extends HibernateDao {
 
     public ArtworkProfile getArtworkProfile(String profileName, ArtworkType artworkType) {
