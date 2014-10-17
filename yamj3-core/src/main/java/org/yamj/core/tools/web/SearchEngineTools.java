@@ -27,7 +27,6 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedList;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.CommonHttpClient;
@@ -220,12 +219,17 @@ public class SearchEngineTools {
 
             String xml = httpClient.requestContent(sb.toString(), charset);
 
-            int beginIndex = xml.indexOf("//" + site + searchSuffix);
+            String link = HTMLTools.extractTag(xml, "<span class=\"url\"", "</span>");
+            link = HTMLTools.removeHtmlTags(link);
+            int beginIndex = link.indexOf(site + searchSuffix);
             if (beginIndex != -1) {
-                String link = xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
-                if (StringUtils.isNotBlank(link)) {
-                    return "http:" + link;
+                link = link.substring(beginIndex);
+                // Remove "/info/xxx" from the end of the URL
+                beginIndex = link.indexOf("/info");
+                if (beginIndex > -1) {
+                    link = link.substring(0, beginIndex);
                 }
+                return "http://" + link;
             }
         } catch (IOException error) {
             LOG.error("Failed retrieving link url by yahoo search '{}'", title, error);
