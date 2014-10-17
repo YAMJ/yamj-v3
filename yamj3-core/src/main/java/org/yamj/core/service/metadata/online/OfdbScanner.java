@@ -78,7 +78,9 @@ public class OfdbScanner implements IMovieScanner {
         LOG.info("Initialize OFDb scanner");
         
         charset = Charset.forName("UTF-8");
+        
         searchEngineTools = new SearchEngineTools(httpClient, "de");
+        searchEngineTools.setSearchSites("google");
         
         // register this scanner
         onlineScannerService.registerMovieScanner(this);

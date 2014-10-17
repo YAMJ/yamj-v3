@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.tools.web.HTMLTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
@@ -66,7 +65,7 @@ public class ImdbSearchEngine {
     public void init() throws Exception {
         LOG.info("Initialize IMDb search engine");
         
-        String country = PropertyTools.getProperty("yamj3.searchengine.country", "us");
+        String country = configService.getProperty("imdb.id.search.country", "us");
         searchEngineTools = new SearchEngineTools(httpClient, country);
     }
     
