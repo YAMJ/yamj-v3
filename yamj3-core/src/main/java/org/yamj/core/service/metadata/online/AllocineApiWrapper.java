@@ -22,15 +22,12 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.apache.commons.lang3.StringUtils;
-
-import com.moviejukebox.allocine.*;
-import com.moviejukebox.allocine.model.Movie;
-import com.moviejukebox.allocine.model.ShortPerson;
-import com.moviejukebox.allocine.model.TvSeries;
+import com.moviejukebox.allocine.AllocineApi;
+import com.moviejukebox.allocine.model.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

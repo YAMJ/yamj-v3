@@ -22,9 +22,7 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.moviejukebox.allocine.*;
-import com.moviejukebox.allocine.model.CastMember;
-import com.moviejukebox.allocine.model.Episode;
+import com.moviejukebox.allocine.model.*;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
