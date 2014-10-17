@@ -229,7 +229,7 @@ public class SearchEngineTools {
                 if (beginIndex > -1) {
                     link = link.substring(0, beginIndex);
                 }
-                return "http://" + link;
+                return HTTP + link;
             }
         } catch (IOException error) {
             LOG.error("Failed retrieving link url by yahoo search '{}'", title, error);
