@@ -438,8 +438,12 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                 List<CastMember> castMembers = null;
                 EpisodeInfos episodeInfos = this.allocineApiWrapper.getEpisodeInfos(allocineId);
                 if (episodeInfos == null) {
+                    // fix episode from season info
+                    episode.setSynopsis(HTMLTools.replaceHtmlTags(episode.getSynopsis(), " "));
+
                     episodeInfos = new EpisodeInfos();
                     episodeInfos.setEpisode(episode);
+                    
                     // use members from season
                     if (tvSeasonInfos.getSeason() != null) {
                         castMembers = tvSeasonInfos.getSeason().getCastMember();
