@@ -22,13 +22,15 @@
  */
 package org.yamj.core.service.mediainfo;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -171,15 +173,16 @@ public class MediaInfoService {
         }
         
         LOG.debug("Scanning media file {}", stageFile.getFullPath());
-        InputStream is = null;
+        
+        MediaInfoStream stream = null;
         boolean scanned = false;
         try {
         	if (StringUtils.isNotBlank(stageFile.getContent())) {
         		// read from stored content
-        		is = IOUtils.toInputStream(stageFile.getContent());
+        		stream = new MediaInfoStream(stageFile.getContent());
         	} else {
         		// read from file
-        		is = createInputStream(stageFile.getFullPath());
+        		stream = createStream(stageFile.getFullPath());
         	}
         	
             Map<String, String> infosGeneral = new HashMap<String, String>();
@@ -187,19 +190,17 @@ public class MediaInfoService {
             List<Map<String, String>> infosAudio = new ArrayList<Map<String, String>>();
             List<Map<String, String>> infosText = new ArrayList<Map<String, String>>();
 
-            parseMediaInfo(is, infosGeneral, infosVideo, infosAudio, infosText);
+            parseMediaInfo(stream, infosGeneral, infosVideo, infosAudio, infosText);
 
             updateMediaFile(mediaFile, infosGeneral, infosVideo, infosAudio, infosText);
 
             scanned = true;
-        } catch (IOException error) {
+        } catch (Exception error) {
             LOG.error("Failed reading mediainfo output: {}", stageFile);
             LOG.warn("MediaInfo error", error);
         } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (Exception ignore) {}
+            if (stream != null) {
+                stream.close();
             }
         }
 
@@ -493,7 +494,7 @@ public class MediaInfoService {
         return -1;
     }
 
-    private InputStream createInputStream(String movieFilePath) throws IOException {
+    private MediaInfoStream createStream(String movieFilePath) throws IOException {
         // Create the command line
         List<String> commandMedia = new ArrayList<String>(execMediaInfo);
         commandMedia.add(movieFilePath);
@@ -503,10 +504,9 @@ public class MediaInfoService {
         // set up the working directory.
         pb.directory(MEDIAINFO_PATH);
 
-        Process p = pb.start();
-        return p.getInputStream();
+        return new MediaInfoStream(pb.start());
     }
-
+    
     /**
      * Read the input skipping any blank lines
      *
@@ -522,17 +522,17 @@ public class MediaInfoService {
         return line;
     }
 
-    public void parseMediaInfo(InputStream in,
+    public void parseMediaInfo(MediaInfoStream stream,
             Map<String, String> infosGeneral,
             List<Map<String, String>> infosVideo,
             List<Map<String, String>> infosAudio,
-            List<Map<String, String>> infosText) throws IOException {
+            List<Map<String, String>> infosText) throws Exception {
 
         InputStreamReader isr = null;
         BufferedReader bufReader = null;
 
         try {
-            isr = new InputStreamReader(in);
+            isr = new InputStreamReader(stream.getInputStream());
             bufReader = new BufferedReader(isr);
 
             // Improvement, less code line, each cat have same code, so use the same for all.
