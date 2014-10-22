@@ -93,6 +93,18 @@ public class MetadataStorageService {
     }
 
     @Transactional(readOnly = true)
+    public List<QueueDTO> getFilmographyQueueForScanning(final int maxResults) {
+        final StringBuilder sql = new StringBuilder();
+        sql.append("select id, '");
+        sql.append(MetaDataType.FILMOGRAPHY);
+        sql.append("' as mediatype, create_timestamp, update_timestamp ");
+        sql.append("from person ");
+        sql.append("where (filmography_status is null or filmography_status in ('NEW','UPDATED')) ");
+
+        return metadataDao.getMetadataQueue(sql, maxResults);
+    }
+
+    @Transactional(readOnly = true)
     public VideoData getRequiredVideoData(Long id) {
         final StringBuilder sb = new StringBuilder();
         sb.append("from VideoData vd ");
@@ -559,6 +571,15 @@ public class MetadataStorageService {
         Person person = metadataDao.getById(Person.class, id);
         if (person != null) {
             person.setStatus(StatusType.ERROR);
+            metadataDao.updateEntity(person);
+        }
+    }
+
+    @Transactional
+    public void errorFilmography(Long id) {
+        Person person = metadataDao.getById(Person.class, id);
+        if (person != null) {
+            person.setFilmographyStatus(StatusType.ERROR);
             metadataDao.updateEntity(person);
         }
     }

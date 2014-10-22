@@ -117,8 +117,26 @@ public class MetadataScannerService {
                 LOG.error("Storage error", error);
             }
         }
-}
+    }
+
+    public boolean isFilmographyScanEnabled() {
+        return this.onlineScannerService.isFilmographyScanEnabled();
+    }
     
+    /**
+     * Scan the data site for information on the person
+     *
+     * @param id
+     */
+    public void scanFilmography(Long id) {
+        Person person = metadataStorageService.getRequiredPerson(id);
+
+        // online scanning (only)
+        this.onlineScannerService.scanFilmography(person);
+        
+        // TODO store person with filmography
+    }
+
     public void processingError(QueueDTO queueElement) {
         if (queueElement == null) {
             // nothing to
@@ -131,6 +149,8 @@ public class MetadataScannerService {
             metadataStorageService.errorSeries(queueElement.getId());
         } else if (queueElement.isMetadataType(MetaDataType.PERSON)) {
             metadataStorageService.errorPerson(queueElement.getId());
+        } else if (queueElement.isMetadataType(MetaDataType.FILMOGRAPHY)) {
+            metadataStorageService.errorFilmography(queueElement.getId());
         }
     }
 }

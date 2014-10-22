@@ -52,7 +52,10 @@ public class MetadataScannerRunner implements Runnable {
                     service.scanSeries(queueElement.getId());
                 } else if (queueElement.isMetadataType(MetaDataType.PERSON)) {
                     service.scanPerson(queueElement.getId());
+                } else if (queueElement.isMetadataType(MetaDataType.FILMOGRAPHY)) {
+                    service.scanFilmography(queueElement.getId());
                 } else {
+                    // should never happen
                     LOG.error("No valid element for scanning metadata '{}'", queueElement);
                 }
             } catch (Exception error) {

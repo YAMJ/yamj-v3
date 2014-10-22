@@ -20,25 +20,11 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.common.type;
+package org.yamj.core.service.metadata.online;
 
-public enum StatusType {
+import org.yamj.core.database.model.Person;
 
-    NEW,            // new record
-    UPDATED,        // updated record
-    DELETED,        // deleted record
-    ERROR,          // something went wrong
-    NOTFOUND,       // something hasn't been found
-    INVALID,        // invalid record
-    DUPLICATE,      // duplicate record
-    TEMP_DONE,      // temporary done
-    DONE;           // all is done
-    
-    public static StatusType fromString(String type) {
-        try {
-            return StatusType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ex) {
-            return NEW;
-        }
-    }
+public interface IFilmographyScanner extends IPersonScanner {
+
+    ScanResult scanFilmography(Person person);
 }

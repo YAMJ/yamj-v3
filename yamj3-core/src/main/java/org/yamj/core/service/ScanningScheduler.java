@@ -65,6 +65,7 @@ public class ScanningScheduler {
     private boolean messageDisabledMediaFiles = Boolean.FALSE;   // Have we already printed the disabled message
     private boolean messageDisabledMetaData = Boolean.FALSE;     // Have we already printed the disabled message
     private boolean messageDisabledPeople = Boolean.FALSE;       // Have we already printed the disabled message
+    private boolean messageDisabledFilmography = Boolean.FALSE;  // Have we already printed the disabled message
     private boolean messageDisabledArtwork = Boolean.FALSE;      // Have we already printed the disabled message
 
 
@@ -186,6 +187,52 @@ public class ScanningScheduler {
         }
 
         LOG.debug("Finished people data scanning");
+    }
+
+    @Scheduled(initialDelay = 20000, fixedDelay = 45000)
+    public void scanFilmographyData() throws Exception {
+        int maxThreads = configService.getIntProperty("yamj3.scheduler.filmographyscan.maxThreads", 1);
+        if (maxThreads <= 0) {
+            if (!messageDisabledFilmography) {
+                messageDisabledFilmography = Boolean.TRUE;
+                LOG.info("Filmography scanning is disabled");
+            }
+            return;
+        } else if (!this.metadataScannerService.isFilmographyScanEnabled()) {
+            if (!messageDisabledFilmography) {
+                messageDisabledFilmography = Boolean.TRUE;
+                LOG.info("Filmography scanner not set");
+            }
+            return;
+        } else {
+            messageDisabledFilmography = Boolean.FALSE;
+        }
+
+        int maxResults = configService.getIntProperty("yamj3.scheduler.filmographyscan.maxResults", 50);
+        List<QueueDTO> queueElements = metadataStorageService.getFilmographyQueueForScanning(maxResults);
+        if (CollectionUtils.isEmpty(queueElements)) {
+            LOG.debug("No filmography data found to scan");
+            return;
+        }
+
+        LOG.info("Found {} filmography objects to process; scan with {} threads", queueElements.size(), maxThreads);
+        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
+
+        ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
+        for (int i = 0; i < maxThreads; i++) {
+            MetadataScannerRunner worker = new MetadataScannerRunner(queue, metadataScannerService);
+            executor.execute(worker);
+        }
+        executor.shutdown();
+
+        // run until all workers have finished
+        while (!executor.isTerminated()) {
+            try {
+                TimeUnit.SECONDS.sleep(5);
+            } catch (InterruptedException ignore) {}
+        }
+
+        LOG.debug("Finished filmography data scanning");
     }
 
     @Scheduled(initialDelay = 30000, fixedDelay = 45000)

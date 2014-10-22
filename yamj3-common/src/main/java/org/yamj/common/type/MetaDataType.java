@@ -50,6 +50,10 @@ public enum MetaDataType {
      */
     PERSON,
     /**
+     * This is a person filmography
+     */
+    FILMOGRAPHY,
+    /**
      * The type is unknown
      */
     UNKNOWN;

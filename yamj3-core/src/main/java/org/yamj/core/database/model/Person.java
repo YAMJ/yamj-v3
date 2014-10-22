@@ -105,6 +105,11 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @Column(name = "source", length = 30, nullable = false)
     private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
 
+    @Index(name = "IX_PERSON_FILMOGRAPHY_STATUS")
+    @Type(type = "statusType")
+    @Column(name = "filmography_status", length = 30)
+    private StatusType filmographyStatus;
+
     @Transient
     private Map<String,String> photoURLS = new HashMap<String,String>(0);
 
@@ -279,8 +284,16 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         return overrideFlags.get(overrideFlag);
     }
 
+    public StatusType getFilmographyStatus() {
+        return filmographyStatus;
+    }
+
+    public void setFilmographyStatus(StatusType filmographyStatus) {
+        this.filmographyStatus = filmographyStatus;
+    }
+
     // TRANSIENT METHODS
-    
+
     public Map<String, String> getPhotoURLS() {
         return photoURLS;
     }

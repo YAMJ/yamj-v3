@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -47,10 +49,12 @@ public class OnlineScannerService {
     public static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.alternate", "");
     public static final String PERSON_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.person", "tmdb");
     public static final String PERSON_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.person.alternate", "");
+    public static final String FILMOGRAPHY_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.filmography", "");
     
     private final HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<String, IMovieScanner>();
     private final HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<String, ISeriesScanner>();
     private final HashMap<String, IPersonScanner> registeredPersonScanner = new HashMap<String, IPersonScanner>();
+    private final HashMap<String, IFilmographyScanner> registeredFilmographyScanner = new HashMap<String, IFilmographyScanner>();
 
     @Autowired
     private ConfigService configService;
@@ -83,6 +87,12 @@ public class OnlineScannerService {
     public void registerPersonScanner(IPersonScanner personScanner) {
         LOG.info("Registered person scanner: {}", personScanner.getScannerName().toLowerCase());
         registeredPersonScanner.put(personScanner.getScannerName().toLowerCase(), personScanner);
+        
+        if (personScanner instanceof IFilmographyScanner) {
+            IFilmographyScanner filmographyScanner = (IFilmographyScanner)personScanner;
+            LOG.info("Registered filmography scanner: {}", filmographyScanner.getScannerName().toLowerCase());
+            registeredFilmographyScanner.put(filmographyScanner.getScannerName().toLowerCase(), filmographyScanner);
+        }
     }
     
     /**
@@ -269,7 +279,65 @@ public class OnlineScannerService {
             person.setStatus(StatusType.ERROR);
         }
     }
+
+    /**
+     * Check if filmography scan is enabled.
+     * 
+     * @return true, if filmography scanner has been set, else false
+     */
+    public boolean isFilmographyScanEnabled() {
+        return StringUtils.isNotBlank(FILMOGRAPHY_SCANNER);
+    }
+
+    /**
+     * Check if scanner is the filmography scanner
+     * 
+     * @return true, if scanner is the filmography scanner, else false
+     */
+    public boolean isFilmographyScanner(String scannerName) {
+        return StringUtils.equalsIgnoreCase(scannerName, FILMOGRAPHY_SCANNER);
+    }
+
+    /**
+     * Scan a person.
+     * 
+     * @param person
+     */
+    public void scanFilmography(Person person) {
+        ScanResult scanResult;
+        
+        IFilmographyScanner filmographyScanner = registeredFilmographyScanner.get(FILMOGRAPHY_SCANNER);
+        if (filmographyScanner == null) {
+            LOG.error("Filmography scanner '{}' not registered", FILMOGRAPHY_SCANNER);
+            scanResult = ScanResult.SKIPPED;
+        } else {
+            LOG.info("Scanning for filmography of person {}-'{}' using {}", person.getId(), person.getName(), FILMOGRAPHY_SCANNER);
     
+            // scan person data
+            try {
+                scanResult = filmographyScanner.scanFilmography(person);
+            } catch (Exception error) {
+                scanResult = ScanResult.ERROR;
+                LOG.error("Failed scanning person filmography (ID '{}') data with scanner {} ", person.getId(), FILMOGRAPHY_SCANNER);
+                LOG.warn("Scanning error", error);
+            }
+        }
+        
+        // evaluate status
+        if (ScanResult.OK.equals(scanResult)) {
+            LOG.debug("Person filmography {}-'{}', scanned OK", person.getId(), person.getName());
+            person.setFilmographyStatus(StatusType.DONE);
+        } else if (ScanResult.SKIPPED.equals(scanResult)) {
+            LOG.warn("Person filmography {}-'{}', skipped", person.getId(), person.getName());
+            person.setFilmographyStatus(StatusType.DONE);
+        } else if (ScanResult.MISSING_ID.equals(scanResult)) {
+            LOG.warn("Person filmography {}-'{}', not found", person.getId(), person.getName());
+            person.setFilmographyStatus(StatusType.NOTFOUND);
+        } else {
+            person.setFilmographyStatus(StatusType.ERROR);
+        }
+    }
+
     public boolean scanNFO(String nfoContent, InfoDTO dto) {
         INfoScanner nfoScanner;
         if (dto.isTvShow()) {
