@@ -28,6 +28,5 @@ public enum ScanResult {
     TYPE_CHANGE,
     ERROR,
     SKIPPED,
-    OK,
-    OK_USE_ALTERNATE;
+    OK;
 }

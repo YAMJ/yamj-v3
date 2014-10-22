@@ -129,12 +129,25 @@ public class MetadataScannerService {
      * @param id
      */
     public void scanFilmography(Long id) {
-        Person person = metadataStorageService.getRequiredPerson(id);
+        Person person = metadataStorageService.getRequiredPersonWithFilmo(id);
 
         // online scanning (only)
         this.onlineScannerService.scanFilmography(person);
         
-        // TODO store person with filmography
+        try {
+            // update person in one transaction
+            metadataStorageService.updateScannedPersonFilmography(person);
+
+            LOG.debug("Updated person filmography in database: {}-'{}'", id, person.getName());
+        } catch (Exception error) {
+            // NOTE: status will not be changed
+            if (ExceptionTools.isLockingError(error)) {
+                LOG.warn("Locking error while storing person filmography {}-'{}'", id, person.getName());
+            } else {
+                LOG.error("Failed storing person filmography {}-'{}'", id, person.getName());
+                LOG.error("Storage error", error);
+            }
+        }
     }
 
     public void processingError(QueueDTO queueElement) {

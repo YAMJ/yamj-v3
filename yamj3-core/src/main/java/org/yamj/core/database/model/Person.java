@@ -22,10 +22,15 @@
  */
 package org.yamj.core.database.model;
 
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.CascadeType;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+
 import javax.persistence.Column;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.EnumMap;
@@ -110,9 +115,15 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @Column(name = "filmography_status", length = 30)
     private StatusType filmographyStatus;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "person")
+    private Set<FilmParticipation> filmography = new HashSet<FilmParticipation>(0);
+    
     @Transient
     private Map<String,String> photoURLS = new HashMap<String,String>(0);
 
+    @Transient
+    private Set<FilmParticipation> newFilmography = new HashSet<FilmParticipation>(0);
+    
     // GETTER and SETTER
     
     public String getName() {
@@ -292,6 +303,14 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         this.filmographyStatus = filmographyStatus;
     }
 
+    public Set<FilmParticipation> getFilmography() {
+        return filmography;
+    }
+
+    public void setFilmography(Set<FilmParticipation> filmography) {
+        this.filmography = filmography;
+    }
+    
     // TRANSIENT METHODS
 
     public Map<String, String> getPhotoURLS() {
@@ -304,6 +323,14 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         }
     }
 
+    public Set<FilmParticipation> getNewFilmography() {
+        return newFilmography;
+    }
+
+    public void setNewFilmography(Set<FilmParticipation> newFilmography) {
+        this.newFilmography = newFilmography;
+    }
+    
     // EQUALITY CHECKS
 
     @Override

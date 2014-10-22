@@ -34,12 +34,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigService;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.service.metadata.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
@@ -48,7 +48,7 @@ import org.yamj.core.tools.web.PoolingHttpClient;
 import org.yamj.core.tools.web.SearchEngineTools;
 
 @Service("allocineScanner")
-public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonScanner {
+public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmographyScanner {
 
     private static final String SCANNER_ID = "allocine";
     private static final Logger LOG = LoggerFactory.getLogger(AllocineScanner.class);
@@ -576,6 +576,63 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         // add poster URL
         person.addPhotoURL(personInfos.getPhotoURL(), SCANNER_ID);
 
+        return ScanResult.OK;
+    }
+
+    @Override
+    public boolean isFilmographyScanEnabled() {
+        return configService.getBooleanProperty("allocine.person.filmography", false);
+    }
+
+    @Override
+    public ScanResult scanFilmography(Person person) {
+        // NOTE: no scanning for ID; must be present
+        String allocineId = person.getSourceDbId(SCANNER_ID);
+        
+        if (StringUtils.isBlank(allocineId)) {
+            LOG.debug("Allocine id not available '{}'", person.getName());
+            return ScanResult.MISSING_ID;
+        }
+
+        FilmographyInfos filmographyInfos = this.allocineApiWrapper.getFilmographyInfos(allocineId);
+        if (filmographyInfos == null || filmographyInfos.isNotValid()) {
+            LOG.error("Can't find filmography for person with id {}", allocineId);
+            return ScanResult.ERROR;
+        }
+    
+        Set<FilmParticipation> newFilmography = new HashSet<FilmParticipation>();
+        for (Participance participance : filmographyInfos.getParticipances()) {
+            FilmParticipation filmo = new FilmParticipation();
+            filmo.setSourceDb(SCANNER_ID);
+            filmo.setSourceDbId(String.valueOf(participance.getCode()));
+            filmo.setPerson(person);
+            
+            if (participance.isActor()) {
+                filmo.setJobType(JobType.ACTOR);
+                filmo.setRole(participance.getRole());
+            } else if (participance.isDirector()) {
+                filmo.setJobType(JobType.DIRECTOR);
+            } else if (participance.isWriter()) {
+                filmo.setJobType(JobType.WRITER);
+            }
+
+            if (participance.isTvShow()) {
+                filmo.setParticipationType(ParticipationType.SERIES);
+                filmo.setYear(participance.getYearStart());
+                filmo.setYearEnd(participance.getYearEnd());
+            } else {
+                filmo.setParticipationType(ParticipationType.MOVIE);
+                filmo.setYear(participance.getYear());
+            }
+            
+            filmo.setTitle(participance.getTitle());
+            filmo.setTitleOriginal(participance.getOriginalTitle());
+            filmo.setDescription(participance.getSynopsisShort());
+            filmo.setReleaseDate(participance.getReleaseDate());
+            newFilmography.add(filmo);
+        }
+        person.setNewFilmography(newFilmography);
+        
         return ScanResult.OK;
     }
 

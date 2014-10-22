@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -49,7 +47,6 @@ public class OnlineScannerService {
     public static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.alternate", "");
     public static final String PERSON_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.person", "tmdb");
     public static final String PERSON_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.person.alternate", "");
-    public static final String FILMOGRAPHY_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.filmography", "");
     
     private final HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<String, IMovieScanner>();
     private final HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<String, ISeriesScanner>();
@@ -106,7 +103,7 @@ public class OnlineScannerService {
         IMovieScanner movieScanner = registeredMovieScanner.get(MOVIE_SCANNER);
         if (movieScanner == null) {
             LOG.error("Movie scanner '{}' not registered", MOVIE_SCANNER);
-            scanResult = ScanResult.SKIPPED;
+            scanResult = ScanResult.ERROR;
         } else {
             LOG.debug("Scanning movie data for '{}' using {}", videoData.getTitle(), MOVIE_SCANNER);
 
@@ -145,9 +142,6 @@ public class OnlineScannerService {
         if (ScanResult.OK.equals(scanResult)) {
             LOG.debug("Movie {}-'{}', scanned OK", videoData.getId(), videoData.getTitle());
             videoData.setStatus(StatusType.DONE);
-        } else if (ScanResult.OK_USE_ALTERNATE.equals(scanResult)) {
-            LOG.debug("Movie {}-'{}', scanned OK with alternate fallback", videoData.getId(), videoData.getTitle());
-            videoData.setStatus(StatusType.DONE);
         } else if (ScanResult.SKIPPED.equals(scanResult)) {
             LOG.warn("Movie {}-'{}', skipped", videoData.getId(), videoData.getTitle());
             videoData.setStatus(StatusType.DONE);
@@ -170,7 +164,7 @@ public class OnlineScannerService {
         ISeriesScanner seriesScanner = registeredSeriesScanner.get(SERIES_SCANNER);
         if (seriesScanner == null) {
             LOG.error("Series scanner '{}' not registered", SERIES_SCANNER);
-            scanResult = ScanResult.SKIPPED;
+            scanResult = ScanResult.ERROR;
         } else {
             LOG.debug("Scanning series data for '{}' using {}", series.getTitle(), SERIES_SCANNER);
 
@@ -209,9 +203,6 @@ public class OnlineScannerService {
         if (ScanResult.OK.equals(scanResult)) {
             LOG.debug("Series {}-'{}', scanned OK", series.getId(), series.getTitle());
             series.setStatus(StatusType.DONE);
-        } else if (ScanResult.OK_USE_ALTERNATE.equals(scanResult)) {
-            LOG.debug("Series {}-'{}', scanned OK with alternate fallback", series.getId(), series.getTitle());
-            series.setStatus(StatusType.DONE);
         } else if (ScanResult.SKIPPED.equals(scanResult)) {
             LOG.warn("Series {}-'{}', skipped", series.getId(), series.getTitle());
             series.setStatus(StatusType.DONE);
@@ -234,7 +225,7 @@ public class OnlineScannerService {
         IPersonScanner personScanner = registeredPersonScanner.get(PERSON_SCANNER);
         if (personScanner == null) {
             LOG.error("Person scanner '{}' not registered", PERSON_SCANNER);
-            scanResult = ScanResult.SKIPPED;
+            scanResult = ScanResult.ERROR;
         } else {
             LOG.info("Scanning for information on person {}-'{}' using {}", person.getId(), person.getName(), PERSON_SCANNER);
     
@@ -286,7 +277,11 @@ public class OnlineScannerService {
      * @return true, if filmography scanner has been set, else false
      */
     public boolean isFilmographyScanEnabled() {
-        return StringUtils.isNotBlank(FILMOGRAPHY_SCANNER);
+        IFilmographyScanner filmographyScanner = registeredFilmographyScanner.get(PERSON_SCANNER);
+        if (filmographyScanner == null) {
+            return false;
+        }
+        return filmographyScanner.isFilmographyScanEnabled();
     }
 
     /**
@@ -295,7 +290,8 @@ public class OnlineScannerService {
      * @return true, if scanner is the filmography scanner, else false
      */
     public boolean isFilmographyScanner(String scannerName) {
-        return StringUtils.equalsIgnoreCase(scannerName, FILMOGRAPHY_SCANNER);
+        IFilmographyScanner filmographyScanner = registeredFilmographyScanner.get(scannerName);
+        return (filmographyScanner == null);
     }
 
     /**
@@ -306,19 +302,19 @@ public class OnlineScannerService {
     public void scanFilmography(Person person) {
         ScanResult scanResult;
         
-        IFilmographyScanner filmographyScanner = registeredFilmographyScanner.get(FILMOGRAPHY_SCANNER);
+        IFilmographyScanner filmographyScanner = registeredFilmographyScanner.get(PERSON_SCANNER);
         if (filmographyScanner == null) {
-            LOG.error("Filmography scanner '{}' not registered", FILMOGRAPHY_SCANNER);
-            scanResult = ScanResult.SKIPPED;
+            LOG.error("Filmography scanner '{}' not registered", PERSON_SCANNER);
+            scanResult = ScanResult.ERROR;
         } else {
-            LOG.info("Scanning for filmography of person {}-'{}' using {}", person.getId(), person.getName(), FILMOGRAPHY_SCANNER);
+            LOG.info("Scanning for filmography of person {}-'{}' using {}", person.getId(), person.getName(), PERSON_SCANNER);
     
             // scan person data
             try {
                 scanResult = filmographyScanner.scanFilmography(person);
             } catch (Exception error) {
                 scanResult = ScanResult.ERROR;
-                LOG.error("Failed scanning person filmography (ID '{}') data with scanner {} ", person.getId(), FILMOGRAPHY_SCANNER);
+                LOG.error("Failed scanning person filmography (ID '{}') data with scanner {} ", person.getId(), PERSON_SCANNER);
                 LOG.warn("Scanning error", error);
             }
         }

@@ -144,6 +144,18 @@ public class MetadataStorageService {
         return metadataDao.getById(Person.class, id);
     }
 
+    @Transactional(readOnly = true)
+    public Person getRequiredPersonWithFilmo(Long id) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("from Person p ");
+        sb.append("left outer join fetch p.filmography f ");
+        sb.append("where p.id = :id ");
+
+        @SuppressWarnings("unchecked")
+        List<Person> objects = this.commonDao.findById(sb, id);
+        return DataAccessUtils.requiredUniqueResult(objects);
+    }
+
     /**
      * Store associated entities, like genres or cast.
      * 
@@ -253,6 +265,48 @@ public class MetadataStorageService {
             photo.setPerson(person);
             photo.setStatus(StatusType.NEW);
             this.artworkDao.saveEntity(photo);
+        }
+    }
+
+    @Transactional
+    public void updateScannedPersonFilmography(Person person) {
+        // update entity
+        metadataDao.updateEntity(person);
+        
+        // NOTE: participations are stored by cascade
+        
+        // holds the participatiosn to delete
+        Set<FilmParticipation> deletions = new HashSet<FilmParticipation>();
+        
+        for (FilmParticipation filmo : person.getFilmography()) {
+            
+            FilmParticipation newFilmo = null;
+            for (FilmParticipation fp : person.getNewFilmography()) {
+                if (filmo.equals(fp)) {
+                    newFilmo = fp;
+                    break;
+                }
+            }
+            
+            if (newFilmo == null) {
+                // actual participation should be deleted
+                deletions.add(filmo);
+            } else {
+                // merge new participation into existing participation
+                filmo.merge(newFilmo);
+                // remove participation from new participations
+                person.getNewFilmography().remove(filmo);
+            }
+        }
+        
+        // delete old participations
+        for (FilmParticipation filmo : deletions) {
+            person.getFilmography().remove(filmo);
+        }
+        
+        // store new participations
+        for (FilmParticipation filmo : person.getNewFilmography()) {
+            person.getFilmography().add(filmo);
         }
     }
 

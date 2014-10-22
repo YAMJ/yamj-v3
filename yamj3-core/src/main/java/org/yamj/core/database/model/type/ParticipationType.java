@@ -20,13 +20,28 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online;
+package org.yamj.core.database.model.type;
 
-import org.yamj.core.database.model.Person;
+/**
+ * List of participation types.
+ */
+public enum ParticipationType {
 
-public interface IFilmographyScanner extends IPersonScanner {
+    MOVIE,
+    SERIES,
+    UNKNOWN;
 
-    boolean isFilmographyScanEnabled();
-    
-    ScanResult scanFilmography(Person person);
+    /**
+     * Determine the job type from a string
+     *
+     * @param type
+     * @return
+     */
+    public static ParticipationType fromString(String type) {
+        try {
+            return ParticipationType.valueOf(type.trim().toUpperCase());
+        } catch (Exception ex) {
+            return UNKNOWN;
+        }
+    }
 }

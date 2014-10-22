@@ -264,6 +264,17 @@ public class AllocineApiWrapper {
         return personInfos;
     }
 
+    public FilmographyInfos getFilmographyInfos(String allocineId) {
+        FilmographyInfos filmographyInfos = null;
+        try {
+            filmographyInfos = allocineApi.getPersonFilmography(allocineId);
+        } catch (Exception error) {
+            LOG.error("Failed retrieving Allocine filmography for person: {}", allocineId);
+            LOG.error("Allocine error" , error);
+        }
+        return filmographyInfos;
+    }
+
     public EpisodeInfos getEpisodeInfos(String allocineId) {
         EpisodeInfos personInfos = null;
         try {
