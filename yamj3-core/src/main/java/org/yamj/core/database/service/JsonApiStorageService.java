@@ -30,12 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.dto.ApiArtworkDTO;
-import org.yamj.core.api.model.dto.ApiEpisodeDTO;
-import org.yamj.core.api.model.dto.ApiGenreDTO;
-import org.yamj.core.api.model.dto.ApiPersonDTO;
-import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
-import org.yamj.core.api.model.dto.ApiVideoDTO;
+import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
@@ -43,12 +38,7 @@ import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.ApiDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.PlayerDao;
-import org.yamj.core.database.model.BoxedSet;
-import org.yamj.core.database.model.Certification;
-import org.yamj.core.database.model.Configuration;
-import org.yamj.core.database.model.Genre;
-import org.yamj.core.database.model.PlayerPathOld;
-import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;
 
 @Service("jsonApiStorageService")

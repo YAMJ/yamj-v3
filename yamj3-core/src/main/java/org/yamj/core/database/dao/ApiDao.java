@@ -509,7 +509,7 @@ public class ApiDao extends HibernateDao {
 
             if (options.hasDataItem(DataItem.FILMOGRAPHY)) {
                 LOG.info("Adding filmograpgy for {}", person.getName());
-                LOG.warn("Not implemented yet!");
+                person.setFilmography(getPersonFilmography(person.getId()));
             }
 
             wrapper.setResult(person);
@@ -518,44 +518,30 @@ public class ApiDao extends HibernateDao {
         }
     }
 
-    @SuppressWarnings("unused")
-    private void getFilmographyForPerson(Object id) {
-        SqlScalars sqlScalars = new SqlScalars();
+    private List<ApiFilmographyDTO> getPersonFilmography(long id) {
+        StringBuilder sbSQL = new StringBuilder();
+        sbSQL.append("SELECT p.participation_type as typeString, p.job as job, p.role as role,");
+        sbSQL.append("p.title as title, p.title_original as originalTitle, p.year as year,");
+        sbSQL.append("p.year_end as yearEnd, p.release_date as releaseDate, p.description as description ");
+        sbSQL.append("FROM participation p ");
+        sbSQL.append("WHERE p.person_id = :id ");
 
-        sqlScalars.addToSql("SELECT " + MetaDataType.MOVIE + " AS videoType,");
-        sqlScalars.addToSql("c.job, c.role, c.videodata_id AS videoId,");
-        sqlScalars.addToSql("v.title AS videoTitle, v.publication_year as videoYear,");
-        sqlScalars.addToSql("-1 AS seasonId, -1 AS season, -1 AS episode");
-        sqlScalars.addToSql("FROM person p, cast_crew c, videodata v");
-        sqlScalars.addToSql("WHERE p.id=c.person_id");
-        sqlScalars.addToSql("AND c.videodata_id = v.id");
-        sqlScalars.addToSql("AND v.episode<0");
-        sqlScalars.addToSql("AND p.id IN (:id)");
-        sqlScalars.addToSql("");
-        sqlScalars.addToSql("");
+        SqlScalars sqlScalars = new SqlScalars(sbSQL);
+        LOG.info("Filmography SQL: {}", sqlScalars.getSql());
 
+        sqlScalars.addScalar("typeString", StringType.INSTANCE);
+        sqlScalars.addScalar("job", StringType.INSTANCE);
+        sqlScalars.addScalar("role", StringType.INSTANCE);
+        sqlScalars.addScalar("title", StringType.INSTANCE);
+        sqlScalars.addScalar("originalTitle", StringType.INSTANCE);
+        sqlScalars.addScalar("year", IntegerType.INSTANCE);
+        sqlScalars.addScalar("yearEnd", IntegerType.INSTANCE);
+        sqlScalars.addScalar("releaseDate", StringType.INSTANCE);
+        sqlScalars.addScalar("description", StringType.INSTANCE);
 
-        /*
-         Select p.id, p.name, "MOVIE" as type,
-         c.job, c.role, c.videodata_id as data_id,
-         v.title as title, v.publication_year as year, -1 as season, -1 as episode
-         from person p, cast_crew c, videodata v
-         where p.id=c.person_id
-         and c.videodata_id = v.id
-         and p.id=2
-         and v.episode<0
-         UNION ALL
-         Select p.id, p.name, "SEASON" as type,
-         c.job, c.role, s.id as data_id,
-         v.title_original as title, LEFT(s.first_aired,4) as year, s.season, v.episode
-         from person p, cast_crew c, videodata v, season s
-         where p.id=c.person_id
-         and c.videodata_id = v.id
-         and v.season_id=s.id
-         and p.id=2
-         and v.episode>=0
-         ORDER by type, data_id, season, episode
-         */
+        sqlScalars.addParameters(ID, id);
+
+        return executeQueryWithTransform(ApiFilmographyDTO.class, sqlScalars, null);
     }
 
     public void getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {

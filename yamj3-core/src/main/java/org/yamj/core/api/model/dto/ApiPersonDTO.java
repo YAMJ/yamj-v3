@@ -126,8 +126,4 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     public void setFilmography(List<ApiFilmographyDTO> filmography) {
         this.filmography = filmography;
     }
-
-    public void addFilmography(ApiFilmographyDTO film) {
-        this.filmography.add(film);
-    }
 }

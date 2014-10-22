@@ -22,89 +22,133 @@
  */
 package org.yamj.core.api.model.dto;
 
-import org.yamj.common.type.MetaDataType;
+import org.apache.commons.lang3.StringUtils;
+
+import org.yamj.core.database.model.type.ParticipationType;
 
 public class ApiFilmographyDTO extends AbstractApiDTO {
 
-    private MetaDataType videoType = MetaDataType.UNKNOWN;
-    private String job = "";
+    private ParticipationType type;
+    private String job;
     private String role = "";
+    private String title = "";
+    private String originalTitle = "";
+    private Integer year;
+    private Integer yearEnd;
+    private String releaseDate = "";
+    private String description = "";
     private Long videoId = -1L;
-    private String videoTitle = "";
-    private Integer videoYear = -1;
-    private Long seasonId = -1L;
-    private Integer season = -1;
-    private Integer episode = -1;
+    private Long seriesId = -1L;
 
-    public void setVideoType(MetaDataType videoType) {
-        this.videoType = videoType;
+    public ParticipationType getType() {
+        return type;
     }
 
-    public void setJob(String job) {
-        this.job = job;
+    public void setType(ParticipationType type) {
+        this.type = type;
     }
 
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public void setVideoId(Long videoId) {
-        this.videoId = videoId;
-    }
-
-    public void setVideoTitle(String videoTitle) {
-        this.videoTitle = videoTitle;
-    }
-
-    public void setVideoYear(Integer videoYear) {
-        this.videoYear = videoYear;
-    }
-
-    public void setSeason(Integer season) {
-        this.season = season;
-    }
-
-    public void setSeasonId(Long seasonId) {
-        this.seasonId = seasonId;
-    }
-
-    public void setEpisode(Integer episode) {
-        this.episode = episode;
-    }
-
-    public MetaDataType getVideoType() {
-        return videoType;
+    public void setTypeString(String type) {
+        setType(ParticipationType.fromString(type));
     }
 
     public String getJob() {
         return job;
     }
 
+    public void setJob(String job) {
+        this.job = job;
+    }
+
     public String getRole() {
         return role;
+    }
+
+    public void setRole(String role) {
+        if (StringUtils.isBlank(role)) {
+            this.role = "";
+        } else {
+            this.role = role;
+        }
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        if (StringUtils.isBlank(title)) {
+            this.title = "";
+        } else {
+            this.title = title;
+        }
+    }
+
+    public String getOriginalTitle() {
+        return originalTitle;
+    }
+
+    public void setOriginalTitle(String originalTitle) {
+        if (StringUtils.isBlank(originalTitle)) {
+            this.originalTitle = "";
+        } else {
+            this.originalTitle = originalTitle;
+        }
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
+
+    public Integer getYearEnd() {
+        return yearEnd;
+    }
+
+    public void setYearEnd(Integer yearEnd) {
+        this.yearEnd = yearEnd;
+    }
+
+    public String getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        if (StringUtils.isBlank(releaseDate)) {
+            this.releaseDate = "";
+        } else {
+            this.releaseDate = releaseDate;
+        }
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        if (StringUtils.isBlank(description)) {
+            this.description = "";
+        } else {
+            this.description = description;
+        }
     }
 
     public Long getVideoId() {
         return videoId;
     }
 
-    public String getVideoTitle() {
-        return videoTitle;
+    public void setVideoId(Long videoId) {
+        this.videoId = videoId;
     }
 
-    public Integer getVideoYear() {
-        return videoYear;
+    public Long getSeriesId() {
+        return seriesId;
     }
 
-    public Integer getSeason() {
-        return season;
-    }
-
-    public Long getSeasonId() {
-        return seasonId;
-    }
-
-    public Integer getEpisode() {
-        return episode;
+    public void setSeriesId(Long seriesId) {
+        this.seriesId = seriesId;
     }
 }
