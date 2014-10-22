@@ -63,6 +63,8 @@ public class SystemInfoController {
             for (MetaDataType singleType : MetaDataType.values()) {
                 if (singleType == MetaDataType.UNKNOWN) {
                     continue;
+                } else if (singleType == MetaDataType.FILMOGRAPHY) {
+                        continue;
                 }
 
                 CountTimestamp result = jsonApi.getCountTimestamp(singleType);

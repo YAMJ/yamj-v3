@@ -62,7 +62,7 @@ public class MetadataStorageService {
         final StringBuilder sql = new StringBuilder();
         sql.append("select vd.id,'");
         sql.append(MetaDataType.MOVIE);
-        sql.append("' as mediatype,vd.create_timestamp,vd.update_timestamp ");
+        sql.append("' as metatype,vd.create_timestamp,vd.update_timestamp ");
         sql.append("from videodata vd ");
         sql.append("where vd.status in ('NEW','UPDATED') ");
         sql.append("and vd.episode<0 ");
@@ -85,7 +85,7 @@ public class MetadataStorageService {
         final StringBuilder sql = new StringBuilder();
         sql.append("select id, '");
         sql.append(MetaDataType.PERSON);
-        sql.append("' as mediatype, create_timestamp, update_timestamp ");
+        sql.append("' as metatype, create_timestamp, update_timestamp ");
         sql.append("from person ");
         sql.append("where status in ('NEW','UPDATED') ");
 
@@ -97,7 +97,7 @@ public class MetadataStorageService {
         final StringBuilder sql = new StringBuilder();
         sql.append("select id, '");
         sql.append(MetaDataType.FILMOGRAPHY);
-        sql.append("' as mediatype, create_timestamp, update_timestamp ");
+        sql.append("' as metatype, create_timestamp, update_timestamp ");
         sql.append("from person ");
         sql.append("where (filmography_status is null or filmography_status in ('NEW','UPDATED')) ");
 
