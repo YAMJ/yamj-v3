@@ -23,7 +23,6 @@
 package org.yamj.core.database.model;
 
 import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
@@ -319,7 +318,6 @@ public class VideoData extends AbstractMetadata {
         this.certifications.add(certification);
     }
 
-    @JsonIgnore // This is not needed for the API
     private Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
@@ -333,7 +331,6 @@ public class VideoData extends AbstractMetadata {
         this.overrideFlags.put(overrideFlag, source.toLowerCase());
     }
 
-    @JsonIgnore // This is not needed for the API
     @Override
     public String getOverrideSource(OverrideFlag overrideFlag) {
         return overrideFlags.get(overrideFlag);
@@ -430,7 +427,6 @@ public class VideoData extends AbstractMetadata {
 
     // TRANSIENTS METHODS
     
-    @JsonIgnore // This is not needed for the API
     public Set<CreditDTO> getCreditDTOS() {
         return creditDTOS;
     }
@@ -473,7 +469,6 @@ public class VideoData extends AbstractMetadata {
         }
     }
     
-    @JsonIgnore // This is not needed for the API
     public Set<String> getGenreNames() {
         return genreNames;
     }
@@ -485,7 +480,6 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
-    @JsonIgnore // This is not needed for the API
     public Set<String> getStudioNames() {
         return studioNames;
     }
@@ -497,7 +491,6 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
-    @JsonIgnore // This is not needed for the API
     public Map<String,Integer> getSetInfos() {
         return setInfos;
     }
@@ -514,7 +507,6 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
-    @JsonIgnore // This is not needed for the API
     public Map<String,String> getCertificationInfos() {
         return certificationInfos;
     }
@@ -531,7 +523,6 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
-    @JsonIgnore // This is not needed for the API
     public Map<String, String> getPosterURLS() {
         return posterURLS;
     }
@@ -542,7 +533,6 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
-    @JsonIgnore // This is not needed for the API
     public Map<String, String> getFanartURLS() {
         return fanartURLS;
     }
@@ -580,7 +570,6 @@ public class VideoData extends AbstractMetadata {
         this.setStatus(StatusType.NOTFOUND);
     }
 
-    @JsonIgnore // This is not needed for the API
     @Override
     public int getSeasonNumber() {
         if (isMovie()) {

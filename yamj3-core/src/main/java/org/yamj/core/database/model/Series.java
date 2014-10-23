@@ -22,7 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
@@ -191,7 +190,6 @@ public class Series extends AbstractMetadata {
         }
     }
 
-    @JsonIgnore // This is not needed for the API
     public Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
@@ -205,7 +203,6 @@ public class Series extends AbstractMetadata {
         this.overrideFlags.put(overrideFlag, source.toLowerCase());
     }
 
-    @JsonIgnore // This is not needed for the API
     @Override
     public String getOverrideSource(OverrideFlag overrideFlag) {
         return overrideFlags.get(overrideFlag);
@@ -254,7 +251,6 @@ public class Series extends AbstractMetadata {
 
     // TRANSIENTS METHODS
     
-    @JsonIgnore // This is not needed for the API
     public Set<String> getGenreNames() {
         return genreNames;
     }
@@ -266,7 +262,6 @@ public class Series extends AbstractMetadata {
         }
     }
 
-    @JsonIgnore // This is not needed for the API
     public Set<String> getStudioNames() {
         return studioNames;
     }
@@ -278,7 +273,6 @@ public class Series extends AbstractMetadata {
         }
     }
 
-    @JsonIgnore // This is not needed for the API
     public Map<String, String> getPosterURLS() {
         return posterURLS;
     }
@@ -289,7 +283,6 @@ public class Series extends AbstractMetadata {
         }
     }
 
-    @JsonIgnore // This is not needed for the API
     public Map<String, String> getFanartURLS() {
         return fanartURLS;
     }

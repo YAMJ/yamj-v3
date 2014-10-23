@@ -32,7 +32,6 @@ import javax.persistence.Column;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.EnumMap;
 import javax.persistence.*;
 import org.hibernate.annotations.*;
@@ -275,7 +274,6 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         this.lastScanned = lastScanned;
     }
     
-    @JsonIgnore // This is not needed for the API
     public Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
@@ -289,7 +287,6 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         this.overrideFlags.put(overrideFlag, source.toLowerCase());
     }
 
-    @JsonIgnore // This is not needed for the API
     @Override
     public String getOverrideSource(OverrideFlag overrideFlag) {
         return overrideFlags.get(overrideFlag);

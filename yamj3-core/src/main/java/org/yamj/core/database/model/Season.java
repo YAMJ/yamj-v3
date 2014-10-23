@@ -24,7 +24,6 @@ package org.yamj.core.database.model;
 
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
@@ -159,7 +158,6 @@ public class Season extends AbstractMetadata {
         }
     }
 
-    @JsonIgnore // This is not needed for the API
     private Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
@@ -173,7 +171,6 @@ public class Season extends AbstractMetadata {
         this.overrideFlags.put(overrideFlag, source.toLowerCase());
     }
 
-    @JsonIgnore // This is not needed for the API
     @Override
     public String getOverrideSource(OverrideFlag overrideFlag) {
         return overrideFlags.get(overrideFlag);
