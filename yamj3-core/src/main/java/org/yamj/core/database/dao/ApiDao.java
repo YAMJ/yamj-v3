@@ -240,6 +240,15 @@ public class ApiDao extends HibernateDao {
         if (options.getId() > 0L) {
             sbSQL.append(" AND vd.id=").append(options.getId());
         }
+
+        if (includes.containsKey(YEAR)) {
+            sbSQL.append(" AND vd.publication_year=").append(includes.get(YEAR));
+        }
+
+        if (excludes.containsKey(YEAR)) {
+            sbSQL.append(" AND vd.publication_year!=").append(includes.get(YEAR));
+        }
+
         // Add joins for genres
         if (includes.containsKey(GENRE) || excludes.containsKey(GENRE)) {
             sbSQL.append(" AND vd.id=vg.data_id");
@@ -251,14 +260,6 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append(excludes.get(GENRE));
             }
             sbSQL.append("'");
-        }
-
-        if (includes.containsKey(YEAR)) {
-            sbSQL.append(" AND vd.publication_year=").append(includes.get(YEAR));
-        }
-
-        if (excludes.containsKey(YEAR)) {
-            sbSQL.append(" AND vd.publication_year!=").append(includes.get(YEAR));
         }
 
         // Add the search string, this will be empty if there is no search required
@@ -290,6 +291,11 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", '-1' AS episode");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "ser"));
         sbSQL.append(" FROM series ser ");
+        // Add genre tables for include and exclude
+        if (includes.containsKey(GENRE) || excludes.containsKey(GENRE)) {
+            sbSQL.append(", series_genres sg, genre g");
+        }
+        
         sbSQL.append(SQL_WHERE_1_EQ_1); // To make it easier to add the optional include and excludes
         if (options.getId() > 0L) {
             sbSQL.append(" AND ser.id=").append(options.getId());
@@ -301,6 +307,19 @@ public class ApiDao extends HibernateDao {
 
         if (excludes.containsKey(YEAR)) {
             sbSQL.append(" AND ser.start_year!=").append(includes.get(YEAR));
+        }
+
+        // Add joins for genres
+        if (includes.containsKey(GENRE) || excludes.containsKey(GENRE)) {
+            sbSQL.append(" AND ser.id=sg.series_id");
+            sbSQL.append(" AND sg.genre_id=g.id");
+            sbSQL.append(" AND g.name='");
+            if (includes.containsKey(GENRE)) {
+                sbSQL.append(includes.get(GENRE));
+            } else {
+                sbSQL.append(excludes.get(GENRE));
+            }
+            sbSQL.append("'");
         }
 
         // Add the search string, this will be empty if there is no search required
