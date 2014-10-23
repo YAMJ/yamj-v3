@@ -37,7 +37,7 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
     private Integer yearEnd;
     private String releaseDate = "";
     private String description = "";
-    private Long videoId = -1L;
+    private Long videoDataId = -1L;
     private Long seriesId = -1L;
 
     public ParticipationType getType() {
@@ -136,12 +136,12 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
         }
     }
 
-    public Long getVideoId() {
-        return videoId;
+    public Long getVideoDataId() {
+        return videoDataId;
     }
 
-    public void setVideoId(Long videoId) {
-        this.videoId = videoId;
+    public void setVideoDataId(Long videoDataId) {
+        this.videoDataId = videoDataId;
     }
 
     public Long getSeriesId() {
