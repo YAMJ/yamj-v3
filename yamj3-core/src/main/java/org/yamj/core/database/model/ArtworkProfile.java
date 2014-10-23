@@ -198,15 +198,6 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
         return 1f;
     }
 
-    public boolean hasRelevantChanges(ArtworkProfile profile) {
-        if (getWidth() != profile.getWidth()) {
-            return true;
-        } else if (getHeight() != profile.getHeight()) {
-            return true;
-        }
-        return false;
-    }
-
     // EQUALITY CHECKS
     
     @Override

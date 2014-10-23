@@ -55,11 +55,7 @@ public class ArtworkStorageService {
             this.artworkDao.saveEntity(newProfile);
             LOG.info("Stored new artwork profile {}", newProfile);
         } else {
-            // TODO what to do if profile changes in size and height?
-
-            if (profile.hasRelevantChanges(newProfile)) {
-                LOG.warn("Artwork profile update with relevant changes: {}", profile.getProfileName());
-            }
+            // TODO what to do if profile changed? set generated values to update?
 
             profile.setHeight(newProfile.getHeight());
             profile.setWidth(newProfile.getWidth());
@@ -69,7 +65,7 @@ public class ArtworkStorageService {
             profile.setApplyToEpisode(newProfile.isApplyToEpisode());
             profile.setApplyToPerson(newProfile.isApplyToPerson());
             profile.setPreProcess(newProfile.isPreProcess());
-            this.artworkDao.saveEntity(profile);
+            this.artworkDao.updateEntity(profile);
             LOG.info("Updated artwork profile {}", profile);
         }
     }
