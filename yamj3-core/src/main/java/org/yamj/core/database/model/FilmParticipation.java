@@ -83,7 +83,7 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
 
     @Column(name = "release_date")
     private String releaseDate;
-
+    
     // GETTER and SETTER
     
     public String getSourceDb() {
@@ -181,9 +181,9 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
     }
-
-    // TRANSIENT METHODS
     
+    // TRANSIENT METHODS
+
     public void merge(FilmParticipation newFilmo) {
         this.setJobType(newFilmo.getJobType());
         this.setRole(newFilmo.getRole());

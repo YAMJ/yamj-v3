@@ -285,16 +285,6 @@ public class OnlineScannerService {
     }
 
     /**
-     * Check if scanner is the filmography scanner
-     * 
-     * @return true, if scanner is the filmography scanner, else false
-     */
-    public boolean isFilmographyScanner(String scannerName) {
-        IFilmographyScanner filmographyScanner = registeredFilmographyScanner.get(scannerName);
-        return (filmographyScanner == null);
-    }
-
-    /**
      * Scan a person.
      * 
      * @param person

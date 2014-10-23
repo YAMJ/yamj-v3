@@ -22,18 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import org.yamj.core.database.model.type.ArtworkType;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.LinkedHashSet;
-import javax.persistence.Transient;
-import java.util.HashSet;
-import java.util.Set;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import org.hibernate.annotations.ForeignKey;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
 import javax.persistence.*;
@@ -43,6 +31,7 @@ import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
 @Entity

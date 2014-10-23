@@ -522,8 +522,11 @@ public class ApiDao extends HibernateDao {
         StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("SELECT p.participation_type as typeString, p.job as job, p.role as role,");
         sbSQL.append("p.title as title, p.title_original as originalTitle, p.year as year,");
-        sbSQL.append("p.year_end as yearEnd, p.release_date as releaseDate, p.description as description ");
+        sbSQL.append("p.year_end as yearEnd, p.release_date as releaseDate, p.description as description, ");
+        sbSQL.append("v.videodata_id as videoDataId, s.series_id as seriesId ");
         sbSQL.append("FROM participation p ");
+        sbSQL.append("LEFT OUTER JOIN videodata_ids v ON v.sourcedb=p.sourcedb and v.sourcedb_id=p.sourcedb_id ");
+        sbSQL.append("LEFT OUTER JOIN series_ids s ON s.sourcedb=p.sourcedb and s.sourcedb_id=p.sourcedb_id ");
         sbSQL.append("WHERE p.person_id = :id ");
 
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
@@ -538,6 +541,8 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("yearEnd", IntegerType.INSTANCE);
         sqlScalars.addScalar("releaseDate", StringType.INSTANCE);
         sqlScalars.addScalar("description", StringType.INSTANCE);
+        sqlScalars.addScalar("videoDataId", LongType.INSTANCE);
+        sqlScalars.addScalar("seriesId", LongType.INSTANCE);
 
         sqlScalars.addParameters(ID, id);
 

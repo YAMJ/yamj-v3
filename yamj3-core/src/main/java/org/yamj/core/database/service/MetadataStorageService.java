@@ -22,8 +22,6 @@
  */
 package org.yamj.core.database.service;
 
-import java.util.Date;
-
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -99,7 +97,8 @@ public class MetadataStorageService {
         sql.append(MetaDataType.FILMOGRAPHY);
         sql.append("' as metatype, create_timestamp, update_timestamp ");
         sql.append("from person ");
-        sql.append("where (filmography_status is null or filmography_status in ('NEW','UPDATED')) ");
+        sql.append("where status='DONE' ");
+        sql.append("and (filmography_status is null or filmography_status in ('NEW','UPDATED')) ");
 
         return metadataDao.getMetadataQueue(sql, maxResults);
     }
@@ -360,7 +359,7 @@ public class MetadataStorageService {
             metadataDao.updateEntity(season);
 
             for (VideoData videoData : season.getVideoDatas()) {
-                updateScannedMetaData(videoData);
+                updateScannedMetaData(videoData);;
             }
         }
     }

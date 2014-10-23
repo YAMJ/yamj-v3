@@ -115,6 +115,5 @@ public class MetadataDao extends HibernateDao {
         query.setParameter("jobType", jobType);
         query.setString("personName", personName.toLowerCase());
         return (CastCrew)query.uniqueResult();
-        
     }
 }

@@ -132,13 +132,13 @@
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
             <version>10.10.1.1</version>
-            <scope>runtime</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.29</version>
-            <scope>runtime</scope>
+            <scope>provided</scope>
         </dependency>
         <!-- TEST -->
         <dependency>

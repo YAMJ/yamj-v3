@@ -141,7 +141,11 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
     }
 
     public void setVideoDataId(Long videoDataId) {
-        this.videoDataId = videoDataId;
+        if (videoDataId == null) {
+            videoDataId = Long.valueOf(0);
+        } else {
+            this.videoDataId = videoDataId;
+        }
     }
 
     public Long getSeriesId() {
@@ -149,6 +153,10 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
     }
 
     public void setSeriesId(Long seriesId) {
-        this.seriesId = seriesId;
+        if (seriesId == null) {
+            seriesId = Long.valueOf(0);
+        } else {
+            this.seriesId = seriesId;
+        }
     }
 }
