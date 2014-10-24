@@ -833,15 +833,15 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             
             // DIRECTORS
             if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
-                for (String directorMatch : "Directed by|Director".split(HTML_SLASH_PIPE)) {
-                    parseCredits(videoData, JobType.DIRECTOR, xml, directorMatch + "&nbsp;</h4>");            
+                for (String creditsMatch : "Directed by|Director".split(HTML_SLASH_PIPE)) {
+                    parseCredits(videoData, JobType.DIRECTOR, xml, creditsMatch + "&nbsp;</h4>");            
                 }
             }
             
             // WRITERS
             if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
-                for (String writerMatch : "Writing Credits|Writer".split(HTML_SLASH_PIPE)) {
-                    parseCredits(videoData, JobType.WRITER, xml, writerMatch);
+                for (String creditsMatch : "Writing Credits|Writer".split(HTML_SLASH_PIPE)) {
+                    parseCredits(videoData, JobType.WRITER, xml, creditsMatch);
                 }
             }
             
@@ -884,24 +884,53 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             
             // CAMERA
             if (this.configServiceWrapper.isCastScanEnabled(JobType.CAMERA)) {
-                for (String producerMatch : "Cinematography by".split(HTML_SLASH_PIPE)) {
-                    parseCredits(videoData, JobType.CAMERA, xml, producerMatch);
+                for (String creditsMatch : "Cinematography by".split(HTML_SLASH_PIPE)) {
+                    parseCredits(videoData, JobType.CAMERA, xml, creditsMatch);
                 }
             }
             
             // PRODUCERS
             if (this.configServiceWrapper.isCastScanEnabled(JobType.PRODUCER)) {
-                for (String producerMatch : "Produced by".split(HTML_SLASH_PIPE)) {
-                    parseCredits(videoData, JobType.PRODUCER, xml, producerMatch);
+                for (String creditsMatch : "Produced by|Casting By|Casting by".split(HTML_SLASH_PIPE)) {
+                    parseCredits(videoData, JobType.PRODUCER, xml, creditsMatch);
                 }
             }
+
+            // SOUND
+            if (this.configServiceWrapper.isCastScanEnabled(JobType.SOUND)) {
+                for (String creditsMatch : "Music by".split(HTML_SLASH_PIPE)) {
+                    parseCredits(videoData, JobType.SOUND, xml, creditsMatch);
+                }
+            }
+
+            // ART
+            if (this.configServiceWrapper.isCastScanEnabled(JobType.ART)) {
+                for (String creditsMatch : "Production Design by|Art Direction by|Set Decoration by".split(HTML_SLASH_PIPE)) {
+                    parseCredits(videoData, JobType.ART, xml, creditsMatch);
+                }
+            }
+
+            // EDITING
+            if (this.configServiceWrapper.isCastScanEnabled(JobType.EDITING)) {
+                for (String creditsMatch : "Film Editing by".split(HTML_SLASH_PIPE)) {
+                    parseCredits(videoData, JobType.EDITING, xml, creditsMatch);
+                }
+            }
+
+            // COSTUME_MAKEUP
+            if (this.configServiceWrapper.isCastScanEnabled(JobType.COSTUME_MAKEUP)) {
+                for (String creditsMatch : "Costume Design by".split(HTML_SLASH_PIPE)) {
+                    parseCredits(videoData, JobType.COSTUME_MAKEUP, xml, creditsMatch);
+                }
+            }
+            
         } catch (Exception ex) {
             LOG.warn("Failed to scan cast crew: " + imdbId, ex);
         }
     }
     
     private static void parseCredits(VideoData videoData, JobType jobType, String xml, String creditsMatch) {
-        if (StringUtils.indexOfIgnoreCase(xml, HTML_GT + creditsMatch) > 0) {
+        if (StringUtils.indexOf(xml, HTML_GT + creditsMatch) > 0) {
             for (String member : HTMLTools.extractTags(xml, HTML_GT + creditsMatch, HTML_TABLE_END, HTML_A_START, HTML_A_END, Boolean.FALSE)) {
                 int beginIndex = member.indexOf("href=\"/name/");
                 if (beginIndex > -1) {
