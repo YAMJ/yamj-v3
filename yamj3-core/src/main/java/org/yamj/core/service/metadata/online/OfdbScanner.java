@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.core.configuration.ConfigService;
+import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
@@ -66,7 +66,7 @@ public class OfdbScanner implements IMovieScanner {
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
     @Autowired
-    private ConfigService configService;
+    private ConfigServiceWrapper configServiceWrapper;
 
     @Override
     public String getScannerName() {
@@ -94,7 +94,7 @@ public class OfdbScanner implements IMovieScanner {
             // get and check IMDb id
             String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
             if (StringUtils.isBlank(imdbId)) {
-                boolean searchImdb = configService.getBooleanProperty("ofdb.search.imdb", false);
+                boolean searchImdb = configServiceWrapper.getBooleanProperty("ofdb.search.imdb", false);
                 if (searchImdb) {
                     // search IMDb id if not present
                     imdbId = this.imdbSearchEngine.getImdbId(videoData.getTitle(), videoData.getPublicationYear(), false);
@@ -294,26 +294,33 @@ public class OfdbScanner implements IMovieScanner {
                     }
                 }
 
-                // CAST and CREW
-
-                if (detailXml.contains("<i>Regie</i>")) {
-                    tags = HTMLTools.extractHtmlTags(detailXml, "<i>Regie</i>", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
-                    for (String tag : tags) {
-                        videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.DIRECTOR, extractName(tag)));
+                // DIRECTORS
+                if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
+                    if (detailXml.contains("<i>Regie</i>")) {
+                        tags = HTMLTools.extractHtmlTags(detailXml, "<i>Regie</i>", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
+                        for (String tag : tags) {
+                            videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.DIRECTOR, extractName(tag)));
+                        }
                     }
                 }
-
-                if (detailXml.contains("<i>Drehbuchautor(in)</i>")) {
-                    tags = HTMLTools.extractHtmlTags(detailXml, "<i>Drehbuchautor(in)</i>", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
-                    for (String tag : tags) {
-                        videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.WRITER, extractName(tag)));
+                
+                // WRITERS
+                if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
+                    if (detailXml.contains("<i>Drehbuchautor(in)</i>")) {
+                        tags = HTMLTools.extractHtmlTags(detailXml, "<i>Drehbuchautor(in)</i>", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
+                        for (String tag : tags) {
+                            videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.WRITER, extractName(tag)));
+                        }
                     }
                 }
-
-                if (detailXml.contains("<i>Darsteller</i>")) {
-                    tags = HTMLTools.extractHtmlTags(detailXml, "<i>Darsteller</i>", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
-                    for (String tag : tags) {
-                        videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.ACTOR, extractName(tag), extractRole(tag)));
+                
+                // ACTORS
+                if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+                    if (detailXml.contains("<i>Darsteller</i>")) {
+                        tags = HTMLTools.extractHtmlTags(detailXml, "<i>Darsteller</i>", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
+                        for (String tag : tags) {
+                            videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.ACTOR, extractName(tag), extractRole(tag)));
+                        }
                     }
                 }
             }

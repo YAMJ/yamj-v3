@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
@@ -51,7 +52,9 @@ public class TheTVDbScanner implements ISeriesScanner {
     private OnlineScannerService onlineScannerService;
     @Autowired
     private TheTVDbApiWrapper tvdbApiWrapper;
-
+    @Autowired
+    private ConfigServiceWrapper configServiceWrapper;
+    
     @Override
     public String getScannerName() {
         return SCANNER_ID;
@@ -137,10 +140,12 @@ public class TheTVDbScanner implements ISeriesScanner {
 
         // CAST & CREW
         Set<CreditDTO> actors = new LinkedHashSet<CreditDTO>();
-        for (Actor actor : tvdbApiWrapper.getActors(id)) {
-            actors.add(new CreditDTO(SCANNER_ID, JobType.ACTOR, actor.getName(), actor.getRole()));
+        if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+            for (Actor actor : tvdbApiWrapper.getActors(id)) {
+                actors.add(new CreditDTO(SCANNER_ID, JobType.ACTOR, actor.getName(), actor.getRole()));
+            }
         }
-
+        
         // SCAN SEASONS
         this.scanSeasons(series, tvdbSeries, actors);
 
@@ -246,19 +251,30 @@ public class TheTVDbScanner implements ISeriesScanner {
                     videoData.setReleaseDate(releaseDate, SCANNER_ID);
                 }
 
+                // directors
+                if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
+                    for (String director : episode.getDirectors()) {
+                        videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.DIRECTOR, director));
+                    }
+                }
+                
+                // writers
+                if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
+                    for (String writer : episode.getWriters()) {
+                        videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.WRITER, writer));
+                    }
+                }
+
                 // actors
                 videoData.addCreditDTOS(actors);
 
-                for (String director : episode.getDirectors()) {
-                    videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.DIRECTOR, director));
+                // guest stars
+                if (this.configServiceWrapper.isCastScanEnabled(JobType.GUEST_STAR)) {
+                    for (String guestStar : episode.getGuestStars()) {
+                        videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.GUEST_STAR, guestStar));
+                    }
                 }
-                for (String writer : episode.getWriters()) {
-                    videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.WRITER, writer));
-                }
-                for (String guestStar : episode.getGuestStars()) {
-                    videoData.addCreditDTO(new CreditDTO(SCANNER_ID, JobType.GUEST_STAR, guestStar));
-                }
-
+                
                 // mark episode as done
                 videoData.setTvEpisodeDone();
             }

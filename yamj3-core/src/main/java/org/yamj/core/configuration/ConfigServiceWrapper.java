@@ -24,17 +24,26 @@ package org.yamj.core.configuration;
 
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.model.type.JobType;
 
 @Service("configServiceWrapper")
 public class ConfigServiceWrapper {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigServiceWrapper.class);
+
     @Autowired
     private ConfigService configService;
+
+    public String getProperty(String key, String defaultValue) {
+        return this.configService.getProperty(key, defaultValue);
+    }
 
     public boolean getBooleanProperty(String key, boolean defaultValue) {
         return this.configService.getBooleanProperty(key, defaultValue);
@@ -112,5 +121,24 @@ public class ConfigServiceWrapper {
                 sb.append("tvshow.series");
             }
         }
+    }
+    
+    public boolean isCastScanEnabled(JobType jobType) {
+        if (jobType == null) {
+            return false;
+        }
+        
+        String key = "yamj3.scan.castcrew." + jobType.name().toLowerCase();
+        boolean value = this.configService.getBooleanProperty(key, Boolean.FALSE);
+        
+        if (LOG.isTraceEnabled()) {
+            if (value) {
+                LOG.trace("CastCrew scanning for job '{}' is enabled", jobType);   
+            } else {
+                LOG.trace("CastCrew scanning for job '{}' is disabled", jobType);   
+            }
+        }
+        
+        return value;
     }
 }

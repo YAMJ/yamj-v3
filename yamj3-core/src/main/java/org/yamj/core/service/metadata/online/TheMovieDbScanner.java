@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.core.configuration.ConfigService;
+import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
@@ -57,7 +57,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner {
     @Autowired
     private OnlineScannerService onlineScannerService;
     @Autowired
-    private ConfigService configService;
+    private ConfigServiceWrapper configServiceWrapper;
     @Autowired
     private TheMovieDbApi tmdbApi;
 
@@ -79,7 +79,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner {
     public String getMovieId(VideoData videoData) {
         String tmdbID = videoData.getSourceDbId(SCANNER_ID);
         String imdbID = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
-        String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+        String defaultLanguage = configServiceWrapper.getProperty("themoviedb.language", "en");
         MovieDb moviedb = null;
 
 
@@ -127,9 +127,9 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner {
     @Override
     public String getMovieId(String title, int year) {
         MovieDb moviedb = null;
-        String defaultLanguage = configService.getProperty("themoviedb.language", "en");
-        boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
-        int searchMatch = configService.getIntProperty("themoviedb.searchMatch", 3);
+        String defaultLanguage = configServiceWrapper.getProperty("themoviedb.language", "en");
+        boolean includeAdult = configServiceWrapper.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
+        int searchMatch = configServiceWrapper.getIntProperty("themoviedb.searchMatch", 3);
 
         try {
             // Search using movie name
@@ -175,7 +175,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner {
 
     private ScanResult updateVideoData(VideoData videoData) {
         String tmdbID = videoData.getSourceDbId(SCANNER_ID);
-        String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+        String defaultLanguage = configServiceWrapper.getProperty("themoviedb.language", "en");
         MovieDb moviedb;
 
         if (StringUtils.isBlank(tmdbID)) {
@@ -259,48 +259,55 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner {
         try {
             CreditDTO credit;
             for (com.omertron.themoviedbapi.model.Person person : tmdbApi.getMovieCasts(Integer.parseInt(tmdbID)).getResults()) {
-                credit = new CreditDTO(SCANNER_ID);
-                credit.addPersonId(SCANNER_ID, String.valueOf(person.getId()));
-                credit.setName(person.getName());
-                credit.setRole(person.getCharacter());
-
-                if (person.getAka() != null && !person.getAka().isEmpty()) {
-                    credit.setRealName(person.getAka().get(0));
-                }
-
+                JobType jobType = null;
+                
                 if (person.getPersonType() == PersonType.CAST) {
-                    credit.setJobType(JobType.ACTOR);
+                    jobType = JobType.ACTOR;
                 } else if (person.getPersonType() == PersonType.CREW) {
                     if (person.getDepartment().equalsIgnoreCase("writing")) {
-                        credit.setJobType(JobType.WRITER);
+                        jobType = JobType.WRITER;
                     } else if (person.getDepartment().equalsIgnoreCase("directing")) {
-                        credit.setJobType(JobType.DIRECTOR);
+                        jobType = JobType.DIRECTOR;
                     } else if (person.getDepartment().equalsIgnoreCase("production")) {
-                        credit.setJobType(JobType.PRODUCER);
+                        jobType = JobType.PRODUCER;
                     } else if (person.getDepartment().equalsIgnoreCase("sound")) {
-                        credit.setJobType(JobType.SOUND);
+                        jobType = JobType.SOUND;
                     } else if (person.getDepartment().equalsIgnoreCase("camera")) {
-                        credit.setJobType(JobType.CAMERA);
+                        jobType = JobType.CAMERA;
                     } else if (person.getDepartment().equalsIgnoreCase("art")) {
-                        credit.setJobType(JobType.ART);
+                        jobType = JobType.ART;
                     } else if (person.getDepartment().equalsIgnoreCase("editing")) {
-                        credit.setJobType(JobType.EDITING);
+                        jobType = JobType.EDITING;
                     } else if (person.getDepartment().equalsIgnoreCase("costume & make-up")) {
-                        credit.setJobType(JobType.COSTUME_MAKEUP);
+                        jobType = JobType.COSTUME_MAKEUP;
                     } else if (person.getDepartment().equalsIgnoreCase("crew")) {
-                        credit.setJobType(JobType.CREW);
+                        jobType = JobType.CREW;
                     } else if (person.getDepartment().equalsIgnoreCase("visual effects")) {
-                        credit.setJobType(JobType.EFFECTS);
+                        jobType = JobType.EFFECTS;
                     } else if (person.getDepartment().equalsIgnoreCase("lighting")) {
-                        credit.setJobType(JobType.LIGHTING);
+                        jobType = JobType.LIGHTING;
                     } else {
                         LOG.debug("Adding unknown department '{}' for: '{}', person: '{}'", person.getDepartment(), videoData.getTitle(), person.getName());
                         LOG.trace("Person: {}", person.toString());
-                        credit.setJobType(JobType.UNKNOWN);
+                        jobType = JobType.UNKNOWN;
                     }
                 } else {
                     LOG.debug("Unknown job type: '{}', for: '{}', person: '{}'", person.getPersonType().toString(), videoData.getTitle(), person.getName());
                     LOG.trace("Person: {}", person.toString());
+                }
+
+                if (!this.configServiceWrapper.isCastScanEnabled(jobType)) {
+                    // scan not enabled for that job
+                    continue;
+                }
+                
+                credit = new CreditDTO(SCANNER_ID);
+                credit.addPersonId(SCANNER_ID, String.valueOf(person.getId()));
+                credit.setName(person.getName());
+                credit.setJobType(jobType);
+                credit.setRole(person.getCharacter());
+                if (person.getAka() != null && !person.getAka().isEmpty()) {
+                    credit.setRealName(person.getAka().get(0));
                 }
                 videoData.addCreditDTO(credit);
             }
@@ -334,7 +341,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner {
         com.omertron.themoviedbapi.model.Person closestPerson = null;
         int closestMatch = Integer.MAX_VALUE;
         boolean foundPerson = Boolean.FALSE;
-        boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
+        boolean includeAdult = configServiceWrapper.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
 
         try {
             TmdbResultsList<com.omertron.themoviedbapi.model.Person> results = tmdbApi.searchPeople(name, includeAdult, 0);

@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
+import org.yamj.core.database.model.type.JobType;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,7 +39,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.configuration.ConfigService;
+import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.metadata.online.ImdbScanner;
@@ -61,7 +63,7 @@ public final class InfoReader {
     private static final String SPLIT_GENRE = "(?<!-)/|,|\\|";  // caters for the case where "-/" is not wanted as part of the split
 
     @Autowired
-    private ConfigService configService;
+    private ConfigServiceWrapper configServiceWrapper;
     @Autowired
     private StagingService stagingService;
     @Autowired
@@ -311,49 +313,55 @@ public final class InfoReader {
         }
         
         // director and writers
-        if (!this.configService.getBooleanProperty("nfo.skip.crew", false)) {
-            parseDirectors(eCommon.getElementsByTagName("director"), dto);
+        if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.crew", false)) {
+            if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
+                parseDirectors(eCommon.getElementsByTagName("director"), dto);
+            }
             
-            List<Node> writerNodes = new ArrayList<Node>();
-            // get writers list
-            NodeList nlWriters = eCommon.getElementsByTagName("writer");
-            if (nlWriters != null && nlWriters.getLength() > 0) {
-                for (int looper = 0; looper < nlWriters.getLength(); looper++) {
-                    Node node = nlWriters.item(looper);
-                    if (node.getNodeType() == Node.ELEMENT_NODE) {
-                        writerNodes.add(node);
+            if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
+                List<Node> writerNodes = new ArrayList<Node>();
+                // get writers list
+                NodeList nlWriters = eCommon.getElementsByTagName("writer");
+                if (nlWriters != null && nlWriters.getLength() > 0) {
+                    for (int looper = 0; looper < nlWriters.getLength(); looper++) {
+                        Node node = nlWriters.item(looper);
+                        if (node.getNodeType() == Node.ELEMENT_NODE) {
+                            writerNodes.add(node);
+                        }
                     }
                 }
-            }
-            // get credits list (old style)
-            nlWriters = eCommon.getElementsByTagName("credits");
-            if (nlWriters != null && nlWriters.getLength() > 0) {
-                for (int looper = 0; looper < nlWriters.getLength(); looper++) {
-                    Node node = nlWriters.item(looper);
-                    if (node.getNodeType() == Node.ELEMENT_NODE) {
-                        writerNodes.add(node);
+                // get credits list (old style)
+                nlWriters = eCommon.getElementsByTagName("credits");
+                if (nlWriters != null && nlWriters.getLength() > 0) {
+                    for (int looper = 0; looper < nlWriters.getLength(); looper++) {
+                        Node node = nlWriters.item(looper);
+                        if (node.getNodeType() == Node.ELEMENT_NODE) {
+                            writerNodes.add(node);
+                        }
                     }
                 }
+                // parse writers
+                parseWriters(writerNodes, dto);
             }
-            // parse writers
-            parseWriters(writerNodes, dto);
         }
 
         // parse actors
-        if (!this.configService.getBooleanProperty("nfo.skip.cast", false)) {
+        if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.cast", false)
+            && this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) 
+        {
             parseActors(eCommon.getElementsByTagName("actor"), dto);
         }
         
         // parse artwork URLs
-        if (!this.configService.getBooleanProperty("nfo.skip.posterURL", true)) {
+        if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.posterURL", true)) {
             dto.addPosterURL(DOMHelper.getValueFromElement(eCommon, "thumb"));
         }
-        if (!this.configService.getBooleanProperty("nfo.skip.fanartURL", true)) {
+        if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.fanartURL", true)) {
             dto.addFanartURL(DOMHelper.getValueFromElement(eCommon, "fanart"));
         }
 
         // parse trailer
-        if (!this.configService.getBooleanProperty("nfo.skip.trailerURL", false)) {
+        if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.trailerURL", false)) {
             parseTrailers(eCommon.getElementsByTagName("trailer"), dto);
         }
         
@@ -445,7 +453,7 @@ public final class InfoReader {
                 prefRuntime = rtSingle;
             }
 
-            String preferredCountry = this.configService.getProperty("yamj3.scan.preferredCountry", "USA");
+            String preferredCountry = this.configServiceWrapper.getProperty("yamj3.scan.preferredCountry", "USA");
             // Check to see if we have our preferred country in the string
             if (StringUtils.containsIgnoreCase(rtSingle, preferredCountry)) {
                 // Lets get the country runtime
@@ -462,7 +470,7 @@ public final class InfoReader {
      * @param movie
      */
     private void parseCertification(Element eCommon, InfoDTO dto) {
-        boolean certFromMPAA = this.configService.getBooleanProperty("yamj3.scan.certificationFromMPAA", false);
+        boolean certFromMPAA = this.configServiceWrapper.getBooleanProperty("yamj3.scan.certificationFromMPAA", false);
         
         String tempCert;
         if (certFromMPAA) {
@@ -475,7 +483,7 @@ public final class InfoReader {
             tempCert = DOMHelper.getValueFromElement(eCommon, "certification");
             if (StringUtils.isNotBlank(tempCert)) {
                 String certCountry = null;
-                String preferredCountry = this.configService.getProperty("yamj3.scan.preferredCountry", "USA");
+                String preferredCountry = this.configServiceWrapper.getProperty("yamj3.scan.preferredCountry", "USA");
                 int countryPos = tempCert.lastIndexOf(preferredCountry);
                 if (countryPos >= 0) {
                     // We've found the country, so extract just that tag

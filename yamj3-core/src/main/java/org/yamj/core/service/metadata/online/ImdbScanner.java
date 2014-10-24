@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.tools.StringTools;
-import org.yamj.core.configuration.ConfigService;
+import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
@@ -75,7 +75,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     @Autowired
     private OnlineScannerService onlineScannerService;
     @Autowired
-    private ConfigService configService;
+    private ConfigServiceWrapper configServiceWrapper;
 
     @Override
     public String getScannerName() {
@@ -460,7 +460,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                         releaseInfoXML = httpClient.requestContent(getImdbUrl(imdbId, "releaseinfo"), charset);
                     }
     
-                    String preferredCountry = this.configService.getProperty("yamj3.scan.preferredCountry", "USA");
+                    String preferredCountry = this.configServiceWrapper.getProperty("yamj3.scan.preferredCountry", "USA");
                     Pattern pRelease = Pattern.compile("(?:.*?)\\Q" + preferredCountry + "\\E(?:.*?)\\Qrelease_date\">\\E(.*?)(?:<.*?>)(.*?)(?:</a>.*)");
                     Matcher mRelease = pRelease.matcher(releaseInfoXML);
         
@@ -506,13 +506,13 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
 
         // TITLE for preferred country from AKAS
-        boolean akaScrapeTitle = configService.getBooleanProperty("imdb.aka.scrape.title", Boolean.FALSE);
+        boolean akaScrapeTitle = configServiceWrapper.getBooleanProperty("imdb.aka.scrape.title", Boolean.FALSE);
         if (akaScrapeTitle && OverrideTools.checkOverwriteTitle(metadata, SCANNER_ID)) {
             try {
-                List<String> akaIgnoreVersions = configService.getPropertyAsList("imdb.aka.ignore.versions", "");
+                List<String> akaIgnoreVersions = configServiceWrapper.getPropertyAsList("imdb.aka.ignore.versions", "");
     
-                String preferredCountry = this.configService.getProperty("yamj3.scan.preferredCountry", "USA");
-                String fallbacks = configService.getProperty("imdb.aka.fallback.countries", "");
+                String preferredCountry = this.configServiceWrapper.getProperty("yamj3.scan.preferredCountry", "USA");
+                String fallbacks = configServiceWrapper.getProperty("imdb.aka.fallback.countries", "");
                 List<String> akaMatchingCountries;
                 if (StringUtils.isBlank(fallbacks)) {
                     akaMatchingCountries = Collections.singletonList(preferredCountry);
@@ -736,7 +736,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 }
             }
 
-            String preferredCountry = this.configService.getProperty("yamj3.scan.preferredCountry", "USA");
+            String preferredCountry = this.configServiceWrapper.getProperty("yamj3.scan.preferredCountry", "USA");
             String certification = getPreferredValue(HTMLTools.extractTags(xml, HTML_H5_START + "Certification" + HTML_H5_END, HTML_DIV_END,
                     "<a href=\"/search/title?certificates=", HTML_A_END), true, preferredCountry);
             videoData.addCertificationInfo(preferredCountry, certification);
@@ -832,86 +832,91 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             String xml = httpClient.requestContent(getImdbUrl(imdbId, "fullcredits"), charset);
             
             // DIRECTORS
-            for (String directorMatch : "Directed by|Director".split(HTML_SLASH_PIPE)) {
-                if (xml.indexOf(HTML_GT + directorMatch + "&nbsp;</h4>") > 0) {
-                    for (String member : HTMLTools.extractTags(xml, HTML_GT + directorMatch + "&nbsp;</h4>", HTML_TABLE_END, HTML_A_START, HTML_A_END, Boolean.FALSE)) {
-                        int beginIndex = member.indexOf("href=\"/name/");
-                        if (beginIndex > -1) {
-                            String personId = member.substring(beginIndex + 12, member.indexOf("/", beginIndex + 12));
-                            String name = StringUtils.trimToEmpty(member.substring(member.indexOf(HTML_GT, beginIndex) + 1));
-                            
-                            // add director, but check that there are no invalid characters in the name which may indicate a bad scrape
-                            if (StringUtils.containsNone(name, "<>:/")) {
-                                CreditDTO creditDTO = new CreditDTO(SCANNER_ID);
-                                creditDTO.setJobType(JobType.DIRECTOR);
-                                creditDTO.setName(name);
-                                creditDTO.addPersonId(SCANNER_ID, personId);
-                                videoData.addCreditDTO(creditDTO);
-                            }
-                        }
-                    }
+            if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
+                for (String directorMatch : "Directed by|Director".split(HTML_SLASH_PIPE)) {
+                    parseCredits(videoData, JobType.DIRECTOR, xml, directorMatch + "&nbsp;</h4>");            
                 }
             }
-
+            
             // WRITERS
-            for (String writerMatch : "Writing Credits|Writer".split(HTML_SLASH_PIPE)) {
-                if (StringUtils.indexOfIgnoreCase(xml, HTML_GT + writerMatch) > 0) {
-                    for (String member : HTMLTools.extractTags(xml, HTML_GT + writerMatch, HTML_TABLE_END, HTML_A_START, HTML_A_END, Boolean.FALSE)) {
-                        int beginIndex = member.indexOf("href=\"/name/");
-                        if (beginIndex > -1) {
-                            String personId = member.substring(beginIndex + 12, member.indexOf("/", beginIndex + 12));
-                            String name = StringUtils.trimToEmpty(member.substring(member.indexOf(HTML_GT, beginIndex) + 1));
-                            if (name.indexOf("more credit") == -1) {
-                                CreditDTO creditDTO = new CreditDTO(SCANNER_ID);
-                                creditDTO.setJobType(JobType.WRITER);
-                                creditDTO.setName(name);
-                                creditDTO.addPersonId(SCANNER_ID, personId);
-                                videoData.addCreditDTO(creditDTO);
-                            }
+            if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
+                for (String writerMatch : "Writing Credits|Writer".split(HTML_SLASH_PIPE)) {
+                    parseCredits(videoData, JobType.WRITER, xml, writerMatch);
+                }
+            }
+            
+            // ACTORS 
+            if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+                boolean skipFaceless = configServiceWrapper.getBooleanProperty("imdb.skip.faceless", Boolean.FALSE);
+                for (String actorBlock : HTMLTools.extractTags(xml, "<table class=\"cast_list\">", HTML_TABLE_END, "<td class=\"primary_photo\"", "</tr>")) {
+                    // skip faceless persons ('loadlate' is present for actors with photos)
+                    if (skipFaceless && actorBlock.indexOf("loadlate") == -1) {
+                        continue;
+                    }
+    
+                    int nmPosition = actorBlock.indexOf("/nm");
+                    String personId = actorBlock.substring(nmPosition + 1, actorBlock.indexOf("/", nmPosition + 1));
+                    String name = HTMLTools.stripTags(HTMLTools.extractTag(actorBlock, "itemprop=\"name\">", HTML_SPAN_END));
+                    String character = HTMLTools.stripTags(HTMLTools.extractTag(actorBlock, "<td class=\"character\">", HTML_TD_END));
+    
+                    if (StringUtils.isNotBlank(name) && StringUtils.indexOf(character, "uncredited") == -1) {
+                        // fix character (as = alternate name)
+                        int idx = StringUtils.indexOf(character, "(as ");
+                        if (idx > 0) {
+                            character = StringUtils.substring(character, 0, idx);
                         }
+                        // fix character (double roles)
+                        idx = StringUtils.indexOf(character, "/");
+                        if (idx > 0) {
+                            List<String> characters = StringTools.splitList(character, "/");
+                            character = StringUtils.join(characters.toArray(), " / ");
+                        }
+                        
+                        CreditDTO creditDTO = new CreditDTO(SCANNER_ID);
+                        creditDTO.setJobType(JobType.ACTOR);
+                        creditDTO.setName(name);
+                        creditDTO.setRole(character);
+                        creditDTO.addPersonId(SCANNER_ID, personId);
+                        videoData.addCreditDTO(creditDTO);
                     }
                 }
             }
             
-            // CAST 
-            boolean skipFaceless = configService.getBooleanProperty("imdb.skip.faceless", Boolean.FALSE);
-            for (String actorBlock : HTMLTools.extractTags(xml, "<table class=\"cast_list\">", HTML_TABLE_END, "<td class=\"primary_photo\"", "</tr>")) {
-                // skip faceless persons ('loadlate' is present for actors with photos)
-                if (skipFaceless && actorBlock.indexOf("loadlate") == -1) {
-                    continue;
-                }
-
-                int nmPosition = actorBlock.indexOf("/nm");
-                String personId = actorBlock.substring(nmPosition + 1, actorBlock.indexOf("/", nmPosition + 1));
-                String name = HTMLTools.stripTags(HTMLTools.extractTag(actorBlock, "itemprop=\"name\">", HTML_SPAN_END));
-                String character = HTMLTools.stripTags(HTMLTools.extractTag(actorBlock, "<td class=\"character\">", HTML_TD_END));
-
-                if (StringUtils.isNotBlank(name) && StringUtils.indexOf(character, "uncredited") == -1) {
-                    // fix character (as = alternate name)
-                    int idx = StringUtils.indexOf(character, "(as ");
-                    if (idx > 0) {
-                        character = StringUtils.substring(character, 0, idx);
-                    }
-                    // fix character (double roles)
-                    idx = StringUtils.indexOf(character, "/");
-                    if (idx > 0) {
-                        List<String> characters = StringTools.splitList(character, "/");
-                        character = StringUtils.join(characters.toArray(), " / ");
-                    }
-                    
-                    CreditDTO creditDTO = new CreditDTO(SCANNER_ID);
-                    creditDTO.setJobType(JobType.ACTOR);
-                    creditDTO.setName(name);
-                    creditDTO.setRole(character);
-                    creditDTO.addPersonId(SCANNER_ID, personId);
-                    videoData.addCreditDTO(creditDTO);
+            // CAMERA
+            if (this.configServiceWrapper.isCastScanEnabled(JobType.CAMERA)) {
+                for (String producerMatch : "Cinematography by".split(HTML_SLASH_PIPE)) {
+                    parseCredits(videoData, JobType.CAMERA, xml, producerMatch);
                 }
             }
-
+            
+            // PRODUCERS
+            if (this.configServiceWrapper.isCastScanEnabled(JobType.PRODUCER)) {
+                for (String producerMatch : "Produced by".split(HTML_SLASH_PIPE)) {
+                    parseCredits(videoData, JobType.PRODUCER, xml, producerMatch);
+                }
+            }
         } catch (Exception ex) {
             LOG.warn("Failed to scan cast crew: " + imdbId, ex);
         }
-
+    }
+    
+    private static void parseCredits(VideoData videoData, JobType jobType, String xml, String creditsMatch) {
+        if (StringUtils.indexOfIgnoreCase(xml, HTML_GT + creditsMatch) > 0) {
+            for (String member : HTMLTools.extractTags(xml, HTML_GT + creditsMatch, HTML_TABLE_END, HTML_A_START, HTML_A_END, Boolean.FALSE)) {
+                int beginIndex = member.indexOf("href=\"/name/");
+                if (beginIndex > -1) {
+                    String personId = member.substring(beginIndex + 12, member.indexOf("/", beginIndex + 12));
+                    String name = StringUtils.trimToEmpty(member.substring(member.indexOf(HTML_GT, beginIndex) + 1));
+                    if (name.indexOf("more credit") == -1 && StringUtils.containsNone(name, "<>:/")) {
+                        CreditDTO creditDTO = new CreditDTO(SCANNER_ID);
+                        creditDTO.setJobType(jobType);
+                        creditDTO.setName(name);
+                        creditDTO.addPersonId(SCANNER_ID, personId);
+                        videoData.addCreditDTO(creditDTO);
+                    }
+                }
+            }
+        }
     }
     
     @Override

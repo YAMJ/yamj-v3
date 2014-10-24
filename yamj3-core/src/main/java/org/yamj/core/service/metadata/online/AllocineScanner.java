@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.core.configuration.ConfigService;
+import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
@@ -63,7 +63,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
     @Autowired
     private OnlineScannerService onlineScannerService;
     @Autowired
-    private ConfigService configService; 
+    private ConfigServiceWrapper configServiceWrapper; 
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
 
@@ -94,7 +94,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         // we also get IMDb id for extra infos
         String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
         if (StringUtils.isBlank(imdbId) && StringUtils.isNotBlank(videoData.getTitleOriginal())) {
-            boolean searchImdb = configService.getBooleanProperty("allocine.search.imdb", false);
+            boolean searchImdb = configServiceWrapper.getBooleanProperty("allocine.search.imdb", false);
             if (searchImdb) {
                 imdbId = imdbSearchEngine.getImdbId(videoData.getTitleOriginal(), videoData.getYear(), false);
                 if (StringUtils.isNotBlank(imdbId)) {
@@ -193,31 +193,41 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         // allocine rating
         videoData.addRating(SCANNER_ID, movieInfos.getUserRating());
 
-        for (MoviePerson person : movieInfos.getDirectors()) {
-            CreditDTO creditDTO = new CreditDTO(SCANNER_ID, JobType.DIRECTOR, person.getName());
-            if (person.getCode() > 0 ) {
-                creditDTO.addPersonId(SCANNER_ID, String.valueOf(person.getCode()));
+        // DIRECTORS
+        if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
+            for (MoviePerson person : movieInfos.getDirectors()) {
+                videoData.addCreditDTO(createCredit(person, JobType.DIRECTOR));
             }
-            creditDTO.addPhotoURL(person.getPhotoURL(), SCANNER_ID);
-            videoData.addCreditDTO(creditDTO);
         }
         
-        for (MoviePerson person : movieInfos.getWriters()) {
-            CreditDTO creditDTO = new CreditDTO(SCANNER_ID, JobType.WRITER, person.getName());
-            if (person.getCode() > 0 ) {
-                creditDTO.addPersonId(SCANNER_ID, String.valueOf(person.getCode()));
+        // WRITERS
+        if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
+            for (MoviePerson person : movieInfos.getWriters()) {
+                videoData.addCreditDTO(createCredit(person, JobType.WRITER));
             }
-            creditDTO.addPhotoURL(person.getPhotoURL(), SCANNER_ID);
-            videoData.addCreditDTO(creditDTO);
         }
-
-        for (MoviePerson person : movieInfos.getActors()) {
-            CreditDTO creditDTO = new CreditDTO(SCANNER_ID, JobType.ACTOR, person.getName(), person.getRole());
-            if (person.getCode() > 0) {
-                creditDTO.addPersonId(SCANNER_ID, String.valueOf(person.getCode()));
+        
+        // ACTORS
+        if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+            for (MoviePerson person : movieInfos.getActors()) {
+                CreditDTO credit = createCredit(person, JobType.ACTOR);
+                credit.setRole(person.getRole());
+                videoData.addCreditDTO(credit);
             }
-            creditDTO.addPhotoURL(person.getPhotoURL(), SCANNER_ID);
-            videoData.addCreditDTO(creditDTO);
+        }
+        
+        // CAMERA    
+        if (this.configServiceWrapper.isCastScanEnabled(JobType.CAMERA)) {
+            for (MoviePerson person : movieInfos.getCamera()) {
+                videoData.addCreditDTO(createCredit(person, JobType.CAMERA));
+            }
+        }
+        
+        // PRODUCERS        
+        if (this.configServiceWrapper.isCastScanEnabled(JobType.PRODUCER)) {
+            for (MoviePerson person : movieInfos.getProducers()) {
+                videoData.addCreditDTO(createCredit(person, JobType.PRODUCER));
+            }
         }
         
         // add poster URLs
@@ -241,7 +251,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         // we also get IMDb id for extra infos
         String imdbId = series.getSourceDbId(ImdbScanner.SCANNER_ID);
         if (StringUtils.isBlank(imdbId) && StringUtils.isNotBlank(series.getTitleOriginal())) {
-            boolean searchImdb = configService.getBooleanProperty("allocine.search.imdb", false);
+            boolean searchImdb = configServiceWrapper.getBooleanProperty("allocine.search.imdb", false);
             if (searchImdb) {
                 imdbId = imdbSearchEngine.getImdbId(series.getTitleOriginal(), series.getYear(), true);
                 if (StringUtils.isNotBlank(imdbId)) {
@@ -493,43 +503,56 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
                 }
                 
                 if (member.isActor()) {
-                    JobType jobType;
-                    if (member.isLeadActor()) {
-                        jobType = JobType.ACTOR;
-                    } else {
-                        jobType = JobType.GUEST_STAR;
+                    if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+                        CreditDTO credit;
+                        if (member.isLeadActor()) {
+                            credit = createCredit(member, JobType.ACTOR);
+                        } else {
+                            credit = createCredit(member, JobType.GUEST_STAR);
+                        }
+                        credit.setRole(member.getRole());
+                        result.add(credit);
                     }
-                    CreditDTO credit = new CreditDTO(SCANNER_ID, jobType, member.getShortPerson().getName());
-                    credit.setRole(member.getRole());
-                    if (member.getShortPerson().getCode() > 0) {
-                        credit.addPersonId(SCANNER_ID, String.valueOf(member.getShortPerson().getCode()));
-                    }
-                    if (member.getPicture() != null) {
-                        credit.addPhotoURL(member.getPicture().getHref(), SCANNER_ID);
-                    }
-                    result.add(credit);
                 } else if (member.isDirector()) {
-                    CreditDTO credit = new CreditDTO(SCANNER_ID, JobType.DIRECTOR, member.getShortPerson().getName());
-                    if (member.getShortPerson().getCode() > 0) {
-                        credit.addPersonId(SCANNER_ID, String.valueOf(member.getShortPerson().getCode()));
+                    if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
+                        result.add(createCredit(member, JobType.DIRECTOR));
                     }
-                    if (member.getPicture() != null) {
-                        credit.addPhotoURL(member.getPicture().getHref(), SCANNER_ID);
-                    }
-                    result.add(credit);
                 } else if (member.isWriter()) {
-                    CreditDTO credit = new CreditDTO(SCANNER_ID, JobType.WRITER, member.getShortPerson().getName());
-                    if (member.getShortPerson().getCode() > 0) {
-                        credit.addPersonId(SCANNER_ID, String.valueOf(member.getShortPerson().getCode()));
+                    if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
+                        result.add(createCredit(member, JobType.WRITER));
                     }
-                    if (member.getPicture() != null) {
-                        credit.addPhotoURL(member.getPicture().getHref(), SCANNER_ID);
+                } else if (member.isCamera()) {
+                    if (this.configServiceWrapper.isCastScanEnabled(JobType.CAMERA)) {
+                        result.add(createCredit(member, JobType.CAMERA));
                     }
-                    result.add(credit);
+                } else if (member.isProducer()) {
+                    if (this.configServiceWrapper.isCastScanEnabled(JobType.PRODUCER)) {
+                        result.add(createCredit(member, JobType.PRODUCER));
+                    }
                 }
             }
         }
         return result;
+    }
+    
+    private static CreditDTO createCredit(CastMember member, JobType jobType) {
+        CreditDTO credit = new CreditDTO(SCANNER_ID, jobType, member.getShortPerson().getName());
+        if (member.getShortPerson().getCode() > 0) {
+            credit.addPersonId(SCANNER_ID, String.valueOf(member.getShortPerson().getCode()));
+        }
+        if (member.getPicture() != null) {
+            credit.addPhotoURL(member.getPicture().getHref(), SCANNER_ID);
+        }
+        return credit;
+    }
+
+    private static CreditDTO createCredit(MoviePerson person, JobType jobType) {
+        CreditDTO credit = new CreditDTO(SCANNER_ID, jobType, person.getName());
+        if (person.getCode() > 0) {
+            credit.addPersonId(SCANNER_ID, String.valueOf(person.getCode()));
+        }
+        credit.addPhotoURL(person.getPhotoURL(), SCANNER_ID);
+        return credit;
     }
 
     @Override
@@ -581,7 +604,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
 
     @Override
     public boolean isFilmographyScanEnabled() {
-        return configService.getBooleanProperty("allocine.person.filmography", false);
+        return configServiceWrapper.getBooleanProperty("allocine.person.filmography", false);
     }
 
     @Override
@@ -614,6 +637,10 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
                 filmo.setJobType(JobType.DIRECTOR);
             } else if (participance.isWriter()) {
                 filmo.setJobType(JobType.WRITER);
+            } else if (participance.isCamera()) {
+                filmo.setJobType(JobType.CAMERA);
+            } else if (participance.isProducer()) {
+                filmo.setJobType(JobType.PRODUCER);
             }
 
             if (participance.isTvShow()) {
