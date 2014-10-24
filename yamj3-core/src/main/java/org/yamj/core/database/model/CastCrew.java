@@ -46,6 +46,7 @@ public class CastCrew extends AbstractIdentifiable implements Serializable {
     private Person person;
 
     @NaturalId
+    @Index(name = "IX_CASTCREW_VIDEOJOB")
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_CASTCREW_VIDEODATA")
     @Fetch(FetchMode.SELECT)
@@ -53,6 +54,7 @@ public class CastCrew extends AbstractIdentifiable implements Serializable {
     private VideoData videoData;
 
     @NaturalId
+    @Index(name = "IX_CASTCREW_VIDEOJOB")
     @Type(type = "jobType")
     @Column(name = "job", nullable = false, length = 30)
     private JobType jobType;
