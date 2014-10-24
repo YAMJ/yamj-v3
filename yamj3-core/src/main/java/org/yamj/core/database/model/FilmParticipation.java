@@ -23,6 +23,7 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -33,7 +34,7 @@ import org.yamj.core.database.model.type.ParticipationType;
 
 @Entity
 @Table(name = "participation",
-    uniqueConstraints = @UniqueConstraint(name = "UIX_PARTICIPATION_NATURALID", columnNames = {"person_id", "sourcedb", "sourcedb_id"})
+    uniqueConstraints = @UniqueConstraint(name = "UIX_PARTICIPATION_NATURALID", columnNames = {"person_id", "sourcedb", "sourcedb_id", "job"})
 )
 public class FilmParticipation extends AbstractAuditable implements Serializable {
 
@@ -54,6 +55,7 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     @Column(name = "sourcedb_id", nullable = false, length = 40)
     private String sourceDbId;
 
+    @NaturalId(mutable = true)
     @Type(type = "jobType")
     @Column(name = "job", nullable = false, length = 30)
     private JobType jobType;
@@ -81,9 +83,13 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     @Column(name = "year_end", nullable = false)
     private int yearEnd = -1;
 
+    @Temporal(value = TemporalType.DATE)
     @Column(name = "release_date")
-    private String releaseDate;
-    
+    private Date releaseDate;
+
+    @Column(name = "release_state", length = 255)
+    private String releaseState;
+
     // GETTER and SETTER
     
     public String getSourceDb() {
@@ -174,18 +180,25 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
         this.yearEnd = yearEnd;
     }
 
-    public String getReleaseDate() {
+    public Date getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(String releaseDate) {
+    public void setReleaseDate(Date releaseDate) {
         this.releaseDate = releaseDate;
+    }
+    
+    public String getReleaseState() {
+        return releaseState;
+    }
+
+    public void setReleaseState(String releaseState) {
+        this.releaseState = releaseState;
     }
     
     // TRANSIENT METHODS
 
     public void merge(FilmParticipation newFilmo) {
-        this.setJobType(newFilmo.getJobType());
         this.setRole(newFilmo.getRole());
         this.setParticipationType(newFilmo.getParticipationType());
         this.setYear(newFilmo.getYear());
@@ -194,6 +207,7 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
         this.setTitleOriginal(newFilmo.getTitleOriginal());
         this.setDescription(newFilmo.getDescription());
         this.setReleaseDate(newFilmo.getReleaseDate());
+        this.setReleaseState(newFilmo.getReleaseState());
     }
     
     // EQUALITY CHECKS
@@ -204,6 +218,7 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
         int result = 1;
         result = prime * result + (this.sourceDb == null ? 0 : this.sourceDb.hashCode());
         result = prime * result + (this.sourceDbId == null ? 0 : this.sourceDbId.hashCode());
+        result = prime * result + (this.jobType == null ? 0 : this.jobType.hashCode());
         return result;
     }
 
@@ -223,6 +238,9 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
             return false;
         }
         if (!StringUtils.equalsIgnoreCase(this.sourceDbId, castOther.sourceDbId)) {
+            return false;
+        }
+        if (this.jobType != castOther.jobType) {
             return false;
         }
         return true;

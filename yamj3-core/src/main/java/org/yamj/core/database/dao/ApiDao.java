@@ -540,8 +540,8 @@ public class ApiDao extends HibernateDao {
     private List<ApiFilmographyDTO> getPersonFilmography(long id) {
         StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("SELECT p.participation_type as typeString, p.job as job, p.role as role,");
-        sbSQL.append("p.title as title, p.title_original as originalTitle, p.year as year,");
-        sbSQL.append("p.year_end as yearEnd, p.release_date as releaseDate, p.description as description, ");
+        sbSQL.append("p.title as title, p.title_original as originalTitle, p.year as year,p.year_end as yearEnd,");
+        sbSQL.append("p.release_date as releaseDate, p.release_state as releaseState,p.description as description, ");
         sbSQL.append("v.videodata_id as videoDataId, s.series_id as seriesId ");
         sbSQL.append("FROM participation p ");
         sbSQL.append("LEFT OUTER JOIN videodata_ids v ON v.sourcedb=p.sourcedb and v.sourcedb_id=p.sourcedb_id ");
@@ -558,7 +558,8 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("originalTitle", StringType.INSTANCE);
         sqlScalars.addScalar("year", IntegerType.INSTANCE);
         sqlScalars.addScalar("yearEnd", IntegerType.INSTANCE);
-        sqlScalars.addScalar("releaseDate", StringType.INSTANCE);
+        sqlScalars.addScalar("releaseDate", DateType.INSTANCE);
+        sqlScalars.addScalar("releaseState", StringType.INSTANCE);
         sqlScalars.addScalar("description", StringType.INSTANCE);
         sqlScalars.addScalar("videoDataId", LongType.INSTANCE);
         sqlScalars.addScalar("seriesId", LongType.INSTANCE);

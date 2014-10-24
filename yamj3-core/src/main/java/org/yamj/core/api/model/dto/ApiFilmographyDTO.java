@@ -22,8 +22,8 @@
  */
 package org.yamj.core.api.model.dto;
 
+import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
-
 import org.yamj.core.database.model.type.ParticipationType;
 
 public class ApiFilmographyDTO extends AbstractApiDTO {
@@ -35,7 +35,8 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
     private String originalTitle = "";
     private Integer year;
     private Integer yearEnd;
-    private String releaseDate = "";
+    private Date releaseDate;
+    private String releaseState = "";
     private String description = "";
     private Long videoDataId = -1L;
     private Long seriesId = -1L;
@@ -112,15 +113,23 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
         this.yearEnd = yearEnd;
     }
 
-    public String getReleaseDate() {
+    public Date getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(String releaseDate) {
-        if (StringUtils.isBlank(releaseDate)) {
-            this.releaseDate = "";
+    public void setReleaseDate(Date releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public String getReleaseState() {
+        return releaseState;
+    }
+
+    public void setReleaseState(String releaseState) {
+        if (StringUtils.isBlank(releaseState)) {
+            this.releaseState = "";
         } else {
-            this.releaseDate = releaseDate;
+            this.releaseState = releaseState;
         }
     }
 

@@ -250,4 +250,11 @@ public final class MetadataTools {
             return -1;
         }
     }
+    
+    public static void main(String[] args) {
+        System.err.println(parseToDate("24.10.2014"));
+        System.err.println(parseToDate("2014-10-23"));
+        System.err.println(parseToDate("2013"));
+        System.err.println(parseToDate("2013-12"));
+    }
 }

@@ -299,14 +299,9 @@ public class MetadataStorageService {
         }
         
         // delete old participations
-        for (FilmParticipation filmo : deletions) {
-            person.getFilmography().remove(filmo);
-        }
-        
+        person.getFilmography().removeAll(deletions);
         // store new participations
-        for (FilmParticipation filmo : person.getNewFilmography()) {
-            person.getFilmography().add(filmo);
-        }
+        person.getFilmography().addAll(person.getNewFilmography());
     }
 
     @Transactional

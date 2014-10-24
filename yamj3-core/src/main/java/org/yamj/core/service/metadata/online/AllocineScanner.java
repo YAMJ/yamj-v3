@@ -632,7 +632,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
             
             if (participance.isActor()) {
                 filmo.setJobType(JobType.ACTOR);
-                filmo.setRole(participance.getRole());
+                filmo.setRole(StringUtils.trimToNull(participance.getRole()));
             } else if (participance.isDirector()) {
                 filmo.setJobType(JobType.DIRECTOR);
             } else if (participance.isWriter()) {
@@ -653,9 +653,10 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
             }
             
             filmo.setTitle(participance.getTitle());
-            filmo.setTitleOriginal(participance.getOriginalTitle());
-            filmo.setDescription(participance.getSynopsisShort());
-            filmo.setReleaseDate(participance.getReleaseDate());
+            filmo.setTitleOriginal(StringUtils.trimToNull(participance.getOriginalTitle()));
+            filmo.setDescription(StringUtils.trimToNull(participance.getSynopsisShort()));
+            filmo.setReleaseDate(MetadataTools.parseToDate(participance.getReleaseDate()));
+            filmo.setReleaseState(StringUtils.trimToNull(participance.getReleaseState()));
             newFilmography.add(filmo);
         }
         person.setNewFilmography(newFilmography);
