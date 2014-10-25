@@ -350,6 +350,11 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", '-1' AS episode");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "sea"));
         sbSQL.append(" FROM season sea");
+        // Add genre tables for include and exclude
+        if (includes.containsKey(GENRE) || excludes.containsKey(GENRE)) {
+            sbSQL.append(", series_genres sg, genre g");
+        }
+        
         sbSQL.append(SQL_WHERE_1_EQ_1); // To make it easier to add the optional include and excludes
         if (options.getId() > 0L) {
             sbSQL.append(" AND sea.id=").append(options.getId());
@@ -363,6 +368,19 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" AND sea.publication_year!=").append(includes.get(YEAR));
         }
 
+        // Add joins for genres
+        if (includes.containsKey(GENRE) || excludes.containsKey(GENRE)) {
+            sbSQL.append(" AND sea.series_id=sg.series_id");
+            sbSQL.append(" AND sg.genre_id=g.id");
+            sbSQL.append(" AND g.name='");
+            if (includes.containsKey(GENRE)) {
+                sbSQL.append(includes.get(GENRE));
+            } else {
+                sbSQL.append(excludes.get(GENRE));
+            }
+            sbSQL.append("'");
+        }
+        
         // Add the search string, this will be empty if there is no search required
         sbSQL.append(options.getSearchString(false));
 
