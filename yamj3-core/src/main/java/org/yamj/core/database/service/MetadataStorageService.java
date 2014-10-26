@@ -272,9 +272,14 @@ public class MetadataStorageService {
         // update entity
         metadataDao.updateEntity(person);
         
+        if (!StatusType.DONE.equals(person.getFilmographyStatus())) {
+            // filmography must have been scanned
+            return;
+        }
+        
         // NOTE: participations are stored by cascade
         
-        // holds the participatiosn to delete
+        // holds the participations to delete
         Set<FilmParticipation> deletions = new HashSet<FilmParticipation>();
         
         for (FilmParticipation filmo : person.getFilmography()) {

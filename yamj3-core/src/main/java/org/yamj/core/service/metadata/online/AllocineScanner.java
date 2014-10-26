@@ -609,17 +609,14 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
 
     @Override
     public ScanResult scanFilmography(Person person) {
-        // NOTE: no scanning for ID; must be present
-        String allocineId = person.getSourceDbId(SCANNER_ID);
-        
-        if (StringUtils.isBlank(allocineId)) {
-            LOG.debug("Allocine id not available '{}'", person.getName());
+        String id = getPersonId(person);
+        if (StringUtils.isBlank(id)) {
             return ScanResult.MISSING_ID;
         }
 
-        FilmographyInfos filmographyInfos = this.allocineApiWrapper.getFilmographyInfos(allocineId);
+        FilmographyInfos filmographyInfos = this.allocineApiWrapper.getFilmographyInfos(id);
         if (filmographyInfos == null || filmographyInfos.isNotValid()) {
-            LOG.error("Can't find filmography for person with id {}", allocineId);
+            LOG.error("Can't find filmography for person '{}' with id {}", person.getName(), id);
             return ScanResult.ERROR;
         }
     

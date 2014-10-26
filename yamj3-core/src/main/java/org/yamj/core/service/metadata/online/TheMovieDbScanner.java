@@ -22,12 +22,13 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import java.util.HashSet;
+import java.util.Set;
+import org.yamj.core.database.model.FilmParticipation;
+import org.yamj.core.database.model.type.ParticipationType;
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
-import com.omertron.themoviedbapi.model.MovieDb;
-import com.omertron.themoviedbapi.model.PersonType;
-import com.omertron.themoviedbapi.model.ProductionCompany;
-import com.omertron.themoviedbapi.model.ProductionCountry;
+import com.omertron.themoviedbapi.model.*;
 import com.omertron.themoviedbapi.results.TmdbResultsList;
 import java.util.*;
 import javax.annotation.PostConstruct;
@@ -47,7 +48,7 @@ import org.yamj.core.service.metadata.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 
 @Service("tmdbScanner")
-public class TheMovieDbScanner implements IMovieScanner, IPersonScanner {
+public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
 
     public static final String SCANNER_ID = "tmdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbScanner.class);
@@ -259,43 +260,7 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner {
         try {
             CreditDTO credit;
             for (com.omertron.themoviedbapi.model.Person person : tmdbApi.getMovieCasts(Integer.parseInt(tmdbID)).getResults()) {
-                JobType jobType = null;
-                
-                if (person.getPersonType() == PersonType.CAST) {
-                    jobType = JobType.ACTOR;
-                } else if (person.getPersonType() == PersonType.CREW) {
-                    if (person.getDepartment().equalsIgnoreCase("writing")) {
-                        jobType = JobType.WRITER;
-                    } else if (person.getDepartment().equalsIgnoreCase("directing")) {
-                        jobType = JobType.DIRECTOR;
-                    } else if (person.getDepartment().equalsIgnoreCase("production")) {
-                        jobType = JobType.PRODUCER;
-                    } else if (person.getDepartment().equalsIgnoreCase("sound")) {
-                        jobType = JobType.SOUND;
-                    } else if (person.getDepartment().equalsIgnoreCase("camera")) {
-                        jobType = JobType.CAMERA;
-                    } else if (person.getDepartment().equalsIgnoreCase("art")) {
-                        jobType = JobType.ART;
-                    } else if (person.getDepartment().equalsIgnoreCase("editing")) {
-                        jobType = JobType.EDITING;
-                    } else if (person.getDepartment().equalsIgnoreCase("costume & make-up")) {
-                        jobType = JobType.COSTUME_MAKEUP;
-                    } else if (person.getDepartment().equalsIgnoreCase("crew")) {
-                        jobType = JobType.CREW;
-                    } else if (person.getDepartment().equalsIgnoreCase("visual effects")) {
-                        jobType = JobType.EFFECTS;
-                    } else if (person.getDepartment().equalsIgnoreCase("lighting")) {
-                        jobType = JobType.LIGHTING;
-                    } else {
-                        LOG.debug("Adding unknown department '{}' for: '{}', person: '{}'", person.getDepartment(), videoData.getTitle(), person.getName());
-                        LOG.trace("Person: {}", person.toString());
-                        jobType = JobType.UNKNOWN;
-                    }
-                } else {
-                    LOG.debug("Unknown job type: '{}', for: '{}', person: '{}'", person.getPersonType().toString(), videoData.getTitle(), person.getName());
-                    LOG.trace("Person: {}", person.toString());
-                }
-
+                JobType jobType = this.retrieveJobType(person.getPersonType(), person.getDepartment());
                 if (!this.configServiceWrapper.isCastScanEnabled(jobType)) {
                     // scan not enabled for that job
                     continue;
@@ -452,6 +417,109 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner {
         }
 
         return newBio.trim();
+    }
+
+
+    @Override
+    public boolean isFilmographyScanEnabled() {
+        return configServiceWrapper.getBooleanProperty("themoviedb.person.filmography", false);
+    }
+
+    @Override
+    public ScanResult scanFilmography(Person person) {
+        String id = getPersonId(person);
+        if (StringUtils.isBlank(id) || !StringUtils.isNumeric(id)) {
+            return ScanResult.MISSING_ID;
+        }
+        
+        try {
+            TmdbResultsList<PersonCredit> credits = this.tmdbApi.getPersonCredits(Integer.parseInt(id));
+            
+            Set<FilmParticipation> newFilmography = new HashSet<FilmParticipation>();
+            for (PersonCredit credit : credits.getResults()) {
+                JobType jobType = this.retrieveJobType(credit.getPersonType(), credit.getDepartment());
+                if (jobType == null) {
+                    // job type must be present
+                    continue;
+                }
+                Date releaseDate = MetadataTools.parseToDate(credit.getReleaseDate());
+                if (releaseDate == null) {
+                    // release date must be present
+                    continue;
+                }
+                
+                // NOTE: until now just movies possible; no TV credits
+                FilmParticipation filmo = new FilmParticipation();
+                filmo.setParticipationType(ParticipationType.MOVIE);
+                filmo.setSourceDb(SCANNER_ID);
+                filmo.setSourceDbId(String.valueOf(credit.getMovieId()));
+                filmo.setPerson(person);
+                filmo.setJobType(jobType);;
+                if (JobType.ACTOR == jobType) {
+                    filmo.setRole(credit.getCharacter());
+                }
+                filmo.setTitle(credit.getMovieTitle());
+                filmo.setTitleOriginal(StringUtils.trimToNull(credit.getMovieOriginalTitle()));
+                filmo.setReleaseDate(releaseDate);
+                filmo.setYear(MetadataTools.extractYearAsInt(releaseDate));
+                newFilmography.add(filmo);
+                
+            }
+            person.setNewFilmography(newFilmography);
+            
+            return ScanResult.OK;
+        } catch (MovieDbException ex) {
+            LOG.error("Failed retrieving TheMovieDb filmography for '{}', error: {}", person.getName(), ex.getMessage());
+            return ScanResult.ERROR;
+        }
+    }
+    
+    private JobType retrieveJobType(PersonType personType, String department) {
+        if (personType == PersonType.CAST) {
+            return JobType.ACTOR;
+        }
+        
+        if (personType == PersonType.CREW) {
+            if ("writing".equalsIgnoreCase(department)) {
+                return JobType.WRITER;
+            }
+            if ("directing".equalsIgnoreCase(department)) {
+                return JobType.DIRECTOR;
+            }
+            if ("production".equalsIgnoreCase(department)) {
+                return JobType.PRODUCER;
+            }
+            if ("sound".equalsIgnoreCase(department)) {
+                return JobType.SOUND;
+            }
+            if ("camera".equalsIgnoreCase(department)) {
+                return JobType.CAMERA;
+            }
+            if ("art".equalsIgnoreCase(department)) {
+                return JobType.ART;
+            }
+            if ("editing".equalsIgnoreCase(department)) {
+                return JobType.EDITING;
+            }
+            if ("costume & make-up".equalsIgnoreCase(department)) {
+                return JobType.COSTUME_MAKEUP;
+            }
+            if ("crew".equalsIgnoreCase(department)) {
+                return JobType.CREW;
+            }
+            if ("visual effects".equalsIgnoreCase(department)) {
+                return JobType.EFFECTS;
+            }
+            if ("lighting".equalsIgnoreCase(department)) {
+                return JobType.LIGHTING;
+            }
+
+            LOG.debug("Unknown department '{}'", department);
+            return JobType.UNKNOWN;
+        }
+
+        LOG.debug("Unknown person type: '{}'", personType);
+        return null;
     }
 
     @Override
