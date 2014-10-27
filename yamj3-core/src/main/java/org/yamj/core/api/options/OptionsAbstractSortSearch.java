@@ -82,7 +82,11 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
      */
     @Override
     public void setSortdir(String sortdir) {
-        this.sortdir = sortdir;
+        if ("DESC".equalsIgnoreCase(sortdir)) {
+            this.sortdir = "DESC";
+        } else {
+            this.sortdir = "ASC";
+        }
     }
 
     /**
@@ -95,8 +99,10 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     public String getSortString() {
         StringBuilder sb = new StringBuilder();
         if (StringUtils.isNotBlank(sortby)) {
-            sb.append(" ORDER BY ").append(sortby);
-            sb.append(" ").append(sortdir);
+            sb.append(" ORDER BY ");
+            sb.append(sortby);
+            sb.append(" ");
+            sb.append(sortdir);
         }
         return sb.toString();
     }

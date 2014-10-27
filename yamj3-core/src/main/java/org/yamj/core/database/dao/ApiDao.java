@@ -546,7 +546,7 @@ public class ApiDao extends HibernateDao {
 
             if (options.hasDataItem(DataItem.FILMOGRAPHY)) {
                 LOG.info("Adding filmograpgy for {}", person.getName());
-                person.setFilmography(getPersonFilmography(person.getId()));
+                person.setFilmography(getPersonFilmography(person.getId(), options.getSortby(), options.getSortdir()));
             }
 
             wrapper.setResult(person);
@@ -555,7 +555,7 @@ public class ApiDao extends HibernateDao {
         }
     }
 
-    private List<ApiFilmographyDTO> getPersonFilmography(long id) {
+    private List<ApiFilmographyDTO> getPersonFilmography(long id, String sortBy, String sortDir) {
         StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("SELECT p.participation_type as typeString, p.job as job, p.role as role,");
         sbSQL.append("p.title as title, p.title_original as originalTitle, p.year as year,p.year_end as yearEnd,");
@@ -566,6 +566,27 @@ public class ApiDao extends HibernateDao {
         sbSQL.append("LEFT OUTER JOIN series_ids s ON s.sourcedb=p.sourcedb and s.sourcedb_id=p.sourcedb_id ");
         sbSQL.append("WHERE p.person_id = :id ");
 
+        if ("title".equalsIgnoreCase(sortBy)) {
+            sbSQL.append("ORDER BY p.title ");
+            sbSQL.append(sortDir); 
+            sbSQL.append(", p.year ");
+            sbSQL.append(sortDir); 
+            sbSQL.append(", p.release_date ");
+            sbSQL.append(sortDir);
+        } else if ("job".equalsIgnoreCase(sortBy)) {
+            sbSQL.append("ORDER BY p.job ");
+            sbSQL.append(sortDir); 
+            sbSQL.append(", p.year ");
+            sbSQL.append(sortDir); 
+            sbSQL.append(", p.release_date ");
+            sbSQL.append(sortDir);
+        } else {
+            sbSQL.append("ORDER BY p.year ");
+            sbSQL.append(sortDir); 
+            sbSQL.append(", p.release_date ");
+            sbSQL.append(sortDir); 
+        } 
+        
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
         LOG.info("Filmography SQL: {}", sqlScalars.getSql());
 
@@ -660,7 +681,7 @@ public class ApiDao extends HibernateDao {
 
         // Add the search string
         sqlScalars.addToSql(options.getSearchString(Boolean.FALSE));
-        // This will default to blank if there's no sort required
+        // This will default to blank if there's no  required
         sqlScalars.addToSql(options.getSortString());
 
         // Add the ID
@@ -700,24 +721,27 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql(" p.birth_name AS birthName, ");
         sqlScalars.addToSql(" p.death_day AS deathDay ");
         sqlScalars.addToSql(" FROM person p");
-        if (CollectionUtils.isNotEmpty(options.getJob())) {
-            sqlScalars.addToSql(", cast_crew c");
-        }
+
         if (options.getId() > 0L) {
             sqlScalars.addToSql(" WHERE id=:id");
             sqlScalars.addParameters(ID, options.getId());
         } else {
+            if (CollectionUtils.isNotEmpty(options.getJob())) {
+                sqlScalars.addToSql(", cast_crew c");
+            }
+
             sqlScalars.addToSql(SQL_WHERE_1_EQ_1);
+
+            if (CollectionUtils.isNotEmpty(options.getJob())) {
+                sqlScalars.addToSql(" AND p.id=c.person_id");
+                sqlScalars.addToSql(" AND c.job IN (:joblist)");
+                sqlScalars.addParameters("joblist", options.getJob());
+            }
+            // Add the search string
+            sqlScalars.addToSql(options.getSearchString(Boolean.FALSE));
+            // This will default to blank if there's no sort required
+            sqlScalars.addToSql(options.getSortString());
         }
-        if (CollectionUtils.isNotEmpty(options.getJob())) {
-            sqlScalars.addToSql(" AND p.id=c.person_id");
-            sqlScalars.addToSql(" AND c.job IN (:joblist)");
-            sqlScalars.addParameters("joblist", options.getJob());
-        }
-        // Add the search string
-        sqlScalars.addToSql(options.getSearchString(Boolean.FALSE));
-        // This will default to blank if there's no sort required
-        sqlScalars.addToSql(options.getSortString());
 
         sqlScalars.addScalar(ID, LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
