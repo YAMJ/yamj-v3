@@ -566,26 +566,24 @@ public class ApiDao extends HibernateDao {
         sbSQL.append("LEFT OUTER JOIN series_ids s ON s.sourcedb=p.sourcedb and s.sourcedb_id=p.sourcedb_id ");
         sbSQL.append("WHERE p.person_id = :id ");
 
+        sbSQL.append("ORDER BY ");
         if ("title".equalsIgnoreCase(sortBy)) {
-            sbSQL.append("ORDER BY p.title ");
-            sbSQL.append(sortDir); 
-            sbSQL.append(", p.year ");
-            sbSQL.append(sortDir); 
-            sbSQL.append(", p.release_date ");
+            sbSQL.append("p.title ");
             sbSQL.append(sortDir);
+            sbSQL.append(", ");
+        } else if ("type".equalsIgnoreCase(sortBy)) {
+            sbSQL.append("p.participation_type ");
+            sbSQL.append(sortDir); 
+            sbSQL.append(", ");
         } else if ("job".equalsIgnoreCase(sortBy)) {
-            sbSQL.append("ORDER BY p.job ");
+            sbSQL.append("p.job ");
             sbSQL.append(sortDir); 
-            sbSQL.append(", p.year ");
-            sbSQL.append(sortDir); 
-            sbSQL.append(", p.release_date ");
-            sbSQL.append(sortDir);
-        } else {
-            sbSQL.append("ORDER BY p.year ");
-            sbSQL.append(sortDir); 
-            sbSQL.append(", p.release_date ");
-            sbSQL.append(sortDir); 
-        } 
+            sbSQL.append(", ");
+        }
+        sbSQL.append("p.year ");
+        sbSQL.append(sortDir); 
+        sbSQL.append(", p.release_date ");
+        sbSQL.append(sortDir); 
         
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
         LOG.info("Filmography SQL: {}", sqlScalars.getSql());
