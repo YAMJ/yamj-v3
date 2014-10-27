@@ -545,7 +545,7 @@ public class ApiDao extends HibernateDao {
             }
 
             if (options.hasDataItem(DataItem.FILMOGRAPHY)) {
-                LOG.info("Adding filmograpgy for {}", person.getName());
+                LOG.info("Adding filmograpgy for '{}'", person.getName());
                 person.setFilmography(getPersonFilmography(person.getId(), options.getSortby(), options.getSortdir()));
             }
 
@@ -560,10 +560,24 @@ public class ApiDao extends HibernateDao {
         sbSQL.append("SELECT p.participation_type as typeString, p.job as job, p.role as role,");
         sbSQL.append("p.title as title, p.title_original as originalTitle, p.year as year,p.year_end as yearEnd,");
         sbSQL.append("p.release_date as releaseDate, p.release_state as releaseState,p.description as description, ");
-        sbSQL.append("v.videodata_id as videoDataId, s.series_id as seriesId ");
+        sbSQL.append("movie.id as videoDataId, tvseries.id as seriesId ");
         sbSQL.append("FROM participation p ");
-        sbSQL.append("LEFT OUTER JOIN videodata_ids v ON v.sourcedb=p.sourcedb and v.sourcedb_id=p.sourcedb_id ");
-        sbSQL.append("LEFT OUTER JOIN series_ids s ON s.sourcedb=p.sourcedb and s.sourcedb_id=p.sourcedb_id ");
+        sbSQL.append("LEFT OUTER JOIN cast_crew c1 ON c1.person_id=p.person_id and p.participation_type='MOVIE' ");
+        sbSQL.append("  LEFT OUTER JOIN (");
+        sbSQL.append("    SELECT v.id as id, v.publication_year, v.title_original as title_original, i.sourcedb as sourcedb,i.sourcedb_id as sourcedb_id ");
+        sbSQL.append("    FROM videodata v, videodata_ids i ");
+        sbSQL.append("    WHERE v.id=i.videodata_id) movie ");
+        sbSQL.append("  ON movie.id=c1.videodata_id and (" );
+        sbSQL.append("    (movie.publication_year=p.year and movie.title_original is not null and upper(movie.title_original)=upper(p.title_original)) ");
+        sbSQL.append("     or (movie.sourcedb=p.sourcedb and movie.sourcedb_id=p.sourcedb_id)) ");
+        sbSQL.append("LEFT OUTER JOIN cast_crew c2 ON c2.person_id=p.person_id and p.participation_type='TVSERIES' ");
+        sbSQL.append("  LEFT OUTER JOIN (");
+        sbSQL.append("    SELECT ser.id as id, ser.start_year as year, ser.title_original as title_original, i.sourcedb as sourcedb,i.sourcedb_id as sourcedb_id ");
+        sbSQL.append("    FROM videodata v, season sea, series ser, series_ids i ");
+        sbSQL.append("    WHERE v.season_id=sea.id and sea.series_id=ser.id and i.series_id=ser.id) tvseries ");
+        sbSQL.append("  ON tvseries.id=c2.videodata_id and (" );
+        sbSQL.append("    (tvseries.year=p.year and tvseries.title_original is not null and upper(tvseries.title_original)=upper(p.title_original)) ");
+        sbSQL.append("     or (tvseries.sourcedb=p.sourcedb and tvseries.sourcedb_id=p.sourcedb_id))");
         sbSQL.append("WHERE p.person_id = :id ");
 
         sbSQL.append("ORDER BY ");
