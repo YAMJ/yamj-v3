@@ -142,7 +142,7 @@ public abstract class HibernateDao {
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected <T> T getByNameCaseInsensitive(Class<? extends T> entityClass, String name) {
+    public <T> T getByNameCaseInsensitive(Class<? extends T> entityClass, String name) {
         StringBuffer sb = new StringBuffer();
         sb.append("from ");
         sb.append(entityClass.getSimpleName());
@@ -161,7 +161,7 @@ public abstract class HibernateDao {
      * @param name
      * @return
      */
-    protected <T> T getByNameCaseSensitive(Class<? extends T> entityClass, String name) {
+    public <T> T getByNameCaseSensitive(Class<? extends T> entityClass, String name) {
         return getByField(entityClass, "name", name);
     }
 
@@ -283,6 +283,10 @@ public abstract class HibernateDao {
             queryObject.setParameterList(paramName, (Collection) value);
         } else if (value instanceof Object[]) {
             queryObject.setParameterList(paramName, (Object[]) value);
+        } else if (value instanceof Date) {
+            queryObject.setDate(paramName, (Date)value);
+        } else if (value instanceof String) {
+            queryObject.setString(paramName, (String)value);
         } else {
             queryObject.setParameter(paramName, value);
         }
@@ -323,7 +327,7 @@ public abstract class HibernateDao {
     /**
      * Find unique entity by named parameters.
      *
-     * @param queryCharSequence the query string.
+     * @param queryCharSequence the query string
      * @param params the named parameters
      * @return list of entities
      */
@@ -334,6 +338,22 @@ public abstract class HibernateDao {
             applyNamedParameterToQuery(query, param.getKey(), param.getValue());
         }
         return query.uniqueResult();
+    }
+
+    /**
+     * Execute an update statement.
+     *
+     * @param queryCharSequence the query string
+     * @param params the named parameters
+     * @return number of affected rows
+     */
+    public int executeUpdate(CharSequence queryCharSequence, Map<String, Object> params) {
+        Query query = getSession().createQuery(queryCharSequence.toString());
+        query.setCacheable(true);
+        for (Entry<String, Object> param : params.entrySet()) {
+            applyNamedParameterToQuery(query, param.getKey(), param.getValue());
+        }
+        return query.executeUpdate();
     }
 
     /**

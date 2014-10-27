@@ -190,7 +190,7 @@ public class ScanningScheduler {
     }
 
     @Scheduled(initialDelay = 20000, fixedDelay = 45000)
-    public void scanFilmographyData() throws Exception {
+    public void scanFilmography() throws Exception {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.filmographyscan.maxThreads", 1);
         if (maxThreads <= 0 || !this.metadataScannerService.isFilmographyScanEnabled()) { 
             if (!messageDisabledFilmography) {

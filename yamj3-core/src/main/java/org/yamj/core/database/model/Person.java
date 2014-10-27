@@ -237,20 +237,24 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     }
 
     @Override
-    public boolean setSourceDbId(String sourceDb, String id) {
+    public void setSourceDbId(String sourceDb, String id) {
         if (StringUtils.isBlank(sourceDb) || StringUtils.isBlank(id)) {
-            return false;
+            return;
         }
-        this.sourceDbIdMap.put(sourceDb, id);
-        return true;
+        this.sourceDbIdMap.put(sourceDb, id.trim());
     }
 
     public boolean setSourceDbIds(Map<String,String> sourceDbIdMap) {
         boolean changed  = false;
         if (MapUtils.isNotEmpty(sourceDbIdMap)) {
             for (Entry<String,String> entry : sourceDbIdMap.entrySet()) {
-                if (this.setSourceDbId(entry.getKey(), entry.getValue())) {
-                    changed = true;
+                String sourceDb = entry.getKey();
+                String newId = StringUtils.trimToNull(entry.getValue());
+                if (StringUtils.isNotBlank(sourceDb) && StringUtils.isNotBlank(newId)) {
+                    String oldId = this.sourceDbIdMap.put(sourceDb, newId);
+                    if (!StringUtils.equals(oldId, newId)) {
+                        changed = true;
+                    }
                 }
             }
         }

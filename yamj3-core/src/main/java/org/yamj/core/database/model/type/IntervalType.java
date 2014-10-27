@@ -20,20 +20,36 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.database.model;
+package org.yamj.core.database.model.type;
 
-import java.util.Date;
-import org.yamj.core.database.model.type.OverrideFlag;
+public enum IntervalType {
 
-public interface IScannable {
+    MONTHLY {
+        @Override
+        public boolean needsDelay() {
+            return false;
+        }
+    },
+    DAILY {
+        @Override
+        public boolean needsDelay() {
+            return false;
+        }
+    },
+    DAYS,
+    HOURS,
+    MINUTES,
+    UNKNOWN;
 
-    String getSourceDbId(String sourceDb);
+    public boolean needsDelay() {
+        return true;
+    }
 
-    void setSourceDbId(String sourceDb, String id);
-
-    String getOverrideSource(OverrideFlag overrideFlag);
-
-    void setOverrideFlag(OverrideFlag overrideFlag, String source);
-    
-    Date getLastScanned();
+    public static IntervalType fromString(String type) {
+        try {
+            return IntervalType.valueOf(type.trim().toUpperCase());
+        } catch (Exception ex) {
+            return UNKNOWN;
+        }
+    }
 }

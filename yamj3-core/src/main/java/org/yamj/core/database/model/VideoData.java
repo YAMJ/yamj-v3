@@ -284,12 +284,10 @@ public class VideoData extends AbstractMetadata {
     }
 
     @Override
-    public boolean setSourceDbId(String sourceDb, String id) {
+    public void setSourceDbId(String sourceDb, String id) {
         if (StringUtils.isNotBlank(id)) {
             sourceDbIdMap.put(sourceDb, id.trim());
-            return true;
         }
-        return false;
     }
 
     private Map<String, Integer> getRatings() {

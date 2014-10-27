@@ -93,7 +93,7 @@ public class ArtworkInitialization {
                     // call another service to handle transactions
                     this.artworkStorageService.storeArtworkProfile(artworkProfile);
                 } catch (Exception error) {
-                    LOG.error("Failed to store artwork profile {}", artworkProfile);
+                    LOG.error("Failed to store {}", artworkProfile);
                     LOG.warn("Storage error", error);
                 }
             }

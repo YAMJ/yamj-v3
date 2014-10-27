@@ -32,7 +32,9 @@
     @TypeDef(name = "fileType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.FileType")}),
     @TypeDef(name = "participationType", typeClass = EnumStringUserType.class,
-        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ParticipationType")})
+        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ParticipationType")}),
+    @TypeDef(name = "intervalType", typeClass = EnumStringUserType.class,
+        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.IntervalType")})
 })
 package org.yamj.core.database.model;
 

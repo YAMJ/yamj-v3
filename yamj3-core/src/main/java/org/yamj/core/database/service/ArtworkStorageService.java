@@ -53,7 +53,7 @@ public class ArtworkStorageService {
         ArtworkProfile profile = artworkDao.getArtworkProfile(newProfile.getProfileName(), newProfile.getArtworkType());
         if (profile == null) {
             this.artworkDao.saveEntity(newProfile);
-            LOG.info("Stored new artwork profile {}", newProfile);
+            LOG.info("Stored: {}", newProfile);
         } else {
             // TODO what to do if profile changed? set generated values to update?
 
@@ -66,7 +66,7 @@ public class ArtworkStorageService {
             profile.setApplyToPerson(newProfile.isApplyToPerson());
             profile.setPreProcess(newProfile.isPreProcess());
             this.artworkDao.updateEntity(profile);
-            LOG.info("Updated artwork profile {}", profile);
+            LOG.info("Updated: {}", profile);
         }
     }
 

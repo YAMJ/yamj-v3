@@ -260,9 +260,11 @@ public class OnlineScannerService {
         if (ScanResult.OK.equals(scanResult)) {
             LOG.debug("Person {}-'{}', scanned OK", person.getId(), person.getName());
             person.setStatus(StatusType.DONE);
+            person.setFilmographyStatus(StatusType.NEW);
         } else if (ScanResult.SKIPPED.equals(scanResult)) {
             LOG.warn("Person {}-'{}', skipped", person.getId(), person.getName());
             person.setStatus(StatusType.DONE);
+            person.setFilmographyStatus(StatusType.NEW);
         } else if (ScanResult.MISSING_ID.equals(scanResult)) {
             LOG.warn("Person {}-'{}', not found", person.getId(), person.getName());
             person.setStatus(StatusType.NOTFOUND);

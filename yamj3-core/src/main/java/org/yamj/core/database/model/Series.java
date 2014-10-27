@@ -168,12 +168,10 @@ public class Series extends AbstractMetadata {
     }
 
     @Override
-    public boolean setSourceDbId(String sourceDb, String id) {
+    public void setSourceDbId(String sourceDb, String id) {
         if (StringUtils.isNotBlank(id)) {
             sourceDbIdMap.put(sourceDb, id.trim());
-            return true;
         }
-        return false;
     }
 
     public Map<String, Integer> getRatings() {

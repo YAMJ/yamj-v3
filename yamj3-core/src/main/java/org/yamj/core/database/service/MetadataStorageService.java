@@ -636,4 +636,40 @@ public class MetadataStorageService {
             metadataDao.updateEntity(person);
         }
     }
+    
+    @Transactional
+    public void recheckMovie(Date compareDate) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("update VideoData vd set vd.status='UPDATED' ");
+        sql.append("where vd.status not in ('NEW','UPDATED') ");
+        sql.append("and (vd.lastScanned is null or vd.lastScanned<=:compareDate) ");
+        sql.append("and vd.episode<0 ");
+        
+        Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
+        this.commonDao.executeUpdate(sql, params);
+    }
+
+    @Transactional
+    public void recheckTvShow(Date compareDate) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("update Series ser set ser.status='UPDATED' ");
+        sql.append("where ser.status not in ('NEW','UPDATED') ");
+        sql.append("and (ser.lastScanned is null or ser.lastScanned<=:compareDate) ");
+        
+        // TODO: what is with season and episodes?
+        
+        Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
+        this.commonDao.executeUpdate(sql, params);
+    }
+
+    @Transactional
+    public void recheckPerson(Date compareDate) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("update Person p set p.status='UPDATED',p.filmographyStatus='NEW' ");
+        sql.append("where p.status not in ('NEW','UPDATED') ");
+        sql.append("and (p.lastScanned is null or p.lastScanned<=:compareDate) ");
+        
+        Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
+        this.commonDao.executeUpdate(sql, params);
+    }
 }
