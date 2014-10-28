@@ -283,8 +283,6 @@ public abstract class HibernateDao {
             queryObject.setParameterList(paramName, (Collection) value);
         } else if (value instanceof Object[]) {
             queryObject.setParameterList(paramName, (Object[]) value);
-        } else if (value instanceof Date) {
-            queryObject.setDate(paramName, (Date)value);
         } else if (value instanceof String) {
             queryObject.setString(paramName, (String)value);
         } else {
