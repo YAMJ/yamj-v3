@@ -79,13 +79,7 @@ public final class InfoDTO {
     public void setSkipAllOnlineScans() {
         this.skipOnlineScans.clear();
         this.skipOnlineScans.add("all");
-    }
-
-    public void setSkipOnlineScans(String skipOnlineScans) {
-        if (StringUtils.isNotBlank(skipOnlineScans)) {
-            this.skipOnlineScans.clear();
-            this.skipOnlineScans.addAll(Arrays.asList(StringUtils.split(skipOnlineScans, ";")));
-        }
+        this.changed = true;
     }
     
     public String getSkipOnlineScans() {

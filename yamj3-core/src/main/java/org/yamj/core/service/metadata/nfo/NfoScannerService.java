@@ -55,6 +55,7 @@ public class NfoScannerService {
         // get the stage files
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(videoData);
         if (CollectionUtils.isEmpty(stageFiles)) {
+            videoData.setSkipOnlineScans(null);
             return;
         }
 
@@ -63,7 +64,6 @@ public class NfoScannerService {
         // create an info DTO for movie
         InfoDTO infoDTO = new InfoDTO(false);
         infoDTO.setIds(videoData.getSourceDbIdMap());
-        infoDTO.setSkipOnlineScans(videoData.getSkipOnlineScans());
        
         // scan the NFOs
         this.scanNFOs(stageFiles, infoDTO);
@@ -152,6 +152,7 @@ public class NfoScannerService {
         // get the stage files
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(series);
         if (CollectionUtils.isEmpty(stageFiles)) {
+            series.setSkipOnlineScans(null);
             return;
         }
 
@@ -160,7 +161,6 @@ public class NfoScannerService {
         // create an info DTO for TV show
         InfoDTO infoDTO = new InfoDTO(true);
         infoDTO.setIds(series.getSourceDbIdMap());
-        infoDTO.setSkipOnlineScans(series.getSkipOnlineScans());
        
         // scan the NFOs
         this.scanNFOs(stageFiles, infoDTO);
