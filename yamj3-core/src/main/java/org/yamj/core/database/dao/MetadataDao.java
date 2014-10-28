@@ -95,8 +95,11 @@ public class MetadataDao extends HibernateDao {
             person.setFilmographyStatus(StatusType.NEW);
             this.saveEntity(person);
         } else {
-            // update person if ID's has has been changed
-            if (person.setSourceDbIds(dto.getPersonIdMap())) {
+            boolean changed = person.setSourceDbIds(dto.getPersonIdMap());
+            if (StatusType.DELETED.equals(person.getStatus())) {
+                changed = true;
+            }
+            if (changed) {
                 person.setStatus(StatusType.UPDATED);
                 this.updateEntity(person);
             }
