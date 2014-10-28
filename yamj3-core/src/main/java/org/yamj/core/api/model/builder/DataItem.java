@@ -38,7 +38,8 @@ public enum DataItem {
     TAGLINE(true),
     TOP_RANK(true),
     BIOGRAPHY(true),
-    FILMOGRAPHY(false),
+    FILMOGRAPHY_INSIDE(false),
+    FILMOGRAPHY_SCANNED(false),
     FILES(false),
     UNKNOWN(false);
     private final boolean column; // Is the DataItem a column or a collection (e.g. artwork, genres, etc)
@@ -59,7 +60,7 @@ public enum DataItem {
         try {
             String cleanItem = item.trim().toUpperCase();
             return DataItem.valueOf(cleanItem);
-        } catch (IllegalArgumentException ex) {
+        } catch (Exception ex) {
             return UNKNOWN;
         }
     }

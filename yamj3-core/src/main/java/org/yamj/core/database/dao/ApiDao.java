@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.dao;
 
+import org.yamj.core.database.model.type.ParticipationType;
+
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -544,9 +546,12 @@ public class ApiDao extends HibernateDao {
                 }
             }
 
-            if (options.hasDataItem(DataItem.FILMOGRAPHY)) {
-                LOG.info("Adding filmograpgy for '{}'", person.getName());
-                person.setFilmography(getPersonFilmography(person.getId(), options.getSortby(), options.getSortdir()));
+            if (options.hasDataItem(DataItem.FILMOGRAPHY_INSIDE)) {
+                LOG.info("Adding filmograpghy inside for '{}'", person.getName());
+                person.setFilmography(getPersonFilmographyInside(person.getId(), options.getSortby(), options.getSortdir()));
+            } else if (options.hasDataItem(DataItem.FILMOGRAPHY_SCANNED)) {
+                LOG.info("Adding filmograpghy scanned for '{}'", person.getName());
+                person.setFilmography(getPersonFilmographyScanned(person.getId(), options.getSortby(), options.getSortdir()));
             }
 
             wrapper.setResult(person);
@@ -555,29 +560,81 @@ public class ApiDao extends HibernateDao {
         }
     }
 
-    private List<ApiFilmographyDTO> getPersonFilmography(long id, String sortBy, String sortDir) {
+    private List<ApiFilmographyDTO> getPersonFilmographyInside(long id, String sortBy, String sortDir) {
         StringBuilder sbSQL = new StringBuilder();
-        sbSQL.append("SELECT p.participation_type as typeString, p.job as job, p.role as role,");
+        sbSQL.append("SELECT DISTINCT '"+ParticipationType.MOVIE.name()+"' as typeString, c1.job as job, c1.role as role,");
+        sbSQL.append("v1.title as title, v1.title_original as originalTitle, v1.publication_year as year, -1 as yearEnd,");
+        sbSQL.append("v1.release_date as releaseDate, null as releaseState, v1.plot as description,");
+        sbSQL.append("v1.id as videoDataId, -1 as seriesId ");
+        sbSQL.append("FROM cast_crew c1, videodata v1 ");
+        sbSQL.append("WHERE c1.person_id = :id and v1.id=c1.videodata_id and v1.episode<0 ");
+        sbSQL.append("UNION ");
+        sbSQL.append("SELECT DISTINCT '"+ParticipationType.SERIES.name()+"' as typeString, c2.job as job, c2.role as role,");
+        sbSQL.append("ser.title as title, ser.title_original as originalTitle, ser.start_year as year, ser.end_year as yearEnd,");
+        sbSQL.append("null as releaseDate, null as releaseState, ser.plot as description,");
+        sbSQL.append("-1 as videoDataId, ser.id as seriesId ");
+        sbSQL.append("FROM cast_crew c2, videodata v2, season sea, series ser ");
+        sbSQL.append("WHERE c2.person_id = :id and v2.id=c2.videodata_id and v2.episode>=0 ");
+        sbSQL.append("and v2.season_id=sea.id and sea.series_id=ser.id ");
+
+        sbSQL.append("ORDER BY ");
+        if ("title".equalsIgnoreCase(sortBy)) {
+            sbSQL.append("title ");
+            sbSQL.append(sortDir);
+            sbSQL.append(", ");
+        } else if ("type".equalsIgnoreCase(sortBy)) {
+            sbSQL.append("typeString ");
+            sbSQL.append(sortDir); 
+            sbSQL.append(", ");
+        } else if ("job".equalsIgnoreCase(sortBy)) {
+            sbSQL.append("job ");
+            sbSQL.append(sortDir); 
+            sbSQL.append(", ");
+        }
+        sbSQL.append("year ");
+        sbSQL.append(sortDir); 
+        sbSQL.append(", releaseDate ");
+        sbSQL.append(sortDir); 
+        
+        SqlScalars sqlScalars = new SqlScalars(sbSQL);
+        LOG.info("Filmography inside SQL: {}", sqlScalars.getSql());
+
+        sqlScalars.addScalar("typeString", StringType.INSTANCE);
+        sqlScalars.addScalar("job", StringType.INSTANCE);
+        sqlScalars.addScalar("role", StringType.INSTANCE);
+        sqlScalars.addScalar("title", StringType.INSTANCE);
+        sqlScalars.addScalar("originalTitle", StringType.INSTANCE);
+        sqlScalars.addScalar("year", IntegerType.INSTANCE);
+        sqlScalars.addScalar("yearEnd", IntegerType.INSTANCE);
+        sqlScalars.addScalar("releaseDate", DateType.INSTANCE);
+        sqlScalars.addScalar("releaseState", StringType.INSTANCE);
+        sqlScalars.addScalar("description", StringType.INSTANCE);
+        sqlScalars.addScalar("videoDataId", LongType.INSTANCE);
+        sqlScalars.addScalar("seriesId", LongType.INSTANCE);
+
+        sqlScalars.addParameters(ID, id);
+
+        return executeQueryWithTransform(ApiFilmographyDTO.class, sqlScalars, null);
+    }
+
+    private List<ApiFilmographyDTO> getPersonFilmographyScanned(long id, String sortBy, String sortDir) {
+        StringBuilder sbSQL = new StringBuilder();
+        sbSQL.append("SELECT DISTINCT p.participation_type as typeString, p.job as job, p.role as role,");
         sbSQL.append("p.title as title, p.title_original as originalTitle, p.year as year,p.year_end as yearEnd,");
-        sbSQL.append("p.release_date as releaseDate, p.release_state as releaseState,p.description as description, ");
-        sbSQL.append("movie.id as videoDataId, tvseries.id as seriesId ");
+        sbSQL.append("p.release_date as releaseDate, p.release_state as releaseState,p.description as description,");
+        sbSQL.append("movie.id as videoDataId, serids.series_id as seriesId ");
         sbSQL.append("FROM participation p ");
-        sbSQL.append("LEFT OUTER JOIN cast_crew c1 ON c1.person_id=p.person_id and p.participation_type='MOVIE' ");
-        sbSQL.append("  LEFT OUTER JOIN (SELECT v.id as id, v.publication_year, v.title_original as title_original, i.sourcedb as sourcedb,i.sourcedb_id as sourcedb_id ");
+        sbSQL.append("LEFT OUTER JOIN cast_crew c ON c.person_id=p.person_id and p.participation_type='MOVIE' ");
+        sbSQL.append("  LEFT OUTER JOIN (SELECT v.id as id, v.publication_year, v.title_original as title_original, i.sourcedb as sourcedb, i.sourcedb_id as sourcedb_id ");
         sbSQL.append("    FROM videodata v, videodata_ids i ");
         sbSQL.append("    WHERE v.episode<0 and v.id=i.videodata_id) movie ");
-        sbSQL.append("  ON movie.id=c1.videodata_id and ");
+        sbSQL.append("  ON movie.id=c.videodata_id and ");
         sbSQL.append("  ((movie.publication_year=p.year and movie.title_original is not null and upper(movie.title_original)=upper(p.title_original)) ");
         sbSQL.append("   or (movie.sourcedb=p.sourcedb and movie.sourcedb_id=p.sourcedb_id)) ");
-        sbSQL.append("LEFT OUTER JOIN cast_crew c2 ON c2.person_id=p.person_id and p.participation_type='TVSERIES' ");
-        sbSQL.append("  LEFT OUTER JOIN (SELECT ser.id as id, ser.start_year as year, ser.title_original as title_original, i.sourcedb as sourcedb,i.sourcedb_id as sourcedb_id ");
-        sbSQL.append("    FROM videodata v, season sea, series ser, series_ids i ");
-        sbSQL.append("    WHERE v.episode>=0 and v.season_id=sea.id and sea.series_id=ser.id and i.series_id=ser.id) tvseries ");
-        sbSQL.append("  ON tvseries.id=c2.videodata_id and " );
-        sbSQL.append("  ((tvseries.year=p.year and tvseries.title_original is not null and upper(tvseries.title_original)=upper(p.title_original)) ");
-        sbSQL.append("   or (tvseries.sourcedb=p.sourcedb and tvseries.sourcedb_id=p.sourcedb_id)) ");
+        sbSQL.append("LEFT OUTER JOIN series_ids serids ON serids.sourcedb=p.sourcedb and serids.sourcedb_id=p.sourcedb_id ");
         sbSQL.append("WHERE p.person_id = :id ");
 
+        // sorting
         sbSQL.append("ORDER BY ");
         if ("title".equalsIgnoreCase(sortBy)) {
             sbSQL.append("p.title ");
@@ -598,8 +655,12 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(sortDir); 
         
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
-        LOG.info("Filmography SQL: {}", sqlScalars.getSql());
+        LOG.info("Filmography scanned SQL: {}", sqlScalars.getSql());
 
+        return retrieveFilmography(id, sqlScalars);
+    }
+
+    public List<ApiFilmographyDTO> retrieveFilmography(long id, SqlScalars sqlScalars) {
         sqlScalars.addScalar("typeString", StringType.INSTANCE);
         sqlScalars.addScalar("job", StringType.INSTANCE);
         sqlScalars.addScalar("role", StringType.INSTANCE);
@@ -617,7 +678,7 @@ public class ApiDao extends HibernateDao {
 
         return executeQueryWithTransform(ApiFilmographyDTO.class, sqlScalars, null);
     }
-
+    
     public void getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {
         OptionsIndexPerson options = (OptionsIndexPerson) wrapper.getOptions();
         LOG.info("Getting person list for {} with ID '{}'", metaDataType, options.getId());
