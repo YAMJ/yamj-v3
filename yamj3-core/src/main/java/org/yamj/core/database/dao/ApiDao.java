@@ -599,22 +599,7 @@ public class ApiDao extends HibernateDao {
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
         LOG.info("Filmography inside SQL: {}", sqlScalars.getSql());
 
-        sqlScalars.addScalar("typeString", StringType.INSTANCE);
-        sqlScalars.addScalar("job", StringType.INSTANCE);
-        sqlScalars.addScalar("role", StringType.INSTANCE);
-        sqlScalars.addScalar("title", StringType.INSTANCE);
-        sqlScalars.addScalar("originalTitle", StringType.INSTANCE);
-        sqlScalars.addScalar("year", IntegerType.INSTANCE);
-        sqlScalars.addScalar("yearEnd", IntegerType.INSTANCE);
-        sqlScalars.addScalar("releaseDate", DateType.INSTANCE);
-        sqlScalars.addScalar("releaseState", StringType.INSTANCE);
-        sqlScalars.addScalar("description", StringType.INSTANCE);
-        sqlScalars.addScalar("videoDataId", LongType.INSTANCE);
-        sqlScalars.addScalar("seriesId", LongType.INSTANCE);
-
-        sqlScalars.addParameters(ID, id);
-
-        return executeQueryWithTransform(ApiFilmographyDTO.class, sqlScalars, null);
+        return retrieveFilmography(id, sqlScalars);
     }
 
     private List<ApiFilmographyDTO> getPersonFilmographyScanned(long id, String sortBy, String sortDir) {
