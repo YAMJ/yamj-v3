@@ -22,6 +22,9 @@
  */
 package org.yamj.core.api.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -34,25 +37,26 @@ import org.yamj.core.database.model.type.ArtworkType;
  *
  * @author stuart.boston
  */
+@JsonInclude(Include.NON_DEFAULT) 
 public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     private MetaDataType videoType;
     private String title;
     private String originalTitle;
     private Integer videoYear;
-    private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
-    private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
-    private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
     private String outline;
     private String plot;
     private String country;
     private String quote;
     private String tagline;
     private Long topRank;
-    private Long seriesId = -1L;
-    private Long seasonId = -1L;
-    private Long season = -1L;
-    private Long episode = -1L;
+    private Long seriesId;
+    private Long seasonId;
+    private Long season;
+    private Long episode;
+    private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
+    private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
+    private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
 
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public MetaDataType getVideoType() {

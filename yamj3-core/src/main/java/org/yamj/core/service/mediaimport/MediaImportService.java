@@ -96,8 +96,6 @@ public class MediaImportService {
             
             // just update media file
             MediaFile mediaFile = stageFile.getMediaFile();
-            mediaFile.setFileDate(stageFile.getFileDate());
-            mediaFile.setFileSize(stageFile.getFileSize());
             mediaFile.setStatus(StatusType.UPDATED);
             mediaDao.updateEntity(mediaFile);
         }
@@ -143,8 +141,6 @@ public class MediaImportService {
         // new media file
         mediaFile = new MediaFile();
         mediaFile.setFileName(stageFile.getFileName());
-        mediaFile.setFileDate(stageFile.getFileDate());
-        mediaFile.setFileSize(stageFile.getFileSize());
         mediaFile.setContainer(dto.getContainer());
         mediaFile.setExtra(dto.isExtra());
         mediaFile.setPart(dto.getPart());

@@ -22,24 +22,27 @@
  */
 package org.yamj.core.api.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import java.util.Date;
-import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.type.ParticipationType;
 
+@JsonInclude(Include.NON_DEFAULT) 
 public class ApiFilmographyDTO extends AbstractApiDTO {
 
     private ParticipationType type;
     private String job;
-    private String role = "";
-    private String title = "";
-    private String originalTitle = "";
+    private String role;
+    private String title;
+    private String originalTitle;
     private Integer year;
     private Integer yearEnd;
     private Date releaseDate;
-    private String releaseState = "";
-    private String description = "";
-    private Long videoDataId = -1L;
-    private Long seriesId = -1L;
+    private String releaseState;
+    private String description;
+    private Long videoDataId;
+    private Long seriesId;
 
     public ParticipationType getType() {
         return type;
@@ -66,11 +69,7 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
     }
 
     public void setRole(String role) {
-        if (StringUtils.isBlank(role)) {
-            this.role = "";
-        } else {
-            this.role = role;
-        }
+        this.role = role;
     }
 
     public String getTitle() {
@@ -78,11 +77,7 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
     }
 
     public void setTitle(String title) {
-        if (StringUtils.isBlank(title)) {
-            this.title = "";
-        } else {
-            this.title = title;
-        }
+        this.title = title;
     }
 
     public String getOriginalTitle() {
@@ -90,11 +85,7 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
     }
 
     public void setOriginalTitle(String originalTitle) {
-        if (StringUtils.isBlank(originalTitle)) {
-            this.originalTitle = "";
-        } else {
-            this.originalTitle = originalTitle;
-        }
+        this.originalTitle = originalTitle;
     }
 
     public Integer getYear() {
@@ -126,11 +117,7 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
     }
 
     public void setReleaseState(String releaseState) {
-        if (StringUtils.isBlank(releaseState)) {
-            this.releaseState = "";
-        } else {
-            this.releaseState = releaseState;
-        }
+        this.releaseState = releaseState;
     }
 
     public String getDescription() {
@@ -138,11 +125,7 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
     }
 
     public void setDescription(String description) {
-        if (StringUtils.isBlank(description)) {
-            this.description = "";
-        } else {
-            this.description = description;
-        }
+        this.description = description;
     }
 
     public Long getVideoDataId() {
@@ -150,11 +133,7 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
     }
 
     public void setVideoDataId(Long videoDataId) {
-        if (videoDataId == null) {
-            videoDataId = Long.valueOf(0);
-        } else {
-            this.videoDataId = videoDataId;
-        }
+        this.videoDataId = videoDataId;
     }
 
     public Long getSeriesId() {
@@ -162,10 +141,6 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
     }
 
     public void setSeriesId(Long seriesId) {
-        if (seriesId == null) {
-            seriesId = Long.valueOf(0);
-        } else {
-            this.seriesId = seriesId;
-        }
+        this.seriesId = seriesId;
     }
 }

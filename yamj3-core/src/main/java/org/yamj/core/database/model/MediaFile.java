@@ -53,13 +53,6 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     @NaturalId
     @Column(name = "file_name", nullable = false, length = 255)
     private String fileName;
-    
-    @Temporal(value = TemporalType.TIMESTAMP)
-    @Column(name = "file_date")
-    private Date fileDate;
-    
-    @Column(name = "file_size", nullable = false)
-    private long fileSize = -1;
 
     @Column(name = "extra", nullable = false)
     private boolean extra = false;
@@ -142,22 +135,6 @@ public class MediaFile extends AbstractAuditable implements Serializable {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
-    }
-
-    public Date getFileDate() {
-        return fileDate;
-    }
-
-    public void setFileDate(Date fileDate) {
-        this.fileDate = fileDate;
-    }
-
-    public long getFileSize() {
-        return fileSize;
-    }
-
-    public void setFileSize(long fileSize) {
-        this.fileSize = fileSize;
     }
 
     public boolean isExtra() {

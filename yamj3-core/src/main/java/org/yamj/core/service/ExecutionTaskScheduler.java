@@ -38,7 +38,7 @@ public class ExecutionTaskScheduler {
     @Autowired
     private ExecutionTaskService executionTaskService;
     
-    @Scheduled(initialDelay = 5000, fixedDelay = 60000)
+    @Scheduled(initialDelay = 5000, fixedDelay = 180000)
     public void executeTasks() throws Exception {
         PROCESS_LOCK.lock();
 

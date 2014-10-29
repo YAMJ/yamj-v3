@@ -22,30 +22,35 @@
  */
 package org.yamj.core.api.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- *
  * @author stuart.boston
  */
-public class ApiEpisodeDTO {
+@JsonInclude(Include.NON_DEFAULT) 
+public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
 
     private Long seriesId = -1L;
     private Long seasonId = -1L;
     private Long season = -1L;
     private Long episode = -1L;
-    private Long episodeId = -1L;
-    private String title = "";
-    private String outline = "";
-    private String plot = "";
-    private String filename = "";
-    @JsonIgnore
+    private String title;
+    private String originalTitle;
+    private String outline;
+    private String plot;
+    private Date firstAired;
     private String cacheFilename;
-    @JsonIgnore
     private String cacheDir;
-    private String videoimage = "";
+    private String videoimage;
+    private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
 
     //<editor-fold defaultstate="collapsed" desc="Setter Methods">
     public void setSeriesId(Long seriesId) {
@@ -64,12 +69,12 @@ public class ApiEpisodeDTO {
         this.episode = episode;
     }
 
-    public void setEpisodeId(Long episodeId) {
-        this.episodeId = episodeId;
-    }
-
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
     }
 
     public void setOutline(String outline) {
@@ -79,17 +84,23 @@ public class ApiEpisodeDTO {
     public void setPlot(String plot) {
         this.plot = plot;
     }
+    
+    public void setFirstAired(Date firstAired) {
+        this.firstAired = firstAired;
+    }
 
+    @JsonIgnore
     public void setCacheFilename(String cacheFilename) {
         this.cacheFilename = cacheFilename;
     }
 
+    @JsonIgnore
     public void setCacheDir(String cacheDir) {
         this.cacheDir = cacheDir;
     }
 
-    public void setFilename(String filename) {
-        this.filename = FilenameUtils.separatorsToUnix(filename);
+    public void setFiles(List<ApiFileDTO> files) {
+        this.files = files;
     }
     //</editor-fold>
 
@@ -110,12 +121,12 @@ public class ApiEpisodeDTO {
         return episode;
     }
 
-    public Long getEpisodeId() {
-        return episodeId;
-    }
-
     public String getTitle() {
         return title;
+    }
+
+    public String getOriginalTitle() {
+        return originalTitle;
     }
 
     public String getOutline() {
@@ -126,6 +137,10 @@ public class ApiEpisodeDTO {
         return plot;
     }
 
+    public Date getFirstAired() {
+        return firstAired;
+    }
+
     public String getVideoimage() {
         if (StringUtils.isBlank(videoimage) && (StringUtils.isNotBlank(cacheDir) && StringUtils.isNotBlank(cacheFilename))) {
             this.videoimage = FilenameUtils.normalize(FilenameUtils.concat(this.cacheDir, this.cacheFilename), Boolean.TRUE);
@@ -133,8 +148,8 @@ public class ApiEpisodeDTO {
         return videoimage;
     }
 
-    public String getFilename() {
-        return filename;
+    public List<ApiFileDTO> getFiles() {
+        return files;
     }
     //</editor-fold>
 }

@@ -22,6 +22,9 @@
  */
 package org.yamj.core.api.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,6 +33,7 @@ import java.util.List;
  *
  * @author stuart.boston
  */
+@JsonInclude(Include.NON_DEFAULT) 
 public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
 
     private String name;
@@ -38,8 +42,8 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     private String birthPlace;
     private String birthName;
     private Date deathDay;
-    private String job = "";
-    private String role = "";
+    private String job;
+    private String role;
     private List<ApiArtworkDTO> artwork = new ArrayList<ApiArtworkDTO>(0);
     private List<ApiFilmographyDTO> filmography = new ArrayList<ApiFilmographyDTO>(0);
 

@@ -22,8 +22,6 @@
  */
 package org.yamj.core.database.dao;
 
-import org.yamj.core.database.model.type.ParticipationType;
-
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +42,7 @@ import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Repository("apiDao")
@@ -223,9 +222,9 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", vd.title");
         sbSQL.append(", vd.title_original AS originalTitle");
         sbSQL.append(", vd.publication_year AS videoYear");
-        sbSQL.append(", '-1' AS seriesId");
+        sbSQL.append(", null AS seriesId");
         sbSQL.append(", vd.season_id AS seasonId");
-        sbSQL.append(", '-1' AS season");
+        sbSQL.append(", null AS season");
         sbSQL.append(", vd.episode AS episode");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "vd"));
         sbSQL.append(" FROM videodata vd");
@@ -288,9 +287,9 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", ser.title_original AS originalTitle");
         sbSQL.append(", ser.start_year AS videoYear");
         sbSQL.append(", ser.id AS seriesId");
-        sbSQL.append(", '-1' AS seasonId");
-        sbSQL.append(", '-1' AS season");
-        sbSQL.append(", '-1' AS episode");
+        sbSQL.append(", null AS seasonId");
+        sbSQL.append(", null AS season");
+        sbSQL.append(", null AS episode");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "ser"));
         sbSQL.append(" FROM series ser ");
         // Add genre tables for include and exclude
@@ -349,7 +348,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", sea.series_id AS seriesId");
         sbSQL.append(", sea.id AS seasonId");
         sbSQL.append(", sea.season AS season");
-        sbSQL.append(", '-1' AS episode");
+        sbSQL.append(", null AS episode");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "sea"));
         sbSQL.append(" FROM season sea");
         // Add genre tables for include and exclude
@@ -563,16 +562,16 @@ public class ApiDao extends HibernateDao {
     private List<ApiFilmographyDTO> getPersonFilmographyInside(long id, String sortBy, String sortDir) {
         StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("SELECT DISTINCT '"+ParticipationType.MOVIE.name()+"' as typeString, c1.job as job, c1.role as role,");
-        sbSQL.append("v1.title as title, v1.title_original as originalTitle, v1.publication_year as year, -1 as yearEnd,");
+        sbSQL.append("v1.title as title, v1.title_original as originalTitle, v1.publication_year as year, null as yearEnd,");
         sbSQL.append("v1.release_date as releaseDate, null as releaseState, v1.plot as description,");
-        sbSQL.append("v1.id as videoDataId, -1 as seriesId ");
+        sbSQL.append("v1.id as videoDataId, null as seriesId ");
         sbSQL.append("FROM cast_crew c1, videodata v1 ");
         sbSQL.append("WHERE c1.person_id = :id and v1.id=c1.videodata_id and v1.episode<0 ");
         sbSQL.append("UNION ");
         sbSQL.append("SELECT DISTINCT '"+ParticipationType.SERIES.name()+"' as typeString, c2.job as job, c2.role as role,");
         sbSQL.append("ser.title as title, ser.title_original as originalTitle, ser.start_year as year, ser.end_year as yearEnd,");
         sbSQL.append("null as releaseDate, null as releaseState, ser.plot as description,");
-        sbSQL.append("-1 as videoDataId, ser.id as seriesId ");
+        sbSQL.append("null as videoDataId, ser.id as seriesId ");
         sbSQL.append("FROM cast_crew c2, videodata v2, season sea, series ser ");
         sbSQL.append("WHERE c2.person_id = :id and v2.id=c2.videodata_id and v2.episode>=0 ");
         sbSQL.append("and v2.season_id=sea.id and sea.series_id=ser.id ");
@@ -895,26 +894,18 @@ public class ApiDao extends HibernateDao {
         OptionsEpisode options = (OptionsEpisode) wrapper.getOptions();
         SqlScalars sqlScalars = new SqlScalars();
 
-        sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.id AS seasonId, sea.season, vid.episode, vid.id AS episodeId, vid.title,");
+        sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.id AS seasonId, sea.season, vid.episode, ");
+        sqlScalars.addToSql("vid.id, vid.title, vid.title_original as originalTitle, vid.release_date as firstAired, ");
         if (options.hasDataItem(DataItem.OUTLINE)) {
-            sqlScalars.addToSql("vid.outline,");
+            sqlScalars.addToSql("vid.outline, ");
             sqlScalars.addScalar("outline", StringType.INSTANCE);
         }
         if (options.hasDataItem(DataItem.PLOT)) {
-            sqlScalars.addToSql("vid.plot,");
+            sqlScalars.addToSql("vid.plot, ");
             sqlScalars.addScalar("plot", StringType.INSTANCE);
         }
-        if (options.hasDataItem(DataItem.FILES)) {
-            sqlScalars.addToSql("sf.full_path AS filename,");
-            sqlScalars.addScalar("filename", StringType.INSTANCE);
-        }
         sqlScalars.addToSql("ag.cache_filename AS cacheFilename, ag.cache_dir AS cacheDir");
-        sqlScalars.addToSql("FROM season sea, series ser, videodata vid");
-        if (options.hasDataItem(DataItem.FILES)) {
-            sqlScalars.addToSql(", mediafile_videodata mv, stage_file sf");
-        }
-
-        sqlScalars.addToSql(", artwork a");
+        sqlScalars.addToSql("FROM season sea, series ser, videodata vid, artwork a");
         sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
         sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
         sqlScalars.addToSql("WHERE sea.series_id=ser.id");
@@ -932,25 +923,26 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("AND sea.id=:seasonid");
             sqlScalars.addParameters("seasonid", options.getSeasonid());
         }
-        if (options.hasDataItem(DataItem.FILES)) {
-            sqlScalars.addToSql("AND vid.id = mv.videodata_id");
-            sqlScalars.addToSql("AND mv.mediafile_id = sf.mediafile_id");
-            sqlScalars.addToSql("AND sf.status != '" + StatusType.DUPLICATE.toString() +"'");
-            sqlScalars.addToSql("AND sf.file_type = '" + FileType.VIDEO.toString() + "'");
-        }
-        sqlScalars.addToSql("ORDER BY seriesId, season, episode");
+        sqlScalars.addToSql(" ORDER BY seriesId, season, episode");
         LOG.debug("getEpisodeList SQL: {}", sqlScalars.getSql());
 
+        sqlScalars.addScalar(ID, LongType.INSTANCE);
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON, LongType.INSTANCE);
         sqlScalars.addScalar(EPISODE, LongType.INSTANCE);
-        sqlScalars.addScalar("episodeId", LongType.INSTANCE);
         sqlScalars.addScalar(TITLE, StringType.INSTANCE);
+        sqlScalars.addScalar(ORIGINAL_TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(CACHE_FILENAME, StringType.INSTANCE);
         sqlScalars.addScalar(CACHE_DIR, StringType.INSTANCE);
-
+        sqlScalars.addScalar("firstAired", DateType.INSTANCE);
+        
         List<ApiEpisodeDTO> results = executeQueryWithTransform(ApiEpisodeDTO.class, sqlScalars, wrapper);
+        if (CollectionUtils.isNotEmpty(results) && options.hasDataItem(DataItem.FILES)) {
+            for (ApiEpisodeDTO episode : results) {
+                episode.setFiles(this.getFilesForId(MetaDataType.EPISODE, episode.getId()));
+            }
+        }
         wrapper.setResults(results);
     }
 
@@ -1029,47 +1021,98 @@ public class ApiDao extends HibernateDao {
      * @param id
      * @return
      */
-    public List<ApiFileDTO> getFilesForId(MetaDataType type, Long id) {
+    private List<ApiFileDTO> getFilesForId(MetaDataType type, Long id) {
         // Build the SQL statement
-        SqlScalars sqlScalars = new SqlScalars();
-
+        StringBuilder sbSQL = new StringBuilder();
+        sbSQL.append("SELECT mf.id as id, mf.extra as extra, mf.part as part, mf.part_title as partTitle, mf.movie_version as version, ");
+        sbSQL.append("mf.container as container, mf.codec as codec, mf.codec_format as codecFormat, mf.codec_profile as codecProfile, ");  
+        sbSQL.append("mf.bitrate as bitrate, mf.overall_bitrate as overallBitrate, mf.fps as fps, ");
+        sbSQL.append("mf.width as width, mf.height as height, mf.aspect_ratio as aspectRatio, mf.runtime as runtime,  mf.video_source as videoSource, ");
+        sbSQL.append("sf.full_path as fileName, sf.file_date as fileDate, sf.file_size as fileSize, ");
+        
         if (type == MetaDataType.MOVIE) {
-            sqlScalars.addToSql("SELECT sf.mediafile_id AS id, sf.full_path AS filename,-1 AS season, -1 AS episode");
-            sqlScalars.addToSql("FROM videodata vd, mediafile_videodata mv, stage_file sf");
-            sqlScalars.addToSql("WHERE file_type='" + FileType.VIDEO.toString() + "'");
-            sqlScalars.addToSql("AND vd.id=:id");
-            sqlScalars.addToSql("AND vd.id=mv.videodata_id");
-            sqlScalars.addToSql("AND mv.mediafile_id=sf.mediafile_id");
+            sbSQL.append("null as season, null as episode ");
+            sbSQL.append("FROM mediafile_videodata mv, mediafile mf, stage_file sf ");
+            sbSQL.append("WHERE mv.videodata_id=:id ");
         } else if (type == MetaDataType.SERIES) {
-            sqlScalars.addToSql("SELECT sf.mediafile_id AS id, sf.full_path AS filename, s.season, vd.episode");
-            sqlScalars.addToSql("FROM stage_file sf, season s, videodata vd, mediafile_videodata mv");
-            sqlScalars.addToSql("WHERE file_type='" + FileType.VIDEO.toString() + "'");
-            sqlScalars.addToSql("AND s.series_id=:id");
-            sqlScalars.addToSql("AND s.id = vd.season_id");
-            sqlScalars.addToSql("AND vd.id=mv.videodata_id");
-            sqlScalars.addToSql("AND mv.mediafile_id=sf.mediafile_id");
+            sbSQL.append("sea.season, vd.episode ");
+            sbSQL.append("FROM mediafile_videodata mv, mediafile mf, stage_file sf, season sea, videodata vd ");
+            sbSQL.append("WHERE sea.series_id=:id ");
+            sbSQL.append("and vd.season_id=sea.id ");
+            sbSQL.append("and mv.videodata_id=vd.id ");
         } else if (type == MetaDataType.SEASON) {
-            sqlScalars.addToSql("SELECT sf.mediafile_id AS id, sf.full_path AS filename, s.season, vd.episode");
-            sqlScalars.addToSql("FROM stage_file sf, season s, videodata vd, mediafile_videodata mv");
-            sqlScalars.addToSql("WHERE file_type='" + FileType.VIDEO.toString() + "'");
-            sqlScalars.addToSql("AND s.id=:id");
-            sqlScalars.addToSql("AND s.id = vd.season_id");
-            sqlScalars.addToSql("AND vd.id=mv.videodata_id");
-            sqlScalars.addToSql("AND mv.mediafile_id=sf.mediafile_id");
+            sbSQL.append("sea.season, vd.episode ");
+            sbSQL.append("FROM mediafile_videodata mv, mediafile mf, stage_file sf, season sea, videodata vd ");
+            sbSQL.append("WHERE sea.id=:id ");
+            sbSQL.append("and vd.season_id=sea.id ");
+            sbSQL.append("and mv.videodata_id=vd.id ");
         } else if (type == MetaDataType.EPISODE) {
-            return Collections.emptyList();
+            sbSQL.append("null as season, null as episode ");
+            sbSQL.append("FROM mediafile_videodata mv, mediafile mf, stage_file sf ");
+            sbSQL.append("WHERE mv.videodata_id=:id ");
+        }
+        
+        sbSQL.append("and mv.mediafile_id=mf.id ");
+        sbSQL.append("and sf.mediafile_id=mf.id ");
+        sbSQL.append("and sf.file_type='" + FileType.VIDEO.toString() + "' ");
+        sbSQL.append("and sf.status!='" + StatusType.DUPLICATE.toString() + "' ");
+
+        if (type == MetaDataType.SERIES || type == MetaDataType.SEASON) {
+            sbSQL.append("ORDER BY sea.season ASC, vd.episode ASC");
         }
 
-        LOG.debug("getFilesForId ({}-{}) SQL: {}", type, id, sqlScalars.getSql());
 
+        SqlScalars sqlScalars = new SqlScalars(sbSQL);
         sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar("filename", StringType.INSTANCE);
+        sqlScalars.addScalar("extra", BooleanType.INSTANCE);
+        sqlScalars.addScalar("part", IntegerType.INSTANCE);
+        sqlScalars.addScalar("partTitle", StringType.INSTANCE);
+        sqlScalars.addScalar("version", StringType.INSTANCE);
+        sqlScalars.addScalar("container", StringType.INSTANCE);
+        sqlScalars.addScalar("codec", StringType.INSTANCE);
+        sqlScalars.addScalar("codecFormat", StringType.INSTANCE);
+        sqlScalars.addScalar("codecProfile", StringType.INSTANCE);
+        sqlScalars.addScalar("bitrate", IntegerType.INSTANCE);
+        sqlScalars.addScalar("overallBitrate", IntegerType.INSTANCE);
+        sqlScalars.addScalar("fps", FloatType.INSTANCE);
+        sqlScalars.addScalar("width", IntegerType.INSTANCE);
+        sqlScalars.addScalar("height", IntegerType.INSTANCE);
+        sqlScalars.addScalar("aspectRatio", StringType.INSTANCE);
+        sqlScalars.addScalar("runtime", IntegerType.INSTANCE);
+        sqlScalars.addScalar("videoSource", StringType.INSTANCE);
+        sqlScalars.addScalar("fileName", StringType.INSTANCE);
+        sqlScalars.addScalar("fileDate", TimestampType.INSTANCE);
+        sqlScalars.addScalar("fileSize", LongType.INSTANCE);
         sqlScalars.addScalar(SEASON, LongType.INSTANCE);
         sqlScalars.addScalar(EPISODE, LongType.INSTANCE);
-
         sqlScalars.addParameters(ID, id);
 
-        return executeQueryWithTransform(ApiFileDTO.class, sqlScalars, null);
+        List<ApiFileDTO> results = executeQueryWithTransform(ApiFileDTO.class, sqlScalars, null);
+        if (CollectionUtils.isNotEmpty(results)) {
+            for (ApiFileDTO file : results)  {
+                file.setAudioCodes(this.getAudioCodecs(file.getId()));
+            }
+        }
+        return results;
+    }
+    
+    private List<ApiAudioCodecDTO> getAudioCodecs(long mediaFileId) {
+        // Build the SQL statement
+        StringBuilder sbSQL = new StringBuilder();
+        sbSQL.append("SELECT ac.codec, ac.codec_format as codecFormat, ac.bitrate, ac.channels, ac.language ");
+        sbSQL.append("FROM audio_codec ac ");
+        sbSQL.append("WHERE ac.mediafile_id=:id ");
+        sbSQL.append("ORDER BY ac.counter ASC");
+
+        SqlScalars sqlScalars = new SqlScalars(sbSQL);
+        sqlScalars.addScalar("codec", StringType.INSTANCE);
+        sqlScalars.addScalar("codecFormat", StringType.INSTANCE);
+        sqlScalars.addScalar("bitrate", IntegerType.INSTANCE);
+        sqlScalars.addScalar("channels", IntegerType.INSTANCE);
+        sqlScalars.addScalar("language", StringType.INSTANCE);
+        sqlScalars.addParameters(ID, mediaFileId);
+
+        return executeQueryWithTransform(ApiAudioCodecDTO.class, sqlScalars, null);
     }
 
     /**
