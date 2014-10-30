@@ -608,13 +608,15 @@ public class ApiDao extends HibernateDao {
         sbSQL.append("p.release_date as releaseDate, p.release_state as releaseState,p.description as description,");
         sbSQL.append("movie.id as videoDataId, serids.series_id as seriesId ");
         sbSQL.append("FROM participation p ");
-        sbSQL.append("LEFT OUTER JOIN cast_crew c ON c.person_id=p.person_id and p.participation_type='MOVIE' ");
-        sbSQL.append("  LEFT OUTER JOIN (SELECT v.id as id, v.publication_year, v.title_original as title_original, i.sourcedb as sourcedb, i.sourcedb_id as sourcedb_id ");
-        sbSQL.append("    FROM videodata v, videodata_ids i ");
-        sbSQL.append("    WHERE v.episode<0 and v.id=i.videodata_id) movie ");
-        sbSQL.append("  ON movie.id=c.videodata_id and ");
-        sbSQL.append("  ((movie.publication_year=p.year and movie.title_original is not null and upper(movie.title_original)=upper(p.title_original)) ");
-        sbSQL.append("   or (movie.sourcedb=p.sourcedb and movie.sourcedb_id=p.sourcedb_id)) ");
+        sbSQL.append(" LEFT OUTER JOIN (SELECT DISTINCT v1.id, p1.id as participation_id ");
+        sbSQL.append("  FROM participation p1 "); 
+        sbSQL.append("  JOIN cast_crew c1 ON c1.person_id=p1.person_id ");
+        sbSQL.append("  JOIN videodata v1 ON c1.videodata_id=v1.id and v1.episode<0 ");
+        sbSQL.append("  LEFT OUTER JOIN videodata_ids ids on v1.id=ids.videodata_id "); 
+        sbSQL.append("  WHERE p1.person_id=:id and p1.participation_type='MOVIE' ");
+        sbSQL.append("  and ((v1.publication_year=p1.year and p1.title_original is not null and upper(v1.title_original)=upper(p1.title_original)) ");
+        sbSQL.append("       or (ids.sourcedb=p1.sourcedb and ids.sourcedb_id=p1.sourcedb_id))) movie ");
+        sbSQL.append(" ON p.id=movie.participation_id ");
         sbSQL.append("LEFT OUTER JOIN series_ids serids ON serids.sourcedb=p.sourcedb and serids.sourcedb_id=p.sourcedb_id ");
         sbSQL.append("WHERE p.person_id = :id ");
 
