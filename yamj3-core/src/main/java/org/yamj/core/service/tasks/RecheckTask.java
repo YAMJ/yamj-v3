@@ -23,7 +23,6 @@
 package org.yamj.core.service.tasks;
 
 import java.util.Calendar;
-
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +31,10 @@ import org.springframework.stereotype.Component;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.service.MetadataStorageService;
 
+/**
+ * Task for checking if video, series or person is older than x days
+ * and marks those data entries as updated in order to force a rescan. 
+ */
 @Component
 public class RecheckTask implements ITask {
 
@@ -53,7 +56,8 @@ public class RecheckTask implements ITask {
     public void init() throws Exception {
         executionTaskService.registerTask(this);
     }
-    
+
+    @Override
     public void execute(String options) throws Exception {
         LOG.debug("Execute recheck task");
 

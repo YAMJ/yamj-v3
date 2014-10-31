@@ -30,19 +30,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.yamj.core.api.wrapper.ApiWrapperList;
-import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.dto.ApiVideoDTO;
-import org.yamj.core.api.options.OptionsIndexVideo;
+import org.springframework.web.bind.annotation.*;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.CountGeneric;
+import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
+import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.core.api.options.OptionsIndexPerson;
+import org.yamj.core.api.options.OptionsIndexVideo;
+import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller

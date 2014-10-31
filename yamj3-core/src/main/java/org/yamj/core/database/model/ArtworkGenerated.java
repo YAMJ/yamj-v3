@@ -48,7 +48,7 @@ public class ArtworkGenerated extends AbstractAuditable implements Serializable 
     @JoinColumn(name = "profile_id")
     private ArtworkProfile artworkProfile;
 
-    @Column(name = "cache_filename", nullable = false, length = 200)
+    @Column(name = "cache_filename", nullable = false, length = 255)
     private String cacheFilename;
 
     @Column(name = "cache_dir", nullable = false, length = 50)

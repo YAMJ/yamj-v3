@@ -22,20 +22,14 @@
  */
 package org.yamj.core.database.model;
 
-import java.util.HashSet;
-import java.util.Set;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
@@ -273,7 +267,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
         sb.append(getFileDate());
         sb.append(", fileSize=");
         sb.append(getFileSize());
-        if (getStageDirectory() != null) {
+        if (this.stageDirectory != null && Hibernate.isInitialized(this.stageDirectory)) {
             sb.append(", stageDirectory=");
             sb.append(getStageDirectory().getDirectoryPath());
         }

@@ -88,6 +88,9 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @Column(name = "cache_filename",length = 255)
     private String cacheFilename;
 
+    @Column(name = "cache_dir", length = 50)
+    private String cacheDirectory;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "artworkLocated")
     private Set<ArtworkGenerated> generatedArtworks = new HashSet<ArtworkGenerated>(0);
 
@@ -187,6 +190,14 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     public void setCacheFilename(String cacheFilename) {
         this.cacheFilename = cacheFilename;
+    }
+
+    public String getCacheDirectory() {
+        return cacheDirectory;
+    }
+
+    public void setCacheDirectory(String cacheDirectory) {
+        this.cacheDirectory = cacheDirectory;
     }
 
     public Set<ArtworkGenerated> getGeneratedArtworks() {

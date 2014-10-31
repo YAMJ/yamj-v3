@@ -105,6 +105,8 @@ public class ArtworkProcessorService {
         }
 
         // set values in located artwork
+        String cacheDirectory = FileTools.createDirHash(cacheFilename);
+        located.setCacheDirectory(StringUtils.removeEnd(cacheDirectory, File.separator + cacheFilename));
         located.setCacheFilename(cacheFilename);
         located.setStatus(StatusType.DONE);
 
