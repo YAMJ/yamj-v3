@@ -58,9 +58,9 @@ public class CommonStorageService {
     public List<Long> getStageFilesToDelete() {
         final StringBuilder sb = new StringBuilder();
         sb.append("select f.id from StageFile f ");
-        sb.append("where f.status = :deleted " );
+        sb.append("where f.status = :delete " );
 
-        Map<String,Object> params = Collections.singletonMap("deleted", (Object)StatusType.DELETED);
+        Map<String,Object> params = Collections.singletonMap("delete", (Object)StatusType.DELETE);
         return commonDao.findByNamedParameters(sb, params);
     }
     
@@ -79,8 +79,8 @@ public class CommonStorageService {
         if (stageFile == null) {
             // not found
             return Collections.emptySet();
-        } if (StatusType.DELETED != stageFile.getStatus()) {
-            // status must still be DELETED
+        } if (StatusType.DELETE != stageFile.getStatus()) {
+            // status must still be DELETE
             return Collections.emptySet();
         }
         

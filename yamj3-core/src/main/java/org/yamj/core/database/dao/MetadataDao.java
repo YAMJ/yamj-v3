@@ -96,7 +96,7 @@ public class MetadataDao extends HibernateDao {
             this.saveEntity(person);
         } else {
             boolean changed = person.setSourceDbIds(dto.getPersonIdMap());
-            if (StatusType.DELETED.equals(person.getStatus())) {
+            if (StatusType.DELETE.equals(person.getStatus())) {
                 changed = true;
             }
             if (changed) {
