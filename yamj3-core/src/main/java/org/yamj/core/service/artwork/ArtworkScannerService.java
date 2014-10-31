@@ -74,37 +74,37 @@ public class ArtworkScannerService {
     private ConfigServiceWrapper configServiceWrapper;
 
     public void registerMoviePosterScanner(IMoviePosterScanner posterScanner) {
-        LOG.info("Registered movie poster scanner: {}", posterScanner.getScannerName().toLowerCase());
+        LOG.trace("Registered movie poster scanner: {}", posterScanner.getScannerName().toLowerCase());
         registeredMoviePosterScanner.put(posterScanner.getScannerName().toLowerCase(), posterScanner);
     }
 
     public void registerTvShowPosterScanner(ITvShowPosterScanner posterScanner) {
-        LOG.info("Registered TV show poster scanner: {}", posterScanner.getScannerName().toLowerCase());
+        LOG.trace("Registered TV show poster scanner: {}", posterScanner.getScannerName().toLowerCase());
         registeredTvShowPosterScanner.put(posterScanner.getScannerName().toLowerCase(), posterScanner);
     }
 
     public void registerMovieFanartScanner(IMovieFanartScanner fanartScanner) {
-        LOG.info("Registered movie fanart scanner: {}", fanartScanner.getScannerName().toLowerCase());
+        LOG.trace("Registered movie fanart scanner: {}", fanartScanner.getScannerName().toLowerCase());
         registeredMovieFanartScanner.put(fanartScanner.getScannerName().toLowerCase(), fanartScanner);
     }
 
     public void registerTvShowFanartScanner(ITvShowFanartScanner fanartScanner) {
-        LOG.info("Registered TV show fanart scanner: {}", fanartScanner.getScannerName().toLowerCase());
+        LOG.trace("Registered TV show fanart scanner: {}", fanartScanner.getScannerName().toLowerCase());
         registeredTvShowFanartScanner.put(fanartScanner.getScannerName().toLowerCase(), fanartScanner);
     }
 
     public void registerTvShowBannerScanner(ITvShowBannerScanner bannerScanner) {
-        LOG.info("Registered TV show banner scanner: {}", bannerScanner.getScannerName().toLowerCase());
+        LOG.trace("Registered TV show banner scanner: {}", bannerScanner.getScannerName().toLowerCase());
         registeredTvShowBannerScanner.put(bannerScanner.getScannerName().toLowerCase(), bannerScanner);
     }
 
     public void registerTvShowVideoImageScanner(ITvShowVideoImageScanner videoImageScanner) {
-        LOG.info("Registered TV show episode image scanner: {}", videoImageScanner.getScannerName().toLowerCase());
+        LOG.trace("Registered TV show episode image scanner: {}", videoImageScanner.getScannerName().toLowerCase());
         registeredTvShowVideoImageScanner.put(videoImageScanner.getScannerName().toLowerCase(), videoImageScanner);
     }
 
     public void registerPhotoScanner(IPhotoScanner photoScanner) {
-        LOG.info("Registered photo scanner: {}", photoScanner.getScannerName().toLowerCase());
+        LOG.trace("Registered photo scanner: {}", photoScanner.getScannerName().toLowerCase());
         registeredPhotoScanner.put(photoScanner.getScannerName().toLowerCase(), photoScanner);
     }
 

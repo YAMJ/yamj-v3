@@ -62,7 +62,7 @@ public class OnlineScannerService {
      * @param movieScanner
      */
     public void registerMovieScanner(IMovieScanner movieScanner) {
-        LOG.info("Registered movie scanner: {}", movieScanner.getScannerName().toLowerCase());
+        LOG.trace("Registered movie scanner: {}", movieScanner.getScannerName().toLowerCase());
         registeredMovieScanner.put(movieScanner.getScannerName().toLowerCase(), movieScanner);
     }
 
@@ -72,7 +72,7 @@ public class OnlineScannerService {
      * @param seriesScanner
      */
     public void registerSeriesScanner(ISeriesScanner seriesScanner) {
-        LOG.info("Registered series scanner: {}", seriesScanner.getScannerName().toLowerCase());
+        LOG.trace("Registered series scanner: {}", seriesScanner.getScannerName().toLowerCase());
         registeredSeriesScanner.put(seriesScanner.getScannerName().toLowerCase(), seriesScanner);
     }
 
@@ -82,12 +82,12 @@ public class OnlineScannerService {
      * @param personScanner
      */
     public void registerPersonScanner(IPersonScanner personScanner) {
-        LOG.info("Registered person scanner: {}", personScanner.getScannerName().toLowerCase());
+        LOG.trace("Registered person scanner: {}", personScanner.getScannerName().toLowerCase());
         registeredPersonScanner.put(personScanner.getScannerName().toLowerCase(), personScanner);
         
         if (personScanner instanceof IFilmographyScanner) {
             IFilmographyScanner filmographyScanner = (IFilmographyScanner)personScanner;
-            LOG.info("Registered filmography scanner: {}", filmographyScanner.getScannerName().toLowerCase());
+            LOG.trace("Registered filmography scanner: {}", filmographyScanner.getScannerName().toLowerCase());
             registeredFilmographyScanner.put(filmographyScanner.getScannerName().toLowerCase(), filmographyScanner);
         }
     }
@@ -105,7 +105,7 @@ public class OnlineScannerService {
             LOG.error("Movie scanner '{}' not registered", MOVIE_SCANNER);
             scanResult = ScanResult.ERROR;
         } else {
-            LOG.debug("Scanning movie data for '{}' using {}", videoData.getTitle(), MOVIE_SCANNER);
+            LOG.info("Scanning movie data for '{}' using {}", videoData.getTitle(), MOVIE_SCANNER);
 
             // scan video data
             try {
@@ -166,7 +166,7 @@ public class OnlineScannerService {
             LOG.error("Series scanner '{}' not registered", SERIES_SCANNER);
             scanResult = ScanResult.ERROR;
         } else {
-            LOG.debug("Scanning series data for '{}' using {}", series.getTitle(), SERIES_SCANNER);
+            LOG.info("Scanning series data for '{}' using {}", series.getTitle(), SERIES_SCANNER);
 
             // scan series
             try {

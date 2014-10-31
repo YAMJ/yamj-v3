@@ -1056,8 +1056,13 @@ public class ApiDao extends HibernateDao {
         
         sbSQL.append("and mv.mediafile_id=mf.id ");
         sbSQL.append("and sf.mediafile_id=mf.id ");
-        sbSQL.append("and sf.file_type='" + FileType.VIDEO.toString() + "' ");
-        sbSQL.append("and sf.status!='" + StatusType.DUPLICATE.toString() + "' ");
+        sbSQL.append("and sf.file_type='");
+        sbSQL.append(FileType.VIDEO.toString());
+        sbSQL.append("' and sf.status not in ('");
+        sbSQL.append(StatusType.DUPLICATE.toString());
+        sbSQL.append("','");
+        sbSQL.append(StatusType.DELETED.toString());
+        sbSQL.append("') ");
 
         if (type == MetaDataType.SERIES || type == MetaDataType.SEASON) {
             sbSQL.append("ORDER BY sea.season ASC, vd.episode ASC");

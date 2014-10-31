@@ -142,6 +142,10 @@ public class Artwork extends AbstractAuditable implements Serializable {
         this.artworkLocated.add(artworkLocated);
     }
 
+    public void removeArtworkLocated(ArtworkLocated artworkLocated) {
+        this.artworkLocated.remove(artworkLocated);
+    }
+
     public StatusType getStatus() {
         return status;
     }

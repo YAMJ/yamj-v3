@@ -46,7 +46,7 @@ public class ExecutionTaskService {
      * @param task
      */
     public void registerTask(ITask task) {
-        LOG.info("Registered task: {}", task.getTaskName().toLowerCase());
+        LOG.debug("Registered task: {}", task.getTaskName().toLowerCase());
         registeredTasks.put(task.getTaskName().toLowerCase(), task);
     }
 

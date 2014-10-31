@@ -22,10 +22,12 @@
  */
 package org.yamj.core.database.service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import org.springframework.util.CollectionUtils;
+
+import java.util.*;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.CommonDao;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.ArtworkGenerated;
+import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.service.file.FileStorageService;
+import org.yamj.core.service.file.StorageType;
 
 @Service("commonStorageService")
 public class CommonStorageService {
@@ -42,12 +50,14 @@ public class CommonStorageService {
     
     @Autowired
     private CommonDao commonDao;
-
+    @Autowired
+    private FileStorageService fileStorageService;
+    
     @SuppressWarnings("unchecked")
     @Transactional(readOnly = true)
-    public List<StageFile> getStageFilesToDelete() {
+    public List<Long> getStageFilesToDelete() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("select f from StageFile f ");
+        sb.append("select f.id from StageFile f ");
         sb.append("where f.status = :deleted " );
 
         Map<String,Object> params = Collections.singletonMap("deleted", (Object)StatusType.DELETED);
@@ -61,8 +71,15 @@ public class CommonStorageService {
      * @return list of cached file names which must be deleted also
      */
     @Transactional
-    public Set<String> deleteStageFile(StageFile stageFile) {
-        if (StatusType.DELETED != stageFile.getStatus()) {
+    public Set<String> deleteStageFile(Long id) {
+        // get the stage file
+        StageFile stageFile = this.commonDao.getById(StageFile.class, id);
+        
+        // check stage file
+        if (stageFile == null) {
+            // not found
+            return Collections.emptySet();
+        } if (StatusType.DELETED != stageFile.getStatus()) {
             // status must still be DELETED
             return Collections.emptySet();
         }
@@ -92,13 +109,52 @@ public class CommonStorageService {
     }
 
     private Set<String> deleteImageStageFile(StageFile stageFile) {
-        // TODO needs implementation
+        Set<String> filesToDelete = new HashSet<String>();
         
-        return Collections.emptySet();
+        for (ArtworkLocated located : stageFile.getArtworkLocated()) {
+            Artwork artwork = located.getArtwork();
+            this.deleteLocatedArtwork(artwork, located, filesToDelete);
+
+            // if no located artwork exists anymore then set status of artwork to NEW 
+            if (CollectionUtils.isEmpty(located.getArtwork().getArtworkLocated())) {
+                artwork.setStatus(StatusType.NEW);
+                this.commonDao.updateEntity(artwork);
+            }
+        }
+        
+        // delete stage file
+        this.commonDao.deleteEntity(stageFile);
+        
+        return filesToDelete;
     }
     
     private void deleteCommonStageFile(StageFile stageFile) {
         // just delete the stage file
         this.commonDao.deleteEntity(stageFile);
+    }
+    
+    private void deleteLocatedArtwork(Artwork artwork, ArtworkLocated located, Set<String> filesToDelete) {
+        StorageType storageType;
+        if (artwork.getArtworkType() == ArtworkType.PHOTO) {
+            storageType = StorageType.PHOTO;
+        } else {
+            storageType = StorageType.ARTWORK;
+        }
+
+        // delete generated files
+        String filename;
+        for (ArtworkGenerated generated : located.getGeneratedArtworks()) {
+            filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
+            filesToDelete.add(this.fileStorageService.getStorageDir(storageType, filename));
+            this.commonDao.deleteEntity(generated);
+        }
+
+        // delete located file
+        if (StringUtils.isNotBlank(located.getCacheFilename())) {
+            filename = FilenameUtils.concat(located.getCacheDirectory(), located.getCacheFilename());
+            filesToDelete.add(this.fileStorageService.getStorageDir(storageType, filename));
+        }
+        artwork.removeArtworkLocated(located);
+        this.commonDao.deleteEntity(located);
     }
 }

@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.service.CommonStorageService;
 
 /**
@@ -45,38 +44,40 @@ public class DeleteTask implements ITask {
     public void execute(String options) throws Exception {
         LOG.debug("Execute delete task");
         
-        List<StageFile> stageFiles = this.commonStorageService.getStageFilesToDelete();
-        if (CollectionUtils.isEmpty(stageFiles)) {
-            LOG.trace("No stage files found to delete");
+        List<Long> ids = this.commonStorageService.getStageFilesToDelete();
+        if (CollectionUtils.isEmpty(ids)) {
+            LOG.debug("No stage files found to delete");
             return;
         }
         
         // delete stage files
         Set<String> filesToDelete = new HashSet<String>();
-        for (StageFile stageFile : stageFiles) {
+        for (Long id : ids) {
             try {
-                filesToDelete.addAll(this.commonStorageService.deleteStageFile(stageFile));
+                filesToDelete.addAll(this.commonStorageService.deleteStageFile(id));
             } catch (Exception ex) {
-                LOG.warn("Failed to delete stage file: {})", stageFile);
+                LOG.warn("Failed to delete stage file ID: {}", id);
                 LOG.error("Deletion error", ex);
             }
         }
 
         if (CollectionUtils.isEmpty(filesToDelete)) {
-            LOG.trace("No files to delete on disc");
+            LOG.debug("No files to delete on disc");
             return;
         }
 
         // delete files on disk
-        for (String fileName : filesToDelete) {
+        for (String filename : filesToDelete) {
             try {
-                File file = new File(fileName);
-                if (!file.delete()) {
-                    LOG.info("File '{}' could not be deleted", fileName);
+                LOG.trace("Delete file: {}", filename);
+                File file = new File(filename);
+                if (!file.exists()) {
+                    LOG.info("File '{}' does not exist", filename);
+                } else if (!file.delete()) {
+                    LOG.info("File '{}' could not be deleted", filename);
                 }
             } catch (Exception ex) {
-                LOG.warn("File '{}' could not be deleted", fileName);
-                LOG.error("Deletion error", ex);
+                LOG.error("Deletion error for file: '"+ filename+"'", ex);
             }
         }
     }
