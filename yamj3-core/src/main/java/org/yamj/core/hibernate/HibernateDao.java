@@ -94,6 +94,21 @@ public abstract class HibernateDao {
     }
 
     /**
+     * Delete all entities.
+     *
+     * @param entities the entities to delete
+     */
+    @SuppressWarnings("rawtypes")
+    public void deleteAll(final Collection entities) {
+        if (entities != null && entities.size() > 0) {
+            Session session = getSession();
+            for (Object entity : entities) {
+                session.delete(entity);
+            }
+        }
+    }
+
+    /**
      * Save an entity.
      *
      * @param entity the entity to save
@@ -291,9 +306,23 @@ public abstract class HibernateDao {
     }
 
     /**
+     * Find entries-
+     *
+     * @param queryString the query string
+     * @param id the id
+     * @return list of entities
+     */
+    @SuppressWarnings("rawtypes")
+    public List find(CharSequence queryString) {
+        Query queryObject = getSession().createQuery(queryString.toString());
+        queryObject.setCacheable(true);
+        return queryObject.list();
+    }
+
+    /**
      * Find entries by id.
      *
-     * @param queryString the query string.
+     * @param queryString the query string
      * @param id the id
      * @return list of entities
      */
@@ -308,7 +337,7 @@ public abstract class HibernateDao {
     /**
      * Find list of entities by named parameters.
      *
-     * @param queryCharSequence the query string.
+     * @param queryCharSequence the query string
      * @param params the named parameters
      * @return list of entities
      */

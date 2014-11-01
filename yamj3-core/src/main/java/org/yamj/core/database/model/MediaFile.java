@@ -26,9 +26,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import org.hibernate.annotations.ForeignKey;
-
 import org.yamj.core.database.model.type.FileType;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
@@ -375,5 +373,15 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         }
         MediaFile castOther = (MediaFile) other;
         return StringUtils.equals(this.fileName, castOther.fileName);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("MediaFile [ID=");
+        sb.append(getId());
+        sb.append(", filename=");
+        sb.append(getFileName());
+        return sb.toString();
     }
 }

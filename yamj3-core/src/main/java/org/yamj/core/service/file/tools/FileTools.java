@@ -34,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.PropertyTools;
+import org.yamj.core.database.model.StageDirectory;
 import org.yamj.core.database.model.StageFile;
 
 public class FileTools {
@@ -374,36 +375,51 @@ public class FileTools {
     }
 
     public static boolean isFileScannable(StageFile stageFile) {
-        boolean scannable = true;
-
+        boolean scannable;
         if (StringUtils.isBlank(stageFile.getContent())) {
-            // check if NFO file is readable when no content exists
-            try {
-                File file = new File(stageFile.getFullPath());
-                if (!file.exists() || !file.canRead()) {
-                    scannable = false;
-                }
-            } catch (Exception e) {
-                scannable = false;
-            }
+            scannable = isFileReadable(stageFile);
+        } else {
+            scannable = true;
         }
         return scannable;
     }
 
-    public static boolean isArtworkFileScannable(StageFile stageFile) {
-        boolean scannable = true;
-
+    public static boolean isFileReadable(StageFile stageFile) {
+        boolean readable = false;
         try {
             File file = new File(stageFile.getFullPath());
-            if (!file.exists() || !file.canRead()) {
-                scannable = false;
-            }
-        } catch (Exception e) {
-            scannable = false;
-        }
-        return scannable;
+            readable = (file.exists() && file.canRead());
+        } catch (Exception ignore) {}
+        return readable;
     }
 
+    public static boolean isFileReadable(StageDirectory stageDirectory) {
+        boolean readable = false;
+        try {
+            File file = new File(stageDirectory.getDirectoryPath());
+            readable = (file.exists() && file.canRead());
+        } catch (Exception ignore) {}
+        return readable;
+    }
+
+    public static boolean isFileExistent(StageFile stageFile) {
+        boolean exists = false;
+        try {
+            File file = new File(stageFile.getFullPath());
+            exists = file.exists();
+        } catch (Exception ignore) {}
+        return exists;
+    }
+
+    public static boolean isFileExistent(StageDirectory stageDirectory) {
+        boolean exists = false;
+        try {
+            File file = new File(stageDirectory.getDirectoryPath());
+            exists = file.exists();
+        } catch (Exception ignore) {}
+        return exists;
+    }
+    
     public static String makeSafeFilename(String filename) {
         String newFilename = filename;
 

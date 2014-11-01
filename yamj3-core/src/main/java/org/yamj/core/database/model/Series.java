@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.*;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
@@ -206,6 +208,19 @@ public class Series extends AbstractMetadata {
         return overrideFlags.get(overrideFlag);
     }
 
+    @Override
+    public boolean removeOverrideSource(final String source) {
+        boolean removed = false;
+        for (Iterator<Entry<OverrideFlag, String>> it = this.overrideFlags.entrySet().iterator(); it.hasNext();) {
+            Entry<OverrideFlag,String> e = it.next();
+            if (StringUtils.endsWithIgnoreCase(e.getValue(), source)) {
+                it.remove();
+                removed = true;
+            }
+        }
+        return removed;
+    }
+    
     public Set<Season> getSeasons() {
         return seasons;
     }

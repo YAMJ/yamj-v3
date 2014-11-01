@@ -749,14 +749,14 @@ public class MediaImportService {
                 int hash = stageFile.getFullPath().hashCode();
                 located.setHashCode(String.valueOf((hash < 0 ? 0 - hash : hash)));
 
-                if (FileTools.isArtworkFileScannable(stageFile)) {
+                if (FileTools.isFileReadable(stageFile)) {
                     located.setStatus(StatusType.NEW);
                 } else {
                     located.setStatus(StatusType.INVALID);
                 }
                 
                 this.mediaDao.saveEntity(located);
-                artwork.addArtworkLocated(located);
+                artwork.getArtworkLocated().add(located);
             }
         }
         

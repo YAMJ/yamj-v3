@@ -25,6 +25,8 @@ package org.yamj.core.tools;
 import java.io.File;
 import java.text.BreakIterator;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,11 +39,13 @@ public final class StringTools {
     private static final long KB = 1024;
     private static final long MB = KB * KB;
     private static final long GB = KB * KB * KB;
-    private static final DecimalFormat FILESIZE_FORMAT_0 = new DecimalFormat("0");
-    private static final DecimalFormat FILESIZE_FORMAT_1 = new DecimalFormat("0.#");
-    private static final DecimalFormat FILESIZE_FORMAT_2 = new DecimalFormat("0.##");
+    private static final DecimalFormat FILESIZE_FORMAT_0;
+    private static final DecimalFormat FILESIZE_FORMAT_1;
+    private static final DecimalFormat FILESIZE_FORMAT_2;
     private static final Map<Character, Character> CHAR_REPLACEMENT_MAP = new HashMap<Character, Character>();
     private static final String MPPA_RATED = "Rated";
+    private static final SimpleDateFormat DATE_FORMAT;
+    private static final SimpleDateFormat DATE_FORMAT_LONG;
 
     private StringTools() {
         throw new UnsupportedOperationException("Utility class");
@@ -62,6 +66,30 @@ public final class StringTools {
                 }
             }
         }
+        
+        String dateFormat = PropertyTools.getProperty("yamj3.date.format", "yyyy-MM-dd");
+        
+        // short date format
+        SimpleDateFormat sdf;
+        try {
+            sdf = new SimpleDateFormat(dateFormat);
+        } catch (Exception ignore) {
+            sdf = new SimpleDateFormat("yyyy-MM-dd");
+        }
+        DATE_FORMAT = sdf;
+        try {
+            sdf = new SimpleDateFormat(dateFormat + " HH:mm:ss");
+        } catch (Exception ignore) {
+            sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        }
+        DATE_FORMAT_LONG = sdf;
+
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        // Use the "." as a decimal format separator, ignoring localisation
+        symbols.setDecimalSeparator('.');
+        FILESIZE_FORMAT_0 = new DecimalFormat("0", symbols);
+        FILESIZE_FORMAT_1 = new DecimalFormat("0.#", symbols);
+        FILESIZE_FORMAT_2 = new DecimalFormat("0.##", symbols);
     }
 
     /**
@@ -119,15 +147,40 @@ public final class StringTools {
     }
 
     /**
+     * Format the date into short format
+     * 
+     * @param date
+     */
+    public static String formatDateShort(Date date) {
+        if (date == null) {
+            return null;
+        }
+        return DATE_FORMAT.format(date);
+    }
+
+    /**
+     * Format the date into short format
+     * 
+     * @param date
+     */
+    public static String formatDateLong(Date date) {
+        if (date == null) {
+            return null;
+        }
+        return DATE_FORMAT_LONG.format(date);
+    }
+    
+    /**
      * Format the file size
      *
      * @param fileSize
      * @return
      */
     public static String formatFileSize(long fileSize) {
-
         String returnSize;
-        if (fileSize < KB) {
+        if (fileSize < 0 ) {
+           returnSize = null;
+        } else if (fileSize < KB) {
             returnSize = fileSize + " Bytes";
         } else {
             String appendText;
@@ -161,6 +214,35 @@ public final class StringTools {
         }
 
         return returnSize;
+    }
+
+    /**
+     * Format the duration passed as ?h ?m format
+     *
+     * @param duration duration in seconds
+     * @return
+     */
+    public static String formatDuration(final int duration) {
+        if (duration < 0) {
+            return null;
+        }
+        int fixed = duration / 1000;
+        StringBuilder returnString = new StringBuilder();
+
+        int nbHours = fixed / 3600;
+        if (nbHours != 0) {
+            returnString.append(nbHours).append("h");
+        }
+
+        int nbMinutes = (fixed - (nbHours * 3600)) / 60;
+        if (nbMinutes != 0) {
+            if (nbHours != 0) {
+                returnString.append(" ");
+            }
+            returnString.append(nbMinutes).append("m");
+        }
+        
+        return returnString.toString();
     }
 
     /**

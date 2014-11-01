@@ -134,6 +134,7 @@ public final class InfoDTO {
     public void setTitleOriginal(String titleOriginal) {
         if (StringUtils.isNotBlank(titleOriginal)) {
             this.titleOriginal = titleOriginal;
+            this.changed = true;
         }
     }
 

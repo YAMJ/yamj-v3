@@ -22,14 +22,9 @@
  */
 package org.yamj.core.database.model;
 
-import java.util.Date;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Lob;
-import javax.persistence.MappedSuperclass;
+import java.util.Date;
+import javax.persistence.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
@@ -217,4 +212,6 @@ public abstract class AbstractMetadata extends AbstractAuditable
     // ABSTRACT DECLARATIONS
     
     abstract String getSkipOnlineScans();
+    
+    abstract boolean removeOverrideSource(String source);
 }

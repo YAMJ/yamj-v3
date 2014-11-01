@@ -23,8 +23,6 @@
 package org.yamj.core.database.service;
 
 
-import org.springframework.util.CollectionUtils;
-
 import java.util.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,12 +31,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.dao.CommonDao;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.ArtworkGenerated;
-import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.dao.StagingDao;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
@@ -49,7 +45,7 @@ public class CommonStorageService {
     private static final Logger LOG = LoggerFactory.getLogger(CommonStorageService.class);
     
     @Autowired
-    private CommonDao commonDao;
+    private StagingDao stagingDao;
     @Autowired
     private FileStorageService fileStorageService;
     
@@ -61,7 +57,7 @@ public class CommonStorageService {
         sb.append("where f.status = :delete " );
 
         Map<String,Object> params = Collections.singletonMap("delete", (Object)StatusType.DELETE);
-        return commonDao.findByNamedParameters(sb, params);
+        return stagingDao.findByNamedParameters(sb, params);
     }
     
     /**
@@ -73,7 +69,7 @@ public class CommonStorageService {
     @Transactional
     public Set<String> deleteStageFile(Long id) {
         // get the stage file
-        StageFile stageFile = this.commonDao.getById(StageFile.class, id);
+        StageFile stageFile = this.stagingDao.getById(StageFile.class, id);
         
         // check stage file
         if (stageFile == null) {
@@ -84,8 +80,6 @@ public class CommonStorageService {
             return Collections.emptySet();
         }
         
-        LOG.debug("Delete: {}", stageFile);
-        
         Set<String> filesToDelete;
         switch(stageFile.getFileType()) {
             case VIDEO:
@@ -95,7 +89,7 @@ public class CommonStorageService {
                 filesToDelete = this.deleteImageStageFile(stageFile);
                 break;
             default:
-                this.deleteCommonStageFile(stageFile);
+                this.delete(stageFile);
                 filesToDelete = Collections.emptySet();
                 break;
         }
@@ -103,9 +97,21 @@ public class CommonStorageService {
     }
 
     private Set<String> deleteVideoStageFile(StageFile stageFile) {
-        // TODO needs implementation
+        Set<String> filesToDelete = new HashSet<String>(); 
+
+        // delete the media file if no other stage files are present
+        MediaFile mediaFile = stageFile.getMediaFile();
+        if (mediaFile != null) {
+            mediaFile.getStageFiles().remove(stageFile);
+            if (CollectionUtils.isEmpty(mediaFile.getStageFiles())) {
+                this.delete(mediaFile, filesToDelete);
+            }
+        }
         
-        return Collections.emptySet();
+        // delete the stage file
+        this.delete(stageFile);
+
+        return filesToDelete;
     }
 
     private Set<String> deleteImageStageFile(StageFile stageFile) {
@@ -113,27 +119,131 @@ public class CommonStorageService {
         
         for (ArtworkLocated located : stageFile.getArtworkLocated()) {
             Artwork artwork = located.getArtwork();
-            this.deleteLocatedArtwork(artwork, located, filesToDelete);
+            this.delete(artwork, located, filesToDelete);
 
             // if no located artwork exists anymore then set status of artwork to NEW 
             if (CollectionUtils.isEmpty(located.getArtwork().getArtworkLocated())) {
                 artwork.setStatus(StatusType.NEW);
-                this.commonDao.updateEntity(artwork);
+                this.stagingDao.updateEntity(artwork);
             }
         }
         
         // delete stage file
-        this.commonDao.deleteEntity(stageFile);
+        this.delete(stageFile);
         
         return filesToDelete;
     }
     
-    private void deleteCommonStageFile(StageFile stageFile) {
+    private void delete(StageFile stageFile) {
+        LOG.debug("Delete: {}", stageFile);
+        
+        StageDirectory stageDirectory = stageFile.getStageDirectory();
+
         // just delete the stage file
-        this.commonDao.deleteEntity(stageFile);
+        this.stagingDao.deleteEntity(stageFile);
+        stageDirectory.getStageFiles().remove(stageFile);
+        
+        // check and delete stage directory
+        this.delete(stageDirectory);
+    }
+
+    /**
+     * Delete stage file recursivly.
+     * 
+     * @param stageDirectory
+     */
+    private void delete(StageDirectory stageDirectory) {
+        if (stageDirectory == null) {
+            return;
+        } else if (!CollectionUtils.isEmpty(stageDirectory.getStageFiles())) {
+            return;
+        } else if (!CollectionUtils.isEmpty(this.stagingDao.getChildDirectories(stageDirectory))) {
+            return;
+        }
+        
+        LOG.debug("Delete empty directory:  {}", stageDirectory);
+        this.stagingDao.deleteEntity(stageDirectory);
+        
+        // recurse to parents
+        this.delete(stageDirectory.getParentDirectory());
+    }
+
+    private void delete(MediaFile mediaFile, Set<String> filesToDelete) {
+        LOG.debug("Delete: {}", mediaFile);
+ 
+        // delete video data if this is the only media file
+        for (VideoData videoData : mediaFile.getVideoDatas()) {
+            if (videoData.getMediaFiles().size() == 1) {
+                // video data has only this media file
+                this.delete(videoData, filesToDelete);
+            }
+        }
+        
+        // delete media file
+        mediaFile.getVideoDatas().clear();
+        this.stagingDao.deleteEntity(mediaFile);
+    }
+
+    private void delete(VideoData videoData, Set<String> filesToDelete) {
+        LOG.debug("Delete: {}", videoData);
+        
+        Season season = videoData.getSeason();
+        if (season != null) {
+            season.getVideoDatas().remove(videoData);
+            if (CollectionUtils.isEmpty(season.getVideoDatas())) {
+                this.delete(season, filesToDelete);
+            }
+        }
+        
+        // delete artwork
+        for (Artwork artwork : videoData.getArtworks()) {
+            this.delete(artwork, filesToDelete);
+        }
+        
+        this.stagingDao.deleteEntity(videoData);
     }
     
-    private void deleteLocatedArtwork(Artwork artwork, ArtworkLocated located, Set<String> filesToDelete) {
+    private void delete(Season season, Set<String> filesToDelete) {
+        LOG.debug("Delete: {}", season);
+        
+        Series series = season.getSeries();
+        series.getSeasons().remove(season);
+        if (CollectionUtils.isEmpty(season.getVideoDatas())) {
+            this.delete(series, filesToDelete);
+        }
+
+        // delete artwork
+        for (Artwork artwork : season.getArtworks()) {
+            this.delete(artwork, filesToDelete);
+        }
+
+        this.stagingDao.deleteEntity(season);
+    }
+
+    private void delete(Series series, Set<String> filesToDelete) {
+        LOG.debug("Delete: {}", series);
+        
+        // delete artwork
+        for (Artwork artwork : series.getArtworks()) {
+            this.delete(artwork, filesToDelete);
+        }
+
+        this.stagingDao.deleteEntity(series);
+    }
+    
+    private void delete(Artwork artwork, Set<String> filesToDelete) {
+        if (artwork == null) {
+            return;
+        }
+        
+        for (ArtworkLocated located : artwork.getArtworkLocated()) {
+            this.delete(artwork, located, filesToDelete);
+        }
+        
+        this.stagingDao.deleteEntity(artwork);
+    }
+
+    private void delete(Artwork artwork, ArtworkLocated located, Set<String> filesToDelete) {
         StorageType storageType;
         if (artwork.getArtworkType() == ArtworkType.PHOTO) {
             storageType = StorageType.PHOTO;
@@ -146,7 +256,7 @@ public class CommonStorageService {
         for (ArtworkGenerated generated : located.getGeneratedArtworks()) {
             filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
             filesToDelete.add(this.fileStorageService.getStorageDir(storageType, filename));
-            this.commonDao.deleteEntity(generated);
+            this.stagingDao.deleteEntity(generated);
         }
 
         // delete located file
@@ -154,7 +264,31 @@ public class CommonStorageService {
             filename = FilenameUtils.concat(located.getCacheDirectory(), located.getCacheFilename());
             filesToDelete.add(this.fileStorageService.getStorageDir(storageType, filename));
         }
-        artwork.removeArtworkLocated(located);
-        this.commonDao.deleteEntity(located);
+        this.stagingDao.deleteEntity(located);
+    }
+
+    @Transactional
+    @SuppressWarnings("unchecked")
+    public List<Long> getOrphanPersons() {
+        final StringBuilder query = new StringBuilder();
+        query.append("Select p.id from Person p ");
+        query.append("where not exists (select 1 from CastCrew c where c.person=p)");
+        return this.stagingDao.find(query);
+    }
+    
+    @Transactional
+    public Set<String> deletePerson(Long id) {
+        Set<String> filesToDelete = new HashSet<String>();
+        Person person = this.stagingDao.getById(Person.class, id);
+        
+        LOG.debug("Delete: {}", person);
+        
+        if (person != null) {
+            this.delete(person.getPhoto(), filesToDelete);
+        }
+        
+        this.stagingDao.deleteEntity(person);
+        
+        return filesToDelete;
     }
 }

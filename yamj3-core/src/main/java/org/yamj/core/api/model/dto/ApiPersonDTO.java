@@ -119,10 +119,6 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
         this.artwork = artwork;
     }
 
-    public void addArtwrok(ApiArtworkDTO artwork) {
-        this.artwork.add(artwork);
-    }
-
     public List<ApiFilmographyDTO> getFilmography() {
         return filmography;
     }

@@ -252,19 +252,20 @@ public class MetadataStorageService {
 
     @Transactional
     public void updateScannedPerson(Person person) {
-        // update entity
-        person.setLastScanned(new Date(System.currentTimeMillis()));
-        metadataDao.updateEntity(person);
-        
         // store artwork
-        Artwork photo = artworkDao.getArtwork(person, ArtworkType.PHOTO);
+        Artwork photo = person.getPhoto();
         if (photo == null) {
             photo = new Artwork();
             photo.setArtworkType(ArtworkType.PHOTO);
             photo.setPerson(person);
             photo.setStatus(StatusType.NEW);
+            person.setPhoto(photo);
             this.artworkDao.saveEntity(photo);
         }
+
+        // update entity
+        person.setLastScanned(new Date(System.currentTimeMillis()));
+        metadataDao.updateEntity(person);
     }
 
     @Transactional
@@ -596,7 +597,7 @@ public class MetadataStorageService {
             if (!artwork.getArtworkLocated().contains(located)) {
                 // not present until now
                 artworkDao.saveEntity(located);
-                artwork.addArtworkLocated(located);
+                artwork.getArtworkLocated().add(located);
             }
         }
     }

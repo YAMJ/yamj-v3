@@ -52,6 +52,9 @@ public class NfoScannerService {
     private InfoReader infoReader;
     
     public void scanMovie(VideoData videoData) {
+        // remove override source for NFO
+        videoData.removeOverrideSource(SCANNER_ID);
+        
         // get the stage files
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(videoData);
         if (CollectionUtils.isEmpty(stageFiles)) {
@@ -149,10 +152,25 @@ public class NfoScannerService {
     }
 
     public void scanSeriese(Series series) {
+        // remove override source for NFO
+        series.removeOverrideSource(SCANNER_ID);
+
         // get the stage files
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(series);
         if (CollectionUtils.isEmpty(stageFiles)) {
             series.setSkipOnlineScans(null);
+
+            for (Season season : series.getSeasons()) {
+                if (season.removeOverrideSource(SCANNER_ID)) {
+                    season.setStatus(StatusType.UPDATED);
+                }
+                for (VideoData videoData : season.getVideoDatas()) {
+                    if (videoData.removeOverrideSource(SCANNER_ID)) {
+                        videoData.setStatus(StatusType.UPDATED);
+                    }
+                }
+            }
+
             return;
         }
 
@@ -201,7 +219,9 @@ public class NfoScannerService {
             }
 
             for (Season season : series.getSeasons()) {
-
+                // remove override source for NFO
+                season.removeOverrideSource(SCANNER_ID);
+                
                 if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
                     season.setPlot(infoDTO.getPlot(), SCANNER_ID);
                 }
@@ -218,11 +238,20 @@ public class NfoScannerService {
                 season.setTvSeasonDone();
                 
                 for (VideoData videoData : season.getVideoDatas()) {
+                    
                     InfoEpisodeDTO episode = infoDTO.getEpisode(season.getSeason(), videoData.getEpisode());
                     if (episode == null) {
+                        // reset status if NFO source has been removed
+                        if (videoData.removeOverrideSource(SCANNER_ID)) {
+                            videoData.setStatus(StatusType.UPDATED);
+                        }
+
                         // mark episode as not found
                         videoData.setTvEpisodeNotFound();
                     } else {
+                        // remove override source for NFO
+                        videoData.removeOverrideSource(SCANNER_ID);
+
                         if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
                             videoData.setTitle(episode.getTitle(), SCANNER_ID);
                         }

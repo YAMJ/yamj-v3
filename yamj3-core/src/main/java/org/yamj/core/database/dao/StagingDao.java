@@ -75,7 +75,16 @@ public class StagingDao extends HibernateDao {
         criteria.setCacheMode(CacheMode.NORMAL);
         return (Long) criteria.uniqueResult();
     }
-    
+
+    @SuppressWarnings("unchecked")
+    public List<StageDirectory> getRootDirectories() {
+        Criteria criteria = getSession().createCriteria(StageDirectory.class);
+        criteria.add(Restrictions.isNull("parentDirectory"));
+        criteria.setCacheable(true);
+        criteria.setCacheMode(CacheMode.NORMAL);
+        return (List<StageDirectory>)criteria.list();
+    }
+
     @SuppressWarnings("unchecked")
     public List<StageDirectory> getChildDirectories(StageDirectory stageDirectory) {
         if (stageDirectory == null) {

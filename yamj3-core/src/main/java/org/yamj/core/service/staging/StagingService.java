@@ -112,7 +112,13 @@ public class StagingService {
                 // no valid baseName or extension
                 continue;
             }
-            
+
+            FileType fileType = filenameScanner.determineFileType(extension);
+            if (fileType == FileType.UNKNOWN) {
+                // unknown file type
+                continue;
+            }
+
             StageFile stageFile = stagingDao.getStageFile(baseName, extension, stageDirectory);
             if (stageFile == null) {
                 // create new stage file entry

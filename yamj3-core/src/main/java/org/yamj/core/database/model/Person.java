@@ -22,32 +22,18 @@
  */
 package org.yamj.core.database.model;
 
-import java.util.HashSet;
-import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-
-import javax.persistence.Column;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import java.util.EnumMap;
-import javax.persistence.*;
-import org.hibernate.annotations.*;
-import org.yamj.core.database.model.type.OverrideFlag;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.type.OverrideFlag;
 
 @Entity
 @Table(name = "person",
@@ -116,6 +102,9 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "person")
     private Set<FilmParticipation> filmography = new HashSet<FilmParticipation>(0);
+    
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "person")
+    private Artwork photo;
     
     @Transient
     private Map<String,String> photoURLS = new HashMap<String,String>(0);
@@ -310,6 +299,14 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
 
     public void setFilmography(Set<FilmParticipation> filmography) {
         this.filmography = filmography;
+    }
+
+    public Artwork getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(Artwork photo) {
+        this.photo = photo;
     }
     
     // TRANSIENT METHODS

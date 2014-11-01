@@ -22,12 +22,12 @@
  */
 package org.yamj.core.api.model.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import org.yamj.core.tools.StringTools;
 
 /**
  * Information on the physical file for the API
@@ -51,11 +51,12 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
     private Integer width = -1;
     private Integer height = -1;
     private String aspectRatio;
-    private Integer runtime;
+    private String runtime;
     private String videoSource;
+    private Long fileId;
     private String fileName;
-    private Date fileDate;
-    private Long fileSize = -1L;
+    private String fileDate;
+    private String fileSize;
     private Long season;
     private Long episode;
     private List<ApiAudioCodecDTO> audioCodes = new ArrayList<ApiAudioCodecDTO>();
@@ -172,14 +173,16 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
         this.aspectRatio = aspectRatio;
     }
 
-    public Integer getRuntime() {
+    public String getRuntime() {
         return runtime;
     }
 
     public void setRuntime(Integer runtime) {
-        this.runtime = runtime;
+        if (runtime != null) {
+            this.runtime = StringTools.formatDuration(runtime.intValue());
+        }
     }
-
+    
     public String getVideoSource() {
         return videoSource;
     }
@@ -195,23 +198,33 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
+    
+    public Long getFileId() {
+        return fileId;
+    }
 
-    public Date getFileDate() {
+    public void setFileId(Long fileId) {
+        this.fileId = fileId;
+    }
+
+    public String getFileDate() {
         return fileDate;
     }
 
     public void setFileDate(Date fileDate) {
-        this.fileDate = fileDate;
+        this.fileDate = StringTools.formatDateLong(fileDate);
     }
 
-    public Long getFileSize() {
+    public String getFileSize() {
         return fileSize;
     }
 
     public void setFileSize(Long fileSize) {
-        this.fileSize = fileSize;
+        if (fileSize != null) {
+            this.fileSize = StringTools.formatFileSize(fileSize.longValue());
+        }
     }
-
+    
     public Long getSeason() {
         return season;
     }
