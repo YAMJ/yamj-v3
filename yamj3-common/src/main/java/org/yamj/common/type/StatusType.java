@@ -26,7 +26,7 @@ public enum StatusType {
 
     NEW,            // new record
     UPDATED,        // updated record
-    DELETE,        // deleted record
+    DELETED,        // deleted record
     ERROR,          // something went wrong
     NOTFOUND,       // something hasn't been found
     INVALID,        // invalid record

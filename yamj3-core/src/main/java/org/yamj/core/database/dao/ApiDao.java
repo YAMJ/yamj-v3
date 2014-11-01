@@ -1061,7 +1061,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append("' and sf.status not in ('");
         sbSQL.append(StatusType.DUPLICATE.toString());
         sbSQL.append("','");
-        sbSQL.append(StatusType.DELETE.toString());
+        sbSQL.append(StatusType.DELETED.toString());
         sbSQL.append("') ");
 
         if (type == MetaDataType.SERIES || type == MetaDataType.SEASON) {

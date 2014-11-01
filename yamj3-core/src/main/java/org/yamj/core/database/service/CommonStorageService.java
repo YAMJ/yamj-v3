@@ -56,7 +56,7 @@ public class CommonStorageService {
         sb.append("select f.id from StageFile f ");
         sb.append("where f.status = :delete " );
 
-        Map<String,Object> params = Collections.singletonMap("delete", (Object)StatusType.DELETE);
+        Map<String,Object> params = Collections.singletonMap("delete", (Object)StatusType.DELETED);
         return stagingDao.findByNamedParameters(sb, params);
     }
     
@@ -75,7 +75,7 @@ public class CommonStorageService {
         if (stageFile == null) {
             // not found
             return Collections.emptySet();
-        } if (StatusType.DELETE != stageFile.getStatus()) {
+        } if (StatusType.DELETED != stageFile.getStatus()) {
             // status must still be DELETE
             return Collections.emptySet();
         }

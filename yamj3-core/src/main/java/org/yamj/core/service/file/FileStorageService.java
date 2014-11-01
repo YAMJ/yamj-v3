@@ -264,8 +264,8 @@ public class FileStorageService {
         return message;
     }
 
-    public boolean delete(StorageType type, String filename) throws IOException {
-        LOG.debug("Delete file {}", filename);
+    public boolean deleteFile(StorageType type, String filename) throws IOException {
+        LOG.debug("Delete file '{}'", filename);
         File file = getFile(type, filename);
         return file.delete();
     }

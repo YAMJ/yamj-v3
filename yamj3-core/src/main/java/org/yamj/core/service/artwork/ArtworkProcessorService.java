@@ -185,7 +185,7 @@ public class ArtworkProcessorService {
             // delete generated file storage element also
             LOG.trace("Failed to generate file storage for {}, error: {}", cacheFilename, ex.getMessage());
             try {
-                fileStorageService.delete(storageType, cacheFilename);
+                fileStorageService.deleteFile(storageType, cacheFilename);
             } catch (IOException ex2) {
                 LOG.trace("Unable to delete file after exception: {}", ex2.getMessage(), ex);
             }
