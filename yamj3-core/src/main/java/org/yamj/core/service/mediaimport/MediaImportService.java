@@ -91,6 +91,12 @@ public class MediaImportService {
             attachNfoFilesToVideo(stageFile);
             
             // TODO attach subtitles
+
+            // mark stage file as done
+            stageFile.setStatus(StatusType.DONE);
+            stagingDao.updateEntity(stageFile);
+        } else if (StatusType.DUPLICATE.equals(stageFile.getStatus())) {
+            LOG.info("No update of duplicate video {}-'{}'", stageFile.getId(), stageFile.getFileName());
         } else {
             LOG.info("Process updated video {}-'{}'", stageFile.getId(), stageFile.getFileName());
             
@@ -98,11 +104,11 @@ public class MediaImportService {
             MediaFile mediaFile = stageFile.getMediaFile();
             mediaFile.setStatus(StatusType.UPDATED);
             mediaDao.updateEntity(mediaFile);
-        }
 
-        // mark stage file as done
-        stageFile.setStatus(StatusType.DONE);
-        stagingDao.updateEntity(stageFile);
+            // mark stage file as done
+            stageFile.setStatus(StatusType.DONE);
+            stagingDao.updateEntity(stageFile);
+        }
     }
 
     private void processNewVideo(StageFile stageFile) {

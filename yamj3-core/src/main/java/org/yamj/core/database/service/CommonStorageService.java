@@ -105,7 +105,20 @@ public class CommonStorageService {
             mediaFile.getStageFiles().remove(stageFile);
             if (CollectionUtils.isEmpty(mediaFile.getStageFiles())) {
                 this.delete(mediaFile, filesToDelete);
+            } else {
+                // mark first duplicate as DONE and reset media file status
+                for (StageFile check : mediaFile.getStageFiles()) {
+                    if (StatusType.DUPLICATE.equals(check.getStatus())) {
+                        check.setStatus(StatusType.DONE);
+                        this.stagingDao.updateEntity(check);
+                        mediaFile.setStatus(StatusType.UPDATED);
+                        this.stagingDao.updateEntity(mediaFile);
+                        // break the loop; so that just one duplicate is processed
+                        break;
+                    }
+                }
             }
+            
         }
         
         // delete the stage file
