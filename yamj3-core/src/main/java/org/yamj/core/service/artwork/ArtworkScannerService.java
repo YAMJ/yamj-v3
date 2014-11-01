@@ -333,7 +333,15 @@ public class ArtworkScannerService {
 
         LOG.trace("Scan local for TV show banner: {}", artwork);
 
-        // TODO local scan
+        List<StageFile> banners = null;
+
+        if (artwork.getSeason() != null) {
+            banners = this.artworkLocatorService.getMatchingBanners(artwork.getSeason());
+        } else if (artwork.getSeries() != null) {
+            // TODO scan series banners
+        }
+
+        createLocatedArtworksLocal(artwork, banners, locatedArtworks);
     }
 
     private void scanBannerOnline(Artwork artwork, List<ArtworkLocated> locatedArtworks) {

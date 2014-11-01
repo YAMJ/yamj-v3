@@ -41,7 +41,61 @@ public class ArtworkLocatorService {
 
     @Autowired
     private StagingDao stagingDao;
+    
+    private Set<String> buildPosterSearchMap(List<StageFile> videoFiles, Set<StageDirectory> directories) {
+        Set<String> artworkNames = new HashSet<String>();
+        artworkNames.add("poster");
+        artworkNames.add("cover");
+        artworkNames.add("folder");
+        for (StageFile videoFile : videoFiles) {
+            directories.add(videoFile.getStageDirectory());
+            artworkNames.add(videoFile.getBaseName().toLowerCase());
+            artworkNames.add(videoFile.getBaseName().toLowerCase() + ".poster");
+            artworkNames.add(videoFile.getBaseName().toLowerCase() + "-poster");
+            
+            // same name as directory
+            String directoryName = videoFile.getStageDirectory().getDirectoryName().toLowerCase();
+            artworkNames.add(directoryName);
+            artworkNames.add(directoryName + ".poster");
+            artworkNames.add(directoryName + "-poster");
+        }
+        return artworkNames;
+    }
 
+    private Set<String> buildFanartSearchMap(List<StageFile> videoFiles, Set<StageDirectory> directories) {
+        Set<String> artworkNames = new HashSet<String>();
+        artworkNames.add("fanart");
+        artworkNames.add("backdrop");
+        artworkNames.add("background");
+        for (StageFile videoFile : videoFiles) {
+            directories.add(videoFile.getStageDirectory());
+            artworkNames.add(videoFile.getBaseName().toLowerCase() + ".fanart");
+            artworkNames.add(videoFile.getBaseName().toLowerCase() + "-fanart");
+            
+            // same name as directory
+            String directoryName = videoFile.getStageDirectory().getDirectoryName().toLowerCase();
+            artworkNames.add(directoryName + ".fanart");
+            artworkNames.add(directoryName + "-fanart");
+        }
+        return artworkNames;
+    }
+
+    private Set<String> buildBannerSearchMap(List<StageFile> videoFiles, Set<StageDirectory> directories) {
+        Set<String> artworkNames = new HashSet<String>();
+        artworkNames.add("banner");
+        for (StageFile videoFile : videoFiles) {
+            directories.add(videoFile.getStageDirectory());
+            artworkNames.add(videoFile.getBaseName().toLowerCase() + ".banner");
+            artworkNames.add(videoFile.getBaseName().toLowerCase() + "-banner");
+            
+            // same name as directory
+            String directoryName = videoFile.getStageDirectory().getDirectoryName().toLowerCase();
+            artworkNames.add(directoryName + ".banner");
+            artworkNames.add(directoryName + "-banner");
+        }
+        return artworkNames;
+    }
+    
     @Transactional(readOnly = true)
     public List<StageFile> getMatchingPosters(VideoData videoData) {
         List<StageFile> videoFiles = findVideoFiles(videoData);
@@ -74,26 +128,6 @@ public class ArtworkLocatorService {
         List<StageFile> posters = findArtworkStageFiles(directories, artworkNames);
         LOG.debug("Found {} local posters for season {}", posters.size(), season.getIdentifier());
         return posters;
-    }
-
-    private Set<String> buildPosterSearchMap(List<StageFile> videoFiles, Set<StageDirectory> directories) {
-        Set<String> artworkNames = new HashSet<String>();
-        artworkNames.add("poster");
-        artworkNames.add("cover");
-        artworkNames.add("folder");
-        for (StageFile videoFile : videoFiles) {
-            directories.add(videoFile.getStageDirectory());
-            artworkNames.add(videoFile.getBaseName().toLowerCase());
-            artworkNames.add(videoFile.getBaseName().toLowerCase() + ".poster");
-            artworkNames.add(videoFile.getBaseName().toLowerCase() + "-poster");
-            
-            // same name as directory
-            String directoryName = videoFile.getStageDirectory().getDirectoryName().toLowerCase();
-            artworkNames.add(directoryName);
-            artworkNames.add(directoryName + ".poster");
-            artworkNames.add(directoryName + "-poster");
-        }
-        return artworkNames;
     }
 
     @Transactional(readOnly = true)
@@ -130,22 +164,21 @@ public class ArtworkLocatorService {
         return fanarts;
     }
 
-    private Set<String> buildFanartSearchMap(List<StageFile> videoFiles, Set<StageDirectory> directories) {
-        Set<String> artworkNames = new HashSet<String>();
-        artworkNames.add("fanart");
-        artworkNames.add("backdrop");
-        artworkNames.add("background");
-        for (StageFile videoFile : videoFiles) {
-            directories.add(videoFile.getStageDirectory());
-            artworkNames.add(videoFile.getBaseName().toLowerCase() + ".fanart");
-            artworkNames.add(videoFile.getBaseName().toLowerCase() + "-fanart");
-            
-            // same name as directory
-            String directoryName = videoFile.getStageDirectory().getDirectoryName().toLowerCase();
-            artworkNames.add(directoryName + ".fanart");
-            artworkNames.add(directoryName + "-fanart");
+    @Transactional(readOnly = true)
+    public List<StageFile> getMatchingBanners(Season season) {
+        List<StageFile> videoFiles = findVideoFiles(season);
+        if (CollectionUtils.isEmpty(videoFiles)) {
+            return null;
         }
-        return artworkNames;
+
+        // build search maps
+        Set<StageDirectory> directories = new HashSet<StageDirectory>();
+        Set<String> artworkNames = this.buildBannerSearchMap(videoFiles, directories);
+        
+        // get the fanarts
+        List<StageFile> fanarts = findArtworkStageFiles(directories, artworkNames);
+        LOG.debug("Found {} local banners for season {}", fanarts.size(), season.getIdentifier());
+        return fanarts;
     }
     
     @SuppressWarnings("unchecked")
@@ -155,11 +188,13 @@ public class ArtworkLocatorService {
         sb.append("join f.mediaFile m ");
         sb.append("join m.videoDatas v ");
         sb.append("where v.id=:videoDataId ");
-        sb.append("and f.status != :duplicate " );
+        sb.append("and f.status != :duplicate ");
+        sb.append("and f.status != :deleted ");
 
         final Map<String,Object> params = new HashMap<String,Object>();
         params.put("videoDataId", videoData.getId());
         params.put("duplicate", StatusType.DUPLICATE);
+        params.put("deleted", StatusType.DELETED);
 
         return stagingDao.findByNamedParameters(sb, params);
     }
@@ -172,11 +207,13 @@ public class ArtworkLocatorService {
         sb.append("join m.videoDatas v ");
         sb.append("join v.season sea ");
         sb.append("where sea.id=:seasonId ");
-        sb.append("and f.status != :duplicate " );
-
+        sb.append("and f.status != :duplicate ");
+        sb.append("and f.status != :deleted ");
+        
         final Map<String,Object> params = new HashMap<String,Object>();
         params.put("seasonId", season.getId());
         params.put("duplicate", StatusType.DUPLICATE);
+        params.put("deleted", StatusType.DELETED);
 
         return stagingDao.findByNamedParameters(sb, params);
     }
@@ -188,11 +225,13 @@ public class ArtworkLocatorService {
         sb.append("where f.stageDirectory in (:directories) ");
         sb.append("and f.fileType = :fileType ");
         sb.append("and lower(f.baseName) in (:artworkNames) ");
+        sb.append("and f.status != :deleted ");
 
         final Map<String,Object> params = new HashMap<String,Object>();
         params.put("directories", directories);
         params.put("fileType", FileType.IMAGE);
         params.put("artworkNames", artworkNames);
+        params.put("deleted", StatusType.DELETED);
 
         return stagingDao.findByNamedParameters(sb, params);
     }
