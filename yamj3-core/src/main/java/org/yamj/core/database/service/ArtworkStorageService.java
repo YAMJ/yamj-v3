@@ -133,7 +133,8 @@ public class ArtworkStorageService {
         sql.append("LEFT OUTER JOIN videodata vd ON vd.id=art.videodata_id ");
         sql.append("LEFT OUTER JOIN season sea ON sea.id=art.season_id ");
         sql.append("LEFT OUTER JOIN series ser ON ser.id=art.series_id ");
-        sql.append("WHERE art.status = 'NEW' ");
+        sql.append("LEFT OUTER JOIN person p ON p.id=art.person_id ");
+        sql.append("WHERE art.status in ('NEW','UPDATED') ");
         sql.append("AND (vd.status is null OR vd.status='DONE') ");
         sql.append("AND (sea.status is null OR sea.status='DONE') ");
         sql.append("AND (ser.status is null OR ser.status='DONE') ");

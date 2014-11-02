@@ -32,6 +32,7 @@ public enum StatusType {
     INVALID,        // invalid record
     DUPLICATE,      // duplicate record
     TEMP_DONE,      // temporary done
+    IGNORE,         // ignored entry
     DONE;           // all is done
     
     public static StatusType fromString(String type) {

@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.dto.ImportDTO;
 import org.yamj.common.dto.StageDirectoryDTO;
@@ -53,7 +52,7 @@ public class StagingService {
     @Autowired
     private FilenameScanner filenameScanner;
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public Library storeLibrary(ImportDTO libraryDTO) {
         Library library = stagingDao.getLibrary(libraryDTO.getClient(), libraryDTO.getPlayerPath());
         if (library == null) {
@@ -67,7 +66,7 @@ public class StagingService {
         return library;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public void storeStageDirectory(StageDirectoryDTO stageDirectoryDTO, Library library) {
         // normalize the directory path by using URI
         String normalized = FilenameUtils.normalizeNoEndSeparator(stageDirectoryDTO.getPath(), true);
@@ -195,5 +194,33 @@ public class StagingService {
     @Transactional
     public void updateStageFile(StageFile stageFile) {
         this.stagingDao.updateEntity(stageFile);
+    }
+    
+    @Transactional
+    public boolean deleteStageFile(long id) {
+        StageFile stageFile = stagingDao.getStageFile(id);
+        if (stageFile == null) {
+            // stage file not found
+            return false;
+        }
+        stageFile.setStatus(StatusType.DELETED);
+        this.stagingDao.updateEntity(stageFile);
+        return true;
+    }
+
+    @Transactional
+    public boolean updateStageFile(long id) {
+        StageFile stageFile = stagingDao.getStageFile(id);
+        if (stageFile == null) {
+            // stage file not found
+            return false;
+        }
+        if (StatusType.DUPLICATE.equals(stageFile.getStatus())) {
+            // no update of duplicates
+            return false;
+        }
+        stageFile.setStatus(StatusType.UPDATED);
+        this.stagingDao.updateEntity(stageFile);
+        return true;
     }
 }

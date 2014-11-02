@@ -49,7 +49,7 @@ public class ArtworkController {
 
         LOG.info("Attempting to retrieve artwork with id '{}'", id);
         ApiArtworkDTO artwork = api.getArtworkById(id);
-        LOG.info("Artwork: {}", artwork.toString());
+        LOG.info("Artwork: {}", artwork);
 
         // Add the result to the wrapper
         wrapper.setResult(artwork);

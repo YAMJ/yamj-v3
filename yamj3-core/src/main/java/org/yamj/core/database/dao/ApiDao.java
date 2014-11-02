@@ -67,9 +67,9 @@ public class ApiDao extends HibernateDao {
     private static final String SQL_AS_VIDEO_TYPE_STRING = "' AS videoTypeString";
     private static final String SQL_WHERE_1_EQ_1 = " WHERE 1=1";
     private static final String SQL_COMMA_SPACE_QUOTE = ", '";
-    private static final String SQL_ARTWORK_TYPE_IN_ARTWORKLIST = " AND a.artwork_type IN (:artworklist)";
-    private static final String SQL_LEFT_JOIN_ARTWORK_GENERATED = " LEFT JOIN artwork_generated ag ON al.id=ag.located_id";
-    private static final String SQL_LEFT_JOIN_ARTWORK_LOCATED = " LEFT JOIN artwork_located al ON a.id=al.artwork_id and al.status not in('INVALID','NOTFOUND')";
+    private static final String SQL_ARTWORK_TYPE_IN_ARTWORKLIST = " AND a.artwork_type IN (:artworklist) ";
+    private static final String SQL_LEFT_JOIN_ARTWORK_GENERATED = " LEFT JOIN artwork_generated ag ON al.id=ag.located_id ";
+    private static final String SQL_LEFT_JOIN_ARTWORK_LOCATED = " LEFT JOIN artwork_located al ON a.id=al.artwork_id and al.status not in ('INVALID','NOTFOUND','ERROR','IGNORE') ";
 
     /**
      * Generate the query and load the results into the wrapper

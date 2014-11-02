@@ -95,8 +95,6 @@ public class MediaImportService {
             // mark stage file as done
             stageFile.setStatus(StatusType.DONE);
             stagingDao.updateEntity(stageFile);
-        } else if (StatusType.DUPLICATE.equals(stageFile.getStatus())) {
-            LOG.info("No update of duplicate video {}-'{}'", stageFile.getId(), stageFile.getFileName());
         } else {
             LOG.info("Process updated video {}-'{}'", stageFile.getId(), stageFile.getFileName());
             

@@ -81,7 +81,7 @@ public class DeleteTask implements ITask {
         }
         
         if (CollectionUtils.isEmpty(filesToDelete)) {
-            LOG.debug("No files to delete on disc");
+            LOG.debug("No files to delete in cache directories");
             return;
         }
 
