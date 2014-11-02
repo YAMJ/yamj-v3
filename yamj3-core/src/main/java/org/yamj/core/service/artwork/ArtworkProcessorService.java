@@ -71,43 +71,50 @@ public class ArtworkProcessorService {
         }
         LOG.debug("Process located artwork: {}", located);
 
-        // validate artwork
-        boolean valid = checkArtworkQuality(located);
-        if (!valid) {
-            LOG.debug("Located artwork {} is not valid", located);
-            located.setStatus(StatusType.INVALID);
-            artworkStorageService.updateArtworkLocated(located);
-            return;
-        }
-
-        // store original in file cache
-        String cacheFilename = buildCacheFilename(located);
-        LOG.debug("Cache artwork with file name: {}", cacheFilename);
-
-        boolean stored;
-        try {
-            if (located.getStageFile() != null) {
-                stored = fileStorageService.store(storageType, cacheFilename, located.getStageFile());
-            } else {
-                stored = fileStorageService.store(storageType, cacheFilename, new URL(located.getUrl()));
+        if (StringUtils.isBlank(located.getCacheFilename())) {
+            // just processed if cache file name not stored before
+            // which means that no original image has been created
+            
+            // validate artwork
+            boolean valid = checkArtworkQuality(located);
+            if (!valid) {
+                LOG.debug("Located artwork {} is not valid", located);
+                located.setStatus(StatusType.INVALID);
+                artworkStorageService.updateArtworkLocated(located);
+                return;
             }
-        } catch (IOException error) {
-            LOG.warn("Storage error: {}", error.getMessage(), error);
-            return;
-        }
+    
+            // store original in file cache
+            String cacheFilename = buildCacheFilename(located);
+            LOG.debug("Cache artwork with file name: {}", cacheFilename);
+    
+            boolean stored;
+            try {
+                if (located.getStageFile() != null) {
+                    stored = fileStorageService.store(storageType, cacheFilename, located.getStageFile());
+                } else {
+                    stored = fileStorageService.store(storageType, cacheFilename, new URL(located.getUrl()));
+                }
+            } catch (IOException error) {
+                LOG.warn("Storage error: {}", error.getMessage(), error);
+                return;
+            }
 
-        if (!stored) {
-            LOG.error("Failed to store artwork store artwork in file cache: {}", cacheFilename);
-            // mark located artwork with error
-            located.setStatus(StatusType.ERROR);
-            artworkStorageService.updateArtworkLocated(located);
-            return;
-        }
+            if (!stored) {
+                LOG.error("Failed to store artwork store artwork in file cache: {}", cacheFilename);
+                // mark located artwork with error
+                located.setStatus(StatusType.ERROR);
+                artworkStorageService.updateArtworkLocated(located);
+                return;
+            }
 
-        // set values in located artwork
-        String cacheDirectory = FileTools.createDirHash(cacheFilename);
-        located.setCacheDirectory(StringUtils.removeEnd(cacheDirectory, File.separator + cacheFilename));
-        located.setCacheFilename(cacheFilename);
+            // set values in located artwork
+            String cacheDirectory = FileTools.createDirHash(cacheFilename);
+            located.setCacheDirectory(StringUtils.removeEnd(cacheDirectory, File.separator + cacheFilename));
+            located.setCacheFilename(cacheFilename);
+        }
+        
+        // located has been done
         located.setStatus(StatusType.DONE);
 
         // after that: try preProcessing of images

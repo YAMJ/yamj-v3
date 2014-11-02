@@ -188,7 +188,7 @@ public class ArtworkStorageService {
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT DISTINCT loc.id, loc.create_timestamp, loc.update_timestamp ");
         sql.append("FROM artwork_located loc ");
-        sql.append("WHERE loc.status = 'NEW' ");
+        sql.append("WHERE loc.status in ('NEW','UPDATED')");
 
         return artworkDao.getArtworkLocatedQueue(sql, maxResults);
     }
@@ -228,6 +228,6 @@ public class ArtworkStorageService {
 
     @Transactional
     public void storeArtworkGenerated(ArtworkGenerated generated) {
-        this.artworkDao.saveEntity(generated);
+        this.artworkDao.storeEntity(generated);
     }
 }
