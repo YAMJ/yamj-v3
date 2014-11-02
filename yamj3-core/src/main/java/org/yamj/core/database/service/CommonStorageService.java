@@ -23,6 +23,11 @@
 package org.yamj.core.database.service;
 
 
+import java.util.HashSet;
+import java.util.Set;
+import org.yamj.core.database.model.ArtworkGenerated;
+import org.yamj.core.database.model.ArtworkLocated;
+
 import java.util.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -53,8 +58,8 @@ public class CommonStorageService {
     @Transactional(readOnly = true)
     public List<Long> getStageFilesToDelete() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("select f.id from StageFile f ");
-        sb.append("where f.status = :delete " );
+        sb.append("SELECT f.id FROM StageFile f ");
+        sb.append("WHERE f.status = :delete " );
 
         Map<String,Object> params = Collections.singletonMap("delete", (Object)StatusType.DELETED);
         return stagingDao.findByNamedParameters(sb, params);
@@ -265,27 +270,30 @@ public class CommonStorageService {
         }
 
         // delete generated files
-        String filename;
         for (ArtworkGenerated generated : located.getGeneratedArtworks()) {
-            filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
-            filesToDelete.add(this.fileStorageService.getStorageDir(storageType, filename));
-            this.stagingDao.deleteEntity(generated);
+            this.delete(generated, storageType, filesToDelete);
         }
 
         // delete located file
         if (StringUtils.isNotBlank(located.getCacheFilename())) {
-            filename = FilenameUtils.concat(located.getCacheDirectory(), located.getCacheFilename());
+            String filename = FilenameUtils.concat(located.getCacheDirectory(), located.getCacheFilename());
             filesToDelete.add(this.fileStorageService.getStorageDir(storageType, filename));
         }
         this.stagingDao.deleteEntity(located);
     }
 
+    private void delete(ArtworkGenerated generated, StorageType storageType, Set<String> filesToDelete) {
+        String filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
+        filesToDelete.add(this.fileStorageService.getStorageDir(storageType, filename));
+        this.stagingDao.deleteEntity(generated);
+    }
+    
     @Transactional
     @SuppressWarnings("unchecked")
     public List<Long> getOrphanPersons() {
         final StringBuilder query = new StringBuilder();
-        query.append("Select p.id from Person p ");
-        query.append("where not exists (select 1 from CastCrew c where c.person=p)");
+        query.append("SELECT p.id FROM Person p ");
+        query.append("WHERE not exists (select 1 from CastCrew c where c.person=p)");
         return this.stagingDao.find(query);
     }
     
@@ -298,10 +306,33 @@ public class CommonStorageService {
         
         if (person != null) {
             this.delete(person.getPhoto(), filesToDelete);
+            this.stagingDao.deleteEntity(person);
         }
-        
-        this.stagingDao.deleteEntity(person);
         
         return filesToDelete;
     }
-}
+
+    @Transactional
+    public Set<String> ignoreArtworkLocated(Long id) {
+        ArtworkLocated located = this.stagingDao.getById(ArtworkLocated.class, id);
+        if (located != null) {
+            StorageType storageType;
+            if (located.getArtwork().getArtworkType() == ArtworkType.PHOTO) {
+                storageType = StorageType.PHOTO;
+            } else {
+                storageType = StorageType.ARTWORK;
+            }
+
+            Set<String> filesToDelete = new HashSet<String>();
+            // delete generated files
+            for (ArtworkGenerated generated : located.getGeneratedArtworks()) {
+                this.delete(generated, storageType, filesToDelete);
+            }
+            
+            located.getGeneratedArtworks().clear();
+            located.setStatus(StatusType.IGNORE);
+            stagingDao.updateEntity(located);
+            return filesToDelete;
+        }
+        return null;
+    }}

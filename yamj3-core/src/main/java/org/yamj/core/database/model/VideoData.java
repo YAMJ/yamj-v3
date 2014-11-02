@@ -79,6 +79,15 @@ public class VideoData extends AbstractMetadata {
     @Column(name = "skip_online_scans", length=255)
     private String skipOnlineScans;
     
+    @Column(name =  "watched_nfo", nullable = false)
+    private boolean watchedNfo = false;
+
+    @Column(name =  "watched_file", nullable = false)
+    private boolean watchedFile = false;
+    
+    @Column(name =  "watched_api", nullable = false)
+    private boolean watchedApi = false;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_ids", joinColumns = @JoinColumn(name = "videodata_id"))
     @ForeignKey(name = "FK_VIDEODATA_SOURCEIDS")
@@ -282,6 +291,30 @@ public class VideoData extends AbstractMetadata {
         this.skipOnlineScans = skipOnlineScans;
     }
 
+    private boolean isWatchedNfo() {
+        return watchedNfo;
+    }
+
+    public void setWatchedNfo(boolean watchedNfo) {
+        this.watchedNfo = watchedNfo;
+    }
+
+    private boolean isWatchedFile() {
+        return watchedFile;
+    }
+
+    public void setWatchedFile(boolean watchedFile) {
+        this.watchedFile = watchedFile;
+    }
+
+    private boolean isWatchedApi() {
+        return watchedApi;
+    }
+
+    public void setWatchedApi(boolean watchedApi) {
+        this.watchedApi = watchedApi;
+    }
+
     @Override
     public void setSourceDbId(String sourceDb, String id) {
         if (StringUtils.isNotBlank(id)) {
@@ -436,6 +469,10 @@ public class VideoData extends AbstractMetadata {
     }
 
     // TRANSIENTS METHODS
+    
+    public boolean isWatched() {
+        return (this.watchedNfo || this.watchedFile || this.watchedApi);
+    }
     
     public Set<CreditDTO> getCreditDTOS() {
         return creditDTOS;

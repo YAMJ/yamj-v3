@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.model.Artwork;
@@ -39,7 +40,6 @@ import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.common.type.MetaDataType;
 
 @Service("artworkStorageService")
 public class ArtworkStorageService {
@@ -47,7 +47,7 @@ public class ArtworkStorageService {
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkStorageService.class);
     @Autowired
     private ArtworkDao artworkDao;
-
+    
     @Transactional
     public void storeArtworkProfile(ArtworkProfile newProfile) {
         ArtworkProfile profile = artworkDao.getArtworkProfile(newProfile.getProfileName(), newProfile.getArtworkType());
@@ -211,12 +211,14 @@ public class ArtworkStorageService {
     }
 
     @Transactional
-    public void errorArtworkLocated(Long id) {
+    public boolean errorArtworkLocated(Long id) {
         ArtworkLocated located = artworkDao.getArtworkLocated(id);
         if (located != null) {
             located.setStatus(StatusType.ERROR);
             artworkDao.updateEntity(located);
+            return true;
         }
+        return false;
     }
 
     @Transactional

@@ -22,19 +22,14 @@
  */
 package org.yamj.core.service.file;
 
-import org.yamj.core.database.model.StageFile;
-
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
@@ -51,7 +46,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.yamj.core.api.model.Skin;
+import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.type.ImageFormat;
 import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
@@ -325,6 +322,28 @@ public class FileStorageService {
         return hashFilename;
     }
 
+    public void deleteStorageFiles(Set<String> filesToDelete) {
+        if (CollectionUtils.isEmpty(filesToDelete)) {
+            LOG.trace("No files to delete in storage");
+            return;
+        }
+
+        // delete files on disk
+        for (String filename : filesToDelete) {
+            try {
+                LOG.debug("Delete file: {}", filename);
+                File file = new File(filename);
+                if (!file.exists()) {
+                    LOG.info("File '{}' does not exist", filename);
+                } else if (!file.delete()) {
+                    LOG.warn("File '{}' could not be deleted", filename);
+                }
+            } catch (Exception ex) {
+                LOG.error("Deletion error for file: '" + filename + "'", ex);
+            }
+        }
+    }
+    
     public String getStorageResourceDir() {
         return storageResourceDir;
     }

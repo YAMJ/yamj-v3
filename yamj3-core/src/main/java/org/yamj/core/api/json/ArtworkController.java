@@ -23,16 +23,21 @@
 package org.yamj.core.api.json;
 
 import java.io.IOException;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
+import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.options.OptionsIndexArtwork;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
+import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.JsonApiStorageService;
+import org.yamj.core.service.file.FileStorageService;
 
 @Controller
 @RequestMapping("/api/artwork/**")
@@ -41,7 +46,11 @@ public class ArtworkController {
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkController.class);
     @Autowired
     private JsonApiStorageService api;
-
+    @Autowired
+    private CommonStorageService commonStorageService;
+    @Autowired
+    private FileStorageService fileStorageService;
+    
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperSingle<ApiArtworkDTO> getArtwork(@PathVariable Long id) throws IOException {
@@ -68,5 +77,34 @@ public class ArtworkController {
         wrapper.setStatusCheck();
 
         return wrapper;
+    }
+
+    /**
+     * Mark a located artwork as ignored.
+     *
+     * @param options
+     * @return
+     */
+    @RequestMapping(value = "/located/ignore/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiStatus deleteLocatedById(@ModelAttribute("options") OptionsId options) {
+        ApiStatus status = new ApiStatus();
+        Long id = options.getId();
+        if (id != null && id > 0L) {
+            LOG.info("Ignore located artwork '{}'", id);
+            Set<String> filesToDelete = this.commonStorageService.ignoreArtworkLocated(id);
+            if (filesToDelete != null) {
+                this.fileStorageService.deleteStorageFiles(filesToDelete);
+                status.setStatus(200);
+                status.setMessage("Successfully marked located artwork '" + id + "' as ignored");
+            } else {
+                status.setStatus(400);
+                status.setMessage("Located artwork not found '" + id + "'");
+            }
+        } else {
+            status.setStatus(400);
+            status.setMessage("Invalid located artwork id specified");
+        }
+        return status;
     }
 }
