@@ -31,10 +31,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.ArtworkProfile;
-import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -117,6 +114,14 @@ public class ArtworkDao extends HibernateDao {
         return (ArtworkLocated) criteria.uniqueResult();
     }
 
+    public ArtworkGenerated getStoredArtworkGenerated(ArtworkGenerated generated) {
+        Criteria criteria = getSession().createCriteria(ArtworkGenerated.class);
+        criteria.add(Restrictions.eq("artworkLocated", generated.getArtworkLocated()));
+        criteria.add(Restrictions.eq("artworkProfile", generated.getArtworkProfile()));
+        criteria.setCacheable(true);
+        return (ArtworkGenerated) criteria.uniqueResult();
+    }
+    
     @SuppressWarnings("unchecked")
     public List<QueueDTO> getArtworkLocatedQueue(final CharSequence sql, final int maxResults) {
         SQLQuery query = getSession().createSQLQuery(sql.toString());

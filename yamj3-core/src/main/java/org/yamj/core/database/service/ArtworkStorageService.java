@@ -228,6 +228,13 @@ public class ArtworkStorageService {
 
     @Transactional
     public void storeArtworkGenerated(ArtworkGenerated generated) {
-        this.artworkDao.storeEntity(generated);
+        ArtworkGenerated stored = this.artworkDao.getStoredArtworkGenerated(generated);
+        if (stored == null) {
+            this.artworkDao.saveEntity(generated);
+        } else {
+            stored.setCacheDirectory(generated.getCacheDirectory());
+            stored.setCacheFilename(generated.getCacheFilename());
+            this.artworkDao.updateEntity(stored);
+        }
     }
 }
