@@ -22,12 +22,6 @@
  */
 package org.yamj.core.database.service;
 
-
-import java.util.HashSet;
-import java.util.Set;
-import org.yamj.core.database.model.ArtworkGenerated;
-import org.yamj.core.database.model.ArtworkLocated;
-
 import java.util.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -41,8 +35,10 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
+import org.yamj.core.service.metadata.tools.MetadataTools;
 
 @Service("commonStorageService")
 public class CommonStorageService {
@@ -53,6 +49,8 @@ public class CommonStorageService {
     private StagingDao stagingDao;
     @Autowired
     private FileStorageService fileStorageService;
+    @Autowired
+    private MetadataStorageService metadataStorageService;
     
     @SuppressWarnings("unchecked")
     @Transactional(readOnly = true)
@@ -74,7 +72,7 @@ public class CommonStorageService {
     @Transactional
     public Set<String> deleteStageFile(Long id) {
         // get the stage file
-        StageFile stageFile = this.stagingDao.getById(StageFile.class, id);
+        StageFile stageFile = this.stagingDao.getStageFile(id);
         
         // check stage file
         if (stageFile == null) {
@@ -92,6 +90,10 @@ public class CommonStorageService {
                 break;
             case IMAGE:
                 filesToDelete = this.deleteImageStageFile(stageFile);
+                break;
+            case WATCHED:
+                this.deleteWatchedStageFile(stageFile);
+                filesToDelete = Collections.emptySet();
                 break;
             default:
                 this.delete(stageFile);
@@ -116,6 +118,11 @@ public class CommonStorageService {
                     if (StatusType.DUPLICATE.equals(check.getStatus())) {
                         check.setStatus(StatusType.DONE);
                         this.stagingDao.updateEntity(check);
+                        
+                        // reset watched file
+                        StageFile watchFile = this.stagingDao.getStageFile(FileType.WATCHED, check.getFileName(), check.getStageDirectory());
+                        mediaFile.setWatchedFile((watchFile!=null));
+
                         mediaFile.setStatus(StatusType.UPDATED);
                         this.stagingDao.updateEntity(mediaFile);
                         // break the loop; so that just one duplicate is processed
@@ -150,6 +157,18 @@ public class CommonStorageService {
         this.delete(stageFile);
         
         return filesToDelete;
+    }
+
+    private void deleteWatchedStageFile(StageFile stageFile) {
+        String videoBaseName = FilenameUtils.getBaseName(stageFile.getBaseName());
+        String videoExtension = FilenameUtils.getExtension(stageFile.getBaseName());
+        if (StringUtils.isNotBlank(videoBaseName) && StringUtils.isNotBlank(videoExtension)) {
+            StageFile videoFile = stagingDao.getStageFile(FileType.VIDEO, videoBaseName, videoExtension, stageFile.getStageDirectory());
+            this.toogleWatchedStatus(videoFile, false, false);
+        }
+        
+        // delete stage file
+        this.delete(stageFile);
     }
     
     private void delete(StageFile stageFile) {
@@ -194,6 +213,21 @@ public class CommonStorageService {
             if (videoData.getMediaFiles().size() == 1) {
                 // video data has only this media file
                 this.delete(videoData, filesToDelete);
+            } else if (videoData.getMediaFiles().size() > 1) {
+                // reset watched flag on video data
+                videoData.getMediaFiles().remove(mediaFile);
+                
+                boolean watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
+                if (videoData.isWatchedFile() != watchedFile) {
+                    videoData.setWatchedFile(watchedFile);
+                    this.stagingDao.updateEntity(videoData);
+                }
+
+                boolean watchedApi = MetadataTools.allMediaFilesWatched(videoData, true);
+                if (videoData.isWatchedApi() != watchedApi) {
+                    videoData.setWatchedApi(watchedFile);
+                    this.stagingDao.updateEntity(videoData);
+                }
             }
         }
         
@@ -335,4 +369,60 @@ public class CommonStorageService {
             return filesToDelete;
         }
         return null;
-    }}
+    }
+
+    @Transactional
+    public boolean toogleWatchedStatus(long id, boolean watched, boolean apiCall) {
+        StageFile stageFile = this.stagingDao.getStageFile(id);
+        return this.toogleWatchedStatus(stageFile, watched, apiCall);
+    }
+
+    public boolean toogleWatchedStatus(StageFile stageFile, boolean watched, boolean apiCall) {
+        if (stageFile == null) {
+            return false;
+        }
+        if (!FileType.VIDEO.equals(stageFile.getFileType())) {
+            return false;
+        }
+        if (StatusType.DUPLICATE.equals(stageFile.getStatus())) {
+            return false;
+        }
+
+        MediaFile mediaFile = stageFile.getMediaFile();
+        if (mediaFile == null) {
+            return false;
+        }
+        
+        // update media file
+        if (apiCall) {
+            mediaFile.setWatchedApi(watched);
+        } else {
+            mediaFile.setWatchedFile(watched);
+        }
+        LOG.debug("Mark as {} {}: {}", (apiCall?"api":"file"), (watched?"watched":"unwatched"), mediaFile);
+        this.stagingDao.updateEntity(mediaFile);
+
+        if (mediaFile.isExtra()) {
+            LOG.trace("Media file is an extra where no watched status will be populated: {}", mediaFile);
+            return true;
+        }
+        
+        // determine watch status for each video data which is no extra
+        for (VideoData videoData : mediaFile.getVideoDatas()) {
+            boolean watchedAll = MetadataTools.allMediaFilesWatched(videoData, apiCall);
+            if (apiCall) {
+                if (videoData.isWatchedApi() != watchedAll) {
+                    videoData.setWatchedApi(watchedAll);
+                    LOG.debug("Mark as api {}: {}", (watchedAll?"watched":"unwatched"), videoData);
+                    this.stagingDao.updateEntity(videoData);
+                }
+            } else if (videoData.isWatchedFile() != watchedAll) {
+                videoData.setWatchedFile(watchedAll);
+                LOG.debug("Mark as file {}: {}", (watchedAll?"watched":"unwatched"), videoData);
+                this.stagingDao.updateEntity(videoData);
+            }
+        }
+        
+        return true;
+    }
+}

@@ -28,6 +28,7 @@ public enum FileType {
     IMAGE,
     SUBTITLE,
     NFO,
+    WATCHED,
     UNKNOWN;
 
     public static FileType fromString(String type) {

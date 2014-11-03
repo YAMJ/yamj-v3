@@ -220,6 +220,10 @@ public class FilenameScanner {
                 return FileType.NFO;
             }
 
+            if ("watched".equals(extension)) {
+                return FileType.WATCHED;
+            }
+            
             if (videoExtensions.contains(ext)) {
                 return FileType.VIDEO;
             }

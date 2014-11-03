@@ -31,6 +31,8 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.pojava.datetime.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamj.core.database.model.MediaFile;
+import org.yamj.core.database.model.VideoData;
 
 public final class MetadataTools {
 
@@ -251,10 +253,32 @@ public final class MetadataTools {
         }
     }
     
-    public static void main(String[] args) {
-        System.err.println(parseToDate("24.10.2014"));
-        System.err.println(parseToDate("2014-10-23"));
-        System.err.println(parseToDate("2013"));
-        System.err.println(parseToDate("2013-12"));
+    /**
+     * Checks if all media files have been watched.
+     * 
+     * @param videoData
+     * @param apiCall
+     * @return
+     */
+    public static boolean allMediaFilesWatched(VideoData videoData, boolean apiCall) {
+        boolean onlyExtras = true;
+        for (MediaFile stored : videoData.getMediaFiles()) {
+            if (stored.isExtra()) {
+                continue;
+            }
+            onlyExtras = false;
+            if (apiCall) {
+                if (!stored.isWatchedApi()) {
+                    return false;
+                }
+            } else if (!stored.isWatchedFile()) {
+                return false;
+            }
+        }
+
+        if (onlyExtras) {
+            return false;
+        }
+        return true;
     }
 }

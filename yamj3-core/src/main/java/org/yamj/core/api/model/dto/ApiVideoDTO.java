@@ -54,6 +54,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private Long seasonId;
     private Long season;
     private Long episode;
+    private Boolean watched;
     private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
     private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
     private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
@@ -218,6 +219,14 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public void setEpisode(Long episode) {
         this.episode = episode;
+    }
+
+    public Boolean getWatched() {
+        return watched;
+    }
+
+    public void setWatched(Boolean watched) {
+        this.watched = watched;
     }
 
     public void setFiles(List<ApiFileDTO> files) {

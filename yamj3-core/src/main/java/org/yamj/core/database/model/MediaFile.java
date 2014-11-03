@@ -22,13 +22,7 @@
  */
 package org.yamj.core.database.model;
 
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import org.hibernate.annotations.ForeignKey;
-import org.yamj.core.database.model.type.FileType;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
@@ -38,6 +32,7 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.type.FileType;
 
 @Entity
 @Table(name = "mediafile",
@@ -102,6 +97,12 @@ public class MediaFile extends AbstractAuditable implements Serializable {
 
     @Column(name = "episode_count", nullable = false)
     private int episodeCount = 0;
+
+    @Column(name =  "watched_file", nullable = false)
+    private boolean watchedFile = false;
+
+    @Column(name =  "watched_api", nullable = false)
+    private boolean watchedApi = false;
     
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
@@ -270,6 +271,22 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     public void setEpisodeCount(int episodeCount) {
         this.episodeCount = episodeCount;
     }
+    
+    public boolean isWatchedFile() {
+        return watchedFile;
+    }
+
+    public void setWatchedFile(boolean watchedFile) {
+        this.watchedFile = watchedFile;
+    }
+
+    public boolean isWatchedApi() {
+        return watchedApi;
+    }
+
+    public void setWatchedApi(boolean watchedApi) {
+        this.watchedApi = watchedApi;
+    }
 
     public StatusType getStatus() {
         return status;
@@ -320,7 +337,7 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     }
 
     // TRANSIENT METHODS
-
+    
     public StageFile getVideoFile() {
         for (StageFile stageFile : getStageFiles()) {
             if (FileType.VIDEO.equals(stageFile.getFileType())
@@ -382,6 +399,7 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         sb.append(getId());
         sb.append(", filename=");
         sb.append(getFileName());
+        sb.append("]");
         return sb.toString();
     }
 }

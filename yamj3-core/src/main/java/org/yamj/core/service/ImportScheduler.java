@@ -129,8 +129,33 @@ public class ImportScheduler {
             }
         } while (id != null);
 
-        // PROCESS SUBTITLES
+        // PROCESS WATCHED
+        do {
+            PROCESS_LOCK.lock();
+            
+            try {
+                // find next stage file to process
+                id = mediaImportService.getNextStageFileId(FileType.WATCHED, StatusType.NEW, StatusType.UPDATED);
+                if (id != null) {
+                    LOG.debug("Process watched stage file: {}", id);
+                    mediaImportService.processWatched(id);
+                    LOG.info("Processed watched stage file: {}", id);
+                }
+            } catch (Exception error) {
+                if (ExceptionTools.isLockingError(error)) {
+                    LOG.warn("Locking error during import of watched stage file {}", id);
+                } else {
+                    LOG.error("Failed to process watched stage file {}", id);
+                    LOG.warn("Staging error", error);
+                    try {
+                        mediaImportService.processingError(id);
+                    } catch (Exception ignore) {}
+                }
+            } finally {
+                PROCESS_LOCK.unlock();
+            }
+        } while (id != null);
 
-        // PROCESS PEOPLE
+        // PROCESS SUBTITLES
     }
 }

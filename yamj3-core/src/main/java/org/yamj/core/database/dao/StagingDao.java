@@ -66,6 +66,23 @@ public class StagingDao extends HibernateDao {
                 .load();
     }
 
+    public StageFile getStageFile(FileType fileType, String baseName, StageDirectory stageDirectory) {
+        return this.getStageFile(fileType, baseName, null, stageDirectory);
+    }
+
+    public StageFile getStageFile(FileType fileType, String baseName, String extension, StageDirectory stageDirectory) {
+        Criteria criteria = getSession().createCriteria(StageFile.class);
+        criteria.add(Restrictions.eq("stageDirectory", stageDirectory));
+        criteria.add(Restrictions.eq("fileType", fileType));
+        criteria.add(Restrictions.eq("baseName", baseName));
+        if (extension != null) {
+            criteria.add(Restrictions.eq("extension", extension));
+        }
+        criteria.setCacheable(true);
+        criteria.setCacheMode(CacheMode.NORMAL);
+        return (StageFile) criteria.uniqueResult();
+    }
+    
     public Long getNextStageFileId(FileType fileType, StatusType... statusTypes) {
         Criteria criteria = getSession().createCriteria(StageFile.class);
         criteria.add(Restrictions.eq("fileType", fileType));

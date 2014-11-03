@@ -42,13 +42,14 @@ public final class InfoDTO {
     private Set<String> posterURLs = new HashSet<String>(0);
     private Set<String> fanartURLs = new HashSet<String>(0);
     private Set<String> trailerURLs= new HashSet<String>(0);
+    private boolean watched = false;
     private String title;
     private String titleOriginal;
     private String titleSort;
     private int year = -1;
     private Date releaseDate;
-    private int rating;
-    private int top250;
+    private int rating = -1;
+    private int top250 = -1;
     private String runtime;
     private String plot;
     private String outline;
@@ -116,6 +117,15 @@ public final class InfoDTO {
         }
     }
 
+    public boolean isWatched() {
+        return watched;
+    }
+
+    public void setWatched(boolean watched) {
+        this.watched = watched;
+        this.changed = true;
+    }
+    
     public String getTitle() {
         return title;
     }

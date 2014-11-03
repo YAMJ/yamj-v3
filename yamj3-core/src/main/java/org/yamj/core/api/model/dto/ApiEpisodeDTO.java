@@ -47,6 +47,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     private String outline;
     private String plot;
     private Date firstAired;
+    private Boolean watched;
     private String cacheFilename;
     private String cacheDir;
     private String videoimage;
@@ -87,6 +88,14 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     
     public void setFirstAired(Date firstAired) {
         this.firstAired = firstAired;
+    }
+
+    public Boolean getWatched() {
+        return watched;
+    }
+
+    public void setWatched(Boolean watched) {
+        this.watched = watched;
     }
 
     @JsonIgnore

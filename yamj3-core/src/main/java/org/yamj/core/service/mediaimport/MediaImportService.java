@@ -26,12 +26,12 @@ import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigServiceWrapper;
@@ -41,9 +41,11 @@ import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.mediaimport.FilenameDTO.SetDTO;
+import org.yamj.core.service.metadata.tools.MetadataTools;
 
 /**
  * The media import service is a spring-managed service. This will be used by the MediaImportRunner only in order to access other
@@ -71,13 +73,15 @@ public class MediaImportService {
     private ConfigServiceWrapper configServiceWrapper;
     @Autowired
     private MetadataStorageService metadataStorageService;
+    @Autowired
+    private CommonStorageService commonStorageService;
     
     @Transactional(readOnly = true)
     public Long getNextStageFileId(final FileType fileType, final StatusType... statusTypes) {
         return this.stagingDao.getNextStageFileId(fileType, statusTypes);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public void processVideo(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
         
@@ -91,10 +95,6 @@ public class MediaImportService {
             attachNfoFilesToVideo(stageFile);
             
             // TODO attach subtitles
-
-            // mark stage file as done
-            stageFile.setStatus(StatusType.DONE);
-            stagingDao.updateEntity(stageFile);
         } else {
             LOG.info("Process updated video {}-'{}'", stageFile.getId(), stageFile.getFileName());
             
@@ -102,11 +102,11 @@ public class MediaImportService {
             MediaFile mediaFile = stageFile.getMediaFile();
             mediaFile.setStatus(StatusType.UPDATED);
             mediaDao.updateEntity(mediaFile);
-
-            // mark stage file as done
-            stageFile.setStatus(StatusType.DONE);
-            stagingDao.updateEntity(stageFile);
         }
+
+        // mark stage file as done
+        stageFile.setStatus(StatusType.DONE);
+        stagingDao.updateEntity(stageFile);
     }
 
     private void processNewVideo(StageFile stageFile) {
@@ -142,6 +142,9 @@ public class MediaImportService {
             }
         }
         
+        // check for watched file
+        StageFile watchFile = this.stagingDao.getStageFile(FileType.WATCHED, stageFile.getFileName(), stageFile.getStageDirectory());
+        
         // new media file
         mediaFile = new MediaFile();
         mediaFile.setFileName(stageFile.getFileName());
@@ -155,6 +158,7 @@ public class MediaImportService {
         mediaFile.setVideoSource(dto.getVideoSource());
         mediaFile.setEpisodeCount(dto.getEpisodes().size());
         mediaFile.setStatus(StatusType.NEW);
+        mediaFile.setWatchedFile((watchFile!=null));
         mediaFile.addStageFile(stageFile);
         stageFile.setMediaFile(mediaFile);
 
@@ -181,6 +185,11 @@ public class MediaImportService {
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);
 
+                // set watched if media file is NO extra
+                if (!mediaFile.isExtra()) {
+                    videoData.setWatchedFile(mediaFile.isWatchedFile());
+                }
+                
                 LOG.debug("Store new movie: '{}' - {}", videoData.getTitle(), videoData.getPublicationYear());
                 metadataDao.saveEntity(videoData);
 
@@ -201,6 +210,15 @@ public class MediaImportService {
             } else {
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);
+                
+                // set watched file if all media files are watched
+                boolean watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
+                videoData.setWatchedFile(watchedFile);
+
+                // set watched ap if all media files are watched
+                boolean watchedApi = MetadataTools.allMediaFilesWatched(videoData, true);
+                videoData.setWatchedApi(watchedApi);
+
                 metadataDao.updateEntity(videoData);
             }
 
@@ -465,7 +483,7 @@ public class MediaImportService {
         return false;
     }
     
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public void processingError(Long id) {
         if (id == null) {
             return;
@@ -478,7 +496,7 @@ public class MediaImportService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public void processNfo(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
         if (StatusType.NEW.equals(stageFile.getStatus())) {
@@ -643,7 +661,7 @@ public class MediaImportService {
         }
     }
     
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public void processImage(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
         boolean found;
@@ -673,7 +691,6 @@ public class MediaImportService {
     }
     
     private boolean processNewImage(StageFile stageFile) {
-        
         List<Artwork> artworks;
         if (stageFile.getBaseName().equalsIgnoreCase("poster")
                 || stageFile.getBaseName().equalsIgnoreCase("cover")
@@ -767,4 +784,20 @@ public class MediaImportService {
         return true;
     }
     
+    @Transactional
+    public void processWatched(long id) {
+        StageFile stageFile = stagingDao.getStageFile(id);
+        LOG.info("Process watched {}-'{}'", stageFile.getId(), stageFile.getFileName());
+
+        String videoBaseName = FilenameUtils.getBaseName(stageFile.getBaseName());
+        String videoExtension = FilenameUtils.getExtension(stageFile.getBaseName());
+        if (StringUtils.isNotBlank(videoBaseName) && StringUtils.isNotBlank(videoExtension)) {
+            StageFile videoFile = stagingDao.getStageFile(FileType.VIDEO, videoBaseName, videoExtension, stageFile.getStageDirectory());
+            this.commonStorageService.toogleWatchedStatus(videoFile, true, false);
+        }
+            
+        // update stage file
+        stageFile.setStatus(StatusType.DONE);
+        stagingDao.updateEntity(stageFile);
+    }
 }

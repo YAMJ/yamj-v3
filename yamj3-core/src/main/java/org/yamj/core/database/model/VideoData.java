@@ -173,7 +173,7 @@ public class VideoData extends AbstractMetadata {
     
     @Transient
     private Map<String,String> fanartURLS = new HashMap<String,String>(0);
-
+    
     // GETTER and SETTER
     
     public int getPublicationYear() {
@@ -291,7 +291,7 @@ public class VideoData extends AbstractMetadata {
         this.skipOnlineScans = skipOnlineScans;
     }
 
-    private boolean isWatchedNfo() {
+    public boolean isWatchedNfo() {
         return watchedNfo;
     }
 
@@ -299,7 +299,7 @@ public class VideoData extends AbstractMetadata {
         this.watchedNfo = watchedNfo;
     }
 
-    private boolean isWatchedFile() {
+    public boolean isWatchedFile() {
         return watchedFile;
     }
 
@@ -307,14 +307,14 @@ public class VideoData extends AbstractMetadata {
         this.watchedFile = watchedFile;
     }
 
-    private boolean isWatchedApi() {
+    public boolean isWatchedApi() {
         return watchedApi;
     }
 
     public void setWatchedApi(boolean watchedApi) {
         this.watchedApi = watchedApi;
     }
-
+    
     @Override
     public void setSourceDbId(String sourceDb, String id) {
         if (StringUtils.isNotBlank(id)) {
@@ -473,7 +473,7 @@ public class VideoData extends AbstractMetadata {
     public boolean isWatched() {
         return (this.watchedNfo || this.watchedFile || this.watchedApi);
     }
-    
+        
     public Set<CreditDTO> getCreditDTOS() {
         return creditDTOS;
     }

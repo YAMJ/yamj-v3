@@ -39,8 +39,9 @@ public final class InfoEpisodeDTO {
     private String airsAfterSeason;
     private String airsBeforeSeason;
     private String airsBeforeEpisode;
-    private int rating;
-
+    private int rating = -1;
+    private boolean watched = false;
+    
     public boolean isValid() {
         return ((this.season >= 0) && (this.episode >= 0)); 
     }
@@ -139,6 +140,14 @@ public final class InfoEpisodeDTO {
         if (rating >= 0) {
             this.rating = rating;
         }
+    }
+
+    public boolean isWatched() {
+        return watched;
+    }
+
+    public void setWatched(boolean watched) {
+        this.watched = watched;
     }
 
     @Override

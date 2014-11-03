@@ -89,6 +89,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON, LongType.INSTANCE);
+        sqlScalars.addScalar("watched", BooleanType.INSTANCE);
         DataItemTools.addDataItemScalars(sqlScalars, options.splitDataitems());
 
         List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
@@ -226,6 +227,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", vd.season_id AS seasonId");
         sbSQL.append(", null AS season");
         sbSQL.append(", vd.episode AS episode");
+        sbSQL.append(", (vd.watched_nfo or vd.watched_file or vd.watched_api) as watched");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "vd"));
         sbSQL.append(" FROM videodata vd");
         // Add genre tables for include and exclude
@@ -290,6 +292,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", null AS seasonId");
         sbSQL.append(", null AS season");
         sbSQL.append(", null AS episode");
+        sbSQL.append(", (select min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched ");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "ser"));
         sbSQL.append(" FROM series ser ");
         // Add genre tables for include and exclude
@@ -349,6 +352,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", sea.id AS seasonId");
         sbSQL.append(", sea.season AS season");
         sbSQL.append(", null AS episode");
+        sbSQL.append(", (select min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid where vid.season_id=sea.id) as watched ");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "sea"));
         sbSQL.append(" FROM season sea");
         // Add genre tables for include and exclude
@@ -898,6 +902,7 @@ public class ApiDao extends HibernateDao {
 
         sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.id AS seasonId, sea.season, vid.episode, ");
         sqlScalars.addToSql("vid.id, vid.title, vid.title_original as originalTitle, vid.release_date as firstAired, ");
+        sqlScalars.addToSql("(vid.watched_nfo or vid.watched_file or vid.watched_api) as watched, ");
         if (options.hasDataItem(DataItem.OUTLINE)) {
             sqlScalars.addToSql("vid.outline, ");
             sqlScalars.addScalar("outline", StringType.INSTANCE);
@@ -938,6 +943,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(CACHE_FILENAME, StringType.INSTANCE);
         sqlScalars.addScalar(CACHE_DIR, StringType.INSTANCE);
         sqlScalars.addScalar("firstAired", DateType.INSTANCE);
+        sqlScalars.addScalar("watched", BooleanType.INSTANCE);
         
         List<ApiEpisodeDTO> results = executeQueryWithTransform(ApiEpisodeDTO.class, sqlScalars, wrapper);
         if (CollectionUtils.isNotEmpty(results) && options.hasDataItem(DataItem.FILES)) {
@@ -979,6 +985,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON, LongType.INSTANCE);
+        sqlScalars.addScalar("watched", BooleanType.INSTANCE);
         // Add Scalars for additional data item columns
         DataItemTools.addDataItemScalars(sqlScalars, dataItems);
 

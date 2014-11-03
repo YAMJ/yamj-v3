@@ -245,14 +245,25 @@ public final class InfoReader {
         // get the movie IDs
         parseIds(eCommon.getElementsByTagName("id"), dto, isTV);
 
-        // ID specific to TV Shows
+        // parsed watched
+        value = DOMHelper.getValueFromElement(eCommon, "watched");
+        boolean watched = Boolean.parseBoolean(value);
+        
         if (dto.isTvShow()) {
+            // TV show specific
+
+            // specific TVDB id
             value = DOMHelper.getValueFromElement(eCommon, "tvdbid");
             if (StringUtils.isNotBlank(value)) {
                 dto.addId(TheTVDbScanner.SCANNER_ID, value);
             }
+        } else {
+            // movie specific
+        
+            // movie watched status
+            dto.setWatched(watched);
         }
-
+        
         // parse sets
         parseSets(eCommon.getElementsByTagName("set"), dto);
 
@@ -367,7 +378,7 @@ public final class InfoReader {
         
         // parse all episodes
         if (dto.isTvShow()) {
-            parseAllEpisodeDetails(dto, xmlDoc.getElementsByTagName(DOMHelper.TYPE_EPISODE));
+            parseAllEpisodeDetails(dto, xmlDoc.getElementsByTagName(DOMHelper.TYPE_EPISODE), watched);
         }
     }
 
@@ -706,13 +717,14 @@ public final class InfoReader {
      * @param dto
      * @param nlEpisodeDetails
      */
-    private void parseAllEpisodeDetails(InfoDTO dto, NodeList nlEpisodeDetails) {
+    private void parseAllEpisodeDetails(InfoDTO dto, NodeList nlEpisodeDetails, boolean watched) {
         Node nEpisodeDetails;
         for (int looper = 0; looper < nlEpisodeDetails.getLength(); looper++) {
             nEpisodeDetails = nlEpisodeDetails.item(looper);
             if (nEpisodeDetails.getNodeType() == Node.ELEMENT_NODE) {
                 Element eEpisodeDetail = (Element) nEpisodeDetails;
                 InfoEpisodeDTO episodeDTO = parseSingleEpisodeDetail(eEpisodeDetail);
+                episodeDTO.setWatched(watched);
                 dto.addEpisode(episodeDTO);
             }
         }

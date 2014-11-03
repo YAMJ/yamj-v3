@@ -68,7 +68,7 @@ public class MetadataScannerService {
         Series series = this.metadataStorageService.getRequiredSeries(id);
         
         // NFO scanning
-        this.nfoScannerService.scanSeriese(series);
+        this.nfoScannerService.scanSeries(series);
         
         // online scanning
         this.onlineScannerService.scanSeries(series);
