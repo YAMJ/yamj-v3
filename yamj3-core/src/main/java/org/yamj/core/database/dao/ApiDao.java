@@ -62,6 +62,7 @@ public class ApiDao extends HibernateDao {
     private static final String ORIGINAL_TITLE = "originalTitle";
     private static final String CACHE_FILENAME = "cacheFilename";
     private static final String CACHE_DIR = "cacheDir";
+    private static final String WATCHED = "watched";
     // SQL
     private static final String SQL_UNION_ALL = " UNION ALL ";
     private static final String SQL_AS_VIDEO_TYPE_STRING = "' AS videoTypeString";
@@ -89,7 +90,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON, LongType.INSTANCE);
-        sqlScalars.addScalar("watched", BooleanType.INSTANCE);
+        sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
         DataItemTools.addDataItemScalars(sqlScalars, options.splitDataitems());
 
         List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
@@ -943,7 +944,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(CACHE_FILENAME, StringType.INSTANCE);
         sqlScalars.addScalar(CACHE_DIR, StringType.INSTANCE);
         sqlScalars.addScalar("firstAired", DateType.INSTANCE);
-        sqlScalars.addScalar("watched", BooleanType.INSTANCE);
+        sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
         
         List<ApiEpisodeDTO> results = executeQueryWithTransform(ApiEpisodeDTO.class, sqlScalars, wrapper);
         if (CollectionUtils.isNotEmpty(results) && options.hasDataItem(DataItem.FILES)) {
@@ -985,7 +986,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON, LongType.INSTANCE);
-        sqlScalars.addScalar("watched", BooleanType.INSTANCE);
+        sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
         // Add Scalars for additional data item columns
         DataItemTools.addDataItemScalars(sqlScalars, dataItems);
 
@@ -1247,7 +1248,8 @@ public class ApiDao extends HibernateDao {
         LOG.info("Getting series information for seriesId '{}'", id);
 
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT s.id AS seriesId, title, start_year AS seriesYear");
+        sqlScalars.addToSql("SELECT s.id AS seriesId, title, start_year AS seriesYear, ");
+        sqlScalars.addToSql("(select min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=s.id) as watched ");
         sqlScalars.addToSql("FROM series s");
         sqlScalars.addToSql("WHERE id=:id");
         sqlScalars.addToSql("ORDER BY id");
@@ -1256,7 +1258,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(SERIES_YEAR, IntegerType.INSTANCE);
-
+        sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
         List<ApiSeriesInfoDTO> seriesResults = executeQueryWithTransform(ApiSeriesInfoDTO.class, sqlScalars, wrapper);
         LOG.debug("Found {} series for SeriesId '{}'", seriesResults.size(), id);
 
@@ -1277,7 +1279,8 @@ public class ApiDao extends HibernateDao {
 
         LOG.debug("Getting season information for seriesId '{}'", seriesId);
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT s.series_id AS seriesId, s.id AS seasonId, s.season, title");
+        sqlScalars.addToSql("SELECT s.series_id AS seriesId, s.id AS seasonId, s.season, title,");
+        sqlScalars.addToSql("(select min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid where vid.season_id=s.id) as watched ");
         sqlScalars.addToSql("FROM season s");
         sqlScalars.addToSql("WHERE series_id=:id");
         sqlScalars.addToSql("ORDER BY series_id, season");
@@ -1287,6 +1290,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(SEASON_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON, IntegerType.INSTANCE);
         sqlScalars.addScalar(TITLE, StringType.INSTANCE);
+        sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
 
         List<ApiSeasonInfoDTO> seasonResults = executeQueryWithTransform(ApiSeasonInfoDTO.class, sqlScalars, null);
         LOG.debug("Found {} seasons for SeriesId '{}'", seasonResults.size(), seriesId);

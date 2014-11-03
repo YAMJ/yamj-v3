@@ -34,6 +34,7 @@ public class ApiSeasonInfoDTO extends AbstractApiDTO {
     private Long seasonId;
     private Integer season;
     private String title;
+    private Boolean watched;
     Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
 
     public Long getSeriesId() {
@@ -66,6 +67,14 @@ public class ApiSeasonInfoDTO extends AbstractApiDTO {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+    
+    public Boolean getWatched() {
+        return watched;
+    }
+
+    public void setWatched(Boolean watched) {
+        this.watched = watched;
     }
 
     public Map<ArtworkType, List<ApiArtworkDTO>> getArtwork() {

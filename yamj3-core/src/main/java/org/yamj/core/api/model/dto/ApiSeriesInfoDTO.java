@@ -22,17 +22,22 @@
  */
 package org.yamj.core.api.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import org.yamj.core.database.model.type.ArtworkType;
 
+@JsonInclude(Include.NON_DEFAULT) 
 public class ApiSeriesInfoDTO extends AbstractApiDTO {
 
     private Long seriesId;
     private String title;
     private Integer year;
+    private Boolean watched;
     private List<ApiSeasonInfoDTO> seasonList;
     private Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
 
@@ -64,6 +69,10 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
         return year;
     }
 
+    public Boolean getWatched() {
+        return watched;
+    }
+    
     public Map<ArtworkType, List<ApiArtworkDTO>> getArtwork() {
         return artwork;
     }
@@ -74,6 +83,10 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
 
     public void setSeriesYear(Integer seriesYear) {
         this.year = seriesYear;
+    }
+
+    public void setWatched(Boolean watched) {
+        this.watched = watched;
     }
 
     public void setArtwork(Map<ArtworkType, List<ApiArtworkDTO>> artwork) {
