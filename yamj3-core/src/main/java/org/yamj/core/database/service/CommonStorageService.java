@@ -436,7 +436,15 @@ public class CommonStorageService {
                 this.stagingDao.updateEntity(videoData);
             }
         }
-        
         return true;
+    }
+
+    @Transactional
+    public int deleteOrphanGenres() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("DELETE FROM genre ");
+        sb.append("WHERE not exists (select 1 from videodata_genres vg where vg.genre_id=id) ");
+        sb.append("AND not exists (select 1 from series_genres sg where sg.genre_id=id) ");
+        return this.stagingDao.executeSqlUpdate(sb);
     }
 }

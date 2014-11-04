@@ -371,6 +371,18 @@ public abstract class HibernateDao {
      * Execute an update statement.
      *
      * @param queryCharSequence the query string
+     * @return number of affected rows
+     */
+    public int executeUpdate(CharSequence queryCharSequence) {
+        Query query = getSession().createQuery(queryCharSequence.toString());
+        query.setCacheable(true);
+        return query.executeUpdate();
+    }
+
+    /**
+     * Execute an update statement.
+     *
+     * @param queryCharSequence the query string
      * @param params the named parameters
      * @return number of affected rows
      */

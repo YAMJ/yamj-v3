@@ -85,7 +85,16 @@ public class DeleteTask implements ITask {
                 LOG.warn("Failed to retrieve orphan person", ex);
             }
         }
-        
+
+        // delete orphan persons if allowed
+        if (this.configService.getBooleanProperty("yamj3.delete.orphan.genre", Boolean.TRUE)) {
+            try {
+                this.commonStorageService.deleteOrphanGenres();
+            } catch (Exception ex) {
+                LOG.warn("Failed to delete orphan genres", ex);
+            }
+        }
+
         // delete storage files
         this.fileStorageService.deleteStorageFiles(filesToDelete);
     }
