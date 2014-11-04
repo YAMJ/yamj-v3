@@ -26,7 +26,6 @@ import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +45,7 @@ import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.mediaimport.FilenameDTO.SetDTO;
 import org.yamj.core.service.metadata.tools.MetadataTools;
+import org.yamj.core.service.staging.StagingService;
 
 /**
  * The media import service is a spring-managed service. This will be used by the MediaImportRunner only in order to access other
@@ -75,6 +75,8 @@ public class MediaImportService {
     private MetadataStorageService metadataStorageService;
     @Autowired
     private CommonStorageService commonStorageService;
+    @Autowired
+    private StagingService stagingService;
     
     @Transactional(readOnly = true)
     public Long getNextStageFileId(final FileType fileType, final StatusType... statusTypes) {
@@ -141,9 +143,9 @@ public class MediaImportService {
                 return;
             }
         }
-        
-        // check for watched file
-        StageFile watchFile = this.stagingDao.getStageFile(FileType.WATCHED, stageFile.getFileName(), stageFile.getStageDirectory());
+
+        // determine if watched file exists for the video file
+        boolean watchedFile = this.stagingService.isWatchedVideoFile(stageFile);
         
         // new media file
         mediaFile = new MediaFile();
@@ -158,7 +160,7 @@ public class MediaImportService {
         mediaFile.setVideoSource(dto.getVideoSource());
         mediaFile.setEpisodeCount(dto.getEpisodes().size());
         mediaFile.setStatus(StatusType.NEW);
-        mediaFile.setWatchedFile((watchFile!=null));
+        mediaFile.setWatchedFile(watchedFile);
         mediaFile.addStageFile(stageFile);
         stageFile.setMediaFile(mediaFile);
 
@@ -211,11 +213,11 @@ public class MediaImportService {
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);
                 
-                // set watched file if all media files are watched
-                boolean watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
+                // set watched file if all media files are watched by file
+                watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
                 videoData.setWatchedFile(watchedFile);
 
-                // set watched ap if all media files are watched
+                // set watched API if all media files are watched by API
                 boolean watchedApi = MetadataTools.allMediaFilesWatched(videoData, true);
                 videoData.setWatchedApi(watchedApi);
 
@@ -786,18 +788,16 @@ public class MediaImportService {
     
     @Transactional
     public void processWatched(long id) {
-        StageFile stageFile = stagingDao.getStageFile(id);
-        LOG.info("Process watched {}-'{}'", stageFile.getId(), stageFile.getFileName());
+        StageFile watchedFile = stagingDao.getStageFile(id);
+        LOG.info("Process watched {}-'{}'", watchedFile.getId(), watchedFile.getFileName());
 
-        String videoBaseName = FilenameUtils.getBaseName(stageFile.getBaseName());
-        String videoExtension = FilenameUtils.getExtension(stageFile.getBaseName());
-        if (StringUtils.isNotBlank(videoBaseName) && StringUtils.isNotBlank(videoExtension)) {
-            StageFile videoFile = stagingDao.getStageFile(FileType.VIDEO, videoBaseName, videoExtension, stageFile.getStageDirectory());
+        // set watched status for video file(s)
+        for (StageFile videoFile : this.stagingService.findWatchedVideoFiles(watchedFile)) {
             this.commonStorageService.toogleWatchedStatus(videoFile, true, false);
         }
             
         // update stage file
-        stageFile.setStatus(StatusType.DONE);
-        stagingDao.updateEntity(stageFile);
+        watchedFile.setStatus(StatusType.DONE);
+        stagingDao.updateEntity(watchedFile);
     }
 }

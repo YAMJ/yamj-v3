@@ -83,7 +83,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
         String property = StringUtils.trimToEmpty(PROPERTIES.getProperty(key));
 
         if (StringUtils.isNotBlank(property)) {
-            return Boolean.parseBoolean(property);
+            return Boolean.parseBoolean(property.trim());
         }
         return defaultValue;
     }

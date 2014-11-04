@@ -85,7 +85,7 @@ public class ScanningScheduler {
         int maxResults = configService.getIntProperty("yamj3.scheduler.mediafilescan.maxResults", 20);
         List<QueueDTO> queueElements = mediaStorageService.getMediaFileQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
-            LOG.debug("No media files found to scan");
+            LOG.trace("No media files found to scan");
             return;
         }
 
@@ -125,7 +125,7 @@ public class ScanningScheduler {
         int maxResults = configService.getIntProperty("yamj3.scheduler.metadatascan.maxResults", 20);
         List<QueueDTO> queueElements = metadataStorageService.getMetaDataQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
-            LOG.debug("No metadata found to scan");
+            LOG.trace("No metadata found to scan");
             return;
         }
 
@@ -165,7 +165,7 @@ public class ScanningScheduler {
         int maxResults = configService.getIntProperty("yamj3.scheduler.peoplescan.maxResults", 50);
         List<QueueDTO> queueElements = metadataStorageService.getPersonQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
-            LOG.debug("No people data found to scan");
+            LOG.trace("No people data found to scan");
             return;
         }
 
@@ -205,7 +205,7 @@ public class ScanningScheduler {
         int maxResults = configService.getIntProperty("yamj3.scheduler.filmographyscan.maxResults", 50);
         List<QueueDTO> queueElements = metadataStorageService.getFilmographyQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
-            LOG.debug("No filmography data found to scan");
+            LOG.trace("No filmography data found to scan");
             return;
         }
 
@@ -245,7 +245,7 @@ public class ScanningScheduler {
         int maxResults = configService.getIntProperty("yamj3.scheduler.artworkscan.maxResults", 30);
         List<QueueDTO> queueElements = artworkStorageService.getArtworkQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
-            LOG.debug("No artwork found to scan");
+            LOG.trace("No artwork found to scan");
             return;
         }
 

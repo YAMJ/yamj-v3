@@ -23,6 +23,7 @@
 package org.yamj.core.service.staging;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.dto.ImportDTO;
 import org.yamj.common.dto.StageDirectoryDTO;
 import org.yamj.common.dto.StageFileDTO;
+import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
@@ -222,5 +224,38 @@ public class StagingService {
         stageFile.setStatus(StatusType.UPDATED);
         this.stagingDao.updateEntity(stageFile);
         return true;
+    }
+
+    @Transactional
+    public boolean isWatchedVideoFile(StageFile videoFile) {
+        // get the name used for WATCHED directories
+        String watchedDirName = PropertyTools.getProperty("yamj3.folder.name.watched", "watched");
+        BigInteger count = this.stagingDao.countWatchFiles(videoFile, watchedDirName);
+        return (count != null && count.intValue()>0);
+    }
+    
+    @Transactional
+    public List<StageFile> findWatchedVideoFiles(StageFile watchedFile) {
+        String videoBaseName = FilenameUtils.getBaseName(watchedFile.getBaseName());
+        String videoExtension = FilenameUtils.getExtension(watchedFile.getBaseName());
+        if (filenameScanner.determineFileType(videoExtension) != FileType.VIDEO) {
+            // extension is no video, so use the full base name
+            videoBaseName = watchedFile.getBaseName();
+            videoExtension = null;
+        }
+
+        // get the name used for WATCHED directories
+        String watchedDirName = PropertyTools.getProperty("yamj3.folder.name.watched", "watched");
+
+        List<StageFile> videoFiles;
+        if (watchedDirName.equalsIgnoreCase(watchedFile.getStageDirectory().getDirectoryName())) {
+            // search in all directories of the library
+            videoFiles = this.stagingDao.findStageFiles(FileType.VIDEO, videoBaseName, videoExtension, watchedFile.getStageDirectory().getLibrary());
+        } else {
+            // search in just this directory
+            videoFiles = this.stagingDao.findStageFiles(FileType.VIDEO, videoBaseName, videoExtension, watchedFile.getStageDirectory());
+        }
+
+        return videoFiles;
     }
 }

@@ -22,6 +22,9 @@
  */
 package org.yamj.core.database.service;
 
+import org.yamj.core.database.model.StageFile;
+
+import org.yamj.core.service.staging.StagingService;
 import java.util.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -50,8 +53,8 @@ public class CommonStorageService {
     @Autowired
     private FileStorageService fileStorageService;
     @Autowired
-    private MetadataStorageService metadataStorageService;
-    
+    private StagingService stagingService;
+
     @SuppressWarnings("unchecked")
     @Transactional(readOnly = true)
     public List<Long> getStageFilesToDelete() {
@@ -120,11 +123,24 @@ public class CommonStorageService {
                         this.stagingDao.updateEntity(check);
                         
                         // reset watched file
-                        StageFile watchFile = this.stagingDao.getStageFile(FileType.WATCHED, check.getFileName(), check.getStageDirectory());
-                        mediaFile.setWatchedFile((watchFile!=null));
-
+                        boolean watchedFile = this.stagingService.isWatchedVideoFile(check);
+                        mediaFile.setWatchedFile(watchedFile);
                         mediaFile.setStatus(StatusType.UPDATED);
                         this.stagingDao.updateEntity(mediaFile);
+                        
+                        for (VideoData videoData : mediaFile.getVideoDatas()) {
+                            watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
+                            if (videoData.isWatchedFile() != watchedFile) {
+                                videoData.setWatchedFile(watchedFile);
+                                this.stagingDao.updateEntity(videoData);
+                            }
+
+                            boolean watchedApi = MetadataTools.allMediaFilesWatched(videoData, true);
+                            if (videoData.isWatchedApi() != watchedApi) {
+                                videoData.setWatchedApi(watchedFile);
+                                this.stagingDao.updateEntity(videoData);
+                            }
+                        }
                         // break the loop; so that just one duplicate is processed
                         break;
                     }
@@ -159,16 +175,14 @@ public class CommonStorageService {
         return filesToDelete;
     }
 
-    private void deleteWatchedStageFile(StageFile stageFile) {
-        String videoBaseName = FilenameUtils.getBaseName(stageFile.getBaseName());
-        String videoExtension = FilenameUtils.getExtension(stageFile.getBaseName());
-        if (StringUtils.isNotBlank(videoBaseName) && StringUtils.isNotBlank(videoExtension)) {
-            StageFile videoFile = stagingDao.getStageFile(FileType.VIDEO, videoBaseName, videoExtension, stageFile.getStageDirectory());
+    private void deleteWatchedStageFile(StageFile watchedFile) {
+        // set watched status for video file(s)
+        for (StageFile videoFile : this.stagingService.findWatchedVideoFiles(watchedFile)) {
             this.toogleWatchedStatus(videoFile, false, false);
         }
         
-        // delete stage file
-        this.delete(stageFile);
+        // delete watched file
+        this.delete(watchedFile);
     }
     
     private void delete(StageFile stageFile) {

@@ -66,7 +66,7 @@ public class ArtworkProcessScheduler {
         int maxResults = configService.getIntProperty("yamj3.scheduler.artworkprocess.maxResults", 20);
         List<QueueDTO> queueElements = artworkStorageService.getArtworLocatedQueue(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
-            LOG.debug("No artwork found to process");
+            LOG.trace("No artwork found to process");
             return;
         }
 

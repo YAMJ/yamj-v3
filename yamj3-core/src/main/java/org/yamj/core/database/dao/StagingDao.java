@@ -22,11 +22,11 @@
  */
 package org.yamj.core.database.dao;
 
+import java.math.BigInteger;
 import java.util.*;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
-import org.hibernate.SQLQuery;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -66,23 +66,6 @@ public class StagingDao extends HibernateDao {
                 .load();
     }
 
-    public StageFile getStageFile(FileType fileType, String baseName, StageDirectory stageDirectory) {
-        return this.getStageFile(fileType, baseName, null, stageDirectory);
-    }
-
-    public StageFile getStageFile(FileType fileType, String baseName, String extension, StageDirectory stageDirectory) {
-        Criteria criteria = getSession().createCriteria(StageFile.class);
-        criteria.add(Restrictions.eq("stageDirectory", stageDirectory));
-        criteria.add(Restrictions.eq("fileType", fileType));
-        criteria.add(Restrictions.eq("baseName", baseName));
-        if (extension != null) {
-            criteria.add(Restrictions.eq("extension", extension));
-        }
-        criteria.setCacheable(true);
-        criteria.setCacheMode(CacheMode.NORMAL);
-        return (StageFile) criteria.uniqueResult();
-    }
-    
     public Long getNextStageFileId(FileType fileType, StatusType... statusTypes) {
         Criteria criteria = getSession().createCriteria(StageFile.class);
         criteria.add(Restrictions.eq("fileType", fileType));
@@ -136,7 +119,8 @@ public class StagingDao extends HibernateDao {
             sb.append("AND lower(sf.baseName)=:baseName ");
         }
         sb.append("AND sf.stageDirectory=:stageDirectory ");
-        
+        sb.append("AND sf.status != :deleted ");
+
         Query query = getSession().createQuery(sb.toString());
         query.setParameter("fileType", FileType.VIDEO);
         query.setBoolean("extra", Boolean.FALSE);
@@ -144,6 +128,7 @@ public class StagingDao extends HibernateDao {
             query.setString("baseName", baseName.toLowerCase());
         }
         query.setParameter("stageDirectory", stageDirectory);
+        query.setParameter("deleted", StatusType.DELETED);
         query.setCacheable(true);
         query.setCacheMode(CacheMode.NORMAL);
         return (List<VideoData>)query.list();
@@ -163,11 +148,13 @@ public class StagingDao extends HibernateDao {
         sb.append("WHERE sf.fileType=:fileType ");
         sb.append("AND mf.extra=:extra ");
         sb.append("AND sf.stageDirectory in (:stageDirectories) ");
+        sb.append("AND sf.status != :deleted ");
         
         Query query = getSession().createQuery(sb.toString());
         query.setParameter("fileType", FileType.VIDEO);
         query.setBoolean("extra", Boolean.FALSE);
         query.setParameterList("stageDirectories", stageDirectories);
+        query.setParameter("deleted", StatusType.DELETED);
         query.setCacheable(true);
         query.setCacheMode(CacheMode.NORMAL);
         return (List<VideoData>)query.list();
@@ -182,6 +169,7 @@ public class StagingDao extends HibernateDao {
         sb.append("WHERE sf.fileType=:fileType ");
         sb.append("AND lower(sf.baseName)=:searchName ");
         sb.append("AND sf.stageDirectory=:stageDirectory ");
+        sb.append("AND sf.status != :deleted ");
         
         Query query = getSession().createQuery(sb.toString());
         query.setParameter("fileType", FileType.NFO);
@@ -189,23 +177,8 @@ public class StagingDao extends HibernateDao {
         query.setParameter("stageDirectory", stageDirectory);
         query.setCacheable(true);
         query.setCacheMode(CacheMode.NORMAL);
+        query.setParameter("deleted", StatusType.DELETED);
         return (StageFile)query.uniqueResult();
-    }
-    
-    public NfoRelation getNfoRelation(long stageFileId, long videoDataId) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("SELECT * ");
-        sb.append("FROM nfo_relation nfrel ");
-        sb.append("WHERE nfrel.stagefile_id=:stageFileId ");
-        sb.append("AND nfrel.videodata_id=:videoDataId ");
-        
-        SQLQuery query = getSession().createSQLQuery(sb.toString());
-        query.setLong("stageFileId", stageFileId);
-        query.setLong("videoDataId", videoDataId);
-        query.setCacheable(true);
-        query.setCacheMode(CacheMode.NORMAL);
-        query.addEntity(NfoRelation.class);
-        return (NfoRelation)query.uniqueResult();
     }
     
     @SuppressWarnings("unchecked")
@@ -319,5 +292,82 @@ public class StagingDao extends HibernateDao {
         query.setCacheable(true);
         query.setCacheMode(CacheMode.NORMAL);
         return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<StageFile> findStageFiles(FileType fileType, String searchName, String searchExtension, StageDirectory stageDirectory) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("SELECT distinct sf ");
+        sb.append("FROM StageFile sf ");
+        sb.append("WHERE sf.fileType=:fileType ");
+        sb.append("AND lower(sf.baseName)=:searchName ");
+        if (searchExtension != null) {
+            sb.append("AND lower(sf.extension)=:searchExtension ");
+        }
+        sb.append("AND sf.stageDirectory=:stageDirectory ");
+        sb.append("AND sf.status != :duplicate ");
+        sb.append("AND sf.status != :deleted ");
+        
+        Query query = getSession().createQuery(sb.toString());
+        query.setParameter("fileType", fileType);
+        query.setString("searchName", searchName.toLowerCase());
+        if (searchExtension != null) {
+            query.setString("searchExtension", searchExtension.toLowerCase());
+        }
+        query.setParameter("stageDirectory", stageDirectory);
+        query.setParameter("duplicate", StatusType.DUPLICATE);
+        query.setParameter("deleted", StatusType.DELETED);
+        query.setCacheable(true);
+        query.setCacheMode(CacheMode.NORMAL);
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<StageFile> findStageFiles(FileType fileType, String searchName, String searchExtension, Library library) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("SELECT distinct sf ");
+        sb.append("FROM StageFile sf ");
+        sb.append("JOIN sf.stageDirectory sd ");
+        sb.append("WHERE sf.fileType=:fileType ");
+        sb.append("AND lower(sf.baseName)=:searchName ");
+        if (searchExtension != null) {
+            sb.append("AND lower(sf.extension)=:searchExtension ");
+        }
+        sb.append("AND sd.library=:library ");
+        sb.append("AND sf.status != :duplicate ");
+        sb.append("AND sf.status != :deleted ");
+        
+        Query query = getSession().createQuery(sb.toString());
+        query.setParameter("fileType", fileType);
+        query.setString("searchName", searchName.toLowerCase());
+        if (searchExtension != null) {
+            query.setString("searchExtension", searchExtension.toLowerCase());
+        }
+        query.setParameter("library", library);
+        query.setParameter("duplicate", StatusType.DUPLICATE);
+        query.setParameter("deleted", StatusType.DELETED);
+        query.setCacheable(true);
+        query.setCacheMode(CacheMode.NORMAL);
+        return query.list();
+    }
+    
+    public BigInteger countWatchFiles(StageFile videoFile, String watchedDirName) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("SELECT count(*) ");
+        sb.append("FROM stage_file sf ");
+        sb.append("JOIN stage_directory sd ON sf.directory_id=sd.id and (sd.id=:dirId or lower(sd.directory_name)=:dirName) and sd.library_id=:libraryId ");
+        sb.append("WHERE sf.file_type=:watched ");
+        sb.append("and (lower(sf.base_name)=:check1 or lower(sf.base_name)=:check2) ");
+        sb.append("and sf.status != :deleted ");
+            
+        Query query = getSession().createSQLQuery(sb.toString());
+        query.setLong("dirId", videoFile.getStageDirectory().getId());
+        query.setString("dirName", watchedDirName.toLowerCase());
+        query.setLong("libraryId", videoFile.getStageDirectory().getLibrary().getId());
+        query.setString("watched", FileType.WATCHED.toString());
+        query.setString("check1", videoFile.getBaseName().toLowerCase());
+        query.setString("check2", videoFile.getFileName().toLowerCase());
+        query.setString("deleted", StatusType.DELETED.toString());
+        return (BigInteger)query.uniqueResult();
     }
 }
