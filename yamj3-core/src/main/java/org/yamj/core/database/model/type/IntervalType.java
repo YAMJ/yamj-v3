@@ -39,6 +39,7 @@ public enum IntervalType {
     DAYS,
     HOURS,
     MINUTES,
+    ONCE, // just running once
     UNKNOWN;
 
     public boolean needsDelay() {

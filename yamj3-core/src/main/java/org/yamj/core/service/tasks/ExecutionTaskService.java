@@ -67,6 +67,17 @@ public class ExecutionTaskService {
             }
         }
 
+        if (IntervalType.ONCE == executionTask.getIntervalType()) {
+            // just delete the task after executed once
+            try {
+                this.executionTaskStorageService.deleteEntity(executionTask);
+            } catch (Exception ex) {
+                LOG.error("Failed to delete execution task: " + executionTask.getName(), ex);
+            }
+            // nothing to do for this task anymore
+            return;
+        }
+
         try {
             Calendar nextCal = Calendar.getInstance();
             nextCal.setTime(executionTask.getNextExecution());

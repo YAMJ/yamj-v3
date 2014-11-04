@@ -72,4 +72,9 @@ public class ExecutionTaskStorageService {
     public void updateEntity(Object entity) {
         this.commonDao.updateEntity(entity);
     }
+
+    @Transactional
+    public void deleteEntity(Object entity) {
+        this.commonDao.deleteEntity(entity);
+    }
 }

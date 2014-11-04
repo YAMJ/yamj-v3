@@ -73,8 +73,6 @@ public class MediaInfoService {
     private MediaStorageService mediaStorageService;
     @Autowired
     private AspectRatioTools aspectRatioTools;
-    @Autowired
-    private LanguageTools languageTools;
     
     @PostConstruct
     public void init() throws Exception {
@@ -397,7 +395,7 @@ public class MediaInfoService {
             }
             // determine language
             if (StringUtils.isNotBlank(infoValue)) {
-                String language = languageTools.determineLanguage(infoValue);
+                String language = LanguageTools.determineLanguage(infoValue);
                 if (StringUtils.isNotBlank(language)) {
                     audioCodec.setLanguage(language);
                 }
@@ -420,7 +418,7 @@ public class MediaInfoService {
                 infoLanguage = infoLanguage.substring(0, infoLanguage.indexOf('/')).trim(); // In this case, language are "doubled", just take the first one.
             }
             // determine language
-            infoLanguage = languageTools.determineLanguage(infoLanguage);
+            infoLanguage = LanguageTools.determineLanguage(infoLanguage);
         }
 
         // just use defined formats

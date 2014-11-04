@@ -22,22 +22,24 @@
  */
 package org.yamj.core.tools;
 
-import org.yamj.common.tools.PropertyTools;
-import org.yamj.common.util.KeywordMap;
-import org.yamj.common.util.PatternUtils;
-import org.yamj.common.util.TokensPatternMap;
 import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import org.yamj.common.tools.PropertyTools;
+import org.yamj.common.util.KeywordMap;
+import org.yamj.common.util.PatternUtils;
+import org.yamj.common.util.TokensPatternMap;
 
-@Service("languageTools")
+@Component
 public class LanguageTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(LanguageTools.class);
+    
     /**
      * Mapping exact tokens to language.
      *
@@ -51,7 +53,7 @@ public class LanguageTools {
      *
      * Language markers, found with this pattern are counted as token delimiters (they will cut movie title)
      */
-    private final TokensPatternMap strictLanguageMap = new TokensPatternMap() {
+    private final static TokensPatternMap STRICT_LANGUAGE_MAP = new TokensPatternMap() {
         private static final long serialVersionUID = 3630995345545037071L;
 
         @Override
@@ -66,6 +68,7 @@ public class LanguageTools {
             put(key, PatternUtils.tpatt(tokenBuilder.toString()));
         }
     };
+    
     /**
      * Mapping loose language markers.
      *
@@ -74,7 +77,7 @@ public class LanguageTools {
      *
      * Markers in this map are case insensitive.
      */
-    private final TokensPatternMap looseLanguageMap = new TokensPatternMap() {
+    private final  static TokensPatternMap LOOSE_LANGUAGE_MAP = new TokensPatternMap() {
         private static final long serialVersionUID = 1383819843117148442L;
 
         @Override
@@ -94,14 +97,15 @@ public class LanguageTools {
         }
     };
 
-    public LanguageTools() {
+    @PostConstruct
+    public void init() throws Exception {
         final KeywordMap languages = PropertyTools.getKeywordMap("language.detection.keywords", null);
         if (languages.size() > 0) {
             for (String lang : languages.getKeywords()) {
                 String values = languages.get(lang);
                 if (values != null) {
-                    strictLanguageMap.put(lang, values);
-                    looseLanguageMap.put(lang, values);
+                    STRICT_LANGUAGE_MAP.put(lang, values);
+                    LOOSE_LANGUAGE_MAP.put(lang, values);
                 } else {
                     LOG.info("No values found for language code '{}'", lang);
                 }
@@ -115,8 +119,8 @@ public class LanguageTools {
      * @param language
      * @return
      */
-    public String determineLanguage(String language) {
-        for (Map.Entry<String, Pattern> e : strictLanguageMap.entrySet()) {
+    public static String determineLanguage(String language) {
+        for (Map.Entry<String, Pattern> e : STRICT_LANGUAGE_MAP.entrySet()) {
             Matcher matcher = e.getValue().matcher(language);
             if (matcher.find()) {
                 return e.getKey();
@@ -131,20 +135,20 @@ public class LanguageTools {
      * @param language
      * @return
      */
-    public String getLanguageList(String language) {
-        if (looseLanguageMap.containsKey(language)) {
-            Pattern langPatt = looseLanguageMap.get(language);
+    public static String getLanguageList(String language) {
+        if (LOOSE_LANGUAGE_MAP.containsKey(language)) {
+            Pattern langPatt = LOOSE_LANGUAGE_MAP.get(language);
             return langPatt.toString().toLowerCase();
         } else {
             return "";
         }
     }
 
-    public TokensPatternMap getStrictLanguageMap() {
-        return this.strictLanguageMap;
+    public static TokensPatternMap getStrictLanguageMap() {
+        return STRICT_LANGUAGE_MAP;
     }
 
-    public TokensPatternMap getLooseLanguageMap() {
-        return this.looseLanguageMap;
+    public static TokensPatternMap getLooseLanguageMap() {
+        return LOOSE_LANGUAGE_MAP;
     }
 }

@@ -53,7 +53,7 @@ public class DeleteTask implements ITask {
         try {
             List<Long> ids = this.commonStorageService.getStageFilesToDelete();
             if (CollectionUtils.isEmpty(ids)) {
-                LOG.debug("No stage files found to delete");
+                LOG.trace("No stage files found to delete");
             } else {
                 // delete stage files
                 for (Long id : ids) {

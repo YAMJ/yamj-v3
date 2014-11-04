@@ -384,6 +384,18 @@ public abstract class HibernateDao {
     }
 
     /**
+     * Execute a SQL update statement.
+     *
+     * @param queryCharSequence the query string
+     * @return number of affected rows
+     */
+    public int executeSqlUpdate(CharSequence queryCharSequence) {
+        Query query = getSession().createSQLQuery(queryCharSequence.toString());
+        query.setCacheable(true);
+        return query.executeUpdate();
+    }
+    
+    /**
      * Execute a query return the results.
      *
      * Puts the total count returned from the query into the wrapper
