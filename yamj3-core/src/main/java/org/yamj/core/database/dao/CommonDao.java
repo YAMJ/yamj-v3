@@ -45,12 +45,13 @@ public class CommonDao extends HibernateDao {
     }
 
     @Transactional
-    public synchronized void storeNewGenre(String name) {
+    public synchronized void storeNewGenreXML(String name, String targetXml) {
         Genre genre = this.getGenre(name);
         if (genre == null) {
             // create new genre
             genre = new Genre();
             genre.setName(name);
+            genre.setTargetXml(targetXml);
             this.saveEntity(genre);
         }
     }
@@ -58,33 +59,37 @@ public class CommonDao extends HibernateDao {
     public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper) {
         OptionsId options = (OptionsId) wrapper.getOptions();
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT id, name");
+        sqlScalars.addToSql("SELECT id, name, target_api as targetApi, target_xml as targetXml ");
         sqlScalars.addToSql("FROM genre");
         sqlScalars.addToSql(options.getSearchString(true));
         sqlScalars.addToSql(options.getSortString());
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar("targetApi", StringType.INSTANCE);
+        sqlScalars.addScalar("targetXml", StringType.INSTANCE);
 
         return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
     }
 
-    public List<Genre> getGenreFilename(ApiWrapperList<Genre> wrapper, String filename) {
+    public List<ApiGenreDTO> getGenreFilename(ApiWrapperList<ApiGenreDTO> wrapper, String filename) {
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT g.id, g.name");
+        sqlScalars.addToSql("SELECT g.id, g.name, g.target_api as targetApi, g.target_xml as targetXml ");
         sqlScalars.addToSql("FROM mediafile m, mediafile_videodata mv, videodata v, videodata_genres vg, genre g");
         sqlScalars.addToSql("WHERE m.id=mv.mediafile_id");
         sqlScalars.addToSql("AND mv.videodata_id=v.id");
         sqlScalars.addToSql("AND v.id = vg.data_id");
         sqlScalars.addToSql("AND vg.genre_id=g.id");
-        sqlScalars.addToSql("AND m.file_name=:filename");
+        sqlScalars.addToSql("AND lower(m.file_name)=:filename");
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar("targetApi", StringType.INSTANCE);
+        sqlScalars.addScalar("targetXml", StringType.INSTANCE);
 
-        sqlScalars.addParameters("filename", filename);
+        sqlScalars.addParameters("filename", filename.toLowerCase());
 
-        return executeQueryWithTransform(Genre.class, sqlScalars, wrapper);
+        return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
     }
 
     public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {

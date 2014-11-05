@@ -231,16 +231,13 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", (vd.watched_nfo or vd.watched_file or vd.watched_api) as watched");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "vd"));
         sbSQL.append(" FROM videodata vd");
-        // Add genre tables for include and exclude
-        if (includes.containsKey(GENRE) || excludes.containsKey(GENRE)) {
-            sbSQL.append(", videodata_genres vg, genre g");
-        }
 
         if (isMovie) {
             sbSQL.append(" WHERE vd.episode < 0");
         } else {
             sbSQL.append(" WHERE vd.episode > -1");
         }
+        
         if (options.getId() > 0L) {
             sbSQL.append(" AND vd.id=").append(options.getId());
         }
@@ -253,20 +250,25 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" AND vd.publication_year!=").append(includes.get(YEAR));
         }
 
-        // Add joins for genres
+        // check genre
         if (includes.containsKey(GENRE) || excludes.containsKey(GENRE)) {
-            sbSQL.append(" AND vd.id=vg.data_id");
-            sbSQL.append(" AND vg.genre_id=g.id");
-            sbSQL.append(" AND g.name='");
+            String genre;
             if (includes.containsKey(GENRE)) {
-                sbSQL.append(includes.get(GENRE));
+                sbSQL.append(" AND exists(");
+                genre = includes.get(GENRE).toLowerCase();
             } else {
-                sbSQL.append(excludes.get(GENRE));
+                sbSQL.append(" AND not exists (");
+                genre = excludes.get(GENRE).toLowerCase();
             }
-            sbSQL.append("'");
+            sbSQL.append("SELECT 1 FROM videodata_genres vg, genre g ");
+            sbSQL.append("WHERE vd.id=vg.data_id ");
+            sbSQL.append("AND vg.genre_id=g.id ");
+            sbSQL.append("AND (lower(g.name)='").append(genre).append("'");
+            sbSQL.append(" or (g.target_api is not null and lower(g.target_api)='").append(genre).append("')");
+            sbSQL.append(" or (g.target_xml is not null and lower(g.target_xml)='").append(genre).append("')))");
         }
 
-        // Add the search string, this will be empty if there is no search required
+        // add the search string, this will be empty if there is no search required
         sbSQL.append(options.getSearchString(false));
 
         LOG.debug("SQL: {}", sbSQL);
@@ -296,10 +298,6 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", (select min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched ");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "ser"));
         sbSQL.append(" FROM series ser ");
-        // Add genre tables for include and exclude
-        if (includes.containsKey(GENRE) || excludes.containsKey(GENRE)) {
-            sbSQL.append(", series_genres sg, genre g");
-        }
         
         sbSQL.append(SQL_WHERE_1_EQ_1); // To make it easier to add the optional include and excludes
         if (options.getId() > 0L) {
@@ -314,20 +312,25 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" AND ser.start_year!=").append(includes.get(YEAR));
         }
 
-        // Add joins for genres
+        // check genre
         if (includes.containsKey(GENRE) || excludes.containsKey(GENRE)) {
-            sbSQL.append(" AND ser.id=sg.series_id");
-            sbSQL.append(" AND sg.genre_id=g.id");
-            sbSQL.append(" AND g.name='");
+            String genre;
             if (includes.containsKey(GENRE)) {
-                sbSQL.append(includes.get(GENRE));
+                sbSQL.append(" AND exists(");
+                genre = includes.get(GENRE).toLowerCase();
             } else {
-                sbSQL.append(excludes.get(GENRE));
+                sbSQL.append(" AND not exists (");
+                genre = excludes.get(GENRE).toLowerCase();
             }
-            sbSQL.append("'");
+            sbSQL.append("SELECT 1 FROM series_genres sg, genre g ");
+            sbSQL.append("WHERE ser.id=sg.series_id ");
+            sbSQL.append("AND sg.genre_id=g.id ");
+            sbSQL.append("AND (lower(g.name)='").append(genre).append("'");
+            sbSQL.append(" or (g.target_api is not null and lower(g.target_api)='").append(genre).append("')");
+            sbSQL.append(" or (g.target_xml is not null and lower(g.target_xml)='").append(genre).append("')))");
         }
 
-        // Add the search string, this will be empty if there is no search required
+        // add the search string, this will be empty if there is no search required
         sbSQL.append(options.getSearchString(false));
 
         return sbSQL.toString();
@@ -356,10 +359,6 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", (select min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid where vid.season_id=sea.id) as watched ");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "sea"));
         sbSQL.append(" FROM season sea");
-        // Add genre tables for include and exclude
-        if (includes.containsKey(GENRE) || excludes.containsKey(GENRE)) {
-            sbSQL.append(", series_genres sg, genre g");
-        }
         
         sbSQL.append(SQL_WHERE_1_EQ_1); // To make it easier to add the optional include and excludes
         if (options.getId() > 0L) {
@@ -374,20 +373,25 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" AND sea.publication_year!=").append(includes.get(YEAR));
         }
 
-        // Add joins for genres
+        // check genre
         if (includes.containsKey(GENRE) || excludes.containsKey(GENRE)) {
-            sbSQL.append(" AND sea.series_id=sg.series_id");
-            sbSQL.append(" AND sg.genre_id=g.id");
-            sbSQL.append(" AND g.name='");
+            String genre;
             if (includes.containsKey(GENRE)) {
-                sbSQL.append(includes.get(GENRE));
+                sbSQL.append(" AND exists(");
+                genre = includes.get(GENRE).toLowerCase();
             } else {
-                sbSQL.append(excludes.get(GENRE));
+                sbSQL.append(" AND not exists (");
+                genre = excludes.get(GENRE).toLowerCase();
             }
-            sbSQL.append("'");
+            sbSQL.append("SELECT 1 FROM series_genres sg, genre g ");
+            sbSQL.append("WHERE sea.series_id=sg.series_id ");
+            sbSQL.append("AND sg.genre_id=g.id ");
+            sbSQL.append("AND (lower(g.name)='").append(genre).append("'");
+            sbSQL.append(" or (g.target_api is not null and lower(g.target_api)='").append(genre).append("')");
+            sbSQL.append(" or (g.target_xml is not null and lower(g.target_xml)='").append(genre).append("')))");
         }
         
-        // Add the search string, this will be empty if there is no search required
+        // add the search string, this will be empty if there is no search required
         sbSQL.append(options.getSearchString(false));
 
         return sbSQL.toString();
@@ -996,7 +1000,7 @@ public class ApiDao extends HibernateDao {
             ApiVideoDTO video = queryResults.get(0);
             if (dataItems.contains(DataItem.GENRE)) {
                 LOG.debug("Adding genres");
-                video.setGenres(getGenresForId(MetaDataType.MOVIE, options.getId()));
+                video.setGenres(getGenresForId(type, options.getId()));
             }
 
             if (dataItems.contains(DataItem.ARTWORK)) {
@@ -1140,27 +1144,31 @@ public class ApiDao extends HibernateDao {
      */
     public List<ApiGenreDTO> getGenresForId(MetaDataType type, Long id) {
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT g.id, g.name");
-        sqlScalars.addToSql("FROM videodata_genres vg, genre g");
+        sqlScalars.addToSql("SELECT DISTINCT g.id, g.name, g.target_api as targetApi, g.target_xml as targetXml");
         if (type == MetaDataType.SERIES) {
-            sqlScalars.addToSql(", series v");
+            sqlScalars.addToSql("FROM series_genres sg, genre g ");
+            sqlScalars.addToSql("WHERE sg.series_id=:id ");
+            sqlScalars.addToSql("AND sg.genre_id=g.id ");
         } else if (type == MetaDataType.SEASON) {
-            sqlScalars.addToSql(", season v");
+            sqlScalars.addToSql("FROM season sea, series_genres sg, genre g ");
+            sqlScalars.addToSql("WHERE sea.id=:id ");
+            sqlScalars.addToSql("AND sg.series_id=sea.series_id ");
+            sqlScalars.addToSql("AND sg.genre_id=g.id ");
         } else {
-            // Default to Movie
-            sqlScalars.addToSql(", videodata v");
+            // defaults to movie/episode
+            sqlScalars.addToSql("FROM videodata_genres vg, genre g ");
+            sqlScalars.addToSql("WHERE vg.data_id=:id ");
+            sqlScalars.addToSql("AND vg.genre_id=g.id ");
         }
-        sqlScalars.addToSql("WHERE vg.genre_id=g.id");
-        sqlScalars.addToSql("AND vg.data_id=:id");
-        sqlScalars.addToSql("AND v.id=vg.data_id");
 
         sqlScalars.addScalar(ID, LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar("targetApi", StringType.INSTANCE);
+        sqlScalars.addScalar("targetXml", StringType.INSTANCE);
 
         sqlScalars.addParameters(ID, id);
 
         return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, null);
-
     }
 
     /**

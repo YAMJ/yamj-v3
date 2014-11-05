@@ -22,10 +22,8 @@
  */
 package org.yamj.core.database.service;
 
-import org.yamj.core.database.model.StageFile;
-
-import org.yamj.core.service.staging.StagingService;
 import java.util.*;
+import java.util.Map.Entry;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -42,6 +40,7 @@ import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.service.metadata.tools.MetadataTools;
+import org.yamj.core.service.staging.StagingService;
 
 @Service("commonStorageService")
 public class CommonStorageService {
@@ -440,10 +439,36 @@ public class CommonStorageService {
     }
 
     @Transactional
+    public void updateGenresXml(Map<String,String> subGenres) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("UPDATE Genre ");
+        sb.append("SET targetXml = null ");
+        sb.append("WHERE targetXml is not null ");
+        sb.append("AND lower(name) not in (:subGenres) ");
+        
+        Map<String,Object> params = new HashMap<String,Object>();
+        params.put("subGenres", subGenres.keySet());
+        this.stagingDao.executeUpdate(sb, params);
+
+        for (Entry<String,String> entry : subGenres.entrySet()) {
+            sb.setLength(0);
+            sb.append("UPDATE Genre ");
+            sb.append("SET targetXml=:targetXml " );
+            sb.append("WHERE lower(name)=:subGenre ");
+
+            params.clear();
+            params.put("subGenre", entry.getKey());
+            params.put("targetXml", entry.getValue());
+            this.stagingDao.executeUpdate(sb, params);
+        }
+    }
+    
+    @Transactional
     public int deleteOrphanGenres() {
         StringBuffer sb = new StringBuffer();
         sb.append("DELETE FROM genre ");
-        sb.append("WHERE not exists (select 1 from videodata_genres vg where vg.genre_id=id) ");
+        sb.append("WHERE target_api is not null ");
+        sb.append("AND not exists (select 1 from videodata_genres vg where vg.genre_id=id) ");
         sb.append("AND not exists (select 1 from series_genres sg where sg.genre_id=id) ");
         return this.stagingDao.executeSqlUpdate(sb);
     }

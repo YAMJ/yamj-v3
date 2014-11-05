@@ -24,6 +24,7 @@ package org.yamj.core.database.service;
 
 import java.io.Serializable;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,7 +122,7 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = true)
-    public List<Genre> getGenreFilename(ApiWrapperList<Genre> wrapper, String filename) {
+    public List<ApiGenreDTO> getGenreFilename(ApiWrapperList<ApiGenreDTO> wrapper, String filename) {
         return commonDao.getGenreFilename(wrapper, filename);
     }
     //</editor-fold>
@@ -226,5 +227,39 @@ public class JsonApiStorageService {
     @Transactional(readOnly = true)
     public List<PlayerInfo> getPlayerInfo(OptionsPlayer options) {
         return playerDao.getPlayerInfo(options);
+    }
+    
+    @Transactional
+    public boolean addGenre(String name, String targetApi) {
+        Genre genre = commonDao.getGenre(name);
+        if (genre != null)  {
+            return false;
+        }
+        genre = new Genre(name);
+        genre.setTargetApi(targetApi);
+        this.commonDao.saveEntity(genre);
+        return true;
+    }
+
+    @Transactional
+    public boolean updateGenre(long id, String targetApi) {
+        Genre genre = commonDao.getById(Genre.class, id);
+        if (genre == null)  {
+            return false;
+        }
+        genre.setTargetApi(StringUtils.trimToNull(targetApi));
+        this.commonDao.updateEntity(genre);
+        return true;
+    }
+
+    @Transactional
+    public boolean updateGenre(String name, String targetApi) {
+        Genre genre = commonDao.getGenre(name);
+        if (genre == null)  {
+            return false;
+        }
+        genre.setTargetApi(StringUtils.trimToNull(targetApi));
+        this.commonDao.updateEntity(genre);
+        return true;
     }
 }

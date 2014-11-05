@@ -1,0 +1,39 @@
+﻿<!--                                                                                   -->
+<!-- Genre elements contains the relation between some sub-genres and a master genre   -->
+<!--                                                                                   -->
+<!-- Example of usage for internationalization (Comédie is French for Comedy)          -->
+<!--  <genre name="Comédie">                                                           -->
+<!--    <subgenre>Comedy</subgenre>                                                    -->
+<!--  </genre>                                                                         -->
+
+<genres>
+  <genre name="Action">
+    <subgenre>Adventure</subgenre>
+    <subgenre>Sport</subgenre>
+    <subgenre>War</subgenre>
+    <subgenre>Western</subgenre>
+    <subgenre>Guerre</subgenre>
+    <subgenre>Aventure</subgenre>
+    <subgenre>Action and Adventure</subgenre>
+  </genre>
+  <genre name="Drama">
+    <subgenre>Biography</subgenre>
+    <subgenre>Romance</subgenre>
+    <subgenre>History</subgenre>
+    <subgenre>Crime</subgenre>
+  </genre>
+  <genre name="Thriller">
+    <subgenre>Horror</subgenre>
+    <subgenre>Mystery</subgenre>
+  </genre>
+  <genre name="Other">
+    <subgenre>Short</subgenre> 
+    <subgenre>Music</subgenre>
+    <subgenre>Musical</subgenre>
+  </genre>
+  <genre name="Sci-Fi">
+    <subgenre>Science Fiction</subgenre>
+    <subgenre>Science-Fiction</subgenre>
+  </genre>
+</genres>
+  

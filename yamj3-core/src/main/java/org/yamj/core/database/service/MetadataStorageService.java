@@ -43,6 +43,7 @@ import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.artwork.ArtworkTools;
+import org.yamj.core.tools.GenreXmlTools;
 
 @Service("metadataStorageService")
 public class MetadataStorageService {
@@ -166,7 +167,8 @@ public class MetadataStorageService {
             // store new genres
             for (String genreName : videoData.getGenreNames()) {
                 try {
-                    this.commonDao.storeNewGenre(genreName);
+                    String targetXml = GenreXmlTools.getMasterGenre(genreName);
+                    this.commonDao.storeNewGenreXML(genreName, targetXml);
                 } catch (Exception ex) {
                     LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
                     LOG.trace("Storage error", ex);
@@ -223,7 +225,8 @@ public class MetadataStorageService {
             // store new genres
             for (String genreName : series.getGenreNames()) {
                 try {
-                    this.commonDao.storeNewGenre(genreName);
+                    String targetXml = GenreXmlTools.getMasterGenre(genreName);
+                    this.commonDao.storeNewGenreXML(genreName, targetXml);
                 } catch (Exception ex) {
                     LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
                     LOG.trace("Storage error", ex);

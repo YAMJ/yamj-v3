@@ -22,6 +22,7 @@
  */
 package org.yamj.core.database.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
@@ -67,6 +68,7 @@ public class Configuration implements Auditable, Serializable {
         this.value = value;
     }
 
+    @JsonIgnore
     public Date getCreateTimestamp() {
         return this.createTimestamp;
     }
@@ -75,6 +77,7 @@ public class Configuration implements Auditable, Serializable {
         this.createTimestamp = createTimestamp;
     }
 
+    @JsonIgnore
     public Date getUpdateTimestamp() {
         return this.updateTimestamp;
     }

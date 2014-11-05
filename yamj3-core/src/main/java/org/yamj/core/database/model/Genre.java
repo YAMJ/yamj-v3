@@ -42,6 +42,12 @@ public class Genre extends AbstractIdentifiable implements Serializable {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
+    @Column(name = "target_api", length = 100)
+    private String targetApi;
+
+    @Column(name = "target_xml", length = 100)
+    private String targetXml;
+
     public Genre() {}
 
     public Genre(String name) {
@@ -58,8 +64,24 @@ public class Genre extends AbstractIdentifiable implements Serializable {
         this.name = name;
     }
 
-    // EQUALITY CHECKS
+    public String getTargetApi() {
+        return targetApi;
+    }
 
+    public void setTargetApi(String targetApi) {
+        this.targetApi = targetApi;
+    }
+
+    public String getTargetXml() {
+        return targetXml;
+    }
+
+    public void setTargetXml(String targetXml) {
+        this.targetXml = targetXml;
+    }
+    
+    // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         final int prime = 7;
@@ -90,6 +112,14 @@ public class Genre extends AbstractIdentifiable implements Serializable {
         sb.append(getId());
         sb.append(", name=");
         sb.append(getName());
+        if (getTargetApi() != null) {
+            sb.append(", targetApi=");
+            sb.append(getTargetApi());
+        }
+        if (getTargetXml() != null) {
+            sb.append(", targetXml=");
+            sb.append(getTargetXml());
+        }
         sb.append("]");
         return sb.toString();
     }

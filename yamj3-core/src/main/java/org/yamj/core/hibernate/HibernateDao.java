@@ -402,8 +402,24 @@ public abstract class HibernateDao {
      * @return number of affected rows
      */
     public int executeSqlUpdate(CharSequence queryCharSequence) {
-        Query query = getSession().createSQLQuery(queryCharSequence.toString());
+        SQLQuery query = getSession().createSQLQuery(queryCharSequence.toString());
         query.setCacheable(true);
+        return query.executeUpdate();
+    }
+
+    /**
+     * Execute an update statement.
+     *
+     * @param queryCharSequence the query string
+     * @param params the named parameters
+     * @return number of affected rows
+     */
+    public int executeSqlUpdate(CharSequence queryCharSequence, Map<String, Object> params) {
+        SQLQuery query = getSession().createSQLQuery(queryCharSequence.toString());
+        query.setCacheable(true);
+        for (Entry<String, Object> param : params.entrySet()) {
+            applyNamedParameterToQuery(query, param.getKey(), param.getValue());
+        }
         return query.executeUpdate();
     }
     

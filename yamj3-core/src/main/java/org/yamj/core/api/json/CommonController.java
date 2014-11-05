@@ -22,6 +22,11 @@
  */
 package org.yamj.core.api.json;
 
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -72,10 +77,10 @@ public class CommonController {
     //<editor-fold defaultstate="collapsed" desc="Genre Methods">
     @RequestMapping(value = "/genre")
     @ResponseBody
-    public ApiWrapperList<Genre> getGenreFilename(@RequestParam(required = true, defaultValue = "") String filename) {
+    public ApiWrapperList<ApiGenreDTO> getGenreFilename(@RequestParam(required = true, defaultValue = "") String filename) {
         LOG.info("Getting genres for filename '{}'", filename);
-        ApiWrapperList<Genre> wrapper = new ApiWrapperList<Genre>();
-        List<Genre> genres = jsonApiStorageService.getGenreFilename(wrapper, filename);
+        ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<ApiGenreDTO>();
+        List<ApiGenreDTO> genres = jsonApiStorageService.getGenreFilename(wrapper, filename);
         wrapper.setResults(genres);
         wrapper.setStatusCheck();
         return wrapper;
@@ -83,9 +88,9 @@ public class CommonController {
 
     @RequestMapping(value = "/genre/{name}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperSingle<Genre> getGenre(@PathVariable String name) {
+    public ApiWrapperSingle<ApiGenreDTO> getGenre(@PathVariable String name) {
         Genre genre;
-        ApiWrapperSingle<Genre> wrapper = new ApiWrapperSingle<Genre>();
+        ApiWrapperSingle<ApiGenreDTO> wrapper = new ApiWrapperSingle<ApiGenreDTO>();
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting genre with ID '{}'", name);
             genre = jsonApiStorageService.getGenre(Long.parseLong(name));
@@ -93,12 +98,14 @@ public class CommonController {
             LOG.info("Getting genre with name '{}'", name);
             genre = jsonApiStorageService.getGenre(name);
         }
-        wrapper.setResult(genre);
+        if (genre != null) {
+            wrapper.setResult(new ApiGenreDTO(genre));
+        }
         wrapper.setStatusCheck();
         return wrapper;
     }
-
-    @RequestMapping(value = "/genres", method = RequestMethod.GET)
+    
+    @RequestMapping(value = "/genres/list", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperList<ApiGenreDTO> getGenres(@ModelAttribute("options") OptionsId options) {
         LOG.info("Getting genre list with {}", options.toString());
@@ -110,6 +117,62 @@ public class CommonController {
         wrapper.setStatusCheck();
         return wrapper;
     }
+    
+    @RequestMapping(value = "/genres/add", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiStatus genreAdd(
+            @RequestParam(required = true, defaultValue = "") String name,
+            @RequestParam(required = true, defaultValue = "") String target) {
+
+        ApiStatus status = new ApiStatus();
+        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(target)) {
+            LOG.info("Adding genre '{}' with target '{}'", name, target);
+            boolean result = this.jsonApiStorageService.addGenre(name, target);
+            if (result) {
+                status.setStatus(200);
+                status.setMessage("Successfully added genre '" + name + "' with target '" + target + "'");
+            } else {
+                status.setStatus(400);
+                status.setMessage("Genre '" + name + "' already exists");
+            }
+        } else {
+            status.setStatus(400);
+            status.setMessage("Invalid name/target specified, genre not added");
+        }
+        return status;
+    }
+
+    @RequestMapping(value = "/genres/update", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiStatus genreUpdate(
+            @RequestParam(required = true, defaultValue = "") String name,
+            @RequestParam(required = false, defaultValue = "") String target) {
+
+        ApiStatus status = new ApiStatus();
+        if (StringUtils.isNotBlank(name)) {
+            LOG.info("Updating genre '{}' with target '{}'", name, target);
+            
+            boolean result;
+            if (StringUtils.isNumeric(name)) {
+                result = this.jsonApiStorageService.updateGenre(Long.valueOf(name), target);
+            } else {
+                result = this.jsonApiStorageService.updateGenre(name, target);
+            }
+            
+            if (result) {
+                status.setStatus(200);
+                status.setMessage("Successfully update genre '" + name + "' with target '" + target + "'");
+            } else {
+                status.setStatus(400);
+                status.setMessage("Genre '" + name + "' does not exist");
+            }
+        } else {
+            status.setStatus(400);
+            status.setMessage("Invalid name specified, genre not updated");
+        }
+        return status;
+    }
+
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Studio Methods">
