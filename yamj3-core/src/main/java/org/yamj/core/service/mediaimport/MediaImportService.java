@@ -91,8 +91,8 @@ public class MediaImportService {
         if (stageFile.getMediaFile() == null) {
             LOG.info("Process new video {}-'{}'", stageFile.getId(), stageFile.getFileName());
             
-            // process new video
-            processNewVideo(stageFile);
+            // process video file
+            processVideoFile(stageFile);
 
             // attach NFO files
             attachNfoFilesToVideo(stageFile);
@@ -112,7 +112,7 @@ public class MediaImportService {
         stagingDao.updateEntity(stageFile);
     }
 
-    private void processNewVideo(StageFile stageFile) {
+    private void processVideoFile(StageFile stageFile) {
         
         // check if same media file already exists
         MediaFile mediaFile = mediaDao.getMediaFile(stageFile.getFileName());
@@ -502,14 +502,7 @@ public class MediaImportService {
     @Transactional
     public void processNfo(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
-        if (StatusType.NEW.equals(stageFile.getStatus())) {
-            LOG.info("Process new nfo {}-'{}'", stageFile.getId(), stageFile.getFileName());
-            
-            // process new NFO
-            processNewNFO(stageFile);
-        } else {
-            LOG.info("Process updated nfo {}-'{}'", stageFile.getId(), stageFile.getFileName());
-        }
+        LOG.info("Process nfo {}-'{}'", stageFile.getId(), stageFile.getFileName());
 
         // check if NFO file can be scanned
         if (!FileTools.isFileScannable(stageFile)) {
@@ -519,9 +512,14 @@ public class MediaImportService {
             // nothing to do anymore
             return;
         }
-        
-        // mark stage file as done
-        stageFile.setStatus(StatusType.DONE);
+
+        // process new NFO
+        boolean found = processNfoFile(stageFile);
+        if (found || !CollectionUtils.isNotEmpty(stageFile.getNfoRelations())) {
+            stageFile.setStatus(StatusType.DONE);
+        } else {
+            stageFile.setStatus(StatusType.NOTFOUND);
+        }
         stagingDao.updateEntity(stageFile);        
         
         // update meta-data for NFO scan
@@ -549,12 +547,12 @@ public class MediaImportService {
         }
     }
 
-    private void processNewNFO(StageFile stageFile) {
+    private boolean processNfoFile(StageFile stageFile) {
         // find video files for this NFO file
         Map<VideoData,Integer> videoFiles = this.findVideoFilesForNFO(stageFile);
         if (MapUtils.isEmpty(videoFiles)) {
-            // no NFO files found
-            return;
+            // no video files found
+            return false;
         }
 
         for (Entry<VideoData,Integer> entry : videoFiles.entrySet()) {
@@ -581,6 +579,7 @@ public class MediaImportService {
                 }
             }
         }
+        return true;
     }
     
     private Map<VideoData,Integer> findVideoFilesForNFO(StageFile stageFile) {
@@ -626,7 +625,7 @@ public class MediaImportService {
                 LOG.trace("Recursive scan of directories is {}", (recurse?"enabled":"disabled"));
                 
                 if (recurse) {
-                    // // case 11-n: recursive scanning
+                    // TODO case 11-n: recursive scanning
                 }
             }
             
@@ -679,7 +678,7 @@ public class MediaImportService {
         }
 
         // process new image
-        boolean found = processVideoImage(stageFile);
+        boolean found = processImageFile(stageFile);
 
         // update stage file
         if (found || updated) {
@@ -690,7 +689,7 @@ public class MediaImportService {
         stagingDao.updateEntity(stageFile);
     }
     
-    private boolean processVideoImage(StageFile stageFile) {
+    private boolean processImageFile(StageFile stageFile) {
         Collection<Artwork> artworks;
         int priority = 1;
         if (stageFile.getBaseName().equalsIgnoreCase("poster")
