@@ -65,7 +65,7 @@ public class ApiGenreDTO {
         if (this.targetXml != null) {
             return this.targetXml;
         }
-        return null;
+        return this.name;
     }
     
     public void setId(Long id) {

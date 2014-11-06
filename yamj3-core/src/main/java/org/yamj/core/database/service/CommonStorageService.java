@@ -467,8 +467,7 @@ public class CommonStorageService {
     public int deleteOrphanGenres() {
         StringBuffer sb = new StringBuffer();
         sb.append("DELETE FROM genre ");
-        sb.append("WHERE target_api is not null ");
-        sb.append("AND not exists (select 1 from videodata_genres vg where vg.genre_id=id) ");
+        sb.append("WHERE not exists (select 1 from videodata_genres vg where vg.genre_id=id) ");
         sb.append("AND not exists (select 1 from series_genres sg where sg.genre_id=id) ");
         return this.stagingDao.executeSqlUpdate(sb);
     }
