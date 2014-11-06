@@ -65,6 +65,11 @@ public class ArtworkStorageService {
             profile.setApplyToEpisode(newProfile.isApplyToEpisode());
             profile.setApplyToPerson(newProfile.isApplyToPerson());
             profile.setPreProcess(newProfile.isPreProcess());
+            profile.setRoundedCorners(newProfile.isRoundedCorners());
+            profile.setReflection(newProfile.isReflection());
+            profile.setNormalize(newProfile.isNormalize());
+            profile.setStretch(newProfile.isStretch());
+            
             this.artworkDao.updateEntity(profile);
             LOG.info("Updated: {}", profile);
         }

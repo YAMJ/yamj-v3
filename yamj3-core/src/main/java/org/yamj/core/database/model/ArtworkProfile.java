@@ -73,6 +73,18 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     @Column(name = "pre_process", nullable = false)
     private boolean preProcess = false;
 
+    @Column(name = "rounded_corners", nullable = false)
+    private boolean roundedCorners = false;
+    
+    @Column(name = "reflection", nullable = false)
+    private boolean reflection = false;
+
+    @Column(name = "normalize", nullable = false)
+    private boolean normalize = false;
+
+    @Column(name = "stretch", nullable = false)
+    private boolean stretch = false;
+
     // GETTER and SETTER
     
     public String getProfileName() {
@@ -155,31 +167,49 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
         this.preProcess = preProcess;
     }
 
+    public boolean isRoundedCorners() {
+        return roundedCorners;
+    }
+
+    public void setRoundedCorners(boolean roundedCorners) {
+        this.roundedCorners = roundedCorners;
+    }
+
+    public boolean isReflection() {
+        return reflection;
+    }
+
+    public void setReflection(boolean reflection) {
+        this.reflection = reflection;
+    }
+
+    public boolean isNormalize() {
+        return normalize;
+    }
+
+    public void setNormalize(boolean normalize) {
+        this.normalize = normalize;
+    }
+
+    public boolean isStretch() {
+        return stretch;
+    }
+
+    public void setStretch(boolean stretch) {
+        this.stretch = stretch;
+    }
+
     // TODO
     public ImageFormat getImageFormat() {
         return ImageFormat.JPEG;
     }
 
-    public boolean isRoundedCorners() {
-        return false;
-    }
-
-    public boolean isReflection() {
-        return false;
-    }
-
-    public boolean isImageNormalize() {
-        return false;
-    }
-
-    public boolean isImageStretch() {
-        return false;
-    }
-
+    // TODO
     public int getCornerQuality() {
         return 0;
     }
 
+    // TODO
     public int getQuality() {
         return 75;
     }

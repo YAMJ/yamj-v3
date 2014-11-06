@@ -22,36 +22,32 @@
  */
 package org.yamj.core.service;
 
-import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.mediaimport.MediaImportService;
 import org.yamj.core.tools.ExceptionTools;
 
-@Service
+@Component
 public class ImportScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImportScheduler.class);
-    private static final ReentrantLock PROCESS_LOCK = new ReentrantLock();
     
     @Autowired
     private MediaImportService mediaImportService;
 
     @Async
     @Scheduled(initialDelay = 10000, fixedDelay = 30000)
-    public void processStageFiles() throws Exception {
+    public synchronized void processStageFiles() throws Exception {
         Long id = null;
 
         // PROCESS VIDEOS
         do {
-            PROCESS_LOCK.lock();
-            
             try {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.VIDEO, StatusType.NEW, StatusType.UPDATED);
@@ -70,15 +66,11 @@ public class ImportScheduler {
                         mediaImportService.processingError(id);
                     } catch (Exception ignore) {}
                 }
-            } finally {
-                PROCESS_LOCK.unlock();
             }
         } while (id != null);
 
         // PROCESS NFOS
         do {
-            PROCESS_LOCK.lock();
-            
             try {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.NFO, StatusType.NEW, StatusType.UPDATED);
@@ -97,15 +89,11 @@ public class ImportScheduler {
                         mediaImportService.processingError(id);
                     } catch (Exception ignore) {}
                 }
-            } finally {
-                PROCESS_LOCK.unlock();
             }
         } while (id != null);
 
         // PROCESS IMAGES
         do {
-            PROCESS_LOCK.lock();
-            
             try {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.IMAGE, StatusType.NEW, StatusType.UPDATED);
@@ -124,15 +112,11 @@ public class ImportScheduler {
                         mediaImportService.processingError(id);
                     } catch (Exception ignore) {}
                 }
-            } finally {
-                PROCESS_LOCK.unlock();
             }
         } while (id != null);
 
         // PROCESS WATCHED
         do {
-            PROCESS_LOCK.lock();
-            
             try {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.WATCHED, StatusType.NEW, StatusType.UPDATED);
@@ -151,8 +135,6 @@ public class ImportScheduler {
                         mediaImportService.processingError(id);
                     } catch (Exception ignore) {}
                 }
-            } finally {
-                PROCESS_LOCK.unlock();
             }
         } while (id != null);
 

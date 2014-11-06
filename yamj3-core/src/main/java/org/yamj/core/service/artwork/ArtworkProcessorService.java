@@ -123,6 +123,16 @@ public class ArtworkProcessorService {
             try {
                 // generate image for a profiles
                 generateImage(located, profile);
+            } catch (IOException ex)  {
+                LOG.warn("Original image is not found: {}/{}", located.getCacheDirectory(), located.getCacheFilename());
+                
+                // reset cache values and mark located artwork and reset to updated
+                located.setCacheDirectory(null);
+                located.setCacheDirectory(null);
+                located.setStatus(StatusType.UPDATED);
+
+                // no further processing for that located image
+                break;
             } catch (OutOfMemoryError ex) {
                 LOG.error("Failed to load/transform image due to memory constraints: {}", located);
 
@@ -131,18 +141,18 @@ public class ArtworkProcessorService {
 
                 // no further processing for that located image
                 break;
-             } catch (ImageReadException error) {
+             } catch (ImageReadException ex) {
                 LOG.warn("Original image is invalid: {}", located);
-                LOG.trace("Invalid image error", error);
+                LOG.trace("Invalid image error", ex);
 
                 // mark located artwork as invalid
                 located.setStatus(StatusType.INVALID);
 
                 // no further processing for that located image
                 break;
-            } catch (Exception error) {
+            } catch (Exception ex) {
                 LOG.error("Failed to generate image for {} with profile {}", located, profile.getProfileName());
-                LOG.warn("Image generation error", error);
+                LOG.warn("Image generation error", ex);
             }
         }
 
@@ -209,15 +219,14 @@ public class ArtworkProcessorService {
         }
 
         // fit image to size
-        if (profile.isImageNormalize()) {
+        if (profile.isNormalize()) {
             if (skipResize) {
-                bi = GraphicTools.scaleToSizeNormalized((int) (origHeight * profile.getRounderCornerQuality() * ratio), (int) (origHeight * rcqFactor), bi);
+                bi = GraphicTools.scaleToSizeNormalized((int) (origHeight * rcqFactor * ratio), (int) (origHeight * rcqFactor), bi);
             } else {
                 bi = GraphicTools.scaleToSizeNormalized((int) (profile.getWidth() * rcqFactor), (int) (profile.getHeight() * rcqFactor), bi);
             }
-        } else if (profile.isImageStretch()) {
+        } else if (profile.isStretch()) {
             bi = GraphicTools.scaleToSizeStretch((int) (profile.getWidth() * rcqFactor), (int) (profile.getHeight() * rcqFactor), bi);
-
         } else if (!skipResize) {
             bi = GraphicTools.scaleToSize((int) (profile.getWidth() * rcqFactor), (int) (profile.getHeight() * rcqFactor), bi);
         }

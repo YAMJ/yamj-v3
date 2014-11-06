@@ -88,6 +88,10 @@ public class ArtworkInitialization {
                 artworkProfile.setApplyToEpisode(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToEpisode", Boolean.FALSE));
                 artworkProfile.setApplyToPerson(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToPerson", Boolean.FALSE));
                 artworkProfile.setPreProcess(PropertyTools.getBooleanProperty("artwork.profile." + name + ".preProcess", Boolean.FALSE));
+                artworkProfile.setRoundedCorners(PropertyTools.getBooleanProperty("artwork.profile." + name + ".roundedCorners", Boolean.FALSE));
+                artworkProfile.setReflection(PropertyTools.getBooleanProperty("artwork.profile." + name + ".reflection", Boolean.FALSE));
+                artworkProfile.setNormalize(PropertyTools.getBooleanProperty("artwork.profile." + name + ".normalize", Boolean.FALSE));
+                artworkProfile.setStretch(PropertyTools.getBooleanProperty("artwork.profile." + name + ".stretch", Boolean.FALSE));
 
                 try {
                     // call another service to handle transactions
