@@ -22,11 +22,6 @@
  */
 package org.yamj.core.api.json;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -36,6 +31,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
+import org.yamj.core.api.options.OptionsGenre;
 import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
@@ -107,12 +103,12 @@ public class CommonController {
     
     @RequestMapping(value = "/genres/list", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<ApiGenreDTO> getGenres(@RequestParam(required = false, defaultValue = "") String used) {
-        boolean requestUsed = Boolean.parseBoolean(used);
-        LOG.info("Getting genre list with used="+requestUsed);
+    public ApiWrapperList<ApiGenreDTO> getGenres(@ModelAttribute("options") OptionsGenre options) {
+        LOG.info("Getting genre list: used={}, full={}", options.getUsed(), options.getFull());
 
         ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<ApiGenreDTO>();
-        List<ApiGenreDTO> results = jsonApiStorageService.getGenres(wrapper, requestUsed);
+        wrapper.setOptions(options);
+        List<ApiGenreDTO> results = jsonApiStorageService.getGenres(wrapper);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
         return wrapper;

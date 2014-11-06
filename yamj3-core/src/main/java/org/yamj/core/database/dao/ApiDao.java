@@ -951,9 +951,16 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
         
         List<ApiEpisodeDTO> results = executeQueryWithTransform(ApiEpisodeDTO.class, sqlScalars, wrapper);
-        if (CollectionUtils.isNotEmpty(results) && options.hasDataItem(DataItem.FILES)) {
-            for (ApiEpisodeDTO episode : results) {
-                episode.setFiles(this.getFilesForId(MetaDataType.EPISODE, episode.getId()));
+        if (CollectionUtils.isNotEmpty(results)) {
+            if (options.hasDataItem(DataItem.FILES)) {
+                for (ApiEpisodeDTO episode : results) {
+                    episode.setFiles(this.getFilesForId(MetaDataType.EPISODE, episode.getId()));
+                }
+            }
+            if (options.hasDataItem(DataItem.GENRE)) {
+                for (ApiEpisodeDTO episode : results) {
+                    episode.setGenres(this.getGenresForId(MetaDataType.EPISODE, episode.getId()));
+                }
             }
         }
         wrapper.setResults(results);
@@ -1144,7 +1151,12 @@ public class ApiDao extends HibernateDao {
      */
     public List<ApiGenreDTO> getGenresForId(MetaDataType type, Long id) {
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT DISTINCT g.id, g.name, g.target_api as targetApi, g.target_xml as targetXml");
+        sqlScalars.addToSql("SELECT DISTINCT ");
+        sqlScalars.addToSql("CASE ");
+        sqlScalars.addToSql(" WHEN target_api is not null THEN target_api ");
+        sqlScalars.addToSql(" WHEN target_xml is not null THEN target_xml ");
+        sqlScalars.addToSql(" ELSE name ");
+        sqlScalars.addToSql("END as name ");
         if (type == MetaDataType.SERIES) {
             sqlScalars.addToSql("FROM series_genres sg, genre g ");
             sqlScalars.addToSql("WHERE sg.series_id=:id ");
@@ -1160,12 +1172,9 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("WHERE vg.data_id=:id ");
             sqlScalars.addToSql("AND vg.genre_id=g.id ");
         }
+        sqlScalars.addToSql("ORDER BY name");
 
-        sqlScalars.addScalar(ID, LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
-        sqlScalars.addScalar("targetApi", StringType.INSTANCE);
-        sqlScalars.addScalar("targetXml", StringType.INSTANCE);
-
         sqlScalars.addParameters(ID, id);
 
         return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, null);

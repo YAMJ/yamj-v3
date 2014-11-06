@@ -29,6 +29,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
+import org.yamj.core.api.options.OptionsGenre;
 import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.model.BoxedSet;
@@ -56,27 +57,51 @@ public class CommonDao extends HibernateDao {
         }
     }
 
-    public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper, boolean used) {
+    public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper) {
+        OptionsGenre options = (OptionsGenre) wrapper.getOptions();
+        
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT g.id, g.name, g.target_api as targetApi, g.target_xml as targetXml ");
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+
+        sqlScalars.addToSql("SELECT DISTINCT ");
+        if (options.getFull().booleanValue()) {
+            sqlScalars.addToSql("g.id, g.name, ");
+            sqlScalars.addToSql("CASE ");
+            sqlScalars.addToSql(" WHEN target_api is not null THEN target_api ");
+            sqlScalars.addToSql(" WHEN target_xml is not null THEN target_xml ");
+            sqlScalars.addToSql(" ELSE name ");
+            sqlScalars.addToSql("END as target ");
+            
+            sqlScalars.addScalar("id", LongType.INSTANCE);
+            sqlScalars.addScalar("target", StringType.INSTANCE);
+        } else {
+            sqlScalars.addToSql("CASE ");
+            sqlScalars.addToSql(" WHEN target_api is not null THEN target_api ");
+            sqlScalars.addToSql(" WHEN target_xml is not null THEN target_xml ");
+            sqlScalars.addToSql(" ELSE name ");
+            sqlScalars.addToSql("END as name ");
+        }
         sqlScalars.addToSql("FROM genre g ");
-        if (used) {
+        if (options.getUsed() != null && options.getUsed().booleanValue()) {
             sqlScalars.addToSql("WHERE (exists (select 1 from videodata_genres vg where vg.genre_id=id) ");
             sqlScalars.addToSql(" or exists (select 1 from series_genres sg where sg.genre_id=id)) ");
+            sqlScalars.addToSql(options.getSearchString(false));
+        } else {
+            sqlScalars.addToSql(options.getSearchString(true));
         }
-        sqlScalars.addToSql("ORDER BY g.id");
+        sqlScalars.addToSql(options.getSortString());
         
-        sqlScalars.addScalar("id", LongType.INSTANCE);
-        sqlScalars.addScalar("name", StringType.INSTANCE);
-        sqlScalars.addScalar("targetApi", StringType.INSTANCE);
-        sqlScalars.addScalar("targetXml", StringType.INSTANCE);
-
         return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
     }
 
     public List<ApiGenreDTO> getGenreFilename(ApiWrapperList<ApiGenreDTO> wrapper, String filename) {
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT g.id, g.name, g.target_api as targetApi, g.target_xml as targetXml ");
+        sqlScalars.addToSql("SELECT g.id, g.name, ");
+        sqlScalars.addToSql("CASE ");
+        sqlScalars.addToSql(" WHEN target_api is not null THEN target_api ");
+        sqlScalars.addToSql(" WHEN target_xml is not null THEN target_xml ");
+        sqlScalars.addToSql(" ELSE name ");
+        sqlScalars.addToSql("END as target ");
         sqlScalars.addToSql("FROM mediafile m, mediafile_videodata mv, videodata v, videodata_genres vg, genre g");
         sqlScalars.addToSql("WHERE m.id=mv.mediafile_id");
         sqlScalars.addToSql("AND mv.videodata_id=v.id");
@@ -86,8 +111,7 @@ public class CommonDao extends HibernateDao {
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
-        sqlScalars.addScalar("targetApi", StringType.INSTANCE);
-        sqlScalars.addScalar("targetXml", StringType.INSTANCE);
+        sqlScalars.addScalar("target", StringType.INSTANCE);
 
         sqlScalars.addParameters("filename", filename.toLowerCase());
 
@@ -96,6 +120,7 @@ public class CommonDao extends HibernateDao {
 
     public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
         OptionsId options = (OptionsId) wrapper.getOptions();
+        
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT id, certification_text AS certification, country");
         sqlScalars.addToSql("FROM certification");

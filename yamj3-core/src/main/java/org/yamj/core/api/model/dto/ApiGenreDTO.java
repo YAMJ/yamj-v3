@@ -24,63 +24,54 @@ package org.yamj.core.api.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.yamj.core.database.model.Genre;
 
 /**
  * @author Stuart
  */
-@JsonInclude(Include.NON_DEFAULT) 
+@JsonInclude(Include.NON_DEFAULT)
 public class ApiGenreDTO {
 
     private Long id;
     private String name;
-    private String targetApi;
-    private String targetXml;
-    
-    public ApiGenreDTO() {}
-    
+    private String target;
+
+    public ApiGenreDTO() {
+    }
+
     public ApiGenreDTO(Genre genre) {
         this.id = genre.getId();
         this.name = genre.getName();
-        this.targetApi = genre.getTargetApi();
-        this.targetXml = genre.getTargetXml();
+        if (genre.getTargetApi() != null) {
+            this.target = genre.getTargetApi();
+        } else if (genre.getTargetXml() != null) {
+            this.target = genre.getTargetXml();
+        } else {
+            this.target = genre.getName();
+        }
     }
-    
-    @JsonProperty
+
     public Long getId() {
         return id;
     }
 
-    @JsonProperty
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
 
-    @JsonProperty
-    public String getTarget() {
-        if (this.targetApi != null) {
-            return this.targetApi;
-        }
-        if (this.targetXml != null) {
-            return this.targetXml;
-        }
-        return this.name;
-    }
-    
-    public void setId(Long id) {
-        this.id = id;
-    }
-    
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setTargetApi(String targetApi) {
-        this.targetApi = targetApi;
+    public String getTarget() {
+        return target;
     }
 
-    public void setTargetXml(String targetXml) {
-        this.targetXml = targetXml;
+    public void setTarget(String target) {
+        this.target = target;
     }
 }

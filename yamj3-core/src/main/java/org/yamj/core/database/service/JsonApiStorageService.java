@@ -117,8 +117,8 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = true)
-    public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper, boolean used) {
-        return commonDao.getGenres(wrapper, used);
+    public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper) {
+        return commonDao.getGenres(wrapper);
     }
 
     @Transactional(readOnly = true)

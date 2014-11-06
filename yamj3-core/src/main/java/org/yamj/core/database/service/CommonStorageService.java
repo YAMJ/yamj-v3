@@ -24,6 +24,7 @@ package org.yamj.core.database.service;
 
 import java.util.*;
 import java.util.Map.Entry;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -31,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
@@ -205,9 +205,9 @@ public class CommonStorageService {
     private void delete(StageDirectory stageDirectory) {
         if (stageDirectory == null) {
             return;
-        } else if (!CollectionUtils.isEmpty(stageDirectory.getStageFiles())) {
+        } else if (CollectionUtils.isNotEmpty(stageDirectory.getStageFiles())) {
             return;
-        } else if (!CollectionUtils.isEmpty(this.stagingDao.getChildDirectories(stageDirectory))) {
+        } else if (CollectionUtils.isNotEmpty(this.stagingDao.getChildDirectories(stageDirectory))) {
             return;
         }
         

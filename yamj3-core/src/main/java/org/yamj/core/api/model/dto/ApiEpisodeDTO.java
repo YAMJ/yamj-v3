@@ -52,6 +52,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     private String cacheDir;
     private String videoimage;
     private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
+    private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
 
     //<editor-fold defaultstate="collapsed" desc="Setter Methods">
     public void setSeriesId(Long seriesId) {
@@ -111,6 +112,10 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     public void setFiles(List<ApiFileDTO> files) {
         this.files = files;
     }
+
+    public void setGenres(List<ApiGenreDTO> genres) {
+        this.genres = genres;
+    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
@@ -159,6 +164,10 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
 
     public List<ApiFileDTO> getFiles() {
         return files;
+    }
+    
+    public List<ApiGenreDTO> getGenres() {
+        return genres;
     }
     //</editor-fold>
 }
