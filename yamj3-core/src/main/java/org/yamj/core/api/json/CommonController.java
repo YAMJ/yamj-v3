@@ -107,12 +107,12 @@ public class CommonController {
     
     @RequestMapping(value = "/genres/list", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<ApiGenreDTO> getGenres(@ModelAttribute("options") OptionsId options) {
-        LOG.info("Getting genre list with {}", options.toString());
+    public ApiWrapperList<ApiGenreDTO> getGenres(@RequestParam(required = false, defaultValue = "") String used) {
+        boolean requestUsed = Boolean.parseBoolean(used);
+        LOG.info("Getting genre list with used="+requestUsed);
 
         ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<ApiGenreDTO>();
-        wrapper.setOptions(options);
-        List<ApiGenreDTO> results = jsonApiStorageService.getGenres(wrapper);
+        List<ApiGenreDTO> results = jsonApiStorageService.getGenres(wrapper, requestUsed);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
         return wrapper;

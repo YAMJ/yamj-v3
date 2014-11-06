@@ -56,14 +56,16 @@ public class CommonDao extends HibernateDao {
         }
     }
 
-    public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper) {
-        OptionsId options = (OptionsId) wrapper.getOptions();
+    public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper, boolean used) {
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT id, name, target_api as targetApi, target_xml as targetXml ");
-        sqlScalars.addToSql("FROM genre");
-        sqlScalars.addToSql(options.getSearchString(true));
-        sqlScalars.addToSql(options.getSortString());
-
+        sqlScalars.addToSql("SELECT g.id, g.name, g.target_api as targetApi, g.target_xml as targetXml ");
+        sqlScalars.addToSql("FROM genre g ");
+        if (used) {
+            sqlScalars.addToSql("WHERE (exists (select 1 from videodata_genres vg where vg.genre_id=id) ");
+            sqlScalars.addToSql(" or exists (select 1 from series_genres sg where sg.genre_id=id)) ");
+        }
+        sqlScalars.addToSql("ORDER BY g.id");
+        
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
         sqlScalars.addScalar("targetApi", StringType.INSTANCE);
