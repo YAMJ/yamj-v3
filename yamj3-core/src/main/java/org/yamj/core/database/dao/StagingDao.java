@@ -235,15 +235,34 @@ public class StagingDao extends HibernateDao {
         return query.list();
     }
 
-    public List<Artwork> findMatchingArtworksForVideo(ArtworkType artworkType, StageDirectory stageDirectory)  {
+    public Set<Artwork> findMatchingArtworksForVideo(ArtworkType artworkType, StageDirectory stageDirectory)  {
         return this.findMatchingArtworksForVideo(artworkType, null, stageDirectory);
     }
 
     @SuppressWarnings("unchecked")
-    public List<Artwork> findMatchingArtworksForVideo(ArtworkType artworkType, String baseName, StageDirectory stageDirectory)  {
-        StringBuffer sb = new StringBuffer();
+    public Set<Artwork> findMatchingArtworksForVideo(ArtworkType artworkType, String baseName, StageDirectory stageDirectory)  {
+        // NOTE: union not supported in HQL, so each query has to be executed
+        //       and mapped into a set to have uniqueness
+        Set<Artwork> result = new HashSet<Artwork>();
+        
+        Set<StatusType> statusSet = new HashSet<StatusType>();
+        statusSet.add(StatusType.NEW);
+        statusSet.add(StatusType.UPDATED);
+        statusSet.add(StatusType.DONE);
+
+        Map<String,Object> params = new HashMap<String,Object>();
+        params.put("artworkType", artworkType);
+        params.put("fileType", FileType.VIDEO);
+        params.put("extra", Boolean.FALSE);
+        if (baseName != null) {
+            params.put("baseName", baseName);
+        }
+        params.put("statusSet", statusSet);
+        params.put("stageDirectory", stageDirectory);
+
         // for movies
-        sb.append("SELECT distinct a ");
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT a ");
         sb.append("FROM Artwork a ");
         sb.append("JOIN a.videoData vd ");
         sb.append("JOIN vd.mediaFiles mf ");
@@ -257,9 +276,12 @@ public class StagingDao extends HibernateDao {
             sb.append("AND lower(sf.baseName)=:baseName ");
         }
         sb.append("AND sf.stageDirectory=:stageDirectory ");
-        sb.append("UNION ");
+        List<Artwork> artworks = this.findByNamedParameters(sb, params);
+        result.addAll(artworks);
+        
         // for season
-        sb.append("SELECT distinct a ");
+        sb.setLength(0);
+        sb.append("SELECT a ");
         sb.append("FROM Artwork a ");
         sb.append("JOIN a.season sea ");
         sb.append("JOIN sea.videoDatas vd ");
@@ -274,26 +296,70 @@ public class StagingDao extends HibernateDao {
             sb.append("AND lower(sf.baseName)=:baseName ");
         }
         sb.append("AND sf.stageDirectory=:stageDirectory ");
+        artworks = this.findByNamedParameters(sb, params);
+        result.addAll(artworks);
+        
+        return result;
+    }
 
+    @SuppressWarnings("unchecked")
+    public Set<Artwork> findMatchingArtworksForVideo(ArtworkType artworkType, String baseName, Library library)  {
+        // NOTE: union not supported in HQL, so each query has to be executed
+        //       and mapped into a set to have uniqueness
+        Set<Artwork> result = new HashSet<Artwork>();
+        
         Set<StatusType> statusSet = new HashSet<StatusType>();
         statusSet.add(StatusType.NEW);
         statusSet.add(StatusType.UPDATED);
         statusSet.add(StatusType.DONE);
 
-        Query query = getSession().createQuery(sb.toString());
-        query.setParameter("artworkType", artworkType);
-        query.setParameter("fileType", FileType.VIDEO);
-        query.setBoolean("extra", Boolean.FALSE);
-        if (baseName != null) {
-            query.setString("baseName", baseName);
-        }
-        query.setParameterList("statusSet", statusSet);
-        query.setParameter("stageDirectory", stageDirectory);
-        query.setCacheable(true);
-        query.setCacheMode(CacheMode.NORMAL);
-        return query.list();
-    }
+        Map<String,Object> params = new HashMap<String,Object>();
+        params.put("artworkType", artworkType);
+        params.put("fileType", FileType.VIDEO);
+        params.put("extra", Boolean.FALSE);
+        params.put("baseName", baseName);
+        params.put("statusSet", statusSet);
+        params.put("library", library);
 
+        // for movies
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT a ");
+        sb.append("FROM Artwork a ");
+        sb.append("JOIN a.videoData vd ");
+        sb.append("JOIN vd.mediaFiles mf ");
+        sb.append("JOIN mf.stageFiles sf ");
+        sb.append("JOIN sf.stageDirectory sd ");
+        sb.append("WHERE a.artworkType=:artworkType ");
+        sb.append("AND sf.fileType=:fileType ");
+        sb.append("AND sf.status in (:statusSet) ");
+        sb.append("AND mf.extra=:extra ");
+        sb.append("AND vd.episode < 0 ");
+        sb.append("AND lower(sf.baseName)=:baseName ");
+        sb.append("AND sd.library=:library ");
+        List<Artwork> artworks = this.findByNamedParameters(sb, params);
+        result.addAll(artworks);
+        
+        sb.setLength(0);
+        sb.append("SELECT a ");
+        sb.append("FROM Artwork a ");
+        sb.append("JOIN a.season sea ");
+        sb.append("JOIN sea.videoDatas vd ");
+        sb.append("JOIN vd.mediaFiles mf ");
+        sb.append("JOIN mf.stageFiles sf ");
+        sb.append("JOIN sf.stageDirectory sd ");
+        sb.append("WHERE a.artworkType=:artworkType ");
+        sb.append("AND sf.fileType=:fileType ");
+        sb.append("AND sf.status in (:statusSet) ");
+        sb.append("AND mf.extra=:extra ");
+        sb.append("AND vd.episode >= 0 ");
+        sb.append("AND lower(sf.baseName)=:baseName ");
+        sb.append("AND sd.library=:library ");
+        artworks = this.findByNamedParameters(sb, params);
+        result.addAll(artworks);
+
+        return result;
+    }
+    
     @SuppressWarnings("unchecked")
     public List<StageFile> findStageFiles(FileType fileType, String searchName, String searchExtension, StageDirectory stageDirectory) {
         StringBuffer sb = new StringBuffer();

@@ -326,6 +326,8 @@ public class CommonStorageService {
             String filename = FilenameUtils.concat(located.getCacheDirectory(), located.getCacheFilename());
             filesToDelete.add(this.fileStorageService.getStorageDir(storageType, filename));
         }
+        
+        artwork.getArtworkLocated().remove(located);
         this.stagingDao.deleteEntity(located);
     }
 
