@@ -89,7 +89,7 @@ public class MediaImportService {
         StageFile stageFile = stagingDao.getStageFile(id);
         
         if (stageFile.getMediaFile() == null) {
-            LOG.info("Process new video {}-'{}'", stageFile.getId(), stageFile.getFileName());
+            LOG.info("Process new video {} - '{}'", stageFile.getId(), stageFile.getFileName());
             
             // process video file
             processVideoFile(stageFile);
@@ -99,7 +99,7 @@ public class MediaImportService {
             
             // TODO attach subtitles
         } else {
-            LOG.info("Process updated video {}-'{}'", stageFile.getId(), stageFile.getFileName());
+            LOG.info("Process updated video {} - '{}'", stageFile.getId(), stageFile.getFileName());
             
             // just update media file
             MediaFile mediaFile = stageFile.getMediaFile();
@@ -502,7 +502,7 @@ public class MediaImportService {
     @Transactional
     public void processNfo(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
-        LOG.info("Process nfo {}-'{}'", stageFile.getId(), stageFile.getFileName());
+        LOG.info("Process nfo {} - '{}'", stageFile.getId(), stageFile.getFileName());
 
         // check if NFO file can be scanned
         if (!FileTools.isFileScannable(stageFile)) {
@@ -666,7 +666,7 @@ public class MediaImportService {
     @Transactional
     public void processImage(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
-        LOG.info("Process image {}-'{}'", stageFile.getId(), stageFile.getFileName());
+        LOG.info("Process image {} - '{}'", stageFile.getId(), stageFile.getFileName());
 
         boolean updated = false;
         // just update located artwork
@@ -825,7 +825,7 @@ public class MediaImportService {
     @Transactional
     public void processWatched(long id) {
         StageFile watchedFile = stagingDao.getStageFile(id);
-        LOG.info("Process watched {}-'{}'", watchedFile.getId(), watchedFile.getFileName());
+        LOG.info("Process watched {} - '{}'", watchedFile.getId(), watchedFile.getFileName());
 
         // set watched status for video file(s)
         for (StageFile videoFile : this.stagingService.findWatchedVideoFiles(watchedFile)) {

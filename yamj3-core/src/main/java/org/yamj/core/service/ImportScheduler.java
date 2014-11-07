@@ -52,7 +52,7 @@ public class ImportScheduler {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.VIDEO, StatusType.NEW, StatusType.UPDATED);
                 if (id != null) {
-                    LOG.debug("Process video stage file: {}", id);
+                    LOG.trace("Process video stage file: {}", id);
                     mediaImportService.processVideo(id);
                     LOG.info("Processed video stage file: {}", id);
                 }
@@ -75,7 +75,7 @@ public class ImportScheduler {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.NFO, StatusType.NEW, StatusType.UPDATED);
                 if (id != null) {
-                    LOG.debug("Process nfo stage file: {}", id);
+                    LOG.trace("Process nfo stage file: {}", id);
                     mediaImportService.processNfo(id);
                     LOG.info("Processed nfo stage file: {}", id);
                 }
@@ -98,7 +98,7 @@ public class ImportScheduler {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.IMAGE, StatusType.NEW, StatusType.UPDATED);
                 if (id != null) {
-                    LOG.debug("Process image stage file: {}", id);
+                    LOG.trace("Process image stage file: {}", id);
                     mediaImportService.processImage(id);
                     LOG.info("Processed image stage file: {}", id);
                 }
@@ -121,7 +121,7 @@ public class ImportScheduler {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.WATCHED, StatusType.NEW, StatusType.UPDATED);
                 if (id != null) {
-                    LOG.debug("Process watched stage file: {}", id);
+                    LOG.trace("Process watched stage file: {}", id);
                     mediaImportService.processWatched(id);
                     LOG.info("Processed watched stage file: {}", id);
                 }
