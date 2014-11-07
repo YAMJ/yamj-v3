@@ -351,7 +351,7 @@ public class OnlineScannerService {
         } else if (ScanResult.RETRY.equals(scanResult)) {
             LOG.warn("Person filmography {}-'{}', will be retried", person.getId(), person.getName());
             person.setRetries(person.getRetries()+1);
-            person.setStatus(StatusType.UPDATED);
+            person.setFilmographyStatus(StatusType.UPDATED);
         } else {
             person.setRetries(0);
             person.setFilmographyStatus(StatusType.ERROR);
