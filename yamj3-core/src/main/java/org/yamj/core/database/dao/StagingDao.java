@@ -456,7 +456,9 @@ public class StagingDao extends HibernateDao {
 
         Map<String,Object> params = new HashMap<String,Object>();
         params.put("fileType", fileType);
-        params.put("library", library);
+        if (library != null) {
+            params.put("library", library);
+        }
         params.put("folderName", folderName.toLowerCase());
         params.put("searchNames", searchNames);
         params.put("duplicate", StatusType.DUPLICATE);
@@ -467,7 +469,9 @@ public class StagingDao extends HibernateDao {
         sb.append("FROM StageFile sf ");
         sb.append("JOIN sf.stageDirectory sd ");
         sb.append("WHERE sf.fileType=:fileType ");
-        sb.append("AND sd.library=:library ");
+        if (library != null) {
+            sb.append("AND sd.library=:library ");
+        }
         sb.append("AND sf.status != :duplicate ");
         sb.append("AND sf.status != :deleted ");
         sb.append("AND lower(sf.baseName) in (:searchNames) ");

@@ -22,6 +22,9 @@
  */
 package org.yamj.core.database.dao;
 
+import org.yamj.core.database.model.type.ArtworkType;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -120,5 +123,21 @@ public class MetadataDao extends HibernateDao {
         query.setParameter("jobType", jobType);
         query.setString("personName", personName.toLowerCase());
         return (CastCrew)query.uniqueResult();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public List<Artwork> findPersonArtworks(String personName) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("select a ");
+        sb.append("from Artwork a ");
+        sb.append("join a.person p ");
+        sb.append("WHERE a.artworkType=:artworkType ");
+        sb.append("AND lower(p.name)=:personName ");
+
+        Map<String,Object> params = new HashMap<String,Object>();
+        params.put("artworkType", ArtworkType.PHOTO);
+        params.put("personName", personName.toLowerCase());
+        
+        return this.findByNamedParameters(sb, params);
     }
 }

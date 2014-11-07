@@ -220,7 +220,19 @@ public class ArtworkLocatorService {
     }
 
     public List<StageFile> getPhotos(Person person) {
-        // TODO: Scan for staged local files
-        return Collections.emptyList();
+        List<StageFile> artworks;
+        
+        String photoFolderName = PropertyTools.getProperty("yamj3.folder.name.photo");
+        if (StringUtils.isNotBlank(photoFolderName)) {
+            Set<String> artworkNames = new HashSet<String>();
+            artworkNames.add(person.getName().toLowerCase() + ".photo");
+            artworkNames.add(person.getName().toLowerCase() + "-photo");
+            artworks = this.stagingDao.findStageFilesInSpecialFolder(FileType.IMAGE, photoFolderName, null, artworkNames);
+        } else {
+            artworks = Collections.emptyList();
+        }
+
+        LOG.debug("Found {} local photos for person '{}'", artworks.size(), person.getName());
+        return artworks;
     }
 }

@@ -440,7 +440,14 @@ public class ArtworkScannerService {
 
         LOG.trace("Scan local for photo: {}", artwork);
 
-        // TODO local scan
+        List<StageFile> photos = null;
+
+        if (artwork.getPerson() != null) {
+            // scan person photo
+            photos = this.artworkLocatorService.getPhotos(artwork.getPerson());
+        }
+
+        createLocatedArtworksLocal(artwork, photos, locatedArtworks);
     }
 
     private void scanPhotoOnline(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
