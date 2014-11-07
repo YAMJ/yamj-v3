@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -44,6 +45,8 @@ public class ArtworkLocatorService {
 
     @Autowired
     private StagingDao stagingDao;
+    @Autowired
+    private ConfigService configService;
 
     private Set<String> buildSearchMap(ArtworkType artworkType, List<StageFile> videoFiles, Set<StageDirectory> directories) {
         Set<String> artworkNames = new HashSet<String>();
@@ -129,7 +132,12 @@ public class ArtworkLocatorService {
 
         String artworkFolderName = PropertyTools.getProperty("yamj3.folder.name.artwork");
         if (StringUtils.isNotBlank(artworkFolderName)) {
-            Library library = videoFiles.get(0).getStageDirectory().getLibrary();
+            
+            Library library = null;
+            if (this.configService.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
+                library = videoFiles.get(0).getStageDirectory().getLibrary();
+            }
+            
             artworkNames = this.buildSpecialMap(artworkType, videoFiles);
             List<StageFile> specials = this.stagingDao.findStageFilesInSpecialFolder(FileType.IMAGE, artworkFolderName, library, artworkNames);
             artworks.addAll(specials);
@@ -154,7 +162,12 @@ public class ArtworkLocatorService {
 
         String artworkFolderName = PropertyTools.getProperty("yamj3.folder.name.artwork");
         if (StringUtils.isNotBlank(artworkFolderName)) {
-            Library library = videoFiles.get(0).getStageDirectory().getLibrary();
+            
+            Library library = null;
+            if (this.configService.getBooleanProperty("yamj3.librarycheck.folder.artwork", Boolean.TRUE)) {
+                library = videoFiles.get(0).getStageDirectory().getLibrary();
+            }
+
             artworkNames = this.buildSpecialMap(artworkType, videoFiles);
             List<StageFile> specials = this.stagingDao.findStageFilesInSpecialFolder(FileType.IMAGE, artworkFolderName, library, artworkNames);
             artworks.addAll(specials);
@@ -171,6 +184,7 @@ public class ArtworkLocatorService {
         sb.append("join f.mediaFile m ");
         sb.append("join m.videoDatas v ");
         sb.append("where v.id=:videoDataId ");
+        sb.append("and m.extra=:extra ");
         sb.append("and f.status != :duplicate ");
         sb.append("and f.status != :deleted ");
 
@@ -178,6 +192,7 @@ public class ArtworkLocatorService {
         params.put("videoDataId", videoData.getId());
         params.put("duplicate", StatusType.DUPLICATE);
         params.put("deleted", StatusType.DELETED);
+        params.put("extra", Boolean.FALSE);
 
         return stagingDao.findByNamedParameters(sb, params);
     }
@@ -190,6 +205,7 @@ public class ArtworkLocatorService {
         sb.append("join m.videoDatas v ");
         sb.append("join v.season sea ");
         sb.append("where sea.id=:seasonId ");
+        sb.append("and m.extra=:extra ");
         sb.append("and f.status != :duplicate ");
         sb.append("and f.status != :deleted ");
         
@@ -197,7 +213,8 @@ public class ArtworkLocatorService {
         params.put("seasonId", season.getId());
         params.put("duplicate", StatusType.DUPLICATE);
         params.put("deleted", StatusType.DELETED);
-
+        params.put("extra", Boolean.FALSE);
+        
         return stagingDao.findByNamedParameters(sb, params);
     }
 

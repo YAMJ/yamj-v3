@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.staging;
 
-import org.yamj.core.service.file.tools.FileTools;
-
 import java.io.File;
 import java.math.BigInteger;
 import java.util.Calendar;
@@ -41,9 +39,11 @@ import org.yamj.common.dto.StageDirectoryDTO;
 import org.yamj.common.dto.StageFileDTO;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.mediaimport.FilenameScanner;
 
 @Service("stagingService")
@@ -55,6 +55,8 @@ public class StagingService {
     private StagingDao stagingDao;
     @Autowired
     private FilenameScanner filenameScanner;
+    @Autowired
+    private ConfigService configService;
 
     @Transactional
     public Library storeLibrary(ImportDTO libraryDTO) {
@@ -231,7 +233,10 @@ public class StagingService {
     public boolean isWatchedVideoFile(StageFile videoFile) {
         // get the name used for WATCHED directories
         String watchedFolderName = PropertyTools.getProperty("yamj3.folder.name.watched");
-        BigInteger count = this.stagingDao.countWatchedFiles(videoFile, watchedFolderName);
+
+        boolean checkLibrary = this.configService.getBooleanProperty("yamj3.librarycheck.folder.watched", Boolean.TRUE);
+
+        BigInteger count = this.stagingDao.countWatchedFiles(videoFile, watchedFolderName, checkLibrary);
         return (count != null && count.intValue()>0);
     }
     
@@ -249,8 +254,14 @@ public class StagingService {
 
         List<StageFile> videoFiles;
         if (FileTools.isWithinSpecialFolder(watchedFile, watchedFolderName)) {
+            
+            Library library = null;
+            if (this.configService.getBooleanProperty("yamj3.librarycheck.folder.watched", Boolean.TRUE)) {
+                library = watchedFile.getStageDirectory().getLibrary();
+            }
+
             // search in all directories of the library
-            videoFiles = this.stagingDao.findStageFiles(FileType.VIDEO, videoBaseName, videoExtension, watchedFile.getStageDirectory().getLibrary());
+            videoFiles = this.stagingDao.findStageFiles(FileType.VIDEO, videoBaseName, videoExtension, library);
         } else {
             // search in just this directory
             videoFiles = this.stagingDao.findStageFiles(FileType.VIDEO, videoBaseName, videoExtension, watchedFile.getStageDirectory());

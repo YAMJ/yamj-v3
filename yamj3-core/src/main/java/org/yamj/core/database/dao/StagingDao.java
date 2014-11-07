@@ -147,18 +147,24 @@ public class StagingDao extends HibernateDao {
         sb.append("FROM VideoData vd ");
         sb.append("JOIN vd.mediaFiles mf ");
         sb.append("JOIN mf.stageFiles sf ");
-        sb.append("JOIN sf.stageDirectory sd ");
+        if (library != null) {
+            sb.append("JOIN sf.stageDirectory sd ");
+        }
         sb.append("WHERE sf.fileType=:fileType ");
         sb.append("AND mf.extra=:extra ");
         sb.append("AND lower(sf.baseName)=:baseName ");
-        sb.append("AND sd.library=:library ");
+        if (library != null) {
+            sb.append("AND sd.library=:library ");
+        }
         sb.append("AND sf.status != :deleted ");
 
         Query query = getSession().createQuery(sb.toString());
         query.setParameter("fileType", FileType.VIDEO);
         query.setBoolean("extra", Boolean.FALSE);
         query.setString("baseName", baseName.toLowerCase());
-        query.setParameter("library", library);
+        if (library != null) {
+            query.setParameter("library", library);
+        }
         query.setParameter("deleted", StatusType.DELETED);
         query.setCacheable(true);
         query.setCacheMode(CacheMode.NORMAL);
@@ -350,7 +356,9 @@ public class StagingDao extends HibernateDao {
         params.put("extra", Boolean.FALSE);
         params.put("baseName", baseName);
         params.put("statusSet", statusSet);
-        params.put("library", library);
+        if (library != null) {
+            params.put("library", library);
+        }
 
         // for movies
         StringBuilder sb = new StringBuilder();
@@ -359,14 +367,18 @@ public class StagingDao extends HibernateDao {
         sb.append("JOIN a.videoData vd ");
         sb.append("JOIN vd.mediaFiles mf ");
         sb.append("JOIN mf.stageFiles sf ");
-        sb.append("JOIN sf.stageDirectory sd ");
+        if (library != null) {
+            sb.append("JOIN sf.stageDirectory sd ");
+        }
         sb.append("WHERE a.artworkType=:artworkType ");
         sb.append("AND sf.fileType=:fileType ");
         sb.append("AND sf.status in (:statusSet) ");
         sb.append("AND mf.extra=:extra ");
         sb.append("AND vd.episode < 0 ");
         sb.append("AND lower(sf.baseName)=:baseName ");
-        sb.append("AND sd.library=:library ");
+        if (library != null) {
+            sb.append("AND sd.library=:library ");
+        }
         List<Artwork> artworks = this.findByNamedParameters(sb, params);
         result.addAll(artworks);
         
@@ -377,14 +389,18 @@ public class StagingDao extends HibernateDao {
         sb.append("JOIN sea.videoDatas vd ");
         sb.append("JOIN vd.mediaFiles mf ");
         sb.append("JOIN mf.stageFiles sf ");
-        sb.append("JOIN sf.stageDirectory sd ");
+        if (library != null) {
+            sb.append("JOIN sf.stageDirectory sd ");
+        }
         sb.append("WHERE a.artworkType=:artworkType ");
         sb.append("AND sf.fileType=:fileType ");
         sb.append("AND sf.status in (:statusSet) ");
         sb.append("AND mf.extra=:extra ");
         sb.append("AND vd.episode >= 0 ");
         sb.append("AND lower(sf.baseName)=:baseName ");
-        sb.append("AND sd.library=:library ");
+        if (library != null) {
+            sb.append("AND sd.library=:library ");
+        }
         artworks = this.findByNamedParameters(sb, params);
         result.addAll(artworks);
 
@@ -424,13 +440,17 @@ public class StagingDao extends HibernateDao {
         StringBuffer sb = new StringBuffer();
         sb.append("SELECT distinct sf ");
         sb.append("FROM StageFile sf ");
-        sb.append("JOIN sf.stageDirectory sd ");
+        if (library != null) {
+            sb.append("JOIN sf.stageDirectory sd ");
+        }
         sb.append("WHERE sf.fileType=:fileType ");
         sb.append("AND lower(sf.baseName)=:searchName ");
         if (searchExtension != null) {
             sb.append("AND lower(sf.extension)=:searchExtension ");
         }
-        sb.append("AND sd.library=:library ");
+        if (library != null) {
+            sb.append("AND sd.library=:library ");
+        }
         sb.append("AND sf.status != :duplicate ");
         sb.append("AND sf.status != :deleted ");
         
@@ -440,7 +460,9 @@ public class StagingDao extends HibernateDao {
         if (searchExtension != null) {
             query.setString("searchExtension", searchExtension.toLowerCase());
         }
-        query.setParameter("library", library);
+        if (library != null) {
+            query.setParameter("library", library);
+        }
         query.setParameter("duplicate", StatusType.DUPLICATE);
         query.setParameter("deleted", StatusType.DELETED);
         query.setCacheable(true);
@@ -482,7 +504,7 @@ public class StagingDao extends HibernateDao {
         return this.findByNamedParameters(sb, params);
     }
     
-    public BigInteger countWatchedFiles(StageFile videoFile, String folderName) {
+    public BigInteger countWatchedFiles(StageFile videoFile, String folderName, boolean checkLibrary) {
         StringBuffer sb = new StringBuffer();
         sb.append("SELECT count(*) ");
         sb.append("FROM stage_file sf ");
@@ -493,14 +515,18 @@ public class StagingDao extends HibernateDao {
             String dirFragment = FileTools.getPathFragment(folderName).toLowerCase();
             sb.append(" (sd.id=:dirId or lower(sd.directory_name)=:dirName or lower(sd.directory_path) like '%").append(dirFragment).append("%') ");
         }
-        sb.append(" and sd.library_id=:libraryId ");
+        if (checkLibrary) {
+            sb.append(" and sd.library_id=:libraryId ");
+        }
         sb.append("WHERE sf.file_type=:watched ");
         sb.append("and (lower(sf.base_name)=:check1 or lower(sf.base_name)=:check2) ");
         sb.append("and sf.status != :deleted ");
             
         Query query = getSession().createSQLQuery(sb.toString());
         query.setLong("dirId", videoFile.getStageDirectory().getId());
-        query.setLong("libraryId", videoFile.getStageDirectory().getLibrary().getId());
+        if (checkLibrary) {
+            query.setLong("libraryId", videoFile.getStageDirectory().getLibrary().getId());
+        }
         query.setString("watched", FileType.WATCHED.toString());
         query.setString("check1", videoFile.getBaseName().toLowerCase());
         query.setString("check2", videoFile.getFileName().toLowerCase());
