@@ -93,7 +93,17 @@ public class TheTVDbScanner implements ISeriesScanner {
         }
 
         com.omertron.thetvdbapi.model.Series tvdbSeries = tvdbApiWrapper.getSeries(id);
-
+        if (StringUtils.isBlank(tvdbSeries.getId())) {
+            LOG.error("Can't find informations for series with id {}", id);
+            
+            // check retry
+            int maxRetries = this.configServiceWrapper.getIntProperty("thetvdb.maxRetries.tvshow", 0);
+            if (series.getRetries() < maxRetries) {
+                return ScanResult.RETRY;
+            }
+            return ScanResult.ERROR;
+        }
+        
         series.setSourceDbId(SCANNER_ID, tvdbSeries.getId());
         series.setSourceDbId(ImdbScanner.SCANNER_ID, tvdbSeries.getImdbId());
 

@@ -190,6 +190,12 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             moviedb = tmdbApi.getMovieInfo(Integer.parseInt(tmdbID), defaultLanguage);
         } catch (MovieDbException ex) {
             LOG.error("Failed retrieving TheMovieDb information for {}, error: {}", videoData.getTitle(), ex.getMessage());
+            
+            // check retry
+            int maxRetries = this.configServiceWrapper.getIntProperty("themoviedb.maxRetries.movie", 0);
+            if (videoData.getRetries() < maxRetries) {
+                return ScanResult.RETRY;
+            }
             return ScanResult.ERROR;
         }
 
@@ -382,6 +388,12 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
 
         } catch (MovieDbException ex) {
             LOG.warn("Failed to get information on {}-'{}', error: {}", id, person.getName(), ex.getMessage());
+            
+            // check retry
+            int maxRetries = this.configServiceWrapper.getIntProperty("themoviedb.maxRetries.person", 0);
+            if (person.getRetries() < maxRetries) {
+                return ScanResult.RETRY;
+            }
             return ScanResult.ERROR;
         }
 
@@ -470,6 +482,12 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             return ScanResult.OK;
         } catch (MovieDbException ex) {
             LOG.error("Failed retrieving TheMovieDb filmography for '{}', error: {}", person.getName(), ex.getMessage());
+            
+            // check retry
+            int maxRetries = this.configServiceWrapper.getIntProperty("themoviedb.maxRetries.filmography", 0);
+            if (person.getRetries() < maxRetries) {
+                return ScanResult.RETRY;
+            }
             return ScanResult.ERROR;
         }
     }
