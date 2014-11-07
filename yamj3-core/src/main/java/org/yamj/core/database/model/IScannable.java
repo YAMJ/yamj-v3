@@ -36,4 +36,6 @@ public interface IScannable {
     void setOverrideFlag(OverrideFlag overrideFlag, String source);
     
     Date getLastScanned();
+    
+    int getRetries();
 }

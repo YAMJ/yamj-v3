@@ -166,9 +166,10 @@ public class ArtworkScannerService {
 
         if (artwork.getVideoData() != null) {
             // scan movie poster
-            posters = this.artworkLocatorService.getMatchingPosters(artwork.getVideoData());
+            posters = this.artworkLocatorService.getMatchingArtwork(ArtworkType.POSTER, artwork.getVideoData());
         } else if (artwork.getSeason() != null) {
-            posters = this.artworkLocatorService.getMatchingPosters(artwork.getSeason());
+            // scan season poster
+            posters = this.artworkLocatorService.getMatchingArtwork(ArtworkType.POSTER, artwork.getSeason());
         } else if (artwork.getSeries() != null) {
             // TODO scan series poster
         }
@@ -252,12 +253,13 @@ public class ArtworkScannerService {
         List<StageFile> fanarts = null;
 
         if (artwork.getVideoData() != null) {
-            // scan movie poster
-            fanarts = this.artworkLocatorService.getMatchingFanarts(artwork.getVideoData());
+            // scan movie fanart
+            fanarts = this.artworkLocatorService.getMatchingArtwork(ArtworkType.FANART, artwork.getVideoData());
         } else if (artwork.getSeason() != null) {
-            fanarts = this.artworkLocatorService.getMatchingFanarts(artwork.getSeason());
+            // scan season fanart
+            fanarts = this.artworkLocatorService.getMatchingArtwork(ArtworkType.FANART, artwork.getSeason());
         } else if (artwork.getSeries() != null) {
-            // TODO scan series poster
+            // TODO scan series fanart
         }
 
         createLocatedArtworksLocal(artwork, fanarts, locatedArtworks);
@@ -336,9 +338,10 @@ public class ArtworkScannerService {
         List<StageFile> banners = null;
 
         if (artwork.getSeason() != null) {
-            banners = this.artworkLocatorService.getMatchingBanners(artwork.getSeason());
+            // scan season banner
+            banners = this.artworkLocatorService.getMatchingArtwork(ArtworkType.BANNER, artwork.getSeason());
         } else if (artwork.getSeries() != null) {
-            // TODO scan series banners
+            // TODO scan series banner
         }
 
         createLocatedArtworksLocal(artwork, banners, locatedArtworks);

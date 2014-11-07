@@ -89,7 +89,7 @@ public class MediaImportService {
         StageFile stageFile = stagingDao.getStageFile(id);
         
         if (stageFile.getMediaFile() == null) {
-            LOG.info("Process new video {} - '{}'", stageFile.getId(), stageFile.getFileName());
+            LOG.info("Process new video {}-'{}'", stageFile.getId(), stageFile.getFileName());
             
             // process video file
             processVideoFile(stageFile);
@@ -408,7 +408,8 @@ public class MediaImportService {
 
         // case 2: find matching files in NFO folder
         String nfoFolderName = PropertyTools.getProperty("yamj3.folder.name.nfo");
-        for (StageFile nfoFile : this.stagingDao.findStageFilesInSpecialFolder(FileType.NFO, nfoFolderName, stageFile.getStageDirectory().getLibrary(), searchName)) {
+        Set<String> searchNames = Collections.singleton(searchName.toLowerCase());
+        for (StageFile nfoFile : this.stagingDao.findStageFilesInSpecialFolder(FileType.NFO, nfoFolderName, stageFile.getStageDirectory().getLibrary(), searchNames)) {
             nfoFiles.put(nfoFile, Integer.valueOf(2));
             
             // change status for PRIO-2-NFO
@@ -516,7 +517,7 @@ public class MediaImportService {
     @Transactional
     public void processNfo(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
-        LOG.info("Process nfo {} - '{}'", stageFile.getId(), stageFile.getFileName());
+        LOG.info("Process nfo {}-'{}'", stageFile.getId(), stageFile.getFileName());
 
         // check if NFO file can be scanned
         if (!FileTools.isFileScannable(stageFile)) {
@@ -691,7 +692,7 @@ public class MediaImportService {
     @Transactional
     public void processImage(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
-        LOG.info("Process image {} - '{}'", stageFile.getId(), stageFile.getFileName());
+        LOG.info("Process image {}-'{}'", stageFile.getId(), stageFile.getFileName());
 
         boolean updated = false;
         // just update located artwork
@@ -849,7 +850,7 @@ public class MediaImportService {
     @Transactional
     public void processWatched(long id) {
         StageFile watchedFile = stagingDao.getStageFile(id);
-        LOG.info("Process watched {} - '{}'", watchedFile.getId(), watchedFile.getFileName());
+        LOG.info("Process watched {}-'{}'", watchedFile.getId(), watchedFile.getFileName());
 
         // set watched status for video file(s)
         for (StageFile videoFile : this.stagingService.findWatchedVideoFiles(watchedFile)) {

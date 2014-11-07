@@ -138,6 +138,12 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         MovieInfos movieInfos = this.allocineApiWrapper.getMovieInfos(allocineId);
         if (movieInfos == null || movieInfos.isNotValid()) {
             LOG.error("Can't find informations for movie with id {}", allocineId);
+
+            // check retry
+            int maxRetries = this.configServiceWrapper.getIntProperty("allocine.maxRetries.movie", 0);
+            if (videoData.getRetries() < maxRetries) {
+                return ScanResult.RETRY;
+            }
             return ScanResult.ERROR;
         }
 
@@ -327,6 +333,12 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         TvSeriesInfos tvSeriesInfos = this.allocineApiWrapper.getTvSeriesInfos(allocineId);
         if (tvSeriesInfos == null || tvSeriesInfos.isNotValid()) {
             LOG.error("Can't find informations for series with id {}", allocineId);
+         
+            // check retry
+            int maxRetries = this.configServiceWrapper.getIntProperty("allocine.maxRetries.tvshow", 0);
+            if (series.getRetries() < maxRetries) {
+                return ScanResult.RETRY;
+            }
             return ScanResult.ERROR;
         }
 
@@ -567,6 +579,12 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         PersonInfos personInfos = this.allocineApiWrapper.getPersonInfos(allocineId);
         if (personInfos == null || personInfos.isNotValid()) {
             LOG.error("Can't find informations for person with id {}", allocineId);
+            
+            // check retry
+            int maxRetries = this.configServiceWrapper.getIntProperty("allocine.maxRetries.person", 0);
+            if (person.getRetries() < maxRetries) {
+                return ScanResult.RETRY;
+            }
             return ScanResult.ERROR;
         }
 
@@ -617,6 +635,12 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         FilmographyInfos filmographyInfos = this.allocineApiWrapper.getFilmographyInfos(id);
         if (filmographyInfos == null || filmographyInfos.isNotValid()) {
             LOG.error("Can't find filmography for person '{}' with id {}", person.getName(), id);
+            
+            // check retry
+            int maxRetries = this.configServiceWrapper.getIntProperty("allocine.maxRetries.filmography", 0);
+            if (person.getRetries() < maxRetries) {
+                return ScanResult.RETRY;
+            }
             return ScanResult.ERROR;
         }
     

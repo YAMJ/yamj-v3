@@ -449,15 +449,16 @@ public class StagingDao extends HibernateDao {
     }
 
     @SuppressWarnings("unchecked")
-    public List<StageFile> findStageFilesInSpecialFolder(FileType fileType, String folderName, Library library, String... searchNames) {
-        if (StringUtils.isBlank(folderName) || searchNames == null) {
+    public List<StageFile> findStageFilesInSpecialFolder(FileType fileType, String folderName, Library library, Collection<String> searchNames) {
+        if (StringUtils.isBlank(folderName) || CollectionUtils.isEmpty(searchNames)) {
             return Collections.emptyList();
         }
 
         Map<String,Object> params = new HashMap<String,Object>();
         params.put("fileType", fileType);
-        params.put("folderName", folderName.toLowerCase());
         params.put("library", library);
+        params.put("folderName", folderName.toLowerCase());
+        params.put("searchNames", searchNames);
         params.put("duplicate", StatusType.DUPLICATE);
         params.put("deleted", StatusType.DELETED);
         
@@ -466,21 +467,13 @@ public class StagingDao extends HibernateDao {
         sb.append("FROM StageFile sf ");
         sb.append("JOIN sf.stageDirectory sd ");
         sb.append("WHERE sf.fileType=:fileType ");
-        sb.append("AND (");
-
-        int counter = 0;
-        for (String searchName : searchNames) {
-            if (counter > 0) sb.append(" or ");
-            sb.append("lower(sf.baseName)=:searchName"+counter);
-            params.put("searchName"+counter, searchName.toLowerCase());
-        }
-        
-        sb.append(") AND sd.library=:library ");
+        sb.append("AND sd.library=:library ");
+        sb.append("AND sf.status != :duplicate ");
+        sb.append("AND sf.status != :deleted ");
+        sb.append("AND lower(sf.baseName) in (:searchNames) ");
 
         String dirFragment = FileTools.getPathFragment(folderName).toLowerCase();
         sb.append("AND (lower(sd.directoryName)=:folderName or lower(sd.directoryPath) like '%").append(dirFragment).append("%') ");
-        sb.append("AND sf.status != :duplicate ");
-        sb.append("AND sf.status != :deleted ");
 
         return this.findByNamedParameters(sb, params);
     }

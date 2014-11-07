@@ -86,6 +86,9 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @Column(name = "last_scanned")
     private Date lastScanned;
     
+    @Column(name = "retries", nullable = false)
+    private int retries = 0;
+    
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "person_override", joinColumns = @JoinColumn(name = "person_id"))
     @ForeignKey(name = "FK_PERSON_OVERRIDE")
@@ -267,6 +270,15 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         this.lastScanned = lastScanned;
     }
     
+    @Override
+    public int getRetries() {
+        return retries;
+    }
+
+    public void setRetries(int retries) {
+        this.retries = retries;
+    }
+
     public Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }

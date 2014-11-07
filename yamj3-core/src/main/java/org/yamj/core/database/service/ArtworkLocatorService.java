@@ -24,14 +24,17 @@ package org.yamj.core.database.service;
 
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 
 @Service("artworkLocatorService")
@@ -41,146 +44,126 @@ public class ArtworkLocatorService {
 
     @Autowired
     private StagingDao stagingDao;
-    
-    private Set<String> buildPosterSearchMap(List<StageFile> videoFiles, Set<StageDirectory> directories) {
+
+    private Set<String> buildSearchMap(ArtworkType artworkType, List<StageFile> videoFiles, Set<StageDirectory> directories) {
         Set<String> artworkNames = new HashSet<String>();
-        artworkNames.add("poster");
-        artworkNames.add("cover");
-        artworkNames.add("folder");
+
+        // generic names (placed in folder)
+        if (ArtworkType.POSTER == artworkType) {
+            artworkNames.add("poster");
+            artworkNames.add("cover");
+            artworkNames.add("folder");
+        } else if (ArtworkType.FANART == artworkType) {
+            artworkNames.add("fanart");
+            artworkNames.add("backdrop");
+            artworkNames.add("background");
+        } else if (ArtworkType.BANNER == artworkType) {
+            artworkNames.add("banner");
+        } else {
+            // no artwork names for this type
+            return artworkNames;
+        }
+        
         for (StageFile videoFile : videoFiles) {
             directories.add(videoFile.getStageDirectory());
-            artworkNames.add(videoFile.getBaseName().toLowerCase());
-            artworkNames.add(videoFile.getBaseName().toLowerCase() + ".poster");
-            artworkNames.add(videoFile.getBaseName().toLowerCase() + "-poster");
+            
+            // same name than video file
+            if (ArtworkType.POSTER == artworkType) {
+                artworkNames.add(videoFile.getBaseName().toLowerCase());
+                artworkNames.add(videoFile.getBaseName().toLowerCase() + ".poster");
+                artworkNames.add(videoFile.getBaseName().toLowerCase() + "-poster");
+            } else if (ArtworkType.FANART == artworkType) {
+                artworkNames.add(videoFile.getBaseName().toLowerCase() + ".fanart");
+                artworkNames.add(videoFile.getBaseName().toLowerCase() + "-fanart");
+            } else if (ArtworkType.BANNER == artworkType) {
+                artworkNames.add(videoFile.getBaseName().toLowerCase() + ".banner");
+                artworkNames.add(videoFile.getBaseName().toLowerCase() + "-banner");
+            }
             
             // same name as directory
             String directoryName = videoFile.getStageDirectory().getDirectoryName().toLowerCase();
-            artworkNames.add(directoryName);
-            artworkNames.add(directoryName + ".poster");
-            artworkNames.add(directoryName + "-poster");
+            if (ArtworkType.POSTER == artworkType) {
+                artworkNames.add(directoryName);
+                artworkNames.add(directoryName + ".poster");
+                artworkNames.add(directoryName + "-poster");
+            } else if (ArtworkType.FANART == artworkType) {
+                artworkNames.add(directoryName + ".fanart");
+                artworkNames.add(directoryName + "-fanart");
+            } else if (ArtworkType.BANNER == artworkType) {
+                artworkNames.add(directoryName + ".banner");
+                artworkNames.add(directoryName + "-banner");
+            }
         }
         return artworkNames;
     }
 
-    private Set<String> buildFanartSearchMap(List<StageFile> videoFiles, Set<StageDirectory> directories) {
+    private Set<String> buildSpecialMap(ArtworkType artworkType, List<StageFile> videoFiles) {
         Set<String> artworkNames = new HashSet<String>();
-        artworkNames.add("fanart");
-        artworkNames.add("backdrop");
-        artworkNames.add("background");
         for (StageFile videoFile : videoFiles) {
-            directories.add(videoFile.getStageDirectory());
-            artworkNames.add(videoFile.getBaseName().toLowerCase() + ".fanart");
-            artworkNames.add(videoFile.getBaseName().toLowerCase() + "-fanart");
-            
-            // same name as directory
-            String directoryName = videoFile.getStageDirectory().getDirectoryName().toLowerCase();
-            artworkNames.add(directoryName + ".fanart");
-            artworkNames.add(directoryName + "-fanart");
+            if (ArtworkType.POSTER == artworkType) {
+                artworkNames.add(videoFile.getBaseName().toLowerCase());
+                artworkNames.add(videoFile.getBaseName().toLowerCase() + ".poster");
+                artworkNames.add(videoFile.getBaseName().toLowerCase() + "-poster");
+            } else if (ArtworkType.FANART == artworkType) {
+                artworkNames.add(videoFile.getBaseName().toLowerCase() + ".fanart");
+                artworkNames.add(videoFile.getBaseName().toLowerCase() + "-fanart");
+            } else if (ArtworkType.BANNER == artworkType) {
+                artworkNames.add(videoFile.getBaseName().toLowerCase() + ".banner");
+                artworkNames.add(videoFile.getBaseName().toLowerCase() + "-banner");
+            }
         }
         return artworkNames;
     }
 
-    private Set<String> buildBannerSearchMap(List<StageFile> videoFiles, Set<StageDirectory> directories) {
-        Set<String> artworkNames = new HashSet<String>();
-        artworkNames.add("banner");
-        for (StageFile videoFile : videoFiles) {
-            directories.add(videoFile.getStageDirectory());
-            artworkNames.add(videoFile.getBaseName().toLowerCase() + ".banner");
-            artworkNames.add(videoFile.getBaseName().toLowerCase() + "-banner");
-            
-            // same name as directory
-            String directoryName = videoFile.getStageDirectory().getDirectoryName().toLowerCase();
-            artworkNames.add(directoryName + ".banner");
-            artworkNames.add(directoryName + "-banner");
-        }
-        return artworkNames;
-    }
-    
     @Transactional(readOnly = true)
-    public List<StageFile> getMatchingPosters(VideoData videoData) {
+    public List<StageFile> getMatchingArtwork(ArtworkType artworkType, VideoData videoData) {
         List<StageFile> videoFiles = findVideoFiles(videoData);
         if (CollectionUtils.isEmpty(videoFiles)) {
             return null;
         }
 
-        // build search maps
+        // search in same directory than video files
         Set<StageDirectory> directories = new HashSet<StageDirectory>();
-        Set<String> artworkNames = this.buildPosterSearchMap(videoFiles, directories);
-        
-        // get the posters
-        List<StageFile> posters = findArtworkStageFiles(directories, artworkNames);
-        LOG.debug("Found {} local posters for movie {}", posters.size(), videoData.getIdentifier());
-        return posters;
+        Set<String> artworkNames = this.buildSearchMap(artworkType, videoFiles, directories);
+        List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
+
+        String artworkFolderName = PropertyTools.getProperty("yamj3.folder.name.artwork");
+        if (StringUtils.isNotBlank(artworkFolderName)) {
+            Library library = videoFiles.get(0).getStageDirectory().getLibrary();
+            artworkNames = this.buildSpecialMap(artworkType, videoFiles);
+            List<StageFile> specials = this.stagingDao.findStageFilesInSpecialFolder(FileType.IMAGE, artworkFolderName, library, artworkNames);
+            artworks.addAll(specials);
+        }
+
+        // search
+        LOG.debug("Found {} local {}s for movie {}", artworks.size(), artworkType.toString().toLowerCase(), videoData.getIdentifier());
+        return artworks;
     }
 
     @Transactional(readOnly = true)
-    public List<StageFile> getMatchingPosters(Season season) {
+    public List<StageFile> getMatchingArtwork(ArtworkType artworkType, Season season) {
         List<StageFile> videoFiles = findVideoFiles(season);
         if (CollectionUtils.isEmpty(videoFiles)) {
             return null;
         }
 
-        // build search maps
+        // search in same directory than video files
         Set<StageDirectory> directories = new HashSet<StageDirectory>();
-        Set<String> artworkNames = this.buildPosterSearchMap(videoFiles, directories);
-        
-        // get the posters
-        List<StageFile> posters = findArtworkStageFiles(directories, artworkNames);
-        LOG.debug("Found {} local posters for season {}", posters.size(), season.getIdentifier());
-        return posters;
-    }
+        Set<String> artworkNames = this.buildSearchMap(artworkType, videoFiles, directories);
+        List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
 
-    @Transactional(readOnly = true)
-    public List<StageFile> getMatchingFanarts(VideoData videoData) {
-        List<StageFile> videoFiles = findVideoFiles(videoData);
-        if (CollectionUtils.isEmpty(videoFiles)) {
-            return null;
+        String artworkFolderName = PropertyTools.getProperty("yamj3.folder.name.artwork");
+        if (StringUtils.isNotBlank(artworkFolderName)) {
+            Library library = videoFiles.get(0).getStageDirectory().getLibrary();
+            artworkNames = this.buildSpecialMap(artworkType, videoFiles);
+            List<StageFile> specials = this.stagingDao.findStageFilesInSpecialFolder(FileType.IMAGE, artworkFolderName, library, artworkNames);
+            artworks.addAll(specials);
         }
 
-        // build search maps
-        Set<StageDirectory> directories = new HashSet<StageDirectory>();
-        Set<String> artworkNames = this.buildFanartSearchMap(videoFiles, directories);
-
-        // get the fanarts
-        List<StageFile> fanarts = findArtworkStageFiles(directories, artworkNames);
-        LOG.debug("Found {} local fanarts for movie {}", fanarts.size(), videoData.getIdentifier());
-        return fanarts;
+        LOG.debug("Found {} local {}s for season {}", artworks.size(), artworkType.toString().toLowerCase(), season.getIdentifier());
+        return artworks;
     }
 
-    @Transactional(readOnly = true)
-    public List<StageFile> getMatchingFanarts(Season season) {
-        List<StageFile> videoFiles = findVideoFiles(season);
-        if (CollectionUtils.isEmpty(videoFiles)) {
-            return null;
-        }
-
-        // build search maps
-        Set<StageDirectory> directories = new HashSet<StageDirectory>();
-        Set<String> artworkNames = this.buildFanartSearchMap(videoFiles, directories);
-        
-        // get the fanarts
-        List<StageFile> fanarts = findArtworkStageFiles(directories, artworkNames);
-        LOG.debug("Found {} local fanarts for season {}", fanarts.size(), season.getIdentifier());
-        return fanarts;
-    }
-
-    @Transactional(readOnly = true)
-    public List<StageFile> getMatchingBanners(Season season) {
-        List<StageFile> videoFiles = findVideoFiles(season);
-        if (CollectionUtils.isEmpty(videoFiles)) {
-            return null;
-        }
-
-        // build search maps
-        Set<StageDirectory> directories = new HashSet<StageDirectory>();
-        Set<String> artworkNames = this.buildBannerSearchMap(videoFiles, directories);
-        
-        // get the fanarts
-        List<StageFile> fanarts = findArtworkStageFiles(directories, artworkNames);
-        LOG.debug("Found {} local banners for season {}", fanarts.size(), season.getIdentifier());
-        return fanarts;
-    }
-    
     @SuppressWarnings("unchecked")
     private List<StageFile> findVideoFiles(VideoData videoData) {
         final StringBuilder sb = new StringBuilder();

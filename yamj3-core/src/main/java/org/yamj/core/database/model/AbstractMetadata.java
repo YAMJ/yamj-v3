@@ -22,6 +22,7 @@
  */
 package org.yamj.core.database.model;
 
+import javax.persistence.Column;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
@@ -69,6 +70,9 @@ public abstract class AbstractMetadata extends AbstractAuditable
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "last_scanned")
     private Date lastScanned;
+
+    @Column(name = "retries", nullable = false)
+    private int retries = 0;
 
     // GETTER and SETTER
     
@@ -182,6 +186,15 @@ public abstract class AbstractMetadata extends AbstractAuditable
         this.lastScanned = lastScanned;
     }
 
+    @Override
+    public int getRetries() {
+        return retries;
+    }
+
+    public void setRetries(int retries) {
+        this.retries = retries;
+    }
+    
     @Override
     public final int getYear() {
         if (this instanceof VideoData) {
