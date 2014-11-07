@@ -521,9 +521,7 @@ public class ArtworkScannerService {
             located.setSource("file");
             located.setPriority(1);
             located.setStageFile(stageFile);
-            
-            int hash = stageFile.getFullPath().hashCode();
-            located.setHashCode(String.valueOf((hash < 0 ? 0 - hash : hash)));
+            located.setHashCode(stageFile.getArtworkHashCode());
 
             if (FileTools.isFileReadable(stageFile)) {
                 located.setStatus(StatusType.NEW);

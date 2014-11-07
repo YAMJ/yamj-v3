@@ -204,7 +204,12 @@ public class StageFile extends AbstractAuditable implements Serializable {
     public String getFileName() {
         return this.baseName + "." + this.extension;
     }
-    
+
+    public String getArtworkHashCode() {
+        int hash = this.getFullPath().hashCode();
+        return String.valueOf((hash < 0 ? 0 - hash : hash));
+    }
+
     // EQUALITY CHECKS
     
     @Override
