@@ -719,7 +719,8 @@ public class MediaImportService {
             String stripped = stageFile.getBaseName().toLowerCase();
             stripped = StringUtils.substring(stripped, 0, stripped.length()-7);
             
-            if (this.isLocatedInArtworkDirectory(stageFile)) {
+            String artworkFolderName = PropertyTools.getProperty("yamj3.folder.name.artwork");
+            if (FileTools.isWithinSpecialFolder(stageFile, artworkFolderName)) {
                 // artwork inside located artwork directory
                 artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stripped, stageFile.getStageDirectory().getLibrary());
                 // priority = 2 when inside artwork folder
@@ -739,7 +740,8 @@ public class MediaImportService {
             String stripped = stageFile.getBaseName().toLowerCase();
             stripped = StringUtils.substring(stripped, 0, stripped.length()-7);
             
-            if (this.isLocatedInArtworkDirectory(stageFile)) {
+            String artworkFolderName = PropertyTools.getProperty("yamj3.folder.name.artwork");
+            if (FileTools.isWithinSpecialFolder(stageFile, artworkFolderName)) {
                 // artwork inside located artwork directory
                 artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stripped, stageFile.getStageDirectory().getLibrary());
                 // priority = 2 when inside artwork folder
@@ -769,7 +771,8 @@ public class MediaImportService {
                 stripped = StringUtils.substring(stripped, 0, stripped.length()-7);
             }
             
-            if (this.isLocatedInArtworkDirectory(stageFile)) {
+            String artworkFolderName = PropertyTools.getProperty("yamj3.folder.name.artwork");
+            if (FileTools.isWithinSpecialFolder(stageFile, artworkFolderName)) {
                 // artwork inside located artwork directory
                 artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stripped, stageFile.getStageDirectory().getLibrary());
                 // priority = 2 when inside artwork folder
@@ -819,29 +822,6 @@ public class MediaImportService {
         return true;
     }
 
-    private boolean isLocatedInArtworkDirectory(StageFile stageFile) {
-        if (stageFile == null) {
-            return false;
-        }
-        
-        String artworkFolderName = PropertyTools.getProperty("yamj3.folder.name.artwork");
-        if (StringUtils.isBlank(artworkFolderName)) {
-            return false;
-        }
-        return this.isLocatedInArtworkDirectory(stageFile.getStageDirectory(), artworkFolderName);
-    }
-        
-    private boolean isLocatedInArtworkDirectory(StageDirectory directory, String artworkFolderName) {
-        if (directory == null) {
-            return false;
-        }
-        if (directory.getDirectoryName().equalsIgnoreCase(artworkFolderName)) {
-            return true;
-        }
-        return isLocatedInArtworkDirectory(directory.getParentDirectory(), artworkFolderName);
-    }
-    
-    
     @Transactional
     public void processWatched(long id) {
         StageFile watchedFile = stagingDao.getStageFile(id);

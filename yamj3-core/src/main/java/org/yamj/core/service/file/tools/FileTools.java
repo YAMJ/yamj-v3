@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.file.tools;
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -432,5 +434,20 @@ public class FileTools {
         }
 
         return newFilename;
+    }
+
+    public static boolean isWithinSpecialFolder(StageFile stageFile, String folderName) {
+        if (StringUtils.isBlank(folderName) || stageFile == null) {
+            return false;
+        }
+        StageDirectory directory = stageFile.getStageDirectory();
+        if (directory == null) {
+            return false;
+        }
+        if (directory.getDirectoryName().equalsIgnoreCase(folderName)) {
+            return true;
+        }
+        String dirFragment = FilenameUtils.separatorsToUnix("/"+folderName+"/");
+        return StringUtils.containsIgnoreCase(directory.getDirectoryPath(), dirFragment);
     }
 }

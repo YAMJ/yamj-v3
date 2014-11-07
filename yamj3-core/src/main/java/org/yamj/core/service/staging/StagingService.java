@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.staging;
 
+import org.yamj.core.service.file.tools.FileTools;
+
 import java.io.File;
 import java.math.BigInteger;
 import java.util.Calendar;
@@ -70,7 +72,7 @@ public class StagingService {
 
     @Transactional
     public void storeStageDirectory(StageDirectoryDTO stageDirectoryDTO, Library library) {
-        // normalize the directory path by using URI
+        // normalize the directory path
         String normalized = FilenameUtils.normalizeNoEndSeparator(stageDirectoryDTO.getPath(), true);
 
         StageDirectory stageDirectory = stagingDao.getStageDirectory(normalized, library);
@@ -245,10 +247,10 @@ public class StagingService {
         }
 
         // get the name used for WATCHED directories
-        String watchedDirName = PropertyTools.getProperty("yamj3.folder.name.watched", "watched");
+        String watchedFolderName = PropertyTools.getProperty("yamj3.folder.name.watched", "watched");
 
         List<StageFile> videoFiles;
-        if (watchedDirName.equalsIgnoreCase(watchedFile.getStageDirectory().getDirectoryName())) {
+        if (FileTools.isWithinSpecialFolder(watchedFile, watchedFolderName)) {
             // search in all directories of the library
             videoFiles = this.stagingDao.findStageFiles(FileType.VIDEO, videoBaseName, videoExtension, watchedFile.getStageDirectory().getLibrary());
         } else {

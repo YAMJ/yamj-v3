@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.dao;
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.math.BigInteger;
 import java.util.*;
 import org.hibernate.CacheMode;
@@ -417,18 +419,23 @@ public class StagingDao extends HibernateDao {
         return query.list();
     }
     
-    public BigInteger countWatchFiles(StageFile videoFile, String watchedDirName) {
+    public BigInteger countWatchFiles(StageFile videoFile, String folderName) {
+        String dirFragment = FilenameUtils.separatorsToUnix("/"+folderName+"/").toLowerCase();
+
         StringBuffer sb = new StringBuffer();
         sb.append("SELECT count(*) ");
         sb.append("FROM stage_file sf ");
-        sb.append("JOIN stage_directory sd ON sf.directory_id=sd.id and (sd.id=:dirId or lower(sd.directory_name)=:dirName) and sd.library_id=:libraryId ");
+        sb.append("JOIN stage_directory sd ON ");
+        sb.append(" sf.directory_id=sd.id and ");
+        sb.append(" (sd.id=:dirId or lower(sd.directory_name)=:dirName or lower(sd.directory_path) like '%").append(dirFragment).append("%') ");
+        sb.append(" and sd.library_id=:libraryId ");
         sb.append("WHERE sf.file_type=:watched ");
         sb.append("and (lower(sf.base_name)=:check1 or lower(sf.base_name)=:check2) ");
         sb.append("and sf.status != :deleted ");
             
         Query query = getSession().createSQLQuery(sb.toString());
         query.setLong("dirId", videoFile.getStageDirectory().getId());
-        query.setString("dirName", watchedDirName.toLowerCase());
+        query.setString("dirName", folderName.toLowerCase());
         query.setLong("libraryId", videoFile.getStageDirectory().getLibrary().getId());
         query.setString("watched", FileType.WATCHED.toString());
         query.setString("check1", videoFile.getBaseName().toLowerCase());
