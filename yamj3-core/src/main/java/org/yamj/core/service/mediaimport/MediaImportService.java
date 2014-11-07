@@ -403,20 +403,34 @@ public class MediaImportService {
             } else {
                 foundNfoFile.setStatus(StatusType.INVALID);
             }
-            this.stagingDao.updateEntity(stageFile);
+            this.stagingDao.updateEntity(foundNfoFile);
         }
 
+        // case 2: find matching files in NFO folder
+        String nfoFolderName = PropertyTools.getProperty("yamj3.folder.name.nfo");
+        for (StageFile nfoFile : this.stagingDao.findStageFilesInSpecialFolder(FileType.NFO, nfoFolderName, stageFile.getStageDirectory().getLibrary(), searchName)) {
+            nfoFiles.put(nfoFile, Integer.valueOf(2));
+            
+            // change status for PRIO-2-NFO
+            if (FileTools.isFileScannable(nfoFile)) {
+                nfoFile.setStatus(StatusType.DONE);
+            } else {
+                nfoFile.setStatus(StatusType.INVALID);
+            }
+            this.stagingDao.updateEntity(nfoFile);
+        }
+        
         if (isTvShow) {
             // case 2: tvshow.nfo in same directory as video
             foundNfoFile = this.stagingDao.findNfoFile(TVSHOW_NFO_NAME, directory);
             if (foundNfoFile != null && !nfoFiles.containsKey(foundNfoFile)) {
-                nfoFiles.put(foundNfoFile, Integer.valueOf(2));
+                nfoFiles.put(foundNfoFile, Integer.valueOf(3));
             }
 
             // case 3: tvshow.nfo in parent directory
             foundNfoFile = this.stagingDao.findNfoFile(TVSHOW_NFO_NAME, directory.getParentDirectory());
             if (foundNfoFile != null && !nfoFiles.containsKey(foundNfoFile)) {
-                nfoFiles.put(foundNfoFile, Integer.valueOf(3));
+                nfoFiles.put(foundNfoFile, Integer.valueOf(4));
             }
         }
         
@@ -515,7 +529,7 @@ public class MediaImportService {
 
         // process new NFO
         boolean found = processNfoFile(stageFile);
-        if (found || !CollectionUtils.isNotEmpty(stageFile.getNfoRelations())) {
+        if (found || CollectionUtils.isNotEmpty(stageFile.getNfoRelations())) {
             stageFile.setStatus(StatusType.DONE);
         } else {
             stageFile.setStatus(StatusType.NOTFOUND);
@@ -586,7 +600,15 @@ public class MediaImportService {
         Map<VideoData,Integer> videoFiles = new HashMap<VideoData,Integer>();
         List<VideoData> videoDatas = null;
         
-        if (stageFile.getBaseName().equalsIgnoreCase(stageFile.getStageDirectory().getDirectoryName())) {
+        String nfoFolderName = PropertyTools.getProperty("yamj3.folder.name.nfo");
+        if (FileTools.isWithinSpecialFolder(stageFile, nfoFolderName)) {
+            
+            // case 2: video file has same base name in library
+            videoDatas = this.stagingDao.findVideoDatas(stageFile.getBaseName(), stageFile.getStageDirectory().getLibrary());
+            this.attachVideoDataToNFO(videoFiles, videoDatas, 2);
+            
+        } else if (stageFile.getBaseName().equalsIgnoreCase(stageFile.getStageDirectory().getDirectoryName())) {
+            
             if (isBlurayOrDvdFolder(stageFile.getStageDirectory())) {
                 // ignore NFO in BDMV or DVD folder; should be placed in parent directory 
                 return videoFiles;
@@ -602,7 +624,7 @@ public class MediaImportService {
                 return videoFiles;
             }
                 
-            // filter out bluray and DVD folders from child directories
+            // filter out BluRay and DVD folders from child directories
             List<StageDirectory> blurayOrDvdFolders = new ArrayList<StageDirectory>();
             for (StageDirectory directory : childDirectories) {
                 if (this.isBlurayOrDvdFolder(directory)) {
@@ -611,7 +633,7 @@ public class MediaImportService {
             }
             childDirectories.removeAll(blurayOrDvdFolders);
 
-            // case 1: bluray/DVD handling
+            // case 1: BluRay/DVD handling
             if (CollectionUtils.isNotEmpty(blurayOrDvdFolders)) {
                 for (StageDirectory folder : blurayOrDvdFolders) {
                     videoDatas = this.stagingDao.findVideoDatas(folder);
@@ -630,16 +652,19 @@ public class MediaImportService {
             }
             
         } else if (TVSHOW_NFO_NAME.equals(stageFile.getBaseName())) {
-            // case 2: tvshow.nfo in same directory as video
-            videoDatas = this.stagingDao.findVideoDatas(stageFile.getStageDirectory());
-            this.attachVideoDataToNFO(videoFiles, videoDatas, 2, true);
             
-            // case 3: tvshow.nfo in parent directory (so search in child directories)
+            // case 3: tvshow.nfo in same directory as video
+            videoDatas = this.stagingDao.findVideoDatas(stageFile.getStageDirectory());
+            this.attachVideoDataToNFO(videoFiles, videoDatas, 3, true);
+            
+            // case 4: tvshow.nfo in parent directory (so search in child directories)
             List<StageDirectory> childDirectories = this.stagingDao.getChildDirectories(stageFile.getStageDirectory());
             videoDatas = this.stagingDao.findVideoDatas(childDirectories);
-            this.attachVideoDataToNFO(videoFiles, videoDatas, 3, true);
+            this.attachVideoDataToNFO(videoFiles, videoDatas, 4, true);
+            
         } else {
-            // case 1: Video file has same base name in same directory
+            
+            // case 1: video file has same base name in same directory
             videoDatas = this.stagingDao.findVideoDatas(stageFile.getBaseName(), stageFile.getStageDirectory());
             this.attachVideoDataToNFO(videoFiles, videoDatas, 1);
         }

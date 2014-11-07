@@ -228,15 +228,13 @@ public class StagingService {
         return true;
     }
 
-    @Transactional
     public boolean isWatchedVideoFile(StageFile videoFile) {
         // get the name used for WATCHED directories
-        String watchedDirName = PropertyTools.getProperty("yamj3.folder.name.watched", "watched");
-        BigInteger count = this.stagingDao.countWatchFiles(videoFile, watchedDirName);
+        String watchedFolderName = PropertyTools.getProperty("yamj3.folder.name.watched");
+        BigInteger count = this.stagingDao.countWatchedFiles(videoFile, watchedFolderName);
         return (count != null && count.intValue()>0);
     }
     
-    @Transactional
     public List<StageFile> findWatchedVideoFiles(StageFile watchedFile) {
         String videoBaseName = FilenameUtils.getBaseName(watchedFile.getBaseName());
         String videoExtension = FilenameUtils.getExtension(watchedFile.getBaseName());
@@ -247,7 +245,7 @@ public class StagingService {
         }
 
         // get the name used for WATCHED directories
-        String watchedFolderName = PropertyTools.getProperty("yamj3.folder.name.watched", "watched");
+        String watchedFolderName = PropertyTools.getProperty("yamj3.folder.name.watched");
 
         List<StageFile> videoFiles;
         if (FileTools.isWithinSpecialFolder(watchedFile, watchedFolderName)) {

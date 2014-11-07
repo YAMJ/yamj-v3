@@ -159,6 +159,7 @@ public class CommonStorageService {
         
         for (ArtworkLocated located : stageFile.getArtworkLocated()) {
             Artwork artwork = located.getArtwork();
+            artwork.getArtworkLocated().remove(located);
             this.delete(artwork, located, filesToDelete);
 
             // if no located artwork exists anymore then set status of artwork to NEW 
@@ -327,7 +328,6 @@ public class CommonStorageService {
             filesToDelete.add(this.fileStorageService.getStorageDir(storageType, filename));
         }
         
-        artwork.getArtworkLocated().remove(located);
         this.stagingDao.deleteEntity(located);
     }
 

@@ -447,7 +447,10 @@ public class FileTools {
         if (directory.getDirectoryName().equalsIgnoreCase(folderName)) {
             return true;
         }
-        String dirFragment = FilenameUtils.separatorsToUnix("/"+folderName+"/");
-        return StringUtils.containsIgnoreCase(directory.getDirectoryPath(), dirFragment);
+        return StringUtils.containsIgnoreCase(directory.getDirectoryPath(), getPathFragment(folderName));
+    }
+    
+    public static String getPathFragment(String folderName) {
+        return  FilenameUtils.separatorsToUnix("/"+folderName+"/");
     }
 }
