@@ -473,4 +473,13 @@ public class CommonStorageService {
         sb.append("AND not exists (select 1 from series_genres sg where sg.genre_id=id) ");
         return this.stagingDao.executeSqlUpdate(sb);
     }
+
+    @Transactional
+    public int deleteOrphanCertifications() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("DELETE FROM certification ");
+        sb.append("WHERE not exists (select 1 from videodata_certifications vc where vc.cert_id=id) ");
+        sb.append("AND not exists (select 1 from series_certifications sc where sc.cert_id=id) ");
+        return this.stagingDao.executeSqlUpdate(sb);
+    }
 }

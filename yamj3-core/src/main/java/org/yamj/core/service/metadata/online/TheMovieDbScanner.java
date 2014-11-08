@@ -238,11 +238,11 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             }
         }
 
-        if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
-            if (CollectionUtils.isNotEmpty(moviedb.getGenres())) {
+        if (CollectionUtils.isNotEmpty(moviedb.getGenres())) {
+            if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
                 Set<String> genreNames = new HashSet<String>();
                 for (com.omertron.themoviedbapi.model.Genre genre : moviedb.getGenres()) {
-                    if (StringUtils.isBlank(genre.getName())) {
+                    if (StringUtils.isNotBlank(genre.getName())) {
                         genreNames.add(StringUtils.trim(genre.getName()));
                     }
                 }
@@ -250,11 +250,11 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             }
         }
 
-        if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
-            if (CollectionUtils.isNotEmpty(moviedb.getProductionCompanies())) {
+        if (CollectionUtils.isNotEmpty(moviedb.getProductionCompanies())) {
+            if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
                 Set<String> studioNames = new HashSet<String>();
                 for (ProductionCompany company : moviedb.getProductionCompanies()) {
-                    if (StringUtils.isBlank(company.getName())) {
+                    if (StringUtils.isNotBlank(company.getName())) {
                         studioNames.add(StringUtils.trim(company.getName()));
                     }
                 }

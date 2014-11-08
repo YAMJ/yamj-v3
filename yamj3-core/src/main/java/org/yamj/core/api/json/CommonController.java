@@ -36,6 +36,7 @@ import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.BoxedSet;
+import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -168,7 +169,6 @@ public class CommonController {
         }
         return status;
     }
-
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Studio Methods">
@@ -204,6 +204,21 @@ public class CommonController {
     }
     //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Certification Methods">
+    @RequestMapping(value = "/certifications/list", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperList<Certification> getCertifications(@ModelAttribute("options") OptionsId options) {
+        LOG.info("Getting certifications list with {}", options.toString());
+
+        ApiWrapperList<Certification> wrapper = new ApiWrapperList<Certification>();
+        wrapper.setOptions(options);
+        List<Certification> results = jsonApiStorageService.getCertifications(wrapper);
+        wrapper.setResults(results);
+        wrapper.setStatusCheck();
+        return wrapper;
+    }
+    //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="Boxed-Set Methods">
     @RequestMapping(value = "/boxedset/{name}", method = RequestMethod.GET)
     @ResponseBody

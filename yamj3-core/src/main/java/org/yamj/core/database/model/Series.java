@@ -22,6 +22,16 @@
  */
 package org.yamj.core.database.model;
 
+import java.util.HashMap;
+import javax.persistence.Transient;
+import java.util.Map;
+import org.apache.commons.collections.MapUtils;
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import org.hibernate.annotations.ForeignKey;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.*;
@@ -97,6 +107,13 @@ public class Series extends AbstractMetadata {
     private Set<Genre> genres = new HashSet<Genre>(0);
 
     @ManyToMany
+    @ForeignKey(name = "FK_SERIESCERTS_SERIES", inverseName = "FK_SERIESCERTS_CERTIFICATION")
+    @JoinTable(name = "series_certifications",
+               joinColumns = @JoinColumn(name = "series_id"),
+               inverseJoinColumns = @JoinColumn(name = "cert_id"))
+    private Set<Certification> certifications = new HashSet<Certification>(0);
+
+    @ManyToMany
     @ForeignKey(name = "FK_SERIESSTUDIOS_SERIES", inverseName = "FK_SERIESSTUDIOS_STUDIO")
     @JoinTable(name = "series_studios",
                joinColumns = @JoinColumn(name = "series_id"),
@@ -104,11 +121,14 @@ public class Series extends AbstractMetadata {
     private Set<Studio> studios = new HashSet<Studio>(0);
 
     @Transient
-    private Set<String> genreNames = new LinkedHashSet<String>(0);
+    private Set<String> genreNames;
     
     @Transient
-    private Set<String> studioNames = new LinkedHashSet<String>(0);
+    private Set<String> studioNames;
 
+    @Transient
+    private Map<String,String> certificationInfos = new HashMap<String,String>(0);
+    
     @Transient
     private Map<String,String> posterURLS = new HashMap<String,String>(0);
     
@@ -254,6 +274,14 @@ public class Series extends AbstractMetadata {
         this.genres = genres;
     }
 
+    public Set<Certification> getCertifications() {
+        return certifications;
+    }
+
+    public void setCertifications(Set<Certification> certifications) {
+        this.certifications = certifications;
+    }
+    
     public Set<Studio> getStudios() {
         return studios;
     }
@@ -286,6 +314,31 @@ public class Series extends AbstractMetadata {
         }
     }
 
+    public Map<String,String> getCertificationInfos() {
+        return certificationInfos;
+    }
+
+    public void setCertificationInfos(Map<String,String> certificationInfos) {
+        if (MapUtils.isNotEmpty(certificationInfos)) {
+            for (Entry<String,String> entry : certificationInfos.entrySet()) {
+                this.addCertificationInfo(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    public void addCertificationInfo(String country, String certificate) {
+        if (StringUtils.isNotBlank(country) && StringUtils.isNotBlank(certificate)) {
+            // check if country already present
+            for (String stored : this.certificationInfos.keySet()) {
+                if (country.equalsIgnoreCase(stored)) {
+                    // certificate for country already present
+                    return;
+                }
+            }
+            this.certificationInfos.put(country, certificate);
+        }
+    }
+    
     public Map<String, String> getPosterURLS() {
         return posterURLS;
     }

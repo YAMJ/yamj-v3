@@ -171,15 +171,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
             Date releaseDate = MetadataTools.parseToDate(movieInfos.getReleaseDate());
             videoData.setReleaseDate(releaseDate, SCANNER_ID);
         }
-        
-        if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
-            String studioName = movieInfos.getDistributor();
-            if (studioName != null) {
-                Set<String> studioNames = Collections.singleton(studioName);
-                videoData.setStudioNames(studioNames, SCANNER_ID);
-            }
-        }
-        
+                
         if (OverrideTools.checkOverwriteCountry(videoData, SCANNER_ID)) {
             Set<String> nationalities = movieInfos.getNationalities();
             if (CollectionUtils.isNotEmpty(nationalities)) {
@@ -193,7 +185,15 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
             videoData.setGenreNames(movieInfos.getGenres(), SCANNER_ID);
         }
 
-        // should be a french certification
+        if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
+            String studioName = movieInfos.getDistributor();
+            if (StringUtils.isNotBlank(studioName)) {
+                Set<String> studioNames = Collections.singleton(studioName);
+                videoData.setStudioNames(studioNames, SCANNER_ID);
+            }
+        }
+        
+        // certification
         videoData.addCertificationInfo("France", movieInfos.getCertification());
 
         // allocine rating
@@ -456,7 +456,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
                     allocineId = String.valueOf(episode.getCode());
                 }
                 videoData.setSourceDbId(SCANNER_ID, allocineId);
-                
+
                 List<CastMember> castMembers = null;
                 EpisodeInfos episodeInfos = this.allocineApiWrapper.getEpisodeInfos(allocineId);
                 if (episodeInfos == null) {
@@ -474,7 +474,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
                     // use members from episode
                     castMembers = episodeInfos.getEpisode().getCastMember();
                 }
-                
+
                 if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
                     videoData.setTitle(episodeInfos.getTitle(), SCANNER_ID);
                 }

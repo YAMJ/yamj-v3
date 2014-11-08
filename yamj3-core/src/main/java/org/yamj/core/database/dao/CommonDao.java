@@ -22,7 +22,9 @@
  */
 package org.yamj.core.database.dao;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
 import org.springframework.stereotype.Repository;
@@ -46,7 +48,7 @@ public class CommonDao extends HibernateDao {
     }
 
     @Transactional
-    public synchronized void storeNewGenreXML(String name, String targetXml) {
+    public synchronized void storeNewGenre(String name, String targetXml) {
         Genre genre = this.getGenre(name);
         if (genre == null) {
             // create new genre
@@ -118,18 +120,71 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
     }
 
-    public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
+    public Studio getStudio(String name) {
+        return getByNameCaseInsensitive(Studio.class, name);
+    }
+
+    @Transactional
+    public synchronized void storeNewStudio(String name) {
+        Studio studio = this.getStudio(name);
+        if (studio == null) {
+            // create new studio
+            studio = new Studio();
+            studio.setName(name);
+            this.saveEntity(studio);
+        }
+    }
+    
+    public List<Studio> getStudios(ApiWrapperList<Studio> wrapper) {
         OptionsId options = (OptionsId) wrapper.getOptions();
         
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT id, certification_text AS certification, country");
-        sqlScalars.addToSql("FROM certification");
+        sqlScalars.addToSql("SELECT id, name FROM studio");
         sqlScalars.addToSql(options.getSearchString(true));
         sqlScalars.addToSql(options.getSortString());
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
-        sqlScalars.addScalar("certification", StringType.INSTANCE);
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+
+        return executeQueryWithTransform(Studio.class, sqlScalars, wrapper);
+    }
+    
+    public Certification getCertification(String country, String certificate) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("from Certification ");
+        sb.append("where lower(country) = :country ");
+        sb.append("and lower(certificate) = :certificate ");
+        
+        Map<String, Object> params = new HashMap<String,Object>();
+        params.put("country", country.toLowerCase());
+        params.put("certificate", certificate.toLowerCase());
+        
+        return (Certification)this.findUniqueByNamedParameters(sb, params);
+    }
+    
+    @Transactional
+    public synchronized void storeNewCertification(String country, String certificate) {
+        Certification certification = this.getCertification(country, certificate);
+        if (certification == null) {
+            // create new certification
+            certification = new Certification();
+            certification.setCountry(country);
+            certification.setCertificate(certificate);
+            this.saveEntity(certification);
+        }
+    }
+
+    public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
+        OptionsId options = (OptionsId) wrapper.getOptions();
+        
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT id, country, certificate FROM certification");
+        sqlScalars.addToSql(options.getSearchString(true));
+        sqlScalars.addToSql(options.getSortString());
+
+        sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("country", StringType.INSTANCE);
+        sqlScalars.addScalar("certificate", StringType.INSTANCE);
 
         return executeQueryWithTransform(Certification.class, sqlScalars, wrapper);
     }
@@ -151,9 +206,9 @@ public class CommonDao extends HibernateDao {
 
     public List<BoxedSet> getBoxedSets(ApiWrapperList<BoxedSet> wrapper) {
         OptionsId options = (OptionsId) wrapper.getOptions();
+        
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT id, name");
-        sqlScalars.addToSql("FROM boxed_set");
+        sqlScalars.addToSql("SELECT id, name FROM boxed_set");
         sqlScalars.addToSql(options.getSearchString(true));
         sqlScalars.addToSql(options.getSortString());
 
@@ -161,34 +216,5 @@ public class CommonDao extends HibernateDao {
         sqlScalars.addScalar("name", StringType.INSTANCE);
 
         return executeQueryWithTransform(BoxedSet.class, sqlScalars, wrapper);
-    }
-
-    public Studio getStudio(String name) {
-        return getByNameCaseInsensitive(Studio.class, name);
-    }
-
-    @Transactional
-    public synchronized void storeNewStudio(String name) {
-        Studio studio = this.getStudio(name);
-        if (studio == null) {
-            // create new studio
-            studio = new Studio();
-            studio.setName(name);
-            this.saveEntity(studio);
-        }
-    }
-    
-    public List<Studio> getStudios(ApiWrapperList<Studio> wrapper) {
-        OptionsId options = (OptionsId) wrapper.getOptions();
-        SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT id, name");
-        sqlScalars.addToSql("FROM studio");
-        sqlScalars.addToSql(options.getSearchString(true));
-        sqlScalars.addToSql(options.getSortString());
-
-        sqlScalars.addScalar("id", LongType.INSTANCE);
-        sqlScalars.addScalar("name", StringType.INSTANCE);
-
-        return executeQueryWithTransform(Studio.class, sqlScalars, wrapper);
     }
 }

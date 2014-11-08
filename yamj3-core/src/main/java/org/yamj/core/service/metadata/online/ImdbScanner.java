@@ -27,6 +27,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -209,21 +210,21 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 videoData.setCountry(parseCountry(xml), SCANNER_ID);
             }
 
-            // STUDIOS
-            if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
-                videoData.setStudioNames(parseStudios(imdbId), SCANNER_ID);
-            }
-
             // GENRES
             if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
                 videoData.setGenreNames(parseGenres(xml), SCANNER_ID);
             }
 
-            // parse release data
-            parseReleaseData(videoData, imdbId);
-
+            // STUDIOS
+            if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
+                videoData.setStudioNames(parseStudios(imdbId), SCANNER_ID);
+            }
+            
             // CERTIFICATIONS
-            parseCertifications(videoData, imdbId);
+            videoData.setCertificationInfos(parseCertifications(imdbId));
+            
+            // RELEASE DATE
+            parseReleaseData(videoData, imdbId);
 
             // CAST and CREW
             parseCastCrew(videoData, imdbId);
@@ -282,17 +283,20 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 series.setOutline(parseOutline(xml), SCANNER_ID);
             }
 
-            // STUDIOS
-            if (OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
-                series.setStudioNames(parseStudios(imdbId), SCANNER_ID);
-            }
-
             // GENRES
             if (OverrideTools.checkOverwriteGenres(series, SCANNER_ID)) {
                 series.setGenreNames(parseGenres(xml), SCANNER_ID);
             }
 
-            // parse release data
+            // STUDIOS
+            if (OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
+                series.setStudioNames(parseStudios(imdbId), SCANNER_ID);
+            }
+
+            // CERTIFICATIONS
+            series.setCertificationInfos(parseCertifications(imdbId));
+
+            // RELEASE DATE
             parseReleaseData(series, imdbId);
             
             // scan seasons
@@ -715,34 +719,45 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return studios;
     }
 
-    private void parseCertifications(VideoData videoData, String imdbId) {
+    private Map<String,String> parseCertifications(String imdbId) {
+        Map<String,String> certificationInfos = new HashMap<String,String>();
+        
         try {
             // use the default site definition for the certification, because the local versions don't have the parentalguide page
             String xml = httpClient.requestContent(getImdbUrl(imdbId, "parentalguide#certification"), charset);
 
-            String mpaa = HTMLTools.extractTag(xml, "<h5><a href=\"/mpaa\">MPAA</a>:</h5>", 1);
-            if (StringUtils.isNotBlank(mpaa)) {
-                String key = "Rated ";
-                int pos = mpaa.indexOf(key);
-                if (pos != -1) {
-                    int start = key.length();
-                    pos = mpaa.indexOf(" on appeal for ", start);
-                    if (pos == -1) {
-                        pos = mpaa.indexOf(" for ", start);
-                    }
+            if (this.configServiceWrapper.getBooleanProperty("yamj3.certification.mpaa", false)) {
+                String mpaa = HTMLTools.extractTag(xml, "<h5><a href=\"/mpaa\">MPAA</a>:</h5>", 1);
+                if (StringUtils.isNotBlank(mpaa)) {
+                    String key = "Rated ";
+                    int pos = mpaa.indexOf(key);
                     if (pos != -1) {
-                        videoData.addCertificationInfo("MPAA", mpaa.substring(start, pos));
+                        int start = key.length();
+                        pos = mpaa.indexOf(" on appeal for ", start);
+                        if (pos == -1) {
+                            pos = mpaa.indexOf(" for ", start);
+                        }
+                        if (pos != -1) {
+                            certificationInfos.put("MPAA", mpaa.substring(start, pos));
+                        }
                     }
                 }
             }
-
-            String preferredCountry = this.configServiceWrapper.getProperty("yamj3.scan.preferredCountry", "USA");
-            String certification = getPreferredValue(HTMLTools.extractTags(xml, HTML_H5_START + "Certification" + HTML_H5_END, HTML_DIV_END,
-                    "<a href=\"/search/title?certificates=", HTML_A_END), true, preferredCountry);
-            videoData.addCertificationInfo(preferredCountry, certification);
+            
+            List<String> countries = this.configServiceWrapper.getCertificationCountries();
+            if (CollectionUtils.isNotEmpty(countries)) {
+                List<String> tags = HTMLTools.extractTags(xml, HTML_H5_START + "Certification" + HTML_H5_END, HTML_DIV_END,
+                                "<a href=\"/search/title?certificates=", HTML_A_END);
+                for (String country : countries) {
+                    String certificate = getPreferredValue(tags, true, country);
+                    certificationInfos.put(country, certificate);
+                }
+            }
         } catch (Exception ex) {
             LOG.trace("Failed to retrieve certification", ex);
         }
+        
+        return certificationInfos;
     }
     
     /**

@@ -24,13 +24,13 @@ package org.yamj.core.api.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.type.ArtworkType;
 
 /**
@@ -56,6 +56,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private Long episode;
     private Boolean watched;
     private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
+    private List<Certification> certifications = new ArrayList<Certification>();
     private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
     private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
 
@@ -94,6 +95,14 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public int getGenreCount() {
         return genres.size();
+    }
+    
+    public List<Certification> getCertifications() {
+        return certifications;
+    }
+
+    public int getCertificationCount() {
+        return certifications.size();
     }
 
     public String getOutline() {
@@ -181,6 +190,10 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         this.genres = genres;
     }
 
+    public void setCertifications(List<Certification> certifications) {
+        this.certifications = certifications;
+    }
+    
     public void setOutline(String outline) {
         this.outline = outline;
     }

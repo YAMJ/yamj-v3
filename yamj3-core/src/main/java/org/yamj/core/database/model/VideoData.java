@@ -119,13 +119,20 @@ public class VideoData extends AbstractMetadata {
                joinColumns = @JoinColumn(name = "data_id"),
                inverseJoinColumns = @JoinColumn(name = "genre_id"))
     private Set<Genre> genres = new HashSet<Genre>(0);
-    
+
     @ManyToMany
     @ForeignKey(name = "FK_DATASTUDIOS_VIDEODATA", inverseName = "FK_DATASTUDIOS_STUDIO")
     @JoinTable(name = "videodata_studios",
                joinColumns = @JoinColumn(name = "data_id"),
                inverseJoinColumns = @JoinColumn(name = "studio_id"))
     private Set<Studio> studios = new HashSet<Studio>(0);
+    
+    @ManyToMany
+    @ForeignKey(name = "FK_DATACERTS_VIDEODATA", inverseName = "FK_DATACERTS_CERTIFICATION")
+    @JoinTable(name = "videodata_certifications",
+               joinColumns = @JoinColumn(name = "data_id"),
+               inverseJoinColumns = @JoinColumn(name = "cert_id"))
+    private Set<Certification> certifications = new HashSet<Certification>(0);
     
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_VIDEODATA_SEASON")
@@ -145,29 +152,26 @@ public class VideoData extends AbstractMetadata {
     private List<BoxedSetOrder> boxedSets = new ArrayList<BoxedSetOrder>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
-    private List<Certification> certifications = new ArrayList<Certification>(0);
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
     
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
     private List<NfoRelation> nfoRelations = new ArrayList<NfoRelation>(0);
+        
+    @Transient
+    private Set<String> genreNames;
     
     @Transient
-    private Set<CreditDTO> creditDTOS = new LinkedHashSet<CreditDTO>(0);
-    
+    private Set<String> studioNames;
+
     @Transient
-    private Set<String> genreNames = new LinkedHashSet<String>(0);
-    
-    @Transient
-    private Set<String> studioNames = new LinkedHashSet<String>(0);
+    private Map<String,String> certificationInfos = new HashMap<String,String>(0);
 
     @Transient
     private Map<String,Integer> setInfos = new HashMap<String,Integer>(0);
 
     @Transient
-    private Map<String,String> certificationInfos = new HashMap<String,String>(0);
-
+    private Set<CreditDTO> creditDTOS = new LinkedHashSet<CreditDTO>(0);
+    
     @Transient
     private Map<String,String> posterURLS = new HashMap<String,String>(0);
     
@@ -336,18 +340,6 @@ public class VideoData extends AbstractMetadata {
         }
     }
     
-    public List<Certification> getCertifications() {
-        return certifications;
-    }
-
-    private void setCertifications(List<Certification> certifications) {
-        this.certifications = certifications;
-    }
-
-    public void addCertification(Certification certification) {
-        this.certifications.add(certification);
-    }
-
     private Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
@@ -385,6 +377,14 @@ public class VideoData extends AbstractMetadata {
 
     public void setGenres(Set<Genre> genres) {
         this.genres = genres;
+    }
+    
+    public Set<Certification> getCertifications() {
+        return certifications;
+    }
+
+    public void setCertifications(Set<Certification> certifications) {
+        this.certifications = certifications;
     }
     
     public Set<Studio> getStudios() {
@@ -538,10 +538,35 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
+    public Map<String,String> getCertificationInfos() {
+        return certificationInfos;
+    }
+
+    public void setCertificationInfos(Map<String,String> certificationInfos) {
+        if (MapUtils.isNotEmpty(certificationInfos)) {
+            for (Entry<String,String> entry : certificationInfos.entrySet()) {
+                this.addCertificationInfo(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    public void addCertificationInfo(String country, String certificate) {
+        if (StringUtils.isNotBlank(country) && StringUtils.isNotBlank(certificate)) {
+            // check if country already present
+            for (String stored : this.certificationInfos.keySet()) {
+                if (country.equalsIgnoreCase(stored)) {
+                    // certificate for country already present
+                    return;
+                }
+            }
+            this.certificationInfos.put(country, certificate);
+        }
+    }
+
     public Map<String,Integer> getSetInfos() {
         return setInfos;
     }
-
+    
     public void addSetInfo(String setName, Integer ordering) {
         if (StringUtils.isNotBlank(setName)) {
             this.setInfos.put(setName, ordering);
@@ -551,22 +576,6 @@ public class VideoData extends AbstractMetadata {
     public void addSetInfos(Map<String,Integer> setInfos) {
         if (MapUtils.isNotEmpty(setInfos)) {
             this.setInfos.putAll(setInfos);
-        }
-    }
-
-    public Map<String,String> getCertificationInfos() {
-        return certificationInfos;
-    }
-
-    public void addCertificationInfo(String country, String certification) {
-        if (StringUtils.isNotBlank(country) && StringUtils.isNotBlank(certification)) {
-            this.certificationInfos.put(country, certification);
-        }
-    }
-
-    public void addCertificationInfos(Map<String,String> certificationInfos) {
-        if (MapUtils.isNotEmpty(certificationInfos)) {
-            this.certificationInfos.putAll(certificationInfos);
         }
     }
 

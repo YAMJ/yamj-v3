@@ -22,15 +22,15 @@
  */
 package org.yamj.core.api.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.yamj.core.database.model.Certification;
 
 /**
  * @author stuart.boston
@@ -51,8 +51,9 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     private String cacheFilename;
     private String cacheDir;
     private String videoimage;
-    private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
     private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
+    private List<Certification> certifications = new ArrayList<Certification>();
+    private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
 
     //<editor-fold defaultstate="collapsed" desc="Setter Methods">
     public void setSeriesId(Long seriesId) {
@@ -109,12 +110,16 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
         this.cacheDir = cacheDir;
     }
 
-    public void setFiles(List<ApiFileDTO> files) {
-        this.files = files;
-    }
-
     public void setGenres(List<ApiGenreDTO> genres) {
         this.genres = genres;
+    }
+    
+    public void setCertifications(List<Certification> certifications) {
+        this.certifications = certifications;
+    }
+    
+    public void setFiles(List<ApiFileDTO> files) {
+        this.files = files;
     }
     //</editor-fold>
 
@@ -162,12 +167,16 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
         return videoimage;
     }
 
-    public List<ApiFileDTO> getFiles() {
-        return files;
-    }
-    
     public List<ApiGenreDTO> getGenres() {
         return genres;
+    }
+
+    public List<Certification> getCertifications() {
+        return certifications;
+    }
+    
+    public List<ApiFileDTO> getFiles() {
+        return files;
     }
     //</editor-fold>
 }

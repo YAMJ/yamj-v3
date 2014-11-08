@@ -127,6 +127,13 @@ public class JsonApiStorageService {
     }
     //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Certification Methods">
+    @Transactional(readOnly = true)
+    public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
+        return commonDao.getCertifications(wrapper);
+    }
+    //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="Boxed Set Methods">
     @Transactional(readOnly = true)
     public BoxedSet getBoxedSet(Serializable id) {

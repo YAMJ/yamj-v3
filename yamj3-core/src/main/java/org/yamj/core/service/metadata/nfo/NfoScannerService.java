@@ -94,32 +94,39 @@ public class NfoScannerService {
             if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
                 videoData.setTitle(infoDTO.getTitle(), SCANNER_ID);
             }
+            
             if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID)) {
                 videoData.setTitleOriginal(infoDTO.getTitleOriginal(), SCANNER_ID);
             }
+            
             if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID)) {
                 videoData.setPublicationYear(infoDTO.getYear(), SCANNER_ID);
             }
+            
             if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
                 videoData.setReleaseDate(infoDTO.getReleaseDate(), SCANNER_ID);
             }
+            
             if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
                 videoData.setPlot(infoDTO.getPlot(), SCANNER_ID);
             }
+            
             if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
                 videoData.setOutline(infoDTO.getOutline(), SCANNER_ID);
             }
+            
             if (OverrideTools.checkOverwriteTagline(videoData, SCANNER_ID)) {
                 videoData.setTagline(infoDTO.getTagline(), SCANNER_ID);
             }
+            
             if (OverrideTools.checkOverwriteQuote(videoData, SCANNER_ID)) {
                 videoData.setQuote(infoDTO.getQuote(), SCANNER_ID);
             }
-            if (CollectionUtils.isNotEmpty(infoDTO.getGenres())) {
-                if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
-                    videoData.setGenreNames(infoDTO.getGenres(), SCANNER_ID);
-                }
+            
+            if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
+                videoData.setGenreNames(infoDTO.getGenres(), SCANNER_ID);
             }
+            
             if (StringUtils.isNotBlank(infoDTO.getCompany())) {
                 if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
                     Set<String> studioNames = Collections.singleton(infoDTO.getCompany());
@@ -127,11 +134,11 @@ public class NfoScannerService {
                 }
             }
 
+            // add certifications
+            videoData.setCertificationInfos(infoDTO.getCertificationInfos());
+
             // add boxed sets
             videoData.addSetInfos(infoDTO.getSetInfos());
-
-            // add certifications
-            videoData.addCertificationInfos(infoDTO.getCertificationInfos());
 
             // add credit DTOs for update in database
             videoData.addCreditDTOS(infoDTO.getCredits());
@@ -222,6 +229,9 @@ public class NfoScannerService {
                 series.setStartYear(infoDTO.getYear(), SCANNER_ID);
             }
 
+            // add certifications
+            series.setCertificationInfos(infoDTO.getCertificationInfos());
+            
             for (Season season : series.getSeasons()) {
                 // remove override source for NFO
                 season.removeOverrideSource(SCANNER_ID);

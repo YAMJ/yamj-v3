@@ -453,6 +453,8 @@ public final class InfoReader {
      * @param dto
      */
     private void parseRuntime(Element eCommon, InfoDTO dto) {
+        // TODO
+        /*
         String runtime = DOMHelper.getValueFromElement(eCommon, "runtime");
 
         // Save the first runtime to use if no preferred one is found
@@ -472,6 +474,7 @@ public final class InfoReader {
             }
         }
         dto.setRuntime(prefRuntime);
+        */
     }
 
     /**
@@ -481,50 +484,45 @@ public final class InfoReader {
      * @param movie
      */
     private void parseCertification(Element eCommon, InfoDTO dto) {
-        boolean certFromMPAA = this.configServiceWrapper.getBooleanProperty("yamj3.scan.certificationFromMPAA", false);
-        
+        boolean certificationMPAA = this.configServiceWrapper.getBooleanProperty("yamj3.certification.mpaa", false);
         String tempCert;
-        if (certFromMPAA) {
+        
+        if (certificationMPAA) {
             tempCert = DOMHelper.getValueFromElement(eCommon, "mpaa");
             if (StringUtils.isNotBlank(tempCert)) {
                 String mpaa = StringTools.processMpaaCertification(tempCert);
-                dto.addCertificatioInfo("MPAA", mpaa);
+                dto.addCertificatioInfo("MPAA", StringUtils.trimToNull(mpaa));
             }
-        } else {
-            tempCert = DOMHelper.getValueFromElement(eCommon, "certification");
-            if (StringUtils.isNotBlank(tempCert)) {
-                String certCountry = null;
-                String preferredCountry = this.configServiceWrapper.getProperty("yamj3.scan.preferredCountry", "USA");
-                int countryPos = tempCert.lastIndexOf(preferredCountry);
+        }
+
+        tempCert = DOMHelper.getValueFromElement(eCommon, "certification");
+        if (StringUtils.isNotBlank(tempCert)) {
+            // scan for given countries
+            List<String> countries = this.configServiceWrapper.getCertificationCountries();
+            for (String country : countries) {
+                int countryPos = StringUtils.lastIndexOfIgnoreCase(tempCert, country);
                 if (countryPos >= 0) {
                     // We've found the country, so extract just that tag
-                    tempCert = tempCert.substring(countryPos);
-                    int pos = tempCert.indexOf(':');
+                    String certification = tempCert.substring(countryPos);
+                    int pos = certification.indexOf(':');
                     if (pos > 0) {
-                        int endPos = tempCert.indexOf(" /");
+                        int endPos = certification.indexOf("/");
                         if (endPos > 0) {
-                            // This is in the middle of the string
-                            tempCert = tempCert.substring(pos + 1, endPos);
+                            // this is in the middle of the string
+                            certification = certification.substring(pos + 1, endPos);
                         } else {
-                            // This is at the end of the string
-                            tempCert = tempCert.substring(pos + 1);
+                            // this is at the end of the string
+                            certification = certification.substring(pos + 1);
                         }
                     }
-                    certCountry = preferredCountry;
-                } else if (StringUtils.containsIgnoreCase(tempCert, "Rated")) {
-                    // Extract the MPAA rating from the certification
-                    tempCert = StringTools.processMpaaCertification(tempCert);
-                    certCountry = "MPAA";
-                } else {
-                    // The country wasn't found in the value, so grab the last one
-                    int pos = tempCert.lastIndexOf(':');
-                    if (pos > 0) {
-                        // Strip the country code from the rating for certification like "UK:PG-12"
-                        tempCert = tempCert.substring(pos + 1);
-                    }
-                    // TODO get the country
+                    dto.addCertificatioInfo(country, StringUtils.trimToNull(certification));
                 }
-                dto.addCertificatioInfo(certCountry, tempCert);
+
+                if (certificationMPAA && StringUtils.containsIgnoreCase(tempCert, "Rated")) {
+                    // extract the MPAA rating from the certification
+                    String mpaa = StringTools.processMpaaCertification(tempCert);
+                    dto.addCertificatioInfo("MPAA", StringUtils.trimToNull(mpaa));
+                }
             }
         }
     }

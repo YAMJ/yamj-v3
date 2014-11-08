@@ -40,6 +40,7 @@ import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
+import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.model.type.ParticipationType;
@@ -271,7 +272,6 @@ public class ApiDao extends HibernateDao {
         // add the search string, this will be empty if there is no search required
         sbSQL.append(options.getSearchString(false));
 
-        LOG.debug("SQL: {}", sbSQL);
         return sbSQL.toString();
     }
 
@@ -517,7 +517,7 @@ public class ApiDao extends HibernateDao {
         List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
         if (CollectionUtils.isNotEmpty(results)) {
             if (options.hasDataItem(DataItem.ARTWORK)) {
-                LOG.info("Adding photos");
+                LOG.trace("Adding photos");
                 // Get the artwork associated with the IDs in the results
                 Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, generateIdList(results), Arrays.asList("PHOTO"));
                 for (ApiPersonDTO p : results) {
@@ -962,6 +962,11 @@ public class ApiDao extends HibernateDao {
                     episode.setGenres(this.getGenresForId(MetaDataType.EPISODE, episode.getId()));
                 }
             }
+            if (options.hasDataItem(DataItem.CERTIFICATION)) {
+                for (ApiEpisodeDTO episode : results) {
+                    episode.setCertifications(this.getCertificationsForId(MetaDataType.EPISODE, episode.getId()));
+                }
+            }
         }
         wrapper.setResults(results);
     }
@@ -1005,13 +1010,19 @@ public class ApiDao extends HibernateDao {
         LOG.debug("Found {} results for ID '{}'", queryResults.size(), options.getId());
         if (CollectionUtils.isNotEmpty(queryResults)) {
             ApiVideoDTO video = queryResults.get(0);
+            
             if (dataItems.contains(DataItem.GENRE)) {
-                LOG.debug("Adding genres");
+                LOG.trace("Adding genres for ID '{}'", options.getId());
                 video.setGenres(getGenresForId(type, options.getId()));
             }
 
+            if (dataItems.contains(DataItem.CERTIFICATION)) {
+                LOG.trace("Adding certifications for ID '{}'", options.getId());
+                video.setCertifications(getCertificationsForId(type, options.getId()));
+            }
+
             if (dataItems.contains(DataItem.ARTWORK)) {
-                LOG.debug("Adding artwork");
+                LOG.trace("Adding artwork for ID '{}'", options.getId());
                 Map<Long, List<ApiArtworkDTO>> artworkList;
                 if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
                     artworkList = getArtworkForId(type, options.getId(), options.getArtworkTypes());
@@ -1025,7 +1036,7 @@ public class ApiDao extends HibernateDao {
             }
 
             if (dataItems.contains(DataItem.FILES)) {
-                LOG.debug("Adding files");
+                LOG.trace("Adding files for ID '{}'", options.getId());
                 video.setFiles(getFilesForId(type, options.getId()));
             }
 
@@ -1143,7 +1154,7 @@ public class ApiDao extends HibernateDao {
     }
 
     /**
-     * Get a list of the Genres for a give video ID
+     * Get a list of the genres for a given video ID
      *
      * @param type
      * @param id
@@ -1178,6 +1189,36 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addParameters(ID, id);
 
         return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, null);
+    }
+
+    /**
+     * Get a list of the certifications for a given video ID
+     *
+     * @param type
+     * @param id
+     * @return
+     */
+    public List<Certification> getCertificationsForId(MetaDataType type, Long id) {
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT DISTINCT c.id, c.country, c.certificate ");
+        sqlScalars.addToSql("FROM certification c ");
+        if (type == MetaDataType.SERIES) {
+            sqlScalars.addToSql("JOIN series_certifications sc ON c.id=sc.cert_id and sc.series_id=:id ");
+        } else if (type == MetaDataType.SEASON) {
+            sqlScalars.addToSql("JOIN season sea ON sea.id = :id ");
+            sqlScalars.addToSql("JOIN series_certifications sc ON c.id=sc.cert_id and sc.series_id=sea.series_id ");
+        } else {
+            // defaults to movie/episode
+            sqlScalars.addToSql("JOIN videodata_certifications vc ON c.id=vc.cert_id and vc.data_id=:id ");
+        }
+        sqlScalars.addToSql("ORDER BY country");
+
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("country", StringType.INSTANCE);
+        sqlScalars.addScalar("certificate", StringType.INSTANCE);
+        sqlScalars.addParameters(ID, id);
+
+        return executeQueryWithTransform(Certification.class, sqlScalars, null);
     }
 
     /**

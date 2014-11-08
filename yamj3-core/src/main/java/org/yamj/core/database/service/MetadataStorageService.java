@@ -168,7 +168,7 @@ public class MetadataStorageService {
             for (String genreName : videoData.getGenreNames()) {
                 try {
                     String targetXml = GenreXmlTools.getMasterGenre(genreName);
-                    this.commonDao.storeNewGenreXML(genreName, targetXml);
+                    this.commonDao.storeNewGenre(genreName, targetXml);
                 } catch (Exception ex) {
                     LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
                     LOG.trace("Storage error", ex);
@@ -183,6 +183,18 @@ public class MetadataStorageService {
                     this.commonDao.storeNewStudio(studioName);
                 } catch (Exception ex) {
                     LOG.error("Failed to store studio '{}', error: {}", studioName, ex.getMessage());
+                    LOG.trace("Storage error", ex);
+                }
+            }
+        }
+        
+        if (MapUtils.isNotEmpty(videoData.getCertificationInfos())) {
+            // store new certifications
+            for (Entry<String,String> entry : videoData.getCertificationInfos().entrySet()) {
+                try {
+                    this.commonDao.storeNewCertification(entry.getKey(), entry.getValue());
+                } catch (Exception ex) {
+                    LOG.error("Failed to store certification '{}'-'{}', error: {}", entry.getKey(), entry.getValue(), ex.getMessage());
                     LOG.trace("Storage error", ex);
                 }
             }
@@ -226,7 +238,7 @@ public class MetadataStorageService {
             for (String genreName : series.getGenreNames()) {
                 try {
                     String targetXml = GenreXmlTools.getMasterGenre(genreName);
-                    this.commonDao.storeNewGenreXML(genreName, targetXml);
+                    this.commonDao.storeNewGenre(genreName, targetXml);
                 } catch (Exception ex) {
                     LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
                     LOG.trace("Storage error", ex);
@@ -246,6 +258,18 @@ public class MetadataStorageService {
             }
         }
 
+        if (MapUtils.isNotEmpty(series.getCertificationInfos())) {
+            // store new certifications
+            for (Entry<String,String> entry : series.getCertificationInfos().entrySet()) {
+                try {
+                    this.commonDao.storeNewCertification(entry.getKey(), entry.getValue());
+                } catch (Exception ex) {
+                    LOG.error("Failed to store certification '{}'-'{}', error: {}", entry.getKey(), entry.getValue(), ex.getMessage());
+                    LOG.trace("Storage error", ex);
+                }
+            }
+        }
+        
         for (Season season : series.getSeasons()) {
             for (VideoData videoData : season.getVideoDatas()) {
                 this.storeAssociatedEntities(videoData);
@@ -330,6 +354,9 @@ public class MetadataStorageService {
         // update studios
         updateStudios(videoData);
 
+        // update certifications
+        updateCertifications(videoData);
+
         // update cast and crew
         updateCastCrew(videoData);
         
@@ -355,6 +382,9 @@ public class MetadataStorageService {
         // update studios
         updateStudios(series);
 
+        // update certifications
+        updateCertifications(series);
+        
         // update artwork
         updateLocatedArtwork(series);
         
@@ -389,6 +419,66 @@ public class MetadataStorageService {
     }
 
     /**
+     * Update genres for Series from the database
+     *
+     * @param series
+     */
+    private void updateGenres(Series series) {
+        if (CollectionUtils.isEmpty(series.getGenreNames())) {
+            return;
+        }
+
+        Set<Genre> genres = new LinkedHashSet<Genre>();
+        for (String genreName : series.getGenreNames()) {
+            Genre genre = commonDao.getGenre(genreName);
+            if (genre != null) {
+                genres.add(genre);
+            }
+        }
+        series.setGenres(genres);
+    }
+
+    /**
+     * Update certifications for VideoData from the database
+     *
+     * @param videoData
+     */
+    private void updateCertifications(VideoData videoData) {
+        if (MapUtils.isEmpty(videoData.getCertificationInfos())) {
+            return;
+        }
+
+        Set<Certification> certifications = new LinkedHashSet<Certification>();
+        for (Entry<String,String> entry : videoData.getCertificationInfos().entrySet()) {
+            Certification certification = commonDao.getCertification(entry.getKey(), entry.getValue());
+            if (certification != null) {
+                certifications.add(certification);
+            }
+        }
+        videoData.setCertifications(certifications);
+    }
+
+    /**
+     * Update certifications for Series from the database
+     *
+     * @param series
+     */
+    private void updateCertifications(Series series) {
+        if (MapUtils.isEmpty(series.getCertificationInfos())) {
+            return;
+        }
+
+        Set<Certification> certifications = new LinkedHashSet<Certification>();
+        for (Entry<String,String> entry : series.getCertificationInfos().entrySet()) {
+            Certification certification = commonDao.getCertification(entry.getKey(), entry.getValue());
+            if (certification != null) {
+                certifications.add(certification);
+            }
+        }
+        series.setCertifications(certifications);
+    }
+
+    /**
      * Update studios for VideoData from the database
      *
      * @param videoData
@@ -409,9 +499,9 @@ public class MetadataStorageService {
     }
 
     /**
-     * Update studios for VideoData from the database
+     * Update studios for Series from the database
      *
-     * @param videoData
+     * @param series
      */
     private void updateStudios(Series series) {
         if (CollectionUtils.isEmpty(series.getStudioNames())) {
@@ -426,26 +516,6 @@ public class MetadataStorageService {
             }
         }
         series.setStudios(studios);
-    }
-
-    /**
-     * Update genres for Series from the database
-     *
-     * @param series
-     */
-    private void updateGenres(Series series) {
-        if (CollectionUtils.isEmpty(series.getGenreNames())) {
-            return;
-        }
-
-        Set<Genre> genres = new LinkedHashSet<Genre>();
-        for (String genreName : series.getGenreNames()) {
-            Genre genre = commonDao.getGenre(genreName);
-            if (genre != null) {
-                genres.add(genre);
-            }
-        }
-        series.setGenres(genres);
     }
 
     /**
@@ -488,41 +558,6 @@ public class MetadataStorageService {
                     boxedSetOrder.setOrdering(entry.getValue().intValue());
                 }
                 this.commonDao.updateEntity(boxedSetOrder);                
-            }
-        }
-    }
-
-    /**
-     * Update boxed sets
-     *
-     * @param videoData
-     */
-    private void updateCertifications(VideoData videoData) {
-        if (MapUtils.isEmpty(videoData.getCertificationInfos())) {
-            return;
-        }
-
-        for (Entry<String,String> entry : videoData.getCertificationInfos().entrySet()) {
-            
-            Certification certification = null;
-            for (Certification stored : videoData.getCertifications()) {
-                if (StringUtils.equalsIgnoreCase(stored.getCountry(), entry.getKey())) {
-                    certification = stored;
-                    break;
-                }
-            }
-            
-            if (certification == null) {
-                // create new certification
-                certification = new Certification();
-                certification.setVideoData(videoData);
-                certification.setCountry(entry.getKey());
-                certification.setCertificationText(entry.getValue());
-                videoData.addCertification(certification);
-                this.commonDao.saveEntity(certification);
-            } else {
-                certification.setCertificationText(entry.getValue());
-                this.commonDao.updateEntity(certification);                
             }
         }
     }

@@ -71,6 +71,11 @@ public final class OverrideTools {
         putVideodataPriorities(OverrideFlag.GENRES, sources);
         sources = PropertyTools.getProperty("priority.series.genres", DEFAULT_PLUGIN_SERIES);
         putSeriesPriorities(OverrideFlag.GENRES, sources);
+        // studios
+        sources = PropertyTools.getProperty("priority.videodata.studios", DEFAULT_PLUGIN_MOVIE_SERIES);
+        putVideodataPriorities(OverrideFlag.STUDIOS, sources);
+        sources = PropertyTools.getProperty("priority.series.studios", DEFAULT_PLUGIN_SERIES);
+        putSeriesPriorities(OverrideFlag.STUDIOS, sources);
         // original title
         sources = PropertyTools.getProperty("priority.videodata.originaltitle", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.ORIGINALTITLE, sources);
@@ -98,11 +103,6 @@ public final class OverrideTools {
         // releasedate
         sources = PropertyTools.getProperty("priority.videodata.releasedate", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.RELEASEDATE, sources);
-        // studios
-        sources = PropertyTools.getProperty("priority.videodata.studios", DEFAULT_PLUGIN_MOVIE_SERIES);
-        putVideodataPriorities(OverrideFlag.STUDIOS, sources);
-        sources = PropertyTools.getProperty("priority.series.studios", DEFAULT_PLUGIN_SERIES);
-        putSeriesPriorities(OverrideFlag.STUDIOS, sources);
         // tagline
         sources = PropertyTools.getProperty("priority.videodata.tagline", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.TAGLINE, sources);
