@@ -22,11 +22,15 @@
  */
 package org.yamj.core.api.options;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 /**
  * List of the options available for the indexes
  *
  * @author stuart.boston
  */
+@JsonInclude(Include.NON_DEFAULT)
 public class OptionsId extends OptionsAbstractSortSearch {
 
     private Long id = -1L;

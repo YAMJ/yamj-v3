@@ -251,6 +251,14 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" AND vd.publication_year!=").append(includes.get(YEAR));
         }
 
+        if (options.getWatched() != null) {
+            if (options.getWatched()) {
+                sbSQL.append(" AND (vd.watched_nfo=1 or vd.watched_file=1 or vd.watched_api=1)");
+            } else {
+                sbSQL.append(" AND vd.watched_nfo=0 AND vd.watched_file=0 AND vd.watched_api=0");
+            }
+        }
+        
         // check genre
         if (includes.containsKey(GENRE) || excludes.containsKey(GENRE)) {
             String genre;
@@ -297,7 +305,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", null AS episode");
         sbSQL.append(", (select min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched ");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "ser"));
-        sbSQL.append(" FROM series ser ");
+        sbSQL.append(" FROM series ser");
         
         sbSQL.append(SQL_WHERE_1_EQ_1); // To make it easier to add the optional include and excludes
         if (options.getId() > 0L) {
@@ -310,6 +318,17 @@ public class ApiDao extends HibernateDao {
 
         if (excludes.containsKey(YEAR)) {
             sbSQL.append(" AND ser.start_year!=").append(includes.get(YEAR));
+        }
+
+        if (options.getWatched() != null) {
+            if (options.getWatched()) {
+                sbSQL.append(" AND not exists");
+            } else {
+                sbSQL.append(" AND exists");
+            }
+            sbSQL.append(" (SELECT 1 FROM videodata v,season sea");
+            sbSQL.append(" WHERE v.watched_nfo=0 AND v.watched_file=0 AND v.watched_api=0");
+            sbSQL.append(" AND v.season_id=sea.id and sea.series_id=ser.id)");
         }
 
         // check genre
@@ -359,7 +378,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", (select min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid where vid.season_id=sea.id) as watched ");
         sbSQL.append(DataItemTools.addSqlDataItems(dataItems, "sea"));
         sbSQL.append(" FROM season sea");
-        
+
         sbSQL.append(SQL_WHERE_1_EQ_1); // To make it easier to add the optional include and excludes
         if (options.getId() > 0L) {
             sbSQL.append(" AND sea.id=").append(options.getId());
@@ -373,6 +392,17 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" AND sea.publication_year!=").append(includes.get(YEAR));
         }
 
+        if (options.getWatched() != null) {
+            if (options.getWatched()) {
+                sbSQL.append(" AND not exists");
+            } else {
+                sbSQL.append(" AND exists");
+            }
+            sbSQL.append(" (SELECT 1 FROM videodata v");
+            sbSQL.append(" WHERE v.watched_nfo=0 AND v.watched_file=0 AND v.watched_api=0");
+            sbSQL.append(" AND v.season_id=sea.id)");
+        }
+        
         // check genre
         if (includes.containsKey(GENRE) || excludes.containsKey(GENRE)) {
             String genre;
@@ -390,7 +420,7 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" or (g.target_api is not null and lower(g.target_api)='").append(genre).append("')");
             sbSQL.append(" or (g.target_xml is not null and lower(g.target_xml)='").append(genre).append("')))");
         }
-        
+ 
         // add the search string, this will be empty if there is no search required
         sbSQL.append(options.getSearchString(false));
 
@@ -923,6 +953,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("WHERE sea.series_id=ser.id");
         sqlScalars.addToSql("AND vid.season_id=sea.id");
         sqlScalars.addToSql("AND a.videodata_id=vid.id");
+        
         if (options.getSeriesid() > 0L) {
             sqlScalars.addToSql("AND ser.id=:seriesid");
             sqlScalars.addParameters("seriesid", options.getSeriesid());
@@ -931,10 +962,18 @@ public class ApiDao extends HibernateDao {
                 sqlScalars.addParameters(SEASON, options.getSeason());
             }
         }
+        
         if (options.getSeasonid() > 0L) {
             sqlScalars.addToSql("AND sea.id=:seasonid");
             sqlScalars.addParameters("seasonid", options.getSeasonid());
         }
+        
+        if (options.getWatched() != null && options.getWatched()) {
+            sqlScalars.addToSql(" AND (vid.watched_nfo=1 or vid.watched_file=1 or vid.watched_api=1)");
+        } else if (options.getWatched() != null && !options.getWatched()) {
+            sqlScalars.addToSql(" AND vid.watched_nfo=0 AND vid.watched_file=0 AND vid.watched_api=0");
+        }
+        
         sqlScalars.addToSql(" ORDER BY seriesId, season, episode");
         LOG.debug("getEpisodeList SQL: {}", sqlScalars.getSql());
 

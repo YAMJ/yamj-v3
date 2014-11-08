@@ -22,6 +22,9 @@
  */
 package org.yamj.core.api.options;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,13 +36,14 @@ import org.yamj.core.api.model.builder.DataItem;
  *
  * @author stuart.boston
  */
+@JsonInclude(Include.NON_DEFAULT)
 public abstract class OptionsAbstractSortSearch extends OptionsAbstract implements IOptionsSort, IOptionsSearch {
 
-    private String sortby = "";
-    private String sortdir = "ASC";
-    private String field = "";
-    private String search = "";
-    private String mode = "";
+    private String sortby;
+    private String sortdir;
+    private String field;
+    private String search;
+    private String mode;
     private List<String> dataitems = new ArrayList<String>();
     @JsonIgnore
     private final List<DataItem> dataitemList = new ArrayList<DataItem>();
@@ -82,11 +86,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
      */
     @Override
     public void setSortdir(String sortdir) {
-        if ("DESC".equalsIgnoreCase(sortdir)) {
-            this.sortdir = "DESC";
-        } else {
-            this.sortdir = "ASC";
-        }
+        this.sortdir = sortdir;
     }
 
     /**
@@ -101,8 +101,11 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
         if (StringUtils.isNotBlank(sortby)) {
             sb.append(" ORDER BY ");
             sb.append(sortby);
-            sb.append(" ");
-            sb.append(sortdir);
+            if ("DESC".equalsIgnoreCase(sortdir)) {
+                sb.append(" DESC");
+            } else {
+                sb.append(" ASC");
+            }
         }
         return sb.toString();
     }

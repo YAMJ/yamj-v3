@@ -22,16 +22,21 @@
  */
 package org.yamj.core.api.options;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 /**
  * List of the options available for the indexes
  *
  * @author stuart.boston
  */
+@JsonInclude(Include.NON_DEFAULT)
 public class OptionsEpisode extends OptionsAbstractSortSearch {
 
     private Long seriesid = -1L;
     private Long seasonid = -1L;
     private Long season = -1L;
+    private Boolean watched;
 
     public Long getSeriesid() {
         return seriesid;
@@ -55,5 +60,17 @@ public class OptionsEpisode extends OptionsAbstractSortSearch {
 
     public void setSeason(Long season) {
         this.season = season;
+    }
+
+    public Boolean getWatched() {
+        return watched;
+    }
+
+    public void setWatched(String watched) {
+        if ("true".equalsIgnoreCase(watched)) {
+            this.watched = Boolean.TRUE;
+        } else if ("false".equalsIgnoreCase(watched)) {
+            this.watched = Boolean.FALSE;
+        }
     }
 }

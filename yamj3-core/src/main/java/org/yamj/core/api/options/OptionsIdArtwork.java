@@ -22,6 +22,9 @@
  */
 package org.yamj.core.api.options;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +36,7 @@ import org.yamj.core.database.model.type.ArtworkType;
  *
  * @author stuart.boston
  */
+@JsonInclude(Include.NON_DEFAULT)
 public class OptionsIdArtwork extends OptionsId {
 
     private String artwork = "";

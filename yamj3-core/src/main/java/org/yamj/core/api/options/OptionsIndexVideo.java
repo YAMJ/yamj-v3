@@ -22,6 +22,9 @@
  */
 package org.yamj.core.api.options;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,36 +38,51 @@ import org.yamj.common.type.MetaDataType;
  *
  * @author stuart.boston
  */
+@JsonInclude(Include.NON_DEFAULT)
 public class OptionsIndexVideo extends OptionsIdArtwork {
 
-    private String type = "";
-    private String include = "";
-    private String exclude = "";
+    private String include;
+    private String exclude;
+    private Boolean watched;
+    private String type;
+    
     @JsonIgnore
     private final List<MetaDataType> videoTypes = new ArrayList<MetaDataType>();
 
-    public void setInclude(String include) {
-        this.include = include;
-    }
-
-    public void setExclude(String exclude) {
-        this.exclude = exclude;
-    }
-
     public String getInclude() {
         return include;
+    }
+    
+    public void setInclude(String include) {
+        this.include = include;
     }
 
     public String getExclude() {
         return exclude;
     }
 
+    public void setExclude(String exclude) {
+        this.exclude = exclude;
+    }
+
+    public Boolean getWatched() {
+        return watched;
+    }
+
+    public void setWatched(String watched) {
+        if ("true".equalsIgnoreCase(watched)) {
+            this.watched = Boolean.TRUE;
+        } else if ("false".equalsIgnoreCase(watched)) {
+            this.watched = Boolean.FALSE;
+        }
+    }
+    
     public String getType() {
         return type;
     }
 
     public void setType(String type) {
-        this.type = type.toUpperCase();
+        this.type = type;
         this.videoTypes.clear();
     }
 
@@ -75,7 +93,7 @@ public class OptionsIndexVideo extends OptionsIdArtwork {
      */
     public List<MetaDataType> splitTypes() {
         if (CollectionUtils.isEmpty(videoTypes)) {
-            if (StringUtils.containsIgnoreCase(type, "ALL") || StringUtils.isEmpty(type)) {
+            if (StringUtils.isEmpty(type) || StringUtils.containsIgnoreCase(type, "ALL")) {
                 videoTypes.add(MetaDataType.MOVIE);
                 videoTypes.add(MetaDataType.SERIES);
                 videoTypes.add(MetaDataType.SEASON);

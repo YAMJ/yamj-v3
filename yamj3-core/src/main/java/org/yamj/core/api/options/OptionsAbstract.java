@@ -22,6 +22,10 @@
  */
 package org.yamj.core.api.options;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import java.util.Collections;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,6 +40,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  *
  * @author stuart.boston
  */
+@JsonInclude(Include.NON_DEFAULT)
 public abstract class OptionsAbstract implements IOptions {
 
     private static final String DEFAULT_SPLIT = ",|;";  // Used for splitting strings
@@ -142,10 +147,12 @@ public abstract class OptionsAbstract implements IOptions {
      */
     protected Map<String, String> splitDashList(String dashList) {
         Map<String, String> values = new HashMap<String, String>();
-        for (String inc : StringUtils.split(dashList, ",")) {
-            int pos = inc.indexOf('-');
-            if (pos >= 0) {
-                values.put(inc.substring(0, pos), inc.substring(pos + 1));
+        if (dashList != null) {
+            for (String inc : StringUtils.split(dashList, ",")) {
+                int pos = inc.indexOf('-');
+                if (pos >= 0) {
+                    values.put(inc.substring(0, pos), inc.substring(pos + 1));
+                }
             }
         }
         return values;
@@ -158,6 +165,9 @@ public abstract class OptionsAbstract implements IOptions {
      * @return
      */
     protected List<String> splitList(String list) {
+        if (list == null) {
+            return Collections.emptyList();
+        }
         return Arrays.asList(StringUtils.split(list, DEFAULT_SPLIT));
     }
 }
