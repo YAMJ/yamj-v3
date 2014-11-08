@@ -25,6 +25,7 @@
             <list>
                 <value>classpath:/yamj3-filescanner.properties</value>
                 <value>file:${yamj3.home}/config/yamj3-filescanner.properties</value>
+                <value>file:${yamj3.home}/config/yamj3-filescanner.user.properties</value>
             </list>
         </property>
         <property name="ignoreResourceNotFound" value="true"/>
