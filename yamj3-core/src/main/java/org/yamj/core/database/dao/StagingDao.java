@@ -503,7 +503,7 @@ public class StagingDao extends HibernateDao {
 
         return this.findByNamedParameters(sb, params);
     }
-    
+
     public BigInteger countWatchedFiles(StageFile videoFile, String folderName, boolean checkLibrary) {
         StringBuffer sb = new StringBuffer();
         sb.append("SELECT count(*) ");

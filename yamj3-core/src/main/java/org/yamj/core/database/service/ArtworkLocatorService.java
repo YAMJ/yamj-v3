@@ -238,14 +238,18 @@ public class ArtworkLocatorService {
 
     public List<StageFile> getPhotos(Person person) {
         List<StageFile> artworks;
+
+        Set<String> artworkNames = new HashSet<String>();
+        artworkNames.add(person.getName().toLowerCase());
+        artworkNames.add(person.getName().toLowerCase() + ".photo");
+        artworkNames.add(person.getName().toLowerCase() + "-photo");
+
         
         String photoFolderName = PropertyTools.getProperty("yamj3.folder.name.photo");
         if (StringUtils.isNotBlank(photoFolderName)) {
-            Set<String> artworkNames = new HashSet<String>();
-            artworkNames.add(person.getName().toLowerCase() + ".photo");
-            artworkNames.add(person.getName().toLowerCase() + "-photo");
             artworks = this.stagingDao.findStageFilesInSpecialFolder(FileType.IMAGE, photoFolderName, null, artworkNames);
         } else {
+            // TODO search in complete library (needs refactoring of this method)
             artworks = Collections.emptyList();
         }
 
