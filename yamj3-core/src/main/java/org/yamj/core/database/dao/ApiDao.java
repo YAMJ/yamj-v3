@@ -41,6 +41,7 @@ import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Certification;
+import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.model.type.ParticipationType;
@@ -997,13 +998,39 @@ public class ApiDao extends HibernateDao {
                 }
             }
             if (options.hasDataItem(DataItem.GENRE)) {
+                // use series genres
+                Map<Long,List<ApiGenreDTO>> map = new HashMap<Long,List<ApiGenreDTO>>();
                 for (ApiEpisodeDTO episode : results) {
-                    episode.setGenres(this.getGenresForId(MetaDataType.EPISODE, episode.getId()));
+                    List<ApiGenreDTO>  genres = map.get(episode.getSeriesId());
+                    if (genres == null) {
+                        genres = getGenresForId(MetaDataType.SERIES, episode.getSeriesId());
+                        map.put(episode.getSeriesId(), genres);
+                    }
+                    episode.setGenres(genres);
+                }
+            }
+            if (options.hasDataItem(DataItem.STUDIO)) {
+                // use series studios
+                Map<Long,List<Studio>> map = new HashMap<Long,List<Studio>>();
+                for (ApiEpisodeDTO episode : results) {
+                    List<Studio>  studios = map.get(episode.getSeriesId());
+                    if (studios == null) {
+                        studios = getStudiosForId(MetaDataType.SERIES, episode.getSeriesId());
+                        map.put(episode.getSeriesId(), studios);
+                    }
+                    episode.setStudios(studios);
                 }
             }
             if (options.hasDataItem(DataItem.CERTIFICATION)) {
+                // use series certifications
+                Map<Long,List<Certification>> map = new HashMap<Long,List<Certification>>();
                 for (ApiEpisodeDTO episode : results) {
-                    episode.setCertifications(this.getCertificationsForId(MetaDataType.EPISODE, episode.getId()));
+                    List<Certification>  certifications = map.get(episode.getSeriesId());
+                    if (certifications == null) {
+                        certifications = getCertificationsForId(MetaDataType.SERIES, episode.getSeriesId());
+                        map.put(episode.getSeriesId(), certifications);
+                    }
+                    episode.setCertifications(certifications);
                 }
             }
         }
@@ -1053,6 +1080,11 @@ public class ApiDao extends HibernateDao {
             if (dataItems.contains(DataItem.GENRE)) {
                 LOG.trace("Adding genres for ID '{}'", options.getId());
                 video.setGenres(getGenresForId(type, options.getId()));
+            }
+
+            if (dataItems.contains(DataItem.STUDIO)) {
+                LOG.trace("Adding studis for ID '{}'", options.getId());
+                video.setStudios(getStudiosForId(type, options.getId()));
             }
 
             if (dataItems.contains(DataItem.CERTIFICATION)) {
@@ -1217,7 +1249,7 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("AND sg.series_id=sea.series_id ");
             sqlScalars.addToSql("AND sg.genre_id=g.id ");
         } else {
-            // defaults to movie/episode
+            // defaults to movie
             sqlScalars.addToSql("FROM videodata_genres vg, genre g ");
             sqlScalars.addToSql("WHERE vg.data_id=:id ");
             sqlScalars.addToSql("AND vg.genre_id=g.id ");
@@ -1230,6 +1262,35 @@ public class ApiDao extends HibernateDao {
         return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, null);
     }
 
+    /**
+     * Get a list of the studios for a given video ID
+     *
+     * @param type
+     * @param id
+     * @return
+     */
+    public List<Studio> getStudiosForId(MetaDataType type, Long id) {
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT DISTINCT s.id, s.name ");
+        sqlScalars.addToSql("FROM studio s ");
+        if (type == MetaDataType.SERIES) {
+            sqlScalars.addToSql("JOIN series_studios ss ON s.id=ss.studio_id and ss.series_id=:id ");
+        } else if (type == MetaDataType.SEASON) {
+            sqlScalars.addToSql("JOIN season sea ON sea.id = :id ");
+            sqlScalars.addToSql("JOIN series_studios ss ON s.id=ss.studio_id and ss.series_id=sea.series_id ");
+        } else {
+            // defaults to movie
+            sqlScalars.addToSql("JOIN videodata_studios vs ON s.id=vs.studio_id and vs.data_id=:id ");
+        }
+        sqlScalars.addToSql("ORDER BY name");
+
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addParameters(ID, id);
+
+        return executeQueryWithTransform(Studio.class, sqlScalars, null);
+    }
+    
     /**
      * Get a list of the certifications for a given video ID
      *
@@ -1247,7 +1308,7 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("JOIN season sea ON sea.id = :id ");
             sqlScalars.addToSql("JOIN series_certifications sc ON c.id=sc.cert_id and sc.series_id=sea.series_id ");
         } else {
-            // defaults to movie/episode
+            // defaults to movie
             sqlScalars.addToSql("JOIN videodata_certifications vc ON c.id=vc.cert_id and vc.data_id=:id ");
         }
         sqlScalars.addToSql("ORDER BY country");

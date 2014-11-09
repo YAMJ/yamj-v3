@@ -32,16 +32,17 @@ public enum DataItem {
     ARTWORK(false),
     PLOT(true),
     OUTLINE(true),
-    GENRE(false),
     COUNTRY(true),
     QUOTE(true),
     TAGLINE(true),
     TOP_RANK(true),
+    GENRE(false),
+    STUDIO(false),
+    CERTIFICATION(false),
     BIOGRAPHY(true),
     FILMOGRAPHY_INSIDE(false),
     FILMOGRAPHY_SCANNED(false),
     FILES(false),
-    CERTIFICATION(false),
     UNKNOWN(false);
     
     private final boolean column; // Is the DataItem a column or a collection (e.g. artwork, genres, etc)

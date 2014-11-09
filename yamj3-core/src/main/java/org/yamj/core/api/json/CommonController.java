@@ -189,7 +189,7 @@ public class CommonController {
         return wrapper;
     }
 
-    @RequestMapping(value = "/studios", method = RequestMethod.GET)
+    @RequestMapping(value = "/studios/list", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperList<Studio> getStudios(@ModelAttribute("options") OptionsId options) {
         LOG.info("Getting studio list with {}", options.toString());

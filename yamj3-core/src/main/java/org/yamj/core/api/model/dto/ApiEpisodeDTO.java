@@ -22,6 +22,8 @@
  */
 package org.yamj.core.api.model.dto;
 
+import org.yamj.core.database.model.Studio;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -52,6 +54,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     private String cacheDir;
     private String videoimage;
     private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
+    private List<Studio> studios = new ArrayList<Studio>();
     private List<Certification> certifications = new ArrayList<Certification>();
     private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
 
@@ -113,7 +116,11 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     public void setGenres(List<ApiGenreDTO> genres) {
         this.genres = genres;
     }
-    
+
+    public void setStudios(List<Studio> studios) {
+        this.studios = studios;
+    }
+
     public void setCertifications(List<Certification> certifications) {
         this.certifications = certifications;
     }
@@ -171,6 +178,10 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
         return genres;
     }
 
+    public List<Studio> getStudios() {
+        return studios;
+    }
+    
     public List<Certification> getCertifications() {
         return certifications;
     }

@@ -31,6 +31,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.Certification;
+import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.model.type.ArtworkType;
 
 /**
@@ -56,6 +57,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private Long episode;
     private Boolean watched;
     private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
+    private List<Studio> studios = new ArrayList<Studio>();
     private List<Certification> certifications = new ArrayList<Certification>();
     private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
     private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
@@ -97,6 +99,14 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         return genres.size();
     }
     
+    public List<Studio> getStudios() {
+        return studios;
+    }
+
+    public int getStudioCount() {
+        return studios.size();
+    }
+
     public List<Certification> getCertifications() {
         return certifications;
     }
@@ -188,6 +198,10 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public void setGenres(List<ApiGenreDTO> genres) {
         this.genres = genres;
+    }
+
+    public void setStudios(List<Studio> studios) {
+        this.studios = studios;
     }
 
     public void setCertifications(List<Certification> certifications) {
