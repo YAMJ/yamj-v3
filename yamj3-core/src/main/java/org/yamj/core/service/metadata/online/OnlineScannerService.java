@@ -152,7 +152,7 @@ public class OnlineScannerService {
             videoData.setRetries(0);
             videoData.setStatus(StatusType.NOTFOUND);
         } else if (ScanResult.RETRY.equals(scanResult)) {
-            LOG.warn("Movie {}-'{}', will be retried", videoData.getId(), videoData.getTitle());
+            LOG.info("Movie {}-'{}', will be retried", videoData.getId(), videoData.getTitle());
             videoData.setRetries(videoData.getRetries()+1);
             videoData.setStatus(StatusType.UPDATED);
         } else {
@@ -221,7 +221,7 @@ public class OnlineScannerService {
             series.setRetries(0);
             series.setStatus(StatusType.NOTFOUND);
        } else if (ScanResult.RETRY.equals(scanResult)) {
-           LOG.warn("Series {}-'{}', not found", series.getId(), series.getTitle());
+           LOG.info("Series {}-'{}', will be retried", series.getId(), series.getTitle());
            series.setRetries(series.getRetries()+1);
            series.setStatus(StatusType.UPDATED);
         } else {
@@ -288,7 +288,7 @@ public class OnlineScannerService {
             person.setRetries(0);
             person.setStatus(StatusType.NOTFOUND);
         } else if (ScanResult.RETRY.equals(scanResult)) {
-            LOG.warn("Person {}-'{}', will be retried", person.getId(), person.getName());
+            LOG.info("Person {}-'{}', will be retried", person.getId(), person.getName());
             person.setRetries(person.getRetries()+1);
             person.setStatus(StatusType.UPDATED);
         } else {
@@ -349,7 +349,7 @@ public class OnlineScannerService {
             person.setRetries(0);
             person.setFilmographyStatus(StatusType.NOTFOUND);
         } else if (ScanResult.RETRY.equals(scanResult)) {
-            LOG.warn("Person filmography {}-'{}', will be retried", person.getId(), person.getName());
+            LOG.info("Person filmography {}-'{}', will be retried", person.getId(), person.getName());
             person.setRetries(person.getRetries()+1);
             person.setFilmographyStatus(StatusType.UPDATED);
         } else {

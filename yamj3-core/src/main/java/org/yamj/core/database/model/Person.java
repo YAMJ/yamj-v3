@@ -242,7 +242,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
             for (Entry<String,String> entry : sourceDbIdMap.entrySet()) {
                 String sourceDb = entry.getKey();
                 String newId = StringUtils.trimToNull(entry.getValue());
-                if (StringUtils.isNotBlank(sourceDb) && StringUtils.isNotBlank(newId)) {
+                if (StringUtils.isNotBlank(sourceDb) && (newId != null)) {
                     String oldId = this.sourceDbIdMap.put(sourceDb, newId);
                     if (!StringUtils.equals(oldId, newId)) {
                         changed = true;

@@ -32,6 +32,7 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
+import org.yamj.common.tools.EqualityTools;
 import org.yamj.common.type.StatusType;
 
 @Entity
@@ -48,12 +49,16 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @JoinColumn(name = "artwork_id", nullable = false)
     private Artwork artwork;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @ForeignKey(name = "FK_ARTWORKLOCATED_STAGEFILE")
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.JOIN)
     @JoinColumn(name = "stagefile_id")
     private StageFile stageFile;
 
+    // only used for equality checks
+    @Column(name = "stagefile_id", insertable=false, updatable=false)
+    private Long stageFileId; 
+    
     @Index(name = "IX_ARTWORKLOCATED_DOWNLOAD")
     @Column(name = "source", length = 50)
     private String source;
@@ -110,6 +115,15 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     public void setStageFile(StageFile stageFile) {
         this.stageFile = stageFile;
+        setStageFileId(stageFile == null ? null : stageFile.getId());
+    }
+    
+    private Long getStageFileId() {
+        return stageFileId;
+    }
+
+    private void setStageFileId(Long stageFileId) {
+        this.stageFileId = stageFileId;
     }
 
     public String getSource() {
@@ -233,7 +247,7 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
         final int prime = 7;
         int result = 1;
         result = prime * result + (getArtwork() == null ? 0 : getArtwork().hashCode());
-        result = prime * result + (getStageFile() == null ? 0 : getStageFile().hashCode());
+        result = prime * result + (getStageFileId() == null ? 0 : getStageFileId().hashCode());
         result = prime * result + (getSource() == null ? 0 : getSource().hashCode());
         result = prime * result + (getUrl() == null ? 0 : getUrl().hashCode());
         return result;
@@ -252,8 +266,8 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
         }
         ArtworkLocated castOther = (ArtworkLocated) other;
         // first check the id
-        if ((this.getId() > 0) && (castOther.getId() > 0)) {
-            return this.getId() == castOther.getId();
+        if ((getId() > 0) && (castOther.getId() > 0)) {
+            return getId() == castOther.getId();
         }
         // check source
         if (!StringUtils.equals(getSource(), castOther.getSource())) {
@@ -264,31 +278,11 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
             return false;
         }
         // check artwork
-        if (getArtwork() == null && castOther.getArtwork() != null) {
+        if (EqualityTools.notEquals(getArtwork(), castOther.getArtwork())) {
             return false;
         }
-        if (getArtwork() != null && castOther.getArtwork() == null) {
-            return false;
-        }
-        if (getArtwork() != null && castOther.getArtwork() != null) {
-            if (!getArtwork().equals(castOther.getArtwork())) {
-                return false;
-            }
-        }
-        // check stage file
-        if (getStageFile() == null && castOther.getStageFile() != null) {
-            return false;
-        }
-        if (getStageFile() != null && castOther.getStageFile() == null) {
-            return false;
-        }
-        if (getStageFile() != null && castOther.getStageFile() != null) {
-            if (!getStageFile().equals(castOther.getStageFile())) {
-                return false;
-            }
-        }
-        // all checks passed
-        return true;
+        // check stage file id
+        return EqualityTools.equals(getStageFileId(), castOther.getStageFileId());
     }
 
     @Override
@@ -310,7 +304,8 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
                 sb.append(", stageFile=");
                 sb.append(getStageFile().getFileName());
             } else {
-                sb.append(", stage file used");
+                sb.append(", stageFileId=");
+                sb.append(getStageFileId());
             }
         }
         sb.append("]");

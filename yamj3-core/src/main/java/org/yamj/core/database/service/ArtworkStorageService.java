@@ -105,7 +105,6 @@ public class ArtworkStorageService {
 
     @Transactional
     public void updateArtwork(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
-
         if (CollectionUtils.isEmpty(artwork.getArtworkLocated())) {
             // no located artwork presents; just store all
             this.artworkDao.storeAll(locatedArtworks);
@@ -154,8 +153,8 @@ public class ArtworkStorageService {
         sb.append("LEFT OUTER JOIN FETCH art.videoData ");
         sb.append("LEFT OUTER JOIN FETCH art.season ");
         sb.append("LEFT OUTER JOIN FETCH art.series ");
-        sb.append("LEFT OUTER JOIN FETCH art.artworkLocated ");
         sb.append("LEFT OUTER JOIN FETCH art.person ");
+        sb.append("LEFT OUTER JOIN FETCH art.artworkLocated ");
         sb.append("WHERE art.id = :id");
 
         @SuppressWarnings("unchecked")

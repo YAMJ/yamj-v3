@@ -31,6 +31,7 @@ import org.hibernate.Query;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.*;
@@ -39,6 +40,7 @@ import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.hibernate.HibernateDao;
 import org.yamj.core.service.file.tools.FileTools;
 
+@Transactional
 @Repository("stagingDao")
 public class StagingDao extends HibernateDao {
 
@@ -224,7 +226,7 @@ public class StagingDao extends HibernateDao {
         sb.append("SELECT distinct sf ");
         sb.append("FROM StageFile sf ");
         sb.append("JOIN sf.nfoRelations nfrel ");
-        sb.append("JOIN nfrel.videoData vd ");
+        sb.append("JOIN nfrel.nfoRelationPK.videoData vd ");
         sb.append("WHERE vd.id=:videoDataId ");
         sb.append("AND sf.fileType=:fileType ");
         sb.append("AND sf.status in (:statusSet) ");
@@ -250,7 +252,7 @@ public class StagingDao extends HibernateDao {
         sb.append("SELECT distinct sf ");
         sb.append("FROM StageFile sf ");
         sb.append("JOIN sf.nfoRelations nfrel ");
-        sb.append("JOIN nfrel.videoData vd ");
+        sb.append("JOIN nfrel.nfoRelationPK.videoData vd ");
         sb.append("JOIN vd.season sea ");
         sb.append("JOIN sea.series ser ");
         sb.append("WHERE ser.id=:seriesId ");

@@ -40,6 +40,7 @@ import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.hibernate.HibernateDao;
 
+@Transactional
 @Repository("commonDao")
 public class CommonDao extends HibernateDao {
 
@@ -47,7 +48,6 @@ public class CommonDao extends HibernateDao {
         return getByNameCaseInsensitive(Genre.class, name);
     }
 
-    @Transactional
     public synchronized void storeNewGenre(String name, String targetXml) {
         Genre genre = this.getGenre(name);
         if (genre == null) {
@@ -124,7 +124,6 @@ public class CommonDao extends HibernateDao {
         return getByNameCaseInsensitive(Studio.class, name);
     }
 
-    @Transactional
     public synchronized void storeNewStudio(String name) {
         Studio studio = this.getStudio(name);
         if (studio == null) {
@@ -162,7 +161,6 @@ public class CommonDao extends HibernateDao {
         return (Certification)this.findUniqueByNamedParameters(sb, params);
     }
     
-    @Transactional
     public synchronized void storeNewCertification(String country, String certificate) {
         Certification certification = this.getCertification(country, certificate);
         if (certification == null) {
@@ -193,7 +191,6 @@ public class CommonDao extends HibernateDao {
         return getByNameCaseInsensitive(BoxedSet.class, name);
     }
 
-    @Transactional
     public synchronized void storeNewBoxedSet(String name) {
         BoxedSet boxedSet = this.getBoxedSet(name);
         if (boxedSet == null) {

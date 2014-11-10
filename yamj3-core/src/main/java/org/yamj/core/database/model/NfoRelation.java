@@ -22,14 +22,12 @@
  */
 package org.yamj.core.database.model;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-
 import java.io.Serializable;
-import javax.persistence.*;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.ForeignKey;
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import org.yamj.common.tools.EqualityTools;
 
 @Entity
 @Table(name = "nfo_relation")
@@ -38,41 +36,25 @@ public class NfoRelation implements Serializable {
     private static final long serialVersionUID = 1083402240122932701L;
 
     @EmbeddedId 
-    private NfoRelationPK primary = new NfoRelationPK(); 
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_NFORELATION_STAGEFILE")
-    @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "stagefile_id", nullable = false, insertable = false, updatable = false)
-    private StageFile stageFile;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_NFORELATION_VIDEODATA")
-    @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false)
-    private VideoData videoData;
+    private NfoRelationPK nfoRelationPK; 
 
     @Column(name = "priority", nullable = false)
     private int priority = -1;
 
     // GETTER and SETTER
 
-    public StageFile getStageFile() {
-        return stageFile;
+    public NfoRelation() {}
+
+    public NfoRelation(StageFile stageFile, VideoData videoData) {
+        setNfoRelationPK(new NfoRelationPK(stageFile, videoData));
     }
 
-    public void setStageFile(StageFile stageFile) {
-        this.stageFile = stageFile;
-        this.primary.stageFileId = stageFile.getId();
+    public NfoRelationPK getNfoRelationPK() {
+        return nfoRelationPK;
     }
 
-    public VideoData getVideoData() {
-        return videoData;
-    }
-
-    public void setVideoData(VideoData videoData) {
-        this.videoData = videoData;
-        this.primary.videoDataId = videoData.getId();
+    private void setNfoRelationPK(NfoRelationPK nfoRelationPK) {
+        this.nfoRelationPK = nfoRelationPK;
     }
 
     public int getPriority() {
@@ -89,7 +71,7 @@ public class NfoRelation implements Serializable {
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (this.primary == null ? 0 : this.primary.hashCode());
+        result = prime * result + (getNfoRelationPK() == null ? 0 : getNfoRelationPK().hashCode());
         return result;
     }
 
@@ -105,51 +87,6 @@ public class NfoRelation implements Serializable {
             return false;
         }
         NfoRelation castOther = (NfoRelation) other;
-        return this.primary.equals(castOther.primary);
-    }
-
-    @Embeddable
-    public static class NfoRelationPK implements Serializable {
-
-        private static final long serialVersionUID = 8030842012557188597L;
-        
-        @Column(name = "stagefile_id", insertable = false, updatable = false)
-        protected long stageFileId = -1;
-
-        @Column(name = "videodata_id", insertable = false, updatable = false)
-        protected long videoDataId = -1;
-       
-        // EQUALITY CHECKS
-
-        @Override
-        public int hashCode() {
-            final int prime = 7;
-            int result = 1;
-            result = prime * result + Long.valueOf(stageFileId).intValue();
-            result = prime * result + Long.valueOf(videoDataId).intValue();
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if (this == other) {
-                return true;
-            }
-            if (other == null) {
-                return false;
-            }
-            if (!(other instanceof NfoRelationPK)) {
-                return false;
-            }
-            NfoRelationPK castOther = (NfoRelationPK) other;
-            
-            if (this.stageFileId != castOther.stageFileId) {
-                return false;
-            }
-            if (this.stageFileId != castOther.stageFileId) {
-                return false;
-            }
-            return true;
-        }
+        return EqualityTools.equals(getNfoRelationPK(), castOther.getNfoRelationPK());
     }
 }

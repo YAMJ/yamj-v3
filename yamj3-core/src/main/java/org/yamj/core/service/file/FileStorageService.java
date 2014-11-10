@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.PostConstruct;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
@@ -44,9 +45,9 @@ import org.apache.http.HttpEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.api.model.Skin;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.type.ImageFormat;
@@ -57,6 +58,7 @@ import org.yamj.core.tools.web.PoolingHttpClient;
 public class FileStorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileStorageService.class);
+
     // This is the base directory to store the resources in. It should NOT be used in the hash of the filename
     private String storageResourceDir;
     private String storagePathArtwork;
@@ -66,49 +68,49 @@ public class FileStorageService {
     @Autowired
     private PoolingHttpClient httpClient;
 
-    //<editor-fold defaultstate="collapsed" desc="Property Setters">
-    @Value("${yamj3.file.storage.resources}")
-    public void setStorageResourceDir(String storageResourceDir) {
-        this.storageResourceDir = FilenameUtils.normalize(storageResourceDir, Boolean.TRUE);
+    @PostConstruct
+    public void init() throws Exception {
+        LOG.info("Initialize file storage service");
+
+        String value = PropertyTools.getProperty("yamj3.file.storage.resources");
+        if (StringUtils.isBlank(value)) {
+            throw new IllegalArgumentException("Property 'yamj3.file.storage.resources' not set");
+        }
+        this.storageResourceDir = FilenameUtils.normalizeNoEndSeparator(value, true);
         LOG.info("Resource path set to '{}'", this.storageResourceDir);
-    }
 
-    @Value("${yamj3.file.storage.artwork}")
-    public void setStoragePathArtwork(String storagePathArtwork) {
-        this.storagePathArtwork = FilenameUtils.normalize(FilenameUtils.concat(storageResourceDir, storagePathArtwork), Boolean.TRUE);
-        if (!this.storagePathArtwork.endsWith("/")) {
-            this.storagePathArtwork += "/";
+        value = PropertyTools.getProperty("yamj3.file.storage.artwork");
+        if (StringUtils.isBlank(value)) {
+            throw new IllegalArgumentException("Property 'yamj3.file.storage.artwork' not set");
         }
+        this.storagePathArtwork = FilenameUtils.normalizeNoEndSeparator(FilenameUtils.concat(this.storageResourceDir, value), true);
+        this.storagePathArtwork += "/";
         LOG.info("Artwork storage path set to '{}'", this.storagePathArtwork);
-    }
 
-    @Value("${yamj3.file.storage.mediainfo}")
-    public void setStoragePathMediaInfo(String storagePathMediaInfo) {
-        this.storagePathMediaInfo = FilenameUtils.normalize(FilenameUtils.concat(storageResourceDir, storagePathMediaInfo), Boolean.TRUE);
-        if (!this.storagePathMediaInfo.endsWith("/")) {
-            this.storagePathMediaInfo += "/";
+        value = PropertyTools.getProperty("yamj3.file.storage.mediainfo");
+        if (StringUtils.isBlank(value)) {
+            throw new IllegalArgumentException("Property 'yamj3.file.storage.mediainfo' not set");
         }
+        this.storagePathMediaInfo = FilenameUtils.normalizeNoEndSeparator(FilenameUtils.concat(this.storageResourceDir, value), true);
+        this.storagePathMediaInfo += "/";
         LOG.info("MediaInfo storage path set to '{}'", this.storagePathMediaInfo);
-    }
 
-    @Value("${yamj3.file.storage.photo}")
-    public void setStoragePathPhoto(String storagePathPhoto) {
-        this.storagePathPhoto = FilenameUtils.normalize(FilenameUtils.concat(storageResourceDir, storagePathPhoto), Boolean.TRUE);
-        if (!this.storagePathPhoto.endsWith("/")) {
-            this.storagePathPhoto += "/";
+        value = PropertyTools.getProperty("yamj3.file.storage.photo");
+        if (StringUtils.isBlank(value)) {
+            throw new IllegalArgumentException("Property 'yamj3.file.storage.photo' not set");
         }
+        this.storagePathPhoto = FilenameUtils.normalizeNoEndSeparator(FilenameUtils.concat(this.storageResourceDir, value), true);
+        this.storagePathPhoto += "/";
         LOG.info("Photo storage path set to '{}'", this.storagePathPhoto);
-    }
 
-    @Value("${yamj3.file.storage.skins}")
-    public void setStoragePathSkins(String storagePathSkins) {
-        this.storagePathSkin = FilenameUtils.normalize(FilenameUtils.concat(storageResourceDir, storagePathSkins), Boolean.TRUE);
-        if (!this.storagePathSkin.endsWith("/")) {
-            this.storagePathSkin += "/";
+        value = PropertyTools.getProperty("yamj3.file.storage.skins");
+        if (StringUtils.isBlank(value)) {
+            throw new IllegalArgumentException("Property 'yamj3.file.storage.skins' not set");
         }
+        this.storagePathSkin = FilenameUtils.normalizeNoEndSeparator(FilenameUtils.concat(this.storageResourceDir, value), true);
+        this.storagePathSkin += "/";
         LOG.info("Skins storage path set to '{}'", this.storagePathSkin);
     }
-    //</editor-fold>
 
     public boolean exists(StorageType type, String filename) throws IOException {
         return false;

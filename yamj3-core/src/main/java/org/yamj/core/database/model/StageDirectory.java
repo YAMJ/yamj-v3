@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import org.yamj.common.tools.EqualityTools;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
@@ -121,7 +123,7 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
         final int prime = 7;
         int result = 1;
         result = prime * result + (getDirectoryPath() == null ? 0 : getDirectoryPath().hashCode());
-        result = prime * result + (getLibrary() == null ? 0 : getLibrary().hashCode());
+        result = prime * result + (getLibrary() == null ? 0 : Long.valueOf(getLibrary().getId()).hashCode());
         return result;
     }
 
@@ -146,13 +148,7 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
             return false;
         }
         // check the library
-        if (getLibrary() == null && castOther.getLibrary() == null) {
-            return true;
-        }
-        if (getLibrary() == null || castOther.getLibrary() == null) {
-            return false;
-        }
-        return getLibrary().equals(castOther.getLibrary());
+        return EqualityTools.equals(getLibrary(), castOther.getLibrary());
     }
 
     @Override

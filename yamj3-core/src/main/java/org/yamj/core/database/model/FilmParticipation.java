@@ -218,7 +218,7 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
         int result = 1;
         result = prime * result + (getSourceDb() == null ? 0 : getSourceDb().hashCode());
         result = prime * result + (getSourceDbId() == null ? 0 : getSourceDbId().hashCode());
-        result = prime * result + (this.jobType == null ? 0 : this.jobType.hashCode());
+        result = prime * result + (getJobType() == null ? 0 : getJobType().hashCode());
         return result;
     }
 

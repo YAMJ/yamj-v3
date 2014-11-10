@@ -36,12 +36,12 @@ import org.yamj.core.api.options.OptionsConfig;
 import org.yamj.core.database.model.Configuration;
 import org.yamj.core.hibernate.HibernateDao;
 
+@Transactional
 @Repository("configDao")
 public class ConfigDao extends HibernateDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigDao.class);
 
-    @Transactional
     @SuppressWarnings("unchecked")
     public Map<String, String> readConfig() {
         SQLQuery query = getSession().createSQLQuery("select config_key, config_value from configuration");
@@ -59,14 +59,12 @@ public class ConfigDao extends HibernateDao {
         return config;
     }
 
-    @Transactional
     public void storeConfig(Map<String, String> config) {
         for (Map.Entry<String, String> entry : config.entrySet()) {
             storeConfig(entry.getKey(), entry.getValue(), false);
         }
     }
 
-    @Transactional
     public void storeConfig(String key, String value, boolean updateAllowed) {
         Session session = getSession();
         Configuration config = (Configuration) session.byId(Configuration.class).load(key);
@@ -82,7 +80,6 @@ public class ConfigDao extends HibernateDao {
         }
     }
 
-    @Transactional
     @SuppressWarnings("unchecked")
     public List<Configuration> getConfigurationEntries(OptionsConfig options) {
         StringBuilder sbSQL = new StringBuilder("from Configuration");
@@ -99,7 +96,6 @@ public class ConfigDao extends HibernateDao {
         return getSession().createQuery(sbSQL.toString()).list();
     }
 
-    @Transactional
     public List<Configuration> getConfigurationEntries(String key) {
         OptionsConfig options = new OptionsConfig();
         options.setConfig(key);
@@ -113,7 +109,6 @@ public class ConfigDao extends HibernateDao {
      *
      * @param key
      */
-    @Transactional
     public void deleteConfig(String key) {
         if (StringUtils.isNotBlank(key)) {
             List<Configuration> configList = getConfigurationEntries(key);

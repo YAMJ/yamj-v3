@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import org.yamj.common.tools.EqualityTools;
+
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -137,29 +139,19 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
         }
         Subtitle castOther = (Subtitle) other;
         // first check the id
-        if ((this.getId() > 0) && (castOther.getId() > 0)) {
-            return this.getId() == castOther.getId();
+        if ((getId() > 0) && (castOther.getId() > 0)) {
+            return getId() == castOther.getId();
         }
         // check counter
         if (getCounter() != castOther.getCounter()) {
             return false;
         }
         // check media file
-        if (getMediaFile()!= null && castOther.getMediaFile() != null && !getMediaFile().equals(castOther.getMediaFile())) {
+        if (EqualityTools.notEquals(getStageFile(), castOther.getStageFile())) {
             return false;
         }
         // check stage file
-        if (getStageFile() == null && castOther.getStageFile() != null) {
-            return false;
-        }
-        if (getStageFile()!= null && castOther.getStageFile() == null) {
-            return false;
-        }
-        if (getStageFile() != null && castOther.getStageFile() != null) {
-            return getStageFile().equals(castOther.getStageFile());
-        }
-        // both stage files are null
-        return true;
+        return EqualityTools.equals(getStageFile(), castOther.getStageFile());
     }
 
     @Override

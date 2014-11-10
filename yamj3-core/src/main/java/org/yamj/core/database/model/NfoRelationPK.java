@@ -23,49 +23,46 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import javax.persistence.*;
-import org.hibernate.annotations.*;
-import org.yamj.core.database.model.type.JobType;
+import javax.persistence.Embeddable;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.ForeignKey;
 
 @Embeddable
-public class CastCrewPK implements Serializable {
+public class NfoRelationPK implements Serializable {
 
-    private static final long serialVersionUID = -1986488516405874557L;
+    private static final long serialVersionUID = -2719804527986484389L;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @ForeignKey(name = "FK_CASTCREW_PERSON")
+    @ForeignKey(name = "FK_NFORELATION_STAGEFILE")
     @Fetch(FetchMode.JOIN)
-    @JoinColumn(name = "person_id", nullable = false, insertable = false, updatable = false)
-    private Person person;
+    @JoinColumn(name = "stagefile_id", nullable = false, insertable = false, updatable = false)
+    private StageFile stageFile;
 
-    @Index(name = "IX_CASTCREW_VIDEOJOB")
     @ManyToOne(fetch = FetchType.EAGER)
-    @ForeignKey(name = "FK_CASTCREW_VIDEODATA")
+    @ForeignKey(name = "FK_NFORELATION_VIDEODATA")
     @Fetch(FetchMode.JOIN)
     @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false)
     private VideoData videoData;
 
-    @Index(name = "IX_CASTCREW_VIDEOJOB")
-    @Type(type = "jobType")
-    @Column(name = "job", nullable = false, length = 30, insertable = false, updatable = false)
-    private JobType jobType;
+    public NfoRelationPK() {}
 
-    public CastCrewPK() {}
-
-    public CastCrewPK(Person person, VideoData videoData, JobType jobType) {
-        this.person = person;
+    public NfoRelationPK(StageFile stageFile, VideoData videoData) {
+        this.stageFile = stageFile;
         this.videoData = videoData;
-        this.jobType = jobType;
     }
 
     // GETTER AND SETTER
 
-    public Person getPerson() {
-        return person;
+    public StageFile getStageFile() {
+        return stageFile;
     }
 
-    public void setPerson(Person person) {
-        this.person = person;
+    public void setStageFile(StageFile stageFile) {
+        this.stageFile = stageFile;
     }
 
     public VideoData getVideoData() {
@@ -76,23 +73,15 @@ public class CastCrewPK implements Serializable {
         this.videoData = videoData;
     }
 
-    public JobType getJobType() {
-        return jobType;
-    }
-
-    public void setJobType(JobType jobType) {
-        this.jobType = jobType;
-    }
-
     // EQUALITY CHECKS
 
     @Override
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + Long.valueOf(getPerson().getId()).hashCode();
+        result = prime * result + Long.valueOf(getStageFile().getId()).hashCode();
         result = prime * result + Long.valueOf(getVideoData().getId()).hashCode();
-        result = prime * result + getJobType().hashCode();
+        
         return result;
     }
 
@@ -104,28 +93,23 @@ public class CastCrewPK implements Serializable {
         if (other == null) {
             return false;
         }
-        if (!(other instanceof CastCrewPK)) {
+        if (!(other instanceof NfoRelationPK)) {
             return false;
         }
-        CastCrewPK castOther = (CastCrewPK) other;
-        if (getJobType() != castOther.getJobType()) {
-            return false;
-        }
-        if (getPerson().getId() != castOther.getPerson().getId()) {
+        NfoRelationPK castOther = (NfoRelationPK) other;
+        if (getStageFile().getId() != castOther.getStageFile().getId()) {
             return false;
         }
         return getVideoData().getId() == castOther.getVideoData().getId();
-            }
+    }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("CastCrewPK [person='");
-        sb.append(getPerson().getName());
+        sb.append("NfoRelationPK [stageFile='");
+        sb.append(getStageFile().getFileName());
         sb.append("', videoData='");
         sb.append(getVideoData().getIdentifier());
-        sb.append("', job=");
-        sb.append(getJobType());
         sb.append("]");
         return sb.toString();
     }

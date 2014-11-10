@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import org.yamj.common.tools.EqualityTools;
+
 import java.io.Serializable;
 import java.util.*;
 import javax.persistence.*;
@@ -77,7 +79,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "stageFile")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "nfoRelationPK.stageFile")
     private List<NfoRelation> nfoRelations = new ArrayList<NfoRelation>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "stageFile")
@@ -218,7 +220,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
         int result = 1;
         result = prime * result + (getExtension() == null ? 0 : getExtension().hashCode());
         result = prime * result + (getBaseName() == null ? 0 : getBaseName().hashCode());
-        result = prime * result + (getStageDirectory() == null ? 0 : getStageDirectory().hashCode());
+        result = prime * result + (getStageDirectory() == null ? 0 : Long.valueOf(getStageDirectory().getId()).hashCode());
         return result;
     }
 
@@ -235,8 +237,8 @@ public class StageFile extends AbstractAuditable implements Serializable {
         }
         StageFile castOther = (StageFile) other;
         // first check the id
-        if ((this.getId() > 0) && (castOther.getId() > 0)) {
-            return this.getId() == castOther.getId();
+        if ((getId() > 0) && (castOther.getId() > 0)) {
+            return getId() == castOther.getId();
         }
         // check extension
         if (!StringUtils.equals(getExtension(), castOther.getExtension())) {
@@ -247,13 +249,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
             return false;
         }
         // check stage directory
-        if (this.getStageDirectory() == null && castOther.getStageDirectory() == null) {
-            return true;
-        }
-        if (getStageDirectory() == null || castOther.getStageDirectory() == null) {
-            return false;
-        }
-        return getStageDirectory().equals(castOther.getStageDirectory());
+        return EqualityTools.equals(getStageDirectory(), castOther.getStageDirectory());
     }
 
     @Override

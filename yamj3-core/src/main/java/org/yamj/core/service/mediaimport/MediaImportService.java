@@ -460,9 +460,7 @@ public class MediaImportService {
                 LOG.debug("Found NFO {}-'{}' with priority {} for video data '{}'",
                                 nfoFile.getId(), nfoFile.getFileName(), priority, videoData.getIdentifier());
 
-                NfoRelation nfoRelation = new NfoRelation();
-                nfoRelation.setStageFile(nfoFile);
-                nfoRelation.setVideoData(videoData);
+                NfoRelation nfoRelation = new NfoRelation(nfoFile, videoData);
                 nfoRelation.setPriority(priority);
 
                 if (!videoData.getNfoRelations().contains(nfoRelation)) {
@@ -470,11 +468,7 @@ public class MediaImportService {
                     videoData.addNfoRelation(nfoRelation);
                     nfoFile.addNfoRelation(nfoRelation);
 
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Stored new NFO relation: stageFile={}, videoData={}",
-                                        nfoRelation.getStageFile().getId(),
-                                        nfoRelation.getVideoData().getId());
-                    }
+                    LOG.trace("Stored new NFO relation: stageFile={}, videoData={}", nfoFile.getId(), videoData.getId());
                 }
             }
         }
@@ -545,7 +539,7 @@ public class MediaImportService {
         
         // update meta-data for NFO scan
         for (NfoRelation nfoRelation : stageFile.getNfoRelations()) {
-            VideoData videoData = nfoRelation.getVideoData();
+            VideoData videoData = nfoRelation.getNfoRelationPK().getVideoData();
             if (videoData.isMovie()) {
                 videoData.setStatus(StatusType.UPDATED);
                 stagingDao.updateEntity(videoData);
@@ -583,9 +577,7 @@ public class MediaImportService {
             LOG.debug("Found video data {}-'{}' for nfo file '{}' with priority {}",
                             videoData.getId(), videoData.getIdentifier(), stageFile.getFileName(), priority);
 
-            NfoRelation nfoRelation = new NfoRelation();
-            nfoRelation.setStageFile(stageFile);
-            nfoRelation.setVideoData(videoData);
+            NfoRelation nfoRelation = new NfoRelation(stageFile, videoData);
             nfoRelation.setPriority(priority);
 
             if (!stageFile.getNfoRelations().contains(nfoRelation)) {
@@ -593,11 +585,8 @@ public class MediaImportService {
                 stageFile.addNfoRelation(nfoRelation);
                 videoData.addNfoRelation(nfoRelation);
 
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Stored new NFO relation: stageFile={}, videoData={}",
-                                    nfoRelation.getStageFile().getId(),
-                                    nfoRelation.getVideoData().getId());
-                }
+                LOG.trace("Stored new NFO relation: stageFile={}, videoData={}", stageFile.getId(), videoData.getId());
+
             }
         }
         return true;

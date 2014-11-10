@@ -554,29 +554,28 @@ public class MetadataStorageService {
         int ordering = 0; // ordering counter
         
         for (CreditDTO dto : videoData.getCreditDTOS()) {
-            Person person = metadataDao.getPerson(dto.getName());
-            if (person == null) {
-                LOG.warn("Person '{}' not found, skipping", dto.getName());
-                // continue with next cast entry
-                continue;
-            } else {
-                LOG.trace("Found person '{}' for searched name '{}'", person.getName(), dto.getName());
-            }
+            CastCrew castCrew = this.metadataDao.getCastCrew(videoData, dto.getJobType(), dto.getName());
 
-            // creae a new entry
-            CastCrew castCrew = new CastCrew(person, videoData, dto.getJobType());
-            
-            int index = videoData.getCredits().indexOf(castCrew);
-            if (index >= 0) {
-                // updated cast crew
-                castCrew = videoData.getCredits().get(index);
-                castCrew.setRole(StringUtils.abbreviate(dto.getRole(), 255));
-                castCrew.setOrdering(ordering++);
-            } else {
-                // new cast crew
+            if (castCrew == null) {
+                // retrieve person
+                Person person = metadataDao.getPerson(dto.getName());
+                if (person == null) {
+                    LOG.warn("Person '{}' not found, skipping", dto.getName());
+                    // continue with next cast entry
+                    continue;
+                } else {
+                    LOG.trace("Found person '{}' for searched name '{}'", person.getName(), dto.getName());
+                }
+
+                // create new association between person and video
+                castCrew = new CastCrew(person, videoData, dto.getJobType());
                 castCrew.setRole(StringUtils.abbreviate(dto.getRole(), 255));
                 castCrew.setOrdering(ordering++);
                 videoData.getCredits().add(castCrew);
+            } else {
+                // updated cast entry
+                castCrew.setRole(StringUtils.abbreviate(dto.getRole(), 255));
+                castCrew.setOrdering(ordering++);
             }
             // remove from credits to delete
             deleteCredits.remove(castCrew);

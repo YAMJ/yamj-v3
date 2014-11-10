@@ -88,8 +88,8 @@ public class Certification extends AbstractIdentifiable implements Serializable 
         }
         Certification castOther = (Certification) other;
         // first check the id
-        if ((this.getId() > 0) && (castOther.getId() > 0)) {
-            return this.getId() == castOther.getId();
+        if ((getId() > 0) && (castOther.getId() > 0)) {
+            return getId() == castOther.getId();
         }
         // check country
         if (!StringUtils.equals(getCountry(), castOther.getCountry())) {

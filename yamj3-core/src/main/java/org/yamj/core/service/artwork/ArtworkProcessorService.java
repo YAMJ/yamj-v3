@@ -207,6 +207,8 @@ public class ArtworkProcessorService {
     private BufferedImage drawImage(BufferedImage imageGraphic, ArtworkProfile profile) {
         BufferedImage bi = imageGraphic;
 
+        // TODO more graphic options
+        
         int origWidth = imageGraphic.getWidth();
         int origHeight = imageGraphic.getHeight();
         float ratio = profile.getRatio();

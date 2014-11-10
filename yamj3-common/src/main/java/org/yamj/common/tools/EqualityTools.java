@@ -22,25 +22,19 @@
  */
 package org.yamj.common.tools;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class StringTools {
+public class EqualityTools {
     
-    /**
-     * Split a list using a regex and return a list of trimmed strings
-     *
-     * @param stringToSplit
-     * @param regexDelim
-     * @return
-     */
-    public static List<String> splitList(String stringToSplit, String regexDelim) {
-        List<String> finalValues = new ArrayList<String>();
-
-        for (String output : stringToSplit.split(regexDelim)) {
-            finalValues.add(output.trim());
+    public static boolean equals(Object o1, Object o2) {
+        if (o1 == o2)  {
+            return true;
         }
+        if (o1 == null || o2 == null) {
+            return false;
+        }
+        return (o1.equals(o2));
+    }
 
-        return finalValues;
+    public static boolean notEquals(Object o1, Object o2) {
+        return !equals(o1, o2);
     }
 }

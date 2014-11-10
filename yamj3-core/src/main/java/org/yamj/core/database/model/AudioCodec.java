@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.model;
 
+import org.yamj.common.tools.EqualityTools;
+
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -160,11 +162,7 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
             return false;
         }
         // check media file
-        if (getMediaFile() != null && castOther.getMediaFile() != null) {
-            return getMediaFile().equals(castOther.getMediaFile());
-        }
-        // case if one media file is null
-        return true;
+        return EqualityTools.equals(getMediaFile(), castOther.getMediaFile());
     }
 
     @Override

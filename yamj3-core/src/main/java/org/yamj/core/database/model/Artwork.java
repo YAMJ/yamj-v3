@@ -22,8 +22,9 @@
  */
 package org.yamj.core.database.model;
 
-import javax.persistence.UniqueConstraint;
+import org.yamj.common.tools.EqualityTools;
 
+import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.NaturalId;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -199,55 +200,19 @@ public class Artwork extends AbstractAuditable implements Serializable {
             return false;
         }
         // check video data
-        if (getVideoData() == null && castOther.getVideoData() != null) {
+        if (EqualityTools.notEquals(getVideoData(), castOther.getVideoData())) {
             return false;
-        }
-        if (getVideoData() != null && castOther.getVideoData() == null) {
-            return false;
-        }
-        if (getVideoData() != null && castOther.getVideoData() != null) {
-            if (!getVideoData().equals(castOther.getVideoData())) {
-                return false;
-            }
         }
         // check season
-        if (getSeason() == null && castOther.getSeason() != null) {
+        if (EqualityTools.notEquals(getSeason(), castOther.getSeason())) {
             return false;
-        }
-        if (getSeason() != null && castOther.getSeason() == null) {
-            return false;
-        }
-        if (getSeason() != null && castOther.getSeason() != null) {
-            if (!getSeason().equals(castOther.getSeason())) {
-                return false;
-            }
         }
         // check series
-        if (getSeries() == null && castOther.getSeries() != null) {
+        if (EqualityTools.notEquals(getSeries(), castOther.getSeries())) {
             return false;
         }
-        if (getSeries() != null && castOther.getSeries() == null) {
-            return false;
-        }
-        if (getSeries() != null && castOther.getSeries() != null) {
-            if (!getSeries().equals(castOther.getSeries())) {
-                return false;
-            }
-        }
-        // check person photo
-        if (getPerson() == null && castOther.getPerson() != null) {
-            return false;
-        }
-        if (getPerson() != null && castOther.getPerson() == null) {
-            return false;
-        }
-        if (getPerson() != null && castOther.getPerson() != null) {
-            if (!getPerson().equals(castOther.getPerson())) {
-                return false;
-            }
-        }
-        // all checks passed
-        return true;
+        // check person
+        return EqualityTools.equals(getPerson(), castOther.getPerson());
     }
 
     @Override

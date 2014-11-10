@@ -38,19 +38,18 @@ import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.hibernate.HibernateDao;
 
+@Transactional
 @Repository("playerDao")
 public class PlayerDao extends HibernateDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlayerDao.class);
 
-    @Transactional
     public void storePlayer(List<PlayerPathOld> playerList) {
         for (PlayerPathOld player : playerList) {
             storePlayer(player);
         }
     }
 
-    @Transactional
     public void storePlayer(PlayerPathOld player) {
         
         LOG.debug("Checking for existing information on player '{}'", player.getName());
@@ -68,7 +67,6 @@ public class PlayerDao extends HibernateDao {
         }
     }
 
-    @Transactional
     public void storePlayer(PlayerInfo player) {
         LOG.debug("Checking for existing information on player '{}'", player.getName());
         PlayerInfo existingPlayer = getByNameCaseSensitive(PlayerInfo.class, player.getName());
@@ -89,7 +87,6 @@ public class PlayerDao extends HibernateDao {
         }
     }
 
-    @Transactional
     @SuppressWarnings("unchecked")
     public List<PlayerInfo> getPlayerInfo(OptionsPlayer options) {
         Session session = getSession();
@@ -97,7 +94,6 @@ public class PlayerDao extends HibernateDao {
         return criteria.list();
     }
 
-    @Transactional
     public List<PlayerPathOld> getPlayerEntries(OptionsPlayer options) {
         SqlScalars sqlScalars = new SqlScalars();
 
@@ -115,7 +111,6 @@ public class PlayerDao extends HibernateDao {
         return players;
     }
 
-    @Transactional
     public List<PlayerPathOld> getPlayerEntries(String player) {
         OptionsPlayer options = new OptionsPlayer();
         options.setPlayer(player);
@@ -129,7 +124,6 @@ public class PlayerDao extends HibernateDao {
      *
      * @param name
      */
-    @Transactional
     public void deletePlayer(String name) {
         if (StringUtils.isNotBlank(name)) {
             PlayerPathOld player = getByNameCaseSensitive(PlayerPathOld.class, name);

@@ -27,6 +27,7 @@ import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import org.yamj.common.tools.EqualityTools;
 import org.yamj.core.database.model.type.JobType;
 
 @Entity
@@ -51,8 +52,8 @@ public class CastCrew implements Serializable {
     public CastCrew(Person person, VideoData videoData, JobType jobType) {
         setCastCrewPK(new CastCrewPK(person, videoData, jobType));
     }
-                    
-    private CastCrewPK getCastCrewPK() {
+
+    public CastCrewPK getCastCrewPK() {
         return castCrewPK;
     }
 
@@ -98,6 +99,6 @@ public class CastCrew implements Serializable {
             return false;
         }
         CastCrew castOther = (CastCrew) other;
-        return getCastCrewPK().equals(castOther.getCastCrewPK());
+        return EqualityTools.equals(getCastCrewPK(), castOther.getCastCrewPK());
     }
 }
