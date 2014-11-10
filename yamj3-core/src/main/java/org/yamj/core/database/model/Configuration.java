@@ -92,7 +92,7 @@ public class Configuration implements Auditable, Serializable {
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (key == null ? 0 : key.hashCode());
+        result = prime * result + (getKey() == null ? 0 : getKey().hashCode());
         return result;
     }
 
@@ -108,7 +108,7 @@ public class Configuration implements Auditable, Serializable {
             return false;
         }
         Configuration castOther = (Configuration) other;
-        return StringUtils.equals(this.key, castOther.key);
+        return StringUtils.equals(getKey(), castOther.getKey());
     }
 
     @Override

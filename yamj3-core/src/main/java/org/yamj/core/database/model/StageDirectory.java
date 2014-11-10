@@ -120,8 +120,8 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (this.directoryPath == null ? 0 : this.directoryPath.hashCode());
-        result = prime * result + (this.library == null ? 0 : this.library.hashCode());
+        result = prime * result + (getDirectoryPath() == null ? 0 : getDirectoryPath().hashCode());
+        result = prime * result + (getLibrary() == null ? 0 : getLibrary().hashCode());
         return result;
     }
 
@@ -138,24 +138,21 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
         }
         StageDirectory castOther = (StageDirectory) other;
         // first check the id
-        if ((this.getId() > 0) && (castOther.getId() > 0)) {
-            return this.getId() == castOther.getId();
+        if ((getId() > 0) && (castOther.getId() > 0)) {
+            return getId() == castOther.getId();
         }
         // check the directory path
-        if (!StringUtils.equals(this.directoryPath, castOther.directoryPath)) {
+        if (!StringUtils.equals(getDirectoryPath(), castOther.getDirectoryPath())) {
             return false;
         }
         // check the library
-        if (this.library == null && castOther.library == null) {
+        if (getLibrary() == null && castOther.getLibrary() == null) {
             return true;
         }
-        if (this.library == null) {
+        if (getLibrary() == null || castOther.getLibrary() == null) {
             return false;
         }
-        if (castOther.library == null) {
-            return false;
-        }
-        return this.library.equals(castOther.library);
+        return getLibrary().equals(castOther.getLibrary());
     }
 
     @Override

@@ -134,8 +134,8 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (mediaFile == null ? 0 : mediaFile.hashCode());
-        result = prime * result + counter;
+        result = prime * result + (getMediaFile() == null ? 0 : getMediaFile().hashCode());
+        result = prime * result + getCounter();
         return result;
     }
 
@@ -152,16 +152,16 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
         }
         AudioCodec castOther = (AudioCodec) other;
         // first check the id
-        if ((this.getId() > 0) && (castOther.getId() > 0)) {
-            return this.getId() == castOther.getId();
+        if ((getId() > 0) && (castOther.getId() > 0)) {
+            return getId() == castOther.getId();
         }
         // check counter
-        if (this.counter != castOther.counter) {
+        if (getCounter() != castOther.getCounter()) {
             return false;
         }
         // check media file
-        if (this.mediaFile != null && castOther.mediaFile != null) {
-            return this.mediaFile.equals(castOther.mediaFile);
+        if (getMediaFile() != null && castOther.getMediaFile() != null) {
+            return getMediaFile().equals(castOther.getMediaFile());
         }
         // case if one media file is null
         return true;

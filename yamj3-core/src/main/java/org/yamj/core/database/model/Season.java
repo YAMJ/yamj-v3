@@ -257,6 +257,11 @@ public class Season extends AbstractMetadata {
             return false;
         }
         Season castOther = (Season) other;
+        // first check the id
+        if ((getId() > 0) && (castOther.getId() > 0)) {
+            return getId() == castOther.getId();
+        }
+        // check the identifier
         return StringUtils.equals(getIdentifier(), castOther.getIdentifier());
     }
 
@@ -269,7 +274,7 @@ public class Season extends AbstractMetadata {
         sb.append(getIdentifier());
         sb.append(", title=");
         sb.append(getTitle());
-        sb.append(", title=");
+        sb.append(", year=");
         sb.append(getYear());
         sb.append("]");
         return sb.toString();

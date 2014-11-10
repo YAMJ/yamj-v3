@@ -1531,7 +1531,7 @@ public class ApiDao extends HibernateDao {
         SqlScalars sqlScalars = new SqlScalars();
 
         sqlScalars.addToSql("SELECT job AS item, COUNT(*) AS count");
-        sqlScalars.addToSql("FROM  cast_crew");
+        sqlScalars.addToSql("FROM cast_crew");
         if (CollectionUtils.isNotEmpty(requiredJobs)) {
             sqlScalars.addToSql("WHERE job IN (:joblist)");
             sqlScalars.addParameters("joblist", requiredJobs);

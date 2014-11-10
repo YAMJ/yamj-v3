@@ -342,7 +342,7 @@ public class CommonStorageService {
     public List<Long> getOrphanPersons() {
         final StringBuilder query = new StringBuilder();
         query.append("SELECT p.id FROM Person p ");
-        query.append("WHERE not exists (select 1 from CastCrew c where c.person=p)");
+        query.append("WHERE not exists (select 1 from CastCrew c where c.castCrewPK.person=p)");
         return this.stagingDao.find(query);
     }
     

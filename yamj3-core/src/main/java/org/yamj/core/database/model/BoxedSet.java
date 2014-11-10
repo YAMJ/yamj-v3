@@ -58,7 +58,7 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (this.name == null ? 0 : this.name.hashCode());
+        result = prime * result + (getName() == null ? 0 : getName().hashCode());
         return result;
     }
 
@@ -74,6 +74,22 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
             return false;
         }
         BoxedSet castOther = (BoxedSet) other;
-        return StringUtils.equalsIgnoreCase(this.name, castOther.name);
+        // first check the id
+        if ((getId() > 0) && (castOther.getId() > 0)) {
+            return getId() == castOther.getId();
+        }
+        // check the name
+        return StringUtils.equalsIgnoreCase(getName(), castOther.getName());
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("BoxedSet [ID=");
+        sb.append(getId());
+        sb.append(", name=");
+        sb.append(getName());
+        sb.append("]");
+        return sb.toString();
     }
 }

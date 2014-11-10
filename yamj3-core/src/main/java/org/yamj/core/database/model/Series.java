@@ -381,6 +381,11 @@ public class Series extends AbstractMetadata {
             return false;
         }
         Series castOther = (Series) other;
+        // first check the id
+        if ((getId() > 0) && (castOther.getId() > 0)) {
+            return getId() == castOther.getId();
+        }
+        // check the identifier
         return StringUtils.equals(getIdentifier(), castOther.getIdentifier());
     }
 

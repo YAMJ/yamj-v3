@@ -216,8 +216,8 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (this.sourceDb == null ? 0 : this.sourceDb.hashCode());
-        result = prime * result + (this.sourceDbId == null ? 0 : this.sourceDbId.hashCode());
+        result = prime * result + (getSourceDb() == null ? 0 : getSourceDb().hashCode());
+        result = prime * result + (getSourceDbId() == null ? 0 : getSourceDbId().hashCode());
         result = prime * result + (this.jobType == null ? 0 : this.jobType.hashCode());
         return result;
     }
@@ -234,16 +234,13 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
             return false;
         }
         FilmParticipation castOther = (FilmParticipation) other;
-        if (!StringUtils.equalsIgnoreCase(this.sourceDb, castOther.sourceDb)) {
+        if (!StringUtils.equalsIgnoreCase(getSourceDb(), castOther.getSourceDb())) {
             return false;
         }
-        if (!StringUtils.equalsIgnoreCase(this.sourceDbId, castOther.sourceDbId)) {
+        if (!StringUtils.equalsIgnoreCase(getSourceDbId(), castOther.getSourceDbId())) {
             return false;
         }
-        if (this.jobType != castOther.jobType) {
-            return false;
-        }
-        return true;
+        return (getJobType() == castOther.getJobType());
     }
 
     @Override

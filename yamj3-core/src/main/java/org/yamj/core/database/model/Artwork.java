@@ -170,10 +170,11 @@ public class Artwork extends AbstractAuditable implements Serializable {
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (artworkType == null ? 0 : artworkType.hashCode());
-        result = prime * result + (videoData == null ? 0 : videoData.hashCode());
-        result = prime * result + (season == null ? 0 : season.hashCode());
-        result = prime * result + (season == null ? 0 : season.hashCode());
+        result = prime * result + (getArtworkType() == null ? 0 : getArtworkType().hashCode());
+        result = prime * result + (getVideoData() == null ? 0 : getVideoData().hashCode());
+        result = prime * result + (getSeason() == null ? 0 : getSeason().hashCode());
+        result = prime * result + (getSeries() == null ? 0 : getSeries().hashCode());
+        result = prime * result + (getPerson() == null ? 0 : getPerson().hashCode());
         return result;
     }
 
@@ -190,58 +191,58 @@ public class Artwork extends AbstractAuditable implements Serializable {
         }
         Artwork castOther = (Artwork) other;
         // first check the id
-        if ((this.getId() > 0) && (castOther.getId() > 0)) {
-            return this.getId() == castOther.getId();
+        if ((getId() > 0) && (castOther.getId() > 0)) {
+            return getId() == castOther.getId();
         }
         // check artwork type
-        if (this.artworkType != castOther.artworkType) {
+        if (getArtworkType() != castOther.getArtworkType()) {
             return false;
         }
         // check video data
-        if (this.videoData == null && castOther.videoData != null) {
+        if (getVideoData() == null && castOther.getVideoData() != null) {
             return false;
         }
-        if (this.videoData != null && castOther.videoData == null) {
+        if (getVideoData() != null && castOther.getVideoData() == null) {
             return false;
         }
-        if (this.videoData != null && castOther.videoData != null) {
-            if (!this.videoData.equals(castOther.videoData)) {
+        if (getVideoData() != null && castOther.getVideoData() != null) {
+            if (!getVideoData().equals(castOther.getVideoData())) {
                 return false;
             }
         }
         // check season
-        if (this.season == null && castOther.season != null) {
+        if (getSeason() == null && castOther.getSeason() != null) {
             return false;
         }
-        if (this.season != null && castOther.season == null) {
+        if (getSeason() != null && castOther.getSeason() == null) {
             return false;
         }
-        if (this.season != null && castOther.season != null) {
-            if (!this.season.equals(castOther.season)) {
+        if (getSeason() != null && castOther.getSeason() != null) {
+            if (!getSeason().equals(castOther.getSeason())) {
                 return false;
             }
         }
         // check series
-        if (this.series == null && castOther.series != null) {
+        if (getSeries() == null && castOther.getSeries() != null) {
             return false;
         }
-        if (this.series != null && castOther.series == null) {
+        if (getSeries() != null && castOther.getSeries() == null) {
             return false;
         }
-        if (this.series != null && castOther.series != null) {
-            if (!this.series.equals(castOther.series)) {
+        if (getSeries() != null && castOther.getSeries() != null) {
+            if (!getSeries().equals(castOther.getSeries())) {
                 return false;
             }
         }
         // check person photo
-        if (this.person == null && castOther.person != null) {
+        if (getPerson() == null && castOther.getPerson() != null) {
             return false;
         }
-        if (this.person != null && castOther.person == null) {
+        if (getPerson() != null && castOther.getPerson() == null) {
             return false;
         }
-        if (this.person != null && castOther.person != null) {
-            if (!this.person.equals(castOther.person)) {
+        if (getPerson() != null && castOther.getPerson() != null) {
+            if (!getPerson().equals(castOther.getPerson())) {
                 return false;
             }
         }

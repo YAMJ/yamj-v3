@@ -232,10 +232,10 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (artwork == null ? 0 : artwork.hashCode());
-        result = prime * result + (stageFile == null ? 0 : stageFile.hashCode());
-        result = prime * result + (source == null ? 0 : source.hashCode());
-        result = prime * result + (url == null ? 0 : url.hashCode());
+        result = prime * result + (getArtwork() == null ? 0 : getArtwork().hashCode());
+        result = prime * result + (getStageFile() == null ? 0 : getStageFile().hashCode());
+        result = prime * result + (getSource() == null ? 0 : getSource().hashCode());
+        result = prime * result + (getUrl() == null ? 0 : getUrl().hashCode());
         return result;
     }
 
@@ -256,34 +256,34 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
             return this.getId() == castOther.getId();
         }
         // check source
-        if (!StringUtils.equals(source, castOther.source)) {
+        if (!StringUtils.equals(getSource(), castOther.getSource())) {
             return false;
         }
         // check URL
-        if (!StringUtils.equals(url, castOther.url)) {
+        if (!StringUtils.equals(getUrl(), castOther.getUrl())) {
             return false;
         }
         // check artwork
-        if (this.artwork == null && castOther.artwork != null) {
+        if (getArtwork() == null && castOther.getArtwork() != null) {
             return false;
         }
-        if (this.artwork != null && castOther.artwork == null) {
+        if (getArtwork() != null && castOther.getArtwork() == null) {
             return false;
         }
-        if (this.artwork != null && castOther.artwork != null) {
-            if (!this.artwork.equals(castOther.artwork)) {
+        if (getArtwork() != null && castOther.getArtwork() != null) {
+            if (!getArtwork().equals(castOther.getArtwork())) {
                 return false;
             }
         }
         // check stage file
-        if (this.stageFile == null && castOther.stageFile != null) {
+        if (getStageFile() == null && castOther.getStageFile() != null) {
             return false;
         }
-        if (this.stageFile != null && castOther.stageFile == null) {
+        if (getStageFile() != null && castOther.getStageFile() == null) {
             return false;
         }
-        if (this.stageFile != null && castOther.stageFile != null) {
-            if (!this.stageFile.equals(castOther.stageFile)) {
+        if (getStageFile() != null && castOther.getStageFile() != null) {
+            if (!getStageFile().equals(castOther.getStageFile())) {
                 return false;
             }
         }

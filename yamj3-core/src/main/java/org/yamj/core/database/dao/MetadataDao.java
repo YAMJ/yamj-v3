@@ -22,13 +22,7 @@
  */
 package org.yamj.core.database.dao;
 
-import org.yamj.core.database.model.type.ArtworkType;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import org.hibernate.Query;
+import java.util.*;
 import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +31,7 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
-import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Repository("metadataDao")
@@ -107,22 +101,6 @@ public class MetadataDao extends HibernateDao {
                 this.updateEntity(person);
             }
         }
-    }
-    
-    public CastCrew getCastCrew(VideoData videoData, JobType jobType, String personName) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("select distinct c ");
-        sb.append("from CastCrew c ");
-        sb.append("join c.person p ");
-        sb.append("where c.videoData=:videoData " );
-        sb.append("and c.jobType=:jobType ");
-        sb.append("and lower(p.name)=:personName ");
-        
-        Query query = getSession().createQuery(sb.toString());
-        query.setParameter("videoData", videoData);
-        query.setParameter("jobType", jobType);
-        query.setString("personName", personName.toLowerCase());
-        return (CastCrew)query.uniqueResult();
     }
     
     @SuppressWarnings("unchecked")

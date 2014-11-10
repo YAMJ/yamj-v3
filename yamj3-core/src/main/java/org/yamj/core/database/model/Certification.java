@@ -70,8 +70,8 @@ public class Certification extends AbstractIdentifiable implements Serializable 
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (country == null ? 0 : country.hashCode());
-        result = prime * result + (certificate == null ? 0 : certificate.hashCode());
+        result = prime * result + (getCountry() == null ? 0 : getCountry().hashCode());
+        result = prime * result + (getCertificate() == null ? 0 : getCertificate().hashCode());
         return result;
     }
 
@@ -92,11 +92,11 @@ public class Certification extends AbstractIdentifiable implements Serializable 
             return this.getId() == castOther.getId();
         }
         // check country
-        if (!StringUtils.equals(this.country, castOther.country)) {
+        if (!StringUtils.equals(getCountry(), castOther.getCountry())) {
             return false;
         }
         // check text
-        if (!StringUtils.equals(this.certificate, castOther.certificate)) {
+        if (!StringUtils.equals(getCertificate(), castOther.getCertificate())) {
             return false;
         }
         // all checks passed

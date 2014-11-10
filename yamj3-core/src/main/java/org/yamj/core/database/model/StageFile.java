@@ -202,7 +202,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
     // TRANSIENT METHODS
     
     public String getFileName() {
-        return this.baseName + "." + this.extension;
+        return this.getBaseName() + "." + this.getExtension();
     }
 
     public String getArtworkHashCode() {
@@ -216,9 +216,9 @@ public class StageFile extends AbstractAuditable implements Serializable {
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (this.extension == null ? 0 : this.extension.hashCode());
-        result = prime * result + (this.baseName == null ? 0 : this.baseName.hashCode());
-        result = prime * result + (this.stageDirectory == null ? 0 : this.stageDirectory.hashCode());
+        result = prime * result + (getExtension() == null ? 0 : getExtension().hashCode());
+        result = prime * result + (getBaseName() == null ? 0 : getBaseName().hashCode());
+        result = prime * result + (getStageDirectory() == null ? 0 : getStageDirectory().hashCode());
         return result;
     }
 
@@ -239,24 +239,21 @@ public class StageFile extends AbstractAuditable implements Serializable {
             return this.getId() == castOther.getId();
         }
         // check extension
-        if (!StringUtils.equals(this.extension, castOther.extension)) {
+        if (!StringUtils.equals(getExtension(), castOther.getExtension())) {
             return false;
         }
         // check base name
-        if (!StringUtils.equals(this.baseName, castOther.baseName)) {
+        if (!StringUtils.equals(getBaseName(), castOther.getBaseName())) {
             return false;
         }
         // check stage directory
-        if (this.stageDirectory == null && castOther.stageDirectory == null) {
+        if (this.getStageDirectory() == null && castOther.getStageDirectory() == null) {
             return true;
         }
-        if (this.stageDirectory == null) {
+        if (getStageDirectory() == null || castOther.getStageDirectory() == null) {
             return false;
         }
-        if (castOther.stageDirectory == null) {
-            return false;
-        }
-        return this.stageDirectory.equals(castOther.stageDirectory);
+        return getStageDirectory().equals(castOther.getStageDirectory());
     }
 
     @Override

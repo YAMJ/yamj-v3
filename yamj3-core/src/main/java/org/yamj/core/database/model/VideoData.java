@@ -143,9 +143,7 @@ public class VideoData extends AbstractMetadata {
     @ManyToMany(mappedBy = "videoDatas")
     private Set<MediaFile> mediaFiles = new HashSet<MediaFile>(0);
     
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @OrderColumn(name = "ordering", nullable = false)
-    @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "castCrewPK.videoData")
     private List<CastCrew> credits = new ArrayList<CastCrew>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
@@ -415,16 +413,12 @@ public class VideoData extends AbstractMetadata {
         this.mediaFiles.add(mediaFile);
     }
 
-    private List<CastCrew> getCredits() {
+    public List<CastCrew> getCredits() {
         return credits;
     }
 
     private void setCredits(List<CastCrew> credits) {
         this.credits = credits;
-    }
-
-    public void addCredit(CastCrew credit) {
-        this.credits.add(credit);
     }
 
     public List<Artwork> getArtworks() {
@@ -666,6 +660,11 @@ public class VideoData extends AbstractMetadata {
             return false;
         }
         VideoData castOther = (VideoData) other;
+        // first check the id
+        if ((getId() > 0) && (castOther.getId() > 0)) {
+            return getId() == castOther.getId();
+        }
+        // check the identifier
         return StringUtils.equals(getIdentifier(), castOther.getIdentifier());
     }
 

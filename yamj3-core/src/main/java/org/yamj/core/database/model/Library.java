@@ -94,8 +94,8 @@ public class Library extends AbstractIdentifiable implements Serializable {
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (this.client == null ? 0 : this.client.hashCode());
-        result = prime * result + (this.playerPath == null ? 0 : this.playerPath.hashCode());
+        result = prime * result + (getClient() == null ? 0 : getClient().hashCode());
+        result = prime * result + (getPlayerPath() == null ? 0 : getPlayerPath().hashCode());
         return result;
     }
 
@@ -112,10 +112,10 @@ public class Library extends AbstractIdentifiable implements Serializable {
         }
         Library castOther = (Library) other;
 
-        if (!StringUtils.equals(this.client, castOther.client)) {
+        if (!StringUtils.equals(getClient(), castOther.getClient())) {
             return false;
         }
-        return StringUtils.equals(this.playerPath, castOther.playerPath);
+        return StringUtils.equals(getPlayerPath(), castOther.getPlayerPath());
     }
 
     @Override

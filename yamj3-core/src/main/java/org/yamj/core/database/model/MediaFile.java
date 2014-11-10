@@ -373,7 +373,7 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (this.fileName == null ? 0 : this.fileName.hashCode());
+        result = prime * result + (getFileName() == null ? 0 : getFileName().hashCode());
         return result;
     }
 
@@ -389,7 +389,7 @@ public class MediaFile extends AbstractAuditable implements Serializable {
             return false;
         }
         MediaFile castOther = (MediaFile) other;
-        return StringUtils.equals(this.fileName, castOther.fileName);
+        return StringUtils.equals(getFileName(), castOther.getFileName());
     }
 
     @Override

@@ -108,10 +108,6 @@ public class MetadataStorageService {
     public VideoData getRequiredVideoData(Long id) {
         final StringBuilder sb = new StringBuilder();
         sb.append("from VideoData vd ");
-        sb.append("left outer join fetch vd.credits ");
-        sb.append("left outer join fetch vd.genres ");
-        sb.append("left outer join fetch vd.studios ");
-        sb.append("left outer join fetch vd.boxedSets ");
         sb.append("where vd.id = :id ");
         
         @SuppressWarnings("unchecked")
@@ -125,12 +121,6 @@ public class MetadataStorageService {
         sb.append("from Series ser ");
         sb.append("join fetch ser.seasons sea ");
         sb.append("join fetch sea.videoDatas vd ");
-        sb.append("left outer join fetch vd.credits ");
-        sb.append("left outer join fetch vd.genres ");
-        sb.append("left outer join fetch vd.studios ");
-        sb.append("left outer join fetch vd.boxedSets ");
-        sb.append("left outer join fetch ser.genres ");
-        sb.append("left outer join fetch ser.studios ");
         sb.append("where ser.id = :id ");
 
         @SuppressWarnings("unchecked")
@@ -142,18 +132,6 @@ public class MetadataStorageService {
     public Person getRequiredPerson(Long id) {
         // later on there it could be necessary to fetch associated entities
         return metadataDao.getById(Person.class, id);
-    }
-
-    @Transactional(readOnly = true)
-    public Person getRequiredPersonWithFilmo(Long id) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("from Person p ");
-        sb.append("left outer join fetch p.filmography f ");
-        sb.append("where p.id = :id ");
-
-        @SuppressWarnings("unchecked")
-        List<Person> objects = this.commonDao.findById(sb, id);
-        return DataAccessUtils.requiredUniqueResult(objects);
     }
 
     /**
@@ -343,7 +321,7 @@ public class MetadataStorageService {
         if (StatusType.TEMP_DONE.equals(videoData.getStatus())) {
             videoData.setStatus(StatusType.DONE);
         }
-        
+
         // update entity
         videoData.setLastScanned(new Date(System.currentTimeMillis()));
         metadataDao.updateEntity(videoData);
@@ -571,33 +549,40 @@ public class MetadataStorageService {
         if (CollectionUtils.isEmpty(videoData.getCreditDTOS())) {
             return;
         }
+
+        List<CastCrew> deleteCredits = new ArrayList<CastCrew>(videoData.getCredits());
+        int ordering = 0; // ordering counter
         
         for (CreditDTO dto : videoData.getCreditDTOS()) {
-            CastCrew castCrew = this.metadataDao.getCastCrew(videoData, dto.getJobType(), dto.getName());
-
-            if (castCrew == null) {
-                // retrieve person
-                Person person = metadataDao.getPerson(dto.getName());
-                if (person == null) {
-                    LOG.warn("Person '{}' not found, skipping", dto.getName());
-                    // continue with next cast entry
-                    continue;
-                } else {
-                    LOG.trace("Found person '{}' for searched name '{}'", person.getName(), dto.getName());
-                }
-
-                // create new association between person and video
-                castCrew = new CastCrew();
-                castCrew.setPerson(person);
-                castCrew.setJob(dto.getJobType(), dto.getRole());
-                castCrew.setVideoData(videoData);
-                videoData.addCredit(castCrew);
-                metadataDao.saveEntity(castCrew);
-            } else if (castCrew.setJob(castCrew.getJobType(), dto.getRole())) {
-                // updated role
-                metadataDao.updateEntity(castCrew);
+            Person person = metadataDao.getPerson(dto.getName());
+            if (person == null) {
+                LOG.warn("Person '{}' not found, skipping", dto.getName());
+                // continue with next cast entry
+                continue;
+            } else {
+                LOG.trace("Found person '{}' for searched name '{}'", person.getName(), dto.getName());
             }
+
+            // creae a new entry
+            CastCrew castCrew = new CastCrew(person, videoData, dto.getJobType());
+            
+            int index = videoData.getCredits().indexOf(castCrew);
+            if (index >= 0) {
+                // updated cast crew
+                castCrew = videoData.getCredits().get(index);
+                castCrew.setRole(StringUtils.abbreviate(dto.getRole(), 255));
+                castCrew.setOrdering(ordering++);
+            } else {
+                // new cast crew
+                castCrew.setRole(StringUtils.abbreviate(dto.getRole(), 255));
+                castCrew.setOrdering(ordering++);
+                videoData.getCredits().add(castCrew);
+            }
+            // remove from credits to delete
+            deleteCredits.remove(castCrew);
         }
+        // delete orphans
+        videoData.getCredits().removeAll(deleteCredits);
     }
     
     private void updateLocatedArtwork(VideoData videoData) {

@@ -129,7 +129,7 @@ public class MetadataScannerService {
      * @param id
      */
     public void scanFilmography(Long id) {
-        Person person = metadataStorageService.getRequiredPersonWithFilmo(id);
+        Person person = metadataStorageService.getRequiredPerson(id);
 
         // online scanning (only)
         this.onlineScannerService.scanFilmography(person);

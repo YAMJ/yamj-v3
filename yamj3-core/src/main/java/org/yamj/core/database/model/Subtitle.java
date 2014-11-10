@@ -118,9 +118,9 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (mediaFile == null ? 0 : mediaFile.hashCode());
-        result = prime * result + (stageFile == null ? 0 : stageFile.hashCode());
-        result = prime * result + counter;
+        result = prime * result + (getMediaFile() == null ? 0 : getMediaFile().hashCode());
+        result = prime * result + (getStageFile() == null ? 0 : getStageFile().hashCode());
+        result = prime * result + getCounter();
         return result;
     }
 
@@ -141,22 +141,22 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
             return this.getId() == castOther.getId();
         }
         // check counter
-        if (this.counter != castOther.counter) {
+        if (getCounter() != castOther.getCounter()) {
             return false;
         }
         // check media file
-        if (this.mediaFile != null && castOther.mediaFile != null && !this.mediaFile.equals(castOther.mediaFile)) {
+        if (getMediaFile()!= null && castOther.getMediaFile() != null && !getMediaFile().equals(castOther.getMediaFile())) {
             return false;
         }
         // check stage file
-        if (this.stageFile == null && castOther.stageFile != null) {
+        if (getStageFile() == null && castOther.getStageFile() != null) {
             return false;
         }
-        if (this.stageFile != null && castOther.stageFile == null) {
+        if (getStageFile()!= null && castOther.getStageFile() == null) {
             return false;
         }
-        if (this.stageFile != null && castOther.stageFile != null) {
-            return this.stageFile.equals(castOther.stageFile);
+        if (getStageFile() != null && castOther.getStageFile() != null) {
+            return getStageFile().equals(castOther.getStageFile());
         }
         // both stage files are null
         return true;

@@ -124,10 +124,9 @@ public class ExecutionTask implements Serializable {
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (name == null ? 0 : name.hashCode());
+        result = prime * result + (getName() == null ? 0 : getName().hashCode());
         return result;
     }
-
 
     @Override
     public boolean equals(Object other) {
@@ -141,7 +140,7 @@ public class ExecutionTask implements Serializable {
             return false;
         }
         ExecutionTask castOther = (ExecutionTask) other;
-        return StringUtils.equalsIgnoreCase(name, castOther.name);
+        return StringUtils.equalsIgnoreCase(getName(), castOther.getName());
     }
 
     @Override
