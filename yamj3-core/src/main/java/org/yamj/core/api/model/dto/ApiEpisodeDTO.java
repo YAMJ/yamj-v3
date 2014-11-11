@@ -22,8 +22,10 @@
  */
 package org.yamj.core.api.model.dto;
 
+import java.util.EnumMap;
+import java.util.Map;
+import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.Studio;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -57,6 +59,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     private List<Studio> studios = new ArrayList<Studio>();
     private List<Certification> certifications = new ArrayList<Certification>();
     private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
+    private final Map<JobType,List<ApiCastDTO>> cast = new EnumMap<JobType,List<ApiCastDTO>>(JobType.class);
 
     //<editor-fold defaultstate="collapsed" desc="Setter Methods">
     public void setSeriesId(Long seriesId) {
@@ -128,6 +131,12 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     public void setFiles(List<ApiFileDTO> files) {
         this.files = files;
     }
+    
+    public void setCast(List<ApiCastDTO> castList) {
+        for (ApiCastDTO acdto : castList) {
+            addCast(acdto);
+        }
+    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
@@ -189,5 +198,17 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     public List<ApiFileDTO> getFiles() {
         return files;
     }
+    
+    public Map<JobType, List<ApiCastDTO>> getCast() {
+        return cast;
+    }
     //</editor-fold>
+
+    public void addCast(ApiCastDTO newCast) {
+        // Add a blank list if it doesn't already exist
+        if (!cast.containsKey(newCast.getJob())) {
+            cast.put(newCast.getJob(), new ArrayList<ApiCastDTO>(1));
+        }
+        this.cast.get(newCast.getJob()).add(newCast);
+    }
 }

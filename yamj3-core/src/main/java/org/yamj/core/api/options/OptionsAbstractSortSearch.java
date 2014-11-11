@@ -22,14 +22,13 @@
  */
 package org.yamj.core.api.options;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.api.model.builder.DataItem;
+import org.yamj.core.database.model.type.JobType;
 
 /**
  * Abstract class for the query options
@@ -239,4 +238,40 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
         return dataitemList.contains(di);
     }
     //</editor-fold>
+
+    protected static Map<JobType,Integer> splitJobs(String jobs) {
+        Map<JobType,Integer> jobTypes = new EnumMap<JobType,Integer>(JobType.class);
+        if (StringUtils.isEmpty(jobs)) {
+            jobTypes = Collections.emptyMap();
+        } else if (StringUtils.containsIgnoreCase(jobs, "ALL")) {
+            // will be handled separately
+            jobTypes = new HashMap<JobType,Integer>();
+        } else {
+            jobTypes = new HashMap<JobType,Integer>();
+            for (String param : StringUtils.split(jobs, ",")) {
+                String[] vals = StringUtils.split(param, "-");
+                
+                JobType jobType = null;
+                Integer amount = null;
+                if (vals.length > 0) {
+                    try {
+                        jobType = JobType.valueOf(vals[0].trim().toUpperCase());
+                        if (vals.length > 1) {
+                            try {
+                                amount = Integer.parseInt(vals[1]);
+                                if (amount.intValue() <= 0) {
+                                    // ignore jobs <= 0
+                                    jobType = null;
+                                }
+                            } catch (Exception ignore) {}
+                        }
+                    } catch (Exception ignore) {}
+                }
+                if (jobType != null) {
+                    jobTypes.put(jobType,amount);
+                }
+            }
+        }
+        return jobTypes;
+    }
 }

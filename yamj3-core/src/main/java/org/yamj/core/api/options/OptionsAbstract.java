@@ -22,15 +22,10 @@
  */
 package org.yamj.core.api.options;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import java.util.Collections;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -145,7 +140,7 @@ public abstract class OptionsAbstract implements IOptions {
      * @param dashList
      * @return
      */
-    protected Map<String, String> splitDashList(String dashList) {
+    protected static Map<String, String> splitDashList(String dashList) {
         Map<String, String> values = new HashMap<String, String>();
         if (dashList != null) {
             for (String inc : StringUtils.split(dashList, ",")) {
@@ -164,7 +159,7 @@ public abstract class OptionsAbstract implements IOptions {
      * @param list
      * @return
      */
-    protected List<String> splitList(String list) {
+    protected static List<String> splitList(String list) {
         if (list == null) {
             return Collections.emptyList();
         }

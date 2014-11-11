@@ -28,10 +28,6 @@ package org.yamj.core.database.model.type;
 public enum JobType {
 
     /**
-     * The job type is not known
-     */
-    UNKNOWN,
-    /**
      * The person is a director
      */
     DIRECTOR,
@@ -82,7 +78,11 @@ public enum JobType {
     /**
      * Lighting jobs
      */
-    LIGHTING;
+    LIGHTING,
+    /**
+     * The job type is not known
+     */
+    UNKNOWN;
 
     /**
      * Determine the job type from a string

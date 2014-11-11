@@ -22,8 +22,11 @@
  */
 package org.yamj.core.api.options;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.Map;
+import org.yamj.core.database.model.type.JobType;
 
 /**
  * List of the options available for the indexes
@@ -37,7 +40,11 @@ public class OptionsEpisode extends OptionsAbstractSortSearch {
     private Long seasonid = -1L;
     private Long season = -1L;
     private Boolean watched;
-
+    private String jobs;
+    
+    @JsonIgnore
+    private Map<JobType,Integer> jobTypes;
+    
     public Long getSeriesid() {
         return seriesid;
     }
@@ -72,5 +79,26 @@ public class OptionsEpisode extends OptionsAbstractSortSearch {
         } else if ("false".equalsIgnoreCase(watched)) {
             this.watched = Boolean.FALSE;
         }
+    }
+
+    public String getJobs() {
+        return jobs;
+    }
+
+    public void setJobs(String jobs) {
+        this.jobs = jobs;
+        this.jobTypes = null;
+    }
+
+    /**
+     * Get a map of job types and amount to search for
+     *
+     * @return
+     */
+    public Map<JobType,Integer> splitJobs() {
+        if (jobTypes == null) {
+            jobTypes = splitJobs(jobs);
+        }
+        return jobTypes;
     }
 }

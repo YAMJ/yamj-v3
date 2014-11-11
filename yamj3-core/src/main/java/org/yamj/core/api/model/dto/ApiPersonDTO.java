@@ -24,13 +24,12 @@ package org.yamj.core.api.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.yamj.core.tools.StringTools;
 
 /**
- *
  * @author stuart.boston
  */
 @JsonInclude(Include.NON_DEFAULT) 
@@ -38,12 +37,11 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
 
     private String name;
     private String biography;
-    private Date birthDay;
+    private String birthDay;
     private String birthPlace;
     private String birthName;
-    private Date deathDay;
-    private String job;
-    private String role;
+    private String deathDay;
+    private String deathPlace;
     private List<ApiArtworkDTO> artwork = new ArrayList<ApiArtworkDTO>(0);
     private List<ApiFilmographyDTO> filmography = new ArrayList<ApiFilmographyDTO>(0);
 
@@ -63,12 +61,12 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
         this.name = name;
     }
 
-    public Date getBirthDay() {
+    public String getBirthDay() {
         return birthDay;
     }
 
     public void setBirthDay(Date birthDay) {
-        this.birthDay = birthDay;
+        this.birthDay = StringTools.formatDateShort(birthDay);
     }
 
     public String getBirthPlace() {
@@ -87,28 +85,20 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
         this.birthName = birthName;
     }
 
-    public Date getDeathDay() {
+    public String getDeathDay() {
         return deathDay;
     }
 
     public void setDeathDay(Date deathDay) {
-        this.deathDay = deathDay;
+        this.deathDay = StringTools.formatDateShort(deathDay);
     }
 
-    public String getJob() {
-        return job;
+    public String getDeathPlace() {
+        return deathPlace;
     }
 
-    public void setJob(String job) {
-        this.job = job;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
+    public void setDeathPlace(String deathPlace) {
+        this.deathPlace = deathPlace;
     }
 
     public List<ApiArtworkDTO> getArtwork() {

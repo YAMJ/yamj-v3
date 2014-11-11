@@ -22,16 +22,14 @@
  */
 package org.yamj.core.api.options;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.core.database.model.type.JobType;
 
 /**
  * List of the options available for the indexes
@@ -45,9 +43,12 @@ public class OptionsIndexVideo extends OptionsIdArtwork {
     private String exclude;
     private Boolean watched;
     private String type;
+    private String jobs;
     
     @JsonIgnore
     private final List<MetaDataType> videoTypes = new ArrayList<MetaDataType>();
+    @JsonIgnore
+    private Map<JobType,Integer> jobTypes;
 
     public String getInclude() {
         return include;
@@ -85,6 +86,15 @@ public class OptionsIndexVideo extends OptionsIdArtwork {
         this.type = type;
         this.videoTypes.clear();
     }
+    
+    public String getJobs() {
+        return jobs;
+    }
+
+    public void setJobs(String jobs) {
+        this.jobs = jobs;
+        this.jobTypes = null;
+    }
 
     /**
      * Get a list of the video types to search for
@@ -109,7 +119,7 @@ public class OptionsIndexVideo extends OptionsIdArtwork {
         }
         return videoTypes;
     }
-
+    
     /**
      * Split the include list into a map of values
      *
@@ -126,5 +136,17 @@ public class OptionsIndexVideo extends OptionsIdArtwork {
      */
     public Map<String, String> splitExcludes() {
         return splitDashList(exclude);
+    }
+
+    /**
+     * Get a map of job types and amount to search for
+     *
+     * @return
+     */
+    public Map<JobType,Integer> splitJobs() {
+        if (jobTypes == null) {
+            jobTypes = splitJobs(jobs);
+        }
+        return jobTypes;
     }
 }

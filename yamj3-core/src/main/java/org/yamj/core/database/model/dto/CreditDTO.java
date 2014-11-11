@@ -48,10 +48,15 @@ public class CreditDTO {
     }
 
     public CreditDTO(String source, JobType jobType, String name, String role) {
+        this(source, jobType, name, null, null);
+    }
+
+    public CreditDTO(String source, JobType jobType, String name, String role, String personId) {
         this.source = source;
         this.jobType = jobType;
-        this.name = StringUtils.trim(name);
-        this.role = StringUtils.trim(role);
+        setName(name);
+        setRole(role);
+        addPersonId(source, personId);
     }
 
     public String getSource() {

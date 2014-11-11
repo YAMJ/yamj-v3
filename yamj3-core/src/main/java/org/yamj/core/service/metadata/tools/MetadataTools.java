@@ -22,6 +22,9 @@
  */
 package org.yamj.core.service.metadata.tools;
 
+import java.util.List;
+import org.yamj.common.tools.StringTools;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -280,5 +283,33 @@ public final class MetadataTools {
             return false;
         }
         return true;
+    }
+    
+    /**
+     * Remove alternate name from role
+     * 
+     * @param role
+     * @return
+     */
+    public static String fixActorRole(final String role) {
+        if (role == null) {
+            return null;
+        }
+        String fixed = role;
+        
+        // (as = alternate name)
+        int idx = StringUtils.indexOfIgnoreCase(fixed, "(as ");
+        if (idx > 0) {
+            fixed = fixed.substring(0, idx);
+        }
+        
+        // double characters
+        idx = StringUtils.indexOf(fixed, "/");
+        if (idx > 0) {
+            List<String> characters = StringTools.splitList(fixed, "/");
+            fixed = StringUtils.join(characters.toArray(), " / ");
+        }
+        
+        return fixed;
     }
 }

@@ -22,10 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import java.util.HashSet;
-import java.util.Set;
-import org.yamj.core.database.model.FilmParticipation;
-import org.yamj.core.database.model.type.ParticipationType;
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.model.*;
@@ -39,10 +35,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigServiceWrapper;
+import org.yamj.core.database.model.FilmParticipation;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.service.metadata.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
@@ -272,11 +270,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
                     continue;
                 }
                 
-                credit = new CreditDTO(SCANNER_ID);
-                credit.addPersonId(SCANNER_ID, String.valueOf(person.getId()));
-                credit.setName(person.getName());
-                credit.setJobType(jobType);
-                credit.setRole(person.getCharacter());
+                credit = new CreditDTO(SCANNER_ID, jobType, person.getName(), person.getCharacter(), String.valueOf(person.getId()));
                 if (person.getAka() != null && !person.getAka().isEmpty()) {
                     credit.setRealName(person.getAka().get(0));
                 }

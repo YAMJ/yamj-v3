@@ -346,21 +346,22 @@ public final class InfoDTO {
 
     public void addDirector(String director) {
         if (StringUtils.isNotBlank(director)) {
-            this.credits.add(new CreditDTO(NfoScannerService.SCANNER_ID, JobType.DIRECTOR, director.trim()));
+            this.credits.add(new CreditDTO(NfoScannerService.SCANNER_ID, JobType.DIRECTOR, director));
             this.changed = true;
         }
     }
 
     public void addWriter(String writer) {
         if (StringUtils.isNotBlank(writer)) {
-            this.credits.add(new CreditDTO(NfoScannerService.SCANNER_ID, JobType.WRITER, writer.trim()));
+            this.credits.add(new CreditDTO(NfoScannerService.SCANNER_ID, JobType.WRITER, writer));
             this.changed = true;
         }
     }
 
     public void addActor(String actor, String role, String photoURL) {
         if (StringUtils.isNotBlank(actor)) {
-            CreditDTO credit = new CreditDTO(NfoScannerService.SCANNER_ID, JobType.ACTOR, actor.trim(), role);
+            role = MetadataTools.fixActorRole(role);
+            CreditDTO credit = new CreditDTO(NfoScannerService.SCANNER_ID, JobType.ACTOR, actor, role);
             credit.addPhotoURL(photoURL, NfoScannerService.SCANNER_ID);
             this.credits.add(credit);
             this.changed = true;

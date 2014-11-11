@@ -507,40 +507,30 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
 
     private Set<CreditDTO> parseCredits(List<CastMember> castMembers) {
         Set<CreditDTO> result = new LinkedHashSet<CreditDTO>();
-        
+
         if (CollectionUtils.isNotEmpty(castMembers)) {
             for (CastMember member: castMembers) {
                 if (member.getShortPerson() == null) {
                     continue;
                 }
                 
-                if (member.isActor()) {
-                    if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
-                        CreditDTO credit;
-                        if (member.isLeadActor()) {
-                            credit = createCredit(member, JobType.ACTOR);
-                        } else {
-                            credit = createCredit(member, JobType.GUEST_STAR);
-                        }
-                        credit.setRole(member.getRole());
-                        result.add(credit);
+                if (member.isActor() && this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+                    CreditDTO credit;
+                    if (member.isLeadActor()) {
+                        credit = createCredit(member, JobType.ACTOR);
+                    } else {
+                        credit = createCredit(member, JobType.GUEST_STAR);
                     }
-                } else if (member.isDirector()) {
-                    if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
-                        result.add(createCredit(member, JobType.DIRECTOR));
-                    }
-                } else if (member.isWriter()) {
-                    if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
-                        result.add(createCredit(member, JobType.WRITER));
-                    }
-                } else if (member.isCamera()) {
-                    if (this.configServiceWrapper.isCastScanEnabled(JobType.CAMERA)) {
-                        result.add(createCredit(member, JobType.CAMERA));
-                    }
-                } else if (member.isProducer()) {
-                    if (this.configServiceWrapper.isCastScanEnabled(JobType.PRODUCER)) {
-                        result.add(createCredit(member, JobType.PRODUCER));
-                    }
+                    credit.setRole(member.getRole());
+                    result.add(credit);
+                } else if (member.isDirector() && this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
+                    result.add(createCredit(member, JobType.DIRECTOR));
+                } else if (member.isWriter() && this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
+                    result.add(createCredit(member, JobType.WRITER));
+                } else if (member.isCamera() && this.configServiceWrapper.isCastScanEnabled(JobType.CAMERA)) {
+                    result.add(createCredit(member, JobType.CAMERA));
+                } else if (member.isProducer() && this.configServiceWrapper.isCastScanEnabled(JobType.PRODUCER)) {
+                    result.add(createCredit(member, JobType.PRODUCER));
                 }
             }
         }

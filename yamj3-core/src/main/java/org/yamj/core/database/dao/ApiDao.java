@@ -44,6 +44,7 @@ import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.hibernate.HibernateDao;
 
@@ -817,6 +818,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql(" p.birth_place AS birthPlace, ");
         sqlScalars.addToSql(" p.birth_name AS birthName, ");
         sqlScalars.addToSql(" p.death_day AS deathDay ");
+        sqlScalars.addToSql(" p.death_place AS deathPlace ");
         sqlScalars.addToSql(" FROM person p");
 
         if (options.getId() > 0L) {
@@ -846,6 +848,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("birthPlace", StringType.INSTANCE);
         sqlScalars.addScalar("birthName", StringType.INSTANCE);
         sqlScalars.addScalar("deathDay", DateType.INSTANCE);
+        sqlScalars.addScalar("deathPlace", StringType.INSTANCE);
 
         return sqlScalars;
     }
@@ -1033,6 +1036,30 @@ public class ApiDao extends HibernateDao {
                     episode.setCertifications(certifications);
                 }
             }
+            
+            if (StringUtils.containsIgnoreCase(options.getJobs(), "ALL")) {
+                for (ApiEpisodeDTO episode : results) {
+                    episode.setCast(getCastForId(MetaDataType.EPISODE, episode.getId(), null));
+                }
+            } else if (!options.splitJobs().isEmpty()) {
+                for (ApiEpisodeDTO episode : results) {
+                    List<ApiCastDTO> cast = getCastForId(MetaDataType.EPISODE, episode.getId(), options.splitJobs().keySet());
+                    
+                    // just add given amount for jobs to cast
+                    Map<JobType,Integer> jobs = new HashMap<JobType,Integer>(options.splitJobs());
+                    for (ApiCastDTO entry : cast) {
+                        Integer amount = jobs.get(entry.getJob());
+                        if (amount == null) {
+                            episode.addCast(entry);
+                        } else if (amount.intValue() > 0) {
+                            episode.addCast(entry);
+                            amount = Integer.valueOf(amount.intValue() -1);
+                            jobs.put(entry.getJob(), amount);
+                        }
+                    }
+                }
+            }
+            
         }
         wrapper.setResults(results);
     }
@@ -1111,6 +1138,28 @@ public class ApiDao extends HibernateDao {
                 video.setFiles(getFilesForId(type, options.getId()));
             }
 
+            if (StringUtils.containsIgnoreCase(options.getJobs(), "ALL")) {
+                LOG.debug("Adding all jobs for ID '{}'", options.getId());
+                video.setCast(getCastForId(type, options.getId(), null));
+            } else if (!options.splitJobs().isEmpty()) {
+                LOG.debug("Adding jobs for ID '{}': {}", options.getId(), options.splitJobs());
+                
+                List<ApiCastDTO> cast = getCastForId(type, options.getId(), options.splitJobs().keySet());
+                
+                // just add given amount for jobs to cast
+                Map<JobType,Integer> jobs = new HashMap<JobType,Integer>(options.splitJobs());
+                for (ApiCastDTO entry : cast) {
+                    Integer amount = jobs.get(entry.getJob());
+                    if (amount == null) {
+                        video.addCast(entry);
+                    } else if (amount.intValue() > 0) {
+                        video.addCast(entry);
+                        amount = Integer.valueOf(amount.intValue() -1);
+                        jobs.put(entry.getJob(), amount);
+                    }
+                }
+            }
+            
             wrapper.setResult(video);
         } else {
             wrapper.setResult(null);
@@ -1284,7 +1333,7 @@ public class ApiDao extends HibernateDao {
         }
         sqlScalars.addToSql("ORDER BY name");
 
-        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar(ID, LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
         sqlScalars.addParameters(ID, id);
 
@@ -1313,12 +1362,52 @@ public class ApiDao extends HibernateDao {
         }
         sqlScalars.addToSql("ORDER BY country");
 
-        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar(ID, LongType.INSTANCE);
         sqlScalars.addScalar("country", StringType.INSTANCE);
         sqlScalars.addScalar("certificate", StringType.INSTANCE);
         sqlScalars.addParameters(ID, id);
 
         return executeQueryWithTransform(Certification.class, sqlScalars, null);
+    }
+
+    /**
+     * Get a list of the cast for a given video ID
+     *
+     * @param type
+     * @param id
+     * @return
+     */
+    public List<ApiCastDTO> getCastForId(MetaDataType type, Long id, Collection<JobType> jobTypes) {
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT DISTINCT p.id, p.name, c.job as jobAsString, c.role ");
+        sqlScalars.addToSql("FROM person p " );
+        sqlScalars.addToSql("JOIN cast_crew c ON p.id=c.person_id ");
+        if (type == MetaDataType.SERIES) {
+            sqlScalars.addToSql("JOIN season sea ON sea.series_id=:id ");
+            sqlScalars.addToSql("JOIN videodata vd ON vd.id=c.videodata_id and vd.season_id=sea.id " );
+        } else if (type == MetaDataType.SEASON) {
+            sqlScalars.addToSql("JOIN videodata vd ON vd.id=c.videodata_id and vd.season_id=:id " );
+        } else {
+            // defaults to movie/episode
+            sqlScalars.addToSql("JOIN videodata vd ON vd.id=c.videodata_id and vd.id=:id" );
+        }
+        if (jobTypes != null) {
+            List<String> jobList = new ArrayList<String>();
+            for (JobType jobType : jobTypes) {
+                jobList.add(jobType.toString());
+            }
+            sqlScalars.addToSql("WHERE c.job in (:jobList) ");
+            sqlScalars.addParameters("jobList", jobList);
+        }
+        sqlScalars.addToSql("ORDER BY c.ordering");
+
+        sqlScalars.addScalar(ID, LongType.INSTANCE);
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar("role", StringType.INSTANCE);
+        sqlScalars.addScalar("jobAsString", StringType.INSTANCE);
+        sqlScalars.addParameters(ID, id);
+
+        return executeQueryWithTransform(ApiCastDTO.class, sqlScalars, null);
     }
 
     /**

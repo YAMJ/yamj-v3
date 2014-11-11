@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.common.tools.StringTools;
 import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
@@ -875,23 +874,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                     String character = HTMLTools.stripTags(HTMLTools.extractTag(actorBlock, "<td class=\"character\">", HTML_TD_END));
     
                     if (StringUtils.isNotBlank(name) && StringUtils.indexOf(character, "uncredited") == -1) {
-                        // fix character (as = alternate name)
-                        int idx = StringUtils.indexOf(character, "(as ");
-                        if (idx > 0) {
-                            character = StringUtils.substring(character, 0, idx);
-                        }
-                        // fix character (double roles)
-                        idx = StringUtils.indexOf(character, "/");
-                        if (idx > 0) {
-                            List<String> characters = StringTools.splitList(character, "/");
-                            character = StringUtils.join(characters.toArray(), " / ");
-                        }
-                        
-                        CreditDTO creditDTO = new CreditDTO(SCANNER_ID);
-                        creditDTO.setJobType(JobType.ACTOR);
-                        creditDTO.setName(name);
-                        creditDTO.setRole(character);
-                        creditDTO.addPersonId(SCANNER_ID, personId);
+                        character = MetadataTools.fixActorRole(character);
+                        CreditDTO creditDTO = new CreditDTO(SCANNER_ID, JobType.ACTOR, name, character, personId);
                         videoData.addCreditDTO(creditDTO);
                     }
                 }
@@ -952,10 +936,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                     String personId = member.substring(beginIndex + 12, member.indexOf("/", beginIndex + 12));
                     String name = StringUtils.trimToEmpty(member.substring(member.indexOf(HTML_GT, beginIndex) + 1));
                     if (name.indexOf("more credit") == -1 && StringUtils.containsNone(name, "<>:/")) {
-                        CreditDTO creditDTO = new CreditDTO(SCANNER_ID);
-                        creditDTO.setJobType(jobType);
-                        creditDTO.setName(name);
-                        creditDTO.addPersonId(SCANNER_ID, personId);
+                        CreditDTO creditDTO = new CreditDTO(SCANNER_ID, jobType, name, null, personId);
                         videoData.addCreditDTO(creditDTO);
                     }
                 }
