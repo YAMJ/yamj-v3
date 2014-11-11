@@ -61,7 +61,7 @@ public enum MetaDataType {
     public static MetaDataType fromString(String type) {
         try {
             return MetaDataType.valueOf(type.trim().toUpperCase());
-        } catch (IllegalArgumentException ex) {
+        } catch (Exception ex) {
             return UNKNOWN;
         }
     }

@@ -31,7 +31,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
-import org.yamj.core.api.options.OptionsGenre;
+import org.yamj.core.api.options.OptionsCommon;
 import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
@@ -104,7 +104,7 @@ public class CommonController {
     
     @RequestMapping(value = "/genres/list", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<ApiGenreDTO> getGenres(@ModelAttribute("options") OptionsGenre options) {
+    public ApiWrapperList<ApiGenreDTO> getGenres(@ModelAttribute("options") OptionsCommon options) {
         LOG.info("Getting genre list: used={}, full={}", options.getUsed(), options.getFull());
 
         ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<ApiGenreDTO>();
@@ -191,7 +191,7 @@ public class CommonController {
 
     @RequestMapping(value = "/studios/list", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<Studio> getStudios(@ModelAttribute("options") OptionsId options) {
+    public ApiWrapperList<Studio> getStudios(@ModelAttribute("options") OptionsCommon options) {
         LOG.info("Getting studio list with {}", options.toString());
 
         ApiWrapperList<Studio> wrapper = new ApiWrapperList<Studio>();

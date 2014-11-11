@@ -109,9 +109,15 @@ public class OptionsIndexVideo extends OptionsIdArtwork {
                 videoTypes.add(MetaDataType.SEASON);
             } else {
                 for (String param : StringUtils.split(type, ",")) {
-                    // Validate that the string passed is a correct artwork type
+                    // validate that the string passed is a correct artwork type
                     MetaDataType mdt = MetaDataType.fromString(param);
-                    if (mdt != MetaDataType.UNKNOWN) {
+                    if (MetaDataType.SERIES == mdt) {
+                        videoTypes.add(mdt);
+                    } else if (MetaDataType.SEASON == mdt) {
+                        videoTypes.add(mdt);
+                    } else if (MetaDataType.MOVIE == mdt) {
+                        videoTypes.add(mdt);
+                    } else if (MetaDataType.EPISODE == mdt) {
                         videoTypes.add(mdt);
                     }
                 }

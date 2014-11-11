@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.dao;
 
+import org.yamj.common.type.MetaDataType;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +33,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
-import org.yamj.core.api.options.OptionsGenre;
+import org.yamj.core.api.options.OptionsCommon;
 import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.model.BoxedSet;
@@ -60,37 +62,45 @@ public class CommonDao extends HibernateDao {
     }
 
     public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper) {
-        OptionsGenre options = (OptionsGenre) wrapper.getOptions();
+        OptionsCommon options = (OptionsCommon) wrapper.getOptions();
         
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addScalar("name", StringType.INSTANCE);
 
         sqlScalars.addToSql("SELECT DISTINCT ");
         if (options.getFull().booleanValue()) {
-            sqlScalars.addToSql("g.id, g.name, ");
+            sqlScalars.addToSql("g.id as id, g.name as name, ");
             sqlScalars.addToSql("CASE ");
-            sqlScalars.addToSql(" WHEN target_api is not null THEN target_api ");
-            sqlScalars.addToSql(" WHEN target_xml is not null THEN target_xml ");
-            sqlScalars.addToSql(" ELSE name ");
+            sqlScalars.addToSql(" WHEN g.target_api is not null THEN g.target_api ");
+            sqlScalars.addToSql(" WHEN g.target_xml is not null THEN g.target_xml ");
+            sqlScalars.addToSql(" ELSE g.name ");
             sqlScalars.addToSql("END as target ");
             
             sqlScalars.addScalar("id", LongType.INSTANCE);
             sqlScalars.addScalar("target", StringType.INSTANCE);
         } else {
             sqlScalars.addToSql("CASE ");
-            sqlScalars.addToSql(" WHEN target_api is not null THEN target_api ");
-            sqlScalars.addToSql(" WHEN target_xml is not null THEN target_xml ");
-            sqlScalars.addToSql(" ELSE name ");
+            sqlScalars.addToSql(" WHEN g.target_api is not null THEN g.target_api ");
+            sqlScalars.addToSql(" WHEN g.target_xml is not null THEN g.target_xml ");
+            sqlScalars.addToSql(" ELSE g.name ");
             sqlScalars.addToSql("END as name ");
         }
         sqlScalars.addToSql("FROM genre g ");
-        if (options.getUsed() != null && options.getUsed().booleanValue()) {
-            sqlScalars.addToSql("WHERE (exists (select 1 from videodata_genres vg where vg.genre_id=id) ");
-            sqlScalars.addToSql(" or exists (select 1 from series_genres sg where sg.genre_id=id)) ");
-            sqlScalars.addToSql(options.getSearchString(false));
-        } else {
-            sqlScalars.addToSql(options.getSearchString(true));
+        
+        boolean addWhere = true;
+        if (options.getType() != null) {
+            if (MetaDataType.MOVIE == options.getType()) {
+                sqlScalars.addToSql("JOIN videodata_genres vg ON g.id=vg.genre_id ");
+            } else {
+                sqlScalars.addToSql("JOIN series_genres sg ON g.id=sg.genre_id ");
+            }
+        } else if (options.getUsed() != null && options.getUsed().booleanValue()) {
+            sqlScalars.addToSql("WHERE (exists (select 1 from videodata_genres vg where vg.genre_id=g.id) ");
+            sqlScalars.addToSql(" or exists (select 1 from series_genres sg where sg.genre_id=g.id)) ");
+            addWhere = false;
         }
+        
+        sqlScalars.addToSql(options.getSearchString(addWhere));
         sqlScalars.addToSql(options.getSortString());
         
         return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
@@ -135,11 +145,26 @@ public class CommonDao extends HibernateDao {
     }
     
     public List<Studio> getStudios(ApiWrapperList<Studio> wrapper) {
-        OptionsId options = (OptionsId) wrapper.getOptions();
+        OptionsCommon options = (OptionsCommon) wrapper.getOptions();
         
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT id, name FROM studio");
-        sqlScalars.addToSql(options.getSearchString(true));
+        sqlScalars.addToSql("SELECT stu.id as id, stu.name as name ");
+        sqlScalars.addToSql("FROM studio stu ");
+        
+        boolean addWhere = true;
+        if (options.getType() != null) {
+            if (MetaDataType.MOVIE == options.getType()) {
+                sqlScalars.addToSql("JOIN videodata_studios vs ON stu.id=vs.studio_id ");
+            } else {
+                sqlScalars.addToSql("JOIN series_studios ss ON stu.id=ss.studio_id ");
+            }
+        } else if (options.getUsed() != null && options.getUsed().booleanValue()) {
+            sqlScalars.addToSql("WHERE (exists (select 1 from videodata_studios vs where vs.studio_id=stu.id) ");
+            sqlScalars.addToSql(" or exists (select 1 from series_studios ss where ss.studio_id=stu.id)) ");
+            addWhere = false;
+        }
+        
+        sqlScalars.addToSql(options.getSearchString(addWhere));
         sqlScalars.addToSql(options.getSortString());
 
         sqlScalars.addScalar("id", LongType.INSTANCE);

@@ -1204,10 +1204,10 @@ public class ApiDao extends HibernateDao {
             }
 
             if (StringUtils.containsIgnoreCase(options.getJobs(), "ALL")) {
-                LOG.debug("Adding all jobs for ID '{}'", options.getId());
+                LOG.trace("Adding all jobs for ID '{}'", options.getId());
                 video.setCast(getCastForId(type, options.getId(), null));
             } else if (!options.splitJobs().isEmpty()) {
-                LOG.debug("Adding jobs for ID '{}': {}", options.getId(), options.splitJobs());
+                LOG.trace("Adding jobs for ID '{}': {}", options.getId(), options.splitJobs());
                 
                 List<ApiCastDTO> cast = getCastForId(type, options.getId(), options.splitJobs().keySet());
                 

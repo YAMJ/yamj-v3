@@ -22,15 +22,18 @@
  */
 package org.yamj.core.api.options;
 
+import org.yamj.common.type.MetaDataType;
+
 /**
  * List of the options available for the genres
  *
  * @author modmax
  */
-public class OptionsGenre extends OptionsAbstractSortSearch {
+public class OptionsCommon extends OptionsAbstractSortSearch {
 
     private Boolean used = Boolean.TRUE;
     private Boolean full = Boolean.FALSE;
+    private MetaDataType type;
     
     public Boolean getUsed() {
         return used;
@@ -46,5 +49,15 @@ public class OptionsGenre extends OptionsAbstractSortSearch {
 
     public void setFull(Boolean full) {
         this.full = full;
+    }
+
+    public MetaDataType getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        try {
+            this.type = MetaDataType.valueOf(type.trim().toUpperCase());
+        } catch (Exception ignore) {}
     }
 }
