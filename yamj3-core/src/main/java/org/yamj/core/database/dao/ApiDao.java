@@ -55,6 +55,7 @@ public class ApiDao extends HibernateDao {
     private static final String ID = "id";
     private static final String YEAR = "year";
     private static final String GENRE = "genre";
+    private static final String STUDIO = "studio";
     private static final String TITLE = "title";
     private static final String EPISODE = "episode";
     private static final String SEASON = "season";
@@ -271,14 +272,45 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append(" AND not exists (");
                 genre = excludes.get(GENRE).toLowerCase();
             }
-            sbSQL.append("SELECT 1 FROM videodata_genres vg, genre g ");
-            sbSQL.append("WHERE vd.id=vg.data_id ");
-            sbSQL.append("AND vg.genre_id=g.id ");
+            if (isMovie) {
+                sbSQL.append("SELECT 1 FROM videodata_genres vg, genre g ");
+                sbSQL.append("WHERE vd.id=vg.data_id ");
+                sbSQL.append("AND vg.genre_id=g.id ");
+            } else {
+                sbSQL.append("SELECT 1 FROM series_genres sg, genre g, season sea ");
+                sbSQL.append("WHERE vd.season_id=sea.id ");
+                sbSQL.append("AND sg.series_id=sea.series_id ");
+                sbSQL.append("AND sg.genre_id=g.id ");
+                
+            }
             sbSQL.append("AND (lower(g.name)='").append(genre).append("'");
             sbSQL.append(" or (g.target_api is not null and lower(g.target_api)='").append(genre).append("')");
             sbSQL.append(" or (g.target_xml is not null and lower(g.target_xml)='").append(genre).append("')))");
         }
 
+        // check studio
+        if (includes.containsKey(STUDIO) || excludes.containsKey(STUDIO)) {
+            String studio;
+            if (includes.containsKey(STUDIO)) {
+                sbSQL.append(" AND exists(");
+                studio = includes.get(STUDIO).toLowerCase();
+            } else {
+                sbSQL.append(" AND not exists (");
+                studio = excludes.get(STUDIO).toLowerCase();
+            }
+            if (isMovie) {
+                sbSQL.append("SELECT 1 FROM videodata_studios vs, studio stu ");
+                sbSQL.append("WHERE vd.id=vs.data_id ");
+                sbSQL.append("AND vs.studio_id=stu.id ");
+            } else {
+                sbSQL.append("SELECT 1 FROM series_studios ss, studio stu, season sea ");
+                sbSQL.append("WHERE vd.season_id=sea.id ");
+                sbSQL.append("AND ss.series_id=sea.series_id ");
+                sbSQL.append("AND ss.studio_id=stu.id ");
+            }
+            sbSQL.append("AND lower(stu.name)='").append(studio).append("')");
+        }
+        
         // add the search string, this will be empty if there is no search required
         sbSQL.append(options.getSearchString(false));
 
@@ -351,6 +383,22 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" or (g.target_xml is not null and lower(g.target_xml)='").append(genre).append("')))");
         }
 
+        // check studio
+        if (includes.containsKey(STUDIO) || excludes.containsKey(STUDIO)) {
+            String studio;
+            if (includes.containsKey(STUDIO)) {
+                sbSQL.append(" AND exists(");
+                studio = includes.get(STUDIO).toLowerCase();
+            } else {
+                sbSQL.append(" AND not exists (");
+                studio = excludes.get(STUDIO).toLowerCase();
+            }
+            sbSQL.append("SELECT 1 FROM series_studios ss, studio stu ");
+            sbSQL.append("WHERE ser.id=ss.series_id ");
+            sbSQL.append("AND ss.studio_id=stu.id ");
+            sbSQL.append("AND lower(stu.name)='").append(studio).append("')");
+        }
+        
         // add the search string, this will be empty if there is no search required
         sbSQL.append(options.getSearchString(false));
 
@@ -421,8 +469,25 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("AND (lower(g.name)='").append(genre).append("'");
             sbSQL.append(" or (g.target_api is not null and lower(g.target_api)='").append(genre).append("')");
             sbSQL.append(" or (g.target_xml is not null and lower(g.target_xml)='").append(genre).append("')))");
+            System.err.println(sbSQL);
         }
  
+        // check studio
+        if (includes.containsKey(STUDIO) || excludes.containsKey(STUDIO)) {
+            String studio;
+            if (includes.containsKey(STUDIO)) {
+                sbSQL.append(" AND exists(");
+                studio = includes.get(STUDIO).toLowerCase();
+            } else {
+                sbSQL.append(" AND not exists (");
+                studio = excludes.get(STUDIO).toLowerCase();
+            }
+            sbSQL.append("SELECT 1 FROM series_studios ss, studio stu ");
+            sbSQL.append("WHERE sea.series_id=ss.series_id ");
+            sbSQL.append("AND ss.studio_id=stu.id ");
+            sbSQL.append("AND lower(stu.name)='").append(studio).append("')");
+        }
+        
         // add the search string, this will be empty if there is no search required
         sbSQL.append(options.getSearchString(false));
 
@@ -1298,7 +1363,7 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("AND sg.series_id=sea.series_id ");
             sqlScalars.addToSql("AND sg.genre_id=g.id ");
         } else {
-            // defaults to movie
+            // defaults to movie/episode
             sqlScalars.addToSql("FROM videodata_genres vg, genre g ");
             sqlScalars.addToSql("WHERE vg.data_id=:id ");
             sqlScalars.addToSql("AND vg.genre_id=g.id ");
