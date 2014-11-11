@@ -95,6 +95,15 @@ public class DeleteTask implements ITask {
             }
         }
 
+        // delete orphan studios if allowed
+        if (this.configService.getBooleanProperty("yamj3.delete.orphan.studio", Boolean.TRUE)) {
+            try {
+                this.commonStorageService.deleteOrphanStudios();
+            } catch (Exception ex) {
+                LOG.warn("Failed to delete orphan studios", ex);
+            }
+        }
+
         // delete orphan certifications if allowed
         if (this.configService.getBooleanProperty("yamj3.delete.orphan.certification", Boolean.TRUE)) {
             try {

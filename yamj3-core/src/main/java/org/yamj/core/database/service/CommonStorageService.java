@@ -475,6 +475,15 @@ public class CommonStorageService {
     }
 
     @Transactional
+    public int deleteOrphanStudios() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("DELETE FROM studio ");
+        sb.append("WHERE not exists (select 1 from videodata_studios vs where vs.studio_id=id) ");
+        sb.append("AND not exists (select 1 from series_studios ss where ss.studio_id=id) ");
+        return this.stagingDao.executeSqlUpdate(sb);
+    }
+
+    @Transactional
     public int deleteOrphanCertifications() {
         StringBuffer sb = new StringBuffer();
         sb.append("DELETE FROM certification ");
