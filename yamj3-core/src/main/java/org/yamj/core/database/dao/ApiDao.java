@@ -298,17 +298,33 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append(" AND not exists (");
                 studio = excludes.get(STUDIO).toLowerCase();
             }
-            if (isMovie) {
-                sbSQL.append("SELECT 1 FROM videodata_studios vs, studio stu ");
-                sbSQL.append("WHERE vd.id=vs.data_id ");
-                sbSQL.append("AND vs.studio_id=stu.id ");
+            
+            if (StringUtils.isNumeric(studio)) {
+                if (isMovie) {
+                    sbSQL.append("SELECT 1 FROM videodata_studios vs ");
+                    sbSQL.append("WHERE vd.id=vs.data_id ");
+                    sbSQL.append("AND vs.studio_id=");
+                } else {
+                    sbSQL.append("SELECT 1 FROM series_studios ss, season sea ");
+                    sbSQL.append("WHERE vd.season_id=sea.id ");
+                    sbSQL.append("AND ss.series_id=sea.series_id ");
+                    sbSQL.append("AND ss.studio_id=");
+                }
+                sbSQL.append(Integer.parseInt(studio));
+                sbSQL.append(")");
             } else {
-                sbSQL.append("SELECT 1 FROM series_studios ss, studio stu, season sea ");
-                sbSQL.append("WHERE vd.season_id=sea.id ");
-                sbSQL.append("AND ss.series_id=sea.series_id ");
-                sbSQL.append("AND ss.studio_id=stu.id ");
+                if (isMovie) {
+                    sbSQL.append("SELECT 1 FROM videodata_studios vs, studio stu ");
+                    sbSQL.append("WHERE vd.id=vs.data_id ");
+                    sbSQL.append("AND vs.studio_id=stu.id ");
+                } else {
+                    sbSQL.append("SELECT 1 FROM series_studios ss, studio stu, season sea ");
+                    sbSQL.append("WHERE vd.season_id=sea.id ");
+                    sbSQL.append("AND ss.series_id=sea.series_id ");
+                    sbSQL.append("AND ss.studio_id=stu.id ");
+                }
+                sbSQL.append("AND lower(stu.name)='").append(studio).append("')");
             }
-            sbSQL.append("AND lower(stu.name)='").append(studio).append("')");
         }
         
         // add the search string, this will be empty if there is no search required
@@ -393,10 +409,19 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append(" AND not exists (");
                 studio = excludes.get(STUDIO).toLowerCase();
             }
-            sbSQL.append("SELECT 1 FROM series_studios ss, studio stu ");
-            sbSQL.append("WHERE ser.id=ss.series_id ");
-            sbSQL.append("AND ss.studio_id=stu.id ");
-            sbSQL.append("AND lower(stu.name)='").append(studio).append("')");
+            
+            if (StringUtils.isNumeric(studio)) {
+                sbSQL.append("SELECT 1 FROM series_studios ss ");
+                sbSQL.append("WHERE ss.series_id=ser.id ");
+                sbSQL.append("AND ss.studio_id=");
+                sbSQL.append(Integer.parseInt(studio));
+                sbSQL.append(")");
+            } else {
+                sbSQL.append("SELECT 1 FROM series_studios ss, studio stu ");
+                sbSQL.append("WHERE ser.id=ss.series_id ");
+                sbSQL.append("AND ss.studio_id=stu.id ");
+                sbSQL.append("AND lower(stu.name)='").append(studio).append("')");
+            }
         }
         
         // add the search string, this will be empty if there is no search required
@@ -482,10 +507,18 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append(" AND not exists (");
                 studio = excludes.get(STUDIO).toLowerCase();
             }
-            sbSQL.append("SELECT 1 FROM series_studios ss, studio stu ");
-            sbSQL.append("WHERE sea.series_id=ss.series_id ");
-            sbSQL.append("AND ss.studio_id=stu.id ");
-            sbSQL.append("AND lower(stu.name)='").append(studio).append("')");
+            if (StringUtils.isNumeric(studio)) {
+                sbSQL.append("SELECT 1 FROM series_studios ss ");
+                sbSQL.append("WHERE sea.series_id=ss.series_id ");
+                sbSQL.append("AND ss.studio_id=");
+                sbSQL.append(Integer.parseInt(studio));
+                sbSQL.append(")");
+            } else {
+                sbSQL.append("SELECT 1 FROM series_studios ss, studio stu ");
+                sbSQL.append("WHERE sea.series_id=ss.series_id ");
+                sbSQL.append("AND ss.studio_id=stu.id ");
+                sbSQL.append("AND lower(stu.name)='").append(studio).append("')");
+            }
         }
         
         // add the search string, this will be empty if there is no search required
