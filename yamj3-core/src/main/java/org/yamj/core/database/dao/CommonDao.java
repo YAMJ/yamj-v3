@@ -22,8 +22,6 @@
  */
 package org.yamj.core.database.dao;
 
-import org.yamj.common.type.MetaDataType;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +29,7 @@ import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.options.OptionsCommon;
@@ -201,7 +200,12 @@ public class CommonDao extends HibernateDao {
         OptionsId options = (OptionsId) wrapper.getOptions();
         
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT id, country, certificate FROM certification");
+        sqlScalars.addToSql("SELECT id, country, certificate, ");
+        
+        // TODO certificate_order until now just tested with MySQL
+        sqlScalars.addToSql("CASE WHEN cast(certificate as signed)>0 THEN cast(certificate as signed) ELSE ascii(substring(lower(certificate),1,1))+ascii(substring(lower(certificate),2,1)) END as certificate_order ");
+        
+        sqlScalars.addToSql("FROM certification ");
         sqlScalars.addToSql(options.getSearchString(true));
         sqlScalars.addToSql(options.getSortString());
 

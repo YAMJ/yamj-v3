@@ -1535,7 +1535,8 @@ public class ApiDao extends HibernateDao {
      * @return
      */
     public Map<Long, List<ApiArtworkDTO>> getArtworkForId(MetaDataType type, Object id, List<String> artworkRequired) {
-        LOG.debug("Artwork required for {} ID '{}' is {}", type, id, artworkRequired);
+        LOG.trace("Artwork required for {} ID '{}' is {}", type, id, artworkRequired);
+        
         StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("SELECT '").append(type.toString()).append("' AS sourceString,");
         sbSQL.append(" v.id AS sourceId, a.id AS artworkId, al.id AS locatedId, ag.id AS generatedId,");
@@ -1799,7 +1800,9 @@ public class ApiDao extends HibernateDao {
                 results.get(sourceId).add(idSingle);
             } else {
                 // ID didn't exist so add a new list
-                results.put(sourceId, new ArrayList<T>(Arrays.asList(idSingle)));
+                List<T> list = new ArrayList<T>();
+                list.add(idSingle);
+                results.put(sourceId, list);
             }
         }
 
