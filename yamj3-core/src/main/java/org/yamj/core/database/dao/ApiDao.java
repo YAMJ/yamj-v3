@@ -915,7 +915,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql(" p.birth_day AS birthDay, ");
         sqlScalars.addToSql(" p.birth_place AS birthPlace, ");
         sqlScalars.addToSql(" p.birth_name AS birthName, ");
-        sqlScalars.addToSql(" p.death_day AS deathDay ");
+        sqlScalars.addToSql(" p.death_day AS deathDay, ");
         sqlScalars.addToSql(" p.death_place AS deathPlace ");
         sqlScalars.addToSql(" FROM person p");
 
