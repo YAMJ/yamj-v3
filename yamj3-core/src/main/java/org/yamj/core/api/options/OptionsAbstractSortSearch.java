@@ -96,10 +96,21 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     @JsonIgnore
     @Override
     public String getSortString() {
+        return getSortString(sortby);
+    }
+
+    /**
+     * Get the sort string to append to the SQL statement
+     *
+     * @param sortBy
+     * @return
+     */
+    @JsonIgnore
+    public String getSortString(String sortBy) {
         StringBuilder sb = new StringBuilder();
-        if (StringUtils.isNotBlank(sortby)) {
+        if (StringUtils.isNotBlank(sortBy)) {
             sb.append(" ORDER BY ");
-            sb.append(sortby);
+            sb.append(sortBy);
             if ("DESC".equalsIgnoreCase(sortdir)) {
                 sb.append(" DESC");
             } else {
@@ -108,6 +119,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
         }
         return sb.toString();
     }
+
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Search Setters/Getters">

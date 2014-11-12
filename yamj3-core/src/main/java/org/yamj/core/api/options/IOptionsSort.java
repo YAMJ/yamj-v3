@@ -38,4 +38,6 @@ public interface IOptionsSort {
     String getSortdir();
 
     String getSortString();
+
+    String getSortString(String sortby);
 }

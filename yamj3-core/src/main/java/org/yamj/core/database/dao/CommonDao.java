@@ -198,25 +198,20 @@ public class CommonDao extends HibernateDao {
 
     public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
         OptionsId options = (OptionsId) wrapper.getOptions();
-
-        boolean orderByCertificate = ("certificate".equalsIgnoreCase(options.getSortby()));
+        String sortBy = options.getSortby();
         
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT id, country, certificate ");
         
-        // TODO certificate_order until now just tested with MySQL
-        if (orderByCertificate) {
+        if ("certificate".equalsIgnoreCase(sortBy)) {
+            sortBy = "certificate_order";
+            // TODO certificate_order until now just tested with MySQL
             sqlScalars.addToSql(", CASE WHEN cast(certificate as signed)>0 THEN cast(certificate as signed) ELSE ascii(substring(lower(certificate),1,1))*1000+ascii(substring(lower(certificate),2,1)) END as certificate_order ");
         }
         
         sqlScalars.addToSql("FROM certification ");
         sqlScalars.addToSql(options.getSearchString(true));
-        
-        if (orderByCertificate) {
-            sqlScalars.addToSql("ORDER BY certificate_order");
-        } else {
-            sqlScalars.addToSql(options.getSortString());
-        }
+        sqlScalars.addToSql(options.getSortString(sortBy));
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("country", StringType.INSTANCE);
