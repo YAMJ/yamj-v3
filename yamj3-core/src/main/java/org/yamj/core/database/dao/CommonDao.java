@@ -148,7 +148,7 @@ public class CommonDao extends HibernateDao {
         OptionsCommon options = (OptionsCommon) wrapper.getOptions();
         
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT stu.id as id, stu.name as name ");
+        sqlScalars.addToSql("SELECT DISTINCT stu.id as id, stu.name as name ");
         sqlScalars.addToSql("FROM studio stu ");
         
         boolean addWhere = true;
