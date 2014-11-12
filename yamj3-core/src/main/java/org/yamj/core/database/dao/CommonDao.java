@@ -46,7 +46,7 @@ import org.yamj.core.hibernate.HibernateDao;
 public class CommonDao extends HibernateDao {
 
     public Genre getGenre(String name) {
-        return getByNameCaseInsensitive(Genre.class, name);
+        return getByNaturalIdCaseInsensitive(Genre.class, "name", name);
     }
 
     public synchronized void storeNewGenre(String name, String targetXml) {
@@ -130,7 +130,7 @@ public class CommonDao extends HibernateDao {
     }
 
     public Studio getStudio(String name) {
-        return getByNameCaseInsensitive(Studio.class, name);
+        return getByNaturalIdCaseInsensitive(Studio.class, "name", name);
     }
 
     public synchronized void storeNewStudio(String name) {
@@ -221,7 +221,7 @@ public class CommonDao extends HibernateDao {
     }
 
     public BoxedSet getBoxedSet(String name) {
-        return getByNameCaseInsensitive(BoxedSet.class, name);
+        return getByNaturalIdCaseInsensitive(BoxedSet.class, "name", name);
     }
 
     public synchronized void storeNewBoxedSet(String name) {

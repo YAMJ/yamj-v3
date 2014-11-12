@@ -67,19 +67,19 @@ public class MetadataDao extends HibernateDao {
     }
 
     public VideoData getVideoData(String identifier) {
-        return getByField(VideoData.class, "identifier", identifier);
+        return getByNaturalIdCaseInsensitive(VideoData.class, "identifier", identifier);
     }
 
     public Season getSeason(String identifier) {
-        return getByField(Season.class, "identifier", identifier);
+        return getByNaturalIdCaseInsensitive(Season.class, "identifier", identifier);
     }
 
     public Series getSeries(String identifier) {
-        return getByField(Series.class, "identifier", identifier);
+        return getByNaturalIdCaseInsensitive(Series.class, "identifier", identifier);
     }
     
     public Person getPerson(String name) {
-        return getByNameCaseInsensitive(Person.class, name);
+        return getByNaturalIdCaseInsensitive(Person.class, "name", name);
     }
 
     public synchronized void storePerson(CreditDTO dto) {

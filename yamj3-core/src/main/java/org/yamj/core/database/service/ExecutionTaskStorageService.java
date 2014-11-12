@@ -43,7 +43,8 @@ public class ExecutionTaskStorageService {
 
     @Transactional
     public void storeExecutionTask(ExecutionTask executionTask) {
-        ExecutionTask stored = commonDao.getByNameCaseInsensitive(ExecutionTask.class, executionTask.getName());
+        ExecutionTask stored = commonDao.getByNaturalIdCaseInsensitive(ExecutionTask.class, "name", executionTask.getName());
+
         if (stored == null) {
             this.commonDao.saveEntity(executionTask);
             LOG.info("Stored: {}", executionTask);

@@ -149,39 +149,7 @@ public abstract class HibernateDao {
     }
 
     /**
-     * Get a single object using the name field
-     *
-     * @param <T>
-     * @param entityClass
-     * @param name
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T getByNameCaseInsensitive(Class<? extends T> entityClass, String name) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("from ");
-        sb.append(entityClass.getSimpleName());
-        sb.append(" where lower(name) = :name ");
-        
-        Map<String, Object> params = new HashMap<String,Object>();
-        params.put("name", name.toLowerCase());
-        return (T)this.findUniqueByNamedParameters(sb, params);
-    }
-
-    /**
-     * Get a single object using the name field
-     *
-     * @param <T>
-     * @param entityClass
-     * @param name
-     * @return
-     */
-    public <T> T getByNameCaseSensitive(Class<? extends T> entityClass, String name) {
-        return getByField(entityClass, "name", name);
-    }
-
-    /**
-     * Get a single object by the passed field
+     * Get a single object by the passed field using the name case sensitive.
      *
      * @param <T>
      * @param entityClass
@@ -190,10 +158,30 @@ public abstract class HibernateDao {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public <T> T getByField(Class<? extends T> entityClass, String field, String name) {
+    public <T> T getByNaturalId(Class<? extends T> entityClass, String field, String name) {
         return (T) getSession().byNaturalId(entityClass).using(field, name).load();
     }
 
+    /**
+     * Get a single object by the passed field using the name case insensitive.
+     *
+     * @param <T>
+     * @param entityClass
+     * @param field
+     * @param name
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getByNaturalIdCaseInsensitive(Class<? extends T> entityClass, String field, String name) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("from ");
+        sb.append(entityClass.getSimpleName());
+        sb.append(" where lower(").append(field).append(") = :name) { ");
+        
+        Map<String, Object> params = Collections.singletonMap("name", (Object)name.toLowerCase());
+        return (T)this.findUniqueByNamedParameters(sb, params);
+    }
+    
     /**
      * Convert row object to a string.
      *

@@ -25,13 +25,6 @@ package org.yamj.core.service.mediaimport;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static org.springframework.util.StringUtils.tokenizeToStringArray;
 
-import org.yamj.common.util.KeywordMap;
-import org.yamj.common.util.PatternUtils;
-import org.yamj.common.util.TokensPatternMap;
-import org.yamj.core.database.model.type.FileType;
-import org.yamj.core.tools.LanguageTools;
-import org.yamj.common.tools.PropertyTools;
-import org.yamj.core.tools.StringTools;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,8 +32,14 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.common.tools.PropertyTools;
+import org.yamj.common.util.KeywordMap;
+import org.yamj.common.util.PatternUtils;
+import org.yamj.common.util.TokensPatternMap;
+import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.tools.LanguageTools;
+import org.yamj.core.tools.StringTools;
 
 @Service("filenameScanner")
 public class FilenameScanner {
@@ -153,7 +152,6 @@ public class FilenameScanner {
     private final boolean skipEpisodeTitle;
     private boolean useParentRegex;
     private Pattern useParentPattern;
-    private LanguageTools languageTools;
 
     public FilenameScanner() {
         // resolve extensions
@@ -205,11 +203,6 @@ public class FilenameScanner {
         // set source keywords
         KeywordMap sourceKeywords = PropertyTools.getKeywordMap("filename.scanner.source.keywords", "HDTV,PDTV,DVDRip,DVDSCR,DSRip,CAM,R5,LINE,HD2DVD,DVD,DVD5,DVD9,HRHDTV,MVCD,VCD,TS,VHSRip,BluRay,BDRip,HDDVD,D-THEATER,SDTV");
         videoSourceMap.putAll(sourceKeywords.getKeywords(), sourceKeywords);
-    }
-
-    @Autowired
-    public void setLanguageTools(LanguageTools languageTools) {
-        this.languageTools = languageTools;
     }
 
     public FileType determineFileType(final String extension) {
@@ -386,7 +379,7 @@ public class FilenameScanner {
         // LANGUAGES
         if (languageDetection) {
             for (;;) {
-                String language = seekPatternAndUpdateRest(this.languageTools.getStrictLanguageMap(), null, dto);
+                String language = seekPatternAndUpdateRest(LanguageTools.getStrictLanguageMap(), null, dto);
                 if (language == null) {
                     break;
                 }
@@ -442,7 +435,7 @@ public class FilenameScanner {
 
                     // Loose language search
                     if (token.length() >= 2 && token.indexOf('-') < 0) {
-                        for (Map.Entry<String, Pattern> e : this.languageTools.getLooseLanguageMap().entrySet()) {
+                        for (Map.Entry<String, Pattern> e : LanguageTools.getLooseLanguageMap().entrySet()) {
                             Matcher matcher = e.getValue().matcher(token);
                             if (matcher.find()) {
                                 dto.getLanguages().add(e.getKey());

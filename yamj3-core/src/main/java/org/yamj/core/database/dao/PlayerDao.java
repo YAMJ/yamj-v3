@@ -53,7 +53,7 @@ public class PlayerDao extends HibernateDao {
     public void storePlayer(PlayerPathOld player) {
         
         LOG.debug("Checking for existing information on player '{}'", player.getName());
-        PlayerPathOld existingPlayer = getByNameCaseSensitive(PlayerPathOld.class, player.getName());
+        PlayerPathOld existingPlayer = getByNaturalId(PlayerPathOld.class, "name", player.getName());
 
         if (existingPlayer != null) {
             // Player already exists
@@ -69,7 +69,7 @@ public class PlayerDao extends HibernateDao {
 
     public void storePlayer(PlayerInfo player) {
         LOG.debug("Checking for existing information on player '{}'", player.getName());
-        PlayerInfo existingPlayer = getByNameCaseSensitive(PlayerInfo.class, player.getName());
+        PlayerInfo existingPlayer = getByNaturalId(PlayerInfo.class, "name", player.getName());
 
         if (existingPlayer != null) {
             // Player already exists
@@ -126,7 +126,7 @@ public class PlayerDao extends HibernateDao {
      */
     public void deletePlayer(String name) {
         if (StringUtils.isNotBlank(name)) {
-            PlayerPathOld player = getByNameCaseSensitive(PlayerPathOld.class, name);
+            PlayerPathOld player = getByNaturalId(PlayerPathOld.class, "name", name);
             LOG.debug("Deleting player '{}'", player.toString());
             deleteEntity(player);
             LOG.debug("Successfully deleted '{}'", name);

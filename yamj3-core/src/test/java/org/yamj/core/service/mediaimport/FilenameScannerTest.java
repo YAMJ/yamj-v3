@@ -22,13 +22,11 @@
  */
 package org.yamj.core.service.mediaimport;
 
-import org.apache.commons.io.FilenameUtils;
-
 import junit.framework.TestCase;
+import org.apache.commons.io.FilenameUtils;
 import org.junit.Test;
 import org.yamj.core.database.model.StageDirectory;
 import org.yamj.core.database.model.StageFile;
-import org.yamj.core.tools.LanguageTools;
 
 public class FilenameScannerTest extends TestCase {
 
@@ -37,7 +35,6 @@ public class FilenameScannerTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         scanner = new FilenameScanner();
-        scanner.setLanguageTools(new LanguageTools());
     }
 
     private StageFile createStageFile(String fileName) {
