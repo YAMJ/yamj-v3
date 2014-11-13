@@ -22,6 +22,7 @@
  */
 package org.yamj.core.tools;
 
+import com.ibm.icu.text.Transliterator;
 import java.io.File;
 import java.text.BreakIterator;
 import java.text.DecimalFormat;
@@ -35,7 +36,7 @@ import org.yamj.common.tools.PropertyTools;
 
 public final class StringTools {
 
-    private static final Pattern CLEAN_STRING_PATTERN = Pattern.compile("[^a-zA-Z0-9]");
+    private static final Pattern CLEAN_STRING_PATTERN = Pattern.compile("[^a-zA-Z0-9\\-\\(\\)]");
     private static final long KB = 1024;
     private static final long MB = KB * KB;
     private static final long GB = KB * KB * KB;
@@ -46,6 +47,7 @@ public final class StringTools {
     private static final String MPPA_RATED = "Rated";
     private static final SimpleDateFormat DATE_FORMAT;
     private static final SimpleDateFormat DATE_FORMAT_LONG;
+    private static final Transliterator TRANSLITERATOR;
 
     private StringTools() {
         throw new UnsupportedOperationException("Utility class");
@@ -90,8 +92,11 @@ public final class StringTools {
         FILESIZE_FORMAT_0 = new DecimalFormat("0", symbols);
         FILESIZE_FORMAT_1 = new DecimalFormat("0.#", symbols);
         FILESIZE_FORMAT_2 = new DecimalFormat("0.##", symbols);
-    }
 
+        // create a new transliterator
+        TRANSLITERATOR = Transliterator.getInstance("NFD; Any-Latin; NFC");
+    }
+    
     /**
      * Check the passed character against the replacement list.
      *
@@ -140,10 +145,6 @@ public final class StringTools {
         newPath.append((basePath.trim().endsWith(File.separator) ? "" : File.separator));
         newPath.append(additionalPath.trim());
         return newPath.toString();
-    }
-
-    public static String cleanString(String sourceString) {
-        return CLEAN_STRING_PATTERN.matcher(sourceString).replaceAll(" ").trim();
     }
 
     /**
@@ -372,5 +373,17 @@ public final class StringTools {
         } else {
             return mpaaCertification.trim();
         }
+    }
+
+    public static String cleanString(final String input) {
+        String output = input.replaceAll("ß", "ss");
+        output = StringUtils.stripAccents(output);
+        output = CLEAN_STRING_PATTERN.matcher(output).replaceAll(" ").trim();
+        output = output.replaceAll("^ +| +$|( ){2,}", "$1");
+        return output;
+    }
+
+    public static String transliterate(final String input) {
+        return TRANSLITERATOR.transliterate(input); 
     }
 }

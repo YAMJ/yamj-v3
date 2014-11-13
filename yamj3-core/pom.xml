@@ -96,7 +96,12 @@
             <groupId>org.pojava</groupId>
             <artifactId>pojava</artifactId>
             <version>3.0.2</version>
-        </dependency>        
+        </dependency>    
+        <dependency>
+            <groupId>com.ibm.icu</groupId>
+            <artifactId>icu4j</artifactId>
+            <version>54.1.1</version>
+        </dependency>   
         <!--APACHE COMMONS-->
         <dependency>
             <groupId>org.apache.commons</groupId>

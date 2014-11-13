@@ -129,13 +129,13 @@ public class ApiDao extends HibernateDao {
                 }
 
                 if (foundArtworkIds) {
-                    LOG.debug("Found artwork to process, IDs: {}", ids);
+                    LOG.trace("Found artwork to process, IDs: {}", ids);
                     addArtworks(ids, results, options);
                 } else {
-                    LOG.debug("No artwork found to process, skipping.");
+                    LOG.trace("No artwork found to process, skipping.");
                 }
             } else {
-                LOG.debug("Artwork not required, skipping.");
+                LOG.trace("Artwork not required, skipping.");
             }
         } else {
             LOG.debug("No results found to process.");

@@ -22,11 +22,9 @@
  */
 package org.yamj.core.service.metadata.tools;
 
-import java.util.List;
-import org.yamj.common.tools.StringTools;
-
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
@@ -36,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.database.model.VideoData;
+import org.yamj.core.tools.StringTools;
 
 public final class MetadataTools {
 
