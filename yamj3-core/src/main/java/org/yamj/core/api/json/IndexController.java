@@ -36,7 +36,7 @@ import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.model.dto.ApiVideoDTO;
-import org.yamj.core.api.options.OptionsIndexPerson;
+import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -64,8 +64,7 @@ public class IndexController {
 
     @RequestMapping(value = "/person", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<ApiPersonDTO> getPersonList(
-            @ModelAttribute("options") OptionsIndexPerson options) {
+    public ApiWrapperList<ApiPersonDTO> getPersonList(@ModelAttribute("options") OptionsId options) {
         LOG.debug("INDEX: Person list - Options: {}", options.toString());
 
         ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<ApiPersonDTO>();

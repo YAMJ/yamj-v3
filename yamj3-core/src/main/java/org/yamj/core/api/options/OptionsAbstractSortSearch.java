@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.api.model.builder.DataItem;
 import org.yamj.core.database.model.type.JobType;
@@ -43,10 +44,17 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     private String field;
     private String search;
     private String mode;
-    private List<String> dataitems = new ArrayList<String>();
+    
+    private List<String> dataitems;
+    private List<String> jobs;
+    
     @JsonIgnore
-    private final List<DataItem> dataitemList = new ArrayList<DataItem>();
-
+    private List<DataItem> dataitemList;
+    @JsonIgnore
+    private Map<JobType,Integer> jobTypes;
+    @JsonIgnore
+    private boolean allJobTypes;
+    
     //<editor-fold defaultstate="collapsed" desc="Sort Setters/Getters">
     /**
      * Get field to sort on
@@ -224,66 +232,91 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
 
     public void setDataitems(List<String> dataitems) {
         this.dataitems = dataitems;
-        genarateDataItemsList();
+        this.dataitemList = null;
     }
 
-    private void genarateDataItemsList() {
-        dataitemList.clear();
-        for (String item : dataitems) {
-            DataItem di = DataItem.fromString(item);
-            if (di != DataItem.UNKNOWN) {
-                dataitemList.add(di);
+    public List<DataItem> splitDataItems() {
+        if (dataitemList == null) {
+            dataitemList = new ArrayList<DataItem>();
+            if (dataitems != null) {
+                for (String item : dataitems) {
+                    DataItem di = DataItem.fromString(item);
+                    if (di != DataItem.UNKNOWN) {
+                        dataitemList.add(di);
+                    }
+                }
             }
         }
-    }
-
-    /**
-     * Split the additionalDataItems into a list of DataItems
-     *
-     * @return
-     */
-    public List<DataItem> splitDataitems() {
         return dataitemList;
     }
 
     public boolean hasDataItem(DataItem di) {
-        return dataitemList.contains(di);
+        return splitDataItems().contains(di);
     }
     //</editor-fold>
 
-    protected static Map<JobType,Integer> splitJobs(String jobs) {
-        Map<JobType,Integer> jobTypes = new EnumMap<JobType,Integer>(JobType.class);
-        if (StringUtils.isEmpty(jobs)) {
-            jobTypes = Collections.emptyMap();
-        } else if (StringUtils.containsIgnoreCase(jobs, "ALL")) {
-            // will be handled separately
-            jobTypes = new HashMap<JobType,Integer>();
-        } else {
-            jobTypes = new HashMap<JobType,Integer>();
-            for (String param : StringUtils.split(jobs, ",")) {
-                String[] vals = StringUtils.split(param, "-");
-                
-                JobType jobType = null;
-                Integer amount = null;
-                if (vals.length > 0) {
-                    try {
-                        jobType = JobType.valueOf(vals[0].trim().toUpperCase());
-                        if (vals.length > 1) {
-                            try {
-                                amount = Integer.parseInt(vals[1]);
-                                if (amount.intValue() <= 0) {
-                                    // ignore jobs <= 0
-                                    jobType = null;
-                                }
-                            } catch (Exception ignore) {}
-                        }
-                    } catch (Exception ignore) {}
-                }
-                if (jobType != null) {
-                    jobTypes.put(jobType,amount);
+    //<editor-fold defaultstate="collapsed" desc="Jobs Methods">
+    public List<String> getJobs() {
+        return jobs;
+    }
+
+    public void setJobs(List<String> jobs) {
+        this.jobs = jobs;
+        this.jobTypes = null;
+    }
+
+    public boolean isAllJobTypes() {
+        return this.allJobTypes;
+    }
+    
+    public Map<JobType,Integer> splitJobs() {
+        if (jobTypes == null ) {
+            jobTypes = new EnumMap<JobType,Integer>(JobType.class);
+            if (CollectionUtils.isEmpty(jobs)) {
+                jobTypes = Collections.emptyMap();
+            } else {
+                jobTypes = new HashMap<JobType,Integer>();
+                for (String job : jobs) {
+                    if ("ALL".equalsIgnoreCase(job)) {
+                        allJobTypes = true;
+                        jobTypes.clear();
+                        break;
+                    }
+                    
+                    String[] vals = StringUtils.split(job, "-");
+                    
+                    JobType jobType = null;
+                    Integer amount = null;
+                    if (vals.length > 0) {
+                        try {
+                            jobType = JobType.valueOf(vals[0].trim().toUpperCase());
+                            if (vals.length > 1) {
+                                try {
+                                    amount = Integer.parseInt(vals[1]);
+                                    if (amount.intValue() <= 0) {
+                                        // ignore jobs <= 0
+                                        jobType = null;
+                                    }
+                                } catch (Exception ignore) {}
+                            }
+                        } catch (Exception ignore) {}
+                    }
+                    if (jobType != null) {
+                        jobTypes.put(jobType,amount);
+                    }
                 }
             }
         }
         return jobTypes;
     }
+    
+    @JsonIgnore
+    public Set<String> getJobTypesAsSet() {
+        HashSet<String> set = new HashSet<String>();
+        for (JobType jobType : this.splitJobs().keySet()) {
+            set.add(jobType.toString());
+        }
+        return set;
+    }
+    //</editor-fold>
 }

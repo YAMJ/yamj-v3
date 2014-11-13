@@ -22,6 +22,8 @@
  */
 package org.yamj.core.api.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.yamj.core.database.model.type.JobType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.ArrayList;
@@ -42,8 +44,12 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     private String birthName;
     private String deathDay;
     private String deathPlace;
+    private String job;
+    private String role;
     private List<ApiArtworkDTO> artwork = new ArrayList<ApiArtworkDTO>(0);
     private List<ApiFilmographyDTO> filmography = new ArrayList<ApiFilmographyDTO>(0);
+    @JsonIgnore
+    private JobType jobType;
 
     public String getBiography() {
         return biography;
@@ -100,6 +106,22 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     public void setDeathPlace(String deathPlace) {
         this.deathPlace = deathPlace;
     }
+    
+    public String getJob() {
+        return job;
+    }
+
+    public void setJob(String job) {
+        this.job = job;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 
     public List<ApiArtworkDTO> getArtwork() {
         return artwork;
@@ -115,5 +137,13 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
 
     public void setFilmography(List<ApiFilmographyDTO> filmography) {
         this.filmography = filmography;
+    }
+
+    public JobType getJobType() {
+        return jobType;
+    }
+
+    public void setJobTypeAsString(String job) {
+        this.jobType = JobType.fromString(job);
     }
 }

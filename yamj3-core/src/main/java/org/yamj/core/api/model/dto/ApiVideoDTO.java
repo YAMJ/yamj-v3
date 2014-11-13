@@ -62,7 +62,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private List<Certification> certifications = new ArrayList<Certification>();
     private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
     private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
-    private final Map<JobType,List<ApiCastDTO>> cast = new EnumMap<JobType,List<ApiCastDTO>>(JobType.class);
+    private final Map<JobType,List<ApiPersonDTO>> cast = new EnumMap<JobType,List<ApiPersonDTO>>(JobType.class);
                     
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public MetaDataType getVideoType() {
@@ -93,13 +93,13 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         return count;
     }
 
-    public Map<JobType, List<ApiCastDTO>> getCast() {
+    public Map<JobType, List<ApiPersonDTO>> getCast() {
         return cast;
     }
 
     public int getCastCount() {
         int count = 0;
-        for (Map.Entry<JobType, List<ApiCastDTO>> entry : cast.entrySet()) {
+        for (Map.Entry<JobType, List<ApiPersonDTO>> entry : cast.entrySet()) {
             count += entry.getValue().size();
         }
         return count;
@@ -210,8 +210,8 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         }
     }
 
-    public void setCast(List<ApiCastDTO> castList) {
-        for (ApiCastDTO acdto : castList) {
+    public void setCast(List<ApiPersonDTO> castList) {
+        for (ApiPersonDTO acdto : castList) {
             addCast(acdto);
         }
     }
@@ -289,11 +289,11 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         this.artwork.get(newArtwork.getArtworkType()).add(newArtwork);
     }
 
-    public void addCast(ApiCastDTO newCast) {
+    public void addCast(ApiPersonDTO newCast) {
         // Add a blank list if it doesn't already exist
-        if (!cast.containsKey(newCast.getJob())) {
-            cast.put(newCast.getJob(), new ArrayList<ApiCastDTO>(1));
+        if (!cast.containsKey(newCast.getJobType())) {
+            cast.put(newCast.getJobType(), new ArrayList<ApiPersonDTO>(1));
         }
-        this.cast.get(newCast.getJob()).add(newCast);
+        this.cast.get(newCast.getJobType()).add(newCast);
     }
 }

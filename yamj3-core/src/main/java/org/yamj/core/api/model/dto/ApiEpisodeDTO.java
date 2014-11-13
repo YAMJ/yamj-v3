@@ -55,7 +55,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     private List<Studio> studios = new ArrayList<Studio>();
     private List<Certification> certifications = new ArrayList<Certification>();
     private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
-    private final Map<JobType,List<ApiCastDTO>> cast = new EnumMap<JobType,List<ApiCastDTO>>(JobType.class);
+    private final Map<JobType,List<ApiPersonDTO>> cast = new EnumMap<JobType,List<ApiPersonDTO>>(JobType.class);
 
     //<editor-fold defaultstate="collapsed" desc="Setter Methods">
     public void setSeriesId(Long seriesId) {
@@ -128,8 +128,8 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
         this.files = files;
     }
     
-    public void setCast(List<ApiCastDTO> castList) {
-        for (ApiCastDTO acdto : castList) {
+    public void setCast(List<ApiPersonDTO> castList) {
+        for (ApiPersonDTO acdto : castList) {
             addCast(acdto);
         }
     }
@@ -195,16 +195,16 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
         return files;
     }
     
-    public Map<JobType, List<ApiCastDTO>> getCast() {
+    public Map<JobType, List<ApiPersonDTO>> getCast() {
         return cast;
     }
     //</editor-fold>
 
-    public void addCast(ApiCastDTO newCast) {
+    public void addCast(ApiPersonDTO newCast) {
         // Add a blank list if it doesn't already exist
-        if (!cast.containsKey(newCast.getJob())) {
-            cast.put(newCast.getJob(), new ArrayList<ApiCastDTO>(1));
+        if (!cast.containsKey(newCast.getJobType())) {
+            cast.put(newCast.getJobType(), new ArrayList<ApiPersonDTO>(1));
         }
-        this.cast.get(newCast.getJob()).add(newCast);
+        this.cast.get(newCast.getJobType()).add(newCast);
     }
 }

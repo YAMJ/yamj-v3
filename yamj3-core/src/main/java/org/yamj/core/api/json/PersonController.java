@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
-import org.yamj.core.api.options.OptionsIndexPerson;
+import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -47,7 +47,7 @@ public class PersonController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperSingle<ApiPersonDTO> getPersonById(@ModelAttribute("options") OptionsIndexPerson options) {
+    public ApiWrapperSingle<ApiPersonDTO> getPersonById(@ModelAttribute("options") OptionsId options) {
         ApiWrapperSingle<ApiPersonDTO> wrapper = new ApiWrapperSingle<ApiPersonDTO>();
         if (options.getId() > 0) {
             LOG.info("Getting person with ID '{}'", options.getId());
@@ -63,29 +63,29 @@ public class PersonController {
 
     @RequestMapping(value = "/movie", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<ApiPersonDTO> getPersonListByMovie(@ModelAttribute("options") OptionsIndexPerson options) {
+    public ApiWrapperList<ApiPersonDTO> getPersonListByMovie(@ModelAttribute("options") OptionsId options) {
         return getPersonListByVideo(MetaDataType.MOVIE, options);
     }
 
     @RequestMapping(value = "/series", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<ApiPersonDTO> getPersonListBySeries(@ModelAttribute("options") OptionsIndexPerson options) {
+    public ApiWrapperList<ApiPersonDTO> getPersonListBySeries(@ModelAttribute("options") OptionsId options) {
         return getPersonListByVideo(MetaDataType.SERIES, options);
     }
 
     @RequestMapping(value = "/season", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<ApiPersonDTO> getPersonListBySeason(@ModelAttribute("options") OptionsIndexPerson options) {
+    public ApiWrapperList<ApiPersonDTO> getPersonListBySeason(@ModelAttribute("options") OptionsId options) {
         return getPersonListByVideo(MetaDataType.SEASON, options);
     }
 
     @RequestMapping(value = "/episode", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<ApiPersonDTO> getPersonListByEpisode(@ModelAttribute("options") OptionsIndexPerson options) {
+    public ApiWrapperList<ApiPersonDTO> getPersonListByEpisode(@ModelAttribute("options") OptionsId options) {
         return getPersonListByVideo(MetaDataType.EPISODE, options);
     }
 
-    private ApiWrapperList<ApiPersonDTO> getPersonListByVideo(MetaDataType metaDataType, OptionsIndexPerson options) {
+    private ApiWrapperList<ApiPersonDTO> getPersonListByVideo(MetaDataType metaDataType, OptionsId options) {
         ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<ApiPersonDTO>();
 
         if (options.getId() > 0L) {
@@ -99,13 +99,4 @@ public class PersonController {
         }
         return wrapper;
     }
-// Search by name
-
-    /* List of people with count of jobs
-     select p.id,p.name,c.job, count(*)
-     from person p, cast_crew c
-     where p.id=c.person_id
-     group by p.id,c.job
-     order by p.id
-     */
 }
