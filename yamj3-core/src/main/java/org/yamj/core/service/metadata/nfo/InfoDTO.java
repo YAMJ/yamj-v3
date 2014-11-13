@@ -50,7 +50,6 @@ public final class InfoDTO {
     private Date releaseDate;
     private int rating = -1;
     private int top250 = -1;
-    private String runtime;
     private String plot;
     private String outline;
     private String tagline;
@@ -200,17 +199,6 @@ public final class InfoDTO {
     public void setTop250(int top250) {
         if (top250 >= 0) {
             this.top250 = top250;
-            this.changed = true;
-        }
-    }
-
-    public String getRuntime() {
-        return runtime;
-    }
-
-    public void setRuntime(String runtime) {
-        if (StringUtils.isNotBlank(runtime)) {
-            this.runtime = runtime;
             this.changed = true;
         }
     }

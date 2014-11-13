@@ -271,9 +271,6 @@ public final class InfoReader {
         int rating = MetadataTools.parseRating(DOMHelper.getValueFromElement(eCommon, "rating"));
         dto.setRating(rating);
 
-        // parse runtime
-        parseRuntime(eCommon, dto);
-
         // parse certification
         parseCertification(eCommon, dto);
 
@@ -444,37 +441,6 @@ public final class InfoReader {
                 }
             }
         }
-    }
-
-    /**
-     * Parse Runtime from the XML NFO file
-     *
-     * @param eCommon
-     * @param dto
-     */
-    private void parseRuntime(Element eCommon, InfoDTO dto) {
-        // TODO
-        /*
-        String runtime = DOMHelper.getValueFromElement(eCommon, "runtime");
-
-        // Save the first runtime to use if no preferred one is found
-        String prefRuntime = null;
-        // Split the runtime into individual parts
-        for (String rtSingle : runtime.split("\\|")) {
-            // IF we don't have a current preferred runtime, set it now.
-            if (StringUtils.isBlank(prefRuntime)) {
-                prefRuntime = rtSingle;
-            }
-
-            String preferredCountry = this.configServiceWrapper.getProperty("yamj3.scan.preferredCountry", "USA");
-            // Check to see if we have our preferred country in the string
-            if (StringUtils.containsIgnoreCase(rtSingle, preferredCountry)) {
-                // Lets get the country runtime
-                prefRuntime = rtSingle.substring(rtSingle.indexOf(preferredCountry) + preferredCountry.length() + 1);
-            }
-        }
-        dto.setRuntime(prefRuntime);
-        */
     }
 
     /**

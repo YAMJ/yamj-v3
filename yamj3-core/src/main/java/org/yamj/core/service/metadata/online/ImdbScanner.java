@@ -459,11 +459,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 
                 if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
                     // load the release page from IMDb
-                    if (releaseInfoXML == null) {
-                        releaseInfoXML = httpClient.requestContent(getImdbUrl(imdbId, "releaseinfo"), charset);
-                    }
+                    releaseInfoXML = httpClient.requestContent(getImdbUrl(imdbId, "releaseinfo"), charset);
     
-                    String preferredCountry = this.configServiceWrapper.getProperty("yamj3.scan.preferredCountry", "USA");
+                    String preferredCountry = this.configServiceWrapper.getProperty("imdb.aka.preferred.country", "USA");
                     Pattern pRelease = Pattern.compile("(?:.*?)\\Q" + preferredCountry + "\\E(?:.*?)\\Qrelease_date\">\\E(.*?)(?:<.*?>)(.*?)(?:</a>.*)");
                     Matcher mRelease = pRelease.matcher(releaseInfoXML);
         
@@ -513,9 +511,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         if (akaScrapeTitle && OverrideTools.checkOverwriteTitle(metadata, SCANNER_ID)) {
             try {
                 List<String> akaIgnoreVersions = configServiceWrapper.getPropertyAsList("imdb.aka.ignore.versions", "");
-    
-                String preferredCountry = this.configServiceWrapper.getProperty("yamj3.scan.preferredCountry", "USA");
+                String preferredCountry = this.configServiceWrapper.getProperty("imdb.aka.preferred.country", "USA");
                 String fallbacks = configServiceWrapper.getProperty("imdb.aka.fallback.countries", "");
+                
                 List<String> akaMatchingCountries;
                 if (StringUtils.isBlank(fallbacks)) {
                     akaMatchingCountries = Collections.singletonList(preferredCountry);
