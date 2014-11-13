@@ -41,7 +41,7 @@ import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.core.service.metadata.tools.MetadataTools;
+import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.web.HTMLTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
@@ -576,6 +576,10 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
                 return ScanResult.RETRY;
             }
             return ScanResult.ERROR;
+        }
+
+        if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
+            person.setName(personInfos.getFullName(), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {

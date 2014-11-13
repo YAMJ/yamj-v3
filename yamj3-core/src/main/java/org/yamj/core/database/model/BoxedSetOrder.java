@@ -22,9 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import java.io.Serializable;
 import javax.persistence.*;
 import org.hibernate.annotations.ForeignKey;

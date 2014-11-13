@@ -42,3 +42,4 @@ import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 import org.yamj.core.hibernate.usertypes.EnumStringUserType;
+

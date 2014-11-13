@@ -22,18 +22,14 @@
  */
 package org.yamj.core.remote.service;
 
+import static org.junit.Assert.assertTrue;
+
 import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.BasicConfigurator;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.Ignore;
+import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.junit.Assert.*;
 
 public class GitHubServiceImplTest {
 

@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.yamj.core.tools.StringTools;
+import org.yamj.core.tools.MetadataTools;
 
 /**
  * Information on the physical file for the API
@@ -179,7 +179,7 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
 
     public void setRuntime(Integer runtime) {
         if (runtime != null) {
-            this.runtime = StringTools.formatDuration(runtime.intValue());
+            this.runtime = MetadataTools.formatRuntime(runtime.intValue());
         }
     }
     
@@ -212,7 +212,7 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
     }
 
     public void setFileDate(Date fileDate) {
-        this.fileDate = StringTools.formatDateLong(fileDate);
+        this.fileDate = MetadataTools.formatDateLong(fileDate);
     }
 
     public String getFileSize() {
@@ -221,7 +221,7 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
 
     public void setFileSize(Long fileSize) {
         if (fileSize != null) {
-            this.fileSize = StringTools.formatFileSize(fileSize.longValue());
+            this.fileSize = MetadataTools.formatFileSize(fileSize.longValue());
         }
     }
     

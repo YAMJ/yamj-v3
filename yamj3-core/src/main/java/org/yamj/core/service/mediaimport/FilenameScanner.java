@@ -34,12 +34,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
+import org.yamj.common.tools.StringTools;
 import org.yamj.common.util.KeywordMap;
 import org.yamj.common.util.PatternUtils;
 import org.yamj.common.util.TokensPatternMap;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.tools.LanguageTools;
-import org.yamj.core.tools.StringTools;
 
 @Service("filenameScanner")
 public class FilenameScanner {

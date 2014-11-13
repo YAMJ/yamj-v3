@@ -20,56 +20,249 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.tools;
+package org.yamj.core.tools;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import com.ibm.icu.text.Transliterator;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.pojava.datetime.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamj.common.tools.PropertyTools;
+import org.yamj.common.tools.StringTools;
 import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.tools.StringTools;
 
 public final class MetadataTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(MetadataTools.class);
+    
+    private static final Pattern CLEAN_STRING_PATTERN = Pattern.compile("[^a-zA-Z0-9\\-\\(\\)]");
+    private static final char[] CLEAN_DELIMITERS = new char[]{'.',' ','_','-'};
     private static final Pattern DATE_COUNTRY = Pattern.compile("(.*)(\\s*?\\(\\w*\\))");
     private static final Pattern YEAR_PATTERN = Pattern.compile("(?:.*?)(\\d{4})(?:.*?)");
+    private static final String MPPA_RATED = "Rated";
+    private static final long KB = 1024;
+    private static final long MB = KB * KB;
+    private static final long GB = KB * KB * KB;
+    private static final Map<Character, Character> CHAR_REPLACEMENT_MAP = new HashMap<Character, Character>();
+    
+    private static final DecimalFormat FILESIZE_FORMAT_0;
+    private static final DecimalFormat FILESIZE_FORMAT_1;
+    private static final DecimalFormat FILESIZE_FORMAT_2;
+    private static final SimpleDateFormat DATE_FORMAT;
+    private static final SimpleDateFormat DATE_FORMAT_LONG;
+    private static final boolean IDENT_TRANSLITERATE;
+    private static final boolean IDENT_CLEAN;
+    private static final Transliterator TRANSLITERATOR;
 
     private MetadataTools() {
         throw new UnsupportedOperationException("Class cannot be instantiated");
     }
 
+    static {
+        // identifier cleaning
+        IDENT_TRANSLITERATE = PropertyTools.getBooleanProperty("yamj3.identifier.transliterate", Boolean.FALSE);
+        IDENT_CLEAN = PropertyTools.getBooleanProperty("yamj3.identifier.clean", Boolean.TRUE);
+        
+        // Populate the charReplacementMap
+        String temp = PropertyTools.getProperty("indexing.character.replacement", "");
+        StringTokenizer tokenizer = new StringTokenizer(temp, ",");
+        while (tokenizer.hasMoreTokens()) {
+            String token = tokenizer.nextToken();
+            int idx = token.indexOf('-');
+            if (idx > 0) {
+                String key = token.substring(0, idx).trim();
+                String value = token.substring(idx + 1).trim();
+                if (key.length() == 1 && value.length() == 1) {
+                    CHAR_REPLACEMENT_MAP.put(Character.valueOf(key.charAt(0)), Character.valueOf(value.charAt(0)));
+                }
+            }
+        }
+        
+        String dateFormat = PropertyTools.getProperty("yamj3.date.format", "yyyy-MM-dd");
+        
+        // short date format
+        SimpleDateFormat sdf;
+        try {
+            sdf = new SimpleDateFormat(dateFormat);
+        } catch (Exception ignore) {
+            sdf = new SimpleDateFormat("yyyy-MM-dd");
+        }
+        DATE_FORMAT = sdf;
+        try {
+            sdf = new SimpleDateFormat(dateFormat + " HH:mm:ss");
+        } catch (Exception ignore) {
+            sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        }
+        DATE_FORMAT_LONG = sdf;
+
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        // Use the "." as a decimal format separator, ignoring localisation
+        symbols.setDecimalSeparator('.');
+        FILESIZE_FORMAT_0 = new DecimalFormat("0", symbols);
+        FILESIZE_FORMAT_1 = new DecimalFormat("0.#", symbols);
+        FILESIZE_FORMAT_2 = new DecimalFormat("0.##", symbols);
+
+        // create a new transliterator
+        TRANSLITERATOR = Transliterator.getInstance("NFD; Any-Latin; NFC");
+    }
+    
     /**
-     * Format the duration passed as ?h?m format
+     * Check the passed character against the replacement list.
      *
-     * @param duration Duration in seconds
+     * @param charToReplace
      * @return
      */
-    public static String formatDuration(int duration) {
+    public static String characterMapReplacement(Character charToReplace) {
+        Character tempC = CHAR_REPLACEMENT_MAP.get(charToReplace);
+        if (tempC == null) {
+            return charToReplace.toString();
+        } else {
+            return tempC.toString();
+        }
+    }
+
+    /**
+     * Change all the characters in a string to the safe replacements
+     *
+     * @param stringToReplace
+     * @return
+     */
+    public static String stringMapReplacement(String stringToReplace) {
+        Character tempC;
+        StringBuilder sb = new StringBuilder();
+
+        for (Character c : stringToReplace.toCharArray()) {
+            tempC = CHAR_REPLACEMENT_MAP.get(c);
+            if (tempC == null) {
+                sb.append(c);
+            } else {
+                sb.append(tempC);
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Format the date into short format
+     * 
+     * @param date
+     */
+    public static String formatDateShort(Date date) {
+        if (date == null) {
+            return null;
+        }
+        return DATE_FORMAT.format(date);
+    }
+
+    /**
+     * Format the date into short format
+     * 
+     * @param date
+     */
+    public static String formatDateLong(Date date) {
+        if (date == null) {
+            return null;
+        }
+        return DATE_FORMAT_LONG.format(date);
+    }
+    
+    /**
+     * Format the file size
+     *
+     * @param fileSize
+     * @return
+     */
+    public static String formatFileSize(long fileSize) {
+        String returnSize;
+        if (fileSize < 0 ) {
+           returnSize = null;
+        } else if (fileSize < KB) {
+            returnSize = fileSize + " Bytes";
+        } else {
+            String appendText;
+            long divider;
+
+            // resolve text to append and divider
+            if (fileSize < MB) {
+                appendText = " KB";
+                divider = KB;
+            } else if (fileSize < GB) {
+                appendText = " MB";
+                divider = MB;
+            } else {
+                appendText = " GB";
+                divider = GB;
+            }
+
+            // resolve decimal format
+            DecimalFormat df;
+            long checker = (fileSize / divider);
+            if (checker < 10) {
+                df = FILESIZE_FORMAT_2;
+            } else if (checker < 100) {
+                df = FILESIZE_FORMAT_1;
+            } else {
+                df = FILESIZE_FORMAT_0;
+            }
+
+            // build string
+            returnSize = df.format((float) ((float) fileSize / (float) divider)) + appendText;
+        }
+
+        return returnSize;
+    }
+
+    /**
+     * Format the duration passed as ?h ?m format
+     *
+     * @param duration duration in seconds
+     * @return
+     */
+    public static String formatRuntime(final int runtime) {
+        if (runtime < 0) {
+            return null;
+        }
+        int fixed = runtime / 1000;
         StringBuilder returnString = new StringBuilder();
 
-        int nbHours = duration / 3600;
+        int nbHours = fixed / 3600;
         if (nbHours != 0) {
             returnString.append(nbHours).append("h");
         }
 
-        int nbMinutes = (duration - (nbHours * 3600)) / 60;
+        int nbMinutes = (fixed - (nbHours * 3600)) / 60;
         if (nbMinutes != 0) {
             if (nbHours != 0) {
                 returnString.append(" ");
             }
             returnString.append(nbMinutes).append("m");
         }
-
-        LOG.trace("Formatted duration " + duration + " to " + returnString.toString());
+        
         return returnString.toString();
+    }
+
+    public static int toYear(String string) {
+        int year;
+
+        if (StringUtils.isNotBlank(string) && StringUtils.isNumeric(string)) {
+            try {
+                year = Integer.parseInt(string);
+            } catch (NumberFormatException ex) {
+                year = -1;
+            }
+        } else {
+            year = -1;
+        }
+        return year;
     }
 
     /**
@@ -310,5 +503,56 @@ public final class MetadataTools {
         }
         
         return fixed;
+    }
+
+
+    /**
+     * Get the certification from the MPAA string
+     *
+     * @param mpaaCertification
+     * @return
+     */
+    public static String processMpaaCertification(String mpaaCertification) {
+        return processMpaaCertification(MPPA_RATED, mpaaCertification);
+    }
+
+    /**
+     * Get the certification from the MPAA rating string
+     *
+     * @param mpaaRated
+     * @param mpaaCertification
+     * @return
+     */
+    public static String processMpaaCertification(String mpaaRated, String mpaaCertification) {
+        // Strip out the "Rated " and extra words at the end of the MPAA certification
+        Pattern mpaaPattern = Pattern.compile("(?:" + (StringUtils.isNotBlank(mpaaRated) ? mpaaRated : MPPA_RATED) + "\\s)?(.*?)(?:($|\\s).*?)");
+        Matcher m = mpaaPattern.matcher(mpaaCertification);
+        if (m.find()) {
+            return m.group(1).trim();
+        } else {
+            return mpaaCertification.trim();
+        }
+    }
+    
+    public static String cleanIdentifier(final String identifier) {
+        String result = identifier;
+        if (IDENT_TRANSLITERATE) {
+            result = TRANSLITERATOR.transliterate(result); 
+        }
+        if (IDENT_CLEAN) {
+            // format ß to ss
+            result = result.replaceAll("ß", "ss");
+            // remove all accents from letters
+            result = StringUtils.stripAccents(result);
+            // capitalize first letter
+            result = WordUtils.capitalize(result, CLEAN_DELIMITERS);
+            // remove punctuation and symbols
+            result = result.replaceAll("[\\p{Po}|\\p{S}]", "");
+            // just leave characters and digits
+            result = CLEAN_STRING_PATTERN.matcher(result).replaceAll(" ").trim();
+            // remove double whitespaces
+            result = result.replaceAll("^ +| +$|( ){2,}", "$1");
+        }
+        return result;
     }
 }

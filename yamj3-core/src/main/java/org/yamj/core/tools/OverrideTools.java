@@ -122,6 +122,8 @@ public final class OverrideTools {
         putSeasonPriorities(OverrideFlag.YEAR, sources);
         
         // person priorities
+        sources = PropertyTools.getProperty("priority.person.name", DEFAULT_PLUGIN_PERSON);
+        putPersonPriorities(OverrideFlag.NAME, sources);
         sources = PropertyTools.getProperty("priority.person.birtday", DEFAULT_PLUGIN_PERSON);
         putPersonPriorities(OverrideFlag.BIRTHDAY, sources);
         sources = PropertyTools.getProperty("priority.person.birtplace", DEFAULT_PLUGIN_PERSON);
@@ -452,7 +454,17 @@ public final class OverrideTools {
     }
     
     // PERSON OVERRIDE
-    
+
+    public static boolean checkOverwriteName(Person person, String source) {
+        if (skipCheck(person, OverrideFlag.NAME, source)) {
+            // skip the check
+            return Boolean.FALSE;
+        } else if (person.getName() == null) {
+            return Boolean.TRUE;
+        }
+        return checkOverwrite(person, OverrideFlag.NAME, source);
+    }
+
     public static boolean checkOverwriteBirthDay(Person person, String source) {
         if (skipCheck(person, OverrideFlag.BIRTHDAY, source)) {
             // skip the check

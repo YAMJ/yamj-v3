@@ -45,8 +45,8 @@ import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.mediaimport.FilenameDTO.SetDTO;
-import org.yamj.core.service.metadata.tools.MetadataTools;
 import org.yamj.core.service.staging.StagingService;
+import org.yamj.core.tools.MetadataTools;
 
 /**
  * The media import service is a spring-managed service. This will be used by the MediaImportRunner only in order to access other
@@ -178,8 +178,7 @@ public class MediaImportService {
             if (videoData == null) {
 
                 // NEW video data
-                videoData = new VideoData();
-                videoData.setIdentifier(identifier);
+                videoData = new VideoData(identifier);
                 videoData.setSourceDbIdMap(dto.getIdMap());
                 videoData.setTitle(dto.getTitle(), MEDIA_SOURCE);
                 videoData.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
@@ -255,8 +254,7 @@ public class MediaImportService {
                         String seriesIdentifier = dto.buildIdentifier();
                         Series series = metadataDao.getSeries(seriesIdentifier);
                         if (series == null) {
-                            series = new Series();
-                            series.setIdentifier(seriesIdentifier);
+                            series = new Series(seriesIdentifier);
                             series.setTitle(dto.getTitle(), MEDIA_SOURCE);
                             series.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                             series.setSourceDbIdMap(dto.getIdMap());
@@ -286,8 +284,7 @@ public class MediaImportService {
                             metadataDao.saveEntity(banner);
                         }
 
-                        season = new Season();
-                        season.setIdentifier(seasonIdentifier);
+                        season = new Season(seasonIdentifier);
                         season.setSeason(dto.getSeason());
                         season.setTitle(dto.getTitle(), MEDIA_SOURCE);
                         season.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
@@ -319,8 +316,7 @@ public class MediaImportService {
                         metadataDao.saveEntity(banner);
                     }
 
-                    videoData = new VideoData();
-                    videoData.setIdentifier(identifier);
+                    videoData = new VideoData(identifier);
                     if (StringUtils.isNotBlank(dto.getEpisodeTitle())) {
                         videoData.setTitle(dto.getEpisodeTitle(), MEDIA_SOURCE);
                         videoData.setTitleOriginal(dto.getEpisodeTitle(), MEDIA_SOURCE);
@@ -812,7 +808,8 @@ public class MediaImportService {
                 }
     
                 // find person artwork
-                artworks = this.metadataDao.findPersonArtworks(stripped);
+                String identifier = MetadataTools.cleanIdentifier(stripped);
+                artworks = this.metadataDao.findPersonArtworks(identifier);
             }
             else 
             {

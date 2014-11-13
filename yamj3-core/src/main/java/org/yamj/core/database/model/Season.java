@@ -22,16 +22,15 @@
  */
 package org.yamj.core.database.model;
 
-import java.util.Iterator;
-import java.util.Map.Entry;
-import org.springframework.util.CollectionUtils;
 import java.util.*;
+import java.util.Map.Entry;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
+import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
@@ -94,7 +93,20 @@ public class Season extends AbstractMetadata {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "season")
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
 
+    // CONSTRUCTORS
+    
+    public Season() {
+        super();
+    }
+
+    public Season(String identifier) {
+        super();
+        setIdentifier(identifier);
+    }
+
+    
     // GETTER and SETTER
+    
     public int getSeason() {
         return season;
     }
@@ -275,7 +287,7 @@ public class Season extends AbstractMetadata {
         sb.append(", title=");
         sb.append(getTitle());
         sb.append(", year=");
-        sb.append(getYear());
+        sb.append(getPublicationYear());
         sb.append("]");
         return sb.toString();
     }

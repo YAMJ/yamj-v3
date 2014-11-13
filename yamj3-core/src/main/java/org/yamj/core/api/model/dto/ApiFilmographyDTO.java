@@ -22,12 +22,11 @@
  */
 package org.yamj.core.api.model.dto;
 
-import org.yamj.core.tools.StringTools;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
 import org.yamj.core.database.model.type.ParticipationType;
+import org.yamj.core.tools.MetadataTools;
 
 @JsonInclude(Include.NON_DEFAULT) 
 public class ApiFilmographyDTO extends AbstractApiDTO {
@@ -110,7 +109,7 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
     }
 
     public void setReleaseDate(Date releaseDate) {
-        this.releaseDate = StringTools.formatDateShort(releaseDate);
+        this.releaseDate = MetadataTools.formatDateShort(releaseDate);
     }
 
     public String getReleaseState() {

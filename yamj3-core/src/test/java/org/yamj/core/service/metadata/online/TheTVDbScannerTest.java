@@ -25,13 +25,11 @@ package org.yamj.core.service.metadata.online;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-import org.yamj.core.service.metadata.online.ScanResult;
-import org.yamj.core.service.metadata.online.TheTVDbScanner;
-
 import javax.annotation.Resource;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.junit.*;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
@@ -46,25 +44,6 @@ public class TheTVDbScannerTest extends AbstractJUnit4SpringContextTests {
 
     @Resource(name = "tvdbScanner")
     private TheTVDbScanner tvdbScanner;
-
-    public TheTVDbScannerTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
 
     /**
      * Test of getScannerName method, of class TheTVDbScanner.

@@ -228,9 +228,22 @@ public class TheMovieDbArtworkScanner implements
      */
     @Override
     public String getPersonId(String name) {
-        Person person = new Person();
-        person.setName(name);
-        return getPersonId(person);
+        if (StringUtils.isBlank(name)) {
+            return null;
+        }
+        
+        try {
+            TmdbResultsList<com.omertron.themoviedbapi.model.Person> results = tmdbApi.searchPeople(name, Boolean.FALSE, -1);
+            if (CollectionUtils.isEmpty(results.getResults())) {
+                return null;
+            }
+
+            com.omertron.themoviedbapi.model.Person tmdbPerson = results.getResults().get(0);
+            return Integer.toString(tmdbPerson.getId());
+        } catch (MovieDbException ex) {
+            LOG.warn("Failed to get ID for {} from {}, error: {}", name, getScannerName(), ex.getMessage());
+            return null;
+        }
     }
 
     /**
@@ -249,7 +262,7 @@ public class TheMovieDbArtworkScanner implements
         if (StringUtils.isBlank(person.getName())) {
             return null;
         }
-
+        
         try {
             TmdbResultsList<com.omertron.themoviedbapi.model.Person> results = tmdbApi.searchPeople(person.getName(), Boolean.FALSE, -1);
             if (CollectionUtils.isEmpty(results.getResults())) {

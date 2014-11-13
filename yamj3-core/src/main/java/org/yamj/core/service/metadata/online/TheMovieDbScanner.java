@@ -42,7 +42,7 @@ import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.core.service.metadata.tools.MetadataTools;
+import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 
 @Service("tmdbScanner")
@@ -354,6 +354,10 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             com.omertron.themoviedbapi.model.Person tmdbPerson = tmdbApi.getPersonInfo(Integer.parseInt(id));
 
             person.setSourceDbId(ImdbScanner.SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
+
+            if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
+                person.setName(tmdbPerson.getName(), SCANNER_ID);
+            }
 
             if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {
                 Date parsedDate = MetadataTools.parseToDate(tmdbPerson.getBirthday());

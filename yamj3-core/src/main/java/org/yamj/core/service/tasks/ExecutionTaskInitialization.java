@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.tasks;
 
-import org.yamj.core.database.service.ExecutionTaskStorageService;
-
 import java.util.Date;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +32,8 @@ import org.springframework.stereotype.Component;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.ExecutionTask;
 import org.yamj.core.database.model.type.IntervalType;
-import org.yamj.core.service.metadata.tools.MetadataTools;
+import org.yamj.core.database.service.ExecutionTaskStorageService;
+import org.yamj.core.tools.MetadataTools;
 
 /**
  * Just used for initialization of artwork profiles at startup.

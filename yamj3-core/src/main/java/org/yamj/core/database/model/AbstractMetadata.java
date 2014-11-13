@@ -22,7 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import javax.persistence.Column;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
@@ -98,24 +97,24 @@ public abstract class AbstractMetadata extends AbstractAuditable
         return false;
     }
 
-    public String getIdentifier() {
+    public final String getIdentifier() {
         return identifier;
     }
 
-    public void setIdentifier(String identifier) {
+    protected final void setIdentifier(String identifier) {
         this.identifier = identifier;
     }
 
     @Override
-    public String getTitle() {
+    public final String getTitle() {
         return title;
     }
 
-    private void setTitle(String title) {
+    private final void setTitle(String title) {
         this.title = title;
     }
 
-    public void setTitle(String title, String source) {
+    public final void setTitle(String title, String source) {
         if (StringUtils.isNotBlank(title)) {
             this.title = title.trim();
             setOverrideFlag(OverrideFlag.TITLE, source);
@@ -123,45 +122,45 @@ public abstract class AbstractMetadata extends AbstractAuditable
     }
 
     @Override
-    public String getTitleOriginal() {
+    public final String getTitleOriginal() {
         return titleOriginal;
     }
 
-    private void setTitleOriginal(String titleOriginal) {
+    private final void setTitleOriginal(String titleOriginal) {
         this.titleOriginal = titleOriginal;
     }
 
-    public void setTitleOriginal(String titleOriginal, String source) {
+    public final void setTitleOriginal(String titleOriginal, String source) {
         if (StringUtils.isNotBlank(titleOriginal)) {
             this.titleOriginal = titleOriginal.trim();
             setOverrideFlag(OverrideFlag.ORIGINALTITLE, source);
         }
     }
 
-    public String getPlot() {
+    public final String getPlot() {
         return plot;
     }
 
-    private void setPlot(String plot) {
+    private final void setPlot(String plot) {
         this.plot = plot;
     }
 
-    public void setPlot(String plot, String source) {
+    public final void setPlot(String plot, String source) {
         if (StringUtils.isNotBlank(plot)) {
             this.plot = plot.trim();
             setOverrideFlag(OverrideFlag.PLOT, source);
         }
     }
 
-    public String getOutline() {
+    public final String getOutline() {
         return outline;
     }
 
-    private void setOutline(String outline) {
+    private final void setOutline(String outline) {
         this.outline = outline;
     }
 
-    public void setOutline(String outline, String source) {
+    public final void setOutline(String outline, String source) {
         if (StringUtils.isNotBlank(outline)) {
             this.outline = outline.trim();
             setOverrideFlag(OverrideFlag.OUTLINE, source);
@@ -178,20 +177,20 @@ public abstract class AbstractMetadata extends AbstractAuditable
     }
 
     @Override
-    public Date getLastScanned() {
+    public final Date getLastScanned() {
         return lastScanned;
     }
 
-    public void setLastScanned(Date lastScanned) {
+    public final void setLastScanned(Date lastScanned) {
         this.lastScanned = lastScanned;
     }
 
     @Override
-    public int getRetries() {
+    public final int getRetries() {
         return retries;
     }
 
-    public void setRetries(int retries) {
+    public final void setRetries(int retries) {
         this.retries = retries;
     }
     

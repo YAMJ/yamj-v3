@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
-import org.yamj.core.database.model.type.JobType;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,14 +39,14 @@ import org.w3c.dom.NodeList;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 import org.yamj.core.service.metadata.online.TheTVDbScanner;
-import org.yamj.core.service.metadata.tools.MetadataTools;
 import org.yamj.core.service.staging.StagingService;
-import org.yamj.core.tools.StringTools;
+import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.xml.DOMHelper;
 
 /**
@@ -456,7 +454,7 @@ public final class InfoReader {
         if (certificationMPAA) {
             tempCert = DOMHelper.getValueFromElement(eCommon, "mpaa");
             if (StringUtils.isNotBlank(tempCert)) {
-                String mpaa = StringTools.processMpaaCertification(tempCert);
+                String mpaa = MetadataTools.processMpaaCertification(tempCert);
                 dto.addCertificatioInfo("MPAA", StringUtils.trimToNull(mpaa));
             }
         }
@@ -486,7 +484,7 @@ public final class InfoReader {
 
                 if (certificationMPAA && StringUtils.containsIgnoreCase(tempCert, "Rated")) {
                     // extract the MPAA rating from the certification
-                    String mpaa = StringTools.processMpaaCertification(tempCert);
+                    String mpaa = MetadataTools.processMpaaCertification(tempCert);
                     dto.addCertificatioInfo("MPAA", StringUtils.trimToNull(mpaa));
                 }
             }

@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
-import org.yamj.core.service.metadata.tools.MetadataTools;
-
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -38,6 +36,7 @@ import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.staging.StagingService;
+import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 
 @Service("nfoScannerService")

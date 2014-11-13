@@ -243,6 +243,9 @@ public class ArtworkLocatorService {
         artworkNames.add(person.getName().toLowerCase());
         artworkNames.add(person.getName().toLowerCase() + ".photo");
         artworkNames.add(person.getName().toLowerCase() + "-photo");
+        artworkNames.add(person.getIdentifier().toLowerCase());
+        artworkNames.add(person.getIdentifier().toLowerCase() + ".photo");
+        artworkNames.add(person.getIdentifier().toLowerCase() + "-photo");
 
         
         String photoFolderName = PropertyTools.getProperty("yamj3.folder.name.photo");

@@ -39,8 +39,8 @@ import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
-import org.yamj.core.service.metadata.tools.MetadataTools;
 import org.yamj.core.service.staging.StagingService;
+import org.yamj.core.tools.MetadataTools;
 
 @Service("commonStorageService")
 public class CommonStorageService {

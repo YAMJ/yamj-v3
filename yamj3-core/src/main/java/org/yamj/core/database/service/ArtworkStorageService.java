@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.service;
 
+import org.yamj.core.database.model.StageFile;
+
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Hibernate;
@@ -118,6 +120,15 @@ public class ArtworkStorageService {
             }
         }
 
+        // update not found stage files to DONE
+        for (ArtworkLocated located : locatedArtworks) {
+            StageFile stageFile = located.getStageFile();
+            if (stageFile != null && StatusType.NOTFOUND.equals(stageFile.getStatus())) {
+                stageFile.setStatus(StatusType.DONE);
+                this.artworkDao.updateEntity(stageFile);
+            }
+        }
+        
         // set status of artwork
         if (CollectionUtils.isEmpty(locatedArtworks) && CollectionUtils.isEmpty(artwork.getArtworkLocated())) {
             artwork.setStatus(StatusType.NOTFOUND);
@@ -128,7 +139,7 @@ public class ArtworkStorageService {
         // update artwork in database
         this.artworkDao.updateEntity(artwork);
     }
-
+    
     @Transactional(readOnly = true)
     public List<QueueDTO> getArtworkQueueForScanning(final int maxResults) {
         final StringBuilder sql = new StringBuilder();

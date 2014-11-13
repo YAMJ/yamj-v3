@@ -35,6 +35,7 @@ import org.yamj.core.database.model.dto.QueueDTOComparator;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.hibernate.HibernateDao;
+import org.yamj.core.tools.MetadataTools;
 
 @Transactional
 @Repository("metadataDao")
@@ -78,16 +79,18 @@ public class MetadataDao extends HibernateDao {
         return getByNaturalIdCaseInsensitive(Series.class, "identifier", identifier);
     }
     
-    public Person getPerson(String name) {
-        return getByNaturalIdCaseInsensitive(Person.class, "name", name);
+    public Person getPerson(String identifier) {
+        return getByNaturalIdCaseInsensitive(Person.class, "identifier", identifier);
     }
 
     public synchronized void storePerson(CreditDTO dto) {
-        Person person = this.getPerson(dto.getName());
+        String identifier = MetadataTools.cleanIdentifier(dto.getName());
+        
+        Person person = this.getPerson(identifier);
         if (person == null) {
             // create new person
-            person = new Person();
-            person.setName(dto.getName());
+            person = new Person(identifier);
+            person.setName(dto.getName(), dto.getSource());
             person.setBirthName(dto.getRealName(), dto.getSource());
             person.setSourceDbIds(dto.getPersonIdMap());
             person.setStatus(StatusType.NEW);
@@ -105,34 +108,34 @@ public class MetadataDao extends HibernateDao {
         }
     }
     
-    public CastCrew getCastCrew(VideoData videoData, JobType jobType, String personName) {
+    public CastCrew getCastCrew(VideoData videoData, JobType jobType, String identifier) {
         StringBuffer sb = new StringBuffer();
         sb.append("select distinct c ");
         sb.append("from CastCrew c ");
         sb.append("join c.castCrewPK.person p ");
         sb.append("where c.castCrewPK.videoData=:videoData " );
         sb.append("and c.castCrewPK.jobType=:jobType ");
-        sb.append("and lower(p.name)=:personName ");
+        sb.append("and lower(p.identifier)=:identifier ");
         
         Query query = getSession().createQuery(sb.toString());
         query.setParameter("videoData", videoData);
         query.setParameter("jobType", jobType);
-        query.setString("personName", personName.toLowerCase());
+        query.setString("identifier", identifier.toLowerCase());
         return (CastCrew)query.uniqueResult();
     }
     
     @SuppressWarnings("unchecked")
-    public List<Artwork> findPersonArtworks(String personName) {
+    public List<Artwork> findPersonArtworks(String identifier) {
         StringBuffer sb = new StringBuffer();
         sb.append("select a ");
         sb.append("from Artwork a ");
         sb.append("join a.person p ");
         sb.append("WHERE a.artworkType=:artworkType ");
-        sb.append("AND lower(p.name)=:personName ");
+        sb.append("AND lower(p.identifier)=:identifier ");
 
         Map<String,Object> params = new HashMap<String,Object>();
         params.put("artworkType", ArtworkType.PHOTO);
-        params.put("personName", personName.toLowerCase());
+        params.put("identifier", identifier.toLowerCase());
         
         return this.findByNamedParameters(sb, params);
     }

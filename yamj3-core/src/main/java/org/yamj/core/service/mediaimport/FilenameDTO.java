@@ -23,12 +23,15 @@
 package org.yamj.core.service.mediaimport;
 
 import java.text.DecimalFormat;
-
-import org.yamj.core.database.model.StageDirectory;
-import org.yamj.core.database.model.StageFile;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.yamj.core.database.model.StageDirectory;
+import org.yamj.core.database.model.StageFile;
+import org.yamj.core.tools.MetadataTools;
 
 /**
  * Container of parsed data from movie file name. Contains only information which could be possibly extracted from file name.
@@ -259,7 +262,7 @@ public class FilenameDTO {
 
     public String buildIdentifier() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getTitle().trim());
+        sb.append(MetadataTools.cleanIdentifier(getTitle()));
         sb.append("_");
         sb.append(getYear() > -1 ? getYear() : "0000");
         return sb.toString();
@@ -267,11 +270,11 @@ public class FilenameDTO {
 
     public String buildEpisodeIdentifier(int episode) {
         StringBuilder sb = new StringBuilder();
-        sb.append(getTitle());
+        sb.append(MetadataTools.cleanIdentifier(getTitle()));
         sb.append("_");
         sb.append(getYear() > -1 ? getYear() : "0000");
         sb.append("_");
-        sb.append(PADDED_FORMAT.format(getSeason()));
+        sb.append(PADDED_FORMAT.format(season));
         sb.append("_");
         sb.append(PADDED_FORMAT.format(episode));
         return sb.toString();
@@ -279,11 +282,11 @@ public class FilenameDTO {
 
     public String buildSeasonIdentifier() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getTitle());
+        sb.append(MetadataTools.cleanIdentifier(getTitle()));
         sb.append("_");
         sb.append(getYear() > -1 ? getYear() : "0000");
         sb.append("_");
-        sb.append(PADDED_FORMAT.format(getSeason()));
+        sb.append(PADDED_FORMAT.format(season));
         return sb.toString();
     }
 

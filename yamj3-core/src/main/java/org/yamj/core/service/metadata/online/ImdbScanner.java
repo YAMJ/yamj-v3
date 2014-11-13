@@ -39,7 +39,7 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.core.service.metadata.tools.MetadataTools;
+import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.web.HTMLTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
@@ -1021,16 +1021,20 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             String url = HTML_SITE_FULL + HTML_NAME + imdbId + "/";
             String xml = httpClient.requestContent(url, charset);
 
-            // We can work out if this is the new site by looking for " - IMDb" at the end of the title
-            String title = HTMLTools.extractTag(xml, "<title>");
-            // Check for the new version and correct the title if found.
-            if (title.toLowerCase().endsWith(" - imdb")) {
-                title = title.substring(0, title.length() - 7);
+
+            if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
+                // We can work out if this is the new site by looking for " - IMDb" at the end of the title
+                String title = HTMLTools.extractTag(xml, "<title>");
+                // Check for the new version and correct the title if found.
+                if (title.toLowerCase().endsWith(" - imdb")) {
+                    title = title.substring(0, title.length() - 7);
+                }
+                if (title.toLowerCase().startsWith("imdb - ")) {
+                    title = title.substring(7);
+                }
+                
+                person.setName(title, SCANNER_ID);
             }
-            if (title.toLowerCase().startsWith("imdb - ")) {
-                title = title.substring(7);
-            }
-            person.setName(title);
 
             if (xml.indexOf("id=\"img_primary\"") > -1) {
                 LOG.trace("Looking for image on webpage for {}", person.getName());

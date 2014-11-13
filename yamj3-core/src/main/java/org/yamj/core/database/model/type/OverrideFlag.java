@@ -40,6 +40,7 @@ public enum OverrideFlag {
     TITLE,
     YEAR,
     // person specific
+    NAME,
     BIRTHDAY,
     BIRTHPLACE,
     BIRTHNAME,

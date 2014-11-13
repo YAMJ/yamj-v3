@@ -22,21 +22,14 @@
  */
 package org.yamj.core.database.model;
 
-import org.yamj.common.tools.EqualityTools;
-
 import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.yamj.common.tools.EqualityTools;
 
 @Entity
 @Table(name = "audio_codec",

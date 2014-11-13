@@ -22,10 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import org.yamj.common.tools.EqualityTools;
-
-import javax.persistence.UniqueConstraint;
-import org.hibernate.annotations.NaturalId;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -35,6 +31,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
+import org.yamj.common.tools.EqualityTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.ArtworkType;
 

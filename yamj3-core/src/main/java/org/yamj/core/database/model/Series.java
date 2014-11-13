@@ -22,24 +22,14 @@
  */
 package org.yamj.core.database.model;
 
-import java.util.HashMap;
-import javax.persistence.Transient;
-import java.util.Map;
-import org.apache.commons.collections.MapUtils;
-import java.util.HashSet;
-import java.util.Set;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import org.hibernate.annotations.ForeignKey;
-import java.util.Iterator;
-import java.util.Map.Entry;
 import java.util.*;
+import java.util.Map.Entry;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -134,6 +124,17 @@ public class Series extends AbstractMetadata {
     
     @Transient
     private Map<String,String> fanartURLS = new HashMap<String,String>(0);
+
+    // CONSTRUCTORS
+    
+    public Series() {
+        super();
+    }
+
+    public Series(String identifier) {
+        super();
+        setIdentifier(identifier);
+    }
 
     // GETTER and SETTER
     
@@ -398,8 +399,10 @@ public class Series extends AbstractMetadata {
         sb.append(getIdentifier());
         sb.append(", title=");
         sb.append(getTitle());
-        sb.append(", year=");
-        sb.append(getYear());
+        sb.append(", startYear=");
+        sb.append(getStartYear());
+        sb.append(", endYear=");
+        sb.append(getEndYear());
         sb.append("]");
         return sb.toString();
     }

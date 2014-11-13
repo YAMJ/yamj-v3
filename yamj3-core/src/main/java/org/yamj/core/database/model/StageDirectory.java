@@ -22,8 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import org.yamj.common.tools.EqualityTools;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
@@ -32,6 +30,7 @@ import javax.persistence.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.NaturalId;
+import org.yamj.common.tools.EqualityTools;
 
 @Entity
 @Table(name = "stage_directory",

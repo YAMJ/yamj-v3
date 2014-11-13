@@ -40,8 +40,8 @@ import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
+import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
-import org.yamj.core.tools.StringTools;
 import org.yamj.core.tools.web.HTMLTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
 import org.yamj.core.tools.web.SearchEngineTools;
@@ -273,7 +273,7 @@ public class OfdbScanner implements IMovieScanner {
 
                     if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID) && tag.contains("Erscheinungsjahr")) {
                         String scraped = HTMLTools.removeHtmlTags(HTMLTools.extractTag(tag, "class=\"Daten\">", HTML_FONT)).trim();
-                        videoData.setPublicationYear(StringTools.toYear(scraped), SCANNER_ID);
+                        videoData.setPublicationYear(MetadataTools.toYear(scraped), SCANNER_ID);
                     }
 
                     if (OverrideTools.checkOverwriteCountry(videoData, SCANNER_ID) && tag.contains("Herstellungsland")) {

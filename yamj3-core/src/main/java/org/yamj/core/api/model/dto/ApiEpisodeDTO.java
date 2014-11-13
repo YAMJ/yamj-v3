@@ -22,19 +22,15 @@
  */
 package org.yamj.core.api.model.dto;
 
-import java.util.EnumMap;
-import java.util.Map;
-import org.yamj.core.database.model.type.JobType;
-import org.yamj.core.database.model.Studio;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.Certification;
+import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.type.JobType;
 
 /**
  * @author stuart.boston

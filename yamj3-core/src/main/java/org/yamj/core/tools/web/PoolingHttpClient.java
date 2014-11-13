@@ -22,8 +22,6 @@
  */
 package org.yamj.core.tools.web;
 
-import org.apache.http.protocol.HTTP;
-import org.yamj.api.common.http.UserAgentSelector;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -43,10 +41,12 @@ import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.yamj.api.common.http.DefaultPoolingHttpClient;
+import org.yamj.api.common.http.UserAgentSelector;
 import org.yamj.common.tools.PropertyTools;
 
 public class PoolingHttpClient extends DefaultPoolingHttpClient implements DisposableBean {

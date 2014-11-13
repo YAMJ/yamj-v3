@@ -37,17 +37,20 @@ import org.yamj.core.database.model.type.OverrideFlag;
 
 @Entity
 @Table(name = "person",
-    uniqueConstraints = @UniqueConstraint(name = "UIX_PERSON_NATURALID", columnNames = {"name"})
+    uniqueConstraints = @UniqueConstraint(name = "UIX_PERSON_NATURALID", columnNames = {"identifier"})
 )
 @SuppressWarnings("unused")
 public class Person extends AbstractAuditable implements IScannable, Serializable {
 
     private static final long serialVersionUID = 660066902996412843L;
     
-    @NaturalId(mutable = true)
+    @NaturalId
+    @Column(name = "identifier", nullable = false, length = 255)
+    private String identifier;
+
     @Column(name = "name", nullable = false, length = 255)
     private String name;
-    
+
     @Temporal(value = TemporalType.DATE)
     @Column(name = "birth_day")
     private Date birthDay;
@@ -115,14 +118,40 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @Transient
     private Set<FilmParticipation> newFilmography = new HashSet<FilmParticipation>(0);
     
+    // CONSTRUCTORS
+    
+    public Person() {
+        super();
+    }
+    
+    public Person(String identifier) {
+        super();
+        this.identifier = identifier;
+    }
+    
     // GETTER and SETTER
+    
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    private void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
     
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    private void setName(String name) {
         this.name = name;
+    }
+
+    public void setName(String name, String source) {
+        if (StringUtils.isNotBlank(name)) {
+            this.name = name.trim();
+            setOverrideFlag(OverrideFlag.NAME, source);
+        }
     }
 
     public Date getBirthDay() {
@@ -347,7 +376,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (getName() == null ? 0 : getName().hashCode());
+        result = prime * result + (getIdentifier() == null ? 0 : getIdentifier().hashCode());
         return result;
     }
 
@@ -367,8 +396,8 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         if ((getId() > 0) && (castOther.getId() > 0)) {
             return getId() == castOther.getId();
         }
-        // check the name
-        return StringUtils.equalsIgnoreCase(getName(), castOther.getName());
+        // check the identifier
+        return StringUtils.equals(getIdentifier(), castOther.getIdentifier());
     }
 
     @Override
@@ -376,6 +405,8 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         StringBuilder sb = new StringBuilder();
         sb.append("Person [ID=");
         sb.append(getId());
+        sb.append(", identifier=");
+        sb.append(getIdentifier());
         sb.append(", name=");
         sb.append(getName());
         sb.append("]");

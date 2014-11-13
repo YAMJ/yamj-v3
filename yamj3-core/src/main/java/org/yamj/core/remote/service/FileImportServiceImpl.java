@@ -22,15 +22,14 @@
  */
 package org.yamj.core.remote.service;
 
-import org.yamj.core.service.staging.StagingService;
-
-import org.yamj.common.dto.ImportDTO;
-import org.yamj.common.remote.service.FileImportService;
-import org.yamj.core.database.model.Library;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.common.dto.ImportDTO;
+import org.yamj.common.remote.service.FileImportService;
+import org.yamj.core.database.model.Library;
+import org.yamj.core.service.staging.StagingService;
 
 @Service("fileImportService")
 public class FileImportServiceImpl implements FileImportService {

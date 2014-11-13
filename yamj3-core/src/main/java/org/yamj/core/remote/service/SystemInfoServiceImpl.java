@@ -22,9 +22,9 @@
  */
 package org.yamj.core.remote.service;
 
-import org.yamj.common.remote.service.SystemInfoService;
 import org.springframework.stereotype.Service;
 import org.yamj.common.model.YamjInfo;
+import org.yamj.common.remote.service.SystemInfoService;
 
 @Service("systemInfoService")
 public class SystemInfoServiceImpl implements SystemInfoService {

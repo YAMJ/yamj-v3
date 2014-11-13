@@ -26,13 +26,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.yamj.core.database.model.Season;
-
 import javax.annotation.Resource;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
@@ -78,14 +77,12 @@ public class ImdbScannerTest extends AbstractJUnit4SpringContextTests {
         season.setSeries(series);
         series.getSeasons().add(season);
         
-        VideoData episode1 = new VideoData();
-        episode1.setIdentifier("GOT_1");
+        VideoData episode1 = new VideoData("GOT_1");
         episode1.setEpisode(1);
         episode1.setSeason(season);
         season.getVideoDatas().add(episode1);
 
-        VideoData episode2 = new VideoData();
-        episode2.setIdentifier("GOT_2");
+        VideoData episode2 = new VideoData("GOT_2");
         episode2.setEpisode(2);
         episode2.setSeason(season);
         season.getVideoDatas().add(episode2);

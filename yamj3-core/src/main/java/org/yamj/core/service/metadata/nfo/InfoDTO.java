@@ -22,11 +22,11 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
-import org.yamj.core.service.metadata.tools.MetadataTools;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.tools.MetadataTools;
 
 public final class InfoDTO {
 

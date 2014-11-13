@@ -44,6 +44,7 @@ import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.artwork.ArtworkTools;
 import org.yamj.core.tools.GenreXmlTools;
+import org.yamj.core.tools.MetadataTools;
 
 @Service("metadataStorageService")
 public class MetadataStorageService {
@@ -554,17 +555,19 @@ public class MetadataStorageService {
         int ordering = 0; // ordering counter
         
         for (CreditDTO dto : videoData.getCreditDTOS()) {
+            String identifier = MetadataTools.cleanIdentifier(dto.getName());
             CastCrew castCrew = this.metadataDao.getCastCrew(videoData, dto.getJobType(), dto.getName());
 
             if (castCrew == null) {
                 // retrieve person
-                Person person = metadataDao.getPerson(dto.getName());
+                Person person = metadataDao.getPerson(identifier);
+                
                 if (person == null) {
                     LOG.warn("Person '{}' not found, skipping", dto.getName());
                     // continue with next cast entry
                     continue;
                 } else {
-                    LOG.trace("Found person '{}' for searched name '{}'", person.getName(), dto.getName());
+                    LOG.trace("Found person '{}' for identifier '{}'", person.getName(), identifier);
                 }
 
                 // create new association between person and video

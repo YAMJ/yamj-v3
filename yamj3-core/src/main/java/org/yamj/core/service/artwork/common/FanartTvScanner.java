@@ -22,14 +22,13 @@
  */
 package org.yamj.core.service.artwork.common;
 
-import javax.annotation.PostConstruct;
-
 import com.omertron.fanarttvapi.FanartTvApi;
 import com.omertron.fanarttvapi.FanartTvException;
 import com.omertron.fanarttvapi.model.FTArtworkType;
 import com.omertron.fanarttvapi.model.FanartTvArtwork;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

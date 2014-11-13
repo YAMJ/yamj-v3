@@ -22,10 +22,10 @@
  */
 package org.yamj.core.service.artwork;
 
-import org.yamj.core.database.model.dto.QueueDTO;
 import java.util.concurrent.BlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamj.core.database.model.dto.QueueDTO;
 
 public class ArtworkScannerRunner implements Runnable {
 

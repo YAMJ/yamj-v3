@@ -79,6 +79,9 @@ public class ScanningScheduler {
             }
             return;
         } else {
+            if (messageDisabledMediaFiles) {
+                LOG.info("Media file scanning is enabled");
+            }
             messageDisabledMediaFiles = Boolean.FALSE;
         }
 
@@ -119,6 +122,9 @@ public class ScanningScheduler {
             }
             return;
         } else {
+            if (messageDisabledMetaData) {
+                LOG.info("Metadata scanning is enabled");
+            }
             messageDisabledMetaData = Boolean.FALSE;
         }
 
@@ -159,6 +165,9 @@ public class ScanningScheduler {
             }
             return;
         } else {
+            if (messageDisabledPeople) {
+                LOG.info("People scanning is enabled");
+            }
             messageDisabledPeople = Boolean.FALSE;
         }
 
@@ -199,6 +208,9 @@ public class ScanningScheduler {
             }
             return;
         } else {
+            if (messageDisabledFilmography) {
+                LOG.info("Filmography scanning is enabled");
+            }
             messageDisabledFilmography = Boolean.FALSE;
         }
 
@@ -239,6 +251,9 @@ public class ScanningScheduler {
             }
             return;
         } else {
+            if (messageDisabledArtwork) {
+                LOG.info("Artwork scanning is enabled");
+            }
             messageDisabledArtwork = Boolean.FALSE;
         }
 

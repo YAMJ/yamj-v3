@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.file.tools;
 
-import org.apache.commons.io.FilenameUtils;
-
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -32,6 +30,7 @@ import java.util.StringTokenizer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

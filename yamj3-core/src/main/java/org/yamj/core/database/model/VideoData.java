@@ -176,6 +176,17 @@ public class VideoData extends AbstractMetadata {
     @Transient
     private Map<String,String> fanartURLS = new HashMap<String,String>(0);
     
+    // CONSTRUCTORS
+    
+    public VideoData() {
+        super();
+    }
+
+    public VideoData(String identifier) {
+        super();
+        setIdentifier(identifier);
+    }
+
     // GETTER and SETTER
     
     public int getPublicationYear() {
@@ -677,8 +688,8 @@ public class VideoData extends AbstractMetadata {
         sb.append(getIdentifier());
         sb.append(", title=");
         sb.append(getTitle());
-        sb.append(", title=");
-        sb.append(getYear());
+        sb.append(", year=");
+        sb.append(getPublicationYear());
         sb.append("]");
         return sb.toString();
     }

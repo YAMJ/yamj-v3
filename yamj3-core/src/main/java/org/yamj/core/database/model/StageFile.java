@@ -22,8 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import org.yamj.common.tools.EqualityTools;
-
 import java.io.Serializable;
 import java.util.*;
 import javax.persistence.*;
@@ -33,6 +31,7 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
+import org.yamj.common.tools.EqualityTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
 

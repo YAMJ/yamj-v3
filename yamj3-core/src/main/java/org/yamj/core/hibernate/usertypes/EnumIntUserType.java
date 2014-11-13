@@ -22,8 +22,6 @@
  */
 package org.yamj.core.hibernate.usertypes;
 
-import org.hibernate.engine.spi.SessionImplementor;
-
 import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,8 +30,10 @@ import java.sql.Types;
 import java.util.EnumSet;
 import java.util.Properties;
 import org.hibernate.HibernateException;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.usertype.EnhancedUserType;
 import org.hibernate.usertype.ParameterizedType;
+import org.hibernate.usertype.UserType;
 
 /**
  * User type for enumerations.

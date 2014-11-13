@@ -22,7 +22,10 @@
  */
 package org.yamj.core.database.model;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import org.yamj.core.hibernate.Identifiable;
 
 /**

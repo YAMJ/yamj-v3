@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.yamj.core.tools.StringTools;
+import org.yamj.core.tools.MetadataTools;
 
 /**
  * @author stuart.boston
@@ -66,7 +66,7 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     }
 
     public void setBirthDay(Date birthDay) {
-        this.birthDay = StringTools.formatDateShort(birthDay);
+        this.birthDay = MetadataTools.formatDateShort(birthDay);
     }
 
     public String getBirthPlace() {
@@ -90,7 +90,7 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     }
 
     public void setDeathDay(Date deathDay) {
-        this.deathDay = StringTools.formatDateShort(deathDay);
+        this.deathDay = MetadataTools.formatDateShort(deathDay);
     }
 
     public String getDeathPlace() {

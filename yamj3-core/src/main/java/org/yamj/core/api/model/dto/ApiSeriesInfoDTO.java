@@ -24,7 +24,6 @@ package org.yamj.core.api.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
