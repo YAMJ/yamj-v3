@@ -56,6 +56,7 @@ public class ApiDao extends HibernateDao {
     private static final String ID = "id";
     private static final String YEAR = "year";
     private static final String GENRE = "genre";
+    private static final String CERTIFICATION = "certification";
     private static final String STUDIO = "studio";
     private static final String TITLE = "title";
     private static final String EPISODE = "episode";
@@ -328,6 +329,37 @@ public class ApiDao extends HibernateDao {
             }
         }
         
+        // check certification
+        if (includes.containsKey(CERTIFICATION) || excludes.containsKey(CERTIFICATION)) {
+            String cert;
+            if (includes.containsKey(CERTIFICATION)) {
+                cert = includes.get(CERTIFICATION).toLowerCase();
+            } else {
+                cert = excludes.get(CERTIFICATION).toLowerCase();
+            }
+
+            // must be numeric
+            if (StringUtils.isNumeric(cert)) {
+                if (includes.containsKey(CERTIFICATION)) {
+                    sbSQL.append(" AND exists(");
+                } else {
+                    sbSQL.append(" AND not exists (");
+                }
+                if (isMovie) {
+                    sbSQL.append("SELECT 1 FROM videodata_certifications vc ");
+                    sbSQL.append("WHERE vd.id=vc.data_id ");
+                    sbSQL.append("AND vc.cert_id=");
+                } else {
+                    sbSQL.append("SELECT 1 FROM series_certifications sc, season sea ");
+                    sbSQL.append("WHERE vd.season_id=sea.id ");
+                    sbSQL.append("AND sc.series_id=sea.series_id ");
+                    sbSQL.append("AND sc.cert_id=");
+                }
+                sbSQL.append(Integer.parseInt(cert));
+                sbSQL.append(")");
+            }
+        }
+        
         // add the search string, this will be empty if there is no search required
         sbSQL.append(options.getSearchString(false));
 
@@ -425,6 +457,30 @@ public class ApiDao extends HibernateDao {
             }
         }
         
+        // check certification
+        if (includes.containsKey(CERTIFICATION) || excludes.containsKey(CERTIFICATION)) {
+            String cert;
+            if (includes.containsKey(CERTIFICATION)) {
+                cert = includes.get(CERTIFICATION).toLowerCase();
+            } else {
+                cert = excludes.get(CERTIFICATION).toLowerCase();
+            }
+
+            // must be numeric
+            if (StringUtils.isNumeric(cert)) {
+                if (includes.containsKey(CERTIFICATION)) {
+                    sbSQL.append(" AND exists(");
+                } else {
+                    sbSQL.append(" AND not exists (");
+                }
+                sbSQL.append("SELECT 1 FROM series_certifications sc ");
+                sbSQL.append("WHERE ser.id=sc.series_id ");
+                sbSQL.append("AND sc.cert_id=");
+                sbSQL.append(Integer.parseInt(cert));
+                sbSQL.append(")");
+            }
+        }
+        
         // add the search string, this will be empty if there is no search required
         sbSQL.append(options.getSearchString(false));
 
@@ -519,6 +575,30 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append("WHERE sea.series_id=ss.series_id ");
                 sbSQL.append("AND ss.studio_id=stu.id ");
                 sbSQL.append("AND lower(stu.name)='").append(studio).append("')");
+            }
+        }
+
+        // check certification
+        if (includes.containsKey(CERTIFICATION) || excludes.containsKey(CERTIFICATION)) {
+            String cert;
+            if (includes.containsKey(CERTIFICATION)) {
+                cert = includes.get(CERTIFICATION).toLowerCase();
+            } else {
+                cert = excludes.get(CERTIFICATION).toLowerCase();
+            }
+
+            // must be numeric
+            if (StringUtils.isNumeric(cert)) {
+                if (includes.containsKey(CERTIFICATION)) {
+                    sbSQL.append(" AND exists(");
+                } else {
+                    sbSQL.append(" AND not exists (");
+                }
+                sbSQL.append("SELECT 1 FROM series_certifications sc ");
+                sbSQL.append("WHERE sea.series_id=sc.series_id ");
+                sbSQL.append("AND sc.cert_id=");
+                sbSQL.append(Integer.parseInt(cert));
+                sbSQL.append(")");
             }
         }
         
