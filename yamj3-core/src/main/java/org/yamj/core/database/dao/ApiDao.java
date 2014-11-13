@@ -536,8 +536,8 @@ public class ApiDao extends HibernateDao {
      * @param options
      */
     private void addArtworks(Map<MetaDataType, List<Long>> ids, Map<String, ApiVideoDTO> artworkList, OptionsIndexVideo options) {
-        List<String> artworkRequired = options.getArtworkTypes();
-        LOG.debug("Artwork required: {}", artworkRequired.toString());
+        Set<String> artworkRequired = options.getArtworkTypes();
+        LOG.debug("Artwork required: {}", artworkRequired);
 
         if (CollectionUtils.isNotEmpty(artworkRequired)) {
             SqlScalars sqlScalars = new SqlScalars();
@@ -650,7 +650,8 @@ public class ApiDao extends HibernateDao {
             if (options.hasDataItem(DataItem.ARTWORK)) {
                 LOG.trace("Adding photos");
                 // Get the artwork associated with the IDs in the results
-                Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, generateIdList(results), Arrays.asList("PHOTO"));
+                Set<String> artworkRequired = Collections.singleton(ArtworkType.PHOTO.toString());
+                Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, generateIdList(results), artworkRequired);
                 for (ApiPersonDTO p : results) {
                     if (artworkList.containsKey(p.getId())) {
                         p.setArtwork(artworkList.get(p.getId()));
@@ -676,7 +677,8 @@ public class ApiDao extends HibernateDao {
             if (options.hasDataItem(DataItem.ARTWORK)) {
                 LOG.info("Adding photo for {}", person.getName());
                 // Add the artwork
-                Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, person.getId(), Arrays.asList("PHOTO"));
+                Set<String> artworkRequired = Collections.singleton(ArtworkType.PHOTO.toString());
+                Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, person.getId(), artworkRequired);
                 if (artworkList.containsKey(options.getId())) {
                     LOG.info("Found {} artworks", artworkList.get(options.getId()).size());
                     person.setArtwork(artworkList.get(options.getId()));
@@ -687,10 +689,10 @@ public class ApiDao extends HibernateDao {
 
             if (options.hasDataItem(DataItem.FILMOGRAPHY_INSIDE)) {
                 LOG.info("Adding filmograpghy inside for '{}'", person.getName());
-                person.setFilmography(getPersonFilmographyInside(person.getId(), options.getSortby(), options.getSortdir()));
+                person.setFilmography(getPersonFilmographyInside(person.getId(), options));
             } else if (options.hasDataItem(DataItem.FILMOGRAPHY_SCANNED)) {
                 LOG.info("Adding filmograpghy scanned for '{}'", person.getName());
-                person.setFilmography(getPersonFilmographyScanned(person.getId(), options.getSortby(), options.getSortdir()));
+                person.setFilmography(getPersonFilmographyScanned(person.getId(), options));
             }
 
             wrapper.setResult(person);
@@ -699,41 +701,58 @@ public class ApiDao extends HibernateDao {
         }
     }
 
-    private List<ApiFilmographyDTO> getPersonFilmographyInside(long id, String sortBy, String sortDir) {
+    private List<ApiFilmographyDTO> getPersonFilmographyInside(long id, OptionsId options) {
         StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("SELECT DISTINCT '"+ParticipationType.MOVIE.name()+"' as typeString, c1.job as job, c1.role as role,");
         sbSQL.append("v1.title as title, v1.title_original as originalTitle, v1.publication_year as year, null as yearEnd,");
-        sbSQL.append("v1.release_date as releaseDate, null as releaseState, v1.plot as description,");
+        sbSQL.append("v1.release_date as releaseDate, null as releaseState,");
         sbSQL.append("v1.id as videoDataId, null as seriesId ");
+        
+        if (options.hasDataItem(DataItem.PLOT)) {
+            sbSQL.append(", v1.plot as description ");
+        } else {
+            sbSQL.append(", null as description "); 
+        }
+        
         sbSQL.append("FROM cast_crew c1, videodata v1 ");
         sbSQL.append("WHERE c1.person_id = :id and v1.id=c1.videodata_id and v1.episode<0 ");
         sbSQL.append("UNION ");
         sbSQL.append("SELECT DISTINCT '"+ParticipationType.SERIES.name()+"' as typeString, c2.job as job, c2.role as role,");
         sbSQL.append("ser.title as title, ser.title_original as originalTitle, ser.start_year as year, ser.end_year as yearEnd,");
-        sbSQL.append("null as releaseDate, null as releaseState, ser.plot as description,");
+        sbSQL.append("null as releaseDate, null as releaseState,");
         sbSQL.append("null as videoDataId, ser.id as seriesId ");
+
+        if (options.hasDataItem(DataItem.PLOT)) {
+            sbSQL.append(", ser.plot as description ");
+        } else {
+            sbSQL.append(", null as description "); 
+        }
+        
         sbSQL.append("FROM cast_crew c2, videodata v2, season sea, series ser ");
         sbSQL.append("WHERE c2.person_id = :id and v2.id=c2.videodata_id and v2.episode>=0 ");
         sbSQL.append("and v2.season_id=sea.id and sea.series_id=ser.id ");
 
+        // sorting
+        final String sortDir = ("DESC".equalsIgnoreCase(options.getSortdir())?"DESC":"ASC");
+
         sbSQL.append("ORDER BY ");
-        if ("title".equalsIgnoreCase(sortBy)) {
+        if ("title".equalsIgnoreCase(options.getSortby())) {
             sbSQL.append("title ");
             sbSQL.append(sortDir);
             sbSQL.append(", ");
-        } else if ("type".equalsIgnoreCase(sortBy)) {
+        } else if ("type".equalsIgnoreCase(options.getSortby())) {
             sbSQL.append("typeString ");
-            sbSQL.append(sortDir); 
+            sbSQL.append(sortDir);
             sbSQL.append(", ");
-        } else if ("job".equalsIgnoreCase(sortBy)) {
+        } else if ("job".equalsIgnoreCase(options.getSortby())) {
             sbSQL.append("job ");
-            sbSQL.append(sortDir); 
+            sbSQL.append(sortDir);
             sbSQL.append(", ");
         }
         sbSQL.append("year ");
-        sbSQL.append(sortDir); 
+        sbSQL.append(sortDir);
         sbSQL.append(", releaseDate ");
-        sbSQL.append(sortDir); 
+        sbSQL.append(sortDir);
         
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
         LOG.info("Filmography inside SQL: {}", sqlScalars.getSql());
@@ -741,12 +760,19 @@ public class ApiDao extends HibernateDao {
         return retrieveFilmography(id, sqlScalars);
     }
 
-    private List<ApiFilmographyDTO> getPersonFilmographyScanned(long id, String sortBy, String sortDir) {
+    private List<ApiFilmographyDTO> getPersonFilmographyScanned(long id, OptionsId options) {
         StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("SELECT DISTINCT p.participation_type as typeString, p.job as job, p.role as role,");
         sbSQL.append("p.title as title, p.title_original as originalTitle, p.year as year,p.year_end as yearEnd,");
-        sbSQL.append("p.release_date as releaseDate, p.release_state as releaseState,p.description as description,");
+        sbSQL.append("p.release_date as releaseDate, p.release_state as releaseState,");
         sbSQL.append("movie.id as videoDataId, serids.series_id as seriesId ");
+        
+        if (options.hasDataItem(DataItem.PLOT)) {
+            sbSQL.append(", p.description as description ");
+        } else {
+            sbSQL.append(", null as description "); 
+        }
+        
         sbSQL.append("FROM participation p ");
         sbSQL.append(" LEFT OUTER JOIN (SELECT DISTINCT v1.id, p1.id as participation_id ");
         sbSQL.append("  FROM participation p1 "); 
@@ -761,16 +787,18 @@ public class ApiDao extends HibernateDao {
         sbSQL.append("WHERE p.person_id = :id ");
 
         // sorting
+        final String sortDir = ("DESC".equalsIgnoreCase(options.getSortdir())?"DESC":"ASC");
+        
         sbSQL.append("ORDER BY ");
-        if ("title".equalsIgnoreCase(sortBy)) {
+        if ("title".equalsIgnoreCase(options.getSortby())) {
             sbSQL.append("p.title ");
             sbSQL.append(sortDir);
             sbSQL.append(", ");
-        } else if ("type".equalsIgnoreCase(sortBy)) {
+        } else if ("type".equalsIgnoreCase(options.getSortby())) {
             sbSQL.append("p.participation_type ");
             sbSQL.append(sortDir); 
             sbSQL.append(", ");
-        } else if ("job".equalsIgnoreCase(sortBy)) {
+        } else if ("job".equalsIgnoreCase(options.getSortby())) {
             sbSQL.append("p.job ");
             sbSQL.append(sortDir); 
             sbSQL.append(", ");
@@ -816,7 +844,8 @@ public class ApiDao extends HibernateDao {
         if (options.hasDataItem(DataItem.ARTWORK) && results.size() > 0) {
             LOG.info("Looking for person artwork for {} with id '{}'", metaDataType, options.getId());
 
-            Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, generateIdList(results), Arrays.asList("PHOTO"));
+            Set<String> artworkRequired = Collections.singleton(ArtworkType.PHOTO.toString());
+            Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.PERSON, generateIdList(results), artworkRequired);
             for (ApiPersonDTO person : results) {
                 if (artworkList.containsKey(person.getId())) {
                     person.setArtwork(artworkList.get(person.getId()));
@@ -1532,7 +1561,7 @@ public class ApiDao extends HibernateDao {
      * @return
      */
     public Map<Long, List<ApiArtworkDTO>> getArtworkForId(MetaDataType type, Long id) {
-        List<String> artworkRequired = new ArrayList<String>();
+        Set<String> artworkRequired = new HashSet<String>();
         for (ArtworkType at : ArtworkType.values()) {
             artworkRequired.add(at.toString());
         }
@@ -1550,7 +1579,7 @@ public class ApiDao extends HibernateDao {
      * @param artworkRequired
      * @return
      */
-    public Map<Long, List<ApiArtworkDTO>> getArtworkForId(MetaDataType type, Object id, List<String> artworkRequired) {
+    public Map<Long, List<ApiArtworkDTO>> getArtworkForId(MetaDataType type, Object id, Set<String> artworkRequired) {
         LOG.trace("Artwork required for {} ID '{}' is {}", type, id, artworkRequired);
         
         StringBuilder sbSQL = new StringBuilder();

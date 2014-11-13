@@ -25,8 +25,8 @@ package org.yamj.core.api.options;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.type.ArtworkType;
 
@@ -40,7 +40,7 @@ public class OptionsIdArtwork extends OptionsId {
 
     private String artwork = "";
     @JsonIgnore
-    private final List<String> artworkTypes = new ArrayList<String>();
+    private final Set<String> artworkTypes = new HashSet<String>();
 
     public String getArtwork() {
         return artwork;
@@ -62,17 +62,13 @@ public class OptionsIdArtwork extends OptionsId {
             for (ArtworkType at : ArtworkType.values()) {
                 artworkTypes.add(at.toString());
             }
-            // Remove the unknown type
-            artworkTypes.remove(ArtworkType.UNKNOWN.toString());
         } else {
             for (String param : StringUtils.split(artwork, ",")) {
-                // Validate that the string passed is a correct artwork type
-                ArtworkType at = ArtworkType.fromString(param);
-                if (at != ArtworkType.UNKNOWN) {
-                    artworkTypes.add(at.toString());
-                }
+                artworkTypes.add(ArtworkType.fromString(param).toString());
             }
         }
+        // Remove the unknown type
+        artworkTypes.remove(ArtworkType.UNKNOWN.toString());
     }
 
     /**
@@ -81,7 +77,7 @@ public class OptionsIdArtwork extends OptionsId {
      * @return
      */
     @JsonIgnore
-    public List<String> getArtworkTypes() {
+    public Set<String> getArtworkTypes() {
         return artworkTypes;
     }
 }
