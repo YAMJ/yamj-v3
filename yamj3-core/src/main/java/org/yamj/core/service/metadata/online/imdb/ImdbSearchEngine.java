@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online;
+package org.yamj.core.service.metadata.online.imdb;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

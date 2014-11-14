@@ -248,7 +248,7 @@ public final class DOMHelper {
             } catch (DOMException ex) {
                 LOG.trace("DOM processing exception", ex);
             } catch (NullPointerException ex) {
-                // Shouldn't really catch null pointer exceptions, but there you go.
+                // shouldn't really catch null pointer exceptions, but there you go
                 LOG.trace("Null pointer exception", ex);
             }
         }

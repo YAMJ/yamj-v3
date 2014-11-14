@@ -89,6 +89,8 @@ public class NfoScannerService {
             videoData.addRating(SCANNER_ID, infoDTO.getRating());
             // set watched by NFO
             videoData.setWatchedNfo(infoDTO.isWatched());
+            // set sort title
+            videoData.setTitleSort(infoDTO.getTitleSort());
             
             if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
                 videoData.setTitle(infoDTO.getTitle(), SCANNER_ID);
@@ -208,6 +210,8 @@ public class NfoScannerService {
             series.setSkipOnlineScans(infoDTO.getSkipOnlineScans());
             // set last scan date
             series.setLastScanned(new Date(System.currentTimeMillis()));
+            // set sort title
+            series.setTitleSort(infoDTO.getTitleSort());
             
             if (OverrideTools.checkOverwriteTitle(series, SCANNER_ID)) {
                 series.setTitle(infoDTO.getTitle(), SCANNER_ID);
@@ -234,7 +238,15 @@ public class NfoScannerService {
             for (Season season : series.getSeasons()) {
                 // remove override source for NFO
                 season.removeOverrideSource(SCANNER_ID);
-                
+                // set sort title
+                season.setTitleSort(infoDTO.getTitleSort());
+
+                if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
+                    season.setTitle(infoDTO.getTitle(), SCANNER_ID);
+                }
+                if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
+                    season.setTitleOriginal(infoDTO.getTitleOriginal(), SCANNER_ID);
+                }
                 if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
                     season.setPlot(infoDTO.getPlot(), SCANNER_ID);
                 }

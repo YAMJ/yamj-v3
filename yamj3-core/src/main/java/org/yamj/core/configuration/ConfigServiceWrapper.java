@@ -157,4 +157,10 @@ public class ConfigServiceWrapper {
         }
         return false;
     }
+    
+    public List<String> getSortStripPrefixes() {
+        return this.configService.getPropertyAsList(
+                        "yamj3.sort.strip.prefixes",
+                        "A,An,The,Le,Les,De,Het,Een,El,Los,Las,Der,Die,Das,Ein,Eine");
+    }
 }

@@ -33,8 +33,8 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.artwork.ArtworkTools.HashCodeType;
-import org.yamj.core.service.metadata.online.ImdbScanner;
-import org.yamj.core.service.metadata.online.ImdbSearchEngine;
+import org.yamj.core.service.metadata.online.imdb.ImdbScanner;
+import org.yamj.core.service.metadata.online.imdb.ImdbSearchEngine;
 import org.yamj.core.tools.web.PoolingHttpClient;
 
 @Service("imdbPosterScanner")

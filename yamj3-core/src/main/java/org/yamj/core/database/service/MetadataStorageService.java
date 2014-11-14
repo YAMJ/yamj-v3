@@ -369,6 +369,7 @@ public class MetadataStorageService {
         
         // update underlying seasons and episodes
         for (Season season : series.getSeasons()) {
+            season.setLastScanned(series.getLastScanned());
             metadataDao.updateEntity(season);
 
             for (VideoData videoData : season.getVideoDatas()) {
@@ -556,7 +557,7 @@ public class MetadataStorageService {
         
         for (CreditDTO dto : videoData.getCreditDTOS()) {
             String identifier = MetadataTools.cleanIdentifier(dto.getName());
-            CastCrew castCrew = this.metadataDao.getCastCrew(videoData, dto.getJobType(), dto.getName());
+            CastCrew castCrew = this.metadataDao.getCastCrew(videoData, dto.getJobType(), identifier);
 
             if (castCrew == null) {
                 // retrieve person

@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.tools.StringTools;
+import org.yamj.core.database.model.AbstractMetadata;
 import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.database.model.VideoData;
 
@@ -136,11 +137,15 @@ public final class MetadataTools {
      * @param stringToReplace
      * @return
      */
-    public static String stringMapReplacement(String stringToReplace) {
+    public static String stringMapReplacement(String input) {
+        if (input == null || CHAR_REPLACEMENT_MAP.isEmpty()) {
+            return input;
+        }
+        
         Character tempC;
         StringBuilder sb = new StringBuilder();
 
-        for (Character c : stringToReplace.toCharArray()) {
+        for (Character c : input.toCharArray()) {
             tempC = CHAR_REPLACEMENT_MAP.get(c);
             if (tempC == null) {
                 sb.append(c);
@@ -554,5 +559,39 @@ public final class MetadataTools {
             result = result.replaceAll("^ +| +$|( ){2,}", "$1");
         }
         return result;
+    }
+
+    /**
+     * Set the sort title.
+     * 
+     * @param metadata the scanned metadata
+     * @param prefixes a list with prefixed to strip
+     */
+    public static void setSortTitle(AbstractMetadata metadata, List<String> prefixes) {
+        String sortTitle;
+        if (StringUtils.isBlank(metadata.getTitleSort())) {
+            sortTitle = StringUtils.stripAccents(metadata.getTitle());
+
+            // strip prefix
+            for (String prefix : prefixes) {
+                String check = prefix.trim()+" ";
+                if (StringUtils.startsWithIgnoreCase(sortTitle, check)) {
+                    sortTitle = sortTitle.substring(check.length());
+                    break;
+                }
+            }
+        } else {
+            sortTitle = StringUtils.stripAccents(metadata.getTitleSort());
+        }
+
+        // first char must be a letter or digit
+        int idx = 0;
+        while (idx < sortTitle.length() && !Character.isLetterOrDigit(sortTitle.charAt(idx))) {
+            idx++;
+        }
+        
+        // replace all non-standard characters in the title sort
+        sortTitle = MetadataTools.stringMapReplacement(sortTitle.substring(idx));
+        metadata.setTitleSort(sortTitle);
     }
 }

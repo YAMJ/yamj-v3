@@ -51,7 +51,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private String country;
     private String quote;
     private String tagline;
-    private Long topRank;
+    private Integer topRank = -1;
     private Long seriesId;
     private Long seasonId;
     private Long season;
@@ -149,7 +149,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         return tagline;
     }
 
-    public Long getTopRank() {
+    public Integer getTopRank() {
         return topRank;
     }
 
@@ -248,7 +248,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         this.tagline = tagline;
     }
 
-    public void setTopRank(Long topRank) {
+    public void setTopRank(Integer topRank) {
         this.topRank = topRank;
     }
 

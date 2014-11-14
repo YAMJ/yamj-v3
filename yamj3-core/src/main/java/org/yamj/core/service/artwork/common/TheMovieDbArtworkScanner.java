@@ -48,8 +48,8 @@ import org.yamj.core.service.artwork.ArtworkTools.HashCodeType;
 import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
 import org.yamj.core.service.artwork.photo.IPhotoScanner;
 import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
-import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
+import org.yamj.core.service.metadata.online.imdb.ImdbScanner;
 
 @Service("tmdbArtworkScanner")
 public class TheMovieDbArtworkScanner implements

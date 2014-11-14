@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online;
+package org.yamj.core.service.metadata.online.allocine;
 
 import com.moviejukebox.allocine.model.*;
 import java.util.*;
@@ -41,6 +41,9 @@ import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
+import org.yamj.core.service.metadata.online.*;
+import org.yamj.core.service.metadata.online.imdb.ImdbScanner;
+import org.yamj.core.service.metadata.online.imdb.ImdbSearchEngine;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.web.HTMLTools;
@@ -400,13 +403,14 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
 
             // use values from series
             if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
-                season.setTitle(StringUtils.trim(tvSeriesInfos.getTitle()), SCANNER_ID);
+                season.setTitle(tvSeriesInfos.getTitle(), SCANNER_ID);
             }
-
+            if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
+                season.setTitle(tvSeriesInfos.getOriginalTitle(), SCANNER_ID);
+            }
             if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
                 season.setPlot(tvSeriesInfos.getSynopsis(), SCANNER_ID);
             }
-
             if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
                 season.setOutline(tvSeriesInfos.getSynopsisShort(), SCANNER_ID);
             }

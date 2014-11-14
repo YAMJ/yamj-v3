@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.mediaimport;
 
+import java.util.List;
+
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -191,7 +193,10 @@ public class MediaImportService {
                 if (!mediaFile.isExtra()) {
                     videoData.setWatchedFile(mediaFile.isWatchedFile());
                 }
-                
+
+                // set sort title
+                MetadataTools.setSortTitle(videoData, configServiceWrapper.getSortStripPrefixes());
+
                 LOG.debug("Store new movie: '{}' - {}", videoData.getTitle(), videoData.getPublicationYear());
                 metadataDao.saveEntity(videoData);
 
@@ -243,6 +248,9 @@ public class MediaImportService {
                 String identifier = dto.buildEpisodeIdentifier(episode);
                 VideoData videoData = metadataDao.getVideoData(identifier);
                 if (videoData == null) {
+                    // get the prefix for setting the sort title
+                    List<String> prefixes = this.configServiceWrapper.getSortStripPrefixes();
+                    
                     // NEW video data
 
                     // getById or create season
@@ -259,6 +267,10 @@ public class MediaImportService {
                             series.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                             series.setSourceDbIdMap(dto.getIdMap());
                             series.setStatus(StatusType.NEW);
+                            
+                            // set sort title
+                            MetadataTools.setSortTitle(series, prefixes);
+                            
                             LOG.debug("Store new series: '{}'", series.getTitle());
                             metadataDao.saveEntity(series);
 
@@ -290,7 +302,10 @@ public class MediaImportService {
                         season.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                         season.setSeries(series);
                         season.setStatus(StatusType.NEW);
-                        
+
+                        // set sort title
+                        MetadataTools.setSortTitle(season, prefixes);
+
                         LOG.debug("Store new seaon: '{}' - Season {}", season.getTitle(), season.getSeason());
                         metadataDao.saveEntity(season);
 
@@ -329,6 +344,9 @@ public class MediaImportService {
                     videoData.setEpisode(episode);
                     mediaFile.addVideoData(videoData);
                     videoData.addMediaFile(mediaFile);
+
+                    // set sort title
+                    MetadataTools.setSortTitle(videoData, prefixes);
 
                     LOG.debug("Store new episode: '{}' - Season {} - Episode {}", season.getTitle(), season.getSeason(), videoData.getEpisode());
                     metadataDao.saveEntity(videoData);

@@ -22,8 +22,6 @@
  */
 package org.yamj.core.database.service;
 
-import org.yamj.core.database.model.StageFile;
-
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Hibernate;
@@ -36,10 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.ArtworkDao;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.ArtworkGenerated;
-import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.ArtworkProfile;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 

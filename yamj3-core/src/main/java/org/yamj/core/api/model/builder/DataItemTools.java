@@ -24,7 +24,7 @@ package org.yamj.core.api.model.builder;
 
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
-import org.hibernate.type.LongType;
+import org.hibernate.type.IntegerType;
 import org.hibernate.type.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +81,7 @@ public class DataItemTools {
                 continue;
             }
             if (item == DataItem.TOP_RANK) {
-                sqlScalars.addScalar("topRank", LongType.INSTANCE);
+                sqlScalars.addScalar("topRank", IntegerType.INSTANCE);
                 continue;
             }
             // This is the default approach

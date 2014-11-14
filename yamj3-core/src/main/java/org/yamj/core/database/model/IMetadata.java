@@ -32,6 +32,8 @@ public interface IMetadata extends IScannable {
 
     String getTitleOriginal();
 
+    String getTitleSort();
+
     int getYear();
 
     boolean isMovie();

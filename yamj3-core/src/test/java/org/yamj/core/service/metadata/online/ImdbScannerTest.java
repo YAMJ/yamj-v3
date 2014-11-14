@@ -26,6 +26,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.yamj.core.service.metadata.online.imdb.ImdbScanner;
+
 import javax.annotation.Resource;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;

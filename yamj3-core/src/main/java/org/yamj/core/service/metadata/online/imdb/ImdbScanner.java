@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online;
+package org.yamj.core.service.metadata.online.imdb;
 
 import java.nio.charset.Charset;
 import java.util.*;
@@ -39,6 +39,7 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
+import org.yamj.core.service.metadata.online.*;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.web.HTMLTools;
@@ -258,13 +259,15 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             String headerXml = HTMLTools.extractTag(xml, "<h1 class=\"header\">", "</h1>");
 
             // TITLE 
+            String title = parseTitle(headerXml);
             if (OverrideTools.checkOverwriteTitle(series, SCANNER_ID)) {
-                series.setTitle(parseTitle(headerXml), SCANNER_ID);
+                series.setTitle(title, SCANNER_ID);
             }
             
             // ORIGINAL TITLE 
+            String titleOriginal = parseOriginalTitle(headerXml);
             if (OverrideTools.checkOverwriteOriginalTitle(series, SCANNER_ID)) {
-                series.setTitleOriginal(parseOriginalTitle(headerXml), SCANNER_ID);
+                series.setTitleOriginal(titleOriginal, SCANNER_ID);
             }
 
             // START YEAR and END YEAR
@@ -273,13 +276,15 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             }
 
             // PLOT
+            String plot = parsePlot(xml);
             if (OverrideTools.checkOverwritePlot(series, SCANNER_ID)) {
-                series.setPlot(parsePlot(xml), SCANNER_ID);
+                series.setPlot(plot, SCANNER_ID);
             }
 
             // OUTLINE
+            String outline = parseOutline(xml);
             if (OverrideTools.checkOverwriteOutline(series, SCANNER_ID)) {
-                series.setOutline(parseOutline(xml), SCANNER_ID);
+                series.setOutline(outline, SCANNER_ID);
             }
 
             // GENRES
@@ -299,7 +304,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             parseReleaseData(series, imdbId);
             
             // scan seasons
-            scanSeasons(series, imdbId);
+            this.scanSeasons(series, imdbId, title, titleOriginal, plot, outline);
             
         } catch (Exception ex) {
             LOG.error("Scanning error for IMDb ID " + imdbId, ex);
@@ -310,50 +315,101 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return ScanResult.ERROR;
     }
 
-    private void scanSeasons(Series series, String imdbId) {
+    private void scanSeasons(Series series, String imdbId, String title, String titleOriginal, String plot, String outline) {
         for (Season season : series.getSeasons()) {
-            if (season.isTvEpisodesScanned(SCANNER_ID)) {
-                // nothing to do anymore
-                continue;
-            }
-            
-            Map<Integer,String> episodes = getEpisodes(imdbId, season.getSeason());
 
-            for (VideoData videoData : season.getVideoDatas()) {
-                if (videoData.isTvEpisodeDone(SCANNER_ID)) {
-                    // nothing to do if already done
-                    continue;
-                }
-                
-                // set source DB id
-                String episodeImdbId = episodes.get(Integer.valueOf(videoData.getEpisode()));
-                // scan episode
-                this.scanEpisode(videoData, episodeImdbId);
+            // use values from series
+            if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
+                season.setTitle(title, SCANNER_ID);
             }
-            
+            if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
+                season.setTitle(titleOriginal, SCANNER_ID);
+            }
+            if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
+                season.setPlot(plot, SCANNER_ID);
+            }
+            if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
+                season.setOutline(outline, SCANNER_ID);
+            }
+
+             Map<Integer,ImdbEpisodeDTO> episodes = null;
+             if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
+                 episodes = getEpisodes(imdbId, season.getSeason());
+             
+                 Date publicationYear = null;
+                 for (ImdbEpisodeDTO episode : episodes.values()) {
+                     if (publicationYear == null) {
+                         publicationYear = episode.getAirDate();
+                     } else if (episode.getAirDate() != null) {
+                         if (publicationYear.after(episode.getAirDate())) {
+                             // previous episode
+                             publicationYear = episode.getAirDate();
+                         }
+                     }
+                 }
+                 season.setPublicationYear(MetadataTools.extractYearAsInt(publicationYear), SCANNER_ID);
+             }
+
             // mark season as done
             season.setTvSeasonDone();
+
+            // only scan episodes if not done before
+            if (!season.isTvEpisodesScanned(SCANNER_ID)) {
+                if  (episodes == null) {
+                    episodes = getEpisodes(imdbId, season.getSeason());
+                }
+                
+                for (VideoData videoData : season.getVideoDatas()) {
+                    if (videoData.isTvEpisodeDone(SCANNER_ID)) {
+                        // nothing to do if already done
+                        continue;
+                    }
+                    
+                    // scan episode
+                    this.scanEpisode(videoData, episodes.get(Integer.valueOf(videoData.getEpisode())));
+                }
+            }
         }
     }
 
-    private void scanEpisode(VideoData videoData, String imdbId) {
-        if (StringUtils.isBlank(imdbId)) {
+    private void scanEpisode(VideoData videoData, ImdbEpisodeDTO dto) {
+        if (dto == null) {
+            videoData.setTvEpisodeNotFound();
+            return;
+        } else if (StringUtils.isBlank(dto.getImdbId())) {
+            // set other values
+            if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
+                videoData.setTitle(dto.getTitle(), SCANNER_ID);
+            }
+            if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
+                videoData.setReleaseDate(dto.getAirDate(), SCANNER_ID);
+            }
+            if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
+                videoData.setPlot(dto.getOutline(), SCANNER_ID);
+            }
+            if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
+                videoData.setOutline(dto.getOutline(), SCANNER_ID);
+            }
             videoData.setTvEpisodeNotFound();
             return;
         }
         
         try {
-            String xml = httpClient.requestContent(getImdbUrl(imdbId), charset);
+            String xml = httpClient.requestContent(getImdbUrl(dto.getImdbId()), charset);
 
             // set IMDb id
-            videoData.setSourceDbId(SCANNER_ID, imdbId);
+            videoData.setSourceDbId(SCANNER_ID, dto.getImdbId());
 
             // get header tag
             String headerXml = HTMLTools.extractTag(xml, "<h1 class=\"header\">", "</h1>");
             
             // TITLE 
             if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
-                videoData.setTitle(parseTitle(headerXml), SCANNER_ID);
+                String title = parseTitle(headerXml);
+                if (StringUtils.isBlank(title)) {
+                    title = dto.getTitle();
+                }
+                videoData.setTitle(title, SCANNER_ID);
             }
             
             // ORIGINAL TITLE 
@@ -363,17 +419,27 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
             // RELEASE DATE (First Aired)
             if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-                videoData.setReleaseDate(parseFirstAiredDate(headerXml), SCANNER_ID);
+                Date releaseDate = parseFirstAiredDate(headerXml);
+                if (releaseDate == null) releaseDate = dto.getAirDate();
+                videoData.setReleaseDate(releaseDate, SCANNER_ID);
             }
 
             // PLOT
             if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-                videoData.setPlot(parsePlot(xml), SCANNER_ID);
+                String plot = parsePlot(xml);
+                if (StringUtils.isBlank(plot)) {
+                    plot = dto.getOutline();
+                }
+                videoData.setPlot(plot, SCANNER_ID);
             }
 
             // OUTLINE
             if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-                videoData.setOutline(parseOutline(xml), SCANNER_ID);
+                String outline = parseOutline(xml);
+                if (StringUtils.isBlank(outline)) {
+                    outline = dto.getOutline();
+                }
+                videoData.setOutline(outline, SCANNER_ID);
             }
 
             // TAGLINE
@@ -387,22 +453,22 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             }
 
             // CAST and CREW
-            parseCastCrew(videoData, imdbId);
+            parseCastCrew(videoData, dto.getImdbId());
             
         } catch (Exception ex) {
-            LOG.error("Failed to scan episode " + imdbId, ex);
+            LOG.error("Failed to scan episode " + dto.getImdbId(), ex);
             videoData.setTvEpisodeNotFound();
         }
     }
     
-    private Map<Integer,String> getEpisodes(String imdbId, int season) {
-        Map<Integer,String> episodes = new HashMap<Integer,String>();
+    private Map<Integer,ImdbEpisodeDTO> getEpisodes(String imdbId, int season) {
+        Map<Integer,ImdbEpisodeDTO> episodes = new HashMap<Integer,ImdbEpisodeDTO>();
         
         try {
             String xml = httpClient.requestContent(getImdbUrl(imdbId, "episodes?season="+season), charset);
     
             // scrape episode tags
-            List<String> tags = HTMLTools.extractTags(xml, "<h3 id=\"episode_top\"", "<h2>See also</h2>", "<div class=\"info\" itemprop=\"episodes\"", "<div class=\"item_description\"");
+            List<String> tags = HTMLTools.extractTags(xml, "<h3 id=\"episode_top\"", "<h2>See also</h2>", "<div class=\"info\" itemprop=\"episodes\"", "<div class=\"clear\"");
             
             for (String tag : tags) {
                 // scrape episode number
@@ -419,14 +485,29 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 
                 // scrape IMDb id
                 if (episode > -1) {
+                    ImdbEpisodeDTO dto = new ImdbEpisodeDTO();
+                    dto.setEpisode(episode);
+
+                    // set title
+                    String value  = HTMLTools.extractTag(tag, "itemprop=\"name\">", HTML_A_END);
+                    dto.setTitle(value);
+                    
+                    // set air date
+                    value = HTMLTools.extractTag(tag, "<div class=\"airdate\">", HTML_DIV_END);
+                    dto.setAirDate(MetadataTools.parseToDate(StringUtils.trimToNull(value)));
+
+                    // set outline
+                    value = HTMLTools.extractTag(tag, "<div class=\"item_description\" itemprop=\"description\">", HTML_DIV_END);
+                    dto.setOutline(StringUtils.trimToNull(HTMLTools.removeHtmlTags(value)));
+                    
+                    // set source id
                     int beginIndex = tag.indexOf("/tt");
                     if (beginIndex != -1) {
                         StringTokenizer st = new StringTokenizer(tag.substring(beginIndex + 1), "/ \n,:!&Ã©\"'(--Ã¨_Ã§Ã )=$");
-                        String sourceId = st.nextToken();
-                        if (StringUtils.isNotBlank(sourceId)) {
-                            episodes.put(Integer.valueOf(episode), sourceId);
-                        }
+                        dto.setImdbId(st.nextToken());
                     }
+
+                    episodes.put(Integer.valueOf(episode), dto);
                 }
             }
         } catch (Exception ex) {

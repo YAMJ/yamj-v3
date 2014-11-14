@@ -48,8 +48,8 @@ import org.yamj.core.service.artwork.fanart.ITvShowFanartScanner;
 import org.yamj.core.service.artwork.poster.ITvShowPosterScanner;
 import org.yamj.core.service.artwork.tv.ITvShowBannerScanner;
 import org.yamj.core.service.artwork.tv.ITvShowVideoImageScanner;
-import org.yamj.core.service.metadata.online.TheTVDbApiWrapper;
-import org.yamj.core.service.metadata.online.TheTVDbScanner;
+import org.yamj.core.service.metadata.online.tvdb.TheTVDbApiWrapper;
+import org.yamj.core.service.metadata.online.tvdb.TheTVDbScanner;
 
 @Service("tvdbArtworkScanner")
 public class TheTVDbArtworkScanner implements

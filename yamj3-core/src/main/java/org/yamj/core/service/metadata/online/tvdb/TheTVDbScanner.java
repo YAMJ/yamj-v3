@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online;
+package org.yamj.core.service.metadata.online.tvdb;
 
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
@@ -39,6 +39,10 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
+import org.yamj.core.service.metadata.online.ISeriesScanner;
+import org.yamj.core.service.metadata.online.OnlineScannerService;
+import org.yamj.core.service.metadata.online.ScanResult;
+import org.yamj.core.service.metadata.online.imdb.ImdbScanner;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 
@@ -108,15 +112,15 @@ public class TheTVDbScanner implements ISeriesScanner {
         series.setSourceDbId(ImdbScanner.SCANNER_ID, tvdbSeries.getImdbId());
 
         if (OverrideTools.checkOverwriteTitle(series, SCANNER_ID)) {
-            series.setTitle(StringUtils.trim(tvdbSeries.getSeriesName()), SCANNER_ID);
+            series.setTitle(tvdbSeries.getSeriesName(), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwritePlot(series, SCANNER_ID)) {
-            series.setPlot(StringUtils.trim(tvdbSeries.getOverview()), SCANNER_ID);
+            series.setPlot(tvdbSeries.getOverview(), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteOutline(series, SCANNER_ID)) {
-            series.setOutline(StringUtils.trim(tvdbSeries.getOverview()), SCANNER_ID);
+            series.setOutline(tvdbSeries.getOverview(), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteGenres(series, SCANNER_ID)) {
@@ -168,15 +172,13 @@ public class TheTVDbScanner implements ISeriesScanner {
 
             // use values from series
             if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
-                season.setTitle(StringUtils.trim(tvdbSeries.getSeriesName()), SCANNER_ID);
+                season.setTitle(tvdbSeries.getSeriesName(), SCANNER_ID);
             }
-
             if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
-                season.setPlot(StringUtils.trim(tvdbSeries.getOverview()), SCANNER_ID);
+                season.setPlot(tvdbSeries.getOverview(), SCANNER_ID);
             }
-
             if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
-                season.setOutline(StringUtils.trim(tvdbSeries.getOverview()), SCANNER_ID);
+                season.setOutline(tvdbSeries.getOverview(), SCANNER_ID);
             }
 
             if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
@@ -245,15 +247,15 @@ public class TheTVDbScanner implements ISeriesScanner {
                 videoData.setSourceDbId(SCANNER_ID, episode.getId());
 
                 if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
-                    videoData.setTitle(StringUtils.trim(episode.getEpisodeName()), SCANNER_ID);
+                    videoData.setTitle(episode.getEpisodeName(), SCANNER_ID);
                 }
-
+                
                 if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-                    videoData.setPlot(StringUtils.trim(episode.getOverview()), SCANNER_ID);
+                    videoData.setPlot(episode.getOverview(), SCANNER_ID);
                 }
-
+                
                 if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-                    videoData.setOutline(StringUtils.trim(episode.getOverview()), SCANNER_ID);
+                    videoData.setOutline(episode.getOverview(), SCANNER_ID);
                 }
 
                 if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {

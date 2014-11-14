@@ -1,11 +1,14 @@
 package org.yamj.core.service.metadata;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.QueueDTO;
@@ -13,6 +16,7 @@ import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.metadata.nfo.NfoScannerService;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.tools.ExceptionTools;
+import org.yamj.core.tools.MetadataTools;
 
 @Service("metadataScannerService")
 public class MetadataScannerService {
@@ -25,6 +29,8 @@ public class MetadataScannerService {
     private NfoScannerService nfoScannerService;
     @Autowired
     private OnlineScannerService onlineScannerService;
+    @Autowired
+    private ConfigServiceWrapper configServiceWrapper;
     
     /**
      * Scan a movie
@@ -33,6 +39,9 @@ public class MetadataScannerService {
      */
     public void scanMovie(Long id) {
         VideoData videoData = this.metadataStorageService.getRequiredVideoData(id);
+
+        // empty sort title; will be reset after scan
+        videoData.setTitleSort(null);
         
         // NFO scanning
         this.nfoScannerService.scanMovie(videoData);
@@ -40,6 +49,9 @@ public class MetadataScannerService {
         // online scanning
         this.onlineScannerService.scanMovie(videoData);
 
+        // reset sort title
+        MetadataTools.setSortTitle(videoData, configServiceWrapper.getSortStripPrefixes());
+        
         try {
             // store associated entities
             metadataStorageService.storeAssociatedEntities(videoData);
@@ -66,12 +78,32 @@ public class MetadataScannerService {
      */
     public void scanSeries(Long id) {
         Series series = this.metadataStorageService.getRequiredSeries(id);
+       
+        // empty sort title; will be reset after scan
+        series.setTitleSort(null);
+        for (Season season : series.getSeasons()) {
+            season.setTitleSort(null);
+            for (VideoData videoData : season.getVideoDatas()) {
+                videoData.setTitleSort(null);
+            }
+        }
         
         // NFO scanning
         this.nfoScannerService.scanSeries(series);
         
         // online scanning
         this.onlineScannerService.scanSeries(series);
+
+        
+        // reset sort title
+        List<String> prefixes = this.configServiceWrapper.getSortStripPrefixes();
+        MetadataTools.setSortTitle(series, prefixes);
+        for (Season season : series.getSeasons()) {
+            MetadataTools.setSortTitle(season, prefixes);
+            for (VideoData videoData : season.getVideoDatas()) {
+                MetadataTools.setSortTitle(videoData, prefixes);
+            }
+        }
 
         try {
             // store associated entities
@@ -91,7 +123,7 @@ public class MetadataScannerService {
             }
         }
     }
-
+        
     /**
      * Scan the data site for information on the person
      *

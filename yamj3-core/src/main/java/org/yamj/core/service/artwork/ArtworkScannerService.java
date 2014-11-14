@@ -50,7 +50,7 @@ import org.yamj.core.service.artwork.tv.ITvShowBannerScanner;
 import org.yamj.core.service.artwork.tv.ITvShowVideoImageScanner;
 import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
-import org.yamj.core.service.metadata.online.TheTVDbScanner;
+import org.yamj.core.service.metadata.online.tvdb.TheTVDbScanner;
 
 @Service("artworkScannerService")
 public class ArtworkScannerService {

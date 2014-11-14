@@ -41,10 +41,10 @@ import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.file.tools.FileTools;
-import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
-import org.yamj.core.service.metadata.online.TheTVDbScanner;
+import org.yamj.core.service.metadata.online.imdb.ImdbScanner;
+import org.yamj.core.service.metadata.online.tvdb.TheTVDbScanner;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.xml.DOMHelper;
@@ -289,17 +289,14 @@ public final class InfoReader {
         dto.setQuote(value);
 
         // parse company (may be studio)
-        value = DOMHelper.getValueFromElement(eCommon, "studio");
-        dto.setCompany(value);
-        value = DOMHelper.getValueFromElement(eCommon, "company");
+        value = DOMHelper.getValueFromElement(eCommon, "studio", "company");
         dto.setCompany(value);
 
         // parse genres
         parseGenres(eCommon.getElementsByTagName("genre"), dto);
 
         // premiered / release date
-        movieDate(DOMHelper.getValueFromElement(eCommon, "premiered"), dto, nfoFilename);
-        movieDate(DOMHelper.getValueFromElement(eCommon, "releasedate"), dto, nfoFilename);
+        movieDate(DOMHelper.getValueFromElement(eCommon, "premiered", "releasedate"), dto, nfoFilename);
 
 
         /* TODO

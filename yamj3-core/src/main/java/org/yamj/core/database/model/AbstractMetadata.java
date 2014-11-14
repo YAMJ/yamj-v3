@@ -53,7 +53,10 @@ public abstract class AbstractMetadata extends AbstractAuditable
     
     @Column(name = "title_original", length = 255)
     private String titleOriginal;
-    
+
+    @Column(name = "title_sort", nullable = false, length = 255)
+    private String titleSort;
+
     @Lob
     @Column(name = "plot", length = 50000)
     private String plot;
@@ -135,6 +138,15 @@ public abstract class AbstractMetadata extends AbstractAuditable
             this.titleOriginal = titleOriginal.trim();
             setOverrideFlag(OverrideFlag.ORIGINALTITLE, source);
         }
+    }
+
+    @Override
+    public String getTitleSort() {
+        return titleSort;
+    }
+
+    public void setTitleSort(String titleSort) {
+        this.titleSort = titleSort;
     }
 
     public final String getPlot() {
