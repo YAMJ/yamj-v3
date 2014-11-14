@@ -22,6 +22,8 @@
  */
 package org.yamj.core.api.model.dto;
 
+import org.yamj.core.database.model.Certification;
+import org.yamj.core.database.model.Studio;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.ArrayList;
@@ -35,8 +37,14 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
 
     private Long seriesId;
     private String title;
+    private String originalTitle;
+    private String plot;
+    private String outline;
     private Integer year;
     private Boolean watched;
+    private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
+    private List<Studio> studios = new ArrayList<Studio>();
+    private List<Certification> certifications = new ArrayList<Certification>();
     private List<ApiSeasonInfoDTO> seasonList;
     private Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
 
@@ -55,6 +63,74 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
     public void setTitle(String title) {
         this.title = title;
     }
+    
+    public String getOriginalTitle() {
+        return originalTitle;
+    }
+
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
+    }
+
+    public String getPlot() {
+        return plot;
+    }
+
+    public void setPlot(String plot) {
+        this.plot = plot;
+    }
+
+    public String getOutline() {
+        return outline;
+    }
+
+    public void setOutline(String outline) {
+        this.outline = outline;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
+
+    public void setSeriesYear(Integer seriesYear) {
+        this.year = seriesYear;
+    }
+    
+    public Boolean getWatched() {
+        return watched;
+    }
+
+    public void setWatched(Boolean watched) {
+        this.watched = watched;
+    }
+
+    public List<ApiGenreDTO> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(List<ApiGenreDTO> genres) {
+        this.genres = genres;
+    }
+
+    public List<Studio> getStudios() {
+        return studios;
+    }
+
+    public void setStudios(List<Studio> studios) {
+        this.studios = studios;
+    }
+
+    public List<Certification> getCertifications() {
+        return certifications;
+    }
+
+    public void setCertifications(List<Certification> certifications) {
+        this.certifications = certifications;
+    }
 
     public List<ApiSeasonInfoDTO> getSeasonList() {
         return seasonList;
@@ -64,28 +140,8 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
         this.seasonList = seasonList;
     }
 
-    public Integer getYear() {
-        return year;
-    }
-
-    public Boolean getWatched() {
-        return watched;
-    }
-    
     public Map<ArtworkType, List<ApiArtworkDTO>> getArtwork() {
         return artwork;
-    }
-
-    public void setYear(Integer seriesYear) {
-        this.year = seriesYear;
-    }
-
-    public void setSeriesYear(Integer seriesYear) {
-        this.year = seriesYear;
-    }
-
-    public void setWatched(Boolean watched) {
-        this.watched = watched;
     }
 
     public void setArtwork(Map<ArtworkType, List<ApiArtworkDTO>> artwork) {

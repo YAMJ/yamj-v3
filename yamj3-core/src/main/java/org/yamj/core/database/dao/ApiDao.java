@@ -1150,13 +1150,13 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.id AS seasonId, sea.season, vid.episode, ");
         sqlScalars.addToSql("vid.id, vid.title, vid.title_original as originalTitle, vid.release_date as firstAired, ");
         sqlScalars.addToSql("(vid.watched_nfo or vid.watched_file or vid.watched_api) as watched, ");
-        if (options.hasDataItem(DataItem.OUTLINE)) {
-            sqlScalars.addToSql("vid.outline, ");
-            sqlScalars.addScalar("outline", StringType.INSTANCE);
-        }
         if (options.hasDataItem(DataItem.PLOT)) {
             sqlScalars.addToSql("vid.plot, ");
             sqlScalars.addScalar("plot", StringType.INSTANCE);
+        }
+        if (options.hasDataItem(DataItem.OUTLINE)) {
+            sqlScalars.addToSql("vid.outline, ");
+            sqlScalars.addScalar("outline", StringType.INSTANCE);
         }
         sqlScalars.addToSql("ag.cache_filename AS cacheFilename, ag.cache_dir AS cacheDir");
         sqlScalars.addToSql("FROM season sea, series ser, videodata vid, artwork a");
@@ -1722,21 +1722,42 @@ public class ApiDao extends HibernateDao {
         LOG.info("Getting series information for seriesId '{}'", id);
 
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT s.id AS seriesId, title, start_year AS seriesYear, ");
+        sqlScalars.addToSql("SELECT s.id AS seriesId, s.title, s.title_original AS originalTitle, s.start_year AS seriesYear, ");
+        if (options.hasDataItem(DataItem.PLOT)) {
+            sqlScalars.addToSql("s.plot, ");
+            sqlScalars.addScalar("plot", StringType.INSTANCE);
+        }
+        if (options.hasDataItem(DataItem.OUTLINE)) {
+            sqlScalars.addToSql("s.outline, ");
+            sqlScalars.addScalar("outline", StringType.INSTANCE);
+        }
         sqlScalars.addToSql("(select min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=s.id) as watched ");
         sqlScalars.addToSql("FROM series s");
         sqlScalars.addToSql("WHERE id=:id");
         sqlScalars.addToSql("ORDER BY id");
-        sqlScalars.addParameters(ID, options.getId());
+        sqlScalars.addParameters(ID, id);
 
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(TITLE, StringType.INSTANCE);
+        sqlScalars.addScalar(ORIGINAL_TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(SERIES_YEAR, IntegerType.INSTANCE);
         sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
         List<ApiSeriesInfoDTO> seriesResults = executeQueryWithTransform(ApiSeriesInfoDTO.class, sqlScalars, wrapper);
         LOG.debug("Found {} series for SeriesId '{}'", seriesResults.size(), id);
 
         for (ApiSeriesInfoDTO series : seriesResults) {
+            if (options.hasDataItem(DataItem.GENRE)) {
+                series.setGenres(getGenresForId(MetaDataType.SERIES, id));
+            }
+
+            if (options.hasDataItem(DataItem.STUDIO)) {
+                series.setStudios(getStudiosForId(MetaDataType.SERIES, id));
+            }
+
+            if (options.hasDataItem(DataItem.CERTIFICATION)) {
+                series.setCertifications(getCertificationsForId(MetaDataType.SERIES, id));
+            }
+            
             if (options.hasDataItem(DataItem.ARTWORK)) {
                 Map<Long, List<ApiArtworkDTO>> artworkList = getArtworkForId(MetaDataType.SERIES, id, options.getArtworkTypes());
                 for (ApiArtworkDTO artwork : artworkList.get(id)) {
