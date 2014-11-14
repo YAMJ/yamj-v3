@@ -203,21 +203,21 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
         StringBuilder sb = new StringBuilder();
         if (StringUtils.isNotBlank(field) && StringUtils.isNotBlank(search)) {
             if (addWhere) {
-                sb.append(" WHERE ");
+                sb.append(" WHERE lower(");
             } else {
-                sb.append(" AND ");
+                sb.append(" AND lower(");
             }
-            sb.append(field).append(" LIKE '");
+            sb.append(field).append(") LIKE '");
 
             if (StringUtils.equalsIgnoreCase("START", mode)) {
-                sb.append(search).append("%");
+                sb.append(search.toLowerCase()).append("%");
             } else if (StringUtils.equalsIgnoreCase("END", mode)) {
-                sb.append("%").append(search);
+                sb.append("%").append(search.toLowerCase());
             } else if (StringUtils.equalsIgnoreCase("EXACT", mode)) {
-                sb.append(search);
+                sb.append(search.toLowerCase());
             } else {
                 // Default to ANY
-                sb.append("%").append(search).append("%");
+                sb.append("%").append(search.toLowerCase()).append("%");
             }
             sb.append("'");
         }

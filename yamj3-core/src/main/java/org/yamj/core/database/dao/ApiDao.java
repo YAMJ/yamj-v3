@@ -229,6 +229,7 @@ public class ApiDao extends HibernateDao {
         }
         sbSQL.append(", vd.title");
         sbSQL.append(", vd.title_original AS originalTitle");
+        sbSQL.append(", vd.title_sort AS sortTitle");
         sbSQL.append(", vd.publication_year AS videoYear");
         sbSQL.append(", null AS seriesId");
         sbSQL.append(", vd.season_id AS seasonId");
@@ -381,6 +382,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.SERIES).append(SQL_AS_VIDEO_TYPE_STRING);
         sbSQL.append(", ser.title");
         sbSQL.append(", ser.title_original AS originalTitle");
+        sbSQL.append(", ser.title_sort AS sortTitle");
         sbSQL.append(", ser.start_year AS videoYear");
         sbSQL.append(", ser.id AS seriesId");
         sbSQL.append(", null AS seasonId");
@@ -502,6 +504,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.SEASON).append(SQL_AS_VIDEO_TYPE_STRING);
         sbSQL.append(", sea.title");
         sbSQL.append(", sea.title_original AS originalTitle");
+        sbSQL.append(", sea.title_sort AS sortTitle");
         sbSQL.append(", sea.publication_year as videoYear");
         sbSQL.append(", sea.series_id AS seriesId");
         sbSQL.append(", sea.id AS seasonId");
