@@ -22,14 +22,14 @@
  */
 package org.yamj.core.api.model.dto;
 
-import org.yamj.core.database.model.Certification;
-import org.yamj.core.database.model.Studio;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import org.yamj.core.database.model.Certification;
+import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.model.type.ArtworkType;
 
 @JsonInclude(Include.NON_DEFAULT) 
@@ -45,7 +45,8 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
     private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
     private List<Studio> studios = new ArrayList<Studio>();
     private List<Certification> certifications = new ArrayList<Certification>();
-    private List<ApiSeasonInfoDTO> seasonList;
+    private List<ApiRatingDTO> ratings = new ArrayList<ApiRatingDTO>();
+    private List<ApiSeasonInfoDTO> seasonList = new ArrayList<ApiSeasonInfoDTO>();
     private Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
 
     public Long getSeriesId() {
@@ -116,6 +117,10 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
         this.genres = genres;
     }
 
+    public int getGenreCount() {
+        return genres.size();
+    }
+
     public List<Studio> getStudios() {
         return studios;
     }
@@ -124,12 +129,32 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
         this.studios = studios;
     }
 
+    public int getStudioCount() {
+        return studios.size();
+    }
+    
     public List<Certification> getCertifications() {
         return certifications;
     }
 
     public void setCertifications(List<Certification> certifications) {
         this.certifications = certifications;
+    }
+
+    public int getCertificationCount() {
+        return certifications.size();
+    }
+    
+    public List<ApiRatingDTO> getRatings() {
+        return ratings;
+    }
+
+    public void setRatings(List<ApiRatingDTO> ratings) {
+        this.ratings = ratings;
+    }
+
+    public int getRatingCount() {
+        return ratings.size();
     }
 
     public List<ApiSeasonInfoDTO> getSeasonList() {

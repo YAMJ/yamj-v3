@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.mediaimport;
 
-import java.util.List;
-
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;

@@ -60,6 +60,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
     private List<Studio> studios = new ArrayList<Studio>();
     private List<Certification> certifications = new ArrayList<Certification>();
+    private List<ApiRatingDTO> ratings = new ArrayList<ApiRatingDTO>();
     private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
     private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
     private final Map<JobType,List<ApiPersonDTO>> cast = new EnumMap<JobType,List<ApiPersonDTO>>(JobType.class);
@@ -127,6 +128,14 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public int getCertificationCount() {
         return certifications.size();
+    }
+
+    public List<ApiRatingDTO> getRatings() {
+        return ratings;
+    }
+
+    public int getRatingCount() {
+        return ratings.size();
     }
 
     public String getOutline() {
@@ -226,6 +235,10 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public void setCertifications(List<Certification> certifications) {
         this.certifications = certifications;
+    }
+
+    public void setRatings(List<ApiRatingDTO> ratings) {
+        this.ratings = ratings;
     }
     
     public void setOutline(String outline) {

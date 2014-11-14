@@ -25,8 +25,6 @@ package org.yamj.core.service.metadata.online;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-import org.yamj.core.service.metadata.online.tvdb.TheTVDbScanner;
-
 import javax.annotation.Resource;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -37,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.yamj.core.database.model.Series;
+import org.yamj.core.service.metadata.online.tvdb.TheTVDbScanner;
 
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
 public class TheTVDbScannerTest extends AbstractJUnit4SpringContextTests {

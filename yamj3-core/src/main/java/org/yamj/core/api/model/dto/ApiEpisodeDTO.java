@@ -54,6 +54,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
     private List<Studio> studios = new ArrayList<Studio>();
     private List<Certification> certifications = new ArrayList<Certification>();
+    private List<ApiRatingDTO> ratings = new ArrayList<ApiRatingDTO>();
     private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
     private final Map<JobType,List<ApiPersonDTO>> cast = new EnumMap<JobType,List<ApiPersonDTO>>(JobType.class);
 
@@ -124,6 +125,10 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
         this.certifications = certifications;
     }
     
+    public void setRatings(List<ApiRatingDTO> ratings) {
+        this.ratings = ratings;
+    }
+
     public void setFiles(List<ApiFileDTO> files) {
         this.files = files;
     }
@@ -191,6 +196,10 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
         return certifications;
     }
     
+    public List<ApiRatingDTO> getRatings() {
+        return ratings;
+    }
+
     public List<ApiFileDTO> getFiles() {
         return files;
     }

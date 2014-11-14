@@ -49,17 +49,19 @@ public class DataItemTools {
 
         if (CollectionUtils.isNotEmpty(dataItems)) {
             LOG.trace("Adding dataitems {} to table prefix {}", dataItems, tablePrefix);
+            
             for (DataItem item : dataItems) {
                 if (item.isNotColumn()) {
                     // This is not a specific SQL statement and is not needed
                     continue;
                 }
+                
                 if (item == DataItem.TOP_RANK) {
                     sbSQL.append(", ").append(tablePrefix).append(".top_rank as topRank");
-                    continue;
+                } else {
+                    // default approach
+                    sbSQL.append(", ").append(tablePrefix).append(".").append(item.toString().toLowerCase());
                 }
-                // Default approach
-                sbSQL.append(", ").append(tablePrefix).append(".").append(item.toString().toLowerCase());
             }
         } else {
             LOG.trace("No dataitems to add to table prefix {}", tablePrefix);
@@ -80,12 +82,13 @@ public class DataItemTools {
                 // This is not a specific scalar and is not needed
                 continue;
             }
+            
             if (item == DataItem.TOP_RANK) {
                 sqlScalars.addScalar("topRank", IntegerType.INSTANCE);
-                continue;
+            } else {
+                //  default approach
+                sqlScalars.addScalar(item.toString().toLowerCase(), StringType.INSTANCE);
             }
-            // This is the default approach
-            sqlScalars.addScalar(item.toString().toLowerCase(), StringType.INSTANCE);
         }
     }
 }

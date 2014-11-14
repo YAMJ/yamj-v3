@@ -34,6 +34,9 @@ public class ApiSeasonInfoDTO extends AbstractApiDTO {
     private Long seasonId;
     private Integer season;
     private String title;
+    private String originalTitle;
+    private String plot;
+    private String outline;
     private Boolean watched;
     Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
 
@@ -69,6 +72,30 @@ public class ApiSeasonInfoDTO extends AbstractApiDTO {
         this.title = title;
     }
     
+    public String getOriginalTitle() {
+        return originalTitle;
+    }
+
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
+    }
+
+    public String getPlot() {
+        return plot;
+    }
+
+    public void setPlot(String plot) {
+        this.plot = plot;
+    }
+
+    public String getOutline() {
+        return outline;
+    }
+
+    public void setOutline(String outline) {
+        this.outline = outline;
+    }
+
     public Boolean getWatched() {
         return watched;
     }
