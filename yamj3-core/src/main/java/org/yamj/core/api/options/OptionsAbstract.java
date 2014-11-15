@@ -146,7 +146,7 @@ public abstract class OptionsAbstract implements IOptions {
             for (String inc : StringUtils.split(dashList, ",")) {
                 int pos = inc.indexOf('-');
                 if (pos >= 0) {
-                    values.put(inc.substring(0, pos), inc.substring(pos + 1));
+                    values.put(inc.substring(0, pos).toLowerCase(), inc.substring(pos + 1).toLowerCase());
                 }
             }
         }

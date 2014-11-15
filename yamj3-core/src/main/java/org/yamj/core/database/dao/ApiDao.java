@@ -53,11 +53,9 @@ import org.yamj.core.hibernate.HibernateDao;
 public class ApiDao extends HibernateDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiDao.class);
+    
     private static final String ID = "id";
     private static final String YEAR = "year";
-    private static final String GENRE = "genre";
-    private static final String CERTIFICATION = "certification";
-    private static final String STUDIO = "studio";
     private static final String TITLE = "title";
     private static final String EPISODE = "episode";
     private static final String SEASON = "season";
@@ -69,6 +67,11 @@ public class ApiDao extends HibernateDao {
     private static final String CACHE_FILENAME = "cacheFilename";
     private static final String CACHE_DIR = "cacheDir";
     private static final String WATCHED = "watched";
+    // inclusion/exclusion
+    private static final String GENRE = "genre";
+    private static final String CERTIFICATION = "certification";
+    private static final String STUDIO = "studio";
+    private static final String VIDEOSOURCE = "videosource";
     // SQL
     private static final String SQL_UNION_ALL = " UNION ALL ";
     private static final String SQL_AS_VIDEO_TYPE_STRING = "' AS videoTypeString";
@@ -270,10 +273,10 @@ public class ApiDao extends HibernateDao {
             String genre;
             if (includes.containsKey(GENRE)) {
                 sbSQL.append(" AND exists(");
-                genre = includes.get(GENRE).toLowerCase();
+                genre = includes.get(GENRE);
             } else {
                 sbSQL.append(" AND not exists (");
-                genre = excludes.get(GENRE).toLowerCase();
+                genre = excludes.get(GENRE);
             }
             if (isMovie) {
                 sbSQL.append("SELECT 1 FROM videodata_genres vg, genre g ");
@@ -296,10 +299,10 @@ public class ApiDao extends HibernateDao {
             String studio;
             if (includes.containsKey(STUDIO)) {
                 sbSQL.append(" AND exists(");
-                studio = includes.get(STUDIO).toLowerCase();
+                studio = includes.get(STUDIO);
             } else {
                 sbSQL.append(" AND not exists (");
-                studio = excludes.get(STUDIO).toLowerCase();
+                studio = excludes.get(STUDIO);
             }
             
             if (StringUtils.isNumeric(studio)) {
@@ -334,9 +337,9 @@ public class ApiDao extends HibernateDao {
         if (includes.containsKey(CERTIFICATION) || excludes.containsKey(CERTIFICATION)) {
             String cert;
             if (includes.containsKey(CERTIFICATION)) {
-                cert = includes.get(CERTIFICATION).toLowerCase();
+                cert = includes.get(CERTIFICATION);
             } else {
-                cert = excludes.get(CERTIFICATION).toLowerCase();
+                cert = excludes.get(CERTIFICATION);
             }
 
             // must be numeric
@@ -359,6 +362,25 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append(Integer.parseInt(cert));
                 sbSQL.append(")");
             }
+        }
+
+        // check video source
+        if (includes.containsKey(VIDEOSOURCE) || excludes.containsKey(VIDEOSOURCE)) {
+            String videosource;
+            if (includes.containsKey(VIDEOSOURCE)) {
+                sbSQL.append(" AND exists(");
+                videosource = includes.get(VIDEOSOURCE);
+            } else {
+                sbSQL.append(" AND not exists (");
+                videosource = excludes.get(VIDEOSOURCE);
+            }
+
+            sbSQL.append("SELECT 1 FROM mediafile mf ");
+            sbSQL.append("JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
+            sbSQL.append("WHERE mv.videodata_id=vd.id ");
+            sbSQL.append("AND lower(mf.video_source)='");
+            sbSQL.append(videosource);
+            sbSQL.append("')");
         }
         
         // add the search string, this will be empty if there is no search required
@@ -421,10 +443,10 @@ public class ApiDao extends HibernateDao {
             String genre;
             if (includes.containsKey(GENRE)) {
                 sbSQL.append(" AND exists(");
-                genre = includes.get(GENRE).toLowerCase();
+                genre = includes.get(GENRE);
             } else {
                 sbSQL.append(" AND not exists (");
-                genre = excludes.get(GENRE).toLowerCase();
+                genre = excludes.get(GENRE);
             }
             sbSQL.append("SELECT 1 FROM series_genres sg, genre g ");
             sbSQL.append("WHERE ser.id=sg.series_id ");
@@ -439,10 +461,10 @@ public class ApiDao extends HibernateDao {
             String studio;
             if (includes.containsKey(STUDIO)) {
                 sbSQL.append(" AND exists(");
-                studio = includes.get(STUDIO).toLowerCase();
+                studio = includes.get(STUDIO);
             } else {
                 sbSQL.append(" AND not exists (");
-                studio = excludes.get(STUDIO).toLowerCase();
+                studio = excludes.get(STUDIO);
             }
             
             if (StringUtils.isNumeric(studio)) {
@@ -481,6 +503,27 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append(Integer.parseInt(cert));
                 sbSQL.append(")");
             }
+        }
+        
+        // check video source
+        if (includes.containsKey(VIDEOSOURCE) || excludes.containsKey(VIDEOSOURCE)) {
+            String videosource;
+            if (includes.containsKey(VIDEOSOURCE)) {
+                sbSQL.append(" AND exists(");
+                videosource = includes.get(VIDEOSOURCE);
+            } else {
+                sbSQL.append(" AND not exists (");
+                videosource = excludes.get(VIDEOSOURCE);
+            }
+
+            sbSQL.append("SELECT 1 FROM mediafile mf ");
+            sbSQL.append("JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
+            sbSQL.append("JOIN videodata vd ON mv.mediafile_id=mv.videodata_id ");
+            sbSQL.append("JOIN season sea ON sea.id=vd.season_id ");
+            sbSQL.append("WHERE sea.series_id=ser.id ");
+            sbSQL.append("AND lower(mf.video_source)='");
+            sbSQL.append(videosource);
+            sbSQL.append("')");
         }
         
         // add the search string, this will be empty if there is no search required
@@ -543,10 +586,10 @@ public class ApiDao extends HibernateDao {
             String genre;
             if (includes.containsKey(GENRE)) {
                 sbSQL.append(" AND exists(");
-                genre = includes.get(GENRE).toLowerCase();
+                genre = includes.get(GENRE);
             } else {
                 sbSQL.append(" AND not exists (");
-                genre = excludes.get(GENRE).toLowerCase();
+                genre = excludes.get(GENRE);
             }
             sbSQL.append("SELECT 1 FROM series_genres sg, genre g ");
             sbSQL.append("WHERE sea.series_id=sg.series_id ");
@@ -562,10 +605,10 @@ public class ApiDao extends HibernateDao {
             String studio;
             if (includes.containsKey(STUDIO)) {
                 sbSQL.append(" AND exists(");
-                studio = includes.get(STUDIO).toLowerCase();
+                studio = includes.get(STUDIO);
             } else {
                 sbSQL.append(" AND not exists (");
-                studio = excludes.get(STUDIO).toLowerCase();
+                studio = excludes.get(STUDIO);
             }
             if (StringUtils.isNumeric(studio)) {
                 sbSQL.append("SELECT 1 FROM series_studios ss ");
@@ -585,9 +628,9 @@ public class ApiDao extends HibernateDao {
         if (includes.containsKey(CERTIFICATION) || excludes.containsKey(CERTIFICATION)) {
             String cert;
             if (includes.containsKey(CERTIFICATION)) {
-                cert = includes.get(CERTIFICATION).toLowerCase();
+                cert = includes.get(CERTIFICATION);
             } else {
-                cert = excludes.get(CERTIFICATION).toLowerCase();
+                cert = excludes.get(CERTIFICATION);
             }
 
             // must be numeric
@@ -603,6 +646,26 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append(Integer.parseInt(cert));
                 sbSQL.append(")");
             }
+        }
+        
+        // check video source
+        if (includes.containsKey(VIDEOSOURCE) || excludes.containsKey(VIDEOSOURCE)) {
+            String videosource;
+            if (includes.containsKey(VIDEOSOURCE)) {
+                sbSQL.append(" AND exists(");
+                videosource = includes.get(VIDEOSOURCE);
+            } else {
+                sbSQL.append(" AND not exists (");
+                videosource = excludes.get(VIDEOSOURCE);
+            }
+
+            sbSQL.append("SELECT 1 FROM mediafile mf ");
+            sbSQL.append("JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
+            sbSQL.append("JOIN videodata vd ON mv.mediafile_id=mv.videodata_id ");
+            sbSQL.append("WHERE vd.season_id=sea.id ");
+            sbSQL.append("AND lower(mf.video_source)='");
+            sbSQL.append(videosource);
+            sbSQL.append("')");
         }
         
         // add the search string, this will be empty if there is no search required
