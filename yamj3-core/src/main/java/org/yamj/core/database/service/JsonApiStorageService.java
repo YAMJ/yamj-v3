@@ -139,7 +139,7 @@ public class JsonApiStorageService {
 
     //<editor-fold defaultstate="collapsed" desc="VideoSource Methods">
     @Transactional(readOnly = true)
-    public List<String> getVideoSources(ApiWrapperList<String> wrapper) {
+    public List<ApiNameDTO> getVideoSources(ApiWrapperList<ApiNameDTO> wrapper) {
         return mediaDao.getVideoSources(wrapper);
     }
     //</editor-fold>

@@ -31,6 +31,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
+import org.yamj.core.api.model.dto.ApiNameDTO;
 import org.yamj.core.api.model.dto.ApiRatingDTO;
 import org.yamj.core.api.options.OptionsCommon;
 import org.yamj.core.api.options.OptionsId;
@@ -256,12 +257,12 @@ public class CommonController {
     //<editor-fold defaultstate="collapsed" desc="VideoSource Methods">
     @RequestMapping(value = "/videosources/list", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<String> getVideoSources(@ModelAttribute("options") OptionsId options) {
+    public ApiWrapperList<ApiNameDTO> getVideoSources(@ModelAttribute("options") OptionsId options) {
         LOG.info("Getting video sources list with {}", options.toString());
 
-        ApiWrapperList<String> wrapper = new ApiWrapperList<String>();
+        ApiWrapperList<ApiNameDTO> wrapper = new ApiWrapperList<ApiNameDTO>();
         wrapper.setOptions(options);
-        List<String> results = jsonApiStorageService.getVideoSources(wrapper);
+        List<ApiNameDTO> results = jsonApiStorageService.getVideoSources(wrapper);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
         return wrapper;
