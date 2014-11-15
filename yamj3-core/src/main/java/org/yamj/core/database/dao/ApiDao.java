@@ -72,6 +72,7 @@ public class ApiDao extends HibernateDao {
     private static final String CERTIFICATION = "certification";
     private static final String STUDIO = "studio";
     private static final String VIDEOSOURCE = "videosource";
+    private static final String RATING = "rating";
     // SQL
     private static final String SQL_UNION_ALL = " UNION ALL ";
     private static final String SQL_AS_VIDEO_TYPE_STRING = "' AS videoTypeString";
@@ -382,13 +383,52 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(videosource);
             sbSQL.append("')");
         }
-        
+
+        // check rating
+        if (includes.containsKey(RATING) || excludes.containsKey(RATING)) {
+            String[] parsed;
+            if (includes.containsKey(RATING)) {
+                System.err.println(includes.get(RATING));
+                parsed = parseRating(includes.get(RATING));
+            } else {
+                System.err.println(excludes.get(RATING));
+                parsed = parseRating(excludes.get(RATING));
+            }
+
+            if (parsed != null) {
+                System.err.println(parsed);
+                String rating = parsed[0];
+                String source = parsed[1];
+
+                if (includes.containsKey(RATING)) {
+                    sbSQL.append(" AND exists(");
+                } else {
+                    sbSQL.append(" AND not exists (");
+                }
+
+                if ("combined".equalsIgnoreCase(source)) {
+                    sbSQL.append("SELECT avg(vr.rating/10) as test, vr.videodata_id ");
+                    sbSQL.append("FROM videodata_ratings vr ");
+                    sbSQL.append("WHERE vr.videodata_id = vd.id ");
+                    sbSQL.append("GROUP BY vr.videodata_id ");
+                    sbSQL.append("HAVING round(test)=").append(rating);
+                } else {
+                    sbSQL.append("SELECT 1 FROM videodata_ratings vr ");
+                    sbSQL.append("WHERE vr.videodata_id = vd.id ");
+                    sbSQL.append("AND vr.sourcedb='").append(source).append("' ");
+                    sbSQL.append("AND round(vr.rating/10)=").append(rating);
+                }
+                sbSQL.append(")");
+            }
+        }
+
         // add the search string, this will be empty if there is no search required
         sbSQL.append(options.getSearchString(false));
 
         return sbSQL.toString();
     }
 
+    
     /**
      * Create the SQL fragment for the selection of series
      *
@@ -524,6 +564,41 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("AND lower(mf.video_source)='");
             sbSQL.append(videosource);
             sbSQL.append("')");
+        }
+        
+        // check rating
+        if (includes.containsKey(RATING) || excludes.containsKey(RATING)) {
+            String[] parsed;
+            if (includes.containsKey(RATING)) {
+                parsed = parseRating(includes.get(RATING));
+            } else {
+                parsed = parseRating(excludes.get(RATING));
+            }
+
+            if (parsed != null) {
+                String rating = parsed[0];
+                String source = parsed[1];
+
+                if (includes.containsKey(RATING)) {
+                    sbSQL.append(" AND exists(");
+                } else {
+                    sbSQL.append(" AND not exists (");
+                }
+
+                if ("combined".equalsIgnoreCase(source)) {
+                    sbSQL.append("SELECT avg(sr.rating/10) as test, sr.series_id ");
+                    sbSQL.append("FROM series_ratings sr ");
+                    sbSQL.append("WHERE sr.series_id = ser.id ");
+                    sbSQL.append("GROUP BY sr.series_id ");
+                    sbSQL.append("HAVING round(test)=").append(rating);
+                } else {
+                    sbSQL.append("SELECT 1 FROM series_ratings sr ");
+                    sbSQL.append("WHERE sr.series_id = ser.id ");
+                    sbSQL.append("AND sr.sourcedb='").append(source).append("' ");
+                    sbSQL.append("AND round(sr.rating/10)=").append(rating);
+                }
+                sbSQL.append(")");
+            }
         }
         
         // add the search string, this will be empty if there is no search required
@@ -668,12 +743,73 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("')");
         }
         
+        // check rating
+        if (includes.containsKey(RATING) || excludes.containsKey(RATING)) {
+            String[] parsed;
+            if (includes.containsKey(RATING)) {
+                parsed = parseRating(includes.get(RATING));
+            } else {
+                parsed = parseRating(excludes.get(RATING));
+            }
+
+            if (parsed != null) {
+                String rating = parsed[0];
+                String source = parsed[1];
+
+                if (includes.containsKey(RATING)) {
+                    sbSQL.append(" AND exists(");
+                } else {
+                    sbSQL.append(" AND not exists (");
+                }
+
+                if ("combined".equalsIgnoreCase(source)) {
+                    sbSQL.append("SELECT avg(sr.rating/10) as test, sr.series_id ");
+                    sbSQL.append("FROM series_ratings sr ");
+                    sbSQL.append("WHERE sr.series_id = sea.series_id ");
+                    sbSQL.append("GROUP BY sr.series_id ");
+                    sbSQL.append("HAVING round(test)=").append(rating);
+                } else {
+                    sbSQL.append("SELECT 1 FROM series_ratings sr ");
+                    sbSQL.append("WHERE sr.series_id = sea.series_id ");
+                    sbSQL.append("AND sr.sourcedb='").append(source).append("' ");
+                    sbSQL.append("AND round(sr.rating/10)=").append(rating);
+                }
+                sbSQL.append(")");
+            }
+        }
+        
         // add the search string, this will be empty if there is no search required
         sbSQL.append(options.getSearchString(false));
 
         return sbSQL.toString();
     }
 
+    private String[] parseRating(final String value) {
+        String[] result = StringUtils.split(value, '-');
+        if (result == null || result.length == 0) {
+            return null;
+        }
+        int rating;
+        try {
+            rating = Integer.parseInt(result[0]);
+        } catch (Exception e) {
+            return null;
+        }
+        if (rating <0) {
+            rating = 0;
+        } else if (rating>10) {
+            rating = 10;
+        }
+        
+        String source;
+        if (result.length>1) {
+            source = result[1];
+        } else {
+            source = "combined";
+        }
+        
+        return new String[]{""+rating, source};
+    }
     /**
      * Search the list of IDs for artwork and add to the artworkList.
      *
