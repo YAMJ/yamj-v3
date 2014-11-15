@@ -38,6 +38,7 @@ import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.ApiDao;
 import org.yamj.core.database.dao.CommonDao;
+import org.yamj.core.database.dao.MediaDao;
 import org.yamj.core.database.dao.PlayerDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;
@@ -47,6 +48,8 @@ public class JsonApiStorageService {
 
     @Autowired
     private CommonDao commonDao;
+    @Autowired
+    private MediaDao mediaDao;
     @Autowired
     private ApiDao apiDao;
     @Autowired
@@ -133,7 +136,14 @@ public class JsonApiStorageService {
         return commonDao.getCertifications(wrapper);
     }
     //</editor-fold>
-    
+
+    //<editor-fold defaultstate="collapsed" desc="VideoSource Methods">
+    @Transactional(readOnly = true)
+    public List<String> getVideoSources(ApiWrapperList<String> wrapper) {
+        return mediaDao.getVideoSources(wrapper);
+    }
+    //</editor-fold>
+
     //<editor-fold defaultstate="collapsed" desc="Boxed Set Methods">
     @Transactional(readOnly = true)
     public BoxedSet getBoxedSet(Serializable id) {

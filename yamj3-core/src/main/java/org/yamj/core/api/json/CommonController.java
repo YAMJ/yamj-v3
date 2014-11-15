@@ -251,4 +251,19 @@ public class CommonController {
         return wrapper;
     }
     //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="VideoSource Methods">
+    @RequestMapping(value = "/videosources/list", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperList<String> getVideoSources(@ModelAttribute("options") OptionsId options) {
+        LOG.info("Getting certifications list with {}", options.toString());
+
+        ApiWrapperList<String> wrapper = new ApiWrapperList<String>();
+        wrapper.setOptions(options);
+        List<String> results = jsonApiStorageService.getVideoSources(wrapper);
+        wrapper.setResults(results);
+        wrapper.setStatusCheck();
+        return wrapper;
+    }
+    //</editor-fold>
 }

@@ -26,7 +26,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.hibernate.SQLQuery;
+import org.hibernate.type.StringType;
 import org.springframework.stereotype.Repository;
+import org.yamj.core.api.model.builder.SqlScalars;
+import org.yamj.core.api.options.OptionsId;
+import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
@@ -66,5 +70,22 @@ public class MediaDao extends HibernateDao {
 
         Collections.sort(queueElements, new QueueDTOComparator());
         return queueElements;
+    }
+    
+    public List<String> getVideoSources(ApiWrapperList<String> wrapper) {
+        OptionsId options = (OptionsId) wrapper.getOptions();
+
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT DISTINCT video_source FROM mediafile ");
+        sqlScalars.addToSql("WHERE video_source is not null ");
+        sqlScalars.addToSql("ORDER BY video_source ");
+        if ("DESC".equalsIgnoreCase(options.getSortdir())) {
+            sqlScalars.addToSql("DESC");
+        } else {
+            sqlScalars.addToSql("ASC");
+        }
+        sqlScalars.addScalar("video_source", StringType.INSTANCE);
+
+        return executeQueryWithTransform(String.class, sqlScalars, wrapper);
     }
 }
