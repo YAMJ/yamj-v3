@@ -388,15 +388,12 @@ public class ApiDao extends HibernateDao {
         if (includes.containsKey(RATING) || excludes.containsKey(RATING)) {
             String[] parsed;
             if (includes.containsKey(RATING)) {
-                System.err.println(includes.get(RATING));
                 parsed = parseRating(includes.get(RATING));
             } else {
-                System.err.println(excludes.get(RATING));
                 parsed = parseRating(excludes.get(RATING));
             }
 
             if (parsed != null) {
-                System.err.println(parsed);
                 String rating = parsed[0];
                 String source = parsed[1];
 
