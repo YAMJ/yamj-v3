@@ -31,6 +31,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
+import org.yamj.core.api.model.dto.ApiRatingDTO;
 import org.yamj.core.api.options.OptionsCommon;
 import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.wrapper.ApiWrapperList;
@@ -256,11 +257,26 @@ public class CommonController {
     @RequestMapping(value = "/videosources/list", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperList<String> getVideoSources(@ModelAttribute("options") OptionsId options) {
-        LOG.info("Getting certifications list with {}", options.toString());
+        LOG.info("Getting video sources list with {}", options.toString());
 
         ApiWrapperList<String> wrapper = new ApiWrapperList<String>();
         wrapper.setOptions(options);
         List<String> results = jsonApiStorageService.getVideoSources(wrapper);
+        wrapper.setResults(results);
+        wrapper.setStatusCheck();
+        return wrapper;
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Rating Methods">
+    @RequestMapping(value = "/ratings/list", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperList<ApiRatingDTO> getRatings(@ModelAttribute("options") OptionsId options) {
+        LOG.info("Getting ratings list with {}", options.toString());
+
+        ApiWrapperList<ApiRatingDTO> wrapper = new ApiWrapperList<ApiRatingDTO>();
+        wrapper.setOptions(options);
+        List<ApiRatingDTO> results = jsonApiStorageService.getRatings(wrapper);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
         return wrapper;

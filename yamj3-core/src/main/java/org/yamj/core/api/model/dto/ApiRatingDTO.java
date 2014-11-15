@@ -22,13 +22,26 @@
  */
 package org.yamj.core.api.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 /**
  * @author modmax
  */
+@JsonInclude(Include.NON_DEFAULT) 
 public class ApiRatingDTO {
 
+    private String type;
     private String source;
     private Integer rating;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public String getSource() {
         return source;

@@ -79,11 +79,13 @@ public class MediaDao extends HibernateDao {
         sqlScalars.addToSql("SELECT DISTINCT video_source FROM mediafile ");
         sqlScalars.addToSql("WHERE video_source is not null ");
         sqlScalars.addToSql("ORDER BY video_source ");
+        
         if ("DESC".equalsIgnoreCase(options.getSortdir())) {
             sqlScalars.addToSql("DESC");
         } else {
             sqlScalars.addToSql("ASC");
         }
+        
         sqlScalars.addScalar("video_source", StringType.INSTANCE);
 
         return executeQueryWithTransform(String.class, sqlScalars, wrapper);

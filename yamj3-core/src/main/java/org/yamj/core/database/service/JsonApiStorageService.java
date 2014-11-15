@@ -161,6 +161,13 @@ public class JsonApiStorageService {
     }
     //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="VideoSource Methods">
+    @Transactional(readOnly = true)
+    public List<ApiRatingDTO> getRatings(ApiWrapperList<ApiRatingDTO> wrapper) {
+        return commonDao.getRatings(wrapper);
+    }
+    //</editor-fold>
+
     //<editor-fold defaultstate="collapsed" desc="Studio Methods">
     @Transactional(readOnly = true)
     public Studio getStudio(Serializable id) {

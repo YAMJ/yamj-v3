@@ -25,6 +25,7 @@ package org.yamj.core.database.dao;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.hibernate.type.IntegerType;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
 import org.springframework.stereotype.Repository;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
+import org.yamj.core.api.model.dto.ApiRatingDTO;
 import org.yamj.core.api.options.OptionsCommon;
 import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.wrapper.ApiWrapperList;
@@ -246,5 +248,38 @@ public class CommonDao extends HibernateDao {
         sqlScalars.addScalar("name", StringType.INSTANCE);
 
         return executeQueryWithTransform(BoxedSet.class, sqlScalars, wrapper);
+    }
+
+    public List<ApiRatingDTO> getRatings(ApiWrapperList<ApiRatingDTO> wrapper) {
+        OptionsId options = (OptionsId) wrapper.getOptions();
+        
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT distinct grouped.type as type, grouped.sourcedb as source, round(grouped.rating/10) as rating ");
+        sqlScalars.addToSql("FROM ( ");
+        sqlScalars.addToSql("select DISTINCT 'MOVIE' as type, v1.rating, v1.sourcedb, v1.videodata_id, 2 as ordering ");
+        sqlScalars.addToSql("from videodata_ratings v1 ");
+        sqlScalars.addToSql("UNION ");
+        sqlScalars.addToSql("select DISTINCT 'SERIES' as type, s1.rating, s1.sourcedb, s1.series_id, 2 as ordering ");
+        sqlScalars.addToSql("from series_ratings s1 ");
+        sqlScalars.addToSql("UNION ");
+        sqlScalars.addToSql("select DISTINCT 'MOVIE', avg(v2.rating) as rating, 'combined' as sourcedb, v2.videodata_id, 1 as ordering ");
+        sqlScalars.addToSql("from videodata_ratings v2 ");
+        sqlScalars.addToSql("group by v2.videodata_id ");
+        sqlScalars.addToSql("UNION ");
+        sqlScalars.addToSql("select DISTINCT 'SERIES', avg(s2.rating) as rating, 'combined' as sourcedb, s2.series_id, 1 as ordering ");
+        sqlScalars.addToSql("from series_ratings s2 ");
+        sqlScalars.addToSql("group by s2.series_id) as grouped ");
+        sqlScalars.addToSql("order by type, grouped.ordering, source, rating ");
+        
+        if ("DESC".equalsIgnoreCase(options.getSortdir())) {
+            sqlScalars.addToSql("DESC");
+        } else {
+            sqlScalars.addToSql("ASC");
+        }
+        sqlScalars.addScalar("type", StringType.INSTANCE);
+        sqlScalars.addScalar("source", StringType.INSTANCE);
+        sqlScalars.addScalar("rating", IntegerType.INSTANCE);
+
+        return executeQueryWithTransform(ApiRatingDTO.class, sqlScalars, wrapper);
     }
 }
