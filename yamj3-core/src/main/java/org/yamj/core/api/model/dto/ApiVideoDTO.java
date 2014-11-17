@@ -22,12 +22,11 @@
  */
 package org.yamj.core.api.model.dto;
 
+import org.yamj.core.tools.MetadataTools;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.Certification;
@@ -57,6 +56,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private Long season;
     private Long episode;
     private Boolean watched;
+    private Date newest;
     private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
     private List<Studio> studios = new ArrayList<Studio>();
     private List<Certification> certifications = new ArrayList<Certification>();
@@ -287,6 +287,14 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public void setWatched(Boolean watched) {
         this.watched = watched;
+    }
+    
+    public String getNewest() {
+        return MetadataTools.formatDateLong(this.newest);
+    }
+
+    public void setNewest(Date newest) {
+        this.newest = newest;
     }
 
     public void setFiles(List<ApiFileDTO> files) {

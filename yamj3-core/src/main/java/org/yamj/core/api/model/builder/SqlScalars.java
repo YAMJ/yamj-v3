@@ -57,11 +57,13 @@ public final class SqlScalars {
     public SqlScalars(String sql) {
         setSql(sql);
         this.scalars = new HashMap<String, BasicType>();
+        this.parameters = new HashMap<String, Object>();
     }
 
     public SqlScalars(StringBuilder sql, Map<String, BasicType> scalars) {
         this.sql = sql;
         this.scalars = scalars;
+        this.parameters = new HashMap<String, Object>();
     }
 
     /**
