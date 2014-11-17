@@ -59,8 +59,14 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
     @Column(name = "format", nullable = false)
     private String format;
 
-    @Column(name = "language")
+    @Column(name = "language", nullable = false)
     private String language;
+
+    @Column(name = "default_flag", nullable = false)
+    private boolean defaultFlag = false;
+
+    @Column(name = "forced_flag", nullable = false)
+    private boolean forcedFlag = false;
 
     public MediaFile getMediaFile() {
         return mediaFile;
@@ -94,6 +100,21 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
         this.counter = counter;
     }
 
+    public boolean isDefaultFlag() {
+        return defaultFlag;
+    }
+
+    public void setDefaultFlag(boolean defaultFlag) {
+        this.defaultFlag = defaultFlag;
+    }
+
+    public boolean isForcedFlag() {
+        return forcedFlag;
+    }
+
+    public void setForcedFlag(boolean forcedFlag) {
+        this.forcedFlag = forcedFlag;
+    }
 
     public String getLanguage() {
         return language;
@@ -102,7 +123,6 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
     public void setLanguage(String language) {
         this.language = language;
     }
-
 
     // EQUALITY CHECKS
 
@@ -137,7 +157,7 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
             return false;
         }
         // check media file
-        if (EqualityTools.notEquals(getStageFile(), castOther.getStageFile())) {
+        if (EqualityTools.notEquals(getMediaFile(), castOther.getMediaFile())) {
             return false;
         }
         // check stage file

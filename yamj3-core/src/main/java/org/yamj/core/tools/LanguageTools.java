@@ -126,7 +126,7 @@ public class LanguageTools {
                 return e.getKey();
             }
         }
-        return language;
+        return null;
     }
 
     /**

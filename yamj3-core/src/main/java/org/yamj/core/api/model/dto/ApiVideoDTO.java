@@ -22,8 +22,6 @@
  */
 package org.yamj.core.api.model.dto;
 
-import org.yamj.core.tools.MetadataTools;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.*;
@@ -33,6 +31,7 @@ import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.tools.MetadataTools;
 
 /**
  *

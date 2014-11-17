@@ -435,6 +435,9 @@ public class MediaInfoService {
             } else {
                 subtitle.setLanguage(infoLanguage);
             }
+            
+            subtitle.setDefaultFlag("yes".equalsIgnoreCase(infosText.get("Default")));
+            subtitle.setForcedFlag("yes".equalsIgnoreCase(infosText.get("Forced")));
             return Boolean.TRUE;
         }
 

@@ -59,7 +59,8 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
     private String fileSize;
     private Long season;
     private Long episode;
-    private List<ApiAudioCodecDTO> audioCodes = new ArrayList<ApiAudioCodecDTO>();
+    private List<ApiAudioCodecDTO> audioCodecs = new ArrayList<ApiAudioCodecDTO>();
+    private List<ApiSubtitleDTO> subtitles = new ArrayList<ApiSubtitleDTO>();
 
     public Boolean getExtra() {
         return extra;
@@ -241,11 +242,19 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
         this.episode = episode;
     }
 
-    public List<ApiAudioCodecDTO> getAudioCodes() {
-        return audioCodes;
+    public List<ApiAudioCodecDTO> getAudioCodecs() {
+        return audioCodecs;
     }
 
-    public void setAudioCodes(List<ApiAudioCodecDTO> audioCodes) {
-        this.audioCodes = audioCodes;
+    public void setAudioCodecs(List<ApiAudioCodecDTO> audioCodecs) {
+        this.audioCodecs = audioCodecs;
+    }
+
+    public List<ApiSubtitleDTO> getSubtitles() {
+        return subtitles;
+    }
+
+    public void setSubtitles(List<ApiSubtitleDTO> subtitles) {
+        this.subtitles = subtitles;
     }
 }

@@ -84,6 +84,9 @@ public class StageFile extends AbstractAuditable implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "stageFile")
     private Set<ArtworkLocated> artworkLocated = new HashSet<ArtworkLocated>(0);
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "stageFile")
+    private Set<Subtitle> subtitles = new HashSet<Subtitle>(0);
+
     @Lob
     @Column(name = "content")
     private String content;
@@ -196,10 +199,14 @@ public class StageFile extends AbstractAuditable implements Serializable {
         return artworkLocated;
     }
 
-    public void addArtworkLocated(ArtworkLocated artworkLocated) {
-        this.artworkLocated.add(artworkLocated);
+    public Set<Subtitle> getSubtitles() {
+        return subtitles;
     }
 
+    public void setSubtitles(Set<Subtitle> subtitles) {
+        this.subtitles = subtitles;
+    }
+    
     // TRANSIENT METHODS
     
     public String getFileName() {

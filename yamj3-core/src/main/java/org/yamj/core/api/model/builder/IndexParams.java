@@ -22,12 +22,10 @@
  */
 package org.yamj.core.api.model.builder;
 
-import java.util.List;
-import org.yamj.common.type.MetaDataType;
-
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.options.OptionsIndexVideo;
 
 /**

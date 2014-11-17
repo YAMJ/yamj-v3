@@ -120,6 +120,7 @@ public class StagingService {
 
             FileType fileType = filenameScanner.determineFileType(extension);
             if (fileType == FileType.UNKNOWN) {
+                LOG.info("Skipped file cause unknown extension: {}", stageFileDTO.getFileName());
                 // unknown file type
                 continue;
             }
@@ -265,6 +266,34 @@ public class StagingService {
         } else {
             // search in just this directory
             videoFiles = this.stagingDao.findStageFiles(FileType.VIDEO, videoBaseName, videoExtension, watchedFile.getStageDirectory());
+        }
+
+        return videoFiles;
+    }
+
+    public List<StageFile> findSubtitleVideoFiles(StageFile subtitleFile, String language) {
+        String videoBaseName = subtitleFile.getBaseName();
+        if (StringUtils.isNotBlank(language)) {
+            // remove extension cause that was the language
+            videoBaseName = FilenameUtils.removeExtension(videoBaseName);
+        }
+        
+        // get the name used for SUBTITLE directories
+        String subtitleFolderName = PropertyTools.getProperty("yamj3.folder.name.subtitle");
+
+        List<StageFile> videoFiles;
+        if (FileTools.isWithinSpecialFolder(subtitleFile, subtitleFolderName)) {
+            
+            Library library = null;
+            if (this.configService.getBooleanProperty("yamj3.librarycheck.folder.subtitle", Boolean.TRUE)) {
+                library = subtitleFile.getStageDirectory().getLibrary();
+            }
+
+            // search in all directories of the library
+            videoFiles = this.stagingDao.findStageFiles(FileType.VIDEO, videoBaseName, null, library);
+        } else {
+            // search in just this directory
+            videoFiles = this.stagingDao.findStageFiles(FileType.VIDEO, videoBaseName, null, subtitleFile.getStageDirectory());
         }
 
         return videoFiles;

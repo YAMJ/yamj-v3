@@ -138,6 +138,29 @@ public class ImportScheduler {
             }
         } while (id != null);
 
+        // PROCESS SUBTITLE
+        do {
+            try {
+                // find next stage file to process
+                id = mediaImportService.getNextStageFileId(FileType.SUBTITLE, StatusType.NEW, StatusType.UPDATED);
+                if (id != null) {
+                    LOG.trace("Process subtitle stage file: {}", id);
+                    mediaImportService.processSubtitle(id);
+                    LOG.info("Processed subtitle stage file: {}", id);
+                }
+            } catch (Exception error) {
+                if (ExceptionTools.isLockingError(error)) {
+                    LOG.warn("Locking error during import of subtitle stage file {}", id);
+                } else {
+                    LOG.error("Failed to process subtitle stage file {}", id);
+                    LOG.warn("Staging error", error);
+                    try {
+                        mediaImportService.processingError(id);
+                    } catch (Exception ignore) {}
+                }
+            }
+        } while (id != null);
+
         // PROCESS SUBTITLES
     }
 }

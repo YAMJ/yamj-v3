@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,8 @@ import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.mediaimport.FilenameDTO.SetDTO;
 import org.yamj.core.service.staging.StagingService;
+import org.yamj.core.tools.Constants;
+import org.yamj.core.tools.LanguageTools;
 import org.yamj.core.tools.MetadataTools;
 
 /**
@@ -907,5 +910,44 @@ public class MediaImportService {
         // update stage file
         watchedFile.setStatus(StatusType.DONE);
         stagingDao.updateEntity(watchedFile);
+    }
+
+    @Transactional
+    public void processSubtitle(long id) {
+        StageFile subtitleFile = stagingDao.getStageFile(id);
+        LOG.info("Process subtitle {}-'{}'", subtitleFile.getId(), subtitleFile.getFileName());
+
+        // determine language which may only be the "extension" of the base name
+        String language = LanguageTools.determineLanguage(FilenameUtils.getExtension(subtitleFile.getBaseName()));
+        
+        for (StageFile videoFile : this.stagingService.findSubtitleVideoFiles(subtitleFile, language)) {
+            Subtitle subtitle = new Subtitle();
+            subtitle.setCounter(0);
+            subtitle.setStageFile(subtitleFile);
+            subtitle.setMediaFile(videoFile.getMediaFile());
+            
+            if (!subtitleFile.getSubtitles().contains(subtitle)) {
+                // TODO map subtitle extension to a format
+                subtitle.setFormat(subtitleFile.getExtension());
+                
+                if (StringUtils.isBlank(language)) {
+                    subtitle.setLanguage(Constants.UNDEFINED);
+                    subtitle.setDefaultFlag(true);
+                } else {
+                    subtitle.setLanguage(language);
+                }
+                
+                subtitleFile.getSubtitles().add(subtitle);
+                this.mediaDao.saveEntity(subtitle);
+            }
+        }
+        
+        // update stage file
+        if (CollectionUtils.isEmpty(subtitleFile.getSubtitles())) {
+            subtitleFile.setStatus(StatusType.NOTFOUND);
+        } else {
+            subtitleFile.setStatus(StatusType.DONE);
+        }
+        stagingDao.updateEntity(subtitleFile);
     }
 }
