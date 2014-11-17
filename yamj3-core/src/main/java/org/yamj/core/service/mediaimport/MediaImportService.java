@@ -99,8 +99,6 @@ public class MediaImportService {
 
             // attach NFO files
             attachNfoFilesToVideo(stageFile);
-            
-            // TODO attach subtitles
         } else {
             LOG.info("Process updated video {} - '{}'", stageFile.getId(), stageFile.getFileName());
             
@@ -170,6 +168,9 @@ public class MediaImportService {
 
         LOG.debug("Store new media file: '{}'", mediaFile.getFileName());
         mediaDao.saveEntity(mediaFile);
+        
+        // SUBTITLE
+        this.attachSubtilesToMediaFile(mediaFile, stageFile);
         
         // METADATA OBJECTS
                 
@@ -515,6 +516,41 @@ public class MediaImportService {
         }
         return false;
     }
+
+    private void attachSubtilesToMediaFile(MediaFile mediaFile, StageFile videoFile) {
+        String subtitleFolderName = PropertyTools.getProperty("yamj3.folder.name.subtitle");
+        
+        Library library = null;
+        if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.subtitle", Boolean.TRUE)) {
+            library = videoFile.getStageDirectory().getLibrary();
+        }
+
+        // case 1: find matching files in same directory
+        List<StageFile> stageFiles = this.stagingDao.findStageFiles(FileType.SUBTITLE, videoFile.getBaseName(), null, videoFile.getStageDirectory());
+        // case 2: find matching files in subtitle folder
+        Set<String> searchNames = Collections.singleton(videoFile.getBaseName().toLowerCase());
+        List<StageFile> other = this.stagingDao.findStageFilesInSpecialFolder(FileType.SUBTITLE, subtitleFolderName, library, searchNames);
+        stageFiles.addAll(other);
+        
+        for (StageFile subtitleFile : stageFiles) {
+            Subtitle subtitle = new Subtitle();
+            subtitle.setCounter(0);
+            subtitle.setStageFile(subtitleFile);
+            subtitle.setMediaFile(mediaFile);
+            // TODO map subtitle extension to a format
+            subtitle.setFormat(subtitleFile.getExtension());
+            // TODO search stage files with language
+            subtitle.setLanguage(Constants.UNDEFINED);
+            subtitle.setDefaultFlag(true);
+            this.mediaDao.saveEntity(subtitle);
+
+            if (StatusType.NOTFOUND.equals(subtitleFile.getStatus())) {
+                subtitleFile.getSubtitles().add(subtitle);
+                subtitleFile.setStatus(StatusType.DONE);
+                this.stagingDao.updateEntity(subtitleFile);
+            }
+        }
+    }
     
     @Transactional
     public void processingError(Long id) {
@@ -657,7 +693,6 @@ public class MediaImportService {
                     this.attachVideoDataToNFO(videoFiles, videoDatas, 1);
                 }
             }
-            
             
             if (CollectionUtils.isNotEmpty(childDirectories)) {
                 boolean recurse = this.configServiceWrapper.getBooleanProperty("yamj3.scan.nfo.recursiveDirectories", false);
@@ -921,24 +956,26 @@ public class MediaImportService {
         String language = LanguageTools.determineLanguage(FilenameUtils.getExtension(subtitleFile.getBaseName()));
         
         for (StageFile videoFile : this.stagingService.findSubtitleVideoFiles(subtitleFile, language)) {
-            Subtitle subtitle = new Subtitle();
-            subtitle.setCounter(0);
-            subtitle.setStageFile(subtitleFile);
-            subtitle.setMediaFile(videoFile.getMediaFile());
-            
-            if (!subtitleFile.getSubtitles().contains(subtitle)) {
-                // TODO map subtitle extension to a format
-                subtitle.setFormat(subtitleFile.getExtension());
+            if (videoFile.getMediaFile() != null) {
+                Subtitle subtitle = new Subtitle();
+                subtitle.setCounter(0);
+                subtitle.setStageFile(subtitleFile);
+                subtitle.setMediaFile(videoFile.getMediaFile());
                 
-                if (StringUtils.isBlank(language)) {
-                    subtitle.setLanguage(Constants.UNDEFINED);
-                    subtitle.setDefaultFlag(true);
-                } else {
-                    subtitle.setLanguage(language);
+                if (!subtitleFile.getSubtitles().contains(subtitle)) {
+                    // TODO map subtitle extension to a format
+                    subtitle.setFormat(subtitleFile.getExtension());
+                    
+                    if (StringUtils.isBlank(language)) {
+                        subtitle.setLanguage(Constants.UNDEFINED);
+                        subtitle.setDefaultFlag(true);
+                    } else {
+                        subtitle.setLanguage(language);
+                    }
+                    
+                    subtitleFile.getSubtitles().add(subtitle);
+                    this.mediaDao.saveEntity(subtitle);
                 }
-                
-                subtitleFile.getSubtitles().add(subtitle);
-                this.mediaDao.saveEntity(subtitle);
             }
         }
         
