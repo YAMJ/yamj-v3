@@ -62,7 +62,7 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
     @Column(name = "channels", nullable = false)
     private int channels = -1;
 
-    @Column(name = "language")
+    @Column(name = "language", nullable = false, length = 50)
     private String language;
 
     // GETTER AND SETTER

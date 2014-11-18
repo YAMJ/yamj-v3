@@ -594,4 +594,12 @@ public final class MetadataTools {
         sortTitle = MetadataTools.stringMapReplacement(sortTitle.substring(idx));
         metadata.setTitleSort(sortTitle);
     }
+    
+    public static String getExternalSubtitleFormat(String extension) {
+        if ("srt".equalsIgnoreCase(extension)) return "SubRip";
+        if ("ssa".equalsIgnoreCase(extension)) return "SubStation Alpha";
+        if ("ass".equalsIgnoreCase(extension)) return "Advanced SubStation Alpha";
+        if ("pgs".equalsIgnoreCase(extension)) return "Presentation Grapic Stream";
+        return extension.toUpperCase();
+    }
 }

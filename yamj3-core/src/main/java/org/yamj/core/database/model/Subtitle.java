@@ -56,10 +56,10 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
     @Column(name = "counter", nullable = false)
     private int counter = -1;
 
-    @Column(name = "format", nullable = false)
+    @Column(name = "format", nullable = false, length = 50)
     private String format;
 
-    @Column(name = "language", nullable = false)
+    @Column(name = "language", nullable = false, length = 50)
     private String language;
 
     @Column(name = "default_flag", nullable = false)

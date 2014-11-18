@@ -537,8 +537,7 @@ public class MediaImportService {
             subtitle.setCounter(0);
             subtitle.setStageFile(subtitleFile);
             subtitle.setMediaFile(mediaFile);
-            // TODO map subtitle extension to a format
-            subtitle.setFormat(subtitleFile.getExtension());
+            subtitle.setFormat(MetadataTools.getExternalSubtitleFormat(subtitleFile.getExtension()));
             // TODO search stage files with language
             subtitle.setLanguage(Constants.UNDEFINED);
             subtitle.setDefaultFlag(true);
@@ -963,8 +962,7 @@ public class MediaImportService {
                 subtitle.setMediaFile(videoFile.getMediaFile());
                 
                 if (!subtitleFile.getSubtitles().contains(subtitle)) {
-                    // TODO map subtitle extension to a format
-                    subtitle.setFormat(subtitleFile.getExtension());
+                    subtitle.setFormat(MetadataTools.getExternalSubtitleFormat(subtitleFile.getExtension()));
                     
                     if (StringUtils.isBlank(language)) {
                         subtitle.setLanguage(Constants.UNDEFINED);
