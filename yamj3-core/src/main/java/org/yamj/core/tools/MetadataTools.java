@@ -600,6 +600,9 @@ public final class MetadataTools {
         if ("ssa".equalsIgnoreCase(extension)) return "SubStation Alpha";
         if ("ass".equalsIgnoreCase(extension)) return "Advanced SubStation Alpha";
         if ("pgs".equalsIgnoreCase(extension)) return "Presentation Grapic Stream";
+        if ("sup".equalsIgnoreCase(extension)) return "Presentation Grapic Stream";
+        if ("smi".equalsIgnoreCase(extension)) return "Synchronized Accessible Media Interchange";
+        if ("sami".equalsIgnoreCase(extension)) return "Synchronized Accessible Media Interchange";
         return extension.toUpperCase();
     }
 }

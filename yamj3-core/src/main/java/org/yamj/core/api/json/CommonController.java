@@ -35,6 +35,7 @@ import org.yamj.core.api.model.dto.ApiNameDTO;
 import org.yamj.core.api.model.dto.ApiRatingDTO;
 import org.yamj.core.api.options.OptionsCommon;
 import org.yamj.core.api.options.OptionsId;
+import org.yamj.core.api.options.OptionsRating;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.BoxedSet;
@@ -272,7 +273,7 @@ public class CommonController {
     //<editor-fold defaultstate="collapsed" desc="Rating Methods">
     @RequestMapping(value = "/ratings/list", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<ApiRatingDTO> getRatings(@ModelAttribute("options") OptionsId options) {
+    public ApiWrapperList<ApiRatingDTO> getRatings(@ModelAttribute("options") OptionsRating options) {
         LOG.info("Getting ratings list with {}", options.toString());
 
         ApiWrapperList<ApiRatingDTO> wrapper = new ApiWrapperList<ApiRatingDTO>();
