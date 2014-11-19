@@ -210,7 +210,7 @@ public class IndexParams {
     }
 
     public String getRatingSource() {
-        if (ratingSource != null) {
+        if (ratingSource == null) {
             if (includeRating()) {
                 this.parseRating(includes.get(RATING));
             } else {
