@@ -47,7 +47,7 @@ public class IndexParams {
     private final List<DataItem> dataItems;
     private final Map<String,Object> parameters = new HashMap<String,Object>();
     
-    private int certificationId;
+    private int certificationId = -1;
     private String year;
     private String genreName;
     private String studioName;
