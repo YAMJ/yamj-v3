@@ -161,13 +161,6 @@ public class JsonApiStorageService {
     }
     //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="VideoSource Methods">
-    @Transactional(readOnly = true)
-    public List<ApiRatingDTO> getRatings(ApiWrapperList<ApiRatingDTO> wrapper) {
-        return commonDao.getRatings(wrapper);
-    }
-    //</editor-fold>
-
     //<editor-fold defaultstate="collapsed" desc="Studio Methods">
     @Transactional(readOnly = true)
     public Studio getStudio(Serializable id) {
@@ -185,6 +178,20 @@ public class JsonApiStorageService {
     }
     //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Rating Methods">
+    @Transactional(readOnly = true)
+    public List<ApiRatingDTO> getRatings(ApiWrapperList<ApiRatingDTO> wrapper) {
+        return commonDao.getRatings(wrapper);
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Alphabetical Methods">
+    @Transactional(readOnly = true)
+    public List<ApiNameDTO> getAlphabeticals(ApiWrapperList<ApiNameDTO> wrapper) {
+        return apiDao.getAlphabeticals(wrapper);
+    }
+    //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="Artwork Methods">
     @Transactional(readOnly = true)
     public ApiArtworkDTO getArtworkById(Long id) {

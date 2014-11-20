@@ -61,6 +61,8 @@ public class FilenameDTO {
     private String hdResolution = null;
     private String videoSource = null;
     private final Map<String, String> idMap = new HashMap<String, String>(2);
+    private final Map<String, Integer> setMap = new HashMap<String, Integer>(0);
+    private final List<String> languages = new ArrayList<String>(0);
 
     public FilenameDTO(StageFile stageFile) {
         this.name = stageFile.getFileName();
@@ -93,30 +95,6 @@ public class FilenameDTO {
     public void setRest(String rest) {
         this.rest = rest;
     }
-
-    public static class SetDTO {
-
-        private String title = null;
-        private Integer index = null;
-
-        public String getTitle() {
-            return title;
-        }
-
-        public void setTitle(String title) {
-            this.title = title;
-        }
-
-        public Integer getIndex() {
-            return index;
-        }
-
-        public void setIndex(Integer index) {
-            this.index = index;
-        }
-    }
-    private final List<SetDTO> sets = new ArrayList<SetDTO>();
-    private final List<String> languages = new ArrayList<String>();
 
     public String getTitle() {
         return title;
@@ -226,8 +204,8 @@ public class FilenameDTO {
         this.videoSource = videoSource;
     }
 
-    public List<SetDTO> getSets() {
-        return sets;
+    public Map<String,Integer> getSetMap() {
+        return setMap;
     }
 
     public List<String> getLanguages() {

@@ -22,6 +22,8 @@
  */
 package org.yamj.core.api.options;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import org.yamj.common.type.MetaDataType;
 
 /**
@@ -29,7 +31,8 @@ import org.yamj.common.type.MetaDataType;
  *
  * @author modmax
  */
-public class OptionsCommon extends OptionsAbstractSortSearch {
+@JsonInclude(Include.NON_DEFAULT)
+public class OptionsSingleType extends OptionsAbstractSortSearch {
 
     private Boolean used = Boolean.TRUE;
     private Boolean full = Boolean.FALSE;

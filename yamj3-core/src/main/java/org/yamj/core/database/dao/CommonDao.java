@@ -35,9 +35,9 @@ import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.model.dto.ApiRatingDTO;
-import org.yamj.core.api.options.OptionsCommon;
 import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.options.OptionsRating;
+import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.database.model.Certification;
@@ -65,7 +65,7 @@ public class CommonDao extends HibernateDao {
     }
 
     public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper) {
-        OptionsCommon options = (OptionsCommon) wrapper.getOptions();
+        OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
         
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addScalar("name", StringType.INSTANCE);
@@ -148,7 +148,7 @@ public class CommonDao extends HibernateDao {
     }
     
     public List<Studio> getStudios(ApiWrapperList<Studio> wrapper) {
-        OptionsCommon options = (OptionsCommon) wrapper.getOptions();
+        OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
         
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT DISTINCT stu.id as id, stu.name as name ");
@@ -258,72 +258,89 @@ public class CommonDao extends HibernateDao {
         boolean justMovie = (MetaDataType.MOVIE == options.getType());
         boolean justSeries = (MetaDataType.SERIES == options.getType());
         
-        SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT DISTINCT ");
-        sqlScalars.addToSql("grouped.type as type, ");
-        sqlScalars.addToSql("grouped.sourcedb as source ");
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT DISTINCT ");
+        sb.append("grouped.type as type, ");
+        sb.append("grouped.sourcedb as source ");
         if (options.getRating() == null || options.getRating()) {
-            sqlScalars.addToSql(", round(grouped.rating/10) as rating ");
+            sb.append(", round(grouped.rating/10) as rating ");
         }
-        sqlScalars.addToSql("FROM ( ");
+        sb.append("FROM ( ");
         
         if (!justSeries) {
             // not just series
             if (StringUtils.isBlank(options.getSource())) {
-                sqlScalars.addToSql("select distinct 'MOVIE' as type, v1.rating, v1.sourcedb, v1.videodata_id, 2 as ordering ");
-                sqlScalars.addToSql("from videodata_ratings v1 ");
-                sqlScalars.addToSql("UNION ");
-                sqlScalars.addToSql("select distinct 'MOVIE' as type, avg(v2.rating) as rating, 'combined' as sourcedb, v2.videodata_id, 1 as ordering ");
-                sqlScalars.addToSql("from videodata_ratings v2 ");
-                sqlScalars.addToSql("group by v2.videodata_id ");
+                sb.append("select distinct '");
+                sb.append(MetaDataType.MOVIE.toString());
+                sb.append("' as type, v1.rating, v1.sourcedb, v1.videodata_id, 2 as ordering ");
+                sb.append("from videodata_ratings v1 ");
+                sb.append("UNION ");
+                sb.append("select distinct '");
+                sb.append(MetaDataType.MOVIE.toString());
+                sb.append("' as type, avg(v2.rating) as rating, 'combined' as sourcedb, v2.videodata_id, 1 as ordering ");
+                sb.append("from videodata_ratings v2 ");
+                sb.append("group by v2.videodata_id ");
             } else if ("combined".equalsIgnoreCase(options.getSource())) {
-                sqlScalars.addToSql("select distinct 'MOVIE' as type, avg(v2.rating) as rating, 'combined' as sourcedb, v2.videodata_id, 1 as ordering ");
-                sqlScalars.addToSql("from videodata_ratings v2 ");
-                sqlScalars.addToSql("group by v2.videodata_id ");
+                sb.append("select distinct '");
+                sb.append(MetaDataType.MOVIE.toString());
+                sb.append("' as type, avg(v2.rating) as rating, 'combined' as sourcedb, v2.videodata_id, 1 as ordering ");
+                sb.append("from videodata_ratings v2 ");
+                sb.append("group by v2.videodata_id ");
             } else {
-                sqlScalars.addToSql("select distinct 'MOVIE' as type, v1.rating, v1.sourcedb, v1.videodata_id, 2 as ordering ");
-                sqlScalars.addToSql("from videodata_ratings v1 ");
-                sqlScalars.addToSql("where v1.sourcedb='"+options.getSource().toLowerCase()+"'");
+                sb.append("select distinct '");
+                sb.append(MetaDataType.MOVIE.toString());
+                sb.append("' as type, v1.rating, v1.sourcedb, v1.videodata_id, 2 as ordering ");
+                sb.append("from videodata_ratings v1 ");
+                sb.append("where v1.sourcedb='");
+                sb.append(options.getSource().toLowerCase());
+                sb.append("' ");
             }
         }
         if (!justMovie) {
             if (!justSeries) {
-                sqlScalars.addToSql("UNION ");
+                sb.append("UNION ");
             }
             // not just movies
             if (StringUtils.isBlank(options.getSource())) {
-                sqlScalars.addToSql("select distinct 'SERIES' as type, s1.rating, s1.sourcedb, s1.series_id, 2 as ordering ");
-                sqlScalars.addToSql("from series_ratings s1 ");
-                sqlScalars.addToSql("UNION ");
-                sqlScalars.addToSql("select distinct 'SERIES' as type, avg(s2.rating) as rating, 'combined' as sourcedb, s2.series_id, 1 as ordering ");
-                sqlScalars.addToSql("from series_ratings s2 ");
-                sqlScalars.addToSql("group by s2.series_id ");
+                sb.append("select distinct '");
+                sb.append(MetaDataType.SERIES.toString());
+                sb.append("' as type, s1.rating, s1.sourcedb, s1.series_id, 2 as ordering ");
+                sb.append("from series_ratings s1 ");
+                sb.append("UNION ");
+                sb.append("select distinct '");
+                sb.append(MetaDataType.SERIES.toString());
+                sb.append("' as type, avg(s2.rating) as rating, 'combined' as sourcedb, s2.series_id, 1 as ordering ");
+                sb.append("from series_ratings s2 ");
+                sb.append("group by s2.series_id");
             } else if ("combined".equalsIgnoreCase(options.getSource())) {
-                sqlScalars.addToSql("select distinct 'SERIES' as type, avg(s2.rating) as rating, 'combined' as sourcedb, s2.series_id, 1 as ordering ");
-                sqlScalars.addToSql("from series_ratings s2 ");
-                sqlScalars.addToSql("group by s2.series_id ");
+                sb.append("select distinct '");
+                sb.append(MetaDataType.SERIES.toString());
+                sb.append("' as type, avg(s2.rating) as rating, 'combined' as sourcedb, s2.series_id, 1 as ordering ");
+                sb.append("from series_ratings s2 ");
+                sb.append("group by s2.series_id ");
             } else {
-                sqlScalars.addToSql("select distinct 'SERIES' as type, s1.rating, s1.sourcedb, s1.series_id, 2 as ordering ");
-                sqlScalars.addToSql("from series_ratings s1 ");
-                sqlScalars.addToSql("where s1.sourcedb='"+options.getSource().toLowerCase()+"'");
+                sb.append("select distinct '");
+                sb.append(MetaDataType.SERIES.toString());
+                sb.append("' as type, s1.rating, s1.sourcedb, s1.series_id, 2 as ordering ");
+                sb.append("from series_ratings s1 ");
+                sb.append("where s1.sourcedb='");
+                sb.append(options.getSource().toLowerCase());
+                sb.append("' ");
             }
         }
-        sqlScalars.addToSql(") as grouped ");
+        sb.append(") as grouped ");
         
         // order by
-        sqlScalars.addToSql("order by type, grouped.ordering, source ");
+        sb.append("order by type, grouped.ordering, source");
         if (options.getRating() == null || options.getRating()) {
-            sqlScalars.addToSql(", rating");
+            sb.append(", rating");
         }
-        sqlScalars.addToSql("DESC".equalsIgnoreCase(options.getSortdir()) ? "DESC" : "ASC");
+        sb.append("DESC".equalsIgnoreCase(options.getSortdir()) ? " DESC" : " ASC");
 
         // add scalars
-        if (!justMovie && !justSeries) {
-            sqlScalars.addScalar("type", StringType.INSTANCE);
-        }
-        if (StringUtils.isBlank(options.getSource())) {
-            sqlScalars.addScalar("source", StringType.INSTANCE);
-        }
+        SqlScalars sqlScalars = new SqlScalars(sb);
+        sqlScalars.addScalar("type", StringType.INSTANCE);
+        sqlScalars.addScalar("source", StringType.INSTANCE);
         if (options.getRating() == null || options.getRating()) {
             sqlScalars.addScalar("rating", IntegerType.INSTANCE);
         }

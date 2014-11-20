@@ -24,43 +24,33 @@ package org.yamj.core.api.options;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.List;
 import org.yamj.common.type.MetaDataType;
 
 /**
- * List of the common options
+ * List of the options available for the genres
  *
  * @author modmax
  */
 @JsonInclude(Include.NON_DEFAULT)
-public class OptionsRating extends OptionsAbstractSortSearch {
+public class OptionsMultiType extends OptionsAbstractSortSearch {
 
-    private MetaDataType type;
-    private String source;
-    private Boolean rating = Boolean.TRUE;
+    private String type;
     
-    public MetaDataType getType() {
+    public String getType() {
         return type;
     }
 
     public void setType(String type) {
-        try {
-            this.type = MetaDataType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ignore) {}
+        this.type = type;
     }
 
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public Boolean getRating() {
-        return rating;
-    }
-
-    public void setRating(Boolean rating) {
-        this.rating = rating;
+    /**
+     * Split the video types
+     * 
+     * @return
+     */
+    public List<MetaDataType> splitTypes() {
+        return this.splitTypes(type);
     }
 }

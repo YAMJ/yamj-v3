@@ -70,6 +70,7 @@ public class ApiDao extends HibernateDao {
     private static final String WATCHED = "watched";
     private static final String TYPE_STRING = "typeString";
     // SQL
+    private static final String SQL_UNION = " UNION ";
     private static final String SQL_UNION_ALL = " UNION ALL ";
     private static final String SQL_AS_VIDEO_TYPE_STRING = "' AS videoTypeString";
     private static final String SQL_WHERE_1_EQ_1 = " WHERE 1=1";
@@ -170,42 +171,32 @@ public class ApiDao extends HibernateDao {
             LOG.debug("Additional data items requested: {}", params.getDataItems());
         }
 
-        boolean hasMovie = mdt.contains(MetaDataType.MOVIE);
-        boolean hasSeries = mdt.contains(MetaDataType.SERIES);
-        boolean hasSeason = mdt.contains(MetaDataType.SEASON);
-        boolean hasEpisode = mdt.contains(MetaDataType.EPISODE);
-
         StringBuilder sbSQL = new StringBuilder();
-
-        // Add the movie entries
-        if (hasMovie) {
+        boolean appendUnion = false;
+        
+        // add the movie entries
+        if (mdt.contains(MetaDataType.MOVIE)) {
             sbSQL.append(generateSqlForVideo(true, params));
+            appendUnion = true;
         }
 
-        if (hasMovie && hasSeries) {
-            sbSQL.append(SQL_UNION_ALL);
-        }
-
-        // Add the TV series entires
-        if (hasSeries) {
+        // add the TV series entries
+        if (mdt.contains(MetaDataType.SERIES)) {
+            if (appendUnion) sbSQL.append(SQL_UNION_ALL);
             sbSQL.append(generateSqlForSeries(params));
+            appendUnion = true;
         }
 
-        if ((hasMovie || hasSeries) && hasSeason) {
-            sbSQL.append(SQL_UNION_ALL);
-        }
-
-        // Add the TV season entires
-        if (hasSeason) {
+        // add the TV season entries
+        if (mdt.contains(MetaDataType.SEASON)) {
+            if (appendUnion) sbSQL.append(SQL_UNION_ALL);
             sbSQL.append(generateSqlForSeason(params));
+            appendUnion = true;
         }
 
-        if ((hasMovie || hasSeries || hasSeason) && hasEpisode) {
-            sbSQL.append(SQL_UNION_ALL);
-        }
-
-        // Add the TV episode entries
-        if (hasEpisode) {
+        // add the TV episode entries
+        if (mdt.contains(MetaDataType.EPISODE)) {
+            if (appendUnion) sbSQL.append(SQL_UNION_ALL);
             sbSQL.append(generateSqlForVideo(false, params));
         }
 
@@ -2389,4 +2380,53 @@ public class ApiDao extends HibernateDao {
         return results;
     }
     //</editor-fold>
+
+    public List<ApiNameDTO> getAlphabeticals(ApiWrapperList<ApiNameDTO> wrapper) {
+        OptionsMultiType options = (OptionsMultiType) wrapper.getOptions();
+        List<MetaDataType> mdt = options.splitTypes();
+        
+        StringBuilder sbSQL = new StringBuilder();
+        boolean appendUnion = false;
+        
+        // add the movie entries
+        if (mdt.contains(MetaDataType.MOVIE)) {
+            sbSQL.append("select distinct upper(left(vd.title_sort,1)) as name ");
+            sbSQL.append("from videodata vd ");
+            sbSQL.append("where vd.episode < 0 ");
+            appendUnion = true;
+        }
+
+        // add the TV series entries
+        if (mdt.contains(MetaDataType.SERIES)) {
+            if (appendUnion) sbSQL.append(SQL_UNION);
+            sbSQL.append("select distinct upper(left(ser.title_sort,1)) as name ");
+            sbSQL.append("from series ser ");
+            appendUnion = true;
+        }
+
+        // add the TV season entries
+        if (mdt.contains(MetaDataType.SEASON)) {
+            if (appendUnion) sbSQL.append(SQL_UNION);
+            sbSQL.append("select distinct upper(left(sea.title_sort,1)) as name ");
+            sbSQL.append("from season sea ");
+            appendUnion = true;
+        }
+
+        // add the TV episode entries
+        if (mdt.contains(MetaDataType.EPISODE)) {
+            if (appendUnion) sbSQL.append(SQL_UNION);
+            sbSQL.append("select distinct upper(left(vd.title_sort,1)) as name ");
+            sbSQL.append("from videodata vd ");
+            sbSQL.append("where vd.episode >= 0 ");
+            appendUnion = true;
+        }
+
+        sbSQL.append("ORDER BY name ");
+        sbSQL.append("DESC".equalsIgnoreCase(options.getSortdir()) ? "DESC" : "ASC");
+        
+        SqlScalars sqlScalars = new SqlScalars(sbSQL);
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+        
+        return executeQueryWithTransform(ApiNameDTO.class, sqlScalars, wrapper);
+    }
 }

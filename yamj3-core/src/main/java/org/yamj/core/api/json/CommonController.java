@@ -33,9 +33,10 @@ import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.model.dto.ApiNameDTO;
 import org.yamj.core.api.model.dto.ApiRatingDTO;
-import org.yamj.core.api.options.OptionsCommon;
 import org.yamj.core.api.options.OptionsId;
+import org.yamj.core.api.options.OptionsMultiType;
 import org.yamj.core.api.options.OptionsRating;
+import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.BoxedSet;
@@ -107,7 +108,7 @@ public class CommonController {
     
     @RequestMapping(value = "/genres/list", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<ApiGenreDTO> getGenres(@ModelAttribute("options") OptionsCommon options) {
+    public ApiWrapperList<ApiGenreDTO> getGenres(@ModelAttribute("options") OptionsSingleType options) {
         LOG.info("Getting genre list: used={}, full={}", options.getUsed(), options.getFull());
 
         ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<ApiGenreDTO>();
@@ -194,7 +195,7 @@ public class CommonController {
 
     @RequestMapping(value = "/studios/list", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<Studio> getStudios(@ModelAttribute("options") OptionsCommon options) {
+    public ApiWrapperList<Studio> getStudios(@ModelAttribute("options") OptionsSingleType options) {
         LOG.info("Getting studio list with {}", options.toString());
 
         ApiWrapperList<Studio> wrapper = new ApiWrapperList<Studio>();
@@ -279,6 +280,21 @@ public class CommonController {
         ApiWrapperList<ApiRatingDTO> wrapper = new ApiWrapperList<ApiRatingDTO>();
         wrapper.setOptions(options);
         List<ApiRatingDTO> results = jsonApiStorageService.getRatings(wrapper);
+        wrapper.setResults(results);
+        wrapper.setStatusCheck();
+        return wrapper;
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Alphabetical Methods">
+    @RequestMapping(value = "/alphabetical/list", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperList<ApiNameDTO> getAlphabeticals(@ModelAttribute("options") OptionsMultiType options) {
+        LOG.info("Getting alphabetical list with {}", options.toString());
+
+        ApiWrapperList<ApiNameDTO> wrapper = new ApiWrapperList<ApiNameDTO>();
+        wrapper.setOptions(options);
+        List<ApiNameDTO> results = jsonApiStorageService.getAlphabeticals(wrapper);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
         return wrapper;

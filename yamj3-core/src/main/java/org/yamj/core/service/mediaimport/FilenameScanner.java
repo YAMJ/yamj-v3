@@ -339,19 +339,20 @@ public class FilenameScanner {
                 }
                 dto.setRest(cutMatch(dto.getRest(), matcher, PatternUtils.SPACE_SLASH_SPACE));
 
-                FilenameDTO.SetDTO set = new FilenameDTO.SetDTO();
-                dto.getSets().add(set);
-
+                Integer order = null;
                 String n = matcher.group(1);
                 Matcher nmatcher = SET_INDEX_PATTERN.matcher(n);
                 if (nmatcher.find()) {
                     String sIndex = StringUtils.trim(nmatcher.group(1));
                     if (StringUtils.isNumeric(sIndex)) {
-                        set.setIndex(Integer.valueOf(sIndex));
+                        order = Integer.valueOf(sIndex);
                     }
                     n = cutMatch(n, nmatcher);
                 }
-                set.setTitle(n.trim());
+                String setName = n.trim();
+                if (StringUtils.isNotBlank(setName)) {
+                    dto.getSetMap().put(setName, order);
+                }
             }
         }
 

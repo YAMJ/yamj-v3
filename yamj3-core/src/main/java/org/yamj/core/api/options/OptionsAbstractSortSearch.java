@@ -22,6 +22,10 @@
  */
 package org.yamj.core.api.options;
 
+import java.util.ArrayList;
+
+import java.util.List;
+import org.yamj.common.type.MetaDataType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -52,6 +56,8 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     private List<DataItem> dataitemList;
     @JsonIgnore
     private Map<JobType,Integer> jobTypes;
+    @JsonIgnore
+    private List<MetaDataType> videoTypes;
     @JsonIgnore
     private boolean allJobTypes;
     
@@ -319,4 +325,35 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
         return set;
     }
     //</editor-fold>
+
+    /**
+     * Get a list of the video types to search for
+     *
+     * @return
+     */
+    protected List<MetaDataType> splitTypes(String type) {
+        if (CollectionUtils.isEmpty(videoTypes)) {
+            videoTypes = new ArrayList<MetaDataType>();            
+            if (StringUtils.isEmpty(type) || StringUtils.containsIgnoreCase(type, "ALL")) {
+                videoTypes.add(MetaDataType.MOVIE);
+                videoTypes.add(MetaDataType.SERIES);
+                videoTypes.add(MetaDataType.SEASON);
+            } else {
+                for (String param : StringUtils.split(type, ",")) {
+                    // validate that the string passed is a correct artwork type
+                    MetaDataType mdt = MetaDataType.fromString(param);
+                    if (MetaDataType.SERIES == mdt) {
+                        videoTypes.add(mdt);
+                    } else if (MetaDataType.SEASON == mdt) {
+                        videoTypes.add(mdt);
+                    } else if (MetaDataType.MOVIE == mdt) {
+                        videoTypes.add(mdt);
+                    } else if (MetaDataType.EPISODE == mdt) {
+                        videoTypes.add(mdt);
+                    }
+                }
+            }
+        }
+        return videoTypes;
+    }
 }

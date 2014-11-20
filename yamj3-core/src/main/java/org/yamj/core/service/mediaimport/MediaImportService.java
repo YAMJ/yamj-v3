@@ -45,7 +45,6 @@ import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.file.tools.FileTools;
-import org.yamj.core.service.mediaimport.FilenameDTO.SetDTO;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.Constants;
 import org.yamj.core.tools.LanguageTools;
@@ -232,10 +231,10 @@ public class MediaImportService {
             }
 
             // boxed set handling
-            if (CollectionUtils.isNotEmpty(dto.getSets())) {
-                for (SetDTO set: dto.getSets()) {
+            if (MapUtils.isNotEmpty(dto.getSetMap())) {
+                for (Entry<String,Integer> entry : dto.getSetMap().entrySet()) {
                     // add boxed set to video data
-                    videoData.addSetInfo(set.getTitle(), set.getIndex());
+                    videoData.addSetInfo(entry.getKey(), entry.getValue());
                 }
 
                 // store associated entities (only sets right now)

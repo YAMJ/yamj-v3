@@ -22,15 +22,12 @@
  */
 package org.yamj.core.api.options;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.List;
+import org.yamj.common.type.MetaDataType;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
-import org.yamj.common.type.MetaDataType;
 
 /**
  * List of the options available for the indexes
@@ -45,9 +42,6 @@ public class OptionsIndexVideo extends OptionsIdArtwork {
     private Boolean watched;
     private String type;
     
-    @JsonIgnore
-    private final List<MetaDataType> videoTypes = new ArrayList<MetaDataType>();
-
     public String getInclude() {
         return include;
     }
@@ -82,37 +76,6 @@ public class OptionsIndexVideo extends OptionsIdArtwork {
 
     public void setType(String type) {
         this.type = type;
-        this.videoTypes.clear();
-    }
-
-    /**
-     * Get a list of the video types to search for
-     *
-     * @return
-     */
-    public List<MetaDataType> splitTypes() {
-        if (CollectionUtils.isEmpty(videoTypes)) {
-            if (StringUtils.isEmpty(type) || StringUtils.containsIgnoreCase(type, "ALL")) {
-                videoTypes.add(MetaDataType.MOVIE);
-                videoTypes.add(MetaDataType.SERIES);
-                videoTypes.add(MetaDataType.SEASON);
-            } else {
-                for (String param : StringUtils.split(type, ",")) {
-                    // validate that the string passed is a correct artwork type
-                    MetaDataType mdt = MetaDataType.fromString(param);
-                    if (MetaDataType.SERIES == mdt) {
-                        videoTypes.add(mdt);
-                    } else if (MetaDataType.SEASON == mdt) {
-                        videoTypes.add(mdt);
-                    } else if (MetaDataType.MOVIE == mdt) {
-                        videoTypes.add(mdt);
-                    } else if (MetaDataType.EPISODE == mdt) {
-                        videoTypes.add(mdt);
-                    }
-                }
-            }
-        }
-        return videoTypes;
     }
     
     /**
@@ -131,5 +94,14 @@ public class OptionsIndexVideo extends OptionsIdArtwork {
      */
     public Map<String, String> splitExcludes() {
         return splitDashList(exclude);
+    }
+
+    /**
+     * Split the video types
+     * 
+     * @return
+     */
+    public List<MetaDataType> splitTypes() {
+        return this.splitTypes(type);
     }
 }
