@@ -146,18 +146,13 @@ public class JsonApiStorageService {
 
     //<editor-fold defaultstate="collapsed" desc="Boxed Set Methods">
     @Transactional(readOnly = true)
-    public BoxedSet getBoxedSet(Serializable id) {
-        return commonDao.getById(BoxedSet.class, id);
+    public List<ApiBoxedSetDTO> getBoxedSets(ApiWrapperList<ApiBoxedSetDTO> wrapper) {
+        return apiDao.getBoxedSets(wrapper);
     }
 
     @Transactional(readOnly = true)
-    public BoxedSet getBoxedSet(String name) {
-        return commonDao.getBoxedSet(name);
-    }
-
-    @Transactional(readOnly = true)
-    public List<BoxedSet> getBoxedSets(ApiWrapperList<BoxedSet> wrapper) {
-        return commonDao.getBoxedSets(wrapper);
+    public ApiBoxedSetDTO getBoxedSet(ApiWrapperSingle<ApiBoxedSetDTO> wrapper) {
+        return apiDao.getBoxedSet(wrapper);
     }
     //</editor-fold>
 

@@ -442,7 +442,6 @@ public abstract class HibernateDao {
         query.setReadOnly(true);
         query.setCacheable(true);
 
-        // TODO: Add a transformation if the class is not "Object"
         if (T != null) {
             if (T.equals(String.class)) {
                 // no transformer needed

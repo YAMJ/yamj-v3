@@ -2381,6 +2381,103 @@ public class ApiDao extends HibernateDao {
     }
     //</editor-fold>
 
+    public List<ApiBoxedSetDTO> getBoxedSets(ApiWrapperList<ApiBoxedSetDTO> wrapper) {
+        OptionsBoxedSet options = (OptionsBoxedSet) wrapper.getOptions();
+        SqlScalars sqlScalars = this.generateSqlForBoxedSet(options);
+        
+        return executeQueryWithTransform(ApiBoxedSetDTO.class, sqlScalars, wrapper);
+    }
+
+    public ApiBoxedSetDTO getBoxedSet(ApiWrapperSingle<ApiBoxedSetDTO> wrapper) {
+        OptionsBoxedSet options = (OptionsBoxedSet) wrapper.getOptions();
+        SqlScalars sqlScalars = this.generateSqlForBoxedSet(options);
+
+        List<ApiBoxedSetDTO> boxsets = executeQueryWithTransform(ApiBoxedSetDTO.class, sqlScalars, wrapper);
+        if (CollectionUtils.isEmpty(boxsets)) {
+            return null;
+        }
+
+        ApiBoxedSetDTO boxedSet = boxsets.get(0);
+        if (options.hasDataItem(DataItem.MEMBER)) {
+            // get members
+            sqlScalars = new SqlScalars();
+            sqlScalars.addToSql("SELECT vd.id");
+            sqlScalars.addToSql(SQL_COMMA_SPACE_QUOTE + MetaDataType.MOVIE + SQL_AS_VIDEO_TYPE_STRING);
+            sqlScalars.addToSql(", bo1.ordering, vd.title, vd.title_original AS originalTitle, vd.publication_year AS year,vd.release_date AS releaseDate,");
+            sqlScalars.addToSql("min(vd.watched_nfo or vd.watched_file or vd.watched_api) as watched");
+            sqlScalars.addToSql(DataItemTools.addSqlDataItems(options.splitDataItems(), "vd").toString());
+            sqlScalars.addToSql("FROM boxed_set_order bo1");
+            sqlScalars.addToSql("JOIN videodata vd ON bo1.videodata_id=vd.id");
+            sqlScalars.addToSql("WHERE bo1.boxedset_id="+options.getId().longValue());
+            sqlScalars.addToSql(SQL_UNION);
+            sqlScalars.addToSql("SELECT ser.id");
+            sqlScalars.addToSql(SQL_COMMA_SPACE_QUOTE + MetaDataType.SERIES + SQL_AS_VIDEO_TYPE_STRING);
+            sqlScalars.addToSql(", bo2.ordering, ser.title, ser.title_original AS originalTitle, ser.start_year AS year,null as releaseDate,");
+            sqlScalars.addToSql("(select min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched");
+            sqlScalars.addToSql(DataItemTools.addSqlDataItems(options.splitDataItems(), "ser").toString());
+            sqlScalars.addToSql("FROM boxed_set_order bo2");
+            sqlScalars.addToSql("JOIN series ser ON bo2.series_id=ser.id");
+            sqlScalars.addToSql("WHERE bo2.boxedset_id="+options.getId().longValue());
+            sqlScalars.addToSql(options.getSortString());
+            
+            sqlScalars.addScalar(ID, LongType.INSTANCE);
+            sqlScalars.addScalar("videoTypeString", StringType.INSTANCE);
+            sqlScalars.addScalar("ordering", IntegerType.INSTANCE);
+            sqlScalars.addScalar(TITLE, StringType.INSTANCE);
+            sqlScalars.addScalar(ORIGINAL_TITLE, StringType.INSTANCE);
+            sqlScalars.addScalar(YEAR, IntegerType.INSTANCE);
+            sqlScalars.addScalar("releaseDate", DateType.INSTANCE);
+            sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
+            DataItemTools.addDataItemScalars(sqlScalars, options.splitDataItems());
+            
+            List<ApiBoxedSetMemberDTO> members = this.executeQueryWithTransform(ApiBoxedSetMemberDTO.class, sqlScalars, null);
+            boxedSet.setMembers(members);
+        }
+        return boxedSet;
+    }    
+
+    private SqlScalars generateSqlForBoxedSet(OptionsBoxedSet options) {
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT s.id, s.name, count(s.member) as memberCount, min(s.watched_set) as watched FROM (");
+        sqlScalars.addToSql("SELECT bs1.id, bs1.name, bo1.id as member,");
+        sqlScalars.addToSql("min(vd1.watched_nfo or vd1.watched_file or vd1.watched_api) as watched_set");
+        sqlScalars.addToSql("FROM boxed_set bs1");
+        sqlScalars.addToSql("JOIN boxed_set_order bo1 ON bs1.id=bo1.boxedset_id");
+        sqlScalars.addToSql("JOIN videodata vd1 ON bo1.videodata_id=vd1.id");
+        if (options.getId()>0L) {
+            sqlScalars.addToSql("WHERE bs1.id="+options.getId().longValue());
+        }
+        sqlScalars.addToSql(SQL_UNION);
+        sqlScalars.addToSql("SELECT bs2.id, bs2.name, bo2.id as member,");
+        sqlScalars.addToSql("(select min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched_set");
+        sqlScalars.addToSql("FROM boxed_set bs2");
+        sqlScalars.addToSql("JOIN boxed_set_order bo2 ON bs2.id=bo2.boxedset_id");
+        sqlScalars.addToSql("JOIN series ser ON bo2.series_id=ser.id");
+        if (options.getId()>0L) {
+            sqlScalars.addToSql("WHERE bs2.id="+options.getId().longValue());
+        }
+        sqlScalars.addToSql(") AS s");
+        sqlScalars.addToSql("GROUP BY s.id, s.name");
+        sqlScalars.addToSql("HAVING count(s.member)>0");
+        if (options.getId()<=0L) {
+            if (options.getWatched() != null) {
+                if (options.getWatched()) {
+                    sqlScalars.addToSql("and min(s.watched_set)=1");
+                } else {
+                    sqlScalars.addToSql("and min(s.watched_set)=0");
+                }
+            }
+            sqlScalars.addToSql(options.getSortString());
+        }
+        
+        sqlScalars.addScalar(ID, LongType.INSTANCE);
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar("memberCount", IntegerType.INSTANCE);
+        sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
+        
+        return sqlScalars;
+    }
+    
     public List<ApiNameDTO> getAlphabeticals(ApiWrapperList<ApiNameDTO> wrapper) {
         OptionsMultiType options = (OptionsMultiType) wrapper.getOptions();
         List<MetaDataType> mdt = options.splitTypes();

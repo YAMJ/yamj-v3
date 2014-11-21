@@ -22,10 +22,6 @@
  */
 package org.yamj.core.database.dao;
 
-import org.yamj.common.type.StatusType;
-
-import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.database.model.Artwork;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +32,7 @@ import org.hibernate.type.StringType;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.model.dto.ApiRatingDTO;
@@ -43,10 +40,8 @@ import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.options.OptionsRating;
 import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
-import org.yamj.core.database.model.BoxedSet;
-import org.yamj.core.database.model.Certification;
-import org.yamj.core.database.model.Genre;
-import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Transactional
@@ -262,21 +257,7 @@ public class CommonDao extends HibernateDao {
             this.saveEntity(banner);
         }
     }
-
-    public List<BoxedSet> getBoxedSets(ApiWrapperList<BoxedSet> wrapper) {
-        OptionsId options = (OptionsId) wrapper.getOptions();
-        
-        SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT id, name FROM boxed_set");
-        sqlScalars.addToSql(options.getSearchString(true));
-        sqlScalars.addToSql(options.getSortString());
-
-        sqlScalars.addScalar("id", LongType.INSTANCE);
-        sqlScalars.addScalar("name", StringType.INSTANCE);
-
-        return executeQueryWithTransform(BoxedSet.class, sqlScalars, wrapper);
-    }
-
+    
     public List<ApiRatingDTO> getRatings(ApiWrapperList<ApiRatingDTO> wrapper) {
         OptionsRating options = (OptionsRating) wrapper.getOptions();
 

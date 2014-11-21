@@ -121,7 +121,7 @@ public class DeleteTask implements ITask {
                     try {
                         filesToDelete.addAll(this.commonStorageService.deleteBoxedSet(id));
                     } catch (Exception ex) {
-                        LOG.warn("Failed to delete person ID: {}", id);
+                        LOG.warn("Failed to delete boxed set ID: {}", id);
                         LOG.error("Deletion error", ex);
                     }
                 }

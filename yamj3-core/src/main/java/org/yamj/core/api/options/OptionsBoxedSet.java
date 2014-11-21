@@ -20,38 +20,20 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api.model.dto;
+package org.yamj.core.api.options;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.List;
 
 /**
- * @author modmax
+ * List of the options available for the indexes
+ *
+ * @author stuart.boston
  */
 @JsonInclude(Include.NON_DEFAULT)
-public class ApiBoxedSetDTO extends AbstractApiIdentifiableDTO {
+public class OptionsBoxedSet extends OptionsIdArtwork {
 
-    private String name;
-    private Integer memberCount;
     private Boolean watched;
-    private List<ApiBoxedSetMemberDTO> members;
-    
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Integer getMemberCount() {
-        return memberCount;
-    }
-
-    public void setMemberCount(Integer memberCount) {
-        this.memberCount = memberCount;
-    }
 
     public Boolean getWatched() {
         return watched;
@@ -59,13 +41,5 @@ public class ApiBoxedSetDTO extends AbstractApiIdentifiableDTO {
 
     public void setWatched(Boolean watched) {
         this.watched = watched;
-    }
-
-    public List<ApiBoxedSetMemberDTO> getMembers() {
-        return members;
-    }
-
-    public void setMembers(List<ApiBoxedSetMemberDTO> members) {
-        this.members = members;
     }
 }

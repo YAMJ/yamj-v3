@@ -43,6 +43,7 @@ public enum DataItem {
     BIOGRAPHY(true),
     FILMOGRAPHY_INSIDE(false),
     FILMOGRAPHY_SCANNED(false),
+    MEMBER(false),
     FILES(false),
     UNKNOWN(false);
     

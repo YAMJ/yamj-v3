@@ -30,16 +30,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.yamj.core.api.model.ApiStatus;
+import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
 import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.model.dto.ApiNameDTO;
 import org.yamj.core.api.model.dto.ApiRatingDTO;
-import org.yamj.core.api.options.OptionsId;
-import org.yamj.core.api.options.OptionsMultiType;
-import org.yamj.core.api.options.OptionsRating;
-import org.yamj.core.api.options.OptionsSingleType;
+import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
-import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
@@ -216,46 +213,12 @@ public class CommonController {
 
         ApiWrapperList<Certification> wrapper = new ApiWrapperList<Certification>();
         wrapper.setOptions(options);
-        List<Certification> results = jsonApiStorageService.getCertifications(wrapper);
-        wrapper.setResults(results);
+        wrapper.setResults(jsonApiStorageService.getCertifications(wrapper));
         wrapper.setStatusCheck();
         return wrapper;
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Boxed-Set Methods">
-    @RequestMapping(value = "/boxedset/{name}", method = RequestMethod.GET)
-    @ResponseBody
-    public ApiWrapperSingle<BoxedSet> getBoxSet(@PathVariable("name") String name) {
-        BoxedSet boxedSet;
-        ApiWrapperSingle<BoxedSet> wrapper = new ApiWrapperSingle<BoxedSet>();
-        if (StringUtils.isNumeric(name)) {
-            LOG.info("Getting boxset with ID '{}'", name);
-            boxedSet = jsonApiStorageService.getBoxedSet(Long.parseLong(name));
-        } else {
-            LOG.info("Getting boxset '{}'", name);
-            boxedSet = jsonApiStorageService.getBoxedSet(name);
-        }
-        wrapper.setResult(boxedSet);
-        wrapper.setStatusCheck();
-        return wrapper;
-    }
-
-    @RequestMapping(value = "/boxedsets", method = RequestMethod.GET)
-    @ResponseBody
-    public ApiWrapperList<BoxedSet> getBoxSets(@ModelAttribute("options") OptionsId options) {
-        LOG.info("Getting boxset list with {}", options.toString());
-
-        ApiWrapperList<BoxedSet> wrapper = new ApiWrapperList<BoxedSet>();
-        wrapper.setOptions(options);
-        List<BoxedSet> results = jsonApiStorageService.getBoxedSets(wrapper);
-        wrapper.setResults(results);
-        wrapper.setStatus(new ApiStatus(200, "OK"));
-
-        return wrapper;
-    }
-    //</editor-fold>
-
     //<editor-fold defaultstate="collapsed" desc="VideoSource Methods">
     @RequestMapping(value = "/videosources/list", method = RequestMethod.GET)
     @ResponseBody
@@ -264,8 +227,7 @@ public class CommonController {
 
         ApiWrapperList<ApiNameDTO> wrapper = new ApiWrapperList<ApiNameDTO>();
         wrapper.setOptions(options);
-        List<ApiNameDTO> results = jsonApiStorageService.getVideoSources(wrapper);
-        wrapper.setResults(results);
+        wrapper.setResults(jsonApiStorageService.getVideoSources(wrapper));
         wrapper.setStatusCheck();
         return wrapper;
     }
@@ -279,8 +241,7 @@ public class CommonController {
 
         ApiWrapperList<ApiRatingDTO> wrapper = new ApiWrapperList<ApiRatingDTO>();
         wrapper.setOptions(options);
-        List<ApiRatingDTO> results = jsonApiStorageService.getRatings(wrapper);
-        wrapper.setResults(results);
+        wrapper.setResults(jsonApiStorageService.getRatings(wrapper));
         wrapper.setStatusCheck();
         return wrapper;
     }
@@ -294,8 +255,34 @@ public class CommonController {
 
         ApiWrapperList<ApiNameDTO> wrapper = new ApiWrapperList<ApiNameDTO>();
         wrapper.setOptions(options);
-        List<ApiNameDTO> results = jsonApiStorageService.getAlphabeticals(wrapper);
-        wrapper.setResults(results);
+        wrapper.setResults(jsonApiStorageService.getAlphabeticals(wrapper));
+        wrapper.setStatusCheck();
+        return wrapper;
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Boxed-Set Methods">
+    @RequestMapping(value = "/boxset/list", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperList<ApiBoxedSetDTO> getBoxSets(@ModelAttribute("options") OptionsBoxedSet options) {
+        LOG.info("Getting boxset list with {}", options.toString());
+
+        ApiWrapperList<ApiBoxedSetDTO> wrapper = new ApiWrapperList<ApiBoxedSetDTO>();
+        wrapper.setOptions(options);
+        wrapper.setResults(jsonApiStorageService.getBoxedSets(wrapper));
+        wrapper.setStatus(new ApiStatus(200, "OK"));
+
+        return wrapper;
+    }
+    
+    @RequestMapping(value = "/boxset/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperSingle<ApiBoxedSetDTO> getBoxSet(@ModelAttribute("options") OptionsBoxedSet options) {
+        LOG.info("Getting boxset with {}", options.toString());
+
+        ApiWrapperSingle<ApiBoxedSetDTO> wrapper = new ApiWrapperSingle<ApiBoxedSetDTO>();
+        wrapper.setOptions(options);
+        wrapper.setResult(jsonApiStorageService.getBoxedSet(wrapper));
         wrapper.setStatusCheck();
         return wrapper;
     }
