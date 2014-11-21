@@ -121,15 +121,15 @@ public class ArtworkScannerService {
         List<ArtworkLocated> locatedArtworks = new LinkedList<ArtworkLocated>();
 
         if (ArtworkType.POSTER == artwork.getArtworkType()) {
-            // banner only for movie, season and series
+            // poster only for movie, season, series and boxed sets
             this.scanPosterLocal(artwork, locatedArtworks);
             this.scanPosterOnline(artwork, locatedArtworks);
         } else if (ArtworkType.FANART == artwork.getArtworkType()) {
-            // banner only for movie, season and series
+            // fanart only for movie, season, series and boxed sets
             this.scanFanartLocal(artwork, locatedArtworks);
             this.scanFanartOnline(artwork, locatedArtworks);
         } else if (ArtworkType.BANNER == artwork.getArtworkType()) {
-            // banner only for season and series
+            // banner only for season, series and boxed sets
             this.scanBannerLocal(artwork, locatedArtworks);
             this.scanBannerOnline(artwork, locatedArtworks);
         } else if (ArtworkType.VIDEOIMAGE == artwork.getArtworkType()) {
@@ -172,17 +172,25 @@ public class ArtworkScannerService {
             posters = this.artworkLocatorService.getMatchingArtwork(ArtworkType.POSTER, artwork.getSeason());
         } else if (artwork.getSeries() != null) {
             // TODO scan series poster
+        } else if (artwork.getBoxedSet() != null) {
+            // TODO scan boxed set poster
         }
 
         createLocatedArtworksLocal(artwork, posters, locatedArtworks);
     }
 
     private void scanPosterOnline(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
+        if (artwork.getBoxedSet() != null) {
+            // no online poster scan for boxed sets
+            return;
+        }
+
         if (!configServiceWrapper.isOnlineArtworkScanEnabled(artwork, locatedArtworks)) {
             LOG.trace("Online poster scan disabled: {}", artwork);
             return;
         }
-
+        
+        
         LOG.debug("Scan online for poster: {}", artwork);
 
         List<ArtworkDetailDTO> posters = null;
@@ -193,7 +201,7 @@ public class ArtworkScannerService {
                 IMoviePosterScanner scanner = registeredMoviePosterScanner.get(prio);
                 if (scanner != null) {
                     LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                    posters = scanner.getPosters(artwork.getMetadata());
+                    posters = scanner.getPosters(artwork.getVideoData());
                     if (CollectionUtils.isNotEmpty(posters)) {
                         break;
                     }
@@ -260,12 +268,19 @@ public class ArtworkScannerService {
             fanarts = this.artworkLocatorService.getMatchingArtwork(ArtworkType.FANART, artwork.getSeason());
         } else if (artwork.getSeries() != null) {
             // TODO scan series fanart
+        } else if (artwork.getBoxedSet() != null) {
+            // TODO scan boxed set fanart
         }
 
         createLocatedArtworksLocal(artwork, fanarts, locatedArtworks);
     }
 
     private void scanFanartOnline(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
+        if (artwork.getBoxedSet() != null) {
+            // no online fanart scan for boxed sets
+            return;
+        }
+        
         if (!configServiceWrapper.isOnlineArtworkScanEnabled(artwork, locatedArtworks)) {
             LOG.trace("Online fanart scan disabled: {}", artwork);
             return;
@@ -342,12 +357,19 @@ public class ArtworkScannerService {
             banners = this.artworkLocatorService.getMatchingArtwork(ArtworkType.BANNER, artwork.getSeason());
         } else if (artwork.getSeries() != null) {
             // TODO scan series banner
+        } else if (artwork.getBoxedSet() != null) {
+            // TODO scan boxed set bannner
         }
 
         createLocatedArtworksLocal(artwork, banners, locatedArtworks);
     }
 
     private void scanBannerOnline(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
+        if (artwork.getBoxedSet() != null) {
+            // no online banner scan for boxed sets
+            return;
+        }
+
         if (!configServiceWrapper.isOnlineArtworkScanEnabled(artwork, locatedArtworks)) {
             LOG.trace("Online banner scan disabled: {}", artwork);
             return;

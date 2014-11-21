@@ -37,7 +37,7 @@ import org.yamj.core.database.model.type.ArtworkType;
 
 @Entity
 @Table(name = "artwork",
-    uniqueConstraints= @UniqueConstraint(name="UIX_ARTWORK_NATURALID", columnNames={"artwork_type","videodata_id","season_id","series_id","person_id"})
+    uniqueConstraints= @UniqueConstraint(name="UIX_ARTWORK_NATURALID", columnNames={"artwork_type","videodata_id","season_id","series_id","person_id","boxedset_id"})
 )
 @SuppressWarnings("unused")
 public class Artwork extends AbstractAuditable implements Serializable {
@@ -77,6 +77,13 @@ public class Artwork extends AbstractAuditable implements Serializable {
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "person_id")
     private Person person;
+
+    @NaturalId(mutable = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_ARTWORK_BOXEDSET")
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "boxedset_id")
+    private BoxedSet boxedSet;
     
     @Index(name = "IX_ARTWORK_STATUS")
     @Type(type = "statusType")
@@ -128,6 +135,14 @@ public class Artwork extends AbstractAuditable implements Serializable {
         this.person = person;
     }
 
+    public BoxedSet getBoxedSet() {
+        return boxedSet;
+    }
+
+    public void setBoxedSet(BoxedSet boxedSet) {
+        this.boxedSet = boxedSet;
+    }
+
     private void setArtworkLocated(Set<ArtworkLocated> artworkLocated) {
         this.artworkLocated = artworkLocated;
     }
@@ -173,6 +188,7 @@ public class Artwork extends AbstractAuditable implements Serializable {
         result = prime * result + (getSeason() == null ? 0 : getSeason().hashCode());
         result = prime * result + (getSeries() == null ? 0 : getSeries().hashCode());
         result = prime * result + (getPerson() == null ? 0 : getPerson().hashCode());
+        result = prime * result + (getBoxedSet() == null ? 0 : getBoxedSet().hashCode());
         return result;
     }
 
@@ -208,8 +224,12 @@ public class Artwork extends AbstractAuditable implements Serializable {
         if (EqualityTools.notEquals(getSeries(), castOther.getSeries())) {
             return false;
         }
-        // check person
-        return EqualityTools.equals(getPerson(), castOther.getPerson());
+        // check series
+        if (EqualityTools.notEquals(getPerson(), castOther.getPerson())) {
+            return false;
+        }
+        // check boxed set
+        return EqualityTools.equals(getBoxedSet(), castOther.getBoxedSet());
     }
 
     @Override
@@ -258,6 +278,14 @@ public class Artwork extends AbstractAuditable implements Serializable {
                 sb.append("'");
             } else {
                 sb.append(", target=Person");
+            }
+        } else if (getBoxedSet() != null) {
+            if (Hibernate.isInitialized(getBoxedSet())) {
+                sb.append(", boxedset-id='");
+                sb.append(getBoxedSet().getId());
+                sb.append("'");
+            } else {
+                sb.append(", target=BoxedSet");
             }
         } else {
             sb.append("Unknown");

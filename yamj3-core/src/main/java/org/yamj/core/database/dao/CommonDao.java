@@ -22,6 +22,10 @@
  */
 package org.yamj.core.database.dao;
 
+import org.yamj.common.type.StatusType;
+
+import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.model.Artwork;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -235,6 +239,27 @@ public class CommonDao extends HibernateDao {
             boxedSet = new BoxedSet();
             boxedSet.setName(name);
             this.saveEntity(boxedSet);
+            
+            // create new poster artwork entry
+            Artwork poster = new Artwork();
+            poster.setArtworkType(ArtworkType.POSTER);
+            poster.setStatus(StatusType.NEW);
+            poster.setBoxedSet(boxedSet);
+            this.saveEntity(poster);
+
+            // create new fanart artwork entry
+            Artwork fanart = new Artwork();
+            fanart.setArtworkType(ArtworkType.FANART);
+            fanart.setStatus(StatusType.NEW);
+            fanart.setBoxedSet(boxedSet);
+            this.saveEntity(fanart);
+
+            // create new banner artwork entry
+            Artwork banner = new Artwork();
+            banner.setArtworkType(ArtworkType.BANNER);
+            banner.setStatus(StatusType.NEW);
+            banner.setBoxedSet(boxedSet);
+            this.saveEntity(banner);
         }
     }
 

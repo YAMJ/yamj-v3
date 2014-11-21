@@ -82,7 +82,7 @@ public class DeleteTask implements ITask {
                     }
                 }
             } catch (Exception ex) {
-                LOG.warn("Failed to retrieve orphan person", ex);
+                LOG.warn("Failed to retrieve orphan persons", ex);
             }
         }
 
@@ -110,6 +110,23 @@ public class DeleteTask implements ITask {
                 this.commonStorageService.deleteOrphanCertifications();
             } catch (Exception ex) {
                 LOG.warn("Failed to delete orphan certifications", ex);
+            }
+        }
+
+        // delete orphan certifications if allowed
+        if (this.configService.getBooleanProperty("yamj3.delete.orphan.boxedset", Boolean.TRUE)) {
+            try {
+                List<Long> ids = this.commonStorageService.getOrphanBoxedSets();
+                for (Long id : ids) {
+                    try {
+                        filesToDelete.addAll(this.commonStorageService.deleteBoxedSet(id));
+                    } catch (Exception ex) {
+                        LOG.warn("Failed to delete person ID: {}", id);
+                        LOG.error("Deletion error", ex);
+                    }
+                }
+            } catch (Exception ex) {
+                LOG.warn("Failed to retrieve orphan boxed sets", ex);
             }
         }
 

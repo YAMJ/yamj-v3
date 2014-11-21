@@ -337,7 +337,7 @@ public class CommonStorageService {
         this.stagingDao.deleteEntity(generated);
     }
     
-    @Transactional
+    @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<Long> getOrphanPersons() {
         final StringBuilder query = new StringBuilder();
@@ -345,7 +345,7 @@ public class CommonStorageService {
         query.append("WHERE not exists (select 1 from CastCrew c where c.castCrewPK.person=p)");
         return this.stagingDao.find(query);
     }
-    
+
     @Transactional
     public Set<String> deletePerson(Long id) {
         Set<String> filesToDelete = new HashSet<String>();
@@ -356,6 +356,34 @@ public class CommonStorageService {
         if (person != null) {
             this.delete(person.getPhoto(), filesToDelete);
             this.stagingDao.deleteEntity(person);
+        }
+        
+        return filesToDelete;
+    }
+    
+    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+    public List<Long> getOrphanBoxedSets() {
+        final StringBuilder query = new StringBuilder();
+        query.append("SELECT b.id FROM BoxedSet b ");
+        query.append("WHERE not exists (select 1 from BoxedSetOrder o where o.boxedSet=b)");
+        return this.stagingDao.find(query);
+    }
+
+    @Transactional
+    public Set<String> deleteBoxedSet(Long id) {
+        Set<String> filesToDelete = new HashSet<String>();
+        BoxedSet boxedSet = this.stagingDao.getById(BoxedSet.class, id);
+        
+        LOG.debug("Delete: {}", boxedSet);
+        
+        if (boxedSet != null) {
+            // delete artwork
+            for (Artwork artwork : boxedSet.getArtworks()) {
+                this.delete(artwork, filesToDelete);
+            }
+            
+            this.stagingDao.deleteEntity(boxedSet);
         }
         
         return filesToDelete;

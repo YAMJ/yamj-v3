@@ -23,10 +23,9 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NaturalId;
 
@@ -42,6 +41,9 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "boxedSet")
+    private List<Artwork> artworks = new ArrayList<Artwork>(0);
+
     // GETTER and SETTER
     
     public String getName() {
@@ -52,6 +54,14 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
         this.name = name;
     }
 
+    public List<Artwork> getArtworks() {
+        return artworks;
+    }
+
+    public void setArtworks(List<Artwork> artworks) {
+        this.artworks = artworks;
+    }
+    
     // EQUALITY CHECKS
     
     @Override
