@@ -69,7 +69,10 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     
     @Column(name = "apply_to_person", nullable = false)
     private boolean applyToPerson = false;
-    
+
+    @Column(name = "apply_to_boxexset", nullable = false)
+    private boolean applyToBoxedSet = false;
+
     @Column(name = "pre_process", nullable = false)
     private boolean preProcess = false;
 
@@ -157,6 +160,14 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
 
     public void setApplyToPerson(boolean applyToPerson) {
         this.applyToPerson = applyToPerson;
+    }
+
+    public boolean isApplyToBoxedSet() {
+        return applyToBoxedSet;
+    }
+
+    public void setApplyToBoxedSet(boolean applyToBoxedSet) {
+        this.applyToBoxedSet = applyToBoxedSet;
     }
 
     public boolean isPreProcess() {

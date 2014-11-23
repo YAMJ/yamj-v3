@@ -87,6 +87,7 @@ public class ArtworkInitialization {
                 artworkProfile.setApplyToSeason(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToSeason", Boolean.FALSE));
                 artworkProfile.setApplyToEpisode(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToEpisode", Boolean.FALSE));
                 artworkProfile.setApplyToPerson(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToPerson", Boolean.FALSE));
+                artworkProfile.setApplyToBoxedSet(PropertyTools.getBooleanProperty("artwork.profile." + name + ".applyToBoxedSet", Boolean.FALSE));
                 artworkProfile.setPreProcess(PropertyTools.getBooleanProperty("artwork.profile." + name + ".preProcess", Boolean.FALSE));
                 artworkProfile.setRoundedCorners(PropertyTools.getBooleanProperty("artwork.profile." + name + ".roundedCorners", Boolean.FALSE));
                 artworkProfile.setReflection(PropertyTools.getBooleanProperty("artwork.profile." + name + ".reflection", Boolean.FALSE));

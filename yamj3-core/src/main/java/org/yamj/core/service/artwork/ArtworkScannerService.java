@@ -173,7 +173,8 @@ public class ArtworkScannerService {
         } else if (artwork.getSeries() != null) {
             // TODO scan series poster
         } else if (artwork.getBoxedSet() != null) {
-            // TODO scan boxed set poster
+            // scan boxed set poster
+            posters = this.artworkLocatorService.getMatchingArtwork(ArtworkType.POSTER, artwork.getBoxedSet());
         }
 
         createLocatedArtworksLocal(artwork, posters, locatedArtworks);
@@ -269,7 +270,8 @@ public class ArtworkScannerService {
         } else if (artwork.getSeries() != null) {
             // TODO scan series fanart
         } else if (artwork.getBoxedSet() != null) {
-            // TODO scan boxed set fanart
+            // scan boxed set fanart
+            fanarts = this.artworkLocatorService.getMatchingArtwork(ArtworkType.FANART, artwork.getBoxedSet());
         }
 
         createLocatedArtworksLocal(artwork, fanarts, locatedArtworks);
@@ -358,7 +360,8 @@ public class ArtworkScannerService {
         } else if (artwork.getSeries() != null) {
             // TODO scan series banner
         } else if (artwork.getBoxedSet() != null) {
-            // TODO scan boxed set bannner
+            // scan boxed set banner
+            banners = this.artworkLocatorService.getMatchingArtwork(ArtworkType.BANNER, artwork.getBoxedSet());
         }
 
         createLocatedArtworksLocal(artwork, banners, locatedArtworks);

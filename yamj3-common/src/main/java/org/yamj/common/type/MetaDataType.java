@@ -32,31 +32,41 @@ public enum MetaDataType {
     /**
      * This is a movie
      */
-    MOVIE,
+    MOVIE(true),
     /**
      * This is a TV Series
      */
-    SERIES,
+    SERIES(true),
     /**
      * This is a season of a TV series
      */
-    SEASON,
+    SEASON(true),
     /**
      * This is an episode of a TV season
      */
-    EPISODE,
+    EPISODE(true),
     /**
      * This is a person, an actor or crew member
      */
-    PERSON,
+    PERSON(true),
     /**
      * This is a person filmography
      */
-    FILMOGRAPHY,
+    FILMOGRAPHY(false),
+    /**
+     * This is a boxed set
+     */
+    BOXSET(false),
     /**
      * The type is unknown
      */
-    UNKNOWN;
+    UNKNOWN(false);
+
+    private final boolean realMetaData;
+
+    private MetaDataType(boolean realMetaData) {
+        this.realMetaData = realMetaData;
+    }
 
     public static MetaDataType fromString(String type) {
         try {
@@ -64,5 +74,9 @@ public enum MetaDataType {
         } catch (Exception ex) {
             return UNKNOWN;
         }
+    }
+
+    public boolean isRealMetaData() {
+        return realMetaData;
     }
 }

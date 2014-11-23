@@ -61,17 +61,13 @@ public class SystemInfoController {
 
         if (BooleanUtils.toBoolean(addcounts)) {
             for (MetaDataType singleType : MetaDataType.values()) {
-                if (singleType == MetaDataType.UNKNOWN) {
-                    continue;
-                } else if (singleType == MetaDataType.FILMOGRAPHY) {
-                        continue;
-                }
-
-                CountTimestamp result = jsonApi.getCountTimestamp(singleType);
-                if (result == null) {
-                    LOG.warn("There was an error getting the count for {}", singleType.toString());
-                } else {
-                    YAMJ_INFO.addCount(result.getType(), result.getCount());
+                if (singleType.isRealMetaData()) {
+                    CountTimestamp result = jsonApi.getCountTimestamp(singleType);
+                    if (result == null) {
+                        LOG.warn("There was an error getting the count for {}", singleType.toString());
+                    } else {
+                        YAMJ_INFO.addCount(result.getType(), result.getCount());
+                    }
                 }
             }
         }

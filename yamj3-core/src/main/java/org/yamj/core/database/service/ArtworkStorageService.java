@@ -61,6 +61,7 @@ public class ArtworkStorageService {
             profile.setApplyToSeason(newProfile.isApplyToSeason());
             profile.setApplyToEpisode(newProfile.isApplyToEpisode());
             profile.setApplyToPerson(newProfile.isApplyToPerson());
+            profile.setApplyToBoxedSet(newProfile.isApplyToBoxedSet());
             profile.setPreProcess(newProfile.isPreProcess());
             profile.setRoundedCorners(newProfile.isRoundedCorners());
             profile.setReflection(newProfile.isReflection());
@@ -82,13 +83,17 @@ public class ArtworkStorageService {
         } else if (ArtworkType.VIDEOIMAGE == artworkType) {
             metaDataType = MetaDataType.EPISODE;
         } else if (ArtworkType.BANNER == artworkType) {
-            if (located.getArtwork().getSeries() != null) {
+            if (located.getArtwork().getBoxedSet() != null) {
+                metaDataType = MetaDataType.BOXSET;
+            } else if (located.getArtwork().getSeries() != null) {
                 metaDataType = MetaDataType.SERIES;
             } else {
                 metaDataType = MetaDataType.SEASON;
             }
         } else if (ArtworkType.POSTER == artworkType || (ArtworkType.FANART == artworkType)) {
-            if (located.getArtwork().getSeries() != null) {
+            if (located.getArtwork().getBoxedSet() != null) {
+                metaDataType = MetaDataType.BOXSET;
+            } else if (located.getArtwork().getSeries() != null) {
                 metaDataType = MetaDataType.SERIES;
             } else if (located.getArtwork().getSeason() != null) {
                 metaDataType = MetaDataType.SEASON;
@@ -143,7 +148,6 @@ public class ArtworkStorageService {
         sql.append("LEFT OUTER JOIN videodata vd ON vd.id=art.videodata_id ");
         sql.append("LEFT OUTER JOIN season sea ON sea.id=art.season_id ");
         sql.append("LEFT OUTER JOIN series ser ON ser.id=art.series_id ");
-        sql.append("LEFT OUTER JOIN person p ON p.id=art.person_id ");
         sql.append("WHERE art.status in ('NEW','UPDATED') ");
         sql.append("AND (vd.status is null OR vd.status='DONE') ");
         sql.append("AND (sea.status is null OR sea.status='DONE') ");
@@ -160,6 +164,7 @@ public class ArtworkStorageService {
         sb.append("LEFT OUTER JOIN FETCH art.season ");
         sb.append("LEFT OUTER JOIN FETCH art.series ");
         sb.append("LEFT OUTER JOIN FETCH art.person ");
+        sb.append("LEFT OUTER JOIN FETCH art.boxedSet ");
         sb.append("LEFT OUTER JOIN FETCH art.artworkLocated ");
         sb.append("WHERE art.id = :id");
 
@@ -212,6 +217,7 @@ public class ArtworkStorageService {
         sb.append("LEFT OUTER JOIN FETCH art.season ");
         sb.append("LEFT OUTER JOIN FETCH art.series ");
         sb.append("LEFT OUTER JOIN FETCH art.person ");
+        sb.append("LEFT OUTER JOIN FETCH art.boxedSet ");
         sb.append("LEFT OUTER JOIN FETCH loc.stageFile ");
         sb.append("WHERE loc.id = :id");
 

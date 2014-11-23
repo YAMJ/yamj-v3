@@ -177,6 +177,32 @@ public class ArtworkLocatorService {
         return artworks;
     }
 
+    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+    public List<StageFile> getMatchingArtwork(ArtworkType artworkType, BoxedSet boxedSet) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("select distinct f from StageFile f ");
+        sb.append("where lower(f.baseName) like 'set_");
+        sb.append(boxedSet.getName().toLowerCase());
+        sb.append("_%' ");
+        if (ArtworkType.FANART == artworkType) {
+            sb.append(" and lower(f.baseName) like '%fanart' ");
+        } else if (ArtworkType.BANNER == artworkType) {
+            sb.append(" and lower(f.baseName) like '%banner' ");
+        } else {
+            sb.append(" and lower(f.baseName) not like '%fanart' ");
+            sb.append(" and lower(f.baseName) not like '%banner' ");
+        }
+        sb.append("and f.status != :deleted ");
+        sb.append("and f.fileType = :fileType ");
+
+        final Map<String,Object> params = new HashMap<String,Object>();
+        params.put("deleted", StatusType.DELETED);
+        params.put("fileType", FileType.IMAGE);
+        
+        return stagingDao.findByNamedParameters(sb, params);
+    }
+    
     @SuppressWarnings("unchecked")
     private List<StageFile> findVideoFiles(VideoData videoData) {
         final StringBuilder sb = new StringBuilder();

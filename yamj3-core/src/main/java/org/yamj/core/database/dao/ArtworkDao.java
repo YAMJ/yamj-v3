@@ -31,7 +31,10 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.ArtworkGenerated;
+import org.yamj.core.database.model.ArtworkLocated;
+import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -63,6 +66,8 @@ public class ArtworkDao extends HibernateDao {
             criteria.add(Restrictions.eq("applyToEpisode", Boolean.TRUE));
         } else if (MetaDataType.PERSON == metaDataType) {
             criteria.add(Restrictions.eq("applyToPerson", Boolean.TRUE));
+        } else if (MetaDataType.BOXSET == metaDataType) {
+            criteria.add(Restrictions.eq("applyToBoxedSet", Boolean.TRUE));
         }
         return criteria.list();
     }
@@ -147,11 +152,12 @@ public class ArtworkDao extends HibernateDao {
         return queueElements;
     }
 
-    public Artwork getArtwork(Person person, ArtworkType artworkType) {
+    @SuppressWarnings("unchecked")
+    public List<Artwork> getBoxedSetArtwork(String boxedSetName, ArtworkType artworkType) {
         Criteria criteria = getSession().createCriteria(Artwork.class);
-        criteria.add(Restrictions.eq("person", person));
         criteria.add(Restrictions.eq("artworkType", artworkType));
-        criteria.setCacheable(true);
-        return (Artwork) criteria.uniqueResult();
+        criteria = criteria.createAlias("boxedSet", "bs");
+        criteria.add(Restrictions.ilike("bs.name", boxedSetName.toLowerCase()));
+        return criteria.list();
     }
 }

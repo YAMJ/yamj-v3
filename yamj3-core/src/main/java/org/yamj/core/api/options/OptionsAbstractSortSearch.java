@@ -22,16 +22,13 @@
  */
 package org.yamj.core.api.options;
 
-import java.util.ArrayList;
-
-import java.util.List;
-import org.yamj.common.type.MetaDataType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.builder.DataItem;
 import org.yamj.core.database.model.type.JobType;
 

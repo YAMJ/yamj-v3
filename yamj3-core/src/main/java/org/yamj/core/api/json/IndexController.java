@@ -90,10 +90,12 @@ public class IndexController {
         }
 
         for (MetaDataType singleType : requiredTypes) {
-            LOG.debug("Getting a count of '{}'", singleType.toString());
-            CountTimestamp result = jsonApiStorageService.getCountTimestamp(singleType);
-            if (result != null) {
-                results.add(result);
+            if (singleType.isRealMetaData()) {
+                LOG.debug("Getting a count of '{}'", singleType.toString());
+                CountTimestamp result = jsonApiStorageService.getCountTimestamp(singleType);
+                if (result != null) {
+                    results.add(result);
+                }
             }
         }
 
