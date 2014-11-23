@@ -23,6 +23,8 @@
 package org.yamj.core.api.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -34,32 +36,32 @@ import org.yamj.core.database.model.type.ArtworkType;
  *
  * @author Stuart
  */
+@JsonInclude(Include.NON_DEFAULT)
 public class ApiArtworkDTO extends AbstractApiIdentifiableDTO {
 
-    // The ID (from AbstractApiIdentifiableDTO) is a generic ID used for MOVIE, SERIES, SEASON or PERSON
     private String key = null;
     private MetaDataType source;
-    private Long artworkId = 0L;
-    private Long locatedId = 0L;
-    private Long generatedId = 0L;
+    private Long artworkId;
+    private Long locatedId;
+    private Long generatedId;
     private ArtworkType artworkType;
     private String cacheDir = "";
     private String cacheFilename = "";
-    private String filename;
+    private String filename = "";
 
     public MetaDataType getSource() {
         return source;
     }
 
-    public long getArtworkId() {
+    public Long getArtworkId() {
         return artworkId;
     }
 
-    public long getLocatedId() {
+    public Long getLocatedId() {
         return locatedId;
     }
 
-    public long getGeneratedId() {
+    public Long getGeneratedId() {
         return generatedId;
     }
 
@@ -108,34 +110,22 @@ public class ApiArtworkDTO extends AbstractApiIdentifiableDTO {
 
     public void setSourceId(Long sourceId) {
         if (sourceId == null) {
-            setId(0L);
+            setId(-1L);
         } else {
             setId(sourceId);
         }
     }
 
     public void setArtworkId(Long artworkId) {
-        if (artworkId == null) {
-            this.artworkId = 0L;
-        } else {
-            this.artworkId = artworkId;
-        }
+        this.artworkId = artworkId;
     }
 
     public void setLocatedId(Long locatedId) {
-        if (locatedId == null) {
-            this.locatedId = 0L;
-        } else {
-            this.locatedId = locatedId;
-        }
+        this.locatedId = locatedId;
     }
 
     public void setGeneratedId(Long generatedId) {
-        if (generatedId == null) {
-            this.generatedId = 0L;
-        } else {
-            this.generatedId = generatedId;
-        }
+        this.generatedId = generatedId;
     }
 
     public void setArtworkType(ArtworkType artworkType) {

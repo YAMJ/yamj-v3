@@ -1487,6 +1487,10 @@ public class ApiDao extends HibernateDao {
                         sb.append(" series_id IS NOT NULL");
                     } else if (mdt == MetaDataType.SEASON) {
                         sb.append(" season_id IS NOT NULL");
+                    } else if (mdt == MetaDataType.PERSON) {
+                        sb.append(" person_id IS NOT NULL");
+                    } else if (mdt == MetaDataType.BOXSET) {
+                        sb.append(" boxedset_id IS NOT NULL");
                     }
                 }
                 sb.append(")");
@@ -2128,6 +2132,8 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("FROM season v ");
         } else if (type == MetaDataType.PERSON) {
             sbSQL.append("FROM person v");
+        } else if (type == MetaDataType.BOXSET) {
+            sbSQL.append("FROM boxed_set v");
         }
         sbSQL.append(", artwork a");    // Artwork must be last for the LEFT JOIN
         sbSQL.append(SQL_LEFT_JOIN_ARTWORK_LOCATED);
@@ -2141,7 +2147,10 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" WHERE v.id=a.season_id");
         } else if (type == MetaDataType.PERSON) {
             sbSQL.append(" WHERE v.id=a.person_id");
+        } else if (type == MetaDataType.BOXSET) {
+            sbSQL.append(" WHERE v.id=a.boxedset_id");
         }
+        sbSQL.append(" AND al.id is not null");
         sbSQL.append(" AND v.id IN (:id)");
         sbSQL.append(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
 
@@ -2492,6 +2501,21 @@ public class ApiDao extends HibernateDao {
             List<ApiBoxedSetMemberDTO> members = this.executeQueryWithTransform(ApiBoxedSetMemberDTO.class, sqlScalars, null);
             boxedSet.setMembers(members);
         }
+
+        if (options.hasDataItem(DataItem.ARTWORK)) {
+            LOG.trace("Adding artwork for ID '{}'", options.getId());
+            Map<Long, List<ApiArtworkDTO>> artworkList;
+            if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
+                artworkList = getArtworkForId(MetaDataType.BOXSET, options.getId(), options.getArtworkTypes());
+            } else {
+                artworkList = getArtworkForId(MetaDataType.BOXSET, options.getId());
+            }
+
+            if (artworkList.containsKey(options.getId())) {
+                boxedSet.setArtwork(artworkList.get(options.getId()));
+            }
+        }
+            
         return boxedSet;
     }    
 

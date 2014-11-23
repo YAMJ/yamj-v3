@@ -24,7 +24,11 @@ package org.yamj.core.api.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
+import org.yamj.core.database.model.type.ArtworkType;
 
 /**
  * @author modmax
@@ -36,7 +40,8 @@ public class ApiBoxedSetDTO extends AbstractApiIdentifiableDTO {
     private Integer memberCount;
     private Boolean watched;
     private List<ApiBoxedSetMemberDTO> members;
-    
+    private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
+
     public String getName() {
         return name;
     }
@@ -67,5 +72,23 @@ public class ApiBoxedSetDTO extends AbstractApiIdentifiableDTO {
 
     public void setMembers(List<ApiBoxedSetMemberDTO> members) {
         this.members = members;
+    }
+
+    public Map<ArtworkType, List<ApiArtworkDTO>> getArtwork() {
+        return artwork;
+    }
+
+    public void setArtwork(List<ApiArtworkDTO> artworkList) {
+        for (ApiArtworkDTO aadto : artworkList) {
+            addArtwork(aadto);
+        }
+    }
+    
+    public void addArtwork(ApiArtworkDTO newArtwork) {
+        // Add a blank list if it doesn't already exist
+        if (!artwork.containsKey(newArtwork.getArtworkType())) {
+            artwork.put(newArtwork.getArtworkType(), new ArrayList<ApiArtworkDTO>(1));
+        }
+        this.artwork.get(newArtwork.getArtworkType()).add(newArtwork);
     }
 }
