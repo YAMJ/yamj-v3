@@ -252,7 +252,7 @@ public class ApiDao extends HibernateDao {
         }
         
         sbSQL.append(" FROM videodata vd");
-
+        
         if (isMovie) {
             sbSQL.append(" WHERE vd.episode < 0");
         } else {
@@ -457,6 +457,29 @@ public class ApiDao extends HibernateDao {
             }
         }
 
+        // check boxed set
+        if (params.includeBoxedSet() || params.excludeBoxedSet()) {
+            int boxSetId = params.getBoxSetId();
+            if (boxSetId > 0) {
+                if (params.includeBoxedSet()) {
+                    sbSQL.append(" AND exists(");
+                } else {
+                    sbSQL.append(" AND not exists (");
+                }
+
+                sbSQL.append("SELECT 1 FROM boxed_set_order bo ");
+                if (isMovie) {
+                    sbSQL.append("WHERE bo.videodata_id=vd.id ");
+                } else {
+                    sbSQL.append("JOIN season sea ON sea.series_id=bo.series_id ");
+                    sbSQL.append("WHERE vd.season_id=sea.id ");                    
+                }
+                sbSQL.append("AND bo.boxedset_id=");
+                sbSQL.append(boxSetId);
+                sbSQL.append(")");
+            }
+        }
+        
         // add the search string, this will be empty if there is no search required
         sbSQL.append(params.getSearchString(false));
 
@@ -685,6 +708,24 @@ public class ApiDao extends HibernateDao {
             }
         }
         
+        // check boxed set
+        if (params.includeBoxedSet() || params.excludeBoxedSet()) {
+            int boxSetId = params.getBoxSetId();
+            if (boxSetId > 0) {
+                if (params.includeBoxedSet()) {
+                    sbSQL.append(" AND exists(");
+                } else {
+                    sbSQL.append(" AND not exists (");
+                }
+
+                sbSQL.append("SELECT 1 FROM boxed_set_order bo ");
+                sbSQL.append("WHERE bo.series_id=ser.id ");
+                sbSQL.append("AND bo.boxedset_id=");
+                sbSQL.append(boxSetId);
+                sbSQL.append(")");
+            }
+        }
+        
         // add the search string, this will be empty if there is no search required
         sbSQL.append(params.getSearchString(false));
 
@@ -909,6 +950,24 @@ public class ApiDao extends HibernateDao {
                     sbSQL.append("' AND mf.extra=:extra ");
                     sbSQL.append("AND sf.file_date >= :newestDate)");
                 }
+            }
+        }
+        
+        // check boxed set
+        if (params.includeBoxedSet() || params.excludeBoxedSet()) {
+            int boxSetId = params.getBoxSetId();
+            if (boxSetId > 0) {
+                if (params.includeBoxedSet()) {
+                    sbSQL.append(" AND exists(");
+                } else {
+                    sbSQL.append(" AND not exists (");
+                }
+
+                sbSQL.append("SELECT 1 FROM boxed_set_order bo ");
+                sbSQL.append("WHERE bo.series_id=sea.series_id ");
+                sbSQL.append("AND bo.boxedset_id=");
+                sbSQL.append(boxSetId);
+                sbSQL.append(")");
             }
         }
         

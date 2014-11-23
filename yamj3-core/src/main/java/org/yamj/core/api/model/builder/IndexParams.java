@@ -40,6 +40,7 @@ public class IndexParams {
     private static final String VIDEOSOURCE = "videosource";
     private static final String RATING = "rating";
     private static final String NEWEST = "newest";
+    private static final String BOXSET = "boxset";
 
     private final OptionsIndexVideo options;
     private final Map<String, String> includes;
@@ -56,6 +57,7 @@ public class IndexParams {
     private int ratingValue;
     private String newestSource;
     private Date newestDate;
+    private int boxSetId = -1;
     
     public IndexParams(OptionsIndexVideo options) {
         this.options = options;
@@ -199,6 +201,29 @@ public class IndexParams {
         return videoSource;
     }
 
+    // video source check
+    
+    public boolean includeBoxedSet() {
+        return includes.containsKey(BOXSET);
+    }
+    
+    public boolean excludeBoxedSet() {
+        return excludes.containsKey(BOXSET);
+    }
+    
+    public int getBoxSetId() {
+        if (boxSetId < 0) {
+            try {
+                if (includeBoxedSet()) {
+                    boxSetId = Integer.parseInt(includes.get(BOXSET));
+                } else {
+                    boxSetId = Integer.parseInt(excludes.get(BOXSET));
+                }
+            } catch (Exception ignore) {}
+        }
+        return boxSetId;
+    }
+    
     // rating check
     
     public boolean includeRating() {
@@ -248,7 +273,7 @@ public class IndexParams {
         }
     }
 
-    // rating check
+    // newest check
     
     public boolean includeNewest() {
         return includes.containsKey(NEWEST);
