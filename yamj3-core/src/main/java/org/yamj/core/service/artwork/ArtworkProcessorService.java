@@ -86,7 +86,7 @@ public class ArtworkProcessorService {
     
             // store original in file cache
             String cacheFilename = buildCacheFilename(located);
-            LOG.debug("Cache artwork with file name: {}", cacheFilename);
+            LOG.trace("Cache artwork with file name: {}", cacheFilename);
     
             boolean stored;
             try {
@@ -168,7 +168,7 @@ public class ArtworkProcessorService {
             storageType = StorageType.ARTWORK;
         }
 
-        LOG.debug("Generate image for {} with profile {}", located, profile.getProfileName());
+        LOG.trace("Generate image for {} with profile {}", located, profile.getProfileName());
         BufferedImage imageGraphic = GraphicTools.loadJPEGImage(this.fileStorageService.getFile(storageType, located.getCacheFilename()));
 
         // set dimension of original image if not done before
