@@ -201,7 +201,7 @@ public class Artwork extends AbstractAuditable implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Library) {
+        if (obj instanceof Artwork) {
             final Artwork other = (Artwork) obj;
             return new EqualsBuilder()
                     .append(getId(), other.getId())
