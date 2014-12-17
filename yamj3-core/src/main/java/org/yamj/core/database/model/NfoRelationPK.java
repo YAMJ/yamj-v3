@@ -48,7 +48,8 @@ public class NfoRelationPK implements Serializable {
     @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false)
     private VideoData videoData;
 
-    public NfoRelationPK() {}
+    public NfoRelationPK() {
+    }
 
     public NfoRelationPK(StageFile stageFile, VideoData videoData) {
         this.stageFile = stageFile;
@@ -56,7 +57,6 @@ public class NfoRelationPK implements Serializable {
     }
 
     // GETTER AND SETTER
-
     public StageFile getStageFile() {
         return stageFile;
     }
@@ -74,14 +74,13 @@ public class NfoRelationPK implements Serializable {
     }
 
     // EQUALITY CHECKS
-
     @Override
     public int hashCode() {
         final int prime = 7;
         int result = 1;
         result = prime * result + Long.valueOf(getStageFile().getId()).hashCode();
         result = prime * result + Long.valueOf(getVideoData().getId()).hashCode();
-        
+
         return result;
     }
 

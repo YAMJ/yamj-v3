@@ -14,18 +14,14 @@ import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.service.file.FileStorageService;
 
 /**
- * Task for checking if video, series or person is older than x days
- * and marks those data entries as updated in order to force a rescan. 
- */
-/**
- * Task for checking if video, series or person is older than x days
- * and marks those data entries as updated in order to force a rescan. 
+ * Task for checking if video, series or person is older than x days and marks
+ * those data entries as updated in order to force a rescan.
  */
 @Component
 public class DeleteTask implements ITask {
 
     private static final Logger LOG = LoggerFactory.getLogger(RecheckTask.class);
-    
+
     @Autowired
     private ExecutionTaskService executionTaskService;
     @Autowired
@@ -68,7 +64,7 @@ public class DeleteTask implements ITask {
         } catch (Exception ex) {
             LOG.warn("Failed to retrieve stage files to delete", ex);
         }
-        
+
         // delete orphan persons if allowed
         if (this.configService.getBooleanProperty("yamj3.delete.orphan.person", Boolean.TRUE)) {
             try {

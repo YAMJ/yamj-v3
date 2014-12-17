@@ -22,7 +22,11 @@
  */
 package org.yamj.core.tools.xml;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URL;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
@@ -37,7 +41,12 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.*;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -45,7 +54,9 @@ import org.xml.sax.SAXParseException;
 import org.yamj.core.service.file.tools.FileTools;
 
 /**
- * Generic set of routines to process the DOM model data Used for read XML files.
+ * Generic set of routines to process the DOM model data
+ *
+ * Used for reading XML files.
  *
  * @author Stuart.Boston
  *
@@ -59,7 +70,7 @@ public final class DOMHelper {
     public static final String TYPE_MOVIE = "movie";
     public static final String TYPE_TVSHOW = "tvshow";
     public static final String TYPE_EPISODE = "episodedetails";
-    
+
     private DOMHelper() {
         throw new UnsupportedOperationException("Class cannot be instantiated");
     }
@@ -100,7 +111,8 @@ public final class DOMHelper {
     }
 
     /**
-     * Append a child element to a parent element with a single attribute/value pair
+     * Append a child element to a parent element with a single attribute/value
+     * pair
      *
      * @param doc
      * @param parentElement
@@ -304,7 +316,7 @@ public final class DOMHelper {
 
             trans.transform(new DOMSource(doc), new StreamResult(localFile));
             return true;
-        } catch (Exception ex) {
+        } catch (IllegalArgumentException | DOMException | TransformerException ex) {
             LOG.error("Error writing the document to {}", localFile);
             LOG.error("Error", ex);
             return false;
@@ -312,7 +324,8 @@ public final class DOMHelper {
     }
 
     /**
-     * Override the standard Sax ErrorHandler with this one, to minimise noise about failed parsing errors
+     * Override the standard Sax ErrorHandler with this one, to minimise noise
+     * about failed parsing errors
      */
     public static class SaxErrorHandler implements ErrorHandler {
 

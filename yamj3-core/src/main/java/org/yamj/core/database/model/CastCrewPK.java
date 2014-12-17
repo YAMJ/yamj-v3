@@ -23,8 +23,16 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import javax.persistence.*;
-import org.hibernate.annotations.*;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.Index;
+import org.hibernate.annotations.Type;
 import org.yamj.core.database.model.type.JobType;
 
 @Embeddable
@@ -50,7 +58,8 @@ public class CastCrewPK implements Serializable {
     @Column(name = "job", nullable = false, length = 30, insertable = false, updatable = false)
     private JobType jobType;
 
-    public CastCrewPK() {}
+    public CastCrewPK() {
+    }
 
     public CastCrewPK(Person person, VideoData videoData, JobType jobType) {
         this.person = person;
@@ -59,7 +68,6 @@ public class CastCrewPK implements Serializable {
     }
 
     // GETTER AND SETTER
-
     public Person getPerson() {
         return person;
     }
@@ -85,7 +93,6 @@ public class CastCrewPK implements Serializable {
     }
 
     // EQUALITY CHECKS
-
     @Override
     public int hashCode() {
         final int prime = 7;
@@ -115,7 +122,7 @@ public class CastCrewPK implements Serializable {
             return false;
         }
         return getVideoData().getId() == castOther.getVideoData().getId();
-            }
+    }
 
     @Override
     public String toString() {
