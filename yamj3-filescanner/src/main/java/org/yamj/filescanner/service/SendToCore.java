@@ -22,9 +22,6 @@
  */
 package org.yamj.filescanner.service;
 
-import org.yamj.common.dto.ImportDTO;
-import org.yamj.common.remote.service.FileImportService;
-import org.yamj.common.type.StatusType;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
@@ -32,6 +29,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
+import org.yamj.common.dto.ImportDTO;
+import org.yamj.common.remote.service.FileImportService;
+import org.yamj.common.type.StatusType;
 
 public class SendToCore implements Callable<StatusType> {
 
@@ -66,9 +66,11 @@ public class SendToCore implements Callable<StatusType> {
             status = StatusType.DONE;
         } catch (RemoteConnectFailureException ex) {
             LOG.error("{}: Failed to connect to the core server: {}", importDto.getBaseDirectory(), ex.getMessage());
+            LOG.trace("Exception:", ex);
             status = StatusType.ERROR;
         } catch (RemoteAccessException ex) {
             LOG.error("{}: Failed to send object to the core server: {}", importDto.getBaseDirectory(), ex.getMessage());
+            LOG.trace("Exception:", ex);
             status = StatusType.ERROR;
         }
 

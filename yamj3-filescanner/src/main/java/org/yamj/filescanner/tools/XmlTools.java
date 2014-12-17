@@ -70,18 +70,23 @@ public class XmlTools {
             return (T) unmarshaller.unmarshal(new StreamSource(is));
         } catch (FileNotFoundException ex) {
             LOG.warn("File not found '{}'", filename);
+            LOG.trace("Exception:", ex);
         } catch (IOException ex) {
             LOG.warn("IO exception for '{}', Error: {}", filename, ex.getMessage());
+            LOG.trace("Exception:", ex);
         } catch (XmlMappingException ex) {
             LOG.warn("XML Mapping error for '{}', Error: {}", filename, ex.getMessage());
+            LOG.trace("Exception:", ex);
         } catch (StreamException ex) {
             LOG.warn("Stream exception for '{}', Error {}", filename, ex.getMessage());
+            LOG.trace("Exception:", ex);
         } finally {
             if (is != null) {
                 try {
                     is.close();
                 } catch (IOException ex) {
                     LOG.warn("Failed to close library file '{}', Error: {}", filename, ex.getMessage());
+                    LOG.trace("Exception:", ex);
                 }
             }
         }
@@ -104,16 +109,20 @@ public class XmlTools {
             LOG.info("Saving completed");
         } catch (FileNotFoundException ex) {
             LOG.warn("File not found: {}", filename);
+            LOG.trace("Exception:", ex);
         } catch (IOException ex) {
             LOG.warn("IO exception for: {}, Error: {}", filename, ex.getMessage());
+            LOG.trace("Exception:", ex);
         } catch (XmlMappingException ex) {
             LOG.warn("XML Mapping error for: {}, Error: {}", filename, ex.getMessage());
+            LOG.trace("Exception:", ex);
         } finally {
             if (os != null) {
                 try {
                     os.close();
                 } catch (IOException ex) {
                     LOG.warn("Failed to close library file: {}, Error: {}", filename, ex.getMessage());
+                    LOG.trace("Exception:", ex);
                 }
             }
         }

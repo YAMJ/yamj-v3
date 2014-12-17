@@ -50,8 +50,8 @@ import org.yamj.filescanner.model.TimeType;
 public class LibrarySendScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(LibrarySendScheduler.class);
-    private AtomicInteger runningCount = new AtomicInteger(0);
-    private AtomicInteger retryCount = new AtomicInteger(0);
+    private final AtomicInteger runningCount = new AtomicInteger(0);
+    private final AtomicInteger retryCount = new AtomicInteger(0);
     private static final int RETRY_MAX = PropertyTools.getIntProperty("filescanner.send.retry", 5);
     @Autowired
     private LibraryCollection libraryCollection;
@@ -99,7 +99,7 @@ public class LibrarySendScheduler {
             } catch (InterruptedException ex) {
                 LOG.info("InterruptedException: {}", ex.getMessage());
             } catch (ExecutionException ex) {
-                LOG.info("ExecutionException: {}", ex.getMessage());
+                LOG.warn("ExecutionException:", ex);
             }
         }
     }
@@ -170,7 +170,7 @@ public class LibrarySendScheduler {
         SendToCore stc = (SendToCore) appContext.getBean("sendToCore");
         stc.setImportDto(dto);
         stc.setCounter(runningCount);
-        FutureTask<StatusType> task = new FutureTask<StatusType>(stc);
+        FutureTask<StatusType> task = new FutureTask<>(stc);
 
         try {
             yamjExecutor.submit(task);
@@ -178,6 +178,7 @@ public class LibrarySendScheduler {
             sentOk = Boolean.TRUE;
         } catch (TaskRejectedException ex) {
             LOG.warn("Send queue full. '{}' will be sent later.", stageDir.getPath());
+            LOG.trace("Exception:", ex);
             library.addDirectoryStatus(stageDir.getPath(), ConcurrentUtils.constantFuture(StatusType.NEW));
         }
         return sentOk;

@@ -22,15 +22,15 @@
  */
 package org.yamj.filescanner.service;
 
-import org.yamj.common.remote.service.SystemInfoService;
-import org.yamj.common.tools.DateTimeTools;
 import java.util.concurrent.TimeUnit;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.stereotype.Service;
+import org.yamj.common.remote.service.SystemInfoService;
+import org.yamj.common.tools.DateTimeTools;
 
 /**
  * Wait for the core server to be available or timeout
@@ -71,7 +71,8 @@ public final class SystemInfoCore {
     }
 
     /**
-     * Attempt to connect to the core server using the default retries and timeout
+     * Attempt to connect to the core server using the default retries and
+     * timeout
      *
      * @return
      */
@@ -80,7 +81,8 @@ public final class SystemInfoCore {
     }
 
     /**
-     * Attempt to connect to the core server using the specified retries and timeout
+     * Attempt to connect to the core server using the specified retries and
+     * timeout
      *
      * @param retries
      * @param timeout
@@ -118,10 +120,12 @@ public final class SystemInfoCore {
             status = Boolean.TRUE;
         } catch (RemoteConnectFailureException ex) {
             LOG.error("Failed to connect to the core server: {}", ex.getMessage());
+            LOG.trace("Exception:", ex);
             status = Boolean.FALSE;
         } catch (Exception ex) {
             // Hate catching general exceptions, but should determine how this is thrown
             LOG.error("General failure to connect to the core server: {}", ex.getMessage());
+            LOG.trace("Exception:", ex);
             status = Boolean.FALSE;
         }
         connected = status;

@@ -66,7 +66,8 @@ import org.yamj.filescanner.tools.DirectoryEnding;
 import org.yamj.filescanner.tools.Watcher;
 
 /**
- * Performs an initial scan of the library location and then updates when changes occur.
+ * Performs an initial scan of the library location and then updates when
+ * changes occur.
  *
  * @author Stuart
  */
@@ -121,6 +122,7 @@ public class ScannerManagementImpl implements ScannerManagement {
                     DIR_IGNORE_FILES.add(Pattern.compile(regex));
                 } catch (PatternSyntaxException ex) {
                     LOG.warn("Pattern '{}' not recognised. Error: {}", keyword, ex.getMessage());
+                    LOG.trace("Exception:", ex);
                 }
             }
         }
@@ -226,7 +228,7 @@ public class ScannerManagementImpl implements ScannerManagement {
         } while (!allDone);
 
         LOG.info(StringUtils.repeat("*", 50));
-        LOG.info("Completed initial sending of all libraries ({} total).",libraryCollection.size());
+        LOG.info("Completed initial sending of all libraries ({} total).", libraryCollection.size());
         LOG.info("");
         LOG.info("Library statistics:");
         for (Library library : libraryCollection.getLibraries()) {
@@ -307,7 +309,7 @@ public class ScannerManagementImpl implements ScannerManagement {
             library.getStatistics().increment(dirType == DirectoryType.BLURAY ? StatType.BLURAY : StatType.DVD);
             stageDir = null;
         } else if (DIR_EXCLUSIONS.containsKey(directory.getName().toLowerCase())) {
-            LOG.info("Skipping directory '{}' as its in the exclusion list.",directory.getAbsolutePath());
+            LOG.info("Skipping directory '{}' as its in the exclusion list.", directory.getAbsolutePath());
             stageDir = null;
         } else {
             try {
@@ -317,6 +319,7 @@ public class ScannerManagementImpl implements ScannerManagement {
                 }
             } catch (IOException ex) {
                 LOG.trace("Failed to seach for '{}' in the directory {}", FILE_MJBIGNORE, directory.getName());
+                LOG.trace("Exception:", ex);
             }
 
             stageDir = new StageDirectoryDTO();
@@ -427,7 +430,8 @@ public class ScannerManagementImpl implements ScannerManagement {
     }
 
     /**
-     * Get the watched status from the command line property or return the default value.
+     * Get the watched status from the command line property or return the
+     * default value.
      *
      * @param parsedOptionValue the property from the command line
      * @return
@@ -451,8 +455,10 @@ public class ScannerManagementImpl implements ScannerManagement {
             }
         } catch (RemoteConnectFailureException ex) {
             LOG.warn("Failed to get GitHub status, error: {}", ex.getMessage());
+            LOG.trace("Exception:", ex);
         } catch (RemoteAccessException ex) {
             LOG.warn("Failed to get GitHub status, error: {}", ex.getMessage());
+            LOG.trace("Exception:", ex);
         }
     }
 

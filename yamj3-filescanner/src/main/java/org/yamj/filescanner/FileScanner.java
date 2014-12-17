@@ -54,6 +54,7 @@ public final class FileScanner {
             ClassTools.checkSystemProperty("yamj3.home", (new File(yamjHome)).getCanonicalPath());
         } catch (IOException ex) {
             ClassTools.checkSystemProperty("yamj3.home", yamjHome);
+            LOG.trace("Exception:", ex);
         }
 
         YamjInfo yi = new YamjInfo(FileScanner.class);
@@ -73,6 +74,7 @@ public final class FileScanner {
             }
         } catch (CmdLineException ex) {
             LOG.error("Failed to parse command line options: {}", ex.getMessage());
+            LOG.trace("Exception:", ex);
             help(parser);
             status = CMDLINE_ERROR;
         }

@@ -113,8 +113,9 @@ public class Watcher {
             key = dir.register(watcherService, STANDARD_EVENTS, FILE_TREE);
         } catch (UnsupportedOperationException ex) {
             LOG.warn("File watching not supported: {}", ex.getMessage());
+            LOG.trace("Exception:", ex);
         } catch (IOException ex) {
-            LOG.error("IO Error: {}", ex.getMessage());
+            LOG.error("IO Error:", ex);
         }
 
         if (key != null) {
@@ -146,6 +147,7 @@ public class Watcher {
                 continue;
             } catch (ClosedWatchServiceException ex) {
                 LOG.info("Watch service closed, terminating.");
+                LOG.trace("Exception:", ex);
                 watchEnabled = Boolean.FALSE;
                 break;
             }
