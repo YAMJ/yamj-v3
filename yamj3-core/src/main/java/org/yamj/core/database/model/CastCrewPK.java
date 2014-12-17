@@ -28,6 +28,8 @@ import javax.persistence.Embeddable;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.ForeignKey;
@@ -95,33 +97,25 @@ public class CastCrewPK implements Serializable {
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + Long.valueOf(getPerson().getId()).hashCode();
-        result = prime * result + Long.valueOf(getVideoData().getId()).hashCode();
-        result = prime * result + getJobType().hashCode();
-        return result;
+        return new HashCodeBuilder()
+                .append(getPerson().getId())
+                .append(getVideoData().getId())
+                .append(getJobType())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof CastCrewPK) {
+            final CastCrewPK other = (CastCrewPK) obj;
+            return new EqualsBuilder()
+                    .append(getJobType(), other.getJobType())
+                    .append(getPerson().getId(), other.getPerson().getId())
+                    .append(getVideoData().getId(), other.getVideoData().getId())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof CastCrewPK)) {
-            return false;
-        }
-        CastCrewPK castOther = (CastCrewPK) other;
-        if (getJobType() != castOther.getJobType()) {
-            return false;
-        }
-        if (getPerson().getId() != castOther.getPerson().getId()) {
-            return false;
-        }
-        return getVideoData().getId() == castOther.getVideoData().getId();
     }
 
     @Override

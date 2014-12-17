@@ -24,6 +24,8 @@ package org.yamj.core.database.model;
 
 import java.io.Serializable;
 import javax.persistence.Column;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.NaturalId;
@@ -31,6 +33,7 @@ import org.hibernate.annotations.NaturalId;
 //@Entity
 //@Table(name = "player_path_old")
 @Deprecated
+@SuppressWarnings("PersistenceUnitPresent")
 public class PlayerPathOld extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 4L;
@@ -70,29 +73,25 @@ public class PlayerPathOld extends AbstractIdentifiable implements Serializable 
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 23 * hash + (this.name != null ? this.name.hashCode() : 0);
-        hash = 23 * hash + (this.ipDevice != null ? this.ipDevice.hashCode() : 0);
-        hash = 23 * hash + (this.storagePath != null ? this.storagePath.hashCode() : 0);
-        return hash;
+        return new HashCodeBuilder()
+                .append(this.name)
+                .append(this.ipDevice)
+                .append(this.storagePath)
+                .toHashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if (obj instanceof PlayerPathOld) {
+            final PlayerPathOld other = (PlayerPathOld) obj;
+            return new EqualsBuilder()
+                    .append(getName(), other.getName())
+                    .append(getIpDevice(), other.getIpDevice())
+                    .append(getStoragePath(), other.getStoragePath())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final PlayerPathOld other = (PlayerPathOld) obj;
-        if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
-            return false;
-        }
-        if ((this.ipDevice == null) ? (other.ipDevice != null) : !this.ipDevice.equals(other.ipDevice)) {
-            return false;
-        }
-        return !((this.storagePath == null) ? (other.storagePath != null) : !this.storagePath.equals(other.storagePath));
     }
 
     @Override

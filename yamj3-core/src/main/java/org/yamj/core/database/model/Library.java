@@ -24,35 +24,41 @@ package org.yamj.core.database.model;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.*;
-import org.apache.commons.lang3.StringUtils;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "library",
-    uniqueConstraints= @UniqueConstraint(name="UIX_LIBRARY_NATURALID", columnNames={"client", "player_path"})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_LIBRARY_NATURALID", columnNames = {"client", "player_path"})
 )
+@SuppressWarnings("PersistenceUnitPresent")
 public class Library extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -3086992329257871600L;
-    
+
     @NaturalId
     @Column(name = "client", nullable = false, length = 100)
     private String client;
-    
+
     @NaturalId
     @Column(name = "player_path", nullable = false, length = 255)
     private String playerPath;
-    
+
     @Column(name = "base_directory", nullable = false, length = 255)
     private String baseDirectory;
-    
+
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "last_scanned", nullable = false)
     private Date lastScanned;
 
     // GETTER and SETTER
-    
     public String getClient() {
         return client;
     }
@@ -86,49 +92,24 @@ public class Library extends AbstractIdentifiable implements Serializable {
     }
 
     // EQUALITY CHECKS
-    
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getClient() == null ? 0 : getClient().hashCode());
-        result = prime * result + (getPlayerPath() == null ? 0 : getPlayerPath().hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(getClient())
+                .append(getPlayerPath())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof Library) {
+            final Library other = (Library) obj;
+            return new EqualsBuilder()
+                    .append(getClient(), other.getClient())
+                    .append(getPlayerPath(), other.getPlayerPath())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof Library)) {
-            return false;
-        }
-        Library castOther = (Library) other;
-
-        if (!StringUtils.equals(getClient(), castOther.getClient())) {
-            return false;
-        }
-        return StringUtils.equals(getPlayerPath(), castOther.getPlayerPath());
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Library [ID=");
-        sb.append(getId());
-        sb.append(", client=");
-        sb.append(getClient());
-        sb.append(", playerPath=");
-        sb.append(getPlayerPath());
-        sb.append(", baseDirectory=");
-        sb.append(getBaseDirectory());
-        sb.append(", lastScanned=");
-        sb.append(getLastScanned());
-        sb.append("]");
-        return sb.toString();
     }
 }

@@ -29,7 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Tools that are useful to the classes themselves, not necessary for functionality
+ * Tools that are useful to the classes themselves, not necessary for
+ * functionality
  *
  * @author stuart.boston
  */
@@ -57,6 +58,7 @@ public class ClassTools {
      *
      * @param property
      * @param defaultValue
+     * @return
      */
     public static String checkSystemProperty(String property, String defaultValue) {
         // Check to see if the yamj3.home property is set

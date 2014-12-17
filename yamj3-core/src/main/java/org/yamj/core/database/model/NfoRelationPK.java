@@ -27,6 +27,8 @@ import javax.persistence.Embeddable;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.ForeignKey;
@@ -76,30 +78,23 @@ public class NfoRelationPK implements Serializable {
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + Long.valueOf(getStageFile().getId()).hashCode();
-        result = prime * result + Long.valueOf(getVideoData().getId()).hashCode();
-
-        return result;
+        return new HashCodeBuilder()
+                .append(getStageFile())
+                .append(getVideoData())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof NfoRelationPK) {
+            final NfoRelationPK other = (NfoRelationPK) obj;
+            return new EqualsBuilder()
+                    .append(getStageFile().getId(), other.getStageFile().getId())
+                    .append(getVideoData(), other.getVideoData())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof NfoRelationPK)) {
-            return false;
-        }
-        NfoRelationPK castOther = (NfoRelationPK) other;
-        if (getStageFile().getId() != castOther.getStageFile().getId()) {
-            return false;
-        }
-        return getVideoData().getId() == castOther.getVideoData().getId();
     }
 
     @Override

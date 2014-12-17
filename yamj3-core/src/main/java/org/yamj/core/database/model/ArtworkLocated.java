@@ -25,20 +25,31 @@ package org.yamj.core.database.model;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.*;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.*;
-import org.yamj.common.tools.EqualityTools;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.Index;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 
 @Entity
 @Table(name = "artwork_located",
-    uniqueConstraints= @UniqueConstraint(name="UIX_ARTWORKLOCATED_NATURALID", columnNames={"artwork_id", "stagefile_id", "source", "url"})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORKLOCATED_NATURALID", columnNames = {"artwork_id", "stagefile_id", "source", "url"})
 )
+@SuppressWarnings("PersistenceUnitPresent")
 public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -981494909436217076L;
@@ -56,15 +67,15 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     private StageFile stageFile;
 
     // only used for equality checks
-    @Column(name = "stagefile_id", insertable=false, updatable=false)
-    private Long stageFileId; 
-    
+    @Column(name = "stagefile_id", insertable = false, updatable = false)
+    private Long stageFileId;
+
     @Index(name = "IX_ARTWORKLOCATED_DOWNLOAD")
     @Column(name = "source", length = 50)
     private String source;
 
     @Index(name = "IX_ARTWORKLOCATED_DOWNLOAD")
-    @Column(name = "url", length=255)
+    @Column(name = "url", length = 255)
     private String url;
 
     @Index(name = "IX_ARTWORKLOCATED_STATUS")
@@ -84,13 +95,13 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @Column(name = "height", nullable = false)
     private int height = -1;
 
-    @Column(name = "language", length=30)
+    @Column(name = "language", length = 30)
     private String language;
 
-    @Column(name = "rating", nullable=false)
+    @Column(name = "rating", nullable = false)
     private int rating = -1;
 
-    @Column(name = "cache_filename",length = 255)
+    @Column(name = "cache_filename", length = 255)
     private String cacheFilename;
 
     @Column(name = "cache_dir", length = 50)
@@ -100,7 +111,6 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     private Set<ArtworkGenerated> generatedArtworks = new HashSet<ArtworkGenerated>(0);
 
     // GETTER and SETTER
-
     public Artwork getArtwork() {
         return artwork;
     }
@@ -117,7 +127,7 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
         this.stageFile = stageFile;
         setStageFileId(stageFile == null ? null : stageFile.getId());
     }
-    
+
     private Long getStageFileId() {
         return stageFileId;
     }
@@ -223,66 +233,38 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     }
 
     // TRANSIENT METHODS
-    
     public boolean isValidStatus() {
         if (status == null) {
             return false;
         }
-        if (StatusType.DONE.equals(status)) {
-            return true;
-        }
-        if (StatusType.NEW.equals(status)) {
-            return true;
-        }
-        if (StatusType.UPDATED.equals(status)) {
-            return true;
-        }
-        return false;
+        return StatusType.DONE.equals(status) || StatusType.NEW.equals(status) || StatusType.UPDATED.equals(status);
     }
-    
-    // EQUALITY CHECKS
 
+    // EQUALITY CHECKS
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getArtwork() == null ? 0 : getArtwork().hashCode());
-        result = prime * result + (getStageFileId() == null ? 0 : getStageFileId().hashCode());
-        result = prime * result + (getSource() == null ? 0 : getSource().hashCode());
-        result = prime * result + (getUrl() == null ? 0 : getUrl().hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(getArtwork())
+                .append(getStageFileId())
+                .append(getSource())
+                .append(getUrl())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof ArtworkLocated) {
+            final ArtworkLocated other = (ArtworkLocated) obj;
+            return new EqualsBuilder()
+                    .append(getId(), other.getId())
+                    .append(getSource(), other.getSource())
+                    .append(getUrl(), other.getUrl())
+                    .append(getArtwork(), other.getArtwork())
+                    .append(getStageFileId(), other.getStageFileId())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof ArtworkLocated)) {
-            return false;
-        }
-        ArtworkLocated castOther = (ArtworkLocated) other;
-        // first check the id
-        if ((getId() > 0) && (castOther.getId() > 0)) {
-            return getId() == castOther.getId();
-        }
-        // check source
-        if (!StringUtils.equals(getSource(), castOther.getSource())) {
-            return false;
-        }
-        // check URL
-        if (!StringUtils.equals(getUrl(), castOther.getUrl())) {
-            return false;
-        }
-        // check artwork
-        if (EqualityTools.notEquals(getArtwork(), castOther.getArtwork())) {
-            return false;
-        }
-        // check stage file id
-        return EqualityTools.equals(getStageFileId(), castOther.getStageFileId());
     }
 
     @Override

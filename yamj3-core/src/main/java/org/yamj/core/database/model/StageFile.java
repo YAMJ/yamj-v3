@@ -29,6 +29,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
 import org.yamj.common.tools.EqualityTools;
@@ -37,9 +39,9 @@ import org.yamj.core.database.model.type.FileType;
 
 @Entity
 @Table(name = "stage_file",
-    uniqueConstraints= @UniqueConstraint(name="UIX_STAGEFILE_NATURALID", columnNames={"directory_id", "base_name", "extension"})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_STAGEFILE_NATURALID", columnNames = {"directory_id", "base_name", "extension"})
 )
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "PersistenceUnitPresent"})
 public class StageFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -6247352843375054146L;
@@ -90,7 +92,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
     @Lob
     @Column(name = "content")
     private String content;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @Fetch(FetchMode.SELECT)
     @ForeignKey(name = "FK_STAGEFILE_MEDIAFILE")
@@ -98,7 +100,6 @@ public class StageFile extends AbstractAuditable implements Serializable {
     private MediaFile mediaFile;
 
     // GETTER and SETTER
-    
     public StageDirectory getStageDirectory() {
         return stageDirectory;
     }
@@ -106,7 +107,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
     public void setStageDirectory(StageDirectory stageDirectory) {
         this.stageDirectory = stageDirectory;
     }
-    
+
     public String getBaseName() {
         return baseName;
     }
@@ -206,9 +207,8 @@ public class StageFile extends AbstractAuditable implements Serializable {
     public void setSubtitles(Set<Subtitle> subtitles) {
         this.subtitles = subtitles;
     }
-    
+
     // TRANSIENT METHODS
-    
     public String getFileName() {
         return this.getBaseName() + "." + this.getExtension();
     }
@@ -219,43 +219,28 @@ public class StageFile extends AbstractAuditable implements Serializable {
     }
 
     // EQUALITY CHECKS
-    
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getExtension() == null ? 0 : getExtension().hashCode());
-        result = prime * result + (getBaseName() == null ? 0 : getBaseName().hashCode());
-        result = prime * result + (getStageDirectory() == null ? 0 : Long.valueOf(getStageDirectory().getId()).hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(getExtension())
+                .append(getBaseName())
+                .append(getStageDirectory())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof StageFile) {
+            final StageFile other = (StageFile) obj;
+            return new EqualsBuilder()
+                    .append(getId(), other.getId())
+                    .append(getExtension(), other.getExtension())
+                    .append(getBaseName(), other.getBaseName())
+                    .append(getStageDirectory(), other.getStageDirectory())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof StageFile)) {
-            return false;
-        }
-        StageFile castOther = (StageFile) other;
-        // first check the id
-        if ((getId() > 0) && (castOther.getId() > 0)) {
-            return getId() == castOther.getId();
-        }
-        // check extension
-        if (!StringUtils.equals(getExtension(), castOther.getExtension())) {
-            return false;
-        }
-        // check base name
-        if (!StringUtils.equals(getBaseName(), castOther.getBaseName())) {
-            return false;
-        }
-        // check stage directory
-        return EqualityTools.equals(getStageDirectory(), castOther.getStageDirectory());
     }
 
     @Override

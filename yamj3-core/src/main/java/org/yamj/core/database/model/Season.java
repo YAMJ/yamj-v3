@@ -29,6 +29,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
@@ -43,7 +45,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
     @Index(name = "IX_SEASON_TITLE", columnNames = {"title"}),
     @Index(name = "IX_SEASON_STATUS", columnNames = {"status"})
 })
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused","PersistenceUnitPresent"})
 public class Season extends AbstractMetadata {
 
     private static final long serialVersionUID = 1858640563119637343L;
@@ -94,7 +96,7 @@ public class Season extends AbstractMetadata {
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
 
     // CONSTRUCTORS
-    
+
     public Season() {
         super();
     }
@@ -104,9 +106,9 @@ public class Season extends AbstractMetadata {
         setIdentifier(identifier);
     }
 
-    
+
     // GETTER and SETTER
-    
+
     public int getSeason() {
         return season;
     }
@@ -186,7 +188,7 @@ public class Season extends AbstractMetadata {
     public String getOverrideSource(OverrideFlag overrideFlag) {
         return overrideFlags.get(overrideFlag);
     }
-    
+
     @Override
     public boolean removeOverrideSource(final String source) {
         boolean removed = false;
@@ -199,7 +201,7 @@ public class Season extends AbstractMetadata {
         }
         return removed;
     }
-    
+
     public Series getSeries() {
         return series;
     }
@@ -230,7 +232,7 @@ public class Season extends AbstractMetadata {
         if (CollectionUtils.isEmpty(this.getVideoDatas())) {
             return true;
         }
-        
+
         for (VideoData videoData : this.getVideoDatas()) {
             if (!videoData.isTvEpisodeDone(sourceDb)) {
                 return false;
@@ -238,7 +240,7 @@ public class Season extends AbstractMetadata {
         }
         return true;
     }
-    
+
     public void setTvSeasonDone() {
         super.setLastScanned(new Date(System.currentTimeMillis()));
         this.setStatus(StatusType.DONE);
@@ -251,30 +253,22 @@ public class Season extends AbstractMetadata {
 
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getIdentifier() == null ? 0 : getIdentifier().hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(getIdentifier())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof Season) {
+            final Season other = (Season) obj;
+            return new EqualsBuilder()
+                    .append(getId(), other.getId())
+                    .append(getIdentifier(), other.getIdentifier())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof Season)) {
-            return false;
-        }
-        Season castOther = (Season) other;
-        // first check the id
-        if ((getId() > 0) && (castOther.getId() > 0)) {
-            return getId() == castOther.getId();
-        }
-        // check the identifier
-        return StringUtils.equals(getIdentifier(), castOther.getIdentifier());
     }
 
     @Override

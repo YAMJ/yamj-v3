@@ -27,13 +27,15 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "certification",
-    uniqueConstraints= @UniqueConstraint(name="UIX_CERTIFICATION_NATURALID", columnNames={"country","certificate"})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_CERTIFICATION_NATURALID", columnNames = {"country", "certificate"})
 )
+@SuppressWarnings("PersistenceUnitPresent")
 public class Certification extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 5949467240717893584L;
@@ -45,9 +47,8 @@ public class Certification extends AbstractIdentifiable implements Serializable 
     @NaturalId
     @Column(name = "certificate", nullable = false, length = 255)
     private String certificate;
-    
-    // GETTER and SETTER
 
+    // GETTER and SETTER
     public String getCountry() {
         return country;
     }
@@ -65,42 +66,26 @@ public class Certification extends AbstractIdentifiable implements Serializable 
     }
 
     // EQUALITY CHECKS
-
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getCountry() == null ? 0 : getCountry().hashCode());
-        result = prime * result + (getCertificate() == null ? 0 : getCertificate().hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(getCountry())
+                .append(getCertificate())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof Certification) {
+            final Certification other = (Certification) obj;
+            return new EqualsBuilder()
+                    .append(getId(), other.getId())
+                    .append(getCountry(), other.getCountry())
+                    .append(getCertificate(), other.getCertificate())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof Certification)) {
-            return false;
-        }
-        Certification castOther = (Certification) other;
-        // first check the id
-        if ((getId() > 0) && (castOther.getId() > 0)) {
-            return getId() == castOther.getId();
-        }
-        // check country
-        if (!StringUtils.equals(getCountry(), castOther.getCountry())) {
-            return false;
-        }
-        // check text
-        if (!StringUtils.equals(getCertificate(), castOther.getCertificate())) {
-            return false;
-        }
-        // all checks passed
-        return true;
     }
 
     @Override

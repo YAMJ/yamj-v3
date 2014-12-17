@@ -31,19 +31,21 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
 @Entity
 @Table(name = "person",
-    uniqueConstraints = @UniqueConstraint(name = "UIX_PERSON_NATURALID", columnNames = {"identifier"})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_PERSON_NATURALID", columnNames = {"identifier"})
 )
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "PersistenceUnitPresent"})
 public class Person extends AbstractAuditable implements IScannable, Serializable {
 
     private static final long serialVersionUID = 660066902996412843L;
-    
+
     @NaturalId
     @Column(name = "identifier", nullable = false, length = 255)
     private String identifier;
@@ -54,13 +56,13 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @Temporal(value = TemporalType.DATE)
     @Column(name = "birth_day")
     private Date birthDay;
-    
+
     @Column(name = "birth_place", length = 255)
     private String birthPlace;
-    
+
     @Column(name = "birth_name", length = 255)
     private String birthName;
-    
+
     @Temporal(value = TemporalType.DATE)
     @Column(name = "death_day")
     private Date deathDay;
@@ -71,7 +73,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @Lob
     @Column(name = "biography", length = 50000)
     private String biography;
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "person_ids", joinColumns = @JoinColumn(name = "person_id"))
     @ForeignKey(name = "FK_PERSON_SOURCEIDS")
@@ -79,7 +81,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 40)
     private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
-    
+
     @Index(name = "IX_PERSON_STATUS")
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
@@ -88,10 +90,10 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "last_scanned")
     private Date lastScanned;
-    
+
     @Column(name = "retries", nullable = false)
     private int retries = 0;
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "person_override", joinColumns = @JoinColumn(name = "person_id"))
     @ForeignKey(name = "FK_PERSON_OVERRIDE")
@@ -108,29 +110,27 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "person")
     private Set<FilmParticipation> filmography = new HashSet<FilmParticipation>(0);
-    
+
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "person")
     private Artwork photo;
-    
+
     @Transient
-    private Map<String,String> photoURLS = new HashMap<String,String>(0);
+    private Map<String, String> photoURLS = new HashMap<String, String>(0);
 
     @Transient
     private Set<FilmParticipation> newFilmography = new HashSet<FilmParticipation>(0);
-    
+
     // CONSTRUCTORS
-    
     public Person() {
         super();
     }
-    
+
     public Person(String identifier) {
         super();
         this.identifier = identifier;
     }
-    
+
     // GETTER and SETTER
-    
     public String getIdentifier() {
         return identifier;
     }
@@ -138,7 +138,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     private void setIdentifier(String identifier) {
         this.identifier = identifier;
     }
-    
+
     public String getName() {
         return name;
     }
@@ -206,7 +206,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     private void setDeathDay(Date deathDay) {
         this.deathDay = deathDay;
     }
-    
+
     public void setDeathDay(Date deathDay, String source) {
         if (deathDay != null) {
             this.deathDay = deathDay;
@@ -265,10 +265,10 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         this.sourceDbIdMap.put(sourceDb, id.trim());
     }
 
-    public boolean setSourceDbIds(Map<String,String> sourceDbIdMap) {
-        boolean changed  = false;
+    public boolean setSourceDbIds(Map<String, String> sourceDbIdMap) {
+        boolean changed = false;
         if (MapUtils.isNotEmpty(sourceDbIdMap)) {
-            for (Entry<String,String> entry : sourceDbIdMap.entrySet()) {
+            for (Entry<String, String> entry : sourceDbIdMap.entrySet()) {
                 String sourceDb = entry.getKey();
                 String newId = StringUtils.trimToNull(entry.getValue());
                 if (StringUtils.isNotBlank(sourceDb) && (newId != null)) {
@@ -298,7 +298,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     public void setLastScanned(Date lastScanned) {
         this.lastScanned = lastScanned;
     }
-    
+
     @Override
     public int getRetries() {
         return retries;
@@ -349,9 +349,8 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     public void setPhoto(Artwork photo) {
         this.photo = photo;
     }
-    
-    // TRANSIENT METHODS
 
+    // TRANSIENT METHODS
     public Map<String, String> getPhotoURLS() {
         return photoURLS;
     }
@@ -369,35 +368,26 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     public void setNewFilmography(Set<FilmParticipation> newFilmography) {
         this.newFilmography = newFilmography;
     }
-    
-    // EQUALITY CHECKS
 
+    // EQUALITY CHECKS
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getIdentifier() == null ? 0 : getIdentifier().hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(getIdentifier())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof Person) {
+            final Person other = (Person) obj;
+            return new EqualsBuilder()
+                    .append(getId(), other.getId())
+                    .append(getIdentifier(), other.getIdentifier())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof Person)) {
-            return false;
-        }
-        Person castOther = (Person) other;
-        // first check the id
-        if ((getId() > 0) && (castOther.getId() > 0)) {
-            return getId() == castOther.getId();
-        }
-        // check the identifier
-        return StringUtils.equals(getIdentifier(), castOther.getIdentifier());
     }
 
     @Override

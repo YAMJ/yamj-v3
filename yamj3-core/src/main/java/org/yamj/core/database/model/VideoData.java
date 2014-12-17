@@ -31,6 +31,8 @@ import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.dto.CreditDTO;
@@ -46,46 +48,46 @@ import org.yamj.core.database.model.type.OverrideFlag;
             @Index(name = "IX_VIDEODATA_TITLE", columnNames = {"title"}),
             @Index(name = "IX_VIDEODATA_STATUS", columnNames = {"status"})
         })
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "PersistenceUnitPresent"})
 public class VideoData extends AbstractMetadata {
 
     private static final long serialVersionUID = 885531396557944590L;
-    
+
     @Column(name = "episode", nullable = false)
     private int episode = -1;
-    
+
     @Index(name = "IX_VIDEODATA_PUBLICATIONYEAR")
     @Column(name = "publication_year", nullable = false)
     private int publicationYear = -1;
-    
+
     @Temporal(value = TemporalType.DATE)
     @Column(name = "release_date")
     private Date releaseDate;
-    
+
     @Column(name = "top_rank", nullable = false)
     private int topRank = -1;
-    
+
     @Lob
     @Column(name = "tagline", length = 25000)
     private String tagline;
-    
+
     @Lob
     @Column(name = "quote", length = 25000)
     private String quote;
-    
+
     @Column(name = "country", length = 100)
     private String country;
-    
-    @Column(name = "skip_online_scans", length=255)
+
+    @Column(name = "skip_online_scans", length = 255)
     private String skipOnlineScans;
-    
-    @Column(name =  "watched_nfo", nullable = false)
+
+    @Column(name = "watched_nfo", nullable = false)
     private boolean watchedNfo = false;
 
-    @Column(name =  "watched_file", nullable = false)
+    @Column(name = "watched_file", nullable = false)
     private boolean watchedFile = false;
-    
-    @Column(name =  "watched_api", nullable = false)
+
+    @Column(name = "watched_api", nullable = false)
     private boolean watchedApi = false;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -95,7 +97,7 @@ public class VideoData extends AbstractMetadata {
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_ratings", joinColumns = @JoinColumn(name = "videodata_id"))
     @ForeignKey(name = "FK_VIDEODATA_RATINGS")
@@ -103,7 +105,7 @@ public class VideoData extends AbstractMetadata {
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_override", joinColumns = @JoinColumn(name = "videodata_id"))
     @ForeignKey(name = "FK_VIDEODATA_OVERRIDE")
@@ -112,37 +114,37 @@ public class VideoData extends AbstractMetadata {
     @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
     private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
-    
+
     @ManyToMany
     @ForeignKey(name = "FK_DATAGENRES_VIDEODATA", inverseName = "FK_DATAGENRES_GENRE")
     @JoinTable(name = "videodata_genres",
-               joinColumns = @JoinColumn(name = "data_id"),
-               inverseJoinColumns = @JoinColumn(name = "genre_id"))
+            joinColumns = @JoinColumn(name = "data_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id"))
     private Set<Genre> genres = new HashSet<Genre>(0);
 
     @ManyToMany
     @ForeignKey(name = "FK_DATASTUDIOS_VIDEODATA", inverseName = "FK_DATASTUDIOS_STUDIO")
     @JoinTable(name = "videodata_studios",
-               joinColumns = @JoinColumn(name = "data_id"),
-               inverseJoinColumns = @JoinColumn(name = "studio_id"))
+            joinColumns = @JoinColumn(name = "data_id"),
+            inverseJoinColumns = @JoinColumn(name = "studio_id"))
     private Set<Studio> studios = new HashSet<Studio>(0);
-    
+
     @ManyToMany
     @ForeignKey(name = "FK_DATACERTS_VIDEODATA", inverseName = "FK_DATACERTS_CERTIFICATION")
     @JoinTable(name = "videodata_certifications",
-               joinColumns = @JoinColumn(name = "data_id"),
-               inverseJoinColumns = @JoinColumn(name = "cert_id"))
+            joinColumns = @JoinColumn(name = "data_id"),
+            inverseJoinColumns = @JoinColumn(name = "cert_id"))
     private Set<Certification> certifications = new HashSet<Certification>(0);
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_VIDEODATA_SEASON")
     @Fetch(FetchMode.JOIN)
     @JoinColumn(name = "season_id")
     private Season season;
-    
+
     @ManyToMany(mappedBy = "videoDatas")
     private Set<MediaFile> mediaFiles = new HashSet<MediaFile>(0);
-    
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "castCrewPK.videoData")
     private List<CastCrew> credits = new ArrayList<CastCrew>(0);
 
@@ -151,33 +153,32 @@ public class VideoData extends AbstractMetadata {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
-    
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "nfoRelationPK.videoData")
     private List<NfoRelation> nfoRelations = new ArrayList<NfoRelation>(0);
-        
+
     @Transient
     private Set<String> genreNames;
-    
+
     @Transient
     private Set<String> studioNames;
 
     @Transient
-    private Map<String,String> certificationInfos = new HashMap<String,String>(0);
+    private Map<String, String> certificationInfos = new HashMap<String, String>(0);
 
     @Transient
-    private Map<String,Integer> setInfos = new HashMap<String,Integer>(0);
+    private Map<String, Integer> setInfos = new HashMap<String, Integer>(0);
 
     @Transient
     private Set<CreditDTO> creditDTOS = new LinkedHashSet<CreditDTO>(0);
-    
+
     @Transient
-    private Map<String,String> posterURLS = new HashMap<String,String>(0);
-    
+    private Map<String, String> posterURLS = new HashMap<String, String>(0);
+
     @Transient
-    private Map<String,String> fanartURLS = new HashMap<String,String>(0);
-    
+    private Map<String, String> fanartURLS = new HashMap<String, String>(0);
+
     // CONSTRUCTORS
-    
     public VideoData() {
         super();
     }
@@ -188,7 +189,6 @@ public class VideoData extends AbstractMetadata {
     }
 
     // GETTER and SETTER
-    
     public int getPublicationYear() {
         return publicationYear;
     }
@@ -281,7 +281,7 @@ public class VideoData extends AbstractMetadata {
             setOverrideFlag(OverrideFlag.COUNTRY, source);
         }
     }
-    
+
     public Map<String, String> getSourceDbIdMap() {
         return sourceDbIdMap;
     }
@@ -327,7 +327,7 @@ public class VideoData extends AbstractMetadata {
     public void setWatchedApi(boolean watchedApi) {
         this.watchedApi = watchedApi;
     }
-    
+
     @Override
     public void setSourceDbId(String sourceDb, String id) {
         if (StringUtils.isNotBlank(id)) {
@@ -348,7 +348,7 @@ public class VideoData extends AbstractMetadata {
             this.ratings.put(sourceDb, Integer.valueOf(rating));
         }
     }
-    
+
     private Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
@@ -371,7 +371,7 @@ public class VideoData extends AbstractMetadata {
     public boolean removeOverrideSource(final String source) {
         boolean removed = false;
         for (Iterator<Entry<OverrideFlag, String>> it = this.overrideFlags.entrySet().iterator(); it.hasNext();) {
-            Entry<OverrideFlag,String> e = it.next();
+            Entry<OverrideFlag, String> e = it.next();
             if (StringUtils.endsWithIgnoreCase(e.getValue(), source)) {
                 it.remove();
                 removed = true;
@@ -387,7 +387,7 @@ public class VideoData extends AbstractMetadata {
     public void setGenres(Set<Genre> genres) {
         this.genres = genres;
     }
-    
+
     public Set<Certification> getCertifications() {
         return certifications;
     }
@@ -395,7 +395,7 @@ public class VideoData extends AbstractMetadata {
     public void setCertifications(Set<Certification> certifications) {
         this.certifications = certifications;
     }
-    
+
     public Set<Studio> getStudios() {
         return studios;
     }
@@ -444,7 +444,7 @@ public class VideoData extends AbstractMetadata {
         }
         return null;
     }
-    
+
     public void setArtworks(List<Artwork> artworks) {
         this.artworks = artworks;
     }
@@ -474,11 +474,10 @@ public class VideoData extends AbstractMetadata {
     }
 
     // TRANSIENTS METHODS
-    
     public boolean isWatched() {
         return (this.watchedNfo || this.watchedFile || this.watchedApi);
     }
-        
+
     public Set<CreditDTO> getCreditDTOS() {
         return creditDTOS;
     }
@@ -503,12 +502,12 @@ public class VideoData extends AbstractMetadata {
                 credit.setRealName(creditDTO.getRealName());
             }
             if (MapUtils.isNotEmpty(creditDTO.getPhotoURLS())) {
-                for (Entry<String,String> entry : creditDTO.getPhotoURLS().entrySet()) {
+                for (Entry<String, String> entry : creditDTO.getPhotoURLS().entrySet()) {
                     credit.addPhotoURL(entry.getKey(), entry.getValue());
                 }
             }
             if (MapUtils.isNotEmpty(creditDTO.getPersonIdMap())) {
-                for (Entry<String,String> entry : creditDTO.getPersonIdMap().entrySet()) {
+                for (Entry<String, String> entry : creditDTO.getPersonIdMap().entrySet()) {
                     credit.addPersonId(entry.getKey(), entry.getValue());
                 }
             }
@@ -520,7 +519,7 @@ public class VideoData extends AbstractMetadata {
             this.addCreditDTO(creditDTO);
         }
     }
-    
+
     public Set<String> getGenreNames() {
         return genreNames;
     }
@@ -543,13 +542,13 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
-    public Map<String,String> getCertificationInfos() {
+    public Map<String, String> getCertificationInfos() {
         return certificationInfos;
     }
 
-    public void setCertificationInfos(Map<String,String> certificationInfos) {
+    public void setCertificationInfos(Map<String, String> certificationInfos) {
         if (MapUtils.isNotEmpty(certificationInfos)) {
-            for (Entry<String,String> entry : certificationInfos.entrySet()) {
+            for (Entry<String, String> entry : certificationInfos.entrySet()) {
                 this.addCertificationInfo(entry.getKey(), entry.getValue());
             }
         }
@@ -568,17 +567,17 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
-    public Map<String,Integer> getSetInfos() {
+    public Map<String, Integer> getSetInfos() {
         return setInfos;
     }
-    
+
     public void addSetInfo(String setName, Integer ordering) {
         if (StringUtils.isNotBlank(setName)) {
             this.setInfos.put(setName, ordering);
         }
     }
-    
-    public void addSetInfos(Map<String,Integer> setInfos) {
+
+    public void addSetInfos(Map<String, Integer> setInfos) {
         if (MapUtils.isNotEmpty(setInfos)) {
             this.setInfos.putAll(setInfos);
         }
@@ -605,7 +604,6 @@ public class VideoData extends AbstractMetadata {
     }
 
     // TV CHECKS
-
     public boolean isTvEpisodeDone(String sourceDb) {
         if (StringUtils.isBlank(this.getSourceDbId(sourceDb))) {
             // not done if episode ID not set
@@ -613,7 +611,7 @@ public class VideoData extends AbstractMetadata {
         }
         return (StatusType.DONE.equals(this.getStatus()));
     }
-    
+
     public void setTvEpisodeDone() {
         super.setLastScanned(new Date(System.currentTimeMillis()));
         this.setStatus(StatusType.TEMP_DONE);
@@ -650,33 +648,24 @@ public class VideoData extends AbstractMetadata {
     }
 
     // EQUALITY CHECKS
-    
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getIdentifier() == null ? 0 : getIdentifier().hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(getIdentifier())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof VideoData) {
+            final VideoData other = (VideoData) obj;
+            return new EqualsBuilder()
+                    .append(getId(), other.getId())
+                    .append(getIdentifier(), other.getIdentifier())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof VideoData)) {
-            return false;
-        }
-        VideoData castOther = (VideoData) other;
-        // first check the id
-        if ((getId() > 0) && (castOther.getId() > 0)) {
-            return getId() == castOther.getId();
-        }
-        // check the identifier
-        return StringUtils.equals(getIdentifier(), castOther.getIdentifier());
     }
 
     @Override

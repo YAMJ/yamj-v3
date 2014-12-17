@@ -23,7 +23,12 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.NaturalId;
 
@@ -32,16 +37,17 @@ import org.hibernate.annotations.NaturalId;
     uniqueConstraints = {@UniqueConstraint(name = "UIX_BOXEDSET_VIDEODATA", columnNames = {"boxedset_id","videodata_id"}),
                          @UniqueConstraint(name = "UIX_BOXEDSET_SERIES", columnNames = {"boxedset_id", "series_id"})}
 )
+@SuppressWarnings("PersistenceUnitPresent")
 public class BoxedSetOrder extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -3478878273175067619L;
-        
+
     @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_BOXEDSETORDER_BOXEDSET")
     @JoinColumn(name = "boxedset_id", nullable = false)
     private BoxedSet boxedSet;
-    
+
     @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_BOXEDSETORDER_VIDEODATA")

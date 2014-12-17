@@ -25,14 +25,22 @@ package org.yamj.core.database.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.*;
-import org.apache.commons.lang3.StringUtils;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "boxed_set",
-    uniqueConstraints = @UniqueConstraint(name = "UIX_BOXEDSET_NATURALID", columnNames = {"name"})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_BOXEDSET_NATURALID", columnNames = {"name"})
 )
+@SuppressWarnings("PersistenceUnitPresent")
 public class BoxedSet extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 3074855702659953694L;
@@ -45,7 +53,6 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
 
     // GETTER and SETTER
-    
     public String getName() {
         return name;
     }
@@ -61,35 +68,26 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
     public void setArtworks(List<Artwork> artworks) {
         this.artworks = artworks;
     }
-    
+
     // EQUALITY CHECKS
-    
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getName() == null ? 0 : getName().hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(getName())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof BoxedSet) {
+            final BoxedSet other = (BoxedSet) obj;
+            return new EqualsBuilder()
+                    .append(getId(), other.getId())
+                    .append(getName(), other.getName())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof BoxedSet)) {
-            return false;
-        }
-        BoxedSet castOther = (BoxedSet) other;
-        // first check the id
-        if ((getId() > 0) && (castOther.getId() > 0)) {
-            return getId() == castOther.getId();
-        }
-        // check the name
-        return StringUtils.equalsIgnoreCase(getName(), castOther.getName());
     }
 
     @Override

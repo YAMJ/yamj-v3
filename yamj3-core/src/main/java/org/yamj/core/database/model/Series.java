@@ -31,6 +31,8 @@ import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
@@ -44,20 +46,20 @@ import org.yamj.core.database.model.type.OverrideFlag;
             @Index(name = "IX_SERIES_TITLE", columnNames = {"title"}),
             @Index(name = "IX_SERIES_STATUS", columnNames = {"status"})
         })
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "PersistenceUnitPresent"})
 public class Series extends AbstractMetadata {
 
     private static final long serialVersionUID = -5782361288021493423L;
-    
+
     @Column(name = "start_year")
     private int startYear = -1;
-    
+
     @Column(name = "end_year")
     private int endYear = -1;
-    
-    @Column(name = "skip_online_scans", length=255)
+
+    @Column(name = "skip_online_scans", length = 255)
     private String skipOnlineScans;
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_ids", joinColumns = @JoinColumn(name = "series_id"))
     @ForeignKey(name = "FK_SERIES_SOURCEIDS")
@@ -65,7 +67,7 @@ public class Series extends AbstractMetadata {
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_ratings", joinColumns = @JoinColumn(name = "series_id"))
     @ForeignKey(name = "FK_SERIES_RATINGS")
@@ -73,7 +75,7 @@ public class Series extends AbstractMetadata {
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_override", joinColumns = @JoinColumn(name = "series_id"))
     @ForeignKey(name = "FK_SERIES_OVERRIDE")
@@ -82,51 +84,52 @@ public class Series extends AbstractMetadata {
     @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
     private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
-    
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
     private Set<Season> seasons = new HashSet<Season>(0);
-    
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
     private List<Artwork> artworks = new ArrayList<Artwork>(0);
-    
+
     @ManyToMany
     @ForeignKey(name = "FK_SERIESGENRES_SERIES", inverseName = "FK_SERIESGENRES_GENRE")
     @JoinTable(name = "series_genres",
-               joinColumns = { @JoinColumn(name = "series_id")},
-               inverseJoinColumns = { @JoinColumn(name = "genre_id")})
+            joinColumns = {
+                @JoinColumn(name = "series_id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "genre_id")})
     private Set<Genre> genres = new HashSet<Genre>(0);
 
     @ManyToMany
     @ForeignKey(name = "FK_SERIESCERTS_SERIES", inverseName = "FK_SERIESCERTS_CERTIFICATION")
     @JoinTable(name = "series_certifications",
-               joinColumns = @JoinColumn(name = "series_id"),
-               inverseJoinColumns = @JoinColumn(name = "cert_id"))
+            joinColumns = @JoinColumn(name = "series_id"),
+            inverseJoinColumns = @JoinColumn(name = "cert_id"))
     private Set<Certification> certifications = new HashSet<Certification>(0);
 
     @ManyToMany
     @ForeignKey(name = "FK_SERIESSTUDIOS_SERIES", inverseName = "FK_SERIESSTUDIOS_STUDIO")
     @JoinTable(name = "series_studios",
-               joinColumns = @JoinColumn(name = "series_id"),
-               inverseJoinColumns = @JoinColumn(name = "studio_id"))
+            joinColumns = @JoinColumn(name = "series_id"),
+            inverseJoinColumns = @JoinColumn(name = "studio_id"))
     private Set<Studio> studios = new HashSet<Studio>(0);
 
     @Transient
     private Set<String> genreNames;
-    
+
     @Transient
     private Set<String> studioNames;
 
     @Transient
-    private Map<String,String> certificationInfos = new HashMap<String,String>(0);
-    
+    private Map<String, String> certificationInfos = new HashMap<String, String>(0);
+
     @Transient
-    private Map<String,String> posterURLS = new HashMap<String,String>(0);
-    
+    private Map<String, String> posterURLS = new HashMap<String, String>(0);
+
     @Transient
-    private Map<String,String> fanartURLS = new HashMap<String,String>(0);
+    private Map<String, String> fanartURLS = new HashMap<String, String>(0);
 
     // CONSTRUCTORS
-    
     public Series() {
         super();
     }
@@ -137,7 +140,6 @@ public class Series extends AbstractMetadata {
     }
 
     // GETTER and SETTER
-    
     public int getStartYear() {
         return startYear;
     }
@@ -233,7 +235,7 @@ public class Series extends AbstractMetadata {
     public boolean removeOverrideSource(final String source) {
         boolean removed = false;
         for (Iterator<Entry<OverrideFlag, String>> it = this.overrideFlags.entrySet().iterator(); it.hasNext();) {
-            Entry<OverrideFlag,String> e = it.next();
+            Entry<OverrideFlag, String> e = it.next();
             if (StringUtils.endsWithIgnoreCase(e.getValue(), source)) {
                 it.remove();
                 removed = true;
@@ -241,7 +243,7 @@ public class Series extends AbstractMetadata {
         }
         return removed;
     }
-    
+
     public Set<Season> getSeasons() {
         return seasons;
     }
@@ -262,7 +264,7 @@ public class Series extends AbstractMetadata {
         }
         return null;
     }
-    
+
     private void setArtworks(List<Artwork> artworks) {
         this.artworks = artworks;
     }
@@ -282,7 +284,7 @@ public class Series extends AbstractMetadata {
     public void setCertifications(Set<Certification> certifications) {
         this.certifications = certifications;
     }
-    
+
     public Set<Studio> getStudios() {
         return studios;
     }
@@ -292,7 +294,6 @@ public class Series extends AbstractMetadata {
     }
 
     // TRANSIENTS METHODS
-    
     public Set<String> getGenreNames() {
         return genreNames;
     }
@@ -315,13 +316,13 @@ public class Series extends AbstractMetadata {
         }
     }
 
-    public Map<String,String> getCertificationInfos() {
+    public Map<String, String> getCertificationInfos() {
         return certificationInfos;
     }
 
-    public void setCertificationInfos(Map<String,String> certificationInfos) {
+    public void setCertificationInfos(Map<String, String> certificationInfos) {
         if (MapUtils.isNotEmpty(certificationInfos)) {
-            for (Entry<String,String> entry : certificationInfos.entrySet()) {
+            for (Entry<String, String> entry : certificationInfos.entrySet()) {
                 this.addCertificationInfo(entry.getKey(), entry.getValue());
             }
         }
@@ -339,7 +340,7 @@ public class Series extends AbstractMetadata {
             this.certificationInfos.put(country, certificate);
         }
     }
-    
+
     public Map<String, String> getPosterURLS() {
         return posterURLS;
     }
@@ -361,33 +362,24 @@ public class Series extends AbstractMetadata {
     }
 
     // EQUALITY CHECKS
-    
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getIdentifier() == null ? 0 : getIdentifier().hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(getIdentifier())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof Series) {
+            final Series other = (Series) obj;
+            return new EqualsBuilder()
+                    .append(getId(), other.getId())
+                    .append(getIdentifier(), other.getIdentifier())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof Series)) {
-            return false;
-        }
-        Series castOther = (Series) other;
-        // first check the id
-        if ((getId() > 0) && (castOther.getId() > 0)) {
-            return getId() == castOther.getId();
-        }
-        // check the identifier
-        return StringUtils.equals(getIdentifier(), castOther.getIdentifier());
     }
 
     @Override

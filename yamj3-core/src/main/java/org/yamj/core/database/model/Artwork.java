@@ -25,21 +25,32 @@ package org.yamj.core.database.model;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.*;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.*;
-import org.yamj.common.tools.EqualityTools;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.Index;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.ArtworkType;
 
 @Entity
 @Table(name = "artwork",
-    uniqueConstraints= @UniqueConstraint(name="UIX_ARTWORK_NATURALID", columnNames={"artwork_type","videodata_id","season_id","series_id","person_id","boxedset_id"})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORK_NATURALID", columnNames = {"artwork_type", "videodata_id", "season_id", "series_id", "person_id", "boxedset_id"})
 )
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "PersistenceUnitPresent"})
 public class Artwork extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -981494909436217076L;
@@ -49,28 +60,28 @@ public class Artwork extends AbstractAuditable implements Serializable {
     @Type(type = "artworkType")
     @Column(name = "artwork_type", nullable = false)
     private ArtworkType artworkType;
-    
+
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_VIDEODATA")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "videodata_id")
     private VideoData videoData;
-    
+
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_SEASON")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "season_id")
     private Season season;
-    
+
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_SERIES")
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "series_id")
     private Series series;
-    
+
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_ARTWORK_PHOTO")
@@ -84,17 +95,16 @@ public class Artwork extends AbstractAuditable implements Serializable {
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "boxedset_id")
     private BoxedSet boxedSet;
-    
+
     @Index(name = "IX_ARTWORK_STATUS")
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
-    
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "artwork")
-    private Set<ArtworkLocated> artworkLocated = new HashSet<ArtworkLocated>(0);
+    private Set<ArtworkLocated> artworkLocated = new HashSet<>(0);
 
     // GETTER and SETTER
-    
     public ArtworkType getArtworkType() {
         return artworkType;
     }
@@ -160,7 +170,6 @@ public class Artwork extends AbstractAuditable implements Serializable {
     }
 
     // TRANSIENT METHODS
-    
     public IMetadata getMetadata() {
         if (getVideoData() != null) {
             return getVideoData();
@@ -178,58 +187,34 @@ public class Artwork extends AbstractAuditable implements Serializable {
     }
 
     // EQUALITY CHECKS
-    
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getArtworkType() == null ? 0 : getArtworkType().hashCode());
-        result = prime * result + (getVideoData() == null ? 0 : getVideoData().hashCode());
-        result = prime * result + (getSeason() == null ? 0 : getSeason().hashCode());
-        result = prime * result + (getSeries() == null ? 0 : getSeries().hashCode());
-        result = prime * result + (getPerson() == null ? 0 : getPerson().hashCode());
-        result = prime * result + (getBoxedSet() == null ? 0 : getBoxedSet().hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(getArtworkType())
+                .append(getVideoData())
+                .append(getSeason())
+                .append(getSeries())
+                .append(getPerson())
+                .append(getBoxedSet())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof Library) {
+            final Artwork other = (Artwork) obj;
+            return new EqualsBuilder()
+                    .append(getId(), other.getId())
+                    .append(getArtworkType(), other.getArtworkType())
+                    .append(getVideoData(), other.getVideoData())
+                    .append(getSeason(), other.getSeason())
+                    .append(getSeries(), other.getSeries())
+                    .append(getPerson(), other.getPerson())
+                    .append(getBoxedSet(), other.getBoxedSet())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof Artwork)) {
-            return false;
-        }
-        Artwork castOther = (Artwork) other;
-        // first check the id
-        if ((getId() > 0) && (castOther.getId() > 0)) {
-            return getId() == castOther.getId();
-        }
-        // check artwork type
-        if (getArtworkType() != castOther.getArtworkType()) {
-            return false;
-        }
-        // check video data
-        if (EqualityTools.notEquals(getVideoData(), castOther.getVideoData())) {
-            return false;
-        }
-        // check season
-        if (EqualityTools.notEquals(getSeason(), castOther.getSeason())) {
-            return false;
-        }
-        // check series
-        if (EqualityTools.notEquals(getSeries(), castOther.getSeries())) {
-            return false;
-        }
-        // check series
-        if (EqualityTools.notEquals(getPerson(), castOther.getPerson())) {
-            return false;
-        }
-        // check boxed set
-        return EqualityTools.equals(getBoxedSet(), castOther.getBoxedSet());
     }
 
     @Override

@@ -26,6 +26,8 @@ import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.core.hibernate.Identifiable;
 
 /**
@@ -47,5 +49,10 @@ public abstract class AbstractIdentifiable implements Identifiable {
     @SuppressWarnings("unused")
     private void setId(long id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

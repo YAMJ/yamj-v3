@@ -30,6 +30,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
@@ -38,11 +40,11 @@ import org.yamj.core.database.model.type.FileType;
 @Table(name = "mediafile",
     uniqueConstraints= @UniqueConstraint(name="UIX_MEDIAFILE_NATURALID", columnNames={"file_name"})
 )
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused","PersistenceUnitPresent"})
 public class MediaFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 8411423609119475972L;
-    
+
     @NaturalId
     @Column(name = "file_name", nullable = false, length = 255)
     private String fileName;
@@ -61,7 +63,7 @@ public class MediaFile extends AbstractAuditable implements Serializable {
 
     @Column(name = "container", length = 30)
     private String container;
-    
+
     @Column(name = "codec", length = 50)
     private String codec;
 
@@ -79,19 +81,19 @@ public class MediaFile extends AbstractAuditable implements Serializable {
 
     @Column(name = "fps", nullable = false)
     private float fps = -1;
-    
+
     @Column(name = "width", nullable = false)
     private int width = -1;
-    
+
     @Column(name = "height", nullable = false)
     private int height = -1;
-    
+
     @Column(name = "aspect_ratio", length = 30)
     private String aspectRatio;
-    
+
     @Column(name = "runtime", nullable = false)
     private int runtime;
-    
+
     @Column(name = "video_source", length = 30)
     private String videoSource;
 
@@ -103,11 +105,11 @@ public class MediaFile extends AbstractAuditable implements Serializable {
 
     @Column(name =  "watched_api", nullable = false)
     private boolean watchedApi = false;
-    
+
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
-    
+
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "mediafile_videodata",
                joinColumns = {@JoinColumn(name = "mediafile_id")},
@@ -127,7 +129,7 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     private Set<Subtitle> subtitles = new HashSet<Subtitle>(0);
 
     // GETTER and SETTER
-    
+
     public String getFileName() {
         return fileName;
     }
@@ -183,7 +185,7 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     public void setCodec(String codec) {
         this.codec = codec;
     }
-    
+
     public String getCodecFormat() {
         return codecFormat;
     }
@@ -271,7 +273,7 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     public void setEpisodeCount(int episodeCount) {
         this.episodeCount = episodeCount;
     }
-    
+
     public boolean isWatchedFile() {
         return watchedFile;
     }
@@ -337,18 +339,18 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     }
 
     // TRANSIENT METHODS
-    
+
     public StageFile getVideoFile() {
         for (StageFile stageFile : getStageFiles()) {
             if (FileType.VIDEO.equals(stageFile.getFileType())
-                && !StatusType.DUPLICATE.equals(stageFile.getStatus())) 
+                && !StatusType.DUPLICATE.equals(stageFile.getStatus()))
             {
                 return stageFile;
             }
         }
         return null;
     }
-    
+
     public AudioCodec getAudioCodec(int counter) {
         for (AudioCodec audioCodec : this.audioCodecs) {
             if (audioCodec.getCounter() == counter) {
@@ -368,28 +370,24 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     }
 
     // EQUALITY CHECKS
-    
+
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getFileName() == null ? 0 : getFileName().hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(getFileName())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof MediaFile) {
+            final MediaFile other = (MediaFile) obj;
+            return new EqualsBuilder()
+                    .append(getFileName(), other.getFileName())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof MediaFile)) {
-            return false;
-        }
-        MediaFile castOther = (MediaFile) other;
-        return StringUtils.equals(getFileName(), castOther.getFileName());
     }
 
     @Override

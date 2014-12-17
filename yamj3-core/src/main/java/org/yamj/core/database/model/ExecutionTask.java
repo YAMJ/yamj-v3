@@ -26,11 +26,14 @@ import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Type;
 import org.yamj.core.database.model.type.IntervalType;
 
 @Entity
 @Table(name = "execution_task")
+@SuppressWarnings("PersistenceUnitPresent")
 public class ExecutionTask implements Serializable {
 
     private static final long serialVersionUID = 5730223895964642472L;
@@ -48,7 +51,7 @@ public class ExecutionTask implements Serializable {
     @Type(type = "intervalType")
     @Column(name = "interval_type", nullable = false, length = 20)
     private IntervalType intervalType;
-    
+
     @Column(name = "delay", nullable = false)
     private int delay = -1;
 
@@ -61,7 +64,7 @@ public class ExecutionTask implements Serializable {
     private Date lastExecution;
 
     // GETTER AND SETTER
-    
+
     public String getName() {
         return name;
     }
@@ -69,7 +72,7 @@ public class ExecutionTask implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public String getTaskName() {
         return taskName;
     }
@@ -122,25 +125,21 @@ public class ExecutionTask implements Serializable {
 
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getName() == null ? 0 : getName().hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(getName())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof ExecutionTask) {
+            final ExecutionTask other = (ExecutionTask) obj;
+            return new EqualsBuilder()
+                    .append(getName(), other.getName())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof ExecutionTask)) {
-            return false;
-        }
-        ExecutionTask castOther = (ExecutionTask) other;
-        return StringUtils.equalsIgnoreCase(getName(), castOther.getName());
     }
 
     @Override

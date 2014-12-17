@@ -22,8 +22,6 @@
  */
 package org.yamj.common.tools;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -34,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * System level helper methods
  *
  * @author Stuart
  */
@@ -44,7 +43,8 @@ public class SystemTools {
     private static String ipv6 = null;
 
     /**
-     * Search through the the network adapters and get the IPv4 address of the server.
+     * Search through the the network adapters and get the IPv4 address of the
+     * server.
      *
      * @return
      */
@@ -106,20 +106,5 @@ public class SystemTools {
         } else {
             return ipv6;
         }
-    }
-
-    /**
-     * Helper method to print the stack trace to the log file
-     *
-     * @param tw
-     * @return
-     */
-    public static String getStackTrace(Throwable tw) {
-        final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw, true);
-        tw.printStackTrace(pw);
-        pw.flush();
-        sw.flush();
-        return sw.toString();
     }
 }

@@ -27,11 +27,13 @@ import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import org.yamj.common.tools.EqualityTools;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.yamj.core.database.model.type.JobType;
 
 @Entity
 @Table(name = "cast_crew")
+@SuppressWarnings("PersistenceUnitPresent")
 public class CastCrew implements Serializable {
 
     private static final long serialVersionUID = -3941301942248344131L;
@@ -46,9 +48,9 @@ public class CastCrew implements Serializable {
     private int ordering;
 
     // GETTER and SETTER
+    public CastCrew() {
+    }
 
-    public CastCrew() {}
-    
     public CastCrew(Person person, VideoData videoData, JobType jobType) {
         setCastCrewPK(new CastCrewPK(person, videoData, jobType));
     }
@@ -76,29 +78,24 @@ public class CastCrew implements Serializable {
     public void setOrdering(int ordering) {
         this.ordering = ordering;
     }
-    
-    // EQUALITY CHECKS
 
+    // EQUALITY CHECKS
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getCastCrewPK() == null ? 0 : getCastCrewPK().hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(getCastCrewPK())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof CastCrew) {
+            final CastCrew other = (CastCrew) obj;
+            return new EqualsBuilder()
+                    .append(getCastCrewPK(), other.getCastCrewPK())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof CastCrew)) {
-            return false;
-        }
-        CastCrew castOther = (CastCrew) other;
-        return EqualityTools.equals(getCastCrewPK(), castOther.getCastCrewPK());
     }
 }

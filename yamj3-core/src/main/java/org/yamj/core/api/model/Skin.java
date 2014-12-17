@@ -33,8 +33,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamj.common.tools.ClassTools;
 import org.yamj.common.tools.StringTools;
-import org.yamj.common.tools.SystemTools;
 
 public class Skin {
 
@@ -45,7 +45,7 @@ public class Skin {
     private String sourceUrl = "";
     private String name = "";
     private String path = "";
-    private List<String> description = new ArrayList<String>();
+    private List<String> description = new ArrayList<>();
     private String image = "";
     private String version = "";
     private String skinDate = "";
@@ -167,7 +167,7 @@ public class Skin {
             setSupportUrl(xmlConfig.getString("supportUrl"));
         } catch (ConfigurationException error) {
             LOG.error("Failed reading version information file '{}'", SKIN_VERSION_FILENAME);
-            LOG.warn(SystemTools.getStackTrace(error));
+            LOG.warn(ClassTools.getStackTrace(error));
         }
     }
 

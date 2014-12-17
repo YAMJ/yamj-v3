@@ -27,16 +27,19 @@ import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.yamj.common.tools.EqualityTools;
 
 @Entity
 @Table(name = "nfo_relation")
+@SuppressWarnings("PersistenceUnitPresent")
 public class NfoRelation implements Serializable {
 
     private static final long serialVersionUID = 1083402240122932701L;
 
-    @EmbeddedId 
-    private NfoRelationPK nfoRelationPK; 
+    @EmbeddedId
+    private NfoRelationPK nfoRelationPK;
 
     @Column(name = "priority", nullable = false)
     private int priority = -1;
@@ -66,27 +69,23 @@ public class NfoRelation implements Serializable {
     }
 
     // EQUALITY CHECKS
-    
+
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getNfoRelationPK() == null ? 0 : getNfoRelationPK().hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(getNfoRelationPK())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof NfoRelation) {
+            final NfoRelation other = (NfoRelation) obj;
+            return new EqualsBuilder()
+                    .append(getNfoRelationPK(), other.getNfoRelationPK())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof NfoRelation)) {
-            return false;
-        }
-        NfoRelation castOther = (NfoRelation) other;
-        return EqualityTools.equals(getNfoRelationPK(), castOther.getNfoRelationPK());
     }
 }

@@ -26,14 +26,17 @@ import java.io.Serializable;
 import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
 import org.yamj.common.tools.EqualityTools;
 
 @Entity
 @Table(name = "subtitle",
-    uniqueConstraints= @UniqueConstraint(name="UIX_SUBTITLE_NATURALID", columnNames={"mediafile_id", "stagefile_id", "counter"})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_SUBTITLE_NATURALID", columnNames = {"mediafile_id", "stagefile_id", "counter"})
 )
+@SuppressWarnings("PersistenceUnitPresent")
 public class Subtitle extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -6279878819525772005L;
@@ -125,43 +128,28 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
     }
 
     // EQUALITY CHECKS
-
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getMediaFile() == null ? 0 : getMediaFile().hashCode());
-        result = prime * result + (getStageFile() == null ? 0 : getStageFile().hashCode());
-        result = prime * result + getCounter();
-        return result;
+        return new HashCodeBuilder()
+                .append(getMediaFile())
+                .append(getStageFile())
+                .append(getCounter())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof Subtitle) {
+            final Subtitle other = (Subtitle) obj;
+            return new EqualsBuilder()
+                    .append(getId(), other.getId())
+                    .append(getCounter(), other.getCounter())
+                    .append(getMediaFile(), other.getMediaFile())
+                    .append(getStageFile(), other.getStageFile())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof Subtitle)) {
-            return false;
-        }
-        Subtitle castOther = (Subtitle) other;
-        // first check the id
-        if ((getId() > 0) && (castOther.getId() > 0)) {
-            return getId() == castOther.getId();
-        }
-        // check counter
-        if (getCounter() != castOther.getCounter()) {
-            return false;
-        }
-        // check media file
-        if (EqualityTools.notEquals(getMediaFile(), castOther.getMediaFile())) {
-            return false;
-        }
-        // check stage file
-        return EqualityTools.equals(getStageFile(), castOther.getStageFile());
     }
 
     @Override

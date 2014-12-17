@@ -23,18 +23,26 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.yamj.common.tools.EqualityTools;
 
 @Entity
 @Table(name = "audio_codec",
-    uniqueConstraints= @UniqueConstraint(name="UIX_AUDIOCODEC_NATURALID", columnNames={"mediafile_id", "counter"})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_AUDIOCODEC_NATURALID", columnNames = {"mediafile_id", "counter"})
 )
+@SuppressWarnings("PersistenceUnitPresent")
 public class AudioCodec extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -6279878819525772005L;
@@ -66,7 +74,6 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
     private String language;
 
     // GETTER AND SETTER
-    
     public MediaFile getMediaFile() {
         return mediaFile;
     }
@@ -124,38 +131,26 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
     }
 
     // EQUALITY CHECKS
-
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getMediaFile() == null ? 0 : getMediaFile().hashCode());
-        result = prime * result + getCounter();
-        return result;
+        return new HashCodeBuilder()
+                .append(getMediaFile())
+                .append(getCounter())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof AudioCodec) {
+            final AudioCodec other = (AudioCodec) obj;
+            return new EqualsBuilder()
+                    .append(getId(), other.getId())
+                    .append(getCounter(), other.getCounter())
+                    .append(getMediaFile(), other.getMediaFile())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof AudioCodec)) {
-            return false;
-        }
-        AudioCodec castOther = (AudioCodec) other;
-        // first check the id
-        if ((getId() > 0) && (castOther.getId() > 0)) {
-            return getId() == castOther.getId();
-        }
-        // check counter
-        if (getCounter() != castOther.getCounter()) {
-            return false;
-        }
-        // check media file
-        return EqualityTools.equals(getMediaFile(), castOther.getMediaFile());
     }
 
     @Override

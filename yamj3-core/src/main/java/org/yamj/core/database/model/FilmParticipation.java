@@ -28,14 +28,17 @@ import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.ParticipationType;
 
 @Entity
 @Table(name = "participation",
-    uniqueConstraints = @UniqueConstraint(name = "UIX_PARTICIPATION_NATURALID", columnNames = {"person_id", "sourcedb", "sourcedb_id", "job"})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_PARTICIPATION_NATURALID", columnNames = {"person_id", "sourcedb", "sourcedb_id", "job"})
 )
+@SuppressWarnings("PersistenceUnitPresent")
 public class FilmParticipation extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 8182882526775933702L;
@@ -69,10 +72,10 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
 
     @Column(name = "title", nullable = false, length = 255)
     private String title;
-    
+
     @Column(name = "title_original", length = 255)
     private String titleOriginal;
-    
+
     @Lob
     @Column(name = "description", length = 50000)
     private String description;
@@ -91,7 +94,6 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     private String releaseState;
 
     // GETTER and SETTER
-    
     public String getSourceDb() {
         return sourceDb;
     }
@@ -171,7 +173,7 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     public void setYear(int year) {
         this.year = year;
     }
-    
+
     public int getYearEnd() {
         return yearEnd;
     }
@@ -187,7 +189,7 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     public void setReleaseDate(Date releaseDate) {
         this.releaseDate = releaseDate;
     }
-    
+
     public String getReleaseState() {
         return releaseState;
     }
@@ -195,9 +197,8 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     public void setReleaseState(String releaseState) {
         this.releaseState = releaseState;
     }
-    
-    // TRANSIENT METHODS
 
+    // TRANSIENT METHODS
     public void merge(FilmParticipation newFilmo) {
         this.setRole(newFilmo.getRole());
         this.setParticipationType(newFilmo.getParticipationType());
@@ -209,38 +210,29 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
         this.setReleaseDate(newFilmo.getReleaseDate());
         this.setReleaseState(newFilmo.getReleaseState());
     }
-    
-    // EQUALITY CHECKS
 
+    // EQUALITY CHECKS
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getSourceDb() == null ? 0 : getSourceDb().hashCode());
-        result = prime * result + (getSourceDbId() == null ? 0 : getSourceDbId().hashCode());
-        result = prime * result + (getJobType() == null ? 0 : getJobType().hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(getSourceDb())
+                .append(getSourceDbId())
+                .append(getJobType())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof FilmParticipation) {
+            final FilmParticipation other = (FilmParticipation) obj;
+            return new EqualsBuilder()
+                    .append(getSourceDb(), other.getSourceDb())
+                    .append(getSourceDbId(), other.getSourceDbId())
+                    .append(getJobType(), other.getJobType())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof FilmParticipation)) {
-            return false;
-        }
-        FilmParticipation castOther = (FilmParticipation) other;
-        if (!StringUtils.equalsIgnoreCase(getSourceDb(), castOther.getSourceDb())) {
-            return false;
-        }
-        if (!StringUtils.equalsIgnoreCase(getSourceDbId(), castOther.getSourceDbId())) {
-            return false;
-        }
-        return (getJobType() == castOther.getJobType());
     }
 
     @Override

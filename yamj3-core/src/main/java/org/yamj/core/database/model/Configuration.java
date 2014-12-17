@@ -25,33 +25,40 @@ package org.yamj.core.database.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.yamj.core.hibernate.Auditable;
 
 @Entity
 @Table(name = "configuration")
+@SuppressWarnings("PersistenceUnitPresent")
 public class Configuration implements Auditable, Serializable {
 
     private static final long serialVersionUID = -3985190780763596771L;
-    
+
     @Id
     @Column(name = "config_key", nullable = false, length = 255)
     private String key;
-    
+
     @Column(name = "config_value", length = 255)
     private String value;
-    
+
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "create_timestamp", nullable = false, updatable = false)
     private Date createTimestamp;
-    
+
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "update_timestamp")
     private Date updateTimestamp;
 
     // GETTER and SETTER
-    
     public String getKey() {
         return key;
     }
@@ -87,28 +94,23 @@ public class Configuration implements Auditable, Serializable {
     }
 
     // EQUALITY CHECKS
-    
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (getKey() == null ? 0 : getKey().hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(getKey())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof Configuration) {
+            final Configuration other = (Configuration) obj;
+            return new EqualsBuilder()
+                    .append(getKey(), other.getKey())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof Configuration)) {
-            return false;
-        }
-        Configuration castOther = (Configuration) other;
-        return StringUtils.equals(getKey(), castOther.getKey());
     }
 
     @Override
