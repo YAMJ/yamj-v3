@@ -98,6 +98,10 @@ public class ScannerManagementImpl implements ScannerManagement {
     private static final List<Pattern> DIR_IGNORE_FILES;
     // YAMJ Information
     private static final YamjInfo YAMJ_INFO = new YamjInfo(ScannerManagementImpl.class);
+    // Number of seconds to wait between checks
+    private static final int WAIT_10_SECONDS = 10;
+    // Length of the * line
+    private static final int DIVIDER_LINE_LENGTH = 50;
 
     static {
         // Set up the break scanning list. A "null" for the list means all files.
@@ -177,7 +181,8 @@ public class ScannerManagementImpl implements ScannerManagement {
         checkGitHubStatus();
         libraryCollection.setDefaultClient(DEFAULT_CLIENT);
         libraryCollection.setDefaultPlayerPath(DEFAULT_PLAYER_PATH);
-        pingCore.check(0, 0);   // Do a quick check of the status of the connection
+        // Do a quick check of the status of the connection
+        pingCore.check(0, 0);
 
         String directoryProperty = parser.getParsedOptionValue("d");
         boolean watchEnabled = parseWatchStatus(parser.getParsedOptionValue("w"));
@@ -220,14 +225,14 @@ public class ScannerManagementImpl implements ScannerManagement {
             if (!allDone) {
                 try {
                     LOG.info("Waiting for library sending to complete...");
-                    TimeUnit.SECONDS.sleep(10);
+                    TimeUnit.SECONDS.sleep(WAIT_10_SECONDS);
                 } catch (InterruptedException ex) {
                     LOG.trace("Interrupted whilst waiting for threads to complete.");
                 }
             }
         } while (!allDone);
 
-        LOG.info(StringUtils.repeat("*", 50));
+        LOG.info(StringUtils.repeat("*", DIVIDER_LINE_LENGTH));
         LOG.info("Completed initial sending of all libraries ({} total).", libraryCollection.size());
         LOG.info("");
         LOG.info("Library statistics:");

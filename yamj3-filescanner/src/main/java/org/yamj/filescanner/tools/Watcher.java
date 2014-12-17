@@ -48,12 +48,8 @@ public class Watcher {
     private boolean trace = Boolean.FALSE;
     @SuppressWarnings("rawtypes")
     private static final WatchEvent.Kind[] STANDARD_EVENTS = {ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE};
-    private boolean watchEnabled = Boolean.TRUE;    // keep watching the directories
-
-    @SuppressWarnings("unchecked")
-    private static <T> WatchEvent<T> cast(WatchEvent<?> event) {
-        return (WatchEvent<T>) event;
-    }
+    // keep watching the directories
+    private boolean watchEnabled = Boolean.TRUE;
 
     /**
      * Creates a WatchService
@@ -79,6 +75,11 @@ public class Watcher {
      */
     public Watcher(String dir) throws IOException {
         addDirectory(dir);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> WatchEvent<T> cast(WatchEvent<?> event) {
+        return (WatchEvent<T>) event;
     }
 
     /**

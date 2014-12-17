@@ -142,7 +142,7 @@ public final class SystemInfoCore {
 
         StringBuilder status = new StringBuilder("Core server last checked at ");
         status.append(DateTimeTools.convertDateToString(lastCheck, DATETIME_FORMAT));
-        if (diff > DIFF_CHECK_SECONDS * 1000) {
+        if (diff > TimeUnit.SECONDS.toMillis(DIFF_CHECK_SECONDS)) {
             // Only add the difference if the time was longer than 5 seconds
             status.append(", ");
             status.append(DateTimeTools.formatDurationText(diff));

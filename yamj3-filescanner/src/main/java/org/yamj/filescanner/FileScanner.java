@@ -42,18 +42,19 @@ import static org.yamj.common.type.ExitType.SUCCESS;
 public final class FileScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileScanner.class);
+    private static final String YAMJ3_HOME = "yamj3.home";
 
     public static void main(String[] args) throws IOException {
         PropertyConfigurator.configure("config/log4j-filescanner.properties");
 
         // Get the current directory
-        String yamjHome = ClassTools.checkSystemProperty("yamj3.home", (new File(".")).getCanonicalPath());
+        String yamjHome = ClassTools.checkSystemProperty(YAMJ3_HOME, (new File(".")).getCanonicalPath());
 
         try {
             // This is a temporary fix until the yamj3.home can be read from the servlet
-            ClassTools.checkSystemProperty("yamj3.home", (new File(yamjHome)).getCanonicalPath());
+            ClassTools.checkSystemProperty(YAMJ3_HOME, (new File(yamjHome)).getCanonicalPath());
         } catch (IOException ex) {
-            ClassTools.checkSystemProperty("yamj3.home", yamjHome);
+            ClassTools.checkSystemProperty(YAMJ3_HOME, yamjHome);
             LOG.trace("Exception:", ex);
         }
 
