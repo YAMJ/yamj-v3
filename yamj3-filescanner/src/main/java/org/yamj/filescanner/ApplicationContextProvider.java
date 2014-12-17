@@ -38,7 +38,7 @@ public class ApplicationContextProvider implements ApplicationContextAware {
      */
     @Override
     @SuppressWarnings("static-access")
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(ApplicationContext applicationContext) {
         // Assign the ApplicationContext into a static variable
         this.applicationContext = applicationContext;
     }

@@ -22,12 +22,13 @@
  */
 package org.yamj.filescanner.model;
 
-import org.yamj.common.tools.DateTimeTools;
 import java.util.EnumMap;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.text.WordUtils;
+import org.yamj.common.tools.DateTimeTools;
 
 /**
  * Class to store any statistics about the jukebox
@@ -37,13 +38,13 @@ import org.apache.commons.lang3.text.WordUtils;
 public class Statistics {
 
     // Statistics
-    private final EnumMap<StatType, Integer> statistics = new EnumMap<StatType, Integer>(StatType.class);
-    private final EnumMap<TimeType, Long> times = new EnumMap<TimeType, Long>(TimeType.class);
+    private final Map<StatType, Integer> stats = new EnumMap<>(StatType.class);
+    private final Map<TimeType, Long> times = new EnumMap<>(TimeType.class);
 
     public Statistics() {
         // Initialise the statistic values
         for (StatType stat : StatType.values()) {
-            statistics.put(stat, 0);
+            stats.put(stat, 0);
         }
 
         // Initialise the time values
@@ -59,7 +60,7 @@ public class Statistics {
      * @return
      */
     public synchronized int getStatistic(StatType stat) {
-        return statistics.get(stat);
+        return stats.get(stat);
     }
 
     /**
@@ -69,7 +70,7 @@ public class Statistics {
      * @param value
      */
     public synchronized void setStatistic(StatType stat, Integer value) {
-        statistics.put(stat, value);
+        stats.put(stat, value);
     }
 
     /**
@@ -89,12 +90,12 @@ public class Statistics {
      */
     public synchronized void increment(StatType stat, Integer amount) {
         Integer current;
-        if (statistics.containsKey(stat)) {
-            current = statistics.get(stat);
+        if (stats.containsKey(stat)) {
+            current = stats.get(stat);
         } else {
             current = 0;
         }
-        statistics.put(stat, current + amount);
+        stats.put(stat, current + amount);
     }
 
     /**
@@ -114,13 +115,13 @@ public class Statistics {
      */
     public synchronized void decrement(StatType stat, Integer amount) {
         Integer current;
-        if (statistics.containsKey(stat)) {
-            current = statistics.get(stat);
+        if (stats.containsKey(stat)) {
+            current = stats.get(stat);
         } else {
-            // The end result will be 0;
+            // The end result will be zero;
             current = amount;
         }
-        statistics.put(stat, current - amount);
+        stats.put(stat, current - amount);
     }
 
     /**
@@ -223,7 +224,7 @@ public class Statistics {
         // Build the counts
         int value;
         for (StatType stat : StatType.values()) {
-            value = statistics.get(stat);
+            value = stats.get(stat);
             if (value > 0 || !skipZero) {
                 statOutput.append(WordUtils.capitalizeFully(stat.toString().replace("_", " ").toLowerCase()));
                 statOutput.append(" = ").append(value).append("\n");

@@ -22,19 +22,29 @@
  */
 package org.yamj.filescanner.tools;
 
-import java.io.*;
-import java.util.*;
-import name.pachler.nio.file.*;
-import static name.pachler.nio.file.StandardWatchEventKind.*;
-import static name.pachler.nio.file.ext.ExtendedWatchEventModifier.*;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import name.pachler.nio.file.ClosedWatchServiceException;
+import name.pachler.nio.file.FileSystems;
+import name.pachler.nio.file.Path;
+import name.pachler.nio.file.Paths;
+import name.pachler.nio.file.StandardWatchEventKind;
+import static name.pachler.nio.file.StandardWatchEventKind.ENTRY_CREATE;
+import static name.pachler.nio.file.StandardWatchEventKind.ENTRY_DELETE;
+import static name.pachler.nio.file.StandardWatchEventKind.ENTRY_MODIFY;
+import name.pachler.nio.file.WatchEvent;
+import name.pachler.nio.file.WatchKey;
+import name.pachler.nio.file.WatchService;
+import static name.pachler.nio.file.ext.ExtendedWatchEventModifier.FILE_TREE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Watcher {
 
     private static final Logger LOG = LoggerFactory.getLogger(Watcher.class);
-    private final WatchService watcher = FileSystems.getDefault().newWatchService();
-    private final Map<WatchKey, Path> keys = new HashMap<WatchKey, Path>();
+    private final WatchService watcherService = FileSystems.getDefault().newWatchService();
+    private final Map<WatchKey, Path> keys = new HashMap<>();
     private boolean trace = Boolean.FALSE;
     @SuppressWarnings("rawtypes")
     private static final WatchEvent.Kind[] STANDARD_EVENTS = {ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE};
@@ -55,6 +65,7 @@ public class Watcher {
      * Creates a WatchService and registers the given directory
      *
      * @param dir
+     * @throws java.io.IOException
      */
     public Watcher(Path dir) throws IOException {
         addDirectory(dir);
@@ -64,6 +75,7 @@ public class Watcher {
      * Creates a WatchService and registers the given directory
      *
      * @param dir
+     * @throws java.io.IOException
      */
     public Watcher(String dir) throws IOException {
         addDirectory(dir);
@@ -98,7 +110,7 @@ public class Watcher {
     private void register(Path dir) {
         WatchKey key = null;
         try {
-            key = dir.register(watcher, STANDARD_EVENTS, FILE_TREE);
+            key = dir.register(watcherService, STANDARD_EVENTS, FILE_TREE);
         } catch (UnsupportedOperationException ex) {
             LOG.warn("File watching not supported: {}", ex.getMessage());
         } catch (IOException ex) {
@@ -129,7 +141,7 @@ public class Watcher {
             // wait for key to be signalled
             WatchKey key;
             try {
-                key = watcher.take();
+                key = watcherService.take();
             } catch (InterruptedException ex) {
                 continue;
             } catch (ClosedWatchServiceException ex) {
