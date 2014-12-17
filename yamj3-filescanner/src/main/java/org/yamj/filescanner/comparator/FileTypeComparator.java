@@ -67,7 +67,7 @@ public class FileTypeComparator implements Comparator<File>, Serializable {
     @Override
     public int compare(File file1, File file2) {
         if (file1.isDirectory() && file2.isFile()) {
-            return (directoriesFirst ? -1 : 1);
+            return directoriesFirst ? -1 : 1;
         }
 
         if (file1.isDirectory() && file2.isDirectory()) {
@@ -78,6 +78,6 @@ public class FileTypeComparator implements Comparator<File>, Serializable {
             return 0;
         }
 
-        return (directoriesFirst ? 1 : -1);
+        return directoriesFirst ? 1 : -1;
     }
 }

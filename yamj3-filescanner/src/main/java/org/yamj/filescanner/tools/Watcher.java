@@ -201,7 +201,7 @@ public class Watcher {
     }
 
     public void setWatching(boolean watchFlag) {
-        LOG.info("{} the watch process", (watchFlag ? "Enabling" : "Disabling"));
+        LOG.info("{} the watch process", watchFlag ? "Enabling" : "Disabling");
         this.watchEnabled = watchFlag;
     }
 }

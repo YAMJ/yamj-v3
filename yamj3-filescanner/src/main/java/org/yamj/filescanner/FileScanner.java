@@ -79,7 +79,7 @@ public final class FileScanner {
             help(parser);
             status = CMDLINE_ERROR;
         }
-        System.exit(status.getReturn());
+        System.exit(status.getReturn());    //NOSONAR
     }
 
     /**

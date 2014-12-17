@@ -40,7 +40,7 @@ public class ApplicationContextProvider implements ApplicationContextAware {
     @SuppressWarnings("static-access")
     public void setApplicationContext(ApplicationContext applicationContext) {
         // Assign the ApplicationContext into a static variable
-        this.applicationContext = applicationContext;
+        this.applicationContext = applicationContext;   //NOSONAR
     }
 
     /**
@@ -58,7 +58,7 @@ public class ApplicationContextProvider implements ApplicationContextAware {
      * @return
      */
     public static boolean isConfigured() {
-        return (applicationContext != null);
+        return applicationContext != null;
     }
 
     /**
