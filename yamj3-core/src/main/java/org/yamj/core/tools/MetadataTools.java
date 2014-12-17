@@ -22,6 +22,7 @@
  */
 package org.yamj.core.tools;
 
+import com.ibm.icu.impl.duration.TimeUnit;
 import com.ibm.icu.text.Transliterator;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -44,25 +45,27 @@ import org.yamj.core.database.model.VideoData;
 public final class MetadataTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(MetadataTools.class);
-    
+
     private static final Pattern CLEAN_STRING_PATTERN = Pattern.compile("[^a-zA-Z0-9\\-\\(\\)]");
-    private static final char[] CLEAN_DELIMITERS = new char[]{'.',' ','_','-'};
+    private static final char[] CLEAN_DELIMITERS = new char[]{'.', ' ', '_', '-'};
     private static final Pattern DATE_COUNTRY = Pattern.compile("(.*)(\\s*?\\(\\w*\\))");
     private static final Pattern YEAR_PATTERN = Pattern.compile("(?:.*?)(\\d{4})(?:.*?)");
     private static final String MPPA_RATED = "Rated";
     private static final long KB = 1024;
     private static final long MB = KB * KB;
     private static final long GB = KB * KB * KB;
-    private static final Map<Character, Character> CHAR_REPLACEMENT_MAP = new HashMap<Character, Character>();
-    
+    private static final Map<Character, Character> CHAR_REPLACEMENT_MAP = new HashMap<>();
+
     private static final DecimalFormat FILESIZE_FORMAT_0;
     private static final DecimalFormat FILESIZE_FORMAT_1;
     private static final DecimalFormat FILESIZE_FORMAT_2;
-    private static final SimpleDateFormat DATE_FORMAT;
-    private static final SimpleDateFormat DATE_FORMAT_LONG;
+    private static final SimpleDateFormat DATE_FORMATa = null;
+    private static final SimpleDateFormat DATE_FORMAT_LONGa = null;
     private static final boolean IDENT_TRANSLITERATE;
     private static final boolean IDENT_CLEAN;
     private static final Transliterator TRANSLITERATOR;
+
+    private static final String dateFormat = PropertyTools.getProperty("yamj3.date.format", "yyyy-MM-dd");
 
     private MetadataTools() {
         throw new UnsupportedOperationException("Class cannot be instantiated");
@@ -72,7 +75,7 @@ public final class MetadataTools {
         // identifier cleaning
         IDENT_TRANSLITERATE = PropertyTools.getBooleanProperty("yamj3.identifier.transliterate", Boolean.FALSE);
         IDENT_CLEAN = PropertyTools.getBooleanProperty("yamj3.identifier.clean", Boolean.TRUE);
-        
+
         // Populate the charReplacementMap
         String temp = PropertyTools.getProperty("indexing.character.replacement", "");
         StringTokenizer tokenizer = new StringTokenizer(temp, ",");
@@ -87,23 +90,6 @@ public final class MetadataTools {
                 }
             }
         }
-        
-        String dateFormat = PropertyTools.getProperty("yamj3.date.format", "yyyy-MM-dd");
-        
-        // short date format
-        SimpleDateFormat sdf;
-        try {
-            sdf = new SimpleDateFormat(dateFormat);
-        } catch (Exception ignore) {
-            sdf = new SimpleDateFormat("yyyy-MM-dd");
-        }
-        DATE_FORMAT = sdf;
-        try {
-            sdf = new SimpleDateFormat(dateFormat + " HH:mm:ss");
-        } catch (Exception ignore) {
-            sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        }
-        DATE_FORMAT_LONG = sdf;
 
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         // Use the "." as a decimal format separator, ignoring localisation
@@ -115,7 +101,7 @@ public final class MetadataTools {
         // create a new transliterator
         TRANSLITERATOR = Transliterator.getInstance("NFD; Any-Latin; NFC");
     }
-    
+
     /**
      * Check the passed character against the replacement list.
      *
@@ -134,14 +120,14 @@ public final class MetadataTools {
     /**
      * Change all the characters in a string to the safe replacements
      *
-     * @param stringToReplace
+     * @param input
      * @return
      */
     public static String stringMapReplacement(String input) {
         if (input == null || CHAR_REPLACEMENT_MAP.isEmpty()) {
             return input;
         }
-        
+
         Character tempC;
         StringBuilder sb = new StringBuilder();
 
@@ -158,28 +144,34 @@ public final class MetadataTools {
 
     /**
      * Format the date into short format
-     * 
+     *
      * @param date
+     * @return
      */
     public static String formatDateShort(Date date) {
         if (date == null) {
             return null;
         }
-        return DATE_FORMAT.format(date);
+
+        SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+        return sdf.format(date);
     }
 
     /**
      * Format the date into short format
-     * 
+     *
      * @param date
+     * @return
      */
     public static String formatDateLong(Date date) {
         if (date == null) {
             return null;
         }
-        return DATE_FORMAT_LONG.format(date);
+
+        SimpleDateFormat sdf = new SimpleDateFormat(dateFormat + " HH:mm:ss");
+        return sdf.format(date);
     }
-    
+
     /**
      * Format the file size
      *
@@ -188,8 +180,8 @@ public final class MetadataTools {
      */
     public static String formatFileSize(long fileSize) {
         String returnSize;
-        if (fileSize < 0 ) {
-           returnSize = null;
+        if (fileSize < 0) {
+            returnSize = null;
         } else if (fileSize < KB) {
             returnSize = fileSize + " Bytes";
         } else {
@@ -229,7 +221,7 @@ public final class MetadataTools {
     /**
      * Format the duration passed as ?h ?m format
      *
-     * @param duration duration in seconds
+     * @param runtime duration in seconds
      * @return
      */
     public static String formatRuntime(final int runtime) {
@@ -251,7 +243,7 @@ public final class MetadataTools {
             }
             returnString.append(nbMinutes).append("m");
         }
-        
+
         return returnString.toString();
     }
 
@@ -336,7 +328,7 @@ public final class MetadataTools {
      */
     public static Date parseToDate(String dateToParse) {
         Date parsedDate = null;
-        
+
         String parseDate = StringUtils.normalizeSpace(dateToParse);
         if (StringUtils.isNotBlank(parseDate)) {
             try {
@@ -364,13 +356,15 @@ public final class MetadataTools {
 
     /**
      * Get the year as string from given date.
-     * 
+     *
      * @param date
-     * @return 
+     * @return
      */
     public static String extractYearAsString(Date date) {
-        if (date == null) return null;
-        
+        if (date == null) {
+            return null;
+        }
+
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         return String.valueOf(cal.get(Calendar.YEAR));
@@ -378,13 +372,15 @@ public final class MetadataTools {
 
     /**
      * Get the year as integer from given date.
-     * 
+     *
      * @param date
-     * @return 
+     * @return
      */
     public static int extractYearAsInt(Date date) {
-        if (date == null) return -1;
-        
+        if (date == null) {
+            return -1;
+        }
+
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         return cal.get(Calendar.YEAR);
@@ -397,19 +393,17 @@ public final class MetadataTools {
      * @return
      */
     public static int extractYearAsInt(String date) {
-        if (StringUtils.isBlank(date))  {
+        if (StringUtils.isBlank(date)) {
             return -1;
         }
-        if (StringUtils.isNumeric(date) && (date.length()==4)) {
-            try {
-                return Integer.parseInt(date);
-            } catch (Exception ignore) {}
+        if (StringUtils.isNumeric(date) && (date.length() == 4)) {
+            return NumberUtils.toInt(date, -1);
         }
 
         int year = -1;
         Matcher m = YEAR_PATTERN.matcher(date);
         if (m.find()) {
-            year = Integer.valueOf(m.group(1)).intValue();
+            year = NumberUtils.toInt(m.group(1));
         }
 
         return year;
@@ -452,10 +446,10 @@ public final class MetadataTools {
             return -1;
         }
     }
-    
+
     /**
      * Checks if all media files have been watched.
-     * 
+     *
      * @param videoData
      * @param apiCall
      * @return
@@ -476,15 +470,12 @@ public final class MetadataTools {
             }
         }
 
-        if (onlyExtras) {
-            return false;
-        }
-        return true;
+        return !onlyExtras;
     }
-    
+
     /**
      * Remove alternate name from role
-     * 
+     *
      * @param role
      * @return
      */
@@ -493,23 +484,22 @@ public final class MetadataTools {
             return null;
         }
         String fixed = role;
-        
+
         // (as = alternate name)
         int idx = StringUtils.indexOfIgnoreCase(fixed, "(as ");
         if (idx > 0) {
             fixed = fixed.substring(0, idx);
         }
-        
+
         // double characters
         idx = StringUtils.indexOf(fixed, "/");
         if (idx > 0) {
             List<String> characters = StringTools.splitList(fixed, "/");
             fixed = StringUtils.join(characters.toArray(), " / ");
         }
-        
+
         return fixed;
     }
-
 
     /**
      * Get the certification from the MPAA string
@@ -538,11 +528,11 @@ public final class MetadataTools {
             return mpaaCertification.trim();
         }
     }
-    
+
     public static String cleanIdentifier(final String identifier) {
         String result = identifier;
         if (IDENT_TRANSLITERATE) {
-            result = TRANSLITERATOR.transliterate(result); 
+            result = TRANSLITERATOR.transliterate(result);
         }
         if (IDENT_CLEAN) {
             // format ß to ss
@@ -563,7 +553,7 @@ public final class MetadataTools {
 
     /**
      * Set the sort title.
-     * 
+     *
      * @param metadata the scanned metadata
      * @param prefixes a list with prefixed to strip
      */
@@ -574,7 +564,7 @@ public final class MetadataTools {
 
             // strip prefix
             for (String prefix : prefixes) {
-                String check = prefix.trim()+" ";
+                String check = prefix.trim() + " ";
                 if (StringUtils.startsWithIgnoreCase(sortTitle, check)) {
                     sortTitle = sortTitle.substring(check.length());
                     break;
@@ -589,20 +579,34 @@ public final class MetadataTools {
         while (idx < sortTitle.length() && !Character.isLetterOrDigit(sortTitle.charAt(idx))) {
             idx++;
         }
-        
+
         // replace all non-standard characters in the title sort
         sortTitle = MetadataTools.stringMapReplacement(sortTitle.substring(idx));
         metadata.setTitleSort(sortTitle);
     }
-    
+
     public static String getExternalSubtitleFormat(String extension) {
-        if ("srt".equalsIgnoreCase(extension)) return "SubRip";
-        if ("ssa".equalsIgnoreCase(extension)) return "SubStation Alpha";
-        if ("ass".equalsIgnoreCase(extension)) return "Advanced SubStation Alpha";
-        if ("pgs".equalsIgnoreCase(extension)) return "Presentation Grapic Stream";
-        if ("sup".equalsIgnoreCase(extension)) return "Presentation Grapic Stream";
-        if ("smi".equalsIgnoreCase(extension)) return "Synchronized Accessible Media Interchange";
-        if ("sami".equalsIgnoreCase(extension)) return "Synchronized Accessible Media Interchange";
+        if ("srt".equalsIgnoreCase(extension)) {
+            return "SubRip";
+        }
+        if ("ssa".equalsIgnoreCase(extension)) {
+            return "SubStation Alpha";
+        }
+        if ("ass".equalsIgnoreCase(extension)) {
+            return "Advanced SubStation Alpha";
+        }
+        if ("pgs".equalsIgnoreCase(extension)) {
+            return "Presentation Grapic Stream";
+        }
+        if ("sup".equalsIgnoreCase(extension)) {
+            return "Presentation Grapic Stream";
+        }
+        if ("smi".equalsIgnoreCase(extension)) {
+            return "Synchronized Accessible Media Interchange";
+        }
+        if ("sami".equalsIgnoreCase(extension)) {
+            return "Synchronized Accessible Media Interchange";
+        }
         return extension.toUpperCase();
     }
 }
