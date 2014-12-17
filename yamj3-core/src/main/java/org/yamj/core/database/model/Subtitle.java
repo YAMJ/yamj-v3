@@ -30,7 +30,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
-import org.yamj.common.tools.EqualityTools;
 
 @Entity
 @Table(name = "subtitle",
