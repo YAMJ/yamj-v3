@@ -110,14 +110,14 @@ public final class FileScanner {
 
             status = scannerManagement.runScanner(parser);
         } catch (BeansException ex) {
-            LOG.error("Failed to load scanner configuration");
-            ex.printStackTrace(System.err);
+            LOG.error("Failed to load scanner configuration", ex);
             status = CONFIG_ERROR;
         } finally {
             if (applicationContext != null) {
                 try {
                     applicationContext.close();
-                } catch (Exception ignore) {
+                } catch (Exception ex) {
+                    LOG.trace("No application context to close", ex);
                 }
             }
         }

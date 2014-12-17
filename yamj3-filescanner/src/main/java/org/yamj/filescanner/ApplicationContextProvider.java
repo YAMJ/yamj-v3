@@ -54,6 +54,7 @@ public class ApplicationContextProvider implements ApplicationContextAware {
 
     /**
      * Check that the application context is configured
+     *
      * @return
      */
     public static boolean isConfigured() {
@@ -64,12 +65,11 @@ public class ApplicationContextProvider implements ApplicationContextAware {
      * Get a bean using it's class and name
      *
      * @param <T>
-     * @param T
      * @param beanName
      * @return
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static <T> T getBean(Class T, String beanName) throws BeansException {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static <T> T getBean(String beanName) throws BeansException {
         return (T) applicationContext.getBean(beanName);
     }
 }

@@ -22,10 +22,6 @@
  */
 package org.yamj.filescanner.model;
 
-import org.yamj.common.dto.ImportDTO;
-import org.yamj.filescanner.dto.LibraryDTO;
-import org.yamj.filescanner.dto.LibraryEntryDTO;
-import org.yamj.filescanner.tools.XmlTools;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,14 +29,18 @@ import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.yamj.common.dto.ImportDTO;
+import org.yamj.filescanner.dto.LibraryDTO;
+import org.yamj.filescanner.dto.LibraryEntryDTO;
+import org.yamj.filescanner.tools.XmlTools;
 
 @Service("libraryCollection")
 public class LibraryCollection implements Serializable {
 
     private static final long serialVersionUID = -134476506971169954L;
     private static final Logger LOG = LoggerFactory.getLogger(LibraryCollection.class);
-    
-    private List<Library> libraries;
+
+    private final List<Library> libraries;
     private String defaultPlayerPath = "";
     private String defaultClient = "";
     // Spring
@@ -48,7 +48,7 @@ public class LibraryCollection implements Serializable {
     private XmlTools xmlTools;
 
     public LibraryCollection() {
-        libraries = new ArrayList<Library>();
+        libraries = new ArrayList<>();
     }
 
     /**
@@ -75,7 +75,7 @@ public class LibraryCollection implements Serializable {
      * @param path
      */
     public void remove(String path) {
-        List<Library> toRemove = new ArrayList<Library>();
+        List<Library> toRemove = new ArrayList<>();
         for (Library library : libraries) {
             if (library.getImportDTO().getBaseDirectory().equalsIgnoreCase(path)) {
                 toRemove.add(library);
@@ -110,10 +110,11 @@ public class LibraryCollection implements Serializable {
     }
 
     /**
-     * Read the library files (multiple) / command line properties and set up the library
+     * Read the library files (multiple) / command line properties and set up
+     * the library
      *
-     * @param libraryFilenames The name and location of the library files to process
-     * @param directoryProperty A single directory from the command line
+     * @param libraryFilenames The name and location of the library files to
+     * process
      * @param defaultWatchState The default watch status
      */
     public void processLibraryList(List<String> libraryFilenames, boolean defaultWatchState) {
@@ -130,11 +131,12 @@ public class LibraryCollection implements Serializable {
      * Read the library file from disk and return the library object
      *
      * @param libraryFilename the file to read
-     * @param defaultWatchState the default watched state if not provided in the file
-     * @return
+     * @param defaultWatchState the default watched state if not provided in the
+     * file
      */
     public void processLibraryFile(String libraryFilename, boolean defaultWatchState) {
-        LOG.info("Processing library file: '{}'", libraryFilename);
+        LOG.info("Processing library: {}", libraryFilename);
+        LOG.info("Default watch     : {}", defaultWatchState);
 
         LibraryDTO lib = xmlTools.read(libraryFilename, LibraryDTO.class);
 
@@ -205,5 +207,14 @@ public class LibraryCollection implements Serializable {
 
     public void setDefaultClient(String defaultClient) {
         this.defaultClient = defaultClient;
+    }
+
+    /**
+     * Is the library collection empty?
+     *
+     * @return
+     */
+    public boolean isEmpty() {
+        return libraries.isEmpty();
     }
 }

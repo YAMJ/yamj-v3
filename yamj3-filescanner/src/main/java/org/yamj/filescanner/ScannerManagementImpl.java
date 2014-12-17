@@ -22,22 +22,6 @@
  */
 package org.yamj.filescanner;
 
-import org.yamj.common.cmdline.CmdLineParser;
-import org.yamj.common.dto.StageDirectoryDTO;
-import org.yamj.common.dto.StageFileDTO;
-import org.yamj.common.remote.service.GitHubService;
-import org.yamj.common.tools.PropertyTools;
-import org.yamj.common.type.DirectoryType;
-import org.yamj.common.type.ExitType;
-import org.yamj.filescanner.comparator.FileTypeComparator;
-import org.yamj.filescanner.model.Library;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yamj.filescanner.model.LibraryCollection;
-import org.yamj.filescanner.model.StatType;
-import org.yamj.filescanner.service.SystemInfoCore;
-import org.yamj.filescanner.tools.DirectoryEnding;
-import org.yamj.filescanner.tools.Watcher;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,15 +39,31 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.util.CollectionUtils;
+import org.yamj.common.cmdline.CmdLineParser;
+import org.yamj.common.dto.StageDirectoryDTO;
+import org.yamj.common.dto.StageFileDTO;
 import org.yamj.common.model.YamjInfo;
+import org.yamj.common.remote.service.GitHubService;
+import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.tools.StringTools;
+import org.yamj.common.type.DirectoryType;
+import org.yamj.common.type.ExitType;
 import org.yamj.common.type.StatusType;
 import org.yamj.common.util.KeywordMap;
+import org.yamj.filescanner.comparator.FileTypeComparator;
+import org.yamj.filescanner.model.Library;
+import org.yamj.filescanner.model.LibraryCollection;
+import org.yamj.filescanner.model.StatType;
 import org.yamj.filescanner.model.TimeType;
+import org.yamj.filescanner.service.SystemInfoCore;
+import org.yamj.filescanner.tools.DirectoryEnding;
+import org.yamj.filescanner.tools.Watcher;
 
 /**
  * Performs an initial scan of the library location and then updates when changes occur.
@@ -93,7 +93,7 @@ public class ScannerManagementImpl implements ScannerManagement {
     // Date check
     private static final int MAX_INSTALL_AGE = PropertyTools.getIntProperty("filescanner.installation.maxdays", 1);
     // Map of filenames & extensions that cause scanning of a directory to stop or a filename to be ignored
-    private static final Map<String, List<String>> DIR_EXCLUSIONS = new HashMap<String, List<String>>();
+    private static final Map<String, List<String>> DIR_EXCLUSIONS = new HashMap<>();
     private static final List<Pattern> DIR_IGNORE_FILES;
     // YAMJ Information
     private static final YamjInfo YAMJ_INFO = new YamjInfo(ScannerManagementImpl.class);
@@ -113,7 +113,7 @@ public class ScannerManagementImpl implements ScannerManagement {
         if (CollectionUtils.isEmpty(keywordList)) {
             DIR_IGNORE_FILES = Collections.emptyList();
         } else {
-            DIR_IGNORE_FILES = new ArrayList<Pattern>(keywordList.size());
+            DIR_IGNORE_FILES = new ArrayList<>(keywordList.size());
             for (String keyword : keywordList) {
                 try {
                     String regex = keyword.replace("?", ".?").replace("*", ".*?");
@@ -192,7 +192,7 @@ public class ScannerManagementImpl implements ScannerManagement {
         }
 
         LOG.info("Found {} libraries to process.", libraryCollection.size());
-        if (libraryCollection.size() == 0) {
+        if (libraryCollection.isEmpty()) {
             return ExitType.NO_DIRECTORY;
         }
 
@@ -334,7 +334,7 @@ public class ScannerManagementImpl implements ScannerManagement {
              *
              * We then build a list of those excluded extensions, so that when we scan the filename list we can exclude the unwanted files.
              */
-            List<String> exclusions = new ArrayList<String>();
+            List<String> exclusions = new ArrayList<>();
             for (File file : currentFileList) {
                 if (file.isFile()) {
                     String lcFilename = file.getName().toLowerCase();
