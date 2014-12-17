@@ -242,6 +242,7 @@ public final class CmdLineParser {
     public String getDescriptions() {
         final StringBuilder sb = new StringBuilder("\n\nAvailable Options: \n\n");
         for (CmdLineOption option : this.options) {
+            sb.append("    ");
             sb.append(option.toString(this));
             sb.append(" => ");
             sb.append(option.getDescription());

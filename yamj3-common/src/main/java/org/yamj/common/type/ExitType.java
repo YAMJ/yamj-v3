@@ -22,6 +22,8 @@
  */
 package org.yamj.common.type;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Enum for the exit codes for the services
  */
@@ -59,7 +61,7 @@ public enum ExitType {
      * Unable to send files to the core
      */
     SEND_FAILURE(6);
-    private int returnValue;
+    private final int returnValue;
 
     private ExitType(int returnValue) {
         this.returnValue = returnValue;
@@ -67,5 +69,24 @@ public enum ExitType {
 
     public int getReturn() {
         return this.returnValue;
+    }
+
+    /**
+     * Get an output string of the exit values
+     *
+     * @return
+     */
+    public static String getDescriptions() {
+        final StringBuilder sb = new StringBuilder("Exit codes: \n");
+
+        for (ExitType et : ExitType.values()) {
+            sb.append("    ");
+            sb.append(et.getReturn());
+            sb.append(" = ");
+            sb.append(StringUtils.capitalize(StringUtils.replace(et.toString(), "_", " ").toLowerCase()));
+            sb.append("\n");
+        }
+
+        return sb.toString();
     }
 }
