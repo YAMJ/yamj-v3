@@ -22,13 +22,22 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.CastCrew;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
@@ -78,14 +87,14 @@ public class MetadataDao extends HibernateDao {
     public Series getSeries(String identifier) {
         return getByNaturalIdCaseInsensitive(Series.class, "identifier", identifier);
     }
-    
+
     public Person getPerson(String identifier) {
         return getByNaturalIdCaseInsensitive(Person.class, "identifier", identifier);
     }
 
     public synchronized void storePerson(CreditDTO dto) {
         String identifier = MetadataTools.cleanIdentifier(dto.getName());
-        
+
         Person person = this.getPerson(identifier);
         if (person == null) {
             // create new person
@@ -107,26 +116,26 @@ public class MetadataDao extends HibernateDao {
             }
         }
     }
-    
+
     public CastCrew getCastCrew(VideoData videoData, JobType jobType, String identifier) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("select distinct c ");
         sb.append("from CastCrew c ");
         sb.append("join c.castCrewPK.person p ");
         sb.append("where c.castCrewPK.videoData=:videoData " );
         sb.append("and c.castCrewPK.jobType=:jobType ");
         sb.append("and lower(p.identifier)=:identifier ");
-        
+
         Query query = getSession().createQuery(sb.toString());
         query.setParameter("videoData", videoData);
         query.setParameter("jobType", jobType);
         query.setString("identifier", identifier.toLowerCase());
         return (CastCrew)query.uniqueResult();
     }
-    
+
     @SuppressWarnings("unchecked")
     public List<Artwork> findPersonArtworks(String identifier) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("select a ");
         sb.append("from Artwork a ");
         sb.append("join a.person p ");
@@ -136,7 +145,7 @@ public class MetadataDao extends HibernateDao {
         Map<String,Object> params = new HashMap<String,Object>();
         params.put("artworkType", ArtworkType.PHOTO);
         params.put("identifier", identifier.toLowerCase());
-        
+
         return this.findByNamedParameters(sb, params);
     }
 }

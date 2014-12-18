@@ -40,7 +40,11 @@ import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.options.OptionsRating;
 import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.BoxedSet;
+import org.yamj.core.database.model.Certification;
+import org.yamj.core.database.model.Genre;
+import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
 
@@ -65,19 +69,19 @@ public class CommonDao extends HibernateDao {
 
     public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper) {
         OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
-        
+
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addScalar("name", StringType.INSTANCE);
 
         sqlScalars.addToSql("SELECT DISTINCT ");
-        if (options.getFull().booleanValue()) {
+        if (options.getFull()) {
             sqlScalars.addToSql("g.id as id, g.name as name, ");
             sqlScalars.addToSql("CASE ");
             sqlScalars.addToSql(" WHEN g.target_api is not null THEN g.target_api ");
             sqlScalars.addToSql(" WHEN g.target_xml is not null THEN g.target_xml ");
             sqlScalars.addToSql(" ELSE g.name ");
             sqlScalars.addToSql("END as target ");
-            
+
             sqlScalars.addScalar("id", LongType.INSTANCE);
             sqlScalars.addScalar("target", StringType.INSTANCE);
         } else {
@@ -88,7 +92,7 @@ public class CommonDao extends HibernateDao {
             sqlScalars.addToSql("END as name ");
         }
         sqlScalars.addToSql("FROM genre g ");
-        
+
         boolean addWhere = true;
         if (options.getType() != null) {
             if (MetaDataType.MOVIE == options.getType()) {
@@ -96,15 +100,15 @@ public class CommonDao extends HibernateDao {
             } else {
                 sqlScalars.addToSql("JOIN series_genres sg ON g.id=sg.genre_id ");
             }
-        } else if (options.getUsed() != null && options.getUsed().booleanValue()) {
+        } else if (options.getUsed() != null && options.getUsed()) {
             sqlScalars.addToSql("WHERE (exists (select 1 from videodata_genres vg where vg.genre_id=g.id) ");
             sqlScalars.addToSql(" or exists (select 1 from series_genres sg where sg.genre_id=g.id)) ");
             addWhere = false;
         }
-        
+
         sqlScalars.addToSql(options.getSearchString(addWhere));
         sqlScalars.addToSql(options.getSortString());
-        
+
         return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
     }
 
@@ -145,14 +149,14 @@ public class CommonDao extends HibernateDao {
             this.saveEntity(studio);
         }
     }
-    
+
     public List<Studio> getStudios(ApiWrapperList<Studio> wrapper) {
         OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
-        
+
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT DISTINCT stu.id as id, stu.name as name ");
         sqlScalars.addToSql("FROM studio stu ");
-        
+
         boolean addWhere = true;
         if (options.getType() != null) {
             if (MetaDataType.MOVIE == options.getType()) {
@@ -160,12 +164,12 @@ public class CommonDao extends HibernateDao {
             } else {
                 sqlScalars.addToSql("JOIN series_studios ss ON stu.id=ss.studio_id ");
             }
-        } else if (options.getUsed() != null && options.getUsed().booleanValue()) {
+        } else if (options.getUsed() != null && options.getUsed()) {
             sqlScalars.addToSql("WHERE (exists (select 1 from videodata_studios vs where vs.studio_id=stu.id) ");
             sqlScalars.addToSql(" or exists (select 1 from series_studios ss where ss.studio_id=stu.id)) ");
             addWhere = false;
         }
-        
+
         sqlScalars.addToSql(options.getSearchString(addWhere));
         sqlScalars.addToSql(options.getSortString());
 
@@ -174,20 +178,20 @@ public class CommonDao extends HibernateDao {
 
         return executeQueryWithTransform(Studio.class, sqlScalars, wrapper);
     }
-    
+
     public Certification getCertification(String country, String certificate) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("from Certification ");
         sb.append("where lower(country) = :country ");
         sb.append("and lower(certificate) = :certificate ");
-        
+
         Map<String, Object> params = new HashMap<String,Object>();
         params.put("country", country.toLowerCase());
         params.put("certificate", certificate.toLowerCase());
-        
+
         return (Certification)this.findUniqueByNamedParameters(sb, params);
     }
-    
+
     public synchronized void storeNewCertification(String country, String certificate) {
         Certification certification = this.getCertification(country, certificate);
         if (certification == null) {
@@ -202,16 +206,16 @@ public class CommonDao extends HibernateDao {
     public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
         OptionsId options = (OptionsId) wrapper.getOptions();
         String sortBy = options.getSortby();
-        
+
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT id, country, certificate ");
-        
+
         if ("certificate".equalsIgnoreCase(sortBy)) {
             sortBy = "certificate_order";
             // TODO certificate_order until now just tested with MySQL
             sqlScalars.addToSql(", CASE WHEN cast(certificate as signed)>0 THEN cast(certificate as signed) ELSE ascii(substring(lower(certificate),1,1))*1000+ascii(substring(lower(certificate),2,1)) END as certificate_order ");
         }
-        
+
         sqlScalars.addToSql("FROM certification ");
         sqlScalars.addToSql(options.getSearchString(true));
         sqlScalars.addToSql(options.getSortString(sortBy));
@@ -234,7 +238,7 @@ public class CommonDao extends HibernateDao {
             boxedSet = new BoxedSet();
             boxedSet.setName(name);
             this.saveEntity(boxedSet);
-            
+
             // create new poster artwork entry
             Artwork poster = new Artwork();
             poster.setArtworkType(ArtworkType.POSTER);
@@ -257,13 +261,13 @@ public class CommonDao extends HibernateDao {
             this.saveEntity(banner);
         }
     }
-    
+
     public List<ApiRatingDTO> getRatings(ApiWrapperList<ApiRatingDTO> wrapper) {
         OptionsRating options = (OptionsRating) wrapper.getOptions();
 
         boolean justMovie = (MetaDataType.MOVIE == options.getType());
         boolean justSeries = (MetaDataType.SERIES == options.getType());
-        
+
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT DISTINCT ");
         sb.append("grouped.type as type, ");
@@ -272,7 +276,7 @@ public class CommonDao extends HibernateDao {
             sb.append(", round(grouped.rating/10) as rating ");
         }
         sb.append("FROM ( ");
-        
+
         if (!justSeries) {
             // not just series
             if (StringUtils.isBlank(options.getSource())) {
@@ -335,7 +339,7 @@ public class CommonDao extends HibernateDao {
             }
         }
         sb.append(") as grouped ");
-        
+
         // order by
         sb.append("order by type, grouped.ordering, source");
         if (options.getRating() == null || options.getRating()) {
@@ -350,7 +354,7 @@ public class CommonDao extends HibernateDao {
         if (options.getRating() == null || options.getRating()) {
             sqlScalars.addScalar("rating", IntegerType.INSTANCE);
         }
-        
+
         return executeQueryWithTransform(ApiRatingDTO.class, sqlScalars, wrapper);
     }
 }

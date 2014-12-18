@@ -48,7 +48,7 @@ public class ConfigServiceWrapper {
     public boolean getBooleanProperty(String key, boolean defaultValue) {
         return this.configService.getBooleanProperty(key, defaultValue);
     }
-    
+
     public int getIntProperty(String key, int defaultValue) {
         return this.configService.getIntProperty(key, defaultValue);
     }
@@ -58,18 +58,18 @@ public class ConfigServiceWrapper {
     }
 
     public boolean isLocalArtworkScanEnabled(Artwork artwork) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("yamj3.artwork.scan.local.");
         this.addScanArtworkType(artwork, sb);
-        
+
         return this.configService.getBooleanProperty(sb.toString(), Boolean.TRUE);
     }
 
     public boolean isOnlineArtworkScanEnabled(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("yamj3.artwork.scan.online.");
         this.addScanArtworkType(artwork, sb);
-        
+
         String value = this.configService.getProperty(sb.toString());
         if (StringUtils.isBlank(value)) {
             // default: true
@@ -81,7 +81,7 @@ public class ConfigServiceWrapper {
         if ("false".equalsIgnoreCase(value.trim())) {
             return false;
         }
-         
+
         // any other case: check if valid artwork is present
 
         // check present artworks
@@ -96,14 +96,14 @@ public class ConfigServiceWrapper {
                 return false;
             }
         }
-        
+
         // do only scan if no valid files are found
         return true;
     }
 
-    private void addScanArtworkType(Artwork artwork, StringBuffer sb) {
+    private void addScanArtworkType(Artwork artwork, StringBuilder sb) {
         sb.append(artwork.getArtworkType().name().toLowerCase());
-        
+
         if (ArtworkType.POSTER == artwork.getArtworkType() || ArtworkType.FANART == artwork.getArtworkType()) {
             sb.append(".");
             if (artwork.getVideoData() != null) {
@@ -122,23 +122,23 @@ public class ConfigServiceWrapper {
             }
         }
     }
-    
+
     public boolean isCastScanEnabled(JobType jobType) {
         if (jobType == null) {
             return false;
         }
-        
+
         String key = "yamj3.scan.castcrew." + jobType.name().toLowerCase();
         boolean value = this.configService.getBooleanProperty(key, Boolean.FALSE);
-        
+
         if (LOG.isTraceEnabled()) {
             if (value) {
-                LOG.trace("CastCrew scanning for job '{}' is enabled", jobType);   
+                LOG.trace("CastCrew scanning for job '{}' is enabled", jobType);
             } else {
-                LOG.trace("CastCrew scanning for job '{}' is disabled", jobType);   
+                LOG.trace("CastCrew scanning for job '{}' is disabled", jobType);
             }
         }
-        
+
         return value;
     }
 
@@ -157,7 +157,7 @@ public class ConfigServiceWrapper {
         }
         return false;
     }
-    
+
     public List<String> getSortStripPrefixes() {
         return this.configService.getPropertyAsList(
                         "yamj3.sort.strip.prefixes",

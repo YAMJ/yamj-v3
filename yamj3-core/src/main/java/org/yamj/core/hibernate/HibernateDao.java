@@ -25,10 +25,18 @@ package org.yamj.core.hibernate;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.*;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.transform.Transformers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.yamj.core.api.model.builder.SqlScalars;
@@ -173,15 +181,15 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings("unchecked")
     public <T> T getByNaturalIdCaseInsensitive(Class<? extends T> entityClass, String field, String name) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("from ");
         sb.append(entityClass.getSimpleName());
         sb.append(" where lower(").append(field).append(") = :name) { ");
-        
+
         Map<String, Object> params = Collections.singletonMap("name", (Object)name.toLowerCase());
         return (T)this.findUniqueByNamedParameters(sb, params);
     }
-    
+
     /**
      * Convert row object to a string.
      *
@@ -410,7 +418,7 @@ public abstract class HibernateDao {
         }
         return query.executeUpdate();
     }
-    
+
     /**
      * Execute a query return the results.
      *

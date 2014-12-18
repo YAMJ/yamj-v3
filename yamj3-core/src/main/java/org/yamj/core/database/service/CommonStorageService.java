@@ -22,8 +22,13 @@
  */
 package org.yamj.core.database.service;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +39,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.StagingDao;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.ArtworkGenerated;
+import org.yamj.core.database.model.ArtworkLocated;
+import org.yamj.core.database.model.BoxedSet;
+import org.yamj.core.database.model.MediaFile;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.StageDirectory;
+import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.file.FileStorageService;
@@ -46,7 +61,7 @@ import org.yamj.core.tools.MetadataTools;
 public class CommonStorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommonStorageService.class);
-    
+
     @Autowired
     private StagingDao stagingDao;
     @Autowired
@@ -64,18 +79,18 @@ public class CommonStorageService {
         Map<String,Object> params = Collections.singletonMap("delete", (Object)StatusType.DELETED);
         return stagingDao.findByNamedParameters(sb, params);
     }
-    
+
     /**
      * Delete a stage file and all associated entities.
-     * 
-     * @param stageFile
+     *
+     * @param id
      * @return list of cached file names which must be deleted also
      */
     @Transactional
     public Set<String> deleteStageFile(Long id) {
         // get the stage file
         StageFile stageFile = this.stagingDao.getStageFile(id);
-        
+
         // check stage file
         if (stageFile == null) {
             // not found
@@ -84,7 +99,7 @@ public class CommonStorageService {
             // status must still be DELETE
             return Collections.emptySet();
         }
-        
+
         Set<String> filesToDelete;
         switch(stageFile.getFileType()) {
             case VIDEO:
@@ -106,7 +121,7 @@ public class CommonStorageService {
     }
 
     private Set<String> deleteVideoStageFile(StageFile stageFile) {
-        Set<String> filesToDelete = new HashSet<String>(); 
+        Set<String> filesToDelete = new HashSet<String>();
 
         // delete the media file if no other stage files are present
         MediaFile mediaFile = stageFile.getMediaFile();
@@ -120,13 +135,13 @@ public class CommonStorageService {
                     if (StatusType.DUPLICATE.equals(check.getStatus())) {
                         check.setStatus(StatusType.DONE);
                         this.stagingDao.updateEntity(check);
-                        
+
                         // reset watched file
                         boolean watchedFile = this.stagingService.isWatchedVideoFile(check);
                         mediaFile.setWatchedFile(watchedFile);
                         mediaFile.setStatus(StatusType.UPDATED);
                         this.stagingDao.updateEntity(mediaFile);
-                        
+
                         for (VideoData videoData : mediaFile.getVideoDatas()) {
                             watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
                             if (videoData.isWatchedFile() != watchedFile) {
@@ -145,9 +160,9 @@ public class CommonStorageService {
                     }
                 }
             }
-            
+
         }
-        
+
         // delete the stage file
         this.delete(stageFile);
 
@@ -156,22 +171,22 @@ public class CommonStorageService {
 
     private Set<String> deleteImageStageFile(StageFile stageFile) {
         Set<String> filesToDelete = new HashSet<String>();
-        
+
         for (ArtworkLocated located : stageFile.getArtworkLocated()) {
             Artwork artwork = located.getArtwork();
             artwork.getArtworkLocated().remove(located);
             this.delete(artwork, located, filesToDelete);
 
-            // if no located artwork exists anymore then set status of artwork to NEW 
+            // if no located artwork exists anymore then set status of artwork to NEW
             if (CollectionUtils.isEmpty(located.getArtwork().getArtworkLocated())) {
                 artwork.setStatus(StatusType.NEW);
                 this.stagingDao.updateEntity(artwork);
             }
         }
-        
+
         // delete stage file
         this.delete(stageFile);
-        
+
         return filesToDelete;
     }
 
@@ -180,27 +195,27 @@ public class CommonStorageService {
         for (StageFile videoFile : this.stagingService.findWatchedVideoFiles(watchedFile)) {
             this.toogleWatchedStatus(videoFile, false, false);
         }
-        
+
         // delete watched file
         this.delete(watchedFile);
     }
-    
+
     private void delete(StageFile stageFile) {
         LOG.debug("Delete: {}", stageFile);
-        
+
         StageDirectory stageDirectory = stageFile.getStageDirectory();
 
         // just delete the stage file
         this.stagingDao.deleteEntity(stageFile);
         stageDirectory.getStageFiles().remove(stageFile);
-        
+
         // check and delete stage directory
         this.delete(stageDirectory);
     }
 
     /**
      * Delete stage file recursivly.
-     * 
+     *
      * @param stageDirectory
      */
     private void delete(StageDirectory stageDirectory) {
@@ -211,17 +226,17 @@ public class CommonStorageService {
         } else if (CollectionUtils.isNotEmpty(this.stagingDao.getChildDirectories(stageDirectory))) {
             return;
         }
-        
+
         LOG.debug("Delete empty directory:  {}", stageDirectory);
         this.stagingDao.deleteEntity(stageDirectory);
-        
+
         // recurse to parents
         this.delete(stageDirectory.getParentDirectory());
     }
 
     private void delete(MediaFile mediaFile, Set<String> filesToDelete) {
         LOG.debug("Delete: {}", mediaFile);
- 
+
         // delete video data if this is the only media file
         for (VideoData videoData : mediaFile.getVideoDatas()) {
             if (videoData.getMediaFiles().size() == 1) {
@@ -230,7 +245,7 @@ public class CommonStorageService {
             } else if (videoData.getMediaFiles().size() > 1) {
                 // reset watched flag on video data
                 videoData.getMediaFiles().remove(mediaFile);
-                
+
                 boolean watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
                 if (videoData.isWatchedFile() != watchedFile) {
                     videoData.setWatchedFile(watchedFile);
@@ -244,7 +259,7 @@ public class CommonStorageService {
                 }
             }
         }
-        
+
         // delete media file
         mediaFile.getVideoDatas().clear();
         this.stagingDao.deleteEntity(mediaFile);
@@ -252,7 +267,7 @@ public class CommonStorageService {
 
     private void delete(VideoData videoData, Set<String> filesToDelete) {
         LOG.debug("Delete: {}", videoData);
-        
+
         Season season = videoData.getSeason();
         if (season != null) {
             season.getVideoDatas().remove(videoData);
@@ -260,18 +275,18 @@ public class CommonStorageService {
                 this.delete(season, filesToDelete);
             }
         }
-        
+
         // delete artwork
         for (Artwork artwork : videoData.getArtworks()) {
             this.delete(artwork, filesToDelete);
         }
-        
+
         this.stagingDao.deleteEntity(videoData);
     }
-    
+
     private void delete(Season season, Set<String> filesToDelete) {
         LOG.debug("Delete: {}", season);
-        
+
         Series series = season.getSeries();
         series.getSeasons().remove(season);
         if (CollectionUtils.isEmpty(season.getVideoDatas())) {
@@ -288,7 +303,7 @@ public class CommonStorageService {
 
     private void delete(Series series, Set<String> filesToDelete) {
         LOG.debug("Delete: {}", series);
-        
+
         // delete artwork
         for (Artwork artwork : series.getArtworks()) {
             this.delete(artwork, filesToDelete);
@@ -296,16 +311,16 @@ public class CommonStorageService {
 
         this.stagingDao.deleteEntity(series);
     }
-    
+
     private void delete(Artwork artwork, Set<String> filesToDelete) {
         if (artwork == null) {
             return;
         }
-        
+
         for (ArtworkLocated located : artwork.getArtworkLocated()) {
             this.delete(artwork, located, filesToDelete);
         }
-        
+
         this.stagingDao.deleteEntity(artwork);
     }
 
@@ -327,7 +342,7 @@ public class CommonStorageService {
             String filename = FilenameUtils.concat(located.getCacheDirectory(), located.getCacheFilename());
             filesToDelete.add(this.fileStorageService.getStorageDir(storageType, filename));
         }
-        
+
         this.stagingDao.deleteEntity(located);
     }
 
@@ -336,7 +351,7 @@ public class CommonStorageService {
         filesToDelete.add(this.fileStorageService.getStorageDir(storageType, filename));
         this.stagingDao.deleteEntity(generated);
     }
-    
+
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<Long> getOrphanPersons() {
@@ -350,17 +365,17 @@ public class CommonStorageService {
     public Set<String> deletePerson(Long id) {
         Set<String> filesToDelete = new HashSet<String>();
         Person person = this.stagingDao.getById(Person.class, id);
-        
+
         LOG.debug("Delete: {}", person);
-        
+
         if (person != null) {
             this.delete(person.getPhoto(), filesToDelete);
             this.stagingDao.deleteEntity(person);
         }
-        
+
         return filesToDelete;
     }
-    
+
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<Long> getOrphanBoxedSets() {
@@ -374,18 +389,18 @@ public class CommonStorageService {
     public Set<String> deleteBoxedSet(Long id) {
         Set<String> filesToDelete = new HashSet<String>();
         BoxedSet boxedSet = this.stagingDao.getById(BoxedSet.class, id);
-        
+
         LOG.debug("Delete: {}", boxedSet);
-        
+
         if (boxedSet != null) {
             // delete artwork
             for (Artwork artwork : boxedSet.getArtworks()) {
                 this.delete(artwork, filesToDelete);
             }
-            
+
             this.stagingDao.deleteEntity(boxedSet);
         }
-        
+
         return filesToDelete;
     }
 
@@ -405,7 +420,7 @@ public class CommonStorageService {
             for (ArtworkGenerated generated : located.getGeneratedArtworks()) {
                 this.delete(generated, storageType, filesToDelete);
             }
-            
+
             located.getGeneratedArtworks().clear();
             located.setStatus(StatusType.IGNORE);
             stagingDao.updateEntity(located);
@@ -435,7 +450,7 @@ public class CommonStorageService {
         if (mediaFile == null) {
             return false;
         }
-        
+
         // update media file
         if (apiCall) {
             mediaFile.setWatchedApi(watched);
@@ -449,7 +464,7 @@ public class CommonStorageService {
             LOG.trace("Media file is an extra where no watched status will be populated: {}", mediaFile);
             return true;
         }
-        
+
         // determine watch status for each video data which is no extra
         for (VideoData videoData : mediaFile.getVideoDatas()) {
             boolean watchedAll = MetadataTools.allMediaFilesWatched(videoData, apiCall);
@@ -475,7 +490,7 @@ public class CommonStorageService {
         sb.append("SET targetXml = null ");
         sb.append("WHERE targetXml is not null ");
         sb.append("AND lower(name) not in (:subGenres) ");
-        
+
         Map<String,Object> params = new HashMap<String,Object>();
         params.put("subGenres", subGenres.keySet());
         this.stagingDao.executeUpdate(sb, params);
@@ -492,10 +507,10 @@ public class CommonStorageService {
             this.stagingDao.executeUpdate(sb, params);
         }
     }
-    
+
     @Transactional
     public int deleteOrphanGenres() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM genre ");
         sb.append("WHERE not exists (select 1 from videodata_genres vg where vg.genre_id=id) ");
         sb.append("AND not exists (select 1 from series_genres sg where sg.genre_id=id) ");
@@ -504,7 +519,7 @@ public class CommonStorageService {
 
     @Transactional
     public int deleteOrphanStudios() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM studio ");
         sb.append("WHERE not exists (select 1 from videodata_studios vs where vs.studio_id=id) ");
         sb.append("AND not exists (select 1 from series_studios ss where ss.studio_id=id) ");
@@ -513,7 +528,7 @@ public class CommonStorageService {
 
     @Transactional
     public int deleteOrphanCertifications() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM certification ");
         sb.append("WHERE not exists (select 1 from videodata_certifications vc where vc.cert_id=id) ");
         sb.append("AND not exists (select 1 from series_certifications sc where sc.cert_id=id) ");
