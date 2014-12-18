@@ -143,13 +143,13 @@ public class TheTVDbArtworkScanner implements
         LOG.debug("Series {}: Found {} posters without language", id, noLangDTOs.size());
 
         List<ArtworkDetailDTO> returnDTOs = null;
-        if (langDTOs.size() > 0) {
+        if (!langDTOs.isEmpty()) {
             LOG.info("Series {}: Using posters with language '{}'", id, defaultLanguage);
             returnDTOs = langDTOs;
-        } else if (altLangDTOs.size() > 0) {
+        } else if (!altLangDTOs.isEmpty()) {
             LOG.info("Series {}: No poster found for language '{}', using posters with language '{}'", id, defaultLanguage, altLanguage);
             returnDTOs = altLangDTOs;
-        } else if (noLangDTOs.size() > 0) {
+        } else if (!noLangDTOs.isEmpty()) {
             LOG.info("Series {}: No poster found for language '{}', using posters with no language", id, defaultLanguage);
             returnDTOs = noLangDTOs;
         } else {
@@ -194,13 +194,13 @@ public class TheTVDbArtworkScanner implements
         LOG.debug("Season {}-{}: Found {} posters without language", id, season, noLangDTOs.size());
 
         List<ArtworkDetailDTO> returnDTOs = null;
-        if (langDTOs.size() > 0) {
+        if (!langDTOs.isEmpty()) {
             LOG.info("Season {}-{}: Using posters with language '{}'", id, season, defaultLanguage);
             returnDTOs = langDTOs;
-        } else if (altLangDTOs.size() > 0) {
+        } else if (!altLangDTOs.isEmpty()) {
             LOG.info("Season {}-{}: No poster found for language '{}', using posters with language '{}'", id, season, defaultLanguage, altLanguage);
             returnDTOs = altLangDTOs;
-        } else if (noLangDTOs.size() > 0) {
+        } else if (!noLangDTOs.isEmpty()) {
             LOG.info("Season {}-{}: No poster found for language '{}', using posters with no language", id, season, defaultLanguage);
             returnDTOs = noLangDTOs;
         } else if (CollectionUtils.isNotEmpty(bannerList.getPosterList())) {
@@ -267,10 +267,10 @@ public class TheTVDbArtworkScanner implements
         LOG.debug("Series {}: Found {} SD fanart", id, sdDTOs.size());
 
         List<ArtworkDetailDTO> returnDTOs = null;
-        if (hdDTOs.size() > 0) {
+        if (!hdDTOs.isEmpty()) {
             LOG.info("Series {}: Using HD fanart", id);
             returnDTOs = hdDTOs;
-        } else if (sdDTOs.size() > 0) {
+        } else if (!sdDTOs.isEmpty()) {
             LOG.info("Series {}: No HD fanart found; using SD fanart", id);
             returnDTOs = sdDTOs;
         } else {
@@ -309,17 +309,17 @@ public class TheTVDbArtworkScanner implements
         LOG.debug("Season {}-{}: Found {} SD fanart", id, season, sdDTOs.size());
 
         List<ArtworkDetailDTO> returnDTOs = null;
-        if (hdDTOs.size() > 0) {
+        if (!hdDTOs.isEmpty()) {
             LOG.debug("Season {}-{}: Using HD fanart", id, season);
             returnDTOs = hdDTOs;
-        } else if (sdDTOs.size() > 0) {
+        } else if (!sdDTOs.isEmpty()) {
             LOG.debug("Season {}-{}: No HD fanart found; using SD fanart", id, season);
             returnDTOs = sdDTOs;
         } else {
             String url = tvdbApiWrapper.getSeries(id).getFanart();
             if (StringUtils.isNotBlank(url)) {
                 LOG.debug("Season {}-{}: Using default series fanart", id, season);
-                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), url, HashCodeType.PART);  
+                ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), url, HashCodeType.PART);
                 returnDTOs = Collections.singletonList(detailDTO);
             }
         }
@@ -407,16 +407,16 @@ public class TheTVDbArtworkScanner implements
         LOG.debug("Series {}: Found {} blank banners", id, blankDTOs.size());
 
         List<ArtworkDetailDTO> returnDTOs = null;
-        if (langDTOs.size() > 0) {
+        if (!langDTOs.isEmpty()) {
             LOG.info("Series {}: Using banners with language '{}'", id, defaultLanguage);
             returnDTOs = langDTOs;
-        } else if (altLangDTOs.size() > 0) {
+        } else if (!altLangDTOs.isEmpty()) {
             LOG.info("Series {}: No banner found for language '{}', using banners with language '{}'", id, defaultLanguage, altLanguage);
             returnDTOs = altLangDTOs;
-        } else if (noLangDTOs.size() > 0) {
+        } else if (!noLangDTOs.isEmpty()) {
             LOG.info("Series {}: No banner found for language '{}', using banners with no language", id, defaultLanguage);
             returnDTOs = noLangDTOs;
-        } else if (blankDTOs.size() > 0) {
+        } else if (!blankDTOs.isEmpty()) {
             LOG.info("Series {}: No banner found for language '{}', using blank banners", id, defaultLanguage);
             returnDTOs = blankDTOs;
         } else {
@@ -490,28 +490,28 @@ public class TheTVDbArtworkScanner implements
         LOG.debug("season {}-{}: Found {} blank banners", id, season, blankDTOs.size());
 
         List<ArtworkDetailDTO> returnDTOs = null;
-        if (configService.getBooleanProperty("thetvdb.season.banner.onlySeries", Boolean.FALSE) && blankDTOs.size() > 0) {
+        if (configService.getBooleanProperty("thetvdb.season.banner.onlySeries", Boolean.FALSE) && !blankDTOs.isEmpty()) {
             LOG.info("Season {}-{}: Using blanks banners", id, season);
             returnDTOs = blankDTOs;
-        } else if (seasonLangDTOs.size() > 0) {
+        } else if (!seasonLangDTOs.isEmpty()) {
             LOG.info("Season {}-{}: Using season banners with language '{}'", id, season, defaultLanguage);
             returnDTOs = seasonLangDTOs;
-        } else if (seasonAltLangDTOs.size() > 0) {
+        } else if (!seasonAltLangDTOs.isEmpty()) {
             LOG.info("Season {}-{}: No season banner found for language '{}', using season banners with language '{}'", id, season, defaultLanguage, altLanguage);
             returnDTOs = seasonAltLangDTOs;
-        } else if (seasonNoLangDTOs.size() > 0) {
+        } else if (!seasonNoLangDTOs.isEmpty()) {
             LOG.info("Season {}-{}: No season banner found for language '{}', using season banners with no language", id, season, defaultLanguage);
             returnDTOs = seasonNoLangDTOs;
-        } else if (seriesLangDTOs.size() > 0) {
+        } else if (!seriesLangDTOs.isEmpty()) {
             LOG.info("Season {}-{}: Using series banners with language '{}'", id, season, defaultLanguage);
             returnDTOs = seriesLangDTOs;
-        } else if (seriesAltLangDTOs.size() > 0) {
+        } else if (!seriesAltLangDTOs.isEmpty()) {
             LOG.info("Season {}-{}: No series banner found for language '{}', using series banners with language '{}'", id, season, defaultLanguage, altLanguage);
             returnDTOs = seriesAltLangDTOs;
-        } else if (seriesNoLangDTOs.size() > 0) {
+        } else if (!seriesNoLangDTOs.isEmpty()) {
             LOG.info("Season {}-{}: No series banner found for language '{}', using series banners with no language", id, season, defaultLanguage);
             returnDTOs = seriesNoLangDTOs;
-        } else if (blankDTOs.size() > 0) {
+        } else if (!blankDTOs.isEmpty()) {
             LOG.info("Season {}-{}: No banner found for language '{}', using blank banners", id, season, defaultLanguage);
             returnDTOs = blankDTOs;
         } else {

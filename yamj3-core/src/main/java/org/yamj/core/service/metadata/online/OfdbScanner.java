@@ -60,7 +60,7 @@ public class OfdbScanner implements IMovieScanner {
 
     private Charset charset;
     private SearchEngineTools searchEngineTools;
-    
+
     @Autowired
     private PoolingHttpClient httpClient;
     @Autowired
@@ -78,12 +78,12 @@ public class OfdbScanner implements IMovieScanner {
     @PostConstruct
     public void init() throws Exception {
         LOG.info("Initialize OFDb scanner");
-        
+
         charset = Charset.forName("UTF-8");
-        
+
         searchEngineTools = new SearchEngineTools(httpClient, "de");
         searchEngineTools.setSearchSites("google");
-        
+
         // register this scanner
         onlineScannerService.registerMovieScanner(this);
     }
@@ -92,7 +92,7 @@ public class OfdbScanner implements IMovieScanner {
     public String getMovieId(VideoData videoData) {
         String ofdbId = videoData.getSourceDbId(SCANNER_ID);
         if (StringUtils.isBlank(ofdbId)) {
-            
+
             // get and check IMDb id
             String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
             if (StringUtils.isBlank(imdbId)) {
@@ -106,7 +106,7 @@ public class OfdbScanner implements IMovieScanner {
                     }
                 }
             }
-            
+
             // find by IMDb id
             if (StringUtils.isNotBlank(imdbId)) {
                 // if IMDb id is present then use this
@@ -280,7 +280,7 @@ public class OfdbScanner implements IMovieScanner {
 
                     if (OverrideTools.checkOverwriteCountry(videoData, SCANNER_ID) && tag.contains("Herstellungsland")) {
                         List<String> scraped = HTMLTools.extractHtmlTags(tag, "class=\"Daten\"", "</td>", "<a", "</a>");
-                        if (scraped.size() > 0) {
+                        if (!scraped.isEmpty()) {
                             // TODO set more countries in movie
                             videoData.setCountry(HTMLTools.removeHtmlTags(scraped.get(0)).trim(), SCANNER_ID);
                         }
@@ -305,7 +305,7 @@ public class OfdbScanner implements IMovieScanner {
                         }
                     }
                 }
-                
+
                 // WRITERS
                 if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
                     if (detailXml.contains("<i>Drehbuchautor(in)</i>")) {
@@ -315,7 +315,7 @@ public class OfdbScanner implements IMovieScanner {
                         }
                     }
                 }
-                
+
                 // ACTORS
                 if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
                     if (detailXml.contains("<i>Darsteller</i>")) {
@@ -360,9 +360,9 @@ public class OfdbScanner implements IMovieScanner {
 
         // scan for IMDb ID
         ImdbScanner.scanImdbID(nfoContent, dto, ignorePresentId);
-        
+
         LOG.trace("Scanning NFO for OFDb url");
-        
+
         try {
             int beginIndex = nfoContent.indexOf("http://www.ofdb.de/film/");
             if (beginIndex != -1) {

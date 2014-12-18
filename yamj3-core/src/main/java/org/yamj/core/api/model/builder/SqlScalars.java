@@ -195,7 +195,7 @@ public final class SqlScalars {
      * @param query
      */
     public void populateScalars(SQLQuery query) {
-        if (scalars != null && scalars.size() > 0) {
+        if (scalars != null && !scalars.isEmpty()) {
             for (Map.Entry<String, BasicType> entry : scalars.entrySet()) {
                 if (entry.getValue() == null) {
                     // Use the default scalar for that entry

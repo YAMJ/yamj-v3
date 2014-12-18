@@ -39,7 +39,7 @@ import org.yamj.common.util.TokensPatternMap;
 public class LanguageTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(LanguageTools.class);
-    
+
     /**
      * Mapping exact tokens to language.
      *
@@ -68,7 +68,7 @@ public class LanguageTools {
             put(key, PatternUtils.tpatt(tokenBuilder.toString()));
         }
     };
-    
+
     /**
      * Mapping loose language markers.
      *
@@ -100,7 +100,7 @@ public class LanguageTools {
     @PostConstruct
     public void init() throws Exception {
         final KeywordMap languages = PropertyTools.getKeywordMap("language.detection.keywords", null);
-        if (languages.size() > 0) {
+        if (!languages.isEmpty()) {
             for (String lang : languages.getKeywords()) {
                 String values = languages.get(lang);
                 if (values != null) {

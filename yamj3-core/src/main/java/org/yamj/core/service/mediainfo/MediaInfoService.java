@@ -26,7 +26,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
@@ -73,11 +79,11 @@ public class MediaInfoService {
     private MediaStorageService mediaStorageService;
     @Autowired
     private AspectRatioTools aspectRatioTools;
-    
+
     @PostConstruct
     public void init() throws Exception {
         LOG.info("Initialize MediaInfo service");
-        
+
         String OS_NAME = System.getProperty("os.name");
         LOG.debug("Operating System Name   : {}", OS_NAME);
         LOG.debug("Operating System Version: {}", System.getProperty("os.version"));
@@ -169,9 +175,9 @@ public class MediaInfoService {
             // nothing to do anymore
             return;
         }
-        
+
         LOG.debug("Scanning media file {}", stageFile.getFullPath());
-        
+
         MediaInfoStream stream = null;
         boolean scanned = false;
         try {
@@ -182,7 +188,7 @@ public class MediaInfoService {
         		// read from file
         		stream = createStream(stageFile.getFullPath());
         	}
-        	
+
             Map<String, String> infosGeneral = new HashMap<String, String>();
             List<Map<String, String>> infosVideo = new ArrayList<Map<String, String>>();
             List<Map<String, String>> infosAudio = new ArrayList<Map<String, String>>();
@@ -207,7 +213,7 @@ public class MediaInfoService {
         } else {
             mediaFile.setStatus(StatusType.ERROR);
         }
-        
+
         mediaStorageService.updateMediaFile(mediaFile);
     }
 
@@ -236,7 +242,7 @@ public class MediaInfoService {
 
         // get Info from first video stream only
         // TODO can evolve to get info from longest video stream
-        if (infosVideo.size() > 0) {
+        if (!infosVideo.isEmpty()) {
             Map<String, String> infosMainVideo = infosVideo.get(0);
 
             // codec
@@ -435,7 +441,7 @@ public class MediaInfoService {
             } else {
                 subtitle.setLanguage(infoLanguage);
             }
-            
+
             subtitle.setDefaultFlag("yes".equalsIgnoreCase(infosText.get("Default")));
             subtitle.setForcedFlag("yes".equalsIgnoreCase(infosText.get("Forced")));
             return Boolean.TRUE;
@@ -457,7 +463,7 @@ public class MediaInfoService {
         if (runtimeValue == null) {
             runtimeValue = infosGeneral.get("PlayTime");
         }
-        if ((runtimeValue == null) && (infosVideo.size() > 0)) {
+        if (runtimeValue == null && !infosVideo.isEmpty()) {
             Map<String, String> infosMainVideo = infosVideo.get(0);
             runtimeValue = infosMainVideo.get("Duration");
         }
@@ -507,7 +513,7 @@ public class MediaInfoService {
 
         return new MediaInfoStream(pb.start());
     }
-    
+
     /**
      * Read the input skipping any blank lines
      *
@@ -580,9 +586,9 @@ public class MediaInfoService {
             try {
                 for (String generalKey1 : generalKey) {
                     List<Map<String, String>> arrayList = matches.get(generalKey1);
-                    if (arrayList.size() > 0) {
+                    if (!arrayList.isEmpty()) {
                         Map<String, String> datas = arrayList.get(0);
-                        if (datas.size() > 0) {
+                        if (!datas.isEmpty()) {
                             infosGeneral.putAll(datas);
                             break;
                         }

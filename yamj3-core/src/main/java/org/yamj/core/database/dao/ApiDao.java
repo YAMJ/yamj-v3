@@ -1333,7 +1333,7 @@ public class ApiDao extends HibernateDao {
         List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
         LOG.info("Found {} results for {} with id '{}'", results.size(), metaDataType, options.getId());
 
-        if (options.hasDataItem(DataItem.ARTWORK) && results.size() > 0) {
+        if (options.hasDataItem(DataItem.ARTWORK) && !results.isEmpty()) {
             LOG.info("Looking for person artwork for {} with id '{}'", metaDataType, options.getId());
 
             Set<String> artworkRequired = Collections.singleton(ArtworkType.PHOTO.toString());

@@ -214,11 +214,7 @@ public final class CmdLineOption {
      * @return true if excluded options exist
      */
     public boolean hasExcludedOptions() {
-        try {
-            return this.excludedOptions.size() != 0;
-        } catch (NullPointerException npe) {
-            return false;
-        }
+        return excludedOptions == null ? false : !excludedOptions.isEmpty();
     }
 
     /**
@@ -233,8 +229,7 @@ public final class CmdLineOption {
         }
 
         boolean result = false;
-        for (int i = 0; i < this.excludedOptions.size(); i++) {
-            CmdLineOption o = this.excludedOptions.get(i);
+        for (CmdLineOption o : this.excludedOptions) {
             if (o.equals(cmdLineOption)) {
                 result = true;
                 break;
@@ -299,11 +294,7 @@ public final class CmdLineOption {
      * @return true if required options exist
      */
     public boolean hasRequiredOptions() {
-        try {
-            return this.requiredOptions.size() != 0;
-        } catch (NullPointerException npe) {
-            return false;
-        }
+        return requiredOptions == null ? false : !requiredOptions.isEmpty();
     }
 
     /**
@@ -318,8 +309,7 @@ public final class CmdLineOption {
         }
 
         boolean result = false;
-        for (int i = 0; i < this.requiredOptions.size(); i++) {
-            CmdLineOption o = this.requiredOptions.get(i);
+        for (CmdLineOption o : this.requiredOptions) {
             if (o.equals(cmdLineOption)) {
                 result = true;
                 break;

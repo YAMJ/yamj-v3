@@ -93,7 +93,7 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings("rawtypes")
     public void storeAll(final Collection entities) {
-        if (entities != null && entities.size() > 0) {
+        if (entities != null && !entities.isEmpty()) {
             Session session = getSession();
             for (Object entity : entities) {
                 session.saveOrUpdate(entity);
@@ -108,7 +108,7 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings("rawtypes")
     public void deleteAll(final Collection entities) {
-        if (entities != null && entities.size() > 0) {
+        if (entities != null && !entities.isEmpty()) {
             Session session = getSession();
             for (Object entity : entities) {
                 session.delete(entity);
