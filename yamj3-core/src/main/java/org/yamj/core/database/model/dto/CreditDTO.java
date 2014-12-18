@@ -25,6 +25,8 @@ package org.yamj.core.database.model.dto;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.core.database.model.type.JobType;
@@ -38,7 +40,7 @@ public class CreditDTO {
     private String role;
     private Map<String,String> photoURLS = new HashMap<String, String>(0);
     private Map<String, String> personIdMap = new HashMap<String, String>(0);
-    
+
     public CreditDTO(String source) {
         this.source = source;
     }
@@ -120,34 +122,26 @@ public class CreditDTO {
             this.personIdMap.put(sourcedb, personId.trim());
         }
     }
- 
+
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (this.name == null ? 0 : this.name.hashCode());
-        result = prime * result + (this.jobType == null ? 0 : this.jobType.hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(name)
+                .append(jobType)
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof CreditDTO) {
+            final CreditDTO other = (CreditDTO) obj;
+            return new EqualsBuilder()
+                    .append(getJobType(), other.getJobType())
+                    .append(getName(), other.getName())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof CreditDTO)) {
-            return false;
-        }
-        CreditDTO castOther = (CreditDTO) other;
-        // check job
-        if (this.jobType != castOther.jobType) {
-            return false;
-        }
-        // check name
-        return StringUtils.equalsIgnoreCase(this.name, castOther.name);
     }
 
     @Override
