@@ -22,17 +22,23 @@
  */
 package org.yamj.core.service.mediaimport;
 
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
-import static org.springframework.util.StringUtils.tokenizeToStringArray;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import static org.springframework.util.StringUtils.tokenizeToStringArray;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.tools.StringTools;
 import org.yamj.common.util.KeywordMap;
@@ -79,7 +85,8 @@ public class FilenameScanner {
         }
     };
     /**
-     * Detect if the file/folder name is incomplete and additional info must be taken from parent folder.
+     * Detect if the file/folder name is incomplete and additional info must be
+     * taken from parent folder.
      *
      * CAUTION: Grouping is used for part number detection/parsing.
      */
@@ -216,7 +223,7 @@ public class FilenameScanner {
             if ("watched".equals(extension)) {
                 return FileType.WATCHED;
             }
-            
+
             if (videoExtensions.contains(ext)) {
                 return FileType.VIDEO;
             }
@@ -246,7 +253,6 @@ public class FilenameScanner {
         }
 
         // EXTENSION AND CONTAINER
-
         if (dto.isDirectory()) {
             dto.setContainer("DVD");
             dto.setVideoSource("DVD");
@@ -301,194 +307,226 @@ public class FilenameScanner {
         dto.setVideoSource(seekPatternAndUpdateRest(videoSourceMap, dto.getVideoSource(), dto, PART_PATTERNS));
 
         // SEASON + EPISODES
-        {
-            final Matcher matcher = TV_PATTERN.matcher(dto.getRest());
+        processSeasonEpisode(dto);
+        processPart(dto);
+        processSets(dto);
+        procesIdDetection(dto);
+        processLanguages(dto);
+        processTitle(dto);
+    }
+
+    /**
+     * Process the Season and Episodes
+     *
+     * @param dto
+     */
+    private void processSeasonEpisode(FilenameDTO dto) {
+        Matcher matcher = TV_PATTERN.matcher(dto.getRest());
+        if (matcher.find()) {
+            dto.setRest(cutMatch(dto.getRest(), matcher, "./TVSHOW/."));
+
+            final Matcher smatcher = SEASON_PATTERN.matcher(matcher.group(0));
+            smatcher.find();
+            int season = Integer.parseInt(smatcher.group(1));
+            dto.setSeason(season);
+
+            final Matcher ematcher = EPISODE_PATTERN.matcher(matcher.group(0));
+            while (ematcher.find()) {
+                dto.getEpisodes().add(Integer.parseInt(ematcher.group(1)));
+            }
+        }
+    }
+
+    /**
+     * Process the "Part" portion
+     *
+     * @param dto
+     */
+    private void processPart(FilenameDTO dto) {
+        Matcher matcher;
+        for (Pattern pattern : PART_PATTERNS) {
+            matcher = pattern.matcher(dto.getRest());
             if (matcher.find()) {
-                dto.setRest(cutMatch(dto.getRest(), matcher, "./TVSHOW/."));
-
-                final Matcher smatcher = SEASON_PATTERN.matcher(matcher.group(0));
-                smatcher.find();
-                int season = Integer.parseInt(smatcher.group(1));
-                dto.setSeason(season);
-
-                final Matcher ematcher = EPISODE_PATTERN.matcher(matcher.group(0));
-                while (ematcher.find()) {
-                    dto.getEpisodes().add(Integer.parseInt(ematcher.group(1)));
-                }
+                dto.setRest(cutMatch(dto.getRest(), matcher, " /PART/ "));
+                dto.setPart(NumberUtils.toInt(matcher.group(1)));
+                break;
             }
         }
+    }
 
-        // PART
-        {
-            for (Pattern pattern : PART_PATTERNS) {
-                final Matcher matcher = pattern.matcher(dto.getRest());
-                if (matcher.find()) {
-                    dto.setRest(cutMatch(dto.getRest(), matcher, " /PART/ "));
-                    dto.setPart(Integer.parseInt(matcher.group(1)));
-                    break;
+    /**
+     * Process sets from the filename
+     *
+     * @param dto
+     */
+    private void processSets(FilenameDTO dto) {
+        Matcher matcher = SET_PATTERN.matcher(dto.getRest());
+        while (matcher.find()) {
+            dto.setRest(cutMatch(dto.getRest(), matcher, PatternUtils.SPACE_SLASH_SPACE));
+
+            Integer order = null;
+            String n = matcher.group(1);
+            Matcher nmatcher = SET_INDEX_PATTERN.matcher(n);
+            if (nmatcher.find()) {
+                String sIndex = StringUtils.trim(nmatcher.group(1));
+                if (StringUtils.isNumeric(sIndex)) {
+                    order = Integer.valueOf(sIndex);
                 }
+                n = cutMatch(n, nmatcher);
             }
-        }
-
-        // SETS
-        {
-            for (;;) {
-                final Matcher matcher = SET_PATTERN.matcher(dto.getRest());
-                if (!matcher.find()) {
-                    break;
-                }
-                dto.setRest(cutMatch(dto.getRest(), matcher, PatternUtils.SPACE_SLASH_SPACE));
-
-                Integer order = null;
-                String n = matcher.group(1);
-                Matcher nmatcher = SET_INDEX_PATTERN.matcher(n);
-                if (nmatcher.find()) {
-                    String sIndex = StringUtils.trim(nmatcher.group(1));
-                    if (StringUtils.isNumeric(sIndex)) {
-                        order = Integer.valueOf(sIndex);
-                    }
-                    n = cutMatch(n, nmatcher);
-                }
-                String setName = n.trim();
-                if (StringUtils.isNotBlank(setName)) {
-                    dto.getSetMap().put(setName, order);
-                }
+            String setName = n.trim();
+            if (StringUtils.isNotBlank(setName)) {
+                dto.getSetMap().put(setName, order);
             }
-        }
 
-        // Movie ID detection
-        {
-            Matcher matcher = ID_PATTERN.matcher(dto.getRest());
+            // Check for the next occurence
+            matcher = SET_PATTERN.matcher(dto.getRest());
+        }
+    }
+
+    /**
+     * Movie ID detection
+     *
+     * @param dto
+     */
+    private void procesIdDetection(FilenameDTO dto) {
+        Matcher matcher = ID_PATTERN.matcher(dto.getRest());
+        if (matcher.find()) {
+            dto.setRest(cutMatch(dto.getRest(), matcher, " /ID/ "));
+
+            String idString[] = matcher.group(1).split("[-\\s+]");
+            if (idString.length == 2) {
+                dto.setId(idString[0].toLowerCase(), idString[1]);
+            } else {
+                LOG.debug("Error decoding ID from filename: {}", matcher.group(1));
+            }
+        } else {
+            matcher = IMDB_PATTERN.matcher(dto.getRest());
             if (matcher.find()) {
                 dto.setRest(cutMatch(dto.getRest(), matcher, " /ID/ "));
+                dto.setId("imdb", matcher.group(1));
+            }
+        }
+    }
 
-                String idString[] = matcher.group(1).split("[-\\s+]");
-                if (idString.length == 2) {
-                    dto.setId(idString[0].toLowerCase(), idString[1]);
-                } else {
-                    LOG.debug("Error decoding ID from filename: {}", matcher.group(1));
+    /**
+     * Process languages
+     *
+     * @param dto
+     */
+    private void processLanguages(FilenameDTO dto) {
+        if (!languageDetection) {
+            return;
+        }
+
+        String language = seekPatternAndUpdateRest(LanguageTools.getStrictLanguageMap(), null, dto);
+        while (StringUtils.isNotBlank(language)) {
+            dto.getLanguages().add(StringUtils.trim(language));
+            language = seekPatternAndUpdateRest(LanguageTools.getStrictLanguageMap(), null, dto);
+        }
+    }
+
+    /**
+     * Process the title from the filename
+     *
+     * @param dto
+     */
+    private void processTitle(FilenameDTO dto) {
+        String rest = dto.getRest();
+        int iextra = dto.isExtra() ? rest.indexOf("/EXTRA/") : rest.length();
+        int itvshow = dto.getSeason() >= 0 ? rest.indexOf("/TVSHOW/") : rest.length();
+        int ipart = dto.getPart() >= 0 ? rest.indexOf("/PART/") : rest.length();
+
+        int min = iextra < itvshow ? iextra : itvshow;
+        min = min < ipart ? min : ipart;
+
+        // Find first token before trailer, TV show and part
+        // Name should not start with '-' (exclude wrongly marked part/episode titles)
+        String title = "";
+        StringTokenizer t = new StringTokenizer(rest.substring(0, min), "/[]");
+        while (t.hasMoreElements()) {
+            String token = t.nextToken();
+            token = cleanUpTitle(token);
+            if (token.length() >= 1 && token.charAt(0) != '-') {
+                title = token;
+                break;
+            }
+        }
+
+        boolean first = Boolean.TRUE;
+        while (t.hasMoreElements()) {
+            String token = t.nextToken();
+            token = cleanUpTitle(token);
+            // Search year (must be next to a non-empty token)
+            if (first) {
+                if (token.length() > 0) {
+                    try {
+                        int year = Integer.parseInt(token);
+                        if (year >= 1800 && year <= 3000) {
+                            dto.setYear(year);
+                        }
+                    } catch (NumberFormatException error) {
+                    }
                 }
-            } else {
-                matcher = IMDB_PATTERN.matcher(dto.getRest());
-                if (matcher.find()) {
-                    dto.setRest(cutMatch(dto.getRest(), matcher, " /ID/ "));
-                    dto.setId("imdb", matcher.group(1));
+                first = Boolean.FALSE;
+            }
+
+            if (!languageDetection) {
+                break;
+            }
+
+            // Loose language search
+            if (token.length() >= 2 && token.indexOf('-') < 0) {
+                for (Map.Entry<String, Pattern> e : LanguageTools.getLooseLanguageMap().entrySet()) {
+                    Matcher matcher = e.getValue().matcher(token);
+                    if (matcher.find()) {
+                        dto.getLanguages().add(e.getKey());
+                    }
                 }
             }
         }
 
-        // LANGUAGES
-        if (languageDetection) {
-            for (;;) {
-                String language = seekPatternAndUpdateRest(LanguageTools.getStrictLanguageMap(), null, dto);
-                if (language == null) {
+        // Search year within title (last 4 digits or 4 digits in parenthesis)
+        if (dto.getYear() < 0) {
+            Matcher ymatcher = MOVIE_YEAR_PATTERN.matcher(title);
+            if (ymatcher.find()) {
+                int year = Integer.parseInt(ymatcher.group(1));
+                if (year >= 1919 && year <= 2099) {
+                    dto.setYear(year);
+                    title = cutMatch(title, ymatcher);
+                }
+            }
+        }
+        dto.setTitle(title);
+
+        // EPISODE TITLE
+        if (dto.getSeason() >= 0) {
+            itvshow += 8;
+            Matcher matcher = SECOND_TITLE_PATTERN.matcher(rest.substring(itvshow));
+            while (matcher.find()) {
+                title = cleanUpTitle(matcher.group(1));
+                if (title.length() > 0) {
+                    if (!skipEpisodeTitle) {
+                        dto.setEpisodeTitle(title);
+                    }
                     break;
                 }
-                dto.getLanguages().add(language);
             }
         }
 
-        // TITLE
-        {
-            String rest = dto.getRest();
-            int iextra = dto.isExtra() ? rest.indexOf("/EXTRA/") : rest.length();
-            int itvshow = dto.getSeason() >= 0 ? rest.indexOf("/TVSHOW/") : rest.length();
-            int ipart = dto.getPart() >= 0 ? rest.indexOf("/PART/") : rest.length();
-
-            {
-                int min = iextra < itvshow ? iextra : itvshow;
-                min = min < ipart ? min : ipart;
-
-                // Find first token before trailer, TV show and part
-                // Name should not start with '-' (exclude wrongly marked part/episode titles)
-                String title = "";
-                StringTokenizer t = new StringTokenizer(rest.substring(0, min), "/[]");
-                while (t.hasMoreElements()) {
-                    String token = t.nextToken();
-                    token = cleanUpTitle(token);
-                    if (token.length() >= 1 && token.charAt(0) != '-') {
-                        title = token;
-                        break;
-                    }
-                }
-
-                boolean first = Boolean.TRUE;
-                while (t.hasMoreElements()) {
-                    String token = t.nextToken();
-                    token = cleanUpTitle(token);
-                    // Search year (must be next to a non-empty token)
-                    if (first) {
-                        if (token.length() > 0) {
-                            try {
-                                int year = Integer.parseInt(token);
-                                if (year >= 1800 && year <= 3000) {
-                                    dto.setYear(year);
-                                }
-                            } catch (NumberFormatException error) {
-                            }
-                        }
-                        first = Boolean.FALSE;
-                    }
-
-                    if (!languageDetection) {
-                        break;
-                    }
-
-                    // Loose language search
-                    if (token.length() >= 2 && token.indexOf('-') < 0) {
-                        for (Map.Entry<String, Pattern> e : LanguageTools.getLooseLanguageMap().entrySet()) {
-                            Matcher matcher = e.getValue().matcher(token);
-                            if (matcher.find()) {
-                                dto.getLanguages().add(e.getKey());
-                            }
-                        }
-                    }
-                }
-
-                // Search year within title (last 4 digits or 4 digits in parenthesis)
-                if (dto.getYear() < 0) {
-                    Matcher ymatcher = MOVIE_YEAR_PATTERN.matcher(title);
-                    if (ymatcher.find()) {
-                        int year = Integer.parseInt(ymatcher.group(1));
-                        if (year >= 1919 && year <= 2099) {
-                            dto.setYear(year);
-                            title = cutMatch(title, ymatcher);
-                        }
-                    }
-                }
-                dto.setTitle(title);
-            }
-
-            // EPISODE TITLE
-            if (dto.getSeason() >= 0) {
-                itvshow += 8;
-                Matcher matcher = SECOND_TITLE_PATTERN.matcher(rest.substring(itvshow));
-                while (matcher.find()) {
-                    String title = cleanUpTitle(matcher.group(1));
-                    if (title.length() > 0) {
-                        if (!skipEpisodeTitle) {
-                            dto.setEpisodeTitle(title);
-                        }
-                        break;
-                    }
-                }
-            }
-
-            // PART TITLE
-            // Just do this for no extra, already named.
-            if ((dto.getPart() >= 0) && !dto.isExtra()) {
-                ipart += 6;
-                Matcher matcher = SECOND_TITLE_PATTERN.matcher(rest.substring(ipart));
-                while (matcher.find()) {
-                    String title = cleanUpTitle(matcher.group(1));
-                    if (title.length() > 0) {
-                        dto.setPartTitle(title);
-                        break;
-                    }
+        // PART TITLE
+        // Just do this for no extra, already named.
+        if ((dto.getPart() >= 0) && !dto.isExtra()) {
+            ipart += 6;
+            Matcher matcher = SECOND_TITLE_PATTERN.matcher(rest.substring(ipart));
+            while (matcher.find()) {
+                title = cleanUpTitle(matcher.group(1));
+                if (title.length() > 0) {
+                    dto.setPartTitle(title);
+                    break;
                 }
             }
         }
-
     }
 
     private String cleanUp(final String filename) {
@@ -500,7 +538,8 @@ public class FilenameScanner {
     }
 
     /**
-     * Replace all dividers with spaces and trim trailing spaces and redundant braces/minuses at the end.
+     * Replace all dividers with spaces and trim trailing spaces and redundant
+     * braces/minuses at the end.
      *
      * @param token String to clean up.
      * @return Prepared title.
