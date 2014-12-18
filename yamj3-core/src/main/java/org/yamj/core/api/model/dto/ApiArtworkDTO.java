@@ -27,8 +27,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
 
@@ -241,9 +239,4 @@ public class ApiArtworkDTO extends AbstractApiIdentifiableDTO {
         return key.toString();
     }
     //</editor-fold>
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
-    }
 }
