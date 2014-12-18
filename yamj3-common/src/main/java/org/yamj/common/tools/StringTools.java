@@ -23,11 +23,19 @@
 package org.yamj.common.tools;
 
 import java.text.BreakIterator;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.StringTokenizer;
 import org.apache.commons.lang3.StringUtils;
 
 public class StringTools {
-    
+
+    private StringTools() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     /**
      * Split a list using a regex and return a list of trimmed strings
      *
@@ -44,7 +52,7 @@ public class StringTools {
 
         return finalValues;
     }
-    
+
     /**
      * Cast a generic list to a specfic class See:
      * http://stackoverflow.com/questions/367626/how-do-i-fix-the-expression-of-type-list-needs-unchecked-conversion
@@ -61,7 +69,7 @@ public class StringTools {
         }
         return r;
     }
-    
+
     public static Collection<String> tokenize(String sourceString, String delimiter) {
         StringTokenizer st = new StringTokenizer(sourceString, delimiter);
         Collection<String> keywords = new HashSet<String>();
@@ -71,9 +79,9 @@ public class StringTools {
         return keywords;
     }
 
-
     /**
-     * Check that the passed string is not longer than the required length and trim it if necessary.
+     * Check that the passed string is not longer than the required length and
+     * trim it if necessary.
      *
      * @param sourceString
      * @param requiredLength
@@ -84,12 +92,15 @@ public class StringTools {
     }
 
     /**
-     * Check that the passed string is not longer than the required length and trim it if necessary
+     * Check that the passed string is not longer than the required length and
+     * trim it if necessary
      *
      * @param sourceString The string to check
      * @param requiredLength The required length (Maximum)
-     * @param trimToWord Trim the source string to the last space to avoid partial words
-     * @param endingSuffix The ending to append if the string is longer than the required length
+     * @param trimToWord Trim the source string to the last space to avoid
+     * partial words
+     * @param endingSuffix The ending to append if the string is longer than the
+     * required length
      * @return
      */
     public static String trimToLength(String sourceString, int requiredLength, boolean trimToWord, String endingSuffix) {

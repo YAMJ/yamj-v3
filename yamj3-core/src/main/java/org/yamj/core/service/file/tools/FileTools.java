@@ -22,7 +22,12 @@
  */
 package org.yamj.core.service.file.tools;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -89,11 +94,16 @@ public class FileTools {
             UNSAFE_CHARS.add(new ReplaceEntry(character.toLowerCase(), translation.toLowerCase()));
         }
     }
-    
+
+    private FileTools() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
+
     private static class ReplaceEntry {
 
-        private String oldText, newText;
-        private int oldLength;
+        private final String oldText;
+        private final String newText;
+        private final int oldLength;
 
         public ReplaceEntry(String oldtext, String newtext) {
             this.oldText = oldtext;
@@ -111,7 +121,7 @@ public class FileTools {
             return newFilename;
         }
     };
-    
+
     /**
      * One buffer for each thread to allow threaded copies
      */
@@ -245,7 +255,8 @@ public class FileTools {
     /**
      * Create all directories up to the level of the file passed
      *
-     * @param sourceDirectory Source directory or file to create the directories directories
+     * @param filename Source directory or file to create the directories
+     * directories
      * @return
      */
     public static boolean makeDirectories(String filename) {
@@ -255,8 +266,9 @@ public class FileTools {
     /**
      * Create all directories up to the level of the file passed
      *
-     * @param sourceDirectory Source directory or file to create the directories
-     * @param numOfTries Number of attempts that will be made to create the directories
+     * @param filename Source directory or file to create the directories
+     * @param numOfTries Number of attempts that will be made to create the
+     * directories
      * @return
      */
     public static boolean makeDirectories(String filename, int numOfTries) {
@@ -266,7 +278,8 @@ public class FileTools {
     /**
      * Create all directories up to the level of the file passed
      *
-     * @param sourceDirectory Source directory or file to create the directories directories
+     * @param file Source directory or file to create the directories
+     * directories
      * @return
      */
     public static boolean makeDirectories(File file) {
@@ -277,7 +290,8 @@ public class FileTools {
      * Create all directories up to the level of the file passed
      *
      * @param sourceDirectory Source directory or file to create the directories
-     * @param numOfTries Number of attempts that will be made to create the directories
+     * @param numOfTries Number of attempts that will be made to create the
+     * directories
      * @return
      */
     public static boolean makeDirectories(final File sourceDirectory, int numOfTries) {
@@ -390,7 +404,8 @@ public class FileTools {
         try {
             File file = new File(stageFile.getFullPath());
             readable = (file.exists() && file.canRead());
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
         return readable;
     }
 
@@ -399,7 +414,8 @@ public class FileTools {
         try {
             File file = new File(stageDirectory.getDirectoryPath());
             readable = (file.exists() && file.canRead());
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
         return readable;
     }
 
@@ -408,7 +424,8 @@ public class FileTools {
         try {
             File file = new File(stageFile.getFullPath());
             exists = file.exists();
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
         return exists;
     }
 
@@ -417,10 +434,11 @@ public class FileTools {
         try {
             File file = new File(stageDirectory.getDirectoryPath());
             exists = file.exists();
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
         return exists;
     }
-    
+
     public static String makeSafeFilename(String filename) {
         String newFilename = filename;
 
@@ -448,8 +466,8 @@ public class FileTools {
         }
         return StringUtils.containsIgnoreCase(directory.getDirectoryPath(), getPathFragment(folderName));
     }
-    
+
     public static String getPathFragment(String folderName) {
-        return  FilenameUtils.separatorsToUnix("/"+folderName+"/");
+        return FilenameUtils.separatorsToUnix("/" + folderName + "/");
     }
 }

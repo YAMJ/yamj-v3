@@ -38,6 +38,10 @@ public class ClassTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClassTools.class);
 
+    private ClassTools() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     /**
      * Helper method to print the stack trace to the log file
      *

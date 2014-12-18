@@ -42,6 +42,10 @@ public class SystemTools {
     private static String ipv4 = null;
     private static String ipv6 = null;
 
+    private SystemTools() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     /**
      * Search through the the network adapters and get the IPv4 address of the
      * server.

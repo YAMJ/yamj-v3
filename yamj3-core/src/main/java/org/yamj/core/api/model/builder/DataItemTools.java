@@ -37,6 +37,10 @@ public class DataItemTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(DataItemTools.class);
 
+    private DataItemTools() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
+
     /**
      * Create a fragment of SQL from the list of data items
      *
@@ -49,13 +53,13 @@ public class DataItemTools {
 
         if (CollectionUtils.isNotEmpty(dataItems)) {
             LOG.trace("Adding dataitems {} to table prefix {}", dataItems, tablePrefix);
-            
+
             for (DataItem item : dataItems) {
                 if (item.isNotColumn()) {
                     // This is not a specific SQL statement and is not needed
                     continue;
                 }
-                
+
                 if (item == DataItem.TOP_RANK) {
                     sbSQL.append(", ").append(tablePrefix).append(".top_rank as topRank");
                 } else {
@@ -82,7 +86,7 @@ public class DataItemTools {
                 // This is not a specific scalar and is not needed
                 continue;
             }
-            
+
             if (item == DataItem.TOP_RANK) {
                 sqlScalars.addScalar("topRank", IntegerType.INSTANCE);
             } else {

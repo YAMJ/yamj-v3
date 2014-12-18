@@ -22,12 +22,22 @@
  */
 package org.yamj.core.tools;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.PropertyTools;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.AbstractMetadata;
+import org.yamj.core.database.model.IScannable;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 
@@ -120,7 +130,7 @@ public final class OverrideTools {
         putSeriesPriorities(OverrideFlag.YEAR, sources);
         sources = PropertyTools.getProperty("priority.season.year", DEFAULT_PLUGIN_SERIES);
         putSeasonPriorities(OverrideFlag.YEAR, sources);
-        
+
         // person priorities
         sources = PropertyTools.getProperty("priority.person.name", DEFAULT_PLUGIN_PERSON);
         putPersonPriorities(OverrideFlag.NAME, sources);
@@ -136,6 +146,10 @@ public final class OverrideTools {
         putPersonPriorities(OverrideFlag.DEATHDAY, sources);
         sources = PropertyTools.getProperty("priority.person.biography", DEFAULT_PLUGIN_PERSON);
         putPersonPriorities(OverrideFlag.BIOGRAPHY, sources);
+    }
+
+    private OverrideTools() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     /**
@@ -263,7 +277,8 @@ public final class OverrideTools {
      * @param actualSource the actual source
      * @param newSource the new source
      * @param metadata the metadata object
-     * @return true, if new source has higher property than actual source, else false
+     * @return true, if new source has higher property than actual source, else
+     * false
      */
     private static boolean hasHigherPriority(final OverrideFlag overrideFlag, final String actualSource, final String newSource, final IScannable scannable) {
         // check sources
@@ -452,9 +467,8 @@ public final class OverrideTools {
         }
         return checkOverwrite(metadata, OverrideFlag.YEAR, source);
     }
-    
-    // PERSON OVERRIDE
 
+    // PERSON OVERRIDE
     public static boolean checkOverwriteName(Person person, String source) {
         if (skipCheck(person, OverrideFlag.NAME, source)) {
             // skip the check

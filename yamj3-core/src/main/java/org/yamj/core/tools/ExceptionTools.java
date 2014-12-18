@@ -34,6 +34,10 @@ import org.springframework.dao.CannotAcquireLockException;
  */
 public class ExceptionTools {
 
+    private ExceptionTools() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
+
     public static boolean isLockingError(Exception e) {
         if (e == null) {
             return false;
@@ -70,7 +74,7 @@ public class ExceptionTools {
         if (e instanceof LockAcquisitionException) {
             return true;
         }
-        
+
         return false;
     }
 }
