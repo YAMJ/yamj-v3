@@ -22,8 +22,14 @@
  */
 package org.yamj.core.service.mediaimport;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -40,7 +46,17 @@ import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.MediaDao;
 import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.dao.StagingDao;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.ArtworkLocated;
+import org.yamj.core.database.model.Library;
+import org.yamj.core.database.model.MediaFile;
+import org.yamj.core.database.model.NfoRelation;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.StageDirectory;
+import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.Subtitle;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.service.CommonStorageService;
@@ -52,8 +68,10 @@ import org.yamj.core.tools.LanguageTools;
 import org.yamj.core.tools.MetadataTools;
 
 /**
- * The media import service is a spring-managed service. This will be used by the MediaImportRunner only in order to access other
- * spring beans cause the MediaImportRunner itself is no spring-managed bean and dependency injection will fail on that runner.
+ * The media import service is a spring-managed service. This will be used by
+ * the MediaImportRunner only in order to access other spring beans cause the
+ * MediaImportRunner itself is no spring-managed bean and dependency injection
+ * will fail on that runner.
  *
  */
 @Service("mediaImportService")
@@ -64,7 +82,7 @@ public class MediaImportService {
     private static final String TVSHOW_NFO_NAME = "tvshow";
     private static final String BDMV_FOLDER = "BDMV";
     private static final String DVD_FOLDER = "VIDEO_TS";
-    
+
     @Autowired
     private StagingDao stagingDao;
     @Autowired
@@ -83,7 +101,7 @@ public class MediaImportService {
     private CommonStorageService commonStorageService;
     @Autowired
     private StagingService stagingService;
-    
+
     @Transactional(readOnly = true)
     public Long getNextStageFileId(final FileType fileType, final StatusType... statusTypes) {
         return this.stagingDao.getNextStageFileId(fileType, statusTypes);
@@ -92,10 +110,10 @@ public class MediaImportService {
     @Transactional
     public void processVideo(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
-        
+
         if (stageFile.getMediaFile() == null) {
             LOG.info("Process new video {}-'{}'", stageFile.getId(), stageFile.getFileName());
-            
+
             // process video file
             processVideoFile(stageFile);
 
@@ -103,7 +121,7 @@ public class MediaImportService {
             attachNfoFilesToVideo(stageFile);
         } else {
             LOG.info("Process updated video {} - '{}'", stageFile.getId(), stageFile.getFileName());
-            
+
             // just update media file
             MediaFile mediaFile = stageFile.getMediaFile();
             mediaFile.setStatus(StatusType.UPDATED);
@@ -116,7 +134,7 @@ public class MediaImportService {
     }
 
     private void processVideoFile(StageFile stageFile) {
-        
+
         // check if same media file already exists
         MediaFile mediaFile = mediaDao.getMediaFile(stageFile.getFileName());
         if (mediaFile != null) {
@@ -150,7 +168,7 @@ public class MediaImportService {
 
         // determine if watched file exists for the video file
         boolean watchedFile = this.stagingService.isWatchedVideoFile(stageFile);
-        
+
         // new media file
         mediaFile = new MediaFile();
         mediaFile.setFileName(stageFile.getFileName());
@@ -170,12 +188,11 @@ public class MediaImportService {
 
         LOG.debug("Store new media file: '{}'", mediaFile.getFileName());
         mediaDao.saveEntity(mediaFile);
-        
+
         // SUBTITLE
         this.attachSubtilesToMediaFile(mediaFile, stageFile);
-        
+
         // METADATA OBJECTS
-                
         if (dto.isMovie()) {
             // VIDEO DATA for movies
 
@@ -221,7 +238,7 @@ public class MediaImportService {
             } else {
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);
-                
+
                 // set watched file if all media files are watched by file
                 watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
                 videoData.setWatchedFile(watchedFile);
@@ -235,7 +252,7 @@ public class MediaImportService {
 
             // boxed set handling
             if (MapUtils.isNotEmpty(dto.getSetMap())) {
-                for (Entry<String,Integer> entry : dto.getSetMap().entrySet()) {
+                for (Entry<String, Integer> entry : dto.getSetMap().entrySet()) {
                     // add boxed set to video data
                     videoData.addSetInfo(entry.getKey(), entry.getValue());
                 }
@@ -254,9 +271,8 @@ public class MediaImportService {
                 if (videoData == null) {
                     // get the prefix for setting the sort title
                     List<String> prefixes = this.configServiceWrapper.getSortStripPrefixes();
-                    
-                    // NEW video data
 
+                    // NEW video data
                     // getById or create season
                     String seasonIdentifier = dto.buildSeasonIdentifier();
                     Season season = metadataDao.getSeason(seasonIdentifier);
@@ -271,10 +287,10 @@ public class MediaImportService {
                             series.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                             series.setSourceDbIdMap(dto.getIdMap());
                             series.setStatus(StatusType.NEW);
-                            
+
                             // set sort title
                             MetadataTools.setSortTitle(series, prefixes);
-                            
+
                             LOG.debug("Store new series: '{}'", series.getTitle());
                             metadataDao.saveEntity(series);
 
@@ -370,10 +386,10 @@ public class MediaImportService {
             }
         }
     }
-    
+
     private void attachNfoFilesToVideo(StageFile stageFile) {
         if (stageFile.getMediaFile() == null) {
-            // video file must be associated to a media file 
+            // video file must be associated to a media file
             return;
         }
         if (stageFile.getMediaFile().isExtra()) {
@@ -396,11 +412,11 @@ public class MediaImportService {
         }
 
         // holds the found NFO files with priority
-        Map<StageFile, Integer> nfoFiles = new HashMap<StageFile,Integer>();
+        Map<StageFile, Integer> nfoFiles = new HashMap<StageFile, Integer>();
 
         // search name is the base name of the stage file
         String searchName = stageFile.getBaseName();
-        
+
         // BDMV and VIDEO_TS folder handling
         StageDirectory directory = stageFile.getStageDirectory();
         if (this.isBlurayOrDvdFolder(directory)) {
@@ -409,12 +425,12 @@ public class MediaImportService {
             // search for name of parent directory
             searchName = directory.getDirectoryName();
         }
-        
+
         // case 1: find matching NFO in directory
         StageFile foundNfoFile = this.stagingDao.findNfoFile(searchName, directory);
         if (foundNfoFile != null && !nfoFiles.containsKey(foundNfoFile)) {
             nfoFiles.put(foundNfoFile, Integer.valueOf(1));
-            
+
             // change status for PRIO-1-NFO
             if (FileTools.isFileScannable(foundNfoFile)) {
                 foundNfoFile.setStatus(StatusType.DONE);
@@ -427,7 +443,7 @@ public class MediaImportService {
         // case 2: find matching files in NFO folder
         String nfoFolderName = PropertyTools.getProperty("yamj3.folder.name.nfo");
         Set<String> searchNames = Collections.singleton(searchName.toLowerCase());
-        
+
         Library library = null;
         if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.nfo", Boolean.TRUE)) {
             library = stageFile.getStageDirectory().getLibrary();
@@ -435,7 +451,7 @@ public class MediaImportService {
 
         for (StageFile nfoFile : this.stagingDao.findStageFilesInSpecialFolder(FileType.NFO, nfoFolderName, library, searchNames)) {
             nfoFiles.put(nfoFile, Integer.valueOf(2));
-            
+
             // change status for PRIO-2-NFO
             if (FileTools.isFileScannable(nfoFile)) {
                 nfoFile.setStatus(StatusType.DONE);
@@ -444,7 +460,7 @@ public class MediaImportService {
             }
             this.stagingDao.updateEntity(nfoFile);
         }
-        
+
         if (isTvShow) {
             // case 2: tvshow.nfo in same directory as video
             foundNfoFile = this.stagingDao.findNfoFile(TVSHOW_NFO_NAME, directory);
@@ -458,25 +474,25 @@ public class MediaImportService {
                 nfoFiles.put(foundNfoFile, Integer.valueOf(4));
             }
         }
-        
+
         // case 10-n: apply "nfoName = dirName" to all video data
         // NOTE: 11-n are only applied if recursive scan is enabled
         boolean recurse = this.configServiceWrapper.getBooleanProperty("yamj3.scan.nfo.recursiveDirectories", false);
-        LOG.trace("Recursive scan of directories is {}", (recurse?"enabled":"disabled"));
+        LOG.trace("Recursive scan of directories is {}", (recurse ? "enabled" : "disabled"));
         this.findNfoWithDirectoryName(nfoFiles, stageFile.getStageDirectory(), 10, recurse);
-        
+
         if (MapUtils.isEmpty(nfoFiles)) {
             // no NFO files found
             return;
         }
 
-        for (Entry<StageFile,Integer> entry : nfoFiles.entrySet()) {
+        for (Entry<StageFile, Integer> entry : nfoFiles.entrySet()) {
             StageFile nfoFile = entry.getKey();
-            int priority = entry.getValue().intValue();
-            
+            int priority = entry.getValue();
+
             for (VideoData videoData : videoDatas) {
                 LOG.debug("Found NFO {}-'{}' with priority {} for video data '{}'",
-                                nfoFile.getId(), nfoFile.getFileName(), priority, videoData.getIdentifier());
+                        nfoFile.getId(), nfoFile.getFileName(), priority, videoData.getIdentifier());
 
                 NfoRelation nfoRelation = new NfoRelation(nfoFile, videoData);
                 nfoRelation.setPriority(priority);
@@ -492,20 +508,22 @@ public class MediaImportService {
         }
     }
 
-    private void findNfoWithDirectoryName(Map<StageFile,Integer> nfoFiles, StageDirectory directory, int counter, boolean recurse) {
-        if (directory == null) return;
-        
+    private void findNfoWithDirectoryName(Map<StageFile, Integer> nfoFiles, StageDirectory directory, int counter, boolean recurse) {
+        if (directory == null) {
+            return;
+        }
+
         StageFile foundNfoFile = this.stagingDao.findNfoFile(directory.getDirectoryName(), directory);
         if (foundNfoFile != null && !nfoFiles.containsKey(foundNfoFile)) {
             nfoFiles.put(foundNfoFile, Integer.valueOf(counter));
         }
-        
+
         if (recurse) {
             // recurse until parent is null
             this.findNfoWithDirectoryName(nfoFiles, directory.getParentDirectory(), (counter + 1), recurse);
         }
     }
-    
+
     private boolean isBlurayOrDvdFolder(StageDirectory directory) {
         if (directory == null) {
             return false;
@@ -521,7 +539,7 @@ public class MediaImportService {
 
     private void attachSubtilesToMediaFile(MediaFile mediaFile, StageFile videoFile) {
         String subtitleFolderName = PropertyTools.getProperty("yamj3.folder.name.subtitle");
-        
+
         Library library = null;
         if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.subtitle", Boolean.TRUE)) {
             library = videoFile.getStageDirectory().getLibrary();
@@ -533,7 +551,7 @@ public class MediaImportService {
         Set<String> searchNames = Collections.singleton(videoFile.getBaseName().toLowerCase());
         List<StageFile> other = this.stagingDao.findStageFilesInSpecialFolder(FileType.SUBTITLE, subtitleFolderName, library, searchNames);
         stageFiles.addAll(other);
-        
+
         for (StageFile subtitleFile : stageFiles) {
             Subtitle subtitle = new Subtitle();
             subtitle.setCounter(0);
@@ -552,7 +570,7 @@ public class MediaImportService {
             }
         }
     }
-    
+
     @Transactional
     public void processingError(Long id) {
         if (id == null) {
@@ -587,8 +605,8 @@ public class MediaImportService {
         } else {
             stageFile.setStatus(StatusType.NOTFOUND);
         }
-        stagingDao.updateEntity(stageFile);        
-        
+        stagingDao.updateEntity(stageFile);
+
         // update meta-data for NFO scan
         for (NfoRelation nfoRelation : stageFile.getNfoRelations()) {
             VideoData videoData = nfoRelation.getNfoRelationPK().getVideoData();
@@ -604,11 +622,11 @@ public class MediaImportService {
                 Season season = videoData.getSeason();
                 season.setStatus(StatusType.UPDATED);
                 stagingDao.updateEntity(videoData);
-                
+
                 Series series = season.getSeries();
                 series.setStatus(StatusType.UPDATED);
                 stagingDao.updateEntity(series);
-                
+
                 LOG.debug("Marked series {}-'{}' as updated", series.getId(), series.getTitle());
             }
         }
@@ -616,18 +634,18 @@ public class MediaImportService {
 
     private boolean processNfoFile(StageFile stageFile) {
         // find video files for this NFO file
-        Map<VideoData,Integer> videoFiles = this.findVideoFilesForNFO(stageFile);
+        Map<VideoData, Integer> videoFiles = this.findVideoFilesForNFO(stageFile);
         if (MapUtils.isEmpty(videoFiles)) {
             // no video files found
             return false;
         }
 
-        for (Entry<VideoData,Integer> entry : videoFiles.entrySet()) {
+        for (Entry<VideoData, Integer> entry : videoFiles.entrySet()) {
             VideoData videoData = entry.getKey();
             int priority = entry.getValue().intValue();
-            
+
             LOG.debug("Found video data {}-'{}' for nfo file '{}' with priority {}",
-                            videoData.getId(), videoData.getIdentifier(), stageFile.getFileName(), priority);
+                    videoData.getId(), videoData.getIdentifier(), stageFile.getFileName(), priority);
 
             NfoRelation nfoRelation = new NfoRelation(stageFile, videoData);
             nfoRelation.setPriority(priority);
@@ -643,41 +661,40 @@ public class MediaImportService {
         }
         return true;
     }
-    
-    private Map<VideoData,Integer> findVideoFilesForNFO(StageFile stageFile) {
-        Map<VideoData,Integer> videoFiles = new HashMap<VideoData,Integer>();
+
+    private Map<VideoData, Integer> findVideoFilesForNFO(StageFile stageFile) {
+        Map<VideoData, Integer> videoFiles = new HashMap<VideoData, Integer>();
         List<VideoData> videoDatas = null;
-        
+
         String nfoFolderName = PropertyTools.getProperty("yamj3.folder.name.nfo");
         if (FileTools.isWithinSpecialFolder(stageFile, nfoFolderName)) {
 
             // case 2: video file has same base name in library
-            
             Library library = null;
             if (this.configServiceWrapper.getBooleanProperty("yamj3.librarycheck.folder.nfo", Boolean.TRUE)) {
                 library = stageFile.getStageDirectory().getLibrary();
             }
-            
+
             videoDatas = this.stagingDao.findVideoDatas(stageFile.getBaseName(), library);
             this.attachVideoDataToNFO(videoFiles, videoDatas, 2);
-            
+
         } else if (stageFile.getBaseName().equalsIgnoreCase(stageFile.getStageDirectory().getDirectoryName())) {
-            
+
             if (isBlurayOrDvdFolder(stageFile.getStageDirectory())) {
-                // ignore NFO in BDMV or DVD folder; should be placed in parent directory 
+                // ignore NFO in BDMV or DVD folder; should be placed in parent directory
                 return videoFiles;
             }
-            
+
             // case 10: apply to all video data in stage directory
             videoDatas = this.stagingDao.findVideoDatas(stageFile.getStageDirectory());
             this.attachVideoDataToNFO(videoFiles, videoDatas, 10);
-            
+
             // get child directories
             List<StageDirectory> childDirectories = this.stagingDao.getChildDirectories(stageFile.getStageDirectory());
             if (CollectionUtils.isEmpty(childDirectories)) {
                 return videoFiles;
             }
-                
+
             // filter out BluRay and DVD folders from child directories
             List<StageDirectory> blurayOrDvdFolders = new ArrayList<StageDirectory>();
             for (StageDirectory directory : childDirectories) {
@@ -694,42 +711,42 @@ public class MediaImportService {
                     this.attachVideoDataToNFO(videoFiles, videoDatas, 1);
                 }
             }
-            
+
             if (CollectionUtils.isNotEmpty(childDirectories)) {
                 boolean recurse = this.configServiceWrapper.getBooleanProperty("yamj3.scan.nfo.recursiveDirectories", false);
-                LOG.trace("Recursive scan of directories is {}", (recurse?"enabled":"disabled"));
-                
+                LOG.trace("Recursive scan of directories is {}", (recurse ? "enabled" : "disabled"));
+
                 if (recurse) {
                     // TODO case 11-n: recursive scanning
                 }
             }
-            
+
         } else if (TVSHOW_NFO_NAME.equals(stageFile.getBaseName())) {
-            
+
             // case 3: tvshow.nfo in same directory as video
             videoDatas = this.stagingDao.findVideoDatas(stageFile.getStageDirectory());
             this.attachVideoDataToNFO(videoFiles, videoDatas, 3, true);
-            
+
             // case 4: tvshow.nfo in parent directory (so search in child directories)
             List<StageDirectory> childDirectories = this.stagingDao.getChildDirectories(stageFile.getStageDirectory());
             videoDatas = this.stagingDao.findVideoDatas(childDirectories);
             this.attachVideoDataToNFO(videoFiles, videoDatas, 4, true);
-            
+
         } else {
-            
+
             // case 1: video file has same base name in same directory
             videoDatas = this.stagingDao.findVideoDatas(stageFile.getBaseName(), stageFile.getStageDirectory());
             this.attachVideoDataToNFO(videoFiles, videoDatas, 1);
         }
-        
+
         return videoFiles;
     }
 
-    private void attachVideoDataToNFO(Map<VideoData,Integer> videoFiles, Collection<VideoData> videoDatas, int priority) {
+    private void attachVideoDataToNFO(Map<VideoData, Integer> videoFiles, Collection<VideoData> videoDatas, int priority) {
         this.attachVideoDataToNFO(videoFiles, videoDatas, priority, false);
     }
 
-    private void attachVideoDataToNFO(Map<VideoData,Integer> videoFiles, Collection<VideoData> videoDatas, int priority, boolean tvShowOnly) {
+    private void attachVideoDataToNFO(Map<VideoData, Integer> videoFiles, Collection<VideoData> videoDatas, int priority, boolean tvShowOnly) {
         if (CollectionUtils.isNotEmpty(videoDatas)) {
             for (VideoData videoData : videoDatas) {
                 if (tvShowOnly && videoData.isMovie()) {
@@ -740,7 +757,7 @@ public class MediaImportService {
             }
         }
     }
-    
+
     @Transactional
     public void processImage(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
@@ -761,41 +778,34 @@ public class MediaImportService {
         // update stage file
         if (found || updated) {
             stageFile.setStatus(StatusType.DONE);
-        }  else {
+        } else {
             stageFile.setStatus(StatusType.NOTFOUND);
         }
         stagingDao.updateEntity(stageFile);
     }
-    
+
     private boolean processImageFile(StageFile stageFile) {
         Collection<Artwork> artworks;
         int priority = 1;
         if (stageFile.getBaseName().equalsIgnoreCase("poster")
                 || stageFile.getBaseName().equalsIgnoreCase("cover")
-                || stageFile.getBaseName().equalsIgnoreCase("folder")) 
-        {
+                || stageFile.getBaseName().equalsIgnoreCase("folder")) {
             LOG.debug("Generic poster found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
             artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stageFile.getStageDirectory());
-        }
-        else if (stageFile.getBaseName().equalsIgnoreCase("fanart")
-                   || stageFile.getBaseName().equalsIgnoreCase("backdrop")
-                   || stageFile.getBaseName().equalsIgnoreCase("background")) 
-        {
+        } else if (stageFile.getBaseName().equalsIgnoreCase("fanart")
+                || stageFile.getBaseName().equalsIgnoreCase("backdrop")
+                || stageFile.getBaseName().equalsIgnoreCase("background")) {
             LOG.debug("Generic fanart found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
             artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stageFile.getStageDirectory());
-        }
-        else if (stageFile.getBaseName().equalsIgnoreCase("banner"))
-        {
-             LOG.debug("Generic banner found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
-             artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stageFile.getStageDirectory());
-        }
-        else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".fanart")
-                 || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-fanart")) 
-        {
+        } else if (stageFile.getBaseName().equalsIgnoreCase("banner")) {
+            LOG.debug("Generic banner found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
+            artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stageFile.getStageDirectory());
+        } else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".fanart")
+                || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-fanart")) {
             LOG.debug("Fanart found: {}", stageFile.getBaseName());
 
             String stripped = stageFile.getBaseName().toLowerCase();
-            stripped = StringUtils.substring(stripped, 0, stripped.length()-7);
+            stripped = StringUtils.substring(stripped, 0, stripped.length() - 7);
 
             if (StringUtils.startsWithIgnoreCase(stripped, "Set_")) {
                 // boxed set fanart
@@ -819,15 +829,13 @@ public class MediaImportService {
                     artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stripped, stageFile.getStageDirectory());
                 }
             }
-        }
-        else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".banner")
-                 || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-banner")) 
-        {
+        } else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".banner")
+                || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-banner")) {
             LOG.debug("Banner found: {}", stageFile.getBaseName());
 
             String stripped = stageFile.getBaseName().toLowerCase();
-            stripped = StringUtils.substring(stripped, 0, stripped.length()-7);
-            
+            stripped = StringUtils.substring(stripped, 0, stripped.length() - 7);
+
             if (StringUtils.startsWithIgnoreCase(stripped, "Set_")) {
                 // boxed set image
                 String boxedSetName = this.getBoxedSetName(stripped);
@@ -850,43 +858,36 @@ public class MediaImportService {
                     artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stripped, stageFile.getStageDirectory());
                 }
             }
-        }
-        else if (StringUtils.indexOf(stageFile.getBaseName(), ".videoimage") > 0) 
-        {
+        } else if (StringUtils.indexOf(stageFile.getBaseName(), ".videoimage") > 0) {
             LOG.debug("VideoImage found: {}", stageFile.getBaseName());
 
-            // TODO apply episode image (which may be for just a part) 
+            // TODO apply episode image (which may be for just a part)
             artworks = Collections.emptyList();
-        }
-        else {
+        } else {
             // NOTE: poster and photo images may have no special image marker like poster or photo
             String photoFolderName = PropertyTools.getProperty("yamj3.folder.name.photo");
             boolean inPhotoFolder = FileTools.isWithinSpecialFolder(stageFile, photoFolderName);
-            
-            if (inPhotoFolder 
-                || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".photo")
-                || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-photo")) 
-            {
+
+            if (inPhotoFolder
+                    || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".photo")
+                    || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-photo")) {
                 LOG.debug("Photo found: {}", stageFile.getBaseName());
-    
+
                 String stripped = stageFile.getBaseName().toLowerCase();
                 if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "photo")) {
-                    stripped = StringUtils.substring(stripped, 0, stripped.length()-6);
+                    stripped = StringUtils.substring(stripped, 0, stripped.length() - 6);
                 }
-    
+
                 // find person artwork
                 String identifier = MetadataTools.cleanIdentifier(stripped);
                 artworks = this.metadataDao.findPersonArtworks(identifier);
-            }
-            else 
-            {
+            } else {
                 LOG.debug("Poster found: {}", stageFile.getBaseName());
-    
+
                 String stripped = stageFile.getBaseName().toLowerCase();
                 if (StringUtils.endsWith(stripped, ".poster")
-                    || StringUtils.endsWith(stripped, "-poster")) 
-                {
-                    stripped = StringUtils.substring(stripped, 0, stripped.length()-7);
+                        || StringUtils.endsWith(stripped, "-poster")) {
+                    stripped = StringUtils.substring(stripped, 0, stripped.length() - 7);
                 }
 
                 if (StringUtils.startsWithIgnoreCase(stripped, "Set_")) {
@@ -920,7 +921,7 @@ public class MediaImportService {
             // no artwork found so return
             return false;
         }
-        
+
         // add artwork stage file to artwork
         for (Artwork artwork : artworks) {
             if (!configServiceWrapper.isLocalArtworkScanEnabled(artwork)) {
@@ -936,18 +937,18 @@ public class MediaImportService {
 
             if (!artwork.getArtworkLocated().contains(located)) {
                 located.setHashCode(stageFile.getArtworkHashCode());
-                
+
                 if (FileTools.isFileReadable(stageFile)) {
                     located.setStatus(StatusType.NEW);
                 } else {
                     located.setStatus(StatusType.INVALID);
                 }
-                
+
                 this.mediaDao.saveEntity(located);
                 artwork.getArtworkLocated().add(located);
             }
         }
-        
+
         return true;
     }
 
@@ -959,7 +960,7 @@ public class MediaImportService {
         }
         return boxedSetName;
     }
-    
+
     @Transactional
     public void processWatched(long id) {
         StageFile watchedFile = stagingDao.getStageFile(id);
@@ -969,7 +970,7 @@ public class MediaImportService {
         for (StageFile videoFile : this.stagingService.findWatchedVideoFiles(watchedFile)) {
             this.commonStorageService.toogleWatchedStatus(videoFile, true, false);
         }
-            
+
         // update stage file
         watchedFile.setStatus(StatusType.DONE);
         stagingDao.updateEntity(watchedFile);
@@ -982,30 +983,30 @@ public class MediaImportService {
 
         // determine language which may only be the "extension" of the base name
         String language = LanguageTools.determineLanguage(FilenameUtils.getExtension(subtitleFile.getBaseName()));
-        
+
         for (StageFile videoFile : this.stagingService.findSubtitleVideoFiles(subtitleFile, language)) {
             if (videoFile.getMediaFile() != null) {
                 Subtitle subtitle = new Subtitle();
                 subtitle.setCounter(0);
                 subtitle.setStageFile(subtitleFile);
                 subtitle.setMediaFile(videoFile.getMediaFile());
-                
+
                 if (!subtitleFile.getSubtitles().contains(subtitle)) {
                     subtitle.setFormat(MetadataTools.getExternalSubtitleFormat(subtitleFile.getExtension()));
-                    
+
                     if (StringUtils.isBlank(language)) {
                         subtitle.setLanguage(Constants.UNDEFINED);
                         subtitle.setDefaultFlag(true);
                     } else {
                         subtitle.setLanguage(language);
                     }
-                    
+
                     subtitleFile.getSubtitles().add(subtitle);
                     this.mediaDao.saveEntity(subtitle);
                 }
             }
         }
-        
+
         // update stage file
         if (CollectionUtils.isEmpty(subtitleFile.getSubtitles())) {
             subtitleFile.setStatus(StatusType.NOTFOUND);

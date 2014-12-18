@@ -74,9 +74,9 @@ public class CommonStorageService {
     public List<Long> getStageFilesToDelete() {
         final StringBuilder sb = new StringBuilder();
         sb.append("SELECT f.id FROM StageFile f ");
-        sb.append("WHERE f.status = :delete " );
+        sb.append("WHERE f.status = :delete ");
 
-        Map<String,Object> params = Collections.singletonMap("delete", (Object)StatusType.DELETED);
+        Map<String, Object> params = Collections.singletonMap("delete", (Object) StatusType.DELETED);
         return stagingDao.findByNamedParameters(sb, params);
     }
 
@@ -95,13 +95,14 @@ public class CommonStorageService {
         if (stageFile == null) {
             // not found
             return Collections.emptySet();
-        } if (StatusType.DELETED != stageFile.getStatus()) {
+        }
+        if (StatusType.DELETED != stageFile.getStatus()) {
             // status must still be DELETE
             return Collections.emptySet();
         }
 
         Set<String> filesToDelete;
-        switch(stageFile.getFileType()) {
+        switch (stageFile.getFileType()) {
             case VIDEO:
                 filesToDelete = this.deleteVideoStageFile(stageFile);
                 break;
@@ -457,7 +458,7 @@ public class CommonStorageService {
         } else {
             mediaFile.setWatchedFile(watched);
         }
-        LOG.debug("Mark as {} {}: {}", (apiCall?"api":"file"), (watched?"watched":"unwatched"), mediaFile);
+        LOG.debug("Mark as {} {}: {}", (apiCall ? "api" : "file"), (watched ? "watched" : "unwatched"), mediaFile);
         this.stagingDao.updateEntity(mediaFile);
 
         if (mediaFile.isExtra()) {
@@ -471,12 +472,12 @@ public class CommonStorageService {
             if (apiCall) {
                 if (videoData.isWatchedApi() != watchedAll) {
                     videoData.setWatchedApi(watchedAll);
-                    LOG.debug("Mark as api {}: {}", (watchedAll?"watched":"unwatched"), videoData);
+                    LOG.debug("Mark as api {}: {}", (watchedAll ? "watched" : "unwatched"), videoData);
                     this.stagingDao.updateEntity(videoData);
                 }
             } else if (videoData.isWatchedFile() != watchedAll) {
                 videoData.setWatchedFile(watchedAll);
-                LOG.debug("Mark as file {}: {}", (watchedAll?"watched":"unwatched"), videoData);
+                LOG.debug("Mark as file {}: {}", (watchedAll ? "watched" : "unwatched"), videoData);
                 this.stagingDao.updateEntity(videoData);
             }
         }
@@ -484,21 +485,21 @@ public class CommonStorageService {
     }
 
     @Transactional
-    public void updateGenresXml(Map<String,String> subGenres) {
+    public void updateGenresXml(Map<String, String> subGenres) {
         StringBuilder sb = new StringBuilder();
         sb.append("UPDATE Genre ");
         sb.append("SET targetXml = null ");
         sb.append("WHERE targetXml is not null ");
         sb.append("AND lower(name) not in (:subGenres) ");
 
-        Map<String,Object> params = new HashMap<String,Object>();
+        Map<String, Object> params = new HashMap<String, Object>();
         params.put("subGenres", subGenres.keySet());
         this.stagingDao.executeUpdate(sb, params);
 
-        for (Entry<String,String> entry : subGenres.entrySet()) {
+        for (Entry<String, String> entry : subGenres.entrySet()) {
             sb.setLength(0);
             sb.append("UPDATE Genre ");
-            sb.append("SET targetXml=:targetXml " );
+            sb.append("SET targetXml=:targetXml ");
             sb.append("WHERE lower(name)=:subGenre ");
 
             params.clear();

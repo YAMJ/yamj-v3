@@ -24,6 +24,10 @@ package org.yamj.core.service.metadata.nfo;
 
 import java.util.Date;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Class to hold the episode information scraped from the XBMC style TV Episode
@@ -41,17 +45,18 @@ public final class InfoEpisodeDTO {
     private String airsBeforeEpisode;
     private int rating = -1;
     private boolean watched = false;
-    
+
     public boolean isValid() {
-        return ((this.season >= 0) && (this.episode >= 0)); 
+        return ((this.season >= 0) && (this.episode >= 0));
     }
-    
+
     public boolean isSameEpisode(int season, int episode) {
-        if (this.season != season) return false;
-        if (this.episode != episode) return false;
-        return true;
+        if (this.season != season) {
+            return false;
+        }
+        return this.episode == episode;
     }
-    
+
     public String getTitle() {
         return title;
     }
@@ -152,51 +157,27 @@ public final class InfoEpisodeDTO {
 
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + getSeason();
-        result = prime * result + getEpisode();
-        return result;
+        return new HashCodeBuilder()
+                .append(getSeason())
+                .append(getEpisode())
+                .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other == null) {
+    public boolean equals(Object obj) {
+        if (obj instanceof InfoEpisodeDTO) {
+            final InfoEpisodeDTO other = (InfoEpisodeDTO) obj;
+            return new EqualsBuilder()
+                    .append(getSeason(), other.getSeason())
+                    .append(getEpisode(), other.getEpisode())
+                    .isEquals();
+        } else {
             return false;
         }
-        if (!(other instanceof InfoEpisodeDTO)) {
-            return false;
-        }
-        InfoEpisodeDTO castOther = (InfoEpisodeDTO) other;
-        if (getSeason() != castOther.getSeason()) return false;
-        if (getEpisode() != castOther.getEpisode()) return false;
-        return true;
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("[EpisodeDetail=");
-        sb.append("[title=").append(title);
-        sb.append("], [season=").append(season);
-        sb.append("], [episode=").append(episode);
-        sb.append("], [plot=").append(plot);
-        if (firstAired != null) {
-            sb.append("], [firstAired=").append(firstAired);
-        }
-        if (airsAfterSeason != null) {
-            sb.append("], [airsAfterSeason=").append(airsAfterSeason);
-        }
-        if (airsBeforeSeason != null) {
-            sb.append("], [airsBeforeSeason=").append(airsBeforeSeason);
-        }
-        if (airsBeforeEpisode != null) {
-            sb.append("], [airsBeforeEpisode=").append(airsBeforeEpisode);
-        }
-        sb.append("], [rating=").append(rating);
-        sb.append("]]");
-        return sb.toString();
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

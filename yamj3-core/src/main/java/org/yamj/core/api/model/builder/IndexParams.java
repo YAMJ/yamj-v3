@@ -22,8 +22,13 @@
  */
 package org.yamj.core.api.model.builder;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.options.OptionsIndexVideo;
@@ -46,8 +51,8 @@ public class IndexParams {
     private final Map<String, String> includes;
     private final Map<String, String> excludes;
     private final List<DataItem> dataItems;
-    private final Map<String,Object> parameters = new HashMap<String,Object>();
-    
+    private final Map<String, Object> parameters = new HashMap<String, Object>();
+
     private int certificationId = -1;
     private String year;
     private String genreName;
@@ -58,14 +63,14 @@ public class IndexParams {
     private String newestSource;
     private Date newestDate;
     private int boxSetId = -1;
-    
+
     public IndexParams(OptionsIndexVideo options) {
         this.options = options;
         this.includes = options.splitIncludes();
         this.excludes = options.splitExcludes();
         this.dataItems = options.splitDataItems();
     }
-    
+
     public List<MetaDataType> getMetaDataTypes() {
         return options.splitTypes();
     }
@@ -85,25 +90,24 @@ public class IndexParams {
     public String getSortString() {
         return options.getSortString();
     }
-    
+
     public List<DataItem> getDataItems() {
         return dataItems;
     }
-    
+
     public boolean hasDataItem(DataItem dataItem) {
         return dataItems.contains(dataItem);
     }
 
     // year check
-    
     public boolean includeYear() {
         return includes.containsKey(YEAR);
     }
-    
+
     public boolean excludeYear() {
         return excludes.containsKey(YEAR);
     }
- 
+
     public String getYear() {
         if (year == null) {
             if (includeYear()) {
@@ -116,15 +120,14 @@ public class IndexParams {
     }
 
     // genre check
-    
     public boolean includeGenre() {
         return includes.containsKey(GENRE);
     }
-    
+
     public boolean excludeGenre() {
         return excludes.containsKey(GENRE);
     }
- 
+
     public String getGenreName() {
         if (genreName == null) {
             if (includeGenre()) {
@@ -137,15 +140,14 @@ public class IndexParams {
     }
 
     // studio check
-    
     public boolean includeStudio() {
         return includes.containsKey(STUDIO);
     }
-    
+
     public boolean excludeStudio() {
         return excludes.containsKey(STUDIO);
     }
- 
+
     public String getStudioName() {
         if (studioName == null) {
             if (includeStudio()) {
@@ -156,44 +158,40 @@ public class IndexParams {
         }
         return studioName;
     }
-    
+
     // certification check
-    
     public boolean includeCertification() {
         return includes.containsKey(CERTIFICATION);
     }
-    
+
     public boolean excludeCertification() {
         return excludes.containsKey(CERTIFICATION);
     }
-    
+
     public int getCertificationId() {
-        if (certificationId == -1 ) { 
-            try {
-                if (includeCertification()) {
-                    certificationId = Integer.parseInt(includes.get(CERTIFICATION));
-                } else {
-                    certificationId = Integer.parseInt(excludes.get(CERTIFICATION));
-                }
-            } catch (Exception ignore) {}
+        if (certificationId == -1) {
+            if (includeCertification()) {
+                certificationId = NumberUtils.toInt(includes.get(CERTIFICATION), -1);
+            } else {
+                certificationId = NumberUtils.toInt(excludes.get(CERTIFICATION), -1);
+            }
         }
         return certificationId;
     }
 
     // video source check
-    
     public boolean includeVideoSource() {
         return includes.containsKey(VIDEOSOURCE);
     }
-    
+
     public boolean excludeVideoSource() {
         return excludes.containsKey(VIDEOSOURCE);
     }
-    
+
     public String getVideoSource() {
         if (videoSource == null) {
             if (includeVideoSource()) {
-                videoSource=  includes.get(VIDEOSOURCE);
+                videoSource = includes.get(VIDEOSOURCE);
             } else {
                 videoSource = excludes.get(VIDEOSOURCE);
             }
@@ -202,34 +200,30 @@ public class IndexParams {
     }
 
     // video source check
-    
     public boolean includeBoxedSet() {
         return includes.containsKey(BOXSET);
     }
-    
+
     public boolean excludeBoxedSet() {
         return excludes.containsKey(BOXSET);
     }
-    
+
     public int getBoxSetId() {
         if (boxSetId < 0) {
-            try {
-                if (includeBoxedSet()) {
-                    boxSetId = Integer.parseInt(includes.get(BOXSET));
-                } else {
-                    boxSetId = Integer.parseInt(excludes.get(BOXSET));
-                }
-            } catch (Exception ignore) {}
+            if (includeBoxedSet()) {
+                boxSetId = NumberUtils.toInt(includes.get(BOXSET), -1);
+            } else {
+                boxSetId = NumberUtils.toInt(excludes.get(BOXSET), -1);
+            }
         }
         return boxSetId;
     }
-    
+
     // rating check
-    
     public boolean includeRating() {
         return includes.containsKey(RATING);
     }
-    
+
     public boolean excludeRating() {
         return excludes.containsKey(RATING);
     }
@@ -244,29 +238,26 @@ public class IndexParams {
         }
         return ratingSource;
     }
-    
+
     public int getRating() {
         return this.ratingValue;
     }
-    
+
     private void parseRating(final String value) {
         String[] result = StringUtils.split(value, '-');
         if (result == null || result.length == 0) {
             return;
         }
-        
-        try {
-            ratingValue = Integer.parseInt(result[0]);
-        } catch (Exception e) {
-            return;
-        }
-        if (ratingValue <0) {
+
+        ratingValue = NumberUtils.toInt(result[0]);
+
+        if (ratingValue < 0) {
             ratingValue = 0;
-        } else if (ratingValue>10) {
+        } else if (ratingValue > 10) {
             ratingValue = 10;
         }
-        
-        if (result.length>1) {
+
+        if (result.length > 1) {
             ratingSource = result[1];
         } else {
             ratingSource = "combined";
@@ -274,11 +265,10 @@ public class IndexParams {
     }
 
     // newest check
-    
     public boolean includeNewest() {
         return includes.containsKey(NEWEST);
     }
-    
+
     public boolean excludeNewest() {
         return excludes.containsKey(NEWEST);
     }
@@ -297,42 +287,40 @@ public class IndexParams {
     public Date getNewestDate() {
         return newestDate;
     }
-    
+
     private void parseNewest(final String value) {
         String[] result = StringUtils.split(value, '-');
         if (result == null || result.length == 0) {
             return;
         }
 
-        int maxDays;
-        try {
-            maxDays = Integer.parseInt(result[0]);
-            if (maxDays <0) maxDays = 30;
-        } catch (Exception e) {
-            return;
+        // Set the default to 30 if the conversion fails
+        int maxDays = NumberUtils.toInt(result[0], 30);
+        if (maxDays < 0) {
+            maxDays = 30;
         }
-        
+
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH , -maxDays);
+        cal.add(Calendar.DAY_OF_MONTH, -maxDays);
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         newestDate = cal.getTime();
 
-        if (result.length>1) {
+        if (result.length > 1) {
             this.newestSource = result[1];
         } else {
             this.newestSource = "file";
         }
     }
-    
+
     public void addParameter(String name, Object value) {
         this.parameters.put(name, value);
     }
-    
+
     public void addScalarParameters(SqlScalars sqlScalars) {
-        for (Entry<String,Object> entry : parameters.entrySet()) {
+        for (Entry<String, Object> entry : parameters.entrySet()) {
             sqlScalars.addParameters(entry.getKey(), entry.getValue());
         }
     }
