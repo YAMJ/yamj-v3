@@ -63,8 +63,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <hibernate.version>4.2.16.Final</hibernate.version>
         <spring.version>3.2.12.RELEASE</spring.version>
-        <org.slf4j.version>1.7.7</org.slf4j.version>
-        <jackson.version>2.4.3</jackson.version>
+        <org.slf4j.version>1.7.9</org.slf4j.version>
+        <jackson.version>2.4.4</jackson.version>
         <jetty.version>8.1.16.v20140903</jetty.version>
     </properties>
 
@@ -227,7 +227,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.5</version>
+                <version>2.6</version>
             </dependency>
             <!--JACKSON JSON-->
             <dependency>
@@ -261,7 +261,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.11</version>
+                <version>4.12</version>
                 <scope>test</scope>
             </dependency>
             <!--XML PROCESSING-->
