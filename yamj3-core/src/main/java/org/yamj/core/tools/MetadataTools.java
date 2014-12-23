@@ -22,7 +22,6 @@
  */
 package org.yamj.core.tools;
 
-import com.ibm.icu.impl.duration.TimeUnit;
 import com.ibm.icu.text.Transliterator;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
