@@ -1,3 +1,25 @@
+/*
+ *      Copyright (c) 2004-2015 YAMJ Members
+ *      https://github.com/organizations/YAMJ/teams
+ *
+ *      This file is part of the Yet Another Media Jukebox (YAMJ).
+ *
+ *      YAMJ is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      any later version.
+ *
+ *      YAMJ is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with YAMJ.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Web: https://github.com/YAMJ/yamj-v3
+ *
+ */
 package org.yamj.core.tools;
 
 import java.io.File;
@@ -22,10 +44,10 @@ public class GenreXmlTools {
     private static final Logger LOG = LoggerFactory.getLogger(GenreXmlTools.class);
 
     private static final Map<String,String> GENRES_MAP = new HashMap<String,String>();
-    
+
     @Autowired
     private CommonStorageService commonStorageService;
-    
+
     @PostConstruct
     public void init() throws Exception {
         String genreFileName = PropertyTools.getProperty("yamj3.genre.fileName");
@@ -37,7 +59,7 @@ public class GenreXmlTools {
             LOG.warn("Invalid genre file name specified: {}", genreFileName);
             return;
         }
-        
+
         File xmlFile;
         if (StringUtils.isBlank(FilenameUtils.getPrefix(genreFileName))) {
             // relative path given
@@ -50,7 +72,7 @@ public class GenreXmlTools {
             // absolute path given
             xmlFile = new File(genreFileName);
         }
-        
+
         if (!xmlFile.exists() || !xmlFile.isFile()) {
             LOG.warn("Genres file does not exist: {}", xmlFile.getPath());
             return;
@@ -61,7 +83,7 @@ public class GenreXmlTools {
         }
 
         LOG.debug("Initialize genres from file: {}", xmlFile.getPath());
-        
+
         try {
             XMLConfiguration c = new XMLConfiguration(xmlFile);
 
@@ -74,7 +96,7 @@ public class GenreXmlTools {
                     GENRES_MAP.put(((String)subGenre).toLowerCase(), masterGenre);
                 }
             }
-            
+
             try {
                 this.commonStorageService.updateGenresXml(GENRES_MAP);
             } catch (Exception ex) {
@@ -84,7 +106,7 @@ public class GenreXmlTools {
             LOG.error("Failed parsing genre input file: " + xmlFile.getPath(), ex);
         }
     }
-    
+
     public static String getMasterGenre(String genre) {
         if (genre == null) {
             return null;

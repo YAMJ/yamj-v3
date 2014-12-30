@@ -1,3 +1,25 @@
+/*
+ *      Copyright (c) 2004-2015 YAMJ Members
+ *      https://github.com/organizations/YAMJ/teams
+ *
+ *      This file is part of the Yet Another Media Jukebox (YAMJ).
+ *
+ *      YAMJ is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      any later version.
+ *
+ *      YAMJ is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with YAMJ.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Web: https://github.com/YAMJ/yamj-v3
+ *
+ */
 package org.yamj.core.service.metadata;
 
 import java.util.List;
@@ -31,7 +53,7 @@ public class MetadataScannerService {
     private OnlineScannerService onlineScannerService;
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
-    
+
     /**
      * Scan a movie
      *
@@ -42,16 +64,16 @@ public class MetadataScannerService {
 
         // empty sort title; will be reset after scan
         videoData.setTitleSort(null);
-        
+
         // NFO scanning
         this.nfoScannerService.scanMovie(videoData);
-        
+
         // online scanning
         this.onlineScannerService.scanMovie(videoData);
 
         // reset sort title
         MetadataTools.setSortTitle(videoData, configServiceWrapper.getSortStripPrefixes());
-        
+
         try {
             // store associated entities
             metadataStorageService.storeAssociatedEntities(videoData);
@@ -70,7 +92,7 @@ public class MetadataScannerService {
             }
         }
     }
-    
+
     /**
      * Scan a TV Series
      *
@@ -78,7 +100,7 @@ public class MetadataScannerService {
      */
     public void scanSeries(Long id) {
         Series series = this.metadataStorageService.getRequiredSeries(id);
-       
+
         // empty sort title; will be reset after scan
         series.setTitleSort(null);
         for (Season season : series.getSeasons()) {
@@ -87,14 +109,14 @@ public class MetadataScannerService {
                 videoData.setTitleSort(null);
             }
         }
-        
+
         // NFO scanning
         this.nfoScannerService.scanSeries(series);
-        
+
         // online scanning
         this.onlineScannerService.scanSeries(series);
 
-        
+
         // reset sort title
         List<String> prefixes = this.configServiceWrapper.getSortStripPrefixes();
         MetadataTools.setSortTitle(series, prefixes);
@@ -108,7 +130,7 @@ public class MetadataScannerService {
         try {
             // store associated entities
             metadataStorageService.storeAssociatedEntities(series);
-            
+
             // update meta data in one transaction
             metadataStorageService.updateScannedMetaData(series);
 
@@ -123,7 +145,7 @@ public class MetadataScannerService {
             }
         }
     }
-        
+
     /**
      * Scan the data site for information on the person
      *
@@ -134,7 +156,7 @@ public class MetadataScannerService {
 
         // online scanning (only)
         this.onlineScannerService.scanPerson(person);
-        
+
         try {
             // update person in one transaction
             metadataStorageService.updateScannedPerson(person);
@@ -154,7 +176,7 @@ public class MetadataScannerService {
     public boolean isFilmographyScanEnabled() {
         return this.onlineScannerService.isFilmographyScanEnabled();
     }
-    
+
     /**
      * Scan the data site for information on the person
      *
@@ -165,7 +187,7 @@ public class MetadataScannerService {
 
         // online scanning (only)
         this.onlineScannerService.scanFilmography(person);
-        
+
         try {
             // update person in one transaction
             metadataStorageService.updateScannedPersonFilmography(person);

@@ -3,7 +3,7 @@ package org.yamj.core.service.metadata.online.imdb;
 import java.util.Date;
 
 /*
- *      Copyright (c) 2004-2014 YAMJ Members
+ *      Copyright (c) 2004-2015 YAMJ Members
  *      https://github.com/organizations/YAMJ/teams
  *
  *      This file is part of the Yet Another Media Jukebox (YAMJ).
