@@ -35,7 +35,6 @@ import org.hibernate.annotations.*;
 @Table(name = "subtitle",
         uniqueConstraints = @UniqueConstraint(name = "UIX_SUBTITLE_NATURALID", columnNames = {"mediafile_id", "stagefile_id", "counter"})
 )
-@SuppressWarnings("PersistenceUnitPresent")
 public class Subtitle extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -6279878819525772005L;
@@ -138,17 +137,25 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Subtitle) {
-            final Subtitle other = (Subtitle) obj;
-            return new EqualsBuilder()
-                    .append(getId(), other.getId())
-                    .append(getCounter(), other.getCounter())
-                    .append(getMediaFile(), other.getMediaFile())
-                    .append(getStageFile(), other.getStageFile())
-                    .isEquals();
-        } else {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
             return false;
         }
+        if (!(obj instanceof Subtitle)) {
+            return false;
+        }
+        final Subtitle other = (Subtitle) obj;
+        // first check the id
+        if ((getId() > 0) && (other.getId() > 0)) {
+            return getId() == other.getId();
+        }
+        return new EqualsBuilder()
+                .append(getCounter(), other.getCounter())
+                .append(getMediaFile(), other.getMediaFile())
+                .append(getStageFile(), other.getStageFile())
+                .isEquals();
     }
 
     @Override

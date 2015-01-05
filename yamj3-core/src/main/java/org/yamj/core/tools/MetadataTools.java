@@ -58,8 +58,6 @@ public final class MetadataTools {
     private static final DecimalFormat FILESIZE_FORMAT_0;
     private static final DecimalFormat FILESIZE_FORMAT_1;
     private static final DecimalFormat FILESIZE_FORMAT_2;
-    private static final SimpleDateFormat DATE_FORMATa = null;
-    private static final SimpleDateFormat DATE_FORMAT_LONGa = null;
     private static final boolean IDENT_TRANSLITERATE;
     private static final boolean IDENT_CLEAN;
     private static final Transliterator TRANSLITERATOR;

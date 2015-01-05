@@ -26,17 +26,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.ForeignKey;
@@ -46,7 +36,6 @@ import org.hibernate.annotations.NaturalId;
 @Table(name = "stage_directory",
         uniqueConstraints = @UniqueConstraint(name = "UIX_STAGEDIRECTORY_NATURALID", columnNames = {"directory_path", "library_id"})
 )
-@SuppressWarnings("PersistenceUnitPresent")
 public class StageDirectory extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 1706389732909764283L;
@@ -129,22 +118,31 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-                .append(getDirectoryPath() == null ? 0 : getDirectoryPath().hashCode())
+                .append(getDirectoryPath())
                 .append(getLibrary() == null ? 0 : Long.valueOf(getLibrary().getId()).hashCode())
                 .toHashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof StageDirectory) {
-            final StageDirectory other = (StageDirectory) obj;
-            return new EqualsBuilder()
-                    .append(getId(), other.getId())
-                    .append(getDirectoryPath(), other.getDirectoryPath())
-                    .append(getLibrary(), other.getLibrary())
-                    .isEquals();
-        } else {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
             return false;
         }
+        if (!(obj instanceof StageDirectory)) {
+            return false;
+        }
+        final StageDirectory other = (StageDirectory) obj;
+        // first check the id
+        if ((getId() > 0) && (other.getId() > 0)) {
+            return getId() == other.getId();
+        }
+        // check other values
+        return new EqualsBuilder()
+                .append(getDirectoryPath(), other.getDirectoryPath())
+                .append(getLibrary(), other.getLibrary())
+                .isEquals();
     }
 }

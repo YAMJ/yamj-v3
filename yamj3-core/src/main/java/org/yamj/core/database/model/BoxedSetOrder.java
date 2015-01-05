@@ -37,7 +37,6 @@ import org.hibernate.annotations.NaturalId;
     uniqueConstraints = {@UniqueConstraint(name = "UIX_BOXEDSET_VIDEODATA", columnNames = {"boxedset_id","videodata_id"}),
                          @UniqueConstraint(name = "UIX_BOXEDSET_SERIES", columnNames = {"boxedset_id", "series_id"})}
 )
-@SuppressWarnings("PersistenceUnitPresent")
 public class BoxedSetOrder extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -3478878273175067619L;

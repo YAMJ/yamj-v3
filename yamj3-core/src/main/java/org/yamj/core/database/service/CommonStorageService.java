@@ -353,8 +353,8 @@ public class CommonStorageService {
         this.stagingDao.deleteEntity(generated);
     }
 
-    @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
+    @Transactional(readOnly = true)
     public List<Long> getOrphanPersons() {
         final StringBuilder query = new StringBuilder();
         query.append("SELECT p.id FROM Person p ");
@@ -377,8 +377,8 @@ public class CommonStorageService {
         return filesToDelete;
     }
 
-    @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
+    @Transactional(readOnly = true)
     public List<Long> getOrphanBoxedSets() {
         final StringBuilder query = new StringBuilder();
         query.append("SELECT b.id FROM BoxedSet b ");

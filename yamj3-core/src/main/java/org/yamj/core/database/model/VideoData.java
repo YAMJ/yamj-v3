@@ -48,7 +48,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
             @Index(name = "IX_VIDEODATA_TITLE", columnNames = {"title"}),
             @Index(name = "IX_VIDEODATA_STATUS", columnNames = {"status"})
         })
-@SuppressWarnings({"unused", "PersistenceUnitPresent"})
+@SuppressWarnings("unused")
 public class VideoData extends AbstractMetadata {
 
     private static final long serialVersionUID = 885531396557944590L;
@@ -657,15 +657,24 @@ public class VideoData extends AbstractMetadata {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof VideoData) {
-            final VideoData other = (VideoData) obj;
-            return new EqualsBuilder()
-                    .append(getId(), other.getId())
-                    .append(getIdentifier(), other.getIdentifier())
-                    .isEquals();
-        } else {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
             return false;
         }
+        if (!(obj instanceof VideoData)) {
+            return false;
+        }
+        final VideoData other = (VideoData) obj;
+        // first check the id
+        if ((getId() > 0) && (other.getId() > 0)) {
+            return getId() == other.getId();
+        }
+        // check other values
+        return new EqualsBuilder()
+                .append(getIdentifier(), other.getIdentifier())
+                .isEquals();
     }
 
     @Override

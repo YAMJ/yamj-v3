@@ -33,7 +33,6 @@ import org.yamj.core.database.model.type.JobType;
 
 @Entity
 @Table(name = "cast_crew")
-@SuppressWarnings("PersistenceUnitPresent")
 public class CastCrew implements Serializable {
 
     private static final long serialVersionUID = -3941301942248344131L;
@@ -94,8 +93,7 @@ public class CastCrew implements Serializable {
             return new EqualsBuilder()
                     .append(getCastCrewPK(), other.getCastCrewPK())
                     .isEquals();
-        } else {
-            return false;
         }
+        return false;
     }
 }

@@ -33,7 +33,6 @@ import org.hibernate.annotations.NaturalId;
 //@Entity
 //@Table(name = "player_path_old")
 @Deprecated
-@SuppressWarnings("PersistenceUnitPresent")
 public class PlayerPathOld extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 4L;
@@ -89,9 +88,8 @@ public class PlayerPathOld extends AbstractIdentifiable implements Serializable 
                     .append(getIpDevice(), other.getIpDevice())
                     .append(getStoragePath(), other.getStoragePath())
                     .isEquals();
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

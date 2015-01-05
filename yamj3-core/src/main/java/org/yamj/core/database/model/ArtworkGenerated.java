@@ -32,7 +32,6 @@ import org.hibernate.annotations.ForeignKey;
 @Table(name = "artwork_generated",
     uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORK_GENERATED", columnNames = {"located_id", "profile_id"})
 )
-@SuppressWarnings("PersistenceUnitPresent")
 public class ArtworkGenerated extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 2326614430648326340L;

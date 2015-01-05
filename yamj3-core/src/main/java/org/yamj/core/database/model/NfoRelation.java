@@ -32,7 +32,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
 @Table(name = "nfo_relation")
-@SuppressWarnings("PersistenceUnitPresent")
 public class NfoRelation implements Serializable {
 
     private static final long serialVersionUID = 1083402240122932701L;
@@ -83,8 +82,7 @@ public class NfoRelation implements Serializable {
             return new EqualsBuilder()
                     .append(getNfoRelationPK(), other.getNfoRelationPK())
                     .isEquals();
-        } else {
-            return false;
         }
+        return false;
     }
 }

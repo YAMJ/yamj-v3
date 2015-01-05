@@ -37,7 +37,6 @@ import org.yamj.core.hibernate.Auditable;
 
 @Entity
 @Table(name = "configuration")
-@SuppressWarnings("PersistenceUnitPresent")
 public class Configuration implements Auditable, Serializable {
 
     private static final long serialVersionUID = -3985190780763596771L;
@@ -107,9 +106,8 @@ public class Configuration implements Auditable, Serializable {
             return new EqualsBuilder()
                     .append(getKey(), other.getKey())
                     .isEquals();
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

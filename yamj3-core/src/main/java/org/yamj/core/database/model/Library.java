@@ -38,7 +38,6 @@ import org.hibernate.annotations.NaturalId;
 @Table(name = "library",
         uniqueConstraints = @UniqueConstraint(name = "UIX_LIBRARY_NATURALID", columnNames = {"client", "player_path"})
 )
-@SuppressWarnings("PersistenceUnitPresent")
 public class Library extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -3086992329257871600L;
@@ -108,8 +107,7 @@ public class Library extends AbstractIdentifiable implements Serializable {
                     .append(getClient(), other.getClient())
                     .append(getPlayerPath(), other.getPlayerPath())
                     .isEquals();
-        } else {
-            return false;
         }
+        return false;
     }
 }

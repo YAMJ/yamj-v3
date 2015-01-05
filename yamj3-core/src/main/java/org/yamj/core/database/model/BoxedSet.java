@@ -40,7 +40,6 @@ import org.hibernate.annotations.NaturalId;
 @Table(name = "boxed_set",
         uniqueConstraints = @UniqueConstraint(name = "UIX_BOXEDSET_NATURALID", columnNames = {"name"})
 )
-@SuppressWarnings("PersistenceUnitPresent")
 public class BoxedSet extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 3074855702659953694L;
@@ -79,15 +78,24 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof BoxedSet) {
-            final BoxedSet other = (BoxedSet) obj;
-            return new EqualsBuilder()
-                    .append(getId(), other.getId())
-                    .append(getName(), other.getName())
-                    .isEquals();
-        } else {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
             return false;
         }
+        if (!(obj instanceof BoxedSet)) {
+            return false;
+        }
+        final BoxedSet other = (BoxedSet) obj;
+        // first check the id
+        if ((getId() > 0) && (other.getId() > 0)) {
+            return getId() == other.getId();
+        }
+        // check other values
+        return new EqualsBuilder()
+                .append(getName(), other.getName())
+                .isEquals();
     }
 
     @Override

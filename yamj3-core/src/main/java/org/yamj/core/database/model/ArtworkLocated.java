@@ -49,7 +49,6 @@ import org.yamj.common.type.StatusType;
 @Table(name = "artwork_located",
         uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORKLOCATED_NATURALID", columnNames = {"artwork_id", "stagefile_id", "source", "url"})
 )
-@SuppressWarnings("PersistenceUnitPresent")
 public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -981494909436217076L;
@@ -253,18 +252,27 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof ArtworkLocated) {
-            final ArtworkLocated other = (ArtworkLocated) obj;
-            return new EqualsBuilder()
-                    .append(getId(), other.getId())
-                    .append(getSource(), other.getSource())
-                    .append(getUrl(), other.getUrl())
-                    .append(getArtwork(), other.getArtwork())
-                    .append(getStageFileId(), other.getStageFileId())
-                    .isEquals();
-        } else {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
             return false;
         }
+        if (!(obj instanceof ArtworkLocated)) {
+            return false;
+        }
+        final ArtworkLocated other = (ArtworkLocated) obj;
+        // first check the id
+        if ((getId() > 0) && (other.getId() > 0)) {
+            return getId() == other.getId();
+        }
+        // check other values
+        return new EqualsBuilder()
+                .append(getSource(), other.getSource())
+                .append(getUrl(), other.getUrl())
+                .append(getArtwork(), other.getArtwork())
+                .append(getStageFileId(), other.getStageFileId())
+                .isEquals();
     }
 
     @Override

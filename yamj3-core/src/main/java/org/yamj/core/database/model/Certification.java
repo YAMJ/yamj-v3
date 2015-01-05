@@ -35,7 +35,6 @@ import org.hibernate.annotations.NaturalId;
 @Table(name = "certification",
         uniqueConstraints = @UniqueConstraint(name = "UIX_CERTIFICATION_NATURALID", columnNames = {"country", "certificate"})
 )
-@SuppressWarnings("PersistenceUnitPresent")
 public class Certification extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 5949467240717893584L;
@@ -76,16 +75,25 @@ public class Certification extends AbstractIdentifiable implements Serializable 
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Certification) {
-            final Certification other = (Certification) obj;
-            return new EqualsBuilder()
-                    .append(getId(), other.getId())
-                    .append(getCountry(), other.getCountry())
-                    .append(getCertificate(), other.getCertificate())
-                    .isEquals();
-        } else {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
             return false;
         }
+        if (!(obj instanceof Certification)) {
+            return false;
+        }
+        final Certification other = (Certification) obj;
+        // first check the id
+        if ((getId() > 0) && (other.getId() > 0)) {
+            return getId() == other.getId();
+        }
+        // check other values
+        return new EqualsBuilder()
+                .append(getCountry(), other.getCountry())
+                .append(getCertificate(), other.getCertificate())
+                .isEquals();
     }
 
     @Override

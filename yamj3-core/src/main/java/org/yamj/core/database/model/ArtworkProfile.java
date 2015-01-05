@@ -36,7 +36,6 @@ import org.yamj.core.database.model.type.ImageFormat;
 @Table(name = "artwork_profile",
     uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORKPROFILE_NATURALID", columnNames = {"profile_name", "artwork_type"})
 )
-@SuppressWarnings("PersistenceUnitPresent")
 public class ArtworkProfile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -5178511945599751914L;

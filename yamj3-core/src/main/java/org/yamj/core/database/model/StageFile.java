@@ -39,7 +39,7 @@ import org.yamj.core.database.model.type.FileType;
 @Table(name = "stage_file",
         uniqueConstraints = @UniqueConstraint(name = "UIX_STAGEFILE_NATURALID", columnNames = {"directory_id", "base_name", "extension"})
 )
-@SuppressWarnings({"unused", "PersistenceUnitPresent"})
+@SuppressWarnings("unused")
 public class StageFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -6247352843375054146L;
@@ -228,17 +228,26 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof StageFile) {
-            final StageFile other = (StageFile) obj;
-            return new EqualsBuilder()
-                    .append(getId(), other.getId())
-                    .append(getExtension(), other.getExtension())
-                    .append(getBaseName(), other.getBaseName())
-                    .append(getStageDirectory(), other.getStageDirectory())
-                    .isEquals();
-        } else {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
             return false;
         }
+        if (!(obj instanceof StageFile)) {
+            return false;
+        }
+        final StageFile other = (StageFile) obj;
+        // first check the id
+        if ((getId() > 0) && (other.getId() > 0)) {
+            return getId() == other.getId();
+        }
+        // check other values
+        return new EqualsBuilder()
+                .append(getExtension(), other.getExtension())
+                .append(getBaseName(), other.getBaseName())
+                .append(getStageDirectory(), other.getStageDirectory())
+                .isEquals();
     }
 
     @Override

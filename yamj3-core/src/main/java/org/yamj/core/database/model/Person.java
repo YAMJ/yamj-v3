@@ -41,7 +41,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
 @Table(name = "person",
         uniqueConstraints = @UniqueConstraint(name = "UIX_PERSON_NATURALID", columnNames = {"identifier"})
 )
-@SuppressWarnings({"unused", "PersistenceUnitPresent"})
+@SuppressWarnings("unused")
 public class Person extends AbstractAuditable implements IScannable, Serializable {
 
     private static final long serialVersionUID = 660066902996412843L;
@@ -379,15 +379,24 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Person) {
-            final Person other = (Person) obj;
-            return new EqualsBuilder()
-                    .append(getId(), other.getId())
-                    .append(getIdentifier(), other.getIdentifier())
-                    .isEquals();
-        } else {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
             return false;
         }
+        if (!(obj instanceof Person)) {
+            return false;
+        }
+        final Person other = (Person) obj;
+        // first check the id
+        if ((getId() > 0) && (other.getId() > 0)) {
+            return getId() == other.getId();
+        }
+        // check other values
+        return new EqualsBuilder()
+                .append(getIdentifier(), other.getIdentifier())
+                .isEquals();
     }
 
     @Override

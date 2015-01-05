@@ -44,6 +44,7 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;
 
 @Service("jsonApiStorageService")
+@Transactional(readOnly = true)
 public class JsonApiStorageService {
 
     @Autowired
@@ -57,23 +58,19 @@ public class JsonApiStorageService {
     @Autowired
     private PlayerDao playerDao;
 
-    @Transactional(readOnly = true)
     public <T> T getEntityById(Class<T> entityClass, Serializable id) {
         return commonDao.getById(entityClass, id);
     }
 
-    @Transactional(readOnly = true)
     public List<Configuration> getConfiguration(String property) {
         return configService.getConfiguration(property);
     }
 
     //<editor-fold defaultstate="collapsed" desc="Index Methods">
-    @Transactional(readOnly = true)
     public void getVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
         apiDao.getVideoList(wrapper);
     }
 
-    @Transactional(readOnly = true)
     public CountTimestamp getCountTimestamp(MetaDataType type) {
         CountTimestamp ct = null;
         if (type.equals(MetaDataType.MOVIE)) {
@@ -89,168 +86,142 @@ public class JsonApiStorageService {
         }
         return ct;
     }
-
-    @Transactional(readOnly = true)
-    public void getPersonList(ApiWrapperList<ApiPersonDTO> wrapper) {
-        apiDao.getPersonList(wrapper);
-    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Person Methods">
-    @Transactional(readOnly = true)
+    public void getPersonList(ApiWrapperList<ApiPersonDTO> wrapper) {
+        apiDao.getPersonList(wrapper);
+    }
+    
     public void getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
         apiDao.getPerson(wrapper);
     }
 
-    @Transactional(readOnly = true)
     public void getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {
         apiDao.getPersonListByVideoType(metaDataType, wrapper);
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Genre Methods">
-    @Transactional(readOnly = true)
     public Genre getGenre(Serializable id) {
         return commonDao.getById(Genre.class, id);
     }
 
-    @Transactional(readOnly = true)
     public Genre getGenre(String name) {
         return commonDao.getGenre(name);
     }
 
-    @Transactional(readOnly = true)
     public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper) {
         return commonDao.getGenres(wrapper);
     }
 
-    @Transactional(readOnly = true)
     public List<ApiGenreDTO> getGenreFilename(ApiWrapperList<ApiGenreDTO> wrapper, String filename) {
         return commonDao.getGenreFilename(wrapper, filename);
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Certification Methods">
-    @Transactional(readOnly = true)
     public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
         return commonDao.getCertifications(wrapper);
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="VideoSource Methods">
-    @Transactional(readOnly = true)
     public List<ApiNameDTO> getVideoSources(ApiWrapperList<ApiNameDTO> wrapper) {
         return mediaDao.getVideoSources(wrapper);
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Boxed Set Methods">
-    @Transactional(readOnly = true)
     public List<ApiBoxedSetDTO> getBoxedSets(ApiWrapperList<ApiBoxedSetDTO> wrapper) {
         return apiDao.getBoxedSets(wrapper);
     }
 
-    @Transactional(readOnly = true)
     public ApiBoxedSetDTO getBoxedSet(ApiWrapperSingle<ApiBoxedSetDTO> wrapper) {
         return apiDao.getBoxedSet(wrapper);
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Studio Methods">
-    @Transactional(readOnly = true)
     public Studio getStudio(Serializable id) {
         return commonDao.getById(Studio.class, id);
     }
 
-    @Transactional(readOnly = true)
     public Studio getStudio(String name) {
         return commonDao.getStudio(name);
     }
 
-    @Transactional(readOnly = true)
     public List<Studio> getStudios(ApiWrapperList<Studio> wrapper) {
         return commonDao.getStudios(wrapper);
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Rating Methods">
-    @Transactional(readOnly = true)
     public List<ApiRatingDTO> getRatings(ApiWrapperList<ApiRatingDTO> wrapper) {
         return commonDao.getRatings(wrapper);
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Alphabetical Methods">
-    @Transactional(readOnly = true)
     public List<ApiNameDTO> getAlphabeticals(ApiWrapperList<ApiNameDTO> wrapper) {
         return apiDao.getAlphabeticals(wrapper);
     }
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Artwork Methods">
-    @Transactional(readOnly = true)
     public ApiArtworkDTO getArtworkById(Long id) {
         return apiDao.getArtworkById(id);
     }
 
-    @Transactional(readOnly = true)
     public List<ApiArtworkDTO> getArtworkList(ApiWrapperList<ApiArtworkDTO> wrapper) {
         return apiDao.getArtworkList(wrapper);
     }
     //</editor-fold>
 
-    @Transactional(readOnly = true)
     public void getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
         apiDao.getEpisodeList(wrapper);
     }
 
-    @Transactional(readOnly = true)
     public void getSingleVideo(ApiWrapperSingle<ApiVideoDTO> wrapper) {
         apiDao.getSingleVideo(wrapper);
     }
 
-    @Transactional(readOnly = true)
     public List<CountGeneric> getJobCount(List<String> requiredJobs) {
         return apiDao.getJobCount(requiredJobs);
     }
 
-    @Transactional(readOnly = true)
     public void getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper) {
         apiDao.getSeriesInfo(wrapper);
     }
 
     // Player methods
-    @Transactional(readOnly = true)
     public List<PlayerPathOld> getPlayer(ApiWrapperList<PlayerPathOld> wrapper) {
         return getPlayer((OptionsPlayer) wrapper.getOptions());
     }
 
-    @Transactional(readOnly = true)
     public List<PlayerPathOld> getPlayer(OptionsPlayer options) {
         return playerDao.getPlayerEntries(options);
     }
 
-    @Transactional(readOnly = true)
     public List<PlayerPathOld> getPlayer(String playerName) {
         return playerDao.getPlayerEntries(playerName);
     }
 
-    @Transactional(readOnly = false)
+    @Transactional
     public void setPlayer(PlayerPathOld player) {
         playerDao.storePlayer(player);
     }
 
-    @Transactional(readOnly = false)
+    @Transactional
     public void deletePlayer(String playerName) {
         playerDao.deletePlayer(playerName);
     }
 
-    @Transactional(readOnly = false)
+    @Transactional
     public void storePlayer(PlayerInfo player) {
         playerDao.storePlayer(player);
     }
 
-    @Transactional(readOnly = true)
     public List<PlayerInfo> getPlayerInfo(OptionsPlayer options) {
         return playerDao.getPlayerInfo(options);
     }

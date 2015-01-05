@@ -89,12 +89,11 @@ public class NfoRelationPK implements Serializable {
         if (obj instanceof NfoRelationPK) {
             final NfoRelationPK other = (NfoRelationPK) obj;
             return new EqualsBuilder()
-                    .append(getStageFile().getId(), other.getStageFile().getId())
+                    .append(getStageFile(), other.getStageFile())
                     .append(getVideoData(), other.getVideoData())
                     .isEquals();
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

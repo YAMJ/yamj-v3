@@ -25,7 +25,6 @@ package org.yamj.core.database.model;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Type;
@@ -33,7 +32,6 @@ import org.yamj.core.database.model.type.IntervalType;
 
 @Entity
 @Table(name = "execution_task")
-@SuppressWarnings("PersistenceUnitPresent")
 public class ExecutionTask implements Serializable {
 
     private static final long serialVersionUID = 5730223895964642472L;
@@ -137,9 +135,8 @@ public class ExecutionTask implements Serializable {
             return new EqualsBuilder()
                     .append(getName(), other.getName())
                     .isEquals();
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

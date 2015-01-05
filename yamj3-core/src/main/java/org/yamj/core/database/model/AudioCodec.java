@@ -42,7 +42,6 @@ import org.hibernate.annotations.OnDeleteAction;
 @Table(name = "audio_codec",
         uniqueConstraints = @UniqueConstraint(name = "UIX_AUDIOCODEC_NATURALID", columnNames = {"mediafile_id", "counter"})
 )
-@SuppressWarnings("PersistenceUnitPresent")
 public class AudioCodec extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -6279878819525772005L;
@@ -141,16 +140,25 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof AudioCodec) {
-            final AudioCodec other = (AudioCodec) obj;
-            return new EqualsBuilder()
-                    .append(getId(), other.getId())
-                    .append(getCounter(), other.getCounter())
-                    .append(getMediaFile(), other.getMediaFile())
-                    .isEquals();
-        } else {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
             return false;
         }
+        if (!(obj instanceof AudioCodec)) {
+            return false;
+        }
+        final AudioCodec other = (AudioCodec) obj;
+        // first check the id
+        if ((getId() > 0) && (other.getId() > 0)) {
+            return getId() == other.getId();
+        }
+        // check other values
+        return new EqualsBuilder()
+                .append(getCounter(), other.getCounter())
+                .append(getMediaFile(), other.getMediaFile())
+                .isEquals();
     }
 
     @Override

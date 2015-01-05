@@ -45,7 +45,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
     @Index(name = "IX_SEASON_TITLE", columnNames = {"title"}),
     @Index(name = "IX_SEASON_STATUS", columnNames = {"status"})
 })
-@SuppressWarnings({"unused","PersistenceUnitPresent"})
+@SuppressWarnings("unused")
 public class Season extends AbstractMetadata {
 
     private static final long serialVersionUID = 1858640563119637343L;
@@ -260,15 +260,24 @@ public class Season extends AbstractMetadata {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Season) {
-            final Season other = (Season) obj;
-            return new EqualsBuilder()
-                    .append(getId(), other.getId())
-                    .append(getIdentifier(), other.getIdentifier())
-                    .isEquals();
-        } else {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
             return false;
         }
+        if (!(obj instanceof Season)) {
+            return false;
+        }
+        final Season other = (Season) obj;
+        // first check the id
+        if ((getId() > 0) && (other.getId() > 0)) {
+            return getId() == other.getId();
+        }
+        // check other values
+        return new EqualsBuilder()
+                .append(getIdentifier(), other.getIdentifier())
+                .isEquals();
     }
 
     @Override

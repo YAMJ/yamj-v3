@@ -40,7 +40,7 @@ import org.yamj.core.database.model.type.FileType;
 @Table(name = "mediafile",
     uniqueConstraints= @UniqueConstraint(name="UIX_MEDIAFILE_NATURALID", columnNames={"file_name"})
 )
-@SuppressWarnings({"unused","PersistenceUnitPresent"})
+@SuppressWarnings("unused")
 public class MediaFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 8411423609119475972L;
@@ -385,9 +385,8 @@ public class MediaFile extends AbstractAuditable implements Serializable {
             return new EqualsBuilder()
                     .append(getFileName(), other.getFileName())
                     .isEquals();
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

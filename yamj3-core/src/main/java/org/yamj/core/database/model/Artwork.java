@@ -50,7 +50,7 @@ import org.yamj.core.database.model.type.ArtworkType;
 @Table(name = "artwork",
         uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORK_NATURALID", columnNames = {"artwork_type", "videodata_id", "season_id", "series_id", "person_id", "boxedset_id"})
 )
-@SuppressWarnings({"unused", "PersistenceUnitPresent"})
+@SuppressWarnings("unused")
 public class Artwork extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -981494909436217076L;
@@ -201,20 +201,29 @@ public class Artwork extends AbstractAuditable implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Artwork) {
-            final Artwork other = (Artwork) obj;
-            return new EqualsBuilder()
-                    .append(getId(), other.getId())
-                    .append(getArtworkType(), other.getArtworkType())
-                    .append(getVideoData(), other.getVideoData())
-                    .append(getSeason(), other.getSeason())
-                    .append(getSeries(), other.getSeries())
-                    .append(getPerson(), other.getPerson())
-                    .append(getBoxedSet(), other.getBoxedSet())
-                    .isEquals();
-        } else {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
             return false;
         }
+        if (!(obj instanceof Artwork)) {
+            return false;
+        }
+        final Artwork other = (Artwork) obj;
+        // first check the id
+        if ((getId() > 0) && (other.getId() > 0)) {
+            return getId() == other.getId();
+        }
+        // check other values
+        return new EqualsBuilder()
+                .append(getArtworkType(), other.getArtworkType())
+                .append(getVideoData(), other.getVideoData())
+                .append(getSeason(), other.getSeason())
+                .append(getSeries(), other.getSeries())
+                .append(getPerson(), other.getPerson())
+                .append(getBoxedSet(), other.getBoxedSet())
+                .isEquals();
     }
 
     @Override

@@ -113,9 +113,8 @@ public class CastCrewPK implements Serializable {
                     .append(getPerson().getId(), other.getPerson().getId())
                     .append(getVideoData().getId(), other.getVideoData().getId())
                     .isEquals();
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

@@ -27,7 +27,6 @@ import java.util.Date;
 import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
@@ -38,7 +37,6 @@ import org.yamj.core.database.model.type.ParticipationType;
 @Table(name = "participation",
         uniqueConstraints = @UniqueConstraint(name = "UIX_PARTICIPATION_NATURALID", columnNames = {"person_id", "sourcedb", "sourcedb_id", "job"})
 )
-@SuppressWarnings("PersistenceUnitPresent")
 public class FilmParticipation extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 8182882526775933702L;
@@ -230,9 +228,8 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
                     .append(getSourceDbId(), other.getSourceDbId())
                     .append(getJobType(), other.getJobType())
                     .isEquals();
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

@@ -46,7 +46,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
             @Index(name = "IX_SERIES_TITLE", columnNames = {"title"}),
             @Index(name = "IX_SERIES_STATUS", columnNames = {"status"})
         })
-@SuppressWarnings({"unused", "PersistenceUnitPresent"})
+@SuppressWarnings("unused")
 public class Series extends AbstractMetadata {
 
     private static final long serialVersionUID = -5782361288021493423L;
@@ -371,15 +371,24 @@ public class Series extends AbstractMetadata {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Series) {
-            final Series other = (Series) obj;
-            return new EqualsBuilder()
-                    .append(getId(), other.getId())
-                    .append(getIdentifier(), other.getIdentifier())
-                    .isEquals();
-        } else {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
             return false;
         }
+        if (!(obj instanceof Series)) {
+            return false;
+        }
+        final Series other = (Series) obj;
+        // first check the id
+        if ((getId() > 0) && (other.getId() > 0)) {
+            return getId() == other.getId();
+        }
+        // check other values
+        return new EqualsBuilder()
+                .append(getIdentifier(), other.getIdentifier())
+                .isEquals();
     }
 
     @Override
