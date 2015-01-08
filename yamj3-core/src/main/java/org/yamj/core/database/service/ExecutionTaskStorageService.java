@@ -49,11 +49,21 @@ public class ExecutionTaskStorageService {
             this.commonDao.saveEntity(executionTask);
             LOG.info("Stored: {}", executionTask);
         } else {
+            // check if next execution date must be reset
+            boolean resetNextExecution = false;
+            if (executionTask.getNextExecution().after(stored.getNextExecution())) {
+                resetNextExecution = true;
+            } else if (!executionTask.getIntervalType().equals(stored.getIntervalType())) {
+                resetNextExecution = true;
+            } else if (executionTask.getDelay() != stored.getDelay()) {
+                resetNextExecution = true;
+            }
+            
             stored.setTaskName(executionTask.getTaskName());
             stored.setOptions(executionTask.getOptions());
             stored.setIntervalType(executionTask.getIntervalType());
             stored.setDelay(executionTask.getDelay());
-            if (executionTask.getNextExecution().after(stored.getNextExecution())) {
+            if (resetNextExecution) {
                 stored.setNextExecution(executionTask.getNextExecution());
             }
             this.commonDao.updateEntity(stored);
