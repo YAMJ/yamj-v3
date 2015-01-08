@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 public class Watcher {
 
     private static final Logger LOG = LoggerFactory.getLogger(Watcher.class);
-    private final WatchService watcherService = FileSystems.getDefault().newWatchService();
+    private final WatchService watcherService;
     private final Map<WatchKey, Path> keys = new HashMap<>();
     private boolean trace = Boolean.FALSE;
     @SuppressWarnings("rawtypes")
@@ -55,6 +55,7 @@ public class Watcher {
      * Creates a WatchService
      */
     public Watcher() {
+       this.watcherService = FileSystems.getDefault().newWatchService();
     }
 
     /**
@@ -64,6 +65,7 @@ public class Watcher {
      * @throws java.io.IOException
      */
     public Watcher(Path dir) throws IOException {
+        this();
         addDirectory(dir);
     }
 
@@ -74,6 +76,7 @@ public class Watcher {
      * @throws java.io.IOException
      */
     public Watcher(String dir) throws IOException {
+        this();
         addDirectory(dir);
     }
 

@@ -242,25 +242,34 @@ public class ScannerManagementImpl implements ScannerManagement {
         }
 
         if (watchEnabled) {
-            Watcher wd = new Watcher();
-            Boolean directoriesToWatch = Boolean.TRUE;
-
-            for (Library library : libraryCollection.getLibraries()) {
-                String dirToWatch = library.getImportDTO().getBaseDirectory();
-                if (library.isWatch()) {
-                    LOG.info("Watching directory '{}' for changes...", dirToWatch);
-                    wd.addDirectory(dirToWatch);
-                    directoriesToWatch = Boolean.TRUE;
-                } else {
-                    LOG.info("Watching skipped for directory '{}'", dirToWatch);
-                }
+            Watcher wd;
+            try {
+                wd = new Watcher();
+            } catch (UnsatisfiedLinkError ule) {
+                LOG.warn("Watching is not possible on this system; therefore watch service will not be used");
+                wd = null;
             }
 
-            if (directoriesToWatch) {
-                wd.processEvents();
-                LOG.info("Watching directory '{}' completed", directoryProperty);
-            } else {
-                LOG.info("No directories marked for watching.");
+            if (wd != null) {
+                Boolean directoriesToWatch = Boolean.TRUE;
+    
+                for (Library library : libraryCollection.getLibraries()) {
+                    String dirToWatch = library.getImportDTO().getBaseDirectory();
+                    if (library.isWatch()) {
+                        LOG.info("Watching directory '{}' for changes...", dirToWatch);
+                        wd.addDirectory(dirToWatch);
+                        directoriesToWatch = Boolean.TRUE;
+                    } else {
+                        LOG.info("Watching skipped for directory '{}'", dirToWatch);
+                    }
+                }
+    
+                if (directoriesToWatch) {
+                    wd.processEvents();
+                    LOG.info("Watching directory '{}' completed", directoryProperty);
+                } else {
+                    LOG.info("No directories marked for watching.");
+                }
             }
         } else {
             LOG.info("Watching not enabled.");
