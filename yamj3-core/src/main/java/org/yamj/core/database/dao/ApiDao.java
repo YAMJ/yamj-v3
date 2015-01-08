@@ -2567,8 +2567,8 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("SELECT bs1.id, bs1.name, bo1.id as member,");
         sqlScalars.addToSql("min(vd1.watched_nfo or vd1.watched_file or vd1.watched_api) as watched_set");
         sqlScalars.addToSql("FROM boxed_set bs1");
-        sqlScalars.addToSql("JOIN boxed_set_order bo1 ON bs1.id=bo1.boxedset_id");
-        sqlScalars.addToSql("JOIN videodata vd1 ON bo1.videodata_id=vd1.id");
+        sqlScalars.addToSql("LEFT OUTER JOIN boxed_set_order bo1 ON bs1.id=bo1.boxedset_id");
+        sqlScalars.addToSql("LEFT OUTER JOIN videodata vd1 ON bo1.videodata_id=vd1.id");
         if (options.getId() > 0L) {
             sqlScalars.addToSql("WHERE bs1.id=" + options.getId());
         }
@@ -2576,20 +2576,19 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("SELECT bs2.id, bs2.name, bo2.id as member,");
         sqlScalars.addToSql("(select min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched_set");
         sqlScalars.addToSql("FROM boxed_set bs2");
-        sqlScalars.addToSql("JOIN boxed_set_order bo2 ON bs2.id=bo2.boxedset_id");
-        sqlScalars.addToSql("JOIN series ser ON bo2.series_id=ser.id");
+        sqlScalars.addToSql("LEFT OUTER JOIN boxed_set_order bo2 ON bs2.id=bo2.boxedset_id");
+        sqlScalars.addToSql("LEFT OUTER JOIN series ser ON bo2.series_id=ser.id");
         if (options.getId() > 0L) {
             sqlScalars.addToSql("WHERE bs2.id=" + options.getId());
         }
         sqlScalars.addToSql(") AS s");
         sqlScalars.addToSql("GROUP BY s.id, s.name");
-        sqlScalars.addToSql("HAVING count(s.member)>0");
         if (options.getId() <= 0L) {
             if (options.getWatched() != null) {
                 if (options.getWatched()) {
-                    sqlScalars.addToSql("and min(s.watched_set)=1");
+                    sqlScalars.addToSql(" HAVING min(s.watched_set)=1");
                 } else {
-                    sqlScalars.addToSql("and min(s.watched_set)=0");
+                    sqlScalars.addToSql(" HAVING min(s.watched_set)=0");
                 }
             }
             sqlScalars.addToSql(options.getSortString());
