@@ -420,11 +420,11 @@ public final class InfoReader {
                                 movieDb = ImdbScanner.SCANNER_ID;
                             }
                             dto.addId(movieDb, movieId);
-                            LOG.debug("Found {} ID: {}, ", movieDb, movieId);
+                            LOG.debug("Found {} ID: {}", movieDb, movieId);
                         }
                     } else {
                         dto.addId(movieDb, movieId);
-                        LOG.debug("Found {} ID: {}, ", movieDb, movieId);
+                        LOG.debug("Found {} ID: {}", movieDb, movieId);
                     }
                 }
                 
