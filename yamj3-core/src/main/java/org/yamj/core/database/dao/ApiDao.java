@@ -2504,10 +2504,15 @@ public class ApiDao extends HibernateDao {
 
         List<ApiBoxedSetDTO> boxsets = executeQueryWithTransform(ApiBoxedSetDTO.class, sqlScalars, wrapper);
         if (CollectionUtils.isEmpty(boxsets)) {
+            System.err.println("isEmpty");
             return null;
         }
 
         ApiBoxedSetDTO boxedSet = boxsets.get(0);
+        if (boxedSet.getMemberCount() == null || boxedSet.getMemberCount().intValue() <= 0) {
+            return boxedSet;
+        }
+        
         if (options.hasDataItem(DataItem.MEMBER)) {
             // get members
             sqlScalars = new SqlScalars();
