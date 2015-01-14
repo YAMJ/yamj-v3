@@ -82,7 +82,7 @@ public final class InfoReader {
         try {
             nfoContent = FileUtils.readFileToString(nfoFile, FileTools.DEFAULT_CHARSET);
         } catch (Exception e) {
-            LOG.trace("Error reading NFO file '" + stageFile.getFullPath() + "'", e);
+            LOG.error("Unable to read NFO file: " + stageFile.getFullPath(), e);
             
             nfoFile = null;
             nfoContent = stageFile.getContent();
