@@ -404,7 +404,8 @@ public class FileTools {
         try {
             File file = new File(stageFile.getFullPath());
             readable = (file.exists() && file.canRead());
-        } catch (Exception ignore) {
+        } catch (Exception e) {
+            LOG.trace("File " + stageFile.getFullPath() + " doesn't exist or is not readable", e);
         }
         return readable;
     }
