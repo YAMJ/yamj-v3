@@ -82,12 +82,14 @@ public final class InfoReader {
         try {
             nfoContent = FileUtils.readFileToString(nfoFile, FileTools.DEFAULT_CHARSET);
         } catch (Exception e) {
+            LOG.trace("Error reading NFO file '" + stageFile.getFullPath() + "'", e);
+            
             nfoFile = null;
             nfoContent = stageFile.getContent();
             
             if (StringUtils.isBlank(nfoContent)) {
                 LOG.warn("NFO file '{}' is not readable", nfoFilename);
-
+                
                 try {
                     stageFile.setStatus(StatusType.INVALID);
                     this.stagingService.updateStageFile(stageFile);
