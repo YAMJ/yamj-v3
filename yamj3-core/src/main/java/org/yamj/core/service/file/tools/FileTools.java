@@ -403,9 +403,13 @@ public class FileTools {
         boolean readable = false;
         try {
             File file = new File(stageFile.getFullPath());
-            readable = (file.exists() && file.canRead());
+            final boolean exists = file.exists();
+            final boolean canRead = file.canRead();
+            readable = (exists && canRead);
+            LOG.trace("File '{}' exists: {}", stageFile.getFullPath(), exists);
+            LOG.trace("File '{}' readable: {}", stageFile.getFullPath(), canRead);
         } catch (Exception e) {
-            LOG.trace("File " + stageFile.getFullPath() + " doesn't exist or is not readable", e);
+            LOG.trace("Could not determine if file '" + stageFile.getFullPath() + "' is readable", e);
         }
         return readable;
     }
@@ -414,30 +418,15 @@ public class FileTools {
         boolean readable = false;
         try {
             File file = new File(stageDirectory.getDirectoryPath());
-            readable = (file.exists() && file.canRead());
-        } catch (Exception ignore) {
+            final boolean exists = file.exists();
+            final boolean canRead = file.canRead();
+            readable = (exists && canRead);
+            LOG.trace("Directory '{}' exists: {}", stageDirectory.getDirectoryPath(), exists);
+            LOG.trace("Directory '{}' readable: {}", stageDirectory.getDirectoryPath(), canRead);
+        } catch (Exception e) {
+            LOG.trace("Could not determine if directory '" + stageDirectory.getDirectoryPath() + "' is readable", e);
         }
         return readable;
-    }
-
-    public static boolean isFileExistent(StageFile stageFile) {
-        boolean exists = false;
-        try {
-            File file = new File(stageFile.getFullPath());
-            exists = file.exists();
-        } catch (Exception ignore) {
-        }
-        return exists;
-    }
-
-    public static boolean isFileExistent(StageDirectory stageDirectory) {
-        boolean exists = false;
-        try {
-            File file = new File(stageDirectory.getDirectoryPath());
-            exists = file.exists();
-        } catch (Exception ignore) {
-        }
-        return exists;
     }
 
     public static String makeSafeFilename(String filename) {
