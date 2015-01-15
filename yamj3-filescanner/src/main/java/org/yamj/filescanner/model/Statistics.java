@@ -207,9 +207,8 @@ public class Statistics {
     public long getTime(TimeType timeType) {
         if (times.containsKey(timeType)) {
             return times.get(timeType);
-        } else {
-            return 0L;
         }
+        return 0L;
     }
 
     /**
@@ -219,28 +218,35 @@ public class Statistics {
      * @return
      */
     public String generateStatistics(Boolean skipZero) {
-        StringBuilder statOutput = new StringBuilder("Jukebox Statistics:\n");
-
+        final String lineFeed = String.format("%n");
+        final StringBuilder statOutput = new StringBuilder("Jukebox Statistics:");
+        
         // Build the counts
         int value;
         for (StatType stat : StatType.values()) {
             value = stats.get(stat);
             if (value > 0 || !skipZero) {
+                statOutput.append(lineFeed);
                 statOutput.append(WordUtils.capitalizeFully(stat.toString().replace("_", " ").toLowerCase()));
-                statOutput.append(" = ").append(value).append("\n");
+                statOutput.append(" = ");
+                statOutput.append(value);
             }
         }
 
         // Add the processing time
         String processTime = getProcessingTime();
         if (StringUtils.isNotBlank(processTime)) {
-            statOutput.append("Scanning Time = ").append(processTime).append("\n");
+            statOutput.append(lineFeed);
+            statOutput.append("Scanning Time = ");
+            statOutput.append(processTime);
         }
-
         processTime = getProcessingTime(TimeType.SENDING_START, TimeType.SENDING_END, Boolean.TRUE);
         if (StringUtils.isNotBlank(processTime)) {
-            statOutput.append("Sending Time = ").append(processTime).append("\n");
+            statOutput.append(lineFeed);
+            statOutput.append("Sending Time = ");
+            statOutput.append(processTime);
         }
+        
         return statOutput.toString();
     }
 
