@@ -149,8 +149,9 @@ public class OfdbScanner implements IMovieScanner {
                 return sb.toString();
             }
 
-        } catch (IOException error) {
-            LOG.error("Failed retreiving OFDb url for IMDb id '{}'", imdbId, error);
+        } catch (IOException ex) {
+            LOG.error("Failed retreiving OFDb url for IMDb id '{}': {}", imdbId, ex.getMessage());
+            LOG.trace("Scanner error", ex);
         }
         return null;
     }
@@ -186,8 +187,9 @@ public class OfdbScanner implements IMovieScanner {
             sb.append(xml.substring(beginIndex + 6, xml.indexOf("\"", beginIndex + 10)));
             return sb.toString();
 
-        } catch (IOException error) {
-            LOG.error("Failed retrieving OFDb url for title '{}'", title, error);
+        } catch (IOException ex) {
+            LOG.error("Failed retrieving OFDb url for title '{}': {}", title, ex.getMessage());
+            LOG.trace("Scanner error", ex);
         }
         return null;
     }
@@ -197,7 +199,7 @@ public class OfdbScanner implements IMovieScanner {
         String ofdbUrl = getMovieId(videoData);
 
         if (StringUtils.isBlank(ofdbUrl)) {
-            LOG.debug("OFDb url not available '{}'", videoData.getTitle());
+            LOG.debug("OFDb url not available: {}", videoData.getTitle());
             return ScanResult.MISSING_ID;
         }
 
@@ -210,7 +212,7 @@ public class OfdbScanner implements IMovieScanner {
 
         try {
             String xml = httpClient.requestContent(ofdbUrl, charset).getContent();
-
+            
             String title = HTMLTools.extractTag(xml, "<title>OFDb -", "</title>");
             // check for movie type change
             if (title.contains("[TV-Serie]")) {
@@ -252,8 +254,9 @@ public class OfdbScanner implements IMovieScanner {
                     if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
                         videoData.setOutline(plot, SCANNER_ID);
                     }
-                } catch (IOException error) {
-                    LOG.error("Failed retrieving plot '{}'", ofdbUrl, error);
+                } catch (IOException ex) {
+                    LOG.error("Failed retrieving plot '{}': {}", ofdbUrl, ex.getMessage());
+                    LOG.trace("Scanner error", ex);
                     scanResult = ScanResult.ERROR;
                 }
             }
@@ -326,8 +329,9 @@ public class OfdbScanner implements IMovieScanner {
                     }
                 }
             }
-        } catch (IOException error) {
-            LOG.error("Failed retrieving meta data '{}'", ofdbUrl, error);
+        } catch (IOException ex) {
+            LOG.error("Failed retrieving meta data '{}': {}", ofdbUrl, ex.getMessage());
+            LOG.trace("Scanner error", ex);
             scanResult = ScanResult.ERROR;
         }
         return scanResult;

@@ -140,7 +140,9 @@ public class TheTVDbScanner implements ISeriesScanner {
             if (StringUtils.isNotBlank(faDate) && (faDate.length() >= 4)) {
                 try {
                     series.setStartYear(Integer.parseInt(faDate.substring(0, 4)), SCANNER_ID);
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                    // ignore error if year is invalid
+                }
             }
         }
 

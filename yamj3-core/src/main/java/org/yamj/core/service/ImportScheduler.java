@@ -64,7 +64,9 @@ public class ImportScheduler {
                     LOG.error("Staging error", error);
                     try {
                         mediaImportService.processingError(id);
-                    } catch (Exception ignore) {}
+                    } catch (Exception ignore) {
+                        // leave status as it is in any error case
+                    }
                 }
             }
         } while (id != null);
@@ -87,7 +89,9 @@ public class ImportScheduler {
                     LOG.warn("Staging error", error);
                     try {
                         mediaImportService.processingError(id);
-                    } catch (Exception ignore) {}
+                    } catch (Exception ignore) {
+                        // leave status as it is in any error case
+                    }
                 }
             }
         } while (id != null);
@@ -110,7 +114,9 @@ public class ImportScheduler {
                     LOG.warn("Staging error", error);
                     try {
                         mediaImportService.processingError(id);
-                    } catch (Exception ignore) {}
+                    } catch (Exception ignore) {
+                        // leave status as it is in any error case
+                    }
                 }
             }
         } while (id != null);
@@ -133,7 +139,9 @@ public class ImportScheduler {
                     LOG.warn("Staging error", error);
                     try {
                         mediaImportService.processingError(id);
-                    } catch (Exception ignore) {}
+                    } catch (Exception ignore) {
+                        // leave status as it is in any error case
+                    }
                 }
             }
         } while (id != null);
@@ -156,7 +164,9 @@ public class ImportScheduler {
                     LOG.warn("Staging error", error);
                     try {
                         mediaImportService.processingError(id);
-                    } catch (Exception ignore) {}
+                    } catch (Exception ignore) {
+                        // leave status as it is in any error case
+                    }
                 }
             }
         } while (id != null);

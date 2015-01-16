@@ -320,7 +320,9 @@ public class NfoScannerService {
                     // mark stage file with error
                     stageFile.setStatus(StatusType.ERROR);
                     this.stagingService.updateStageFile(stageFile);
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                    // error can be ignored cause will be done in next run
+                }
             }
         }
         

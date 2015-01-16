@@ -83,7 +83,9 @@ public class ArtworkTools {
                     hashCode = tmp.substring(0, index);
                 }
             }
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+            // ignore any exception
+        }
         return hashCode;
     }
 }

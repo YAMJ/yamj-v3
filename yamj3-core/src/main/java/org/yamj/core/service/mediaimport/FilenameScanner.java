@@ -22,23 +22,18 @@
  */
 package org.yamj.core.service.mediaimport;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import static org.springframework.util.StringUtils.tokenizeToStringArray;
+
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import static org.springframework.util.StringUtils.tokenizeToStringArray;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.tools.StringTools;
 import org.yamj.common.util.KeywordMap;
@@ -465,7 +460,8 @@ public class FilenameScanner {
                         if (year >= 1800 && year <= 3000) {
                             dto.setYear(year);
                         }
-                    } catch (NumberFormatException error) {
+                    } catch (NumberFormatException ignore) {
+                        // ignore error if year is invalid
                     }
                 }
                 first = Boolean.FALSE;

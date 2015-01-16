@@ -80,33 +80,26 @@ public class JpegReader {
             return null;
         }
 
-        ImageInputStream stream = ImageIO.createImageInputStream(file);
-        Iterator<ImageReader> iter = ImageIO.getImageReaders(stream);
         BufferedImage image = null;
-
-        while (iter.hasNext()) {
-            ImageReader reader = iter.next();
-            reader.setInput(stream);
-
-            try {
-                image = reader.read(0);
-            } catch (CMMException ex) {
-                image = readImageCmyk(file, reader);
-            } catch (IIOException ex) {
-                image = readImageCmyk(file, reader);
-            } finally {
-                reader.dispose();
+        try (ImageInputStream stream = ImageIO.createImageInputStream(file)) {
+            Iterator<ImageReader> iter = ImageIO.getImageReaders(stream);
+    
+            while (iter.hasNext()) {
+                ImageReader reader = iter.next();
+                reader.setInput(stream);
+    
+                try {
+                    image = reader.read(0);
+                } catch (CMMException | IIOException ex) {
+                    image = readImageCmyk(file, reader);
+                } finally {
+                    reader.dispose();
+                }
+    
+                if (image != null) {
+                    break;
+                }
             }
-
-            if (image != null) {
-                break;
-            }
-        }
-
-        try {
-            stream.close();
-        } catch (IOException ex) {
-            LOG.trace("Failed to close stream: {}", ex.getMessage(), ex);
         }
 
         return image;

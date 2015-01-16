@@ -106,7 +106,9 @@ public class ScanningScheduler {
         while (!executor.isTerminated()) {
             try {
                 TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ignore) {}
+            } catch (InterruptedException ignore) {
+                // ignore error which is expected
+            }
         }
 
         LOG.debug("Finished media file scanning");
@@ -149,7 +151,9 @@ public class ScanningScheduler {
         while (!executor.isTerminated()) {
             try {
                 TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ignore) {}
+            } catch (InterruptedException ignore) {
+                // ignore error which is expected
+            }
         }
 
         LOG.debug("Finished metadata scanning");
@@ -192,7 +196,9 @@ public class ScanningScheduler {
         while (!executor.isTerminated()) {
             try {
                 TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ignore) {}
+            } catch (InterruptedException ignore) {
+                // ignore error which is expected
+            }
         }
 
         LOG.debug("Finished people data scanning");
@@ -235,7 +241,9 @@ public class ScanningScheduler {
         while (!executor.isTerminated()) {
             try {
                 TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ignore) {}
+            } catch (InterruptedException ignore) {
+                // ignore error which is expected
+            }
         }
 
         LOG.debug("Finished filmography data scanning");
@@ -278,7 +286,9 @@ public class ScanningScheduler {
         while (!executor.isTerminated()) {
             try {
                 TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ignore) {}
+            } catch (InterruptedException ignore) {
+                // ignore error which is expected
+            }
         }
 
         LOG.debug("Finished artwork scanning");

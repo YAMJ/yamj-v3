@@ -107,6 +107,7 @@ public class ConfigService {
             try {
                 return Integer.parseInt(value.trim());
             } catch (NumberFormatException nfe) {
+                // use default value if value is no valid integer
             }
         }
         return defaultValue;
@@ -118,6 +119,7 @@ public class ConfigService {
             try {
                 return Long.parseLong(value.trim());
             } catch (NumberFormatException nfe) {
+                // use default value if value is no valid long
             }
         }
         return defaultValue;
@@ -136,6 +138,7 @@ public class ConfigService {
             try {
                 return Float.parseFloat(value.trim());
             } catch (NumberFormatException nfe) {
+                // use default value if value is no valid float
             }
         }
         return defaultValue;

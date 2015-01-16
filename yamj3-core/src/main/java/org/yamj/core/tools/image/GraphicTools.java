@@ -49,11 +49,9 @@ public final class GraphicTools {
     }
 
     public static Dimension getDimension(String url) throws IOException {
-        InputStream in = null;
-        ImageInputStream iis = null;
-        try {
-            in = new URL(url).openStream();
-            iis = ImageIO.createImageInputStream(in);
+        try (InputStream in = new URL(url).openStream();
+             ImageInputStream iis = ImageIO.createImageInputStream(in))
+         {
 
             final Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
             if (readers.hasNext()) {
@@ -65,22 +63,8 @@ public final class GraphicTools {
                     try {
                         reader.dispose();
                     } catch (Exception ignore) {
+                        // ignore any error on dispose
                     }
-                }
-            }
-        } finally {
-            if (iis != null) {
-                try {
-                    iis.close();
-                } catch (IOException ex) {
-                    LOG.trace("Failed to close stream: {}", ex.getMessage(), ex);
-                }
-            }
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException ex) {
-                    LOG.trace("Failed to close stream: {}", ex.getMessage(), ex);
                 }
             }
         }

@@ -22,11 +22,7 @@
  */
 package org.yamj.core.tools.xml;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.URL;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
@@ -41,12 +37,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
+import org.w3c.dom.*;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -193,15 +184,12 @@ public final class DOMHelper {
      */
     public static Document getDocFromFile(File xmlFile) throws ParserConfigurationException, SAXException, IOException {
         URL url = xmlFile.toURI().toURL();
-        InputStream in = url.openStream();
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Document doc;
+        DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 
         // Custom error handler
         db.setErrorHandler(new SaxErrorHandler());
-
-        try {
+        Document doc;
+        try (InputStream in = url.openStream()) {
             doc = db.parse(in);
         } catch (SAXParseException ex) {
             if (FilenameUtils.isExtension(xmlFile.getName().toLowerCase(), "xml")) {
@@ -210,19 +198,12 @@ public final class DOMHelper {
                 // Try processing the file a different way
                 doc = null;
             }
-        } finally {
-            // close the stream
-            in.close();
         }
 
         if (doc == null) {
             // try wrapping the file in a root
-            StringReader sr = new StringReader(wrapInXml(FileTools.readFileToString(xmlFile)));
-
-            try {
+            try (StringReader sr = new StringReader(wrapInXml(FileTools.readFileToString(xmlFile)))) {
                 doc = db.parse(new InputSource(sr));
-            } finally {
-                sr.close();
             }
         }
 

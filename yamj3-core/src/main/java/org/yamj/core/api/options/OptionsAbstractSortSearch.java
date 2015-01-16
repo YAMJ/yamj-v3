@@ -300,9 +300,13 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
                                         // ignore jobs <= 0
                                         jobType = null;
                                     }
-                                } catch (Exception ignore) {}
+                                } catch (Exception ignore) {
+                                    // ignore error if job amount is not present
+                                }
                             }
-                        } catch (Exception ignore) {}
+                        } catch (Exception ignore) {
+                            // ignore any error
+                        }
                     }
                     if (jobType != null) {
                         jobTypes.put(jobType,amount);

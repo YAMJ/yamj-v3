@@ -33,6 +33,7 @@ public class JsonpCallbackFilter implements Filter {
 
     @Override
     public void init(FilterConfig fConfig) throws ServletException {
+        // empty interface implementation
     }
 
     @Override
@@ -43,19 +44,17 @@ public class JsonpCallbackFilter implements Filter {
         Map<String, String[]> parms = httpRequest.getParameterMap();
 
         if (parms.containsKey("callback")) {
-            OutputStream out = httpResponse.getOutputStream();
-
-            GenericResponseWrapper wrapper = new GenericResponseWrapper(httpResponse);
-
-            chain.doFilter(request, wrapper);
-
-            out.write((parms.get("callback")[0] + "(").getBytes());
-            out.write(wrapper.getData());
-            out.write(");".getBytes());
-
-            wrapper.setContentType("text/javascript;charset=UTF-8");
-
-            out.close();
+            try (OutputStream out = httpResponse.getOutputStream()) {
+                GenericResponseWrapper wrapper = new GenericResponseWrapper(httpResponse);
+    
+                chain.doFilter(request, wrapper);
+    
+                out.write((parms.get("callback")[0] + "(").getBytes());
+                out.write(wrapper.getData());
+                out.write(");".getBytes());
+    
+                wrapper.setContentType("text/javascript;charset=UTF-8");
+            }
         } else {
             chain.doFilter(request, response);
         }
@@ -63,5 +62,6 @@ public class JsonpCallbackFilter implements Filter {
 
     @Override
     public void destroy() {
+        // empty interface implementation
     }
 }

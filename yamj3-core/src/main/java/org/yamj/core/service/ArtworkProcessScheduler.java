@@ -85,6 +85,7 @@ public class ArtworkProcessScheduler {
             try {
                 TimeUnit.SECONDS.sleep(5);
             } catch (InterruptedException ignore) {
+                // interrupt in sleep can be ignored
             }
         }
 

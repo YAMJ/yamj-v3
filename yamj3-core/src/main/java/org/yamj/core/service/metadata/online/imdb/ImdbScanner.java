@@ -23,16 +23,7 @@
 package org.yamj.core.service.metadata.online.imdb;
 
 import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
@@ -44,19 +35,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigServiceWrapper;
-import org.yamj.core.database.model.AbstractMetadata;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.core.service.metadata.online.IMovieScanner;
-import org.yamj.core.service.metadata.online.IPersonScanner;
-import org.yamj.core.service.metadata.online.ISeriesScanner;
-import org.yamj.core.service.metadata.online.OnlineScannerService;
-import org.yamj.core.service.metadata.online.ScanResult;
+import org.yamj.core.service.metadata.online.*;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.web.HTMLTools;
@@ -572,6 +555,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                     }
                 }
             } catch (Exception ignore) {
+                // error in parsing release date should not lead to an exception
             }
         }
 
@@ -604,6 +588,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
                 metadata.setTitleOriginal(foundValue, SCANNER_ID);
             } catch (Exception ignore) {
+                // error in parsing original title should not lead to an exception
             }
         }
 
@@ -676,6 +661,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
                 metadata.setTitle(foundValue, SCANNER_ID);
             } catch (Exception ignore) {
+                // error in parsing AKAs is no real error
             }
         }
     }

@@ -26,13 +26,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
@@ -535,13 +529,9 @@ public class MediaInfoService {
             List<Map<String, String>> infosAudio,
             List<Map<String, String>> infosText) throws Exception {
 
-        InputStreamReader isr = null;
-        BufferedReader bufReader = null;
-
-        try {
-            isr = new InputStreamReader(stream.getInputStream());
-            bufReader = new BufferedReader(isr);
-
+        try (InputStreamReader isr = new InputStreamReader(stream.getInputStream());
+             BufferedReader bufReader = new BufferedReader(isr))
+        {
             // Improvement, less code line, each cat have same code, so use the same for all.
             Map<String, List<Map<String, String>>> matches = new HashMap<String, List<Map<String, String>>>();
 
@@ -596,14 +586,6 @@ public class MediaInfoService {
                 }
             } catch (Exception ignore) {
                 // We don't care about this exception
-            }
-        } finally {
-            if (isr != null) {
-                isr.close();
-            }
-
-            if (bufReader != null) {
-                bufReader.close();
             }
         }
     }

@@ -45,7 +45,9 @@ public class OptionsRating extends OptionsAbstractSortSearch {
     public void setType(String type) {
         try {
             this.type = MetaDataType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+            // ignore error if type is null
+        }
     }
 
     public String getSource() {

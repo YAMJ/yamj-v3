@@ -126,18 +126,8 @@ public class FileStorageService {
             return Boolean.FALSE;
         }
 
-        OutputStream outputStream = null;
-        try {
-            outputStream = new FileOutputStream(storageFileName);
+        try (OutputStream outputStream = new FileOutputStream(storageFileName)) {
             entity.writeTo(outputStream);
-        } finally {
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (IOException ex) {
-                    LOG.trace("Failed to close stream: {}", ex.getMessage(), ex);
-                }
-            }
         }
 
         return Boolean.TRUE;
@@ -157,7 +147,6 @@ public class FileStorageService {
         File outputFile = new File(storageFileName);
 
         ImageWriter writer = null;
-        FileImageOutputStream output = null;
         try {
             if (ImageFormat.PNG == imageFormat) {
                 ImageIO.write(bi, "png", outputFile);
@@ -174,21 +163,15 @@ public class FileStorageService {
                 iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
                 iwp.setCompressionQuality(jpegQuality);
 
-                output = new FileImageOutputStream(outputFile);
-                writer.setOutput(output);
-                IIOImage image = new IIOImage(bufImage, null, null);
-                writer.write(null, image, iwp);
+                try (FileImageOutputStream output = new FileImageOutputStream(outputFile)) {
+                    writer.setOutput(output);
+                    IIOImage image = new IIOImage(bufImage, null, null);
+                    writer.write(null, image, iwp);
+                }
             }
         } finally {
             if (writer != null) {
                 writer.dispose();
-            }
-            if (output != null) {
-                try {
-                    output.close();
-                } catch (IOException ex) {
-                    LOG.trace("Failed to close stream: {}", ex.getMessage(), ex);
-                }
             }
         }
     }

@@ -22,12 +22,7 @@
  */
 package org.yamj.core.service.file.tools;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -196,17 +191,11 @@ public class FileTools {
             makeDirectories(dst);
             returnValue = copyFile(src, new File(dst + File.separator + src.getName()));
         } else {
-            FileInputStream inSource = null;
-            FileOutputStream outSource = null;
-            FileChannel inChannel = null;
-            FileChannel outChannel = null;
-            try {
-                // gc: copy using file channels, potentially much faster
-                inSource = new FileInputStream(src);
-                outSource = new FileOutputStream(dst);
-                inChannel = inSource.getChannel();
-                outChannel = outSource.getChannel();
-
+            try (FileInputStream inSource = new FileInputStream(src);
+                 FileOutputStream outSource = new FileOutputStream(dst);
+                 FileChannel inChannel = inSource.getChannel();
+                 FileChannel outChannel = outSource.getChannel())
+             {
                 long p = 0, s = inChannel.size();
                 while (p < s) {
                     p += inChannel.transferTo(p, 1024 * 1024, outChannel);
@@ -216,36 +205,6 @@ public class FileTools {
                 LOG.error("Failed copying file '{}' to '{}'", src, dst);
                 LOG.error("File copying error", error);
                 returnValue = Boolean.FALSE;
-            } finally {
-                if (inChannel != null) {
-                    try {
-                        inChannel.close();
-                    } catch (IOException ex) {
-                        // Ignore
-                    }
-                }
-                if (inSource != null) {
-                    try {
-                        inSource.close();
-                    } catch (IOException ex) {
-                        // Ignore
-                    }
-                }
-
-                if (outChannel != null) {
-                    try {
-                        outChannel.close();
-                    } catch (IOException ex) {
-                        // Ignore
-                    }
-                }
-                if (outSource != null) {
-                    try {
-                        outSource.close();
-                    } catch (IOException ex) {
-                        // Ignore
-                    }
-                }
             }
         }
 

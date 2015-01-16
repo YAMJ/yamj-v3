@@ -159,55 +159,31 @@ public final class PlayerTools {
      * @return
      */
     private List<String> scanForPlayers(String baseIpAddress, int port, int scanStart, int scanEnd, int timeout) {
-        PrintWriter out = null;
-        BufferedReader in = null;
         List<String> playerList = new ArrayList<>();
 
         for (int i = (scanStart < 1 ? 1 : scanStart); i <= (scanEnd > 255 ? 255 : scanEnd); i++) {
-            Socket mySocket = null;
-
-            try {
+            try (Socket mySocket = new Socket()) {
                 String ipToScan = baseIpAddress + i;
                 LOG.debug("Scanning {}", ipToScan);
 
-                mySocket = new Socket();
                 SocketAddress address = new InetSocketAddress(ipToScan, port);
                 mySocket.connect(address, timeout);
 
-                out = new PrintWriter(mySocket.getOutputStream(), true);
-                in = new BufferedReader(new InputStreamReader(mySocket.getInputStream()));
-                out.println("setting");
-                String fromServer;
-                while ((fromServer = in.readLine()) != null) {
-                    if (fromServer.equals(XML_PLAYER_IDENT)) {
-                        playerList.add(ipToScan);
-                        break;
+                try (PrintWriter out = new PrintWriter(mySocket.getOutputStream(), true);
+                     BufferedReader in = new BufferedReader(new InputStreamReader(mySocket.getInputStream())))
+                {
+                    out.println("setting");
+                    String fromServer;
+                    while ((fromServer = in.readLine()) != null) {
+                        if (fromServer.equals(XML_PLAYER_IDENT)) {
+                            playerList.add(ipToScan);
+                            break;
+                        }
                     }
                 }
-
-            } catch (java.rmi.UnknownHostException ex) {
-                LOG.trace("UnknownHostException: {}", ex.getMessage());
             } catch (IOException ex) {
-                LOG.trace("IOException: {}", ex.getMessage());
-            } finally {
-                if (mySocket != null) {
-                    try {
-                        mySocket.close();
-                    } catch (Exception ignore) {}
-                }
+                LOG.trace("IO error during scan", ex);
             }
-        }
-
-        if (in != null) {
-            try {
-                in.close();
-            } catch (Exception ignore) {}
-        }
-
-        if (out != null) {
-            try {
-                out.close();
-            } catch (Exception ignore) {}
         }
 
         LOG.info("Found {} players: {}", playerList.size(), playerList.toString());

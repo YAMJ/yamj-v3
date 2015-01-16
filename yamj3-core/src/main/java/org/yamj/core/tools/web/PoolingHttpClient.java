@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -41,13 +40,11 @@ import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.yamj.api.common.http.DefaultPoolingHttpClient;
 import org.yamj.api.common.http.DigestedResponse;
-import org.yamj.api.common.http.UserAgentSelector;
 import org.yamj.common.tools.PropertyTools;
 
 public class PoolingHttpClient extends DefaultPoolingHttpClient implements DisposableBean {
@@ -103,34 +100,15 @@ public class PoolingHttpClient extends DefaultPoolingHttpClient implements Dispo
     public DigestedResponse requestContent(HttpGet httpGet, Charset charset) throws IOException {
         // set route (if not set before)
         setRoute(httpGet);
-
-        if (randomUserAgent) {
-            httpGet.setHeader(HTTP.USER_AGENT, UserAgentSelector.randomUserAgent());
+        
+        DigestedResponse response;
+        if (charset == null) {
+            response = super.requestContent(httpGet, UTF8_CHARSET);
+        } else {
+            response = super.requestContent(httpGet, charset);
         }
-
-        try {
-            HttpResponse response = execute(httpGet);
-
-            int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode != 200) {
-                httpGet.releaseConnection();
-                throw new RuntimeException("Unexpected status " + statusCode + " for uri " + httpGet.getURI());
-            }
-
-            if (response.getEntity() == null) {
-                httpGet.releaseConnection();
-                throw new RuntimeException("No response for uri " + httpGet.getURI());
-            } else if (charset == null) {
-                // use UTF8 char set if none charset given
-                return readContent(response, UTF8_CHARSET);
-            } else {
-                // use given charset
-                return readContent(response, charset);
-            }
-        } catch (IOException ioe) {
-            httpGet.releaseConnection();
-            throw ioe;
-        }
+        
+        return response;
     }
 
     private void setRoute(HttpUriRequest request) throws ClientProtocolException {

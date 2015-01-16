@@ -63,7 +63,9 @@ public class MetadataScannerRunner implements Runnable {
                 LOG.error("Scanning error", error);
                 try {
                     service.processingError(queueElement);
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                    // error can be ignored cause will be done in next run
+                }
             }
             queueElement = queue.poll();
         }

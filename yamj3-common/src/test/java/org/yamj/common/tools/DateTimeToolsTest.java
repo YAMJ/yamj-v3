@@ -22,15 +22,12 @@
  */
 package org.yamj.common.tools;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Calendar;
 import java.util.Date;
 import org.joda.time.DateTime;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class DateTimeToolsTest {
 
@@ -47,22 +44,6 @@ public class DateTimeToolsTest {
         cal.set(2013, 11, 25);  // This is 25/12/2013 Month is ZERO based.
         dateJava = cal.getTime();
         dateTime = new DateTime(dateJava);
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
     }
 
     /**

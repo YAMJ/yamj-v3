@@ -93,7 +93,9 @@ public final class InfoReader {
                 try {
                     stageFile.setStatus(StatusType.INVALID);
                     this.stagingService.updateStageFile(stageFile);
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                    // error can be ignored
+                }
                 
                 // nothing to do for this stage file
                 return;
@@ -157,7 +159,9 @@ public final class InfoReader {
                 try {
                     stageFile.setStatus(StatusType.INVALID);
                     this.stagingService.updateStageFile(stageFile);
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                    // error can be ignored cause will be retried later
+                }
             }
         }
     }
@@ -724,7 +728,9 @@ public final class InfoReader {
         if (StringUtils.isNotBlank(tempValue)) {
             try {
                 episodeDTO.setFirstAired(MetadataTools.parseToDate(tempValue.trim()));
-            } catch (Exception ignore) {}
+            } catch (Exception ignore) {
+                // ignore error if date has invalid format
+            }
         }
 
         episodeDTO.setAirsAfterSeason(DOMHelper.getValueFromElement(eEpisodeDetails, "airsafterseason", "airsAfterSeason"));

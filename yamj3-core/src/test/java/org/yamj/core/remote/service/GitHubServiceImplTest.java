@@ -26,8 +26,7 @@ import static org.junit.Assert.assertTrue;
 
 import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.junit.*;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,33 +35,6 @@ public class GitHubServiceImplTest {
     private static final Logger LOG = LoggerFactory.getLogger(GitHubServiceImplTest.class);
     @Resource(name = "githubService")
     private GitHubServiceImpl github;
-
-    public GitHubServiceImplTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-        BasicConfigurator.configure();
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
-    /**
-     * Test of pushDate method, of class GitHubServiceImpl.
-     */
-    @Ignore("No need to test this")
-    public void testPushDate_String_String() {
-    }
 
     /**
      * Test of pushDate method, of class GitHubServiceImpl.
