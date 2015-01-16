@@ -660,6 +660,9 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
                 filmo.setJobType(JobType.CAMERA);
             } else if (participance.isProducer()) {
                 filmo.setJobType(JobType.PRODUCER);
+            } else {
+                // no entries with unknown job type
+                continue;
             }
 
             if (participance.isTvShow()) {
