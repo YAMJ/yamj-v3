@@ -53,7 +53,7 @@ public class YahooPosterScanner extends AbstractMoviePosterScanner {
     @PostConstruct
     public void init() throws Exception {
         LOG.info("Initialize Yahoo poster scanner");
-        
+
         artworkScannerService.registerMoviePosterScanner(this);
     }
 
@@ -65,14 +65,14 @@ public class YahooPosterScanner extends AbstractMoviePosterScanner {
 
     @Override
     public List<ArtworkDetailDTO> getPosters(String title, int year) {
-        List<ArtworkDetailDTO> dtos = new ArrayList<ArtworkDetailDTO>();
+        List<ArtworkDetailDTO> dtos = new ArrayList<>();
 
         try {
             StringBuilder sb = new StringBuilder("http://fr.images.search.yahoo.com/search/images?p=");
             sb.append(URLEncoder.encode(title, "UTF-8"));
             sb.append("+poster&fr=&ei=utf-8&js=1&x=wrt");
 
-            String xml = httpClient.requestContent(sb.toString());
+            String xml = httpClient.requestContent(sb.toString()).getContent();
 
             // TODO scan more posters at once
             int beginIndex = xml.indexOf("imgurl=");

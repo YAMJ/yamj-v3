@@ -64,11 +64,11 @@ public class ImdbSearchEngine {
     @PostConstruct
     public void init() throws Exception {
         LOG.info("Initialize IMDb search engine");
-        
+
         String country = configService.getProperty("imdb.id.search.country", "us");
         searchEngineTools = new SearchEngineTools(httpClient, country);
     }
-    
+
     /**
      * Retrieve the IMDb matching the specified movie name and year. This routine is based on a IMDb request.
      *
@@ -118,7 +118,7 @@ public class ImdbSearchEngine {
                 sb.append(URLEncoder.encode(personName, "UTF-8")).append("&role=").append(movieId);
 
                 LOG.debug("Querying IMDB for '{}'", sb.toString());
-                String xml = httpClient.requestContent(sb.toString());
+                String xml = httpClient.requestContent(sb.toString()).getContent();
 
                 // Check if this is an exact match (we got a person page instead of a results list)
                 Matcher personMatch = PERSON_REGEX.matcher(xml);
@@ -217,7 +217,7 @@ public class ImdbSearchEngine {
         LOG.debug("Querying IMDb for '{}'", sb.toString());
         String xml;
         try {
-            xml = httpClient.requestContent(sb.toString());
+            xml = httpClient.requestContent(sb.toString()).getContent();
         } catch (IOException ex) {
             LOG.error("Failed retreiving IMDb Id for '{}'", title, ex);
             return null;
@@ -285,7 +285,7 @@ public class ImdbSearchEngine {
                 foundMatch = true;
             } else if (SEARCH_EXACT.equalsIgnoreCase(searchMatch)) {
                 // exact match
-                foundMatch = (searchResult.toLowerCase().indexOf(formattedExact) != -1);
+                foundMatch = (searchResult.toLowerCase().contains(formattedExact));
             } else {
                 // regular match: name and year match independent from each other
                 int nameIndex = searchResult.toLowerCase().indexOf(formattedName);
@@ -298,7 +298,7 @@ public class ImdbSearchEngine {
                 return HTMLTools.extractTag(searchResult, "<a href=\"" + (objectType.equals(OBJECT_MOVIE) ? "/title/" : "/name/"), "/");
             } else {
                 for (String otherResult : HTMLTools.extractTags(searchResult, "</';\">", "</p>", "<p class=\"find-aka\">", "</em>", false)) {
-                    if (otherResult.toLowerCase().indexOf("\"" + searchName + "\"") != -1) {
+                    if (otherResult.toLowerCase().contains("\"" + searchName + "\"")) {
                         return HTMLTools.extractTag(searchResult, "/images/b.gif?link=" + (objectType.equals(OBJECT_MOVIE) ? "/title/" : "/name/"), "/';\">");
                     }
                 }

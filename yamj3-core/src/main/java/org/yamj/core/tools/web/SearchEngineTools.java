@@ -45,11 +45,11 @@ public class SearchEngineTools {
     private static final String SITE = "+site%3A";
     private static final String PAREN_RIGHT = "%29";
     private static final String PAREN_LEFT = "+%28";
-    
+
     private final CommonHttpClient httpClient;
     private final Charset charset;
     private final LinkedList<String> searchSites;
-    
+
     private String country;
     private String searchSuffix = "";
     private String language;
@@ -69,9 +69,9 @@ public class SearchEngineTools {
     public SearchEngineTools(CommonHttpClient httpClient, String country, Charset charset) {
         this.httpClient = httpClient;
         this.charset = charset;
-        
+
         // sites to search for URLs
-        searchSites = new LinkedList<String>();
+        searchSites = new LinkedList<>();
         searchSites.addAll(Arrays.asList(PropertyTools.getProperty("yamj3.searchengine.sites", "google,yahoo,bing,blekko").split(",")));
 
         // country specific presets
@@ -163,9 +163,9 @@ public class SearchEngineTools {
     private String requestContent(CharSequence cs) throws IOException {
         HttpGet httpGet = new HttpGet(cs.toString());
         httpGet.setHeader(HTTP.USER_AGENT, "Mozilla/6.0 (Windows NT 6.2; WOW64; rv:16.0.1) Gecko/20121011 Firefox/16.0.1");
-        return httpClient.requestContent(httpGet, charset);
+        return httpClient.requestContent(httpGet, charset).getContent();
     }
-    
+
     public String searchUrlOnGoogle(String title, int year, String site, String additional) {
         LOG.debug("Searching '{}' on google; site={}", title, site);
 

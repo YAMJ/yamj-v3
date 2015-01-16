@@ -41,14 +41,14 @@ import org.yamj.core.tools.web.PoolingHttpClient;
 public class ImdbPosterScanner extends AbstractMoviePosterScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImdbPosterScanner.class);
-    
+
     @Autowired
     private ArtworkScannerService artworkScannerService;
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
     @Autowired
     private PoolingHttpClient httpClient;
-    
+
     @Override
     public String getScannerName() {
         return ImdbScanner.SCANNER_ID;
@@ -57,7 +57,7 @@ public class ImdbPosterScanner extends AbstractMoviePosterScanner {
     @PostConstruct
     public void init() throws Exception {
         LOG.info("Initialize IMDb poster scanner");
-        
+
         // register this scanner
         artworkScannerService.registerMoviePosterScanner(this);
     }
@@ -75,14 +75,14 @@ public class ImdbPosterScanner extends AbstractMoviePosterScanner {
 
     @Override
     public List<ArtworkDetailDTO> getPosters(String id) {
-        List<ArtworkDetailDTO> dtos = new ArrayList<ArtworkDetailDTO>();
+        List<ArtworkDetailDTO> dtos = new ArrayList<>();
         if (StringUtils.isBlank(id)) {
             return dtos;
         }
 
         try {
-            String xml = this.httpClient.requestContent("http://www.imdb.com/title/" + id);
-            
+            String xml = this.httpClient.requestContent("http://www.imdb.com/title/" + id).getContent();
+
             String metaImageString = "<meta property='og:image' content=\"";
             int beginIndex = xml.indexOf(metaImageString);
             if (beginIndex > 0) {

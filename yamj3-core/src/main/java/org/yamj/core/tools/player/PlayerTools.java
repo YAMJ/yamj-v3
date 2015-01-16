@@ -57,7 +57,7 @@ public final class PlayerTools {
     private static final CommonHttpClient HTTP = new DefaultPoolingHttpClient();
     private static final String XML_PLAYER_IDENT = "<syabasCommandServerXml>";
     // List of the players found
-    private final List<PlayerInfo> players = new ArrayList<PlayerInfo>();
+    private final List<PlayerInfo> players = new ArrayList<>();
     // Timeout for scanning
     private int scanTimeout;
     // Base scan range
@@ -161,15 +161,15 @@ public final class PlayerTools {
     private List<String> scanForPlayers(String baseIpAddress, int port, int scanStart, int scanEnd, int timeout) {
         PrintWriter out = null;
         BufferedReader in = null;
-        List<String> playerList = new ArrayList<String>();
+        List<String> playerList = new ArrayList<>();
 
         for (int i = (scanStart < 1 ? 1 : scanStart); i <= (scanEnd > 255 ? 255 : scanEnd); i++) {
             Socket mySocket = null;
-            
+
             try {
                 String ipToScan = baseIpAddress + i;
                 LOG.debug("Scanning {}", ipToScan);
-                
+
                 mySocket = new Socket();
                 SocketAddress address = new InetSocketAddress(ipToScan, port);
                 mySocket.connect(address, timeout);
@@ -241,10 +241,10 @@ public final class PlayerTools {
      */
     private List<PlayerPath> getPathInfo(String addr, int port) {
         String url = buildUrl(addr, port, FILE_OP);
-        List<PlayerPath> paths = new ArrayList<PlayerPath>();
+        List<PlayerPath> paths = new ArrayList<>();
 
         try {
-            String response = HTTP.requestContent(url);
+            String response = HTTP.requestContent(url).getContent();
             if (StringUtils.isNotBlank(response)) {
                 DavidBoxWrapper wrapper = MAPPER.readValue(response, DavidBoxWrapper.class);
 
@@ -276,7 +276,7 @@ public final class PlayerTools {
         String url = buildUrl(addr, port, GET_DEV_NAME);
         String playerName = "UNKNOWN";
         try {
-            String response = HTTP.requestContent(url);
+            String response = HTTP.requestContent(url).getContent();
             if (StringUtils.isNotBlank(response)) {
                 DavidBoxWrapper wrapper = MAPPER.readValue(response, DavidBoxWrapper.class);
 

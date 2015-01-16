@@ -134,7 +134,7 @@ public class OfdbScanner implements IMovieScanner {
 
     private String getOfdbIdByImdbId(String imdbId) {
         try {
-            String xml = httpClient.requestContent("http://www.ofdb.de/view.php?page=suchergebnis&SText=" + imdbId + "&Kat=IMDb", charset);
+            String xml = httpClient.requestContent("http://www.ofdb.de/view.php?page=suchergebnis&SText=" + imdbId + "&Kat=IMDb", charset).getContent();
 
             int beginIndex = xml.indexOf("Ergebnis der Suchanfrage");
             if (beginIndex < 0) {
@@ -169,7 +169,7 @@ public class OfdbScanner implements IMovieScanner {
             sb.append(year);
             sb.append("&Wo=-&Land=-&Freigabe=-&Cut=A&Indiziert=A&Submit2=Suche+ausf%C3%BChren");
 
-            String xml = httpClient.requestContent(sb.toString(), charset);
+            String xml = httpClient.requestContent(sb.toString(), charset).getContent();
 
             int beginIndex = xml.indexOf("Liste der gefundenen Fassungen");
             if (beginIndex < 0) {
@@ -209,7 +209,7 @@ public class OfdbScanner implements IMovieScanner {
         ScanResult scanResult = ScanResult.OK;
 
         try {
-            String xml = httpClient.requestContent(ofdbUrl, charset);
+            String xml = httpClient.requestContent(ofdbUrl, charset).getContent();
 
             String title = HTMLTools.extractTag(xml, "<title>OFDb -", "</title>");
             // check for movie type change
@@ -238,7 +238,7 @@ public class OfdbScanner implements IMovieScanner {
             String plotMarker = HTMLTools.extractTag(xml, "<a href=\"plot/", 0, "\"");
             if (StringUtils.isNotBlank(plotMarker) && OverrideTools.checkOneOverwrite(videoData, SCANNER_ID, OverrideFlag.PLOT, OverrideFlag.OUTLINE)) {
                 try {
-                    String plotXml = httpClient.requestContent("http://www.ofdb.de/plot/" + plotMarker, charset);
+                    String plotXml = httpClient.requestContent("http://www.ofdb.de/plot/" + plotMarker, charset).getContent();
 
                     int firstindex = plotXml.indexOf("gelesen</b></b><br><br>") + 23;
                     int lastindex = plotXml.indexOf(HTML_FONT, firstindex);
@@ -262,7 +262,7 @@ public class OfdbScanner implements IMovieScanner {
             int beginIndex = xml.indexOf("view.php?page=film_detail");
             if (beginIndex != -1) {
                 String detailUrl = "http://www.ofdb.de/" + xml.substring(beginIndex, xml.indexOf('\"', beginIndex));
-                String detailXml = httpClient.requestContent(detailUrl, charset);
+                String detailXml = httpClient.requestContent(detailUrl, charset).getContent();
 
                 // resolve for additional informations
                 List<String> tags = HTMLTools.extractHtmlTags(detailXml, "<!-- Rechte Spalte -->", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
@@ -288,7 +288,7 @@ public class OfdbScanner implements IMovieScanner {
 
                     if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID) && tag.contains("Genre(s)")) {
                         List<String> scraped = HTMLTools.extractHtmlTags(tag, "class=\"Daten\"", "</td>", "<a", "</a>");
-                        HashSet<String> genreNames = new HashSet<String>();
+                        HashSet<String> genreNames = new HashSet<>();
                         for (String genre : scraped) {
                             genreNames.add(HTMLTools.removeHtmlTags(genre).trim());
                         }

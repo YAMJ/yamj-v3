@@ -96,12 +96,12 @@
             <groupId>org.pojava</groupId>
             <artifactId>pojava</artifactId>
             <version>3.0.2</version>
-        </dependency>    
+        </dependency>
         <dependency>
             <groupId>com.ibm.icu</groupId>
             <artifactId>icu4j</artifactId>
             <version>54.1.1</version>
-        </dependency>   
+        </dependency>
         <!--APACHE COMMONS-->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -155,12 +155,12 @@
         <dependency>
             <groupId>com.omertron</groupId>
             <artifactId>themoviedbapi</artifactId>
-            <version>3.10-SNAPSHOT</version>
+            <version>3.11-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.omertron</groupId>
             <artifactId>thetvdbapi</artifactId>
-            <version>1.7-SNAPSHOT</version>
+            <version>1.8-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.omertron</groupId>
@@ -170,12 +170,12 @@
         <dependency>
             <groupId>com.moviejukebox</groupId>
             <artifactId>allocine-api</artifactId>
-            <version>1.4-SNAPSHOT</version>
+            <version>1.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.yamj</groupId>
             <artifactId>api-common</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>1.3-SNAPSHOT</version>
         </dependency>
         <!--JACKSON JSON-->
         <dependency>

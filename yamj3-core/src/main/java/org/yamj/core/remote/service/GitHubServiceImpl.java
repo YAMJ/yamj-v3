@@ -84,7 +84,7 @@ public class GitHubServiceImpl implements GitHubService {
             URL newUrl = new URL(url.toString());
             httpGet.setURI(newUrl.toURI());
 
-            String jsonData = httpClient.requestContent(httpGet);
+            String jsonData = httpClient.requestContent(httpGet).getContent();
 
             // This is ugly and a bit of a hack, but I don't need to unmarshal the whole object just for a date.
             int posStart = jsonData.indexOf("pushed_at");
@@ -92,15 +92,7 @@ public class GitHubServiceImpl implements GitHubService {
             int posEnd = jsonData.indexOf('\"', posStart);
             returnDate = jsonData.substring(posStart, posEnd);
             LOG.info("Date: '{}'", returnDate);
-        } catch (IOException ex) {
-            LOG.warn("Unable to get GitHub information, error: {}", ex.getMessage());
-            LOG.warn(ClassTools.getStackTrace(ex));
-            return returnDate;
-        } catch (RuntimeException ex) {
-            LOG.warn("Unable to get GitHub information, error: {}", ex.getMessage());
-            LOG.warn(ClassTools.getStackTrace(ex));
-            return returnDate;
-        } catch (URISyntaxException ex) {
+        } catch (IOException | RuntimeException | URISyntaxException ex) {
             LOG.warn("Unable to get GitHub information, error: {}", ex.getMessage());
             LOG.warn(ClassTools.getStackTrace(ex));
             return returnDate;

@@ -46,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.yamj.api.common.http.DefaultPoolingHttpClient;
+import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.UserAgentSelector;
 import org.yamj.common.tools.PropertyTools;
 
@@ -53,8 +54,8 @@ public class PoolingHttpClient extends DefaultPoolingHttpClient implements Dispo
 
     private static final Logger LOG = LoggerFactory.getLogger(PoolingHttpClient.class);
     private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
-    private final Map<String, Integer> groupLimits = new HashMap<String, Integer>();
-    private final List<String> routedHosts = new ArrayList<String>();
+    private final Map<String, Integer> groupLimits = new HashMap<>();
+    private final List<String> routedHosts = new ArrayList<>();
 
     public PoolingHttpClient() {
         this(null, null);
@@ -99,14 +100,14 @@ public class PoolingHttpClient extends DefaultPoolingHttpClient implements Dispo
     }
 
     @Override
-    public String requestContent(HttpGet httpGet, Charset charset) throws IOException {
+    public DigestedResponse requestContent(HttpGet httpGet, Charset charset) throws IOException {
         // set route (if not set before)
         setRoute(httpGet);
 
         if (randomUserAgent) {
             httpGet.setHeader(HTTP.USER_AGENT, UserAgentSelector.randomUserAgent());
         }
-        
+
         try {
             HttpResponse response = execute(httpGet);
 
@@ -115,7 +116,7 @@ public class PoolingHttpClient extends DefaultPoolingHttpClient implements Dispo
                 httpGet.releaseConnection();
                 throw new RuntimeException("Unexpected status " + statusCode + " for uri " + httpGet.getURI());
             }
-            
+
             if (response.getEntity() == null) {
                 httpGet.releaseConnection();
                 throw new RuntimeException("No response for uri " + httpGet.getURI());
