@@ -34,9 +34,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.tools.web.HTMLTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
+import org.yamj.core.tools.web.ResponseTools;
 import org.yamj.core.tools.web.SearchEngineTools;
 
 @Service("imdbSearchEngine")
@@ -113,23 +115,27 @@ public class ImdbSearchEngine {
     public String getImdbPersonId(String personName, String movieId) {
         try {
             if (StringUtils.isNotBlank(movieId)) {
-                StringBuilder sb = new StringBuilder("http://www.imdb.com/");
-                sb.append("search/name?name=");
-                sb.append(URLEncoder.encode(personName, "UTF-8")).append("&role=").append(movieId);
+                StringBuilder sb = new StringBuilder("http://www.imdb.com/")
+                    .append("search/name?name=")
+                    .append(URLEncoder.encode(personName, "UTF-8"))
+                    .append("&role=")
+                    .append(movieId);
 
                 LOG.debug("Querying IMDB for '{}'", sb.toString());
-                String xml = httpClient.requestContent(sb.toString()).getContent();
-
-                // Check if this is an exact match (we got a person page instead of a results list)
-                Matcher personMatch = PERSON_REGEX.matcher(xml);
-                if (personMatch.find()) {
-                    LOG.debug("IMDb returned one match '{}'", personMatch.group(1));
-                    return personMatch.group(1);
-                }
-
-                String firstPersonId = HTMLTools.extractTag(HTMLTools.extractTag(xml, "<tr class=\"even detailed\">", "</tr>"), "<a href=\"/name/", HTML_SLASH_QUOTE);
-                if (StringUtils.isNotBlank(firstPersonId)) {
-                    return firstPersonId;
+                DigestedResponse response = httpClient.requestContent(sb.toString());
+                if (ResponseTools.isOK(response)) {
+                    
+                    // Check if this is an exact match (we got a person page instead of a results list)
+                    Matcher personMatch = PERSON_REGEX.matcher(response.getContent());
+                    if (personMatch.find()) {
+                        LOG.debug("IMDb returned one match '{}'", personMatch.group(1));
+                        return personMatch.group(1);
+                    }
+    
+                    String firstPersonId = HTMLTools.extractTag(HTMLTools.extractTag(response.getContent(), "<tr class=\"even detailed\">", "</tr>"), "<a href=\"/name/", HTML_SLASH_QUOTE);
+                    if (StringUtils.isNotBlank(firstPersonId)) {
+                        return firstPersonId;
+                    }
                 }
             }
 

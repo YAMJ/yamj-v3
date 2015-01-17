@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
@@ -46,6 +47,7 @@ import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.web.HTMLTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
+import org.yamj.core.tools.web.ResponseTools;
 import org.yamj.core.tools.web.SearchEngineTools;
 
 @Service("ofdbScanner")
@@ -134,8 +136,14 @@ public class OfdbScanner implements IMovieScanner {
 
     private String getOfdbIdByImdbId(String imdbId) {
         try {
-            String xml = httpClient.requestContent("http://www.ofdb.de/view.php?page=suchergebnis&SText=" + imdbId + "&Kat=IMDb", charset).getContent();
+            DigestedResponse response = httpClient.requestContent("http://www.ofdb.de/view.php?page=suchergebnis&SText=" + imdbId + "&Kat=IMDb", charset);
+            if (ResponseTools.isNotOK(response)) {
+                LOG.error("Can't find movie id for imdb id due response status {}: {}", response.getStatusCode(), imdbId);
+                return null;
+            }
 
+            final String xml = response.getContent();
+            
             int beginIndex = xml.indexOf("Ergebnis der Suchanfrage");
             if (beginIndex < 0) {
                 return null;
@@ -170,8 +178,15 @@ public class OfdbScanner implements IMovieScanner {
             sb.append(year);
             sb.append("&Wo=-&Land=-&Freigabe=-&Cut=A&Indiziert=A&Submit2=Suche+ausf%C3%BChren");
 
-            String xml = httpClient.requestContent(sb.toString(), charset).getContent();
+            
+            DigestedResponse response = httpClient.requestContent(sb.toString(), charset);
+            if (ResponseTools.isNotOK(response)) {
+                LOG.error("Can't find movie id by title and year due response status {}: '{}'-{}", response.getStatusCode(), title, year);
+                return null;
+            }
 
+            final String xml = response.getContent();
+            
             int beginIndex = xml.indexOf("Liste der gefundenen Fassungen");
             if (beginIndex < 0) {
                 return null;
@@ -211,7 +226,19 @@ public class OfdbScanner implements IMovieScanner {
         ScanResult scanResult = ScanResult.OK;
 
         try {
-            String xml = httpClient.requestContent(ofdbUrl, charset).getContent();
+            DigestedResponse response = httpClient.requestContent(ofdbUrl, charset);
+            if (ResponseTools.isNotOK(response)) {
+                // check retry
+                int maxRetries = this.configServiceWrapper.getIntProperty("ofdb.maxRetries.movie", 0);
+                if (videoData.getRetries() < maxRetries && ResponseTools.isTemporaryError(response)) {
+                    LOG.info("Temporary error accessing OFDb; retry later for {}", ofdbUrl);
+                    return ScanResult.RETRY;
+                }
+                LOG.error("Can't find movie data due response status {}: {}", response.getStatusCode(), ofdbUrl);
+                return ScanResult.ERROR;
+            }
+            
+            final String xml = response.getContent();
             
             String title = HTMLTools.extractTag(xml, "<title>OFDb -", "</title>");
             // check for movie type change
@@ -240,19 +267,32 @@ public class OfdbScanner implements IMovieScanner {
             String plotMarker = HTMLTools.extractTag(xml, "<a href=\"plot/", 0, "\"");
             if (StringUtils.isNotBlank(plotMarker) && OverrideTools.checkOneOverwrite(videoData, SCANNER_ID, OverrideFlag.PLOT, OverrideFlag.OUTLINE)) {
                 try {
-                    String plotXml = httpClient.requestContent("http://www.ofdb.de/plot/" + plotMarker, charset).getContent();
-
-                    int firstindex = plotXml.indexOf("gelesen</b></b><br><br>") + 23;
-                    int lastindex = plotXml.indexOf(HTML_FONT, firstindex);
-                    String plot = plotXml.substring(firstindex, lastindex);
-                    plot = plot.replaceAll("<br />", " ").trim();
-
-                    if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-                        videoData.setPlot(plot, SCANNER_ID);
-                    }
-
-                    if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-                        videoData.setOutline(plot, SCANNER_ID);
+                    response = httpClient.requestContent("http://www.ofdb.de/plot/" + plotMarker, charset);
+                    if (ResponseTools.isNotOK(response)) {
+                        // check retry
+                        int maxRetries = this.configServiceWrapper.getIntProperty("ofdb.maxRetries.movie", 0);
+                        if (videoData.getRetries() < maxRetries && ResponseTools.isTemporaryError(response)) {
+                            LOG.info("Temporary error accessing OFDb; retry later for {}", ofdbUrl);
+                            scanResult = ScanResult.RETRY;
+                        } else {
+                            LOG.error("Can't find movie plot due response status {}: {}", response.getStatusCode(), ofdbUrl);
+                            scanResult = ScanResult.ERROR;
+                        }
+                    } else {
+                        int firstindex = response.getContent().indexOf("gelesen</b></b><br><br>") + 23;
+                        int lastindex = response.getContent().indexOf(HTML_FONT, firstindex);
+                        String plot = response.getContent()
+                                              .substring(firstindex, lastindex)
+                                              .replaceAll("<br />", " ")
+                                              .trim();
+    
+                        if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
+                            videoData.setPlot(plot, SCANNER_ID);
+                        }
+    
+                        if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
+                            videoData.setOutline(plot, SCANNER_ID);
+                        }
                     }
                 } catch (IOException ex) {
                     LOG.error("Failed retrieving plot '{}': {}", ofdbUrl, ex.getMessage());
@@ -265,8 +305,20 @@ public class OfdbScanner implements IMovieScanner {
             int beginIndex = xml.indexOf("view.php?page=film_detail");
             if (beginIndex != -1) {
                 String detailUrl = "http://www.ofdb.de/" + xml.substring(beginIndex, xml.indexOf('\"', beginIndex));
-                String detailXml = httpClient.requestContent(detailUrl, charset).getContent();
+                response = httpClient.requestContent(detailUrl, charset);
+                if (ResponseTools.isNotOK(response)) {
+                    // check retry
+                    int maxRetries = this.configServiceWrapper.getIntProperty("ofdb.maxRetries.movie", 0);
+                    if (videoData.getRetries() < maxRetries && ResponseTools.isTemporaryError(response)) {
+                        LOG.info("Temporary error accessing OFDb; retry later for {}", ofdbUrl);
+                        return ScanResult.RETRY;
+                    }
+                    LOG.error("Can't find movie details due response status {}: {}", response.getStatusCode(), ofdbUrl);
+                    return ScanResult.ERROR;
+                }
 
+                final String detailXml = response.getContent();
+                
                 // resolve for additional informations
                 List<String> tags = HTMLTools.extractHtmlTags(detailXml, "<!-- Rechte Spalte -->", HTML_TABLE_END, HTML_TR_START, HTML_TR_END);
 
@@ -330,7 +382,7 @@ public class OfdbScanner implements IMovieScanner {
                 }
             }
         } catch (IOException ex) {
-            LOG.error("Failed retrieving meta data '{}': {}", ofdbUrl, ex.getMessage());
+            LOG.error("Failed retrieving movie data '{}': {}", ofdbUrl, ex.getMessage());
             LOG.trace("Scanner error", ex);
             scanResult = ScanResult.ERROR;
         }

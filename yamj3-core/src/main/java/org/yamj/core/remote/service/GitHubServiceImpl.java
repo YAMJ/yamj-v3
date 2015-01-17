@@ -33,10 +33,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.common.remote.service.GitHubService;
 import org.yamj.common.tools.ClassTools;
 import org.yamj.common.tools.DateTimeTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
+import org.yamj.core.tools.web.ResponseTools;
 
 /**
  * Calls GitHub to determine the last code update
@@ -84,16 +86,21 @@ public class GitHubServiceImpl implements GitHubService {
             URL newUrl = new URL(url.toString());
             httpGet.setURI(newUrl.toURI());
 
-            String jsonData = httpClient.requestContent(httpGet).getContent();
+            DigestedResponse response = httpClient.requestContent(httpGet);
+            if (ResponseTools.isNotOK(response)) {
+                LOG.error("Error accessing GitHub informations, response with status {}", response.getStatusCode());
+                return returnDate;
+            }
 
-            // This is ugly and a bit of a hack, but I don't need to unmarshal the whole object just for a date.
+            // This is ugly and a bit of a hack, but I don't need to unmarshal the whole object just for a date
+            String jsonData = response.getContent();
             int posStart = jsonData.indexOf("pushed_at");
             posStart = jsonData.indexOf("20", posStart);
             int posEnd = jsonData.indexOf('\"', posStart);
             returnDate = jsonData.substring(posStart, posEnd);
             LOG.info("Date: '{}'", returnDate);
         } catch (IOException | RuntimeException | URISyntaxException ex) {
-            LOG.warn("Unable to get GitHub information, error: {}", ex.getMessage());
+            LOG.error("Unable to get GitHub information, error: {}", ex.getMessage());
             LOG.warn(ClassTools.getStackTrace(ex));
             return returnDate;
         }

@@ -33,17 +33,18 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.CommonHttpClient;
 import org.yamj.api.common.http.DefaultPoolingHttpClient;
+import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.tools.player.davidbox.DavidBoxPlayerPath;
 import org.yamj.core.tools.player.davidbox.DavidBoxWrapper;
+import org.yamj.core.tools.web.ResponseTools;
 
 /**
  * Functions for finding information on players
@@ -220,9 +221,9 @@ public final class PlayerTools {
         List<PlayerPath> paths = new ArrayList<>();
 
         try {
-            String response = HTTP.requestContent(url).getContent();
-            if (StringUtils.isNotBlank(response)) {
-                DavidBoxWrapper wrapper = MAPPER.readValue(response, DavidBoxWrapper.class);
+            DigestedResponse response = HTTP.requestContent(url);
+            if (ResponseTools.isOK(response)) {
+                DavidBoxWrapper wrapper = MAPPER.readValue(response.getContent(), DavidBoxWrapper.class);
 
                 if (wrapper.getResponse().getFileList() != null) {
                     for (DavidBoxPlayerPath db : wrapper.getResponse().getFileList()) {
@@ -236,7 +237,7 @@ public final class PlayerTools {
                 }
             }
         } catch (IOException ex) {
-            LOG.trace("IOException: {}", ex.getMessage());
+            LOG.trace("Error getting path info", ex);
         }
         return paths;
     }
@@ -252,9 +253,9 @@ public final class PlayerTools {
         String url = buildUrl(addr, port, GET_DEV_NAME);
         String playerName = "UNKNOWN";
         try {
-            String response = HTTP.requestContent(url).getContent();
-            if (StringUtils.isNotBlank(response)) {
-                DavidBoxWrapper wrapper = MAPPER.readValue(response, DavidBoxWrapper.class);
+            DigestedResponse response = HTTP.requestContent(url);
+            if (ResponseTools.isOK(response)) {
+                DavidBoxWrapper wrapper = MAPPER.readValue(response.getContent(), DavidBoxWrapper.class);
 
                 if (wrapper.getResponse() != null) {
                     playerName = wrapper.getResponse().getName();
@@ -262,7 +263,7 @@ public final class PlayerTools {
                 }
             }
         } catch (IOException ex) {
-            LOG.trace("IOException: {}", ex.getMessage());
+            LOG.trace("Error getting player name", ex);
         }
         return playerName;
     }

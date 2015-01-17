@@ -33,6 +33,7 @@ import org.apache.http.protocol.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.CommonHttpClient;
+import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.common.tools.PropertyTools;
 
 public class SearchEngineTools {
@@ -160,10 +161,10 @@ public class SearchEngineTools {
         return searchSites.size();
     }
 
-    private String requestContent(CharSequence cs) throws IOException {
+    private DigestedResponse requestContent(CharSequence cs) throws IOException {
         HttpGet httpGet = new HttpGet(cs.toString());
         httpGet.setHeader(HTTP.USER_AGENT, "Mozilla/6.0 (Windows NT 6.2; WOW64; rv:16.0.1) Gecko/20121011 Firefox/16.0.1");
-        return httpClient.requestContent(httpGet, charset).getContent();
+        return httpClient.requestContent(httpGet, charset);
     }
 
     public String searchUrlOnGoogle(String title, int year, String site, String additional) {
@@ -192,8 +193,13 @@ public class SearchEngineTools {
             sb.append("&as_sitesearch=");
             sb.append(site);
 
-            String xml = this.requestContent(sb);
+            DigestedResponse response = this.requestContent(sb);
+            if (ResponseTools.isNotOK(response)) {
+                LOG.warn("Google search failed with status {}: {}", response.getStatusCode(), sb);
+                return null;
+            }
 
+            String xml = response.getContent();
             int beginIndex = xml.indexOf(HTTP_LITERAL + site + searchSuffix);
             if (beginIndex != -1) {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
@@ -229,9 +235,13 @@ public class SearchEngineTools {
                 sb.append(URLEncoder.encode(additional, UTF8));
             }
 
-            String xml = this.requestContent(sb);
+            DigestedResponse response = this.requestContent(sb);
+            if (ResponseTools.isNotOK(response)) {
+                LOG.warn("Yahoo search failed with status {}: {}", response.getStatusCode(), sb);
+                return null;
+            }
 
-            String link = HTMLTools.extractTag(xml, "<span class=\"url\"", "</span>");
+            String link = HTMLTools.extractTag(response.getContent(), "<span class=\"url\"", "</span>");
             link = HTMLTools.removeHtmlTags(link);
             int beginIndex = link.indexOf(site + searchSuffix);
             if (beginIndex != -1) {
@@ -274,8 +284,13 @@ public class SearchEngineTools {
                 sb.append("&filt=rf");
             }
 
-            String xml = this.requestContent(sb);
+            DigestedResponse response = this.requestContent(sb);
+            if (ResponseTools.isNotOK(response)) {
+                LOG.warn("Bing search failed with status {}: {}", response.getStatusCode(), sb);
+                return null;
+            }
 
+            String xml = response.getContent();
             int beginIndex = xml.indexOf(HTTP_LITERAL + site + searchSuffix);
             if (beginIndex != -1) {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));
@@ -306,8 +321,13 @@ public class SearchEngineTools {
                 sb.append(URLEncoder.encode(additional, UTF8));
             }
 
-            String xml = this.requestContent(sb);
+            DigestedResponse response = this.requestContent(sb);
+            if (ResponseTools.isNotOK(response)) {
+                LOG.warn("Bing search failed with status {}: {}", response.getStatusCode(), sb);
+                return null;
+            }
 
+            String xml = response.getContent();
             int beginIndex = xml.indexOf(HTTP_LITERAL + site + searchSuffix);
             if (beginIndex != -1) {
                 return xml.substring(beginIndex, xml.indexOf("\"", beginIndex));

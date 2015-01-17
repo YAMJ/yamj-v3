@@ -31,9 +31,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.tools.web.PoolingHttpClient;
+import org.yamj.core.tools.web.ResponseTools;
 
 @Service("yahooPosterScanner")
 public class YahooPosterScanner extends AbstractMoviePosterScanner {
@@ -72,23 +74,24 @@ public class YahooPosterScanner extends AbstractMoviePosterScanner {
             sb.append(URLEncoder.encode(title, "UTF-8"));
             sb.append("+poster&fr=&ei=utf-8&js=1&x=wrt");
 
-            String xml = httpClient.requestContent(sb.toString()).getContent();
-
-            // TODO scan more posters at once
-            int beginIndex = xml.indexOf("imgurl=");
-            if (beginIndex > 0) {
-                int endIndex = xml.indexOf("rurl=", beginIndex);
-                if (endIndex > 0) {
-                    String url = URLDecoder.decode(xml.substring(beginIndex + 7, endIndex - 1), "UTF-8");
-                    dtos.add(new ArtworkDetailDTO(getScannerName(), url));
-                } else {
-                    String url = URLDecoder.decode(xml.substring(beginIndex + 7), "UTF-8");
-                    dtos.add(new ArtworkDetailDTO(getScannerName(), url));
+            DigestedResponse response = httpClient.requestContent(sb.toString());
+            if (ResponseTools.isOK(response)) {
+                // TODO scan more posters at once
+                int beginIndex = response.getContent().indexOf("imgurl=");
+                if (beginIndex > 0) {
+                    int endIndex = response.getContent().indexOf("rurl=", beginIndex);
+                    if (endIndex > 0) {
+                        String url = URLDecoder.decode(response.getContent().substring(beginIndex + 7, endIndex - 1), "UTF-8");
+                        dtos.add(new ArtworkDetailDTO(getScannerName(), url));
+                    } else {
+                        String url = URLDecoder.decode(response.getContent().substring(beginIndex + 7), "UTF-8");
+                        dtos.add(new ArtworkDetailDTO(getScannerName(), url));
+                    }
                 }
             }
-        } catch (Exception error) {
-            LOG.error("Failed retrieving poster URL from yahoo images : {}", title);
-            LOG.warn("Scanner error", error);
+        } catch (Exception ex) {
+            LOG.error("Failed retrieving poster URL from yahoo images '{}': {}", title, ex.getMessage());
+            LOG.trace("Scanner error", ex);
         }
 
         return dtos;

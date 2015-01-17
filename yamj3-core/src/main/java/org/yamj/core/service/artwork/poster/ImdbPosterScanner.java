@@ -30,12 +30,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.artwork.ArtworkTools.HashCodeType;
 import org.yamj.core.service.metadata.online.imdb.ImdbScanner;
 import org.yamj.core.service.metadata.online.imdb.ImdbSearchEngine;
 import org.yamj.core.tools.web.PoolingHttpClient;
+import org.yamj.core.tools.web.ResponseTools;
 
 @Service("imdbPosterScanner")
 public class ImdbPosterScanner extends AbstractMoviePosterScanner {
@@ -81,21 +83,22 @@ public class ImdbPosterScanner extends AbstractMoviePosterScanner {
         }
 
         try {
-            String xml = this.httpClient.requestContent("http://www.imdb.com/title/" + id).getContent();
-
-            String metaImageString = "<meta property='og:image' content=\"";
-            int beginIndex = xml.indexOf(metaImageString);
-            if (beginIndex > 0) {
-                beginIndex = beginIndex + metaImageString.length();
-                int endIndex =  xml.indexOf("\"", beginIndex);
-                if (endIndex > 0) {
-                    String url = xml.substring(beginIndex, endIndex);
-                    dtos.add(new ArtworkDetailDTO(getScannerName(), url, HashCodeType.PART));
+            DigestedResponse response = this.httpClient.requestContent("http://www.imdb.com/title/" + id);
+            if (ResponseTools.isOK(response)) {
+                String metaImageString = "<meta property='og:image' content=\"";
+                int beginIndex = response.getContent().indexOf(metaImageString);
+                if (beginIndex > 0) {
+                    beginIndex = beginIndex + metaImageString.length();
+                    int endIndex =  response.getContent().indexOf("\"", beginIndex);
+                    if (endIndex > 0) {
+                        String url = response.getContent().substring(beginIndex, endIndex);
+                        dtos.add(new ArtworkDetailDTO(getScannerName(), url, HashCodeType.PART));
+                    }
                 }
             }
-        } catch (Exception error) {
-            LOG.error("Failed retrieving poster URL from imdb images: {}", id);
-            LOG.warn("Scanner error", error);
+        } catch (Exception ex) {
+            LOG.error("Failed retrieving poster URL from imdb images for id {}: {}", id, ex.getMessage());
+            LOG.trace("Scanner error", ex);
         }
 
         return dtos;
