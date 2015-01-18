@@ -68,7 +68,7 @@ public class ApplicationContextProvider implements ApplicationContextAware {
      * @param beanName
      * @return
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings("unchecked")
     public static <T> T getBean(String beanName) throws BeansException {
         return (T) applicationContext.getBean(beanName);
     }

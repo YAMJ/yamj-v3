@@ -22,6 +22,10 @@
  */
 package org.yamj.filescanner;
 
+import static org.yamj.common.type.ExitType.CMDLINE_ERROR;
+import static org.yamj.common.type.ExitType.CONFIG_ERROR;
+import static org.yamj.common.type.ExitType.SUCCESS;
+
 import java.io.File;
 import java.io.IOException;
 import org.apache.log4j.PropertyConfigurator;
@@ -35,9 +39,6 @@ import org.yamj.common.cmdline.CmdLineParser;
 import org.yamj.common.model.YamjInfo;
 import org.yamj.common.tools.ClassTools;
 import org.yamj.common.type.ExitType;
-import static org.yamj.common.type.ExitType.CMDLINE_ERROR;
-import static org.yamj.common.type.ExitType.CONFIG_ERROR;
-import static org.yamj.common.type.ExitType.SUCCESS;
 
 public final class FileScanner {
 
@@ -105,24 +106,13 @@ public final class FileScanner {
 
     private ExitType execute(CmdLineParser parser) {
         ExitType status;
-        ClassPathXmlApplicationContext applicationContext = null;
 
-        try {
-            applicationContext = new ClassPathXmlApplicationContext("yamj3-filescanner.xml");
+        try (ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("yamj3-filescanner.xml")) {
             ScannerManagement scannerManagement = (ScannerManagement) applicationContext.getBean("scannerManagement");
-
             status = scannerManagement.runScanner(parser);
         } catch (BeansException ex) {
             LOG.error("Failed to load scanner configuration", ex);
             status = CONFIG_ERROR;
-        } finally {
-            if (applicationContext != null) {
-                try {
-                    applicationContext.close();
-                } catch (Exception ex) {
-                    LOG.trace("No application context to close", ex);
-                }
-            }
         }
         return status;
     }
