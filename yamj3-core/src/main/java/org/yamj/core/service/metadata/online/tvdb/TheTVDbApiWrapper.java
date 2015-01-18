@@ -23,6 +23,7 @@
 package org.yamj.core.service.metadata.online.tvdb;
 
 import com.omertron.thetvdbapi.TheTVDBApi;
+import com.omertron.thetvdbapi.TvDbException;
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Banners;
 import com.omertron.thetvdbapi.model.Episode;
@@ -34,6 +35,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigService;
@@ -42,16 +45,19 @@ import org.yamj.core.tools.LRUTimedCache;
 @Service("tvdbApiWrapper")
 public class TheTVDbApiWrapper {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TheTVDbApiWrapper.class);
+    private static final String LOG_ERROR = "Failed to get {}, error: {} - {}";
+    private static final String LOG_ERROR_LANG = "Failed to get {} (Lang: {}), error: {} - {}";
     private static final int YEAR_MIN = 1900;
     private static final int YEAR_MAX = 2050;
     private final Lock seriesLock = new ReentrantLock(true);
     private final Lock bannersLock = new ReentrantLock(true);
     // make maximal 20 banners objects maximal 30 minutes accessible
-    private final LRUTimedCache<String, Banners> bannersCache = new LRUTimedCache<String, Banners>(20, 1800);
+    private final LRUTimedCache<String, Banners> bannersCache = new LRUTimedCache<>(20, 1800);
     // make maximal 50 series objects maximal 30 minutes accessible
-    private final LRUTimedCache<String, Series> seriesCache = new LRUTimedCache<String, Series>(50, 1800);
+    private final LRUTimedCache<String, Series> seriesCache = new LRUTimedCache<>(50, 1800);
     // make maximal 30 episode lists maximal 30 minutes accessible
-    private final LRUTimedCache<String, List<Episode>> episodesCache = new LRUTimedCache<String, List<Episode>>(30, 1800);
+    private final LRUTimedCache<String, List<Episode>> episodesCache = new LRUTimedCache<>(30, 1800);
 
     @Autowired
     private ConfigService configService;
@@ -70,6 +76,8 @@ public class TheTVDbApiWrapper {
                     banners = tvdbApi.getBanners(id);
                     bannersCache.put(id, banners);
                 }
+            } catch (TvDbException ex) {
+                LOG.warn(LOG_ERROR, "banners", ex.getExceptionType(), ex.getResponse(), ex);
             } finally {
                 bannersLock.unlock();
             }
@@ -90,7 +98,7 @@ public class TheTVDbApiWrapper {
             try {
                 String defaultLanguage = configService.getProperty("thetvdb.language", "en");
                 String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
-                
+
                 // second try cause meanwhile the cache could have been filled
                 series = seriesCache.get(id);
                 if (series == null) {
@@ -106,6 +114,8 @@ public class TheTVDbApiWrapper {
                     }
                     seriesCache.put(id, series);
                 }
+            } catch (TvDbException ex) {
+                LOG.warn(LOG_ERROR, "series", ex.getExceptionType(), ex.getResponse(), ex);
             } finally {
                 seriesLock.unlock();
             }
@@ -127,12 +137,22 @@ public class TheTVDbApiWrapper {
             try {
                 String defaultLanguage = configService.getProperty("thetvdb.language", "en");
                 String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
-                
+
                 boolean usedDefault = true;
-                List<Series> seriesList = tvdbApi.searchSeries(title, defaultLanguage);
+                List<Series> seriesList = null;
+                try {
+                    seriesList = tvdbApi.searchSeries(title, defaultLanguage);
+                } catch (TvDbException ex) {
+                    LOG.warn(LOG_ERROR_LANG, "Series", defaultLanguage, ex.getExceptionType(), ex.getResponse(), ex);
+                }
+
                 if (CollectionUtils.isEmpty(seriesList) && StringUtils.isNotBlank(altLanguage)) {
-                    seriesList = tvdbApi.searchSeries(title, altLanguage);
-                    usedDefault = false;
+                    try {
+                        seriesList = tvdbApi.searchSeries(title, altLanguage);
+                        usedDefault = false;
+                    } catch (TvDbException ex) {
+                        LOG.warn(LOG_ERROR_LANG, "Series", altLanguage, ex.getExceptionType(), ex.getResponse(), ex);
+                    }
                 }
 
                 if (CollectionUtils.isNotEmpty(seriesList)) {
@@ -153,8 +173,12 @@ public class TheTVDbApiWrapper {
 
                     if (series != null) {
                         id = series.getId();
-                        Series saved = tvdbApi.getSeries(id, (usedDefault ? defaultLanguage : altLanguage));
-                        this.seriesCache.put(id, saved);
+                        try {
+                            Series saved = tvdbApi.getSeries(id, usedDefault ? defaultLanguage : altLanguage);
+                            this.seriesCache.put(id, saved);
+                        } catch (TvDbException ex) {
+                            LOG.warn(LOG_ERROR_LANG, "Series", usedDefault ? defaultLanguage : altLanguage, ex.getExceptionType(), ex.getResponse(), ex);
+                        }
                     }
                 }
             } finally {
@@ -165,20 +189,35 @@ public class TheTVDbApiWrapper {
     }
 
     public List<Actor> getActors(String id) {
-        return tvdbApi.getActors(id);
+        List<Actor> actors = Collections.emptyList();
+        try {
+            actors = tvdbApi.getActors(id);
+        } catch (TvDbException ex) {
+            LOG.warn(LOG_ERROR, "actors", ex.getExceptionType(), ex.getResponse(), ex);
+        }
+        return actors;
     }
 
     public List<Episode> getSeasonEpisodes(String id, int season) {
         String key = (id + "###" + season);
 
         List<Episode> episodeList = this.episodesCache.get(key);
-        if (episodeList == null) {
+        if (episodeList == null || episodeList.isEmpty()) {
             String defaultLanguage = configService.getProperty("thetvdb.language", "en");
             String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
-            
-            episodeList = tvdbApi.getSeasonEpisodes(id, season, defaultLanguage);
+
+            try {
+                episodeList = tvdbApi.getSeasonEpisodes(id, season, defaultLanguage);
+            } catch (TvDbException ex) {
+                LOG.warn(LOG_ERROR_LANG, "Season Episodes", defaultLanguage, ex.getExceptionType(), ex.getResponse(), ex);
+            }
+
             if (CollectionUtils.isEmpty(episodeList) && StringUtils.isNotBlank(altLanguage)) {
-                episodeList = tvdbApi.getSeasonEpisodes(id, season, altLanguage);
+                try {
+                    episodeList = tvdbApi.getSeasonEpisodes(id, season, altLanguage);
+                } catch (TvDbException ex) {
+                    LOG.warn(LOG_ERROR_LANG, "Season Episodes", altLanguage, ex.getExceptionType(), ex.getResponse(), ex);
+                }
             }
             if (episodeList == null) {
                 episodeList = Collections.emptyList();
