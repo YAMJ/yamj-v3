@@ -48,7 +48,7 @@ public class PersonController {
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperSingle<ApiPersonDTO> getPersonById(@ModelAttribute("options") OptionsId options) {
-        ApiWrapperSingle<ApiPersonDTO> wrapper = new ApiWrapperSingle<ApiPersonDTO>();
+        ApiWrapperSingle<ApiPersonDTO> wrapper = new ApiWrapperSingle<>();
         if (options.getId() > 0) {
             LOG.info("Getting person with ID '{}'", options.getId());
             wrapper.setOptions(options);
@@ -86,7 +86,7 @@ public class PersonController {
     }
 
     private ApiWrapperList<ApiPersonDTO> getPersonListByVideo(MetaDataType metaDataType, OptionsId options) {
-        ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<ApiPersonDTO>();
+        ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<>();
 
         if (options.getId() > 0L) {
             LOG.info("Getting person list for {} with ID '{}'", metaDataType, options.getId());

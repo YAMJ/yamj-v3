@@ -22,14 +22,8 @@
  */
 package org.yamj.core.service.mediaimport;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -46,17 +40,7 @@ import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.MediaDao;
 import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.dao.StagingDao;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.Library;
-import org.yamj.core.database.model.MediaFile;
-import org.yamj.core.database.model.NfoRelation;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.StageDirectory;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.Subtitle;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.service.CommonStorageService;
@@ -412,7 +396,7 @@ public class MediaImportService {
         }
 
         // holds the found NFO files with priority
-        Map<StageFile, Integer> nfoFiles = new HashMap<StageFile, Integer>();
+        Map<StageFile, Integer> nfoFiles = new HashMap<>();
 
         // search name is the base name of the stage file
         String searchName = stageFile.getBaseName();
@@ -663,7 +647,7 @@ public class MediaImportService {
     }
 
     private Map<VideoData, Integer> findVideoFilesForNFO(StageFile stageFile) {
-        Map<VideoData, Integer> videoFiles = new HashMap<VideoData, Integer>();
+        Map<VideoData, Integer> videoFiles = new HashMap<>();
         List<VideoData> videoDatas = null;
 
         String nfoFolderName = PropertyTools.getProperty("yamj3.folder.name.nfo");
@@ -696,7 +680,7 @@ public class MediaImportService {
             }
 
             // filter out BluRay and DVD folders from child directories
-            List<StageDirectory> blurayOrDvdFolders = new ArrayList<StageDirectory>();
+            List<StageDirectory> blurayOrDvdFolders = new ArrayList<>();
             for (StageDirectory directory : childDirectories) {
                 if (this.isBlurayOrDvdFolder(directory)) {
                     blurayOrDvdFolders.add(directory);

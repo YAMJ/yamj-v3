@@ -38,7 +38,7 @@ public class ConfigService {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigService.class);
     private static final String DEFAULT_SPLITTER = ",";
     
-    private Map<String, String> cachedProperties = new HashMap<String, String>();
+    private Map<String, String> cachedProperties = new HashMap<>();
 
     @Autowired
     private ConfigDao configDao;

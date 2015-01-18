@@ -22,11 +22,7 @@
  */
 package org.yamj.core.api.model.builder;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -51,7 +47,7 @@ public class IndexParams {
     private final Map<String, String> includes;
     private final Map<String, String> excludes;
     private final List<DataItem> dataItems;
-    private final Map<String, Object> parameters = new HashMap<String, Object>();
+    private final Map<String, Object> parameters = new HashMap<>();
 
     private int certificationId = -1;
     private String year;

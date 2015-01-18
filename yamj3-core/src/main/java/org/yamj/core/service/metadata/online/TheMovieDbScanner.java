@@ -239,7 +239,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
 
         if (CollectionUtils.isNotEmpty(moviedb.getGenres())) {
             if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
-                Set<String> genreNames = new HashSet<String>();
+                Set<String> genreNames = new HashSet<>();
                 for (com.omertron.themoviedbapi.model.Genre genre : moviedb.getGenres()) {
                     if (StringUtils.isNotBlank(genre.getName())) {
                         genreNames.add(StringUtils.trim(genre.getName()));
@@ -251,7 +251,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
 
         if (CollectionUtils.isNotEmpty(moviedb.getProductionCompanies())) {
             if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
-                Set<String> studioNames = new HashSet<String>();
+                Set<String> studioNames = new HashSet<>();
                 for (ProductionCompany company : moviedb.getProductionCompanies()) {
                     if (StringUtils.isNotBlank(company.getName())) {
                         studioNames.add(StringUtils.trim(company.getName()));
@@ -317,15 +317,14 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
                     id = String.valueOf(person.getId());
                     foundPerson = Boolean.TRUE;
                     break;
-                } else {
-                    LOG.trace("{}: Checking against '{}'", name, person.getName());
-                    int lhDistance = StringUtils.getLevenshteinDistance(name, person.getName());
-                    LOG.trace("{}: Current closest match is {}, this match is {}", name, closestMatch, lhDistance);
-                    if (lhDistance < closestMatch) {
-                        LOG.trace("{}: TMDB ID {} is a better match ", name, person.getId());
-                        closestMatch = lhDistance;
-                        closestPerson = person;
-                    }
+                }
+                LOG.trace("{}: Checking against '{}'", name, person.getName());
+                int lhDistance = StringUtils.getLevenshteinDistance(name, person.getName());
+                LOG.trace("{}: Current closest match is {}, this match is {}", name, closestMatch, lhDistance);
+                if (lhDistance < closestMatch) {
+                    LOG.trace("{}: TMDB ID {} is a better match ", name, person.getId());
+                    closestMatch = lhDistance;
+                    closestPerson = person;
                 }
             }
 
@@ -446,7 +445,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         try {
             TmdbResultsList<PersonCredit> credits = this.tmdbApi.getPersonCredits(Integer.parseInt(id));
             
-            Set<FilmParticipation> newFilmography = new HashSet<FilmParticipation>();
+            Set<FilmParticipation> newFilmography = new HashSet<>();
             for (PersonCredit credit : credits.getResults()) {
                 JobType jobType = this.retrieveJobType(credit.getPersonType(), credit.getDepartment());
                 if (jobType == null) {

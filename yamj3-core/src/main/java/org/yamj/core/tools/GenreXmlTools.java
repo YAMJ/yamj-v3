@@ -43,7 +43,7 @@ public class GenreXmlTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(GenreXmlTools.class);
 
-    private static final Map<String,String> GENRES_MAP = new HashMap<String,String>();
+    private static final Map<String,String> GENRES_MAP = new HashMap<>();
 
     @Autowired
     private CommonStorageService commonStorageService;

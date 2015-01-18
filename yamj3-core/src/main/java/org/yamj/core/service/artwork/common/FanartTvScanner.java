@@ -82,7 +82,7 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
 
     @Override
     public List<ArtworkDetailDTO> getPosters(String id) {
-        List<ArtworkDetailDTO> artwork = new ArrayList<ArtworkDetailDTO>();
+        List<ArtworkDetailDTO> artwork = new ArrayList<>();
         try {
             List<FanartTvArtwork> ftartwork;
             if (StringUtils.isNumeric(id)) {

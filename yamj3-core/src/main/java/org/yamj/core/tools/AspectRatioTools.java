@@ -38,7 +38,7 @@ import org.yamj.core.configuration.ConfigService;
 public class AspectRatioTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(AspectRatioTools.class);
-    private final List<AspectRatio> aspectList = new ArrayList<AspectRatio>();
+    private final List<AspectRatio> aspectList = new ArrayList<>();
     private DecimalFormatSymbols symbols = new DecimalFormatSymbols();
 
     @Autowired

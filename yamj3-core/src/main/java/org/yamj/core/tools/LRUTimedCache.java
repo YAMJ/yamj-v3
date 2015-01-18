@@ -59,9 +59,8 @@ public class LRUTimedCache<K,V> {
     
     public LRUTimedCache(final int maxSize, final int defaultTimeout) {
         this.timeoutInMs = (defaultTimeout * 1000);
-        this.internal = (Map<K, CachedObject>) Collections.synchronizedMap(new LinkedHashMap<K, CachedObject>(maxSize + 1, .75F, true) {
+        this.internal = Collections.synchronizedMap(new LinkedHashMap<K, CachedObject>(maxSize + 1, .75F, true) {
             private static final long serialVersionUID = 4464242524720551192L;
-
             @Override
             protected boolean removeEldestEntry(Map.Entry<K, CachedObject> entry)
             {

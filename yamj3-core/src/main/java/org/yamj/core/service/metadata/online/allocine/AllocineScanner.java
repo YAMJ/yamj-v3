@@ -513,7 +513,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
     }
 
     private Set<CreditDTO> parseCredits(List<CastMember> castMembers) {
-        Set<CreditDTO> result = new LinkedHashSet<CreditDTO>();
+        Set<CreditDTO> result = new LinkedHashSet<>();
 
         if (CollectionUtils.isNotEmpty(castMembers)) {
             for (CastMember member: castMembers) {
@@ -647,7 +647,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
             return ScanResult.ERROR;
         }
     
-        Set<FilmParticipation> newFilmography = new HashSet<FilmParticipation>();
+        Set<FilmParticipation> newFilmography = new HashSet<>();
         for (Participance participance : filmographyInfos.getParticipances()) {
             FilmParticipation filmo = new FilmParticipation();
             filmo.setSourceDb(SCANNER_ID);

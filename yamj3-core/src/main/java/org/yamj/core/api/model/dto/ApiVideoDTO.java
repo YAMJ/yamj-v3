@@ -56,13 +56,13 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private Long episode;
     private Boolean watched;
     private Date newest;
-    private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
-    private List<Studio> studios = new ArrayList<Studio>();
-    private List<Certification> certifications = new ArrayList<Certification>();
-    private List<ApiRatingDTO> ratings = new ArrayList<ApiRatingDTO>();
-    private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
-    private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
-    private final Map<JobType,List<ApiPersonDTO>> cast = new EnumMap<JobType,List<ApiPersonDTO>>(JobType.class);
+    private List<ApiGenreDTO> genres = new ArrayList<>();
+    private List<Studio> studios = new ArrayList<>();
+    private List<Certification> certifications = new ArrayList<>();
+    private List<ApiRatingDTO> ratings = new ArrayList<>();
+    private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<>(ArtworkType.class);
+    private List<ApiFileDTO> files = new ArrayList<>();
+    private final Map<JobType,List<ApiPersonDTO>> cast = new EnumMap<>(JobType.class);
                     
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public MetaDataType getVideoType() {

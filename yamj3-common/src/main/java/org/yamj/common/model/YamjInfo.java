@@ -100,7 +100,7 @@ public class YamjInfo {
         this.startUpDateTime = new DateTime(ManagementFactory.getRuntimeMXBean().getStartTime());
 
         // Counts
-        this.counts = new EnumMap<MetaDataType, Long>(MetaDataType.class);
+        this.counts = new EnumMap<>(MetaDataType.class);
 
         // IP Address
         this.coreIp = SystemTools.getIpAddress(Boolean.TRUE);

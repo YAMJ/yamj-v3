@@ -126,7 +126,7 @@ public class TheMovieDbArtworkScanner implements
      * @return
      */
     private List<ArtworkDetailDTO> getFilteredArtwork(String id, String language, ArtworkType artworkType, String artworkSize) {
-        List<ArtworkDetailDTO> dtos = new ArrayList<ArtworkDetailDTO>();
+        List<ArtworkDetailDTO> dtos = new ArrayList<>();
         if (StringUtils.isNumeric(id)) {
             int tmdbId = Integer.parseInt(id);
             try {
@@ -294,9 +294,8 @@ public class TheMovieDbArtworkScanner implements
 
         if (StringUtils.isNotBlank(tmdbId)) {
             return getPhotos(Integer.parseInt(tmdbId));
-        } else {
-            return Collections.emptyList();
         }
+        return Collections.emptyList();
     }
 
     @Override

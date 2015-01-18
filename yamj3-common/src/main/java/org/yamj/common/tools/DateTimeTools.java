@@ -145,9 +145,8 @@ public final class DateTimeTools {
         if (start.isBefore(end)) {
             Interval interval = new Interval(start, end);
             return interval.toDurationMillis();
-        } else {
-            return -1L;
         }
+        return -1L;
     }
 
     /**

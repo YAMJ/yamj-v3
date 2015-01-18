@@ -44,7 +44,7 @@ public class FileTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileTools.class);
     private static final int BUFF_SIZE = 16 * 1024;
-    private static final Collection<ReplaceEntry> UNSAFE_CHARS = new ArrayList<ReplaceEntry>();
+    private static final Collection<ReplaceEntry> UNSAFE_CHARS = new ArrayList<>();
     private static Lock mkdirsLock = new ReentrantLock();
 
     static {
@@ -135,9 +135,8 @@ public class FileTools {
                 int amountRead = is.read(buffer);
                 if (amountRead == -1) {
                     break;
-                } else {
-                    bytesCopied += amountRead;
                 }
+                bytesCopied += amountRead;
                 os.write(buffer, 0, amountRead);
             }
         } finally {

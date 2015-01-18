@@ -24,12 +24,7 @@ package org.yamj.filescanner;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -165,9 +160,8 @@ public class ScannerManagementImpl implements ScannerManagement {
     private static List<String> processKeywords(KeywordMap fsIgnore, String keyName) {
         if (fsIgnore.containsKey(keyName) && StringUtils.isNotBlank(fsIgnore.get(keyName))) {
             return StringTools.splitList(fsIgnore.get(keyName), DEFAULT_SPLIT);
-        } else {
-            return Collections.emptyList();
         }
+        return Collections.emptyList();
     }
 
     /**
@@ -361,13 +355,13 @@ public class ScannerManagementImpl implements ScannerManagement {
                             LOG.debug("Exclusion file '{}' found, skipping scanning of directory {}.", lcFilename, file.getParent());
                             // All files to be excluded, so quit
                             return null;
-                        } else {
-                            // We found a match, so add it to our local copy
-                            LOG.debug("Exclusion file '{}' found, will exclude all {} file types", lcFilename, DIR_EXCLUSIONS.get(lcFilename).toString());
-                            exclusions.addAll(DIR_EXCLUSIONS.get(lcFilename));
-                            // Skip to the next file, theres no need of further processing
-                            continue;
                         }
+                        
+                        // We found a match, so add it to our local copy
+                        LOG.debug("Exclusion file '{}' found, will exclude all {} file types", lcFilename, DIR_EXCLUSIONS.get(lcFilename).toString());
+                        exclusions.addAll(DIR_EXCLUSIONS.get(lcFilename));
+                        // Skip to the next file, theres no need of further processing
+                        continue;
                     }
                 } else {
                     // First directory we find, we can stop (because we sorted the files first)

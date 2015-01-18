@@ -78,12 +78,11 @@ public class ScanningScheduler {
                 LOG.info("Media file scanning is disabled");
             }
             return;
-        } else {
-            if (messageDisabledMediaFiles) {
-                LOG.info("Media file scanning is enabled");
-            }
-            messageDisabledMediaFiles = Boolean.FALSE;
         }
+        if (messageDisabledMediaFiles) {
+            LOG.info("Media file scanning is enabled");
+        }
+        messageDisabledMediaFiles = Boolean.FALSE;
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.mediafilescan.maxResults", 20);
         List<QueueDTO> queueElements = mediaStorageService.getMediaFileQueueForScanning(maxResults);
@@ -93,7 +92,7 @@ public class ScanningScheduler {
         }
 
         LOG.info("Found {} media files to process; scan with {} threads", queueElements.size(), maxThreads);
-        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
+        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {
@@ -123,12 +122,11 @@ public class ScanningScheduler {
                 LOG.info("Metadata scanning is disabled");
             }
             return;
-        } else {
-            if (messageDisabledMetaData) {
-                LOG.info("Metadata scanning is enabled");
-            }
-            messageDisabledMetaData = Boolean.FALSE;
         }
+        if (messageDisabledMetaData) {
+            LOG.info("Metadata scanning is enabled");
+        }
+        messageDisabledMetaData = Boolean.FALSE;
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.metadatascan.maxResults", 20);
         List<QueueDTO> queueElements = metadataStorageService.getMetaDataQueueForScanning(maxResults);
@@ -138,7 +136,7 @@ public class ScanningScheduler {
         }
 
         LOG.info("Found {} metadata objects to process; scan with {} threads", queueElements.size(), maxThreads);
-        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
+        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {
@@ -168,12 +166,11 @@ public class ScanningScheduler {
                 LOG.info("People scanning is disabled");
             }
             return;
-        } else {
-            if (messageDisabledPeople) {
-                LOG.info("People scanning is enabled");
-            }
-            messageDisabledPeople = Boolean.FALSE;
         }
+        if (messageDisabledPeople) {
+            LOG.info("People scanning is enabled");
+        }
+        messageDisabledPeople = Boolean.FALSE;
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.peoplescan.maxResults", 50);
         List<QueueDTO> queueElements = metadataStorageService.getPersonQueueForScanning(maxResults);
@@ -183,7 +180,7 @@ public class ScanningScheduler {
         }
 
         LOG.info("Found {} people objects to process; scan with {} threads", queueElements.size(), maxThreads);
-        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
+        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {
@@ -213,12 +210,11 @@ public class ScanningScheduler {
                 LOG.info("Filmography scanning is disabled");
             }
             return;
-        } else {
-            if (messageDisabledFilmography) {
-                LOG.info("Filmography scanning is enabled");
-            }
-            messageDisabledFilmography = Boolean.FALSE;
         }
+        if (messageDisabledFilmography) {
+            LOG.info("Filmography scanning is enabled");
+        }
+        messageDisabledFilmography = Boolean.FALSE;
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.filmographyscan.maxResults", 50);
         List<QueueDTO> queueElements = metadataStorageService.getFilmographyQueueForScanning(maxResults);
@@ -228,7 +224,7 @@ public class ScanningScheduler {
         }
 
         LOG.info("Found {} filmography objects to process; scan with {} threads", queueElements.size(), maxThreads);
-        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
+        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {
@@ -258,12 +254,11 @@ public class ScanningScheduler {
                 LOG.info("Artwork scanning is disabled");
             }
             return;
-        } else {
-            if (messageDisabledArtwork) {
-                LOG.info("Artwork scanning is enabled");
-            }
-            messageDisabledArtwork = Boolean.FALSE;
         }
+        if (messageDisabledArtwork) {
+            LOG.info("Artwork scanning is enabled");
+        }
+        messageDisabledArtwork = Boolean.FALSE;
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.artworkscan.maxResults", 30);
         List<QueueDTO> queueElements = artworkStorageService.getArtworkQueueForScanning(maxResults);
@@ -273,7 +268,7 @@ public class ScanningScheduler {
         }
 
         LOG.info("Found {} artwork objects to process; scan with {} threads", queueElements.size(), maxThreads);
-        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
+        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {

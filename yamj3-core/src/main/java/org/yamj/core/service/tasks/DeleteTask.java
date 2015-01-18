@@ -66,7 +66,7 @@ public class DeleteTask implements ITask {
     @Override
     public void execute(String options) throws Exception {
         LOG.debug("Execute delete task");
-        Set<String> filesToDelete = new HashSet<String>();
+        Set<String> filesToDelete = new HashSet<>();
 
         try {
             List<Long> ids = this.commonStorageService.getStageFilesToDelete();

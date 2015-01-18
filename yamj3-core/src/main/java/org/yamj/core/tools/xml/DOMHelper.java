@@ -194,10 +194,9 @@ public final class DOMHelper {
         } catch (SAXParseException ex) {
             if (FilenameUtils.isExtension(xmlFile.getName().toLowerCase(), "xml")) {
                 throw new SAXParseException("Failed to process file as XML", null, ex);
-            } else {
-                // Try processing the file a different way
-                doc = null;
             }
+            // Try processing the file a different way
+            doc = null;
         }
 
         if (doc == null) {
@@ -234,7 +233,7 @@ public final class DOMHelper {
                     if (tagElement != null) {
                         tagNodeList = tagElement.getChildNodes();
                         if (tagNodeList != null && tagNodeList.getLength() > 0) {
-                            returnValue = ((Node) tagNodeList.item(0)).getNodeValue();
+                            returnValue = tagNodeList.item(0).getNodeValue();
                         }
                     }
                 }

@@ -37,9 +37,8 @@ public class LRUCache<K,V> {
     }
  
     public LRUCache(final int maxSize) {
-        this.internal = (Map<K, V>) Collections.synchronizedMap(new LinkedHashMap<K, V>(maxSize + 1, .75F, true) {
+        this.internal = Collections.synchronizedMap(new LinkedHashMap<K, V>(maxSize + 1, .75F, true) {
             private static final long serialVersionUID = 4464242524720551192L;
-
             @Override
             protected boolean removeEldestEntry(Map.Entry<K, V> eldest)
             {

@@ -38,8 +38,8 @@ public class CreditDTO {
     private String realName;
     private JobType jobType;
     private String role;
-    private Map<String,String> photoURLS = new HashMap<String, String>(0);
-    private Map<String, String> personIdMap = new HashMap<String, String>(0);
+    private Map<String,String> photoURLS = new HashMap<>(0);
+    private Map<String, String> personIdMap = new HashMap<>(0);
 
     public CreditDTO(String source) {
         this.source = source;
@@ -139,14 +139,12 @@ public class CreditDTO {
                     .append(getJobType(), other.getJobType())
                     .append(getName(), other.getName())
                     .isEquals();
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
-
 }

@@ -40,7 +40,7 @@ public class OptionsIdArtwork extends OptionsId {
 
     private String artwork = "";
     @JsonIgnore
-    private final Set<String> artworkTypes = new HashSet<String>();
+    private final Set<String> artworkTypes = new HashSet<>();
 
     public String getArtwork() {
         return artwork;

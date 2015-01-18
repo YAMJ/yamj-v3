@@ -22,22 +22,12 @@
  */
 package org.yamj.core.tools;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.PropertyTools;
-import org.yamj.core.database.model.AbstractMetadata;
-import org.yamj.core.database.model.IScannable;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 
@@ -62,10 +52,10 @@ public final class OverrideTools {
     private static final String PLUGIN_SERIES_ALT = OnlineScannerService.SERIES_SCANNER_ALT;
     private static final String PLUGIN_PERSON = OnlineScannerService.PERSON_SCANNER;
     private static final String PLUGIN_PERSON_ALT = OnlineScannerService.PERSON_SCANNER_ALT;
-    private static final Map<OverrideFlag, List<String>> VIDEODATA_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
-    private static final Map<OverrideFlag, List<String>> SEASON_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
-    private static final Map<OverrideFlag, List<String>> SERIES_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
-    private static final Map<OverrideFlag, List<String>> PERSON_PRIORITIES = new EnumMap<OverrideFlag, List<String>>(OverrideFlag.class);
+    private static final Map<OverrideFlag, List<String>> VIDEODATA_PRIORITIES = new EnumMap<>(OverrideFlag.class);
+    private static final Map<OverrideFlag, List<String>> SEASON_PRIORITIES = new EnumMap<>(OverrideFlag.class);
+    private static final Map<OverrideFlag, List<String>> SERIES_PRIORITIES = new EnumMap<>(OverrideFlag.class);
+    private static final Map<OverrideFlag, List<String>> PERSON_PRIORITIES = new EnumMap<>(OverrideFlag.class);
     private static final String DEFAULT_PLUGIN_MOVIE_SERIES = "api,nfo,plugin_movie,plugin_series,alternate_movie,alternate_series";
     private static final String DEFAULT_PLUGIN_SERIES = "api,nfo,plugin_series,alternate_series";
     private static final String DEFAULT_PLUGIN_PERSON = "api,nfo,plugin_person,alternate_person";
@@ -233,7 +223,7 @@ public final class OverrideTools {
                 newSources = newSources.replace(TYPE_ALTERNATE_PERSON, PLUGIN_PERSON_ALT);
             }
 
-            priorities = new ArrayList<String>(Arrays.asList(newSources.split(",")));
+            priorities = new ArrayList<>(Arrays.asList(newSources.split(",")));
             priorities.remove(TYPE_PLUGIN_MOVIE);
             priorities.remove(TYPE_PLUGIN_SERIES);
             priorities.remove(TYPE_PLUGIN_PERSON);

@@ -48,7 +48,7 @@ public class ConfigDao extends HibernateDao {
         query.setReadOnly(true);
         query.setCacheable(true);
 
-        HashMap<String, String> config = new HashMap<String, String>();
+        HashMap<String, String> config = new HashMap<>();
         List<Object[]> objects = query.list();
         for (Object[] object : objects) {
             String key = convertRowElementToString(object[0]);

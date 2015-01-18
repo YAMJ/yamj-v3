@@ -53,16 +53,16 @@ public class FilenameDTO {
     private String movieVersion = null;
     private String episodeTitle = null;
     private int season = -1;
-    private final List<Integer> episodes = new ArrayList<Integer>();
+    private final List<Integer> episodes = new ArrayList<>();
     private String audioCodec = null;
     private String videoCodec = null;
     private String container = null;
     private int fps = -1;
     private String hdResolution = null;
     private String videoSource = null;
-    private final Map<String, String> idMap = new HashMap<String, String>(2);
-    private final Map<String, Integer> setMap = new HashMap<String, Integer>(0);
-    private final List<String> languages = new ArrayList<String>(0);
+    private final Map<String, String> idMap = new HashMap<>(2);
+    private final Map<String, Integer> setMap = new HashMap<>(0);
+    private final List<String> languages = new ArrayList<>(0);
 
     public FilenameDTO(StageFile stageFile) {
         this.name = stageFile.getFileName();

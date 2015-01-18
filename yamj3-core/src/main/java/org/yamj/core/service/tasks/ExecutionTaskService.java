@@ -35,7 +35,7 @@ import org.yamj.core.database.service.ExecutionTaskStorageService;
 public class ExecutionTaskService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionTaskService.class);
-    private Map<String,ITask> registeredTasks = new HashMap<String,ITask>();
+    private Map<String,ITask> registeredTasks = new HashMap<>();
 
     @Autowired
     private ExecutionTaskStorageService executionTaskStorageService;

@@ -34,9 +34,9 @@ import org.slf4j.LoggerFactory;
 
 public final class HTMLTools {
 
-    private static final Map<Character, String> AGGRESSIVE_HTML_ENCODE_MAP = new HashMap<Character, String>();
-    private static final Map<Character, String> DEFENSIVE_HTML_ENCODE_MAP = new HashMap<Character, String>();
-    private static final Map<String, Character> HTML_DECODE_MAP = new HashMap<String, Character>();
+    private static final Map<Character, String> AGGRESSIVE_HTML_ENCODE_MAP = new HashMap<>();
+    private static final Map<Character, String> DEFENSIVE_HTML_ENCODE_MAP = new HashMap<>();
+    private static final Map<String, Character> HTML_DECODE_MAP = new HashMap<>();
     private static final Logger LOG = LoggerFactory.getLogger(HTMLTools.class);
 
     static {
@@ -410,7 +410,7 @@ public final class HTMLTools {
         if (url != null && url.length() != 0) {
             try {
                 returnUrl = URLEncoder.encode(url, "UTF-8");
-                returnUrl = returnUrl.replace((CharSequence) "+", (CharSequence) "%20"); // why does URLEncoder do that??!!
+                returnUrl = returnUrl.replace("+", "%20"); // why does URLEncoder do that??!!
             } catch (UnsupportedEncodingException ignored) {
                 LOG.info("Could not decode URL string '{}', will proceed with undecoded string.", returnUrl);
             }
@@ -431,7 +431,7 @@ public final class HTMLTools {
     }
 
     public static List<String> extractHtmlTags(String src, String sectionStart, String sectionEnd, String startTag, String endTag) {
-        ArrayList<String> tags = new ArrayList<String>();
+        ArrayList<String> tags = new ArrayList<>();
         if (src == null) {
             return tags;
         }
@@ -548,7 +548,7 @@ public final class HTMLTools {
     }
 
     public static List<String> extractTags(String src, String sectionStart, String sectionEnd, String startTag, String endTag, boolean forceCloseTag) {
-        ArrayList<String> tags = new ArrayList<String>();
+        ArrayList<String> tags = new ArrayList<>();
         if (src == null) {
             return tags;
         }
@@ -637,9 +637,8 @@ public final class HTMLTools {
                 String[] elems = elem.split(">");
                 if (elems.length > 1) {
                     return HTMLTools.decodeHtml(elems[1].trim());
-                } else {
-                    return HTMLTools.decodeHtml(elems[0].trim());
                 }
+                return HTMLTools.decodeHtml(elems[0].trim());
             }
         }
         return StringUtils.EMPTY;

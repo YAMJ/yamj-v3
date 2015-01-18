@@ -59,8 +59,8 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
     private String fileSize;
     private Long season;
     private Long episode;
-    private List<ApiAudioCodecDTO> audioCodecs = new ArrayList<ApiAudioCodecDTO>();
-    private List<ApiSubtitleDTO> subtitles = new ArrayList<ApiSubtitleDTO>();
+    private List<ApiAudioCodecDTO> audioCodecs = new ArrayList<>();
+    private List<ApiSubtitleDTO> subtitles = new ArrayList<>();
 
     public Boolean getExtra() {
         return extra;

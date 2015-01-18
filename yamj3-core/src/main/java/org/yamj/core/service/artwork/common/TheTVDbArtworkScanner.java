@@ -114,9 +114,9 @@ public class TheTVDbArtworkScanner implements
     }
 
     private List<ArtworkDetailDTO> getSeriesPosters(String id) {
-        List<ArtworkDetailDTO> langDTOs = new ArrayList<ArtworkDetailDTO>(5);
-        List<ArtworkDetailDTO> altLangDTOs = new ArrayList<ArtworkDetailDTO>(5);
-        List<ArtworkDetailDTO> noLangDTOs = new ArrayList<ArtworkDetailDTO>(5);
+        List<ArtworkDetailDTO> langDTOs = new ArrayList<>(5);
+        List<ArtworkDetailDTO> altLangDTOs = new ArrayList<>(5);
+        List<ArtworkDetailDTO> noLangDTOs = new ArrayList<>(5);
 
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);
@@ -165,9 +165,9 @@ public class TheTVDbArtworkScanner implements
     }
 
     private List<ArtworkDetailDTO> getSeasonPosters(String id, int season) {
-        List<ArtworkDetailDTO> langDTOs = new ArrayList<ArtworkDetailDTO>(5);
-        List<ArtworkDetailDTO> altLangDTOs = new ArrayList<ArtworkDetailDTO>(5);
-        List<ArtworkDetailDTO> noLangDTOs = new ArrayList<ArtworkDetailDTO>(5);
+        List<ArtworkDetailDTO> langDTOs = new ArrayList<>(5);
+        List<ArtworkDetailDTO> altLangDTOs = new ArrayList<>(5);
+        List<ArtworkDetailDTO> noLangDTOs = new ArrayList<>(5);
 
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);
@@ -205,7 +205,7 @@ public class TheTVDbArtworkScanner implements
             returnDTOs = noLangDTOs;
         } else if (CollectionUtils.isNotEmpty(bannerList.getPosterList())) {
             LOG.info("Season {}-{}: No poster found by language, using first series poster found", id, season);
-            returnDTOs = new ArrayList<ArtworkDetailDTO>(1);
+            returnDTOs = new ArrayList<>(1);
             Banner banner = bannerList.getPosterList().get(0);
             returnDTOs.add(createArtworDetail(banner));
         } else {
@@ -246,8 +246,8 @@ public class TheTVDbArtworkScanner implements
     }
 
     private List<ArtworkDetailDTO> getSeriesFanarts(String id) {
-        List<ArtworkDetailDTO> hdDTOs = new ArrayList<ArtworkDetailDTO>(5);
-        List<ArtworkDetailDTO> sdDTOs = new ArrayList<ArtworkDetailDTO>(5);
+        List<ArtworkDetailDTO> hdDTOs = new ArrayList<>(5);
+        List<ArtworkDetailDTO> sdDTOs = new ArrayList<>(5);
 
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);
@@ -288,8 +288,8 @@ public class TheTVDbArtworkScanner implements
     private List<ArtworkDetailDTO> getSeasonFanarts(String id, int season) {
         // NOTE: no explicit season fanart in TheTVDb
 
-        List<ArtworkDetailDTO> hdDTOs = new ArrayList<ArtworkDetailDTO>(5);
-        List<ArtworkDetailDTO> sdDTOs = new ArrayList<ArtworkDetailDTO>(5);
+        List<ArtworkDetailDTO> hdDTOs = new ArrayList<>(5);
+        List<ArtworkDetailDTO> sdDTOs = new ArrayList<>(5);
 
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);
@@ -374,10 +374,10 @@ public class TheTVDbArtworkScanner implements
     }
 
     private List<ArtworkDetailDTO> getSeriesBanners(String id) {
-        List<ArtworkDetailDTO> langDTOs = new ArrayList<ArtworkDetailDTO>(5);
-        List<ArtworkDetailDTO> altLangDTOs = new ArrayList<ArtworkDetailDTO>(5);
-        List<ArtworkDetailDTO> noLangDTOs = new ArrayList<ArtworkDetailDTO>(5);
-        List<ArtworkDetailDTO> blankDTOs = new ArrayList<ArtworkDetailDTO>(5);
+        List<ArtworkDetailDTO> langDTOs = new ArrayList<>(5);
+        List<ArtworkDetailDTO> altLangDTOs = new ArrayList<>(5);
+        List<ArtworkDetailDTO> noLangDTOs = new ArrayList<>(5);
+        List<ArtworkDetailDTO> blankDTOs = new ArrayList<>(5);
 
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);
@@ -432,13 +432,13 @@ public class TheTVDbArtworkScanner implements
     }
 
     private List<ArtworkDetailDTO> getSeasonBanners(String id, int season) {
-        List<ArtworkDetailDTO> seasonLangDTOs = new ArrayList<ArtworkDetailDTO>(5);
-        List<ArtworkDetailDTO> seasonAltLangDTOs = new ArrayList<ArtworkDetailDTO>(5);
-        List<ArtworkDetailDTO> seasonNoLangDTOs = new ArrayList<ArtworkDetailDTO>(5);
-        List<ArtworkDetailDTO> seriesLangDTOs = new ArrayList<ArtworkDetailDTO>(5);
-        List<ArtworkDetailDTO> seriesAltLangDTOs = new ArrayList<ArtworkDetailDTO>(5);
-        List<ArtworkDetailDTO> seriesNoLangDTOs = new ArrayList<ArtworkDetailDTO>(5);
-        List<ArtworkDetailDTO> blankDTOs = new ArrayList<ArtworkDetailDTO>(5);
+        List<ArtworkDetailDTO> seasonLangDTOs = new ArrayList<>(5);
+        List<ArtworkDetailDTO> seasonAltLangDTOs = new ArrayList<>(5);
+        List<ArtworkDetailDTO> seasonNoLangDTOs = new ArrayList<>(5);
+        List<ArtworkDetailDTO> seriesLangDTOs = new ArrayList<>(5);
+        List<ArtworkDetailDTO> seriesAltLangDTOs = new ArrayList<>(5);
+        List<ArtworkDetailDTO> seriesNoLangDTOs = new ArrayList<>(5);
+        List<ArtworkDetailDTO> blankDTOs = new ArrayList<>(5);
 
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);

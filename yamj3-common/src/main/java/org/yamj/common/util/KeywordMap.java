@@ -33,7 +33,7 @@ public class KeywordMap extends HashMap<String, String> {
 
     private static final long serialVersionUID = 1L;
 
-    private final transient List<String> keywords = new ArrayList<String>();
+    private final transient List<String> keywords = new ArrayList<>();
 
     public List<String> getKeywords() {
         return keywords;

@@ -23,11 +23,7 @@
 package org.yamj.common.tools;
 
 import java.text.BreakIterator;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 
 public class StringTools {
@@ -44,7 +40,7 @@ public class StringTools {
      * @return
      */
     public static List<String> splitList(String stringToSplit, String regexDelim) {
-        List<String> finalValues = new ArrayList<String>();
+        List<String> finalValues = new ArrayList<>();
 
         for (String output : stringToSplit.split(regexDelim)) {
             finalValues.add(output.trim());
@@ -63,7 +59,7 @@ public class StringTools {
      * @return
      */
     public static <T> List<T> castList(Class<? extends T> objClass, Collection<?> c) {
-        List<T> r = new ArrayList<T>(c.size());
+        List<T> r = new ArrayList<>(c.size());
         for (Object o : c) {
             r.add(objClass.cast(o));
         }
@@ -72,7 +68,7 @@ public class StringTools {
 
     public static Collection<String> tokenize(String sourceString, String delimiter) {
         StringTokenizer st = new StringTokenizer(sourceString, delimiter);
-        Collection<String> keywords = new HashSet<String>();
+        Collection<String> keywords = new HashSet<>();
         while (st.hasMoreTokens()) {
             keywords.add(st.nextToken());
         }
@@ -110,16 +106,14 @@ public class StringTools {
             if (changedString.length() <= requiredLength) {
                 // No need to do anything
                 return changedString;
+            } else if (trimToWord) {
+                BreakIterator bi = BreakIterator.getWordInstance();
+                bi.setText(changedString);
+                int biLength = bi.preceding(requiredLength - endingSuffix.length());
+                return changedString.substring(0, biLength).trim() + endingSuffix;
             } else {
-                if (trimToWord) {
-                    BreakIterator bi = BreakIterator.getWordInstance();
-                    bi.setText(changedString);
-                    int biLength = bi.preceding(requiredLength - endingSuffix.length());
-                    return changedString.substring(0, biLength).trim() + endingSuffix;
-                } else {
-                    // We know that the source string is longer that the required length, so trim it to size
-                    return changedString.substring(0, requiredLength - endingSuffix.length()).trim() + endingSuffix;
-                }
+                // We know that the source string is longer that the required length, so trim it to size
+                return changedString.substring(0, requiredLength - endingSuffix.length()).trim() + endingSuffix;
             }
         }
 

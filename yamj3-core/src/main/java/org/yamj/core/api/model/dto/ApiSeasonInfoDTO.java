@@ -38,7 +38,7 @@ public class ApiSeasonInfoDTO extends AbstractApiDTO {
     private String plot;
     private String outline;
     private Boolean watched;
-    Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
+    Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<>(ArtworkType.class);
 
     public Long getSeriesId() {
         return seriesId;

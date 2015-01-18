@@ -144,12 +144,12 @@ public class FilenameScanner {
             put(key, PatternUtils.iwpatt(patt.toString()));
         }
     };
-    private Collection<String> videoExtensions = new HashSet<String>();
-    private Collection<String> subtitleExtensions = new HashSet<String>();
-    private Collection<String> imageExtensions = new HashSet<String>();
-    private final Collection<Pattern> skipPatterns = new ArrayList<Pattern>();
-    private final Collection<Pattern> movieVersionPatterns = new ArrayList<Pattern>();
-    private final Collection<Pattern> extraPatterns = new ArrayList<Pattern>();
+    private Collection<String> videoExtensions = new HashSet<>();
+    private Collection<String> subtitleExtensions = new HashSet<>();
+    private Collection<String> imageExtensions = new HashSet<>();
+    private final Collection<Pattern> skipPatterns = new ArrayList<>();
+    private final Collection<Pattern> movieVersionPatterns = new ArrayList<>();
+    private final Collection<Pattern> extraPatterns = new ArrayList<>();
     private final boolean languageDetection;
     private final boolean skipEpisodeTitle;
     private boolean useParentRegex;

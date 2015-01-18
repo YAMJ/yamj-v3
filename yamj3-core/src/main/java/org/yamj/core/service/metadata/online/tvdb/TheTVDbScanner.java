@@ -124,7 +124,7 @@ public class TheTVDbScanner implements ISeriesScanner {
         }
 
         if (OverrideTools.checkOverwriteGenres(series, SCANNER_ID)) {
-            series.setGenreNames(new HashSet<String>(tvdbSeries.getGenres()), SCANNER_ID);
+            series.setGenreNames(new HashSet<>(tvdbSeries.getGenres()), SCANNER_ID);
         }
 
         if (StringUtils.isNumeric(tvdbSeries.getRating())) {
@@ -155,7 +155,7 @@ public class TheTVDbScanner implements ISeriesScanner {
         }
 
         // CAST & CREW
-        Set<CreditDTO> actors = new LinkedHashSet<CreditDTO>();
+        Set<CreditDTO> actors = new LinkedHashSet<>();
         if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
             for (Actor actor : tvdbApiWrapper.getActors(id)) {
                 actors.add(new CreditDTO(SCANNER_ID, JobType.ACTOR, actor.getName(), actor.getRole()));

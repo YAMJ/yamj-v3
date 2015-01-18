@@ -80,17 +80,16 @@ public final class GraphicTools {
      * @throws org.apache.sanselan.ImageReadException
      */
     public static BufferedImage loadJPEGImage(File fileImage) throws IOException, ImageReadException {
-        if (fileImage.exists()) {
-            JpegReader jr = new JpegReader();
-            BufferedImage bi = jr.readImage(fileImage);
-            if (bi == null) {
-                // null means: the image is invalid and couldn't be loaded
-                throw new ImageReadException("Image file '" + fileImage.getName() + "' is invalid");
-            }
-            return bi;
-        } else {
+        if (!fileImage.exists()) {
             throw new FileNotFoundException("Image file '" + fileImage.getName() + "' does not exist");
         }
+        JpegReader jr = new JpegReader();
+        BufferedImage bi = jr.readImage(fileImage);
+        if (bi == null) {
+            // null means: the image is invalid and couldn't be loaded
+            throw new ImageReadException("Image file '" + fileImage.getName() + "' is invalid");
+        }
+        return bi;
     }
 
     /**
@@ -130,7 +129,7 @@ public final class GraphicTools {
         int y = 0;
 
         tempWidth = nMaxWidth;
-        tempHeight = (int) (((double) imageHeight * (double) nMaxWidth) / (double) imageWidth);
+        tempHeight = (int) (((double) imageHeight * (double) nMaxWidth) / imageWidth);
 
         if (nMaxHeight > tempHeight) {
             y = nMaxHeight - tempHeight;
@@ -166,7 +165,7 @@ public final class GraphicTools {
         int tempHeight;
 
         tempWidth = nMaxWidth;
-        tempHeight = (int) (((double) imageHeight * (double) nMaxWidth) / (double) imageWidth);
+        tempHeight = (int) (((double) imageHeight * (double) nMaxWidth) / imageWidth);
 
         Image temp1 = imgSrc.getScaledInstance(tempWidth, tempHeight, Image.SCALE_SMOOTH);
         BufferedImage bi = new BufferedImage(tempWidth, tempHeight, BufferedImage.TYPE_INT_ARGB);
@@ -187,9 +186,9 @@ public final class GraphicTools {
 
         if (imageRatio > thumbnailRatio) {
             tempWidth = nMaxWidth;
-            tempHeight = (int) (((double) imageHeight * (double) nMaxWidth) / (double) imageWidth);
+            tempHeight = (int) (((double) imageHeight * (double) nMaxWidth) / imageWidth);
         } else {
-            tempWidth = (int) (((double) imageWidth * (double) nMaxHeight) / (double) imageHeight);
+            tempWidth = (int) (((double) imageWidth * (double) nMaxHeight) / imageHeight);
             tempHeight = nMaxHeight;
         }
 

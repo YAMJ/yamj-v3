@@ -148,9 +148,8 @@ public class LibrarySendScheduler {
             // We do not want to send this again.
             library.addDirectoryStatus(sendDir, ConcurrentUtils.constantFuture(StatusType.INVALID));
             return Boolean.TRUE;
-        } else {
-            return sendToCore(library, stageDto);
         }
+        return sendToCore(library, stageDto);
     }
 
     /**

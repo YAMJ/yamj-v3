@@ -37,7 +37,7 @@ public abstract class TokensPatternMap extends HashMap<String, Pattern> {
      * @param tokensStr Tokens list divided by comma or space.
      */
     public void put(String key, String tokensStr) {
-        List<String> tokens = new ArrayList<String>();
+        List<String> tokens = new ArrayList<>();
         for (String token : tokensStr.split("[ ,]+")) {
             token = StringUtils.trimToNull(token);
             if (token != null) {

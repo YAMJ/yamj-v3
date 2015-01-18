@@ -183,7 +183,7 @@ public final class CmdLineOption {
      */
     public void addExcludedOption(final CmdLineOption excludedOption) {
         if (this.excludedOptions == null) {
-            this.excludedOptions = new LinkedList<CmdLineOption>();
+            this.excludedOptions = new LinkedList<>();
         }
         this.excludedOptions.add(excludedOption);
     }
@@ -263,7 +263,7 @@ public final class CmdLineOption {
      */
     public void addRequiredOption(final CmdLineOption requiredOption) {
         if (this.requiredOptions == null) {
-            this.requiredOptions = new LinkedList<CmdLineOption>();
+            this.requiredOptions = new LinkedList<>();
         }
         this.requiredOptions.add(requiredOption);
     }

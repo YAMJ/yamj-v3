@@ -61,7 +61,7 @@ public class VideoController {
     @RequestMapping(value = "/movie/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperSingle<ApiVideoDTO> getVideoById(@ModelAttribute("options") OptionsIndexVideo options) {
-        ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<ApiVideoDTO>();
+        ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<>();
         // Set the type to movie
         options.setType("MOVIE");
         wrapper.setOptions(options);
@@ -85,7 +85,7 @@ public class VideoController {
     @RequestMapping(value = "/series/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperSingle<ApiVideoDTO> getSeriesById(@ModelAttribute("options") OptionsIndexVideo options) {
-        ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<ApiVideoDTO>();
+        ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<>();
         // Set the type to movie
         options.setType("SERIES");
         wrapper.setOptions(options);
@@ -109,7 +109,7 @@ public class VideoController {
     @RequestMapping(value = "/season/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperSingle<ApiVideoDTO> getSeasonById(@ModelAttribute("options") OptionsIndexVideo options) {
-        ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<ApiVideoDTO>();
+        ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<>();
         // Set the type to movie
         options.setType("SEASON");
         wrapper.setOptions(options);
@@ -131,7 +131,7 @@ public class VideoController {
     @RequestMapping(value = "/seriesinfo", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperList<ApiSeriesInfoDTO> getSeriesInfo(@ModelAttribute("options") OptionsIdArtwork options) {
-        ApiWrapperList<ApiSeriesInfoDTO> wrapper = new ApiWrapperList<ApiSeriesInfoDTO>();
+        ApiWrapperList<ApiSeriesInfoDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
 
         if (options.getId() > 0L) {
@@ -155,7 +155,7 @@ public class VideoController {
                 options.getSeasonid() < 0L ? "All" : options.getSeasonid(),
                 options.getSeason() < 0L ? "All" : options.getSeason());
 
-        ApiWrapperList<ApiEpisodeDTO> wrapper = new ApiWrapperList<ApiEpisodeDTO>();
+        ApiWrapperList<ApiEpisodeDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
         jsonApiStorageService.getEpisodeList(wrapper);
         wrapper.setStatusCheck();

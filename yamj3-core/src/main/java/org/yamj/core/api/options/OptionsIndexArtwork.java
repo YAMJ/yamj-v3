@@ -35,8 +35,8 @@ import java.util.List;
 @JsonInclude(Include.NON_DEFAULT)
 public class OptionsIndexArtwork extends OptionsAbstract {
 
-    private List<String> artwork = new ArrayList<String>();
-    private List<String> video = new ArrayList<String>();
+    private List<String> artwork = new ArrayList<>();
+    private List<String> video = new ArrayList<>();
     private Long id = -1L;
 
     public OptionsIndexArtwork() {

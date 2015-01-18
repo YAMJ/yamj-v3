@@ -55,7 +55,7 @@ public class IndexController {
             @ModelAttribute("options") OptionsIndexVideo options) {
         LOG.debug("INDEX: Video list - Options: {}", options.toString());
 
-        ApiWrapperList<ApiVideoDTO> wrapper = new ApiWrapperList<ApiVideoDTO>();
+        ApiWrapperList<ApiVideoDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
         jsonApiStorageService.getVideoList(wrapper);
         wrapper.setStatusCheck();
@@ -67,7 +67,7 @@ public class IndexController {
     public ApiWrapperList<ApiPersonDTO> getPersonList(@ModelAttribute("options") OptionsId options) {
         LOG.debug("INDEX: Person list - Options: {}", options.toString());
 
-        ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<ApiPersonDTO>();
+        ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
         jsonApiStorageService.getPersonList(wrapper);
         wrapper.setStatusCheck();
@@ -77,8 +77,8 @@ public class IndexController {
     @RequestMapping(value = "/count", method = RequestMethod.GET)
     @ResponseBody
     public List<CountTimestamp> getCount(@RequestParam(required = false, defaultValue = "all") String type) {
-        List<CountTimestamp> results = new ArrayList<CountTimestamp>();
-        List<MetaDataType> requiredTypes = new ArrayList<MetaDataType>();
+        List<CountTimestamp> results = new ArrayList<>();
+        List<MetaDataType> requiredTypes = new ArrayList<>();
 
         if (type.toLowerCase().indexOf("all") < 0) {
             for (String stringType : StringUtils.split(type, ",")) {

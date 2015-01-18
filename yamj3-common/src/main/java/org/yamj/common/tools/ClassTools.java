@@ -71,8 +71,7 @@ public class ClassTools {
             LOG.debug("System property '{}' not found. Setting to '{}'", property, defaultValue);
             System.setProperty(property, defaultValue);
             return defaultValue;
-        } else {
-            return systemProperty;
         }
+        return systemProperty;
     }
 }

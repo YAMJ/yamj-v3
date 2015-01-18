@@ -22,9 +22,6 @@
  */
 package org.yamj.filescanner.model;
 
-import org.yamj.common.dto.ImportDTO;
-import org.yamj.common.dto.StageDirectoryDTO;
-import org.yamj.common.type.StatusType;
 import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -33,6 +30,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentUtils;
+import org.yamj.common.dto.ImportDTO;
+import org.yamj.common.dto.StageDirectoryDTO;
+import org.yamj.common.type.StatusType;
 
 /**
  *
@@ -58,8 +58,8 @@ public class Library implements Serializable {
         this.watch = Boolean.FALSE;
         this.description = "";
         this.statistics = new Statistics();
-        this.directories = new HashMap<String, StageDirectoryDTO>(1);
-        this.directoryStatus = new HashMap<String, Future<StatusType>>(1);
+        this.directories = new HashMap<>(1);
+        this.directoryStatus = new HashMap<>(1);
         importDTO = new ImportDTO();
         this.scanningComplete = new AtomicBoolean(Boolean.FALSE);
         this.sendingComplete = new AtomicBoolean(Boolean.FALSE);
@@ -251,10 +251,9 @@ public class Library implements Serializable {
     public Future<StatusType> findDirectoryStatus(String path) {
         if (directoryStatus.containsKey(path)) {
             return directoryStatus.get(path);
-        } else {
-            // Don't know if this is the right status to send here
-            return ConcurrentUtils.constantFuture(StatusType.NEW);
         }
+        // Don't know if this is the right status to send here
+        return ConcurrentUtils.constantFuture(StatusType.NEW);
     }
 
     /**
@@ -286,12 +285,10 @@ public class Library implements Serializable {
         if (absolutePath.startsWith(importDTO.getBaseDirectory())) {
             if (absolutePath.length() > importDTO.getBaseDirectory().length()) {
                 return absolutePath.substring(importDTO.getBaseDirectory().length() + 1);
-            } else {
-                return FilenameUtils.getBaseName(absolutePath);
             }
-        } else {
-            return absolutePath;
+            return FilenameUtils.getBaseName(absolutePath);
         }
+        return absolutePath;
     }
 
     public boolean isScanningComplete() {

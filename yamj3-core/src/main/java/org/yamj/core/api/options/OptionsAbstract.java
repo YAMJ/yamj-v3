@@ -141,7 +141,7 @@ public abstract class OptionsAbstract implements IOptions {
      * @return
      */
     protected static Map<String, String> splitDashList(String dashList) {
-        Map<String, String> values = new HashMap<String, String>();
+        Map<String, String> values = new HashMap<>();
         if (dashList != null) {
             for (String inc : StringUtils.split(dashList, ",")) {
                 int pos = inc.indexOf('-');

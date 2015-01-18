@@ -23,13 +23,7 @@
 package org.yamj.core.database.dao;
 
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
@@ -40,11 +34,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.Library;
-import org.yamj.core.database.model.StageDirectory;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.hibernate.HibernateDao;
@@ -96,7 +86,7 @@ public class StagingDao extends HibernateDao {
         criteria.add(Restrictions.isNull("parentDirectory"));
         criteria.setCacheable(true);
         criteria.setCacheMode(CacheMode.NORMAL);
-        return (List<StageDirectory>) criteria.list();
+        return criteria.list();
     }
 
     @SuppressWarnings("unchecked")
@@ -109,7 +99,7 @@ public class StagingDao extends HibernateDao {
         criteria.add(Restrictions.eq("parentDirectory", stageDirectory));
         criteria.setCacheable(true);
         criteria.setCacheMode(CacheMode.NORMAL);
-        return (List<StageDirectory>) criteria.list();
+        return criteria.list();
     }
 
     public List<VideoData> findVideoDatas(StageDirectory stageDirectory) {
@@ -145,7 +135,7 @@ public class StagingDao extends HibernateDao {
         query.setParameter("deleted", StatusType.DELETED);
         query.setCacheable(true);
         query.setCacheMode(CacheMode.NORMAL);
-        return (List<VideoData>) query.list();
+        return query.list();
     }
 
     @SuppressWarnings("unchecked")
@@ -174,7 +164,7 @@ public class StagingDao extends HibernateDao {
         query.setParameter("deleted", StatusType.DELETED);
         query.setCacheable(true);
         query.setCacheMode(CacheMode.NORMAL);
-        return (List<VideoData>) query.list();
+        return query.list();
     }
 
     @SuppressWarnings("unchecked")
@@ -200,7 +190,7 @@ public class StagingDao extends HibernateDao {
         query.setParameter("deleted", StatusType.DELETED);
         query.setCacheable(true);
         query.setCacheMode(CacheMode.NORMAL);
-        return (List<VideoData>) query.list();
+        return query.list();
     }
 
     public StageFile findNfoFile(String searchName, StageDirectory stageDirectory) {
@@ -238,7 +228,7 @@ public class StagingDao extends HibernateDao {
         sb.append("AND sf.status in (:statusSet) ");
         sb.append("ORDER by nfrel.priority DESC");
 
-        Set<StatusType> statusSet = new HashSet<StatusType>();
+        Set<StatusType> statusSet = new HashSet<>();
         statusSet.add(StatusType.NEW);
         statusSet.add(StatusType.UPDATED);
         statusSet.add(StatusType.DONE);
@@ -266,7 +256,7 @@ public class StagingDao extends HibernateDao {
         sb.append("AND sf.status in (:statusSet) ");
         sb.append("ORDER by nfrel.priority DESC");
 
-        Set<StatusType> statusSet = new HashSet<StatusType>();
+        Set<StatusType> statusSet = new HashSet<>();
         statusSet.add(StatusType.NEW);
         statusSet.add(StatusType.UPDATED);
         statusSet.add(StatusType.DONE);
@@ -288,14 +278,14 @@ public class StagingDao extends HibernateDao {
     public Set<Artwork> findMatchingArtworksForVideo(ArtworkType artworkType, String baseName, StageDirectory stageDirectory) {
         // NOTE: union not supported in HQL, so each query has to be executed
         //       and mapped into a set to have uniqueness
-        Set<Artwork> result = new HashSet<Artwork>();
+        Set<Artwork> result = new HashSet<>();
 
-        Set<StatusType> statusSet = new HashSet<StatusType>();
+        Set<StatusType> statusSet = new HashSet<>();
         statusSet.add(StatusType.NEW);
         statusSet.add(StatusType.UPDATED);
         statusSet.add(StatusType.DONE);
 
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<>();
         params.put("artworkType", artworkType);
         params.put("fileType", FileType.VIDEO);
         params.put("extra", Boolean.FALSE);
@@ -351,14 +341,14 @@ public class StagingDao extends HibernateDao {
     public Set<Artwork> findMatchingArtworksForVideo(ArtworkType artworkType, String baseName, Library library) {
         // NOTE: union not supported in HQL, so each query has to be executed
         //       and mapped into a set to have uniqueness
-        Set<Artwork> result = new HashSet<Artwork>();
+        Set<Artwork> result = new HashSet<>();
 
-        Set<StatusType> statusSet = new HashSet<StatusType>();
+        Set<StatusType> statusSet = new HashSet<>();
         statusSet.add(StatusType.NEW);
         statusSet.add(StatusType.UPDATED);
         statusSet.add(StatusType.DONE);
 
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<>();
         params.put("artworkType", artworkType);
         params.put("fileType", FileType.VIDEO);
         params.put("extra", Boolean.FALSE);
@@ -484,7 +474,7 @@ public class StagingDao extends HibernateDao {
             return Collections.emptyList();
         }
 
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<>();
         params.put("fileType", fileType);
         if (library != null) {
             params.put("library", library);

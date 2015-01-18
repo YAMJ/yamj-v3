@@ -22,25 +22,11 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.type.BooleanType;
-import org.hibernate.type.DateType;
-import org.hibernate.type.FloatType;
-import org.hibernate.type.IntegerType;
-import org.hibernate.type.LongType;
-import org.hibernate.type.StringType;
-import org.hibernate.type.TimestampType;
+import org.hibernate.type.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -52,29 +38,8 @@ import org.yamj.core.api.model.builder.DataItem;
 import org.yamj.core.api.model.builder.DataItemTools;
 import org.yamj.core.api.model.builder.IndexParams;
 import org.yamj.core.api.model.builder.SqlScalars;
-import org.yamj.core.api.model.dto.AbstractApiIdentifiableDTO;
-import org.yamj.core.api.model.dto.ApiArtworkDTO;
-import org.yamj.core.api.model.dto.ApiAudioCodecDTO;
-import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
-import org.yamj.core.api.model.dto.ApiBoxedSetMemberDTO;
-import org.yamj.core.api.model.dto.ApiEpisodeDTO;
-import org.yamj.core.api.model.dto.ApiFileDTO;
-import org.yamj.core.api.model.dto.ApiFilmographyDTO;
-import org.yamj.core.api.model.dto.ApiGenreDTO;
-import org.yamj.core.api.model.dto.ApiNameDTO;
-import org.yamj.core.api.model.dto.ApiPersonDTO;
-import org.yamj.core.api.model.dto.ApiRatingDTO;
-import org.yamj.core.api.model.dto.ApiSeasonInfoDTO;
-import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
-import org.yamj.core.api.model.dto.ApiSubtitleDTO;
-import org.yamj.core.api.model.dto.ApiVideoDTO;
-import org.yamj.core.api.options.OptionsBoxedSet;
-import org.yamj.core.api.options.OptionsEpisode;
-import org.yamj.core.api.options.OptionsId;
-import org.yamj.core.api.options.OptionsIdArtwork;
-import org.yamj.core.api.options.OptionsIndexArtwork;
-import org.yamj.core.api.options.OptionsIndexVideo;
-import org.yamj.core.api.options.OptionsMultiType;
+import org.yamj.core.api.model.dto.*;
+import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Certification;
@@ -152,12 +117,12 @@ public class ApiDao extends HibernateDao {
         if (CollectionUtils.isNotEmpty(queryResults)) {
             if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
                 // Create and populate the ID list
-                Map<MetaDataType, List<Long>> ids = new EnumMap<MetaDataType, List<Long>>(MetaDataType.class);
+                Map<MetaDataType, List<Long>> ids = new EnumMap<>(MetaDataType.class);
                 for (MetaDataType mdt : MetaDataType.values()) {
                     ids.put(mdt, new ArrayList());
                 }
 
-                Map<String, ApiVideoDTO> results = new HashMap<String, ApiVideoDTO>();
+                Map<String, ApiVideoDTO> results = new HashMap<>();
 
                 for (ApiVideoDTO single : queryResults) {
                     // Add the item to the map for further processing
@@ -1623,7 +1588,7 @@ public class ApiDao extends HibernateDao {
             }
             if (options.hasDataItem(DataItem.GENRE)) {
                 // use series genres
-                Map<Long, List<ApiGenreDTO>> map = new HashMap<Long, List<ApiGenreDTO>>();
+                Map<Long, List<ApiGenreDTO>> map = new HashMap<>();
                 for (ApiEpisodeDTO episode : results) {
                     List<ApiGenreDTO> genres = map.get(episode.getSeriesId());
                     if (genres == null) {
@@ -1635,7 +1600,7 @@ public class ApiDao extends HibernateDao {
             }
             if (options.hasDataItem(DataItem.STUDIO)) {
                 // use series studios
-                Map<Long, List<Studio>> map = new HashMap<Long, List<Studio>>();
+                Map<Long, List<Studio>> map = new HashMap<>();
                 for (ApiEpisodeDTO episode : results) {
                     List<Studio> studios = map.get(episode.getSeriesId());
                     if (studios == null) {
@@ -1647,7 +1612,7 @@ public class ApiDao extends HibernateDao {
             }
             if (options.hasDataItem(DataItem.CERTIFICATION)) {
                 // use series certifications
-                Map<Long, List<Certification>> map = new HashMap<Long, List<Certification>>();
+                Map<Long, List<Certification>> map = new HashMap<>();
                 for (ApiEpisodeDTO episode : results) {
                     List<Certification> certifications = map.get(episode.getSeriesId());
                     if (certifications == null) {
@@ -1672,7 +1637,7 @@ public class ApiDao extends HibernateDao {
                     List<ApiPersonDTO> cast = getCastForId(MetaDataType.EPISODE, episode.getId(), options.splitDataItems(), jobs);
 
                     // just add given amount for jobs to cast
-                    Map<JobType, Integer> jobMap = new HashMap<JobType, Integer>(options.splitJobs());
+                    Map<JobType, Integer> jobMap = new HashMap<>(options.splitJobs());
                     for (ApiPersonDTO entry : cast) {
                         Integer amount = jobMap.get(entry.getJobType());
                         if (amount == null) {
@@ -1781,7 +1746,7 @@ public class ApiDao extends HibernateDao {
                 List<ApiPersonDTO> cast = getCastForId(type, options.getId(), options.splitDataItems(), jobs);
 
                 // just add given amount for jobs to cast
-                Map<JobType, Integer> jobMap = new HashMap<JobType, Integer>(options.splitJobs());
+                Map<JobType, Integer> jobMap = new HashMap<>(options.splitJobs());
                 for (ApiPersonDTO entry : cast) {
                     Integer amount = jobMap.get(entry.getJobType());
                     if (amount == null) {
@@ -2141,7 +2106,7 @@ public class ApiDao extends HibernateDao {
      * @return
      */
     public Map<Long, List<ApiArtworkDTO>> getArtworkForId(MetaDataType type, Long id) {
-        Set<String> artworkRequired = new HashSet<String>();
+        Set<String> artworkRequired = new HashSet<>();
         for (ArtworkType at : ArtworkType.values()) {
             artworkRequired.add(at.toString());
         }
@@ -2457,7 +2422,7 @@ public class ApiDao extends HibernateDao {
      * @return
      */
     private <T extends AbstractApiIdentifiableDTO> Map<Long, List<T>> generateIdMapList(List<T> idList) {
-        Map<Long, List<T>> results = new HashMap<Long, List<T>>();
+        Map<Long, List<T>> results = new HashMap<>();
 
         for (T idSingle : idList) {
             Long sourceId = idSingle.getId();
@@ -2465,7 +2430,7 @@ public class ApiDao extends HibernateDao {
                 results.get(sourceId).add(idSingle);
             } else {
                 // ID didn't exist so add a new list
-                List<T> list = new ArrayList<T>();
+                List<T> list = new ArrayList<>();
                 list.add(idSingle);
                 results.put(sourceId, list);
             }
@@ -2481,7 +2446,7 @@ public class ApiDao extends HibernateDao {
      * @return
      */
     private <T extends AbstractApiIdentifiableDTO> List<Long> generateIdList(List<T> idList) {
-        List<Long> results = new ArrayList<Long>(idList.size());
+        List<Long> results = new ArrayList<>(idList.size());
 
         for (T idSingle : idList) {
             results.add(idSingle.getId());

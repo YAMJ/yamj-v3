@@ -40,7 +40,7 @@ public class ApiBoxedSetDTO extends AbstractApiIdentifiableDTO {
     private Integer memberCount;
     private Boolean watched;
     private List<ApiBoxedSetMemberDTO> members;
-    private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<ArtworkType, List<ApiArtworkDTO>>(ArtworkType.class);
+    private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<>(ArtworkType.class);
 
     public String getName() {
         return name;

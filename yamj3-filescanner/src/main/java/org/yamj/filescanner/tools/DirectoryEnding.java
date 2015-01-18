@@ -22,10 +22,10 @@
  */
 package org.yamj.filescanner.tools;
 
-import org.yamj.common.type.DirectoryType;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import org.yamj.common.type.DirectoryType;
 
 /**
  * Check the ending of a directory against known types
@@ -35,7 +35,7 @@ import java.util.Map;
 public final class DirectoryEnding {
 
     // Directory endings for DVD and Blurays
-    private static final Map<String, DirectoryType> DIR_ENDINGS = new HashMap<String, DirectoryType>(3);
+    private static final Map<String, DirectoryType> DIR_ENDINGS = new HashMap<>(3);
 
     static {
         // The ending of the directory & Type

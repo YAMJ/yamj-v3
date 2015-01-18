@@ -22,22 +22,13 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.CastCrew;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
@@ -59,7 +50,7 @@ public class MetadataDao extends HibernateDao {
             query.setMaxResults(maxResults);
         }
 
-        List<QueueDTO> queueElements = new ArrayList<QueueDTO>();
+        List<QueueDTO> queueElements = new ArrayList<>();
         List<Object[]> objects = query.list();
         for (Object[] object : objects) {
             QueueDTO queueElement = new QueueDTO();
@@ -142,7 +133,7 @@ public class MetadataDao extends HibernateDao {
         sb.append("WHERE a.artworkType=:artworkType ");
         sb.append("AND lower(p.identifier)=:identifier ");
 
-        Map<String,Object> params = new HashMap<String,Object>();
+        Map<String,Object> params = new HashMap<>();
         params.put("artworkType", ArtworkType.PHOTO);
         params.put("identifier", identifier.toLowerCase());
 

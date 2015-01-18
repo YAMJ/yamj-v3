@@ -51,12 +51,12 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     private String cacheFilename;
     private String cacheDir;
     private String videoimage;
-    private List<ApiGenreDTO> genres = new ArrayList<ApiGenreDTO>();
-    private List<Studio> studios = new ArrayList<Studio>();
-    private List<Certification> certifications = new ArrayList<Certification>();
-    private List<ApiRatingDTO> ratings = new ArrayList<ApiRatingDTO>();
-    private List<ApiFileDTO> files = new ArrayList<ApiFileDTO>();
-    private final Map<JobType,List<ApiPersonDTO>> cast = new EnumMap<JobType,List<ApiPersonDTO>>(JobType.class);
+    private List<ApiGenreDTO> genres = new ArrayList<>();
+    private List<Studio> studios = new ArrayList<>();
+    private List<Certification> certifications = new ArrayList<>();
+    private List<ApiRatingDTO> ratings = new ArrayList<>();
+    private List<ApiFileDTO> files = new ArrayList<>();
+    private final Map<JobType,List<ApiPersonDTO>> cast = new EnumMap<>(JobType.class);
 
     //<editor-fold defaultstate="collapsed" desc="Setter Methods">
     public void setSeriesId(Long seriesId) {

@@ -328,7 +328,7 @@ public final class InfoReader {
             }
             
             if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
-                List<Node> writerNodes = new ArrayList<Node>();
+                List<Node> writerNodes = new ArrayList<>();
                 // get writers list
                 NodeList nlWriters = eCommon.getElementsByTagName("writer");
                 if (nlWriters != null && nlWriters.getLength() > 0) {

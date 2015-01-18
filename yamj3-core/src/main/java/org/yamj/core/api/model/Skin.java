@@ -64,9 +64,8 @@ public class Skin {
     public String getName() {
         if (StringUtils.isBlank(name)) {
             return path;
-        } else {
-            return name;
         }
+        return name;
     }
 
     public void setName(String name) {

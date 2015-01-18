@@ -22,12 +22,10 @@
  */
 package org.yamj.jetty;
 
-import org.yamj.common.cmdline.CmdLineException;
-import org.yamj.common.cmdline.CmdLineOption;
-import org.yamj.common.cmdline.CmdLineParser;
-import org.yamj.common.tools.ClassTools;
-import org.yamj.common.type.ExitType;
-import static org.yamj.common.type.ExitType.*;
+import static org.yamj.common.type.ExitType.CMDLINE_ERROR;
+import static org.yamj.common.type.ExitType.STARTUP_FAILURE;
+import static org.yamj.common.type.ExitType.SUCCESS;
+
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;
@@ -43,7 +41,12 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamj.common.cmdline.CmdLineException;
+import org.yamj.common.cmdline.CmdLineOption;
+import org.yamj.common.cmdline.CmdLineParser;
 import org.yamj.common.model.YamjInfo;
+import org.yamj.common.tools.ClassTools;
+import org.yamj.common.type.ExitType;
 
 public class Start {
 
@@ -194,16 +197,14 @@ public class Start {
     private static int convertToInt(String toConvert, int defaultValue) {
         if (StringUtils.isNumeric(toConvert)) {
             return Integer.parseInt(toConvert);
-        } else {
-            return defaultValue;
         }
+        return defaultValue;
     }
 
     private static boolean convertToBoolean(String toConvert, boolean defaultValue) {
         if (StringUtils.isNotBlank(toConvert)) {
             return Boolean.parseBoolean(toConvert);
-        } else {
-            return defaultValue;
         }
+        return defaultValue;
     }
 }

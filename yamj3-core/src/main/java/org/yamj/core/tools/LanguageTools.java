@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -139,9 +140,8 @@ public class LanguageTools {
         if (LOOSE_LANGUAGE_MAP.containsKey(language)) {
             Pattern langPatt = LOOSE_LANGUAGE_MAP.get(language);
             return langPatt.toString().toLowerCase();
-        } else {
-            return "";
         }
+        return StringUtils.EMPTY;
     }
 
     public static TokensPatternMap getStrictLanguageMap() {

@@ -58,13 +58,13 @@ public class ArtworkScannerService {
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkScannerService.class);
     private static final String USE_SCANNER_FOR = "Use {} scanner for {}";
     
-    private final HashMap<String, IMoviePosterScanner> registeredMoviePosterScanner = new HashMap<String, IMoviePosterScanner>();
-    private final HashMap<String, ITvShowPosterScanner> registeredTvShowPosterScanner = new HashMap<String, ITvShowPosterScanner>();
-    private final HashMap<String, IMovieFanartScanner> registeredMovieFanartScanner = new HashMap<String, IMovieFanartScanner>();
-    private final HashMap<String, ITvShowFanartScanner> registeredTvShowFanartScanner = new HashMap<String, ITvShowFanartScanner>();
-    private final HashMap<String, ITvShowBannerScanner> registeredTvShowBannerScanner = new HashMap<String, ITvShowBannerScanner>();
-    private final HashMap<String, ITvShowVideoImageScanner> registeredTvShowVideoImageScanner = new HashMap<String, ITvShowVideoImageScanner>();
-    private final HashMap<String, IPhotoScanner> registeredPhotoScanner = new HashMap<String, IPhotoScanner>();
+    private final HashMap<String, IMoviePosterScanner> registeredMoviePosterScanner = new HashMap<>();
+    private final HashMap<String, ITvShowPosterScanner> registeredTvShowPosterScanner = new HashMap<>();
+    private final HashMap<String, IMovieFanartScanner> registeredMovieFanartScanner = new HashMap<>();
+    private final HashMap<String, ITvShowFanartScanner> registeredTvShowFanartScanner = new HashMap<>();
+    private final HashMap<String, ITvShowBannerScanner> registeredTvShowBannerScanner = new HashMap<>();
+    private final HashMap<String, ITvShowVideoImageScanner> registeredTvShowVideoImageScanner = new HashMap<>();
+    private final HashMap<String, IPhotoScanner> registeredPhotoScanner = new HashMap<>();
     
     @Autowired
     private ArtworkLocatorService artworkLocatorService;
@@ -118,7 +118,7 @@ public class ArtworkScannerService {
         Artwork artwork = artworkStorageService.getRequiredArtwork(queueElement.getId());
 
         // holds the located artwork
-        List<ArtworkLocated> locatedArtworks = new LinkedList<ArtworkLocated>();
+        List<ArtworkLocated> locatedArtworks = new LinkedList<>();
 
         if (ArtworkType.POSTER == artwork.getArtworkType()) {
             // poster only for movie, season, series and boxed sets

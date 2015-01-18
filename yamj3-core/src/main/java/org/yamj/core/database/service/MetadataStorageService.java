@@ -287,7 +287,7 @@ public class MetadataStorageService {
         // NOTE: participations are stored by cascade
         
         // holds the participations to delete
-        Set<FilmParticipation> deletions = new HashSet<FilmParticipation>();
+        Set<FilmParticipation> deletions = new HashSet<>();
         
         for (FilmParticipation filmo : person.getFilmography()) {
             
@@ -388,7 +388,7 @@ public class MetadataStorageService {
             return;
         }
 
-        Set<Genre> genres = new LinkedHashSet<Genre>();
+        Set<Genre> genres = new LinkedHashSet<>();
         for (String genreName : videoData.getGenreNames()) {
             Genre genre = commonDao.getGenre(genreName);
             if (genre != null) {
@@ -408,7 +408,7 @@ public class MetadataStorageService {
             return;
         }
 
-        Set<Genre> genres = new LinkedHashSet<Genre>();
+        Set<Genre> genres = new LinkedHashSet<>();
         for (String genreName : series.getGenreNames()) {
             Genre genre = commonDao.getGenre(genreName);
             if (genre != null) {
@@ -428,7 +428,7 @@ public class MetadataStorageService {
             return;
         }
 
-        Set<Certification> certifications = new LinkedHashSet<Certification>();
+        Set<Certification> certifications = new LinkedHashSet<>();
         for (Entry<String,String> entry : videoData.getCertificationInfos().entrySet()) {
             Certification certification = commonDao.getCertification(entry.getKey(), entry.getValue());
             if (certification != null) {
@@ -448,7 +448,7 @@ public class MetadataStorageService {
             return;
         }
 
-        Set<Certification> certifications = new LinkedHashSet<Certification>();
+        Set<Certification> certifications = new LinkedHashSet<>();
         for (Entry<String,String> entry : series.getCertificationInfos().entrySet()) {
             Certification certification = commonDao.getCertification(entry.getKey(), entry.getValue());
             if (certification != null) {
@@ -468,7 +468,7 @@ public class MetadataStorageService {
             return;
         }
 
-        Set<Studio> studios = new LinkedHashSet<Studio>();
+        Set<Studio> studios = new LinkedHashSet<>();
         for (String studioName : videoData.getStudioNames()) {
             Studio studio = commonDao.getStudio(studioName);
             if (studio != null) {
@@ -488,7 +488,7 @@ public class MetadataStorageService {
             return;
         }
 
-        Set<Studio> studios = new LinkedHashSet<Studio>();
+        Set<Studio> studios = new LinkedHashSet<>();
         for (String studioName : series.getStudioNames()) {
             Studio studio = commonDao.getStudio(studioName);
             if (studio != null) {
@@ -552,7 +552,7 @@ public class MetadataStorageService {
             return;
         }
 
-        List<CastCrew> deleteCredits = new ArrayList<CastCrew>(videoData.getCredits());
+        List<CastCrew> deleteCredits = new ArrayList<>(videoData.getCredits());
         int ordering = 0; // ordering counter
         
         for (CreditDTO dto : videoData.getCreditDTOS()) {
@@ -567,9 +567,8 @@ public class MetadataStorageService {
                     LOG.warn("Person '{}' not found, skipping", dto.getName());
                     // continue with next cast entry
                     continue;
-                } else {
-                    LOG.trace("Found person '{}' for identifier '{}'", person.getName(), identifier);
                 }
+                LOG.trace("Found person '{}' for identifier '{}'", person.getName(), identifier);
 
                 // create new association between person and video
                 castCrew = new CastCrew(person, videoData, dto.getJobType());

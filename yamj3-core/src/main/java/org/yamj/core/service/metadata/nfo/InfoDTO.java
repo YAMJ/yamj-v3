@@ -32,16 +32,16 @@ public final class InfoDTO {
 
     private boolean changed = false;
     private boolean tvShow = false;
-    private List<String> skipOnlineScans = new ArrayList<String>(0);
-    private Map<String, String> ids = new HashMap<String, String>(2);
-    private Map<String, Integer> setInfos = new HashMap<String, Integer>(2);
-    private Map<String, String> certificationInfos = new HashMap<String, String>(1);
-    private Set<CreditDTO> credits = new LinkedHashSet<CreditDTO>(10);
-    private Set<String> genres = new LinkedHashSet<String>(5);
-    private Set<InfoEpisodeDTO> episodes = new HashSet<InfoEpisodeDTO>();
-    private Set<String> posterURLs = new HashSet<String>(0);
-    private Set<String> fanartURLs = new HashSet<String>(0);
-    private Set<String> trailerURLs= new HashSet<String>(0);
+    private List<String> skipOnlineScans = new ArrayList<>(0);
+    private Map<String, String> ids = new HashMap<>(2);
+    private Map<String, Integer> setInfos = new HashMap<>(2);
+    private Map<String, String> certificationInfos = new HashMap<>(1);
+    private Set<CreditDTO> credits = new LinkedHashSet<>(10);
+    private Set<String> genres = new LinkedHashSet<>(5);
+    private Set<InfoEpisodeDTO> episodes = new HashSet<>();
+    private Set<String> posterURLs = new HashSet<>(0);
+    private Set<String> fanartURLs = new HashSet<>(0);
+    private Set<String> trailerURLs= new HashSet<>(0);
     private boolean watched = false;
     private String title;
     private String titleOriginal;
@@ -373,7 +373,7 @@ public final class InfoDTO {
     }
 
     public Set<InfoEpisodeDTO> getEpisodes(int season) {
-        Set<InfoEpisodeDTO> episodeDTOs = new HashSet<InfoEpisodeDTO>();
+        Set<InfoEpisodeDTO> episodeDTOs = new HashSet<>();
         for (InfoEpisodeDTO dto : this.episodes) {
             if (dto.getSeason() == season) {
                 episodeDTOs.add(dto);

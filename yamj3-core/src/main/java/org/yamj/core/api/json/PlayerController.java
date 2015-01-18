@@ -55,7 +55,7 @@ public class PlayerController {
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperList<PlayerPathOld> playerList(@ModelAttribute("player") OptionsPlayer options) {
-        ApiWrapperList<PlayerPathOld> wrapper = new ApiWrapperList<PlayerPathOld>();
+        ApiWrapperList<PlayerPathOld> wrapper = new ApiWrapperList<>();
 
         // If not mode is specified, make it exact
         if (StringUtils.isBlank(options.getMode())) {
@@ -167,7 +167,7 @@ public class PlayerController {
     }
 
     private List<PlayerInfo> getDummyPlayers(int playerCount, int pathCount) {
-        List<PlayerInfo> players = new ArrayList<PlayerInfo>();
+        List<PlayerInfo> players = new ArrayList<>();
 
         for (int loopPlayer = 1; loopPlayer <= playerCount; loopPlayer++) {
             PlayerInfo p = new PlayerInfo();

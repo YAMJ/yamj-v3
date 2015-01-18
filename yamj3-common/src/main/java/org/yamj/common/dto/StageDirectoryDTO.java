@@ -36,7 +36,7 @@ public class StageDirectoryDTO implements Serializable {
     private static final long serialVersionUID = 2L;
     private String path;
     private long date;
-    private List<StageFileDTO> stageFiles = new ArrayList<StageFileDTO>(0);
+    private List<StageFileDTO> stageFiles = new ArrayList<>(0);
 
     public String getPath() {
         return path;

@@ -49,7 +49,7 @@ public class ArtworkLocatorService {
     private ConfigService configService;
 
     private Set<String> buildSearchMap(ArtworkType artworkType, List<StageFile> videoFiles, Set<StageDirectory> directories) {
-        Set<String> artworkNames = new HashSet<String>();
+        Set<String> artworkNames = new HashSet<>();
 
         // generic names (placed in folder)
         if (ArtworkType.POSTER == artworkType) {
@@ -101,7 +101,7 @@ public class ArtworkLocatorService {
     }
 
     private Set<String> buildSpecialMap(ArtworkType artworkType, List<StageFile> videoFiles) {
-        Set<String> artworkNames = new HashSet<String>();
+        Set<String> artworkNames = new HashSet<>();
         for (StageFile videoFile : videoFiles) {
             if (ArtworkType.POSTER == artworkType) {
                 artworkNames.add(videoFile.getBaseName().toLowerCase());
@@ -126,7 +126,7 @@ public class ArtworkLocatorService {
         }
 
         // search in same directory than video files
-        Set<StageDirectory> directories = new HashSet<StageDirectory>();
+        Set<StageDirectory> directories = new HashSet<>();
         Set<String> artworkNames = this.buildSearchMap(artworkType, videoFiles, directories);
         List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
 
@@ -156,7 +156,7 @@ public class ArtworkLocatorService {
         }
 
         // search in same directory than video files
-        Set<StageDirectory> directories = new HashSet<StageDirectory>();
+        Set<StageDirectory> directories = new HashSet<>();
         Set<String> artworkNames = this.buildSearchMap(artworkType, videoFiles, directories);
         List<StageFile> artworks = findArtworkStageFiles(directories, artworkNames);
 
@@ -196,7 +196,7 @@ public class ArtworkLocatorService {
         sb.append("and f.status != :deleted ");
         sb.append("and f.fileType = :fileType ");
 
-        final Map<String,Object> params = new HashMap<String,Object>();
+        final Map<String,Object> params = new HashMap<>();
         params.put("deleted", StatusType.DELETED);
         params.put("fileType", FileType.IMAGE);
         
@@ -214,7 +214,7 @@ public class ArtworkLocatorService {
         sb.append("and f.status != :duplicate ");
         sb.append("and f.status != :deleted ");
 
-        final Map<String,Object> params = new HashMap<String,Object>();
+        final Map<String,Object> params = new HashMap<>();
         params.put("videoDataId", videoData.getId());
         params.put("duplicate", StatusType.DUPLICATE);
         params.put("deleted", StatusType.DELETED);
@@ -235,7 +235,7 @@ public class ArtworkLocatorService {
         sb.append("and f.status != :duplicate ");
         sb.append("and f.status != :deleted ");
         
-        final Map<String,Object> params = new HashMap<String,Object>();
+        final Map<String,Object> params = new HashMap<>();
         params.put("seasonId", season.getId());
         params.put("duplicate", StatusType.DUPLICATE);
         params.put("deleted", StatusType.DELETED);
@@ -253,7 +253,7 @@ public class ArtworkLocatorService {
         sb.append("and lower(f.baseName) in (:artworkNames) ");
         sb.append("and f.status != :deleted ");
 
-        final Map<String,Object> params = new HashMap<String,Object>();
+        final Map<String,Object> params = new HashMap<>();
         params.put("directories", directories);
         params.put("fileType", FileType.IMAGE);
         params.put("artworkNames", artworkNames);
@@ -265,7 +265,7 @@ public class ArtworkLocatorService {
     public List<StageFile> getPhotos(Person person) {
         List<StageFile> artworks;
 
-        Set<String> artworkNames = new HashSet<String>();
+        Set<String> artworkNames = new HashSet<>();
         artworkNames.add(person.getName().toLowerCase());
         artworkNames.add(person.getName().toLowerCase() + ".photo");
         artworkNames.add(person.getName().toLowerCase() + "-photo");

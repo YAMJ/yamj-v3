@@ -43,15 +43,15 @@ public class AllocineApiWrapper {
     private final Lock searchSeriesLock = new ReentrantLock(true);
     private final Lock searchPersonLock = new ReentrantLock(true);
     // make maximal 20 seachMovie objects maximal 30 minutes accessible
-    private final LRUTimedCache<String, Search> searchMoviesCache = new LRUTimedCache<String, Search>(20, 1800);
+    private final LRUTimedCache<String, Search> searchMoviesCache = new LRUTimedCache<>(20, 1800);
     // make maximal 20 seachMovie objects maximal 30 minutes accessible
-    private final LRUTimedCache<String, Search> searchSeriesCache = new LRUTimedCache<String, Search>(20, 1800);
+    private final LRUTimedCache<String, Search> searchSeriesCache = new LRUTimedCache<>(20, 1800);
     // make maximal 10 seachPerson objects maximal 30 minutes accessible
-    private final LRUTimedCache<String, Search> searchPersonCache = new LRUTimedCache<String, Search>(10, 1800);
+    private final LRUTimedCache<String, Search> searchPersonCache = new LRUTimedCache<>(10, 1800);
     // make maximal 30 movies maximal 30 minutes accessible
-    private final LRUTimedCache<String, MovieInfos> moviesCache = new LRUTimedCache<String, MovieInfos>(30, 1800);
+    private final LRUTimedCache<String, MovieInfos> moviesCache = new LRUTimedCache<>(30, 1800);
     // make maximal 30 movies maximal 30 minutes accessible
-    private final LRUTimedCache<String, TvSeriesInfos> tvSeriesCache = new LRUTimedCache<String, TvSeriesInfos>(30, 1800);
+    private final LRUTimedCache<String, TvSeriesInfos> tvSeriesCache = new LRUTimedCache<>(30, 1800);
 
     @Resource(name="allocineApi")
     private AllocineApi allocineApi;

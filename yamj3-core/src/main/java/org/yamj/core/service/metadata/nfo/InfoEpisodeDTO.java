@@ -171,9 +171,8 @@ public final class InfoEpisodeDTO {
                     .append(getSeason(), other.getSeason())
                     .append(getEpisode(), other.getEpisode())
                     .isEquals();
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

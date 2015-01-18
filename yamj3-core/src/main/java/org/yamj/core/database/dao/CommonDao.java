@@ -40,11 +40,7 @@ import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.options.OptionsRating;
 import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.BoxedSet;
-import org.yamj.core.database.model.Certification;
-import org.yamj.core.database.model.Genre;
-import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
 
@@ -185,7 +181,7 @@ public class CommonDao extends HibernateDao {
         sb.append("where lower(country) = :country ");
         sb.append("and lower(certificate) = :certificate ");
 
-        Map<String, Object> params = new HashMap<String,Object>();
+        Map<String, Object> params = new HashMap<>();
         params.put("country", country.toLowerCase());
         params.put("certificate", certificate.toLowerCase());
 

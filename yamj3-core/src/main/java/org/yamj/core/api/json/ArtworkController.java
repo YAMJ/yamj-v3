@@ -54,7 +54,7 @@ public class ArtworkController {
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ApiWrapperSingle<ApiArtworkDTO> getArtwork(@PathVariable Long id) throws IOException {
-        ApiWrapperSingle<ApiArtworkDTO> wrapper = new ApiWrapperSingle<ApiArtworkDTO>();
+        ApiWrapperSingle<ApiArtworkDTO> wrapper = new ApiWrapperSingle<>();
 
         LOG.info("Attempting to retrieve artwork with id '{}'", id);
         ApiArtworkDTO artwork = api.getArtworkById(id);
@@ -71,7 +71,7 @@ public class ArtworkController {
     @ResponseBody
     public ApiWrapperList<ApiArtworkDTO> getArtworkList(@ModelAttribute("options") OptionsIndexArtwork options) {
         LOG.info("INDEX: Artwork list - Options: {}", options.toString());
-        ApiWrapperList<ApiArtworkDTO> wrapper = new ApiWrapperList<ApiArtworkDTO>();
+        ApiWrapperList<ApiArtworkDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
         wrapper.setResults(api.getArtworkList(wrapper));
         wrapper.setStatusCheck();

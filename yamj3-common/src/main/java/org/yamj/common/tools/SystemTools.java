@@ -22,11 +22,7 @@
  */
 package org.yamj.common.tools;
 
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
+import java.net.*;
 import java.util.Enumeration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,8 +103,7 @@ public class SystemTools {
 
         if (getIpv4) {
             return ipv4;
-        } else {
-            return ipv6;
         }
+        return ipv6;
     }
 }

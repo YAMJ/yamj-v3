@@ -59,9 +59,8 @@ public class ArtworkProcessScheduler {
                 LOG.info("Artwork processing is disabled");
             }
             return;
-        } else {
-            messageDisabled = Boolean.FALSE;
         }
+        messageDisabled = Boolean.FALSE;
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.artworkprocess.maxResults", 20);
         List<QueueDTO> queueElements = artworkStorageService.getArtworLocatedQueue(maxResults);
@@ -71,7 +70,7 @@ public class ArtworkProcessScheduler {
         }
 
         LOG.info("Found {} artwork objects to process; process with {} threads", queueElements.size(), maxThreads);
-        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<QueueDTO>(queueElements);
+        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {

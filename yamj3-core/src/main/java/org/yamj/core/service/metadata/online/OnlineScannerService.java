@@ -48,10 +48,10 @@ public class OnlineScannerService {
     public static final String PERSON_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.person", "tmdb");
     public static final String PERSON_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.person.alternate", "");
     
-    private final HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<String, IMovieScanner>();
-    private final HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<String, ISeriesScanner>();
-    private final HashMap<String, IPersonScanner> registeredPersonScanner = new HashMap<String, IPersonScanner>();
-    private final HashMap<String, IFilmographyScanner> registeredFilmographyScanner = new HashMap<String, IFilmographyScanner>();
+    private final HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<>();
+    private final HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<>();
+    private final HashMap<String, IPersonScanner> registeredPersonScanner = new HashMap<>();
+    private final HashMap<String, IFilmographyScanner> registeredFilmographyScanner = new HashMap<>();
 
     @Autowired
     private ConfigService configService;
@@ -375,7 +375,7 @@ public class OnlineScannerService {
         }
         
         if (autodetect && !foundInfo) {
-            Set<INfoScanner> nfoScanners = new HashSet<INfoScanner>();
+            Set<INfoScanner> nfoScanners = new HashSet<>();
             if (dto.isTvShow()) {
                 nfoScanners.addAll(this.registeredSeriesScanner.values());
             } else {

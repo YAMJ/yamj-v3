@@ -287,7 +287,7 @@ public class PagesController {
     public ModelAndView skinInfo() {
         ModelAndView view = new ModelAndView("skin-info", "skin-entity", new Skin());
         List<String> dirNames = fileStorageService.getDirectoryList(StorageType.SKIN, ".");
-        List<Skin> skins = new ArrayList<Skin>(dirNames.size());
+        List<Skin> skins = new ArrayList<>(dirNames.size());
         for (String dir : dirNames) {
             // Skip directories that start with "."
             if (dir.startsWith(".")) {

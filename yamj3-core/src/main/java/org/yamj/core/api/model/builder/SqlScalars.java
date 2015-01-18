@@ -44,26 +44,26 @@ public final class SqlScalars {
 
     public SqlScalars() {
         this.sql = new StringBuilder();
-        this.scalars = new HashMap<String, BasicType>();
-        this.parameters = new HashMap<String, Object>();
+        this.scalars = new HashMap<>();
+        this.parameters = new HashMap<>();
     }
 
     public SqlScalars(StringBuilder sql) {
         this.sql = sql;
-        this.scalars = new HashMap<String, BasicType>();
-        this.parameters = new HashMap<String, Object>();
+        this.scalars = new HashMap<>();
+        this.parameters = new HashMap<>();
     }
 
     public SqlScalars(String sql) {
         setSql(sql);
-        this.scalars = new HashMap<String, BasicType>();
-        this.parameters = new HashMap<String, Object>();
+        this.scalars = new HashMap<>();
+        this.parameters = new HashMap<>();
     }
 
     public SqlScalars(StringBuilder sql, Map<String, BasicType> scalars) {
         this.sql = sql;
         this.scalars = scalars;
-        this.parameters = new HashMap<String, Object>();
+        this.parameters = new HashMap<>();
     }
 
     /**

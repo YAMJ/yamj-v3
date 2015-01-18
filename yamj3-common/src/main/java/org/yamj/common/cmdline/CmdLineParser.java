@@ -38,11 +38,11 @@ public final class CmdLineParser {
     /**
      * Holds the command line options
      */
-    private final LinkedList<CmdLineOption> options = new LinkedList<CmdLineOption>();
+    private final LinkedList<CmdLineOption> options = new LinkedList<>();
     /**
      * Holds the parsed options
      */
-    private final HashMap<String, ParsedOption> parsedOptions = new HashMap<String, ParsedOption>();
+    private final HashMap<String, ParsedOption> parsedOptions = new HashMap<>();
 
     /**
      * Create a new command line parser.

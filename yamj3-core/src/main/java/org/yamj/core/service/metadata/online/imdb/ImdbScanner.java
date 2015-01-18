@@ -676,9 +676,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             final DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "releaseinfo"), charset);
             if (ResponseTools.isOK(response)) {
                 return response.getContent();
-            } else {
-                LOG.warn("Requesting release infos failed with status {}: {}", response.getStatusCode(), imdbId);
             }
+            LOG.warn("Requesting release infos failed with status {}: {}", response.getStatusCode(), imdbId);
         } catch (Exception ex) {
             LOG.error("Requesting release infos failed: " + imdbId, ex);
         }

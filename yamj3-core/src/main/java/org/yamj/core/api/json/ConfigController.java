@@ -50,7 +50,7 @@ public class ConfigController {
         } else {
             LOG.info("Getting configuration properties for '{}'", options.getConfig());
         }
-        ApiWrapperList<Configuration> wrapper = new ApiWrapperList<Configuration>();
+        ApiWrapperList<Configuration> wrapper = new ApiWrapperList<>();
 
         // If not mode is specified, make it exact
         if (StringUtils.isBlank(options.getMode())) {

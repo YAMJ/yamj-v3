@@ -240,7 +240,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
 
     public List<DataItem> splitDataItems() {
         if (dataitemList == null) {
-            dataitemList = new ArrayList<DataItem>();
+            dataitemList = new ArrayList<>();
             if (dataitems != null) {
                 for (String item : dataitems) {
                     DataItem di = DataItem.fromString(item);
@@ -274,11 +274,11 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     
     public Map<JobType,Integer> splitJobs() {
         if (jobTypes == null ) {
-            jobTypes = new EnumMap<JobType,Integer>(JobType.class);
+            jobTypes = new EnumMap<>(JobType.class);
             if (CollectionUtils.isEmpty(jobs)) {
                 jobTypes = Collections.emptyMap();
             } else {
-                jobTypes = new HashMap<JobType,Integer>();
+                jobTypes = new HashMap<>();
                 for (String job : jobs) {
                     if ("ALL".equalsIgnoreCase(job)) {
                         allJobTypes = true;
@@ -319,7 +319,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     
     @JsonIgnore
     public Set<String> getJobTypesAsSet() {
-        HashSet<String> set = new HashSet<String>();
+        HashSet<String> set = new HashSet<>();
         for (JobType jobType : this.splitJobs().keySet()) {
             set.add(jobType.toString());
         }
@@ -334,7 +334,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
      */
     protected List<MetaDataType> splitTypes(String type) {
         if (CollectionUtils.isEmpty(videoTypes)) {
-            videoTypes = new ArrayList<MetaDataType>();            
+            videoTypes = new ArrayList<>();            
             if (StringUtils.isEmpty(type) || StringUtils.containsIgnoreCase(type, "ALL")) {
                 videoTypes.add(MetaDataType.MOVIE);
                 videoTypes.add(MetaDataType.SERIES);

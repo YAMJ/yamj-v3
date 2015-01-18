@@ -64,10 +64,10 @@ public class MediaInfoService {
     private static final String MI_RAR_FILENAME_LINUX = "mediainfo-rar";
     // media info settings
     private static final File MEDIAINFO_PATH = new File(PropertyTools.getProperty("mediainfo.home", "./mediaInfo/"));
-    private final List<String> execMediaInfo = new ArrayList<String>();
+    private final List<String> execMediaInfo = new ArrayList<>();
     private boolean isMediaInfoRar = Boolean.FALSE;
     private boolean isActivated = Boolean.TRUE;
-    private static final List<String> RAR_DISK_IMAGES = new ArrayList<String>();
+    private static final List<String> RAR_DISK_IMAGES = new ArrayList<>();
 
     @Autowired
     private MediaStorageService mediaStorageService;
@@ -183,10 +183,10 @@ public class MediaInfoService {
         		stream = createStream(stageFile.getFullPath());
         	}
 
-            Map<String, String> infosGeneral = new HashMap<String, String>();
-            List<Map<String, String>> infosVideo = new ArrayList<Map<String, String>>();
-            List<Map<String, String>> infosAudio = new ArrayList<Map<String, String>>();
-            List<Map<String, String>> infosText = new ArrayList<Map<String, String>>();
+            Map<String, String> infosGeneral = new HashMap<>();
+            List<Map<String, String>> infosVideo = new ArrayList<>();
+            List<Map<String, String>> infosAudio = new ArrayList<>();
+            List<Map<String, String>> infosText = new ArrayList<>();
 
             parseMediaInfo(stream, infosGeneral, infosVideo, infosAudio, infosText);
 
@@ -299,7 +299,7 @@ public class MediaInfoService {
         }
 
         // cycle through audio streams
-        Set<AudioCodec> processedAudioCodecs = new HashSet<AudioCodec>(0);
+        Set<AudioCodec> processedAudioCodecs = new HashSet<>(0);
         for (int numAudio = 0; numAudio < infosAudio.size(); numAudio++) {
             Map<String, String> infosCurrentAudio = infosAudio.get(numAudio);
             AudioCodec codec = mediaFile.getAudioCodec(numAudio + 1);
@@ -322,7 +322,7 @@ public class MediaInfoService {
         }
 
         // cycle through subtitle streams
-        Set<Subtitle> processedSubtitles = new HashSet<Subtitle>(0);
+        Set<Subtitle> processedSubtitles = new HashSet<>(0);
         for (int numText = 0; numText < infosText.size(); numText++) {
             Map<String, String> infosCurrentText = infosText.get(numText);
             Subtitle subtitle = mediaFile.getSubtitle(numText + 1);
@@ -497,7 +497,7 @@ public class MediaInfoService {
 
     private MediaInfoStream createStream(String movieFilePath) throws IOException {
         // Create the command line
-        List<String> commandMedia = new ArrayList<String>(execMediaInfo);
+        List<String> commandMedia = new ArrayList<>(execMediaInfo);
         commandMedia.add(movieFilePath);
 
         ProcessBuilder pb = new ProcessBuilder(commandMedia);
@@ -533,7 +533,7 @@ public class MediaInfoService {
              BufferedReader bufReader = new BufferedReader(isr))
         {
             // Improvement, less code line, each cat have same code, so use the same for all.
-            Map<String, List<Map<String, String>>> matches = new HashMap<String, List<Map<String, String>>>();
+            Map<String, List<Map<String, String>>> matches = new HashMap<>();
 
             // Create a fake one for General, we got only one, but to use the same algo we must create this one.
             String generalKey[] = {"General", "Géneral", "* Général"};
@@ -558,7 +558,7 @@ public class MediaInfoService {
                 List<Map<String, String>> currentCat = matches.get(line);
 
                 if (currentCat != null) {
-                    HashMap<String, String> currentData = new HashMap<String, String>();
+                    HashMap<String, String> currentData = new HashMap<>();
                     int indexSeparator = -1;
                     while (((line = localInputReadLine(bufReader)) != null) && ((indexSeparator = line.indexOf(" : ")) != -1)) {
                         label = line.substring(0, indexSeparator).trim();

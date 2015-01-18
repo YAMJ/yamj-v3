@@ -46,8 +46,8 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     private String deathPlace;
     private String job;
     private String role;
-    private List<ApiArtworkDTO> artwork = new ArrayList<ApiArtworkDTO>(0);
-    private List<ApiFilmographyDTO> filmography = new ArrayList<ApiFilmographyDTO>(0);
+    private List<ApiArtworkDTO> artwork = new ArrayList<>(0);
+    private List<ApiFilmographyDTO> filmography = new ArrayList<>(0);
     @JsonIgnore
     private JobType jobType;
 

@@ -24,7 +24,6 @@ package org.yamj.common.tools;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import org.yamj.common.util.KeywordMap;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
@@ -36,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.yamj.common.util.KeywordMap;
 
 public final class PropertyTools extends PropertyPlaceholderConfigurer {
 
@@ -183,7 +183,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
 
     public static Set<Entry<Object, Object>> getEntrySet() {
         // Shamelessly adapted from: http://stackoverflow.com/questions/54295/how-to-write-java-util-properties-to-xml-with-sorted-keys
-        return new TreeMap<Object, Object>(PROPERTIES).entrySet();
+        return new TreeMap<>(PROPERTIES).entrySet();
     }
 
     public static void setProperty(String key, String value) {

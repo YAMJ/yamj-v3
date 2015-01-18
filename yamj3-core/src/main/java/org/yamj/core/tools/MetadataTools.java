@@ -109,9 +109,8 @@ public final class MetadataTools {
         Character tempC = CHAR_REPLACEMENT_MAP.get(charToReplace);
         if (tempC == null) {
             return charToReplace.toString();
-        } else {
-            return tempC.toString();
         }
+        return tempC.toString();
     }
 
     /**
@@ -209,7 +208,7 @@ public final class MetadataTools {
             }
 
             // build string
-            returnSize = df.format((float) ((float) fileSize / (float) divider)) + appendText;
+            returnSize = df.format((float) fileSize / (float) divider) + appendText;
         }
 
         return returnSize;
@@ -436,12 +435,10 @@ public final class MetadataTools {
         if (rating > 0.0f) {
             if (rating <= 10.0f) {
                 return Math.round(rating * 10f);
-            } else {
-                return Math.round(rating * 1f);
             }
-        } else {
-            return -1;
+            return Math.round(rating * 1f);
         }
+        return -1;
     }
 
     /**
@@ -521,9 +518,8 @@ public final class MetadataTools {
         Matcher m = mpaaPattern.matcher(mpaaCertification);
         if (m.find()) {
             return m.group(1).trim();
-        } else {
-            return mpaaCertification.trim();
         }
+        return mpaaCertification.trim();
     }
 
     public static String cleanIdentifier(final String identifier) {
