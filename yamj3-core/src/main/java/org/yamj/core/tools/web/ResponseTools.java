@@ -54,10 +54,13 @@ public final class ResponseTools {
         switch (statusCode) {
             case 408:
             case 419:
+            case 423:
+            case 429:
             case 500:
             case 502:
             case 503:
             case 504:
+            case 507:
             case 509:
             case 598:
             case 599:
