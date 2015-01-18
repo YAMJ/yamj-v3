@@ -88,7 +88,7 @@ public class GitHubServiceImpl implements GitHubService {
 
             DigestedResponse response = httpClient.requestContent(httpGet);
             if (ResponseTools.isNotOK(response)) {
-                LOG.error("Error accessing GitHub informations, response with status {}", response.getStatusCode());
+                LOG.warn("Request for GitHub informations failed with status {}", response.getStatusCode());
                 return returnDate;
             }
 

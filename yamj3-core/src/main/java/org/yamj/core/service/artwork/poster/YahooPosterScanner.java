@@ -88,6 +88,8 @@ public class YahooPosterScanner extends AbstractMoviePosterScanner {
                         dtos.add(new ArtworkDetailDTO(getScannerName(), url));
                     }
                 }
+            } else {
+                LOG.warn("Requesting yahoo poster for '{}' failed with status {}", title, response.getStatusCode());
             }
         } catch (Exception ex) {
             LOG.error("Failed retrieving poster URL from yahoo images '{}': {}", title, ex.getMessage());

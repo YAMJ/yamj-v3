@@ -235,6 +235,8 @@ public final class PlayerTools {
                         LOG.debug("Found path for '{}': {}", addr, path.toString());
                     }
                 }
+            } else {
+                LOG.warn("Request for path infos failed with status {}", response.getStatusCode());
             }
         } catch (IOException ex) {
             LOG.trace("Error getting path info", ex);
@@ -261,6 +263,8 @@ public final class PlayerTools {
                     playerName = wrapper.getResponse().getName();
                     LOG.info("Found player name '{}' for '{}'", playerName, addr);
                 }
+            } else {
+                LOG.warn("Request for player name failed with status {}", response.getStatusCode());
             }
         } catch (IOException ex) {
             LOG.trace("Error getting player name", ex);

@@ -95,6 +95,8 @@ public class ImdbPosterScanner extends AbstractMoviePosterScanner {
                         dtos.add(new ArtworkDetailDTO(getScannerName(), url, HashCodeType.PART));
                     }
                 }
+            } else {
+                LOG.warn("Requesting IMDb poster for '{}' failed with status {}", id, response.getStatusCode());
             }
         } catch (Exception ex) {
             LOG.error("Failed retrieving poster URL from imdb images for id {}: {}", id, ex.getMessage());

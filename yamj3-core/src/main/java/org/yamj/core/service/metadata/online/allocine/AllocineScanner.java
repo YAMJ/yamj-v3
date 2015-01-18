@@ -48,6 +48,7 @@ import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.web.HTMLTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
+import org.yamj.core.tools.web.ResponseTools;
 import org.yamj.core.tools.web.SearchEngineTools;
 
 @Service("allocineScanner")
@@ -112,7 +113,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
 
     @Override
     public String getMovieId(String title, int year) {
-        String allocineId = this.allocineApiWrapper.getAllocineMovieId(title, year);
+        String allocineId = allocineApiWrapper.getAllocineMovieId(title, year);
 
         if (StringUtils.isBlank(allocineId)) {
             // try search engines
@@ -131,22 +132,23 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
 
     @Override
     public ScanResult scan(VideoData videoData) {
-        String allocineId = this.getMovieId(videoData);
+        String allocineId = getMovieId(videoData);
 
         if (StringUtils.isBlank(allocineId)) {
             LOG.debug("Allocine id not available '{}'", videoData.getTitle());
             return ScanResult.MISSING_ID;
         }
 
-        MovieInfos movieInfos = this.allocineApiWrapper.getMovieInfos(allocineId);
+        MovieInfos movieInfos = allocineApiWrapper.getMovieInfos(allocineId);
         if (movieInfos == null || movieInfos.isNotValid()) {
-            LOG.error("Can't find informations for movie with id {}", allocineId);
-
-            // check retry
-            int maxRetries = this.configServiceWrapper.getIntProperty("allocine.maxRetries.movie", 0);
-            if (videoData.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
+            if (isTemporaryError(movieInfos)) {
+                // check retry
+                int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.movie", 0);
+                if (videoData.getRetries() < maxRetries) {
+                    return ScanResult.RETRY;
+                }
             }
+            LOG.error("Can't find informations for movie with id {}", allocineId);
             return ScanResult.ERROR;
         }
 
@@ -203,21 +205,21 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         videoData.addRating(SCANNER_ID, movieInfos.getUserRating());
 
         // DIRECTORS
-        if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
+        if (configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
             for (MoviePerson person : movieInfos.getDirectors()) {
                 videoData.addCreditDTO(createCredit(person, JobType.DIRECTOR));
             }
         }
         
         // WRITERS
-        if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
+        if (configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
             for (MoviePerson person : movieInfos.getWriters()) {
                 videoData.addCreditDTO(createCredit(person, JobType.WRITER));
             }
         }
         
         // ACTORS
-        if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+        if (configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
             for (MoviePerson person : movieInfos.getActors()) {
                 CreditDTO credit = createCredit(person, JobType.ACTOR);
                 credit.setRole(person.getRole());
@@ -226,14 +228,14 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         }
         
         // CAMERA    
-        if (this.configServiceWrapper.isCastScanEnabled(JobType.CAMERA)) {
+        if (configServiceWrapper.isCastScanEnabled(JobType.CAMERA)) {
             for (MoviePerson person : movieInfos.getCamera()) {
                 videoData.addCreditDTO(createCredit(person, JobType.CAMERA));
             }
         }
         
         // PRODUCERS        
-        if (this.configServiceWrapper.isCastScanEnabled(JobType.PRODUCER)) {
+        if (configServiceWrapper.isCastScanEnabled(JobType.PRODUCER)) {
             for (MoviePerson person : movieInfos.getProducers()) {
                 videoData.addCreditDTO(createCredit(person, JobType.PRODUCER));
             }
@@ -275,7 +277,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
 
     @Override
     public String getSeriesId(String title, int year) {
-        String allocineId = this.allocineApiWrapper.getAllocineSeriesId(title, year);
+        String allocineId = allocineApiWrapper.getAllocineSeriesId(title, year);
 
         if (StringUtils.isBlank(allocineId)) {
             // try search engines
@@ -307,7 +309,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
 
     @Override
     public String getPersonId(String name) {
-        String allocineId = this.allocineApiWrapper.getAllocinePersonId(name);
+        String allocineId = allocineApiWrapper.getAllocinePersonId(name);
 
         if (StringUtils.isBlank(allocineId)) {
             // try search engines
@@ -326,22 +328,23 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
 
     @Override
     public ScanResult scan(Series series) {
-        String allocineId = this.getSeriesId(series);
+        String allocineId = getSeriesId(series);
 
         if (StringUtils.isBlank(allocineId)) {
             LOG.debug("Allocine id not available '{}'", series.getTitle());
             return ScanResult.MISSING_ID;
         }
 
-        TvSeriesInfos tvSeriesInfos = this.allocineApiWrapper.getTvSeriesInfos(allocineId);
+        TvSeriesInfos tvSeriesInfos = allocineApiWrapper.getTvSeriesInfos(allocineId);
         if (tvSeriesInfos == null || tvSeriesInfos.isNotValid()) {
-            LOG.error("Can't find informations for series with id {}", allocineId);
-         
-            // check retry
-            int maxRetries = this.configServiceWrapper.getIntProperty("allocine.maxRetries.tvshow", 0);
-            if (series.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
+            if (isTemporaryError(tvSeriesInfos)) {
+                // check retry
+                int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.tvshow", 0);
+                if (series.getRetries() < maxRetries) {
+                    return ScanResult.RETRY;
+                }
             }
+            LOG.error("Can't find informations for series with id {}", allocineId);
             return ScanResult.ERROR;
         }
 
@@ -390,7 +393,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         }
 
         // SCAN SEASONS
-        this.scanSeasons(series, tvSeriesInfos);
+        scanSeasons(series, tvSeriesInfos);
 
         return ScanResult.OK;
     }
@@ -399,7 +402,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
 
         for (Season season : series.getSeasons()) {
 
-            TvSeasonInfos tvSeasonInfos = this.allocineApiWrapper.getTvSeasonInfos(tvSeriesInfos, season.getSeason());
+            TvSeasonInfos tvSeasonInfos = allocineApiWrapper.getTvSeasonInfos(tvSeriesInfos, season.getSeason());
 
             // use values from series
             if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
@@ -428,7 +431,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
             season.setTvSeasonDone();
 
             // scan episodes
-            this.scanEpisodes(season, tvSeasonInfos);
+            scanEpisodes(season, tvSeasonInfos);
         }
     }
 
@@ -462,8 +465,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
                 videoData.setSourceDbId(SCANNER_ID, allocineId);
 
                 List<CastMember> castMembers = null;
-                EpisodeInfos episodeInfos = this.allocineApiWrapper.getEpisodeInfos(allocineId);
-                if (episodeInfos == null) {
+                EpisodeInfos episodeInfos = allocineApiWrapper.getEpisodeInfos(allocineId);
+                if (episodeInfos == null || episodeInfos.isNotValid()) {
                     // fix episode from season info
                     episode.setSynopsis(HTMLTools.replaceHtmlTags(episode.getSynopsis(), " "));
 
@@ -474,7 +477,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
                     if (tvSeasonInfos.getSeason() != null) {
                         castMembers = tvSeasonInfos.getSeason().getCastMember();
                     }
-                } else if (episodeInfos.getEpisode() != null) {
+                } else {
                     // use members from episode
                     castMembers = episodeInfos.getEpisode().getCastMember();
                 }
@@ -518,7 +521,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
                     continue;
                 }
                 
-                if (member.isActor() && this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+                if (member.isActor() && configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
                     CreditDTO credit;
                     if (member.isLeadActor()) {
                         credit = createCredit(member, JobType.ACTOR);
@@ -527,13 +530,13 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
                     }
                     credit.setRole(member.getRole());
                     result.add(credit);
-                } else if (member.isDirector() && this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
+                } else if (member.isDirector() && configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
                     result.add(createCredit(member, JobType.DIRECTOR));
-                } else if (member.isWriter() && this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
+                } else if (member.isWriter() && configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
                     result.add(createCredit(member, JobType.WRITER));
-                } else if (member.isCamera() && this.configServiceWrapper.isCastScanEnabled(JobType.CAMERA)) {
+                } else if (member.isCamera() && configServiceWrapper.isCastScanEnabled(JobType.CAMERA)) {
                     result.add(createCredit(member, JobType.CAMERA));
-                } else if (member.isProducer() && this.configServiceWrapper.isCastScanEnabled(JobType.PRODUCER)) {
+                } else if (member.isProducer() && configServiceWrapper.isCastScanEnabled(JobType.PRODUCER)) {
                     result.add(createCredit(member, JobType.PRODUCER));
                 }
             }
@@ -563,22 +566,23 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
 
     @Override
     public ScanResult scan(Person person) {
-        String allocineId = this.getPersonId(person);
+        String allocineId = getPersonId(person);
 
         if (StringUtils.isBlank(allocineId)) {
             LOG.debug("Allocine id not available '{}'", person.getName());
             return ScanResult.MISSING_ID;
         }
 
-        PersonInfos personInfos = this.allocineApiWrapper.getPersonInfos(allocineId);
+        PersonInfos personInfos = allocineApiWrapper.getPersonInfos(allocineId);
         if (personInfos == null || personInfos.isNotValid()) {
-            LOG.error("Can't find informations for person with id {}", allocineId);
-            
-            // check retry
-            int maxRetries = this.configServiceWrapper.getIntProperty("allocine.maxRetries.person", 0);
-            if (person.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
+            if (isTemporaryError(personInfos)) {
+                // check retry
+                int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.person", 0);
+                if (person.getRetries() < maxRetries) {
+                    return ScanResult.RETRY;
+                }
             }
+            LOG.error("Can't find informations for person with id {}", allocineId);
             return ScanResult.ERROR;
         }
 
@@ -630,15 +634,16 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
             return ScanResult.MISSING_ID;
         }
 
-        FilmographyInfos filmographyInfos = this.allocineApiWrapper.getFilmographyInfos(id);
+        FilmographyInfos filmographyInfos = allocineApiWrapper.getFilmographyInfos(id);
         if (filmographyInfos == null || filmographyInfos.isNotValid()) {
-            LOG.error("Can't find filmography for person '{}' with id {}", person.getName(), id);
-            
-            // check retry
-            int maxRetries = this.configServiceWrapper.getIntProperty("allocine.maxRetries.filmography", 0);
-            if (person.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
+            if (isTemporaryError(filmographyInfos)) {
+                // check retry
+                int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.filmography", 0);
+                if (person.getRetries() < maxRetries) {
+                    return ScanResult.RETRY;
+                }
             }
+            LOG.error("Can't find filmography for person '{}' with id {}", person.getName(), id);
             return ScanResult.ERROR;
         }
     
@@ -719,6 +724,13 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         
         LOG.debug("No Allocine ID found in NFO");
         return Boolean.FALSE;
+    }
+    
+    private static boolean isTemporaryError(IResponseStatus responseStatus) {
+        if (responseStatus == null) {
+            return false;
+        }
+        return ResponseTools.isTemporaryError(responseStatus.getResponseStatusCode());
     }
 }
 
