@@ -29,10 +29,10 @@ import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
+import org.hibernate.annotations.ForeignKey;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
 

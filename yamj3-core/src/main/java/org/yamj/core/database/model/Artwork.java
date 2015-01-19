@@ -25,24 +25,16 @@ package org.yamj.core.database.model;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.*;
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.ForeignKey;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.*;
 import org.hibernate.annotations.Index;
-import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.ArtworkType;
 
@@ -63,37 +55,32 @@ public class Artwork extends AbstractAuditable implements Serializable {
 
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_ARTWORK_VIDEODATA")
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "videodata_id")
+    @JoinColumn(name = "videodata_id", foreignKey = @ForeignKey(name = "FK_ARTWORK_VIDEODATA"))
     private VideoData videoData;
 
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_ARTWORK_SEASON")
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "season_id")
+    @JoinColumn(name = "season_id", foreignKey = @ForeignKey(name = "FK_ARTWORK_SEASON"))
     private Season season;
 
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_ARTWORK_SERIES")
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "series_id")
+    @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_ARTWORK_SERIES"))
     private Series series;
 
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_ARTWORK_PHOTO")
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "person_id")
+    @JoinColumn(name = "person_id", foreignKey = @ForeignKey(name = "FK_ARTWORK_PHOTO"))
     private Person person;
 
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_ARTWORK_BOXEDSET")
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "boxedset_id")
+    @JoinColumn(name = "boxedset_id", foreignKey = @ForeignKey(name = "FK_ARTWORK_BOXEDSET"))
     private BoxedSet boxedSet;
 
     @Index(name = "IX_ARTWORK_STATUS")

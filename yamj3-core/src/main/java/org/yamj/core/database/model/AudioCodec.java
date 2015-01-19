@@ -23,17 +23,10 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -48,8 +41,7 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
 
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "mediafile_id", nullable = false)
-    @ForeignKey(name = "FK_AUDIOCODEC_MEDIAFILE")
+    @JoinColumn(name = "mediafile_id", nullable = false, foreignKey = @ForeignKey(name = "FK_AUDIOCODEC_MEDIAFILE"))
     @OnDelete(action = OnDeleteAction.CASCADE)
     private MediaFile mediaFile;
 

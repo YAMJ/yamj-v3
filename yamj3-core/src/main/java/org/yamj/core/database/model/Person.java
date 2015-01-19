@@ -34,6 +34,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
+import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.Index;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
@@ -80,7 +82,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 40)
-    private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
+    private Map<String, String> sourceDbIdMap = new HashMap<>(0);
 
     @Index(name = "IX_PERSON_STATUS")
     @Type(type = "statusType")
@@ -101,7 +103,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
-    private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
+    private Map<OverrideFlag, String> overrideFlags = new EnumMap<>(OverrideFlag.class);
 
     @Index(name = "IX_PERSON_FILMOGRAPHY_STATUS")
     @Type(type = "statusType")
@@ -109,7 +111,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     private StatusType filmographyStatus;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "person")
-    private Set<FilmParticipation> filmography = new HashSet<FilmParticipation>(0);
+    private Set<FilmParticipation> filmography = new HashSet<>(0);
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "person")
     private Artwork photo;
@@ -118,7 +120,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     private Map<String, String> photoURLS = new HashMap<String, String>(0);
 
     @Transient
-    private Set<FilmParticipation> newFilmography = new HashSet<FilmParticipation>(0);
+    private Set<FilmParticipation> newFilmography = new HashSet<>(0);
 
     // CONSTRUCTORS
     public Person() {

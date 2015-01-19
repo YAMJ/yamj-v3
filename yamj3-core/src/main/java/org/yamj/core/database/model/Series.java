@@ -34,6 +34,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
+import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.Index;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 

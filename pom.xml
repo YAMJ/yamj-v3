@@ -61,7 +61,7 @@
         <distribution.format>zip</distribution.format>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <hibernate.version>4.2.17.Final</hibernate.version>
+        <hibernate.version>4.3.8.Final</hibernate.version>
         <spring.version>4.1.4.RELEASE</spring.version>
         <org.slf4j.version>1.7.10</org.slf4j.version>
         <jackson.version>2.5.0</jackson.version>

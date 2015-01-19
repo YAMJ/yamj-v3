@@ -27,11 +27,13 @@ import java.util.*;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
+import org.hibernate.annotations.Index;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
 
@@ -46,8 +48,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.EAGER)
-    @ForeignKey(name = "FK_STAGEFILE_DIRECTORY")
-    @JoinColumn(name = "directory_id", nullable = false)
+    @JoinColumn(name = "directory_id", nullable = false, foreignKey = @ForeignKey(name = "FK_STAGEFILE_DIRECTORY"))
     private StageDirectory stageDirectory;
 
     @Index(name = "IX_STAGEFILE_BASENAME")
@@ -93,8 +94,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Fetch(FetchMode.SELECT)
-    @ForeignKey(name = "FK_STAGEFILE_MEDIAFILE")
-    @JoinColumn(name = "mediafile_id")
+    @JoinColumn(name = "mediafile_id", foreignKey = @ForeignKey(name = "FK_STAGEFILE_MEDIAFILE"))
     private MediaFile mediaFile;
 
     // GETTER and SETTER

@@ -25,11 +25,12 @@ package org.yamj.core.database.model;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Type;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.ParticipationType;
 
@@ -43,9 +44,8 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
 
     @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_PARTICIPATION_PERSON")
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "person_id", nullable = false)
+    @JoinColumn(name = "person_id", nullable = false, foreignKey = @ForeignKey(name = "FK_PARTICIPATION_PERSON"))
     private Person person;
 
     @NaturalId(mutable = true)

@@ -34,6 +34,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
+import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.Index;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -96,7 +98,7 @@ public class VideoData extends AbstractMetadata {
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
-    private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
+    private Map<String, String> sourceDbIdMap = new HashMap<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_ratings", joinColumns = @JoinColumn(name = "videodata_id"))
@@ -104,7 +106,7 @@ public class VideoData extends AbstractMetadata {
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
-    private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
+    private Map<String, Integer> ratings = new HashMap<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_override", joinColumns = @JoinColumn(name = "videodata_id"))
@@ -113,7 +115,7 @@ public class VideoData extends AbstractMetadata {
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
-    private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
+    private Map<OverrideFlag, String> overrideFlags = new EnumMap<>(OverrideFlag.class);
 
     @ManyToMany
     @ForeignKey(name = "FK_DATAGENRES_VIDEODATA", inverseName = "FK_DATAGENRES_GENRE")
@@ -134,7 +136,7 @@ public class VideoData extends AbstractMetadata {
     @JoinTable(name = "videodata_certifications",
             joinColumns = @JoinColumn(name = "data_id"),
             inverseJoinColumns = @JoinColumn(name = "cert_id"))
-    private Set<Certification> certifications = new HashSet<Certification>(0);
+    private Set<Certification> certifications = new HashSet<>(0);
 
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_VIDEODATA_SEASON")
@@ -143,19 +145,19 @@ public class VideoData extends AbstractMetadata {
     private Season season;
 
     @ManyToMany(mappedBy = "videoDatas")
-    private Set<MediaFile> mediaFiles = new HashSet<MediaFile>(0);
+    private Set<MediaFile> mediaFiles = new HashSet<>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "castCrewPK.videoData")
-    private List<CastCrew> credits = new ArrayList<CastCrew>(0);
+    private List<CastCrew> credits = new ArrayList<>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
-    private List<BoxedSetOrder> boxedSets = new ArrayList<BoxedSetOrder>(0);
+    private List<BoxedSetOrder> boxedSets = new ArrayList<>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
-    private List<Artwork> artworks = new ArrayList<Artwork>(0);
+    private List<Artwork> artworks = new ArrayList<>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "nfoRelationPK.videoData")
-    private List<NfoRelation> nfoRelations = new ArrayList<NfoRelation>(0);
+    private List<NfoRelation> nfoRelations = new ArrayList<>(0);
 
     @Transient
     private Set<String> genreNames;
@@ -164,19 +166,19 @@ public class VideoData extends AbstractMetadata {
     private Set<String> studioNames;
 
     @Transient
-    private Map<String, String> certificationInfos = new HashMap<String, String>(0);
+    private Map<String, String> certificationInfos = new HashMap<>(0);
 
     @Transient
-    private Map<String, Integer> setInfos = new HashMap<String, Integer>(0);
+    private Map<String, Integer> setInfos = new HashMap<>(0);
 
     @Transient
-    private Set<CreditDTO> creditDTOS = new LinkedHashSet<CreditDTO>(0);
+    private Set<CreditDTO> creditDTOS = new LinkedHashSet<>(0);
 
     @Transient
-    private Map<String, String> posterURLS = new HashMap<String, String>(0);
+    private Map<String, String> posterURLS = new HashMap<>(0);
 
     @Transient
-    private Map<String, String> fanartURLS = new HashMap<String, String>(0);
+    private Map<String, String> fanartURLS = new HashMap<>(0);
 
     // CONSTRUCTORS
     public VideoData() {

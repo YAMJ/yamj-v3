@@ -34,6 +34,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
+import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.Index;
 import org.yamj.common.type.StatusType;
 
 @Entity

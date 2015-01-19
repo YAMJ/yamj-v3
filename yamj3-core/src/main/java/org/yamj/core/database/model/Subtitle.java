@@ -25,6 +25,7 @@ package org.yamj.core.database.model;
 import java.io.Serializable;
 import javax.persistence.*;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -41,16 +42,14 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
 
     @NaturalId
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "mediafile_id", nullable = false)
-    @ForeignKey(name = "FK_SUBTITLE_MEDIAFILE")
+    @JoinColumn(name = "mediafile_id", nullable = false, foreignKey = @ForeignKey(name = "FK_SUBTITLE_MEDIAFILE"))
     @OnDelete(action = OnDeleteAction.CASCADE)
     private MediaFile mediaFile;
 
     @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_SUBITLE_STAGEFILE")
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "stagefile_id")
+    @JoinColumn(name = "stagefile_id", foreignKey = @ForeignKey(name = "FK_SUBITLE_STAGEFILE"))
     private StageFile stageFile;
 
     @NaturalId

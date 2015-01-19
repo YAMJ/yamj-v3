@@ -23,19 +23,14 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import org.hibernate.annotations.ForeignKey;
+import javax.persistence.*;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "boxed_set_order",
     uniqueConstraints = {@UniqueConstraint(name = "UIX_BOXEDSET_VIDEODATA", columnNames = {"boxedset_id","videodata_id"}),
-                         @UniqueConstraint(name = "UIX_BOXEDSET_SERIES", columnNames = {"boxedset_id", "series_id"})}
+                         @UniqueConstraint(name = "UIX_BOXEDSET_SERIES", columnNames = {"boxedset_id", "series_id"}),
+                         @UniqueConstraint(name = "UIX_BOXEDSET_ORDER_NATURALID", columnNames = {"boxedset_id", "series_id", "videodata_id"})}
 )
 public class BoxedSetOrder extends AbstractIdentifiable implements Serializable {
 
@@ -43,20 +38,17 @@ public class BoxedSetOrder extends AbstractIdentifiable implements Serializable 
 
     @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_BOXEDSETORDER_BOXEDSET")
-    @JoinColumn(name = "boxedset_id", nullable = false)
+    @JoinColumn(name = "boxedset_id", nullable = false, foreignKey = @ForeignKey(name = "FK_BOXEDSETORDER_BOXEDSET"))
     private BoxedSet boxedSet;
 
     @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_BOXEDSETORDER_VIDEODATA")
-    @JoinColumn(name = "videodata_id", nullable = true)
+    @JoinColumn(name = "videodata_id", nullable = true, foreignKey = @ForeignKey(name = "FK_BOXEDSETORDER_VIDEODATA"))
     private VideoData videoData;
 
     @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_BOXEDSETORDER_SERIES")
-    @JoinColumn(name = "series_id", nullable = true)
+    @JoinColumn(name = "series_id", nullable = true, foreignKey = @ForeignKey(name = "FK_BOXEDSETORDER_SERIES"))
     private Series series;
 
     @JoinColumn(name = "ordering", nullable = false)

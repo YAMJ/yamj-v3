@@ -23,16 +23,11 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 import org.yamj.core.database.model.type.JobType;
@@ -43,16 +38,16 @@ public class CastCrewPK implements Serializable {
     private static final long serialVersionUID = -1986488516405874557L;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @ForeignKey(name = "FK_CASTCREW_PERSON")
     @Fetch(FetchMode.JOIN)
-    @JoinColumn(name = "person_id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "person_id", nullable = false, insertable = false, updatable = false,
+                foreignKey = @ForeignKey(name = "FK_CASTCREW_PERSON"))
     private Person person;
 
     @Index(name = "IX_CASTCREW_VIDEOJOB")
     @ManyToOne(fetch = FetchType.EAGER)
-    @ForeignKey(name = "FK_CASTCREW_VIDEODATA")
     @Fetch(FetchMode.JOIN)
-    @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false,
+                foreignKey = @ForeignKey(name = "FK_CASTCREW_VIDEODATA"))
     private VideoData videoData;
 
     @Index(name = "IX_CASTCREW_VIDEOJOB")
