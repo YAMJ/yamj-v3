@@ -43,7 +43,7 @@ public class MetadataDao extends HibernateDao {
 
     @SuppressWarnings("unchecked")
     public List<QueueDTO> getMetadataQueue(final CharSequence sql, final int maxResults) {
-        SQLQuery query = getSession().createSQLQuery(sql.toString());
+        SQLQuery query = currentSession().createSQLQuery(sql.toString());
         query.setReadOnly(true);
         query.setCacheable(true);
         if (maxResults > 0) {
@@ -117,7 +117,7 @@ public class MetadataDao extends HibernateDao {
         sb.append("and c.castCrewPK.jobType=:jobType ");
         sb.append("and lower(p.identifier)=:identifier ");
 
-        Query query = getSession().createQuery(sb.toString());
+        Query query = currentSession().createQuery(sb.toString());
         query.setParameter("videoData", videoData);
         query.setParameter("jobType", jobType);
         query.setString("identifier", identifier.toLowerCase());

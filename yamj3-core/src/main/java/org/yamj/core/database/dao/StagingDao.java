@@ -45,14 +45,14 @@ import org.yamj.core.service.file.tools.FileTools;
 public class StagingDao extends HibernateDao {
 
     public Library getLibrary(String client, String playerPath) {
-        return (Library) getSession().byNaturalId(Library.class)
+        return (Library) currentSession().byNaturalId(Library.class)
                 .using("client", client)
                 .using("playerPath", playerPath)
                 .load();
     }
 
     public StageDirectory getStageDirectory(String directoryPath, Library library) {
-        return (StageDirectory) getSession().byNaturalId(StageDirectory.class)
+        return (StageDirectory) currentSession().byNaturalId(StageDirectory.class)
                 .using("directoryPath", directoryPath)
                 .using("library", library)
                 .load();
@@ -63,7 +63,7 @@ public class StagingDao extends HibernateDao {
     }
 
     public StageFile getStageFile(String baseName, String extension, StageDirectory stageDirectory) {
-        return (StageFile) getSession().byNaturalId(StageFile.class)
+        return (StageFile) currentSession().byNaturalId(StageFile.class)
                 .using("baseName", baseName)
                 .using("extension", extension)
                 .using("stageDirectory", stageDirectory)
@@ -71,7 +71,7 @@ public class StagingDao extends HibernateDao {
     }
 
     public Long getNextStageFileId(FileType fileType, StatusType... statusTypes) {
-        Criteria criteria = getSession().createCriteria(StageFile.class);
+        Criteria criteria = currentSession().createCriteria(StageFile.class);
         criteria.add(Restrictions.eq("fileType", fileType));
         criteria.add(Restrictions.in("status", statusTypes));
         criteria.setProjection(Projections.min("id"));
@@ -82,7 +82,7 @@ public class StagingDao extends HibernateDao {
 
     @SuppressWarnings("unchecked")
     public List<StageDirectory> getRootDirectories() {
-        Criteria criteria = getSession().createCriteria(StageDirectory.class);
+        Criteria criteria = currentSession().createCriteria(StageDirectory.class);
         criteria.add(Restrictions.isNull("parentDirectory"));
         criteria.setCacheable(true);
         criteria.setCacheMode(CacheMode.NORMAL);
@@ -95,7 +95,7 @@ public class StagingDao extends HibernateDao {
             return Collections.emptyList();
         }
 
-        Criteria criteria = getSession().createCriteria(StageDirectory.class);
+        Criteria criteria = currentSession().createCriteria(StageDirectory.class);
         criteria.add(Restrictions.eq("parentDirectory", stageDirectory));
         criteria.setCacheable(true);
         criteria.setCacheMode(CacheMode.NORMAL);
@@ -125,7 +125,7 @@ public class StagingDao extends HibernateDao {
         sb.append("AND sf.stageDirectory=:stageDirectory ");
         sb.append("AND sf.status != :deleted ");
 
-        Query query = getSession().createQuery(sb.toString());
+        Query query = currentSession().createQuery(sb.toString());
         query.setParameter("fileType", FileType.VIDEO);
         query.setBoolean("extra", Boolean.FALSE);
         if (baseName != null) {
@@ -156,7 +156,7 @@ public class StagingDao extends HibernateDao {
         sb.append("AND sd.library=:library ");
         sb.append("AND sf.status != :deleted ");
 
-        Query query = getSession().createQuery(sb.toString());
+        Query query = currentSession().createQuery(sb.toString());
         query.setParameter("fileType", FileType.VIDEO);
         query.setBoolean("extra", Boolean.FALSE);
         query.setString("baseName", baseName.toLowerCase());
@@ -183,7 +183,7 @@ public class StagingDao extends HibernateDao {
         sb.append("AND sf.stageDirectory in (:stageDirectories) ");
         sb.append("AND sf.status != :deleted ");
 
-        Query query = getSession().createQuery(sb.toString());
+        Query query = currentSession().createQuery(sb.toString());
         query.setParameter("fileType", FileType.VIDEO);
         query.setBoolean("extra", Boolean.FALSE);
         query.setParameterList("stageDirectories", stageDirectories);
@@ -206,7 +206,7 @@ public class StagingDao extends HibernateDao {
         sb.append("AND sf.stageDirectory=:stageDirectory ");
         sb.append("AND sf.status != :deleted ");
 
-        Query query = getSession().createQuery(sb.toString());
+        Query query = currentSession().createQuery(sb.toString());
         query.setParameter("fileType", FileType.NFO);
         query.setString("searchName", searchName.toLowerCase());
         query.setParameter("stageDirectory", stageDirectory);
@@ -233,7 +233,7 @@ public class StagingDao extends HibernateDao {
         statusSet.add(StatusType.UPDATED);
         statusSet.add(StatusType.DONE);
 
-        Query query = getSession().createQuery(sb.toString());
+        Query query = currentSession().createQuery(sb.toString());
         query.setParameter("videoDataId", videoDataId);
         query.setParameter("fileType", FileType.NFO);
         query.setParameterList("statusSet", statusSet);
@@ -261,7 +261,7 @@ public class StagingDao extends HibernateDao {
         statusSet.add(StatusType.UPDATED);
         statusSet.add(StatusType.DONE);
 
-        Query query = getSession().createQuery(sb.toString());
+        Query query = currentSession().createQuery(sb.toString());
         query.setParameter("seriesId", seriesId);
         query.setParameter("fileType", FileType.NFO);
         query.setParameterList("statusSet", statusSet);
@@ -419,7 +419,7 @@ public class StagingDao extends HibernateDao {
         sb.append("AND sf.status != :duplicate ");
         sb.append("AND sf.status != :deleted ");
 
-        Query query = getSession().createQuery(sb.toString());
+        Query query = currentSession().createQuery(sb.toString());
         query.setParameter("fileType", fileType);
         query.setString("searchName", searchName.toLowerCase());
         if (searchExtension != null) {
@@ -452,7 +452,7 @@ public class StagingDao extends HibernateDao {
         sb.append("AND sf.status != :duplicate ");
         sb.append("AND sf.status != :deleted ");
 
-        Query query = getSession().createQuery(sb.toString());
+        Query query = currentSession().createQuery(sb.toString());
         query.setParameter("fileType", fileType);
         query.setString("searchName", searchName.toLowerCase());
         if (searchExtension != null) {
@@ -520,7 +520,7 @@ public class StagingDao extends HibernateDao {
         sb.append("and (lower(sf.base_name)=:check1 or lower(sf.base_name)=:check2) ");
         sb.append("and sf.status != :deleted ");
 
-        Query query = getSession().createSQLQuery(sb.toString());
+        Query query = currentSession().createSQLQuery(sb.toString());
         query.setLong("dirId", videoFile.getStageDirectory().getId());
         if (checkLibrary) {
             query.setLong("libraryId", videoFile.getStageDirectory().getLibrary().getId());

@@ -55,7 +55,7 @@ public abstract class HibernateDao {
         this.sessionFactory = sessionFactory;
     }
 
-    public Session getSession() {
+    public Session currentSession() {
         return sessionFactory.getCurrentSession();
     }
 
@@ -63,7 +63,7 @@ public abstract class HibernateDao {
      * Flush and clear the session.
      */
     public void flushAndClear() {
-        Session session = getSession();
+        Session session = currentSession();
         session.flush();
         session.clear();
     }
@@ -74,7 +74,7 @@ public abstract class HibernateDao {
      * @param entity the entity to store
      */
     public void storeEntity(final Object entity) {
-        getSession().saveOrUpdate(entity);
+        currentSession().saveOrUpdate(entity);
     }
 
     /**
@@ -83,7 +83,7 @@ public abstract class HibernateDao {
      * @param entity the entity to merge
      */
     public void mergeEntity(final Object entity) {
-        getSession().merge(entity);
+        currentSession().merge(entity);
     }
 
     /**
@@ -94,7 +94,7 @@ public abstract class HibernateDao {
     @SuppressWarnings("rawtypes")
     public void storeAll(final Collection entities) {
         if (entities != null && !entities.isEmpty()) {
-            Session session = getSession();
+            Session session = currentSession();
             for (Object entity : entities) {
                 session.saveOrUpdate(entity);
             }
@@ -109,7 +109,7 @@ public abstract class HibernateDao {
     @SuppressWarnings("rawtypes")
     public void deleteAll(final Collection entities) {
         if (entities != null && !entities.isEmpty()) {
-            Session session = getSession();
+            Session session = currentSession();
             for (Object entity : entities) {
                 session.delete(entity);
             }
@@ -122,7 +122,7 @@ public abstract class HibernateDao {
      * @param entity the entity to save
      */
     public void saveEntity(final Object entity) {
-        getSession().save(entity);
+        currentSession().save(entity);
     }
 
     /**
@@ -131,7 +131,7 @@ public abstract class HibernateDao {
      * @param entity the entity to update
      */
     public void updateEntity(final Object entity) {
-        getSession().update(entity);
+        currentSession().update(entity);
     }
 
     /**
@@ -140,7 +140,7 @@ public abstract class HibernateDao {
      * @param entity the entity to delete
      */
     public void deleteEntity(final Object entity) {
-        getSession().delete(entity);
+        currentSession().delete(entity);
     }
 
     /**
@@ -153,7 +153,7 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings("unchecked")
     public <T> T getById(Class<T> entityClass, Serializable id) {
-        return (T) getSession().get(entityClass, id);
+        return (T) currentSession().get(entityClass, id);
     }
 
     /**
@@ -167,7 +167,7 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings("unchecked")
     public <T> T getByNaturalId(Class<? extends T> entityClass, String field, String name) {
-        return (T) getSession().byNaturalId(entityClass).using(field, name).load();
+        return (T) currentSession().byNaturalId(entityClass).using(field, name).load();
     }
 
     /**
@@ -310,7 +310,7 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings("rawtypes")
     public List find(CharSequence queryString) {
-        Query queryObject = getSession().createQuery(queryString.toString());
+        Query queryObject = currentSession().createQuery(queryString.toString());
         queryObject.setCacheable(true);
         return queryObject.list();
     }
@@ -324,7 +324,7 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings("rawtypes")
     public List findById(CharSequence queryString, Long id) {
-        Query queryObject = getSession().createQuery(queryString.toString());
+        Query queryObject = currentSession().createQuery(queryString.toString());
         queryObject.setCacheable(true);
         queryObject.setParameter("id", id);
         return queryObject.list();
@@ -339,7 +339,7 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings("rawtypes")
     public List findByNamedParameters(CharSequence queryCharSequence, Map<String, Object> params) {
-        Query query = getSession().createQuery(queryCharSequence.toString());
+        Query query = currentSession().createQuery(queryCharSequence.toString());
         query.setCacheable(true);
         for (Entry<String, Object> param : params.entrySet()) {
             applyNamedParameterToQuery(query, param.getKey(), param.getValue());
@@ -355,7 +355,7 @@ public abstract class HibernateDao {
      * @return list of entities
      */
     public Object findUniqueByNamedParameters(CharSequence queryCharSequence, Map<String, Object> params) {
-        Query query = getSession().createQuery(queryCharSequence.toString());
+        Query query = currentSession().createQuery(queryCharSequence.toString());
         query.setCacheable(true);
         for (Entry<String, Object> param : params.entrySet()) {
             applyNamedParameterToQuery(query, param.getKey(), param.getValue());
@@ -370,7 +370,7 @@ public abstract class HibernateDao {
      * @return number of affected rows
      */
     public int executeUpdate(CharSequence queryCharSequence) {
-        Query query = getSession().createQuery(queryCharSequence.toString());
+        Query query = currentSession().createQuery(queryCharSequence.toString());
         query.setCacheable(true);
         return query.executeUpdate();
     }
@@ -383,7 +383,7 @@ public abstract class HibernateDao {
      * @return number of affected rows
      */
     public int executeUpdate(CharSequence queryCharSequence, Map<String, Object> params) {
-        Query query = getSession().createQuery(queryCharSequence.toString());
+        Query query = currentSession().createQuery(queryCharSequence.toString());
         query.setCacheable(true);
         for (Entry<String, Object> param : params.entrySet()) {
             applyNamedParameterToQuery(query, param.getKey(), param.getValue());
@@ -398,7 +398,7 @@ public abstract class HibernateDao {
      * @return number of affected rows
      */
     public int executeSqlUpdate(CharSequence queryCharSequence) {
-        SQLQuery query = getSession().createSQLQuery(queryCharSequence.toString());
+        SQLQuery query = currentSession().createSQLQuery(queryCharSequence.toString());
         query.setCacheable(true);
         return query.executeUpdate();
     }
@@ -411,7 +411,7 @@ public abstract class HibernateDao {
      * @return number of affected rows
      */
     public int executeSqlUpdate(CharSequence queryCharSequence, Map<String, Object> params) {
-        SQLQuery query = getSession().createSQLQuery(queryCharSequence.toString());
+        SQLQuery query = currentSession().createSQLQuery(queryCharSequence.toString());
         query.setCacheable(true);
         for (Entry<String, Object> param : params.entrySet()) {
             applyNamedParameterToQuery(query, param.getKey(), param.getValue());
@@ -446,7 +446,7 @@ public abstract class HibernateDao {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public <T> List<T> executeQueryWithTransform(Class T, SqlScalars sqlScalars, IApiWrapper wrapper) {
-        SQLQuery query = sqlScalars.createSqlQuery(getSession());
+        SQLQuery query = sqlScalars.createSqlQuery(currentSession());
         query.setReadOnly(true);
         query.setCacheable(true);
 

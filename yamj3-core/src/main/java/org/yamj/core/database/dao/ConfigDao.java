@@ -44,7 +44,7 @@ public class ConfigDao extends HibernateDao {
 
     @SuppressWarnings("unchecked")
     public Map<String, String> readConfig() {
-        SQLQuery query = getSession().createSQLQuery("select config_key, config_value from configuration");
+        SQLQuery query = currentSession().createSQLQuery("select config_key, config_value from configuration");
         query.setReadOnly(true);
         query.setCacheable(true);
 
@@ -66,7 +66,7 @@ public class ConfigDao extends HibernateDao {
     }
 
     public void storeConfig(String key, String value, boolean updateAllowed) {
-        Session session = getSession();
+        Session session = currentSession();
         Configuration config = (Configuration) session.byId(Configuration.class).load(key);
         if (config == null) {
             LOG.debug("Store new configuration: key='{}', value='{}'", key, value);
@@ -93,7 +93,7 @@ public class ConfigDao extends HibernateDao {
         sbSQL.append(options.getSearchString(true));
         sbSQL.append(options.getSortString());
 
-        return getSession().createQuery(sbSQL.toString()).list();
+        return currentSession().createQuery(sbSQL.toString()).list();
     }
 
     public List<Configuration> getConfigurationEntries(String key) {
@@ -114,7 +114,7 @@ public class ConfigDao extends HibernateDao {
             List<Configuration> configList = getConfigurationEntries(key);
             for (Configuration config : configList) {
                 LOG.debug("Deleting key '{}'", key);
-                getSession().delete(config);
+                currentSession().delete(config);
             }
             LOG.debug("Successfully deleted all keys for '{}'", key);
         }

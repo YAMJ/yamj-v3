@@ -44,7 +44,7 @@ import org.yamj.core.hibernate.HibernateDao;
 public class ArtworkDao extends HibernateDao {
 
     public ArtworkProfile getArtworkProfile(String profileName, ArtworkType artworkType) {
-        return (ArtworkProfile) getSession().byNaturalId(ArtworkProfile.class)
+        return (ArtworkProfile) currentSession().byNaturalId(ArtworkProfile.class)
                 .using("profileName", profileName)
                 .using("artworkType", artworkType)
                 .load();
@@ -52,7 +52,7 @@ public class ArtworkDao extends HibernateDao {
 
     @SuppressWarnings("unchecked")
     public List<ArtworkProfile> getPreProcessArtworkProfiles(ArtworkType artworkType, MetaDataType metaDataType) {
-        Session session = getSession();
+        Session session = currentSession();
         Criteria criteria = session.createCriteria(ArtworkProfile.class);
         criteria.add(Restrictions.eq("artworkType", artworkType));
         criteria.add(Restrictions.eq("preProcess", Boolean.TRUE));
@@ -78,7 +78,7 @@ public class ArtworkDao extends HibernateDao {
 
     @SuppressWarnings("unchecked")
     public List<QueueDTO> getArtworkQueue(final CharSequence sql, final int maxResults) {
-        SQLQuery query = getSession().createSQLQuery(sql.toString());
+        SQLQuery query = currentSession().createSQLQuery(sql.toString());
         query.setReadOnly(true);
         query.setCacheable(true);
         if (maxResults > 0) {
@@ -107,7 +107,7 @@ public class ArtworkDao extends HibernateDao {
     }
 
     public ArtworkLocated getStoredArtworkLocated(ArtworkLocated located) {
-        Criteria criteria = getSession().createCriteria(ArtworkLocated.class);
+        Criteria criteria = currentSession().createCriteria(ArtworkLocated.class);
         criteria.add(Restrictions.eq("artwork", located.getArtwork()));
         if (located.getStageFile() != null) {
             criteria.add(Restrictions.eq("stageFile", located.getStageFile()));
@@ -120,7 +120,7 @@ public class ArtworkDao extends HibernateDao {
     }
 
     public ArtworkGenerated getStoredArtworkGenerated(ArtworkGenerated generated) {
-        Criteria criteria = getSession().createCriteria(ArtworkGenerated.class);
+        Criteria criteria = currentSession().createCriteria(ArtworkGenerated.class);
         criteria.add(Restrictions.eq("artworkLocated", generated.getArtworkLocated()));
         criteria.add(Restrictions.eq("artworkProfile", generated.getArtworkProfile()));
         criteria.setCacheable(true);
@@ -129,7 +129,7 @@ public class ArtworkDao extends HibernateDao {
     
     @SuppressWarnings("unchecked")
     public List<QueueDTO> getArtworkLocatedQueue(final CharSequence sql, final int maxResults) {
-        SQLQuery query = getSession().createSQLQuery(sql.toString());
+        SQLQuery query = currentSession().createSQLQuery(sql.toString());
         query.setReadOnly(true);
         query.setCacheable(true);
         if (maxResults > 0) {
@@ -154,7 +154,7 @@ public class ArtworkDao extends HibernateDao {
 
     @SuppressWarnings("unchecked")
     public List<Artwork> getBoxedSetArtwork(String boxedSetName, ArtworkType artworkType) {
-        Criteria criteria = getSession().createCriteria(Artwork.class);
+        Criteria criteria = currentSession().createCriteria(Artwork.class);
         criteria.add(Restrictions.eq("artworkType", artworkType));
         criteria = criteria.createAlias("boxedSet", "bs");
         criteria.add(Restrictions.ilike("bs.name", boxedSetName.toLowerCase()));

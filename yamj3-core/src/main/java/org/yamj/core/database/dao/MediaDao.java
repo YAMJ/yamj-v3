@@ -45,12 +45,12 @@ public class MediaDao extends HibernateDao {
     }
 
     public MediaFile getMediaFile(String fileName) {
-        return (MediaFile)getSession().byNaturalId(MediaFile.class).using("fileName", fileName).load();
+        return (MediaFile)currentSession().byNaturalId(MediaFile.class).using("fileName", fileName).load();
     }
 
     @SuppressWarnings("unchecked")
     public List<QueueDTO> getMediaQueue(final CharSequence sql, final int maxResults) {
-        SQLQuery query = getSession().createSQLQuery(sql.toString());
+        SQLQuery query = currentSession().createSQLQuery(sql.toString());
         query.setReadOnly(true);
         query.setCacheable(true);
         if (maxResults > 0) {
