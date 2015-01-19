@@ -33,6 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.yamj.core.tools.LRUTimedCache;
+import org.yamj.core.tools.web.ResponseTools;
+import org.yamj.core.tools.web.TemporaryUnavailableException;
 
 @Service("allocineApiWrapper")
 public class AllocineApiWrapper {
@@ -66,8 +68,12 @@ public class AllocineApiWrapper {
                 search = allocineApi.searchMovies(title);
                 searchMoviesCache.put(title, search);
             }
-        } catch (Exception ex) {
-            LOG.error("Failed to search for movie infos: " + title, ex);
+        } catch (AllocineException ex) {
+            if (ResponseTools.isTemporaryError(ex.getResponseCode())) {
+                throw new TemporaryUnavailableException(ex);
+            }
+            LOG.error("Failed retrieving Allocine id for movie: {}", title);
+            LOG.warn("Allocine error" , ex);
             return null;
         } finally {
             searchMoviesLock.unlock();
@@ -114,8 +120,12 @@ public class AllocineApiWrapper {
                 search = allocineApi.searchTvSeries(title);
                 searchSeriesCache.put(title, search);
             }
-        } catch (Exception ex) {
-            LOG.error("Failed to search for series infos: " + title, ex);
+        } catch (AllocineException ex) {
+            if (ResponseTools.isTemporaryError(ex.getResponseCode())) {
+                throw new TemporaryUnavailableException(ex);
+            }
+            LOG.error("Failed retrieving Allocine id for series: {}", title);
+            LOG.warn("Allocine error" , ex);
             return null;
         } finally {
             searchSeriesLock.unlock();
@@ -166,8 +176,12 @@ public class AllocineApiWrapper {
                 search = allocineApi.searchPersons(name);
                 searchPersonCache.put(name, search);
             }
-        } catch (Exception ex) {
-            LOG.error("Failed to search for person infos: " + name, ex);
+        } catch (AllocineException ex) {
+            if (ResponseTools.isTemporaryError(ex.getResponseCode())) {
+                throw new TemporaryUnavailableException(ex);
+            }
+            LOG.error("Failed retrieving Allocine id for person: {}", name);
+            LOG.warn("Allocine error" , ex);
             return null;
         } finally {
             searchPersonLock.unlock();
@@ -211,14 +225,11 @@ public class AllocineApiWrapper {
                     moviesCache.put(allocineId, movieInfos);
                 }
             } catch (AllocineException ex) {
-                if (ex.getResponseCode() == 0) {
-                    LOG.error("Failed retrieving Allocine infos for movie: {}", allocineId);
-                    LOG.warn("Allocine error" , ex);
-                } else {
-                    LOG.warn("Allocine request failed with status {} for movie: {}", ex.getResponseCode(), allocineId);
-                    movieInfos = new MovieInfos();
-                    movieInfos.setResponseStatusCode(ex.getResponseCode());
+                if (ResponseTools.isTemporaryError(ex.getResponseCode())) {
+                    throw new TemporaryUnavailableException(ex);
                 }
+                LOG.error("Failed retrieving Allocine infos for movie: {}", allocineId);
+                LOG.warn("Allocine error" , ex);
             }
         }
         return movieInfos;
@@ -234,14 +245,11 @@ public class AllocineApiWrapper {
                     tvSeriesCache.put(allocineId, tvSeriesInfos);
                 }
             } catch (AllocineException ex) {
-                if (ex.getResponseCode() == 0) {
-                    LOG.error("Failed retrieving Allocine infos for series: {}", allocineId);
-                    LOG.warn("Allocine error" , ex);
-                } else {
-                    LOG.warn("Allocine request failed with status {} for series: {}", ex.getResponseCode(), allocineId);
-                    tvSeriesInfos = new TvSeriesInfos();
-                    tvSeriesInfos.setResponseStatusCode(ex.getResponseCode());
+                if (ResponseTools.isTemporaryError(ex.getResponseCode())) {
+                    throw new TemporaryUnavailableException(ex);
                 }
+                LOG.error("Failed retrieving Allocine infos for series: {}", allocineId);
+                LOG.warn("Allocine error" , ex);
             }
         }
         return tvSeriesInfos;
@@ -259,13 +267,11 @@ public class AllocineApiWrapper {
         try {
             tvSeasonInfos = allocineApi.getTvSeasonInfos(seasonCode);
         } catch (AllocineException ex) {
-            if (ex.getResponseCode() == 0) {
+            if (ResponseTools.isTemporaryError(ex.getResponseCode())) {
+                LOG.error("Temporary error {} retrieving Allocine infos for season: {}", ex.getResponseCode(), seasonCode);
+            } else {
                 LOG.error("Failed retrieving Allocine infos for season: {}", seasonCode);
                 LOG.warn("Allocine error" , ex);
-            } else {
-                LOG.warn("Allocine request failed with status {} for season: {}", ex.getResponseCode(), seasonCode);
-                tvSeasonInfos = new TvSeasonInfos();
-                tvSeasonInfos.setResponseStatusCode(ex.getResponseCode());
             }
         }
         
@@ -277,14 +283,11 @@ public class AllocineApiWrapper {
         try {
             personInfos = allocineApi.getPersonInfos(allocineId);
         } catch (AllocineException ex) {
-            if (ex.getResponseCode() == 0) {
-                LOG.error("Failed retrieving Allocine filmography for person: {}", allocineId);
-                LOG.warn("Allocine error" , ex);
-            } else {
-                LOG.warn("Allocine request failed with status {} for person: {}", ex.getResponseCode(), allocineId);
-                personInfos = new PersonInfos();
-                personInfos.setResponseStatusCode(ex.getResponseCode());
+            if (ResponseTools.isTemporaryError(ex.getResponseCode())) {
+                throw new TemporaryUnavailableException(ex);
             }
+            LOG.error("Failed retrieving Allocine filmography for person: {}", allocineId);
+            LOG.warn("Allocine error" , ex);
         }
         return personInfos;
     }
@@ -294,14 +297,11 @@ public class AllocineApiWrapper {
         try {
             filmographyInfos = allocineApi.getPersonFilmography(allocineId);
         } catch (AllocineException ex) {
-            if (ex.getResponseCode() == 0) {
-                LOG.error("Failed retrieving Allocine filmography for person: {}", allocineId);
-                LOG.warn("Allocine error" , ex);
-            } else {
-                LOG.warn("Allocine request failed with status {} for person filmography: {}", ex.getResponseCode(), allocineId);
-                filmographyInfos = new FilmographyInfos();
-                filmographyInfos.setResponseStatusCode(ex.getResponseCode());
+            if (ResponseTools.isTemporaryError(ex.getResponseCode())) {
+                throw new TemporaryUnavailableException(ex);
             }
+            LOG.error("Failed retrieving Allocine filmography for person: {}", allocineId);
+            LOG.warn("Allocine error" , ex);
         }
         return filmographyInfos;
     }
@@ -311,13 +311,11 @@ public class AllocineApiWrapper {
         try {
             episodeInfos = allocineApi.getEpisodeInfos(allocineId);
         } catch (AllocineException ex) {
-            if (ex.getResponseCode() == 0) {
+            if (ResponseTools.isTemporaryError(ex.getResponseCode())) {
+                LOG.error("Temporary error {} retrieving Allocine episode: {}", ex.getResponseCode(), allocineId);
+            } else {
                 LOG.error("Failed retrieving Allocine filmography for episode: {}", allocineId);
                 LOG.warn("Allocine error" , ex);
-            } else {
-                LOG.warn("Allocine request failed with status {} for episode: {}", ex.getResponseCode(), allocineId);
-                episodeInfos = new EpisodeInfos();
-                episodeInfos.setResponseStatusCode(ex.getResponseCode());
             }
         }
         return episodeInfos;
