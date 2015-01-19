@@ -22,6 +22,7 @@
  */
 package org.yamj.core.tools.web;
 
+import org.yamj.api.common.exception.ApiException;
 import org.yamj.api.common.http.DigestedResponse;
 
 public final class ResponseTools {
@@ -34,6 +35,11 @@ public final class ResponseTools {
         return isOK(response.getStatusCode());
     }
 
+    public static boolean isOK(final ApiException apiException) {
+        return isOK(apiException.getResponseCode());
+    }
+
+    
     public static boolean isOK(final int statusCode) {
         return (statusCode == 200);
     }
@@ -42,12 +48,20 @@ public final class ResponseTools {
         return !isOK(response);
     }
 
+    public static boolean isNotOK(final ApiException apiException) {
+        return isNotOK(apiException.getResponseCode());
+    }
+
     public static boolean isNotOK(final int statusCode) {
         return !isOK(statusCode);
     }
 
     public static boolean isTemporaryError(final DigestedResponse response) {
         return isTemporaryError(response.getStatusCode());
+    }
+
+    public static boolean isTemporaryError(final ApiException apiException) {
+        return isTemporaryError(apiException.getResponseCode());
     }
 
     public static boolean isTemporaryError(final int statusCode) {

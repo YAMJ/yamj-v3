@@ -26,19 +26,11 @@ public class TemporaryUnavailableException extends RuntimeException {
 
     private static final long serialVersionUID = 4086445472382776571L;
 
-    public TemporaryUnavailableException() {
-        super();
-    }
-
     public TemporaryUnavailableException(String message) {
         super(message);
     }
 
     public TemporaryUnavailableException(String message, Throwable cause) {
         super(message, cause);
-    }
-
-    public TemporaryUnavailableException(Throwable cause) {
-        super(cause);
     }
 }
