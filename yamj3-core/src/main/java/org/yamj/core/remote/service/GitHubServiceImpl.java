@@ -73,7 +73,7 @@ public class GitHubServiceImpl implements GitHubService {
             throw new IllegalArgumentException("Owner or repository cannot be blank");
         }
 
-        String returnDate = "";
+        String returnDate = StringUtils.EMPTY;
 
         StringBuilder url = new StringBuilder(GH_API);
         url.append(owner).append("/").append(repository);

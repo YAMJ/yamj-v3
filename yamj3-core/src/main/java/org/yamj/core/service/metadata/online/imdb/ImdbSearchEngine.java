@@ -223,7 +223,12 @@ public class ImdbSearchEngine {
         LOG.debug("Querying IMDb for '{}'", sb.toString());
         String xml;
         try {
-            xml = httpClient.requestContent(sb.toString()).getContent();
+            DigestedResponse response = httpClient.requestContent(sb.toString());
+            if (ResponseTools.isNotOK(response)) {
+                LOG.error("Can't find IMDb id due response status {} for '{}'", response.getStatusCode(), title);
+                return null;
+            }
+            xml = response.getContent();
         } catch (IOException ex) {
             LOG.error("Failed retreiving IMDb Id for '{}'", title, ex);
             return null;
