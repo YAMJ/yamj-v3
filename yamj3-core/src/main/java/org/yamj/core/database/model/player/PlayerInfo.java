@@ -34,14 +34,18 @@ import org.yamj.core.database.model.AbstractIdentifiable;
 
 @Entity
 @Table(name = "player_info")
+@SuppressWarnings("deprecation")
 public class PlayerInfo extends AbstractIdentifiable implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2906323039735788880L;
+
     @NaturalId(mutable = true)
     @Column(name = "name", nullable = false, length = 200)
     private String name;
+    
     @Column(name = "ip_address", nullable = false, length = 15)
     private String ipAddress;
+    
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @ForeignKey(name = "FK_PLAYERPATH_INFO", inverseName = "FK_PLAYERPATH_PATH")
     @JoinTable(name = "playerinfo_playerpath",

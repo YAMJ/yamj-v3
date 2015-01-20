@@ -45,7 +45,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
        indexes = {@Index(name = "IX_SERIES_TITLE", columnList = "title"),
                   @Index(name = "IX_SERIES_STATUS", columnList = "status")}
 )
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused","deprecation"})
 public class Series extends AbstractMetadata {
 
     private static final long serialVersionUID = -5782361288021493423L;
