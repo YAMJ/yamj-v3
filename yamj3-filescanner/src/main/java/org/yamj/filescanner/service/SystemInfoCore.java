@@ -37,7 +37,7 @@ import org.yamj.common.tools.DateTimeTools;
  *
  * @author Stuart
  */
-@Service("systemInfoCore")
+@Service
 public final class SystemInfoCore {
 
     private static final Logger LOG = LoggerFactory.getLogger(SystemInfoCore.class);
@@ -47,12 +47,9 @@ public final class SystemInfoCore {
     private int numberOfRetries;
     private DateTime lastCheck;
     private boolean connected;
-    // Spring service(s)
+
     @Autowired
     private SystemInfoService pingService;
-
-    public SystemInfoCore() {
-    }
 
     public void setTimeoutSeconds(int timeoutSeconds) {
         this.timeoutSeconds = timeoutSeconds;

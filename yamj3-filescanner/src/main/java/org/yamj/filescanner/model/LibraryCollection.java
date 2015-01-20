@@ -25,16 +25,17 @@ package org.yamj.filescanner.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.dto.ImportDTO;
 import org.yamj.filescanner.dto.LibraryDTO;
 import org.yamj.filescanner.dto.LibraryEntryDTO;
 import org.yamj.filescanner.tools.XmlTools;
 
-@Service("libraryCollection")
+@Service
 public class LibraryCollection implements Serializable {
 
     private static final long serialVersionUID = -134476506971169954L;
@@ -43,8 +44,8 @@ public class LibraryCollection implements Serializable {
     private final List<Library> libraries;
     private String defaultPlayerPath = "";
     private String defaultClient = "";
-    // Spring
-    @Resource(name = "xmlTools")
+
+    @Autowired
     private XmlTools xmlTools;
 
     public LibraryCollection() {

@@ -24,11 +24,17 @@ package org.yamj.filescanner;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.cmdline.CmdLineParser;
 import org.yamj.common.dto.StageDirectoryDTO;
@@ -66,6 +73,7 @@ import org.yamj.filescanner.tools.Watcher;
  *
  * @author Stuart
  */
+@Service("scannerManagement")
 public class ScannerManagementImpl implements ScannerManagement {
 
     /*

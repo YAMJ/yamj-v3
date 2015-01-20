@@ -6,11 +6,11 @@
        xmlns:oxm="http://www.springframework.org/schema/oxm"
        xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="
-    http://www.springframework.org/schema/beans     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-    http://www.springframework.org/schema/context   http://www.springframework.org/schema/context/spring-context-3.0.xsd
-    http://www.springframework.org/schema/aop       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
-    http://www.springframework.org/schema/oxm       http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd
-    http://www.springframework.org/schema/task      http://www.springframework.org/schema/task/spring-task.xsd
+    http://www.springframework.org/schema/beans     http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+    http://www.springframework.org/schema/context   http://www.springframework.org/schema/context/spring-context-4.1.xsd
+    http://www.springframework.org/schema/aop       http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+    http://www.springframework.org/schema/oxm       http://www.springframework.org/schema/oxm/spring-oxm-4.1.xsd
+    http://www.springframework.org/schema/task      http://www.springframework.org/schema/task/spring-task-4.1.xsd
 ">
 
     <context:annotation-config />
@@ -31,30 +31,17 @@
         <property name="ignoreResourceNotFound" value="true"/>
     </bean>
 
-    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+    <bean id="taskExecutor"
+          class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
         <property name="corePoolSize" value="${filescanner.taskexecutor.corePoolSize}" />
         <property name="maxPoolSize" value="${filescanner.taskexecutor.maxPoolSize}" />
         <property name="queueCapacity" value="${filescanner.taskexecutor.queueCapacity}" />
-    </bean>
-
-    <bean id="scannerManagement"
-          class="org.yamj.filescanner.ScannerManagementImpl">
-    </bean>
-
-    <bean id="librarySendScheduler"
-          class="org.yamj.filescanner.service.LibrarySendScheduler">
-        <property name="yamjExecutor" ref="taskExecutor"/>
     </bean>
 
     <bean id="systemInfoCore"
           class="org.yamj.filescanner.service.SystemInfoCore">
         <property name="timeoutSeconds" value="${filescanner.sicore.timeout}"/>
         <property name="numberOfRetries" value="${filescanner.sicore.retry}"/>
-    </bean>
-
-    <bean id="sendToCore"
-          class="org.yamj.filescanner.service.SendToCore"
-          scope="prototype">
     </bean>
 
     <bean id="fileImportService"
@@ -73,16 +60,6 @@
           class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
         <property name="serviceUrl" value="http://${yamj3.core.host}:${yamj3.core.port}/yamj3/GitHubService"/>
         <property name="serviceInterface" value="org.yamj.common.remote.service.GitHubService"/>
-    </bean>
-
-    <bean id="xmlTools"
-          class="org.yamj.filescanner.tools.XmlTools">
-        <property name="marshaller" ref="xstreamMarshaller" />
-        <property name="unmarshaller" ref="xstreamMarshaller" />
-    </bean>
-
-    <bean id="libraryCollection"
-          class="org.yamj.filescanner.model.LibraryCollection">
     </bean>
 
     <bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">

@@ -22,13 +22,15 @@
  */
 package org.yamj.filescanner.tools;
 
-import com.thoughtworks.xstream.io.StreamException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import javax.annotation.Resource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.oxm.Marshaller;
@@ -36,20 +38,17 @@ import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.stereotype.Service;
 
-@Service("xmlTools")
+import com.thoughtworks.xstream.io.StreamException;
+
+@Service
 public class XmlTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(XmlTools.class);
+    
+    @Resource(name = "xstreamMarshaller")
     private Marshaller marshaller;
+    @Resource(name = "xstreamMarshaller")
     private Unmarshaller unmarshaller;
-
-    public void setMarshaller(Marshaller marshaller) {
-        this.marshaller = marshaller;
-    }
-
-    public void setUnmarshaller(Unmarshaller unmarshaller) {
-        this.unmarshaller = unmarshaller;
-    }
 
     /**
      * Read a file from disk

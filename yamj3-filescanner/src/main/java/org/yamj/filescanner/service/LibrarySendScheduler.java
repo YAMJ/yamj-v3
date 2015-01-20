@@ -27,6 +27,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.annotation.Resource;
+
 import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,12 +53,13 @@ import org.yamj.filescanner.model.TimeType;
 public class LibrarySendScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(LibrarySendScheduler.class);
+    private static final int RETRY_MAX = PropertyTools.getIntProperty("filescanner.send.retry", 5);
     private final AtomicInteger runningCount = new AtomicInteger(0);
     private final AtomicInteger retryCount = new AtomicInteger(0);
-    private static final int RETRY_MAX = PropertyTools.getIntProperty("filescanner.send.retry", 5);
+    
     @Autowired
     private LibraryCollection libraryCollection;
-    @Autowired
+    @Resource(name = "taskExecutor")
     private ThreadPoolTaskExecutor yamjExecutor;
 
     @Async
@@ -181,13 +185,5 @@ public class LibrarySendScheduler {
             library.addDirectoryStatus(stageDir.getPath(), ConcurrentUtils.constantFuture(StatusType.NEW));
         }
         return sentOk;
-    }
-
-    public ThreadPoolTaskExecutor getYamjExecutor() {
-        return yamjExecutor;
-    }
-
-    public void setYamjExecutor(ThreadPoolTaskExecutor yamjExecutor) {
-        this.yamjExecutor = yamjExecutor;
     }
 }

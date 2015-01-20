@@ -24,28 +24,36 @@ package org.yamj.filescanner.service;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
+import org.springframework.stereotype.Service;
 import org.yamj.common.dto.ImportDTO;
 import org.yamj.common.remote.service.FileImportService;
 import org.yamj.common.type.StatusType;
 
+@Service
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class SendToCore implements Callable<StatusType> {
 
     private static final Logger LOG = LoggerFactory.getLogger(SendToCore.class);
-    @Autowired
-    private FileImportService fileImportService;
     private ImportDTO importDto;
     private AtomicInteger runningCount;
 
-    public SendToCore(ImportDTO importDto) {
-        this.importDto = importDto;
-    }
+    @Autowired
+    private FileImportService fileImportService;
 
     public SendToCore() {
+      // empty initialization
+    }
+
+    public SendToCore(ImportDTO importDto) {
+        this.importDto = importDto;
     }
 
     public void setImportDto(ImportDTO importDto) {
