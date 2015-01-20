@@ -46,7 +46,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
                    @Index(name = "IX_SEASON_SEASON", columnList = "season"),
                    @Index(name = "IX_SEASON_PUBLICATIONYEAR", columnList = "publication_year")}
 )
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused","deprecation"})
 public class Season extends AbstractMetadata {
 
     private static final long serialVersionUID = 1858640563119637343L;

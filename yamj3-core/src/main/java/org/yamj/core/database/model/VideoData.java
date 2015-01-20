@@ -48,7 +48,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
                   @Index(name = "IX_VIDEODATA_STATUS", columnList = "status"),
                   @Index(name = "IX_VIDEODATA_PUBLICATIONYEAR", columnList = "publication_year")}
 )
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused","deprecation"})
 public class VideoData extends AbstractMetadata {
 
     private static final long serialVersionUID = 885531396557944590L;

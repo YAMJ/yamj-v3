@@ -46,7 +46,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
                   @Index(name = "IX_PERSON_FILMOGRAPHY_STATUS", columnList = "filmography_status"),
                   @Index(name = "IX_PERSON_NAME", columnList = "name")}
 )
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused","deprecation"})
 public class Person extends AbstractAuditable implements IScannable, Serializable {
 
     private static final long serialVersionUID = 660066902996412843L;
