@@ -25,21 +25,21 @@ package org.yamj.core.database.model;
 import java.io.Serializable;
 import java.util.*;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.*;
-import org.hibernate.annotations.Index;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
 
 @Entity
 @Table(name = "stage_file",
-        uniqueConstraints = @UniqueConstraint(name = "UIX_STAGEFILE_NATURALID", columnNames = {"directory_id", "base_name", "extension"})
+       uniqueConstraints = @UniqueConstraint(name = "UIX_STAGEFILE_NATURALID", columnNames = {"directory_id", "base_name", "extension"}),
+       indexes = {@Index(name = "IX_STAGEFILE_BASENAME", columnList = "base_name"),
+                  @Index(name = "IX_STAGEFILE_STATUS", columnList = "status")}
 )
 @SuppressWarnings("unused")
 public class StageFile extends AbstractAuditable implements Serializable {
@@ -51,7 +51,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
     @JoinColumn(name = "directory_id", nullable = false, foreignKey = @ForeignKey(name = "FK_STAGEFILE_DIRECTORY"))
     private StageDirectory stageDirectory;
 
-    @Index(name = "IX_STAGEFILE_BASENAME")
+    
     @NaturalId(mutable = true)
     @Column(name = "base_name", nullable = false, length = 255)
     private String baseName;
@@ -74,19 +74,18 @@ public class StageFile extends AbstractAuditable implements Serializable {
     @Column(name = "full_path", nullable = false, length = 255)
     private String fullPath;
 
-    @Index(name = "IX_STAGEFILE_STATUS")
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "nfoRelationPK.stageFile")
-    private List<NfoRelation> nfoRelations = new ArrayList<NfoRelation>(0);
+    private List<NfoRelation> nfoRelations = new ArrayList<>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "stageFile")
-    private Set<ArtworkLocated> artworkLocated = new HashSet<ArtworkLocated>(0);
+    private Set<ArtworkLocated> artworkLocated = new HashSet<>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "stageFile")
-    private Set<Subtitle> subtitles = new HashSet<Subtitle>(0);
+    private Set<Subtitle> subtitles = new HashSet<>(0);
 
     @Lob
     @Column(name = "content")

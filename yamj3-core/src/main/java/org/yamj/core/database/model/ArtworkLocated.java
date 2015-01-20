@@ -26,51 +26,45 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.*;
-import org.hibernate.annotations.ForeignKey;
-import org.hibernate.annotations.Index;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 
 @Entity
 @Table(name = "artwork_located",
-        uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORKLOCATED_NATURALID", columnNames = {"artwork_id", "stagefile_id", "source", "url"})
+       uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORKLOCATED_NATURALID", columnNames = {"artwork_id", "stagefile_id", "source", "url"}),
+       indexes = {@Index(name = "IX_ARTWORKLOCATED_DOWNLOAD", columnList = "source,url"),
+                  @Index(name = "IX_ARTWORKLOCATED_STATUS", columnList = "status")}
 )
 public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -981494909436217076L;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_ARTWORKLOCATED_ARTWORK")
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "artwork_id", nullable = false)
+    @JoinColumn(name = "artwork_id", nullable = false, foreignKey = @ForeignKey(name = "FK_ARTWORKLOCATED_ARTWORK"))
     private Artwork artwork;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @ForeignKey(name = "FK_ARTWORKLOCATED_STAGEFILE")
     @Fetch(FetchMode.JOIN)
-    @JoinColumn(name = "stagefile_id")
+    @JoinColumn(name = "stagefile_id", foreignKey = @ForeignKey(name = "FK_ARTWORKLOCATED_STAGEFILE"))
     private StageFile stageFile;
 
     // only used for equality checks
     @Column(name = "stagefile_id", insertable = false, updatable = false)
     private Long stageFileId;
 
-    @Index(name = "IX_ARTWORKLOCATED_DOWNLOAD")
     @Column(name = "source", length = 50)
     private String source;
 
-    @Index(name = "IX_ARTWORKLOCATED_DOWNLOAD")
     @Column(name = "url", length = 255)
     private String url;
 
-    @Index(name = "IX_ARTWORKLOCATED_STATUS")
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;

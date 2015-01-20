@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -35,7 +36,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.ForeignKey;
-import org.hibernate.annotations.Index;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -43,13 +43,11 @@ import org.yamj.core.database.model.type.OverrideFlag;
 
 @Entity
 @Table(name = "videodata",
-        uniqueConstraints
-        = @UniqueConstraint(name = "UIX_VIDEODATA_NATURALID", columnNames = {"identifier"}))
-@org.hibernate.annotations.Table(appliesTo = "videodata",
-        indexes = {
-            @Index(name = "IX_VIDEODATA_TITLE", columnNames = {"title"}),
-            @Index(name = "IX_VIDEODATA_STATUS", columnNames = {"status"})
-        })
+       uniqueConstraints = @UniqueConstraint(name = "UIX_VIDEODATA_NATURALID", columnNames = {"identifier"}),
+       indexes = {@Index(name = "IX_VIDEODATA_TITLE", columnList = "title"),
+                  @Index(name = "IX_VIDEODATA_STATUS", columnList = "status"),
+                  @Index(name = "IX_VIDEODATA_PUBLICATIONYEAR", columnList = "publication_year")}
+)
 @SuppressWarnings("unused")
 public class VideoData extends AbstractMetadata {
 
@@ -58,7 +56,6 @@ public class VideoData extends AbstractMetadata {
     @Column(name = "episode", nullable = false)
     private int episode = -1;
 
-    @Index(name = "IX_VIDEODATA_PUBLICATIONYEAR")
     @Column(name = "publication_year", nullable = false)
     private int publicationYear = -1;
 

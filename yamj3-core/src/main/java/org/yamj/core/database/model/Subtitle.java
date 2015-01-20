@@ -49,7 +49,7 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
     @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "stagefile_id", foreignKey = @ForeignKey(name = "FK_SUBITLE_STAGEFILE"))
+    @JoinColumn(name = "stagefile_id", foreignKey = @ForeignKey(name = "FK_SUBTITLE_STAGEFILE"))
     private StageFile stageFile;
 
     @NaturalId

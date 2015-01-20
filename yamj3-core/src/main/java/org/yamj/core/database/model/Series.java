@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -35,19 +36,15 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.ForeignKey;
-import org.hibernate.annotations.Index;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
 @Entity
 @Table(name = "series",
-        uniqueConstraints
-        = @UniqueConstraint(name = "UIX_SERIES_NATURALID", columnNames = {"identifier"}))
-@org.hibernate.annotations.Table(appliesTo = "series",
-        indexes = {
-            @Index(name = "IX_SERIES_TITLE", columnNames = {"title"}),
-            @Index(name = "IX_SERIES_STATUS", columnNames = {"status"})
-        })
+       uniqueConstraints = @UniqueConstraint(name = "UIX_SERIES_NATURALID", columnNames = {"identifier"}),
+       indexes = {@Index(name = "IX_SERIES_TITLE", columnList = "title"),
+                  @Index(name = "IX_SERIES_STATUS", columnList = "status")}
+)
 @SuppressWarnings("unused")
 public class Series extends AbstractMetadata {
 
@@ -68,7 +65,7 @@ public class Series extends AbstractMetadata {
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
-    private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
+    private Map<String, String> sourceDbIdMap = new HashMap<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_ratings", joinColumns = @JoinColumn(name = "series_id"))
@@ -76,7 +73,7 @@ public class Series extends AbstractMetadata {
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
-    private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
+    private Map<String, Integer> ratings = new HashMap<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_override", joinColumns = @JoinColumn(name = "series_id"))
@@ -85,13 +82,13 @@ public class Series extends AbstractMetadata {
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
-    private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
+    private Map<OverrideFlag, String> overrideFlags = new EnumMap<>(OverrideFlag.class);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
-    private Set<Season> seasons = new HashSet<Season>(0);
+    private Set<Season> seasons = new HashSet<>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
-    private List<Artwork> artworks = new ArrayList<Artwork>(0);
+    private List<Artwork> artworks = new ArrayList<>(0);
 
     @ManyToMany
     @ForeignKey(name = "FK_SERIESGENRES_SERIES", inverseName = "FK_SERIESGENRES_GENRE")

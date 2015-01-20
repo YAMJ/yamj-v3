@@ -26,21 +26,21 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.*;
-import org.hibernate.annotations.Index;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.ArtworkType;
 
 @Entity
 @Table(name = "artwork",
-        uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORK_NATURALID", columnNames = {"artwork_type", "videodata_id", "season_id", "series_id", "person_id", "boxedset_id"})
+       uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORK_NATURALID", columnNames = {"artwork_type", "videodata_id", "season_id", "series_id", "person_id", "boxedset_id"}),
+       indexes = {@Index(name = "IX_ARTWORK_TYPE", columnList = "artwork_type"),
+                  @Index(name = "IX_ARTWORK_STATUS", columnList = "status")}
 )
 @SuppressWarnings("unused")
 public class Artwork extends AbstractAuditable implements Serializable {
@@ -48,7 +48,7 @@ public class Artwork extends AbstractAuditable implements Serializable {
     private static final long serialVersionUID = -981494909436217076L;
 
     @NaturalId(mutable = true)
-    @Index(name = "IX_ARTWORK_TYPE")
+    
     @Type(type = "artworkType")
     @Column(name = "artwork_type", nullable = false)
     private ArtworkType artworkType;
@@ -83,7 +83,6 @@ public class Artwork extends AbstractAuditable implements Serializable {
     @JoinColumn(name = "boxedset_id", foreignKey = @ForeignKey(name = "FK_ARTWORK_BOXEDSET"))
     private BoxedSet boxedSet;
 
-    @Index(name = "IX_ARTWORK_STATUS")
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;

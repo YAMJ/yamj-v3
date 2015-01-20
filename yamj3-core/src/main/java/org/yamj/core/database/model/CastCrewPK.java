@@ -28,7 +28,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 import org.yamj.core.database.model.type.JobType;
 
@@ -43,14 +42,12 @@ public class CastCrewPK implements Serializable {
                 foreignKey = @ForeignKey(name = "FK_CASTCREW_PERSON"))
     private Person person;
 
-    @Index(name = "IX_CASTCREW_VIDEOJOB")
     @ManyToOne(fetch = FetchType.EAGER)
     @Fetch(FetchMode.JOIN)
     @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false,
                 foreignKey = @ForeignKey(name = "FK_CASTCREW_VIDEODATA"))
     private VideoData videoData;
 
-    @Index(name = "IX_CASTCREW_VIDEOJOB")
     @Type(type = "jobType")
     @Column(name = "job", nullable = false, length = 30, insertable = false, updatable = false)
     private JobType jobType;

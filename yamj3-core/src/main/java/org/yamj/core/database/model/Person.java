@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,13 +36,15 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.ForeignKey;
-import org.hibernate.annotations.Index;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
 @Entity
 @Table(name = "person",
-        uniqueConstraints = @UniqueConstraint(name = "UIX_PERSON_NATURALID", columnNames = {"identifier"})
+       uniqueConstraints = @UniqueConstraint(name = "UIX_PERSON_NATURALID", columnNames = {"identifier"}),
+       indexes = {@Index(name = "IX_PERSON_STATUS", columnList = "status"),
+                  @Index(name = "IX_PERSON_FILMOGRAPHY_STATUS", columnList = "filmography_status"),
+                  @Index(name = "IX_PERSON_NAME", columnList = "name")}
 )
 @SuppressWarnings("unused")
 public class Person extends AbstractAuditable implements IScannable, Serializable {
@@ -84,7 +87,6 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @Column(name = "sourcedb_id", length = 40)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);
 
-    @Index(name = "IX_PERSON_STATUS")
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
@@ -105,7 +107,6 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @Column(name = "source", length = 30, nullable = false)
     private Map<OverrideFlag, String> overrideFlags = new EnumMap<>(OverrideFlag.class);
 
-    @Index(name = "IX_PERSON_FILMOGRAPHY_STATUS")
     @Type(type = "statusType")
     @Column(name = "filmography_status", length = 30)
     private StatusType filmographyStatus;
@@ -117,7 +118,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     private Artwork photo;
 
     @Transient
-    private Map<String, String> photoURLS = new HashMap<String, String>(0);
+    private Map<String, String> photoURLS = new HashMap<>(0);
 
     @Transient
     private Set<FilmParticipation> newFilmography = new HashSet<>(0);

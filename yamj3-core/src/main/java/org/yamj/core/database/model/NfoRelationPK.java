@@ -23,15 +23,11 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import javax.persistence.Embeddable;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.ForeignKey;
 
 @Embeddable
 public class NfoRelationPK implements Serializable {
@@ -39,15 +35,15 @@ public class NfoRelationPK implements Serializable {
     private static final long serialVersionUID = -2719804527986484389L;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @ForeignKey(name = "FK_NFORELATION_STAGEFILE")
     @Fetch(FetchMode.JOIN)
-    @JoinColumn(name = "stagefile_id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "stagefile_id", nullable = false, insertable = false, updatable = false,
+                foreignKey = @ForeignKey(name = "FK_NFORELATION_STAGEFILE"))
     private StageFile stageFile;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @ForeignKey(name = "FK_NFORELATION_VIDEODATA")
     @Fetch(FetchMode.JOIN)
-    @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "videodata_id", nullable = false, insertable = false, updatable = false,
+                foreignKey = @ForeignKey(name = "FK_NFORELATION_VIDEODATA"))
     private VideoData videoData;
 
     public NfoRelationPK() {

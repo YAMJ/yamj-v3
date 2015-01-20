@@ -27,36 +27,33 @@ import java.util.Map.Entry;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.ForeignKey;
-import org.hibernate.annotations.Index;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
 @Entity
 @Table(name = "season",
-        uniqueConstraints =
-        @UniqueConstraint(name = "UIX_SEASON_NATURALID", columnNames = {"identifier"}))
-@org.hibernate.annotations.Table(appliesTo = "season",
-        indexes = {
-    @Index(name = "IX_SEASON_TITLE", columnNames = {"title"}),
-    @Index(name = "IX_SEASON_STATUS", columnNames = {"status"})
-})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_SEASON_NATURALID", columnNames = {"identifier"}),
+        indexes = {@Index(name = "IX_SEASON_TITLE", columnList = "title"),
+                   @Index(name = "IX_SEASON_STATUS", columnList = "status"),
+                   @Index(name = "IX_SEASON_SEASON", columnList = "season"),
+                   @Index(name = "IX_SEASON_PUBLICATIONYEAR", columnList = "publication_year")}
+)
 @SuppressWarnings("unused")
 public class Season extends AbstractMetadata {
 
     private static final long serialVersionUID = 1858640563119637343L;
 
-    @Index(name = "IX_SEASON_SEASON")
     @Column(name = "season", nullable = false)
     private int season;
 
-    @Index(name = "IX_SEASON_PUBLICATIONYEAR")
     @Column(name = "publication_year", nullable = false)
     private int publicationYear = -1;
 
@@ -66,7 +63,7 @@ public class Season extends AbstractMetadata {
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
-    private Map<String, String> sourceDbIdMap = new HashMap<String, String>(0);
+    private Map<String, String> sourceDbIdMap = new HashMap<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "season_ratings", joinColumns = @JoinColumn(name = "season_id"))
@@ -74,7 +71,7 @@ public class Season extends AbstractMetadata {
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
-    private Map<String, Integer> ratings = new HashMap<String, Integer>(0);
+    private Map<String, Integer> ratings = new HashMap<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "season_override", joinColumns = @JoinColumn(name = "season_id"))
@@ -83,7 +80,7 @@ public class Season extends AbstractMetadata {
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
     @Column(name = "source", length = 30, nullable = false)
-    private Map<OverrideFlag, String> overrideFlags = new EnumMap<OverrideFlag, String>(OverrideFlag.class);
+    private Map<OverrideFlag, String> overrideFlags = new EnumMap<>(OverrideFlag.class);
 
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_SEASON_SERIES")
@@ -92,10 +89,10 @@ public class Season extends AbstractMetadata {
     private Series series;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "season")
-    private Set<VideoData> videoDatas = new HashSet<VideoData>(0);
+    private Set<VideoData> videoDatas = new HashSet<>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "season")
-    private List<Artwork> artworks = new ArrayList<Artwork>(0);
+    private List<Artwork> artworks = new ArrayList<>(0);
 
     // CONSTRUCTORS
 

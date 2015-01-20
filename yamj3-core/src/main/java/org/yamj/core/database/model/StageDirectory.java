@@ -29,7 +29,6 @@ import java.util.Set;
 import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
@@ -53,13 +52,11 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
 
     @NaturalId
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_STAGEDIRECTORY_LIBRARY")
-    @JoinColumn(name = "library_id", nullable = false)
+    @JoinColumn(name = "library_id", nullable = false, foreignKey = @ForeignKey(name = "FK_STAGEDIRECTORY_LIBRARY"))
     private Library library;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_STAGEDIRECTORY_PARENT")
-    @JoinColumn(name = "parent_id")
+    @JoinColumn(name = "parent_id", foreignKey = @ForeignKey(name = "FK_STAGEDIRECTORY_PARENT"))
     private StageDirectory parentDirectory;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "stageDirectory")

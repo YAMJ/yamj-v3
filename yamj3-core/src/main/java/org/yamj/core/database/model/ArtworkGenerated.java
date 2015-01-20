@@ -26,7 +26,6 @@ import java.io.Serializable;
 import javax.persistence.*;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.ForeignKey;
 
 @Entity
 @Table(name = "artwork_generated",
@@ -37,15 +36,13 @@ public class ArtworkGenerated extends AbstractAuditable implements Serializable 
     private static final long serialVersionUID = 2326614430648326340L;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_ARTWORKGENERATED_LOCATED")
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "located_id")
+    @JoinColumn(name = "located_id", foreignKey = @ForeignKey(name = "FK_ARTWORKGENERATED_LOCATED"))
     private ArtworkLocated artworkLocated;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_ARTWORKGENERATED_PROFILE")
     @Fetch(FetchMode.SELECT)
-    @JoinColumn(name = "profile_id")
+    @JoinColumn(name = "profile_id", foreignKey = @ForeignKey(name = "FK_ARTWORKGENERATED_PROFILE"))
     private ArtworkProfile artworkProfile;
 
     @Column(name = "cache_filename", nullable = false, length = 255)
