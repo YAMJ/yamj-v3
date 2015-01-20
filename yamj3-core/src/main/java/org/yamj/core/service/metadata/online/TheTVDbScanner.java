@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online.tvdb;
+package org.yamj.core.service.metadata.online;
 
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
@@ -39,10 +39,6 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-import org.yamj.core.service.metadata.online.ISeriesScanner;
-import org.yamj.core.service.metadata.online.OnlineScannerService;
-import org.yamj.core.service.metadata.online.ScanResult;
-import org.yamj.core.service.metadata.online.imdb.ImdbScanner;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 

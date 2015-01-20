@@ -1,4 +1,4 @@
-package org.yamj.core.service.metadata.online.imdb;
+package org.yamj.core.service.metadata.online;
 
 import java.util.Date;
 

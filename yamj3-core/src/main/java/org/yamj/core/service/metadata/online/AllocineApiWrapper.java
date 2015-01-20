@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online.allocine;
+package org.yamj.core.service.metadata.online;
 
 import com.moviejukebox.allocine.AllocineApi;
 import com.moviejukebox.allocine.AllocineException;

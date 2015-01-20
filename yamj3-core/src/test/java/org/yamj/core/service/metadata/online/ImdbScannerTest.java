@@ -25,7 +25,6 @@ package org.yamj.core.service.metadata.online;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
 import javax.annotation.Resource;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
@@ -35,7 +34,6 @@ import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.service.metadata.online.imdb.ImdbScanner;
 
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
 public class ImdbScannerTest extends AbstractJUnit4SpringContextTests {

@@ -22,6 +22,9 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
+import org.yamj.core.service.metadata.online.ImdbScanner;
+
+import org.yamj.core.service.metadata.online.TheTVDbScanner;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -43,8 +46,6 @@ import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
-import org.yamj.core.service.metadata.online.imdb.ImdbScanner;
-import org.yamj.core.service.metadata.online.tvdb.TheTVDbScanner;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.xml.DOMHelper;
