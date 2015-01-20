@@ -18,8 +18,6 @@
 
     <!-- Activates @Scheduled and @Async annotations for scheduling -->
     <task:annotation-driven />
-
-    <bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor" />
  
     <bean id="propertyConfigurer" class="org.yamj.common.tools.PropertyTools">
         <property name="locations">
