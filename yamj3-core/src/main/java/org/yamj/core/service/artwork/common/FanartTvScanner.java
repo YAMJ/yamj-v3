@@ -55,7 +55,7 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
     private TheMovieDbApiWrapper tmdbApiWrapper;
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         LOG.info("Initialize FanartTV artwork scanner");
 
         // register this scanner
@@ -82,20 +82,7 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
 
     @Override
     public List<ArtworkDetailDTO> getPosters(String id) {
-        List<ArtworkDetailDTO> artworkList = new ArrayList<>();
-
-        try {
-            FTMovie ftm = fanarttvApi.getMovieArtwork(id);
-
-            for(FTArtwork artwork : ftm.getArtwork(FTArtworkType.MOVIEPOSTER)) {
-                ArtworkDetailDTO aDto = new ArtworkDetailDTO(SCANNER_ID, artwork.getUrl());
-                aDto.setLanguage(artwork.getLanguage());
-                artworkList.add(aDto);
-            }
-        } catch (FanartTvException ex) {
-            LOG.warn("Failed to get artwork from FanartTV for ID '{}', error: {}", id, ex.getMessage(),ex);
-        }
-        return artworkList;
+        return getMovieArtworkType(id, FTArtworkType.MOVIEPOSTER);
     }
 
     @Override
@@ -109,21 +96,66 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
 
     @Override
     public String getId(IMetadata metadata) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        String id;
+        if (metadata.isMovie()) {
+            // Scan for a movie ID
+            id = tmdbApiWrapper.getId(metadata);
+        } else {
+            // Scan for a TV ID
+            id = null;
+        }
+
+        LOG.info("{} {} ID for {} ({}), ID: {}",
+                StringUtils.isBlank(id) ? "Failed to get" : "Got",
+                metadata.isMovie() ? "Movie" : "TV",
+                metadata.getTitle(), metadata.getYear(),
+                id);
+
+        return id;
     }
 
     @Override
     public List<ArtworkDetailDTO> getFanarts(String title, int year) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        String id = this.getId(title, year);
+        return getMovieArtworkType(id, FTArtworkType.MOVIEBACKGROUND);
     }
 
     @Override
     public List<ArtworkDetailDTO> getFanarts(String id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return getMovieArtworkType(id, FTArtworkType.MOVIEBACKGROUND);
     }
 
     @Override
     public List<ArtworkDetailDTO> getFanarts(IMetadata metadata) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        String id = getId(metadata);
+        if (StringUtils.isNotBlank(id)) {
+            return getFanarts(id);
+        }
+        return null;
+    }
+
+    /**
+     * Generic routine to get the artwork type from the FanartTV based on the
+     * passed type
+     *
+     * @param id ID of the artwork to get
+     * @param artworkType Type of the artwork to get
+     * @return List of the appropriate artwork
+     */
+    private List<ArtworkDetailDTO> getMovieArtworkType(String id, FTArtworkType artworkType) {
+        List<ArtworkDetailDTO> artworkList = new ArrayList<>();
+
+        try {
+            FTMovie ftm = fanarttvApi.getMovieArtwork(id);
+
+            for (FTArtwork artwork : ftm.getArtwork(artworkType)) {
+                ArtworkDetailDTO aDto = new ArtworkDetailDTO(SCANNER_ID, artwork.getUrl());
+                aDto.setLanguage(artwork.getLanguage());
+                artworkList.add(aDto);
+            }
+        } catch (FanartTvException ex) {
+            LOG.warn("Failed to get {} artwork from FanartTV for ID '{}', error: {}", artworkType, id, ex.getMessage(), ex);
+        }
+        return artworkList;
     }
 }
