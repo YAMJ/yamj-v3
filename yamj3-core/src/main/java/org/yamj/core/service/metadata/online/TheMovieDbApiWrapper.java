@@ -22,20 +22,18 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import com.omertron.themoviedbapi.MovieDbException;
+import com.omertron.themoviedbapi.TheMovieDbApi;
+import com.omertron.themoviedbapi.model.MovieDb;
+import com.omertron.themoviedbapi.model.Person;
+import com.omertron.themoviedbapi.results.TmdbResultsList;
 import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigService;
-
-import com.omertron.themoviedbapi.MovieDbException;
-import com.omertron.themoviedbapi.TheMovieDbApi;
-import com.omertron.themoviedbapi.model.MovieDb;
-import com.omertron.themoviedbapi.model.Person;
-import com.omertron.themoviedbapi.results.TmdbResultsList;
 
 @Service("tmdbApiWrapper")
 public class TheMovieDbApiWrapper {
@@ -52,7 +50,7 @@ public class TheMovieDbApiWrapper {
         boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
         int searchMatch = configService.getIntProperty("themoviedb.searchMatch", 3);
         MovieDb moviedb = null;
-  
+
         try {
             // Search using movie name
             List<MovieDb> movieList = tmdbApi.searchMovie(title, year, defaultLanguage, includeAdult, 0).getResults();
@@ -65,7 +63,7 @@ public class TheMovieDbApiWrapper {
                 } else {
                     relDate = "";
                 }
-                LOG.debug("Checking " + m.getTitle() + " (" + relDate + ")");
+                LOG.debug("Checking {} {{})", m.getTitle(), relDate);
                 if (TheMovieDbApi.compareMovies(m, title, String.valueOf(year), searchMatch)) {
                     moviedb = m;
                     break;
@@ -74,7 +72,7 @@ public class TheMovieDbApiWrapper {
         } catch (MovieDbException ex) {
             LOG.debug("Failed to get movie info for {}, error: {}", title, ex.getMessage());
         }
-  
+
         if (moviedb != null) {
             LOG.info("TMDB ID found {} for '{}'", moviedb.getId(), title);
             return String.valueOf(moviedb.getId());
@@ -83,42 +81,42 @@ public class TheMovieDbApiWrapper {
     }
 
     public String getPersonId(String name) {
-      String id = null;
-      Person closestPerson = null;
-      int closestMatch = Integer.MAX_VALUE;
-      boolean foundPerson = Boolean.FALSE;
-      boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
+        String id = null;
+        Person closestPerson = null;
+        int closestMatch = Integer.MAX_VALUE;
+        boolean foundPerson = Boolean.FALSE;
+        boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
 
-      try {
-          TmdbResultsList<com.omertron.themoviedbapi.model.Person> results = tmdbApi.searchPeople(name, includeAdult, 0);
-          LOG.info("{}: Found {} results", name, results.getResults().size());
-          for (com.omertron.themoviedbapi.model.Person person : results.getResults()) {
-              if (name.equalsIgnoreCase(person.getName())) {
-                  id = String.valueOf(person.getId());
-                  foundPerson = Boolean.TRUE;
-                  break;
-              }
-              LOG.trace("{}: Checking against '{}'", name, person.getName());
-              int lhDistance = StringUtils.getLevenshteinDistance(name, person.getName());
-              LOG.trace("{}: Current closest match is {}, this match is {}", name, closestMatch, lhDistance);
-              if (lhDistance < closestMatch) {
-                  LOG.trace("{}: TMDB ID {} is a better match ", name, person.getId());
-                  closestMatch = lhDistance;
-                  closestPerson = person;
-              }
-          }
+        try {
+            TmdbResultsList<com.omertron.themoviedbapi.model.Person> results = tmdbApi.searchPeople(name, includeAdult, 0);
+            LOG.info("{}: Found {} results", name, results.getResults().size());
+            for (com.omertron.themoviedbapi.model.Person person : results.getResults()) {
+                if (name.equalsIgnoreCase(person.getName())) {
+                    id = String.valueOf(person.getId());
+                    foundPerson = Boolean.TRUE;
+                    break;
+                }
+                LOG.trace("{}: Checking against '{}'", name, person.getName());
+                int lhDistance = StringUtils.getLevenshteinDistance(name, person.getName());
+                LOG.trace("{}: Current closest match is {}, this match is {}", name, closestMatch, lhDistance);
+                if (lhDistance < closestMatch) {
+                    LOG.trace("{}: TMDB ID {} is a better match ", name, person.getId());
+                    closestMatch = lhDistance;
+                    closestPerson = person;
+                }
+            }
 
-          if (foundPerson) {
-              LOG.debug("{}: Matched against TMDB ID: {}", name, id);
-          } else if (closestMatch < Integer.MAX_VALUE && closestPerson != null) {
-              id = String.valueOf(closestPerson.getId());
-              LOG.debug("{}: Closest match is '{}' differing by {} characters", name, closestPerson.getName(), closestMatch);
-          } else {
-              LOG.debug("{}: No match found", name);
-          }
-      } catch (MovieDbException ex) {
-          LOG.warn("Failed to get information on '{}', error: {}", name, ex.getMessage());
-      }
-      return id;
-  }
+            if (foundPerson) {
+                LOG.debug("{}: Matched against TMDB ID: {}", name, id);
+            } else if (closestMatch < Integer.MAX_VALUE && closestPerson != null) {
+                id = String.valueOf(closestPerson.getId());
+                LOG.debug("{}: Closest match is '{}' differing by {} characters", name, closestPerson.getName(), closestMatch);
+            } else {
+                LOG.debug("{}: No match found", name);
+            }
+        } catch (MovieDbException ex) {
+            LOG.warn("Failed to get information on '{}', error: {}", name, ex.getMessage());
+        }
+        return id;
+    }
 }
