@@ -22,12 +22,14 @@
  */
 package org.yamj.core.service.artwork.common;
 
+import com.omertron.thetvdbapi.model.Banner;
+import com.omertron.thetvdbapi.model.BannerType;
+import com.omertron.thetvdbapi.model.Banners;
+import com.omertron.thetvdbapi.model.Episode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -49,11 +51,6 @@ import org.yamj.core.service.artwork.tv.ITvShowVideoImageScanner;
 import org.yamj.core.service.metadata.online.TheTVDbApiWrapper;
 import org.yamj.core.service.metadata.online.TheTVDbScanner;
 
-import com.omertron.thetvdbapi.model.Banner;
-import com.omertron.thetvdbapi.model.BannerType;
-import com.omertron.thetvdbapi.model.Banners;
-import com.omertron.thetvdbapi.model.Episode;
-
 @Service("tvdbArtworkScanner")
 public class TheTVDbArtworkScanner implements
         ITvShowPosterScanner, ITvShowFanartScanner, ITvShowBannerScanner,
@@ -74,7 +71,7 @@ public class TheTVDbArtworkScanner implements
     }
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         LOG.info("Initialize TheTVDb artwork scanner");
 
         // register this scanner
