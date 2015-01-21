@@ -29,16 +29,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>yamj3-common</artifactId>
         </dependency>
-        <!-- OTHER -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-        </dependency>
-        <!--LOGGING - This is provided by the YAMJ-Core.WAR-->
         <!-- JETTY -->
         <dependency>
             <groupId>org.eclipse.jetty.aggregate</groupId>
