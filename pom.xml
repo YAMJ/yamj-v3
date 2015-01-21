@@ -116,7 +116,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>yamj3-batch</artifactId>
+                <artifactId>yamj3-filescanner</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!--  SPRING -->
