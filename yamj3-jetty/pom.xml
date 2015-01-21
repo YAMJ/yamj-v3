@@ -90,10 +90,10 @@
                 <configuration>
                     <archive>
                         <manifest>
+                            <!-- executable jar from command line -->
                             <mainClass>org.yamj.jetty.Start</mainClass>
-                            <!-- use for executable jar -->
-                            <!--addClasspath>true</addClasspath-->
-                            <!--classpathPrefix>./</classpathPrefix-->
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>./</classpathPrefix>
                         </manifest>
                     </archive>
                 </configuration>
