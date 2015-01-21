@@ -22,13 +22,13 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import com.omertron.themoviedbapi.model.*;
+import com.omertron.themoviedbapi.results.TmdbResultsList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,15 +45,7 @@ import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
-
-import com.omertron.themoviedbapi.MovieDbException;
-import com.omertron.themoviedbapi.TheMovieDbApi;
-import com.omertron.themoviedbapi.model.MovieDb;
-import com.omertron.themoviedbapi.model.PersonCredit;
-import com.omertron.themoviedbapi.model.PersonType;
-import com.omertron.themoviedbapi.model.ProductionCompany;
-import com.omertron.themoviedbapi.model.ProductionCountry;
-import com.omertron.themoviedbapi.results.TmdbResultsList;
+import org.yamj.core.tools.web.TemporaryUnavailableException;
 
 @Service("tmdbScanner")
 public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
@@ -67,8 +59,6 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
     private OnlineScannerService onlineScannerService;
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
-    @Autowired
-    private TheMovieDbApi tmdbApi;
     @Autowired
     private TheMovieDbApiWrapper tmdbApiWrapper;
     
@@ -88,109 +78,96 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
 
     @Override
     public String getMovieId(VideoData videoData) {
-        String tmdbID = videoData.getSourceDbId(SCANNER_ID);
-        String imdbID = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
-        String defaultLanguage = configServiceWrapper.getProperty("themoviedb.language", "en");
-        MovieDb moviedb = null;
-
-
-        // First look to see if we have a TMDb ID as this will make looking the film up easier
-        if (StringUtils.isNotBlank(tmdbID)) {
-            // Search based on TMdb ID
-            LOG.debug("Using TMDb ID ({}) for {}", tmdbID, videoData.getTitle());
-            try {
-                moviedb = tmdbApi.getMovieInfo(Integer.parseInt(tmdbID), defaultLanguage);
-            } catch (MovieDbException ex) {
-                LOG.debug("Failed to get movie info using TMDB ID: {}, Error: {}", tmdbID, ex.getMessage());
-                moviedb = null;
-            }
+        return getMovieId(videoData, false);
+    }
+    
+    private String getMovieId(VideoData videoData, boolean throwTempError) {
+        String tmdbId = videoData.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNumeric(tmdbId)) {
+            return tmdbId;
         }
-
-        if (moviedb == null && StringUtils.isNotBlank(imdbID)) {
+        
+        String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
+        if (StringUtils.isNotBlank(imdbId)) {
             // Search based on IMDb ID
-            LOG.debug("Using IMDb ID ({}) for {}", imdbID, videoData.getTitle());
-            try {
-                moviedb = tmdbApi.getMovieInfoImdb(imdbID, defaultLanguage);
-                tmdbID = String.valueOf(moviedb.getId());
-                if (StringUtils.isBlank(tmdbID)) {
-                    LOG.debug("Failed to get movie info using IMDB ID {} for {}", imdbID, videoData.getTitle());
-                }
-            } catch (MovieDbException ex) {
-                LOG.debug("Failed to get movie info using IMDB ID: {}, Error: {}", imdbID, ex.getMessage());
-                moviedb = null;
+            LOG.debug("Using IMDb id {} for '{}'", imdbId, videoData.getTitle());
+            MovieDb movieDb = tmdbApiWrapper.getMovieInfoByIMDB(imdbId, throwTempError);
+            if (movieDb != null && movieDb.getId() != 0) {
+                tmdbId = String.valueOf(movieDb.getId());
             }
         }
 
-        if (moviedb == null && StringUtils.isNotBlank(videoData.getTitle())) {
-            LOG.debug("No ID found for {}, trying title search with '{} ({})'", videoData.getTitle(), videoData.getTitle(), videoData.getPublicationYear());
-            return tmdbApiWrapper.getMovieDbId(videoData.getTitle(), videoData.getPublicationYear());
+        if (!StringUtils.isNumeric(tmdbId)) {
+            LOG.debug("No TMDb id found for '{}', searching title with year {}", videoData.getTitle(), videoData.getPublicationYear());
+            tmdbId = tmdbApiWrapper.getMovieDbId(videoData.getTitle(), videoData.getPublicationYear(), throwTempError);
+            videoData.setSourceDbId(SCANNER_ID, tmdbId);
         }
 
-        if (StringUtils.isNotBlank(tmdbID)) {
-            LOG.info("Found TMDB ID: {}", tmdbID);
-            videoData.setSourceDbId(SCANNER_ID, tmdbID);
-        } else {
-            LOG.info("No TMDB ID found for {}", videoData.getTitle());
+        if (!StringUtils.isNumeric(tmdbId) && StringUtils.isNotBlank(videoData.getTitleOriginal())) {
+            LOG.debug("No TMDb id found for '{}', searching original title with year {}", videoData.getTitleOriginal(), videoData.getPublicationYear());
+            tmdbId = tmdbApiWrapper.getMovieDbId(videoData.getTitleOriginal(), videoData.getPublicationYear(), throwTempError);
+            videoData.setSourceDbId(SCANNER_ID, tmdbId);
         }
-        return tmdbID;
+
+        if (StringUtils.isNumeric(tmdbId)) {
+            videoData.setSourceDbId(SCANNER_ID, tmdbId);
+            return tmdbId;
+        }
+        
+        return null;
     }
 
     @Override
     public ScanResult scan(VideoData videoData) {
-        String tmdbID = getMovieId(videoData);
-
-        if (StringUtils.isBlank(tmdbID)) {
-            LOG.debug("Missing TMDB ID for {}", videoData.getTitle());
-            return ScanResult.MISSING_ID;
-        }
-
-        return updateVideoData(videoData);
-    }
-
-    private ScanResult updateVideoData(VideoData videoData) {
-        String tmdbID = videoData.getSourceDbId(SCANNER_ID);
-        String defaultLanguage = configServiceWrapper.getProperty("themoviedb.language", "en");
-        MovieDb moviedb;
-
-        if (StringUtils.isBlank(tmdbID)) {
-            LOG.error("Failed retrieving TheMovieDb information for {}, missing id.", videoData.getTitle());
-            return ScanResult.MISSING_ID;
-        }
-
-        LOG.info("Getting information for TMDB ID:{}-{}", tmdbID, videoData.getTitle());
-
+        MovieDb movieDb = null;
+        TmdbResultsList<com.omertron.themoviedbapi.model.Person> movieCasts = null;
         try {
-            moviedb = tmdbApi.getMovieInfo(Integer.parseInt(tmdbID), defaultLanguage);
-        } catch (MovieDbException ex) {
-            LOG.error("Failed retrieving TheMovieDb information for {}, error: {}", videoData.getTitle(), ex.getMessage());
-            
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("themoviedb.throwError.tempUnavailable", Boolean.TRUE);
+            String tmdbId = getMovieId(videoData, throwTempError);
+
+            if (!StringUtils.isNumeric(tmdbId)) {
+                LOG.debug("TMDb id not available '{}'", videoData.getTitle());
+                return ScanResult.MISSING_ID;
+            }
+
+            movieDb = tmdbApiWrapper.getMovieInfoByTMDB(Integer.parseInt(tmdbId), throwTempError);
+            movieCasts = tmdbApiWrapper.getMovieCasts(movieDb.getId(), throwTempError);
+        } catch (TemporaryUnavailableException ex) {
             // check retry
-            int maxRetries = this.configServiceWrapper.getIntProperty("themoviedb.maxRetries.movie", 0);
+            int maxRetries = configServiceWrapper.getIntProperty("themoviedb.maxRetries.movie", 0);
             if (videoData.getRetries() < maxRetries) {
                 return ScanResult.RETRY;
             }
+        }
+        
+        if (movieDb == null || movieCasts == null) {
+            LOG.error("Can't find informations for movie '{}'", videoData.getTitle());
             return ScanResult.ERROR;
         }
 
+        // fill in data
+        
+        videoData.setSourceDbId(ImdbScanner.SCANNER_ID, StringUtils.trim(movieDb.getImdbID()));
+
         if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
-            videoData.setTitle(StringUtils.trim(moviedb.getTitle()), SCANNER_ID);
+            videoData.setTitle(StringUtils.trim(movieDb.getTitle()), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-            videoData.setPlot(StringUtils.trim(moviedb.getOverview()), SCANNER_ID);
+            videoData.setPlot(StringUtils.trim(movieDb.getOverview()), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-            videoData.setOutline(StringUtils.trim(moviedb.getOverview()), SCANNER_ID);
+            videoData.setOutline(StringUtils.trim(movieDb.getOverview()), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteTagline(videoData, SCANNER_ID)) {
-            videoData.setOutline(StringUtils.trim(moviedb.getTagline()), SCANNER_ID);
+            videoData.setOutline(StringUtils.trim(movieDb.getTagline()), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteCountry(videoData, SCANNER_ID)) {
-            if (CollectionUtils.isNotEmpty(moviedb.getProductionCountries())) {
-                for (ProductionCountry country : moviedb.getProductionCountries()) {
+            if (CollectionUtils.isNotEmpty(movieDb.getProductionCountries())) {
+                for (ProductionCountry country : movieDb.getProductionCountries()) {
                     // TODO more countries
                     videoData.setCountry(StringUtils.trimToNull(country.getName()), SCANNER_ID);
                     break;
@@ -198,7 +175,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             }
         }
 
-        String releaseDateString = moviedb.getReleaseDate();
+        String releaseDateString = movieDb.getReleaseDate();
         if (StringUtils.isNotBlank(releaseDateString) && !"1900-01-01".equals(releaseDateString)) {
             Date releaseDate = MetadataTools.parseToDate(releaseDateString);
             if (releaseDate != null) {
@@ -211,10 +188,10 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             }
         }
 
-        if (CollectionUtils.isNotEmpty(moviedb.getGenres())) {
+        if (CollectionUtils.isNotEmpty(movieDb.getGenres())) {
             if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
                 Set<String> genreNames = new HashSet<>();
-                for (com.omertron.themoviedbapi.model.Genre genre : moviedb.getGenres()) {
+                for (com.omertron.themoviedbapi.model.Genre genre : movieDb.getGenres()) {
                     if (StringUtils.isNotBlank(genre.getName())) {
                         genreNames.add(StringUtils.trim(genre.getName()));
                     }
@@ -223,10 +200,10 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             }
         }
 
-        if (CollectionUtils.isNotEmpty(moviedb.getProductionCompanies())) {
+        if (CollectionUtils.isNotEmpty(movieDb.getProductionCompanies())) {
             if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
                 Set<String> studioNames = new HashSet<>();
-                for (ProductionCompany company : moviedb.getProductionCompanies()) {
+                for (ProductionCompany company : movieDb.getProductionCompanies()) {
                     if (StringUtils.isNotBlank(company.getName())) {
                         studioNames.add(StringUtils.trim(company.getName()));
                     }
@@ -236,99 +213,103 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         }
 
         // CAST & CREW
-        try {
-            CreditDTO credit;
-            for (com.omertron.themoviedbapi.model.Person person : tmdbApi.getMovieCasts(Integer.parseInt(tmdbID)).getResults()) {
-                JobType jobType = this.retrieveJobType(person.getPersonType(), person.getDepartment());
-                if (!this.configServiceWrapper.isCastScanEnabled(jobType)) {
-                    // scan not enabled for that job
-                    continue;
-                }
-                
-                credit = new CreditDTO(SCANNER_ID, jobType, person.getName(), person.getCharacter(), String.valueOf(person.getId()));
-                if (person.getAka() != null && !person.getAka().isEmpty()) {
-                    credit.setRealName(person.getAka().get(0));
-                }
-                videoData.addCreditDTO(credit);
+        for (com.omertron.themoviedbapi.model.Person person : movieCasts.getResults()) {
+            JobType jobType = this.retrieveJobType(person.getPersonType(), person.getDepartment());
+            if (!this.configServiceWrapper.isCastScanEnabled(jobType)) {
+                // scan not enabled for that job
+                continue;
             }
-        } catch (MovieDbException ex) {
-            LOG.error("Error getting cast from TheMovieDB: {}", ex.getMessage());
+            
+            CreditDTO credit = new CreditDTO(SCANNER_ID, jobType, person.getName(), person.getCharacter(), String.valueOf(person.getId()));
+            if (person.getAka() != null && !person.getAka().isEmpty()) {
+                credit.setRealName(person.getAka().get(0));
+            }
+            videoData.addCreditDTO(credit);
         }
-
+        
         return ScanResult.OK;
     }
 
     @Override
     public String getPersonId(Person person) {
+        return getPersonId(person, false);
+    }
+
+    private String getPersonId(Person person, boolean throwTempError) {
         String id = person.getSourceDbId(SCANNER_ID);
         if (StringUtils.isNotBlank(id)) {
             return id;
         }
         
         if (StringUtils.isNotBlank(person.getName())) {
-            id = tmdbApiWrapper.getPersonId(person.getName());
+            id = tmdbApiWrapper.getPersonId(person.getName(), throwTempError);
             person.setSourceDbId(SCANNER_ID, id);
         } else {
-            LOG.error("No ID or Name found for {}", person.toString());
-            id = StringUtils.EMPTY;
+            LOG.error("No ID or Name found for '{}'", person.getName());
         }
+        
         return id;
     }
 
     @Override
     public ScanResult scan(Person person) {
-        String id = getPersonId(person);
-        if (StringUtils.isBlank(id) || !StringUtils.isNumeric(id)) {
-            return ScanResult.MISSING_ID;
-        }
-
+        com.omertron.themoviedbapi.model.Person tmdbPerson = null;
         try {
-            LOG.debug("Getting information on {}-'{}' from {}", person.getId(), person.getName(), SCANNER_ID);
-            com.omertron.themoviedbapi.model.Person tmdbPerson = tmdbApi.getPersonInfo(Integer.parseInt(id));
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("themoviedb.throwError.tempUnavailable", Boolean.TRUE);
+            String tmdbId = getPersonId(person, throwTempError);
 
-            person.setSourceDbId(ImdbScanner.SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
-
-            if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
-                person.setName(tmdbPerson.getName(), SCANNER_ID);
+            if (!StringUtils.isNumeric(tmdbId)) {
+                LOG.debug("TMDb id not available '{}'", person.getName());
+                return ScanResult.MISSING_ID;
             }
 
-            if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {
-                Date parsedDate = MetadataTools.parseToDate(tmdbPerson.getBirthday());
-                person.setBirthDay(parsedDate, SCANNER_ID);
-            }
-
-            if (OverrideTools.checkOverwriteBirthPlace(person, SCANNER_ID)) {
-                person.setBirthPlace(StringUtils.trimToNull(tmdbPerson.getBirthplace()), SCANNER_ID);
-            }
-
-            if (OverrideTools.checkOverwriteBirthName(person, SCANNER_ID)) {
-                if (CollectionUtils.isNotEmpty(tmdbPerson.getAka())) {
-                    String birthName = tmdbPerson.getAka().get(0);
-                    person.setBirthName(birthName, SCANNER_ID);
-                }
-            }
-
-            if (OverrideTools.checkOverwriteDeathDay(person, SCANNER_ID)) {
-                Date parsedDate = MetadataTools.parseToDate(tmdbPerson.getDeathday());
-                person.setDeathDay(parsedDate, SCANNER_ID);
-            }
-
-            if (OverrideTools.checkOverwriteBiography(person, SCANNER_ID)) {
-                person.setBiography(cleanBiography(tmdbPerson.getBiography()), SCANNER_ID);
-            }
-
-        } catch (MovieDbException ex) {
-            LOG.warn("Failed to get information on {}-'{}', error: {}", id, person.getName(), ex.getMessage());
-            
+            tmdbPerson = tmdbApiWrapper.getPersonInfo(Integer.parseInt(tmdbId), throwTempError);
+        } catch (TemporaryUnavailableException ex) {
             // check retry
-            int maxRetries = this.configServiceWrapper.getIntProperty("themoviedb.maxRetries.person", 0);
+            int maxRetries = configServiceWrapper.getIntProperty("themoviedb.maxRetries.person", 0);
             if (person.getRetries() < maxRetries) {
                 return ScanResult.RETRY;
             }
+        }
+        
+        if (tmdbPerson == null) {
+            LOG.error("Can't find informations for person '{}'", person.getName());
             return ScanResult.ERROR;
         }
+        
+        // fill in data
+            
+        person.setSourceDbId(ImdbScanner.SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
 
-        LOG.debug("Successfully processed person: {}-'{}'", id, person.getName());
+        if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
+            person.setName(tmdbPerson.getName(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {
+            Date parsedDate = MetadataTools.parseToDate(tmdbPerson.getBirthday());
+            person.setBirthDay(parsedDate, SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteBirthPlace(person, SCANNER_ID)) {
+            person.setBirthPlace(StringUtils.trimToNull(tmdbPerson.getBirthplace()), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteBirthName(person, SCANNER_ID)) {
+            if (CollectionUtils.isNotEmpty(tmdbPerson.getAka())) {
+                String birthName = tmdbPerson.getAka().get(0);
+                person.setBirthName(birthName, SCANNER_ID);
+            }
+        }
+
+        if (OverrideTools.checkOverwriteDeathDay(person, SCANNER_ID)) {
+            Date parsedDate = MetadataTools.parseToDate(tmdbPerson.getDeathday());
+            person.setDeathDay(parsedDate, SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteBiography(person, SCANNER_ID)) {
+            person.setBiography(cleanBiography(tmdbPerson.getBiography()), SCANNER_ID);
+        }
+
         return ScanResult.OK;
     }
 
@@ -370,57 +351,65 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
 
     @Override
     public ScanResult scanFilmography(Person person) {
-        String id = getPersonId(person);
-        if (StringUtils.isBlank(id) || !StringUtils.isNumeric(id)) {
-            return ScanResult.MISSING_ID;
-        }
-        
+        TmdbResultsList<PersonCredit> credits = null;
         try {
-            TmdbResultsList<PersonCredit> credits = this.tmdbApi.getPersonCredits(Integer.parseInt(id));
-            
-            Set<FilmParticipation> newFilmography = new HashSet<>();
-            for (PersonCredit credit : credits.getResults()) {
-                JobType jobType = this.retrieveJobType(credit.getPersonType(), credit.getDepartment());
-                if (jobType == null) {
-                    // job type must be present
-                    continue;
-                }
-                Date releaseDate = MetadataTools.parseToDate(credit.getReleaseDate());
-                if (releaseDate == null) {
-                    // release date must be present
-                    continue;
-                }
-                
-                // NOTE: until now just movies possible; no TV credits
-                FilmParticipation filmo = new FilmParticipation();
-                filmo.setParticipationType(ParticipationType.MOVIE);
-                filmo.setSourceDb(SCANNER_ID);
-                filmo.setSourceDbId(String.valueOf(credit.getMovieId()));
-                filmo.setPerson(person);
-                filmo.setJobType(jobType);;
-                if (JobType.ACTOR == jobType) {
-                    filmo.setRole(credit.getCharacter());
-                }
-                filmo.setTitle(credit.getMovieTitle());
-                filmo.setTitleOriginal(StringUtils.trimToNull(credit.getMovieOriginalTitle()));
-                filmo.setReleaseDate(releaseDate);
-                filmo.setYear(MetadataTools.extractYearAsInt(releaseDate));
-                newFilmography.add(filmo);
-                
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("themoviedb.throwError.tempUnavailable", Boolean.TRUE);
+            String tmdbId = getPersonId(person, throwTempError);
+
+            if (!StringUtils.isNumeric(tmdbId)) {
+                LOG.debug("TMDb id not available '{}'", person.getName());
+                return ScanResult.MISSING_ID;
             }
-            person.setNewFilmography(newFilmography);
-            
-            return ScanResult.OK;
-        } catch (MovieDbException ex) {
-            LOG.error("Failed retrieving TheMovieDb filmography for '{}', error: {}", person.getName(), ex.getMessage());
-            
+
+            credits = tmdbApiWrapper.getPersonCredits(Integer.parseInt(tmdbId), throwTempError);
+        } catch (TemporaryUnavailableException ex) {
             // check retry
-            int maxRetries = this.configServiceWrapper.getIntProperty("themoviedb.maxRetries.filmography", 0);
+            int maxRetries = configServiceWrapper.getIntProperty("themoviedb.maxRetries.filmography", 0);
             if (person.getRetries() < maxRetries) {
                 return ScanResult.RETRY;
             }
+        }
+        
+        if (credits == null) {
+            LOG.error("Can't find filmography for person '{}'", person.getName());
             return ScanResult.ERROR;
         }
+
+        // fill in data
+
+        Set<FilmParticipation> newFilmography = new HashSet<>();
+        for (PersonCredit credit : credits.getResults()) {
+            JobType jobType = this.retrieveJobType(credit.getPersonType(), credit.getDepartment());
+            if (jobType == null) {
+                // job type must be present
+                continue;
+            }
+            Date releaseDate = MetadataTools.parseToDate(credit.getReleaseDate());
+            if (releaseDate == null) {
+                // release date must be present
+                continue;
+            }
+            
+            // NOTE: until now just movies possible; no TV credits
+            FilmParticipation filmo = new FilmParticipation();
+            filmo.setParticipationType(ParticipationType.MOVIE);
+            filmo.setSourceDb(SCANNER_ID);
+            filmo.setSourceDbId(String.valueOf(credit.getMovieId()));
+            filmo.setPerson(person);
+            filmo.setJobType(jobType);;
+            if (JobType.ACTOR == jobType) {
+                filmo.setRole(credit.getCharacter());
+            }
+            filmo.setTitle(credit.getMovieTitle());
+            filmo.setTitleOriginal(StringUtils.trimToNull(credit.getMovieOriginalTitle()));
+            filmo.setReleaseDate(releaseDate);
+            filmo.setYear(MetadataTools.extractYearAsInt(releaseDate));
+            newFilmography.add(filmo);
+            
+        }
+        person.setNewFilmography(newFilmography);
+            
+        return ScanResult.OK;
     }
     
     private JobType retrieveJobType(PersonType personType, String department) {

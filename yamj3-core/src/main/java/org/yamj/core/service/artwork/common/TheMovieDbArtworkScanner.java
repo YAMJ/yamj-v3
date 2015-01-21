@@ -87,7 +87,7 @@ public class TheMovieDbArtworkScanner implements
 
     @Override
     public String getId(String title, int year) {
-        return tmdbApiWrapper.getMovieDbId(title, year);
+        return tmdbApiWrapper.getMovieDbId(title, year, false);
     }
 
     @Override

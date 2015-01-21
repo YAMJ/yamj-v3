@@ -28,9 +28,7 @@ import java.net.URLEncoder;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,13 +139,14 @@ public class ImdbSearchEngine {
                         return firstPersonId;
                     }
                 } else if (throwTempError && ResponseTools.isTemporaryError(response)) {
+                    throw new TemporaryUnavailableException("IMDb service temporary not available: " + response.getStatusCode());
                 }
             }
 
             return getImdbPersonId(personName, throwTempError);
         } catch (IOException ex) {
-            LOG.error("Failed retreiving IMDb Id for person '{}': {}", personName, ex.getMessage());
-            LOG.warn("IMDb search error", ex);
+            LOG.error("Failed retrieving IMDb Id for person '{}': {}", personName, ex.getMessage());
+            LOG.trace("IMDb search error", ex);
             return null;
         }
     }
@@ -238,8 +237,8 @@ public class ImdbSearchEngine {
             }
             xml = response.getContent();
         } catch (IOException ex) {
-            LOG.error("Failed retreiving IMDb Id for '{}': {}", title, ex.getMessage());
-            LOG.warn("IMDb search error", ex);
+            LOG.error("Failed retrieving IMDb Id for '{}': {}", title, ex.getMessage());
+            LOG.trace("IMDb search error", ex);
             return null;
         }
 

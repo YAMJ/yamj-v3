@@ -22,11 +22,12 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import com.moviejukebox.allocine.AllocineApi;
+import com.moviejukebox.allocine.AllocineException;
+import com.moviejukebox.allocine.model.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import javax.annotation.Resource;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,19 +35,6 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.tools.LRUTimedCache;
 import org.yamj.core.tools.web.ResponseTools;
 import org.yamj.core.tools.web.TemporaryUnavailableException;
-
-import com.moviejukebox.allocine.AllocineApi;
-import com.moviejukebox.allocine.AllocineException;
-import com.moviejukebox.allocine.model.EpisodeInfos;
-import com.moviejukebox.allocine.model.FilmographyInfos;
-import com.moviejukebox.allocine.model.Movie;
-import com.moviejukebox.allocine.model.MovieInfos;
-import com.moviejukebox.allocine.model.PersonInfos;
-import com.moviejukebox.allocine.model.Search;
-import com.moviejukebox.allocine.model.ShortPerson;
-import com.moviejukebox.allocine.model.TvSeasonInfos;
-import com.moviejukebox.allocine.model.TvSeries;
-import com.moviejukebox.allocine.model.TvSeriesInfos;
 
 @Service("allocineApiWrapper")
 public class AllocineApiWrapper {
@@ -84,8 +72,8 @@ public class AllocineApiWrapper {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
             }
-            LOG.error("Failed retrieving Allocine id for movie: {}", title);
-            LOG.warn("Allocine error" , ex);
+            LOG.error("Failed retrieving Allocine id for movie '{}': {}", title, ex.getMessage());
+            LOG.trace("Allocine error" , ex);
             return null;
         } finally {
             searchMoviesLock.unlock();
@@ -136,8 +124,8 @@ public class AllocineApiWrapper {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
             }
-            LOG.error("Failed retrieving Allocine id for series: {}", title);
-            LOG.warn("Allocine error" , ex);
+            LOG.error("Failed retrieving Allocine id for series '{}': {}", title, ex.getMessage());
+            LOG.trace("Allocine error" , ex);
             return null;
         } finally {
             searchSeriesLock.unlock();
@@ -192,8 +180,8 @@ public class AllocineApiWrapper {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
             }
-            LOG.error("Failed retrieving Allocine id for person: {}", name);
-            LOG.warn("Allocine error" , ex);
+            LOG.error("Failed retrieving Allocine id for person '{}': {}", name, ex.getMessage());
+            LOG.trace("Allocine error" , ex);
             return null;
         } finally {
             searchPersonLock.unlock();
@@ -240,8 +228,8 @@ public class AllocineApiWrapper {
                 if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                     throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
                 }
-                LOG.error("Failed retrieving Allocine infos for movie: {}", allocineId);
-                LOG.warn("Allocine error" , ex);
+                LOG.error("Failed retrieving Allocine infos for movie id {}: {}", allocineId, ex.getMessage());
+                LOG.trace("Allocine error" , ex);
             }
         }
         return movieInfos;
@@ -260,8 +248,8 @@ public class AllocineApiWrapper {
                 if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                     throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
                 }
-                LOG.error("Failed retrieving Allocine infos for series: {}", allocineId);
-                LOG.warn("Allocine error" , ex);
+                LOG.error("Failed retrieving Allocine infos for series id {}: {}", allocineId, ex.getMessage());
+                LOG.trace("Allocine error" , ex);
             }
         }
         return tvSeriesInfos;
@@ -282,8 +270,8 @@ public class AllocineApiWrapper {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
             }
-            LOG.error("Failed retrieving Allocine infos for season: {}", seasonCode);
-            LOG.warn("Allocine error" , ex);
+            LOG.error("Failed retrieving Allocine infos for season id {}: {}", seasonCode, ex.getMessage());
+            LOG.trace("Allocine error" , ex);
         }
         
         return tvSeasonInfos;
@@ -297,8 +285,8 @@ public class AllocineApiWrapper {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
             }
-            LOG.error("Failed retrieving Allocine filmography for person: {}", allocineId);
-            LOG.warn("Allocine error" , ex);
+            LOG.error("Failed retrieving Allocine infos for person id {}: {}", allocineId, ex.getMessage());
+            LOG.trace("Allocine error" , ex);
         }
         return personInfos;
     }
@@ -311,8 +299,8 @@ public class AllocineApiWrapper {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
             }
-            LOG.error("Failed retrieving Allocine filmography for person: {}", allocineId);
-            LOG.warn("Allocine error" , ex);
+            LOG.error("Failed retrieving Allocine filmography for person id {}: {}", allocineId, ex.getMessage());
+            LOG.trace("Allocine error" , ex);
         }
         return filmographyInfos;
     }
@@ -325,8 +313,8 @@ public class AllocineApiWrapper {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
               throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
             }
-            LOG.error("Failed retrieving Allocine filmography for episode: {}", allocineId);
-            LOG.warn("Allocine error" , ex);
+            LOG.error("Failed retrieving Allocine infos for episode id {}: {}", allocineId, ex.getMessage());
+            LOG.trace("Allocine error" , ex);
         }
         return episodeInfos;
     }

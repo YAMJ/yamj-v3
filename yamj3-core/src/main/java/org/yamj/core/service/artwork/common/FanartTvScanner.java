@@ -71,7 +71,7 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
     @Override
     public String getId(String title, int year) {
         // Use TheMovieDB scanner to get the id
-        return tmdbApiWrapper.getMovieDbId(title, year);
+        return tmdbApiWrapper.getMovieDbId(title, year, false);
     }
 
     @Override
