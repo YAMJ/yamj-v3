@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import org.yamj.core.service.metadata.online.SearchEngineTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
 
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
@@ -53,7 +52,7 @@ public class SearchEngineToolsTest extends AbstractJUnit4SpringContextTests {
         for (int i = 0; i < search.countSearchSites(); i++) {
             String engine = search.getCurrentSearchEngine();
             LOG.info("Testing " + engine);
-            String url = search.searchURL("Avatar", 2009, "www.imdb.com/title");
+            String url = search.searchURL("Avatar", 2009, "www.imdb.com/title", false);
             url = StringUtils.removeEnd(url, "/");
             assertEquals("Search engine '" + engine + "' failed", "http://www.imdb.com/title/tt0499549", url);
         }
@@ -62,7 +61,7 @@ public class SearchEngineToolsTest extends AbstractJUnit4SpringContextTests {
         for (int i = 0; i < search.countSearchSites(); i++) {
             String engine = search.getCurrentSearchEngine();
             LOG.info("Testing " + engine);
-            String url = search.searchURL("Two and a Half Men", -1, "www.imdb.com/title", "TV series");
+            String url = search.searchURL("Two and a Half Men", -1, "www.imdb.com/title", "TV series", false);
             url = StringUtils.removeEnd(url, "/");
             assertEquals("Search engine '" + engine + "' failed", "http://www.imdb.com/title/tt0369179", url);
         }
@@ -78,7 +77,7 @@ public class SearchEngineToolsTest extends AbstractJUnit4SpringContextTests {
         for (int i = 0; i < search.countSearchSites(); i++) {
             String engine = search.getCurrentSearchEngine();
             LOG.info("Testing " + engine);
-            String url = search.searchURL("Avatar", 2009, "www.ofdb.de/film");
+            String url = search.searchURL("Avatar", 2009, "www.ofdb.de/film", false);
             assertEquals("Search engine '" + engine + "' failed", "http://www.ofdb.de/film/188514,Avatar---Aufbruch-nach-Pandora", url);
         }
 
@@ -86,7 +85,7 @@ public class SearchEngineToolsTest extends AbstractJUnit4SpringContextTests {
         for (int i = 0; i < search.countSearchSites(); i++) {
             String engine = search.getCurrentSearchEngine();
             LOG.info("Testing " + engine);
-            String url = search.searchURL("Two and a Half Men", 2003, "www.ofdb.de/film");
+            String url = search.searchURL("Two and a Half Men", 2003, "www.ofdb.de/film", false);
             assertEquals("Search engine '" + engine + "' failed", "http://www.ofdb.de/film/66192,Mein-cooler-Onkel-Charlie", url);
         }
     }
@@ -101,7 +100,7 @@ public class SearchEngineToolsTest extends AbstractJUnit4SpringContextTests {
         for (int i = 0; i < search.countSearchSites(); i++) {
             String engine = search.getCurrentSearchEngine();
             LOG.info("Testing " + engine);
-            String url = search.searchURL("Avatar", 2009, "www.allocine.fr/film");
+            String url = search.searchURL("Avatar", 2009, "www.allocine.fr/film", false);
             assertEquals("Search engine '" + engine + "' failed", "http://www.allocine.fr/film/fichefilm_gen_cfilm=61282.html", url);
         }
         // TV show, must set search suffix
@@ -109,7 +108,7 @@ public class SearchEngineToolsTest extends AbstractJUnit4SpringContextTests {
         for (int i = 0; i < search.countSearchSites(); i++) {
             String engine = search.getCurrentSearchEngine();
             LOG.info("Testing " + engine);
-            String url = search.searchURL("Two and a Half Men", 2003, "www.allocine.fr/series");
+            String url = search.searchURL("Two and a Half Men", 2003, "www.allocine.fr/series", false);
             assertTrue("Search engine '" + engine + "' failed: " + url, url.startsWith("http://www.allocine.fr/series/ficheserie_gen_cserie=132.html"));
         }
     }

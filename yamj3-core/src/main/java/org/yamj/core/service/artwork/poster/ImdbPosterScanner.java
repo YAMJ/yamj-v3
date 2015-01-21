@@ -22,9 +22,6 @@
  */
 package org.yamj.core.service.artwork.poster;
 
-import org.yamj.core.service.metadata.online.ImdbScanner;
-import org.yamj.core.service.metadata.online.ImdbSearchEngine;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +36,8 @@ import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.artwork.ArtworkTools.HashCodeType;
+import org.yamj.core.service.metadata.online.ImdbScanner;
+import org.yamj.core.service.metadata.online.ImdbSearchEngine;
 import org.yamj.core.tools.web.PoolingHttpClient;
 import org.yamj.core.tools.web.ResponseTools;
 
@@ -69,7 +68,7 @@ public class ImdbPosterScanner extends AbstractMoviePosterScanner {
 
     @Override
     public String getId(String title, int year) {
-        return imdbSearchEngine.getImdbId(title, year, false);
+        return imdbSearchEngine.getImdbId(title, year, false, false);
     }
 
     @Override

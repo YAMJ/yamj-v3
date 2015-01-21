@@ -34,6 +34,8 @@ import org.yamj.core.configuration.ConfigService;
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.model.MovieDb;
+import com.omertron.themoviedbapi.model.Person;
+import com.omertron.themoviedbapi.results.TmdbResultsList;
 
 @Service("tmdbApiWrapper")
 public class TheMovieDbApiWrapper {
@@ -79,4 +81,44 @@ public class TheMovieDbApiWrapper {
         }
         return null;
     }
+
+    public String getPersonId(String name) {
+      String id = null;
+      Person closestPerson = null;
+      int closestMatch = Integer.MAX_VALUE;
+      boolean foundPerson = Boolean.FALSE;
+      boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
+
+      try {
+          TmdbResultsList<com.omertron.themoviedbapi.model.Person> results = tmdbApi.searchPeople(name, includeAdult, 0);
+          LOG.info("{}: Found {} results", name, results.getResults().size());
+          for (com.omertron.themoviedbapi.model.Person person : results.getResults()) {
+              if (name.equalsIgnoreCase(person.getName())) {
+                  id = String.valueOf(person.getId());
+                  foundPerson = Boolean.TRUE;
+                  break;
+              }
+              LOG.trace("{}: Checking against '{}'", name, person.getName());
+              int lhDistance = StringUtils.getLevenshteinDistance(name, person.getName());
+              LOG.trace("{}: Current closest match is {}, this match is {}", name, closestMatch, lhDistance);
+              if (lhDistance < closestMatch) {
+                  LOG.trace("{}: TMDB ID {} is a better match ", name, person.getId());
+                  closestMatch = lhDistance;
+                  closestPerson = person;
+              }
+          }
+
+          if (foundPerson) {
+              LOG.debug("{}: Matched against TMDB ID: {}", name, id);
+          } else if (closestMatch < Integer.MAX_VALUE && closestPerson != null) {
+              id = String.valueOf(closestPerson.getId());
+              LOG.debug("{}: Closest match is '{}' differing by {} characters", name, closestPerson.getName(), closestMatch);
+          } else {
+              LOG.debug("{}: No match found", name);
+          }
+      } catch (MovieDbException ex) {
+          LOG.warn("Failed to get information on '{}', error: {}", name, ex.getMessage());
+      }
+      return id;
+  }
 }

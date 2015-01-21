@@ -123,7 +123,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
 
         if (moviedb == null && StringUtils.isNotBlank(videoData.getTitle())) {
             LOG.debug("No ID found for {}, trying title search with '{} ({})'", videoData.getTitle(), videoData.getTitle(), videoData.getPublicationYear());
-            tmdbID = getMovieId(videoData.getTitle(), videoData.getPublicationYear());
+            return tmdbApiWrapper.getMovieDbId(videoData.getTitle(), videoData.getPublicationYear());
         }
 
         if (StringUtils.isNotBlank(tmdbID)) {
@@ -133,10 +133,6 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             LOG.info("No TMDB ID found for {}", videoData.getTitle());
         }
         return tmdbID;
-    }
-
-    private String getMovieId(String title, int year) {
-        return this.tmdbApiWrapper.getMovieDbId(title, year);
     }
 
     @Override
@@ -270,51 +266,11 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         }
         
         if (StringUtils.isNotBlank(person.getName())) {
-            id = getPersonId(person.getName());
+            id = tmdbApiWrapper.getPersonId(person.getName());
             person.setSourceDbId(SCANNER_ID, id);
         } else {
             LOG.error("No ID or Name found for {}", person.toString());
             id = StringUtils.EMPTY;
-        }
-        return id;
-    }
-
-    private String getPersonId(String name) {
-        String id = "";
-        com.omertron.themoviedbapi.model.Person closestPerson = null;
-        int closestMatch = Integer.MAX_VALUE;
-        boolean foundPerson = Boolean.FALSE;
-        boolean includeAdult = configServiceWrapper.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
-
-        try {
-            TmdbResultsList<com.omertron.themoviedbapi.model.Person> results = tmdbApi.searchPeople(name, includeAdult, 0);
-            LOG.info("{}: Found {} results", name, results.getResults().size());
-            for (com.omertron.themoviedbapi.model.Person person : results.getResults()) {
-                if (name.equalsIgnoreCase(person.getName())) {
-                    id = String.valueOf(person.getId());
-                    foundPerson = Boolean.TRUE;
-                    break;
-                }
-                LOG.trace("{}: Checking against '{}'", name, person.getName());
-                int lhDistance = StringUtils.getLevenshteinDistance(name, person.getName());
-                LOG.trace("{}: Current closest match is {}, this match is {}", name, closestMatch, lhDistance);
-                if (lhDistance < closestMatch) {
-                    LOG.trace("{}: TMDB ID {} is a better match ", name, person.getId());
-                    closestMatch = lhDistance;
-                    closestPerson = person;
-                }
-            }
-
-            if (foundPerson) {
-                LOG.debug("{}: Matched against TMDB ID: {}", name, id);
-            } else if (closestMatch < Integer.MAX_VALUE && closestPerson != null) {
-                id = String.valueOf(closestPerson.getId());
-                LOG.debug("{}: Closest match is '{}' differing by {} characters", name, closestPerson.getName(), closestMatch);
-            } else {
-                LOG.debug("{}: No match found", name);
-            }
-        } catch (MovieDbException ex) {
-            LOG.warn("Failed to get information on '{}' from {}, error: {}", name, SCANNER_ID, ex.getMessage());
         }
         return id;
     }

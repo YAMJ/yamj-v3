@@ -41,6 +41,7 @@ import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.tools.web.HTMLTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
 import org.yamj.core.tools.web.ResponseTools;
+import org.yamj.core.tools.web.TemporaryUnavailableException;
 
 @Service("imdbSearchEngine")
 public class ImdbSearchEngine {
@@ -78,10 +79,11 @@ public class ImdbSearchEngine {
      * @param title
      * @param year
      * @param isTVShow flag to indicate if the searched movie is a TV show
+     * @param throwTempError flag to indicate if error should be thrown if service is temporary not available 
      * @return the IMDb id
      */
-    public String getImdbId(String title, int year, boolean isTVShow) {
-        return getImdbId(title, year, (isTVShow ? CATEGORY_TV : CATEGORY_MOVIE));
+    public String getImdbId(String title, int year, boolean isTVShow, boolean throwTempError) {
+        return getImdbId(title, year, (isTVShow ? CATEGORY_TV : CATEGORY_MOVIE), throwTempError);
     }
 
     /**
@@ -90,18 +92,19 @@ public class ImdbSearchEngine {
      * @param title
      * @param year
      * @param categoryType the type of the category to search within
+     * @param throwTempError flag to indicate if error should be thrown if service is temporary not available 
      * @return the IMDb id
      */
-    private String getImdbId(String title, int year, String categoryType) {
-        String imdbId = getImdbIdFromImdb(title, year, OBJECT_MOVIE, categoryType);
+    private String getImdbId(String title, int year, String categoryType, boolean throwTempError) {
+        String imdbId = getImdbIdFromImdb(title, year, OBJECT_MOVIE, categoryType, throwTempError);
         if (StringUtils.isBlank(imdbId)) {
             // try with search engines
             String imdbUrl;
             if (CATEGORY_TV.equals(categoryType)) {
                 // leave out the year
-                imdbUrl = searchEngineTools.searchURL(title, -1, "www.imdb.com/title");
+                imdbUrl = searchEngineTools.searchURL(title, -1, "www.imdb.com/title", throwTempError);
             } else {
-                imdbUrl = searchEngineTools.searchURL(title, year, "www.imdb.com/title");
+                imdbUrl = searchEngineTools.searchURL(title, year, "www.imdb.com/title", throwTempError);
             }
             imdbId = getImdbIdFromURL(imdbUrl, categoryType);
         }
@@ -113,7 +116,7 @@ public class ImdbSearchEngine {
      * @param movieId
      * @return
      */
-    public String getImdbPersonId(String personName, String movieId) {
+    public String getImdbPersonId(String personName, String movieId,  boolean throwTempError) {
         try {
             if (StringUtils.isNotBlank(movieId)) {
                 StringBuilder sb = new StringBuilder("http://www.imdb.com/")
@@ -137,12 +140,14 @@ public class ImdbSearchEngine {
                     if (StringUtils.isNotBlank(firstPersonId)) {
                         return firstPersonId;
                     }
+                } else if (throwTempError && ResponseTools.isTemporaryError(response)) {
                 }
             }
 
-            return getImdbPersonId(personName);
-        } catch (IOException error) {
-            LOG.error("Failed retreiving IMDb Id for person '{}'", personName, error);
+            return getImdbPersonId(personName, throwTempError);
+        } catch (IOException ex) {
+            LOG.error("Failed retreiving IMDb Id for person '{}': {}", personName, ex.getMessage());
+            LOG.warn("IMDb search error", ex);
             return null;
         }
     }
@@ -153,10 +158,10 @@ public class ImdbSearchEngine {
      * @param personName
      * @return
      */
-    public String getImdbPersonId(String personName) {
-        String imdbId = getImdbIdFromImdb(personName.toLowerCase(), -1, OBJECT_PERSON, CATEGORY_ALL);
+    public String getImdbPersonId(String personName, boolean throwTempError) {
+        String imdbId = getImdbIdFromImdb(personName.toLowerCase(), -1, OBJECT_PERSON, CATEGORY_ALL, throwTempError);
         if (StringUtils.isBlank(imdbId)) {
-            String imdbUrl = searchEngineTools.searchURL(personName, -1, "www.imdb.com/name");
+            String imdbUrl = searchEngineTools.searchURL(personName, -1, "www.imdb.com/name", throwTempError);
             imdbId = getImdbIdFromURL(imdbUrl, OBJECT_PERSON);
         }
         return imdbId;
@@ -190,7 +195,7 @@ public class ImdbSearchEngine {
     /**
      * Retrieve the IMDb matching the specified movie name and year. This routine is base on a IMDb request.
      */
-    private String getImdbIdFromImdb(String title, int year, String objectType, String categoryType) {
+    private String getImdbIdFromImdb(String title, int year, String objectType, String categoryType, boolean throwTempError) {
         String searchMatch = configService.getProperty("imdb.id.search.match", "regular");
         boolean searchVariable = configService.getBooleanProperty("imdb.id.search.variable", Boolean.TRUE);
 
@@ -225,13 +230,16 @@ public class ImdbSearchEngine {
         String xml;
         try {
             DigestedResponse response = httpClient.requestContent(sb.toString());
-            if (ResponseTools.isNotOK(response)) {
+            if (throwTempError && ResponseTools.isTemporaryError(response)) {
+                throw new TemporaryUnavailableException("IMDb service temporary not available: " + response.getStatusCode());
+            } else if (ResponseTools.isNotOK(response)) {
                 LOG.error("Can't find IMDb id due response status {} for '{}'", response.getStatusCode(), title);
                 return null;
             }
             xml = response.getContent();
         } catch (IOException ex) {
-            LOG.error("Failed retreiving IMDb Id for '{}'", title, ex);
+            LOG.error("Failed retreiving IMDb Id for '{}': {}", title, ex.getMessage());
+            LOG.warn("IMDb search error", ex);
             return null;
         }
 

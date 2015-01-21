@@ -79,18 +79,16 @@ public class TheTVDbScanner implements ISeriesScanner {
     @Override
     public String getSeriesId(Series series) {
         String id = series.getSourceDbId(SCANNER_ID);
-
         if (StringUtils.isBlank(id)) {
             id = tvdbApiWrapper.getSeriesId(series.getTitle(), series.getStartYear());
+            series.setSourceDbId(SCANNER_ID, id);
         }
-
         return id;
     }
 
     @Override
     public ScanResult scan(Series series) {
-        String id = getSeriesId(series);
-
+      String id = series.getSourceDbId(SCANNER_ID);
         if (StringUtils.isBlank(id)) {
             return ScanResult.MISSING_ID;
         }

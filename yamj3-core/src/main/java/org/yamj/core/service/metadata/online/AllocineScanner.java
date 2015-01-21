@@ -104,17 +104,21 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
 
     @Override
     public String getMovieId(VideoData videoData) {
+        return getMovieId(videoData, false);
+    }
+
+    private String getMovieId(VideoData videoData, boolean throwTempError) {
         String allocineId = videoData.getSourceDbId(SCANNER_ID);
         
         if (StringUtils.isBlank(allocineId)) {
-            allocineId = allocineApiWrapper.getAllocineMovieId(videoData.getTitle(), videoData.getYear());
+            allocineId = allocineApiWrapper.getAllocineMovieId(videoData.getTitle(), videoData.getYear(), throwTempError);
 
             if (StringUtils.isBlank(allocineId)) {
                 // try search engines
                 searchEngingeLock.lock();
                 try {
                     searchEngineTools.setSearchSuffix("/fichefilm_gen_cfilm");
-                    String url = searchEngineTools.searchURL(videoData.getTitle(), videoData.getYear(), "www.allocine.fr/film");
+                    String url = searchEngineTools.searchURL(videoData.getTitle(), videoData.getYear(), "www.allocine.fr/film", throwTempError);
                     allocineId = HTMLTools.extractTag(url, "fichefilm_gen_cfilm=", ".html");
                 } finally {
                     searchEngingeLock.unlock();
@@ -129,7 +133,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         if (StringUtils.isBlank(imdbId) && StringUtils.isNotBlank(videoData.getTitleOriginal())) {
             boolean searchImdb = configServiceWrapper.getBooleanProperty("allocine.search.imdb", false);
             if (searchImdb) {
-                imdbId = imdbSearchEngine.getImdbId(videoData.getTitleOriginal(), videoData.getYear(), false);
+                imdbId = imdbSearchEngine.getImdbId(videoData.getTitleOriginal(), videoData.getYear(), false, false);
                 if (StringUtils.isNotBlank(imdbId)) {
                     LOG.debug("Found IMDb id {} for movie '{}'", imdbId, videoData.getTitleOriginal());
                     videoData.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
@@ -144,14 +148,15 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
     public ScanResult scan(VideoData videoData) {
         MovieInfos movieInfos = null;
         try {
-            String allocineId = getMovieId(videoData);
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
+            String allocineId = getMovieId(videoData, throwTempError);
 
             if (StringUtils.isBlank(allocineId)) {
                 LOG.debug("Allocine id not available '{}'", videoData.getTitle());
                 return ScanResult.MISSING_ID;
             }
 
-            movieInfos = allocineApiWrapper.getMovieInfos(allocineId);
+            movieInfos = allocineApiWrapper.getMovieInfos(allocineId, throwTempError);
         } catch (TemporaryUnavailableException ex) {
             // check retry
             int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.movie", 0);
@@ -267,17 +272,21 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
 
     @Override
     public String getSeriesId(Series series) {
+        return getSeriesId(series, false);
+    }
+    
+    private String getSeriesId(Series series, boolean throwTempError) {
         String allocineId = series.getSourceDbId(SCANNER_ID);
         
         if (StringUtils.isBlank(allocineId)) {
-            allocineId = allocineApiWrapper.getAllocineSeriesId(series.getTitle(), series.getYear());
+            allocineId = allocineApiWrapper.getAllocineSeriesId(series.getTitle(), series.getYear(), throwTempError);
 
             if (StringUtils.isBlank(allocineId)) {
                 // try search engines
                 searchEngingeLock.lock();
                 try {
                     searchEngineTools.setSearchSuffix("/ficheserie_gen_cserie");
-                    String url = searchEngineTools.searchURL(series.getTitle(), series.getYear(), "www.allocine.fr/series");
+                    String url = searchEngineTools.searchURL(series.getTitle(), series.getYear(), "www.allocine.fr/series", throwTempError);
                     allocineId = HTMLTools.extractTag(url, "ficheserie_gen_cserie=", ".html");
                 } finally {
                     searchEngingeLock.unlock();
@@ -292,7 +301,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         if (StringUtils.isBlank(imdbId) && StringUtils.isNotBlank(series.getTitleOriginal())) {
             boolean searchImdb = configServiceWrapper.getBooleanProperty("allocine.search.imdb", false);
             if (searchImdb) {
-                imdbId = imdbSearchEngine.getImdbId(series.getTitleOriginal(), series.getYear(), true);
+                imdbId = imdbSearchEngine.getImdbId(series.getTitleOriginal(), series.getYear(), true, false);
                 if (StringUtils.isNotBlank(imdbId)) {
                     LOG.debug("Found IMDb id {} for series '{}'", imdbId, series.getTitleOriginal());
                     series.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
@@ -305,20 +314,24 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
 
     @Override
     public String getPersonId(Person person) {
+        return getPersonId(person, false);
+    }
+
+    private String getPersonId(Person person, boolean throwTempError) {
         String allocineId = person.getSourceDbId(SCANNER_ID);
         if (StringUtils.isNotBlank(allocineId)) {
             return allocineId;
         }
   
         if (StringUtils.isNotBlank(person.getName())) {
-            allocineId = allocineApiWrapper.getAllocinePersonId(person.getName());
+            allocineId = allocineApiWrapper.getAllocinePersonId(person.getName(), throwTempError);
   
             if (StringUtils.isBlank(allocineId)) {
                 // try search engines
                 searchEngingeLock.lock();
                 try {
                     searchEngineTools.setSearchSuffix("/fichepersonne_gen_cpersonne");
-                    String url = searchEngineTools.searchURL(person.getName(), -1, "www.allocine.fr/personne");
+                    String url = searchEngineTools.searchURL(person.getName(), -1, "www.allocine.fr/personne", throwTempError);
                     allocineId = HTMLTools.extractTag(url, "fichepersonne_gen_cpersonne=", ".html");
                 } finally {
                     searchEngingeLock.unlock();
@@ -335,14 +348,15 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
     public ScanResult scan(Series series) {
         TvSeriesInfos tvSeriesInfos = null;
         try {
-            String allocineId = getSeriesId(series);
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
+            String allocineId = getSeriesId(series, throwTempError);
 
             if (StringUtils.isBlank(allocineId)) {
                 LOG.debug("Allocine id not available '{}'", series.getTitle());
                 return ScanResult.MISSING_ID;
             }
 
-            tvSeriesInfos = allocineApiWrapper.getTvSeriesInfos(allocineId);
+            tvSeriesInfos = allocineApiWrapper.getTvSeriesInfos(allocineId, throwTempError);
         } catch (TemporaryUnavailableException ex) {
             // check retry
             int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.tvshow", 0);
@@ -411,7 +425,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
 
         for (Season season : series.getSeasons()) {
 
-            TvSeasonInfos tvSeasonInfos = allocineApiWrapper.getTvSeasonInfos(tvSeriesInfos, season.getSeason());
+            TvSeasonInfos tvSeasonInfos = allocineApiWrapper.getTvSeasonInfos(tvSeriesInfos, season.getSeason(), false);
 
             // use values from series
             if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
@@ -474,7 +488,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
                 videoData.setSourceDbId(SCANNER_ID, allocineId);
 
                 List<CastMember> castMembers = null;
-                EpisodeInfos episodeInfos = allocineApiWrapper.getEpisodeInfos(allocineId);
+                EpisodeInfos episodeInfos = allocineApiWrapper.getEpisodeInfos(allocineId, false);
                 if (episodeInfos == null || episodeInfos.isNotValid()) {
                     // fix episode from season info
                     episode.setSynopsis(HTMLTools.replaceHtmlTags(episode.getSynopsis(), " "));
@@ -577,14 +591,15 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
     public ScanResult scan(Person person) {
         PersonInfos  personInfos = null;
         try {
-            String allocineId = getPersonId(person);
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
+            String allocineId = getPersonId(person, throwTempError);
 
             if (StringUtils.isBlank(allocineId)) {
                 LOG.debug("Allocine id not available '{}'", person.getName());
                 return ScanResult.MISSING_ID;
             }
 
-            personInfos = allocineApiWrapper.getPersonInfos(allocineId);
+            personInfos = allocineApiWrapper.getPersonInfos(allocineId, throwTempError);
         } catch (TemporaryUnavailableException ex) {
             // check retry
             int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.person", 0);
@@ -644,14 +659,15 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
     public ScanResult scanFilmography(Person person) {
         FilmographyInfos  filmographyInfos = null;
         try {
-            String allocineId = getPersonId(person);
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
+            String allocineId = getPersonId(person, throwTempError);
 
             if (StringUtils.isBlank(allocineId)) {
                 LOG.debug("Allocine id not available '{}'", person.getName());
                 return ScanResult.MISSING_ID;
             }
 
-            filmographyInfos = allocineApiWrapper.getFilmographyInfos(allocineId);
+            filmographyInfos = allocineApiWrapper.getFilmographyInfos(allocineId, throwTempError);
         } catch (TemporaryUnavailableException ex) {
             // check retry
             int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.filmography", 0);

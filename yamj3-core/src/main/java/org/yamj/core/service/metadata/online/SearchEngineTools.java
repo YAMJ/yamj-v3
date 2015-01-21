@@ -38,6 +38,7 @@ import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.tools.web.HTMLTools;
 import org.yamj.core.tools.web.ResponseTools;
+import org.yamj.core.tools.web.TemporaryUnavailableException;
 
 public class SearchEngineTools {
 
@@ -129,22 +130,22 @@ public class SearchEngineTools {
         this.searchSuffix = searchSuffix;
     }
 
-    public String searchURL(String title, int year, String site) {
-        return searchURL(title, year, site, null);
+    public String searchURL(String title, int year, String site, boolean throwTempError) {
+        return searchURL(title, year, site, null, throwTempError);
     }
 
-    public String searchURL(String title, int year, String site, String additional) {
+    public String searchURL(String title, int year, String site, String additional, boolean throwTempError) {
         String url;
 
         String engine = getNextSearchEngine();
         if ("yahoo".equalsIgnoreCase(engine)) {
-            url = searchUrlOnYahoo(title, year, site, additional);
+            url = searchUrlOnYahoo(title, year, site, additional, throwTempError);
         } else if ("bing".equalsIgnoreCase(engine)) {
-            url = searchUrlOnBing(title, year, site, additional);
+            url = searchUrlOnBing(title, year, site, additional, throwTempError);
         } else if ("blekko".equalsIgnoreCase(engine)) {
-            url = searchUrlOnBlekko(title, year, site, additional);
+            url = searchUrlOnBlekko(title, year, site, additional, throwTempError);
         } else {
-            url = searchUrlOnGoogle(title, year, site, additional);
+            url = searchUrlOnGoogle(title, year, site, additional, throwTempError);
         }
 
         return url;
@@ -170,7 +171,7 @@ public class SearchEngineTools {
         return httpClient.requestContent(httpGet, charset);
     }
 
-    public String searchUrlOnGoogle(String title, int year, String site, String additional) {
+    public String searchUrlOnGoogle(String title, int year, String site, String additional, boolean throwTempError) {
         LOG.debug("Searching '{}' on google; site={}", title, site);
 
         try {
@@ -198,6 +199,9 @@ public class SearchEngineTools {
 
             DigestedResponse response = this.requestContent(sb);
             if (ResponseTools.isNotOK(response)) {
+                if (throwTempError && ResponseTools.isTemporaryError(response)) {
+                    throw new TemporaryUnavailableException("Google search is temporary not available: " + response.getStatusCode());
+                }
                 LOG.warn("Google search failed with status {}: {}", response.getStatusCode(), sb);
                 return null;
             }
@@ -213,7 +217,7 @@ public class SearchEngineTools {
         return null;
     }
 
-    public String searchUrlOnYahoo(String title, int year, String site, String additional) {
+    public String searchUrlOnYahoo(String title, int year, String site, String additional, boolean throwTempError) {
         LOG.debug("Searching '{}' on yahoo; site={}", title, site);
 
         try {
@@ -240,6 +244,9 @@ public class SearchEngineTools {
 
             DigestedResponse response = this.requestContent(sb);
             if (ResponseTools.isNotOK(response)) {
+                if (throwTempError && ResponseTools.isTemporaryError(response)) {
+                    throw new TemporaryUnavailableException("Yahoo search is temporary not available: " + response.getStatusCode());
+                }
                 LOG.warn("Yahoo search failed with status {}: {}", response.getStatusCode(), sb);
                 return null;
             }
@@ -262,7 +269,7 @@ public class SearchEngineTools {
         return null;
     }
 
-    public String searchUrlOnBing(String title, int year, String site, String additional) {
+    public String searchUrlOnBing(String title, int year, String site, String additional, boolean throwTempError) {
         LOG.debug("Searching '{}' on bing; site={}", title, site);
 
         try {
@@ -289,6 +296,9 @@ public class SearchEngineTools {
 
             DigestedResponse response = this.requestContent(sb);
             if (ResponseTools.isNotOK(response)) {
+                if (throwTempError && ResponseTools.isTemporaryError(response)) {
+                    throw new TemporaryUnavailableException("Bing search is temporary not available: " + response.getStatusCode());
+                }
                 LOG.warn("Bing search failed with status {}: {}", response.getStatusCode(), sb);
                 return null;
             }
@@ -304,7 +314,7 @@ public class SearchEngineTools {
         return null;
     }
 
-    public String searchUrlOnBlekko(String title, int year, String site, String additional) {
+    public String searchUrlOnBlekko(String title, int year, String site, String additional, boolean throwTempError) {
         LOG.debug("Searching '{}' on blekko; site={}", title, site);
 
         try {
@@ -326,6 +336,9 @@ public class SearchEngineTools {
 
             DigestedResponse response = this.requestContent(sb);
             if (ResponseTools.isNotOK(response)) {
+                if (throwTempError && ResponseTools.isTemporaryError(response)) {
+                    throw new TemporaryUnavailableException("Blekko search is temporary not available: " + response.getStatusCode());
+                }
                 LOG.warn("Bing search failed with status {}: {}", response.getStatusCode(), sb);
                 return null;
             }

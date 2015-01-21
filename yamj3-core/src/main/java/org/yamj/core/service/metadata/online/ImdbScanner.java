@@ -22,6 +22,7 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,8 +59,10 @@ import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.web.HTMLTools;
+import org.yamj.core.tools.web.OnlineScannerException;
 import org.yamj.core.tools.web.PoolingHttpClient;
 import org.yamj.core.tools.web.ResponseTools;
+import org.yamj.core.tools.web.TemporaryUnavailableException;
 
 @Service("imdbScanner")
 public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner {
@@ -113,9 +116,13 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
     @Override
     public String getMovieId(VideoData videoData) {
+        return getMovieId(videoData, false);
+    }
+
+    private String getMovieId(VideoData videoData, boolean throwTempError) {
         String imdbId = videoData.getSourceDbId(SCANNER_ID);
         if (StringUtils.isBlank(imdbId)) {
-            imdbId = imdbSearchEngine.getImdbId(videoData.getTitle(), videoData.getPublicationYear(), false);
+            imdbId = imdbSearchEngine.getImdbId(videoData.getTitle(), videoData.getPublicationYear(), false, throwTempError);
             videoData.setSourceDbId(SCANNER_ID, imdbId);
         }
         return imdbId;
@@ -123,9 +130,13 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
     @Override
     public String getSeriesId(Series series) {
+        return getSeriesId(series, false);
+    }
+
+    private String getSeriesId(Series series, boolean throwTempError) {
         String imdbId = series.getSourceDbId(SCANNER_ID);
         if (StringUtils.isBlank(imdbId)) {
-            imdbId = imdbSearchEngine.getImdbId(series.getTitle(), series.getStartYear(), true);
+            imdbId = imdbSearchEngine.getImdbId(series.getTitle(), series.getStartYear(), true, throwTempError);
             series.setSourceDbId(SCANNER_ID, imdbId);
         }
         return imdbId;
@@ -133,29 +144,41 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
     @Override
     public ScanResult scan(VideoData videoData) {
-        String imdbId = getMovieId(videoData);
-        if (StringUtils.isBlank(imdbId)) {
-            LOG.debug("IMDb id not available : {}", videoData.getTitle());
-            return ScanResult.MISSING_ID;
-        }
-
-        DigestedResponse response;
         try {
-            response = httpClient.requestContent(getImdbUrl(imdbId), charset);
-        } catch (Exception ex) {
-            LOG.error("Failed to get movie data from IMDb", ex);
-            return ScanResult.ERROR;
-        }
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("imdb.throwError.tempUnavailable", Boolean.TRUE);
 
-        if (ResponseTools.isNotOK(response)) {
+            String imdbId = getMovieId(videoData, throwTempError);
+            
+            if (StringUtils.isBlank(imdbId)) {
+                LOG.debug("IMDb id not available : {}", videoData.getTitle());
+                return ScanResult.MISSING_ID;
+            }
+
+            LOG.debug("IMDb id available ({}), updating movie", imdbId);
+            return updateVideoData(videoData, imdbId, throwTempError);
+            
+        } catch (TemporaryUnavailableException tue) {
             // check retry
             int maxRetries = this.configServiceWrapper.getIntProperty("imdb.maxRetries.movie", 0);
-            if (videoData.getRetries() < maxRetries && ResponseTools.isTemporaryError(response)) {
-                LOG.info("Temporary error accessing IMDb for movie: {}", imdbId);
+            if (videoData.getRetries() < maxRetries) {
+                LOG.info("IMDb service temporary not available; trigger retry: '{}'", videoData.getTitle());
                 return ScanResult.RETRY;
             }
-            LOG.error("Can't find movie data due response status {}: {}", response.getStatusCode(), imdbId);
+            LOG.warn("IMDb service temporary not available; no retry: '{}'", videoData.getTitle());
             return ScanResult.ERROR;
+            
+        } catch (IOException ioe) {
+            LOG.error("IMDb service error: '" + videoData.getTitle() + "'", ioe);
+            return ScanResult.ERROR;
+        }
+    }
+
+    private ScanResult updateVideoData(VideoData videoData, String imdbId, boolean throwTempError) throws IOException {
+        DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId), charset);
+        if (throwTempError && ResponseTools.isTemporaryError(response)) {
+            throw new TemporaryUnavailableException("IMDb service is temporary not available: " + response.getStatusCode());
+        } else if (ResponseTools.isNotOK(response)) {
+            throw new OnlineScannerException("IMDb request failed: " + response.getStatusCode());
         }
 
         // check type change
@@ -248,31 +271,44 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return ScanResult.OK;
     }
 
+
     @Override
     public ScanResult scan(Series series) {
-        String imdbId = getSeriesId(series);
-        if (StringUtils.isBlank(imdbId)) {
-            LOG.debug("IMDb id not available: {}", series.getTitle());
-            return ScanResult.MISSING_ID;
-        }
-
-        DigestedResponse response;
         try {
-            response = httpClient.requestContent(getImdbUrl(imdbId), charset);
-        } catch (Exception ex) {
-            LOG.error("Failed to get series data from IMDb", ex);
-            return ScanResult.ERROR;
-        }
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("imdb.throwError.tempUnavailable", Boolean.TRUE);
 
-        if (ResponseTools.isNotOK(response)) {
+            String imdbId = getSeriesId(series, throwTempError);
+            
+            if (StringUtils.isBlank(imdbId)) {
+                LOG.debug("IMDb id not available: {}", series.getTitle());
+                return ScanResult.MISSING_ID;
+            }
+
+            LOG.debug("IMDb id available ({}), updating series", imdbId);
+            return updateSeries(series, imdbId, throwTempError);
+            
+        } catch (TemporaryUnavailableException tue) {
             // check retry
             int maxRetries = this.configServiceWrapper.getIntProperty("imdb.maxRetries.tvshow", 0);
-            if (series.getRetries() < maxRetries && ResponseTools.isTemporaryError(response)) {
-                LOG.info("Temporary error accessing IMDb for series: {}", imdbId);
+            if (series.getRetries() < maxRetries) {
+                LOG.info("IMDb service temporary not available; trigger retry: '{}'", series.getTitle());
                 return ScanResult.RETRY;
             }
-            LOG.error("Can't find series data due response status {}: {}", response.getStatusCode(), imdbId);
+            LOG.warn("IMDb service temporary not available; no retry: '{}'", series.getTitle());
             return ScanResult.ERROR;
+            
+        } catch (IOException ioe) {
+            LOG.error("IMDb service error: '" + series.getTitle() + "'", ioe);
+            return ScanResult.ERROR;
+        }
+    }
+
+    private ScanResult updateSeries(Series series, String imdbId, boolean throwTempError) throws IOException {
+        DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId), charset);
+        if (throwTempError && ResponseTools.isTemporaryError(response)) {
+            throw new TemporaryUnavailableException("IMDb service is temporary not available: " + response.getStatusCode());
+        } else if (ResponseTools.isNotOK(response)) {
+            throw new OnlineScannerException("IMDb request failed: " + response.getStatusCode());
         }
         
         // get content
@@ -1054,7 +1090,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             }
 
         } catch (Exception ex) {
-            LOG.warn("Failed to scan cast crew: " + imdbId, ex);
+            LOG.error("Failed to scan cast crew: " + imdbId, ex);
         }
     }
 
@@ -1119,13 +1155,16 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
     @Override
     public String getPersonId(Person person) {
+        return getPersonId(person, false);
+    }
+
+    private String getPersonId(Person person, boolean throwTempError) {
         String imdbId = person.getSourceDbId(SCANNER_ID);
         if (StringUtils.isNotBlank(imdbId)) {
             return imdbId;
         }
-
         if (StringUtils.isNotBlank(person.getName())) {
-            imdbId = this.imdbSearchEngine.getImdbPersonId(person.getName());
+            imdbId = this.imdbSearchEngine.getImdbPersonId(person.getName(), throwTempError);
             person.setSourceDbId(SCANNER_ID, imdbId);
         }
         return imdbId;
@@ -1133,32 +1172,41 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
     @Override
     public ScanResult scan(Person person) {
-        String imdbId = getPersonId(person);
-        if (StringUtils.isBlank(imdbId)) {
-            LOG.debug("IMDb id not available: {}", person.getName());
-            return ScanResult.MISSING_ID;
-        }
-
-        LOG.info("Getting information for {}  ({})", person.getName(), imdbId);
-
-        DigestedResponse response;
         try {
-            String url = HTML_SITE_FULL + HTML_NAME + imdbId + "/";
-            response = httpClient.requestContent(url, charset);
-        } catch (Exception ex) {
-            LOG.error("Failed to get person data from IMDb", ex);
-            return ScanResult.ERROR;
-        }
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("imdb.throwError.tempUnavailable", Boolean.TRUE);
 
-        if (ResponseTools.isNotOK(response)) {
+            String imdbId = getPersonId(person, throwTempError);
+            
+            if (StringUtils.isBlank(imdbId)) {
+                LOG.debug("IMDb id not available: {}", person.getName());
+                return ScanResult.MISSING_ID;
+            }
+
+            LOG.debug("IMDb id available ({}), updating person", imdbId);
+            return updatePerson(person, imdbId, throwTempError);
+            
+        } catch (TemporaryUnavailableException tue) {
             // check retry
             int maxRetries = this.configServiceWrapper.getIntProperty("imdb.maxRetries.person", 0);
-            if (person.getRetries() < maxRetries && ResponseTools.isTemporaryError(response)) {
-                LOG.info("Temporary error accessing IMDb for person: {}", imdbId);
+            if (person.getRetries() < maxRetries) {
+                LOG.info("IMDb service temporary not available; trigger retry: '{}'", person.getName());
                 return ScanResult.RETRY;
             }
-            LOG.error("Can't find person data due response status {}: {}", response.getStatusCode(), imdbId);
+            LOG.warn("IMDb service temporary not available; no retry: '{}'", person.getName());
             return ScanResult.ERROR;
+            
+        } catch (IOException ioe) {
+            LOG.error("IMDb service error: '" + person.getName() + "'", ioe);
+            return ScanResult.ERROR;
+        }
+    }
+
+    private ScanResult updatePerson(Person person, String imdbId, boolean throwTempError) throws IOException {
+        DigestedResponse response = httpClient.requestContent(HTML_SITE_FULL + HTML_NAME + imdbId + "/", charset);
+        if (throwTempError && ResponseTools.isTemporaryError(response)) {
+            throw new TemporaryUnavailableException("IMDb service is temporary not available: " + response.getStatusCode());
+        } else if (ResponseTools.isNotOK(response)) {
+            throw new OnlineScannerException("IMDb request failed: " + response.getStatusCode());
         }
 
         final String xml = response.getContent();
@@ -1190,23 +1238,11 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             LOG.trace("No image found on webpage for {}", person.getName());
         }
 
-        try {
-            String url = HTML_SITE_FULL + HTML_NAME + imdbId + "/bio";
-            response = httpClient.requestContent(url, charset);
-        } catch (Exception ex) {
-            LOG.error("Failed to get person biography from IMDb", ex);
-            return ScanResult.ERROR;
-        }
-
-        if (ResponseTools.isNotOK(response)) {
-            // check retry
-            int maxRetries = this.configServiceWrapper.getIntProperty("imdb.maxRetries.person", 0);
-            if (person.getRetries() < maxRetries && ResponseTools.isTemporaryError(response)) {
-                LOG.info("Temporary error accessing OFDb; retry later for {}", imdbId);
-                return ScanResult.RETRY;
-            }
-            LOG.error("Can't find person biography due response status {}: {}", response.getStatusCode(), imdbId);
-            return ScanResult.ERROR;
+        response = httpClient.requestContent(HTML_SITE_FULL + HTML_NAME + imdbId + "/bio", charset);
+        if (throwTempError && ResponseTools.isTemporaryError(response)) {
+            throw new TemporaryUnavailableException("IMDb service is temporary not available: " + response.getStatusCode());
+        } else if (ResponseTools.isNotOK(response)) {
+            throw new OnlineScannerException("IMDb biography request failed: " + response.getStatusCode());
         }
 
         int endIndex;

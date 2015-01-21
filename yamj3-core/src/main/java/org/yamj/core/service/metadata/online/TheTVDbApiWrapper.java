@@ -22,16 +22,11 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.omertron.thetvdbapi.TheTVDBApi;
-import com.omertron.thetvdbapi.TvDbException;
-import com.omertron.thetvdbapi.model.Actor;
-import com.omertron.thetvdbapi.model.Banners;
-import com.omertron.thetvdbapi.model.Episode;
-import com.omertron.thetvdbapi.model.Series;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -41,6 +36,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.tools.LRUTimedCache;
+
+import com.omertron.thetvdbapi.TheTVDBApi;
+import com.omertron.thetvdbapi.TvDbException;
+import com.omertron.thetvdbapi.model.Actor;
+import com.omertron.thetvdbapi.model.Banners;
+import com.omertron.thetvdbapi.model.Episode;
+import com.omertron.thetvdbapi.model.Series;
 
 @Service("tvdbApiWrapper")
 public class TheTVDbApiWrapper {
@@ -131,7 +133,7 @@ public class TheTVDbApiWrapper {
      * @return
      */
     public String getSeriesId(String title, int year) {
-        String id = "";
+        String tvdbId = null;
         if (StringUtils.isNotBlank(title)) {
             seriesLock.lock();
             try {
@@ -172,10 +174,10 @@ public class TheTVDbApiWrapper {
                     }
 
                     if (series != null) {
-                        id = series.getId();
+                        tvdbId = series.getId();
                         try {
-                            Series saved = tvdbApi.getSeries(id, usedDefault ? defaultLanguage : altLanguage);
-                            this.seriesCache.put(id, saved);
+                            Series saved = tvdbApi.getSeries(tvdbId, usedDefault ? defaultLanguage : altLanguage);
+                            this.seriesCache.put(tvdbId, saved);
                         } catch (TvDbException ex) {
                             LOG.warn(LOG_ERROR_LANG, "Series", usedDefault ? defaultLanguage : altLanguage, ex.getExceptionType(), ex.getResponse(), ex);
                         }
@@ -185,7 +187,7 @@ public class TheTVDbApiWrapper {
                 seriesLock.unlock();
             }
         }
-        return id;
+        return tvdbId;
     }
 
     public List<Actor> getActors(String id) {
