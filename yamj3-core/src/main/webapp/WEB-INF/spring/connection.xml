@@ -27,8 +27,9 @@
     </bean>
 
     <bean id="fanarttvApi" class="com.omertron.fanarttvapi.FanartTvApi">
-        <constructor-arg index="0" value="${APIKEY.fanarttv}"/>
-        <constructor-arg index="1" ref="poolingHttpClient"/>
+        <constructor-arg index="0" value="${APIKEY.fanarttv.apiKey}"/>
+        <constructor-arg index="1" value="${APIKEY.fanarttv.clientKey}"/>
+        <constructor-arg index="2" ref="poolingHttpClient"/>
     </bean>
 
     <bean id="allocineApi" class="com.moviejukebox.allocine.AllocineApi">
