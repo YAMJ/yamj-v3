@@ -22,13 +22,17 @@
  */
 package org.yamj.core.service.artwork.common;
 
+import com.omertron.themoviedbapi.MovieDbException;
+import com.omertron.themoviedbapi.TheMovieDbApi;
+import com.omertron.themoviedbapi.model.Artwork;
+import com.omertron.themoviedbapi.model.ArtworkType;
+import com.omertron.themoviedbapi.model.MovieDb;
+import com.omertron.themoviedbapi.results.TmdbResultsList;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,13 +51,6 @@ import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
 import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.service.metadata.online.TheMovieDbApiWrapper;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
-
-import com.omertron.themoviedbapi.MovieDbException;
-import com.omertron.themoviedbapi.TheMovieDbApi;
-import com.omertron.themoviedbapi.model.Artwork;
-import com.omertron.themoviedbapi.model.ArtworkType;
-import com.omertron.themoviedbapi.model.MovieDb;
-import com.omertron.themoviedbapi.results.TmdbResultsList;
 
 @Service("tmdbArtworkScanner")
 public class TheMovieDbArtworkScanner implements
@@ -80,7 +77,7 @@ public class TheMovieDbArtworkScanner implements
     }
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         LOG.info("Initialize TheMovieDb artwork scanner");
 
         // register this scanner
@@ -164,7 +161,7 @@ public class TheMovieDbArtworkScanner implements
         }
         return dtos;
     }
-    
+
     @Override
     public List<ArtworkDetailDTO> getPosters(IMetadata metadata) {
         String id = getId(metadata);
@@ -235,7 +232,7 @@ public class TheMovieDbArtworkScanner implements
         if (StringUtils.isBlank(name)) {
             return null;
         }
-        
+
         try {
             TmdbResultsList<com.omertron.themoviedbapi.model.Person> results = tmdbApi.searchPeople(name, Boolean.FALSE, -1);
             if (CollectionUtils.isEmpty(results.getResults())) {
@@ -266,7 +263,7 @@ public class TheMovieDbArtworkScanner implements
         if (StringUtils.isBlank(person.getName())) {
             return null;
         }
-        
+
         try {
             TmdbResultsList<com.omertron.themoviedbapi.model.Person> results = tmdbApi.searchPeople(person.getName(), Boolean.FALSE, -1);
             if (CollectionUtils.isEmpty(results.getResults())) {
