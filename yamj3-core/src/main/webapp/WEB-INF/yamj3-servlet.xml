@@ -14,7 +14,7 @@
 ">
 
     <context:annotation-config />
-    <context:component-scan base-package="org.yamj"/>
+    <context:component-scan base-package="org.yamj.core"/>
 
     <!-- Activates @Scheduled and @Async annotations for scheduling -->
     <task:annotation-driven />

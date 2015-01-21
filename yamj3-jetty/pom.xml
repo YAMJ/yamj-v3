@@ -91,8 +91,9 @@
                     <archive>
                         <manifest>
                             <mainClass>org.yamj.jetty.Start</mainClass>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>./</classpathPrefix>                            
+                            <!-- use for executable jar -->
+                            <!--addClasspath>true</addClasspath-->
+                            <!--classpathPrefix>./</classpathPrefix-->
                         </manifest>
                     </archive>
                 </configuration>
@@ -191,7 +192,9 @@
                                 <property name="title_4"    value="REM Git-SHA: ${buildNumber}${line.separator}" />
                                 <property name="line_1"     value="@echo off${line.separator}" />
                                 <property name="line_2"     value="cls${line.separator}" />
-                                <property name="line_3"     value="java -jar lib/${project.artifactId}-${project.version}.jar %*${line.separator}" />
+                                <property name="line_3"     value="java -classpath .;lib/* org.yamj.jetty.Start %*${line.separator}" />
+                                <!-- use for executable jar -->
+                                <!--property name="line_3"     value="java -jar lib/${project.artifactId}-${project.version}.jar %*${line.separator}" /-->
                                 <echo file="${batch_file}" append="false">${line_1}</echo>
                                 <echo file="${batch_file}" append="true">${title_1}</echo>
                                 <echo file="${batch_file}" append="true">${title_2}</echo>
@@ -217,7 +220,9 @@
                                 <property name="title_4"    value="# Git-SHA: ${buildNumber}${line.separator}" />
                                 <property name="line_1"     value="#!/bin/sh${line.separator}" />
                                 <property name="line_2"     value="clear${line.separator}" />
-                                <property name="line_3"     value="java -jar lib/${project.artifactId}-${project.version}.jar $@${line.separator}" />
+                                <property name="line_3"     value="java -classpath .:./lib/* org.yamj.jetty.Start $@${line.separator}" />
+                                <!-- use for executable jar -->
+                                <!-- property name="line_3"     value="java -jar lib/${project.artifactId}-${project.version}.jar $@${line.separator}" /-->
                                 <echo>Writing shell file: ${shell_file}</echo>
                                 <echo file="${shell_file}" append="false">${line_1}</echo>
                                 <echo file="${shell_file}" append="true">${title_1}</echo>
