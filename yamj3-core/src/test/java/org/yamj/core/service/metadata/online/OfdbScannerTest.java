@@ -27,6 +27,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import javax.annotation.Resource;
+
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
@@ -35,12 +36,17 @@ import org.yamj.core.database.model.VideoData;
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
 public class OfdbScannerTest extends AbstractJUnit4SpringContextTests {
 
+  private static final String PLUGIN_ID = "ofdb";
+    
     @Resource(name = "ofdbScanner")
     private OfdbScanner ofdbScanner;
 
     @Test
     public void testGetMovieId() {
-        String id = ofdbScanner.getMovieId("Avatar", 2009);
+        VideoData videoData = new VideoData();
+        videoData.setTitle("Avatar", PLUGIN_ID);
+        videoData.setPublicationYear(2009, PLUGIN_ID);
+        String id = ofdbScanner.getMovieId(videoData);
         assertEquals("http://www.ofdb.de/film/188514,Avatar---Aufbruch-nach-Pandora", id);
     }
 

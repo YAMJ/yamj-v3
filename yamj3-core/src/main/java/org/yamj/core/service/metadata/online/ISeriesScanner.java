@@ -28,7 +28,5 @@ public interface ISeriesScanner extends INfoScanner {
 
     String getSeriesId(Series series);
 
-    String getSeriesId(String title, int year);
-
     ScanResult scan(Series series);
 }

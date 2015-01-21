@@ -23,10 +23,21 @@
 package org.yamj.core.service.metadata.online;
 
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -36,7 +47,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.core.configuration.ConfigServiceWrapper;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.AbstractMetadata;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
@@ -100,7 +115,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     public String getMovieId(VideoData videoData) {
         String imdbId = videoData.getSourceDbId(SCANNER_ID);
         if (StringUtils.isBlank(imdbId)) {
-            imdbId = getMovieId(videoData.getTitle(), videoData.getPublicationYear());
+            imdbId = imdbSearchEngine.getImdbId(videoData.getTitle(), videoData.getPublicationYear(), false);
             videoData.setSourceDbId(SCANNER_ID, imdbId);
         }
         return imdbId;
@@ -110,20 +125,10 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     public String getSeriesId(Series series) {
         String imdbId = series.getSourceDbId(SCANNER_ID);
         if (StringUtils.isBlank(imdbId)) {
-            imdbId = getSeriesId(series.getTitle(), series.getStartYear());
+            imdbId = imdbSearchEngine.getImdbId(series.getTitle(), series.getStartYear(), true);
             series.setSourceDbId(SCANNER_ID, imdbId);
         }
         return imdbId;
-    }
-
-    @Override
-    public String getMovieId(String title, int year) {
-        return imdbSearchEngine.getImdbId(title, year, false);
-    }
-
-    @Override
-    public String getSeriesId(String title, int year) {
-        return imdbSearchEngine.getImdbId(title, year, true);
     }
 
     @Override
@@ -1114,24 +1119,16 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
     @Override
     public String getPersonId(Person person) {
-        String id = person.getSourceDbId(SCANNER_ID);
-        if (StringUtils.isNotBlank(id)) {
-            return id;
+        String imdbId = person.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNotBlank(imdbId)) {
+            return imdbId;
         }
 
         if (StringUtils.isNotBlank(person.getName())) {
-            id = getPersonId(person.getName());
-            person.setSourceDbId(SCANNER_ID, id);
-        } else {
-            LOG.error("No ID or Name found for {}", person.toString());
-            id = StringUtils.EMPTY;
+            imdbId = this.imdbSearchEngine.getImdbPersonId(person.getName());
+            person.setSourceDbId(SCANNER_ID, imdbId);
         }
-        return id;
-    }
-
-    @Override
-    public String getPersonId(String name) {
-        return this.imdbSearchEngine.getImdbPersonId(name);
+        return imdbId;
     }
 
     @Override

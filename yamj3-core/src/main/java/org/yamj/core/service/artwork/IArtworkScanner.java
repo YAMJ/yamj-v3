@@ -28,5 +28,6 @@ public interface IArtworkScanner {
 
     String getScannerName();
 
+    @Deprecated
     String getId(IMetadata metadata);
 }

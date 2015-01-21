@@ -28,7 +28,5 @@ public interface IPersonScanner extends IOnlineScanner {
 
     String getPersonId(Person person);
 
-    String getPersonId(String name);
-
     ScanResult scan(Person person);
 }

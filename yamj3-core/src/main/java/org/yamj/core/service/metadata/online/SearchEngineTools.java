@@ -20,13 +20,14 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.tools.web;
+package org.yamj.core.service.metadata.online;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedList;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.protocol.HTTP;
@@ -35,6 +36,8 @@ import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.CommonHttpClient;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.common.tools.PropertyTools;
+import org.yamj.core.tools.web.HTMLTools;
+import org.yamj.core.tools.web.ResponseTools;
 
 public class SearchEngineTools {
 

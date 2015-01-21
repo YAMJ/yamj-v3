@@ -22,13 +22,11 @@
  */
 package org.yamj.core.service.artwork.common;
 
-import com.omertron.fanarttvapi.FanartTvApi;
-import com.omertron.fanarttvapi.FanartTvException;
-import com.omertron.fanarttvapi.model.FTArtworkType;
-import com.omertron.fanarttvapi.model.FanartTvArtwork;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,7 +38,12 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
 import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
-import org.yamj.core.service.metadata.online.TheMovieDbScanner;
+import org.yamj.core.service.metadata.online.TheMovieDbApiWrapper;
+
+import com.omertron.fanarttvapi.FanartTvApi;
+import com.omertron.fanarttvapi.FanartTvException;
+import com.omertron.fanarttvapi.model.FTArtworkType;
+import com.omertron.fanarttvapi.model.FanartTvArtwork;
 
 @Service("fanartTvArtworkScanner")
 public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner {
@@ -50,9 +53,9 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
     @Autowired
     private ArtworkScannerService artworkScannerService;
     @Autowired
-    private TheMovieDbScanner tmdbScanner;
-    @Autowired
     private FanartTvApi fanarttvApi;
+    @Autowired
+    private TheMovieDbApiWrapper tmdbApiWrapper;
 
     @PostConstruct
     public void init() throws Exception {
@@ -71,7 +74,7 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
     @Override
     public String getId(String title, int year) {
         // Use TheMovieDB scanner to get the id
-        return tmdbScanner.getMovieId(title, year);
+        return tmdbApiWrapper.getMovieDbId(title, year);
     }
 
     @Override

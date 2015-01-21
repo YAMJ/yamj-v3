@@ -22,12 +22,13 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.omertron.themoviedbapi.MovieDbException;
-import com.omertron.themoviedbapi.TheMovieDbApi;
-import com.omertron.themoviedbapi.model.*;
-import com.omertron.themoviedbapi.results.TmdbResultsList;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,6 +46,15 @@ import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 
+import com.omertron.themoviedbapi.MovieDbException;
+import com.omertron.themoviedbapi.TheMovieDbApi;
+import com.omertron.themoviedbapi.model.MovieDb;
+import com.omertron.themoviedbapi.model.PersonCredit;
+import com.omertron.themoviedbapi.model.PersonType;
+import com.omertron.themoviedbapi.model.ProductionCompany;
+import com.omertron.themoviedbapi.model.ProductionCountry;
+import com.omertron.themoviedbapi.results.TmdbResultsList;
+
 @Service("tmdbScanner")
 public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
 
@@ -59,7 +69,9 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
     private ConfigServiceWrapper configServiceWrapper;
     @Autowired
     private TheMovieDbApi tmdbApi;
-
+    @Autowired
+    private TheMovieDbApiWrapper tmdbApiWrapper;
+    
     @Override
     public String getScannerName() {
         return SCANNER_ID;
@@ -123,41 +135,8 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         return tmdbID;
     }
 
-    @Override
-    public String getMovieId(String title, int year) {
-        MovieDb moviedb = null;
-        String defaultLanguage = configServiceWrapper.getProperty("themoviedb.language", "en");
-        boolean includeAdult = configServiceWrapper.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
-        int searchMatch = configServiceWrapper.getIntProperty("themoviedb.searchMatch", 3);
-
-        try {
-            // Search using movie name
-            List<MovieDb> movieList = tmdbApi.searchMovie(title, year, defaultLanguage, includeAdult, 0).getResults();
-            LOG.info("Found {} potential matches for {} ({})", movieList.size(), title, year);
-            // Iterate over the list until we find a match
-            for (MovieDb m : movieList) {
-                String relDate;
-                if (StringUtils.isNotBlank(m.getReleaseDate()) && m.getReleaseDate().length() > 4) {
-                    relDate = m.getReleaseDate().substring(0, 4);
-                } else {
-                    relDate = "";
-                }
-                LOG.debug("Checking " + m.getTitle() + " (" + relDate + ")");
-                if (TheMovieDbApi.compareMovies(m, title, String.valueOf(year), searchMatch)) {
-                    moviedb = m;
-                    break;
-                }
-            }
-        } catch (MovieDbException ex) {
-            LOG.debug("Failed to get movie info for {}, error: {}", title, ex.getMessage());
-            moviedb = null;
-        }
-
-        if (moviedb != null) {
-            LOG.info("TMDB ID found {} for {}", moviedb.getId(), title);
-            return String.valueOf(moviedb.getId());
-        }
-        return "";
+    private String getMovieId(String title, int year) {
+        return this.tmdbApiWrapper.getMovieDbId(title, year);
     }
 
     @Override
@@ -300,8 +279,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         return id;
     }
 
-    @Override
-    public String getPersonId(String name) {
+    private String getPersonId(String name) {
         String id = "";
         com.omertron.themoviedbapi.model.Person closestPerson = null;
         int closestMatch = Integer.MAX_VALUE;

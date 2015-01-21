@@ -28,7 +28,5 @@ public interface IMovieScanner extends INfoScanner {
 
     String getMovieId(VideoData videoData);
 
-    String getMovieId(String title, int year);
-
     ScanResult scan(VideoData videoData);
 }

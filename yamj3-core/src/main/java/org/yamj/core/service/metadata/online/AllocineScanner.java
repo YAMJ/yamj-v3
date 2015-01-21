@@ -22,11 +22,17 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.moviejukebox.allocine.model.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -34,9 +40,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigServiceWrapper;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.FilmParticipation;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.ParticipationType;
@@ -45,8 +53,18 @@ import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.web.HTMLTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
-import org.yamj.core.tools.web.SearchEngineTools;
 import org.yamj.core.tools.web.TemporaryUnavailableException;
+
+import com.moviejukebox.allocine.model.CastMember;
+import com.moviejukebox.allocine.model.Episode;
+import com.moviejukebox.allocine.model.EpisodeInfos;
+import com.moviejukebox.allocine.model.FilmographyInfos;
+import com.moviejukebox.allocine.model.MovieInfos;
+import com.moviejukebox.allocine.model.MoviePerson;
+import com.moviejukebox.allocine.model.Participance;
+import com.moviejukebox.allocine.model.PersonInfos;
+import com.moviejukebox.allocine.model.TvSeasonInfos;
+import com.moviejukebox.allocine.model.TvSeriesInfos;
 
 @Service("allocineScanner")
 public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmographyScanner {
@@ -87,8 +105,22 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
     @Override
     public String getMovieId(VideoData videoData) {
         String allocineId = videoData.getSourceDbId(SCANNER_ID);
+        
         if (StringUtils.isBlank(allocineId)) {
-            allocineId = getMovieId(videoData.getTitle(), videoData.getYear());
+            allocineId = allocineApiWrapper.getAllocineMovieId(videoData.getTitle(), videoData.getYear());
+
+            if (StringUtils.isBlank(allocineId)) {
+                // try search engines
+                searchEngingeLock.lock();
+                try {
+                    searchEngineTools.setSearchSuffix("/fichefilm_gen_cfilm");
+                    String url = searchEngineTools.searchURL(videoData.getTitle(), videoData.getYear(), "www.allocine.fr/film");
+                    allocineId = HTMLTools.extractTag(url, "fichefilm_gen_cfilm=", ".html");
+                } finally {
+                    searchEngingeLock.unlock();
+                }
+            }
+            
             videoData.setSourceDbId(SCANNER_ID, allocineId);
         }
 
@@ -105,25 +137,6 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
             }
         }
 
-        return allocineId;
-    }
-
-    @Override
-    public String getMovieId(String title, int year) {
-        String allocineId = allocineApiWrapper.getAllocineMovieId(title, year);
-
-        if (StringUtils.isBlank(allocineId)) {
-            // try search engines
-            searchEngingeLock.lock();
-            try {
-                searchEngineTools.setSearchSuffix("/fichefilm_gen_cfilm");
-                String url = searchEngineTools.searchURL(title, year, "www.allocine.fr/film");
-                allocineId = HTMLTools.extractTag(url, "fichefilm_gen_cfilm=", ".html");
-            } finally {
-                searchEngingeLock.unlock();
-            }
-        }
-       
         return allocineId;
     }
 
@@ -255,8 +268,22 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
     @Override
     public String getSeriesId(Series series) {
         String allocineId = series.getSourceDbId(SCANNER_ID);
+        
         if (StringUtils.isBlank(allocineId)) {
-            allocineId = getSeriesId(series.getTitle(), series.getYear());
+            allocineId = allocineApiWrapper.getAllocineSeriesId(series.getTitle(), series.getYear());
+
+            if (StringUtils.isBlank(allocineId)) {
+                // try search engines
+                searchEngingeLock.lock();
+                try {
+                    searchEngineTools.setSearchSuffix("/ficheserie_gen_cserie");
+                    String url = searchEngineTools.searchURL(series.getTitle(), series.getYear(), "www.allocine.fr/series");
+                    allocineId = HTMLTools.extractTag(url, "ficheserie_gen_cserie=", ".html");
+                } finally {
+                    searchEngingeLock.unlock();
+                }
+            }
+          
             series.setSourceDbId(SCANNER_ID, allocineId);
         }
 
@@ -277,50 +304,28 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
     }
 
     @Override
-    public String getSeriesId(String title, int year) {
-        String allocineId = allocineApiWrapper.getAllocineSeriesId(title, year);
-
-        if (StringUtils.isBlank(allocineId)) {
-            // try search engines
-            searchEngingeLock.lock();
-            try {
-                searchEngineTools.setSearchSuffix("/ficheserie_gen_cserie");
-                String url = searchEngineTools.searchURL(title, year, "www.allocine.fr/series");
-                allocineId = HTMLTools.extractTag(url, "ficheserie_gen_cserie=", ".html");
-            } finally {
-                searchEngingeLock.unlock();
-            }
-        }
-        
-        return allocineId;
-    }
-
-    @Override
     public String getPersonId(Person person) {
-        String id = person.getSourceDbId(SCANNER_ID);
-        if (StringUtils.isNotBlank(id)) {
-            return id;
-        } else if (StringUtils.isNotBlank(person.getName())) {
-            return getPersonId(person.getName());
+        String allocineId = person.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNotBlank(allocineId)) {
+            return allocineId;
         }
-        LOG.error("No ID or Name found for {}", person.toString());
-        return StringUtils.EMPTY;
-    }
-
-    @Override
-    public String getPersonId(String name) {
-        String allocineId = allocineApiWrapper.getAllocinePersonId(name);
-
-        if (StringUtils.isBlank(allocineId)) {
-            // try search engines
-            searchEngingeLock.lock();
-            try {
-                searchEngineTools.setSearchSuffix("/fichepersonne_gen_cpersonne");
-                String url = searchEngineTools.searchURL(name, -1, "www.allocine.fr/personne");
-                allocineId = HTMLTools.extractTag(url, "fichepersonne_gen_cpersonne=", ".html");
-            } finally {
-                searchEngingeLock.unlock();
+  
+        if (StringUtils.isNotBlank(person.getName())) {
+            allocineId = allocineApiWrapper.getAllocinePersonId(person.getName());
+  
+            if (StringUtils.isBlank(allocineId)) {
+                // try search engines
+                searchEngingeLock.lock();
+                try {
+                    searchEngineTools.setSearchSuffix("/fichepersonne_gen_cpersonne");
+                    String url = searchEngineTools.searchURL(person.getName(), -1, "www.allocine.fr/personne");
+                    allocineId = HTMLTools.extractTag(url, "fichepersonne_gen_cpersonne=", ".html");
+                } finally {
+                    searchEngingeLock.unlock();
+                }
             }
+            
+            person.setSourceDbId(SCANNER_ID, allocineId);
         }
         
         return allocineId;

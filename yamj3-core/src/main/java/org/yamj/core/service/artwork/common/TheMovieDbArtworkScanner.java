@@ -22,17 +22,13 @@
  */
 package org.yamj.core.service.artwork.common;
 
-import com.omertron.themoviedbapi.MovieDbException;
-import com.omertron.themoviedbapi.TheMovieDbApi;
-import com.omertron.themoviedbapi.model.Artwork;
-import com.omertron.themoviedbapi.model.ArtworkType;
-import com.omertron.themoviedbapi.model.MovieDb;
-import com.omertron.themoviedbapi.results.TmdbResultsList;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +45,15 @@ import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
 import org.yamj.core.service.artwork.photo.IPhotoScanner;
 import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
 import org.yamj.core.service.metadata.online.ImdbScanner;
+import org.yamj.core.service.metadata.online.TheMovieDbApiWrapper;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
+
+import com.omertron.themoviedbapi.MovieDbException;
+import com.omertron.themoviedbapi.TheMovieDbApi;
+import com.omertron.themoviedbapi.model.Artwork;
+import com.omertron.themoviedbapi.model.ArtworkType;
+import com.omertron.themoviedbapi.model.MovieDb;
+import com.omertron.themoviedbapi.results.TmdbResultsList;
 
 @Service("tmdbArtworkScanner")
 public class TheMovieDbArtworkScanner implements
@@ -68,7 +72,7 @@ public class TheMovieDbArtworkScanner implements
     @Autowired
     private TheMovieDbApi tmdbApi;
     @Autowired
-    private TheMovieDbScanner tmdbScanner;
+    private TheMovieDbApiWrapper tmdbApiWrapper;
 
     @Override
     public String getScannerName() {
@@ -87,7 +91,7 @@ public class TheMovieDbArtworkScanner implements
 
     @Override
     public String getId(String title, int year) {
-        return tmdbScanner.getMovieId(title, year);
+        return tmdbApiWrapper.getMovieDbId(title, year);
     }
 
     @Override

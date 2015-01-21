@@ -24,7 +24,9 @@ package org.yamj.core.service.metadata.online;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+
 import javax.annotation.Resource;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.junit.Ignore;
@@ -84,10 +86,11 @@ public class TheTVDbScannerTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testGetSeriesId_String_int() {
         LOG.info("getSeriesId");
-        String title = "Chuck";
-        int year = 2007;
+        Series series = new Series();
+        series.setTitle("Chuck", PLUGIN_ID);
+        series.setStartYear(2007, PLUGIN_ID);
         String expResult = "80348";
-        String result = tvdbScanner.getSeriesId(title, year);
+        String result = tvdbScanner.getSeriesId(series);
         assertEquals("Wrong ID returned", expResult, result);
     }
 

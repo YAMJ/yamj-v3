@@ -22,10 +22,15 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.omertron.thetvdbapi.model.Actor;
-import com.omertron.thetvdbapi.model.Episode;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -41,6 +46,9 @@ import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
+
+import com.omertron.thetvdbapi.model.Actor;
+import com.omertron.thetvdbapi.model.Episode;
 
 @Service("tvdbScanner")
 public class TheTVDbScanner implements ISeriesScanner {
@@ -73,15 +81,10 @@ public class TheTVDbScanner implements ISeriesScanner {
         String id = series.getSourceDbId(SCANNER_ID);
 
         if (StringUtils.isBlank(id)) {
-            return getSeriesId(series.getTitle(), series.getStartYear());
+            id = tvdbApiWrapper.getSeriesId(series.getTitle(), series.getStartYear());
         }
 
         return id;
-    }
-
-    @Override
-    public String getSeriesId(String title, int year) {
-        return tvdbApiWrapper.getSeriesId(title, year);
     }
 
     @Override

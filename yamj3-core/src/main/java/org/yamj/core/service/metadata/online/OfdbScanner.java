@@ -28,7 +28,9 @@ import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +48,6 @@ import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.web.HTMLTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
 import org.yamj.core.tools.web.ResponseTools;
-import org.yamj.core.tools.web.SearchEngineTools;
 
 @Service("ofdbScanner")
 public class OfdbScanner implements IMovieScanner {
@@ -107,27 +108,22 @@ public class OfdbScanner implements IMovieScanner {
                 }
             }
 
-            // find by IMDb id
             if (StringUtils.isNotBlank(imdbId)) {
                 // if IMDb id is present then use this
                 ofdbId = getOfdbIdByImdbId(imdbId);
             }
+            
             if (StringUtils.isBlank(ofdbId)) {
                 // try by title and year
-                ofdbId = getMovieId(videoData.getTitle(), videoData.getPublicationYear());
+                ofdbId = getOfdbIdByTitleAndYear(videoData.getTitle(), videoData.getPublicationYear());
             }
+            
+            if (StringUtils.isBlank(ofdbId)) {
+                // try with search engines
+                ofdbId = searchEngineTools.searchURL(videoData.getTitle(), videoData.getPublicationYear(), "www.ofdb.de/film");
+            }
+            
             videoData.setSourceDbId(SCANNER_ID, ofdbId);
-        }
-        return ofdbId;
-    }
-
-    @Override
-    public String getMovieId(String title, int year) {
-        // try with OFDb search
-        String ofdbId = getOfdbIdByTitleAndYear(title, year);
-        if (StringUtils.isBlank(ofdbId)) {
-            // try with search engines
-            ofdbId = searchEngineTools.searchURL(title, year, "www.ofdb.de/film");
         }
         return ofdbId;
     }

@@ -22,14 +22,12 @@
  */
 package org.yamj.core.service.artwork.common;
 
-import com.omertron.thetvdbapi.model.Banner;
-import com.omertron.thetvdbapi.model.BannerType;
-import com.omertron.thetvdbapi.model.Banners;
-import com.omertron.thetvdbapi.model.Episode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -51,6 +49,11 @@ import org.yamj.core.service.artwork.tv.ITvShowVideoImageScanner;
 import org.yamj.core.service.metadata.online.TheTVDbApiWrapper;
 import org.yamj.core.service.metadata.online.TheTVDbScanner;
 
+import com.omertron.thetvdbapi.model.Banner;
+import com.omertron.thetvdbapi.model.BannerType;
+import com.omertron.thetvdbapi.model.Banners;
+import com.omertron.thetvdbapi.model.Episode;
+
 @Service("tvdbArtworkScanner")
 public class TheTVDbArtworkScanner implements
         ITvShowPosterScanner, ITvShowFanartScanner, ITvShowBannerScanner,
@@ -64,8 +67,6 @@ public class TheTVDbArtworkScanner implements
     private ArtworkScannerService artworkScannerService;
     @Autowired
     private TheTVDbApiWrapper tvdbApiWrapper;
-    @Autowired
-    private TheTVDbScanner tvdbScanner;
 
     @Override
     public String getScannerName() {
@@ -85,7 +86,7 @@ public class TheTVDbArtworkScanner implements
 
     @Override
     public String getId(String title, int year, int season) {
-        return tvdbScanner.getSeriesId(title, year);
+        return tvdbApiWrapper.getSeriesId(title, year);
     }
 
     @Override
@@ -601,7 +602,10 @@ public class TheTVDbArtworkScanner implements
             return null;
         }
 
-        // get the series id
-        return tvdbScanner.getSeriesId(series);
+        String id = series.getSourceDbId(TheTVDbScanner.SCANNER_ID);
+        if (StringUtils.isBlank(id)) {
+            id = tvdbApiWrapper.getSeriesId(series.getTitle(), series.getStartYear());
+        }
+        return id;
     }
 }
