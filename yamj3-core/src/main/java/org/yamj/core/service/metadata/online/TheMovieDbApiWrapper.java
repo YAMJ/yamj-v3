@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigService;
+import org.yamj.core.database.model.IMetadata;
 
 @Service("tmdbApiWrapper")
 public class TheMovieDbApiWrapper {
@@ -119,4 +120,44 @@ public class TheMovieDbApiWrapper {
         }
         return id;
     }
+
+    public String getId(IMetadata metadata) {
+        // First look to see if we have a TMDb ID as this will make looking the film up easier
+        String tmdbID = metadata.getSourceDbId(TheMovieDbScanner.SCANNER_ID);
+        if (StringUtils.isNumeric(tmdbID)) {
+            return tmdbID;
+        }
+
+        // Search based on IMDb ID
+        String imdbID = metadata.getSourceDbId(ImdbScanner.SCANNER_ID);
+        if (StringUtils.isNotBlank(imdbID)) {
+            MovieDb moviedb = null;
+            try {
+                String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+                moviedb = tmdbApi.getMovieInfoImdb(imdbID, defaultLanguage);
+            } catch (MovieDbException ex) {
+                LOG.warn("Failed to get TMDb ID for {}-{}", imdbID, ex.getMessage());
+            }
+
+            if (moviedb != null) {
+                tmdbID = String.valueOf(moviedb.getId());
+                if (StringUtils.isNumeric(tmdbID)) {
+                    metadata.setSourceDbId(TheMovieDbScanner.SCANNER_ID, tmdbID);
+                    return tmdbID;
+                }
+            }
+        }
+
+        // Search based on title and year
+        String title = StringUtils.isBlank(metadata.getTitleOriginal()) ? metadata.getTitle() : metadata.getTitleOriginal();
+        tmdbID = getMovieDbId(title, metadata.getYear());
+        if (StringUtils.isNumeric(tmdbID)) {
+            metadata.setSourceDbId(TheMovieDbScanner.SCANNER_ID, tmdbID);
+            return tmdbID;
+        }
+
+        LOG.warn("No TMDb id found for movie: {} ({})", title, metadata.getYear());
+        return null;
+    }
+
 }

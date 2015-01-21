@@ -26,7 +26,6 @@ import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.model.Artwork;
 import com.omertron.themoviedbapi.model.ArtworkType;
-import com.omertron.themoviedbapi.model.MovieDb;
 import com.omertron.themoviedbapi.results.TmdbResultsList;
 import java.net.URL;
 import java.util.ArrayList;
@@ -118,7 +117,8 @@ public class TheMovieDbArtworkScanner implements
     /**
      * Get a list of the artwork for a movie.
      *
-     * This will get all the artwork for a specified language and the blank languages as well
+     * This will get all the artwork for a specified language and the blank
+     * languages as well
      *
      * @param id
      * @param language
@@ -143,8 +143,7 @@ public class TheMovieDbArtworkScanner implements
                 for (Artwork artwork : artworkList) {
                     if (artwork.getArtworkType() == artworkType
                             && (StringUtils.isBlank(artwork.getLanguage())
-                            || StringUtils.equalsIgnoreCase(artwork.getLanguage(), language)))
-                    {
+                            || StringUtils.equalsIgnoreCase(artwork.getLanguage(), language))) {
                         URL artworkURL = tmdbApi.createImageUrl(artwork.getFilePath(), artworkSize);
                         if (artworkURL == null || artworkURL.toString().endsWith("null")) {
                             LOG.warn("{} URL is invalid and will not be used: {}", artworkType, artworkURL);
@@ -182,42 +181,7 @@ public class TheMovieDbArtworkScanner implements
 
     @Override
     public String getId(IMetadata metadata) {
-        // First look to see if we have a TMDb ID as this will make looking the film up easier
-        String tmdbID = metadata.getSourceDbId(getScannerName());
-        if (StringUtils.isNumeric(tmdbID)) {
-            return tmdbID;
-        }
-
-        // Search based on IMDb ID
-        String imdbID = metadata.getSourceDbId(ImdbScanner.SCANNER_ID);
-        if (StringUtils.isNotBlank(imdbID)) {
-            MovieDb moviedb = null;
-            try {
-                String defaultLanguage = configService.getProperty("themoviedb.language", "en");
-                moviedb = tmdbApi.getMovieInfoImdb(imdbID, defaultLanguage);
-            } catch (MovieDbException ex) {
-                LOG.warn("Failed to get TMDb ID for {}-{}", imdbID, ex.getMessage());
-            }
-
-            if (moviedb != null) {
-                tmdbID = String.valueOf(moviedb.getId());
-                if (StringUtils.isNumeric(tmdbID)) {
-                    metadata.setSourceDbId(getScannerName(), tmdbID);
-                    return tmdbID;
-                }
-            }
-        }
-
-        // Search based on title and year
-        String title = StringUtils.isBlank(metadata.getTitleOriginal()) ? metadata.getTitle() : metadata.getTitleOriginal();
-        tmdbID = getId(title, metadata.getYear());
-        if (StringUtils.isNumeric(tmdbID)) {
-            metadata.setSourceDbId(getScannerName(), tmdbID);
-            return tmdbID;
-        }
-
-        LOG.warn("No TMDb id found for movie");
-        return null;
+        return tmdbApiWrapper.getId(metadata);
     }
 
     //<editor-fold defaultstate="collapsed" desc="Photo Scanner Methods">
