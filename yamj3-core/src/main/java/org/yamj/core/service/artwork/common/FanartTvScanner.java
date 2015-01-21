@@ -22,12 +22,14 @@
  */
 package org.yamj.core.service.artwork.common;
 
+import com.omertron.fanarttvapi.FanartTvApi;
+import com.omertron.fanarttvapi.FanartTvException;
+import com.omertron.fanarttvapi.enumeration.FTArtworkType;
+import com.omertron.fanarttvapi.model.FTArtwork;
+import com.omertron.fanarttvapi.model.FTMovie;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.annotation.PostConstruct;
-
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,11 +41,6 @@ import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
 import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
 import org.yamj.core.service.metadata.online.TheMovieDbApiWrapper;
-
-import com.omertron.fanarttvapi.FanartTvApi;
-import com.omertron.fanarttvapi.FanartTvException;
-import com.omertron.fanarttvapi.model.FTArtworkType;
-import com.omertron.fanarttvapi.model.FanartTvArtwork;
 
 @Service("fanartTvArtworkScanner")
 public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner {
@@ -85,28 +82,20 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
 
     @Override
     public List<ArtworkDetailDTO> getPosters(String id) {
-        List<ArtworkDetailDTO> artwork = new ArrayList<>();
-        try {
-            List<FanartTvArtwork> ftartwork;
-            if (StringUtils.isNumeric(id)) {
-                // Assume its Tmdb
-                ftartwork = fanarttvApi.getMovieArtwork(Integer.parseInt(id), FTArtworkType.MOVIEPOSTER);
-            } else {
-                // Assume imdb
-                ftartwork = fanarttvApi.getMovieArtwork(id, FTArtworkType.MOVIEPOSTER);
-            }
+        List<ArtworkDetailDTO> artworkList = new ArrayList<>();
 
-            if (CollectionUtils.isNotEmpty(artwork)) {
-                for (FanartTvArtwork ft : ftartwork) {
-                    ArtworkDetailDTO a = new ArtworkDetailDTO(SCANNER_ID, ft.getUrl());
-                    a.setLanguage(ft.getLanguage());
-                    artwork.add(a);
-                }
+        try {
+            FTMovie ftm = fanarttvApi.getMovieArtwork(id);
+
+            for(FTArtwork artwork : ftm.getArtwork(FTArtworkType.MOVIEPOSTER)) {
+                ArtworkDetailDTO aDto = new ArtworkDetailDTO(SCANNER_ID, artwork.getUrl());
+                aDto.setLanguage(artwork.getLanguage());
+                artworkList.add(aDto);
             }
         } catch (FanartTvException ex) {
-            LOG.warn("Failed to get artwork from FanartTV for ID '{}', error: {}", id, ex.getMessage());
+            LOG.warn("Failed to get artwork from FanartTV for ID '{}', error: {}", id, ex.getMessage(),ex);
         }
-        return artwork;
+        return artworkList;
     }
 
     @Override
@@ -120,21 +109,21 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
 
     @Override
     public String getId(IMetadata metadata) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public List<ArtworkDetailDTO> getFanarts(String title, int year) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public List<ArtworkDetailDTO> getFanarts(String id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public List<ArtworkDetailDTO> getFanarts(IMetadata metadata) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
