@@ -26,7 +26,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FilenameUtils;
@@ -49,7 +51,7 @@ public class GenreXmlTools {
     private CommonStorageService commonStorageService;
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         String genreFileName = PropertyTools.getProperty("yamj3.genre.fileName");
         if (StringUtils.isBlank(genreFileName)) {
             LOG.trace("No valid genre file name configured");

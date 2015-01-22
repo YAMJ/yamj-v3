@@ -23,22 +23,29 @@
 package org.yamj.core.service.file;
 
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
 import javax.annotation.PostConstruct;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
+
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.FileHeader;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -112,7 +119,7 @@ public class FileStorageService {
         LOG.info("Skins storage path set to '{}'", this.storagePathSkin);
     }
 
-    public boolean exists(StorageType type, String filename) throws IOException {
+    public static boolean exists(StorageType type, String filename) {
         return false;
     }
 
@@ -133,7 +140,7 @@ public class FileStorageService {
         return Boolean.TRUE;
     }
 
-    public boolean store(StorageType type, String filename, StageFile stageFile) throws IOException {
+    public boolean store(StorageType type, String filename, StageFile stageFile) {
         LOG.debug("Store file {}; source file: {}", filename, stageFile.getFullPath());
 
         File src = new File(stageFile.getFullPath());
@@ -197,7 +204,6 @@ public class FileStorageService {
                         ZipFile zf = new ZipFile(zipFilename);
 
                         // Get a list of the files in the zip
-                        @SuppressWarnings("unchecked")
                         List<FileHeader> fileHeaderList = zf.getFileHeaders();
                         // Get the first file
                         String tempFilename = fileHeaderList.get(0).getFileName();
@@ -246,13 +252,13 @@ public class FileStorageService {
         return message;
     }
 
-    public boolean deleteFile(StorageType type, String filename) throws IOException {
+    public boolean deleteFile(StorageType type, String filename) {
         LOG.debug("Delete file '{}'", filename);
         File file = getFile(type, filename);
         return file.delete();
     }
 
-    public File getFile(StorageType type, String filename) throws IOException {
+    public File getFile(StorageType type, String filename) {
         String storageName = getStorageName(type, filename);
         return new File(storageName);
     }

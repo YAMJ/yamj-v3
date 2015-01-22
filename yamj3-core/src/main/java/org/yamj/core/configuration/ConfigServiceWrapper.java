@@ -23,6 +23,7 @@
 package org.yamj.core.configuration;
 
 import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,7 @@ public class ConfigServiceWrapper {
     public boolean isLocalArtworkScanEnabled(Artwork artwork) {
         StringBuilder sb = new StringBuilder();
         sb.append("yamj3.artwork.scan.local.");
-        this.addScanArtworkType(artwork, sb);
+        addScanArtworkType(artwork, sb);
 
         return this.configService.getBooleanProperty(sb.toString(), Boolean.TRUE);
     }
@@ -68,7 +69,7 @@ public class ConfigServiceWrapper {
     public boolean isOnlineArtworkScanEnabled(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
         StringBuilder sb = new StringBuilder();
         sb.append("yamj3.artwork.scan.online.");
-        this.addScanArtworkType(artwork, sb);
+        addScanArtworkType(artwork, sb);
 
         String value = this.configService.getProperty(sb.toString());
         if (StringUtils.isBlank(value)) {
@@ -101,7 +102,7 @@ public class ConfigServiceWrapper {
         return true;
     }
 
-    private void addScanArtworkType(Artwork artwork, StringBuilder sb) {
+    private static void addScanArtworkType(Artwork artwork, StringBuilder sb) {
         sb.append(artwork.getArtworkType().name().toLowerCase());
 
         if (ArtworkType.POSTER == artwork.getArtworkType() || ArtworkType.FANART == artwork.getArtworkType()) {

@@ -23,7 +23,12 @@
 package org.yamj.core.service;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +75,7 @@ public class ScanningScheduler {
 
 
     @Scheduled(initialDelay = 5000, fixedDelay = 45000)
-    public void scanMediaFiles() throws Exception {
+    public void scanMediaFiles() {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.mediafilescan.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabledMediaFiles) {
@@ -114,7 +119,7 @@ public class ScanningScheduler {
     }
 
     @Scheduled(initialDelay = 10000, fixedDelay = 45000)
-    public void scanMetaData() throws Exception {
+    public void scanMetaData() {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.metadatascan.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabledMetaData) {
@@ -158,7 +163,7 @@ public class ScanningScheduler {
     }
 
     @Scheduled(initialDelay = 20000, fixedDelay = 45000)
-    public void scanPeopleData() throws Exception {
+    public void scanPeopleData() {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.peoplescan.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabledPeople) {
@@ -202,7 +207,7 @@ public class ScanningScheduler {
     }
 
     @Scheduled(initialDelay = 20000, fixedDelay = 45000)
-    public void scanFilmography() throws Exception {
+    public void scanFilmography() {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.filmographyscan.maxThreads", 1);
         if (maxThreads <= 0 || !this.metadataScannerService.isFilmographyScanEnabled()) { 
             if (!messageDisabledFilmography) {
@@ -246,7 +251,7 @@ public class ScanningScheduler {
     }
 
     @Scheduled(initialDelay = 30000, fixedDelay = 45000)
-    public void scanArtwork() throws Exception {
+    public void scanArtwork() {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.artworkscan.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabledArtwork) {

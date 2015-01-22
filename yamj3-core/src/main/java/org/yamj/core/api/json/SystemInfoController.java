@@ -49,7 +49,7 @@ public class SystemInfoController {
     @ResponseBody
     public String getSystemUp() {
         StringBuilder sb = new StringBuilder("YAMJ v3 is running, uptime is ");
-        sb.append(YAMJ_INFO.getUptime());
+        sb.append(YamjInfo.getUptime());
         return sb.toString();
     }
 

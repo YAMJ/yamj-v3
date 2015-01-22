@@ -26,7 +26,9 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +48,7 @@ public class AspectRatioTools {
 
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         LOG.info("Initialize aspect ratio tools");
 
         // fill aspect list

@@ -23,7 +23,12 @@
 package org.yamj.core.service;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +56,7 @@ public class ArtworkProcessScheduler {
     private boolean messageDisabled = Boolean.FALSE;    // Have we already printed the disabled message
 
     @Scheduled(initialDelay = 30000, fixedDelay = 60000)
-    public void processArtwork() throws Exception {
+    public void processArtwork() {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.artworkprocess.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabled) {

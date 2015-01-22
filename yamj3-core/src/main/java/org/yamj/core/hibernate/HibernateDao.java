@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -196,7 +197,7 @@ public abstract class HibernateDao {
      * @param rowElement
      * @return <code>String</code>
      */
-    protected String convertRowElementToString(Object rowElement) {
+    protected static String convertRowElementToString(Object rowElement) {
         if (rowElement == null) {
             return null;
         } else if (rowElement instanceof String) {
@@ -212,7 +213,7 @@ public abstract class HibernateDao {
      * @param rowElement
      * @return <code>Integer</code>
      */
-    protected Integer convertRowElementToInteger(Object rowElement) {
+    protected static Integer convertRowElementToInteger(Object rowElement) {
         if (rowElement == null) {
             return Integer.valueOf(0);
         } else if (StringUtils.isNumeric(rowElement.toString())) {
@@ -228,7 +229,7 @@ public abstract class HibernateDao {
      * @param rowElement
      * @return <code>Long</code>
      */
-    protected Long convertRowElementToLong(Object rowElement) {
+    protected static Long convertRowElementToLong(Object rowElement) {
         if (rowElement == null) {
             return Long.valueOf(0);
         } else if (StringUtils.isNumeric(rowElement.toString())) {
@@ -244,7 +245,7 @@ public abstract class HibernateDao {
      * @param rowElement
      * @return
      */
-    protected Date convertRowElementToDate(Object rowElement) {
+    protected static Date convertRowElementToDate(Object rowElement) {
         if (rowElement == null) {
             return null;
         } else if (rowElement instanceof Date) {
@@ -261,7 +262,7 @@ public abstract class HibernateDao {
      * @param rowElement
      * @return
      */
-    protected Timestamp convertRowElementToTimestamp(Object rowElement) {
+    protected static Timestamp convertRowElementToTimestamp(Object rowElement) {
         if (rowElement == null) {
             return null;
         } else if (rowElement instanceof Timestamp) {
@@ -278,7 +279,7 @@ public abstract class HibernateDao {
      * @param rowElement
      * @return <code>BigDecimal</code>
      */
-    protected BigDecimal convertRowElementToBigDecimal(Object rowElement) {
+    protected static BigDecimal convertRowElementToBigDecimal(Object rowElement) {
         if (rowElement == null) {
             return BigDecimal.ZERO;
         } else if (rowElement instanceof BigDecimal) {
@@ -289,7 +290,7 @@ public abstract class HibernateDao {
     }
 
     @SuppressWarnings("rawtypes")
-    protected void applyNamedParameterToQuery(Query queryObject, String paramName, Object value) throws HibernateException {
+    protected static void applyNamedParameterToQuery(Query queryObject, String paramName, Object value) throws HibernateException {
         if (value instanceof Collection) {
             queryObject.setParameterList(paramName, (Collection) value);
         } else if (value instanceof Object[]) {
@@ -444,7 +445,7 @@ public abstract class HibernateDao {
      * @param wrapper
      * @return
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("rawtypes")
     public <T> List<T> executeQueryWithTransform(Class T, SqlScalars sqlScalars, IApiWrapper wrapper) {
         SQLQuery query = sqlScalars.createSqlQuery(currentSession());
         query.setReadOnly(true);

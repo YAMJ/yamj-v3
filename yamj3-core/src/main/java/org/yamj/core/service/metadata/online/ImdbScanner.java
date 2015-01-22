@@ -103,7 +103,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         LOG.info("Initialize IMDb scanner");
 
         charset = Charset.forName("UTF-8");
@@ -724,7 +724,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return null;                
     }
 
-    private Map<String, String> getAkaMap(Map<String, String> akas, String releaseInfoXML) {
+    private static Map<String, String> getAkaMap(Map<String, String> akas, String releaseInfoXML) {
         // The AKAs are stored in the format "title", "country"
         // therefore we need to look for the preferredCountry and then work backwards
         if (akas == null) {
@@ -948,7 +948,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return uncleanString.trim();
     }
 
-    private String getPreferredValue(List<String> values, boolean useLast, String preferredCountry) {
+    private static String getPreferredValue(List<String> values, boolean useLast, String preferredCountry) {
         String value = null;
 
         if (useLast) {

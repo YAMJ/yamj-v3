@@ -28,7 +28,9 @@ import java.net.URLEncoder;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +66,7 @@ public class ImdbSearchEngine {
     private ConfigService configService;
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         LOG.info("Initialize IMDb search engine");
 
         String country = configService.getProperty("imdb.id.search.country", "us");
@@ -166,7 +168,7 @@ public class ImdbSearchEngine {
         return imdbId;
     }
 
-    private String getImdbIdFromURL(String url, String objectType) {
+    private static String getImdbIdFromURL(String url, String objectType) {
         if (StringUtils.isBlank(url)) {
             return null;
         }

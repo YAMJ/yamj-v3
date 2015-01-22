@@ -22,21 +22,24 @@
  */
 package org.yamj.filescanner.tools;
 
+import static name.pachler.nio.file.StandardWatchEventKind.ENTRY_CREATE;
+import static name.pachler.nio.file.StandardWatchEventKind.ENTRY_DELETE;
+import static name.pachler.nio.file.StandardWatchEventKind.ENTRY_MODIFY;
+import static name.pachler.nio.file.ext.ExtendedWatchEventModifier.FILE_TREE;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 import name.pachler.nio.file.ClosedWatchServiceException;
 import name.pachler.nio.file.FileSystems;
 import name.pachler.nio.file.Path;
 import name.pachler.nio.file.Paths;
 import name.pachler.nio.file.StandardWatchEventKind;
-import static name.pachler.nio.file.StandardWatchEventKind.ENTRY_CREATE;
-import static name.pachler.nio.file.StandardWatchEventKind.ENTRY_DELETE;
-import static name.pachler.nio.file.StandardWatchEventKind.ENTRY_MODIFY;
 import name.pachler.nio.file.WatchEvent;
 import name.pachler.nio.file.WatchKey;
 import name.pachler.nio.file.WatchService;
-import static name.pachler.nio.file.ext.ExtendedWatchEventModifier.FILE_TREE;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +67,7 @@ public class Watcher {
      * @param dir
      * @throws java.io.IOException
      */
-    public Watcher(Path dir) throws IOException {
+    public Watcher(Path dir) {
         this();
         addDirectory(dir);
     }
@@ -75,7 +78,7 @@ public class Watcher {
      * @param dir
      * @throws java.io.IOException
      */
-    public Watcher(String dir) throws IOException {
+    public Watcher(String dir) {
         this();
         addDirectory(dir);
     }

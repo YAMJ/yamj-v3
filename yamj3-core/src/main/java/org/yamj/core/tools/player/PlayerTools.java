@@ -22,8 +22,6 @@
  */
 package org.yamj.core.tools.player;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -33,6 +31,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
@@ -45,6 +44,9 @@ import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.tools.player.davidbox.DavidBoxPlayerPath;
 import org.yamj.core.tools.player.davidbox.DavidBoxWrapper;
 import org.yamj.core.tools.web.ResponseTools;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 /**
  * Functions for finding information on players
@@ -159,7 +161,7 @@ public final class PlayerTools {
      * @param timeout
      * @return
      */
-    private List<String> scanForPlayers(String baseIpAddress, int port, int scanStart, int scanEnd, int timeout) {
+    private static List<String> scanForPlayers(String baseIpAddress, int port, int scanStart, int scanEnd, int timeout) {
         List<String> playerList = new ArrayList<>();
 
         for (int i = (scanStart < 1 ? 1 : scanStart); i <= (scanEnd > 255 ? 255 : scanEnd); i++) {
@@ -199,7 +201,7 @@ public final class PlayerTools {
      * @param operation
      * @return
      */
-    private String buildUrl(String ipAddress, int ipPort, String operation) {
+    private static String buildUrl(String ipAddress, int ipPort, String operation) {
         StringBuilder url = new StringBuilder("http://");
         url.append(ipAddress);
         url.append(":").append(ipPort);
@@ -216,7 +218,7 @@ public final class PlayerTools {
      * @param port
      * @return
      */
-    private List<PlayerPath> getPathInfo(String addr, int port) {
+    private static List<PlayerPath> getPathInfo(String addr, int port) {
         String url = buildUrl(addr, port, FILE_OP);
         List<PlayerPath> paths = new ArrayList<>();
 
@@ -251,7 +253,7 @@ public final class PlayerTools {
      * @param port
      * @return
      */
-    private String getPlayerName(String addr, int port) {
+    private static String getPlayerName(String addr, int port) {
         String url = buildUrl(addr, port, GET_DEV_NAME);
         String playerName = "UNKNOWN";
         try {

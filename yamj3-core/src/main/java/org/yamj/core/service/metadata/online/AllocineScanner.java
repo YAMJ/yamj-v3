@@ -92,7 +92,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
     }
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         LOG.info("Initialize Allocine scanner");
         
         searchEngineTools = new SearchEngineTools(httpClient, "fr");

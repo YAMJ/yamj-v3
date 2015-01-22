@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.EnumSet;
 import java.util.Properties;
+
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.usertype.EnhancedUserType;
@@ -89,7 +90,6 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
      * @return @see UserType#returnedClass()
      */
     @Override
-    @SuppressWarnings("rawtypes")
     public Class returnedClass() {
         return this.enumClass;
     }

@@ -43,7 +43,7 @@ public class ImportScheduler {
 
     @Async
     @Scheduled(initialDelay = 10000, fixedDelay = 30000)
-    public synchronized void processStageFiles() throws Exception {
+    public synchronized void processStageFiles() {
         Long id = null;
 
         // PROCESS VIDEOS

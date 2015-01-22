@@ -23,6 +23,7 @@
 package org.yamj.core.service.mediaimport;
 
 import junit.framework.TestCase;
+
 import org.apache.commons.io.FilenameUtils;
 import org.junit.Test;
 import org.yamj.core.database.model.StageDirectory;
@@ -37,7 +38,7 @@ public class FilenameScannerTest extends TestCase {
         scanner = new FilenameScanner();
     }
 
-    private StageFile createStageFile(String fileName) {
+    private static StageFile createStageFile(String fileName) {
         StageDirectory dir = new StageDirectory();
         dir.setDirectoryPath("/movies");
         StageFile file = new StageFile();

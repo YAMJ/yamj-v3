@@ -69,7 +69,7 @@ public class TheTVDbScanner implements ISeriesScanner {
     }
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         LOG.info("Initialize TheTVDb scanner");
         
         // register this scanner
@@ -238,7 +238,7 @@ public class TheTVDbScanner implements ISeriesScanner {
                 continue;
             }
             
-            Episode episode = this.findEpisode(episodeList, season.getSeason(), videoData.getEpisode());
+            Episode episode = findEpisode(episodeList, season.getSeason(), videoData.getEpisode());
             if (episode == null) {
                 // mark episode as not found
                 videoData.setTvEpisodeNotFound();
@@ -300,7 +300,7 @@ public class TheTVDbScanner implements ISeriesScanner {
      * @param episodeNumber
      * @return
      */
-    private Episode findEpisode(List<Episode> episodeList, int seasonNumber, int episodeNumber) {
+    private static Episode findEpisode(List<Episode> episodeList, int seasonNumber, int episodeNumber) {
         if (CollectionUtils.isEmpty(episodeList)) {
             return null;
         }

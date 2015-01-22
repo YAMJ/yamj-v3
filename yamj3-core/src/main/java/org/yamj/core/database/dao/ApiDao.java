@@ -22,11 +22,26 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.type.*;
+import org.hibernate.type.BooleanType;
+import org.hibernate.type.DateType;
+import org.hibernate.type.FloatType;
+import org.hibernate.type.IntegerType;
+import org.hibernate.type.LongType;
+import org.hibernate.type.StringType;
+import org.hibernate.type.TimestampType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -38,8 +53,29 @@ import org.yamj.core.api.model.builder.DataItem;
 import org.yamj.core.api.model.builder.DataItemTools;
 import org.yamj.core.api.model.builder.IndexParams;
 import org.yamj.core.api.model.builder.SqlScalars;
-import org.yamj.core.api.model.dto.*;
-import org.yamj.core.api.options.*;
+import org.yamj.core.api.model.dto.AbstractApiIdentifiableDTO;
+import org.yamj.core.api.model.dto.ApiArtworkDTO;
+import org.yamj.core.api.model.dto.ApiAudioCodecDTO;
+import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
+import org.yamj.core.api.model.dto.ApiBoxedSetMemberDTO;
+import org.yamj.core.api.model.dto.ApiEpisodeDTO;
+import org.yamj.core.api.model.dto.ApiFileDTO;
+import org.yamj.core.api.model.dto.ApiFilmographyDTO;
+import org.yamj.core.api.model.dto.ApiGenreDTO;
+import org.yamj.core.api.model.dto.ApiNameDTO;
+import org.yamj.core.api.model.dto.ApiPersonDTO;
+import org.yamj.core.api.model.dto.ApiRatingDTO;
+import org.yamj.core.api.model.dto.ApiSeasonInfoDTO;
+import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
+import org.yamj.core.api.model.dto.ApiSubtitleDTO;
+import org.yamj.core.api.model.dto.ApiVideoDTO;
+import org.yamj.core.api.options.OptionsBoxedSet;
+import org.yamj.core.api.options.OptionsEpisode;
+import org.yamj.core.api.options.OptionsId;
+import org.yamj.core.api.options.OptionsIdArtwork;
+import org.yamj.core.api.options.OptionsIndexArtwork;
+import org.yamj.core.api.options.OptionsIndexVideo;
+import org.yamj.core.api.options.OptionsMultiType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Certification;
@@ -164,7 +200,7 @@ public class ApiDao extends HibernateDao {
      * @param wrapper
      * @return
      */
-    private String generateSqlForVideoList(IndexParams params) {
+    private static String generateSqlForVideoList(IndexParams params) {
         List<MetaDataType> mdt = params.getMetaDataTypes();
         LOG.debug("Getting video list for types: {}", mdt);
         if (CollectionUtils.isNotEmpty(params.getDataItems())) {
@@ -216,7 +252,7 @@ public class ApiDao extends HibernateDao {
     /**
      * Create the SQL fragment for the selection of movies
      */
-    private String generateSqlForVideo(boolean isMovie, IndexParams params) {
+    private static String generateSqlForVideo(boolean isMovie, IndexParams params) {
         StringBuilder sbSQL = new StringBuilder();
 
         sbSQL.append("SELECT vd.id");
@@ -494,7 +530,7 @@ public class ApiDao extends HibernateDao {
     /**
      * Create the SQL fragment for the selection of series
      */
-    private String generateSqlForSeries(IndexParams params) {
+    private static String generateSqlForSeries(IndexParams params) {
         StringBuilder sbSQL = new StringBuilder();
 
         sbSQL.append("SELECT ser.id");
@@ -744,7 +780,7 @@ public class ApiDao extends HibernateDao {
      * @param excludes
      * @return
      */
-    private String generateSqlForSeason(IndexParams params) {
+    private static String generateSqlForSeason(IndexParams params) {
         StringBuilder sbSQL = new StringBuilder();
 
         sbSQL.append("SELECT sea.id");
@@ -1322,7 +1358,7 @@ public class ApiDao extends HibernateDao {
      * @param options
      * @return
      */
-    private SqlScalars generateSqlForVideoPerson(MetaDataType metaDataType, OptionsId options) {
+    private static SqlScalars generateSqlForVideoPerson(MetaDataType metaDataType, OptionsId options) {
         SqlScalars sqlScalars = new SqlScalars();
 
         sqlScalars.addToSql("SELECT DISTINCT p.id,");
@@ -1387,7 +1423,7 @@ public class ApiDao extends HibernateDao {
      * @param options
      * @return
      */
-    private SqlScalars generateSqlForPerson(OptionsId options) {
+    private static SqlScalars generateSqlForPerson(OptionsId options) {
         SqlScalars sqlScalars = new SqlScalars();
         // Make sure to set the alias for the files for the Transformation into the class
         sqlScalars.addToSql("SELECT DISTINCT p.id,p.name,");
@@ -1452,7 +1488,7 @@ public class ApiDao extends HibernateDao {
         return executeQueryWithTransform(ApiArtworkDTO.class, sqlScalars, wrapper);
     }
 
-    private SqlScalars getSqlArtwork(OptionsIndexArtwork options) {
+    private static SqlScalars getSqlArtwork(OptionsIndexArtwork options) {
         SqlScalars sqlScalars = new SqlScalars();
 
         sqlScalars.addToSql("SELECT a.id AS artworkId,");
@@ -2403,7 +2439,7 @@ public class ApiDao extends HibernateDao {
      * @return
      */
     @SuppressWarnings("unused")
-    private <T extends AbstractApiIdentifiableDTO> Map<Long, T> generateIdMap(List<T> idList) {
+    private static <T extends AbstractApiIdentifiableDTO> Map<Long, T> generateIdMap(List<T> idList) {
         Map<Long, T> results = new HashMap<Long, T>(idList.size());
 
         for (T idSingle : idList) {
@@ -2421,7 +2457,7 @@ public class ApiDao extends HibernateDao {
      * @param idList List of the source type
      * @return
      */
-    private <T extends AbstractApiIdentifiableDTO> Map<Long, List<T>> generateIdMapList(List<T> idList) {
+    private static <T extends AbstractApiIdentifiableDTO> Map<Long, List<T>> generateIdMapList(List<T> idList) {
         Map<Long, List<T>> results = new HashMap<>();
 
         for (T idSingle : idList) {
@@ -2445,7 +2481,7 @@ public class ApiDao extends HibernateDao {
      * @param idList
      * @return
      */
-    private <T extends AbstractApiIdentifiableDTO> List<Long> generateIdList(List<T> idList) {
+    private static <T extends AbstractApiIdentifiableDTO> List<Long> generateIdList(List<T> idList) {
         List<Long> results = new ArrayList<>(idList.size());
 
         for (T idSingle : idList) {
@@ -2458,14 +2494,14 @@ public class ApiDao extends HibernateDao {
 
     public List<ApiBoxedSetDTO> getBoxedSets(ApiWrapperList<ApiBoxedSetDTO> wrapper) {
         OptionsBoxedSet options = (OptionsBoxedSet) wrapper.getOptions();
-        SqlScalars sqlScalars = this.generateSqlForBoxedSet(options);
+        SqlScalars sqlScalars = generateSqlForBoxedSet(options);
 
         return executeQueryWithTransform(ApiBoxedSetDTO.class, sqlScalars, wrapper);
     }
 
     public ApiBoxedSetDTO getBoxedSet(ApiWrapperSingle<ApiBoxedSetDTO> wrapper) {
         OptionsBoxedSet options = (OptionsBoxedSet) wrapper.getOptions();
-        SqlScalars sqlScalars = this.generateSqlForBoxedSet(options);
+        SqlScalars sqlScalars = generateSqlForBoxedSet(options);
 
         List<ApiBoxedSetDTO> boxsets = executeQueryWithTransform(ApiBoxedSetDTO.class, sqlScalars, wrapper);
         if (CollectionUtils.isEmpty(boxsets)) {
@@ -2531,7 +2567,7 @@ public class ApiDao extends HibernateDao {
         return boxedSet;
     }
 
-    private SqlScalars generateSqlForBoxedSet(OptionsBoxedSet options) {
+    private static SqlScalars generateSqlForBoxedSet(OptionsBoxedSet options) {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT s.id, s.name, count(s.member) as memberCount, min(s.watched_set) as watched FROM (");
         sqlScalars.addToSql("SELECT bs1.id, bs1.name, bo1.id as member,");

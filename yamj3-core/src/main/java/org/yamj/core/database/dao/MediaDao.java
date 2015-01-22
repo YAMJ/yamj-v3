@@ -25,6 +25,7 @@ package org.yamj.core.database.dao;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.hibernate.SQLQuery;
 import org.hibernate.type.StringType;
 import org.springframework.stereotype.Repository;
@@ -48,7 +49,6 @@ public class MediaDao extends HibernateDao {
         return (MediaFile)currentSession().byNaturalId(MediaFile.class).using("fileName", fileName).load();
     }
 
-    @SuppressWarnings("unchecked")
     public List<QueueDTO> getMediaQueue(final CharSequence sql, final int maxResults) {
         SQLQuery query = currentSession().createSQLQuery(sql.toString());
         query.setReadOnly(true);

@@ -59,7 +59,7 @@ public class ImdbPosterScanner extends AbstractMoviePosterScanner {
     }
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         LOG.info("Initialize IMDb poster scanner");
 
         // register this scanner

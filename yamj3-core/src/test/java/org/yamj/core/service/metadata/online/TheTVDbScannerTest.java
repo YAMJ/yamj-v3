@@ -29,7 +29,6 @@ import javax.annotation.Resource;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,16 +53,6 @@ public class TheTVDbScannerTest extends AbstractJUnit4SpringContextTests {
         LOG.info("getScannerName");
         String result = tvdbScanner.getScannerName();
         assertEquals("Changed scanner name", PLUGIN_ID, result);
-    }
-
-    /**
-     * Test of afterPropertiesSet method, of class TheTVDbScanner.
-     *
-     * @throws java.lang.Exception
-     */
-    @Ignore("Does not need to be tested")
-    public void testAfterPropertiesSet() throws Exception {
-        LOG.info("afterPropertiesSet");
     }
 
     /**

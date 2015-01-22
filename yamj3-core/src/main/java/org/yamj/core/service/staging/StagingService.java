@@ -27,6 +27,7 @@ import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -41,7 +42,11 @@ import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.StagingDao;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Library;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.StageDirectory;
+import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.mediaimport.FilenameScanner;
@@ -165,7 +170,7 @@ public class StagingService {
         }
     }
     
-    private void setChangeableValues(StageFile stageFile, StageFileDTO stageFileDTO) {
+    private static void setChangeableValues(StageFile stageFile, StageFileDTO stageFileDTO) {
         stageFile.setFileDate(getDateWithoutMilliseconds(stageFileDTO.getFileDate()));
         stageFile.setFileSize(stageFileDTO.getFileSize());
 
@@ -178,7 +183,7 @@ public class StagingService {
         }
     }
 
-    private Date getDateWithoutMilliseconds(long millis) {
+    private static Date getDateWithoutMilliseconds(long millis) {
         // strip milliseconds cause mostly not stored in database
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(millis);

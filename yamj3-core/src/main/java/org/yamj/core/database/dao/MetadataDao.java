@@ -22,13 +22,23 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.CastCrew;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
@@ -41,7 +51,6 @@ import org.yamj.core.tools.MetadataTools;
 @Repository("metadataDao")
 public class MetadataDao extends HibernateDao {
 
-    @SuppressWarnings("unchecked")
     public List<QueueDTO> getMetadataQueue(final CharSequence sql, final int maxResults) {
         SQLQuery query = currentSession().createSQLQuery(sql.toString());
         query.setReadOnly(true);
@@ -124,7 +133,6 @@ public class MetadataDao extends HibernateDao {
         return (CastCrew)query.uniqueResult();
     }
 
-    @SuppressWarnings("unchecked")
     public List<Artwork> findPersonArtworks(String identifier) {
         StringBuilder sb = new StringBuilder();
         sb.append("select a ");

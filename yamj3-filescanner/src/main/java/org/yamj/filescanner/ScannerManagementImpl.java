@@ -440,7 +440,7 @@ public class ScannerManagementImpl implements ScannerManagement {
      * @param parentDto
      * @param file
      */
-    private StageFileDTO scanFile(File file) {
+    private static StageFileDTO scanFile(File file) {
         LOG.info("Scanning file '{}'", file.getName());
         return new StageFileDTO(file);
     }
@@ -452,7 +452,7 @@ public class ScannerManagementImpl implements ScannerManagement {
      * @param parsedOptionValue the property from the command line
      * @return
      */
-    private boolean parseWatchStatus(String parsedOptionValue) {
+    private static boolean parseWatchStatus(String parsedOptionValue) {
         if (StringUtils.isBlank(parsedOptionValue)) {
             return DEFAULT_WATCH_STATE;
         }
@@ -484,7 +484,7 @@ public class ScannerManagementImpl implements ScannerManagement {
      * @param library
      * @param stageDir
      */
-    private void queueForSending(Library library, StageDirectoryDTO stageDir) {
+    private static void queueForSending(Library library, StageDirectoryDTO stageDir) {
         library.addDirectoryStatus(stageDir.getPath(), ConcurrentUtils.constantFuture(StatusType.NEW));
     }
 }

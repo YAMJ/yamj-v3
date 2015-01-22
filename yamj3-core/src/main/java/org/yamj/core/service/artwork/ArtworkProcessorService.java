@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sanselan.ImageReadException;
 import org.slf4j.Logger;
@@ -195,16 +196,12 @@ public class ArtworkProcessorService {
         } catch (Exception ex) {
             // delete generated file storage element also
             LOG.trace("Failed to generate file storage for {}, error: {}", cacheFilename, ex.getMessage());
-            try {
-                fileStorageService.deleteFile(storageType, cacheFilename);
-            } catch (IOException ex2) {
-                LOG.trace("Unable to delete file after exception: {}", ex2.getMessage(), ex);
-            }
+            fileStorageService.deleteFile(storageType, cacheFilename);
             throw ex;
         }
     }
 
-    private BufferedImage drawImage(BufferedImage imageGraphic, ArtworkProfile profile) {
+    private static BufferedImage drawImage(BufferedImage imageGraphic, ArtworkProfile profile) {
         BufferedImage bi = imageGraphic;
 
         // TODO more graphic options
@@ -237,11 +234,11 @@ public class ArtworkProcessorService {
         return bi;
     }
 
-    private String buildCacheFilename(ArtworkLocated located) {
+    private static String buildCacheFilename(ArtworkLocated located) {
         return buildCacheFilename(located, null);
     }
 
-    private String buildCacheFilename(ArtworkLocated located, ArtworkProfile artworkProfile) {
+    private static String buildCacheFilename(ArtworkLocated located, ArtworkProfile artworkProfile) {
         StringBuilder sb = new StringBuilder();
         
         // 1. video name
@@ -311,7 +308,7 @@ public class ArtworkProcessorService {
         artworkStorageService.errorArtworkLocated(queueElement.getId());
     }
 
-    private boolean checkArtworkQuality(ArtworkLocated located) {
+    private static boolean checkArtworkQuality(ArtworkLocated located) {
         if (StringUtils.isNotBlank(located.getUrl())) {
 
             if (located.getWidth() <= 0 || located.getHeight() <= 0) {

@@ -24,6 +24,7 @@ package org.yamj.core.service;
 
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,7 @@ public class ExecutionTaskScheduler {
     private ExecutionTaskService executionTaskService;
     
     @Scheduled(initialDelay = 5000, fixedDelay = 60000)
-    public void executeTasks() throws Exception {
+    public void executeTasks() {
         PROCESS_LOCK.lock();
 
         try {

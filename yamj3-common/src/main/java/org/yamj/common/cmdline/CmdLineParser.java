@@ -147,7 +147,7 @@ public final class CmdLineParser {
      */
     public void parse(final String args[]) throws CmdLineException {
         for (CmdLineOption option : this.options) {
-            int index = this.findOption(args, option);
+            int index = findOption(args, option);
             if (index == -1 && option.isRequired()) {
                 throw new CmdLineException("Missing required option: " + option);
             }
@@ -223,7 +223,7 @@ public final class CmdLineParser {
      * @param option the option to find
      * @return the arguments index of the found option
      */
-    private int findOption(final String args[], final CmdLineOption option) {
+    private static int findOption(final String args[], final CmdLineOption option) {
         int result = -1;
         for (int i = 0; i < args.length && result == -1; i++) {
             if (args[i].equals("-" + option.getName())) {

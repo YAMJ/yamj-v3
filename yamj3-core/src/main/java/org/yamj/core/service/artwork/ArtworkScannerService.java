@@ -25,6 +25,7 @@ package org.yamj.core.service.artwork;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigServiceWrapper;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.ArtworkLocated;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.ArtworkLocatorService;
@@ -512,7 +517,7 @@ public class ArtworkScannerService {
         createLocatedArtworksOnline(artwork, photos, locatedArtworks);
     }
 
-    private void createLocatedArtworksOnline(Artwork artwork, List<ArtworkDetailDTO> dtos, List<ArtworkLocated> locatedArtworks) {
+    private static void createLocatedArtworksOnline(Artwork artwork, List<ArtworkDetailDTO> dtos, List<ArtworkLocated> locatedArtworks) {
         if (CollectionUtils.isEmpty(dtos)) {
             return;
         }
@@ -531,7 +536,7 @@ public class ArtworkScannerService {
         }
     }
 
-    private void createLocatedArtworksLocal(Artwork artwork, List<StageFile> stageFiles, List<ArtworkLocated> locatedArtworks) {
+    private static void createLocatedArtworksLocal(Artwork artwork, List<StageFile> stageFiles, List<ArtworkLocated> locatedArtworks) {
         if (CollectionUtils.isEmpty(stageFiles)) {
             return;
         }

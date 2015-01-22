@@ -25,6 +25,7 @@ package org.yamj.core.database.dao;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -42,7 +43,6 @@ public class ConfigDao extends HibernateDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigDao.class);
 
-    @SuppressWarnings("unchecked")
     public Map<String, String> readConfig() {
         SQLQuery query = currentSession().createSQLQuery("select config_key, config_value from configuration");
         query.setReadOnly(true);
@@ -80,7 +80,6 @@ public class ConfigDao extends HibernateDao {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public List<Configuration> getConfigurationEntries(OptionsConfig options) {
         StringBuilder sbSQL = new StringBuilder("from Configuration");
 

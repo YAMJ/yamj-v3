@@ -22,13 +22,13 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.omertron.themoviedbapi.model.*;
-import com.omertron.themoviedbapi.results.TmdbResultsList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -46,6 +46,13 @@ import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.web.TemporaryUnavailableException;
+
+import com.omertron.themoviedbapi.model.MovieDb;
+import com.omertron.themoviedbapi.model.PersonCredit;
+import com.omertron.themoviedbapi.model.PersonType;
+import com.omertron.themoviedbapi.model.ProductionCompany;
+import com.omertron.themoviedbapi.model.ProductionCountry;
+import com.omertron.themoviedbapi.results.TmdbResultsList;
 
 @Service("tmdbScanner")
 public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
@@ -68,7 +75,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
     }
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         LOG.info("Initialize TheMovieDb scanner");
         
         // register this scanner
@@ -214,7 +221,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
 
         // CAST & CREW
         for (com.omertron.themoviedbapi.model.Person person : movieCasts.getResults()) {
-            JobType jobType = this.retrieveJobType(person.getPersonType(), person.getDepartment());
+            JobType jobType = retrieveJobType(person.getPersonType(), person.getDepartment());
             if (!this.configServiceWrapper.isCastScanEnabled(jobType)) {
                 // scan not enabled for that job
                 continue;
@@ -317,7 +324,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
      * @param bio
      * @return
      */
-    private String cleanBiography(final String bio) {
+    private static String cleanBiography(final String bio) {
         String newBio = StringUtils.trimToNull(bio);
         if (newBio == null) {
             return null;
@@ -377,7 +384,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
 
         Set<FilmParticipation> newFilmography = new HashSet<>();
         for (PersonCredit credit : credits.getResults()) {
-            JobType jobType = this.retrieveJobType(credit.getPersonType(), credit.getDepartment());
+            JobType jobType = retrieveJobType(credit.getPersonType(), credit.getDepartment());
             if (jobType == null) {
                 // job type must be present
                 continue;
@@ -394,7 +401,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             filmo.setSourceDb(SCANNER_ID);
             filmo.setSourceDbId(String.valueOf(credit.getMovieId()));
             filmo.setPerson(person);
-            filmo.setJobType(jobType);;
+            filmo.setJobType(jobType);
             if (JobType.ACTOR == jobType) {
                 filmo.setRole(credit.getCharacter());
             }
@@ -410,7 +417,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         return ScanResult.OK;
     }
     
-    private JobType retrieveJobType(PersonType personType, String department) {
+    private static JobType retrieveJobType(PersonType personType, String department) {
         if (personType == PersonType.CAST) {
             return JobType.ACTOR;
         }

@@ -23,6 +23,7 @@
 package org.yamj.core.database.dao;
 
 import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -87,7 +88,6 @@ public class PlayerDao extends HibernateDao {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public List<PlayerInfo> getPlayerInfo(OptionsPlayer options) {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(PlayerInfo.class);

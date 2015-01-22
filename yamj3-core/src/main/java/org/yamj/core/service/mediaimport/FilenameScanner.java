@@ -25,9 +25,16 @@ package org.yamj.core.service.mediaimport;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static org.springframework.util.StringUtils.tokenizeToStringArray;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -79,12 +86,14 @@ public class FilenameScanner {
             add(PatternUtils.tpatt("([0-9]{1,2})[ \\.]{0,1}DVD"));
         }
     };
+    
     /**
      * Detect if the file/folder name is incomplete and additional info must be
      * taken from parent folder.
      *
      * CAUTION: Grouping is used for part number detection/parsing.
      */
+    @SuppressWarnings("synthetic-access")
     private static final List<Pattern> PARENT_FOLDER_PART_PATTERNS = new ArrayList<Pattern>() {
         private static final long serialVersionUID = 6125546333783004357L;
 
@@ -315,7 +324,7 @@ public class FilenameScanner {
      *
      * @param dto
      */
-    private void processSeasonEpisode(FilenameDTO dto) {
+    private static void processSeasonEpisode(FilenameDTO dto) {
         Matcher matcher = TV_PATTERN.matcher(dto.getRest());
         if (matcher.find()) {
             dto.setRest(cutMatch(dto.getRest(), matcher, "./TVSHOW/."));
@@ -337,7 +346,7 @@ public class FilenameScanner {
      *
      * @param dto
      */
-    private void processPart(FilenameDTO dto) {
+    private static void processPart(FilenameDTO dto) {
         Matcher matcher;
         for (Pattern pattern : PART_PATTERNS) {
             matcher = pattern.matcher(dto.getRest());
@@ -354,7 +363,7 @@ public class FilenameScanner {
      *
      * @param dto
      */
-    private void processSets(FilenameDTO dto) {
+    private static void processSets(FilenameDTO dto) {
         Matcher matcher = SET_PATTERN.matcher(dto.getRest());
         while (matcher.find()) {
             dto.setRest(cutMatch(dto.getRest(), matcher, PatternUtils.SPACE_SLASH_SPACE));
@@ -384,7 +393,7 @@ public class FilenameScanner {
      *
      * @param dto
      */
-    private void procesIdDetection(FilenameDTO dto) {
+    private static void procesIdDetection(FilenameDTO dto) {
         Matcher matcher = ID_PATTERN.matcher(dto.getRest());
         if (matcher.find()) {
             dto.setRest(cutMatch(dto.getRest(), matcher, " /ID/ "));

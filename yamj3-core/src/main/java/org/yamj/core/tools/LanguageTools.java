@@ -26,7 +26,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +101,7 @@ public class LanguageTools {
     };
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         final KeywordMap languages = PropertyTools.getKeywordMap("language.detection.keywords", null);
         if (!languages.isEmpty()) {
             for (String lang : languages.getKeywords()) {

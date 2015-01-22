@@ -22,12 +22,12 @@
  */
 package org.yamj.common.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.EnumMap;
 import java.util.Map;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -38,6 +38,8 @@ import org.yamj.common.tools.DateTimeTools;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.tools.SystemTools;
 import org.yamj.common.type.MetaDataType;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Provides information on the build of YAMJ<br>
@@ -175,7 +177,7 @@ public class YamjInfo {
         return DateTimeTools.convertDateToString(startUpDateTime, DateTimeTools.BUILD_FORMAT);
     }
 
-    public String getUptime() {
+    public static String getUptime() {
         return DateTimeTools.formatDurationText(ManagementFactory.getRuntimeMXBean().getUptime());
     }
 

@@ -23,7 +23,9 @@
 package org.yamj.core.service.tasks;
 
 import java.util.Calendar;
+
 import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +55,7 @@ public class RecheckTask implements ITask {
     }
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         executionTaskService.registerTask(this);
     }
 

@@ -22,13 +22,11 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
-import org.yamj.core.service.metadata.online.ImdbScanner;
-
-import org.yamj.core.service.metadata.online.TheTVDbScanner;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -44,8 +42,10 @@ import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.file.tools.FileTools;
+import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
+import org.yamj.core.service.metadata.online.TheTVDbScanner;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.xml.DOMHelper;
@@ -75,7 +75,7 @@ public final class InfoReader {
      * @param nfoText
      * @param dto
      */
-    public void readNfoFile(StageFile stageFile, InfoDTO dto) throws Exception {
+    public void readNfoFile(StageFile stageFile, InfoDTO dto) {
         String nfoFilename = stageFile.getFileName();
 
         File nfoFile = new File(stageFile.getFullPath());
@@ -174,7 +174,7 @@ public final class InfoReader {
      * @param xmlType
      * @return
      */
-    private int findPosition(final String nfoText, final String xmlType) {
+    private static int findPosition(final String nfoText, final String xmlType) {
         int pos = StringUtils.indexOf(nfoText, XML_START + xmlType);
         return (pos == -1 ? Integer.MAX_VALUE : pos);
     }
@@ -387,7 +387,7 @@ public final class InfoReader {
      * @param eCommon
      * @param dto
      */
-    private  void parseTitle(Element eCommon, InfoDTO dto) {
+    private static void parseTitle(Element eCommon, InfoDTO dto) {
         // determine title elements
         String titleMain = DOMHelper.getValueFromElement(eCommon, "title");
         String titleOrig = DOMHelper.getValueFromElement(eCommon, "originaltitle", "originalTitle");
@@ -405,7 +405,7 @@ public final class InfoReader {
      * @param dto
      * @param isTV
      */
-    private void parseIds(NodeList nlElements, InfoDTO dto, boolean isTV) {
+    private static void parseIds(NodeList nlElements, InfoDTO dto, boolean isTV) {
         Node nElements;
         for (int looper = 0; looper < nlElements.getLength(); looper++) {
             nElements = nlElements.item(looper);
@@ -527,7 +527,7 @@ public final class InfoReader {
      * @param dateString
      * @param parseDate
      */
-    public void movieDate(final String dateString, InfoDTO dto, String nfoFilename) {
+    private static void movieDate(final String dateString, InfoDTO dto, String nfoFilename) {
         Date releaseDate = MetadataTools.parseToDate(dateString);
         if (releaseDate != null) {
             dto.setReleaseDate(releaseDate);
@@ -541,7 +541,7 @@ public final class InfoReader {
      * @param nlElements
      * @param dto
      */
-    private void parseSets(NodeList nlElements, InfoDTO dto) {
+    private static void parseSets(NodeList nlElements, InfoDTO dto) {
         Node nElements;
         for (int looper = 0; looper < nlElements.getLength(); looper++) {
             nElements = nlElements.item(looper);
@@ -564,7 +564,7 @@ public final class InfoReader {
      * @param nlElements
      * @param dto
      */
-    private void parseDirectors(NodeList nlElements, InfoDTO dto) {
+    private static void parseDirectors(NodeList nlElements, InfoDTO dto) {
         // check if we have a node
         if (nlElements == null || nlElements.getLength() == 0) {
             return;
@@ -586,7 +586,7 @@ public final class InfoReader {
      * @param nlElements
      * @param dto
      */
-    private void parseWriters(List<Node> nlWriters, InfoDTO dto) {
+    private static void parseWriters(List<Node> nlWriters, InfoDTO dto) {
         // check if we have nodes
         if (nlWriters == null || nlWriters.isEmpty()) {
             return;
@@ -610,7 +610,7 @@ public final class InfoReader {
      * @param nlElements
      * @param dto
      */
-    private void parseActors(NodeList nlElements, InfoDTO dto) {
+    private static void parseActors(NodeList nlElements, InfoDTO dto) {
         // check if we have a node
         if (nlElements == null || nlElements.getLength() == 0) {
             return;
@@ -666,7 +666,7 @@ public final class InfoReader {
      * @param nlElements
      * @param dto
      */
-    private void parseTrailers(NodeList nlElements, InfoDTO dto) {
+    private static void parseTrailers(NodeList nlElements, InfoDTO dto) {
         Node nElements;
         for (int looper = 0; looper < nlElements.getLength(); looper++) {
             nElements = nlElements.item(looper);
@@ -683,7 +683,7 @@ public final class InfoReader {
      * @param dto
      * @param nlEpisodeDetails
      */
-    private void parseAllEpisodeDetails(InfoDTO dto, NodeList nlEpisodeDetails, boolean watched) {
+    private static void parseAllEpisodeDetails(InfoDTO dto, NodeList nlEpisodeDetails, boolean watched) {
         Node nEpisodeDetails;
         for (int looper = 0; looper < nlEpisodeDetails.getLength(); looper++) {
             nEpisodeDetails = nlEpisodeDetails.item(looper);
@@ -702,7 +702,7 @@ public final class InfoReader {
      * @param eEpisodeDetails
      * @return
      */
-    private InfoEpisodeDTO parseSingleEpisodeDetail(Element eEpisodeDetails) {
+    private static InfoEpisodeDTO parseSingleEpisodeDetail(Element eEpisodeDetails) {
         if (eEpisodeDetails == null) {
             return null;
         }

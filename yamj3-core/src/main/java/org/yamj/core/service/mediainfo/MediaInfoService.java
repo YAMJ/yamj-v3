@@ -26,10 +26,18 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -75,7 +83,7 @@ public class MediaInfoService {
     private AspectRatioTools aspectRatioTools;
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         LOG.info("Initialize MediaInfo service");
 
         String OS_NAME = System.getProperty("os.name");
@@ -349,7 +357,7 @@ public class MediaInfoService {
         }
     }
 
-    private void parseAudioCodec(AudioCodec audioCodec, Map<String, String> infosAudio) {
+    private static void parseAudioCodec(AudioCodec audioCodec, Map<String, String> infosAudio) {
         // codec
         String infoValue = infosAudio.get("Codec ID");
         if (StringUtils.isBlank(infoValue)) {
@@ -403,7 +411,7 @@ public class MediaInfoService {
         }
     }
 
-    private boolean parseSubtitle(Subtitle subtitle, Map<String, String> infosText) {
+    private static boolean parseSubtitle(Subtitle subtitle, Map<String, String> infosText) {
         // format
         String infoFormat = infosText.get("Format");
         if (StringUtils.isBlank(infoFormat)) {
@@ -452,11 +460,8 @@ public class MediaInfoService {
         return Boolean.FALSE;
     }
 
-    private String getRuntime(Map<String, String> infosGeneral, List<Map<String, String>> infosVideo) {
-        String runtimeValue = null;
-        if (runtimeValue == null) {
-            runtimeValue = infosGeneral.get("PlayTime");
-        }
+    private static String getRuntime(Map<String, String> infosGeneral, List<Map<String, String>> infosVideo) {
+        String runtimeValue = infosGeneral.get("PlayTime");
         if (runtimeValue == null && !infosVideo.isEmpty()) {
             Map<String, String> infosMainVideo = infosVideo.get(0);
             runtimeValue = infosMainVideo.get("Duration");
@@ -472,7 +477,7 @@ public class MediaInfoService {
         return runtimeValue;
     }
 
-    public int getBitRate(Map<String, String> infos) {
+    public static int getBitRate(Map<String, String> infos) {
         String bitRateValue = infos.get("Bit rate");
         if (StringUtils.isBlank(bitRateValue)) {
             bitRateValue = infos.get("Nominal bit rate");
@@ -480,7 +485,7 @@ public class MediaInfoService {
         return getBitRate(bitRateValue);
     }
 
-    private int getBitRate(String bitRateValue) {
+    private static int getBitRate(String bitRateValue) {
         if (StringUtils.isNotBlank(bitRateValue)) {
             String tmp;
             if (bitRateValue.indexOf(Constants.SPACE_SLASH_SPACE) > -1) {
@@ -515,7 +520,7 @@ public class MediaInfoService {
      * @return
      * @throws IOException
      */
-    private String localInputReadLine(BufferedReader input) throws IOException {
+    private static String localInputReadLine(BufferedReader input) throws IOException {
         String line = input.readLine();
         while ((line != null) && (line.equals(""))) {
             line = input.readLine();
@@ -523,7 +528,7 @@ public class MediaInfoService {
         return line;
     }
 
-    public void parseMediaInfo(MediaInfoStream stream,
+    public static void parseMediaInfo(MediaInfoStream stream,
             Map<String, String> infosGeneral,
             List<Map<String, String>> infosVideo,
             List<Map<String, String>> infosAudio,

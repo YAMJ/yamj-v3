@@ -25,6 +25,7 @@ package org.yamj.core.database.dao;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -50,7 +51,6 @@ public class ArtworkDao extends HibernateDao {
                 .load();
     }
 
-    @SuppressWarnings("unchecked")
     public List<ArtworkProfile> getPreProcessArtworkProfiles(ArtworkType artworkType, MetaDataType metaDataType) {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(ArtworkProfile.class);
@@ -76,7 +76,6 @@ public class ArtworkDao extends HibernateDao {
         return getById(Artwork.class, id);
     }
 
-    @SuppressWarnings("unchecked")
     public List<QueueDTO> getArtworkQueue(final CharSequence sql, final int maxResults) {
         SQLQuery query = currentSession().createSQLQuery(sql.toString());
         query.setReadOnly(true);
@@ -127,7 +126,6 @@ public class ArtworkDao extends HibernateDao {
         return (ArtworkGenerated) criteria.uniqueResult();
     }
     
-    @SuppressWarnings("unchecked")
     public List<QueueDTO> getArtworkLocatedQueue(final CharSequence sql, final int maxResults) {
         SQLQuery query = currentSession().createSQLQuery(sql.toString());
         query.setReadOnly(true);
@@ -152,7 +150,6 @@ public class ArtworkDao extends HibernateDao {
         return queueElements;
     }
 
-    @SuppressWarnings("unchecked")
     public List<Artwork> getBoxedSetArtwork(String boxedSetName, ArtworkType artworkType) {
         Criteria criteria = currentSession().createCriteria(Artwork.class);
         criteria.add(Restrictions.eq("artworkType", artworkType));

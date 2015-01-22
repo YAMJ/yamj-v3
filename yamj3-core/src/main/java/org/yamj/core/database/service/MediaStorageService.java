@@ -23,6 +23,7 @@
 package org.yamj.core.database.service;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Service;
@@ -61,7 +62,6 @@ public class MediaStorageService {
         sb.append("left outer join fetch mf.stageFiles ");
         sb.append("where mf.id = :id" );
 
-        @SuppressWarnings("unchecked")
         List<MediaFile> objects = this.mediaDao.findById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }

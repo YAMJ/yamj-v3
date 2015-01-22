@@ -28,6 +28,7 @@ import static org.yamj.common.type.ExitType.SUCCESS;
 
 import java.io.File;
 import java.io.IOException;
+
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,8 +72,7 @@ public final class FileScanner {
                 help(parser);
                 status = SUCCESS;
             } else {
-                FileScanner main = new FileScanner();
-                status = main.execute(parser);
+                status = execute(parser);
             }
         } catch (CmdLineException ex) {
             LOG.error("Failed to parse command line options: {}", ex.getMessage());
@@ -104,7 +104,7 @@ public final class FileScanner {
         return parser;
     }
 
-    private ExitType execute(CmdLineParser parser) {
+    private static ExitType execute(CmdLineParser parser) {
         ExitType status;
 
         try (ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("yamj3-filescanner.xml")) {

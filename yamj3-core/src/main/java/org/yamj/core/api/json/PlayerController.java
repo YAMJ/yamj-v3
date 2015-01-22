@@ -24,12 +24,17 @@ package org.yamj.core.api.json;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
@@ -166,7 +171,7 @@ public class PlayerController {
         LOG.info("Player storage completed");
     }
 
-    private List<PlayerInfo> getDummyPlayers(int playerCount, int pathCount) {
+    private static List<PlayerInfo> getDummyPlayers(int playerCount, int pathCount) {
         List<PlayerInfo> players = new ArrayList<>();
 
         for (int loopPlayer = 1; loopPlayer <= playerCount; loopPlayer++) {
