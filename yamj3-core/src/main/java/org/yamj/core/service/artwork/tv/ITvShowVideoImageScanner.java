@@ -23,17 +23,11 @@
 package org.yamj.core.service.artwork.tv;
 
 import java.util.List;
-import org.yamj.core.database.model.IMetadata;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.IArtworkScanner;
 
 public interface ITvShowVideoImageScanner extends IArtworkScanner {
 
-    String getId(String title, int year, int season, int episode);
-
-    List<ArtworkDetailDTO> getVideoImages(String title, int year, int season, int episode);
-
-    List<ArtworkDetailDTO> getVideoImages(String id, int season, int episode);
-
-    List<ArtworkDetailDTO> getVideoImages(IMetadata metadata);
+    List<ArtworkDetailDTO> getVideoImages(VideoData videoData);
 }

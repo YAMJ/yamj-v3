@@ -63,6 +63,8 @@ public class TheTVDbArtworkScanner implements
     @Autowired
     private ArtworkScannerService artworkScannerService;
     @Autowired
+    private TheTVDbScanner tvdbScanner;
+    @Autowired
     private TheTVDbApiWrapper tvdbApiWrapper;
 
     @Override
@@ -525,41 +527,6 @@ public class TheTVDbArtworkScanner implements
     }
 
     @Override
-    public String getId(String title, int year, int season, int episode) {
-        // TheTVDb only knows series IDs
-        return getId(title, year, season);
-    }
-
-    @Override
-    public List<ArtworkDetailDTO> getVideoImages(String title, int year, int season, int episode) {
-        String id = getId(title, year, season, episode);
-        return getVideoImages(id, season, episode);
-    }
-
-    @Override
-    public List<ArtworkDetailDTO> getVideoImages(String id, int season, int episodeNumber) {
-        List<Episode> episodeList = tvdbApiWrapper.getSeasonEpisodes(id, season);
-        if (CollectionUtils.isEmpty(episodeList)) {
-            return null;
-        }
-
-        // NOTE: just one video image per episode
-        for (Episode episode : episodeList) {
-            if (episode.getEpisodeNumber() == episodeNumber) {
-                if (StringUtils.isNotBlank(episode.getFilename())) {
-                    ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), episode.getFilename(), HashCodeType.PART);
-                    return Collections.singletonList(detailDTO);
-                }
-                // episode found but no image
-                break;
-            }
-        }
-
-        // no video image found
-        return null;
-    }
-
-    @Override
     public List<ArtworkDetailDTO> getPosters(IMetadata metadata) {
         String id = getId(metadata);
         return getPosters(id, metadata.getSeasonNumber());
@@ -578,9 +545,35 @@ public class TheTVDbArtworkScanner implements
     }
 
     @Override
-    public List<ArtworkDetailDTO> getVideoImages(IMetadata metadata) {
-        String id = getId(metadata);
-        return getVideoImages(id, metadata.getSeasonNumber(), metadata.getEpisodeNumber());
+    public List<ArtworkDetailDTO> getVideoImages(VideoData videoData) {
+        if (videoData.isMovie()) {
+            // just to be sure
+            return null;
+        }
+        
+        String id = tvdbScanner.getSeriesId(videoData.getSeason().getSeries());
+        if (StringUtils.isBlank(id)) {
+            return null;
+        }
+        
+        List<Episode> episodeList = tvdbApiWrapper.getSeasonEpisodes(id, videoData.getSeason().getSeason());
+        if (CollectionUtils.isEmpty(episodeList)) {
+            return null;
+        }
+
+        // NOTE: just one video image per episode
+        for (Episode episode : episodeList) {
+            if (episode.getEpisodeNumber() == videoData.getEpisode()) {
+                if (StringUtils.isNotBlank(episode.getFilename())) {
+                    ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), episode.getFilename(), HashCodeType.PART);
+                    return Collections.singletonList(detailDTO);
+                }
+                // episode found but no image
+                break;
+            }
+        }
+        
+        return null;
     }
 
     @Override

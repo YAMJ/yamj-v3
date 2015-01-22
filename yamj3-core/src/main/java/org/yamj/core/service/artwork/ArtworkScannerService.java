@@ -22,23 +22,17 @@
  */
 package org.yamj.core.service.artwork;
 
-import org.yamj.core.service.metadata.online.TheTVDbScanner;
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigServiceWrapper;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.ArtworkLocatorService;
@@ -52,6 +46,7 @@ import org.yamj.core.service.artwork.tv.ITvShowBannerScanner;
 import org.yamj.core.service.artwork.tv.ITvShowVideoImageScanner;
 import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
+import org.yamj.core.service.metadata.online.TheTVDbScanner;
 
 @Service("artworkScannerService")
 public class ArtworkScannerService {
@@ -162,7 +157,6 @@ public class ArtworkScannerService {
         }
 
         LOG.trace("Scan local for poster: {}", artwork);
-
         List<StageFile> posters = null;
 
         if (artwork.getVideoData() != null) {
@@ -259,7 +253,6 @@ public class ArtworkScannerService {
         }
 
         LOG.trace("Scan local for fanart: {}", artwork);
-
         List<StageFile> fanarts = null;
 
         if (artwork.getVideoData() != null) {
@@ -290,7 +283,6 @@ public class ArtworkScannerService {
         }
 
         LOG.debug("Scan online for fanart: {}", artwork);
-
         List<ArtworkDetailDTO> fanarts = null;
 
         if (artwork.getMetadata().isMovie()) {
@@ -352,7 +344,6 @@ public class ArtworkScannerService {
         }
 
         LOG.trace("Scan local for TV show banner: {}", artwork);
-
         List<StageFile> banners = null;
 
         if (artwork.getSeason() != null) {
@@ -380,7 +371,6 @@ public class ArtworkScannerService {
         }
         
         LOG.debug("Scan online for TV show banner: {}", artwork);
-
         List<ArtworkDetailDTO> banners = null;
 
         for (String prio : this.configServiceWrapper.getPropertyAsList("yamj3.artwork.scanner.banner.tvshow.priorities", TheTVDbScanner.SCANNER_ID)) {
@@ -427,15 +417,20 @@ public class ArtworkScannerService {
             return;
         }
 
+        VideoData videoData = artwork.getVideoData();
+        if (videoData == null || videoData.isMovie()) {
+            LOG.warn("No associated episode found for artwork: {}", artwork);
+            return;
+        }
+
         LOG.debug("Scan online for TV show episode image: {}", artwork);
-
         List<ArtworkDetailDTO> videoimages = null;
-
+        
         for (String prio : this.configServiceWrapper.getPropertyAsList("yamj3.artwork.scanner.videoimage.priorities", TheTVDbScanner.SCANNER_ID)) {
             ITvShowVideoImageScanner scanner = registeredTvShowVideoImageScanner.get(prio);
             if (scanner != null) {
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                videoimages = scanner.getVideoImages(artwork.getMetadata());
+                videoimages = scanner.getVideoImages(videoData);
                 if (CollectionUtils.isNotEmpty(videoimages)) {
                     break;
                 }
@@ -444,7 +439,7 @@ public class ArtworkScannerService {
             }
         }
 
-        if (CollectionUtils.isEmpty(videoimages) || videoimages == null) {
+        if (CollectionUtils.isEmpty(videoimages)) {
             LOG.info("No TV show episode image found for: {}", artwork);
             return;
         }
@@ -465,7 +460,6 @@ public class ArtworkScannerService {
         }
 
         LOG.trace("Scan local for photo: {}", artwork);
-
         List<StageFile> photos = null;
 
         if (artwork.getPerson() != null) {
@@ -482,31 +476,22 @@ public class ArtworkScannerService {
             return;
         }
 
-        LOG.debug("Scan online for photo: {}", artwork);
+        Person person = artwork.getPerson();
+        if (person == null) {
+            LOG.warn("No associated person found for artwork: {}", artwork);
+            return;
+        }
 
+        LOG.debug("Scan online for photo: {}", artwork);
         List<ArtworkDetailDTO> photos = null;
 
         for (String prio : this.configServiceWrapper.getPropertyAsList("yamj3.artwork.scanner.photo.priorities", TheMovieDbScanner.SCANNER_ID)) {
             IPhotoScanner scanner = registeredPhotoScanner.get(prio);
             if (scanner != null) {
-                LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                Person person = artwork.getPerson();
-                if (person == null) {
-                    LOG.warn("No associated person found for artwork: {}", artwork);
-                } else {
-                    String id = person.getSourceDbId(prio);
-                    LOG.info("Scanning for person ID: {}-{}", prio, id);
-                    if (StringUtils.isNumeric(id)) {
-                        photos = scanner.getPhotos(Integer.parseInt(id));
-                    } else {
-                        // Id looks to be invalid, so look it up
-                        id = scanner.getPersonId(person);
-                        // Could check if the ID is null and then use the IMDB id if available
-                        photos = scanner.getPhotos(id);
-                    }
-                    if (CollectionUtils.isNotEmpty(photos)) {
-                        break;
-                    }
+                LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), person);
+                photos = scanner.getPhotos(person);
+                if (CollectionUtils.isNotEmpty(photos)) {
+                    break;
                 }
             } else {
                 LOG.warn("Desired photo scanner {} not registerd", prio);

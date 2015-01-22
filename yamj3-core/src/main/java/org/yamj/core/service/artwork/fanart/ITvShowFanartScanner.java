@@ -27,9 +27,12 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
 public interface ITvShowFanartScanner extends IFanartScanner {
 
+    @Deprecated
     String getId(String title, int year, int season);
 
+    @Deprecated
     List<ArtworkDetailDTO> getFanarts(String title, int year, int season);
 
+    @Deprecated
     List<ArtworkDetailDTO> getFanarts(String id, int season);
 }

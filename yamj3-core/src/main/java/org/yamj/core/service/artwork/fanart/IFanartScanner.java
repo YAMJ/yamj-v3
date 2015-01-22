@@ -29,5 +29,6 @@ import org.yamj.core.service.artwork.IArtworkScanner;
 
 public interface IFanartScanner extends IArtworkScanner {
 
+    @Deprecated
     List<ArtworkDetailDTO> getFanarts(IMetadata metadata);
 }

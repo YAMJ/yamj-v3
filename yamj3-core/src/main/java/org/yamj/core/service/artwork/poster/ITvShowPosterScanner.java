@@ -27,9 +27,12 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
 public interface ITvShowPosterScanner extends IPosterScanner {
 
+    @Deprecated
     String getId(String title, int year, int season);
 
+    @Deprecated
     List<ArtworkDetailDTO> getPosters(String title, int year, int season);
 
+    @Deprecated
     List<ArtworkDetailDTO> getPosters(String id, int season);
 }

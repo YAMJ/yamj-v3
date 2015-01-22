@@ -37,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.IMetadata;
 import org.yamj.core.database.model.Person;
@@ -47,7 +46,6 @@ import org.yamj.core.service.artwork.ArtworkTools.HashCodeType;
 import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
 import org.yamj.core.service.artwork.photo.IPhotoScanner;
 import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
-import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.service.metadata.online.TheMovieDbApiWrapper;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 
@@ -65,10 +63,14 @@ public class TheMovieDbArtworkScanner implements
     private ConfigService configService;
     @Autowired
     private ArtworkScannerService artworkScannerService;
+    @Deprecated
     @Autowired
     private TheMovieDbApi tmdbApi;
+    @Deprecated
     @Autowired
     private TheMovieDbApiWrapper tmdbApiWrapper;
+    @Autowired
+    private TheMovieDbScanner tmdbScanner;
 
     @Override
     public String getScannerName() {
@@ -184,88 +186,12 @@ public class TheMovieDbArtworkScanner implements
         return tmdbApiWrapper.getId(metadata);
     }
 
-    //<editor-fold defaultstate="collapsed" desc="Photo Scanner Methods">
-    /**
-     * Get the person ID from the name
-     *
-     * @param name
-     * @return
-     */
     @Override
-    public String getPersonId(String name) {
-        if (StringUtils.isBlank(name)) {
-            return null;
-        }
-
-        try {
-            TmdbResultsList<com.omertron.themoviedbapi.model.Person> results = tmdbApi.searchPeople(name, Boolean.FALSE, -1);
-            if (CollectionUtils.isEmpty(results.getResults())) {
-                return null;
-            }
-
-            com.omertron.themoviedbapi.model.Person tmdbPerson = results.getResults().get(0);
-            return Integer.toString(tmdbPerson.getId());
-        } catch (MovieDbException ex) {
-            LOG.warn("Failed to get ID for {} from {}, error: {}", name, getScannerName(), ex.getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * Get the person ID from the person object
-     *
-     * @param person
-     * @return
-     */
-    @Override
-    public String getPersonId(Person person) {
-        String id = person.getSourceDbId(getScannerName());
-        if (StringUtils.isNotBlank(id)) {
-            return id;
-        }
-
-        if (StringUtils.isBlank(person.getName())) {
-            return null;
-        }
-
-        try {
-            TmdbResultsList<com.omertron.themoviedbapi.model.Person> results = tmdbApi.searchPeople(person.getName(), Boolean.FALSE, -1);
-            if (CollectionUtils.isEmpty(results.getResults())) {
-                return null;
-            }
-
-            com.omertron.themoviedbapi.model.Person tmdbPerson = results.getResults().get(0);
-            String tmdbId = Integer.toString(tmdbPerson.getId());
-            String imdbId = tmdbPerson.getImdbId();
-            person.setSourceDbId(getScannerName(), tmdbId);
-            person.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
-            LOG.debug("Found IDs for {} - TMDB: '{}', IMDB: '{}'", person.getName(), tmdbId, imdbId);
-            return Integer.toString(tmdbPerson.getId());
-        } catch (MovieDbException ex) {
-            LOG.warn("Failed to get ID for {} from {}, error: {}", person.getName(), getScannerName(), ex.getMessage());
-            return null;
-        }
-    }
-
-    @Override
-    public List<ArtworkDetailDTO> getPhotos(final String name) {
-        String tmdbId;
-        // Check to see if we were passed the ID and not a name
-        if (StringUtils.isNumeric(name)) {
-            tmdbId = name;
-        } else {
-            tmdbId = getPersonId(name);
-        }
-
-        if (StringUtils.isNotBlank(tmdbId)) {
-            return getPhotos(Integer.parseInt(tmdbId));
+    public List<ArtworkDetailDTO> getPhotos(Person person) {
+        String tmdbId = tmdbScanner.getPersonId(person);
+        if (StringUtils.isNumeric(tmdbId)) {
+            return getFilteredArtwork(tmdbId, LANGUAGE_NONE, ArtworkType.PROFILE, DEFAULT_PHOTO_SIZE);
         }
         return Collections.emptyList();
     }
-
-    @Override
-    public List<ArtworkDetailDTO> getPhotos(Integer id) {
-        return getFilteredArtwork(Integer.toString(id), LANGUAGE_NONE, ArtworkType.PROFILE, DEFAULT_PHOTO_SIZE);
-    }
-    //</editor-fold>
 }

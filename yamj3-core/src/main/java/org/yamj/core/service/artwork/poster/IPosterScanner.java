@@ -29,5 +29,6 @@ import org.yamj.core.service.artwork.IArtworkScanner;
 
 public interface IPosterScanner extends IArtworkScanner {
 
+    @Deprecated
     List<ArtworkDetailDTO> getPosters(IMetadata metadata);
 }

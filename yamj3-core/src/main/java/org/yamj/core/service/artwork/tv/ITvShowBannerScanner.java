@@ -29,11 +29,15 @@ import org.yamj.core.service.artwork.IArtworkScanner;
 
 public interface ITvShowBannerScanner extends IArtworkScanner {
 
+    @Deprecated
     String getId(String title, int year, int season);
 
+    @Deprecated
     List<ArtworkDetailDTO> getBanners(String title, int year, int season);
 
+    @Deprecated
     List<ArtworkDetailDTO> getBanners(String id, int season);
 
+    @Deprecated
     List<ArtworkDetailDTO> getBanners(IMetadata metadata);
 }

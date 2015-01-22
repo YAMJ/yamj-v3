@@ -29,11 +29,5 @@ import org.yamj.core.service.artwork.IArtworkScanner;
 
 public interface IPhotoScanner extends IArtworkScanner {
 
-    String getPersonId(String name);
-
-    String getPersonId(Person person);
-
-    List<ArtworkDetailDTO> getPhotos(String name);
-
-    List<ArtworkDetailDTO> getPhotos(Integer id);
+    List<ArtworkDetailDTO> getPhotos(Person person);
 }

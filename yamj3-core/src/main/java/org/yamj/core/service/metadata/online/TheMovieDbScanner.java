@@ -236,19 +236,17 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
     }
 
     private String getPersonId(Person person, boolean throwTempError) {
-        String id = person.getSourceDbId(SCANNER_ID);
-        if (StringUtils.isNotBlank(id)) {
-            return id;
+        String tmdbId = person.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNumeric(tmdbId)) {
+            return tmdbId;
         }
         
         if (StringUtils.isNotBlank(person.getName())) {
-            id = tmdbApiWrapper.getPersonId(person.getName(), throwTempError);
-            person.setSourceDbId(SCANNER_ID, id);
-        } else {
-            LOG.error("No ID or Name found for '{}'", person.getName());
+            tmdbId = tmdbApiWrapper.getPersonId(person.getName(), throwTempError);
+            person.setSourceDbId(SCANNER_ID, tmdbId);
         }
         
-        return id;
+        return tmdbId;
     }
 
     @Override

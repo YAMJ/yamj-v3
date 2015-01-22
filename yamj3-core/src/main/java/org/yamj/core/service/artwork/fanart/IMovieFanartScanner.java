@@ -27,9 +27,12 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
 public interface IMovieFanartScanner extends IFanartScanner {
 
+    @Deprecated
     String getId(String title, int year);
 
+    @Deprecated
     List<ArtworkDetailDTO> getFanarts(String title, int year);
 
+    @Deprecated
     List<ArtworkDetailDTO> getFanarts(String id);
 }
