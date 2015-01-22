@@ -20,19 +20,14 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork.fanart;
+package org.yamj.core.service.artwork.online;
 
 import java.util.List;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.core.service.metadata.online.IOnlineScanner;
 
-public interface ITvShowFanartScanner extends IFanartScanner {
+public interface ITvShowVideoImageScanner extends IOnlineScanner {
 
-    @Deprecated
-    String getId(String title, int year, int season);
-
-    @Deprecated
-    List<ArtworkDetailDTO> getFanarts(String title, int year, int season);
-
-    @Deprecated
-    List<ArtworkDetailDTO> getFanarts(String id, int season);
+    List<ArtworkDetailDTO> getVideoImages(VideoData videoData);
 }

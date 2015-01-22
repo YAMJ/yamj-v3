@@ -28,9 +28,7 @@ import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,11 +43,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
-import org.yamj.core.tools.web.HTMLTools;
-import org.yamj.core.tools.web.OnlineScannerException;
-import org.yamj.core.tools.web.PoolingHttpClient;
-import org.yamj.core.tools.web.ResponseTools;
-import org.yamj.core.tools.web.TemporaryUnavailableException;
+import org.yamj.core.tools.web.*;
 
 @Service("ofdbScanner")
 public class OfdbScanner implements IMovieScanner {

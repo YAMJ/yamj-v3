@@ -22,23 +22,20 @@
  */
 package org.yamj.filescanner.tools;
 
+import com.thoughtworks.xstream.io.StreamException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
 import javax.annotation.Resource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.stereotype.Service;
-
-import com.thoughtworks.xstream.io.StreamException;
 
 @Service
 public class XmlTools {

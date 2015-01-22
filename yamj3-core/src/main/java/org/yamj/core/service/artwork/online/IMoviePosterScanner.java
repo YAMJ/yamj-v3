@@ -20,14 +20,14 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork.photo;
+package org.yamj.core.service.artwork.online;
 
 import java.util.List;
-import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
-import org.yamj.core.service.artwork.IArtworkScanner;
+import org.yamj.core.service.metadata.online.IOnlineScanner;
 
-public interface IPhotoScanner extends IArtworkScanner {
+public interface IMoviePosterScanner extends IOnlineScanner {
 
-    List<ArtworkDetailDTO> getPhotos(Person person);
+    List<ArtworkDetailDTO> getPosters(VideoData videoData);
 }

@@ -23,7 +23,6 @@
 package org.yamj.core.service.mediaimport;
 
 import junit.framework.TestCase;
-
 import org.apache.commons.io.FilenameUtils;
 import org.junit.Test;
 import org.yamj.core.database.model.StageDirectory;

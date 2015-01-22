@@ -25,16 +25,9 @@ package org.yamj.core.service.mediaimport;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static org.springframework.util.StringUtils.tokenizeToStringArray;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;

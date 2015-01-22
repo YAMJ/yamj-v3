@@ -23,12 +23,10 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
 import org.yamj.core.database.model.type.ArtworkType;

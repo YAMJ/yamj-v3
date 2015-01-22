@@ -22,13 +22,7 @@
  */
 package org.yamj.core.database.service;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,13 +34,7 @@ import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.StagingDao;
-import org.yamj.core.database.model.BoxedSet;
-import org.yamj.core.database.model.Library;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.StageDirectory;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 

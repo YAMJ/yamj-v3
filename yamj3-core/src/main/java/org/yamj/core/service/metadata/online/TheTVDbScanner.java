@@ -22,15 +22,10 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.omertron.thetvdbapi.model.Actor;
+import com.omertron.thetvdbapi.model.Episode;
+import java.util.*;
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -46,9 +41,6 @@ import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
-
-import com.omertron.thetvdbapi.model.Actor;
-import com.omertron.thetvdbapi.model.Episode;
 
 @Service("tvdbScanner")
 public class TheTVDbScanner implements ISeriesScanner {
@@ -183,7 +175,7 @@ public class TheTVDbScanner implements ISeriesScanner {
             if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
                 // get season year from minimal first aired of episodes
                 String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
-                Date year = this.getSeasonYear(seriesId, season.getSeasonNumber());
+                Date year = this.getSeasonYear(seriesId, season.getSeason());
                 if (year == null) {
                     // try first aired from series as fall-back
                     if (StringUtils.isNotBlank(tvdbSeries.getFirstAired())) {

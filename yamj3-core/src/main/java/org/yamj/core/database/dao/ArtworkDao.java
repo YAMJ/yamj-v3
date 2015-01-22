@@ -25,7 +25,6 @@ package org.yamj.core.database.dao;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;

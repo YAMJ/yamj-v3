@@ -20,89 +20,75 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork.poster;
+package org.yamj.core.service.artwork.online;
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.annotation.PostConstruct;
-
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
-import org.yamj.core.service.artwork.ArtworkTools.HashCodeType;
-import org.yamj.core.service.metadata.online.ImdbScanner;
-import org.yamj.core.service.metadata.online.ImdbSearchEngine;
 import org.yamj.core.tools.web.PoolingHttpClient;
 import org.yamj.core.tools.web.ResponseTools;
 
-@Service("imdbPosterScanner")
-public class ImdbPosterScanner extends AbstractMoviePosterScanner {
+@Service("yahooPosterScanner")
+public class YahooPosterScanner implements IMoviePosterScanner {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ImdbPosterScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(YahooPosterScanner.class);
 
     @Autowired
     private ArtworkScannerService artworkScannerService;
-    @Autowired
-    private ImdbSearchEngine imdbSearchEngine;
     @Autowired
     private PoolingHttpClient httpClient;
 
     @Override
     public String getScannerName() {
-        return ImdbScanner.SCANNER_ID;
+        return "yahoo";
     }
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize IMDb poster scanner");
+        LOG.info("Initialize Yahoo poster scanner");
 
-        // register this scanner
         artworkScannerService.registerMoviePosterScanner(this);
     }
 
     @Override
-    public String getId(String title, int year) {
-        return imdbSearchEngine.getImdbId(title, year, false, false);
-    }
-
-    @Override
-    public List<ArtworkDetailDTO> getPosters(String title, int year) {
-        String id = this.getId(title, year);
-        return this.getPosters(id);
-    }
-
-    @Override
-    public List<ArtworkDetailDTO> getPosters(String id) {
+    public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
         List<ArtworkDetailDTO> dtos = new ArrayList<>();
-        if (StringUtils.isBlank(id)) {
-            return dtos;
-        }
 
         try {
-            DigestedResponse response = this.httpClient.requestContent("http://www.imdb.com/title/" + id);
+            StringBuilder sb = new StringBuilder("http://fr.images.search.yahoo.com/search/images?p=");
+            sb.append(URLEncoder.encode(videoData.getTitle(), "UTF-8"));
+            sb.append("+poster&fr=&ei=utf-8&js=1&x=wrt");
+
+            DigestedResponse response = httpClient.requestContent(sb.toString());
             if (ResponseTools.isOK(response)) {
-                String metaImageString = "<meta property='og:image' content=\"";
-                int beginIndex = response.getContent().indexOf(metaImageString);
+                // TODO scan more posters at once
+                int beginIndex = response.getContent().indexOf("imgurl=");
                 if (beginIndex > 0) {
-                    beginIndex = beginIndex + metaImageString.length();
-                    int endIndex =  response.getContent().indexOf("\"", beginIndex);
+                    int endIndex = response.getContent().indexOf("rurl=", beginIndex);
                     if (endIndex > 0) {
-                        String url = response.getContent().substring(beginIndex, endIndex);
-                        dtos.add(new ArtworkDetailDTO(getScannerName(), url, HashCodeType.PART));
+                        String url = URLDecoder.decode(response.getContent().substring(beginIndex + 7, endIndex - 1), "UTF-8");
+                        dtos.add(new ArtworkDetailDTO(getScannerName(), url));
+                    } else {
+                        String url = URLDecoder.decode(response.getContent().substring(beginIndex + 7), "UTF-8");
+                        dtos.add(new ArtworkDetailDTO(getScannerName(), url));
                     }
                 }
             } else {
-                LOG.warn("Requesting IMDb poster for '{}' failed with status {}", id, response.getStatusCode());
+                LOG.warn("Requesting yahoo poster for '{}' failed with status {}", videoData.getTitle(), response.getStatusCode());
             }
         } catch (Exception ex) {
-            LOG.error("Failed retrieving poster URL from imdb images for id {}: {}", id, ex.getMessage());
-            LOG.trace("Scanner error", ex);
+            LOG.error("Failed retrieving poster URL from yahoo images '{}': {}", videoData.getTitle(), ex.getMessage());
+            LOG.trace("Yahoo poster scanner error", ex);
         }
 
         return dtos;

@@ -23,14 +23,7 @@
 package org.yamj.core.database.dao;
 
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
@@ -41,11 +34,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.Library;
-import org.yamj.core.database.model.StageDirectory;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.hibernate.HibernateDao;

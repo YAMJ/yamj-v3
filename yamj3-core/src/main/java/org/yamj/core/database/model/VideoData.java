@@ -629,14 +629,6 @@ public class VideoData extends AbstractMetadata {
     }
 
     @Override
-    public int getSeasonNumber() {
-        if (isMovie()) {
-            return -1;
-        }
-        return getSeason().getSeason();
-    }
-
-    @Override
     public int getEpisodeNumber() {
         return episode;
     }

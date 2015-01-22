@@ -27,7 +27,9 @@ import javax.annotation.Resource;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.core.service.artwork.online.YahooPosterScanner;
 
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
 public class YahooPosterScannerTest extends AbstractJUnit4SpringContextTests {
@@ -37,7 +39,11 @@ public class YahooPosterScannerTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void testPosterUrl() {
-        List<ArtworkDetailDTO> dtos = yahooPosterScanner.getPosters("Avatar", 2009);
+        VideoData videoData = new VideoData();
+        videoData.setTitle("Avatar", yahooPosterScanner.getScannerName());
+        videoData.setPublicationYear(2009, yahooPosterScanner.getScannerName());
+        
+        List<ArtworkDetailDTO> dtos = yahooPosterScanner.getPosters(videoData);
         if (dtos != null) {
             for (ArtworkDetailDTO dto : dtos) {
                 System.err.println(dto);

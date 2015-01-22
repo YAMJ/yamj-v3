@@ -25,7 +25,6 @@ package org.yamj.core.service.artwork;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,22 +32,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigServiceWrapper;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.ArtworkLocatorService;
 import org.yamj.core.database.service.ArtworkStorageService;
-import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
-import org.yamj.core.service.artwork.fanart.ITvShowFanartScanner;
-import org.yamj.core.service.artwork.photo.IPhotoScanner;
-import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
-import org.yamj.core.service.artwork.poster.ITvShowPosterScanner;
-import org.yamj.core.service.artwork.tv.ITvShowBannerScanner;
-import org.yamj.core.service.artwork.tv.ITvShowVideoImageScanner;
+import org.yamj.core.service.artwork.online.*;
 import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 import org.yamj.core.service.metadata.online.TheTVDbScanner;
@@ -191,12 +180,11 @@ public class ArtworkScannerService {
             return;
         }
         
-        
         LOG.debug("Scan online for poster: {}", artwork);
 
         List<ArtworkDetailDTO> posters = null;
 
-        if (artwork.getVideoData() != null) {
+        if (artwork.getVideoData() != null && artwork.getVideoData().isMovie()) {
             // CASE: movie poster scan
             for (String prio : this.configServiceWrapper.getPropertyAsList("yamj3.artwork.scanner.poster.movie.priorities", TheMovieDbScanner.SCANNER_ID)) {
                 IMoviePosterScanner scanner = registeredMoviePosterScanner.get(prio);
@@ -221,13 +209,17 @@ public class ArtworkScannerService {
                 LOG.info("Limited movie posters to {}, actually retrieved {} for {}", maxResults, posters.size(), artwork);
                 posters = posters.subList(0, maxResults);
             }
-        } else {
+        } else if (artwork.getSeason() != null || artwork.getSeries() != null) {
             // CASE: TV show poster scan
             for (String prio : this.configServiceWrapper.getPropertyAsList("yamj3.artwork.scanner.poster.tvshow.priorities", TheTVDbScanner.SCANNER_ID)) {
                 ITvShowPosterScanner scanner = registeredTvShowPosterScanner.get(prio);
                 if (scanner != null) {
                     LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                    posters = scanner.getPosters(artwork.getMetadata());
+                    if (artwork.getSeries() != null) {
+                        posters = scanner.getPosters(artwork.getSeries());
+                    } else {
+                        posters = scanner.getPosters(artwork.getSeason());
+                    }
                     if (CollectionUtils.isNotEmpty(posters)) {
                         break;
                     }
@@ -290,13 +282,13 @@ public class ArtworkScannerService {
         LOG.debug("Scan online for fanart: {}", artwork);
         List<ArtworkDetailDTO> fanarts = null;
 
-        if (artwork.getMetadata().isMovie()) {
+        if (artwork.getVideoData() != null && artwork.getVideoData().isMovie()) {
             // CASE: movie fanart
             for (String prio : this.configServiceWrapper.getPropertyAsList("yamj3.artwork.scanner.fanart.movie.priorities", TheMovieDbScanner.SCANNER_ID)) {
                 IMovieFanartScanner scanner = registeredMovieFanartScanner.get(prio);
                 if (scanner != null) {
                     LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                    fanarts = scanner.getFanarts(artwork.getMetadata());
+                    fanarts = scanner.getFanarts(artwork.getVideoData());
                     if (CollectionUtils.isNotEmpty(fanarts)) {
                         break;
                     }
@@ -315,13 +307,17 @@ public class ArtworkScannerService {
                 LOG.info("Limited movie fanarts to {}, actually retrieved {} for {}", maxResults, fanarts.size(), artwork);
                 fanarts = fanarts.subList(0, maxResults);
             }
-        } else {
+        } else if (artwork.getSeason() != null || artwork.getSeries() != null) {
             // CASE: TV show poster scan
             for (String prio : this.configServiceWrapper.getPropertyAsList("yamj3.artwork.scanner.fanart.tvshow.priorities", TheTVDbScanner.SCANNER_ID)) {
                 ITvShowFanartScanner scanner = registeredTvShowFanartScanner.get(prio);
                 if (scanner != null) {
                     LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                    fanarts = scanner.getFanarts(artwork.getMetadata());
+                    if (artwork.getSeries() != null) {
+                        fanarts = scanner.getFanarts(artwork.getSeries());
+                    } else {
+                        fanarts = scanner.getFanarts(artwork.getSeason());
+                    }
                 } else {
                     LOG.warn("Desired TV show fanart scanner {} not registerd", prio);
                 }
@@ -370,6 +366,11 @@ public class ArtworkScannerService {
             return;
         }
 
+        if (artwork.getSeason() == null && artwork.getSeries() == null) {
+            LOG.warn("No associated season/series found for artwork: {}", artwork);
+            return;
+        }
+
         if (!configServiceWrapper.isOnlineArtworkScanEnabled(artwork, locatedArtworks)) {
             LOG.trace("Online banner scan disabled: {}", artwork);
             return;
@@ -382,7 +383,11 @@ public class ArtworkScannerService {
             ITvShowBannerScanner scanner = registeredTvShowBannerScanner.get(prio);
             if (scanner != null) {
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
-                banners = scanner.getBanners(artwork.getMetadata());
+                if (artwork.getSeries() != null) {
+                    banners = scanner.getBanners(artwork.getSeries());
+                } else {
+                    banners = scanner.getBanners(artwork.getSeason());
+                }
                 if (CollectionUtils.isNotEmpty(banners)) {
                     break;
                 }
@@ -391,7 +396,7 @@ public class ArtworkScannerService {
             }
         }
 
-        if (CollectionUtils.isEmpty(banners) || banners == null) {
+        if (CollectionUtils.isEmpty(banners)) {
             LOG.info("No TV show banner found for: {}", artwork);
             return;
         }

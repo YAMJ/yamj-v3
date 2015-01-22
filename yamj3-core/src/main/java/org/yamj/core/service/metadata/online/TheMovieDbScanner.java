@@ -22,13 +22,13 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import com.omertron.themoviedbapi.model.*;
+import com.omertron.themoviedbapi.results.TmdbResultsList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -46,13 +46,6 @@ import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.web.TemporaryUnavailableException;
-
-import com.omertron.themoviedbapi.model.MovieDb;
-import com.omertron.themoviedbapi.model.PersonCredit;
-import com.omertron.themoviedbapi.model.PersonType;
-import com.omertron.themoviedbapi.model.ProductionCompany;
-import com.omertron.themoviedbapi.model.ProductionCountry;
-import com.omertron.themoviedbapi.results.TmdbResultsList;
 
 @Service("tmdbScanner")
 public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {

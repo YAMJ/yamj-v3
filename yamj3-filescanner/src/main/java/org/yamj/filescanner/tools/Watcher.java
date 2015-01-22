@@ -30,16 +30,7 @@ import static name.pachler.nio.file.ext.ExtendedWatchEventModifier.FILE_TREE;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import name.pachler.nio.file.ClosedWatchServiceException;
-import name.pachler.nio.file.FileSystems;
-import name.pachler.nio.file.Path;
-import name.pachler.nio.file.Paths;
-import name.pachler.nio.file.StandardWatchEventKind;
-import name.pachler.nio.file.WatchEvent;
-import name.pachler.nio.file.WatchKey;
-import name.pachler.nio.file.WatchService;
-
+import name.pachler.nio.file.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

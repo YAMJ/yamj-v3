@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork.common;
+package org.yamj.core.service.artwork.online;
 
 import com.omertron.fanarttvapi.FanartTvApi;
 import com.omertron.fanarttvapi.FanartTvException;
@@ -28,6 +28,7 @@ import com.omertron.fanarttvapi.enumeration.FTArtworkType;
 import com.omertron.fanarttvapi.model.FTArtwork;
 import com.omertron.fanarttvapi.model.FTMovie;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
@@ -35,12 +36,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.core.database.model.IMetadata;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
-import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
-import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
-import org.yamj.core.service.metadata.online.TheMovieDbApiWrapper;
+import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 
 @Service("fanartTvArtworkScanner")
 public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner {
@@ -52,7 +51,7 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
     @Autowired
     private FanartTvApi fanarttvApi;
     @Autowired
-    private TheMovieDbApiWrapper tmdbApiWrapper;
+    private TheMovieDbScanner tmdbScanner;
 
     @PostConstruct
     public void init() {
@@ -69,71 +68,23 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
     }
 
     @Override
-    public String getId(String title, int year) {
-        // Use TheMovieDB scanner to get the id
-        return tmdbApiWrapper.getMovieDbId(title, year, false);
-    }
-
-    @Override
-    public List<ArtworkDetailDTO> getPosters(String title, int year) {
-        String id = this.getId(title, year);
-        return this.getPosters(id);
-    }
-
-    @Override
-    public List<ArtworkDetailDTO> getPosters(String id) {
-        return getMovieArtworkType(id, FTArtworkType.MOVIEPOSTER);
-    }
-
-    @Override
-    public List<ArtworkDetailDTO> getPosters(IMetadata metadata) {
-        String id = getId(metadata);
-        if (StringUtils.isNotBlank(id)) {
-            return getPosters(id);
+    public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
+      String tmdbId = tmdbScanner.getMovieId(videoData);
+        if (StringUtils.isNumeric(tmdbId)) {
+            return getMovieArtworkType(tmdbId, FTArtworkType.MOVIEPOSTER);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
-    public String getId(IMetadata metadata) {
-        String id;
-        if (metadata.isMovie()) {
-            // Scan for a movie ID
-            id = tmdbApiWrapper.getId(metadata);
-        } else {
-            // Scan for a TV ID
-            id = null;
+    public List<ArtworkDetailDTO> getFanarts(VideoData videoData) {
+      String tmdbId = tmdbScanner.getMovieId(videoData);
+        if (StringUtils.isNumeric(tmdbId)) {
+            return getMovieArtworkType(tmdbId, FTArtworkType.MOVIEBACKGROUND);
         }
-
-        LOG.info("{} {} ID for {} ({}), ID: {}",
-                StringUtils.isBlank(id) ? "Failed to get" : "Got",
-                metadata.isMovie() ? "Movie" : "TV",
-                metadata.getTitle(), metadata.getYear(),
-                id);
-
-        return id;
+        return Collections.emptyList();
     }
-
-    @Override
-    public List<ArtworkDetailDTO> getFanarts(String title, int year) {
-        String id = this.getId(title, year);
-        return getMovieArtworkType(id, FTArtworkType.MOVIEBACKGROUND);
-    }
-
-    @Override
-    public List<ArtworkDetailDTO> getFanarts(String id) {
-        return getMovieArtworkType(id, FTArtworkType.MOVIEBACKGROUND);
-    }
-
-    @Override
-    public List<ArtworkDetailDTO> getFanarts(IMetadata metadata) {
-        String id = getId(metadata);
-        if (StringUtils.isNotBlank(id)) {
-            return getFanarts(id);
-        }
-        return null;
-    }
-
+    
     /**
      * Generic routine to get the artwork type from the FanartTV based on the
      * passed type
@@ -154,8 +105,10 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
                 artworkList.add(aDto);
             }
         } catch (FanartTvException ex) {
-            LOG.warn("Failed to get {} artwork from FanartTV for ID '{}', error: {}", artworkType, id, ex.getMessage(), ex);
+            LOG.error("Failed to get {} artwork from FanartTV for id {}: {}", artworkType, id, ex.getMessage(), ex);
+            LOG.trace("FanartTV scanner error", ex);
         }
+        
         return artworkList;
     }
 }

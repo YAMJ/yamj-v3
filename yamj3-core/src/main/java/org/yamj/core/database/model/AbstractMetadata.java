@@ -219,11 +219,6 @@ public abstract class AbstractMetadata extends AbstractAuditable
     }
 
     @Override
-    public int getSeasonNumber() {
-        return -1;
-    }
-
-    @Override
     public int getEpisodeNumber() {
         return -1;
     }

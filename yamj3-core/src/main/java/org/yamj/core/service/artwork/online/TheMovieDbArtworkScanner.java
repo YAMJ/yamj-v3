@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork.common;
+package org.yamj.core.service.artwork.online;
 
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
@@ -38,15 +38,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigService;
-import org.yamj.core.database.model.IMetadata;
 import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.artwork.ArtworkTools.HashCodeType;
-import org.yamj.core.service.artwork.fanart.IMovieFanartScanner;
-import org.yamj.core.service.artwork.photo.IPhotoScanner;
-import org.yamj.core.service.artwork.poster.IMoviePosterScanner;
-import org.yamj.core.service.metadata.online.TheMovieDbApiWrapper;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 
 @Service("tmdbArtworkScanner")
@@ -59,18 +55,15 @@ public class TheMovieDbArtworkScanner implements
     private static final String DEFAULT_PHOTO_SIZE = "original";
     private static final String LANGUAGE_NONE = "";
     private static final String LANGUAGE_EN = "en";
+    
     @Autowired
     private ConfigService configService;
     @Autowired
     private ArtworkScannerService artworkScannerService;
-    @Deprecated
-    @Autowired
-    private TheMovieDbApi tmdbApi;
-    @Deprecated
-    @Autowired
-    private TheMovieDbApiWrapper tmdbApiWrapper;
     @Autowired
     private TheMovieDbScanner tmdbScanner;
+    @Autowired
+    private TheMovieDbApi tmdbApi;
 
     @Override
     public String getScannerName() {
@@ -88,34 +81,34 @@ public class TheMovieDbArtworkScanner implements
     }
 
     @Override
-    public String getId(String title, int year) {
-        return tmdbApiWrapper.getMovieDbId(title, year, false);
+    public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
+      String tmdbId = tmdbScanner.getMovieId(videoData);
+        if (StringUtils.isNumeric(tmdbId)) {
+            String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
+            return getFilteredArtwork(tmdbId, defaultLanguage, ArtworkType.POSTER, DEFAULT_POSTER_SIZE);
+        }
+        return Collections.emptyList();
     }
 
     @Override
-    public List<ArtworkDetailDTO> getPosters(String title, int year) {
-        String id = this.getId(title, year);
-        return this.getPosters(id);
+    public List<ArtworkDetailDTO> getFanarts(VideoData videoData) {
+      String tmdbId = tmdbScanner.getMovieId(videoData);
+        if (StringUtils.isNumeric(tmdbId)) {
+            String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
+            return getFilteredArtwork(tmdbId, defaultLanguage, ArtworkType.BACKDROP, DEFAULT_FANART_SIZE);
+        }
+        return Collections.emptyList();
     }
 
     @Override
-    public List<ArtworkDetailDTO> getFanarts(String title, int year) {
-        String id = this.getId(title, year);
-        return this.getFanarts(id);
+    public List<ArtworkDetailDTO> getPhotos(Person person) {
+        String tmdbId = tmdbScanner.getPersonId(person);
+        if (StringUtils.isNumeric(tmdbId)) {
+            return getFilteredArtwork(tmdbId, LANGUAGE_NONE, ArtworkType.PROFILE, DEFAULT_PHOTO_SIZE);
+        }
+        return Collections.emptyList();
     }
-
-    @Override
-    public List<ArtworkDetailDTO> getPosters(String id) {
-        String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
-        return getFilteredArtwork(id, defaultLanguage, ArtworkType.POSTER, DEFAULT_POSTER_SIZE);
-    }
-
-    @Override
-    public List<ArtworkDetailDTO> getFanarts(String id) {
-        String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
-        return getFilteredArtwork(id, defaultLanguage, ArtworkType.BACKDROP, DEFAULT_FANART_SIZE);
-    }
-
+    
     /**
      * Get a list of the artwork for a movie.
      *
@@ -155,43 +148,12 @@ public class TheMovieDbArtworkScanner implements
                         }
                     }
                 }
-                LOG.debug("Found {} {} artworks for TMDB ID '{}' and language '{}'", dtos.size(), artworkType, tmdbId, language);
-            } catch (MovieDbException error) {
-                LOG.warn("Failed to get the {} URL for TMDb ID {}", artworkType, id, error);
+                LOG.debug("Found {} {} artworks for TMDb id {} and language '{}'", dtos.size(), artworkType, tmdbId, language);
+            } catch (MovieDbException ex) {
+                LOG.error("Failed retrieving {} artworks for movie id {}: {}", artworkType, tmdbId, ex.getMessage());
+                LOG.warn("TheMovieDb error" , ex);
             }
         }
         return dtos;
-    }
-
-    @Override
-    public List<ArtworkDetailDTO> getPosters(IMetadata metadata) {
-        String id = getId(metadata);
-        if (StringUtils.isNotBlank(id)) {
-            return getPosters(id);
-        }
-        return null;
-    }
-
-    @Override
-    public List<ArtworkDetailDTO> getFanarts(IMetadata metadata) {
-        String id = getId(metadata);
-        if (StringUtils.isNotBlank(id)) {
-            return getFanarts(id);
-        }
-        return null;
-    }
-
-    @Override
-    public String getId(IMetadata metadata) {
-        return tmdbApiWrapper.getId(metadata);
-    }
-
-    @Override
-    public List<ArtworkDetailDTO> getPhotos(Person person) {
-        String tmdbId = tmdbScanner.getPersonId(person);
-        if (StringUtils.isNumeric(tmdbId)) {
-            return getFilteredArtwork(tmdbId, LANGUAGE_NONE, ArtworkType.PROFILE, DEFAULT_PHOTO_SIZE);
-        }
-        return Collections.emptyList();
     }
 }

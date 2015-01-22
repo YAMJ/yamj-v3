@@ -246,11 +246,6 @@ public class Season extends AbstractMetadata {
     }
 
     @Override
-    public int getSeasonNumber() {
-        return season;
-    }
-
-    @Override
     public int hashCode() {
         return new HashCodeBuilder()
                 .append(getIdentifier())

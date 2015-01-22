@@ -20,19 +20,17 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork.poster;
+package org.yamj.core.service.artwork.online;
 
 import java.util.List;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
+import org.yamj.core.service.metadata.online.IOnlineScanner;
 
-public interface IMoviePosterScanner extends IPosterScanner {
+public interface ITvShowBannerScanner extends IOnlineScanner {
 
-    @Deprecated
-    String getId(String title, int year);
+    List<ArtworkDetailDTO> getBanners(Season season);
 
-    @Deprecated
-    List<ArtworkDetailDTO> getPosters(String title, int year);
-
-    @Deprecated
-    List<ArtworkDetailDTO> getPosters(String id);
+    List<ArtworkDetailDTO> getBanners(Series series);
 }

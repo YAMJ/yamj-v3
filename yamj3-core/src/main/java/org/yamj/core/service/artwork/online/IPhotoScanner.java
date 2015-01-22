@@ -20,15 +20,14 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork.fanart;
+package org.yamj.core.service.artwork.online;
 
 import java.util.List;
-import org.yamj.core.database.model.IMetadata;
+import org.yamj.core.database.model.Person;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
-import org.yamj.core.service.artwork.IArtworkScanner;
+import org.yamj.core.service.metadata.online.IOnlineScanner;
 
-public interface IFanartScanner extends IArtworkScanner {
+public interface IPhotoScanner extends IOnlineScanner {
 
-    @Deprecated
-    List<ArtworkDetailDTO> getFanarts(IMetadata metadata);
+    List<ArtworkDetailDTO> getPhotos(Person person);
 }

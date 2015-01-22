@@ -22,17 +22,11 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import com.moviejukebox.allocine.model.*;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,11 +34,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigServiceWrapper;
-import org.yamj.core.database.model.FilmParticipation;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.ParticipationType;
@@ -54,17 +46,6 @@ import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.web.HTMLTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
 import org.yamj.core.tools.web.TemporaryUnavailableException;
-
-import com.moviejukebox.allocine.model.CastMember;
-import com.moviejukebox.allocine.model.Episode;
-import com.moviejukebox.allocine.model.EpisodeInfos;
-import com.moviejukebox.allocine.model.FilmographyInfos;
-import com.moviejukebox.allocine.model.MovieInfos;
-import com.moviejukebox.allocine.model.MoviePerson;
-import com.moviejukebox.allocine.model.Participance;
-import com.moviejukebox.allocine.model.PersonInfos;
-import com.moviejukebox.allocine.model.TvSeasonInfos;
-import com.moviejukebox.allocine.model.TvSeriesInfos;
 
 @Service("allocineScanner")
 public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmographyScanner {
