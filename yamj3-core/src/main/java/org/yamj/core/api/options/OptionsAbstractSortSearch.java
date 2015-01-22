@@ -117,6 +117,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
      * @return
      */
     @JsonIgnore
+    @Override
     public String getSortString(String sortBy) {
         StringBuilder sb = new StringBuilder();
         if (StringUtils.isNotBlank(sortBy)) {

@@ -508,7 +508,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         DigestedResponse response;
         try {
-            response = httpClient.requestContent(getImdbUrl(imdbId, "episodes?season=" + imdbId), charset);
+            response = httpClient.requestContent(getImdbUrl(imdbId, "episodes?season=" + season), charset);
             if (ResponseTools.isNotOK(response)) {
                 LOG.error("Can't find episodes due response status {}: {}", response.getStatusCode(), imdbId);
                 return episodes;

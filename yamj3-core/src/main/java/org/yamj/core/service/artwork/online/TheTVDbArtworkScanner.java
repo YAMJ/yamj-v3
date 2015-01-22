@@ -141,6 +141,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
         return returnDTOs;
     }
 
+    @Override
     public List<ArtworkDetailDTO> getPosters(Series series) {
         String id = tvdbScanner.getSeriesId(series);
         if (StringUtils.isBlank(id)) {

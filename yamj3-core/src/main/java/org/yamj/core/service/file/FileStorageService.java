@@ -111,10 +111,6 @@ public class FileStorageService {
         LOG.info("Skins storage path set to '{}'", this.storagePathSkin);
     }
 
-    public static boolean exists(StorageType type, String filename) {
-        return false;
-    }
-
     public boolean store(StorageType type, String filename, URL url) throws IOException {
         LOG.debug("Store file {}; source url: {}", filename, url.toString());
         String storageFileName = getStorageName(type, filename);

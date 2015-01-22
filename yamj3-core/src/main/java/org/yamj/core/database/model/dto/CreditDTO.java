@@ -50,7 +50,7 @@ public class CreditDTO {
     }
 
     public CreditDTO(String source, JobType jobType, String name, String role) {
-        this(source, jobType, name, null, null);
+        this(source, jobType, name, role, null);
     }
 
     public CreditDTO(String source, JobType jobType, String name, String role, String personId) {

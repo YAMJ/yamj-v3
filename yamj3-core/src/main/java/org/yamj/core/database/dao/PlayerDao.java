@@ -87,6 +87,7 @@ public class PlayerDao extends HibernateDao {
         }
     }
 
+    @SuppressWarnings("unused")
     public List<PlayerInfo> getPlayerInfo(OptionsPlayer options) {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(PlayerInfo.class);

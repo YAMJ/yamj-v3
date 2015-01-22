@@ -156,6 +156,7 @@ public final class GraphicTools {
         return bi;
     }
 
+    @SuppressWarnings("unused")
     public static BufferedImage scaleToSizeBestFit(int nMaxWidth, int nMaxHeight, BufferedImage imgSrc) {
         // determine thumbnail size from WIDTH and HEIGHT
         int imageWidth = imgSrc.getWidth(null);
@@ -245,7 +246,7 @@ public final class GraphicTools {
         BufferedImage gradient = createGradientMask(avatarWidth, avatarHeight, reflectionHeight, graphicType);
         BufferedImage buffer = createReflection(avatar, avatarWidth, avatarHeight, reflectionHeight);
 
-        applyAlphaMask(gradient, buffer, avatarWidth, avatarHeight);
+        applyAlphaMask(gradient, buffer, avatarHeight);
 
         return buffer;
     }
@@ -310,7 +311,7 @@ public final class GraphicTools {
         return buffer;
     }
 
-    public static void applyAlphaMask(BufferedImage gradient, BufferedImage buffer, int avatarWidth, int avatarHeight) {
+    public static void applyAlphaMask(BufferedImage gradient, BufferedImage buffer, int avatarHeight) {
         Graphics2D g2 = buffer.createGraphics();
         g2.setComposite(AlphaComposite.DstOut);
         g2.drawImage(gradient, null, 0, avatarHeight);

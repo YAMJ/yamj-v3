@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
-import org.yamj.core.service.file.FileTools;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,6 +40,7 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
@@ -303,7 +302,7 @@ public final class InfoReader {
         parseGenres(eCommon.getElementsByTagName("genre"), dto);
 
         // premiered / release date
-        movieDate(DOMHelper.getValueFromElement(eCommon, "premiered", "releasedate"), dto, nfoFilename);
+        movieDate(DOMHelper.getValueFromElement(eCommon, "premiered", "releasedate"), dto);
 
 
         /* TODO
@@ -523,11 +522,10 @@ public final class InfoReader {
     /**
      * Convert the date string to a date and update the movie object
      *
-     * @param movie
      * @param dateString
-     * @param parseDate
+     * @param dto
      */
-    private static void movieDate(final String dateString, InfoDTO dto, String nfoFilename) {
+    private static void movieDate(final String dateString, InfoDTO dto) {
         Date releaseDate = MetadataTools.parseToDate(dateString);
         if (releaseDate != null) {
             dto.setReleaseDate(releaseDate);

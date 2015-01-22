@@ -169,7 +169,7 @@ public class PagesController {
     }
 
     @RequestMapping(value = "/config/edit/{key}", method = RequestMethod.POST)
-    public ModelAndView configEditUpdate(@ModelAttribute("config") Configuration config, @PathVariable String key) {
+    public ModelAndView configEditUpdate(@ModelAttribute("config") Configuration config) {
         ModelAndView view = new ModelAndView("redirect:/config/list");
         LOG.info("Updating config: {}", config.toString());
         configService.setProperty(config.getKey(), config.getValue());
@@ -239,7 +239,7 @@ public class PagesController {
     }
 
     @RequestMapping(value = "/player/edit/{name}", method = RequestMethod.POST)
-    public ModelAndView playerEditUpdate(@ModelAttribute("player") PlayerPathOld player, @PathVariable String name) {
+    public ModelAndView playerEditUpdate(@ModelAttribute("player") PlayerPathOld player) {
         ModelAndView view = new ModelAndView("redirect:/player/list");
         LOG.info("Updating player: {}", player.toString());
         jsonApi.setPlayer(player);
