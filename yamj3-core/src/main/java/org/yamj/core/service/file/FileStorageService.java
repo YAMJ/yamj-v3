@@ -51,7 +51,6 @@ import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.api.model.Skin;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.type.ImageFormat;
-import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.tools.web.PoolingHttpClient;
 
 @Service("fileStorageService")

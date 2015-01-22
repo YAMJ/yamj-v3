@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.artwork;
 
+import org.yamj.core.service.file.FileTools;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,7 +40,6 @@ import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.ArtworkLocatorService;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.service.artwork.online.*;
-import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 import org.yamj.core.service.metadata.online.TheTVDbScanner;
 

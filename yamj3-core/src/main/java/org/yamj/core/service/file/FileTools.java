@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.file.tools;
+package org.yamj.core.service.file;
 
 import java.io.*;
 import java.nio.channels.FileChannel;

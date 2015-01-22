@@ -22,6 +22,8 @@
  */
 package org.yamj.core.tools.xml;
 
+import org.yamj.core.service.file.FileTools;
+
 import java.io.*;
 import java.net.URL;
 import java.util.Map;
@@ -42,7 +44,6 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-import org.yamj.core.service.file.tools.FileTools;
 
 /**
  * Generic set of routines to process the DOM model data

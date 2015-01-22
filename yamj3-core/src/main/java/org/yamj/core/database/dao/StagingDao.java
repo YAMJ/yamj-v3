@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.dao;
 
+import org.yamj.core.service.file.FileTools;
+
 import java.math.BigInteger;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +40,6 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.hibernate.HibernateDao;
-import org.yamj.core.service.file.tools.FileTools;
 
 @Transactional
 @Repository("stagingDao")

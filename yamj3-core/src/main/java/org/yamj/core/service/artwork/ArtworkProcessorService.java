@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.artwork;
 
+import org.yamj.core.service.file.FileTools;
+
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -44,7 +46,6 @@ import org.yamj.core.database.model.type.ImageFormat;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
-import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.tools.image.GraphicTools;
 
 @Service("artworkProcessorService")

@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.staging;
 
+import org.yamj.core.service.file.FileTools;
+
 import java.io.File;
 import java.math.BigInteger;
 import java.util.Calendar;
@@ -43,7 +45,6 @@ import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.FileType;
-import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.mediaimport.FilenameScanner;
 
 @Service("stagingService")

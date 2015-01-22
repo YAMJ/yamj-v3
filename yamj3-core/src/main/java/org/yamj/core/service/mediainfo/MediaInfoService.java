@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.mediainfo;
 
+import org.yamj.core.service.file.FileTools;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +48,6 @@ import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.Subtitle;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.MediaStorageService;
-import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.tools.AspectRatioTools;
 import org.yamj.core.tools.Constants;
 import org.yamj.core.tools.LanguageTools;

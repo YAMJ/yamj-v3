@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
+import org.yamj.core.service.file.FileTools;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,7 +42,6 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.type.JobType;
-import org.yamj.core.service.file.tools.FileTools;
 import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
