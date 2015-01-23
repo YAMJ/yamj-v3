@@ -175,7 +175,7 @@ public class YamjInfo {
         return DateTimeTools.convertDateToString(startUpDateTime, DateTimeTools.BUILD_FORMAT);
     }
 
-    public static String getUptime() {
+    public String getUptime() {
         return DateTimeTools.formatDurationText(ManagementFactory.getRuntimeMXBean().getUptime());
     }
 
