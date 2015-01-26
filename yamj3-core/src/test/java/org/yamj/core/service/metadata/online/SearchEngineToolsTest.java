@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.yamj.core.tools.web.PoolingHttpClient;
+import org.yamj.core.tools.web.PoolingHttpClientBuilder;
 
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
 public class SearchEngineToolsTest extends AbstractJUnit4SpringContextTests {
@@ -40,7 +41,7 @@ public class SearchEngineToolsTest extends AbstractJUnit4SpringContextTests {
     private static final Logger LOG = LoggerFactory.getLogger(SearchEngineToolsTest.class);
 
     @Resource(name="poolingHttpClient")
-    private PoolingHttpClient httpClient = new PoolingHttpClient();
+    private PoolingHttpClient httpClient = PoolingHttpClientBuilder.create().build();
     
     @Test
     public void roundTripIMDB() {

@@ -23,132 +23,83 @@
 package org.yamj.core.tools.web;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.utils.URIUtils;
-import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.params.HttpParams;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
-import org.yamj.api.common.http.DefaultPoolingHttpClient;
 import org.yamj.api.common.http.DigestedResponse;
-import org.yamj.common.tools.PropertyTools;
+import org.yamj.api.common.http.HttpClientWrapper;
 
-public class PoolingHttpClient extends DefaultPoolingHttpClient implements DisposableBean {
+public class PoolingHttpClient extends HttpClientWrapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(PoolingHttpClient.class);
     private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
-    private final Map<String, Integer> groupLimits = new HashMap<>();
-    private final List<String> routedHosts = new ArrayList<>();
-
-    public PoolingHttpClient() {
-        this(null, null);
+    
+    private final PoolingHttpClientConnectionManager connManager;
+    private final Map<String, Integer> groupLimits;
+    private final List<String> routedHosts;
+    
+    public PoolingHttpClient(HttpClient httpClient, PoolingHttpClientConnectionManager connManager) {
+        super(httpClient);
+        this.connManager = connManager;
+        this.groupLimits = new HashMap<>();
+        this.routedHosts = new ArrayList<>();
     }
 
-    public PoolingHttpClient(ClientConnectionManager conman) {
-        this(conman, null);
-    }
-
-    public PoolingHttpClient(HttpParams params) {
-        this(null, params);
-    }
-
-    public PoolingHttpClient(ClientConnectionManager connectionManager, HttpParams httpParams) {
-        super(connectionManager, httpParams);
-
-        // First we have to read/create the rules
-        // Default, can be overridden
-        groupLimits.put(".*", 1);
-        String limitsProperty = PropertyTools.getProperty("yamj3.http.maxDownloadSlots", ".*=1");
-        LOG.debug("Using download limits: {}", limitsProperty);
-
-        Pattern pattern = Pattern.compile(",?\\s*([^=]+)=(\\d+)");
-        Matcher matcher = pattern.matcher(limitsProperty);
-        while (matcher.find()) {
-            String group = matcher.group(1);
-            try {
-                Pattern.compile(group);
-                groupLimits.put(group, Integer.parseInt(matcher.group(2)));
-            } catch (NumberFormatException error) {
-                LOG.debug("Rule '{}' is not valid regexp, ignored", group);
-            }
-        }
+    protected void addGroupLimit(String group, Integer limit) {
+        this.groupLimits.put(group, limit);
     }
 
     @Override
-    public void destroy() throws Exception {
-        ClientConnectionManager clientManager = super.getConnectionManager();
-        if (clientManager != null) {
-            clientManager.shutdown();
-        }
+    protected void prepareRequest(HttpUriRequest request) throws ClientProtocolException {
+        prepareRequest(determineTarget(request), request);
     }
 
     @Override
-    public DigestedResponse requestContent(HttpGet httpGet, Charset charset) throws IOException {
-        // set route (if not set before)
-        setRoute(httpGet);
-        
-        DigestedResponse response;
-        if (charset == null) {
-            response = super.requestContent(httpGet, UTF8_CHARSET);
-        } else {
-            response = super.requestContent(httpGet, charset);
-        }
-        
-        return response;
-    }
-
-    private void setRoute(HttpUriRequest request) throws ClientProtocolException {
-        HttpHost httpHost = determineTarget(request);
-        String key = httpHost.toString();
-
+    protected void prepareRequest(HttpHost target, HttpRequest request) throws ClientProtocolException {
+        super.prepareRequest(target, request);
+      
+        String key = target.toString();
+  
         synchronized (routedHosts) {
             if (!routedHosts.contains(key)) {
                 String group = ".*";
                 for (String searchGroup : groupLimits.keySet()) {
                     if (key.matches(searchGroup) && searchGroup.length() > group.length()) {
                         group = searchGroup;
-
+  
                     }
                 }
                 int maxRequests = groupLimits.get(group);
-
+  
                 LOG.debug("IO download host: {}; rule: {}, maxRequests: {}", key, group, maxRequests);
                 routedHosts.add(key);
-
-                HttpRoute httpRoute = new HttpRoute(httpHost);
-
-                ClientConnectionManager conMan = this.getConnectionManager();
-                if (conMan instanceof PoolingClientConnectionManager) {
-                    PoolingClientConnectionManager poolMan = (PoolingClientConnectionManager) conMan;
-                    poolMan.setMaxPerRoute(httpRoute, maxRequests);
-                }
+  
+                HttpRoute httpRoute = new HttpRoute(target);
+                connManager.setMaxPerRoute(httpRoute, maxRequests);
             }
         }
     }
-
-    private static HttpHost determineTarget(HttpUriRequest request) throws ClientProtocolException {
-        HttpHost target = null;
-        URI requestURI = request.getURI();
-        if (requestURI.isAbsolute()) {
-            target = URIUtils.extractHost(requestURI);
-            if (target == null) {
-                throw new ClientProtocolException("URI does not specify a valid host name: " + requestURI);
-            }
-        }
-        return target;
+  
+    @Override
+    public DigestedResponse requestContent(HttpGet httpGet, Charset charset) throws IOException {
+        return super.requestContent(httpGet, (charset == null ? UTF8_CHARSET : charset));
+    }
+    
+    @Override
+    public void close() throws IOException {
+        super.close();
+        this.connManager.close();
     }
 }
