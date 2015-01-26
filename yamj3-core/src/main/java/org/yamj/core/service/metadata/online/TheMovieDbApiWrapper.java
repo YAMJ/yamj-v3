@@ -76,8 +76,8 @@ public class TheMovieDbApiWrapper {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
             }
-            LOG.error("Failed retrieving TMDb id for movie: {}", title);
-            LOG.warn("TheMovieDb error" , ex);
+            LOG.error("Failed retrieving TMDb id for movie '{}': {}", title, ex.getMessage());
+            LOG.trace("TheMovieDb error" , ex);
         }
 
         if (movieDb != null && movieDb.getId() != 0) {
@@ -125,8 +125,8 @@ public class TheMovieDbApiWrapper {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
             }
-            LOG.error("Failed retrieving TMDb id for person: {}", name);
-            LOG.warn("TheMovieDb error" , ex);
+            LOG.error("Failed retrieving TMDb id for person '{}': {}", name, ex.getMessage());
+            LOG.trace("TheMovieDb error" , ex);
         }
         return id;
     }

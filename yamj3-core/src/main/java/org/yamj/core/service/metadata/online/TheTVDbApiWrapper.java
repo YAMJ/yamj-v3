@@ -28,7 +28,6 @@ import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Banners;
 import com.omertron.thetvdbapi.model.Episode;
 import com.omertron.thetvdbapi.model.Series;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -41,13 +40,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.tools.LRUTimedCache;
+import org.yamj.core.tools.web.ResponseTools;
+import org.yamj.core.tools.web.TemporaryUnavailableException;
 
 @Service("tvdbApiWrapper")
 public class TheTVDbApiWrapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheTVDbApiWrapper.class);
-    private static final String LOG_ERROR = "Failed to get {}, error: {} - {}";
-    private static final String LOG_ERROR_LANG = "Failed to get {} (Lang: {}), error: {} - {}";
     private static final int YEAR_MIN = 1900;
     private static final int YEAR_MAX = 2050;
     private final Lock seriesLock = new ReentrantLock(true);
@@ -77,7 +76,8 @@ public class TheTVDbApiWrapper {
                     bannersCache.put(id, banners);
                 }
             } catch (TvDbException ex) {
-                LOG.warn(LOG_ERROR, "banners", ex.getExceptionType(), ex.getResponse(), ex);
+                LOG.error("Failed to get banners using TVDb ID {}: {}", id, ex.getMessage());
+                LOG.trace("TheTVDb error" , ex);
             } finally {
                 bannersLock.unlock();
             }
@@ -92,6 +92,16 @@ public class TheTVDbApiWrapper {
      * @return
      */
     public Series getSeries(String id) {
+        return getSeries(id, false);
+    }
+        
+    /**
+     * Get series information using the ID
+     *
+     * @param throwTempError
+     * @return
+     */
+    public Series getSeries(String id, boolean throwTempError) {
         Series series = seriesCache.get(id);
         if (series == null) {
             seriesLock.lock();
@@ -115,7 +125,12 @@ public class TheTVDbApiWrapper {
                     seriesCache.put(id, series);
                 }
             } catch (TvDbException ex) {
-                LOG.warn(LOG_ERROR, "series", ex.getExceptionType(), ex.getResponse(), ex);
+                if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+                    throw new TemporaryUnavailableException("TheTVDb service temporary not available: " + ex.getResponseCode(), ex);
+                }
+                LOG.error("Failed to get series using TVDb ID {}: {}", id, ex.getMessage());
+                LOG.trace("TheTVDb error" , ex);
+                series = new com.omertron.thetvdbapi.model.Series();
             } finally {
                 seriesLock.unlock();
             }
@@ -130,7 +145,7 @@ public class TheTVDbApiWrapper {
      * @param year
      * @return
      */
-    public String getSeriesId(String title, int year) {
+    public String getSeriesId(String title, int year, boolean throwTempError) {
         String tvdbId = null;
         if (StringUtils.isNotBlank(title)) {
             seriesLock.lock();
@@ -139,20 +154,11 @@ public class TheTVDbApiWrapper {
                 String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
 
                 boolean usedDefault = true;
-                List<Series> seriesList = null;
-                try {
-                    seriesList = tvdbApi.searchSeries(title, defaultLanguage);
-                } catch (TvDbException ex) {
-                    LOG.warn(LOG_ERROR_LANG, "Series", defaultLanguage, ex.getExceptionType(), ex.getResponse(), ex);
-                }
+                List<Series> seriesList = tvdbApi.searchSeries(title, defaultLanguage);
 
                 if (CollectionUtils.isEmpty(seriesList) && StringUtils.isNotBlank(altLanguage)) {
-                    try {
-                        seriesList = tvdbApi.searchSeries(title, altLanguage);
-                        usedDefault = false;
-                    } catch (TvDbException ex) {
-                        LOG.warn(LOG_ERROR_LANG, "Series", altLanguage, ex.getExceptionType(), ex.getResponse(), ex);
-                    }
+                    seriesList = tvdbApi.searchSeries(title, altLanguage);
+                    usedDefault = false;
                 }
 
                 if (CollectionUtils.isNotEmpty(seriesList)) {
@@ -173,14 +179,16 @@ public class TheTVDbApiWrapper {
 
                     if (series != null) {
                         tvdbId = series.getId();
-                        try {
-                            Series saved = tvdbApi.getSeries(tvdbId, usedDefault ? defaultLanguage : altLanguage);
-                            this.seriesCache.put(tvdbId, saved);
-                        } catch (TvDbException ex) {
-                            LOG.warn(LOG_ERROR_LANG, "Series", usedDefault ? defaultLanguage : altLanguage, ex.getExceptionType(), ex.getResponse(), ex);
-                        }
+                        Series cached = tvdbApi.getSeries(tvdbId, usedDefault ? defaultLanguage : altLanguage);
+                        this.seriesCache.put(tvdbId, cached);
                     }
                 }
+            } catch (TvDbException ex) {
+                if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+                    throw new TemporaryUnavailableException("TheTVDb service temporary not available: " + ex.getResponseCode(), ex);
+                }
+                LOG.error("Failed retrieving TVDb id for series '{}': {}", title, ex.getMessage());
+                LOG.trace("TheTVDb error" , ex);
             } finally {
                 seriesLock.unlock();
             }
@@ -188,14 +196,17 @@ public class TheTVDbApiWrapper {
         return tvdbId;
     }
 
-    public List<Actor> getActors(String id) {
-        List<Actor> actors = Collections.emptyList();
+    public List<Actor> getActors(String id, boolean throwTempError) {
         try {
-            actors = tvdbApi.getActors(id);
+            return tvdbApi.getActors(id);
         } catch (TvDbException ex) {
-            LOG.warn(LOG_ERROR, "actors", ex.getExceptionType(), ex.getResponse(), ex);
+            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+                throw new TemporaryUnavailableException("TheTVDb service temporary not available: " + ex.getResponseCode(), ex);
+            }
+            LOG.error("Failed to get actors using TVDb ID {}: {}", id, ex.getMessage());
+            LOG.trace("TheTVDb error" , ex);
         }
-        return actors;
+        return null;
     }
 
     public List<Episode> getSeasonEpisodes(String id, int season) {
@@ -203,26 +214,23 @@ public class TheTVDbApiWrapper {
 
         List<Episode> episodeList = this.episodesCache.get(key);
         if (episodeList == null || episodeList.isEmpty()) {
-            String defaultLanguage = configService.getProperty("thetvdb.language", "en");
-            String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
-
             try {
+                String defaultLanguage = configService.getProperty("thetvdb.language", "en");
+                String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
+    
                 episodeList = tvdbApi.getSeasonEpisodes(id, season, defaultLanguage);
-            } catch (TvDbException ex) {
-                LOG.warn(LOG_ERROR_LANG, "Season Episodes", defaultLanguage, ex.getExceptionType(), ex.getResponse(), ex);
-            }
-
-            if (CollectionUtils.isEmpty(episodeList) && StringUtils.isNotBlank(altLanguage)) {
-                try {
+    
+                if (CollectionUtils.isEmpty(episodeList) && StringUtils.isNotBlank(altLanguage)) {
                     episodeList = tvdbApi.getSeasonEpisodes(id, season, altLanguage);
-                } catch (TvDbException ex) {
-                    LOG.warn(LOG_ERROR_LANG, "Season Episodes", altLanguage, ex.getExceptionType(), ex.getResponse(), ex);
                 }
+                
+                if (CollectionUtils.isNotEmpty(episodeList)) {
+                    this.episodesCache.put(key, episodeList);
+                }
+            } catch (TvDbException ex) {
+                LOG.error("Failed to get episodes for TVDb ID {} and season {}: {}", id, season, ex.getMessage());
+                LOG.trace("TheTVDb error" , ex);
             }
-            if (episodeList == null) {
-                episodeList = Collections.emptyList();
-            }
-            this.episodesCache.put(key, episodeList);
         }
         return episodeList;
     }

@@ -41,6 +41,7 @@ import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
+import org.yamj.core.tools.web.TemporaryUnavailableException;
 
 @Service("tvdbScanner")
 public class TheTVDbScanner implements ISeriesScanner {
@@ -70,9 +71,13 @@ public class TheTVDbScanner implements ISeriesScanner {
 
     @Override
     public String getSeriesId(Series series) {
+        return getSeriesId(series, false);
+    }
+
+    private String getSeriesId(Series series, boolean throwTempError) {
         String id = series.getSourceDbId(SCANNER_ID);
         if (StringUtils.isBlank(id)) {
-            id = tvdbApiWrapper.getSeriesId(series.getTitle(), series.getStartYear());
+            id = tvdbApiWrapper.getSeriesId(series.getTitle(), series.getStartYear(), throwTempError);
             series.setSourceDbId(SCANNER_ID, id);
         }
         return id;
@@ -80,20 +85,29 @@ public class TheTVDbScanner implements ISeriesScanner {
 
     @Override
     public ScanResult scan(Series series) {
-      String id = series.getSourceDbId(SCANNER_ID);
-        if (StringUtils.isBlank(id)) {
-            return ScanResult.MISSING_ID;
-        }
+        com.omertron.thetvdbapi.model.Series tvdbSeries = null;
+        List<Actor> tvdbActors = null;
+        try {
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("thetvdb.throwError.tempUnavailable", Boolean.TRUE);
+            String tvdbId = getSeriesId(series, throwTempError); 
 
-        com.omertron.thetvdbapi.model.Series tvdbSeries = tvdbApiWrapper.getSeries(id);
-        if (StringUtils.isBlank(tvdbSeries.getId())) {
-            LOG.error("Can't find informations for series with id {}", id);
-            
+            if (StringUtils.isBlank(tvdbId)) {
+                LOG.debug("TVDb id not available '{}'", series.getTitle());
+                return ScanResult.MISSING_ID;
+            }
+
+            tvdbSeries = tvdbApiWrapper.getSeries(tvdbId, throwTempError);
+            tvdbActors = tvdbApiWrapper.getActors(tvdbSeries.getId(), throwTempError);
+        } catch (TemporaryUnavailableException ex) {
             // check retry
             int maxRetries = this.configServiceWrapper.getIntProperty("thetvdb.maxRetries.tvshow", 0);
             if (series.getRetries() < maxRetries) {
                 return ScanResult.RETRY;
             }
+        }
+        
+        if (tvdbSeries == null || StringUtils.isBlank(tvdbSeries.getId()) || tvdbActors == null) {
+            LOG.error("Can't find informations for series '{}'", series.getTitle());
             return ScanResult.ERROR;
         }
         
@@ -120,7 +134,7 @@ public class TheTVDbScanner implements ISeriesScanner {
             try {
                 series.addRating(SCANNER_ID, (int) (Float.parseFloat(tvdbSeries.getRating()) * 10));
             } catch (NumberFormatException nfe) {
-                LOG.warn("Failed to convert TVDB rating '{}' to an integer, error: {}", tvdbSeries.getRating(), nfe.getMessage());
+                LOG.warn("Failed to convert TVDB rating '{}' to an integer: {}", tvdbSeries.getRating(), nfe.getMessage());
             }
         }
 
@@ -146,7 +160,7 @@ public class TheTVDbScanner implements ISeriesScanner {
         // CAST & CREW
         Set<CreditDTO> actors = new LinkedHashSet<>();
         if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
-            for (Actor actor : tvdbApiWrapper.getActors(id)) {
+            for (Actor actor : tvdbActors) {
                 actors.add(new CreditDTO(SCANNER_ID, JobType.ACTOR, actor.getName(), actor.getRole()));
             }
         }
