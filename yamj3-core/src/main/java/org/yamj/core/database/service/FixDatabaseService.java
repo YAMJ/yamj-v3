@@ -20,39 +20,32 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.database.model.type;
+package org.yamj.core.database.service;
 
-/**
- * The list of override flags
- */
-public enum OverrideFlag {
+import javax.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.yamj.core.database.dao.FixDatabaseDao;
 
-    UNKNOWN,
-    COUNTRIES,
-    GENRES,
-    ORIGINALTITLE,
-    OUTLINE,
-    PLOT,
-    QUOTE,
-    RELEASEDATE,
-    STUDIOS,
-    TAGLINE,
-    TITLE,
-    YEAR,
-    // person specific
-    NAME,
-    BIRTHDAY,
-    BIRTHPLACE,
-    BIRTHNAME,
-    DEATHDAY,
-    DEATHPLACE,
-    BIOGRAPHY;
+@Component
+public class FixDatabaseService {
 
-    public static OverrideFlag fromString(String overrideFlag) {
+    private static final Logger LOG = LoggerFactory.getLogger(FixDatabaseService.class);
+
+    @Autowired
+    private FixDatabaseDao fixDatabaseDao;
+
+    @PostConstruct
+    public void init() {
+        // FIX COUNTRIES
+        // Issues: #150, #151
+        // Date:   28.01.2015
         try {
-            return OverrideFlag.valueOf(overrideFlag.trim().toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return UNKNOWN;
+            fixDatabaseDao.fixCountryChanges();
+        } catch (Exception ex) {
+            LOG.trace("Failed fix for country changes", ex);
         }
     }
 }

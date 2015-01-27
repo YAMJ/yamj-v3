@@ -27,7 +27,6 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.*;
 import javax.annotation.PostConstruct;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -341,11 +340,6 @@ public class OfdbScanner implements IMovieScanner {
                     countryNames.add(HTMLTools.removeHtmlTags(country).trim());
                 }
                 videoData.setCountryNames(countryNames, SCANNER_ID);
-              
-                // TODO remove if countries are completely working
-                if (CollectionUtils.isNotEmpty(countryNames)) {
-                    videoData.setCountry(countryNames.iterator().next(), SCANNER_ID);
-                }
             }
         }
 

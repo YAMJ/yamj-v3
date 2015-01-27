@@ -237,13 +237,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         // COUNTRIES
         if (OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
-            Set<String> countryNames = parseCountries(xml);
-            videoData.setCountryNames(countryNames, SCANNER_ID);
-            
-            // TODO remove if countries are completely working
-            if (CollectionUtils.isNotEmpty(countryNames)) {
-                videoData.setCountry(countryNames.iterator().next(), SCANNER_ID);
-            }
+            videoData.setCountryNames(parseCountries(xml), SCANNER_ID);
         }
         
         // CERTIFICATIONS

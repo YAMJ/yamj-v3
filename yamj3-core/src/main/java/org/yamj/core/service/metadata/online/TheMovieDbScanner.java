@@ -168,11 +168,6 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
                 countryNames.add(country.getName());
             }
             videoData.setCountryNames(countryNames, SCANNER_ID);
-             
-            // TODO remove if countries are completely working
-            if (CollectionUtils.isNotEmpty(countryNames)) {
-                videoData.setCountry(countryNames.iterator().next(), SCANNER_ID);
-            }
         }
 
         String releaseDateString = movieDb.getReleaseDate();

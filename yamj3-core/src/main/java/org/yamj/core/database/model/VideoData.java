@@ -74,10 +74,6 @@ public class VideoData extends AbstractMetadata {
     @Column(name = "quote", length = 25000)
     private String quote;
 
-    @Deprecated
-    @Column(name = "country", length = 100)
-    private String country;
-
     @Column(name = "skip_online_scans", length = 255)
     private String skipOnlineScans;
 
@@ -274,24 +270,6 @@ public class VideoData extends AbstractMetadata {
         if (StringUtils.isNotBlank(quote)) {
             this.quote = quote.trim();
             setOverrideFlag(OverrideFlag.QUOTE, source);
-        }
-    }
-
-    @Deprecated
-    public String getCountry() {
-        return country;
-    }
-
-    @Deprecated
-    private void setCountry(String country) {
-        this.country = country;
-    }
-
-    @Deprecated
-    public void setCountry(String country, String source) {
-        if (StringUtils.isNotBlank(country)) {
-            this.country = country.trim();
-            setOverrideFlag(OverrideFlag.COUNTRIES, source);
         }
     }
 

@@ -191,11 +191,6 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         
         if (OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
             videoData.setCountryNames(movieInfos.getNationalities(), SCANNER_ID);
-            
-            // TODO remove if countries are completely working
-            if (CollectionUtils.isNotEmpty(movieInfos.getNationalities())) {
-                videoData.setCountry(movieInfos.getNationalities().iterator().next(), SCANNER_ID);
-            }
         }
       
         // certification
