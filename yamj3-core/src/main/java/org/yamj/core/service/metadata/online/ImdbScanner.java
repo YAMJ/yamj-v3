@@ -225,11 +225,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             videoData.setTopRank(NumberUtils.toInt(strTop, -1));
         }
 
-        // COUNTRY
-        if (OverrideTools.checkOverwriteCountry(videoData, SCANNER_ID)) {
-            videoData.setCountry(parseCountry(xml), SCANNER_ID);
-        }
-
         // GENRES
         if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
             videoData.setGenreNames(parseGenres(xml), SCANNER_ID);
@@ -240,6 +235,17 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             videoData.setStudioNames(parseStudios(imdbId), SCANNER_ID);
         }
 
+        // COUNTRIES
+        if (OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
+            Set<String> countryNames = parseCountries(xml);
+            videoData.setCountryNames(countryNames, SCANNER_ID);
+            
+            // TODO remove if countries are completely working
+            if (CollectionUtils.isNotEmpty(countryNames)) {
+                videoData.setCountry(countryNames.iterator().next(), SCANNER_ID);
+            }
+        }
+        
         // CERTIFICATIONS
         videoData.setCertificationInfos(parseCertifications(imdbId));
 
@@ -335,6 +341,11 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         // STUDIOS
         if (OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
             series.setStudioNames(parseStudios(imdbId), SCANNER_ID);
+        }
+
+        // COUNTRIES
+        if (OverrideTools.checkOverwriteCountries(series, SCANNER_ID)) {
+            series.setCountryNames(parseCountries(xml), SCANNER_ID);
         }
 
         // CERTIFICATIONS
@@ -833,12 +844,15 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
     }
 
-    private static String parseCountry(String xml) {
+    private static Set<String> parseCountries(String xml) {
+        Set<String> countryNames = new LinkedHashSet<>();
         for (String country : HTMLTools.extractTags(xml, "Country" + HTML_H4_END, HTML_DIV_END, "<a href=\"", HTML_A_END)) {
-            return HTMLTools.removeHtmlTags(country);
-            // TODO set more countries in movie
+            String countryName = HTMLTools.removeHtmlTags(country);
+            if (StringUtils.isNotBlank(countryName)) {
+                countryNames.add(countryName.trim());
+            }
         }
-        return null;
+        return countryNames;
     }
 
     private Set<String> parseStudios(String imdbId) {

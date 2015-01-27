@@ -74,6 +74,7 @@ public class VideoData extends AbstractMetadata {
     @Column(name = "quote", length = 25000)
     private String quote;
 
+    @Deprecated
     @Column(name = "country", length = 100)
     private String country;
 
@@ -129,6 +130,13 @@ public class VideoData extends AbstractMetadata {
     private Set<Studio> studios = new HashSet<Studio>(0);
 
     @ManyToMany
+    @ForeignKey(name = "FK_DATACOUNTRIES_VIDEODATA", inverseName = "FK_DATACOUNTRIES_COUNTRY")
+    @JoinTable(name = "videodata_countries",
+            joinColumns = @JoinColumn(name = "data_id"),
+            inverseJoinColumns = @JoinColumn(name = "country_id"))
+    private Set<Country> countries = new HashSet<Country>(0);
+
+    @ManyToMany
     @ForeignKey(name = "FK_DATACERTS_VIDEODATA", inverseName = "FK_DATACERTS_CERTIFICATION")
     @JoinTable(name = "videodata_certifications",
             joinColumns = @JoinColumn(name = "data_id"),
@@ -161,6 +169,9 @@ public class VideoData extends AbstractMetadata {
 
     @Transient
     private Set<String> studioNames;
+
+    @Transient
+    private Set<String> countryNames;
 
     @Transient
     private Map<String, String> certificationInfos = new HashMap<>(0);
@@ -266,18 +277,21 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
+    @Deprecated
     public String getCountry() {
         return country;
     }
 
+    @Deprecated
     private void setCountry(String country) {
         this.country = country;
     }
 
+    @Deprecated
     public void setCountry(String country, String source) {
         if (StringUtils.isNotBlank(country)) {
             this.country = country.trim();
-            setOverrideFlag(OverrideFlag.COUNTRY, source);
+            setOverrideFlag(OverrideFlag.COUNTRIES, source);
         }
     }
 
@@ -387,20 +401,28 @@ public class VideoData extends AbstractMetadata {
         this.genres = genres;
     }
 
+    public Set<Studio> getStudios() {
+      return studios;
+    }
+  
+    public void setStudios(Set<Studio> studios) {
+        this.studios = studios;
+    }
+  
+    public Set<Country> getCountries() {
+        return countries;
+    }
+  
+    public void setCountries(Set<Country> countries) {
+        this.countries = countries;
+    }
+    
     public Set<Certification> getCertifications() {
         return certifications;
     }
 
     public void setCertifications(Set<Certification> certifications) {
         this.certifications = certifications;
-    }
-
-    public Set<Studio> getStudios() {
-        return studios;
-    }
-
-    public void setStudios(Set<Studio> studios) {
-        this.studios = studios;
     }
 
     public Season getSeason() {
@@ -538,6 +560,17 @@ public class VideoData extends AbstractMetadata {
         if (CollectionUtils.isNotEmpty(studioNames)) {
             this.studioNames = studioNames;
             setOverrideFlag(OverrideFlag.STUDIOS, source);
+        }
+    }
+
+    public Set<String> getCountryNames() {
+        return countryNames;
+    }
+  
+    public void setCountryNames(Set<String> countryNames, String source) {
+        if (CollectionUtils.isNotEmpty(countryNames)) {
+            this.countryNames = countryNames;
+            setOverrideFlag(OverrideFlag.COUNTRIES, source);
         }
     }
 

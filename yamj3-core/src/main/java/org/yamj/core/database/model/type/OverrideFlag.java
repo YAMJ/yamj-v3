@@ -28,7 +28,9 @@ package org.yamj.core.database.model.type;
 public enum OverrideFlag {
 
     UNKNOWN,
+    @Deprecated
     COUNTRY,
+    COUNTRIES,
     GENRES,
     ORIGINALTITLE,
     OUTLINE,

@@ -93,18 +93,9 @@ public class Series extends AbstractMetadata {
     @ManyToMany
     @ForeignKey(name = "FK_SERIESGENRES_SERIES", inverseName = "FK_SERIESGENRES_GENRE")
     @JoinTable(name = "series_genres",
-            joinColumns = {
-                @JoinColumn(name = "series_id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "genre_id")})
-    private Set<Genre> genres = new HashSet<Genre>(0);
-
-    @ManyToMany
-    @ForeignKey(name = "FK_SERIESCERTS_SERIES", inverseName = "FK_SERIESCERTS_CERTIFICATION")
-    @JoinTable(name = "series_certifications",
             joinColumns = @JoinColumn(name = "series_id"),
-            inverseJoinColumns = @JoinColumn(name = "cert_id"))
-    private Set<Certification> certifications = new HashSet<Certification>(0);
+            inverseJoinColumns = @JoinColumn(name = "genre_id"))
+    private Set<Genre> genres = new HashSet<Genre>(0);
 
     @ManyToMany
     @ForeignKey(name = "FK_SERIESSTUDIOS_SERIES", inverseName = "FK_SERIESSTUDIOS_STUDIO")
@@ -113,11 +104,28 @@ public class Series extends AbstractMetadata {
             inverseJoinColumns = @JoinColumn(name = "studio_id"))
     private Set<Studio> studios = new HashSet<Studio>(0);
 
+    @ManyToMany
+    @ForeignKey(name = "FK_SERIESCOUNTRIES_SERIES", inverseName = "FK_SERIESCOUNTRIES_COUNTRY")
+    @JoinTable(name = "series_countries",
+            joinColumns = @JoinColumn(name = "series_id"),
+            inverseJoinColumns = @JoinColumn(name = "country_id"))
+    private Set<Country> countries = new HashSet<Country>(0);
+
+    @ManyToMany
+    @ForeignKey(name = "FK_SERIESCERTS_SERIES", inverseName = "FK_SERIESCERTS_CERTIFICATION")
+    @JoinTable(name = "series_certifications",
+            joinColumns = @JoinColumn(name = "series_id"),
+            inverseJoinColumns = @JoinColumn(name = "cert_id"))
+    private Set<Certification> certifications = new HashSet<Certification>(0);
+
     @Transient
     private Set<String> genreNames;
 
     @Transient
     private Set<String> studioNames;
+
+    @Transient
+    private Set<String> countryNames;
 
     @Transient
     private Map<String, String> certificationInfos = new HashMap<String, String>(0);
@@ -276,14 +284,6 @@ public class Series extends AbstractMetadata {
         this.genres = genres;
     }
 
-    public Set<Certification> getCertifications() {
-        return certifications;
-    }
-
-    public void setCertifications(Set<Certification> certifications) {
-        this.certifications = certifications;
-    }
-
     public Set<Studio> getStudios() {
         return studios;
     }
@@ -291,7 +291,23 @@ public class Series extends AbstractMetadata {
     public void setStudios(Set<Studio> studios) {
         this.studios = studios;
     }
+    
+    public Set<Country> getCountries() {
+        return countries;
+    }
 
+    public void setCountries(Set<Country> countries) {
+        this.countries = countries;
+    }
+
+    public Set<Certification> getCertifications() {
+        return certifications;
+    }
+
+    public void setCertifications(Set<Certification> certifications) {
+        this.certifications = certifications;
+    }
+    
     // TRANSIENTS METHODS
     public Set<String> getGenreNames() {
         return genreNames;
@@ -312,6 +328,17 @@ public class Series extends AbstractMetadata {
         if (CollectionUtils.isNotEmpty(studioNames)) {
             this.studioNames = studioNames;
             setOverrideFlag(OverrideFlag.STUDIOS, source);
+        }
+    }
+
+    public Set<String> getCountryNames() {
+        return countryNames;
+    }
+  
+    public void setCountryNames(Set<String> countryNames, String source) {
+        if (CollectionUtils.isNotEmpty(countryNames)) {
+            this.countryNames = countryNames;
+            setOverrideFlag(OverrideFlag.COUNTRIES, source);
         }
     }
 

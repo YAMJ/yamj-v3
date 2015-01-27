@@ -25,10 +25,9 @@ package org.yamj.core.service.metadata.online;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.util.HashSet;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 import javax.annotation.PostConstruct;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -328,21 +327,25 @@ public class OfdbScanner implements IMovieScanner {
                 videoData.setPublicationYear(MetadataTools.toYear(scraped), SCANNER_ID);
             }
 
-            if (OverrideTools.checkOverwriteCountry(videoData, SCANNER_ID) && tag.contains("Herstellungsland")) {
-                List<String> scraped = HTMLTools.extractHtmlTags(tag, "class=\"Daten\"", "</td>", "<a", "</a>");
-                if (!scraped.isEmpty()) {
-                    // TODO set more countries in movie
-                    videoData.setCountry(HTMLTools.removeHtmlTags(scraped.get(0)).trim(), SCANNER_ID);
-                }
-            }
-
             if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID) && tag.contains("Genre(s)")) {
-                List<String> scraped = HTMLTools.extractHtmlTags(tag, "class=\"Daten\"", "</td>", "<a", "</a>");
                 HashSet<String> genreNames = new HashSet<>();
-                for (String genre : scraped) {
+                for (String genre : HTMLTools.extractHtmlTags(tag, "class=\"Daten\"", "</td>", "<a", "</a>")) {
                     genreNames.add(HTMLTools.removeHtmlTags(genre).trim());
                 }
                 videoData.setGenreNames(genreNames, SCANNER_ID);
+            }
+
+            if (OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID) && tag.contains("Herstellungsland")) {
+                Set<String> countryNames = new LinkedHashSet<>();
+                for (String country : HTMLTools.extractHtmlTags(tag, "class=\"Daten\"", "</td>", "<a", "</a>")) {
+                    countryNames.add(HTMLTools.removeHtmlTags(country).trim());
+                }
+                videoData.setCountryNames(countryNames, SCANNER_ID);
+              
+                // TODO remove if countries are completely working
+                if (CollectionUtils.isNotEmpty(countryNames)) {
+                    videoData.setCountry(countryNames.iterator().next(), SCANNER_ID);
+                }
             }
         }
 

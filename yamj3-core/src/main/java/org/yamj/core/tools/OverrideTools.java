@@ -63,9 +63,11 @@ public final class OverrideTools {
     static {
         String sources;
 
-        // country
-        sources = PropertyTools.getProperty("priority.videodata.country", DEFAULT_PLUGIN_MOVIE_SERIES);
-        putVideodataPriorities(OverrideFlag.COUNTRY, sources);
+        // countries
+        sources = PropertyTools.getProperty("priority.videodata.countries", DEFAULT_PLUGIN_MOVIE_SERIES);
+        putVideodataPriorities(OverrideFlag.COUNTRIES, sources);
+        sources = PropertyTools.getProperty("priority.series.countries", DEFAULT_PLUGIN_SERIES);
+        putSeriesPriorities(OverrideFlag.COUNTRIES, sources);
         // genres
         sources = PropertyTools.getProperty("priority.videodata.genres", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.GENRES, sources);
@@ -368,14 +370,12 @@ public final class OverrideTools {
         return checkOverwrite(metadata, OverrideFlag.STUDIOS, source);
     }
 
-    public static boolean checkOverwriteCountry(VideoData videoData, String source) {
-        if (skipCheck(videoData, OverrideFlag.COUNTRY, source)) {
+    public static boolean checkOverwriteCountries(AbstractMetadata metadata, String source) {
+        if (skipCheck(metadata, OverrideFlag.COUNTRIES, source)) {
             // skip the check
             return Boolean.FALSE;
-        } else if (StringUtils.isEmpty(videoData.getCountry())) {
-            return Boolean.TRUE;
         }
-        return checkOverwrite(videoData, OverrideFlag.COUNTRY, source);
+        return checkOverwrite(metadata, OverrideFlag.COUNTRIES, source);
     }
 
     public static boolean checkOverwriteOriginalTitle(AbstractMetadata metadata, String source) {

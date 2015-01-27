@@ -24,10 +24,7 @@ package org.yamj.core.service.metadata.online;
 
 import com.omertron.themoviedbapi.model.*;
 import com.omertron.themoviedbapi.results.TmdbResultsList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -165,13 +162,16 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             videoData.setOutline(StringUtils.trim(movieDb.getTagline()), SCANNER_ID);
         }
 
-        if (OverrideTools.checkOverwriteCountry(videoData, SCANNER_ID)) {
-            if (CollectionUtils.isNotEmpty(movieDb.getProductionCountries())) {
-                for (ProductionCountry country : movieDb.getProductionCountries()) {
-                    // TODO more countries
-                    videoData.setCountry(StringUtils.trimToNull(country.getName()), SCANNER_ID);
-                    break;
-                }
+        if (OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
+            Set<String> countryNames = new LinkedHashSet<>();
+            for (ProductionCountry country : movieDb.getProductionCountries()) {
+                countryNames.add(country.getName());
+            }
+            videoData.setCountryNames(countryNames, SCANNER_ID);
+             
+            // TODO remove if countries are completely working
+            if (CollectionUtils.isNotEmpty(countryNames)) {
+                videoData.setCountry(countryNames.iterator().next(), SCANNER_ID);
             }
         }
 

@@ -177,15 +177,6 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
             videoData.setReleaseDate(releaseDate, SCANNER_ID);
         }
                 
-        if (OverrideTools.checkOverwriteCountry(videoData, SCANNER_ID)) {
-            Set<String> nationalities = movieInfos.getNationalities();
-            if (CollectionUtils.isNotEmpty(nationalities)) {
-                // TODO more countries
-                String country = nationalities.iterator().next();
-                videoData.setCountry(country, SCANNER_ID);
-            }
-        }
-        
         if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
             videoData.setGenreNames(movieInfos.getGenres(), SCANNER_ID);
         }
@@ -198,6 +189,15 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
             }
         }
         
+        if (OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
+            videoData.setCountryNames(movieInfos.getNationalities(), SCANNER_ID);
+            
+            // TODO remove if countries are completely working
+            if (CollectionUtils.isNotEmpty(movieInfos.getNationalities())) {
+                videoData.setCountry(movieInfos.getNationalities().iterator().next(), SCANNER_ID);
+            }
+        }
+      
         // certification
         videoData.addCertificationInfo("France", movieInfos.getCertification());
 

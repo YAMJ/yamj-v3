@@ -126,10 +126,6 @@ public class TheTVDbScanner implements ISeriesScanner {
             series.setOutline(tvdbSeries.getOverview(), SCANNER_ID);
         }
 
-        if (OverrideTools.checkOverwriteGenres(series, SCANNER_ID)) {
-            series.setGenreNames(new HashSet<>(tvdbSeries.getGenres()), SCANNER_ID);
-        }
-
         if (StringUtils.isNumeric(tvdbSeries.getRating())) {
             try {
                 series.addRating(SCANNER_ID, (int) (Float.parseFloat(tvdbSeries.getRating()) * 10));
@@ -147,6 +143,10 @@ public class TheTVDbScanner implements ISeriesScanner {
                     // ignore error if year is invalid
                 }
             }
+        }
+
+        if (OverrideTools.checkOverwriteGenres(series, SCANNER_ID)) {
+            series.setGenreNames(new LinkedHashSet<>(tvdbSeries.getGenres()), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
