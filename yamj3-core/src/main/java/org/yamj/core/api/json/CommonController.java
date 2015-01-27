@@ -31,13 +31,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
-import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.model.dto.ApiNameDTO;
 import org.yamj.core.api.model.dto.ApiRatingDTO;
+import org.yamj.core.api.model.dto.ApiTargetDTO;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Certification;
+import org.yamj.core.database.model.Country;
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -75,20 +76,20 @@ public class CommonController {
     //<editor-fold defaultstate="collapsed" desc="Genre Methods">
     @RequestMapping(value = "/genre")
     @ResponseBody
-    public ApiWrapperList<ApiGenreDTO> getGenreFilename(@RequestParam(required = true, defaultValue = "") String filename) {
+    public ApiWrapperList<ApiTargetDTO> getGenreFilename(@RequestParam(required = true, defaultValue = "") String filename) {
         LOG.info("Getting genres for filename '{}'", filename);
-        ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<>();
-        List<ApiGenreDTO> genres = jsonApiStorageService.getGenreFilename(wrapper, filename);
-        wrapper.setResults(genres);
+        ApiWrapperList<ApiTargetDTO> wrapper = new ApiWrapperList<>();
+        List<ApiTargetDTO> results = jsonApiStorageService.getGenreFilename(wrapper, filename);
+        wrapper.setResults(results);
         wrapper.setStatusCheck();
         return wrapper;
     }
 
     @RequestMapping(value = "/genre/{name}", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperSingle<ApiGenreDTO> getGenre(@PathVariable String name) {
+    public ApiWrapperSingle<ApiTargetDTO> getGenre(@PathVariable String name) {
         Genre genre;
-        ApiWrapperSingle<ApiGenreDTO> wrapper = new ApiWrapperSingle<>();
+        ApiWrapperSingle<ApiTargetDTO> wrapper = new ApiWrapperSingle<>();
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting genre with ID '{}'", name);
             genre = jsonApiStorageService.getGenre(Long.parseLong(name));
@@ -97,7 +98,7 @@ public class CommonController {
             genre = jsonApiStorageService.getGenre(name);
         }
         if (genre != null) {
-            wrapper.setResult(new ApiGenreDTO(genre));
+            wrapper.setResult(new ApiTargetDTO(genre));
         }
         wrapper.setStatusCheck();
         return wrapper;
@@ -105,12 +106,12 @@ public class CommonController {
     
     @RequestMapping(value = "/genres/list", method = RequestMethod.GET)
     @ResponseBody
-    public ApiWrapperList<ApiGenreDTO> getGenres(@ModelAttribute("options") OptionsSingleType options) {
+    public ApiWrapperList<ApiTargetDTO> getGenres(@ModelAttribute("options") OptionsSingleType options) {
         LOG.info("Getting genre list: used={}, full={}", options.getUsed(), options.getFull());
 
-        ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<>();
+        ApiWrapperList<ApiTargetDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        List<ApiGenreDTO> results = jsonApiStorageService.getGenres(wrapper);
+        List<ApiTargetDTO> results = jsonApiStorageService.getGenres(wrapper);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
         return wrapper;
@@ -159,7 +160,7 @@ public class CommonController {
             
             if (result) {
                 status.setStatus(200);
-                status.setMessage("Successfully update genre '" + name + "' with target '" + target + "'");
+                status.setMessage("Successfully updated genre '" + name + "' with target '" + target + "'");
             } else {
                 status.setStatus(400);
                 status.setMessage("Genre '" + name + "' does not exist");
@@ -205,6 +206,106 @@ public class CommonController {
     }
     //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Country Methods">
+    @RequestMapping(value = "/country")
+    @ResponseBody
+    public ApiWrapperList<ApiTargetDTO> getCountryFilename(@RequestParam(required = true, defaultValue = "") String filename) {
+        LOG.info("Getting countries for filename '{}'", filename);
+        ApiWrapperList<ApiTargetDTO> wrapper = new ApiWrapperList<>();
+        List<ApiTargetDTO> results = jsonApiStorageService.getCountryFilename(wrapper, filename);
+        wrapper.setResults(results);
+        wrapper.setStatusCheck();
+        return wrapper;
+    }
+
+    @RequestMapping(value = "/country/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperSingle<ApiTargetDTO> getCountry(@PathVariable String name) {
+        Country country;
+        ApiWrapperSingle<ApiTargetDTO> wrapper = new ApiWrapperSingle<>();
+        if (StringUtils.isNumeric(name)) {
+            LOG.info("Getting country with ID '{}'", name);
+            country = jsonApiStorageService.getCountry(Long.parseLong(name));
+        } else {
+            LOG.info("Getting country with name '{}'", name);
+            country = jsonApiStorageService.getCountry(name);
+        }
+        if (country != null) {
+            wrapper.setResult(new ApiTargetDTO(country));
+        }
+        wrapper.setStatusCheck();
+        return wrapper;
+    }
+    
+    @RequestMapping(value = "/countries/list", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiWrapperList<ApiTargetDTO> getCountries(@ModelAttribute("options") OptionsSingleType options) {
+        LOG.info("Getting contries list: used={}, full={}", options.getUsed(), options.getFull());
+
+        ApiWrapperList<ApiTargetDTO> wrapper = new ApiWrapperList<>();
+        wrapper.setOptions(options);
+        List<ApiTargetDTO> results = jsonApiStorageService.getCountries(wrapper);
+        wrapper.setResults(results);
+        wrapper.setStatusCheck();
+        return wrapper;
+    }
+    
+    @RequestMapping(value = "/countries/add", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiStatus countryAdd(
+            @RequestParam(required = true, defaultValue = "") String name,
+            @RequestParam(required = true, defaultValue = "") String target) {
+
+        ApiStatus status = new ApiStatus();
+        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(target)) {
+            LOG.info("Adding country '{}' with target '{}'", name, target);
+            boolean result = this.jsonApiStorageService.addCountry(name, target);
+            if (result) {
+                status.setStatus(200);
+                status.setMessage("Successfully added country '" + name + "' with target '" + target + "'");
+            } else {
+                status.setStatus(400);
+                status.setMessage("Country '" + name + "' already exists");
+            }
+        } else {
+            status.setStatus(400);
+            status.setMessage("Invalid name/target specified, country not added");
+        }
+        return status;
+    }
+
+    @RequestMapping(value = "/countries/update", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiStatus countryUpdate(
+            @RequestParam(required = true, defaultValue = "") String name,
+            @RequestParam(required = false, defaultValue = "") String target) {
+
+        ApiStatus status = new ApiStatus();
+        if (StringUtils.isNotBlank(name)) {
+            LOG.info("Updating country '{}' with target '{}'", name, target);
+            
+            boolean result;
+            if (StringUtils.isNumeric(name)) {
+                result = this.jsonApiStorageService.updateCountry(Long.valueOf(name), target);
+            } else {
+                result = this.jsonApiStorageService.updateCountry(name, target);
+            }
+            
+            if (result) {
+                status.setStatus(200);
+                status.setMessage("Successfully updated country '" + name + "' with target '" + target + "'");
+            } else {
+                status.setStatus(400);
+                status.setMessage("Country '" + name + "' does not exist");
+            }
+        } else {
+            status.setStatus(400);
+            status.setMessage("Invalid name specified, country not updated");
+        }
+        return status;
+    }
+    //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="Certification Methods">
     @RequestMapping(value = "/certifications/list", method = RequestMethod.GET)
     @ResponseBody

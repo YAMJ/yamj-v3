@@ -46,7 +46,6 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private Integer videoYear;
     private String outline;
     private String plot;
-    private String country;
     private String quote;
     private String tagline;
     private Integer topRank = -1;
@@ -56,8 +55,9 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private Long episode;
     private Boolean watched;
     private Date newest;
-    private List<ApiGenreDTO> genres = new ArrayList<>();
+    private List<ApiTargetDTO> genres = new ArrayList<>();
     private List<Studio> studios = new ArrayList<>();
+    private List<ApiTargetDTO> countries = new ArrayList<>();
     private List<Certification> certifications = new ArrayList<>();
     private List<ApiRatingDTO> ratings = new ArrayList<>();
     private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<>(ArtworkType.class);
@@ -105,7 +105,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         return count;
     }
     
-    public List<ApiGenreDTO> getGenres() {
+    public List<ApiTargetDTO> getGenres() {
         return genres;
     }
 
@@ -119,6 +119,14 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public int getStudioCount() {
         return studios.size();
+    }
+
+    public List<ApiTargetDTO> getCountries() {
+        return countries;
+    }
+  
+    public int getCountriesCount() {
+        return countries.size();
     }
 
     public List<Certification> getCertifications() {
@@ -143,10 +151,6 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public String getPlot() {
         return plot;
-    }
-
-    public String getCountry() {
-        return country;
     }
 
     public String getQuote() {
@@ -224,8 +228,12 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         }
     }
     
-    public void setGenres(List<ApiGenreDTO> genres) {
+    public void setGenres(List<ApiTargetDTO> genres) {
         this.genres = genres;
+    }
+
+    public void setCountries(List<ApiTargetDTO> countries) {
+        this.countries = countries;
     }
 
     public void setStudios(List<Studio> studios) {
@@ -246,10 +254,6 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public void setPlot(String plot) {
         this.plot = plot;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
     }
 
     public void setQuote(String quote) {

@@ -34,8 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.builder.SqlScalars;
-import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.model.dto.ApiRatingDTO;
+import org.yamj.core.api.model.dto.ApiTargetDTO;
 import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.options.OptionsRating;
 import org.yamj.core.api.options.OptionsSingleType;
@@ -63,7 +63,7 @@ public class CommonDao extends HibernateDao {
         }
     }
 
-    public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper) {
+    public List<ApiTargetDTO> getGenres(ApiWrapperList<ApiTargetDTO> wrapper) {
         OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
 
         SqlScalars sqlScalars = new SqlScalars();
@@ -105,10 +105,10 @@ public class CommonDao extends HibernateDao {
         sqlScalars.addToSql(options.getSearchString(addWhere));
         sqlScalars.addToSql(options.getSortString());
 
-        return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
+        return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, wrapper);
     }
 
-    public List<ApiGenreDTO> getGenreFilename(ApiWrapperList<ApiGenreDTO> wrapper, String filename) {
+    public List<ApiTargetDTO> getGenreFilename(ApiWrapperList<ApiTargetDTO> wrapper, String filename) {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT g.id, g.name, ");
         sqlScalars.addToSql("CASE ");
@@ -129,7 +129,7 @@ public class CommonDao extends HibernateDao {
 
         sqlScalars.addParameters("filename", filename.toLowerCase());
 
-        return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
+        return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, wrapper);
     }
 
     public Studio getStudio(String name) {
@@ -188,6 +188,75 @@ public class CommonDao extends HibernateDao {
             country.setTargetXml(targetXml);
             this.saveEntity(country);
         }
+    }
+
+    public List<ApiTargetDTO> getCountries(ApiWrapperList<ApiTargetDTO> wrapper) {
+        OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
+  
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+  
+        sqlScalars.addToSql("SELECT DISTINCT ");
+        if (options.getFull()) {
+            sqlScalars.addToSql("c.id as id, c.name as name, ");
+            sqlScalars.addToSql("CASE ");
+            sqlScalars.addToSql(" WHEN c.target_api is not null THEN c.target_api ");
+            sqlScalars.addToSql(" WHEN c.target_xml is not null THEN c.target_xml ");
+            sqlScalars.addToSql(" ELSE c.name ");
+            sqlScalars.addToSql("END as target ");
+  
+            sqlScalars.addScalar("id", LongType.INSTANCE);
+            sqlScalars.addScalar("target", StringType.INSTANCE);
+        } else {
+            sqlScalars.addToSql("CASE ");
+            sqlScalars.addToSql(" WHEN c.target_api is not null THEN c.target_api ");
+            sqlScalars.addToSql(" WHEN c.target_xml is not null THEN c.target_xml ");
+            sqlScalars.addToSql(" ELSE c.name ");
+            sqlScalars.addToSql("END as name ");
+        }
+        sqlScalars.addToSql("FROM country c ");
+  
+        boolean addWhere = true;
+        if (options.getType() != null) {
+            if (MetaDataType.MOVIE == options.getType()) {
+                sqlScalars.addToSql("JOIN videodata_countries vc ON c.id=vc.country_id ");
+            } else {
+                sqlScalars.addToSql("JOIN series_countries sc ON c.id=sc.country_id ");
+            }
+        } else if (options.getUsed() != null && options.getUsed()) {
+            sqlScalars.addToSql("WHERE (exists (select 1 from videodata_countries vc where vc.country_id=c.id) ");
+            sqlScalars.addToSql(" or exists (select 1 from series_countries sc where sc.country_id=c.id)) ");
+            addWhere = false;
+        }
+  
+        sqlScalars.addToSql(options.getSearchString(addWhere));
+        sqlScalars.addToSql(options.getSortString());
+  
+        return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, wrapper);
+    }
+
+    public List<ApiTargetDTO> getCountryFilename(ApiWrapperList<ApiTargetDTO> wrapper, String filename) {
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT c.id, c.name, ");
+        sqlScalars.addToSql("CASE ");
+        sqlScalars.addToSql(" WHEN target_api is not null THEN target_api ");
+        sqlScalars.addToSql(" WHEN target_xml is not null THEN target_xml ");
+        sqlScalars.addToSql(" ELSE name ");
+        sqlScalars.addToSql("END as target ");
+        sqlScalars.addToSql("FROM mediafile m, mediafile_videodata mv, videodata v, videodata_countries vc, country c ");
+        sqlScalars.addToSql("WHERE m.id=mv.mediafile_id");
+        sqlScalars.addToSql("AND mv.videodata_id=v.id");
+        sqlScalars.addToSql("AND v.id = vc.data_id");
+        sqlScalars.addToSql("AND vc.country_id=c.id");
+        sqlScalars.addToSql("AND lower(m.file_name)=:filename");
+  
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar("target", StringType.INSTANCE);
+  
+        sqlScalars.addParameters("filename", filename.toLowerCase());
+  
+        return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, wrapper);
     }
 
     public Certification getCertification(String country, String certificate) {

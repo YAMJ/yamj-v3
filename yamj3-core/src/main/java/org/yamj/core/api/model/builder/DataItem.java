@@ -32,7 +32,7 @@ public enum DataItem {
     ARTWORK(false),
     PLOT(true),
     OUTLINE(true),
-    COUNTRY(true),
+    COUNTRY(false),
     QUOTE(true),
     TAGLINE(true),
     TOP_RANK(true),

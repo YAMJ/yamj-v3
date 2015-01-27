@@ -1588,14 +1588,26 @@ public class ApiDao extends HibernateDao {
             }
             if (options.hasDataItem(DataItem.GENRE)) {
                 // use series genres
-                Map<Long, List<ApiGenreDTO>> map = new HashMap<>();
+                Map<Long, List<ApiTargetDTO>> map = new HashMap<>();
                 for (ApiEpisodeDTO episode : results) {
-                    List<ApiGenreDTO> genres = map.get(episode.getSeriesId());
+                    List<ApiTargetDTO> genres = map.get(episode.getSeriesId());
                     if (genres == null) {
                         genres = getGenresForId(MetaDataType.SERIES, episode.getSeriesId());
                         map.put(episode.getSeriesId(), genres);
                     }
                     episode.setGenres(genres);
+                }
+            }
+            if (options.hasDataItem(DataItem.COUNTRY)) {
+                // use series countries
+                Map<Long, List<ApiTargetDTO>> map = new HashMap<>();
+                for (ApiEpisodeDTO episode : results) {
+                    List<ApiTargetDTO> countries = map.get(episode.getSeriesId());
+                    if (countries == null) {
+                      countries = getCountriesForId(MetaDataType.SERIES, episode.getSeriesId());
+                        map.put(episode.getSeriesId(), countries);
+                    }
+                    episode.setCountries(countries);
                 }
             }
             if (options.hasDataItem(DataItem.STUDIO)) {
@@ -1710,6 +1722,11 @@ public class ApiDao extends HibernateDao {
                 video.setStudios(getStudiosForId(type, options.getId()));
             }
 
+            if (options.hasDataItem(DataItem.COUNTRY)) {
+                LOG.trace("Adding countries for ID {}", options.getId());
+                video.setCountries(getCountriesForId(type, options.getId()));
+            }
+            
             if (params.hasDataItem(DataItem.CERTIFICATION)) {
                 LOG.trace("Adding certifications for ID {}", options.getId());
                 video.setCertifications(getCertificationsForId(type, options.getId()));
@@ -1903,7 +1920,7 @@ public class ApiDao extends HibernateDao {
      * @param id
      * @return
      */
-    public List<ApiGenreDTO> getGenresForId(MetaDataType type, Long id) {
+    public List<ApiTargetDTO> getGenresForId(MetaDataType type, Long id) {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT DISTINCT ");
         sqlScalars.addToSql("CASE ");
@@ -1931,7 +1948,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("name", StringType.INSTANCE);
         sqlScalars.addParameters(ID, id);
 
-        return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, null);
+        return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, null);
     }
 
     /**
@@ -1961,6 +1978,44 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addParameters(ID, id);
 
         return executeQueryWithTransform(Studio.class, sqlScalars, null);
+    }
+
+    /**
+     * Get a list of the genres for a given video ID
+     *
+     * @param type
+     * @param id
+     * @return
+     */
+    public List<ApiTargetDTO> getCountriesForId(MetaDataType type, Long id) {
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT DISTINCT ");
+        sqlScalars.addToSql("CASE ");
+        sqlScalars.addToSql(" WHEN target_api is not null THEN target_api ");
+        sqlScalars.addToSql(" WHEN target_xml is not null THEN target_xml ");
+        sqlScalars.addToSql(" ELSE name ");
+        sqlScalars.addToSql("END as name ");
+        if (type == MetaDataType.SERIES) {
+            sqlScalars.addToSql("FROM series_countries sc, country c ");
+            sqlScalars.addToSql("WHERE sc.series_id=:id ");
+            sqlScalars.addToSql("AND sc.country_id=c.id ");
+        } else if (type == MetaDataType.SEASON) {
+            sqlScalars.addToSql("FROM season sea, series_countries sc, country c ");
+            sqlScalars.addToSql("WHERE sea.id=:id ");
+            sqlScalars.addToSql("AND sc.series_id=sea.series_id ");
+            sqlScalars.addToSql("AND sc.country_id=c.id ");
+        } else {
+            // defaults to movie
+            sqlScalars.addToSql("FROM videodata_countries vc, country c ");
+            sqlScalars.addToSql("WHERE vc.data_id=:id ");
+            sqlScalars.addToSql("AND vc.country_id=c.id ");
+        }
+        sqlScalars.addToSql("ORDER BY name");
+
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addParameters(ID, id);
+
+        return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, null);
     }
 
     /**
@@ -2217,6 +2272,10 @@ public class ApiDao extends HibernateDao {
 
             if (options.hasDataItem(DataItem.STUDIO)) {
                 series.setStudios(getStudiosForId(MetaDataType.SERIES, id));
+            }
+
+            if (options.hasDataItem(DataItem.COUNTRY)) {
+                series.setCountries(getCountriesForId(MetaDataType.SERIES, id));
             }
 
             if (options.hasDataItem(DataItem.CERTIFICATION)) {

@@ -111,15 +111,47 @@ public class JsonApiStorageService {
         return commonDao.getGenre(name);
     }
 
-    public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper) {
+    public List<ApiTargetDTO> getGenres(ApiWrapperList<ApiTargetDTO> wrapper) {
         return commonDao.getGenres(wrapper);
     }
 
-    public List<ApiGenreDTO> getGenreFilename(ApiWrapperList<ApiGenreDTO> wrapper, String filename) {
+    public List<ApiTargetDTO> getGenreFilename(ApiWrapperList<ApiTargetDTO> wrapper, String filename) {
         return commonDao.getGenreFilename(wrapper, filename);
     }
     //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Studio Methods">
+    public Studio getStudio(Serializable id) {
+        return commonDao.getById(Studio.class, id);
+    }
+
+    public Studio getStudio(String name) {
+        return commonDao.getStudio(name);
+    }
+
+    public List<Studio> getStudios(ApiWrapperList<Studio> wrapper) {
+        return commonDao.getStudios(wrapper);
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Country Methods">
+    public Country getCountry(Serializable id) {
+        return commonDao.getById(Country.class, id);
+    }
+
+    public Country getCountry(String name) {
+        return commonDao.getCountry(name);
+    }
+
+    public List<ApiTargetDTO> getCountries(ApiWrapperList<ApiTargetDTO> wrapper) {
+        return commonDao.getCountries(wrapper);
+    }
+
+    public List<ApiTargetDTO> getCountryFilename(ApiWrapperList<ApiTargetDTO> wrapper, String filename) {
+        return commonDao.getCountryFilename(wrapper, filename);
+    }
+    //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="Certification Methods">
     public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
         return commonDao.getCertifications(wrapper);
@@ -139,20 +171,6 @@ public class JsonApiStorageService {
 
     public ApiBoxedSetDTO getBoxedSet(ApiWrapperSingle<ApiBoxedSetDTO> wrapper) {
         return apiDao.getBoxedSet(wrapper);
-    }
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="Studio Methods">
-    public Studio getStudio(Serializable id) {
-        return commonDao.getById(Studio.class, id);
-    }
-
-    public Studio getStudio(String name) {
-        return commonDao.getStudio(name);
-    }
-
-    public List<Studio> getStudios(ApiWrapperList<Studio> wrapper) {
-        return commonDao.getStudios(wrapper);
     }
     //</editor-fold>
 
@@ -257,6 +275,40 @@ public class JsonApiStorageService {
         }
         genre.setTargetApi(StringUtils.trimToNull(targetApi));
         this.commonDao.updateEntity(genre);
+        return true;
+    }
+
+    @Transactional
+    public boolean addCountry(String name, String targetApi) {
+        Country country = commonDao.getCountry(name);
+        if (country != null)  {
+            return false;
+        }
+        country = new Country(name);
+        country.setTargetApi(targetApi);
+        this.commonDao.saveEntity(country);
+        return true;
+    }
+
+    @Transactional
+    public boolean updateCountry(long id, String targetApi) {
+        Country country = commonDao.getById(Country.class, id);
+        if (country == null)  {
+            return false;
+        }
+        country.setTargetApi(StringUtils.trimToNull(targetApi));
+        this.commonDao.updateEntity(country);
+        return true;
+    }
+
+    @Transactional
+    public boolean updateCountry(String name, String targetApi) {
+        Country country = commonDao.getCountry(name);
+        if (country == null)  {
+            return false;
+        }
+        country.setTargetApi(StringUtils.trimToNull(targetApi));
+        this.commonDao.updateEntity(country);
         return true;
     }
 }
