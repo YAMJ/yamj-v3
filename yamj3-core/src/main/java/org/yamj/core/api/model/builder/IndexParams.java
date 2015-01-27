@@ -37,6 +37,7 @@ public class IndexParams {
     private static final String YEAR = "year";
     private static final String GENRE = "genre";
     private static final String STUDIO = "studio";
+    private static final String COUNTRY = "country";
     private static final String CERTIFICATION = "certification";
     private static final String VIDEOSOURCE = "videosource";
     private static final String RATING = "rating";
@@ -53,6 +54,7 @@ public class IndexParams {
     private String year;
     private String genreName;
     private String studioName;
+    private String countryName;
     private String videoSource;
     private String ratingSource;
     private int ratingValue;
@@ -153,6 +155,26 @@ public class IndexParams {
             }
         }
         return studioName;
+    }
+
+    // country check
+    public boolean includeCountry() {
+        return includes.containsKey(COUNTRY);
+    }
+
+    public boolean excludeCountry() {
+        return excludes.containsKey(COUNTRY);
+    }
+
+    public String getCountryName() {
+        if (countryName == null) {
+            if (includeCountry()) {
+                countryName = includes.get(COUNTRY);
+            } else {
+                countryName = excludes.get(COUNTRY);
+            }
+        }
+        return countryName;
     }
 
     // certification check

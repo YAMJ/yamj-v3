@@ -347,6 +347,32 @@ public class ApiDao extends HibernateDao {
             }
         }
 
+        // check country
+        if (params.includeCountry() || params.excludeCountry()) {
+            String country = params.getCountryName();
+
+            if (params.includeCountry()) {
+                sbSQL.append(" AND exists(");
+            } else {
+                sbSQL.append(" AND not exists (");
+            }
+
+            if (isMovie) {
+                sbSQL.append("SELECT 1 FROM videodata_countries vc, country c ");
+                sbSQL.append("WHERE vd.id=vc.data_id ");
+                sbSQL.append("AND vc.country_id=c.id ");
+            } else {
+                sbSQL.append("SELECT 1 FROM series_countries sc, country c, season sea ");
+                sbSQL.append("WHERE vd.season_id=sea.id ");
+                sbSQL.append("AND sc.series_id=sea.series_id ");
+                sbSQL.append("AND sc.countryid=c.id ");
+
+            }
+            sbSQL.append("AND (lower(c.name)='").append(country).append("'");
+            sbSQL.append(" or (c.target_api is not null and lower(c.target_api)='").append(country).append("')");
+            sbSQL.append(" or (c.target_xml is not null and lower(c.target_xml)='").append(country).append("')))");
+        }
+        
         // check studio
         if (params.includeCertification() || params.excludeCertification()) {
             int certId = params.getCertificationId();
@@ -600,6 +626,24 @@ public class ApiDao extends HibernateDao {
             }
         }
 
+        // check country
+        if (params.includeCountry() || params.excludeCountry()) {
+            String country = params.getCountryName();
+
+            if (params.includeCountry()) {
+                sbSQL.append(" AND exists(");
+            } else {
+                sbSQL.append(" AND not exists (");
+            }
+
+            sbSQL.append("SELECT 1 FROM series_countries sc, country c ");
+            sbSQL.append("WHERE ser.id=sc.series_id ");
+            sbSQL.append("AND sc.country_id=c.id ");
+            sbSQL.append("AND (lower(c.name)='").append(country).append("'");
+            sbSQL.append(" or (c.target_api is not null and lower(c.target_api)='").append(country).append("')");
+            sbSQL.append(" or (c.target_xml is not null and lower(c.target_xml)='").append(country).append("')))");
+        }
+
         // check certification
         if (params.includeCertification() || params.excludeCertification()) {
             int certId = params.getCertificationId();
@@ -795,6 +839,7 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" AND sea.publication_year!=").append(params.getYear());
         }
 
+        // check watched
         if (params.getWatched() != null) {
             if (params.getWatched()) {
                 sbSQL.append(" AND not exists");
@@ -806,6 +851,7 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" AND v.season_id=sea.id)");
         }
 
+        // check genre
         if (params.includeGenre() || params.excludeGenre()) {
             String genre = params.getGenreName();
 
@@ -845,6 +891,24 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append("AND ss.studio_id=stu.id ");
                 sbSQL.append("AND lower(stu.name)='").append(studio).append("')");
             }
+        }
+
+        // check country
+        if (params.includeCountry() || params.excludeCountry()) {
+            String country = params.getCountryName();
+
+            if (params.includeCountry()) {
+                sbSQL.append(" AND exists(");
+            } else {
+                sbSQL.append(" AND not exists (");
+            }
+
+            sbSQL.append("SELECT 1 FROM series_countries sc, country c ");
+            sbSQL.append("WHERE sea.series_id=sc.series_id ");
+            sbSQL.append("AND sc.country_id=c.id ");
+            sbSQL.append("AND (lower(c.name)='").append(country).append("'");
+            sbSQL.append(" or (c.target_api is not null and lower(c.target_api)='").append(country).append("')");
+            sbSQL.append(" or (c.target_xml is not null and lower(c.target_xml)='").append(country).append("')))");
         }
 
         // check certification
