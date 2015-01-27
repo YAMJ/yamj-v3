@@ -39,7 +39,8 @@ import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
-@RequestMapping("/api/player/**")
+@ResponseBody
+@RequestMapping(value = "/api/player/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class PlayerController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlayerController.class);
@@ -52,8 +53,7 @@ public class PlayerController {
      * @param options
      * @return
      */
-    @RequestMapping(value = "/list", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/list")
     public ApiWrapperList<PlayerPathOld> playerList(@ModelAttribute("player") OptionsPlayer options) {
         ApiWrapperList<PlayerPathOld> wrapper = new ApiWrapperList<>();
 
@@ -76,8 +76,7 @@ public class PlayerController {
      * @param storagePath
      * @return
      */
-    @RequestMapping(value = "/add", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/add")
     public ApiStatus playerAdd(
             @RequestParam(required = true, defaultValue = "") String name,
             @RequestParam(required = true, defaultValue = "") String ipDevice,
@@ -106,8 +105,7 @@ public class PlayerController {
      * @param player
      * @return
      */
-    @RequestMapping(value = "/delete", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/delete")
     public ApiStatus playerDelete(
             @RequestParam(required = true, defaultValue = "") String player) {
         ApiStatus status = new ApiStatus();
@@ -131,8 +129,7 @@ public class PlayerController {
      * @param storagePath
      * @return
      */
-    @RequestMapping(value = "/update", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/update")
     public ApiStatus playerUpdate(
             @RequestParam(required = true, defaultValue = "") String name,
             @RequestParam(required = true, defaultValue = "") String ipDevice,
@@ -154,8 +151,7 @@ public class PlayerController {
         return status;
     }
 
-    @RequestMapping(value = "/scan", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/scan")
     public void playerScan() {
         List<PlayerInfo> players = getDummyPlayers(2, 3);
 
@@ -186,5 +182,4 @@ public class PlayerController {
 
         return players;
     }
-
 }

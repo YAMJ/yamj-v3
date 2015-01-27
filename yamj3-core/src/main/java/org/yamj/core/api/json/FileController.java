@@ -36,7 +36,8 @@ import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.service.staging.StagingService;
 
 @Controller
-@RequestMapping("/api/file/**")
+@ResponseBody
+@RequestMapping(value = "/api/file/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class FileController {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileController.class);
@@ -51,8 +52,7 @@ public class FileController {
      * @param options
      * @return
      */
-    @RequestMapping(value = "/delete/{id}", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/delete/{id}")
     public ApiStatus deleteFileById(@ModelAttribute("options") OptionsId options) {
         ApiStatus status = new ApiStatus();
         Long id = options.getId();
@@ -79,8 +79,7 @@ public class FileController {
      * @param options
      * @return
      */
-    @RequestMapping(value = "/update/{id}", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/update/{id}")
     public ApiStatus updateFileById(@ModelAttribute("options") OptionsId options) {
         ApiStatus status = new ApiStatus();
         Long id = options.getId();
@@ -107,8 +106,7 @@ public class FileController {
      * @param options
      * @return
      */
-    @RequestMapping(value = "/watched/{id}", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/watched/{id}")
     public ApiStatus watchedFileById(@ModelAttribute("options") OptionsId options) {
         ApiStatus status = new ApiStatus();
         Long id = options.getId();
@@ -135,8 +133,7 @@ public class FileController {
      * @param options
      * @return
      */
-    @RequestMapping(value = "/unwatched/{id}", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/unwatched/{id}")
     public ApiStatus unwatchedFileById(@ModelAttribute("options") OptionsId options) {
         ApiStatus status = new ApiStatus();
         Long id = options.getId();

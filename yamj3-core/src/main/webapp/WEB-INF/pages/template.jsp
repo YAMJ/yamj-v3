@@ -15,9 +15,9 @@
             <div class="topbar">
                 <div class="topbar-inner">
                     <div class="container-fluid">
-                        <a href="/" class="brand"><img alt="YAMJ Logo" src="${pageContext.request.contextPath}/images/YAMJ-logo-120-white-reflectv3.png"></a>
+                        <a href="${pageContext.request.contextPath}/" class="brand"><img alt="YAMJ Logo" src="${pageContext.request.contextPath}/images/YAMJ-logo-120-white-reflectv3.png"></a>
                         <ul class="nav">
-                            <li><a href="/"><i class="fa fa-home fa-2x"></i> Home</a></li>
+                            <li><a href="${pageContext.request.contextPath}/"><i class="fa fa-home fa-2x"></i> Home</a></li>
                             <li><a href="${pageContext.request.contextPath}/skin-info.html"><i class="fa fa-ticket fa-2x"></i> Skins</a></li>
                             <li><a href="${pageContext.request.contextPath}/config/list.html"><i class="fa fa-cogs fa-2x"></i> Config</a></li>
                             <li><a href="http://www.networkedmediatank.com/forumdisplay.php?fid=139"><i class="fa fa-comments-o fa-2x"></i> Forums</a></li>

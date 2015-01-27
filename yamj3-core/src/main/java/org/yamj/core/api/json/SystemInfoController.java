@@ -37,7 +37,8 @@ import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
-@RequestMapping("/system/**")
+@ResponseBody
+@RequestMapping(value = "/system/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class SystemInfoController {
 
     private static final Logger LOG = LoggerFactory.getLogger(SystemInfoController.class);
@@ -45,16 +46,14 @@ public class SystemInfoController {
     @Autowired
     private JsonApiStorageService jsonApi;
 
-    @RequestMapping(value = "", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("")
     public String getSystemUp() {
         StringBuilder sb = new StringBuilder("YAMJ v3 is running, uptime is ");
         sb.append(YAMJ_INFO.getUptime());
         return sb.toString();
     }
 
-    @RequestMapping(value = "/info", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/info")
     public YamjInfo getYamjInfo(@RequestParam(required = false, defaultValue = "false") String addcounts) {
         // Clear the list of counts (in case it is out of date)
         YAMJ_INFO.getCounts().clear();

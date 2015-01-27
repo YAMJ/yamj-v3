@@ -38,15 +38,15 @@ import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
-@RequestMapping("/api/person/**")
+@ResponseBody
+@RequestMapping(value = "/api/person/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class PersonController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PersonController.class);
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/{id}")
     public ApiWrapperSingle<ApiPersonDTO> getPersonById(@ModelAttribute("options") OptionsId options) {
         ApiWrapperSingle<ApiPersonDTO> wrapper = new ApiWrapperSingle<>();
         if (options.getId() > 0) {
@@ -61,26 +61,22 @@ public class PersonController {
         return wrapper;
     }
 
-    @RequestMapping(value = "/movie", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/movie")
     public ApiWrapperList<ApiPersonDTO> getPersonListByMovie(@ModelAttribute("options") OptionsId options) {
         return getPersonListByVideo(MetaDataType.MOVIE, options);
     }
 
-    @RequestMapping(value = "/series", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/series")
     public ApiWrapperList<ApiPersonDTO> getPersonListBySeries(@ModelAttribute("options") OptionsId options) {
         return getPersonListByVideo(MetaDataType.SERIES, options);
     }
 
-    @RequestMapping(value = "/season", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/season")
     public ApiWrapperList<ApiPersonDTO> getPersonListBySeason(@ModelAttribute("options") OptionsId options) {
         return getPersonListByVideo(MetaDataType.SEASON, options);
     }
 
-    @RequestMapping(value = "/episode", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/episode")
     public ApiWrapperList<ApiPersonDTO> getPersonListByEpisode(@ModelAttribute("options") OptionsId options) {
         return getPersonListByVideo(MetaDataType.EPISODE, options);
     }

@@ -44,7 +44,8 @@ import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
-@RequestMapping("/api/**")
+@ResponseBody
+@RequestMapping(value = "/api/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class CommonController {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommonController.class);
@@ -52,8 +53,7 @@ public class CommonController {
     private JsonApiStorageService jsonApiStorageService;
 
     //<editor-fold defaultstate="collapsed" desc="Watched Methods">
-    @RequestMapping(value = "/watched", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/watched")
     public ApiStatus markWatched(
             @RequestParam(required = true, defaultValue = "") String filename,
             @RequestParam(required = false, defaultValue = "-1") Integer amount) {
@@ -74,8 +74,7 @@ public class CommonController {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Genre Methods">
-    @RequestMapping(value = "/genre")
-    @ResponseBody
+    @RequestMapping("/genre")
     public ApiWrapperList<ApiTargetDTO> getGenreFilename(@RequestParam(required = true, defaultValue = "") String filename) {
         LOG.info("Getting genres for filename '{}'", filename);
         ApiWrapperList<ApiTargetDTO> wrapper = new ApiWrapperList<>();
@@ -85,8 +84,7 @@ public class CommonController {
         return wrapper;
     }
 
-    @RequestMapping(value = "/genre/{name}", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/genre/{name}")
     public ApiWrapperSingle<ApiTargetDTO> getGenre(@PathVariable String name) {
         Genre genre;
         ApiWrapperSingle<ApiTargetDTO> wrapper = new ApiWrapperSingle<>();
@@ -104,8 +102,7 @@ public class CommonController {
         return wrapper;
     }
     
-    @RequestMapping(value = "/genres/list", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/genres/list")
     public ApiWrapperList<ApiTargetDTO> getGenres(@ModelAttribute("options") OptionsSingleType options) {
         LOG.info("Getting genre list: used={}, full={}", options.getUsed(), options.getFull());
 
@@ -117,8 +114,7 @@ public class CommonController {
         return wrapper;
     }
     
-    @RequestMapping(value = "/genres/add", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/genres/add")
     public ApiStatus genreAdd(
             @RequestParam(required = true, defaultValue = "") String name,
             @RequestParam(required = true, defaultValue = "") String target) {
@@ -141,8 +137,7 @@ public class CommonController {
         return status;
     }
 
-    @RequestMapping(value = "/genres/update", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/genres/update")
     public ApiStatus genreUpdate(
             @RequestParam(required = true, defaultValue = "") String name,
             @RequestParam(required = false, defaultValue = "") String target) {
@@ -174,8 +169,7 @@ public class CommonController {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Studio Methods">
-    @RequestMapping(value = "/studio/{name}", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/studio/{name}")
     public ApiWrapperSingle<Studio> getStudio(@PathVariable String name) {
         Studio studio;
         ApiWrapperSingle<Studio> wrapper = new ApiWrapperSingle<>();
@@ -191,8 +185,7 @@ public class CommonController {
         return wrapper;
     }
 
-    @RequestMapping(value = "/studios/list", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/studios/list")
     public ApiWrapperList<Studio> getStudios(@ModelAttribute("options") OptionsSingleType options) {
         LOG.info("Getting studio list with {}", options.toString());
 
@@ -207,8 +200,7 @@ public class CommonController {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Country Methods">
-    @RequestMapping(value = "/country")
-    @ResponseBody
+    @RequestMapping("/country")
     public ApiWrapperList<ApiTargetDTO> getCountryFilename(@RequestParam(required = true, defaultValue = "") String filename) {
         LOG.info("Getting countries for filename '{}'", filename);
         ApiWrapperList<ApiTargetDTO> wrapper = new ApiWrapperList<>();
@@ -218,8 +210,7 @@ public class CommonController {
         return wrapper;
     }
 
-    @RequestMapping(value = "/country/{name}", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/country/{name}")
     public ApiWrapperSingle<ApiTargetDTO> getCountry(@PathVariable String name) {
         Country country;
         ApiWrapperSingle<ApiTargetDTO> wrapper = new ApiWrapperSingle<>();
@@ -237,8 +228,7 @@ public class CommonController {
         return wrapper;
     }
     
-    @RequestMapping(value = "/countries/list", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/countries/list")
     public ApiWrapperList<ApiTargetDTO> getCountries(@ModelAttribute("options") OptionsSingleType options) {
         LOG.info("Getting contries list: used={}, full={}", options.getUsed(), options.getFull());
 
@@ -250,8 +240,7 @@ public class CommonController {
         return wrapper;
     }
     
-    @RequestMapping(value = "/countries/add", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/countries/add")
     public ApiStatus countryAdd(
             @RequestParam(required = true, defaultValue = "") String name,
             @RequestParam(required = true, defaultValue = "") String target) {
@@ -274,8 +263,7 @@ public class CommonController {
         return status;
     }
 
-    @RequestMapping(value = "/countries/update", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/countries/update")
     public ApiStatus countryUpdate(
             @RequestParam(required = true, defaultValue = "") String name,
             @RequestParam(required = false, defaultValue = "") String target) {
@@ -307,8 +295,7 @@ public class CommonController {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Certification Methods">
-    @RequestMapping(value = "/certifications/list", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/certifications/list")
     public ApiWrapperList<Certification> getCertifications(@ModelAttribute("options") OptionsId options) {
         LOG.info("Getting certifications list with {}", options.toString());
 
@@ -321,8 +308,7 @@ public class CommonController {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="VideoSource Methods">
-    @RequestMapping(value = "/videosources/list", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/videosources/list")
     public ApiWrapperList<ApiNameDTO> getVideoSources(@ModelAttribute("options") OptionsId options) {
         LOG.info("Getting video sources list with {}", options.toString());
 
@@ -335,8 +321,7 @@ public class CommonController {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Rating Methods">
-    @RequestMapping(value = "/ratings/list", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/ratings/list")
     public ApiWrapperList<ApiRatingDTO> getRatings(@ModelAttribute("options") OptionsRating options) {
         LOG.info("Getting ratings list with {}", options.toString());
 
@@ -349,8 +334,7 @@ public class CommonController {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Alphabetical Methods">
-    @RequestMapping(value = "/alphabetical/list", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/alphabetical/list")
     public ApiWrapperList<ApiNameDTO> getAlphabeticals(@ModelAttribute("options") OptionsMultiType options) {
         LOG.info("Getting alphabetical list with {}", options.toString());
 
@@ -363,8 +347,7 @@ public class CommonController {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Boxed-Set Methods">
-    @RequestMapping(value = "/boxset/list", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/boxset/list")
     public ApiWrapperList<ApiBoxedSetDTO> getBoxSets(@ModelAttribute("options") OptionsBoxedSet options) {
         LOG.info("Getting boxset list with {}", options.toString());
 
@@ -376,8 +359,7 @@ public class CommonController {
         return wrapper;
     }
     
-    @RequestMapping(value = "/boxset/{id}", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/boxset/{id}")
     public ApiWrapperSingle<ApiBoxedSetDTO> getBoxSet(@ModelAttribute("options") OptionsBoxedSet options) {
         LOG.info("Getting boxset with {}", options.toString());
 

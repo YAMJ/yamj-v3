@@ -39,7 +39,8 @@ import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.service.file.FileStorageService;
 
 @Controller
-@RequestMapping("/api/artwork/**")
+@ResponseBody
+@RequestMapping(value = "/api/artwork/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class ArtworkController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkController.class);
@@ -50,8 +51,7 @@ public class ArtworkController {
     @Autowired
     private FileStorageService fileStorageService;
     
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/{id}")
     public ApiWrapperSingle<ApiArtworkDTO> getArtwork(@PathVariable Long id) {
         ApiWrapperSingle<ApiArtworkDTO> wrapper = new ApiWrapperSingle<>();
 
@@ -66,8 +66,7 @@ public class ArtworkController {
         return wrapper;
     }
 
-    @RequestMapping(value = "/list", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/list")
     public ApiWrapperList<ApiArtworkDTO> getArtworkList(@ModelAttribute("options") OptionsIndexArtwork options) {
         LOG.info("INDEX: Artwork list - Options: {}", options.toString());
         ApiWrapperList<ApiArtworkDTO> wrapper = new ApiWrapperList<>();
@@ -84,8 +83,7 @@ public class ArtworkController {
      * @param options
      * @return
      */
-    @RequestMapping(value = "/located/ignore/{id}", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/located/ignore/{id}")
     public ApiStatus deleteLocatedById(@ModelAttribute("options") OptionsId options) {
         ApiStatus status = new ApiStatus();
         Long id = options.getId();

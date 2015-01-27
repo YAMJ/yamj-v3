@@ -42,15 +42,15 @@ import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
-@RequestMapping("/api/index/**")
+@ResponseBody
+@RequestMapping(value = "/api/index/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class IndexController {
 
     private static final Logger LOG = LoggerFactory.getLogger(IndexController.class);
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
 
-    @RequestMapping(value = "/video", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/video")
     public ApiWrapperList<ApiVideoDTO> getVideoList(
             @ModelAttribute("options") OptionsIndexVideo options) {
         LOG.debug("INDEX: Video list - Options: {}", options.toString());
@@ -62,8 +62,7 @@ public class IndexController {
         return wrapper;
     }
 
-    @RequestMapping(value = "/person", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/person")
     public ApiWrapperList<ApiPersonDTO> getPersonList(@ModelAttribute("options") OptionsId options) {
         LOG.debug("INDEX: Person list - Options: {}", options.toString());
 
@@ -74,8 +73,7 @@ public class IndexController {
         return wrapper;
     }
 
-    @RequestMapping(value = "/count", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/count")
     public List<CountTimestamp> getCount(@RequestParam(required = false, defaultValue = "all") String type) {
         List<CountTimestamp> results = new ArrayList<>();
         List<MetaDataType> requiredTypes = new ArrayList<>();
@@ -102,8 +100,7 @@ public class IndexController {
         return results;
     }
 
-    @RequestMapping(value = "/jobs")
-    @ResponseBody
+    @RequestMapping("/jobs")
     public List<CountGeneric> getJobs(@RequestParam(required = false, defaultValue = "all") String job) {
         List<CountGeneric> results;
 

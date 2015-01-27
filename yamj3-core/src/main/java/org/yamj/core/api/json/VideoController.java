@@ -43,7 +43,8 @@ import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
-@RequestMapping("/api/video/**")
+@ResponseBody
+@RequestMapping(value = "/api/video/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class VideoController {
 
     private static final Logger LOG = LoggerFactory.getLogger(VideoController.class);
@@ -58,8 +59,7 @@ public class VideoController {
      * @param options
      * @return
      */
-    @RequestMapping(value = "/movie/{id}", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/movie/{id}")
     public ApiWrapperSingle<ApiVideoDTO> getVideoById(@ModelAttribute("options") OptionsIndexVideo options) {
         ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<>();
         // Set the type to movie
@@ -82,8 +82,7 @@ public class VideoController {
      * @param options
      * @return
      */
-    @RequestMapping(value = "/series/{id}", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/series/{id}")
     public ApiWrapperSingle<ApiVideoDTO> getSeriesById(@ModelAttribute("options") OptionsIndexVideo options) {
         ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<>();
         // Set the type to movie
@@ -106,8 +105,7 @@ public class VideoController {
      * @param options
      * @return
      */
-    @RequestMapping(value = "/season/{id}", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/season/{id}")
     public ApiWrapperSingle<ApiVideoDTO> getSeasonById(@ModelAttribute("options") OptionsIndexVideo options) {
         ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<>();
         // Set the type to movie
@@ -128,8 +126,7 @@ public class VideoController {
      * @param options
      * @return
      */
-    @RequestMapping(value = "/seriesinfo", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/seriesinfo")
     public ApiWrapperList<ApiSeriesInfoDTO> getSeriesInfo(@ModelAttribute("options") OptionsIdArtwork options) {
         ApiWrapperList<ApiSeriesInfoDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
@@ -147,8 +144,7 @@ public class VideoController {
         return wrapper;
     }
 
-    @RequestMapping(value = "/episodes")
-    @ResponseBody
+    @RequestMapping("/episodes")
     public ApiWrapperList<ApiEpisodeDTO> getEpisodes(@ModelAttribute("options") OptionsEpisode options) {
         LOG.info("Getting episodes for seriesId '{}', seasonId '{}', season '{}'",
                 options.getSeriesid() < 0L ? "All" : options.getSeriesid(),

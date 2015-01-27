@@ -83,9 +83,9 @@ public class ConfigDao extends HibernateDao {
         StringBuilder sbSQL = new StringBuilder("from Configuration");
 
         if (StringUtils.isBlank(options.getConfig())) {
-            LOG.debug("Getting all configuration entries");
+            LOG.trace("Getting all configuration entries");
         } else {
-            LOG.debug("Getting configuration for '{}'", options.getConfig());
+            LOG.trace("Getting configuration for '{}'", options.getConfig());
         }
 
         sbSQL.append(options.getSearchString(true));
@@ -111,7 +111,7 @@ public class ConfigDao extends HibernateDao {
         if (StringUtils.isNotBlank(key)) {
             List<Configuration> configList = getConfigurationEntries(key);
             for (Configuration config : configList) {
-                LOG.debug("Deleting key '{}'", key);
+                LOG.trace("Deleting key '{}'", key);
                 currentSession().delete(config);
             }
             LOG.debug("Successfully deleted all keys for '{}'", key);

@@ -35,15 +35,15 @@ import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.Configuration;
 
 @Controller
-@RequestMapping("/api/config/**")
+@ResponseBody
+@RequestMapping(value = "/api/config/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class ConfigController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigController.class);
     @Autowired
     private ConfigService configService;
 
-    @RequestMapping(value = "/list", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/list")
     public ApiWrapperList<Configuration> configList(@ModelAttribute("options") OptionsConfig options) {
         if (StringUtils.isBlank(options.getConfig())) {
             LOG.info("Getting all configuration entries");
@@ -63,8 +63,7 @@ public class ConfigController {
         return wrapper;
     }
 
-    @RequestMapping(value = "/add", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/add")
     public ApiStatus configAdd(
             @RequestParam(required = true, defaultValue = "") String key,
             @RequestParam(required = true, defaultValue = "") String value) {
@@ -82,8 +81,7 @@ public class ConfigController {
         return status;
     }
 
-    @RequestMapping(value = "/delete", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/delete")
     public ApiStatus configDelete(
             @RequestParam(required = true, defaultValue = "") String key) {
         ApiStatus status = new ApiStatus();
@@ -99,8 +97,7 @@ public class ConfigController {
         return status;
     }
 
-    @RequestMapping(value = "/update", method = RequestMethod.GET)
-    @ResponseBody
+    @RequestMapping("/update")
     public ApiStatus configUpdate(
             @RequestParam(required = true, defaultValue = "") String key,
             @RequestParam(required = true, defaultValue = "") String value) {

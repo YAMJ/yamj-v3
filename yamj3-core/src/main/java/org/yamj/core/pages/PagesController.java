@@ -78,7 +78,7 @@ public class PagesController {
      * @param name
      * @return
      */
-    @RequestMapping(value = "/test/{name}")
+    @RequestMapping("/test/{name}")
     public ModelAndView displayTest(@PathVariable String name) {
         ModelAndView view = new ModelAndView("test-" + name);
         YamjInfo yi = sic.getYamjInfo("true");
@@ -87,7 +87,7 @@ public class PagesController {
     }
 
     //<editor-fold defaultstate="collapsed" desc="System Info Page">
-    @RequestMapping(value = "/system-info")
+    @RequestMapping("/system-info")
     public ModelAndView displaySystemInfo() {
         ModelAndView view = new ModelAndView("system-info");
         YamjInfo yi = sic.getYamjInfo("true");
@@ -97,7 +97,7 @@ public class PagesController {
     }
     //</editor-fold>
 
-    @RequestMapping(value = "/count/job")
+    @RequestMapping("/count/job")
     public ModelAndView displayCountJob() {
         ModelAndView view = new ModelAndView("count-job");
         YamjInfo yi = sic.getYamjInfo("false");
@@ -117,7 +117,7 @@ public class PagesController {
     }
 
     //<editor-fold defaultstate="collapsed" desc="Configuration Pages">
-    @RequestMapping(value = "/config/add")
+    @RequestMapping("/config/add")
     public ModelAndView configAddPage() {
         ModelAndView view = new ModelAndView("config-add");
         YamjInfo yi = sic.getYamjInfo("true");
@@ -126,7 +126,7 @@ public class PagesController {
         return view;
     }
 
-    @RequestMapping(value = "/config/add/process")
+    @RequestMapping("/config/add/process")
     public ModelAndView configAdd(@ModelAttribute Configuration config) {
 
         ModelAndView view = new ModelAndView("redirect:/config/list");
@@ -138,7 +138,7 @@ public class PagesController {
         return view;
     }
 
-    @RequestMapping(value = "/config/list")
+    @RequestMapping("/config/list")
     public ModelAndView configList() {
         ModelAndView view = new ModelAndView("config-list");
 
@@ -191,7 +191,7 @@ public class PagesController {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Player Path Pages">
-    @RequestMapping(value = "/player/add")
+    @RequestMapping("/player/add")
     public ModelAndView playerAddPage() {
         ModelAndView view = new ModelAndView("player-add");
         YamjInfo yi = sic.getYamjInfo("true");
@@ -200,7 +200,7 @@ public class PagesController {
         return view;
     }
 
-    @RequestMapping(value = "/player/add/process")
+    @RequestMapping("/player/add/process")
     public ModelAndView playerAdd(@ModelAttribute PlayerPathOld player) {
 
         ModelAndView view = new ModelAndView("redirect:/player/list");
@@ -212,7 +212,7 @@ public class PagesController {
         return view;
     }
 
-    @RequestMapping(value = "/player/list")
+    @RequestMapping("/player/list")
     public ModelAndView playerList() {
         ModelAndView view = new ModelAndView("player-list");
 
@@ -283,7 +283,7 @@ public class PagesController {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Skins Pages">
-    @RequestMapping(value = "/skin-info")
+    @RequestMapping("/skin-info")
     public ModelAndView skinInfo() {
         ModelAndView view = new ModelAndView("skin-info", "skin-entity", new Skin());
         List<String> dirNames = fileStorageService.getDirectoryList(StorageType.SKIN, ".");
@@ -306,7 +306,7 @@ public class PagesController {
         return view;
     }
 
-    @RequestMapping(value = "/skin-download")
+    @RequestMapping("/skin-download")
     public ModelAndView skinDownload(@ModelAttribute Skin skin) {
         ModelAndView view = new ModelAndView("skin-download");
         view.addObject("yi", sic.getYamjInfo("true"));
