@@ -175,6 +175,21 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(Studio.class, sqlScalars, wrapper);
     }
 
+    public Country getCountry(String name) {
+        return getByNaturalIdCaseInsensitive(Country.class, "name", name);
+    }
+  
+    public synchronized void storeNewCountry(String name, String targetXml) {
+      Country country = this.getCountry(name);
+        if (country == null) {
+            // create new country
+            country = new Country();
+            country.setName(name);
+            country.setTargetXml(targetXml);
+            this.saveEntity(country);
+        }
+    }
+
     public Certification getCertification(String country, String certificate) {
         StringBuilder sb = new StringBuilder();
         sb.append("from Certification ");

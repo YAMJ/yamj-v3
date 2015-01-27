@@ -43,6 +43,7 @@ import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.artwork.ArtworkTools;
+import org.yamj.core.tools.CountryXmlTools;
 import org.yamj.core.tools.GenreXmlTools;
 import org.yamj.core.tools.MetadataTools;
 
@@ -165,6 +166,19 @@ public class MetadataStorageService {
             }
         }
         
+        if (CollectionUtils.isNotEmpty(videoData.getCountryNames())) {
+            // store new countries
+            for (String countryName : videoData.getCountryNames()) {
+                try {
+                    String targetXml = CountryXmlTools.getMasterCountry(countryName);
+                    this.commonDao.storeNewCountry(countryName, targetXml);
+                } catch (Exception ex) {
+                    LOG.error("Failed to store country '{}', error: {}", countryName, ex.getMessage());
+                    LOG.trace("Storage error", ex);
+                }
+            }
+        }
+
         if (MapUtils.isNotEmpty(videoData.getCertificationInfos())) {
             // store new certifications
             for (Entry<String,String> entry : videoData.getCertificationInfos().entrySet()) {
@@ -230,6 +244,19 @@ public class MetadataStorageService {
                     this.commonDao.storeNewStudio(studioName);
                 } catch (Exception ex) {
                     LOG.error("Failed to store studio '{}', error: {}", studioName, ex.getMessage());
+                    LOG.trace("Storage error", ex);
+                }
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(series.getCountryNames())) {
+            // store new countries
+            for (String countryName : series.getCountryNames()) {
+                try {
+                    String targetXml = CountryXmlTools.getMasterCountry(countryName);
+                    this.commonDao.storeNewCountry(countryName, targetXml);
+                } catch (Exception ex) {
+                    LOG.error("Failed to store country '{}', error: {}", countryName, ex.getMessage());
                     LOG.trace("Storage error", ex);
                 }
             }
@@ -331,6 +358,9 @@ public class MetadataStorageService {
         // update studios
         updateStudios(videoData);
 
+        // update countries
+        updateCountries(videoData);
+
         // update certifications
         updateCertifications(videoData);
 
@@ -358,6 +388,9 @@ public class MetadataStorageService {
 
         // update studios
         updateStudios(series);
+
+        // update countries
+        updateCountries(series);
 
         // update certifications
         updateCertifications(series);
@@ -417,46 +450,6 @@ public class MetadataStorageService {
     }
 
     /**
-     * Update certifications for VideoData from the database
-     *
-     * @param videoData
-     */
-    private void updateCertifications(VideoData videoData) {
-        if (MapUtils.isEmpty(videoData.getCertificationInfos())) {
-            return;
-        }
-
-        Set<Certification> certifications = new LinkedHashSet<>();
-        for (Entry<String,String> entry : videoData.getCertificationInfos().entrySet()) {
-            Certification certification = commonDao.getCertification(entry.getKey(), entry.getValue());
-            if (certification != null) {
-                certifications.add(certification);
-            }
-        }
-        videoData.setCertifications(certifications);
-    }
-
-    /**
-     * Update certifications for Series from the database
-     *
-     * @param series
-     */
-    private void updateCertifications(Series series) {
-        if (MapUtils.isEmpty(series.getCertificationInfos())) {
-            return;
-        }
-
-        Set<Certification> certifications = new LinkedHashSet<>();
-        for (Entry<String,String> entry : series.getCertificationInfos().entrySet()) {
-            Certification certification = commonDao.getCertification(entry.getKey(), entry.getValue());
-            if (certification != null) {
-                certifications.add(certification);
-            }
-        }
-        series.setCertifications(certifications);
-    }
-
-    /**
      * Update studios for VideoData from the database
      *
      * @param videoData
@@ -494,6 +487,86 @@ public class MetadataStorageService {
             }
         }
         series.setStudios(studios);
+    }
+    
+    /**
+     * Update countries for VideoData from the database
+     *
+     * @param series
+     */
+    private void updateCountries(VideoData videoData) {
+        if (CollectionUtils.isEmpty(videoData.getCountryNames())) {
+            return;
+        }
+
+        Set<Country> countries = new LinkedHashSet<>();
+        for (String countryName : videoData.getCountryNames()) {
+            Country country = commonDao.getCountry(countryName);
+            if (country != null) {
+                countries.add(country);
+            }
+        }
+        videoData.setCountries(countries);
+    }
+
+    /**
+     * Update countries for Series from the database
+     *
+     * @param series
+     */
+    private void updateCountries(Series series) {
+        if (CollectionUtils.isEmpty(series.getCountryNames())) {
+            return;
+        }
+
+        Set<Country> countries = new LinkedHashSet<>();
+        for (String countryName : series.getCountryNames()) {
+            Country country = commonDao.getCountry(countryName);
+            if (country != null) {
+                countries.add(country);
+            }
+        }
+        series.setCountries(countries);
+    }
+
+    /**
+     * Update certifications for VideoData from the database
+     *
+     * @param videoData
+     */
+    private void updateCertifications(VideoData videoData) {
+        if (MapUtils.isEmpty(videoData.getCertificationInfos())) {
+            return;
+        }
+
+        Set<Certification> certifications = new LinkedHashSet<>();
+        for (Entry<String,String> entry : videoData.getCertificationInfos().entrySet()) {
+            Certification certification = commonDao.getCertification(entry.getKey(), entry.getValue());
+            if (certification != null) {
+                certifications.add(certification);
+            }
+        }
+        videoData.setCertifications(certifications);
+    }
+
+    /**
+     * Update certifications for Series from the database
+     *
+     * @param series
+     */
+    private void updateCertifications(Series series) {
+        if (MapUtils.isEmpty(series.getCertificationInfos())) {
+            return;
+        }
+
+        Set<Certification> certifications = new LinkedHashSet<>();
+        for (Entry<String,String> entry : series.getCertificationInfos().entrySet()) {
+            Certification certification = commonDao.getCertification(entry.getKey(), entry.getValue());
+            if (certification != null) {
+                certifications.add(certification);
+            }
+        }
+        series.setCertifications(certifications);
     }
 
     /**

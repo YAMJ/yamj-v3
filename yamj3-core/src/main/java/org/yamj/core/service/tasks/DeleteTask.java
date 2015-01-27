@@ -122,6 +122,15 @@ public class DeleteTask implements ITask {
             }
         }
 
+        // delete orphan countries if allowed
+        if (this.configService.getBooleanProperty("yamj3.delete.orphan.country", Boolean.TRUE)) {
+            try {
+                this.commonStorageService.deleteOrphanCountries();
+            } catch (Exception ex) {
+                LOG.warn("Failed to delete orphan countries", ex);
+            }
+        }
+
         // delete orphan certifications if allowed
         if (this.configService.getBooleanProperty("yamj3.delete.orphan.certification", Boolean.TRUE)) {
             try {
@@ -131,7 +140,7 @@ public class DeleteTask implements ITask {
             }
         }
 
-        // delete orphan certifications if allowed
+        // delete orphan boxed sets if allowed
         if (this.configService.getBooleanProperty("yamj3.delete.orphan.boxedset", Boolean.TRUE)) {
             try {
                 List<Long> ids = this.commonStorageService.getOrphanBoxedSets();
@@ -139,8 +148,7 @@ public class DeleteTask implements ITask {
                     try {
                         filesToDelete.addAll(this.commonStorageService.deleteBoxedSet(id));
                     } catch (Exception ex) {
-                        LOG.warn("Failed to delete boxed set ID: {}", id);
-                        LOG.error("Deletion error", ex);
+                        LOG.warn("Failed to delete boxed set ID: " + id, ex);
                     }
                 }
             } catch (Exception ex) {
