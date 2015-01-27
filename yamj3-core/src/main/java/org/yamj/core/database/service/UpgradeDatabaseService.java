@@ -27,25 +27,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.yamj.core.database.dao.FixDatabaseDao;
+import org.yamj.core.database.dao.UpgradeDatabaseDao;
 
 @Component
-public class FixDatabaseService {
+public class UpgradeDatabaseService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FixDatabaseService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UpgradeDatabaseService.class);
 
     @Autowired
-    private FixDatabaseDao fixDatabaseDao;
+    private UpgradeDatabaseDao upgradeDatabaseDao;
 
     @PostConstruct
     public void init() {
-        // FIX COUNTRIES
+        // Issues: #151
+        // Date:   28.01.2015
+        try {
+            upgradeDatabaseDao.deleteOverrideFlagCOUNTRY();
+        } catch (Exception ex) {
+            LOG.trace("Failed upgrade 'deleteOverrideFlagCOUNTRY'", ex);
+        }
+
         // Issues: #150, #151
         // Date:   28.01.2015
         try {
-            fixDatabaseDao.fixCountryChanges();
+            upgradeDatabaseDao.fixVideoDataCountries();
         } catch (Exception ex) {
-            LOG.trace("Failed fix for country changes", ex);
+            LOG.trace("Failed upgrade 'fixVideoDataCountries'", ex);
         }
     }
 }

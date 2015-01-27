@@ -28,28 +28,33 @@ import org.yamj.core.hibernate.HibernateDao;
 
 @Transactional
 @Repository("fixDatabaseDao")
-public class FixDatabaseDao extends HibernateDao {
+public class UpgradeDatabaseDao extends HibernateDao {
 
+    /**
+     * Issues: #151
+     * Date:   28.01.2015
+     */
+    public void deleteOverrideFlagCOUNTRY() {
+        currentSession()
+            .createSQLQuery("DELETE FROM videodata_override WHERE flag='COUNTRY'")
+            .executeUpdate();
+    }
+    
     /**
      * Issues: #150, #151
      * Date:   28.01.2015
      */
-    public void fixCountryChanges() {
+    public void fixVideoDataCountries() {
         StringBuilder sb = new StringBuilder();
         
-        // drop COUNTRY override flag from
-        sb.append("DELETE FROM videodata_override WHERE flag='COUNTRY'");
-        currentSession().createSQLQuery(sb.toString()).executeUpdate();
-        
         // insert countries from existing video data country
-        sb.setLength(0);
         sb.append("INSERT INTO country(name) ");
         sb.append("SELECT distinct vd.country FROM videodata vd ");
         sb.append("WHERE vd.country is not null ");
         sb.append("AND not exists(select 1 from country c where c.name=vd.country)");
         currentSession().createSQLQuery(sb.toString()).executeUpdate();
         
-        // make dependencies between videodata and country
+        // make dependencies between video data and country
         sb.setLength(0);
         sb.append("INSERT INTO videodata_countries(data_id, country_id) ");
         sb.append("SELECT vd.id,c.id ");
@@ -58,6 +63,7 @@ public class FixDatabaseDao extends HibernateDao {
         sb.append("AND not exists(select 1 from videodata_countries vc where vc.data_id=vd.id and vc.country_id=c.id)");
         currentSession().createSQLQuery(sb.toString()).executeUpdate();
         
+        // drop obsolete column country
         sb.setLength(0);
         sb.append("ALTER TABLE videodata DROP column country");
         currentSession().createSQLQuery(sb.toString()).executeUpdate();
