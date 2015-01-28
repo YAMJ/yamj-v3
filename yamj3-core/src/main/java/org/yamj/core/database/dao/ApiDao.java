@@ -738,7 +738,7 @@ public class ApiDao extends HibernateDao {
 
             sbSQL.append("SELECT 1 FROM mediafile mf ");
             sbSQL.append("JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
-            sbSQL.append("JOIN videodata vd ON mv.mediafile_id=mv.videodata_id ");
+            sbSQL.append("JOIN videodata vd ON mv.videodata_id=vd.id ");
             sbSQL.append("JOIN season sea ON sea.id=vd.season_id ");
             sbSQL.append("WHERE sea.series_id=ser.id ");
             sbSQL.append("AND mf.extra=:extra ");
@@ -1030,10 +1030,10 @@ public class ApiDao extends HibernateDao {
 
             sbSQL.append("SELECT 1 FROM mediafile mf ");
             sbSQL.append("JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
-            sbSQL.append("JOIN videodata vd ON mv.mediafile_id=mv.videodata_id ");
+            sbSQL.append("JOIN videodata vd ON mv.videodata_id=vd.id ");
             sbSQL.append("WHERE vd.season_id=sea.id ");
             sbSQL.append("AND mf.extra=:extra ");
-            sbSQL.append("AND lower(mf.video_source)=:videSource)");
+            sbSQL.append("AND lower(mf.video_source)=:videoSource)");
         }
 
         // check rating
