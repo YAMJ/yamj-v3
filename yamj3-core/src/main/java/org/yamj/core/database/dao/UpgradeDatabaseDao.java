@@ -45,9 +45,14 @@ public class UpgradeDatabaseDao extends HibernateDao {
      * Date:   28.01.2015
      */
     public void patchVideoDataCountries() {
-        StringBuilder sb = new StringBuilder();
+        Object object = currentSession().createSQLQuery("SHOW COLUMNS FROM videodata like 'country'").uniqueResult();
+        if (object == null) {
+            // patch already done; nothing to do
+            return;
+        }
         
         // insert countries from existing video data country
+        StringBuilder sb = new StringBuilder();
         sb.append("INSERT INTO country(name) ");
         sb.append("SELECT distinct vd.country FROM videodata vd ");
         sb.append("WHERE vd.country is not null ");
