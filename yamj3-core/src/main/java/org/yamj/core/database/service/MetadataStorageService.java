@@ -750,9 +750,9 @@ public class MetadataStorageService {
                 // updated cast entry
                 castCrew.setRole(StringUtils.abbreviate(dto.getRole(), 255));
                 castCrew.setOrdering(ordering++);
+                // remove from credits to delete
+                deleteCredits.remove(castCrew);
             }
-            // remove from credits to delete
-            deleteCredits.remove(castCrew);
         }
         // delete orphans
         videoData.getCredits().removeAll(deleteCredits);
