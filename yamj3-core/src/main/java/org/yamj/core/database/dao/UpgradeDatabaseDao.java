@@ -44,7 +44,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
      * Issues: #150, #151
      * Date:   28.01.2015
      */
-    public void fixVideoDataCountries() {
+    public void patchVideoDataCountries() {
         StringBuilder sb = new StringBuilder();
         
         // insert countries from existing video data country

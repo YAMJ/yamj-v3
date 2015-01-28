@@ -50,9 +50,9 @@ public class UpgradeDatabaseService {
         // Issues: #150, #151
         // Date:   28.01.2015
         try {
-            upgradeDatabaseDao.fixVideoDataCountries();
+            upgradeDatabaseDao.patchVideoDataCountries();
         } catch (Exception ex) {
-            LOG.trace("Failed upgrade 'fixVideoDataCountries'", ex);
+            LOG.trace("Failed upgrade 'patchVideoDataCountries'", ex);
         }
     }
 }
