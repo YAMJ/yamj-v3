@@ -635,9 +635,9 @@ public class MetadataStorageService {
     }
 
     /**
-     * Update awards for VideoData from the database
+     * Update awards for Series from the database
      *
-     * @param videoData
+     * @param series
      */
     private void updateAwards(Series series) {
         if (CollectionUtils.isEmpty(series.getAwardDTOS())) {
