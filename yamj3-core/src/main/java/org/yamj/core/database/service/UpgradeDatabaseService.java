@@ -42,9 +42,9 @@ public class UpgradeDatabaseService {
         // Issues: #151
         // Date:   28.01.2015
         try {
-            upgradeDatabaseDao.deleteOverrideFlagCOUNTRY();
+            upgradeDatabaseDao.patchCountryOverrideFlag();
         } catch (Exception ex) {
-            LOG.trace("Failed upgrade 'deleteOverrideFlagCOUNTRY'", ex);
+            LOG.trace("Failed upgrade 'patchCountryOverrideFlag'", ex);
         }
 
         // Issues: #150, #151

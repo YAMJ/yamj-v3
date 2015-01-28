@@ -30,13 +30,47 @@ import org.yamj.core.hibernate.HibernateDao;
 @Repository("fixDatabaseDao")
 public class UpgradeDatabaseDao extends HibernateDao {
 
+    private boolean existsColumn(String table, String column) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT * FROM information_schema.COLUMNS ");
+        sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
+        sb.append("AND TABLE_NAME = '").append(table).append("' ");
+        sb.append("AND COLUMN_NAME = '").append(column).append("'");
+        Object object = currentSession().createSQLQuery(sb.toString()).uniqueResult();
+        return (object != null);
+    }
+
+    @SuppressWarnings("unused")
+    private boolean existsForeignKey(String table, String foreignKey) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT * FROM information_schema.TABLE_CONSTRAINTS ");
+        sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
+        sb.append("AND TABLE_NAME = '").append(table).append("' ");
+        sb.append("AND CONSTRAINT_TYPE = 'FOREIGN KEY' ");
+        sb.append("AND CONSTRAINT_NAME = '").append(foreignKey).append("'");
+        Object object = currentSession().createSQLQuery(sb.toString()).uniqueResult();
+        return (object != null);
+    }
+
+    @SuppressWarnings("unused")
+    private boolean existsUniqueIndex(String table, String indexName) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT * FROM information_schema.TABLE_CONSTRAINTS ");
+        sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
+        sb.append("AND TABLE_NAME = '").append(table).append("' ");
+        sb.append("AND CONSTRAINT_TYPE = 'UNIQUE' ");
+        sb.append("AND CONSTRAINT_NAME = '").append(indexName).append("'");
+        Object object = currentSession().createSQLQuery(sb.toString()).uniqueResult();
+        return (object != null);
+    }
+
     /**
      * Issues: #151
      * Date:   28.01.2015
      */
-    public void deleteOverrideFlagCOUNTRY() {
+    public void patchCountryOverrideFlag() {
         currentSession()
-            .createSQLQuery("DELETE FROM videodata_override WHERE flag='COUNTRY'")
+            .createSQLQuery("UPDATE videodata_override SET flag='COUNTRIES' WHERE flag='COUNTRY'")
             .executeUpdate();
     }
     
@@ -45,11 +79,8 @@ public class UpgradeDatabaseDao extends HibernateDao {
      * Date:   28.01.2015
      */
     public void patchVideoDataCountries() {
-        Object object = currentSession().createSQLQuery("SHOW COLUMNS FROM videodata like 'country'").uniqueResult();
-        if (object == null) {
-            // patch already done; nothing to do
-            return;
-        }
+        // check if patch is needed
+        if (!existsColumn("videodata", "country")) return;
         
         // insert countries from existing video data country
         StringBuilder sb = new StringBuilder();
