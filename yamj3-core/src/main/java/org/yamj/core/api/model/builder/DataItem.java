@@ -45,6 +45,7 @@ public enum DataItem {
     FILMOGRAPHY_SCANNED(false),
     MEMBER(false),
     FILES(false),
+    AWARD(false),
     UNKNOWN(false);
     
     private final boolean column; // Is the DataItem a column or a collection (e.g. artwork, genres, etc)

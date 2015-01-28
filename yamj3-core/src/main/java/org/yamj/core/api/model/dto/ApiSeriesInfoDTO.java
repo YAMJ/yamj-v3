@@ -46,8 +46,10 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
     private List<Studio> studios = new ArrayList<>();
     private List<ApiTargetDTO> countries = new ArrayList<>();
     private List<Certification> certifications = new ArrayList<>();
+    private List<ApiAwardDTO> awards = new ArrayList<>();
     private List<ApiRatingDTO> ratings = new ArrayList<>();
     private List<ApiSeasonInfoDTO> seasonList = new ArrayList<>();
+    
     private Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<>(ArtworkType.class);
 
     public Long getSeriesId() {
@@ -168,6 +170,18 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
 
     public int getRatingCount() {
         return ratings.size();
+    }
+
+    public List<ApiAwardDTO> getAwards() {
+        return awards;
+    }
+
+    public void setAwards(List<ApiAwardDTO> awards) {
+        this.awards = awards;
+    }
+
+    public int getAwardCount() {
+        return awards.size();
     }
 
     public List<ApiSeasonInfoDTO> getSeasonList() {

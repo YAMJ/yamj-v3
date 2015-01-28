@@ -1698,7 +1698,18 @@ public class ApiDao extends HibernateDao {
                     episode.setCertifications(certifications);
                 }
             }
-
+            if (options.hasDataItem(DataItem.AWARD)) {
+                // use series awards
+                Map<Long, List<ApiAwardDTO>> map = new HashMap<>();
+                for (ApiEpisodeDTO episode : results) {
+                    List<ApiAwardDTO> awards = map.get(episode.getSeriesId());
+                    if (awards == null) {
+                        awards = getAwardsForId(MetaDataType.SERIES, episode.getSeriesId());
+                        map.put(episode.getSeriesId(), awards);
+                    }
+                    episode.setAwards(awards);
+                }
+            }
             if (options.hasDataItem(DataItem.RATING)) {
                 // use episode certifications
                 for (ApiEpisodeDTO episode : results) {
@@ -1799,6 +1810,11 @@ public class ApiDao extends HibernateDao {
             if (params.hasDataItem(DataItem.RATING)) {
                 LOG.trace("Adding ratings for ID {}", options.getId());
                 video.setRatings(getRatingsForId(type, options.getId()));
+            }
+
+            if (options.hasDataItem(DataItem.AWARD)) {
+              LOG.trace("Adding awards for ID {}", options.getId());
+              video.setAwards(getAwardsForId(type, options.getId()));
             }
 
             if (params.hasDataItem(DataItem.ARTWORK)) {
@@ -2022,7 +2038,7 @@ public class ApiDao extends HibernateDao {
      * @param id
      * @return
      */
-    public List<Studio> getStudiosForId(MetaDataType type, Long id) {
+    private List<Studio> getStudiosForId(MetaDataType type, Long id) {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT DISTINCT s.id, s.name ");
         sqlScalars.addToSql("FROM studio s ");
@@ -2051,7 +2067,7 @@ public class ApiDao extends HibernateDao {
      * @param id
      * @return
      */
-    public List<ApiTargetDTO> getCountriesForId(MetaDataType type, Long id) {
+    private List<ApiTargetDTO> getCountriesForId(MetaDataType type, Long id) {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT DISTINCT ");
         sqlScalars.addToSql("CASE ");
@@ -2089,7 +2105,7 @@ public class ApiDao extends HibernateDao {
      * @param id
      * @return
      */
-    public List<Certification> getCertificationsForId(MetaDataType type, Long id) {
+    private List<Certification> getCertificationsForId(MetaDataType type, Long id) {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT DISTINCT c.id, c.country, c.certificate ");
         sqlScalars.addToSql("FROM certification c ");
@@ -2110,6 +2126,43 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addParameters(ID, id);
 
         return executeQueryWithTransform(Certification.class, sqlScalars, null);
+    }
+
+
+    /**
+     * Get a list of the awards for a given video ID
+     *
+     * @param type
+     * @param id
+     * @return
+     */
+    private List<ApiAwardDTO> getAwardsForId(MetaDataType type, Long id) {
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT DISTINCT e.name as event, e.sourcedb as source, a.award, a.event_year as year ");
+        if (type == MetaDataType.SERIES) {
+            sqlScalars.addToSql("FROM series_awards a ");
+            sqlScalars.addToSql("JOIN award_event ae ON a.event_id=ae.id ");
+            sqlScalars.addToSql("WHERE a.series_id=:id ");
+        } else if (type == MetaDataType.SEASON) {
+            sqlScalars.addToSql("FROM series_awards a ");
+            sqlScalars.addToSql("JOIN season sea ON a.series_id=sea.series_id ");
+            sqlScalars.addToSql("JOIN award_event ae ON a.event_id=ae.id ");
+            sqlScalars.addToSql("WHERE sea.id=:id ");
+        } else {
+            // defaults to movie
+            sqlScalars.addToSql("FROM movie_awards a ");
+            sqlScalars.addToSql("JOIN award_event ae ON a.event_id=ae.id ");
+            sqlScalars.addToSql("WHERE a.videodata_id=:id ");
+        }
+        sqlScalars.addToSql("ORDER BY event, year");
+        
+        sqlScalars.addScalar("event", StringType.INSTANCE);
+        sqlScalars.addScalar("source", StringType.INSTANCE);
+        sqlScalars.addScalar("award", StringType.INSTANCE);
+        sqlScalars.addScalar("year", IntegerType.INSTANCE);
+        sqlScalars.addParameters(ID, id);
+
+        return executeQueryWithTransform(ApiAwardDTO.class, sqlScalars, null);
     }
 
     /**
@@ -2168,7 +2221,7 @@ public class ApiDao extends HibernateDao {
      * @param id
      * @return
      */
-    public List<ApiPersonDTO> getCastForId(MetaDataType type, Long id, List<DataItem> dataItems, Set<String> jobs) {
+    private List<ApiPersonDTO> getCastForId(MetaDataType type, Long id, List<DataItem> dataItems, Set<String> jobs) {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT DISTINCT p.id,");
         sqlScalars.addToSql("p.name,");
@@ -2224,7 +2277,7 @@ public class ApiDao extends HibernateDao {
      * @param id
      * @return
      */
-    public Map<Long, List<ApiArtworkDTO>> getArtworkForId(MetaDataType type, Long id) {
+    private Map<Long, List<ApiArtworkDTO>> getArtworkForId(MetaDataType type, Long id) {
         Set<String> artworkRequired = new HashSet<>();
         for (ArtworkType at : ArtworkType.values()) {
             artworkRequired.add(at.toString());
@@ -2348,6 +2401,10 @@ public class ApiDao extends HibernateDao {
 
             if (options.hasDataItem(DataItem.RATING)) {
                 series.setRatings(getRatingsForId(MetaDataType.SERIES, id));
+            }
+
+            if (options.hasDataItem(DataItem.AWARD)) {
+                series.setAwards(getAwardsForId(MetaDataType.SERIES, id));
             }
 
             if (options.hasDataItem(DataItem.ARTWORK)) {
