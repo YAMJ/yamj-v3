@@ -37,6 +37,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.ForeignKey;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
@@ -183,6 +184,9 @@ public class VideoData extends AbstractMetadata {
 
     @Transient
     private Map<String, String> fanartURLS = new HashMap<>(0);
+
+    @Transient
+    private Set<AwardDTO> awardDTOS = new HashSet<>(0);
 
     // CONSTRUCTORS
     public VideoData() {
@@ -598,7 +602,7 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void addPosterURL(String posterURL, String source) {
-        if (StringUtils.isNotBlank(posterURL)) {
+        if (StringUtils.isNotBlank(posterURL) && StringUtils.isNotBlank(source)) {
             this.posterURLS.put(posterURL.trim(), source);
         }
     }
@@ -608,8 +612,18 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void addFanartURL(String fanartURL, String source) {
-        if (StringUtils.isNotBlank(fanartURL)) {
+        if (StringUtils.isNotBlank(fanartURL) && StringUtils.isNotBlank(source)) {
             this.fanartURLS.put(fanartURL.trim(), source);
+        }
+    }
+
+    public Set<AwardDTO> getAwardDTOS() {
+        return awardDTOS;
+    }
+
+    public void addAward(String event, int year, String award, String source) {
+        if (StringUtils.isNotBlank(event) && StringUtils.isNotBlank(award) && StringUtils.isNotBlank(source)) {
+            this.awardDTOS.add(new AwardDTO(event, source, year, award));
         }
     }
 

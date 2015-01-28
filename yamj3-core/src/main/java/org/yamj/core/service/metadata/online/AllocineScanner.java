@@ -243,6 +243,15 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
             }
         }
 
+        // add awards
+        if (configServiceWrapper.getBooleanProperty("allocine.movie.awards", Boolean.FALSE)) {
+            if (CollectionUtils.isNotEmpty(movieInfos.getFestivalAwards())) {
+                for (FestivalAward festivalAward : movieInfos.getFestivalAwards()) {
+                    videoData.addAward(festivalAward.getFestival(), festivalAward.getYear(), festivalAward.getName(), SCANNER_ID);
+                }
+            }
+        }
+        
         return ScanResult.OK;
     }
 
@@ -368,6 +377,10 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
             series.setOutline(tvSeriesInfos.getSynopsisShort(), SCANNER_ID);
         }
 
+        if (OverrideTools.checkOverwriteGenres(series, SCANNER_ID)) {
+            series.setGenreNames(tvSeriesInfos.getGenres(), SCANNER_ID);
+        }
+
         if (OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
             if (tvSeriesInfos.getOriginalChannel() != null) {
                 Set<String> studioNames = Collections.singleton(tvSeriesInfos.getOriginalChannel());
@@ -375,10 +388,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
             }
         }
 
-        // TODO series country
-        
-        if (OverrideTools.checkOverwriteGenres(series, SCANNER_ID)) {
-            series.setGenreNames(tvSeriesInfos.getGenres(), SCANNER_ID);
+        if (OverrideTools.checkOverwriteCountries(series, SCANNER_ID)) {
+            series.setCountryNames(tvSeriesInfos.getNationalities(), SCANNER_ID);
         }
 
         // allocine rating
@@ -388,6 +399,15 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         if (CollectionUtils.isNotEmpty(tvSeriesInfos.getPosterUrls()))  {
             for (String posterURL : tvSeriesInfos.getPosterUrls()) {
                 series.addPosterURL(posterURL, SCANNER_ID);
+            }
+        }
+
+        // add awards
+        if (configServiceWrapper.getBooleanProperty("allocine.tvshow.awards", Boolean.FALSE)) {
+            if (CollectionUtils.isNotEmpty(tvSeriesInfos.getFestivalAwards())) {
+                for (FestivalAward festivalAward : tvSeriesInfos.getFestivalAwards()) {
+                    series.addAward(festivalAward.getFestival(), festivalAward.getYear(), festivalAward.getName(), SCANNER_ID);
+                }
             }
         }
 

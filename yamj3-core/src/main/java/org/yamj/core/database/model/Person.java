@@ -359,7 +359,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     }
 
     public void addPhotoURL(String photoURL, String source) {
-        if (StringUtils.isNotBlank(photoURL)) {
+        if (StringUtils.isNotBlank(photoURL) && StringUtils.isNotBlank(source)) {
             this.photoURLS.put(photoURL, source);
         }
     }
