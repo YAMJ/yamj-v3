@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.database.model;
+package org.yamj.core.database.model.award;
 
 import java.io.Serializable;
 import javax.persistence.Column;
@@ -29,69 +29,58 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.database.model.Series;
 
 @Entity
-@Table(name = "cast_crew")
-public class CastCrew implements Serializable {
+@Table(name = "series_awards")
+public class SeriesAward implements Serializable {
 
-    private static final long serialVersionUID = -3941301942248344131L;
+    private static final long serialVersionUID = 3672505190965714376L;
 
     @EmbeddedId
-    private CastCrewPK castCrewPK;
+    private SeriesAwardPK seriesAwardPK;
 
-    @Column(name = "role", length = 255)
-    private String role;
-
-    @Column(name = "ordering", nullable = false)
-    private int ordering;
-
-    public CastCrew() {
+    @Column(name = "event_year", nullable = false)
+    private int eventYear = -1;
+    
+    public SeriesAward() {
     }
 
-    public CastCrew(Person person, VideoData videoData, JobType jobType) {
-        setCastCrewPK(new CastCrewPK(person, videoData, jobType));
+    public SeriesAward(Series series, AwardEvent event, String award) {
+      setSeriesAwardPK(new SeriesAwardPK(series, event, award));
     }
 
     // GETTER and SETTER
-    public CastCrewPK getCastCrewPK() {
-        return castCrewPK;
+    public SeriesAwardPK getSeriesAwardPK() {
+        return seriesAwardPK;
+    }
+  
+    public void setSeriesAwardPK(SeriesAwardPK seriesAwardPK) {
+        this.seriesAwardPK = seriesAwardPK;
     }
 
-    private void setCastCrewPK(CastCrewPK castCrewPK) {
-        this.castCrewPK = castCrewPK;
+    public int getEventYear() {
+        return eventYear;
     }
 
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public int getOrdering() {
-        return ordering;
-    }
-
-    public void setOrdering(int ordering) {
-        this.ordering = ordering;
+    public void setEventYear(int eventYear) {
+        this.eventYear = eventYear;
     }
 
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-                .append(getCastCrewPK())
+                .append(getSeriesAwardPK())
                 .toHashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof CastCrew) {
-            final CastCrew other = (CastCrew) obj;
+        if (obj instanceof SeriesAward) {
+            final SeriesAward other = (SeriesAward) obj;
             return new EqualsBuilder()
-                    .append(getCastCrewPK(), other.getCastCrewPK())
+                    .append(getSeriesAwardPK(), other.getSeriesAwardPK())
                     .isEquals();
         }
         return false;

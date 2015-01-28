@@ -39,6 +39,9 @@ import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.award.AwardEvent;
+import org.yamj.core.database.model.award.MovieAward;
+import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
@@ -385,9 +388,6 @@ public class MetadataStorageService {
         // update countries
         updateCountries(videoData);
 
-        // update certifications
-        updateCertifications(videoData);
-
         // update cast and crew
         updateCastCrew(videoData);
         
@@ -396,6 +396,9 @@ public class MetadataStorageService {
         
         // update certifications
         updateCertifications(videoData);
+        
+        // update awards
+        updateAwards(videoData);
         
         // update artwork
         updateLocatedArtwork(videoData);
@@ -418,6 +421,9 @@ public class MetadataStorageService {
 
         // update certifications
         updateCertifications(series);
+        
+        // update awards
+        updateAwards(series);
         
         // update artwork
         updateLocatedArtwork(series);
@@ -591,6 +597,76 @@ public class MetadataStorageService {
             }
         }
         series.setCertifications(certifications);
+    }
+
+    /**
+     * Update awards for VideoData from the database
+     *
+     * @param videoData
+     */
+    private void updateAwards(VideoData videoData) {
+        if (CollectionUtils.isEmpty(videoData.getAwardDTOS())) {
+            return;
+        }
+
+        List<MovieAward> deleteAwards = new ArrayList<>(videoData.getMovieAwards());
+
+        for (AwardDTO dto : videoData.getAwardDTOS()) {
+            AwardEvent event = this.commonDao.getAwardEvent(dto.getEvent(), dto.getSource());
+            if (event != null) {
+                MovieAward award = new MovieAward(videoData, event, dto.getAward());
+                int index = videoData.getMovieAwards().indexOf(award);
+                
+                if (index < 0) {
+                    // new award
+                    award.setEventYear(dto.getYear());
+                    videoData.getMovieAwards().add(award);
+                } else if (dto.getYear() > 0) {
+                    // updates stored award
+                    MovieAward stored = videoData.getMovieAwards().get(index);
+                    stored.setEventYear(dto.getYear());
+                    // remove from credits to delete
+                    deleteAwards.remove(stored);
+                }
+            }
+        }
+        // delete orphans
+        videoData.getMovieAwards().removeAll(deleteAwards);
+    }
+
+    /**
+     * Update awards for VideoData from the database
+     *
+     * @param videoData
+     */
+    private void updateAwards(Series series) {
+        if (CollectionUtils.isEmpty(series.getAwardDTOS())) {
+            return;
+        }
+
+        List<SeriesAward> deleteAwards = new ArrayList<>(series.getSeriesAwards());
+
+        for (AwardDTO dto : series.getAwardDTOS()) {
+            AwardEvent event = this.commonDao.getAwardEvent(dto.getEvent(), dto.getSource());
+            if (event != null) {
+                SeriesAward award = new SeriesAward(series, event, dto.getAward());
+                int index = series.getSeriesAwards().indexOf(award);
+                
+                if (index < 0) {
+                    // new award
+                    award.setEventYear(dto.getYear());
+                    series.getSeriesAwards().add(award);
+                } else if (dto.getYear() > 0) {
+                    // updates stored award
+                    SeriesAward stored = series.getSeriesAwards().get(index);
+                    stored.setEventYear(dto.getYear());
+                    // remove from credits to delete
+                    deleteAwards.remove(stored);
+                }
+            }
+        }
+        // delete orphans
+        series.getSeriesAwards().removeAll(deleteAwards);
     }
 
     /**

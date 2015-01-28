@@ -36,6 +36,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.ForeignKey;
+import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
@@ -118,6 +119,9 @@ public class Series extends AbstractMetadata {
             joinColumns = @JoinColumn(name = "series_id"),
             inverseJoinColumns = @JoinColumn(name = "cert_id"))
     private Set<Certification> certifications = new HashSet<Certification>(0);
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "seriesAwardPK.series")
+    private List<SeriesAward> seriesAwards = new ArrayList<>(0);
 
     @Transient
     private Set<String> genreNames;
@@ -312,6 +316,14 @@ public class Series extends AbstractMetadata {
         this.certifications = certifications;
     }
     
+    public List<SeriesAward> getSeriesAwards() {
+        return seriesAwards;
+    }
+
+    public void setSeriesAwards(List<SeriesAward> seriesAwards) {
+        this.seriesAwards = seriesAwards;
+    }
+
     // TRANSIENTS METHODS
     public Set<String> getGenreNames() {
         return genreNames;

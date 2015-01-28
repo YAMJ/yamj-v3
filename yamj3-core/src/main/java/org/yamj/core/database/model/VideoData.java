@@ -37,6 +37,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.ForeignKey;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -160,6 +161,9 @@ public class VideoData extends AbstractMetadata {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "nfoRelationPK.videoData")
     private List<NfoRelation> nfoRelations = new ArrayList<>(0);
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "movieAwardPK.videoData")
+    private List<MovieAward> movieAwards = new ArrayList<>(0);
 
     @Transient
     private Set<String> genreNames;
@@ -474,6 +478,14 @@ public class VideoData extends AbstractMetadata {
 
     public void addNfoRelation(NfoRelation nfoRelation) {
         this.nfoRelations.add(nfoRelation);
+    }
+
+    public List<MovieAward> getMovieAwards() {
+        return movieAwards;
+    }
+
+    public void setMovieAwards(List<MovieAward> movieAwards) {
+        this.movieAwards = movieAwards;
     }
 
     // TRANSIENTS METHODS

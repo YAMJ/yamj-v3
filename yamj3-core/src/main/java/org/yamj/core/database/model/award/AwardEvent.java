@@ -20,7 +20,9 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.database.model;
+package org.yamj.core.database.model.award;
+
+import org.yamj.core.database.model.AbstractIdentifiable;
 
 import java.io.Serializable;
 import javax.persistence.Column;
@@ -40,7 +42,7 @@ public class AwardEvent extends AbstractIdentifiable implements Serializable {
     private static final long serialVersionUID = -1181486841324976037L;
 
     @NaturalId(mutable = true)
-    @Column(name = "name", nullable = false, length = 50)
+    @Column(name = "name", nullable = false, length = 255)
     private String name;
 
     @NaturalId(mutable = true)
