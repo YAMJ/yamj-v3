@@ -39,6 +39,7 @@ import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -215,6 +216,17 @@ public class MetadataStorageService {
             }
         }
 
+        if (CollectionUtils.isNotEmpty(videoData.getAwardDTOS())) {
+            // store award events
+            for (AwardDTO awardDTO : videoData.getAwardDTOS()) {
+                try {
+                    this.commonDao.storeNewAwardEvent(awardDTO.getEvent(), awardDTO.getSource());
+                } catch (Exception ex) {
+                    LOG.error("Failed to store award event '{}', error: {}", awardDTO.getEvent(), ex.getMessage());
+                    LOG.trace("Storage error", ex);
+                }
+            }
+        }
     }
 
     /**
@@ -273,6 +285,18 @@ public class MetadataStorageService {
                 }
             }
         }
+        
+        if (CollectionUtils.isNotEmpty(series.getAwardDTOS())) {
+          // store award events
+          for (AwardDTO awardDTO : series.getAwardDTOS()) {
+              try {
+                  this.commonDao.storeNewAwardEvent(awardDTO.getEvent(), awardDTO.getSource());
+              } catch (Exception ex) {
+                  LOG.error("Failed to store award event '{}', error: {}", awardDTO.getEvent(), ex.getMessage());
+                  LOG.trace("Storage error", ex);
+              }
+          }
+      }
         
         for (Season season : series.getSeasons()) {
             for (VideoData videoData : season.getVideoDatas()) {
