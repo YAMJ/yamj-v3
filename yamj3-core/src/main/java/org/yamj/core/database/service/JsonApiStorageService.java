@@ -151,7 +151,13 @@ public class JsonApiStorageService {
         return commonDao.getCountryFilename(wrapper, filename);
     }
     //</editor-fold>
-    
+
+    //<editor-fold defaultstate="collapsed" desc="Award Methods">
+    public List<ApiAwardDTO> getAwards(ApiWrapperList<ApiAwardDTO> wrapper) {
+        return commonDao.getAwards(wrapper);
+    }
+    //</editor-fold>
+
     //<editor-fold defaultstate="collapsed" desc="Certification Methods">
     public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
         return commonDao.getCertifications(wrapper);

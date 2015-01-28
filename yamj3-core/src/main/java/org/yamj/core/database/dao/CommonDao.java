@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.builder.SqlScalars;
+import org.yamj.core.api.model.dto.ApiAwardDTO;
 import org.yamj.core.api.model.dto.ApiRatingDTO;
 import org.yamj.core.api.model.dto.ApiTargetDTO;
 import org.yamj.core.api.options.OptionsId;
@@ -282,6 +283,24 @@ public class CommonDao extends HibernateDao {
             certification.setCertificate(certificate);
             this.saveEntity(certification);
         }
+    }
+
+    public List<ApiAwardDTO> getAwards(ApiWrapperList<ApiAwardDTO> wrapper) {
+        OptionsId options = (OptionsId) wrapper.getOptions();
+        String sortBy = options.getSortby();
+
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT id, event, category, sourcedb as source ");
+        sqlScalars.addToSql("FROM award ");
+        sqlScalars.addToSql(options.getSearchString(true));
+        sqlScalars.addToSql(options.getSortString(sortBy));
+
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("event", StringType.INSTANCE);
+        sqlScalars.addScalar("category", StringType.INSTANCE);
+        sqlScalars.addScalar("source", StringType.INSTANCE);
+
+        return executeQueryWithTransform(ApiAwardDTO.class, sqlScalars, wrapper);
     }
 
     public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {

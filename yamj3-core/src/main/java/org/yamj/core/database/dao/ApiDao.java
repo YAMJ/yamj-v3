@@ -398,6 +398,44 @@ public class ApiDao extends HibernateDao {
             }
         }
 
+        // check award
+        if (params.includeAward() || params.excludeAward()) {
+            String awardName = params.getAwardName();
+
+            if (params.includeAward()) {
+                sbSQL.append(" AND exists(");
+            } else {
+                sbSQL.append(" AND not exists (");
+            }
+
+            if (StringUtils.isNumeric(awardName)) {
+                if (isMovie) {
+                    sbSQL.append("SELECT 1 FROM videodata_awards va ");
+                    sbSQL.append("WHERE vd.id=va.videodata_id ");
+                    sbSQL.append("AND va.award_id=");
+                } else {
+                    sbSQL.append("SELECT 1 FROM series_awards sa, season sea ");
+                    sbSQL.append("WHERE vd.season_id=sea.id ");
+                    sbSQL.append("AND sa.series_id=sea.series_id ");
+                    sbSQL.append("AND sa.award_id=");
+                }
+                sbSQL.append(Integer.parseInt(awardName));
+                sbSQL.append(")");
+            } else {
+                if (isMovie) {
+                    sbSQL.append("SELECT 1 FROM videodata_awards va, award a ");
+                    sbSQL.append("WHERE vd.id=va.videodata_id ");
+                    sbSQL.append("AND va.award_id=a.id ");
+                } else {
+                    sbSQL.append("SELECT 1 FROM series_awards sa, award a, season sea ");
+                    sbSQL.append("WHERE vd.season_id=sea.id ");
+                    sbSQL.append("AND sa.series_id=sea.series_id ");
+                    sbSQL.append("AND sa.award_id=a.id ");
+                }
+                sbSQL.append("AND lower(a.event)='").append(awardName).append("')");
+            }
+        }
+        
         // check video source
         if (params.includeVideoSource() || params.excludeVideoSource()) {
             String videosource = params.getVideoSource();
@@ -644,6 +682,30 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" or (c.target_xml is not null and lower(c.target_xml)='").append(country).append("')))");
         }
 
+        // check award
+        if (params.includeAward() || params.excludeAward()) {
+            String awardName = params.getAwardName();
+
+            if (params.includeAward()) {
+                sbSQL.append(" AND exists(");
+            } else {
+                sbSQL.append(" AND not exists (");
+            }
+
+            if (StringUtils.isNumeric(awardName)) {
+                sbSQL.append("SELECT 1 FROM series_awards sa ");
+                sbSQL.append("WHERE sa.series_id=ser.id ");
+                sbSQL.append("AND sa.award_id=");
+                sbSQL.append(Integer.parseInt(awardName));
+                sbSQL.append(")");
+            } else {
+                sbSQL.append("SELECT 1 FROM series_awards sa, award a ");
+                sbSQL.append("WHERE sa.series_id=ser.id ");
+                sbSQL.append("AND sa.award_id=a.id ");
+                sbSQL.append("AND lower(a.event)='").append(awardName).append("')");
+            }
+        }
+        
         // check certification
         if (params.includeCertification() || params.excludeCertification()) {
             int certId = params.getCertificationId();
@@ -911,6 +973,31 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" or (c.target_xml is not null and lower(c.target_xml)='").append(country).append("')))");
         }
 
+        // check award
+        if (params.includeAward() || params.excludeAward()) {
+            String awardName = params.getAwardName();
+            System.err.print("awardName --> " + awardName);
+            
+            if (params.includeAward()) {
+                sbSQL.append(" AND exists(");
+            } else {
+                sbSQL.append(" AND not exists (");
+            }
+
+            if (StringUtils.isNumeric(awardName)) {
+                sbSQL.append("SELECT 1 FROM series_awards sa ");
+                sbSQL.append("WHERE sa.series_id=sea.series_id ");
+                sbSQL.append("AND sa.award_id=");
+                sbSQL.append(Integer.parseInt(awardName));
+                sbSQL.append(")");
+            } else {
+                sbSQL.append("SELECT 1 FROM series_awards sa, award a ");
+                sbSQL.append("WHERE sa.series_id=sea.series_id ");
+                sbSQL.append("AND sa.award_id=a.id ");
+                sbSQL.append("AND lower(a.event)='").append(awardName).append("')");
+            }
+        }
+        
         // check certification
         if (params.includeCertification() || params.excludeCertification()) {
             int certId = params.getCertificationId();
@@ -1813,8 +1900,8 @@ public class ApiDao extends HibernateDao {
             }
 
             if (options.hasDataItem(DataItem.AWARD)) {
-              LOG.trace("Adding awards for ID {}", options.getId());
-              video.setAwards(getAwardsForId(type, options.getId()));
+                  LOG.trace("Adding awards for ID {}", options.getId());
+                  video.setAwards(getAwardsForId(type, options.getId()));
             }
 
             if (params.hasDataItem(DataItem.ARTWORK)) {

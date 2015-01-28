@@ -30,10 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.yamj.core.api.model.ApiStatus;
-import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
-import org.yamj.core.api.model.dto.ApiNameDTO;
-import org.yamj.core.api.model.dto.ApiRatingDTO;
-import org.yamj.core.api.model.dto.ApiTargetDTO;
+import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
@@ -293,7 +290,20 @@ public class CommonController {
         return status;
     }
     //</editor-fold>
-    
+
+    //<editor-fold defaultstate="collapsed" desc="Award Methods">
+    @RequestMapping("/awards/list")
+    public ApiWrapperList<ApiAwardDTO> getAwards(@ModelAttribute("options") OptionsId options) {
+        LOG.info("Getting award list with {}", options.toString());
+
+        ApiWrapperList<ApiAwardDTO> wrapper = new ApiWrapperList<>();
+        wrapper.setOptions(options);
+        wrapper.setResults(jsonApiStorageService.getAwards(wrapper));
+        wrapper.setStatusCheck();
+        return wrapper;
+    }
+    //</editor-fold>
+
     //<editor-fold defaultstate="collapsed" desc="Certification Methods">
     @RequestMapping("/certifications/list")
     public ApiWrapperList<Certification> getCertifications(@ModelAttribute("options") OptionsId options) {
