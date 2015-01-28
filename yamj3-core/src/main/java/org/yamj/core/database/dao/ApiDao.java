@@ -2138,30 +2138,30 @@ public class ApiDao extends HibernateDao {
      */
     private List<ApiAwardDTO> getAwardsForId(MetaDataType type, Long id) {
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT DISTINCT e.name as event, e.sourcedb as source, a.award, a.event_year as year ");
+        sqlScalars.addToSql("SELECT DISTINCT a.event, a.category, a.sourcedb as source, c.year ");
         if (type == MetaDataType.SERIES) {
-            sqlScalars.addToSql("FROM series_awards a ");
-            sqlScalars.addToSql("JOIN award_event ae ON a.event_id=ae.id ");
-            sqlScalars.addToSql("WHERE a.series_id=:id ");
+            sqlScalars.addToSql("FROM series_awards c ");
+            sqlScalars.addToSql("JOIN award a ON c.award_id=a.id ");
+            sqlScalars.addToSql("WHERE c.series_id=:id ");
         } else if (type == MetaDataType.SEASON) {
-            sqlScalars.addToSql("FROM series_awards a ");
-            sqlScalars.addToSql("JOIN season sea ON a.series_id=sea.series_id ");
-            sqlScalars.addToSql("JOIN award_event ae ON a.event_id=ae.id ");
+            sqlScalars.addToSql("FROM series_awards c ");
+            sqlScalars.addToSql("JOIN season sea ON c.series_id=sea.series_id ");
+            sqlScalars.addToSql("JOIN award a ON c.award_id=a.id ");
             sqlScalars.addToSql("WHERE sea.id=:id ");
         } else {
             // defaults to movie
-            sqlScalars.addToSql("FROM movie_awards a ");
-            sqlScalars.addToSql("JOIN award_event ae ON a.event_id=ae.id ");
-            sqlScalars.addToSql("WHERE a.videodata_id=:id ");
+            sqlScalars.addToSql("FROM videodata_awards c ");
+            sqlScalars.addToSql("JOIN award a ON c.award_id=a.id ");
+            sqlScalars.addToSql("WHERE c.videodata_id=:id ");
         }
-        sqlScalars.addToSql("ORDER BY event, year");
+        sqlScalars.addToSql("ORDER BY year, event");
         
         sqlScalars.addScalar("event", StringType.INSTANCE);
+        sqlScalars.addScalar("category", StringType.INSTANCE);
         sqlScalars.addScalar("source", StringType.INSTANCE);
-        sqlScalars.addScalar("award", StringType.INSTANCE);
         sqlScalars.addScalar("year", IntegerType.INSTANCE);
         sqlScalars.addParameters(ID, id);
-
+        
         return executeQueryWithTransform(ApiAwardDTO.class, sqlScalars, null);
     }
 

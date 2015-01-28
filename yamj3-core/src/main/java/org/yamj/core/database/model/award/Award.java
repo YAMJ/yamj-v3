@@ -22,8 +22,6 @@
  */
 package org.yamj.core.database.model.award;
 
-import org.yamj.core.database.model.AbstractIdentifiable;
-
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,38 +30,52 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
+import org.yamj.core.database.model.AbstractIdentifiable;
 
 @Entity
-@Table(name = "award_event",
-       uniqueConstraints = @UniqueConstraint(name = "UIX_AWARDEVENT_NATURALID", columnNames = {"name", "sourcedb"})
+@Table(name = "award",
+       uniqueConstraints = @UniqueConstraint(name = "UIX_AWARD_NATURALID", columnNames = {"event", "category", "sourcedb"})
 )
-public class AwardEvent extends AbstractIdentifiable implements Serializable {
+public class Award extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -1181486841324976037L;
 
-    @NaturalId(mutable = true)
-    @Column(name = "name", nullable = false, length = 255)
-    private String name;
+    @NaturalId
+    @Column(name = "event", nullable = false, length = 255)
+    private String event;
 
-    @NaturalId(mutable = true)
+    @NaturalId
+    @Column(name = "category", nullable = false, length = 255)
+    private String category;
+
+    @NaturalId
     @Column(name = "sourcedb", nullable = false, length = 40)
     private String sourceDb;
     
-    public AwardEvent() {
+    public Award() {
     }
 
-    public AwardEvent(String name, String sourceDb) {
-        this.name = name;
+    public Award(String event, String category, String sourceDb) {
+        this.event = event;
+        this.category = category;
         this.sourceDb = sourceDb;
     }
 
     // GETTER and SETTER
-    public String getName() {
-        return name;
+    public String getEvent() {
+        return event;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setEvent(String event) {
+        this.event = event;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getSourceDb() {
@@ -78,7 +90,8 @@ public class AwardEvent extends AbstractIdentifiable implements Serializable {
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-                .append(getName())
+                .append(getEvent())
+                .append(getCategory())
                 .append(getSourceDb())
                 .toHashCode();
     }
@@ -91,17 +104,18 @@ public class AwardEvent extends AbstractIdentifiable implements Serializable {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof AwardEvent)) {
+        if (!(obj instanceof Award)) {
             return false;
         }
-        final AwardEvent other = (AwardEvent) obj;
+        final Award other = (Award) obj;
         // first check the id
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();
         }
         // check other values        
         return new EqualsBuilder()
-                .append(getName(), other.getName())
+                .append(getEvent(), other.getEvent())
+                .append(getCategory(), other.getCategory())
                 .append(getSourceDb(), other.getSourceDb())
                 .isEquals();
     }
@@ -109,10 +123,12 @@ public class AwardEvent extends AbstractIdentifiable implements Serializable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("AwardEvent [ID=");
+        sb.append("Award [ID=");
         sb.append(getId());
-        sb.append(", name=");
-        sb.append(getName());
+        sb.append(", event=");
+        sb.append(getEvent());
+        sb.append(", category=");
+        sb.append(getCategory());
         sb.append(", source=");
         sb.append(getSourceDb());
         sb.append("]");

@@ -407,9 +407,9 @@ public class Series extends AbstractMetadata {
         return awardDTOS;
     }
   
-    public void addAward(String event, int year, String award, String source) {
-        if (StringUtils.isNotBlank(event) && StringUtils.isNotBlank(award) && StringUtils.isNotBlank(source)) {
-            this.awardDTOS.add(new AwardDTO(event, source, year, award));
+    public void addAward(String event, String category, int year, String source) {
+        if (StringUtils.isNotBlank(event) && StringUtils.isNotBlank(category) && year>0 && StringUtils.isNotBlank(source)) {
+            this.awardDTOS.add(new AwardDTO(event, category, year, source));
         }
     }
 

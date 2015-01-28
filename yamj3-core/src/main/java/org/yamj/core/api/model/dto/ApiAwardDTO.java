@@ -25,8 +25,8 @@ package org.yamj.core.api.model.dto;
 public class ApiAwardDTO {
 
     private String event;
+    private String category;
     private int year;
-    private String award;
     private String source;
     
     public String getEvent() {
@@ -36,21 +36,21 @@ public class ApiAwardDTO {
     public void setEvent(String event) {
         this.event = event;
     }
-  
+    
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
     public int getYear() {
         return year;
     }
   
     public void setYear(int year) {
         this.year = year;
-    }
-  
-    public String getAward() {
-        return award;
-    }
-  
-    public void setAward(String award) {
-        this.award = award;
     }
 
     public String getSource() {

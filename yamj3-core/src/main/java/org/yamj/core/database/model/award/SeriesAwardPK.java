@@ -43,20 +43,20 @@ public class SeriesAwardPK implements Serializable {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @Fetch(FetchMode.JOIN)
-    @JoinColumn(name = "event_id", nullable = false, insertable = false, updatable = false,
-                foreignKey = @ForeignKey(name = "FK_SERIESAWARD_EVENT"))
-    private AwardEvent awardEvent;
+    @JoinColumn(name = "award_id", nullable = false, insertable = false, updatable = false,
+                foreignKey = @ForeignKey(name = "FK_SERIESAWARD_AWARD"))
+    private Award award;
 
-    @Column(name = "award", nullable = false, length = 255, insertable = false, updatable = false)
-    private String award;
+    @Column(name = "year", nullable = false)
+    private int year = -1;
 
     public SeriesAwardPK() {
     }
 
-    public SeriesAwardPK(Series series, AwardEvent awardEvent, String award) {
+    public SeriesAwardPK(Series series, Award award, int year) {
         this.series = series;
-        this.awardEvent = awardEvent;
         this.award = award;
+        this.year = year;
     }
 
     // GETTER AND SETTER
@@ -68,20 +68,20 @@ public class SeriesAwardPK implements Serializable {
         this.series = series;
     }
 
-    public AwardEvent getAwardEvent() {
-        return awardEvent;
-    }
-
-    public void setAwardEvent(AwardEvent awardEvent) {
-        this.awardEvent = awardEvent;
-    }
-
-    public String getAward() {
+    public Award getAward() {
         return award;
     }
 
-    public void setAward(String award) {
+    public void setAward(Award award) {
         this.award = award;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
     }
 
     // EQUALITY CHECKS
@@ -89,8 +89,8 @@ public class SeriesAwardPK implements Serializable {
     public int hashCode() {
         return new HashCodeBuilder()
                 .append(getSeries().getId())
-                .append(getAwardEvent().getId())
-                .append(getAward())
+                .append(getAward().getId())
+                .append(getYear())
                 .toHashCode();
     }
 
@@ -100,8 +100,8 @@ public class SeriesAwardPK implements Serializable {
             final SeriesAwardPK other = (SeriesAwardPK) obj;
             return new EqualsBuilder()
                     .append(getSeries().getId(), other.getSeries().getId())
-                    .append(getAwardEvent().getId(), other.getAwardEvent().getId())
-                    .append(getAward(), other.getAward())
+                    .append(getAward().getId(), other.getAward().getId())
+                    .append(getYear(), other.getYear())
                     .isEquals();
         }
         return false;
@@ -113,9 +113,11 @@ public class SeriesAwardPK implements Serializable {
         sb.append("SeriesAwardPK [series=");
         sb.append(getSeries().getIdentifier());
         sb.append(", event=");
-        sb.append(getAwardEvent().getName());
-        sb.append(", award=");
-        sb.append(getAward());
+        sb.append(getAward().getEvent());
+        sb.append(", category=");
+        sb.append(getAward().getCategory());
+        sb.append(", year=");
+        sb.append(getYear());
         sb.append("]");
         return sb.toString();
     }

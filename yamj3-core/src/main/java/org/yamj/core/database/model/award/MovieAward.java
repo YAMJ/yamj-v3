@@ -23,7 +23,6 @@
 package org.yamj.core.database.model.award;
 
 import java.io.Serializable;
-import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -39,15 +38,12 @@ public class MovieAward implements Serializable {
 
     @EmbeddedId
     private MovieAwardPK movieAwardPK;
-
-    @Column(name = "event_year", nullable = false)
-    private int eventYear = -1;
     
     public MovieAward() {
     }
 
-    public MovieAward(VideoData videoData, AwardEvent event, String award) {
-      setMovieAwardPK(new MovieAwardPK(videoData, event, award));
+    public MovieAward(VideoData videoData, Award award, int year) {
+      setMovieAwardPK(new MovieAwardPK(videoData, award, year));
     }
 
     // GETTER and SETTER
@@ -57,14 +53,6 @@ public class MovieAward implements Serializable {
 
     public void setMovieAwardPK(MovieAwardPK movieAwardPK) {
         this.movieAwardPK = movieAwardPK;
-    }
-
-    public int getEventYear() {
-        return eventYear;
-    }
-
-    public void setEventYear(int eventYear) {
-        this.eventYear = eventYear;
     }
 
     // EQUALITY CHECKS

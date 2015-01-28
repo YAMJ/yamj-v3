@@ -43,20 +43,20 @@ public class MovieAwardPK implements Serializable {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @Fetch(FetchMode.JOIN)
-    @JoinColumn(name = "event_id", nullable = false, insertable = false, updatable = false,
-                foreignKey = @ForeignKey(name = "FK_MOVIEAWARD_EVENT"))
-    private AwardEvent awardEvent;
+    @JoinColumn(name = "award_id", nullable = false, insertable = false, updatable = false,
+                foreignKey = @ForeignKey(name = "FK_MOVIEAWARD_AWARD"))
+    private Award award;
 
-    @Column(name = "award", nullable = false, length = 255, insertable = false, updatable = false)
-    private String award;
+    @Column(name = "year", nullable = false)
+    private int year = -1;
 
     public MovieAwardPK() {
     }
 
-    public MovieAwardPK(VideoData videoData, AwardEvent awardEvent, String award) {
+    public MovieAwardPK(VideoData videoData, Award award, int year) {
         this.videoData = videoData;
-        this.awardEvent = awardEvent;
         this.award = award;
+        this.year = year;
     }
 
     // GETTER AND SETTER
@@ -68,20 +68,20 @@ public class MovieAwardPK implements Serializable {
         this.videoData = videoData;
     }
 
-    public AwardEvent getAwardEvent() {
-        return awardEvent;
-    }
-
-    public void setAwardEvent(AwardEvent awardEvent) {
-        this.awardEvent = awardEvent;
-    }
-
-    public String getAward() {
+    public Award getAward() {
         return award;
     }
 
-    public void setAward(String award) {
+    public void setAward(Award award) {
         this.award = award;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
     }
 
     // EQUALITY CHECKS
@@ -89,8 +89,8 @@ public class MovieAwardPK implements Serializable {
     public int hashCode() {
         return new HashCodeBuilder()
                 .append(getVideoData().getId())
-                .append(getAwardEvent().getId())
-                .append(getAward())
+                .append(getAward().getId())
+                .append(getYear())
                 .toHashCode();
     }
 
@@ -100,8 +100,8 @@ public class MovieAwardPK implements Serializable {
             final MovieAwardPK other = (MovieAwardPK) obj;
             return new EqualsBuilder()
                     .append(getVideoData().getId(), other.getVideoData().getId())
-                    .append(getAwardEvent().getId(), other.getAwardEvent().getId())
-                    .append(getAward(), other.getAward())
+                    .append(getAward().getId(), other.getAward().getId())
+                    .append(getYear(), other.getYear())
                     .isEquals();
         }
         return false;
@@ -113,9 +113,11 @@ public class MovieAwardPK implements Serializable {
         sb.append("MovieAwardPK [videoData=");
         sb.append(getVideoData().getIdentifier());
         sb.append(", event=");
-        sb.append(getAwardEvent().getName());
-        sb.append(", award=");
-        sb.append(getAward());
+        sb.append(getAward().getEvent());
+        sb.append(", category=");
+        sb.append(getAward().getCategory());
+        sb.append(", year=");
+        sb.append(getYear());
         sb.append("]");
         return sb.toString();
     }

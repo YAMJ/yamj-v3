@@ -39,7 +39,7 @@ import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.model.*;
-import org.yamj.core.database.model.award.AwardEvent;
+import org.yamj.core.database.model.award.Award;
 import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.AwardDTO;
@@ -223,9 +223,9 @@ public class MetadataStorageService {
             // store award events
             for (AwardDTO awardDTO : videoData.getAwardDTOS()) {
                 try {
-                    this.commonDao.storeNewAwardEvent(awardDTO.getEvent(), awardDTO.getSource());
+                    this.commonDao.storeNewAward(awardDTO.getEvent(), awardDTO.getCategory(), awardDTO.getSource());
                 } catch (Exception ex) {
-                    LOG.error("Failed to store award event '{}', error: {}", awardDTO.getEvent(), ex.getMessage());
+                    LOG.error("Failed to store award '{}'-'{}', error: {}", awardDTO.getEvent(), awardDTO.getCategory(), ex.getMessage());
                     LOG.trace("Storage error", ex);
                 }
             }
@@ -293,9 +293,9 @@ public class MetadataStorageService {
           // store award events
           for (AwardDTO awardDTO : series.getAwardDTOS()) {
               try {
-                  this.commonDao.storeNewAwardEvent(awardDTO.getEvent(), awardDTO.getSource());
+                  this.commonDao.storeNewAward(awardDTO.getEvent(), awardDTO.getCategory(), awardDTO.getSource());
               } catch (Exception ex) {
-                  LOG.error("Failed to store award event '{}', error: {}", awardDTO.getEvent(), ex.getMessage());
+                  LOG.error("Failed to store award '{}'-'{}', error: {}", awardDTO.getEvent(), awardDTO.getCategory(), ex.getMessage());
                   LOG.trace("Storage error", ex);
               }
           }
@@ -612,21 +612,18 @@ public class MetadataStorageService {
         List<MovieAward> deleteAwards = new ArrayList<>(videoData.getMovieAwards());
 
         for (AwardDTO dto : videoData.getAwardDTOS()) {
-            AwardEvent event = this.commonDao.getAwardEvent(dto.getEvent(), dto.getSource());
-            if (event != null) {
-                MovieAward award = new MovieAward(videoData, event, dto.getAward());
-                int index = videoData.getMovieAwards().indexOf(award);
+            Award award = this.commonDao.getAward(dto.getEvent(), dto.getCategory(), dto.getSource());
+            if (award != null) {
+                MovieAward movieAward = new MovieAward(videoData, award, dto.getYear());
+                int index = videoData.getMovieAwards().indexOf(movieAward);
                 
                 if (index < 0) {
                     // new award
-                    award.setEventYear(dto.getYear());
-                    videoData.getMovieAwards().add(award);
-                } else if (dto.getYear() > 0) {
-                    // updates stored award
-                    MovieAward stored = videoData.getMovieAwards().get(index);
-                    stored.setEventYear(dto.getYear());
-                    // remove from credits to delete
-                    deleteAwards.remove(stored);
+                    videoData.getMovieAwards().add(movieAward);
+                } else {
+                    // remove from deletion awards
+                    movieAward = videoData.getMovieAwards().get(index);
+                    deleteAwards.remove(movieAward);
                 }
             }
         }
@@ -647,21 +644,18 @@ public class MetadataStorageService {
         List<SeriesAward> deleteAwards = new ArrayList<>(series.getSeriesAwards());
 
         for (AwardDTO dto : series.getAwardDTOS()) {
-            AwardEvent event = this.commonDao.getAwardEvent(dto.getEvent(), dto.getSource());
-            if (event != null) {
-                SeriesAward award = new SeriesAward(series, event, dto.getAward());
-                int index = series.getSeriesAwards().indexOf(award);
+            Award award = this.commonDao.getAward(dto.getEvent(), dto.getCategory(), dto.getSource());
+            if (award != null) {
+                SeriesAward seriesAward = new SeriesAward(series, award, dto.getYear());
+                int index = series.getSeriesAwards().indexOf(seriesAward);
                 
                 if (index < 0) {
                     // new award
-                    award.setEventYear(dto.getYear());
-                    series.getSeriesAwards().add(award);
-                } else if (dto.getYear() > 0) {
-                    // updates stored award
-                    SeriesAward stored = series.getSeriesAwards().get(index);
-                    stored.setEventYear(dto.getYear());
-                    // remove from credits to delete
-                    deleteAwards.remove(stored);
+                    series.getSeriesAwards().add(seriesAward);
+                } else {
+                    // remove from deletion awards
+                    seriesAward = series.getSeriesAwards().get(index);
+                    deleteAwards.remove(seriesAward);
                 }
             }
         }

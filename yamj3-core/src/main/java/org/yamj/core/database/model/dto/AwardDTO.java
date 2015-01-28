@@ -30,52 +30,40 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public class AwardDTO {
 
     private final String event;
+    private final String category;
+    private final int year;
     private final String source;
-    private int year;
-    private String award;
 
-    public AwardDTO(String event, String source) {
+    public AwardDTO(String event, String category, int year, String source) {
         this.event = event;
-        this.source = source;
-    }
-
-    public AwardDTO(String event, String source, int year, String award) {
-        this(event, source);
+        this.category = category;
         this.year = year;
-        this.award = award;
+        this.source = source;
     }
 
     public String getEvent() {
         return event;
     }
 
-    public String getSource() {
-        return source;
+    public String getCategory() {
+        return category;
     }
 
     public int getYear() {
         return year;
     }
 
-    public void setYear(int year) {
-        this.year = year;
-    }
-
-    public String getAward() {
-        return award;
-    }
-
-    public void setAward(String award) {
-        this.award = award;
+    public String getSource() {
+        return source;
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-                .append(event)
-                .append(source)
-                .append(year)
-                .append(award)
+                .append(getEvent())
+                .append(getCategory())
+                .append(getYear())
+                .append(getSource())
                 .toHashCode();
     }
 
@@ -85,9 +73,9 @@ public class AwardDTO {
             final AwardDTO other = (AwardDTO) obj;
             return new EqualsBuilder()
                     .append(getEvent(), other.getEvent())
-                    .append(getSource(), other.getSource())
+                    .append(getCategory(), other.getCategory())
                     .append(getYear(), other.getYear())
-                    .append(getAward(), other.getAward())
+                    .append(getSource(), other.getSource())
                     .isEquals();
         }
         return false;

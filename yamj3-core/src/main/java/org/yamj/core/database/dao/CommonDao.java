@@ -41,7 +41,7 @@ import org.yamj.core.api.options.OptionsRating;
 import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.model.*;
-import org.yamj.core.database.model.award.AwardEvent;
+import org.yamj.core.database.model.award.Award;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
 
@@ -439,19 +439,20 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiRatingDTO.class, sqlScalars, wrapper);
     }
 
-    public AwardEvent getAwardEvent(String name, String source) {
-        return (AwardEvent)currentSession()
-                .byNaturalId(AwardEvent.class)
-                .using("name", name)
-                .using("sourcedb", source)
+    public Award getAward(String event, String category, String source) {
+        return (Award)currentSession()
+                .byNaturalId(Award.class)
+                .using("event", event)
+                .using("category", category)
+                .using("sourceDb", source)
                 .load();
     }
   
-    public synchronized void storeNewAwardEvent(String name, String source) {
-      AwardEvent awardEvent = this.getAwardEvent(name, source);
+    public synchronized void storeNewAward(String event, String category, String source) {
+      Award awardEvent = this.getAward(event, category, source);
         if (awardEvent == null) {
             // create new award event
-            awardEvent = new AwardEvent(name, source);
+            awardEvent = new Award(event, category, source);
             this.saveEntity(awardEvent);
         }
     }
