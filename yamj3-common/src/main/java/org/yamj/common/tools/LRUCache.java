@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.tools;
+package org.yamj.common.tools;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

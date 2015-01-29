@@ -28,11 +28,12 @@ import com.moviejukebox.allocine.model.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.Resource;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.yamj.core.tools.LRUTimedCache;
 import org.yamj.core.tools.web.ResponseTools;
 import org.yamj.core.tools.web.TemporaryUnavailableException;
 
@@ -44,39 +45,36 @@ public class AllocineApiWrapper {
     private final Lock searchMoviesLock = new ReentrantLock(true);
     private final Lock searchSeriesLock = new ReentrantLock(true);
     private final Lock searchPersonLock = new ReentrantLock(true);
-    // make maximal 20 seachMovie objects maximal 30 minutes accessible
-    private final LRUTimedCache<String, Search> searchMoviesCache = new LRUTimedCache<>(20, 1800);
-    // make maximal 20 seachMovie objects maximal 30 minutes accessible
-    private final LRUTimedCache<String, Search> searchSeriesCache = new LRUTimedCache<>(20, 1800);
-    // make maximal 10 seachPerson objects maximal 30 minutes accessible
-    private final LRUTimedCache<String, Search> searchPersonCache = new LRUTimedCache<>(10, 1800);
-    // make maximal 30 movies maximal 30 minutes accessible
-    private final LRUTimedCache<String, MovieInfos> moviesCache = new LRUTimedCache<>(30, 1800);
-    // make maximal 30 movies maximal 30 minutes accessible
-    private final LRUTimedCache<String, TvSeriesInfos> tvSeriesCache = new LRUTimedCache<>(30, 1800);
-
+    
+    @Resource(name="allocineSearchCache")
+    private Cache allocineSearchCache;
+    @Resource(name="allocineInfoCache")
+    private Cache allocineInfoCache;
     @Resource(name="allocineApi")
     private AllocineApi allocineApi;
 
     public String getAllocineMovieId(String title, int year, boolean throwTempError) {
-        // get from cache or retrieve online
-        searchMoviesLock.lock();
+        final String cacheKey = "movie###" + title;
+        final Element cacheValue = allocineSearchCache.get(cacheKey);
+        
         Search search;
-        try {
-            search = searchMoviesCache.get(title);
-            if (search == null) {
+        if (cacheValue == null) {
+            searchMoviesLock.lock();
+            try {
                 search = allocineApi.searchMovies(title);
-                searchMoviesCache.put(title, search);
+                allocineSearchCache.putIfAbsent(new Element(cacheKey, search));
+            } catch (AllocineException ex) {
+                if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+                    throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
+                }
+                LOG.error("Failed retrieving Allocine id for movie '{}': {}", title, ex.getMessage());
+                LOG.trace("Allocine error" , ex);
+                return null;
+            } finally {
+                searchMoviesLock.unlock();
             }
-        } catch (AllocineException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
-            }
-            LOG.error("Failed retrieving Allocine id for movie '{}': {}", title, ex.getMessage());
-            LOG.trace("Allocine error" , ex);
-            return null;
-        } finally {
-            searchMoviesLock.unlock();
+        } else {
+            search = (Search)cacheValue.getObjectValue();
         }
         
         if (!search.isValid()) {
@@ -111,25 +109,28 @@ public class AllocineApiWrapper {
     }
 
     public String getAllocineSeriesId(String title, int year, boolean throwTempError) {
-        // get from cache or retrieve online
-        searchSeriesLock.lock();
+        final String cacheKey = "series###" + title;
+        final Element cacheValue = allocineSearchCache.get(cacheKey);
+        
         Search search;
-        try {
-            search = searchSeriesCache.get(title);
-            if (search == null) {
+        if (cacheValue == null) {
+            searchSeriesLock.lock();
+            try {
                 search = allocineApi.searchTvSeries(title);
-                searchSeriesCache.put(title, search);
+                allocineSearchCache.putIfAbsent(new Element(cacheKey, search));
+            } catch (AllocineException ex) {
+                if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+                    throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
+                }
+                LOG.error("Failed retrieving Allocine id for series '{}': {}", title, ex.getMessage());
+                LOG.trace("Allocine error" , ex);
+                return null;
+            } finally {
+              searchSeriesLock.unlock();
             }
-        } catch (AllocineException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
-            }
-            LOG.error("Failed retrieving Allocine id for series '{}': {}", title, ex.getMessage());
-            LOG.trace("Allocine error" , ex);
-            return null;
-        } finally {
-            searchSeriesLock.unlock();
-        }
+        } else {
+            search = (Search)cacheValue.getObjectValue();
+        }      
 
         if (!search.isValid()) {
             return null;
@@ -167,25 +168,28 @@ public class AllocineApiWrapper {
     }
 
     public String getAllocinePersonId(String name, boolean throwTempError) {
-        // get from cache or retrieve online
-        searchPersonLock.lock();
+        final String cacheKey = "person###" + name;
+        final Element cacheValue = allocineSearchCache.get(cacheKey);
+        
         Search search;
-        try {
-            search = searchPersonCache.get(name);
-            if (search == null) {
+        if (cacheValue == null) {
+            searchPersonLock.lock();
+            try {
                 search = allocineApi.searchPersons(name);
-                searchPersonCache.put(name, search);
+                allocineSearchCache.putIfAbsent(new Element(cacheKey, search));
+            } catch (AllocineException ex) {
+                if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+                    throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
+                }
+                LOG.error("Failed retrieving Allocine id for person '{}': {}", name, ex.getMessage());
+                LOG.trace("Allocine error" , ex);
+                return null;
+            } finally {
+                searchPersonLock.unlock();
             }
-        } catch (AllocineException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
-            }
-            LOG.error("Failed retrieving Allocine id for person '{}': {}", name, ex.getMessage());
-            LOG.trace("Allocine error" , ex);
-            return null;
-        } finally {
-            searchPersonLock.unlock();
-        }
+        } else {
+            search = (Search)cacheValue.getObjectValue();
+        }          
         
         if (!search.isValid()) {
             return null;
@@ -216,13 +220,14 @@ public class AllocineApiWrapper {
     }
 
     public MovieInfos getMovieInfos(String allocineId, boolean throwTempError) {
-        MovieInfos movieInfos = moviesCache.get(allocineId);
-        if (movieInfos == null) {
+        Element cacheValue = allocineInfoCache.get(allocineId);
+        MovieInfos movieInfos = null;
+        if (cacheValue == null) {
             try {
                 movieInfos = allocineApi.getMovieInfos(allocineId);
                 if (movieInfos != null && movieInfos.isValid()) {
                     // add to the cache
-                    moviesCache.put(allocineId, movieInfos);
+                    allocineInfoCache.putIfAbsent(new Element(allocineId, movieInfos));
                 }
             } catch (AllocineException ex) {
                 if (throwTempError && ResponseTools.isTemporaryError(ex)) {
@@ -231,18 +236,22 @@ public class AllocineApiWrapper {
                 LOG.error("Failed retrieving Allocine infos for movie id {}: {}", allocineId, ex.getMessage());
                 LOG.trace("Allocine error" , ex);
             }
+        } else {
+            movieInfos = (MovieInfos)cacheValue.getObjectValue(); 
         }
+        
         return movieInfos;
     }
 
     public TvSeriesInfos getTvSeriesInfos(String allocineId, boolean throwTempError) {
-        TvSeriesInfos tvSeriesInfos = tvSeriesCache.get(allocineId);
-        if (tvSeriesInfos == null) {
+        Element cacheValue = allocineInfoCache.get(allocineId);
+        TvSeriesInfos tvSeriesInfos = null;
+        if (cacheValue == null) {
             try {
                 tvSeriesInfos = allocineApi.getTvSeriesInfos(allocineId);
                 if (tvSeriesInfos != null && tvSeriesInfos.isValid()) {
                     // add to the cache
-                    tvSeriesCache.put(allocineId, tvSeriesInfos);
+                    allocineInfoCache.putIfAbsent(new Element(allocineId, tvSeriesInfos));
                 }
             } catch (AllocineException ex) {
                 if (throwTempError && ResponseTools.isTemporaryError(ex)) {
@@ -251,6 +260,8 @@ public class AllocineApiWrapper {
                 LOG.error("Failed retrieving Allocine infos for series id {}: {}", allocineId, ex.getMessage());
                 LOG.trace("Allocine error" , ex);
             }
+        } else {
+            tvSeriesInfos = (TvSeriesInfos)cacheValue.getObjectValue(); 
         }
         return tvSeriesInfos;
     }

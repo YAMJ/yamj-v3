@@ -145,6 +145,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
                 return ScanResult.RETRY;
             }
         }
+        
         if (movieInfos == null || movieInfos.isNotValid()) {
             LOG.error("Can't find informations for movie '{}'", videoData.getTitle());
             return ScanResult.ERROR;
@@ -349,6 +350,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
                 return ScanResult.RETRY;
             }
         }
+        
         if (tvSeriesInfos == null || tvSeriesInfos.isNotValid()) {
             LOG.error("Can't find informations for series '{}'", series.getTitle());
             return ScanResult.ERROR;
