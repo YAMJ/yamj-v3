@@ -38,6 +38,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
@@ -249,6 +250,11 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         // CAST and CREW
         parseCastCrew(videoData, imdbId);
 
+        // AWARDS
+        if (configServiceWrapper.getBooleanProperty("imdb.movie.awards", Boolean.FALSE)) {
+            videoData.addAwards(parseAwards(imdbId), SCANNER_ID);
+        }
+        
         return ScanResult.OK;
     }
 
@@ -347,6 +353,11 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         // RELEASE DATE
         parseReleaseData(series, imdbId);
+
+        // AWARDS
+        if (configServiceWrapper.getBooleanProperty("imdb.tvshow.awards", Boolean.FALSE)) {
+            series.addAwards(parseAwards(imdbId), SCANNER_ID);
+        }
 
         // scan seasons
         this.scanSeasons(series, imdbId, title, titleOriginal, plot, outline);
@@ -907,6 +918,48 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             LOG.error("Failed to retrieve certifications: " + imdbId, ex);
         }
         return certificationInfos;
+    }
+
+    private Set<AwardDTO> parseAwards(String imdbId) {
+        HashSet<AwardDTO> awards = new HashSet<>();
+  
+        try {
+            DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "awards"), charset);
+            if (ResponseTools.isNotOK(response)) {
+                LOG.warn("Requesting certifications failed with status {}: {}", response.getStatusCode(), imdbId);
+            } else if (response.getContent().contains("<h1 class=\"header\">Awards</h1>")) {
+                List<String> awardBlocks = HTMLTools.extractTags(response.getContent(), "<h1 class=\"header\">Awards</h1>", "<div class=\"article\"", "<h3>", "</table>", false);
+
+                for (String awardBlock : awardBlocks) {
+                    //String realEvent = awardBlock.substring(0, awardBlock.indexOf('<')).trim();
+                    String event = StringUtils.trimToEmpty(HTMLTools.extractTag(awardBlock, "<span class=\"award_category\">", "</span>"));
+  
+                    String tmpString = HTMLTools.extractTag(awardBlock, "<a href=", HTML_A_END).trim();
+                    tmpString = tmpString.substring(tmpString.indexOf('>') + 1).trim();
+                    int year = NumberUtils.isNumber(tmpString) ? Integer.parseInt(tmpString) : -1;
+  
+                    boolean awardWon = true;
+                    for (String outcomeBlock : HTMLTools.extractHtmlTags(awardBlock, "<table class=", null, "<tr>", "</tr>")) {
+                        String outcome = HTMLTools.extractTag(outcomeBlock, "<b>", "</b>");
+                        
+                        if (StringUtils.isNotBlank(outcome)) {
+                            awardWon = outcome.equalsIgnoreCase("won");
+                        }
+                        
+                        String category = StringUtils.trimToEmpty(HTMLTools.extractTag(outcomeBlock, "<td class=\"award_description\">", "<br />"));
+                        // Check to see if there was a missing title and just the name in the result
+                        if (category.contains("href=\"/name/")) {
+                            category = StringUtils.trimToEmpty(HTMLTools.extractTag(outcomeBlock, "<span class=\"award_category\">", "</span>"));
+                        }
+                        
+                        awards.add(new AwardDTO(event, category, year).setWon(awardWon).setNominated(!awardWon));
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            LOG.error("Failed to retrieve awards: " + imdbId, ex);
+        }
+        return awards;
     }
 
     /**
