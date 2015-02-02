@@ -33,7 +33,9 @@ public class AwardDTO {
     private final String category;
     private final int year;
     private final String source;
-
+    private boolean won = false;
+    private boolean nominated = false;
+    
     public AwardDTO(String event, String category, int year, String source) {
         this.event = event;
         this.category = category;
@@ -55,6 +57,24 @@ public class AwardDTO {
 
     public String getSource() {
         return source;
+    }
+
+    public boolean isWon() {
+        return won;
+    }
+
+    public AwardDTO setWon(boolean won) {
+        this.won = won;
+        return this;
+    }
+
+    public boolean isNominated() {
+        return nominated;
+    }
+
+    public AwardDTO setNominated(boolean nominated) {
+        this.nominated = nominated;
+        return this;
     }
 
     @Override

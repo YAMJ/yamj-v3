@@ -1900,8 +1900,8 @@ public class ApiDao extends HibernateDao {
             }
 
             if (options.hasDataItem(DataItem.AWARD)) {
-                  LOG.trace("Adding awards for ID {}", options.getId());
-                  video.setAwards(getAwardsForId(type, options.getId()));
+                LOG.trace("Adding awards for ID {}", options.getId());
+                video.setAwards(getAwardsForId(type, options.getId()));
             }
 
             if (params.hasDataItem(DataItem.ARTWORK)) {
@@ -2225,7 +2225,7 @@ public class ApiDao extends HibernateDao {
      */
     private List<ApiAwardDTO> getAwardsForId(MetaDataType type, Long id) {
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT DISTINCT a.event, a.category, a.sourcedb as source, c.year ");
+        sqlScalars.addToSql("SELECT DISTINCT a.event, a.category, a.sourcedb as source, c.year, c.won, c.nominated ");
         if (type == MetaDataType.SERIES) {
             sqlScalars.addToSql("FROM series_awards c ");
             sqlScalars.addToSql("JOIN award a ON c.award_id=a.id ");
@@ -2247,6 +2247,9 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("category", StringType.INSTANCE);
         sqlScalars.addScalar("source", StringType.INSTANCE);
         sqlScalars.addScalar("year", IntegerType.INSTANCE);
+        sqlScalars.addScalar("won", BooleanType.INSTANCE);
+        sqlScalars.addScalar("nominated", BooleanType.INSTANCE);
+        
         sqlScalars.addParameters(ID, id);
         
         return executeQueryWithTransform(ApiAwardDTO.class, sqlScalars, null);

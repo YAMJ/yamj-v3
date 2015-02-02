@@ -23,6 +23,7 @@
 package org.yamj.core.database.model.award;
 
 import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -39,6 +40,12 @@ public class MovieAward implements Serializable {
     @EmbeddedId
     private MovieAwardPK movieAwardPK;
     
+    @Column(name =  "won", nullable = false)
+    private boolean won = false;
+
+    @Column(name =  "nominated", nullable = false)
+    private boolean nominated = false;
+
     public MovieAward() {
     }
 
@@ -53,6 +60,22 @@ public class MovieAward implements Serializable {
 
     public void setMovieAwardPK(MovieAwardPK movieAwardPK) {
         this.movieAwardPK = movieAwardPK;
+    }
+
+    public boolean isWon() {
+        return won;
+    }
+
+    public void setWon(boolean won) {
+        this.won = won;
+    }
+
+    public boolean isNominated() {
+        return nominated;
+    }
+
+    public void setNominated(boolean nominated) {
+        this.nominated = nominated;
     }
 
     // EQUALITY CHECKS

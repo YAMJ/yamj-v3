@@ -104,4 +104,30 @@ public class UpgradeDatabaseDao extends HibernateDao {
         sb.append("ALTER TABLE videodata DROP column country");
         currentSession().createSQLQuery(sb.toString()).executeUpdate();
     }
+
+    /**
+     * Issues: none
+     * Date:   02.02.2015
+     */
+    public void patchAllocineWonAwards() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("UPDATE movie_awards ma SET ma.won=1 ");
+        sb.append("WHERE EXISTS (");
+        sb.append("  SELECT 1 ");
+        sb.append("  FROM award aw ");
+        sb.append("  WHERE aw.sourcedb='allocine' ");
+        sb.append("  AND aw.id=ma.award_id) ");
+        sb.append("AND ma.won=0");
+        currentSession().createSQLQuery(sb.toString()).executeUpdate();
+
+        sb.setLength(0);
+        sb.append("UPDATE series_awards sa SET sa.won=1 ");
+        sb.append("WHERE EXISTS (");
+        sb.append("  SELECT 1 ");
+        sb.append("  FROM award aw ");
+        sb.append("  WHERE aw.sourcedb='allocine' ");
+        sb.append("  AND aw.id=sa.award_id) ");
+        sb.append("AND sa.won=0");
+        currentSession().createSQLQuery(sb.toString()).executeUpdate();
+    }
 }

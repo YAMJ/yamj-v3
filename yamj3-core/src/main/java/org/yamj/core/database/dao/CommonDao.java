@@ -468,11 +468,11 @@ public class CommonDao extends HibernateDao {
     }
   
     public synchronized void storeNewAward(String event, String category, String source) {
-      Award awardEvent = this.getAward(event, category, source);
-        if (awardEvent == null) {
+      Award award = this.getAward(event, category, source);
+        if (award == null) {
             // create new award event
-            awardEvent = new Award(event, category, source);
-            this.saveEntity(awardEvent);
+            award = new Award(event, category, source);
+            this.saveEntity(award);
         }
     }
 }

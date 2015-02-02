@@ -33,6 +33,8 @@ public class ApiAwardDTO {
     private String category;
     private int year;
     private String source;
+    private boolean won;
+    private boolean nominated;
     
     public long getId() {
         return id;
@@ -72,5 +74,21 @@ public class ApiAwardDTO {
 
     public void setSource(String source) {
         this.source = source;
+    }
+
+    public boolean isWon() {
+        return won;
+    }
+
+    public void setWon(boolean won) {
+        this.won = won;
+    }
+
+    public boolean isNominated() {
+        return nominated;
+    }
+
+    public void setNominated(boolean nominated) {
+        this.nominated = nominated;
     }  
 }

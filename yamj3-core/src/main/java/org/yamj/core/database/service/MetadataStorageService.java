@@ -615,6 +615,8 @@ public class MetadataStorageService {
             Award award = this.commonDao.getAward(dto.getEvent(), dto.getCategory(), dto.getSource());
             if (award != null) {
                 MovieAward movieAward = new MovieAward(videoData, award, dto.getYear());
+                movieAward.setWon(dto.isWon());
+                movieAward.setNominated(dto.isNominated());
                 int index = videoData.getMovieAwards().indexOf(movieAward);
                 
                 if (index < 0) {
@@ -647,6 +649,8 @@ public class MetadataStorageService {
             Award award = this.commonDao.getAward(dto.getEvent(), dto.getCategory(), dto.getSource());
             if (award != null) {
                 SeriesAward seriesAward = new SeriesAward(series, award, dto.getYear());
+                seriesAward.setWon(dto.isWon());
+                seriesAward.setNominated(dto.isNominated());
                 int index = series.getSeriesAwards().indexOf(seriesAward);
                 
                 if (index < 0) {
