@@ -34,6 +34,7 @@ import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
 
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
@@ -63,6 +64,10 @@ public class ImdbScannerTest extends AbstractJUnit4SpringContextTests {
         for (CreditDTO credit : videoData.getCreditDTOS()) {
             String role = credit.getRole() == null ? "" : " (" + credit.getRole() + ")";
             System.err.println(credit.getJobType() +": " + credit.getName() + role);
+        }
+
+        for (AwardDTO award : videoData.getAwardDTOS()) {
+            System.err.println(award.getEvent() + " - " + award.getCategory() + ": " + award.getYear() + " (won:" + award.isWon() + ")");
         }
     }
 

@@ -54,5 +54,13 @@ public class UpgradeDatabaseService {
         } catch (Exception ex) {
             LOG.trace("Failed upgrade 'patchVideoDataCountries'", ex);
         }
+
+        // Issues: none
+        // Date:   02.02.2015
+        try {
+            upgradeDatabaseDao.patchAllocineWonAwards();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchAllocineWonAwards'", ex);
+        }
     }
 }

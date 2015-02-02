@@ -111,13 +111,13 @@ public class UpgradeDatabaseDao extends HibernateDao {
      */
     public void patchAllocineWonAwards() {
         StringBuilder sb = new StringBuilder();
-        sb.append("UPDATE movie_awards ma SET ma.won=1 ");
+        sb.append("UPDATE videodata_awards va SET va.won=1 ");
         sb.append("WHERE EXISTS (");
         sb.append("  SELECT 1 ");
         sb.append("  FROM award aw ");
         sb.append("  WHERE aw.sourcedb='allocine' ");
-        sb.append("  AND aw.id=ma.award_id) ");
-        sb.append("AND ma.won=0");
+        sb.append("  AND aw.id=va.award_id) ");
+        sb.append("AND va.won=0");
         currentSession().createSQLQuery(sb.toString()).executeUpdate();
 
         sb.setLength(0);
