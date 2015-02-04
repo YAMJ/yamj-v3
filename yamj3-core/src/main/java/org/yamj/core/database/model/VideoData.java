@@ -328,10 +328,13 @@ public class VideoData extends AbstractMetadata {
     }
 
     @Override
-    public void setSourceDbId(String sourceDb, String id) {
-        if (StringUtils.isNotBlank(id)) {
-            sourceDbIdMap.put(sourceDb, id.trim());
+    public boolean setSourceDbId(String sourceDb, String id) {
+        if (StringUtils.isBlank(sourceDb) || StringUtils.isBlank(id)) {
+            return false;
         }
+        String newId = id.trim();
+        String oldId = this.sourceDbIdMap.put(sourceDb, newId);
+        return (!StringUtils.equals(oldId, newId));
     }
 
     private Map<String, Integer> getRatings() {
@@ -498,41 +501,11 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void addCreditDTO(CreditDTO creditDTO) {
-        CreditDTO credit = null;
-        for (CreditDTO stored : this.creditDTOS) {
-            if (stored.equals(creditDTO)) {
-                credit = stored;
-                break;
-            }
-        }
-        if (credit == null) {
-            // just add new credit
-            this.creditDTOS.add(creditDTO);
-        } else {
-            // update values
-            if (StringUtils.isEmpty(credit.getRole())) {
-                credit.setRole(creditDTO.getRole());
-            }
-            if (StringUtils.isEmpty(credit.getRealName())) {
-                credit.setRealName(creditDTO.getRealName());
-            }
-            if (MapUtils.isNotEmpty(creditDTO.getPhotoURLS())) {
-                for (Entry<String, String> entry : creditDTO.getPhotoURLS().entrySet()) {
-                    credit.addPhotoURL(entry.getKey(), entry.getValue());
-                }
-            }
-            if (MapUtils.isNotEmpty(creditDTO.getPersonIdMap())) {
-                for (Entry<String, String> entry : creditDTO.getPersonIdMap().entrySet()) {
-                    credit.addPersonId(entry.getKey(), entry.getValue());
-                }
-            }
-        }
+        this.creditDTOS.add(creditDTO);
     }
 
     public void addCreditDTOS(Set<CreditDTO> creditDTOS) {
-        for (CreditDTO creditDTO : creditDTOS) {
-            this.addCreditDTO(creditDTO);
-        }
+        this.creditDTOS.addAll(creditDTOS);
     }
 
     public Set<String> getGenreNames() {

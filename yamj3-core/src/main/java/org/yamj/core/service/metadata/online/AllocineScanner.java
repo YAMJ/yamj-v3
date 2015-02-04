@@ -566,22 +566,18 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
     }
     
     private static CreditDTO createCredit(CastMember member, JobType jobType) {
-        CreditDTO credit = new CreditDTO(SCANNER_ID, jobType, member.getShortPerson().getName());
-        if (member.getShortPerson().getCode() > 0) {
-            credit.addPersonId(SCANNER_ID, String.valueOf(member.getShortPerson().getCode()));
-        }
+        String sourceId = (member.getShortPerson().getCode() > 0 ?  String.valueOf(member.getShortPerson().getCode()) : null);
+        CreditDTO credit = new CreditDTO(SCANNER_ID, sourceId, jobType, member.getShortPerson().getName());
         if (member.getPicture() != null) {
-            credit.addPhotoURL(member.getPicture().getHref(), SCANNER_ID);
+            credit.addPhotoURL(member.getPicture().getHref());
         }
         return credit;
     }
 
     private static CreditDTO createCredit(MoviePerson person, JobType jobType) {
-        CreditDTO credit = new CreditDTO(SCANNER_ID, jobType, person.getName());
-        if (person.getCode() > 0) {
-            credit.addPersonId(SCANNER_ID, String.valueOf(person.getCode()));
-        }
-        credit.addPhotoURL(person.getPhotoURL(), SCANNER_ID);
+        String sourceId = (person.getCode() > 0 ?  String.valueOf(person.getCode()) : null);
+        CreditDTO credit = new CreditDTO(SCANNER_ID, sourceId, jobType, person.getName());
+        credit.addPhotoURL(person.getPhotoURL());
         return credit;
     }
 

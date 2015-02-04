@@ -22,81 +22,84 @@
  */
 package org.yamj.core.database.model.dto;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.tools.MetadataTools;
+import org.yamj.core.tools.PersonNameDTO;
 
 public class CreditDTO {
 
     private final String source;
-    private String name;
+    private final String sourceId;
+    private final JobType jobType;
+    private final String name;
     private String firstName;
     private String lastName;
     private String realName;
-    private JobType jobType;
     private String role;
-    private Map<String,String> photoURLS = new HashMap<>(0);
-    private Map<String, String> personIdMap = new HashMap<>(0);
-
-    public CreditDTO(String source) {
-        this.source = source;
-    }
+    private Set<String> photoURLS = new HashSet<>();
 
     public CreditDTO(String source, JobType jobType, String name) {
-        this(source, jobType, name, null);
+      this(source, null, jobType, name, null);
+  }
+
+    public CreditDTO(String source, String sourceId, JobType jobType, String name) {
+        this(source, sourceId, jobType, name, null);
     }
 
     public CreditDTO(String source, JobType jobType, String name, String role) {
-        this(source, jobType, name, role, null);
+        this(source, null, jobType, name, role);
     }
 
-    public CreditDTO(String source, JobType jobType, String name, String role, String personId) {
+    public CreditDTO(String source, String sourceId, JobType jobType, String name, String role) {
         this.source = source;
+        this.sourceId = sourceId;
         this.jobType = jobType;
-        setName(name);
+        PersonNameDTO dto = MetadataTools.splitFullName(name.trim());
+        this.name = dto.getName();
+        setFirstName(dto.getFirstName());
+        setLastName(dto.getLastName());
         setRole(role);
-        addPersonId(source, personId);
     }
 
     public String getSource() {
         return source;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        if (StringUtils.isNotBlank(name)) {
-            this.name = name.trim();
-            String[] splitted = MetadataTools.splitFullNameInFirstAndLast(name);
-            if (splitted.length == 1) {
-                this.firstName = splitted[0];
-            } else if (splitted.length == 2) {
-                this.firstName = splitted[0];
-                this.lastName = splitted[1];
-            }
-        }
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
+    public String getSourceId() {
+      return sourceId;
     }
 
     public JobType getJobType() {
         return jobType;
     }
 
-    public void setJobType(JobType jobType) {
-        this.jobType = jobType;
+    public String getName() {
+        return name;
+    }
+    
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        if (StringUtils.isNotBlank(firstName)) {
+            this.firstName = firstName.trim();
+        }
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        if (StringUtils.isNotBlank(lastName)) {
+            this.lastName = lastName.trim();
+        }
     }
 
     public String getRole() {
@@ -119,23 +122,13 @@ public class CreditDTO {
         }
     }
 
-    public Map<String, String> getPhotoURLS() {
+    public Set<String> getPhotoURLS() {
         return photoURLS;
     }
 
-    public void addPhotoURL(String photoURL, String source) {
+    public void addPhotoURL(String photoURL) {
         if (StringUtils.isNotBlank(photoURL)) {
-            this.photoURLS.put(photoURL.trim(), source);
-        }
-    }
-
-    public Map<String, String> getPersonIdMap() {
-        return personIdMap;
-    }
-
-    public void addPersonId(String sourcedb, String personId) {
-        if (StringUtils.isNotBlank(personId)) {
-            this.personIdMap.put(sourcedb, personId.trim());
+            this.photoURLS.add(photoURL.trim());
         }
     }
 
@@ -144,6 +137,7 @@ public class CreditDTO {
         final int prime = 7;
         int result = 1;
         result = prime * result + (this.name == null ? 0 : this.name.toLowerCase().hashCode());
+        result = prime * result + (this.source == null ? 0 : this.source.hashCode());
         result = prime * result + (this.jobType == null ? 0 : this.jobType.hashCode());
         return result;
     }
@@ -162,6 +156,10 @@ public class CreditDTO {
         CreditDTO castOther = (CreditDTO) other;
         // check job
         if (this.jobType != castOther.jobType) {
+            return false;
+        }
+        // check source
+        if (!StringUtils.equals(this.source, castOther.source)) {
             return false;
         }
         // check name

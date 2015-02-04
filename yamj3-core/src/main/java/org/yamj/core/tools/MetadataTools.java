@@ -603,15 +603,25 @@ public final class MetadataTools {
         return extension.toUpperCase();
     }
 
-    public static String [] splitFullNameInFirstAndLast(String fullName) {
-        String[] result = StringUtils.split(fullName, ' ');
-        if (result == null) return new String[]{};
-          
-        if (result.length <= 2) {
-            return result;
+    public static PersonNameDTO splitFullName(String fullName) {
+        PersonNameDTO dto = new PersonNameDTO(fullName);
+        
+        try {
+          String[] result = StringUtils.split(fullName, ' ');
+          if (result == null) {
+              // nothing to do
+          } else if (result.length == 1) {
+              dto.setFirstName(result[0]);
+          } else if (result.length == 2) {
+              dto.setFirstName(result[0]);
+              dto.setLastName(result[1]);
+          }
+
+          // TODO check for middle name and other purposes
+        } catch (Exception ex) {
+            LOG.trace("Error splitting name: " + fullName, ex);
         }
         
-        // TODO check for middle name and other purposes
-        return new String[]{};
+        return dto;
     }
 }

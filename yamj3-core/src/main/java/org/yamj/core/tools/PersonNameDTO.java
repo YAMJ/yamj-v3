@@ -20,22 +20,36 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.database.model;
+package org.yamj.core.tools;
 
-import java.util.Date;
-import org.yamj.core.database.model.type.OverrideFlag;
 
-public interface IScannable {
+public final class PersonNameDTO {
 
-    String getSourceDbId(String sourceDb);
+  private final String name;
+  private String firstName;
+  private String lastName;
 
-    boolean setSourceDbId(String sourceDb, String id);
+  public PersonNameDTO(String name) {
+      this.name = name;
+  }
+  
+  public String getName() {
+      return name;
+  }
 
-    String getOverrideSource(OverrideFlag overrideFlag);
+  public String getFirstName() {
+      return firstName;
+  }
 
-    void setOverrideFlag(OverrideFlag overrideFlag, String source);
-    
-    Date getLastScanned();
-    
-    int getRetries();
+  public void setFirstName(String firstName) {
+      this.firstName = firstName;
+  }
+
+  public String getLastName() {
+      return lastName;
+  }
+
+  public void setLastName(String lastName) {
+      this.lastName = lastName;
+  }
 }

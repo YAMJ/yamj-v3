@@ -24,13 +24,11 @@ package org.yamj.core.database.model;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.Map.Entry;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -297,28 +295,13 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     }
 
     @Override
-    public void setSourceDbId(String sourceDb, String id) {
+    public boolean setSourceDbId(String sourceDb, String id) {
         if (StringUtils.isBlank(sourceDb) || StringUtils.isBlank(id)) {
-            return;
+            return false;
         }
-        this.sourceDbIdMap.put(sourceDb, id.trim());
-    }
-
-    public boolean setSourceDbIds(Map<String, String> sourceDbIdMap) {
-        boolean changed = false;
-        if (MapUtils.isNotEmpty(sourceDbIdMap)) {
-            for (Entry<String, String> entry : sourceDbIdMap.entrySet()) {
-                String sourceDb = entry.getKey();
-                String newId = StringUtils.trimToNull(entry.getValue());
-                if (StringUtils.isNotBlank(sourceDb) && (newId != null)) {
-                    String oldId = this.sourceDbIdMap.put(sourceDb, newId);
-                    if (!StringUtils.equals(oldId, newId)) {
-                        changed = true;
-                    }
-                }
-            }
-        }
-        return changed;
+        String newId = id.trim();
+        String oldId = this.sourceDbIdMap.put(sourceDb, newId);
+        return (!StringUtils.equals(oldId, newId));
     }
 
     public StatusType getStatus() {

@@ -463,6 +463,13 @@ public final class OverrideTools {
     }
 
     // PERSON OVERRIDE
+    public static boolean checkOverwritePersonNames(Person person, String source) {
+        if (checkOverwriteName(person, source)) return true;
+        if (checkOverwriteFirstName(person, source)) return true;
+        if (checkOverwriteLastName(person, source)) return true;
+        return false;
+    }
+    
     public static boolean checkOverwriteName(Person person, String source) {
         if (skipCheck(person, OverrideFlag.NAME, source)) {
             // skip the check

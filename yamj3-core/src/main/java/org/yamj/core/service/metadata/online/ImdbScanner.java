@@ -44,6 +44,7 @@ import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
+import org.yamj.core.tools.PersonNameDTO;
 import org.yamj.core.tools.web.*;
 
 @Service("imdbScanner")
@@ -1084,8 +1085,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
                     if (StringUtils.isNotBlank(name) && StringUtils.indexOf(character, "uncredited") == -1) {
                         character = MetadataTools.fixActorRole(character);
-                        CreditDTO creditDTO = new CreditDTO(SCANNER_ID, JobType.ACTOR, name, character, personId);
-                        videoData.addCreditDTO(creditDTO);
+                        videoData.addCreditDTO(new CreditDTO(SCANNER_ID, personId, JobType.ACTOR, name, character));
                     }
                 }
             }
@@ -1145,8 +1145,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                     String personId = member.substring(beginIndex + 12, member.indexOf("/", beginIndex + 12));
                     String name = StringUtils.trimToEmpty(member.substring(member.indexOf(HTML_GT, beginIndex) + 1));
                     if (!name.contains("more credit") && StringUtils.containsNone(name, "<>:/")) {
-                        CreditDTO creditDTO = new CreditDTO(SCANNER_ID, jobType, name, null, personId);
-                        videoData.addCreditDTO(creditDTO);
+                        videoData.addCreditDTO(new CreditDTO(SCANNER_ID, personId, jobType, name));
                     }
                 }
             }
@@ -1254,7 +1253,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         final String xml = response.getContent();
         
-        if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
+        if (OverrideTools.checkOverwritePersonNames(person, SCANNER_ID)) {
             // We can work out if this is the new site by looking for " - IMDb" at the end of the title
             String title = HTMLTools.extractTag(xml, "<title>");
             // Check for the new version and correct the title if found.
@@ -1265,7 +1264,17 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 title = title.substring(7);
             }
 
-            person.setName(title, SCANNER_ID);
+            // split person names
+            PersonNameDTO nameDTO = MetadataTools.splitFullName(title);
+            if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
+                person.setName(nameDTO.getName(), SCANNER_ID);
+            }
+            if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
+                person.setFirstName(nameDTO.getFirstName(), SCANNER_ID);
+            }
+            if (OverrideTools.checkOverwriteLastName(person, SCANNER_ID)) {
+                person.setLastName(nameDTO.getLastName(), SCANNER_ID);
+            }
         }
 
         if (xml.contains("id=\"img_primary\"")) {

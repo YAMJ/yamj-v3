@@ -150,10 +150,13 @@ public class Season extends AbstractMetadata {
     }
 
     @Override
-    public void setSourceDbId(String sourceDb, String id) {
-        if (StringUtils.isNotBlank(id)) {
-            sourceDbIdMap.put(sourceDb, id.trim());
+    public boolean setSourceDbId(String sourceDb, String id) {
+        if (StringUtils.isBlank(sourceDb) || StringUtils.isBlank(id)) {
+            return false;
         }
+        String newId = id.trim();
+        String oldId = this.sourceDbIdMap.put(sourceDb, newId);
+        return (!StringUtils.equals(oldId, newId));
     }
 
     public Map<String, Integer> getRatings() {

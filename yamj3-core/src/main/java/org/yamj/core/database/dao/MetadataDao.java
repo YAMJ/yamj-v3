@@ -90,11 +90,11 @@ public class MetadataDao extends HibernateDao {
         if (person == null) {
             // create new person
             person = new Person(identifier);
+            person.setSourceDbId(dto.getSource(), dto.getSourceId());
             person.setName(dto.getName(), dto.getSource());
             person.setFirstName(dto.getFirstName(), dto.getSource());
             person.setLastName(dto.getLastName(), dto.getSource());
             person.setBirthName(dto.getRealName(), dto.getSource());
-            person.setSourceDbIds(dto.getPersonIdMap());
             person.setStatus(StatusType.NEW);
             person.setFilmographyStatus(StatusType.NEW);
             this.saveEntity(person);
@@ -110,7 +110,7 @@ public class MetadataDao extends HibernateDao {
                 person.setBirthName(dto.getRealName(), dto.getSource());
             }
             
-            if (person.setSourceDbIds(dto.getPersonIdMap())) {
+            if (person.setSourceDbId(dto.getSource(), dto.getSourceId())) {
                 // if IDs have changed then person update is needed
                 person.setStatus(StatusType.UPDATED);
             }

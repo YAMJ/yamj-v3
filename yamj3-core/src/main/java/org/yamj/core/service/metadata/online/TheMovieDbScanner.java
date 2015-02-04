@@ -42,6 +42,7 @@ import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
+import org.yamj.core.tools.PersonNameDTO;
 import org.yamj.core.tools.web.TemporaryUnavailableException;
 
 @Service("tmdbScanner")
@@ -215,7 +216,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
                 continue;
             }
             
-            CreditDTO credit = new CreditDTO(SCANNER_ID, jobType, person.getName(), person.getCharacter(), String.valueOf(person.getId()));
+            CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), jobType, person.getName(), person.getCharacter());
             if (person.getAka() != null && !person.getAka().isEmpty()) {
                 credit.setRealName(person.getAka().get(0));
             }
@@ -274,8 +275,18 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             
         person.setSourceDbId(ImdbScanner.SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
 
-        if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
-            person.setName(tmdbPerson.getName(), SCANNER_ID);
+        if (OverrideTools.checkOverwritePersonNames(person, SCANNER_ID)) {
+            // split person names
+            PersonNameDTO nameDTO = MetadataTools.splitFullName(tmdbPerson.getName());
+            if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
+                person.setName(nameDTO.getName(), SCANNER_ID);
+            }
+            if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
+                person.setFirstName(nameDTO.getFirstName(), SCANNER_ID);
+            }
+            if (OverrideTools.checkOverwriteLastName(person, SCANNER_ID)) {
+                person.setLastName(nameDTO.getLastName(), SCANNER_ID);
+            }
         }
 
         if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {

@@ -744,12 +744,15 @@ public class MetadataStorageService {
                 castCrew.setRole(StringUtils.abbreviate(dto.getRole(), 255));
                 castCrew.setOrdering(ordering++);
                 videoData.getCredits().add(castCrew);
-            } else {
-                // updated cast entry
+            } else if (deleteCredits.contains(castCrew)) {
+                // updated cast entry if not processed before
                 castCrew.setRole(StringUtils.abbreviate(dto.getRole(), 255));
                 castCrew.setOrdering(ordering++);
                 // remove from credits to delete
                 deleteCredits.remove(castCrew);
+            } else if (dto.getRole() != null && StringUtils.isBlank(castCrew.getRole())) {
+                // just update the role when cast member already processed
+                castCrew.setRole(StringUtils.abbreviate(dto.getRole(), 255));
             }
         }
         // delete orphans
