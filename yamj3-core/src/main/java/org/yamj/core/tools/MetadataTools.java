@@ -602,4 +602,16 @@ public final class MetadataTools {
         }
         return extension.toUpperCase();
     }
+
+    public static String [] splitFullNameInFirstAndLast(String fullName) {
+        String[] result = StringUtils.split(fullName, ' ');
+        if (result == null) return new String[]{};
+          
+        if (result.length <= 2) {
+            return result;
+        }
+        
+        // TODO check for middle name and other purposes
+        return new String[]{};
+    }
 }

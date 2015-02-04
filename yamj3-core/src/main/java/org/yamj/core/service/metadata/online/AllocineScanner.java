@@ -616,6 +616,14 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
             person.setName(personInfos.getFullName(), SCANNER_ID);
         }
 
+        if (OverrideTools.checkOverwriteFirstName(person, SCANNER_ID)) {
+            person.setFirstName(personInfos.getFirstName(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteLastName(person, SCANNER_ID)) {
+            person.setLastName(personInfos.getLastName(), SCANNER_ID);
+        }
+
         if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {
             Date parsedDate = MetadataTools.parseToDate(personInfos.getBirthDate());
             person.setBirthDay(parsedDate, SCANNER_ID);

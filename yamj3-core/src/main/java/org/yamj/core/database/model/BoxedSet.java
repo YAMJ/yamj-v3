@@ -26,8 +26,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
@@ -65,9 +64,10 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
-        return new HashCodeBuilder()
-                .append(getName())
-                .toHashCode();
+        final int prime = 7;
+        int result = 1;
+        result = prime * result + (getName() == null ? 0 : getName().toLowerCase().hashCode());
+        return result;
     }
 
     @Override
@@ -86,10 +86,8 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
         if ((getId() > 0) && (other.getId() > 0)) {
             return getId() == other.getId();
         }
-        // check other values
-        return new EqualsBuilder()
-                .append(getName(), other.getName())
-                .isEquals();
+        // check the name
+        return StringUtils.equalsIgnoreCase(getName(), other.getName());
     }
 
     @Override

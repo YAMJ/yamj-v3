@@ -58,6 +58,12 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @Column(name = "name", nullable = false, length = 255)
     private String name;
 
+    @Column(name = "first_name", length = 255)
+    private String firstName;
+
+    @Column(name = "last_name", length = 255)
+    private String lastName;
+
     @Temporal(value = TemporalType.DATE)
     @Column(name = "birth_day")
     private Date birthDay;
@@ -157,6 +163,36 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         }
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    private void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setFirstName(String firstName, String source) {
+        if (StringUtils.isNotBlank(firstName)) {
+            this.firstName = firstName.trim();
+            setOverrideFlag(OverrideFlag.FIRSTNAME, source);
+        }
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    private void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setLastName(String lastName, String source) {
+        if (StringUtils.isNotBlank(lastName)) {
+            this.lastName = lastName.trim();
+            setOverrideFlag(OverrideFlag.LASTNAME, source);
+        }
+    }
+    
     public Date getBirthDay() {
         return birthDay;
     }

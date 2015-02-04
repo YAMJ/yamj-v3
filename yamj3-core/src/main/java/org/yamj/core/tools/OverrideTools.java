@@ -126,6 +126,10 @@ public final class OverrideTools {
         // person priorities
         sources = PropertyTools.getProperty("priority.person.name", DEFAULT_PLUGIN_PERSON);
         putPersonPriorities(OverrideFlag.NAME, sources);
+        sources = PropertyTools.getProperty("priority.person.firstname", DEFAULT_PLUGIN_PERSON);
+        putPersonPriorities(OverrideFlag.FIRSTNAME, sources);
+        sources = PropertyTools.getProperty("priority.person.lastname", DEFAULT_PLUGIN_PERSON);
+        putPersonPriorities(OverrideFlag.LASTNAME, sources);
         sources = PropertyTools.getProperty("priority.person.birtday", DEFAULT_PLUGIN_PERSON);
         putPersonPriorities(OverrideFlag.BIRTHDAY, sources);
         sources = PropertyTools.getProperty("priority.person.birtplace", DEFAULT_PLUGIN_PERSON);
@@ -467,6 +471,26 @@ public final class OverrideTools {
             return Boolean.TRUE;
         }
         return checkOverwrite(person, OverrideFlag.NAME, source);
+    }
+
+    public static boolean checkOverwriteFirstName(Person person, String source) {
+        if (skipCheck(person, OverrideFlag.FIRSTNAME, source)) {
+            // skip the check
+            return Boolean.FALSE;
+        } else if (person.getFirstName() == null) {
+            return Boolean.TRUE;
+        }
+        return checkOverwrite(person, OverrideFlag.FIRSTNAME, source);
+    }
+
+    public static boolean checkOverwriteLastName(Person person, String source) {
+        if (skipCheck(person, OverrideFlag.LASTNAME, source)) {
+            // skip the check
+            return Boolean.FALSE;
+        } else if (person.getLastName() == null) {
+            return Boolean.TRUE;
+        }
+        return checkOverwrite(person, OverrideFlag.LASTNAME, source);
     }
 
     public static boolean checkOverwriteBirthDay(Person person, String source) {

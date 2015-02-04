@@ -25,16 +25,17 @@ package org.yamj.core.database.model.dto;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.tools.MetadataTools;
 
 public class CreditDTO {
 
     private final String source;
     private String name;
+    private String firstName;
+    private String lastName;
     private String realName;
     private JobType jobType;
     private String role;
@@ -72,7 +73,22 @@ public class CreditDTO {
     public void setName(String name) {
         if (StringUtils.isNotBlank(name)) {
             this.name = name.trim();
+            String[] splitted = MetadataTools.splitFullNameInFirstAndLast(name);
+            if (splitted.length == 1) {
+                this.firstName = splitted[0];
+            } else if (splitted.length == 2) {
+                this.firstName = splitted[0];
+                this.lastName = splitted[1];
+            }
         }
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
     }
 
     public JobType getJobType() {
@@ -125,22 +141,31 @@ public class CreditDTO {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder()
-                .append(name)
-                .append(jobType)
-                .toHashCode();
+        final int prime = 7;
+        int result = 1;
+        result = prime * result + (this.name == null ? 0 : this.name.toLowerCase().hashCode());
+        result = prime * result + (this.jobType == null ? 0 : this.jobType.hashCode());
+        return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof CreditDTO) {
-            final CreditDTO other = (CreditDTO) obj;
-            return new EqualsBuilder()
-                    .append(getJobType(), other.getJobType())
-                    .append(getName(), other.getName())
-                    .isEquals();
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
         }
-        return false;
+        if (other == null) {
+            return false;
+        }
+        if (!(other instanceof CreditDTO)) {
+            return false;
+        }
+        CreditDTO castOther = (CreditDTO) other;
+        // check job
+        if (this.jobType != castOther.jobType) {
+            return false;
+        }
+        // check name
+        return StringUtils.equalsIgnoreCase(this.name, castOther.name);
     }
 
     @Override

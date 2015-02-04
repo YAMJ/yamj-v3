@@ -1478,10 +1478,8 @@ public class ApiDao extends HibernateDao {
 
         sqlScalars.addToSql("SELECT DISTINCT p.id,");
         sqlScalars.addToSql("p.name,");
-        if (options.hasDataItem(DataItem.BIOGRAPHY)) {
-            sqlScalars.addToSql("p.biography,");
-            sqlScalars.addScalar("biography", StringType.INSTANCE);
-        }
+        sqlScalars.addToSql("p.first_name as firstName,");
+        sqlScalars.addToSql("p.last_name as lastName,");
         sqlScalars.addToSql("p.birth_day AS birthDay,");
         sqlScalars.addToSql("p.birth_place AS birthPlace,");
         sqlScalars.addToSql("p.birth_name AS birthName,");
@@ -1489,6 +1487,10 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("p.death_place AS deathPlace,");
         sqlScalars.addToSql("c.job as job,");
         sqlScalars.addToSql("c.role as role ");
+        if (options.hasDataItem(DataItem.BIOGRAPHY)) {
+            sqlScalars.addToSql("p.biography,");
+            sqlScalars.addScalar("biography", StringType.INSTANCE);
+        }
         sqlScalars.addToSql("FROM person p ");
 
         if (metaDataType == MetaDataType.SERIES) {
@@ -1520,6 +1522,8 @@ public class ApiDao extends HibernateDao {
 
         sqlScalars.addScalar(ID, LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar("firstName", StringType.INSTANCE);
+        sqlScalars.addScalar("lastName", StringType.INSTANCE);
         sqlScalars.addScalar("birthDay", DateType.INSTANCE);
         sqlScalars.addScalar("birthPlace", StringType.INSTANCE);
         sqlScalars.addScalar("birthName", StringType.INSTANCE);
@@ -1542,15 +1546,17 @@ public class ApiDao extends HibernateDao {
         SqlScalars sqlScalars = new SqlScalars();
         // Make sure to set the alias for the files for the Transformation into the class
         sqlScalars.addToSql("SELECT DISTINCT p.id,p.name,");
-        if (options.hasDataItem(DataItem.BIOGRAPHY)) {
-            sqlScalars.addToSql(" p.biography, ");
-            sqlScalars.addScalar("biography", StringType.INSTANCE);
-        }
+        sqlScalars.addToSql("p.first_name AS firstName, ");
+        sqlScalars.addToSql("p.last_name AS lastName, ");
         sqlScalars.addToSql("p.birth_day AS birthDay, ");
         sqlScalars.addToSql("p.birth_place AS birthPlace, ");
         sqlScalars.addToSql("p.birth_name AS birthName, ");
         sqlScalars.addToSql("p.death_day AS deathDay, ");
         sqlScalars.addToSql("p.death_place AS deathPlace ");
+        if (options.hasDataItem(DataItem.BIOGRAPHY)) {
+            sqlScalars.addToSql(" p.biography, ");
+            sqlScalars.addScalar("biography", StringType.INSTANCE);
+        }
         sqlScalars.addToSql("FROM person p");
 
         if (options.getId() > 0L) {
@@ -1577,6 +1583,8 @@ public class ApiDao extends HibernateDao {
 
         sqlScalars.addScalar(ID, LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar("firstName", StringType.INSTANCE);
+        sqlScalars.addScalar("lastName", StringType.INSTANCE);
         sqlScalars.addScalar("birthDay", DateType.INSTANCE);
         sqlScalars.addScalar("birthPlace", StringType.INSTANCE);
         sqlScalars.addScalar("birthName", StringType.INSTANCE);
@@ -2315,10 +2323,8 @@ public class ApiDao extends HibernateDao {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT DISTINCT p.id,");
         sqlScalars.addToSql("p.name,");
-        if (dataItems.contains(DataItem.BIOGRAPHY)) {
-            sqlScalars.addToSql("p.biography,");
-            sqlScalars.addScalar("biography", StringType.INSTANCE);
-        }
+        sqlScalars.addToSql("p.first_name AS firstName,");
+        sqlScalars.addToSql("p.last_name AS lastName,");
         sqlScalars.addToSql("p.birth_day AS birthDay,");
         sqlScalars.addToSql("p.birth_place AS birthPlace,");
         sqlScalars.addToSql("p.birth_name AS birthName,");
@@ -2326,6 +2332,10 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("p.death_place AS deathPlace,");
         sqlScalars.addToSql("c.role as role,");
         sqlScalars.addToSql("c.job as jobTypeAsString ");
+        if (dataItems.contains(DataItem.BIOGRAPHY)) {
+            sqlScalars.addToSql("p.biography,");
+            sqlScalars.addScalar("biography", StringType.INSTANCE);
+        }
         sqlScalars.addToSql("FROM person p ");
 
         if (type == MetaDataType.SERIES) {
@@ -2348,6 +2358,8 @@ public class ApiDao extends HibernateDao {
 
         sqlScalars.addScalar(ID, LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar("firstName", StringType.INSTANCE);
+        sqlScalars.addScalar("lastName", StringType.INSTANCE);
         sqlScalars.addScalar("birthDay", DateType.INSTANCE);
         sqlScalars.addScalar("birthPlace", StringType.INSTANCE);
         sqlScalars.addScalar("birthName", StringType.INSTANCE);

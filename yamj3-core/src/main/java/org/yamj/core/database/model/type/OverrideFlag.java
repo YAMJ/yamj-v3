@@ -41,6 +41,8 @@ public enum OverrideFlag {
     YEAR,
     // person specific
     NAME,
+    FIRSTNAME,
+    LASTNAME,
     BIRTHDAY,
     BIRTHPLACE,
     BIRTHNAME,

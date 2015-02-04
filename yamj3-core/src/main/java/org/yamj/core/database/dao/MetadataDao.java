@@ -90,20 +90,30 @@ public class MetadataDao extends HibernateDao {
             // create new person
             person = new Person(identifier);
             person.setName(dto.getName(), dto.getSource());
+            person.setFirstName(dto.getFirstName(), dto.getSource());
+            person.setLastName(dto.getLastName(), dto.getSource());
             person.setBirthName(dto.getRealName(), dto.getSource());
             person.setSourceDbIds(dto.getPersonIdMap());
             person.setStatus(StatusType.NEW);
             person.setFilmographyStatus(StatusType.NEW);
             this.saveEntity(person);
         } else {
-            boolean changed = person.setSourceDbIds(dto.getPersonIdMap());
-            if (StatusType.DELETED.equals(person.getStatus())) {
-                changed = true;
-            }
-            if (changed) {
+            // these values are not regarded for updating status
+            person.setFirstName(dto.getFirstName(), dto.getSource());
+            person.setLastName(dto.getLastName(), dto.getSource());
+            person.setBirthName(dto.getRealName(), dto.getSource());
+            
+            if (person.setSourceDbIds(dto.getPersonIdMap())) {
+                // if IDs have changed then person update is needed
                 person.setStatus(StatusType.UPDATED);
-                this.updateEntity(person);
             }
+            if (StatusType.DELETED.equals(person.getStatus())) {
+                // if previously deleted then set as updated now
+                person.setStatus(StatusType.UPDATED);
+            }
+            
+            // update person in database
+            this.updateEntity(person);
         }
     }
 
