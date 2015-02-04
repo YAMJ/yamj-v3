@@ -36,6 +36,7 @@ import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.hibernate.HibernateDao;
 import org.yamj.core.tools.MetadataTools;
+import org.yamj.core.tools.OverrideTools;
 
 @Transactional
 @Repository("metadataDao")
@@ -99,9 +100,15 @@ public class MetadataDao extends HibernateDao {
             this.saveEntity(person);
         } else {
             // these values are not regarded for updating status
-            person.setFirstName(dto.getFirstName(), dto.getSource());
-            person.setLastName(dto.getLastName(), dto.getSource());
-            person.setBirthName(dto.getRealName(), dto.getSource());
+            if (OverrideTools.checkOverwriteFirstName(person, dto.getSource())) {
+                person.setFirstName(dto.getFirstName(), dto.getSource());
+            }
+            if (OverrideTools.checkOverwriteLastName(person, dto.getSource())) {
+                person.setLastName(dto.getLastName(), dto.getSource());
+            }
+            if (OverrideTools.checkOverwriteBirthName(person, dto.getSource())) {
+                person.setBirthName(dto.getRealName(), dto.getSource());
+            }
             
             if (person.setSourceDbIds(dto.getPersonIdMap())) {
                 // if IDs have changed then person update is needed
