@@ -49,7 +49,7 @@ public final class MetadataTools {
     private static final char[] CLEAN_DELIMITERS = new char[]{'.', ' ', '_', '-'};
     private static final Pattern DATE_COUNTRY = Pattern.compile("(.*)(\\s*?\\(\\w*\\))");
     private static final Pattern YEAR_PATTERN = Pattern.compile("(?:.*?)(\\d{4})(?:.*?)");
-    private static final Pattern LASTNAME_PATTERN = Pattern.compile("((?:(?:d[aeiu]|de la|mac|v[ao]n(?: de[nr])?) *)?[^ ]+) *(.*)");
+    private static final Pattern LASTNAME_PATTERN = Pattern.compile("((?:(?:d[aeiu]|de la|mac|zu|v[ao]n(?: de[nr])?) *)?[^ ]+) *(.*)");
 
     private static final String MPPA_RATED = "Rated";
     private static final long KB = 1024;

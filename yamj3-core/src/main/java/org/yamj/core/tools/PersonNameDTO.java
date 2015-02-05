@@ -22,34 +22,47 @@
  */
 package org.yamj.core.tools;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 
 public final class PersonNameDTO {
 
-  private final String name;
-  private String firstName;
-  private String lastName;
-
-  public PersonNameDTO(String name) {
-      this.name = name;
-  }
+    private final String name;
+    private String firstName;
+    private String lastName;
   
-  public String getName() {
-      return name;
-  }
+    public PersonNameDTO(String name) {
+        this.name = name;
+    }
+    
+    public String getName() {
+        return name;
+    }
+  
+    public String getFirstName() {
+        return firstName;
+    }
+  
+    public void setFirstName(String firstName) {
+        if (StringUtils.isNotBlank(firstName)) {
+            this.firstName = firstName;
+        }
+    }
+  
+    public String getLastName() {
+        return lastName;
+    }
+  
+    public void setLastName(String lastName) {
+        if (StringUtils.isNotBlank(lastName)) {
+            this.lastName = lastName;
+        }
+    }
 
-  public String getFirstName() {
-      return firstName;
-  }
-
-  public void setFirstName(String firstName) {
-      this.firstName = firstName;
-  }
-
-  public String getLastName() {
-      return lastName;
-  }
-
-  public void setLastName(String lastName) {
-      this.lastName = lastName;
-  }
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    }
 }
