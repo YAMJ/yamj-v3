@@ -49,6 +49,8 @@ public final class MetadataTools {
     private static final char[] CLEAN_DELIMITERS = new char[]{'.', ' ', '_', '-'};
     private static final Pattern DATE_COUNTRY = Pattern.compile("(.*)(\\s*?\\(\\w*\\))");
     private static final Pattern YEAR_PATTERN = Pattern.compile("(?:.*?)(\\d{4})(?:.*?)");
+    private static final Pattern LASTNAME_PATTERN = Pattern.compile("((?:(?:d[aeiu]|de la|mac|v[ao]n(?: de[nr])?) *)?[^ ]+) *(.*)");
+
     private static final String MPPA_RATED = "Rated";
     private static final long KB = 1024;
     private static final long MB = KB * KB;
@@ -579,47 +581,64 @@ public final class MetadataTools {
     }
 
     public static String getExternalSubtitleFormat(String extension) {
-        if ("srt".equalsIgnoreCase(extension)) {
-            return "SubRip";
+        if (extension == null) return null;
+        
+        String format;
+        switch (extension.toLowerCase()) {
+            case "ass":
+                format = "Advanced SubStation Alpha";
+                break;
+            case "pgs":
+            case "sup":
+                format = "Presentation Grapic Stream";
+                break;
+            case "smi":
+            case "sami":
+                format = "Synchronized Accessible Media Interchange";
+                break;
+            case "srt":
+                format = "SubRip";
+                break;
+            case "ssa":
+                format = "SubStation Alpha";
+                break;
+            case "ssf":
+                format = "Structured Subtitle Format";
+                break;
+            case "sub":
+                format = "MicroDVD";
+                break;
+            case "usf":
+                format = "Universal Subtitle Format";
+                break;
+            default:
+                format = extension.toUpperCase();
+                break;
         }
-        if ("ssa".equalsIgnoreCase(extension)) {
-            return "SubStation Alpha";
-        }
-        if ("ass".equalsIgnoreCase(extension)) {
-            return "Advanced SubStation Alpha";
-        }
-        if ("pgs".equalsIgnoreCase(extension)) {
-            return "Presentation Grapic Stream";
-        }
-        if ("sup".equalsIgnoreCase(extension)) {
-            return "Presentation Grapic Stream";
-        }
-        if ("smi".equalsIgnoreCase(extension)) {
-            return "Synchronized Accessible Media Interchange";
-        }
-        if ("sami".equalsIgnoreCase(extension)) {
-            return "Synchronized Accessible Media Interchange";
-        }
-        return extension.toUpperCase();
+        return format;
     }
 
     public static PersonNameDTO splitFullName(String fullName) {
         PersonNameDTO dto = new PersonNameDTO(fullName);
         
         try {
-          String[] result = StringUtils.split(fullName, ' ');
-          if (result == null) {
-              // nothing to do
-          } else if (result.length == 1) {
-              dto.setFirstName(result[0]);
-          } else if (result.length == 2) {
-              dto.setFirstName(result[0]);
-              dto.setLastName(result[1]);
-          }
-
-          // TODO check for middle name and other purposes
+            String[] result = StringUtils.split(fullName, ' ');
+            if (result == null || result.length == 0) {
+                // nothing to do
+            } else if (result.length == 1) {
+                dto.setFirstName(result[0]);
+            } else if (result.length == 2) {
+                dto.setFirstName(result[0]);
+                dto.setLastName(result[1]);
+            } else {
+                Matcher m = LASTNAME_PATTERN.matcher(fullName);
+                if (m.matches()) {
+                    dto.setFirstName(m.group(1));
+                    dto.setLastName(m.group(2));
+                }
+            }
         } catch (Exception ex) {
-            LOG.trace("Error splitting name: " + fullName, ex);
+            LOG.trace("Error splitting full person name: " + fullName, ex);
         }
         
         return dto;
