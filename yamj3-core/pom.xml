@@ -146,7 +146,7 @@
         <dependency>
             <groupId>com.omertron</groupId>
             <artifactId>fanarttvapi</artifactId>
-            <version>3.1.1</version>
+            <version>3.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.moviejukebox</groupId>
@@ -156,7 +156,7 @@
         <dependency>
             <groupId>org.yamj</groupId>
             <artifactId>api-common</artifactId>
-            <version>1.3-SNAPSHOT</version>
+            <version>1.4</version>
         </dependency>
         <!--JACKSON JSON-->
         <dependency>
