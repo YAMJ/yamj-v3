@@ -293,7 +293,7 @@ public class CommonController {
 
     //<editor-fold defaultstate="collapsed" desc="Award Methods">
     @RequestMapping("/awards/list")
-    public ApiWrapperList<ApiAwardDTO> getAwards(@ModelAttribute("options") OptionsId options) {
+    public ApiWrapperList<ApiAwardDTO> getAwards(@ModelAttribute("options") OptionsSingleType options) {
         LOG.info("Getting award list with {}", options.toString());
 
         ApiWrapperList<ApiAwardDTO> wrapper = new ApiWrapperList<>();

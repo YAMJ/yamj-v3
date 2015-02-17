@@ -286,12 +286,19 @@ public class CommonDao extends HibernateDao {
     }
 
     public List<ApiAwardDTO> getAwards(ApiWrapperList<ApiAwardDTO> wrapper) {
-        OptionsId options = (OptionsId) wrapper.getOptions();
+        OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
         String sortBy = options.getSortby();
 
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT id, event, category, sourcedb as source ");
-        sqlScalars.addToSql("FROM award ");
+        sqlScalars.addToSql("SELECT DISTINCT aw.id, aw.event, aw.category, aw.sourcedb as source ");
+        sqlScalars.addToSql("FROM award aw ");
+        if (options.getType() != null) {
+            if (MetaDataType.MOVIE == options.getType()) {
+                sqlScalars.addToSql("JOIN videodata_awards va ON aw.id=va.award_id ");
+            } else {
+                sqlScalars.addToSql("JOIN series_awards sa ON aw.id=sa.award_id ");
+            }
+        }
         sqlScalars.addToSql(options.getSearchString(true));
         sqlScalars.addToSql(options.getSortString(sortBy));
 
