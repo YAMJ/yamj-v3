@@ -37,7 +37,6 @@ import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.model.dto.ApiAwardDTO;
 import org.yamj.core.api.model.dto.ApiRatingDTO;
 import org.yamj.core.api.model.dto.ApiTargetDTO;
-import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.options.OptionsRating;
 import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
@@ -98,7 +97,8 @@ public class CommonDao extends HibernateDao {
             } else {
                 sqlScalars.addToSql("JOIN series_genres sg ON g.id=sg.genre_id ");
             }
-        } else if (options.getUsed() != null && options.getUsed()) {
+        } 
+        if (options.getUsed() != null && options.getUsed()) {
             sqlScalars.addToSql("WHERE (exists (select 1 from videodata_genres vg where vg.genre_id=g.id) ");
             sqlScalars.addToSql(" or exists (select 1 from series_genres sg where sg.genre_id=g.id)) ");
             addWhere = false;
@@ -162,7 +162,8 @@ public class CommonDao extends HibernateDao {
             } else {
                 sqlScalars.addToSql("JOIN series_studios ss ON stu.id=ss.studio_id ");
             }
-        } else if (options.getUsed() != null && options.getUsed()) {
+        } 
+        if (options.getUsed() != null && options.getUsed()) {
             sqlScalars.addToSql("WHERE (exists (select 1 from videodata_studios vs where vs.studio_id=stu.id) ");
             sqlScalars.addToSql(" or exists (select 1 from series_studios ss where ss.studio_id=stu.id)) ");
             addWhere = false;
@@ -225,7 +226,8 @@ public class CommonDao extends HibernateDao {
             } else {
                 sqlScalars.addToSql("JOIN series_countries sc ON c.id=sc.country_id ");
             }
-        } else if (options.getUsed() != null && options.getUsed()) {
+        } 
+        if (options.getUsed() != null && options.getUsed()) {
             sqlScalars.addToSql("WHERE (exists (select 1 from videodata_countries vc where vc.country_id=c.id) ");
             sqlScalars.addToSql(" or exists (select 1 from series_countries sc where sc.country_id=c.id)) ");
             addWhere = false;
@@ -311,19 +313,26 @@ public class CommonDao extends HibernateDao {
     }
 
     public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
-        OptionsId options = (OptionsId) wrapper.getOptions();
-        String sortBy = options.getSortby();
+      OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
 
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT id, country, certificate ");
+        sqlScalars.addToSql("SELECT cert.id, cert.country, cert.certificate ");
 
+        String sortBy = options.getSortby();
         if ("certificate".equalsIgnoreCase(sortBy)) {
             sortBy = "certificate_order";
             // TODO certificate_order until now just tested with MySQL
             sqlScalars.addToSql(", CASE WHEN cast(certificate as signed)>0 THEN cast(certificate as signed) ELSE ascii(substring(lower(certificate),1,1))*1000+ascii(substring(lower(certificate),2,1)) END as certificate_order ");
         }
 
-        sqlScalars.addToSql("FROM certification ");
+        sqlScalars.addToSql("FROM certification cert ");
+        if (options.getType() != null) {
+            if (MetaDataType.MOVIE == options.getType()) {
+                sqlScalars.addToSql("JOIN videodata_certifications vc ON cert.id=vc.cert_id ");
+            } else {
+                sqlScalars.addToSql("JOIN series_certifications sc ON cert.id=sc.cert_id ");
+            }
+        }
         sqlScalars.addToSql(options.getSearchString(true));
         sqlScalars.addToSql(options.getSortString(sortBy));
 

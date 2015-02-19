@@ -31,7 +31,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.*;
-import org.yamj.core.api.options.*;
+import org.yamj.core.api.options.OptionsBoxedSet;
+import org.yamj.core.api.options.OptionsMultiType;
+import org.yamj.core.api.options.OptionsRating;
+import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Certification;
@@ -306,7 +309,7 @@ public class CommonController {
 
     //<editor-fold defaultstate="collapsed" desc="Certification Methods">
     @RequestMapping("/certifications/list")
-    public ApiWrapperList<Certification> getCertifications(@ModelAttribute("options") OptionsId options) {
+    public ApiWrapperList<Certification> getCertifications(@ModelAttribute("options") OptionsSingleType options) {
         LOG.info("Getting certifications list with {}", options.toString());
 
         ApiWrapperList<Certification> wrapper = new ApiWrapperList<>();
@@ -319,7 +322,7 @@ public class CommonController {
     
     //<editor-fold defaultstate="collapsed" desc="VideoSource Methods">
     @RequestMapping("/videosources/list")
-    public ApiWrapperList<ApiNameDTO> getVideoSources(@ModelAttribute("options") OptionsId options) {
+    public ApiWrapperList<ApiNameDTO> getVideoSources(@ModelAttribute("options") OptionsSingleType options) {
         LOG.info("Getting video sources list with {}", options.toString());
 
         ApiWrapperList<ApiNameDTO> wrapper = new ApiWrapperList<>();

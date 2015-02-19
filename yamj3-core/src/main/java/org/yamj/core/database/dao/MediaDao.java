@@ -28,9 +28,10 @@ import java.util.List;
 import org.hibernate.SQLQuery;
 import org.hibernate.type.StringType;
 import org.springframework.stereotype.Repository;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.model.dto.ApiNameDTO;
-import org.yamj.core.api.options.OptionsId;
+import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.database.model.dto.QueueDTO;
@@ -73,14 +74,24 @@ public class MediaDao extends HibernateDao {
     }
     
     public List<ApiNameDTO> getVideoSources(ApiWrapperList<ApiNameDTO> wrapper) {
-        OptionsId options = (OptionsId) wrapper.getOptions();
+        OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
 
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT DISTINCT video_source as name ");
-        sqlScalars.addToSql("FROM mediafile ");
-        sqlScalars.addToSql("WHERE video_source is not null ");
-        sqlScalars.addToSql("ORDER BY video_source ");
+        sqlScalars.addToSql("SELECT DISTINCT mf.video_source as name ");
+        sqlScalars.addToSql("FROM mediafile mf ");
         
+        if (options.getType() != null) {
+            sqlScalars.addToSql("JOIN mediafile_videodata mv ON mf.id=mv.mediafile_id ");
+            if (MetaDataType.MOVIE == options.getType()) {
+                sqlScalars.addToSql("JOIN videodata vd ON vd.id=mv.videodata_id and vd.episode < 0 ");
+            } else {
+                sqlScalars.addToSql("JOIN videodata vd ON vd.id=mv.videodata_id and vd.episode > -1 ");
+            }
+        } 
+        
+        sqlScalars.addToSql("WHERE mf.video_source is not null ");
+        sqlScalars.addToSql("ORDER BY mf.video_source ");
+       
         if ("DESC".equalsIgnoreCase(options.getSortdir())) {
             sqlScalars.addToSql("DESC");
         } else {
