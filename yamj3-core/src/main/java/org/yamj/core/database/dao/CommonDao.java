@@ -316,7 +316,7 @@ public class CommonDao extends HibernateDao {
       OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
 
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT cert.id, cert.country, cert.certificate ");
+        sqlScalars.addToSql("SELECT DISTINCT cert.id, cert.country, cert.certificate ");
 
         String sortBy = options.getSortby();
         if ("certificate".equalsIgnoreCase(sortBy)) {
