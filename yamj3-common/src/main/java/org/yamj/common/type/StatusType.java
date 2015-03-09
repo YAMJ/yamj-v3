@@ -24,17 +24,55 @@ package org.yamj.common.type;
 
 public enum StatusType {
 
-    NEW,            // new record
-    UPDATED,        // updated record
-    DELETED,        // deleted record
-    ERROR,          // something went wrong
-    NOTFOUND,       // something hasn't been found
-    INVALID,        // invalid record
-    DUPLICATE,      // duplicate record
-    TEMP_DONE,      // temporary done
-    IGNORE,         // ignored entry
-    DONE;           // all is done
-    
+    /**
+     * new record
+     */
+    NEW,
+    /**
+     * updated record
+     */
+    UPDATED,
+    /**
+     * deleted record
+     */
+    DELETED,
+    /**
+     * something went wrong
+     */
+    ERROR,
+    /**
+     * something hasn't been found
+     */
+    NOTFOUND,
+    /**
+     * invalid record
+     */
+    INVALID,
+    /**
+     * duplicate record
+     */
+    DUPLICATE,
+    /**
+     * temporary done
+     */
+    TEMP_DONE,
+    /**
+     * ignored entry
+     */
+    IGNORE,
+    /**
+     * all is done
+     */
+    DONE;
+
+    /**
+     * Get the type from a String.
+     *
+     * Returns NEW by default
+     *
+     * @param type
+     * @return
+     */
     public static StatusType fromString(String type) {
         try {
             return StatusType.valueOf(type.trim().toUpperCase());
