@@ -62,9 +62,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <hibernate.version>4.3.8.Final</hibernate.version>
-        <spring.version>4.1.4.RELEASE</spring.version>
-        <org.slf4j.version>1.7.10</org.slf4j.version>
-        <jackson.version>2.5.0</jackson.version>
+        <spring.version>4.1.6.RELEASE</spring.version>
+        <org.slf4j.version>1.7.12</org.slf4j.version>
+        <jackson.version>2.5.2</jackson.version>
         <jetty.version>8.1.16.v20140903</jetty.version>
     </properties>
 
@@ -217,7 +217,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.3.2</version>
+                <version>3.4</version>
             </dependency>
             <dependency>
                 <groupId>commons-configuration</groupId>
