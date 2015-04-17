@@ -18,13 +18,15 @@
 
     <!-- Activates @Scheduled and @Async annotations for scheduling -->
     <task:annotation-driven />
- 
+
     <bean id="propertyConfigurer" class="org.yamj.common.tools.PropertyTools">
         <property name="locations">
             <list>
                 <value>classpath:/yamj3-core-static.properties</value>
                 <value>file:${yamj3.home}/config/yamj3-core-static.properties</value>
                 <value>file:${yamj3.home}/config/yamj3-core-static.user.properties</value>
+                <!-- Add the generated git.properties file. Not sure if this is needed? -->
+                <value>classpath:/git.properties</value>
             </list>
         </property>
         <property name="ignoreResourceNotFound" value="true"/>

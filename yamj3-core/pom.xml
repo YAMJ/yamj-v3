@@ -226,33 +226,14 @@
                         <manifestEntries>
                             <Implementation-Title>${project.name}</Implementation-Title>
                             <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
-                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Implementation-Version>${project.version}-${git.commit.id}</Implementation-Version>
 
-                            <Specification-Title>${project.description}</Specification-Title>
-                            <Specification-Vendor>${timestamp}</Specification-Vendor>
-                            <Specification-Version>${buildNumber}</Specification-Version>
+                            <Specification-Title>${project.name}</Specification-Title>
+                            <Specification-Vendor>${project.organization.name}</Specification-Vendor>
+                            <Specification-Version>${project.version}</Specification-Version>
                         </manifestEntries>
                     </archive>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-                <configuration>
-                    <shortRevisionLength>10</shortRevisionLength>
-                    <doCheck>false</doCheck>
-                    <doUpdate>false</doUpdate>
-                    <timestampFormat>{0,date,yyyy-MM-dd HH:mm:ss}</timestampFormat>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>create</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>

@@ -53,8 +53,6 @@
     </dependencies>
 
     <build>
-        <!--<finalName>filescanner-${project.version}</finalName>-->
-
         <plugins>
 
             <plugin>
@@ -119,88 +117,6 @@
                             </descriptors>
                         </configuration>
 
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>create-version-txt</id>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <target>
-                                <property name="version_file"     value="${project.build.directory}/version.txt" />
-                                <property name="header_line"      value="${project.name}${line.separator}" />
-                                <property name="build_date_line"  value="Build Date: ${timestamp}${line.separator}" />
-                                <property name="version_line"     value="Version   : ${project.version}${line.separator}" />
-                                <property name="buildnumber_line" value="Git-SHA   : ${buildNumber}${line.separator}" />
-                                <echo>Writing version file: ${version_file}</echo>
-                                <echo file="${version_file}" append="false">${header_line}</echo>
-                                <echo file="${version_file}" append="true">${build_date_line}</echo>
-                                <echo file="${version_file}" append="true">${version_line}</echo>
-                                <echo file="${version_file}" append="true">${buildnumber_line}</echo>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>create-batch-file</id>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <target>
-                                <property name="batch_file" value="${project.build.directory}/filescanner.cmd" />
-                                <property name="title_1"    value="REM ${project.name}${line.separator}" />
-                                <property name="title_2"    value="REM ${project.description}${line.separator}" />
-                                <property name="title_3"    value="REM Version: ${project.version}${line.separator}" />
-                                <property name="title_4"    value="REM Git-SHA: ${buildNumber}${line.separator}" />
-                                <property name="line_1"     value="@echo off${line.separator}" />
-                                <property name="line_2"     value="cls${line.separator}" />
-                                <property name="line_3"     value="java -classpath .;./lib/* org.yamj.filescanner.FileScanner %*${line.separator}" />
-                                <echo>Writing batch file: ${batch_file}</echo>
-                                <echo file="${batch_file}" append="false">${line_1}</echo>
-                                <echo file="${batch_file}" append="true">${title_1}</echo>
-                                <echo file="${batch_file}" append="true">${title_2}</echo>
-                                <echo file="${batch_file}" append="true">${title_3}</echo>
-                                <echo file="${batch_file}" append="true">${title_4}</echo>
-                                <echo file="${batch_file}" append="true">${line_2}</echo>
-                                <echo file="${batch_file}" append="true">${line_3}</echo>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>create-shell-file</id>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <target>
-                                <property name="shell_file" value="${project.build.directory}/filescanner.sh" />
-                                <property name="title_1"    value="# ${project.name}${line.separator}" />
-                                <property name="title_2"    value="# ${project.description}${line.separator}" />
-                                <property name="title_3"    value="# Version: ${project.version}${line.separator}" />
-                                <property name="title_4"    value="# Git-SHA: ${buildNumber}${line.separator}" />
-                                <property name="line_1"     value="#!/bin/sh${line.separator}" />
-                                <property name="line_2"     value="clear${line.separator}" />
-                                <property name="line_3"     value="java -classpath .:./lib/* org.yamj.filescanner.FileScanner $@${line.separator}" />
-                                <echo>Writing shell file: ${shell_file}</echo>
-                                <echo file="${shell_file}" append="false">${line_1}</echo>
-                                <echo file="${shell_file}" append="true">${title_1}</echo>
-                                <echo file="${shell_file}" append="true">${title_2}</echo>
-                                <echo file="${shell_file}" append="true">${title_3}</echo>
-                                <echo file="${shell_file}" append="true">${title_4}</echo>
-                                <echo file="${shell_file}" append="true">${line_2}</echo>
-                                <echo file="${shell_file}" append="true">${line_3}</echo>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
