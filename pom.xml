@@ -378,7 +378,10 @@
                 <directory>src/main/resources/</directory>
                 <filtering>true</filtering>
                 <includes>
+                    <!-- Process the version.txt file -->
                     <include>version.txt</include>
+                    <!-- Process the build.properties file -->
+                    <include>build.properties</include>
                     <!-- Process any script files if they are present -->
                     <include>*.cmd</include>
                     <include>*.sh</include>
@@ -401,8 +404,8 @@
                 </executions>
                 <configuration>
                     <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-                    <dateFormat>yyyy-MM-dd HH:mm:ss z</dateFormat>
-                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <dateFormat>yyyy-MM-dd HH:mm:ss Z</dateFormat>
+                    <generateGitPropertiesFile>false</generateGitPropertiesFile>
                     <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
                     <abbrevLength>7</abbrevLength>
                     <injectAllReactorProjects>true</injectAllReactorProjects>

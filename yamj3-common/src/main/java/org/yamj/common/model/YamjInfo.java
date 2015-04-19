@@ -23,11 +23,14 @@
 package org.yamj.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Properties;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -49,17 +52,21 @@ import org.yamj.common.type.MetaDataType;
 public class YamjInfo {
 
     private static final Logger LOG = LoggerFactory.getLogger(YamjInfo.class);
+    // Project properties/information
     private String projectName;
     private String projectVersion;
     private String moduleName;
     private String moduleDescription;
     private DateTime buildDateTime;
     private String buildRevision;
+    private Boolean buildDirty;
+    // Server properties/information
     private int processorCores;
     private String javaVersion;
     private String osArch;
     private String osName;
     private String osVersion;
+    // Service properties/information
     private DateTime startUpDateTime;
     private Map<MetaDataType, Long> counts;
     private String databaseIp;
@@ -78,16 +85,7 @@ public class YamjInfo {
     @SuppressWarnings("rawtypes")
     public YamjInfo(Class myClass) {
         // YAMJ Stuff
-        this.projectName = myClass.getPackage().getImplementationVendor();
-        this.projectVersion = myClass.getPackage().getImplementationVersion();
-        this.moduleName = myClass.getPackage().getImplementationTitle();
-        this.moduleDescription = myClass.getPackage().getSpecificationTitle();
-        if (myClass.getPackage().getSpecificationVendor() != null) {
-            this.buildDateTime = DateTimeTools.parseDate(myClass.getPackage().getSpecificationVendor(), DateTimeTools.BUILD_FORMAT);
-        } else {
-            this.buildDateTime = new DateTime();
-        }
-        this.buildRevision = myClass.getPackage().getSpecificationVersion();
+        processPropertiesFile();
 
         // System Stuff
         this.processorCores = Runtime.getRuntime().availableProcessors();
@@ -117,6 +115,37 @@ public class YamjInfo {
         this.skinDir = buildBaseUrl(PropertyTools.getProperty("yamj3.file.storage.skins", "./skins/"));
     }
 
+    private void processPropertiesFile() {
+        Properties properties = new Properties();
+        try {
+            InputStream res = getClass().getClassLoader().getResourceAsStream("build.properties");
+            if (res == null) {
+                LOG.warn("Unable to open git.properties file");
+            } else {
+                properties.load(res);
+
+                this.projectName = properties.get("yamj.org").toString();
+                this.projectVersion = properties.get("yamj.version").toString();
+                this.moduleName = properties.get("yamj.name").toString();
+                this.moduleDescription = properties.get("yamj.description").toString();
+
+                this.buildDateTime = DateTimeTools.parseDate(properties.get("git.build.time").toString(), DateTimeTools.BUILD_FORMAT);
+                this.buildRevision = properties.get("git.commit.id.abbrev").toString();
+                this.buildDirty = asBoolean(properties.get("git.dirty").toString());
+            }
+        } catch (IOException ex) {
+            LOG.warn("Failed to get build properties from git.properties file", ex);
+        }
+    }
+
+    private Boolean asBoolean(final String valueToConvert) {
+        if (StringUtils.isNotBlank(valueToConvert)) {
+            return Boolean.parseBoolean(StringUtils.trimToEmpty(valueToConvert));
+        }
+        return null;
+    }
+
+
     public String getProjectName() {
         return projectName;
     }
@@ -125,12 +154,14 @@ public class YamjInfo {
         return projectVersion;
     }
 
-    @JsonIgnore //Ignore this for JSON output (use the String version instead
+    //Ignore this for JSON output (use the String version instead
+    @JsonIgnore
     public DateTime getBuildDateTime() {
         return buildDateTime;
     }
 
-    @JsonIgnore //Ignore this for JSON output (use the String version instead
+    //Ignore this for JSON output (use the String version instead
+    @JsonIgnore
     public DateTime getStartUpDateTime() {
         return startUpDateTime;
     }
@@ -145,6 +176,10 @@ public class YamjInfo {
 
     public String getModuleDescription() {
         return moduleDescription;
+    }
+
+    public Boolean isBuildDirty() {
+        return buildDirty;
     }
 
     public int getProcessorCores() {

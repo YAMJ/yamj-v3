@@ -42,7 +42,7 @@ public final class DateTimeTools {
     private static final PeriodFormatter TIME_FORMAT_TEXT = createPeriodFormatter("h", "m", "s");
     // Some default formats in use
     public static final String ISO8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-    public static final String BUILD_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final String BUILD_FORMAT = "yyyy-MM-dd HH:mm:ss Z";
 
     private DateTimeTools() {
         throw new UnsupportedOperationException("Utility class");

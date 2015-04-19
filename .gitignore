@@ -175,7 +175,5 @@ target/
 /yamj3-filescanner/logs/
 /yamj3-core/nb-configuration.xml
 /nb-configuration.xml
-/yamj3-common/src/main/resources/git.properties
-/yamj3-core/src/main/resources/git.properties
-/yamj3-filescanner/src/main/resources/git.properties
-/yamj3-jetty/src/main/resources/git.properties
+/yamj3-jetty/nb-configuration.xml
+/yamj3-filescanner/nb-configuration.xml
