@@ -22,10 +22,6 @@
  */
 package org.yamj.jetty;
 
-import static org.yamj.common.type.ExitType.CMDLINE_ERROR;
-import static org.yamj.common.type.ExitType.STARTUP_FAILURE;
-import static org.yamj.common.type.ExitType.SUCCESS;
-
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;
@@ -45,8 +41,12 @@ import org.yamj.common.cmdline.CmdLineException;
 import org.yamj.common.cmdline.CmdLineOption;
 import org.yamj.common.cmdline.CmdLineParser;
 import org.yamj.common.model.YamjInfo;
+import org.yamj.common.model.YamjInfoBuild;
 import org.yamj.common.tools.ClassTools;
 import org.yamj.common.type.ExitType;
+import static org.yamj.common.type.ExitType.CMDLINE_ERROR;
+import static org.yamj.common.type.ExitType.STARTUP_FAILURE;
+import static org.yamj.common.type.ExitType.SUCCESS;
 
 public class Start {
 
@@ -64,7 +64,7 @@ public class Start {
     public static void main(String[] args) {
         PropertyConfigurator.configure("config/log4j-core.properties");
 
-        YamjInfo yi = new YamjInfo(Start.class);
+        YamjInfo yi = new YamjInfo(YamjInfoBuild.JETTY);
         yi.printHeader(LOG);
 
         CmdLineParser parser = getCmdLineParser();

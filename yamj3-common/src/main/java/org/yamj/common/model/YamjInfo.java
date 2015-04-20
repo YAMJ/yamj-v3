@@ -80,12 +80,13 @@ public class YamjInfo {
 
     @SuppressWarnings("unused")
     private YamjInfo() {
+        this(YamjInfoBuild.COMMON);
     }
 
     @SuppressWarnings("rawtypes")
-    public YamjInfo(Class myClass) {
+    public YamjInfo(YamjInfoBuild yamjInfoBuild) {
         // YAMJ Stuff
-        processPropertiesFile();
+        processPropertiesFile(yamjInfoBuild.getFilename());
 
         // System Stuff
         this.processorCores = Runtime.getRuntime().availableProcessors();
@@ -115,12 +116,12 @@ public class YamjInfo {
         this.skinDir = buildBaseUrl(PropertyTools.getProperty("yamj3.file.storage.skins", "./skins/"));
     }
 
-    private void processPropertiesFile() {
+    private void processPropertiesFile(String filename) {
         Properties properties = new Properties();
         try {
-            InputStream res = getClass().getClassLoader().getResourceAsStream("build.properties");
+            InputStream res = getClass().getClassLoader().getResourceAsStream(filename);
             if (res == null) {
-                LOG.warn("Unable to open git.properties file");
+                LOG.warn("Unable to open '{}' file", filename);
             } else {
                 properties.load(res);
 
@@ -134,7 +135,7 @@ public class YamjInfo {
                 this.buildDirty = asBoolean(properties.get("git.dirty").toString());
             }
         } catch (IOException ex) {
-            LOG.warn("Failed to get build properties from git.properties file", ex);
+            LOG.warn("Failed to get build properties from '{}' file", filename, ex);
         }
     }
 
@@ -144,7 +145,6 @@ public class YamjInfo {
         }
         return null;
     }
-
 
     public String getProjectName() {
         return projectName;

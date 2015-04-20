@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 public class YamjInfoTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(YamjInfoTest.class);
-    private static final YamjInfo YI = new YamjInfo(YamjInfoTest.class);
+    private static final YamjInfo YI = new YamjInfo(YamjInfoBuild.COMMON);
 
     @BeforeClass
     public static void setUpClass() {

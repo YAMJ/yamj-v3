@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.common.model.YamjInfo;
+import org.yamj.common.model.YamjInfoBuild;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -42,7 +43,7 @@ import org.yamj.core.database.service.JsonApiStorageService;
 public class SystemInfoController {
 
     private static final Logger LOG = LoggerFactory.getLogger(SystemInfoController.class);
-    private static final YamjInfo YAMJ_INFO = new YamjInfo(SystemInfoController.class);
+    private static final YamjInfo YAMJ_INFO = new YamjInfo(YamjInfoBuild.CORE);
     @Autowired
     private JsonApiStorageService jsonApi;
 

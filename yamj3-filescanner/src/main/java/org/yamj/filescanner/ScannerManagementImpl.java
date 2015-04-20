@@ -24,7 +24,12 @@ package org.yamj.filescanner;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,6 +50,7 @@ import org.yamj.common.cmdline.CmdLineParser;
 import org.yamj.common.dto.StageDirectoryDTO;
 import org.yamj.common.dto.StageFileDTO;
 import org.yamj.common.model.YamjInfo;
+import org.yamj.common.model.YamjInfoBuild;
 import org.yamj.common.remote.service.GitHubService;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.tools.StringTools;
@@ -94,7 +100,7 @@ public class ScannerManagementImpl implements ScannerManagement {
     private static final Map<String, List<String>> DIR_EXCLUSIONS = new HashMap<>();
     private static final List<Pattern> DIR_IGNORE_FILES;
     // YAMJ Information
-    private static final YamjInfo YAMJ_INFO = new YamjInfo(ScannerManagementImpl.class);
+    private static final YamjInfo YAMJ_INFO = new YamjInfo(YamjInfoBuild.FILESCANNER);
     // Number of seconds to wait between checks
     private static final int WAIT_10_SECONDS = 10;
     // Length of the * line
@@ -248,7 +254,7 @@ public class ScannerManagementImpl implements ScannerManagement {
 
             if (wd != null) {
                 Boolean directoriesToWatch = Boolean.TRUE;
-    
+
                 for (Library library : libraryCollection.getLibraries()) {
                     String dirToWatch = library.getImportDTO().getBaseDirectory();
                     if (library.isWatch()) {
@@ -259,7 +265,7 @@ public class ScannerManagementImpl implements ScannerManagement {
                         LOG.info("Watching skipped for directory '{}'", dirToWatch);
                     }
                 }
-    
+
                 if (directoriesToWatch) {
                     wd.processEvents();
                     LOG.info("Watching directory '{}' completed", directoryProperty);
@@ -358,7 +364,7 @@ public class ScannerManagementImpl implements ScannerManagement {
                             // All files to be excluded, so quit
                             return null;
                         }
-                        
+
                         // We found a match, so add it to our local copy
                         LOG.debug("Exclusion file '{}' found, will exclude all {} file types", lcFilename, DIR_EXCLUSIONS.get(lcFilename).toString());
                         exclusions.addAll(DIR_EXCLUSIONS.get(lcFilename));

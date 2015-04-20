@@ -380,8 +380,8 @@
                 <includes>
                     <!-- Process the version.txt file -->
                     <include>version.txt</include>
-                    <!-- Process the build.properties file -->
-                    <include>build.properties</include>
+                    <!-- Process the build-*.properties file -->
+                    <include>build-*.properties</include>
                     <!-- Process any script files if they are present -->
                     <include>*.cmd</include>
                     <include>*.sh</include>

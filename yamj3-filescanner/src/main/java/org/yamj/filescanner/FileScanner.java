@@ -22,10 +22,6 @@
  */
 package org.yamj.filescanner;
 
-import static org.yamj.common.type.ExitType.CMDLINE_ERROR;
-import static org.yamj.common.type.ExitType.CONFIG_ERROR;
-import static org.yamj.common.type.ExitType.SUCCESS;
-
 import java.io.File;
 import java.io.IOException;
 import org.apache.log4j.PropertyConfigurator;
@@ -37,8 +33,12 @@ import org.yamj.common.cmdline.CmdLineException;
 import org.yamj.common.cmdline.CmdLineOption;
 import org.yamj.common.cmdline.CmdLineParser;
 import org.yamj.common.model.YamjInfo;
+import org.yamj.common.model.YamjInfoBuild;
 import org.yamj.common.tools.ClassTools;
 import org.yamj.common.type.ExitType;
+import static org.yamj.common.type.ExitType.CMDLINE_ERROR;
+import static org.yamj.common.type.ExitType.CONFIG_ERROR;
+import static org.yamj.common.type.ExitType.SUCCESS;
 
 public final class FileScanner {
 
@@ -59,7 +59,7 @@ public final class FileScanner {
             LOG.trace("Exception:", ex);
         }
 
-        YamjInfo yi = new YamjInfo(FileScanner.class);
+        YamjInfo yi = new YamjInfo(YamjInfoBuild.FILESCANNER);
         yi.printHeader(LOG);
         CmdLineParser parser = getCmdLineParser();
 

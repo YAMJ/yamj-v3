@@ -20,25 +20,19 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.remote.service;
+package org.yamj.common.model;
 
-import org.springframework.stereotype.Service;
-import org.yamj.common.model.YamjInfo;
-import org.yamj.common.model.YamjInfoBuild;
-import org.yamj.common.remote.service.SystemInfoService;
+public enum YamjInfoBuild {
 
-@Service("systemInfoService")
-public class SystemInfoServiceImpl implements SystemInfoService {
+    COMMON,
+    CORE,
+    FILESCANNER,
+    JETTY;
 
-    private YamjInfo yamjInfo = new YamjInfo(YamjInfoBuild.CORE);
-
-    @Override
-    public String ping() {
-        return "YAMJ3 Core is running";
+    private YamjInfoBuild() {
     }
 
-    @Override
-    public YamjInfo systemInfo() {
-        return yamjInfo;
+    public String getFilename() {
+        return "build-" + this.name().toLowerCase() + ".properties";
     }
 }
