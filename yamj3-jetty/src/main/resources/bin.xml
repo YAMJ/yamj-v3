@@ -26,16 +26,11 @@
 
         <!-- add configuration files -->
         <fileSet>
-            <directory>${basedir}/config</directory>
+            <directory>${basedir}/root</directory>
             <outputDirectory></outputDirectory>
             <includes>
                 <include>**/*</include>
             </includes>
-            <excludes>
-                <exclude>skins/</exclude>
-                <exclude>*.properties</exclude>
-                <exclude>*.html</exclude>
-            </excludes>
         </fileSet>
 
         <!-- add properties files -->
@@ -49,14 +44,8 @@
 
         <!-- Add the resource folder files -->
         <fileSet>
-            <directory>${basedir}/config/resources</directory>
+            <directory>${basedir}/resources</directory>
             <outputDirectory>resources</outputDirectory>
-        </fileSet>
-
-        <!-- Add the skin information files -->
-        <fileSet>
-            <directory>${basedir}/config/skins</directory>
-            <outputDirectory>resources/skins</outputDirectory>
         </fileSet>
 
         <!--Add the version -->
