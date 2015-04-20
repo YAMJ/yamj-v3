@@ -413,7 +413,6 @@
                     <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
                     <dateFormat>yyyy-MM-dd HH:mm:ss Z</dateFormat>
                     <generateGitPropertiesFile>false</generateGitPropertiesFile>
-                    <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
                     <abbrevLength>7</abbrevLength>
                     <injectAllReactorProjects>true</injectAllReactorProjects>
                 </configuration>
