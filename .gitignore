@@ -163,17 +163,10 @@ pip-log.txt
 .DS_Store
 
 #Project specific
-/nbproject/
-nbactions.xml
-target/
-/yamj3-common/target/
-/yamj3-filescanner/*.log
-/yamj3-filescanner/nbproject/
-/yamj3-common/nbproject/
 /data-sources.xml
-/yamj3-core/src/main/resources/my_settings.txt
+target/
+/yamj3-filescanner/*.log
 /yamj3-filescanner/logs/
-/yamj3-core/nb-configuration.xml
-/nb-configuration.xml
-/yamj3-jetty/nb-configuration.xml
-/yamj3-filescanner/nb-configuration.xml
+**/nbactions.xml
+**/nb-configuration.xml
+**/nbproject/

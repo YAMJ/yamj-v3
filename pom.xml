@@ -375,7 +375,7 @@
         <resources>
             <!-- Filtering for the git-commit-id-plugin -->
             <resource>
-                <directory>src/main/resources/</directory>
+                <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
                     <!-- Process the version.txt file -->
@@ -385,6 +385,13 @@
                     <!-- Process any script files if they are present -->
                     <include>*.cmd</include>
                     <include>*.sh</include>
+                </includes>
+            </resource>
+            <!-- Add the remainder of the resources -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>*</include>
                 </includes>
             </resource>
         </resources>
