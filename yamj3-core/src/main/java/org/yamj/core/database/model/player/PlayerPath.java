@@ -27,8 +27,6 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
 import org.yamj.core.database.model.AbstractIdentifiable;
 
 @Entity
@@ -37,45 +35,30 @@ public class PlayerPath extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "device_type", nullable = false, length = 200)
-    @JsonProperty("device_type")
-    private String deviceType;
-    @Column(name = "device_name", nullable = false, length = 200)
-    @JsonProperty("name")
-    private String deviceName;
-    @Column(name = "device_path", nullable = false, length = 200)
-    @JsonProperty("path")
-    private String devicePath;
+    @Column(name = "source_path", nullable = false, length = 200)
+    @JsonProperty("source_path")
+    private String sourcePath;
+    @Column(name = "target_path", nullable = false, length = 200)
+    @JsonProperty("target_path")
+    private String targetPath;
 
     public PlayerPath() {
     }
 
-    public String getDeviceType() {
-        return deviceType;
+    public String getSourcePath() {
+        return sourcePath;
     }
 
-    public void setDeviceType(String deviceType) {
-        this.deviceType = deviceType;
+    public void setSourcePath(String sourcePath) {
+        this.sourcePath = sourcePath;
     }
 
-    public String getDeviceName() {
-        return deviceName;
+    public String getTargetPath() {
+        return targetPath;
     }
 
-    public void setDeviceName(String deviceName) {
-        this.deviceName = deviceName;
+    public void setTargetPath(String targetPath) {
+        this.targetPath = targetPath;
     }
 
-    public String getDevicePath() {
-        return devicePath;
-    }
-
-    public void setDevicePath(String devicePath) {
-        this.devicePath = devicePath;
-    }
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
-    }
 }

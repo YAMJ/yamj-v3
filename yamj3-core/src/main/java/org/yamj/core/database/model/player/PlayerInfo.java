@@ -22,12 +22,18 @@
  */
 package org.yamj.core.database.model.player;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.*;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.NaturalId;
 import org.yamj.core.database.model.AbstractIdentifiable;
@@ -42,15 +48,21 @@ public class PlayerInfo extends AbstractIdentifiable implements Serializable {
     @NaturalId(mutable = true)
     @Column(name = "name", nullable = false, length = 200)
     private String name;
-    
+
+    @Column(name = "device_type", nullable = false, length = 200)
+    @JsonProperty("device_type")
+    private String deviceType;
+
     @Column(name = "ip_address", nullable = false, length = 15)
     private String ipAddress;
-    
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @ForeignKey(name = "FK_PLAYERPATH_INFO", inverseName = "FK_PLAYERPATH_PATH")
     @JoinTable(name = "playerinfo_playerpath",
-            joinColumns = {@JoinColumn(name = "player_info_id")},
-            inverseJoinColumns = {@JoinColumn(name = "player_path_id")})
+            joinColumns = {
+                @JoinColumn(name = "player_info_id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "player_path_id")})
     private List<PlayerPath> paths = new ArrayList<>();
 
     public String getName() {
@@ -59,6 +71,14 @@ public class PlayerInfo extends AbstractIdentifiable implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
     }
 
     public String getIpAddress() {
@@ -83,11 +103,6 @@ public class PlayerInfo extends AbstractIdentifiable implements Serializable {
 
     public void clearPaths() {
         this.paths.clear();
-    }
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
 }
