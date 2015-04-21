@@ -43,7 +43,6 @@ import org.yamj.core.api.model.Skin;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.Configuration;
-import org.yamj.core.database.model.PlayerPathOld;
 import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.service.file.FileStorageService;
@@ -196,7 +195,7 @@ public class PagesController {
         ModelAndView view = new ModelAndView("player-add");
         YamjInfo yi = sic.getYamjInfo("true");
         view.addObject("yi", yi);
-        view.addObject("player", new PlayerPathOld());
+        view.addObject("player", new PlayerInfo());
         return view;
     }
 

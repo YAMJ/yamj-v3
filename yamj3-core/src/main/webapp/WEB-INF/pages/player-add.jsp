@@ -17,7 +17,7 @@
         </c:import>
 
         <div id="logo">
-            <h2>Add Player Path Entry</h2>
+            <h2>Add Player Entry</h2>
         </div>
         <p id="message" class="center">Enter the player information</p>
         <form:form method="POST" commandName="player" action="${pageContext.request.contextPath}/player/add/process.html">
@@ -27,12 +27,12 @@
                     <td style="width:75%"><form:input size="100" path="name"></form:input></td>
                     </tr>
                     <tr>
-                        <td style="width:25%" class="right">IP/Device:</td>
-                        <td style="width:75%"><form:input size="50" path="ipDevice"></form:input></td>
+                        <td style="width:25%" class="right">Device Type:</td>
+                        <td style="width:75%"><form:input size="100" path="deviceType"></form:input></td>
                     </tr>
                     <tr>
-                        <td style="width:25%" class="right">Storage Path</td>
-                        <td style="width:75%"><form:input size="100" path="storagePath"></form:input></td>
+                        <td style="width:25%" class="right">IP Address:</td>
+                        <td style="width:75%"><form:input size="50" path="ipAddress"></form:input></td>
                     </tr>
                     <tr>
                         <td colspan="2" class="center"><input value="Add Player" type="submit" class="btn default"></td>

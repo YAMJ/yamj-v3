@@ -32,14 +32,14 @@
                     <td class="center">New</td>
                 </tr>
                 <tr>
-                    <td class="right">IP/Device:</td>
-                    <td>${player.ipDevice}</td>
-                    <td><form:input path="ipDevice" size="50"></form:input></td>
+                    <td class="right">Device Type:</td>
+                    <td>${player.deviceType}</td>
+                    <td><form:input path="deviceType" size="100"></form:input></td>
                 </tr>
                 <tr>
-                    <td class="right">Storage Path:</td>
-                    <td>${player.storagePath}</td>
-                    <td><form:input path="storagePath" size="100"></form:input></td>
+                    <td class="right">IP Address:</td>
+                    <td>${player.ipAddress}</td>
+                    <td><form:input path="ipAddress" size="50"></form:input></td>
                 </tr>
                 <tr>
                     <td colspan="3" class="center"><input value="Update" type="submit"></td>
