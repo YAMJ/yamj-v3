@@ -102,7 +102,11 @@ public class YamjInfo {
         this.counts = new EnumMap<>(MetaDataType.class);
 
         // IP Address
-        this.coreIp = SystemTools.getIpAddress(Boolean.TRUE);
+        if (StringUtils.isBlank(PropertyTools.getProperty("yamj3.core.url", ""))) {
+            this.coreIp = SystemTools.getIpAddress(Boolean.TRUE);
+        } else {
+            this.coreIp = PropertyTools.getProperty("yamj3.core.url", "");
+        }
 
         // Core Port
         this.corePort = 8888;   // TODO: Get this from jetty!

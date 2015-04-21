@@ -27,6 +27,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
@@ -34,6 +35,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamj.common.tools.PropertyTools;
 
 /**
  *
@@ -42,11 +44,12 @@ import org.slf4j.LoggerFactory;
 public class YamjInfoTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(YamjInfoTest.class);
-    private static final YamjInfo YI = new YamjInfo(YamjInfoBuild.COMMON);
+    private static YamjInfo YI;
 
     @BeforeClass
     public static void setUpClass() {
         BasicConfigurator.configure();
+        YI = new YamjInfo(YamjInfoBuild.COMMON);
     }
 
     @AfterClass
@@ -223,7 +226,14 @@ public class YamjInfoTest {
     @Test
     public void testGetCoreIp() {
         LOG.info("getCoreIp");
+
         assertTrue(StringUtils.isNotBlank(YI.getCoreIp()));
+
+        // Rebuild the YamjInfo to pick up the property change
+        PropertyTools.setProperty("yamj3.core.url", "www.test.com");
+        YI = new YamjInfo(YamjInfoBuild.COMMON);
+
+        assertEquals("www.test.com", YI.getCoreIp());
     }
 
     /**
