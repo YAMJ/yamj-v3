@@ -201,7 +201,7 @@ public class PagesController {
     }
 
     @RequestMapping("/player/add/process")
-    public ModelAndView playerAdd(@ModelAttribute PlayerPathOld player) {
+    public ModelAndView playerAdd(@ModelAttribute PlayerInfo player) {
 
         ModelAndView view = new ModelAndView("redirect:/player/list");
         LOG.info("Adding player: {}", player.toString());
@@ -218,7 +218,7 @@ public class PagesController {
 
         OptionsPlayer options = new OptionsPlayer();
 
-        List<PlayerPathOld> playerList = jsonApi.getPlayer(options);
+        List<PlayerInfo> playerList = jsonApi.getPlayer(options);
         YamjInfo yi = sic.getYamjInfo("true");
         view.addObject("yi", yi);
         view.addObject("playerlist", playerList);
@@ -229,7 +229,7 @@ public class PagesController {
     @RequestMapping(value = "/player/edit/{name}", method = RequestMethod.GET)
     public ModelAndView playerEditPage(@PathVariable String name) {
         ModelAndView view = new ModelAndView("player-edit");
-        List<PlayerPathOld> playerList = jsonApi.getPlayer(name);
+        List<PlayerInfo> playerList = jsonApi.getPlayer(name);
         if (!playerList.isEmpty()) {
             view.addObject("player", playerList.get(0));
         }
@@ -239,7 +239,7 @@ public class PagesController {
     }
 
     @RequestMapping(value = "/player/edit/{name}", method = RequestMethod.POST)
-    public ModelAndView playerEditUpdate(@ModelAttribute("player") PlayerPathOld player) {
+    public ModelAndView playerEditUpdate(@ModelAttribute("player") PlayerInfo player) {
         ModelAndView view = new ModelAndView("redirect:/player/list");
         LOG.info("Updating player: {}", player.toString());
         jsonApi.setPlayer(player);

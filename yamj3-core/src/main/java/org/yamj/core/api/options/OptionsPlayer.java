@@ -37,8 +37,8 @@ public class OptionsPlayer extends OptionsAbstractSortSearch {
         return getSearch();
     }
 
-    public void setPlayer(String player) {
-        setSearch(player);
+    public void setPlayer(String playerName) {
+        setSearch(playerName);
         setField("name");
     }
 

@@ -33,7 +33,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.options.OptionsPlayer;
-import org.yamj.core.database.model.PlayerPathOld;
 import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.hibernate.HibernateDao;
@@ -44,26 +43,9 @@ public class PlayerDao extends HibernateDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlayerDao.class);
 
-    public void storePlayer(List<PlayerPathOld> playerList) {
-        for (PlayerPathOld player : playerList) {
+    public void storePlayer(List<PlayerInfo> playerList) {
+        for (PlayerInfo player : playerList) {
             storePlayer(player);
-        }
-    }
-
-    public void storePlayer(PlayerPathOld player) {
-        
-        LOG.debug("Checking for existing information on player '{}'", player.getName());
-        PlayerPathOld existingPlayer = getByNaturalId(PlayerPathOld.class, "name", player.getName());
-
-        if (existingPlayer != null) {
-            // Player already exists
-            LOG.debug("Updating player information: '{}'", player.getName());
-            existingPlayer.setIpDevice(player.getIpDevice());
-            existingPlayer.setStoragePath(player.getStoragePath());
-            updateEntity(existingPlayer);
-        } else {
-            LOG.debug("Storing new player: '{}'", player.getName());
-            storeEntity(player);
         }
     }
 
@@ -73,10 +55,11 @@ public class PlayerDao extends HibernateDao {
 
         if (existingPlayer != null) {
             // Player already exists
-            LOG.debug("Updating player information: '{}'", player.getName());
+            LOG.debug("Updating player information: {}-{}", player.getId(), player.getName());
+            existingPlayer.setDeviceType(player.getDeviceType());
             existingPlayer.setIpAddress(player.getIpAddress());
             existingPlayer.clearPaths();
-            for(PlayerPath path:player.getPaths()) {
+            for (PlayerPath path : player.getPaths()) {
                 existingPlayer.addPath(path);
             }
 
@@ -94,26 +77,26 @@ public class PlayerDao extends HibernateDao {
         return criteria.list();
     }
 
-    public List<PlayerPathOld> getPlayerEntries(OptionsPlayer options) {
+    public List<PlayerInfo> getPlayerEntries(OptionsPlayer options) {
         SqlScalars sqlScalars = new SqlScalars();
 
-        sqlScalars.addToSql("SELECT name, ip_device AS ipDevice, storage_path AS storagePath");
-        sqlScalars.addToSql("FROM player_path");
+        sqlScalars.addToSql("SELECT name, device_type AS deviceType, ip_address AS ipAddress");
+        sqlScalars.addToSql("FROM player_info");
         // TODO: Add where clause
         sqlScalars.addToSql(options.getSearchString(true));
         sqlScalars.addToSql(options.getSortString());
 
         sqlScalars.addScalar("name", StringType.INSTANCE);
-        sqlScalars.addScalar("ipDevice", StringType.INSTANCE);
-        sqlScalars.addScalar("storagePath", StringType.INSTANCE);
+        sqlScalars.addScalar("deviceType", StringType.INSTANCE);
+        sqlScalars.addScalar("ipAddress", StringType.INSTANCE);
 
-        List<PlayerPathOld> players = executeQueryWithTransform(PlayerPathOld.class, sqlScalars, null);
+        List<PlayerInfo> players = executeQueryWithTransform(PlayerInfo.class, sqlScalars, null);
         return players;
     }
 
-    public List<PlayerPathOld> getPlayerEntries(String player) {
+    public List<PlayerInfo> getPlayerEntries(String playerName) {
         OptionsPlayer options = new OptionsPlayer();
-        options.setPlayer(player);
+        options.setPlayer(playerName);
         // Make the search exact
         options.setMode("EXACT");
         return getPlayerEntries(options);
@@ -122,14 +105,14 @@ public class PlayerDao extends HibernateDao {
     /**
      * Delete keys from the database
      *
-     * @param name
+     * @param playerName
      */
-    public void deletePlayer(String name) {
-        if (StringUtils.isNotBlank(name)) {
-            PlayerPathOld player = getByNaturalId(PlayerPathOld.class, "name", name);
+    public void deletePlayer(String playerName) {
+        if (StringUtils.isNotBlank(playerName)) {
+            PlayerInfo player = getByNaturalId(PlayerInfo.class, "name", playerName);
             LOG.debug("Deleting player '{}'", player.toString());
             deleteEntity(player);
-            LOG.debug("Successfully deleted '{}'", name);
+            LOG.debug("Successfully deleted '{}'", playerName);
         }
     }
 }

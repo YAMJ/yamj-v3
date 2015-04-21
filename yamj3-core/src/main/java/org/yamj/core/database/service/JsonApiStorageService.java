@@ -31,7 +31,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.dto.*;
+import org.yamj.core.api.model.dto.ApiArtworkDTO;
+import org.yamj.core.api.model.dto.ApiAwardDTO;
+import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
+import org.yamj.core.api.model.dto.ApiEpisodeDTO;
+import org.yamj.core.api.model.dto.ApiNameDTO;
+import org.yamj.core.api.model.dto.ApiPersonDTO;
+import org.yamj.core.api.model.dto.ApiRatingDTO;
+import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
+import org.yamj.core.api.model.dto.ApiTargetDTO;
+import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
@@ -40,7 +49,11 @@ import org.yamj.core.database.dao.ApiDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.MediaDao;
 import org.yamj.core.database.dao.PlayerDao;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Certification;
+import org.yamj.core.database.model.Configuration;
+import org.yamj.core.database.model.Country;
+import org.yamj.core.database.model.Genre;
+import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.model.player.PlayerInfo;
 
 @Service("jsonApiStorageService")
@@ -92,7 +105,7 @@ public class JsonApiStorageService {
     public void getPersonList(ApiWrapperList<ApiPersonDTO> wrapper) {
         apiDao.getPersonList(wrapper);
     }
-    
+
     public void getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
         apiDao.getPerson(wrapper);
     }
@@ -191,7 +204,7 @@ public class JsonApiStorageService {
         return apiDao.getAlphabeticals(wrapper);
     }
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="Artwork Methods">
     public ApiArtworkDTO getArtworkById(Long id) {
         return apiDao.getArtworkById(id);
@@ -219,20 +232,20 @@ public class JsonApiStorageService {
     }
 
     // Player methods
-    public List<PlayerPathOld> getPlayer(ApiWrapperList<PlayerPathOld> wrapper) {
+    public List<PlayerInfo> getPlayer(ApiWrapperList<PlayerInfo> wrapper) {
         return getPlayer((OptionsPlayer) wrapper.getOptions());
     }
 
-    public List<PlayerPathOld> getPlayer(OptionsPlayer options) {
+    public List<PlayerInfo> getPlayer(OptionsPlayer options) {
         return playerDao.getPlayerEntries(options);
     }
 
-    public List<PlayerPathOld> getPlayer(String playerName) {
+    public List<PlayerInfo> getPlayer(String playerName) {
         return playerDao.getPlayerEntries(playerName);
     }
 
     @Transactional
-    public void setPlayer(PlayerPathOld player) {
+    public void setPlayer(PlayerInfo player) {
         playerDao.storePlayer(player);
     }
 
@@ -249,7 +262,7 @@ public class JsonApiStorageService {
     public List<PlayerInfo> getPlayerInfo(OptionsPlayer options) {
         return playerDao.getPlayerInfo(options);
     }
-    
+
     @Transactional
     public boolean addGenre(String name, String targetApi) {
         Genre genre = commonDao.getGenre(name);

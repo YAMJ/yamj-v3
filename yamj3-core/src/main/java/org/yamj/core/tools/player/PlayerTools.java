@@ -33,8 +33,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.CommonHttpClient;
@@ -70,9 +69,11 @@ public final class PlayerTools {
     private static final String GET_DEV_NAME = "/system?arg0=get_nmt_device_name";
 
     /**
-     * Create the player tools with a base IP address range, port 8008 & timeout 75
+     * Create the player tools with a base IP address range, port 8008 & timeout
+     * 75
      *
-     * @param baseIpAddress the first 3 octlets of the IP address, e.g. "192.168.0"
+     * @param baseIpAddress the first 3 octlets of the IP address, e.g.
+     * "192.168.0"
      */
     public PlayerTools(String baseIpAddress) {
         this(baseIpAddress, 8008, 75);
@@ -135,16 +136,16 @@ public final class PlayerTools {
         List<String> ipList = scanForPlayers(baseIpAddress, port, 1, 255, scanTimeout);
 
         for (String ipAddr : ipList) {
-            PlayerInfo pi = new PlayerInfo();
-            pi.setIpAddress(ipAddr);
-            pi.setPaths(getPathInfo(ipAddr, port));
-            pi.setName(getPlayerName(ipAddr, port));
-            players.add(pi);
+            PlayerInfo player = new PlayerInfo();
+            player.setIpAddress(ipAddr);
+            player.setName(getPlayerName(ipAddr, port));
+            getPathInfo(player, ipAddr, port);
+            players.add(player);
         }
 
         LOG.info("Found {} players.", players.size());
-        for (PlayerInfo pi : players) {
-            LOG.info(ToStringBuilder.reflectionToString(pi, ToStringStyle.MULTI_LINE_STYLE));
+        for (PlayerInfo player : players) {
+            LOG.info(player.toString());
         }
 
     }
@@ -171,8 +172,7 @@ public final class PlayerTools {
                 mySocket.connect(address, timeout);
 
                 try (PrintWriter out = new PrintWriter(mySocket.getOutputStream(), true);
-                     BufferedReader in = new BufferedReader(new InputStreamReader(mySocket.getInputStream())))
-                {
+                        BufferedReader in = new BufferedReader(new InputStreamReader(mySocket.getInputStream()))) {
                     out.println("setting");
                     String fromServer;
                     while ((fromServer = in.readLine()) != null) {
@@ -216,9 +216,8 @@ public final class PlayerTools {
      * @param port
      * @return
      */
-    private static List<PlayerPath> getPathInfo(String addr, int port) {
+    private static PlayerInfo getPathInfo(PlayerInfo player, final String addr, final int port) {
         String url = buildUrl(addr, port, FILE_OP);
-        List<PlayerPath> paths = new ArrayList<>();
 
         try {
             DigestedResponse response = HTTP.requestContent(url);
@@ -227,11 +226,19 @@ public final class PlayerTools {
 
                 if (wrapper.getResponse().getFileList() != null) {
                     for (DavidBoxPlayerPath db : wrapper.getResponse().getFileList()) {
+                        LOG.debug("DavidBoxPlayer: {}", db.toString());
+                        if (StringUtils.isBlank(player.getName())) {
+                            player.setName(db.getName());
+                        }
+
+                        if (StringUtils.isBlank(player.getDeviceType())) {
+                            player.setDeviceType(db.getDeviceType());
+                        }
+
                         PlayerPath path = new PlayerPath();
-                        path.setDeviceName(db.getName());
-                        path.setDevicePath(db.getPath());
-                        path.setDeviceType(db.getDeviceType());
-                        paths.add(path);
+                        path.setSourcePath(db.getPath());
+                        path.setTargetPath(db.getPath());
+                        player.addPath(path);
                         LOG.debug("Found path for '{}': {}", addr, path.toString());
                     }
                 }
@@ -241,7 +248,7 @@ public final class PlayerTools {
         } catch (IOException ex) {
             LOG.trace("Error getting path info", ex);
         }
-        return paths;
+        return player;
     }
 
     /**

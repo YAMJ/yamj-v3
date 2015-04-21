@@ -29,11 +29,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
-import org.yamj.core.database.model.PlayerPathOld;
 import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -54,8 +57,8 @@ public class PlayerController {
      * @return
      */
     @RequestMapping("/list")
-    public ApiWrapperList<PlayerPathOld> playerList(@ModelAttribute("player") OptionsPlayer options) {
-        ApiWrapperList<PlayerPathOld> wrapper = new ApiWrapperList<>();
+    public ApiWrapperList<PlayerInfo> playerList(@ModelAttribute("player") OptionsPlayer options) {
+        ApiWrapperList<PlayerInfo> wrapper = new ApiWrapperList<>();
 
         // If not mode is specified, make it exact
         if (StringUtils.isBlank(options.getMode())) {
@@ -72,24 +75,24 @@ public class PlayerController {
      * Add a new player
      *
      * @param name
-     * @param ipDevice
-     * @param storagePath
+     * @param deviceType
+     * @param ipAddress
      * @return
      */
     @RequestMapping("/add")
     public ApiStatus playerAdd(
             @RequestParam(required = true, defaultValue = "") String name,
-            @RequestParam(required = true, defaultValue = "") String ipDevice,
-            @RequestParam(required = true, defaultValue = "") String storagePath) {
+            @RequestParam(required = true, defaultValue = "") String deviceType,
+            @RequestParam(required = true, defaultValue = "") String ipAddress) {
 
         ApiStatus status = new ApiStatus();
-        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(ipDevice) && StringUtils.isNotBlank(storagePath)) {
+        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(ipAddress) && StringUtils.isNotBlank(deviceType)) {
             LOG.info("Storing player '{}'", name);
-            PlayerPathOld pp = new PlayerPathOld();
-            pp.setName(name);
-            pp.setIpDevice(ipDevice);
-            pp.setStoragePath(storagePath);
-            api.setPlayer(pp);
+            PlayerInfo player = new PlayerInfo();
+            player.setName(name);
+            player.setDeviceType(deviceType);
+            player.setIpAddress(ipAddress);
+            api.setPlayer(player);
             status.setStatus(200);
             status.setMessage("Successfully added '" + name + "'");
         } else {
@@ -102,18 +105,18 @@ public class PlayerController {
     /**
      * Delete a player
      *
-     * @param player
+     * @param playerName
      * @return
      */
     @RequestMapping("/delete")
     public ApiStatus playerDelete(
-            @RequestParam(required = true, defaultValue = "") String player) {
+            @RequestParam(required = true, defaultValue = "") String playerName) {
         ApiStatus status = new ApiStatus();
-        if (StringUtils.isNotBlank(player)) {
-            LOG.info("Deleting player '{}'", player);
-            api.deletePlayer(player);
+        if (StringUtils.isNotBlank(playerName)) {
+            LOG.info("Deleting player '{}'", playerName);
+            api.deletePlayer(playerName);
             status.setStatus(200);
-            status.setMessage("Successfully deleted '" + player + "'");
+            status.setMessage("Successfully deleted '" + playerName + "'");
         } else {
             status.setStatus(400);
             status.setMessage("Invalid name specified, player not deleted");
@@ -125,23 +128,23 @@ public class PlayerController {
      * Update a player
      *
      * @param name
-     * @param ipDevice
-     * @param storagePath
+     * @param deviceType
+     * @param ipAddress
      * @return
      */
     @RequestMapping("/update")
     public ApiStatus playerUpdate(
             @RequestParam(required = true, defaultValue = "") String name,
-            @RequestParam(required = true, defaultValue = "") String ipDevice,
-            @RequestParam(required = true, defaultValue = "") String storagePath) {
+            @RequestParam(required = true, defaultValue = "") String deviceType,
+            @RequestParam(required = true, defaultValue = "") String ipAddress) {
         ApiStatus status = new ApiStatus();
-        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(ipDevice) && StringUtils.isNotBlank(storagePath)) {
+        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(ipAddress) && StringUtils.isNotBlank(deviceType)) {
             LOG.info("Updating player '{}'", name);
-            PlayerPathOld pp = new PlayerPathOld();
-            pp.setName(name);
-            pp.setIpDevice(ipDevice);
-            pp.setStoragePath(storagePath);
-            api.setPlayer(pp);
+            PlayerInfo player = new PlayerInfo();
+            player.setName(name);
+            player.setDeviceType(deviceType);
+            player.setIpAddress(ipAddress);
+            api.setPlayer(player);
             status.setStatus(200);
             status.setMessage("Successfully updated '" + name + "'");
         } else {
@@ -169,12 +172,12 @@ public class PlayerController {
             PlayerInfo p = new PlayerInfo();
             p.setIpAddress("192.168.0." + loopPlayer);
             p.setName("PCH-C200-" + loopPlayer);
+            p.setDeviceType("network");
 
             for (int loopPath = 1; loopPath <= pathCount; loopPath++) {
                 PlayerPath pp = new PlayerPath();
-                pp.setDeviceName("samba");
-                pp.setDevicePath("http://some.path/" + loopPlayer + "-" + loopPath + "/");
-                pp.setDeviceType("network");
+                pp.setSourcePath("http://some.path/" + loopPlayer + "-" + loopPath + "/");
+                pp.setTargetPath("http://some.path/" + loopPlayer + "-" + loopPath + "/");
                 p.addPath(pp);
             }
             players.add(p);
