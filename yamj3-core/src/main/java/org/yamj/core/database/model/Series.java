@@ -22,20 +22,40 @@
  */
 package org.yamj.core.database.model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import javax.persistence.*;
+import java.util.Set;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.MapKeyType;
+import org.hibernate.annotations.Type;
 import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -97,28 +117,28 @@ public class Series extends AbstractMetadata {
     @JoinTable(name = "series_genres",
             joinColumns = @JoinColumn(name = "series_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id"))
-    private Set<Genre> genres = new HashSet<Genre>(0);
+    private Set<Genre> genres = new HashSet<>(0);
 
     @ManyToMany
     @ForeignKey(name = "FK_SERIESSTUDIOS_SERIES", inverseName = "FK_SERIESSTUDIOS_STUDIO")
     @JoinTable(name = "series_studios",
             joinColumns = @JoinColumn(name = "series_id"),
             inverseJoinColumns = @JoinColumn(name = "studio_id"))
-    private Set<Studio> studios = new HashSet<Studio>(0);
+    private Set<Studio> studios = new HashSet<>(0);
 
     @ManyToMany
     @ForeignKey(name = "FK_SERIESCOUNTRIES_SERIES", inverseName = "FK_SERIESCOUNTRIES_COUNTRY")
     @JoinTable(name = "series_countries",
             joinColumns = @JoinColumn(name = "series_id"),
             inverseJoinColumns = @JoinColumn(name = "country_id"))
-    private Set<Country> countries = new HashSet<Country>(0);
+    private Set<Country> countries = new HashSet<>(0);
 
     @ManyToMany
     @ForeignKey(name = "FK_SERIESCERTS_SERIES", inverseName = "FK_SERIESCERTS_CERTIFICATION")
     @JoinTable(name = "series_certifications",
             joinColumns = @JoinColumn(name = "series_id"),
             inverseJoinColumns = @JoinColumn(name = "cert_id"))
-    private Set<Certification> certifications = new HashSet<Certification>(0);
+    private Set<Certification> certifications = new HashSet<>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "seriesAwardPK.series")
     private List<SeriesAward> seriesAwards = new ArrayList<>(0);
@@ -133,13 +153,13 @@ public class Series extends AbstractMetadata {
     private Set<String> countryNames;
 
     @Transient
-    private Map<String, String> certificationInfos = new HashMap<String, String>(0);
+    private Map<String, String> certificationInfos = new HashMap<>(0);
 
     @Transient
-    private Map<String, String> posterURLS = new HashMap<String, String>(0);
+    private Map<String, String> posterURLS = new HashMap<>(0);
 
     @Transient
-    private Map<String, String> fanartURLS = new HashMap<String, String>(0);
+    private Map<String, String> fanartURLS = new HashMap<>(0);
 
     @Transient
     private Set<AwardDTO> awardDTOS = new HashSet<>(0);
@@ -302,7 +322,7 @@ public class Series extends AbstractMetadata {
     public void setStudios(Set<Studio> studios) {
         this.studios = studios;
     }
-    
+
     public Set<Country> getCountries() {
         return countries;
     }
@@ -318,7 +338,7 @@ public class Series extends AbstractMetadata {
     public void setCertifications(Set<Certification> certifications) {
         this.certifications = certifications;
     }
-    
+
     public List<SeriesAward> getSeriesAwards() {
         return seriesAwards;
     }
@@ -353,7 +373,7 @@ public class Series extends AbstractMetadata {
     public Set<String> getCountryNames() {
         return countryNames;
     }
-  
+
     public void setCountryNames(Set<String> countryNames, String source) {
         if (CollectionUtils.isNotEmpty(countryNames)) {
             this.countryNames = countryNames;
@@ -409,12 +429,12 @@ public class Series extends AbstractMetadata {
     public Set<AwardDTO> getAwardDTOS() {
         return awardDTOS;
     }
-  
+
     public void addAwards(Collection<AwardDTO> awards, String source) {
         if (CollectionUtils.isEmpty(awards)) {
             return;
         }
-        
+
         for (AwardDTO award: awards) {
            if (StringUtils.isBlank(award.getEvent()) || StringUtils.isBlank(award.getCategory()) || award.getYear()<=0) {
                // event, category and year must be given
@@ -424,7 +444,7 @@ public class Series extends AbstractMetadata {
            this.awardDTOS.add(award);
         }
     }
-    
+
     public void addAward(String event, String category, int year, String source) {
         if (StringUtils.isNotBlank(event) && StringUtils.isNotBlank(category) && year>0 && StringUtils.isNotBlank(source)) {
             this.awardDTOS.add(new AwardDTO(event, category, year, source).setWon(true));

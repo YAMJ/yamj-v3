@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <!DOCTYPE html>
 <html>
     <head>
@@ -9,15 +10,14 @@
             <c:param name="sectionName" value="HEAD" />
         </c:import>
     </head>
-    <body background="${pageContext.request.contextPath}/images/yamj-configbg.jpg">
+    <body>
         <!--Import the navigation header-->
         <c:import url="template.jsp">
             <c:param name="sectionName" value="NAV" />
         </c:import>
 
         <div id="logo">
-            <h2>Player Path Entries</h2>
-            <p><a href="${pageContext.request.contextPath}/player/add-path/${player.name}.html" class="btn info">Add new path &raquo;</a></p>
+            <h2>Add Player Path</h2>
         </div>
 
         <table id="headertable" style="width:75%;">
@@ -35,25 +35,22 @@
             </tr>
         </table>
 
-        <table id="tablelist">
-            <tr>
-                <th>Source Path</th>
-                <th>Target Path</th>
-                <th>Actions</th>
-            </tr>
-            <tbody>
-                <c:forEach items="${pathlist}" var="entry" varStatus="row">
-                    <tr>
-                        <td>${entry.sourcePath}</td>
-                        <td>${entry.targetPath}</td>
-                        <td class="center">
-                            <a href="${pageContext.request.contextPath}/player/edit-path/${entry.id}.html">Edit</a> or
-                            <a href="${pageContext.request.contextPath}/player/delete-path/${entry.id}.html">Delete</a>
-                        </td>
+        <p id="message" class="center">Enter the path information</p>
+        <form:form method="POST" commandName="playerPath" action="${pageContext.request.contextPath}/player/add-path/process/${player.name}.html">
+            <table id="headertable" class="hero-unit" style="width:95%; margin:auto;">
+                <tr>
+                    <td style="width:25%" class="right">Source Path:</td>
+                    <td style="width:75%"><form:input size="100" path="sourcePath"></form:input></td>
                     </tr>
-                </c:forEach>
-            </tbody>
-        </table>
+                    <tr>
+                        <td style="width:25%" class="right">Target Path:</td>
+                        <td style="width:75%"><form:input size="50" path="targetPath"></form:input></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="center"><input value="Add Path" type="submit" class="btn default"></td>
+                    </tr>
+                </table>
+        </form:form>
 
         <!-- Import the footer -->
         <c:import url="template.jsp">

@@ -26,6 +26,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.type.IntegerType;
 import org.hibernate.type.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,7 @@ public class PlayerDao extends HibernateDao {
             existingPlayer.clearPaths();
             for (PlayerPath path : player.getPaths()) {
                 existingPlayer.addPath(path);
+                storeEntity(path);
             }
 
             updateEntity(existingPlayer);
@@ -80,12 +82,13 @@ public class PlayerDao extends HibernateDao {
     public List<PlayerInfo> getPlayerEntries(OptionsPlayer options) {
         SqlScalars sqlScalars = new SqlScalars();
 
-        sqlScalars.addToSql("SELECT name, device_type AS deviceType, ip_address AS ipAddress");
+        sqlScalars.addToSql("SELECT id, name, device_type AS deviceType, ip_address AS ipAddress");
         sqlScalars.addToSql("FROM player_info");
         // TODO: Add where clause
         sqlScalars.addToSql(options.getSearchString(true));
         sqlScalars.addToSql(options.getSortString());
 
+        sqlScalars.addScalar("id", IntegerType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
         sqlScalars.addScalar("deviceType", StringType.INSTANCE);
         sqlScalars.addScalar("ipAddress", StringType.INSTANCE);

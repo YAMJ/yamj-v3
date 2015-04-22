@@ -30,11 +30,11 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.NaturalId;
 import org.yamj.core.database.model.AbstractIdentifiable;
 
@@ -57,12 +57,11 @@ public class PlayerInfo extends AbstractIdentifiable implements Serializable {
     private String ipAddress;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @ForeignKey(name = "FK_PLAYERPATH_INFO", inverseName = "FK_PLAYERPATH_PATH")
     @JoinTable(name = "playerinfo_playerpath",
             joinColumns = {
-                @JoinColumn(name = "player_info_id")},
+                @JoinColumn(foreignKey = @ForeignKey(name = "FK_PLAYERPATH_INFO"), name = "player_info_id")},
             inverseJoinColumns = {
-                @JoinColumn(name = "player_path_id")})
+                @JoinColumn(foreignKey = @ForeignKey(name = "FK_PLAYERPATH_PATH"),name = "player_path_id")})
     private List<PlayerPath> paths = new ArrayList<>();
 
     public String getName() {

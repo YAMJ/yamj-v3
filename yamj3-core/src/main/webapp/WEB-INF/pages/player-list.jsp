@@ -35,7 +35,7 @@
             <tbody>
                 <c:forEach items="${playerlist}" var="entry" varStatus="row">
                     <tr>
-                        <td>${entry.name}</td>
+                        <td><a href="${pageContext.request.contextPath}/player/details/${entry.name}.html">${entry.name}</a></td>
                         <td>${entry.deviceType}</td>
                         <td>${entry.ipAddress}</td>
                         <td class="center">

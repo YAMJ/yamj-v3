@@ -44,6 +44,7 @@ import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.Configuration;
 import org.yamj.core.database.model.player.PlayerInfo;
+import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
@@ -258,19 +259,33 @@ public class PagesController {
         return view;
     }
 
+    @RequestMapping(value = "/player/details/{name}", method = RequestMethod.GET)
+    public ModelAndView playerDetails(@PathVariable String name) {
+        ModelAndView view = new ModelAndView("player-details");
+
+        PlayerInfo player = getSinglePlayer(name, true);
+        view.addObject("player", player);
+        view.addObject("pathlist", player.getPaths());
+
+        YamjInfo yi = sic.getYamjInfo("true");
+        view.addObject("yi", yi);
+        return view;
+    }
+
     @RequestMapping(value = "/player/scan", method = RequestMethod.GET)
     public ModelAndView playerScan(ModelAndView view) {
         LOG.info("Player Scan");
+        //TODO: Add the scan
         return view;
     }
 
     @RequestMapping(value = "/player/scan", method = RequestMethod.POST)
     public ModelAndView playerScanned() {
         LOG.info("Player Scanning...");
+        //TODO: Add the scan
+
         ModelAndView view = new ModelAndView("player-scan");
-
         OptionsPlayer options = new OptionsPlayer();
-
         List<PlayerInfo> playerList = jsonApi.getPlayerInfo(options);
 
         YamjInfo yi = sic.getYamjInfo("true");
@@ -278,6 +293,43 @@ public class PagesController {
         view.addObject("playerlist", playerList);
 
         return view;
+    }
+
+    @RequestMapping("/player/add-path/{name}")
+    public ModelAndView playerAddPath(@PathVariable String name) {
+        ModelAndView view = new ModelAndView("player-path-add");
+
+        YamjInfo yi = sic.getYamjInfo("false");
+        view.addObject("yi", yi);
+        view.addObject("player", getSinglePlayer(name, true));
+        view.addObject("playerPath", new PlayerPath());
+
+        return view;
+    }
+
+    @RequestMapping("/player/add-path/process/{name}")
+    public ModelAndView playerAddPath(@PathVariable String name, @ModelAttribute PlayerPath playerPath) {
+
+        ModelAndView view = new ModelAndView("redirect:/player/details/" + name);
+
+        LOG.info("Updating player '{}' with new path: {}", name, playerPath.toString());
+        PlayerInfo player = getSinglePlayer(name, true);
+        player.addPath(playerPath);
+        jsonApi.setPlayer(player);
+        String message = "Player was successfully updated.";
+        view.addObject("message", message);
+
+        return view;
+    }
+
+    private PlayerInfo getSinglePlayer(String name, boolean newObject) {
+        List<PlayerInfo> playerList = jsonApi.getPlayer(name);
+        if (playerList.isEmpty()) {
+            return newObject ? new PlayerInfo() : null;
+        } else {
+            LOG.info("Found {} players, using first: {}", playerList.size(), playerList.get(0));
+            return playerList.get(0);
+        }
     }
     //</editor-fold>
 

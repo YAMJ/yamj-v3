@@ -22,20 +22,46 @@
  */
 package org.yamj.core.database.model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import javax.persistence.*;
+import java.util.Set;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.MapKeyType;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.dto.AwardDTO;
@@ -118,21 +144,21 @@ public class VideoData extends AbstractMetadata {
     @JoinTable(name = "videodata_genres",
             joinColumns = @JoinColumn(name = "data_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id"))
-    private Set<Genre> genres = new HashSet<Genre>(0);
+    private Set<Genre> genres = new HashSet<>(0);
 
     @ManyToMany
     @ForeignKey(name = "FK_DATASTUDIOS_VIDEODATA", inverseName = "FK_DATASTUDIOS_STUDIO")
     @JoinTable(name = "videodata_studios",
             joinColumns = @JoinColumn(name = "data_id"),
             inverseJoinColumns = @JoinColumn(name = "studio_id"))
-    private Set<Studio> studios = new HashSet<Studio>(0);
+    private Set<Studio> studios = new HashSet<>(0);
 
     @ManyToMany
     @ForeignKey(name = "FK_DATACOUNTRIES_VIDEODATA", inverseName = "FK_DATACOUNTRIES_COUNTRY")
     @JoinTable(name = "videodata_countries",
             joinColumns = @JoinColumn(name = "data_id"),
             inverseJoinColumns = @JoinColumn(name = "country_id"))
-    private Set<Country> countries = new HashSet<Country>(0);
+    private Set<Country> countries = new HashSet<>(0);
 
     @ManyToMany
     @ForeignKey(name = "FK_DATACERTS_VIDEODATA", inverseName = "FK_DATACERTS_CERTIFICATION")
@@ -393,19 +419,19 @@ public class VideoData extends AbstractMetadata {
     public Set<Studio> getStudios() {
       return studios;
     }
-  
+
     public void setStudios(Set<Studio> studios) {
         this.studios = studios;
     }
-  
+
     public Set<Country> getCountries() {
         return countries;
     }
-  
+
     public void setCountries(Set<Country> countries) {
         this.countries = countries;
     }
-    
+
     public Set<Certification> getCertifications() {
         return certifications;
     }
@@ -533,7 +559,7 @@ public class VideoData extends AbstractMetadata {
     public Set<String> getCountryNames() {
         return countryNames;
     }
-  
+
     public void setCountryNames(Set<String> countryNames, String source) {
         if (CollectionUtils.isNotEmpty(countryNames)) {
             this.countryNames = countryNames;
@@ -610,7 +636,7 @@ public class VideoData extends AbstractMetadata {
         if (CollectionUtils.isEmpty(awards)) {
             return;
         }
-        
+
         for (AwardDTO award: awards) {
            if (StringUtils.isBlank(award.getEvent()) || StringUtils.isBlank(award.getCategory()) || award.getYear()<=0) {
                // event, category and year must be given
