@@ -24,7 +24,17 @@ package org.yamj.core.database.model;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Fetch;
@@ -129,7 +139,8 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     }
 
     public void setRole(String role) {
-        this.role = role;
+        // Truncate the role to 255 characters
+        this.role = role.substring(0, Math.min(role.length(), 254));
     }
 
     public ParticipationType getParticipationType() {
