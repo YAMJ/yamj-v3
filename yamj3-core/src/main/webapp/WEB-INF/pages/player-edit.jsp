@@ -20,7 +20,7 @@
             <h2>Edit Player</h2>
         </div>
         <p id="message">Enter the new values required</p>
-        <form:form method="POST" commandName="player" action="${pageContext.request.contextPath}/player/edit/${player.name}.html">
+        <form:form method="POST" commandName="player" action="${pageContext.request.contextPath}/player/edit/${player.id}.html">
             <table id="headertable" style="width:75%;">
                 <tr>
                     <td class="right">Player Name:</td>

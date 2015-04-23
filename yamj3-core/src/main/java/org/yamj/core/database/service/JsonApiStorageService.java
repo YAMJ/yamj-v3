@@ -244,14 +244,31 @@ public class JsonApiStorageService {
         return playerDao.getPlayerEntries(playerName);
     }
 
-    @Transactional
-    public void setPlayer(PlayerInfo player) {
-        playerDao.storePlayer(player);
+    public PlayerInfo getPlayerInfo(String playerName) {
+        return playerDao.getPlayerInfo(playerName);
+    }
+
+    public PlayerInfo getPlayerInfo(Long playerId) {
+        return playerDao.getPlayerInfo(playerId);
+    }
+
+    public List<PlayerInfo> getPlayerList() {
+        return playerDao.getPlayerList();
     }
 
     @Transactional
-    public void deletePlayer(String playerName) {
-        playerDao.deletePlayer(playerName);
+    public void savePlayer(PlayerInfo player) {
+        playerDao.savePlayer(player);
+    }
+
+    @Transactional
+    public void setPlayer(PlayerInfo player) {
+        playerDao.savePlayer(player);
+    }
+
+    @Transactional
+    public void deletePlayer(Long playerId) {
+        playerDao.deletePlayer(playerId);
     }
 
     @Transactional
@@ -266,7 +283,7 @@ public class JsonApiStorageService {
     @Transactional
     public boolean addGenre(String name, String targetApi) {
         Genre genre = commonDao.getGenre(name);
-        if (genre != null)  {
+        if (genre != null) {
             return false;
         }
         genre = new Genre(name);
@@ -278,7 +295,7 @@ public class JsonApiStorageService {
     @Transactional
     public boolean updateGenre(long id, String targetApi) {
         Genre genre = commonDao.getById(Genre.class, id);
-        if (genre == null)  {
+        if (genre == null) {
             return false;
         }
         genre.setTargetApi(StringUtils.trimToNull(targetApi));
@@ -289,7 +306,7 @@ public class JsonApiStorageService {
     @Transactional
     public boolean updateGenre(String name, String targetApi) {
         Genre genre = commonDao.getGenre(name);
-        if (genre == null)  {
+        if (genre == null) {
             return false;
         }
         genre.setTargetApi(StringUtils.trimToNull(targetApi));
@@ -300,7 +317,7 @@ public class JsonApiStorageService {
     @Transactional
     public boolean addCountry(String name, String targetApi) {
         Country country = commonDao.getCountry(name);
-        if (country != null)  {
+        if (country != null) {
             return false;
         }
         country = new Country(name);
@@ -312,7 +329,7 @@ public class JsonApiStorageService {
     @Transactional
     public boolean updateCountry(long id, String targetApi) {
         Country country = commonDao.getById(Country.class, id);
-        if (country == null)  {
+        if (country == null) {
             return false;
         }
         country.setTargetApi(StringUtils.trimToNull(targetApi));
@@ -323,7 +340,7 @@ public class JsonApiStorageService {
     @Transactional
     public boolean updateCountry(String name, String targetApi) {
         Country country = commonDao.getCountry(name);
-        if (country == null)  {
+        if (country == null) {
             return false;
         }
         country.setTargetApi(StringUtils.trimToNull(targetApi));

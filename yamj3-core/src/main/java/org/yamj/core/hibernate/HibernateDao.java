@@ -186,8 +186,8 @@ public abstract class HibernateDao {
         sb.append(entityClass.getSimpleName());
         sb.append(" where lower(").append(field).append(") = :name) { ");
 
-        Map<String, Object> params = Collections.singletonMap("name", (Object)name.toLowerCase());
-        return (T)this.findUniqueByNamedParameters(sb, params);
+        Map<String, Object> params = Collections.singletonMap("name", (Object) name.toLowerCase());
+        return (T) this.findUniqueByNamedParameters(sb, params);
     }
 
     /**
@@ -295,7 +295,7 @@ public abstract class HibernateDao {
         } else if (value instanceof Object[]) {
             queryObject.setParameterList(paramName, (Object[]) value);
         } else if (value instanceof String) {
-            queryObject.setString(paramName, (String)value);
+            queryObject.setString(paramName, (String) value);
         } else {
             queryObject.setParameter(paramName, value);
         }
@@ -433,9 +433,11 @@ public abstract class HibernateDao {
     }
 
     /**
-     * Execute a query return the results
+     * Execute a query to return the results
      *
-     * Gets the options from the wrapper for start and max Puts the total count returned from the query into the wrapper
+     * Gets the options from the wrapper for start and max
+     *
+     * Puts the total count returned from the query into the wrapper
      *
      * @param <T>
      * @param T The class to return the transformed results of.

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,8 +133,7 @@ public class PagesController {
         ModelAndView view = new ModelAndView("redirect:/config/list");
         LOG.info("Adding config: {}", config.toString());
         configService.setProperty(config.getKey(), config.getValue());
-        String message = "Configuration was successfully added.";
-        view.addObject("message", message);
+        LOG.info("Configuration was successfully added.");
 
         return view;
     }
@@ -173,8 +173,7 @@ public class PagesController {
         ModelAndView view = new ModelAndView("redirect:/config/list");
         LOG.info("Updating config: {}", config.toString());
         configService.setProperty(config.getKey(), config.getValue());
-        String message = "Config was successfully edited.";
-        view.addObject("message", message);
+        LOG.info("Config was successfully edited.");
         return view;
     }
 
@@ -184,19 +183,31 @@ public class PagesController {
 
         LOG.info("Deleting config for '{}'", key);
         configService.deleteProperty(key);
-        String message = "Config was successfully deleted.";
-        view.addObject("message", message);
+        LOG.info("Config was successfully deleted.");
         return view;
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Player Path Pages">
+    @RequestMapping("/player/list")
+    public ModelAndView playerList() {
+        ModelAndView view = new ModelAndView("player-list");
+
+        List<PlayerInfo> playerList = jsonApi.getPlayerList();
+        YamjInfo yi = sic.getYamjInfo("true");
+        view.addObject("yi", yi);
+        view.addObject("playerlist", playerList);
+
+        return view;
+    }
+
     @RequestMapping("/player/add")
     public ModelAndView playerAddPage() {
         ModelAndView view = new ModelAndView("player-add");
         YamjInfo yi = sic.getYamjInfo("true");
         view.addObject("yi", yi);
         view.addObject("player", new PlayerInfo());
+
         return view;
     }
 
@@ -206,69 +217,55 @@ public class PagesController {
         ModelAndView view = new ModelAndView("redirect:/player/list");
         LOG.info("Adding player: {}", player.toString());
         jsonApi.setPlayer(player);
-        String message = "Player was successfully added.";
-        view.addObject("message", message);
+        LOG.info("Player was successfully added.");
 
         return view;
     }
 
-    @RequestMapping("/player/list")
-    public ModelAndView playerList() {
-        ModelAndView view = new ModelAndView("player-list");
-
-        OptionsPlayer options = new OptionsPlayer();
-
-        List<PlayerInfo> playerList = jsonApi.getPlayer(options);
-        YamjInfo yi = sic.getYamjInfo("true");
-        view.addObject("yi", yi);
-        view.addObject("playerlist", playerList);
-
-        return view;
-    }
-
-    @RequestMapping(value = "/player/edit/{name}", method = RequestMethod.GET)
-    public ModelAndView playerEditPage(@PathVariable String name) {
+    @RequestMapping(value = "/player/edit/{id}", method = RequestMethod.GET)
+    public ModelAndView playerEditPage(@PathVariable Long id) {
         ModelAndView view = new ModelAndView("player-edit");
-        List<PlayerInfo> playerList = jsonApi.getPlayer(name);
-        if (!playerList.isEmpty()) {
-            view.addObject("player", playerList.get(0));
-        }
+        PlayerInfo player = jsonApi.getPlayerInfo(id);
+        view.addObject("player", player);
         YamjInfo yi = sic.getYamjInfo("true");
         view.addObject("yi", yi);
         return view;
     }
 
-    @RequestMapping(value = "/player/edit/{name}", method = RequestMethod.POST)
-    public ModelAndView playerEditUpdate(@ModelAttribute("player") PlayerInfo player) {
+    @RequestMapping(value = "/player/edit/{id}", method = RequestMethod.POST)
+    public ModelAndView playerEditUpdate(@PathVariable Long id, @ModelAttribute("player") PlayerInfo player) {
         ModelAndView view = new ModelAndView("redirect:/player/list");
-        LOG.info("Updating player: {}", player.toString());
-        jsonApi.setPlayer(player);
-        String message = "Player was successfully edited.";
-        view.addObject("message", message);
+
+        PlayerInfo exisiting = jsonApi.getPlayerInfo(id);
+        LOG.info("Updating player: {}-{}", exisiting.getId(), exisiting.getName());
+        exisiting.setDeviceType(player.getDeviceType());
+        exisiting.setIpAddress(player.getIpAddress());
+        jsonApi.setPlayer(exisiting);
+        LOG.info("Player was successfully edited.");
         return view;
     }
 
-    @RequestMapping(value = "/player/delete/{name}", method = RequestMethod.GET)
-    public ModelAndView playerDelete(@PathVariable String name) {
+    @RequestMapping(value = "/player/delete/{id}", method = RequestMethod.GET)
+    public ModelAndView playerDelete(@PathVariable Long id) {
         ModelAndView view = new ModelAndView("redirect:/player/list");
 
-        LOG.info("Deleting player '{}'", name);
-        jsonApi.deletePlayer(name);
-        String message = "Player was successfully deleted.";
-        view.addObject("message", message);
+        LOG.info("Deleting player '{}'", id);
+        jsonApi.deletePlayer(id);
+        LOG.info("Player was successfully deleted.");
         return view;
     }
 
-    @RequestMapping(value = "/player/details/{name}", method = RequestMethod.GET)
-    public ModelAndView playerDetails(@PathVariable String name) {
+    @RequestMapping(value = "/player/details/{id}", method = RequestMethod.GET)
+    public ModelAndView playerDetails(@PathVariable Long id) {
         ModelAndView view = new ModelAndView("player-details");
 
-        PlayerInfo player = getSinglePlayer(name, true);
+        PlayerInfo player = jsonApi.getPlayerInfo(id);
         view.addObject("player", player);
         view.addObject("pathlist", player.getPaths());
 
         YamjInfo yi = sic.getYamjInfo("true");
         view.addObject("yi", yi);
+
         return view;
     }
 
@@ -295,43 +292,68 @@ public class PagesController {
         return view;
     }
 
-    @RequestMapping("/player/add-path/{name}")
-    public ModelAndView playerAddPath(@PathVariable String name) {
+    @RequestMapping("/player/add-path/{id}")
+    public ModelAndView playerAddPath(@PathVariable Long id) {
         ModelAndView view = new ModelAndView("player-path-add");
 
         YamjInfo yi = sic.getYamjInfo("false");
         view.addObject("yi", yi);
-        view.addObject("player", getSinglePlayer(name, true));
+        view.addObject("player", jsonApi.getPlayerInfo(id));
         view.addObject("playerPath", new PlayerPath());
 
         return view;
     }
 
-    @RequestMapping("/player/add-path/process/{name}")
-    public ModelAndView playerAddPath(@PathVariable String name, @ModelAttribute PlayerPath playerPath) {
+    @RequestMapping("/player/add-path/process/{id}")
+    public ModelAndView playerAddPath(@PathVariable Long id, @ModelAttribute PlayerPath playerPath) {
+        ModelAndView view = new ModelAndView("redirect:/player/details/" + id);
 
-        ModelAndView view = new ModelAndView("redirect:/player/details/" + name);
-
-        LOG.info("Updating player '{}' with new path: {}", name, playerPath.toString());
-        PlayerInfo player = getSinglePlayer(name, true);
+        LOG.info("Updating player '{}' with new path: {}", id, playerPath.toString());
+        PlayerInfo player = jsonApi.getPlayerInfo(id);
         player.addPath(playerPath);
         jsonApi.setPlayer(player);
-        String message = "Player was successfully updated.";
-        view.addObject("message", message);
+        LOG.info("Player was successfully updated.");
 
         return view;
     }
-
-    private PlayerInfo getSinglePlayer(String name, boolean newObject) {
-        List<PlayerInfo> playerList = jsonApi.getPlayer(name);
-        if (playerList.isEmpty()) {
-            return newObject ? new PlayerInfo() : null;
-        } else {
-            LOG.info("Found {} players, using first: {}", playerList.size(), playerList.get(0));
-            return playerList.get(0);
-        }
-    }
     //</editor-fold>
+
+    private void testPlayer() {
+        // TEST
+        LOG.info("TEST Store...");
+        PlayerInfo playerSave = createTestPlayer(3);
+        LOG.info("Player to store: {}", playerSave.toString());
+        jsonApi.savePlayer(playerSave);
+
+        LOG.info("TEST Fetch...");
+        PlayerInfo playerFetch = jsonApi.getPlayerInfo(playerSave.getName());
+        LOG.info("Player retrieved: {}", playerFetch.toString());
+
+        LOG.info("TEST Get all players...");
+        List<PlayerInfo> playerList = jsonApi.getPlayerList();
+        LOG.info("Found {} players", playerList.size());
+        int count = 1;
+        for (PlayerInfo pi : playerList) {
+            LOG.info("#{} - {}", count++, pi.toString());
+        }
+
+    }
+
+    private PlayerInfo createTestPlayer(int numPaths) {
+        Random r = new Random();
+        PlayerInfo player = new PlayerInfo();
+        player.setName("TEST #" + r.nextInt(1000));
+        player.setDeviceType("TYPE");
+        player.setIpAddress(String.format("%d.%d.%d.%d", r.nextInt(256), r.nextInt(256), r.nextInt(256), r.nextInt(256)));
+
+        for (int i = 1; i <= numPaths; i++) {
+            PlayerPath pp = new PlayerPath();
+            pp.setSourcePath("SOURCE-" + i);
+            pp.setTargetPath("TARGET-" + i);
+            player.getPaths().add(pp);
+        }
+        return player;
+    }
 
     //<editor-fold defaultstate="collapsed" desc="Skins Pages">
     @RequestMapping("/skin-info")
@@ -364,7 +386,7 @@ public class PagesController {
         view.addObject("skin", skin);
         skin.setSkinDir(fileStorageService.getStoragePathSkin());
         String message = fileStorageService.storeSkin(skin);
-        view.addObject("message", message);
+        LOG.info(message);
         return view;
     }
     //</editor-fold>

@@ -36,7 +36,7 @@
         </table>
 
         <p id="message" class="center">Enter the path information</p>
-        <form:form method="POST" commandName="playerPath" action="${pageContext.request.contextPath}/player/add-path/process/${player.name}.html">
+        <form:form method="POST" commandName="playerPath" action="${pageContext.request.contextPath}/player/add-path/process/${player.id}.html">
             <table id="headertable" class="hero-unit" style="width:95%; margin:auto;">
                 <tr>
                     <td style="width:25%" class="right">Source Path:</td>

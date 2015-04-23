@@ -105,21 +105,21 @@ public class PlayerController {
     /**
      * Delete a player
      *
-     * @param playerName
+     * @param playerId
      * @return
      */
     @RequestMapping("/delete")
     public ApiStatus playerDelete(
-            @RequestParam(required = true, defaultValue = "") String playerName) {
+            @RequestParam(required = true, defaultValue = "") Long playerId) {
         ApiStatus status = new ApiStatus();
-        if (StringUtils.isNotBlank(playerName)) {
-            LOG.info("Deleting player '{}'", playerName);
-            api.deletePlayer(playerName);
+        if (playerId != null && playerId > 0) {
+            LOG.info("Deleting player '{}'", playerId);
+            api.deletePlayer(playerId);
             status.setStatus(200);
-            status.setMessage("Successfully deleted '" + playerName + "'");
+            status.setMessage("Successfully deleted '" + playerId + "'");
         } else {
             status.setStatus(400);
-            status.setMessage("Invalid name specified, player not deleted");
+            status.setMessage("Invalid player ID specified, player not deleted");
         }
         return status;
     }

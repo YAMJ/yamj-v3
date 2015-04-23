@@ -23,9 +23,9 @@
 package org.yamj.core.database.dao;
 
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.StringType;
 import org.slf4j.Logger;
@@ -44,6 +44,46 @@ public class PlayerDao extends HibernateDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlayerDao.class);
 
+    /**
+     * Get single player information using player name
+     *
+     * @param name
+     * @return
+     */
+    public PlayerInfo getPlayerInfo(String name) {
+        return (PlayerInfo) currentSession().byNaturalId(PlayerInfo.class)
+                .using("name", name)
+                .load();
+    }
+
+    /**
+     * Get single player information using the ID
+     *
+     * @param id
+     * @return
+     */
+    public PlayerInfo getPlayerInfo(Long id) {
+        return (PlayerInfo) currentSession().byId(PlayerInfo.class)
+                .load(id);
+    }
+
+    /**
+     * Get a list of the players
+     *
+     * @return
+     */
+    public List<PlayerInfo> getPlayerList() {
+        Session session = currentSession();
+        Criteria criteria = session.createCriteria(PlayerInfo.class);
+        // http://stackoverflow.com/a/4645549/443283
+        criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
+        return criteria.list();
+    }
+
+    public void savePlayer(PlayerInfo player) {
+        storeEntity(player);
+    }
+
     public void storePlayer(List<PlayerInfo> playerList) {
         for (PlayerInfo player : playerList) {
             storePlayer(player);
@@ -52,7 +92,7 @@ public class PlayerDao extends HibernateDao {
 
     public void storePlayer(PlayerInfo player) {
         LOG.debug("Checking for existing information on player '{}'", player.getName());
-        PlayerInfo existingPlayer = getByNaturalId(PlayerInfo.class, "name", player.getName());
+        PlayerInfo existingPlayer = getPlayerInfo(player.getName());
 
         if (existingPlayer != null) {
             // Player already exists
@@ -108,14 +148,12 @@ public class PlayerDao extends HibernateDao {
     /**
      * Delete keys from the database
      *
-     * @param playerName
+     * @param playerId
      */
-    public void deletePlayer(String playerName) {
-        if (StringUtils.isNotBlank(playerName)) {
-            PlayerInfo player = getByNaturalId(PlayerInfo.class, "name", playerName);
-            LOG.debug("Deleting player '{}'", player.toString());
-            deleteEntity(player);
-            LOG.debug("Successfully deleted '{}'", playerName);
-        }
+    public void deletePlayer(Long playerId) {
+        PlayerInfo player = getById(PlayerInfo.class, playerId);
+        LOG.debug("Deleting player '{}'", player.toString());
+        deleteEntity(player);
+        LOG.debug("Successfully deleted {}-'{}'", playerId, player.getName());
     }
 }
