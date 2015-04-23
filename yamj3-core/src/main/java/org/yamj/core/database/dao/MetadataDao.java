@@ -22,13 +22,22 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.CastCrew;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
@@ -41,6 +50,8 @@ import org.yamj.core.tools.OverrideTools;
 @Transactional
 @Repository("metadataDao")
 public class MetadataDao extends HibernateDao {
+
+    private static final String IDENTIFIER = "identifier";
 
     public List<QueueDTO> getMetadataQueue(final CharSequence sql, final int maxResults) {
         SQLQuery query = currentSession().createSQLQuery(sql.toString());
@@ -68,19 +79,19 @@ public class MetadataDao extends HibernateDao {
     }
 
     public VideoData getVideoData(String identifier) {
-        return getByNaturalIdCaseInsensitive(VideoData.class, "identifier", identifier);
+        return getByNaturalIdCaseInsensitive(VideoData.class, IDENTIFIER, identifier);
     }
 
     public Season getSeason(String identifier) {
-        return getByNaturalIdCaseInsensitive(Season.class, "identifier", identifier);
+        return getByNaturalIdCaseInsensitive(Season.class, IDENTIFIER, identifier);
     }
 
     public Series getSeries(String identifier) {
-        return getByNaturalIdCaseInsensitive(Series.class, "identifier", identifier);
+        return getByNaturalIdCaseInsensitive(Series.class, IDENTIFIER, identifier);
     }
 
     public Person getPerson(String identifier) {
-        return getByNaturalIdCaseInsensitive(Person.class, "identifier", identifier);
+        return getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, identifier);
     }
 
     public synchronized void storePerson(CreditDTO dto) {
@@ -109,7 +120,7 @@ public class MetadataDao extends HibernateDao {
             if (OverrideTools.checkOverwriteBirthName(person, dto.getSource())) {
                 person.setBirthName(dto.getRealName(), dto.getSource());
             }
-            
+
             if (person.setSourceDbId(dto.getSource(), dto.getSourceId())) {
                 // if IDs have changed then person update is needed
                 person.setStatus(StatusType.UPDATED);
@@ -118,7 +129,7 @@ public class MetadataDao extends HibernateDao {
                 // if previously deleted then set as updated now
                 person.setStatus(StatusType.UPDATED);
             }
-            
+
             // update person in database
             this.updateEntity(person);
         }
@@ -129,15 +140,15 @@ public class MetadataDao extends HibernateDao {
         sb.append("select distinct c ");
         sb.append("from CastCrew c ");
         sb.append("join c.castCrewPK.person p ");
-        sb.append("where c.castCrewPK.videoData=:videoData " );
+        sb.append("where c.castCrewPK.videoData=:videoData ");
         sb.append("and c.castCrewPK.jobType=:jobType ");
         sb.append("and lower(p.identifier)=:identifier ");
 
         Query query = currentSession().createQuery(sb.toString());
         query.setParameter("videoData", videoData);
         query.setParameter("jobType", jobType);
-        query.setString("identifier", identifier.toLowerCase());
-        return (CastCrew)query.uniqueResult();
+        query.setString(IDENTIFIER, identifier.toLowerCase());
+        return (CastCrew) query.uniqueResult();
     }
 
     public List<Artwork> findPersonArtworks(String identifier) {
@@ -148,9 +159,9 @@ public class MetadataDao extends HibernateDao {
         sb.append("WHERE a.artworkType=:artworkType ");
         sb.append("AND lower(p.identifier)=:identifier ");
 
-        Map<String,Object> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("artworkType", ArtworkType.PHOTO);
-        params.put("identifier", identifier.toLowerCase());
+        params.put(IDENTIFIER, identifier.toLowerCase());
 
         return this.findByNamedParameters(sb, params);
     }
