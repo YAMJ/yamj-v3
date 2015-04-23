@@ -232,18 +232,6 @@ public class JsonApiStorageService {
     }
 
     // Player methods
-    public List<PlayerInfo> getPlayer(ApiWrapperList<PlayerInfo> wrapper) {
-        return getPlayer((OptionsPlayer) wrapper.getOptions());
-    }
-
-    public List<PlayerInfo> getPlayer(OptionsPlayer options) {
-        return playerDao.getPlayerEntries(options);
-    }
-
-    public List<PlayerInfo> getPlayer(String playerName) {
-        return playerDao.getPlayerEntries(playerName);
-    }
-
     public PlayerInfo getPlayerInfo(String playerName) {
         return playerDao.getPlayerInfo(playerName);
     }
@@ -254,6 +242,10 @@ public class JsonApiStorageService {
 
     public List<PlayerInfo> getPlayerList() {
         return playerDao.getPlayerList();
+    }
+
+    public List<PlayerInfo> getPlayerList(OptionsPlayer options) {
+        return playerDao.getPlayerList(options);
     }
 
     @Transactional
@@ -269,10 +261,6 @@ public class JsonApiStorageService {
     @Transactional
     public void storePlayer(PlayerInfo player) {
         playerDao.storePlayer(player);
-    }
-
-    public List<PlayerInfo> getPlayerInfo(OptionsPlayer options) {
-        return playerDao.getPlayerInfo(options);
     }
 
     @Transactional

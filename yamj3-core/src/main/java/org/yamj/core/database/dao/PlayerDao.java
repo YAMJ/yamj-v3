@@ -24,16 +24,16 @@ package org.yamj.core.database.dao;
 
 import java.util.List;
 import java.util.ListIterator;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.CriteriaSpecification;
-import org.hibernate.type.IntegerType;
-import org.hibernate.type.StringType;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
@@ -81,6 +81,24 @@ public class PlayerDao extends HibernateDao {
         return criteria.list();
     }
 
+    public List<PlayerInfo> getPlayerList(OptionsPlayer options) {
+        Criteria criteria = currentSession().createCriteria(PlayerInfo.class);
+
+        MatchMode mode;
+        if (StringUtils.equalsIgnoreCase("START", options.getMode())) {
+            mode = MatchMode.START;
+        } else if (StringUtils.equalsIgnoreCase("END", options.getMode())) {
+            mode = MatchMode.END;
+        } else if (StringUtils.equalsIgnoreCase("EXACT", options.getMode())) {
+            mode = MatchMode.EXACT;
+        } else {
+            // Default to ANY
+            mode = MatchMode.ANYWHERE;
+        }
+        criteria.add(Restrictions.ilike("name", options.getSearch(), mode));
+        return criteria.list();
+    }
+
     /**
      * Save the player information
      *
@@ -90,39 +108,36 @@ public class PlayerDao extends HibernateDao {
         storeEntity(player);
     }
 
-    @SuppressWarnings("unused")
-    public List<PlayerInfo> getPlayerInfo(OptionsPlayer options) {
-        Session session = currentSession();
-        Criteria criteria = session.createCriteria(PlayerInfo.class);
-        return criteria.list();
-    }
-
-    public List<PlayerInfo> getPlayerEntries(OptionsPlayer options) {
-        SqlScalars sqlScalars = new SqlScalars();
-
-        sqlScalars.addToSql("SELECT id, name, device_type AS deviceType, ip_address AS ipAddress");
-        sqlScalars.addToSql("FROM player_info");
-        // TODO: Add where clause
-        sqlScalars.addToSql(options.getSearchString(true));
-        sqlScalars.addToSql(options.getSortString());
-
-        sqlScalars.addScalar("id", IntegerType.INSTANCE);
-        sqlScalars.addScalar("name", StringType.INSTANCE);
-        sqlScalars.addScalar("deviceType", StringType.INSTANCE);
-        sqlScalars.addScalar("ipAddress", StringType.INSTANCE);
-
-        List<PlayerInfo> players = executeQueryWithTransform(PlayerInfo.class, sqlScalars, null);
-        return players;
-    }
-
-    public List<PlayerInfo> getPlayerEntries(String playerName) {
-        OptionsPlayer options = new OptionsPlayer();
-        options.setPlayer(playerName);
-        // Make the search exact
-        options.setMode("EXACT");
-        return getPlayerEntries(options);
-    }
-
+//    public List<PlayerInfo> getPlayerEntries(OptionsPlayer options) {
+//        return (List<PlayerInfo>) currentSession().byNaturalId(PlayerInfo.class)
+//                .using("name", options.getSearch())
+//                .load();
+//    }
+//    public List<PlayerInfo> getPlayerEntries(OptionsPlayer options) {
+//        SqlScalars sqlScalars = new SqlScalars();
+//
+//        sqlScalars.addToSql("SELECT id, name, device_type AS deviceType, ip_address AS ipAddress");
+//        sqlScalars.addToSql("FROM player_info");
+//        // TODO: Add where clause
+//        sqlScalars.addToSql(options.getSearchString(true));
+//        sqlScalars.addToSql(options.getSortString());
+//
+//        sqlScalars.addScalar("id", IntegerType.INSTANCE);
+//        sqlScalars.addScalar("name", StringType.INSTANCE);
+//        sqlScalars.addScalar("deviceType", StringType.INSTANCE);
+//        sqlScalars.addScalar("ipAddress", StringType.INSTANCE);
+//
+//        List<PlayerInfo> players = executeQueryWithTransform(PlayerInfo.class, sqlScalars, null);
+//        return players;
+//    }
+//
+//    public List<PlayerInfo> getPlayerEntries(String playerName) {
+//        OptionsPlayer options = new OptionsPlayer();
+//        options.setPlayer(playerName);
+//        // Make the search exact
+//        options.setMode("EXACT");
+//        return getPlayerEntries(options);
+//    }
     /**
      * Delete keys from the database
      *

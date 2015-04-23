@@ -48,7 +48,7 @@ public class PlayerController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlayerController.class);
     @Autowired
-    private JsonApiStorageService api;
+    private JsonApiStorageService jsonApi;
 
     /**
      * Get a list of the players
@@ -65,7 +65,7 @@ public class PlayerController {
             options.setMode("EXACT");
         }
         wrapper.setOptions(options);
-        wrapper.setResults(api.getPlayer(wrapper));
+        wrapper.setResults(jsonApi.getPlayerList(options));
         wrapper.setStatusCheck();
 
         return wrapper;
@@ -92,7 +92,7 @@ public class PlayerController {
             player.setName(name);
             player.setDeviceType(deviceType);
             player.setIpAddress(ipAddress);
-            api.storePlayer(player);
+            jsonApi.storePlayer(player);
             status.setStatus(200);
             status.setMessage("Successfully added '" + name + "'");
         } else {
@@ -114,7 +114,7 @@ public class PlayerController {
         ApiStatus status = new ApiStatus();
         if (playerId != null && playerId > 0) {
             LOG.info("Deleting player '{}'", playerId);
-            api.deletePlayer(playerId);
+            jsonApi.deletePlayer(playerId);
             status.setStatus(200);
             status.setMessage("Successfully deleted '" + playerId + "'");
         } else {
@@ -144,7 +144,7 @@ public class PlayerController {
             player.setName(name);
             player.setDeviceType(deviceType);
             player.setIpAddress(ipAddress);
-            api.storePlayer(player);
+            jsonApi.storePlayer(player);
             status.setStatus(200);
             status.setMessage("Successfully updated '" + name + "'");
         } else {
@@ -160,7 +160,7 @@ public class PlayerController {
 
         for (PlayerInfo player : players) {
             LOG.info("Storing player: {}", player);
-            api.storePlayer(player);
+            jsonApi.storePlayer(player);
         }
         LOG.info("Player storage completed");
     }

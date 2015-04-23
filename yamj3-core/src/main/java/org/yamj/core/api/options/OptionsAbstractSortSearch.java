@@ -25,7 +25,14 @@ package org.yamj.core.api.options;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
@@ -44,11 +51,12 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     private String sortdir;
     private String field;
     private String search;
+    // TODO: Change this to MatchMode
     private String mode;
-    
+
     private List<String> dataitems;
     private List<String> jobs;
-    
+
     @JsonIgnore
     private List<DataItem> dataitemList;
     @JsonIgnore
@@ -57,7 +65,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     private List<MetaDataType> videoTypes;
     @JsonIgnore
     private boolean allJobTypes;
-    
+
     //<editor-fold defaultstate="collapsed" desc="Sort Setters/Getters">
     /**
      * Get field to sort on
@@ -272,7 +280,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     public boolean isAllJobTypes() {
         return this.allJobTypes;
     }
-    
+
     public Map<JobType,Integer> splitJobs() {
         if (jobTypes == null ) {
             jobTypes = new EnumMap<>(JobType.class);
@@ -286,9 +294,9 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
                         jobTypes.clear();
                         break;
                     }
-                    
+
                     String[] vals = StringUtils.split(job, "-");
-                    
+
                     JobType jobType = null;
                     Integer amount = null;
                     if (vals.length > 0) {
@@ -317,7 +325,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
         }
         return jobTypes;
     }
-    
+
     @JsonIgnore
     public Set<String> getJobTypesAsSet() {
         HashSet<String> set = new HashSet<>();
@@ -335,7 +343,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
      */
     protected List<MetaDataType> splitTypes(String type) {
         if (CollectionUtils.isEmpty(videoTypes)) {
-            videoTypes = new ArrayList<>();            
+            videoTypes = new ArrayList<>();
             if (StringUtils.isEmpty(type) || StringUtils.containsIgnoreCase(type, "ALL")) {
                 videoTypes.add(MetaDataType.MOVIE);
                 videoTypes.add(MetaDataType.SERIES);
