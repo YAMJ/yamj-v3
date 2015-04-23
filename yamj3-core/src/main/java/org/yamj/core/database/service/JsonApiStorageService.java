@@ -257,16 +257,6 @@ public class JsonApiStorageService {
     }
 
     @Transactional
-    public void savePlayer(PlayerInfo player) {
-        playerDao.savePlayer(player);
-    }
-
-    @Transactional
-    public void setPlayer(PlayerInfo player) {
-        playerDao.savePlayer(player);
-    }
-
-    @Transactional
     public void deletePlayer(Long playerId) {
         playerDao.deletePlayer(playerId);
     }

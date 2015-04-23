@@ -81,36 +81,13 @@ public class PlayerDao extends HibernateDao {
         return criteria.list();
     }
 
-    public void savePlayer(PlayerInfo player) {
-        storeEntity(player);
-    }
-
-    public void storePlayer(List<PlayerInfo> playerList) {
-        for (PlayerInfo player : playerList) {
-            storePlayer(player);
-        }
-    }
-
+    /**
+     * Save the player information
+     *
+     * @param player
+     */
     public void storePlayer(PlayerInfo player) {
-        LOG.debug("Checking for existing information on player '{}'", player.getName());
-        PlayerInfo existingPlayer = getPlayerInfo(player.getName());
-
-        if (existingPlayer != null) {
-            // Player already exists
-            LOG.debug("Updating player information: {}-{}", player.getId(), player.getName());
-            existingPlayer.setDeviceType(player.getDeviceType());
-            existingPlayer.setIpAddress(player.getIpAddress());
-            existingPlayer.clearPaths();
-            for (PlayerPath path : player.getPaths()) {
-                existingPlayer.addPath(path);
-                storeEntity(path);
-            }
-
-            updateEntity(existingPlayer);
-        } else {
-            LOG.debug("Storing new player: '{}'", player.getName());
-            storeEntity(player);
-        }
+        storeEntity(player);
     }
 
     @SuppressWarnings("unused")
@@ -179,7 +156,7 @@ public class PlayerDao extends HibernateDao {
         }
 
         // Update the Player record
-        savePlayer(player);
+        storePlayer(player);
     }
 
 }

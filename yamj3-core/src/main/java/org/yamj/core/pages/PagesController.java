@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -217,7 +216,7 @@ public class PagesController {
 
         ModelAndView view = new ModelAndView("redirect:/player/list");
         LOG.info("Adding player: {}", player.toString());
-        jsonApi.setPlayer(player);
+        jsonApi.storePlayer(player);
         LOG.info("Player was successfully added.");
 
         return view;
@@ -241,7 +240,7 @@ public class PagesController {
         LOG.info("Updating player: {}-{}", exisiting.getId(), exisiting.getName());
         exisiting.setDeviceType(player.getDeviceType());
         exisiting.setIpAddress(player.getIpAddress());
-        jsonApi.setPlayer(exisiting);
+        jsonApi.storePlayer(exisiting);
         LOG.info("Player was successfully edited.");
         return view;
     }
@@ -312,7 +311,7 @@ public class PagesController {
         LOG.info("Updating player '{}' with new path: {}", id, playerPath.toString());
         PlayerInfo player = jsonApi.getPlayerInfo(id);
         player.addPath(playerPath);
-        jsonApi.setPlayer(player);
+        jsonApi.storePlayer(player);
         LOG.info("Player was successfully updated.");
 
         return view;
@@ -364,48 +363,11 @@ public class PagesController {
             }
         }
 
-        jsonApi.setPlayer(player);
+        jsonApi.storePlayer(player);
         LOG.info("Path was successfully updated.");
         return view;
     }
     //</editor-fold>
-
-    private void testPlayer() {
-        // TEST
-        LOG.info("TEST Store...");
-        PlayerInfo playerSave = createTestPlayer(3);
-        LOG.info("Player to store: {}", playerSave.toString());
-        jsonApi.savePlayer(playerSave);
-
-        LOG.info("TEST Fetch...");
-        PlayerInfo playerFetch = jsonApi.getPlayerInfo(playerSave.getName());
-        LOG.info("Player retrieved: {}", playerFetch.toString());
-
-        LOG.info("TEST Get all players...");
-        List<PlayerInfo> playerList = jsonApi.getPlayerList();
-        LOG.info("Found {} players", playerList.size());
-        int count = 1;
-        for (PlayerInfo pi : playerList) {
-            LOG.info("#{} - {}", count++, pi.toString());
-        }
-
-    }
-
-    private PlayerInfo createTestPlayer(int numPaths) {
-        Random r = new Random();
-        PlayerInfo player = new PlayerInfo();
-        player.setName("TEST #" + r.nextInt(1000));
-        player.setDeviceType("TYPE");
-        player.setIpAddress(String.format("%d.%d.%d.%d", r.nextInt(256), r.nextInt(256), r.nextInt(256), r.nextInt(256)));
-
-        for (int i = 1; i <= numPaths; i++) {
-            PlayerPath pp = new PlayerPath();
-            pp.setSourcePath("SOURCE-" + i);
-            pp.setTargetPath("TARGET-" + i);
-            player.getPaths().add(pp);
-        }
-        return player;
-    }
 
     //<editor-fold defaultstate="collapsed" desc="Skins Pages">
     @RequestMapping("/skin-info")

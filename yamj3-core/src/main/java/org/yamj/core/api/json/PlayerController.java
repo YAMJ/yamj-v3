@@ -92,7 +92,7 @@ public class PlayerController {
             player.setName(name);
             player.setDeviceType(deviceType);
             player.setIpAddress(ipAddress);
-            api.setPlayer(player);
+            api.storePlayer(player);
             status.setStatus(200);
             status.setMessage("Successfully added '" + name + "'");
         } else {
@@ -144,7 +144,7 @@ public class PlayerController {
             player.setName(name);
             player.setDeviceType(deviceType);
             player.setIpAddress(ipAddress);
-            api.setPlayer(player);
+            api.storePlayer(player);
             status.setStatus(200);
             status.setMessage("Successfully updated '" + name + "'");
         } else {
