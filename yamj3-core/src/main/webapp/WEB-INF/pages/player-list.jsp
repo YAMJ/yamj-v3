@@ -21,7 +21,7 @@
             <p><a href="${pageContext.request.contextPath}/player/add.html" class="btn info">Add new player &raquo;</a></p>
         </div>
 
-        <table id="tablelist">
+        <table id="tablelist" style="width:95%; margin:auto;">
             <tr>
                 <th>Player Name</th>
                 <th>Device Type</th>
@@ -37,8 +37,9 @@
                         <td>${entry.ipAddress}</td>
                         <td>${fn:length(entry.paths)}</td>
                         <td class="center">
-                            <a href="${pageContext.request.contextPath}/player/edit/${entry.id}.html">Edit</a> or
-                            <a href="${pageContext.request.contextPath}/player/delete/${entry.id}.html">Delete</a>
+                            <a href="${pageContext.request.contextPath}/player/edit/${entry.id}.html" class="btn info">Edit</a>
+                            <a href="${pageContext.request.contextPath}/player/delete/${entry.id}.html" class="btn info">Delete</a>
+                            <a href="${pageContext.request.contextPath}/player/add-path/${entry.id}.html" class="btn info">Add Path</a>
                         </td>
                     </tr>
                 </c:forEach>

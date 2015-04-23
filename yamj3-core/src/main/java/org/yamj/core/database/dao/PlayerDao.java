@@ -23,6 +23,7 @@
 package org.yamj.core.database.dao;
 
 import java.util.List;
+import java.util.ListIterator;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.CriteriaSpecification;
@@ -156,4 +157,29 @@ public class PlayerDao extends HibernateDao {
         deleteEntity(player);
         LOG.debug("Successfully deleted {}-'{}'", playerId, player.getName());
     }
+
+    /**
+     * Delete a path from a player
+     *
+     * @param playerId
+     * @param pathId
+     */
+    public void deletePlayerPath(Long playerId, Long pathId) {
+        LOG.info("Attempting to delete path ID {} from player ID {}", pathId, playerId);
+        PlayerInfo player = getById(PlayerInfo.class, playerId);
+
+        ListIterator<PlayerPath> iter = player.getPaths().listIterator();
+        while (iter.hasNext()) {
+            PlayerPath path = iter.next();
+            if (path.getId() == pathId) {
+                LOG.info("Deleting path: {}", path.toString());
+                iter.remove();
+                break;
+            }
+        }
+
+        // Update the Player record
+        savePlayer(player);
+    }
+
 }

@@ -19,11 +19,6 @@
             <h2>Configuration Entries</h2>
             <p><a href="${pageContext.request.contextPath}/config/add.html" class="btn info">Add new configuration &raquo;</a></p>
         </div>
-        <c:if test="${not empty message}">
-            <br/>
-            <p class="message">Message: ${message}</p>
-            <br/>
-        </c:if>
 
         <table id="headertable" class="hero-unit" style="width: 90%; margin: auto;">
             <tr>

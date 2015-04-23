@@ -17,10 +17,10 @@
 
         <div id="logo">
             <h2>Player Path Entries</h2>
-            <p><a href="${pageContext.request.contextPath}/player/add-path/${player.name}.html" class="btn info">Add new path &raquo;</a></p>
+            <p><a href="${pageContext.request.contextPath}/player/add-path/${player.id}.html" class="btn info">Add new path &raquo;</a></p>
         </div>
 
-        <table id="headertable" style="width:75%;">
+        <table id="headertable" style="width:50%;" class="center">
             <tr>
                 <td class="right">Player Name:</td>
                 <td>${player.name}</td>
@@ -35,7 +35,7 @@
             </tr>
         </table>
 
-        <table id="tablelist">
+            <table id="tablelist" style="width:50%;" class="center">
             <tr>
                 <th>Source Path</th>
                 <th>Target Path</th>
@@ -46,9 +46,9 @@
                     <tr>
                         <td>${entry.sourcePath}</td>
                         <td>${entry.targetPath}</td>
-                        <td class="center">
-                            <a href="${pageContext.request.contextPath}/player/edit-path/${entry.id}.html">Edit</a> or
-                            <a href="${pageContext.request.contextPath}/player/delete-path/${entry.id}.html">Delete</a>
+                        <td>
+                            <a href="${pageContext.request.contextPath}/player/edit-path/${player.id}/${entry.id}.html">Edit</a> or
+                            <a href="${pageContext.request.contextPath}/player/delete-path/${player.id}/${entry.id}.html">Delete</a>
                         </td>
                     </tr>
                 </c:forEach>

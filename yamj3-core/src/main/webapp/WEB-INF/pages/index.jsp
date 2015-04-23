@@ -44,7 +44,7 @@
             </tr>
             <tr>
                 <th style="width: 10%"><i class="fa fa-play-circle-o fa-lg"></i>&nbsp;<a href="${pageContext.request.contextPath}/player/list.html">Player Information</a></th>
-                <td style="width: 30%">Display information about the player paths.</td>
+                <td style="width: 30%">Display information about the players and their paths.</td>
             </tr>
             <tr>
                 <th style="width: 10%"><i class="fa fa-list-ul fa-lg"></i>&nbsp;<a href="${pageContext.request.contextPath}/count/job.html">Job List</a></th>

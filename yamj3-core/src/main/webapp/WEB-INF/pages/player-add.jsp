@@ -24,20 +24,23 @@
             <table id="headertable" class="hero-unit" style="width:95%; margin:auto;">
                 <tr>
                     <td style="width:25%" class="right">Player Name:</td>
-                    <td style="width:75%"><form:input size="100" path="name"></form:input></td>
+                    <td style="width:75%" class="left"><form:input size="200" path="name"></form:input></td>
                     </tr>
                     <tr>
                         <td style="width:25%" class="right">Device Type:</td>
-                        <td style="width:75%"><form:input size="100" path="deviceType"></form:input></td>
+                        <td style="width:75%"><form:input size="200" path="deviceType"></form:input></td>
                     </tr>
                     <tr>
                         <td style="width:25%" class="right">IP Address:</td>
-                        <td style="width:75%"><form:input size="50" path="ipAddress"></form:input></td>
+                        <td style="width:75%"><form:input size="100" path="ipAddress"></form:input></td>
                     </tr>
                     <tr>
-                        <td colspan="2" class="center"><input value="Add Player" type="submit" class="btn default"></td>
-                    </tr>
-                </table>
+                        <td colspan="2" class="center">
+                            <input value="Add Player" type="submit" class="btn info">
+                            <a href="${pageContext.request.contextPath}/player/list.html" class="btn info">Cancel</a>
+                    </td>
+                </tr>
+            </table>
         </form:form>
 
         <!-- Import the footer -->

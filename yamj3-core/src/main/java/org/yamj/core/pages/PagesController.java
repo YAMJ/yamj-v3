@@ -25,6 +25,7 @@ package org.yamj.core.pages;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import org.slf4j.Logger;
@@ -292,7 +293,7 @@ public class PagesController {
         return view;
     }
 
-    @RequestMapping("/player/add-path/{id}")
+    @RequestMapping(value = "/player/add-path/{id}", method = RequestMethod.GET)
     public ModelAndView playerAddPath(@PathVariable Long id) {
         ModelAndView view = new ModelAndView("player-path-add");
 
@@ -304,7 +305,7 @@ public class PagesController {
         return view;
     }
 
-    @RequestMapping("/player/add-path/process/{id}")
+    @RequestMapping(value = "/player/add-path/process/{id}", method = RequestMethod.POST)
     public ModelAndView playerAddPath(@PathVariable Long id, @ModelAttribute PlayerPath playerPath) {
         ModelAndView view = new ModelAndView("redirect:/player/details/" + id);
 
@@ -314,6 +315,57 @@ public class PagesController {
         jsonApi.setPlayer(player);
         LOG.info("Player was successfully updated.");
 
+        return view;
+    }
+
+    @RequestMapping(value = "/player/delete-path/{playerId}/{pathId}", method = RequestMethod.GET)
+    public ModelAndView playerDeletePath(@PathVariable Long playerId, @PathVariable Long pathId) {
+        ModelAndView view = new ModelAndView("redirect:/player/details/" + playerId);
+
+        LOG.info("Deleting path '{}' for player '{}'", pathId, playerId);
+        jsonApi.deletePlayerPath(playerId, pathId);
+        LOG.info("Path was successfully deleted.");
+        return view;
+    }
+
+    @RequestMapping(value = "/player/edit-path/{playerId}/{pathId}", method = RequestMethod.GET)
+    public ModelAndView playerEditPath(@PathVariable Long playerId, @PathVariable Long pathId) {
+        ModelAndView view = new ModelAndView("player-path-edit");
+        PlayerInfo player = jsonApi.getPlayerInfo(playerId);
+        view.addObject("player", player);
+
+        for (PlayerPath path : player.getPaths()) {
+            if (path.getId() == pathId) {
+                view.addObject("path", path);
+                break;
+            }
+        }
+
+        YamjInfo yi = sic.getYamjInfo("true");
+        view.addObject("yi", yi);
+        return view;
+    }
+
+    @RequestMapping(value = "/player/edit-path/{playerId}/{pathId}", method = RequestMethod.POST)
+    public ModelAndView playerEditPath(@PathVariable Long playerId, @PathVariable Long pathId, @ModelAttribute("path") PlayerPath path) {
+        ModelAndView view = new ModelAndView("redirect:/player/details/" + playerId);
+
+        PlayerInfo player = jsonApi.getPlayerInfo(playerId);
+        LOG.info("Updating player: {}-{}", player.getId(), player.getName());
+
+        Iterator<PlayerPath> iter = player.getPaths().iterator();
+        while (iter.hasNext()) {
+            PlayerPath currentPath = iter.next();
+            if (currentPath.getId() == pathId) {
+                LOG.info("Updating path {} to {}", currentPath, path);
+                currentPath.setSourcePath(path.getSourcePath());
+                currentPath.setTargetPath(path.getTargetPath());
+                break;
+            }
+        }
+
+        jsonApi.setPlayer(player);
+        LOG.info("Path was successfully updated.");
         return view;
     }
     //</editor-fold>

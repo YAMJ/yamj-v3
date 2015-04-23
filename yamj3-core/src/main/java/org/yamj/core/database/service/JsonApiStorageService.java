@@ -272,6 +272,11 @@ public class JsonApiStorageService {
     }
 
     @Transactional
+    public void deletePlayerPath(Long playerId, Long pathId) {
+        playerDao.deletePlayerPath(playerId, pathId);
+    }
+
+    @Transactional
     public void storePlayer(PlayerInfo player) {
         playerDao.storePlayer(player);
     }

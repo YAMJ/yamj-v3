@@ -24,7 +24,7 @@
             <table id="headertable" style="width:75%;">
                 <tr>
                     <td class="right">Player Name:</td>
-                    <td colspan="2" class="center">${player.name}</td>
+                    <td colspan="2" class="left">${player.name}</td>
                 </tr>
                 <tr>
                     <td class="center">Player Data</td>
@@ -35,15 +35,18 @@
                     <td class="right">Device Type:</td>
                     <td>${player.deviceType}</td>
                     <td><form:input path="deviceType" size="100"></form:input></td>
-                </tr>
-                <tr>
-                    <td class="right">IP Address:</td>
-                    <td>${player.ipAddress}</td>
+                    </tr>
+                    <tr>
+                        <td class="right">IP Address:</td>
+                        <td>${player.ipAddress}</td>
                     <td><form:input path="ipAddress" size="50"></form:input></td>
-                </tr>
-                <tr>
-                    <td colspan="3" class="center"><input value="Update" type="submit"></td>
-                </tr>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="center">
+                            <input type="submit" name="update" class="btn info" value="Update" >  
+                            <a href="${pageContext.request.contextPath}/player/list.html" class="btn info">Cancel</a>
+                        </td>
+                    </tr>
                 </table>
         </form:form>
 
