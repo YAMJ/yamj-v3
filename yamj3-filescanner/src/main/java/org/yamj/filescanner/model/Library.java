@@ -41,15 +41,15 @@ import org.yamj.common.type.StatusType;
 public class Library implements Serializable {
 
     private static final long serialVersionUID = -7307516287202738381L;
-    
+
     private boolean watch;
     private String description;
     private Statistics statistics;
     private Map<String, StageDirectoryDTO> directories;
     private Map<String, Future<StatusType>> directoryStatus;
     private ImportDTO importDTO;
-    private AtomicBoolean scanningComplete;
-    private AtomicBoolean sendingComplete;
+    private final AtomicBoolean scanningComplete;
+    private final AtomicBoolean sendingComplete;
 
     /**
      * Create a library
@@ -278,7 +278,7 @@ public class Library implements Serializable {
     /**
      * Calculate the relative directory from the library base directory
      *
-     * @param directory
+     * @param absolutePath
      * @return
      */
     public String getRelativeDir(String absolutePath) {

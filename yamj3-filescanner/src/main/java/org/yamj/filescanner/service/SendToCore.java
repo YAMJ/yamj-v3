@@ -48,7 +48,7 @@ public class SendToCore implements Callable<StatusType> {
     private FileImportService fileImportService;
 
     public SendToCore() {
-      // empty initialization
+        // empty initialization
     }
 
     public SendToCore(ImportDTO importDto) {
@@ -60,29 +60,30 @@ public class SendToCore implements Callable<StatusType> {
     }
 
     public void setCounter(AtomicInteger runningCount) {
-        this.runningCount = runningCount;
+          this.runningCount = runningCount;
     }
 
     @Override
     public StatusType call() {
         StatusType status;
+        String displayPath = importDto.getStageDirectory().getPath();
         try {
-            LOG.debug("Sending: {}", importDto.getBaseDirectory());
+            LOG.debug("Sending: {}", displayPath);
             fileImportService.importScanned(importDto);
-            LOG.debug("{}: Successfully queued", importDto.getBaseDirectory());
+            LOG.debug("{}: Successfully queued", displayPath);
             status = StatusType.DONE;
         } catch (RemoteConnectFailureException ex) {
-            LOG.error("{}: Failed to connect to the core server: {}", importDto.getBaseDirectory(), ex.getMessage());
+            LOG.error("{}: Failed to connect to the core server: {}", displayPath, ex.getMessage());
             LOG.trace("Exception:", ex);
             status = StatusType.ERROR;
         } catch (RemoteAccessException ex) {
-            LOG.error("{}: Failed to send object to the core server: {}", importDto.getBaseDirectory(), ex.getMessage());
+            LOG.error("{}: Failed to send object to the core server: {}", displayPath, ex.getMessage());
             LOG.trace("Exception:", ex);
             status = StatusType.ERROR;
         }
 
         // Whether or not the message was sent, quit
-        LOG.info("{}: Exiting with status {}, remaining threads: {}", importDto.getBaseDirectory(), status, runningCount.decrementAndGet());
+        LOG.info("{}: Exiting with status {}, remaining threads: {}", displayPath, status, runningCount.decrementAndGet());
         return status;
     }
 }
