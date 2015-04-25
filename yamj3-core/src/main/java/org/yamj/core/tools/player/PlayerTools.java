@@ -31,14 +31,18 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpHeaders;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yamj.api.common.http.CommonHttpClient;
-import org.yamj.api.common.http.DefaultPoolingHttpClient;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.api.common.http.DigestedResponseReader;
+import org.yamj.api.common.http.SimpleHttpClientBuilder;
 import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.tools.player.davidbox.DavidBoxPlayerPath;
@@ -54,8 +58,10 @@ public final class PlayerTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlayerTools.class);
     private static final ObjectMapper MAPPER = new XmlMapper();
-    private static final CommonHttpClient HTTP = new DefaultPoolingHttpClient();
+    private static final HttpClient HTTP = new SimpleHttpClientBuilder().build();
     private static final String XML_PLAYER_IDENT = "<syabasCommandServerXml>";
+    private static final String DEFAULT_CHARSET = "UTF-8";
+    private static final Charset CHARSET = Charset.forName(DEFAULT_CHARSET);
     // List of the players found
     private final List<PlayerInfo> players = new ArrayList<>();
     // Timeout for scanning
@@ -69,11 +75,9 @@ public final class PlayerTools {
     private static final String GET_DEV_NAME = "/system?arg0=get_nmt_device_name";
 
     /**
-     * Create the player tools with a base IP address range, port 8008 & timeout
-     * 75
+     * Create the player tools with a base IP address range, port 8008 & timeout 75
      *
-     * @param baseIpAddress the first 3 octlets of the IP address, e.g.
-     * "192.168.0"
+     * @param baseIpAddress the first 3 octlets of the IP address, e.g. "192.168.0"
      */
     public PlayerTools(String baseIpAddress) {
         this(baseIpAddress, 8008, 75);
@@ -220,7 +224,7 @@ public final class PlayerTools {
         String url = buildUrl(addr, port, FILE_OP);
 
         try {
-            DigestedResponse response = HTTP.requestContent(url);
+            DigestedResponse response = getRequest(url);
             if (ResponseTools.isOK(response)) {
                 DavidBoxWrapper wrapper = MAPPER.readValue(response.getContent(), DavidBoxWrapper.class);
 
@@ -262,7 +266,7 @@ public final class PlayerTools {
         String url = buildUrl(addr, port, GET_DEV_NAME);
         String playerName = "UNKNOWN";
         try {
-            DigestedResponse response = HTTP.requestContent(url);
+            DigestedResponse response = getRequest(url);
             if (ResponseTools.isOK(response)) {
                 DavidBoxWrapper wrapper = MAPPER.readValue(response.getContent(), DavidBoxWrapper.class);
 
@@ -279,4 +283,16 @@ public final class PlayerTools {
         return playerName;
     }
 
+    private static DigestedResponse getRequest(final String url) {
+        try {
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.addHeader(HttpHeaders.ACCEPT, "application/xml");
+            final DigestedResponse response = DigestedResponseReader.requestContent(HTTP, httpGet, CHARSET);
+
+            return response;
+        } catch (IOException ex) {
+            LOG.warn("Error retrieving URL: {}", url, ex);
+            return null;
+        }
+    }
 }
