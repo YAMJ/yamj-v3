@@ -24,9 +24,9 @@ package org.yamj.core.service.artwork.online;
 
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
-import com.omertron.themoviedbapi.model.Artwork;
-import com.omertron.themoviedbapi.model.ArtworkType;
-import com.omertron.themoviedbapi.results.TmdbResultsList;
+import com.omertron.themoviedbapi.enumeration.ArtworkType;
+import com.omertron.themoviedbapi.model.artwork.Artwork;
+import com.omertron.themoviedbapi.results.ResultList;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,7 +55,7 @@ public class TheMovieDbArtworkScanner implements
     private static final String DEFAULT_PHOTO_SIZE = "original";
     private static final String LANGUAGE_NONE = "";
     private static final String LANGUAGE_EN = "en";
-    
+
     @Autowired
     private ConfigService configService;
     @Autowired
@@ -82,7 +82,7 @@ public class TheMovieDbArtworkScanner implements
 
     @Override
     public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
-      String tmdbId = tmdbScanner.getMovieId(videoData);
+        String tmdbId = tmdbScanner.getMovieId(videoData);
         if (StringUtils.isNumeric(tmdbId)) {
             String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
             return getFilteredArtwork(tmdbId, defaultLanguage, ArtworkType.POSTER, DEFAULT_POSTER_SIZE);
@@ -92,7 +92,7 @@ public class TheMovieDbArtworkScanner implements
 
     @Override
     public List<ArtworkDetailDTO> getFanarts(VideoData videoData) {
-      String tmdbId = tmdbScanner.getMovieId(videoData);
+        String tmdbId = tmdbScanner.getMovieId(videoData);
         if (StringUtils.isNumeric(tmdbId)) {
             String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
             return getFilteredArtwork(tmdbId, defaultLanguage, ArtworkType.BACKDROP, DEFAULT_FANART_SIZE);
@@ -108,7 +108,7 @@ public class TheMovieDbArtworkScanner implements
         }
         return Collections.emptyList();
     }
-    
+
     /**
      * Get a list of the artwork for a movie.
      *
@@ -127,7 +127,7 @@ public class TheMovieDbArtworkScanner implements
             int tmdbId = Integer.parseInt(id);
             try {
                 // Use an empty language to get all artwork and then filter it.
-                TmdbResultsList<Artwork> results;
+                ResultList<Artwork> results;
                 if (artworkType == ArtworkType.PROFILE) {
                     results = tmdbApi.getPersonImages(tmdbId);
                 } else {
@@ -151,7 +151,7 @@ public class TheMovieDbArtworkScanner implements
                 LOG.debug("Found {} {} artworks for TMDb id {} and language '{}'", dtos.size(), artworkType, tmdbId, language);
             } catch (MovieDbException ex) {
                 LOG.error("Failed retrieving {} artworks for movie id {}: {}", artworkType, tmdbId, ex.getMessage());
-                LOG.warn("TheMovieDb error" , ex);
+                LOG.warn("TheMovieDb error", ex);
             }
         }
         return dtos;

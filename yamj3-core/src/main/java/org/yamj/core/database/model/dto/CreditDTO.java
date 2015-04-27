@@ -25,6 +25,7 @@ package org.yamj.core.database.model.dto;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.core.database.model.type.JobType;
@@ -41,11 +42,11 @@ public class CreditDTO {
     private String lastName;
     private String realName;
     private String role;
-    private Set<String> photoURLS = new HashSet<>();
+    private final Set<String> photoURLS = new HashSet<>();
 
     public CreditDTO(String source, JobType jobType, String name) {
-      this(source, null, jobType, name, null);
-  }
+        this(source, null, jobType, name, null);
+    }
 
     public CreditDTO(String source, String sourceId, JobType jobType, String name) {
         this(source, sourceId, jobType, name, null);
@@ -71,7 +72,7 @@ public class CreditDTO {
     }
 
     public String getSourceId() {
-      return sourceId;
+        return sourceId;
     }
 
     public JobType getJobType() {
@@ -81,12 +82,12 @@ public class CreditDTO {
     public String getName() {
         return name;
     }
-    
+
     public String getFirstName() {
         return firstName;
     }
 
-    public void setFirstName(String firstName) {
+    public final void setFirstName(String firstName) {
         if (StringUtils.isNotBlank(firstName)) {
             this.firstName = firstName.trim();
         }
@@ -96,7 +97,7 @@ public class CreditDTO {
         return lastName;
     }
 
-    public void setLastName(String lastName) {
+    public final void setLastName(String lastName) {
         if (StringUtils.isNotBlank(lastName)) {
             this.lastName = lastName.trim();
         }
@@ -106,7 +107,7 @@ public class CreditDTO {
         return role;
     }
 
-    public void setRole(String role) {
+    public final void setRole(String role) {
         if (StringUtils.isNotBlank(role)) {
             this.role = role.trim();
         }
@@ -134,12 +135,11 @@ public class CreditDTO {
 
     @Override
     public int hashCode() {
-        final int prime = 7;
-        int result = 1;
-        result = prime * result + (this.name == null ? 0 : this.name.toLowerCase().hashCode());
-        result = prime * result + (this.source == null ? 0 : this.source.hashCode());
-        result = prime * result + (this.jobType == null ? 0 : this.jobType.hashCode());
-        return result;
+        return new HashCodeBuilder()
+                .append(name)
+                .append(source)
+                .append(jobType)
+                .toHashCode();
     }
 
     @Override

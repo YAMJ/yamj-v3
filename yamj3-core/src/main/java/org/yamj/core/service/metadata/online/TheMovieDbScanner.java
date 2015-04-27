@@ -22,9 +22,21 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.omertron.themoviedbapi.model.*;
-import com.omertron.themoviedbapi.results.TmdbResultsList;
-import java.util.*;
+import com.omertron.themoviedbapi.model.credits.CreditBasic;
+import com.omertron.themoviedbapi.model.credits.CreditMovieBasic;
+import com.omertron.themoviedbapi.model.credits.MediaCreditCast;
+import com.omertron.themoviedbapi.model.credits.MediaCreditCrew;
+import com.omertron.themoviedbapi.model.media.MediaCreditList;
+import com.omertron.themoviedbapi.model.movie.MovieInfo;
+import com.omertron.themoviedbapi.model.movie.ProductionCompany;
+import com.omertron.themoviedbapi.model.movie.ProductionCountry;
+import com.omertron.themoviedbapi.model.person.PersonCreditList;
+import com.omertron.themoviedbapi.model.person.PersonInfo;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -52,14 +64,14 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbScanner.class);
     private static final String FROM_WIKIPEDIA = "From Wikipedia, the free encyclopedia";
     private static final String WIKIPEDIA_DESCRIPTION_ABOVE = "Description above from the Wikipedia";
-    
+
     @Autowired
     private OnlineScannerService onlineScannerService;
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
     @Autowired
     private TheMovieDbApiWrapper tmdbApiWrapper;
-    
+
     @Override
     public String getScannerName() {
         return SCANNER_ID;
@@ -68,7 +80,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
     @PostConstruct
     public void init() {
         LOG.info("Initialize TheMovieDb scanner");
-        
+
         // register this scanner
         onlineScannerService.registerMovieScanner(this);
         onlineScannerService.registerPersonScanner(this);
@@ -78,18 +90,18 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
     public String getMovieId(VideoData videoData) {
         return getMovieId(videoData, false);
     }
-    
+
     private String getMovieId(VideoData videoData, boolean throwTempError) {
         String tmdbId = videoData.getSourceDbId(SCANNER_ID);
         if (StringUtils.isNumeric(tmdbId)) {
             return tmdbId;
         }
-        
+
         String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
         if (StringUtils.isNotBlank(imdbId)) {
             // Search based on IMDb ID
             LOG.debug("Using IMDb id {} for '{}'", imdbId, videoData.getTitle());
-            MovieDb movieDb = tmdbApiWrapper.getMovieInfoByIMDB(imdbId, throwTempError);
+            MovieInfo movieDb = tmdbApiWrapper.getMovieInfoByIMDB(imdbId, throwTempError);
             if (movieDb != null && movieDb.getId() != 0) {
                 tmdbId = String.valueOf(movieDb.getId());
             }
@@ -111,14 +123,14 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             videoData.setSourceDbId(SCANNER_ID, tmdbId);
             return tmdbId;
         }
-        
+
         return null;
     }
 
     @Override
     public ScanResult scan(VideoData videoData) {
-        MovieDb movieDb = null;
-        TmdbResultsList<com.omertron.themoviedbapi.model.Person> movieCasts = null;
+        MovieInfo movieDb = null;
+        MediaCreditList movieCasts = null;
         try {
             boolean throwTempError = configServiceWrapper.getBooleanProperty("themoviedb.throwError.tempUnavailable", Boolean.TRUE);
             String tmdbId = getMovieId(videoData, throwTempError);
@@ -129,7 +141,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             }
 
             movieDb = tmdbApiWrapper.getMovieInfoByTMDB(Integer.parseInt(tmdbId), throwTempError);
-            movieCasts = tmdbApiWrapper.getMovieCasts(movieDb.getId(), throwTempError);
+            movieCasts = tmdbApiWrapper.getMovieCredits(movieDb.getId(), throwTempError);
         } catch (TemporaryUnavailableException ex) {
             // check retry
             int maxRetries = configServiceWrapper.getIntProperty("themoviedb.maxRetries.movie", 0);
@@ -137,14 +149,13 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
                 return ScanResult.RETRY;
             }
         }
-        
+
         if (movieDb == null || movieCasts == null) {
             LOG.error("Can't find informations for movie '{}'", videoData.getTitle());
             return ScanResult.ERROR;
         }
 
         // fill in data
-        
         videoData.setSourceDbId(ImdbScanner.SCANNER_ID, StringUtils.trim(movieDb.getImdbID()));
 
         if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
@@ -208,21 +219,34 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             }
         }
 
-        // CAST & CREW
-        for (com.omertron.themoviedbapi.model.Person person : movieCasts.getResults()) {
-            JobType jobType = retrieveJobType(person.getPersonType(), person.getDepartment());
+        // CAST
+        if (!this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+            for (MediaCreditCast person : movieCasts.getCast()) {
+                CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), JobType.ACTOR, person.getName(), person.getCharacter());
+                videoData.addCreditDTO(credit);
+            }
+        }
+
+        // GUEST STARS
+        if (!this.configServiceWrapper.isCastScanEnabled(JobType.GUEST_STAR)) {
+            for (MediaCreditCast person : movieCasts.getGuestStars()) {
+                CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), JobType.GUEST_STAR, person.getName(), person.getCharacter());
+                videoData.addCreditDTO(credit);
+            }
+        }
+
+        // CREW
+        for (MediaCreditCrew person : movieCasts.getCrew()) {
+            JobType jobType = retrieveJobType(person.getDepartment());
             if (!this.configServiceWrapper.isCastScanEnabled(jobType)) {
                 // scan not enabled for that job
                 continue;
             }
-            
-            CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), jobType, person.getName(), person.getCharacter());
-            if (person.getAka() != null && !person.getAka().isEmpty()) {
-                credit.setRealName(person.getAka().get(0));
-            }
+
+            CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), jobType, person.getName(), person.getJob());
             videoData.addCreditDTO(credit);
         }
-        
+
         return ScanResult.OK;
     }
 
@@ -236,18 +260,18 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         if (StringUtils.isNumeric(tmdbId)) {
             return tmdbId;
         }
-        
+
         if (StringUtils.isNotBlank(person.getName())) {
             tmdbId = tmdbApiWrapper.getPersonId(person.getName(), throwTempError);
             person.setSourceDbId(SCANNER_ID, tmdbId);
         }
-        
+
         return tmdbId;
     }
 
     @Override
     public ScanResult scan(Person person) {
-        com.omertron.themoviedbapi.model.Person tmdbPerson = null;
+        PersonInfo tmdbPerson = null;
         try {
             boolean throwTempError = configServiceWrapper.getBooleanProperty("themoviedb.throwError.tempUnavailable", Boolean.TRUE);
             String tmdbId = getPersonId(person, throwTempError);
@@ -265,14 +289,13 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
                 return ScanResult.RETRY;
             }
         }
-        
+
         if (tmdbPerson == null) {
-            LOG.error("Can't find informations for person '{}'", person.getName());
+            LOG.error("Can't find information for person '{}'", person.getName());
             return ScanResult.ERROR;
         }
-        
+
         // fill in data
-            
         person.setSourceDbId(ImdbScanner.SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
 
         if (OverrideTools.checkOverwritePersonNames(person, SCANNER_ID)) {
@@ -295,12 +318,12 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         }
 
         if (OverrideTools.checkOverwriteBirthPlace(person, SCANNER_ID)) {
-            person.setBirthPlace(StringUtils.trimToNull(tmdbPerson.getBirthplace()), SCANNER_ID);
+            person.setBirthPlace(StringUtils.trimToNull(tmdbPerson.getPlaceOfBirth()), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteBirthName(person, SCANNER_ID)) {
-            if (CollectionUtils.isNotEmpty(tmdbPerson.getAka())) {
-                String birthName = tmdbPerson.getAka().get(0);
+            if (CollectionUtils.isNotEmpty(tmdbPerson.getAlsoKnownAs())) {
+                String birthName = tmdbPerson.getAlsoKnownAs().get(0);
                 person.setBirthName(birthName, SCANNER_ID);
             }
         }
@@ -347,7 +370,6 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         return newBio.trim();
     }
 
-
     @Override
     public boolean isFilmographyScanEnabled() {
         return configServiceWrapper.getBooleanProperty("themoviedb.person.filmography", false);
@@ -355,7 +377,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
 
     @Override
     public ScanResult scanFilmography(Person person) {
-        TmdbResultsList<PersonCredit> credits = null;
+        PersonCreditList<CreditBasic> credits = null;
         try {
             boolean throwTempError = configServiceWrapper.getBooleanProperty("themoviedb.throwError.tempUnavailable", Boolean.TRUE);
             String tmdbId = getPersonId(person, throwTempError);
@@ -373,95 +395,96 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
                 return ScanResult.RETRY;
             }
         }
-        
+
         if (credits == null) {
             LOG.error("Can't find filmography for person '{}'", person.getName());
             return ScanResult.ERROR;
         }
 
         // fill in data
-
         Set<FilmParticipation> newFilmography = new HashSet<>();
-        for (PersonCredit credit : credits.getResults()) {
-            JobType jobType = retrieveJobType(credit.getPersonType(), credit.getDepartment());
+        for (CreditBasic credit : credits.getCast()) {
+            JobType jobType = retrieveJobType(credit.getDepartment());
             if (jobType == null) {
                 // job type must be present
                 continue;
             }
-            Date releaseDate = MetadataTools.parseToDate(credit.getReleaseDate());
-            if (releaseDate == null) {
-                // release date must be present
-                continue;
+
+            FilmParticipation filmo = null;
+            switch (credit.getMediaType()) {
+                case MOVIE:
+                    filmo = convertMovieCreditToFilm((CreditMovieBasic) credit, person, jobType);
+                    break;
+                case TV:
+                    LOG.debug("TV credit information for {} ({}) not used: {}", person.getName(), jobType, credit.toString());
+                    break;
+                case EPISODE:
+                    LOG.debug("TV Episode credit information for {} ({}) not used: {}", person.getName(), jobType, credit.toString());
+                    break;
+                default:
+                    LOG.debug("Unknown media type '{}' for credit {}", credit.getMediaType(), credit.toString());
             }
-            
-            // NOTE: until now just movies possible; no TV credits
-            FilmParticipation filmo = new FilmParticipation();
-            filmo.setParticipationType(ParticipationType.MOVIE);
-            filmo.setSourceDb(SCANNER_ID);
-            filmo.setSourceDbId(String.valueOf(credit.getMovieId()));
-            filmo.setPerson(person);
-            filmo.setJobType(jobType);
-            if (JobType.ACTOR == jobType) {
-                filmo.setRole(credit.getCharacter());
+
+            if (filmo != null) {
+                newFilmography.add(filmo);
             }
-            filmo.setTitle(credit.getMovieTitle());
-            filmo.setTitleOriginal(StringUtils.trimToNull(credit.getMovieOriginalTitle()));
-            filmo.setReleaseDate(releaseDate);
-            filmo.setYear(MetadataTools.extractYearAsInt(releaseDate));
-            newFilmography.add(filmo);
-            
         }
         person.setNewFilmography(newFilmography);
-            
+
         return ScanResult.OK;
     }
-    
-    private static JobType retrieveJobType(PersonType personType, String department) {
-        if (personType == PersonType.CAST) {
-            return JobType.ACTOR;
+
+    private FilmParticipation convertMovieCreditToFilm(CreditMovieBasic credit, Person person, JobType jobType) {
+        Date releaseDate = MetadataTools.parseToDate(credit.getReleaseDate());
+        if (releaseDate == null) {
+            // release date must be present
+            return null;
         }
-        
-        if (personType == PersonType.CREW) {
-            if ("writing".equalsIgnoreCase(department)) {
+
+        FilmParticipation filmo = new FilmParticipation();
+        filmo.setParticipationType(ParticipationType.MOVIE);
+        filmo.setSourceDb(SCANNER_ID);
+        filmo.setSourceDbId(String.valueOf(credit.getId()));
+        filmo.setPerson(person);
+        filmo.setJobType(jobType);
+        if (JobType.ACTOR == jobType) {
+            filmo.setRole(credit.getCharacter());
+        }
+        filmo.setTitle(credit.getTitle());
+        filmo.setTitleOriginal(StringUtils.trimToNull(credit.getOriginalTitle()));
+        filmo.setReleaseDate(releaseDate);
+        filmo.setYear(MetadataTools.extractYearAsInt(releaseDate));
+        return filmo;
+    }
+
+    private static JobType retrieveJobType(String department) {
+        switch (department) {
+            case "writing":
                 return JobType.WRITER;
-            }
-            if ("directing".equalsIgnoreCase(department)) {
+            case "directing":
                 return JobType.DIRECTOR;
-            }
-            if ("production".equalsIgnoreCase(department)) {
+            case "production":
                 return JobType.PRODUCER;
-            }
-            if ("sound".equalsIgnoreCase(department)) {
+            case "sound":
                 return JobType.SOUND;
-            }
-            if ("camera".equalsIgnoreCase(department)) {
+            case "camera":
                 return JobType.CAMERA;
-            }
-            if ("art".equalsIgnoreCase(department)) {
+            case "art":
                 return JobType.ART;
-            }
-            if ("editing".equalsIgnoreCase(department)) {
+            case "editing":
                 return JobType.EDITING;
-            }
-            if ("costume & make-up".equalsIgnoreCase(department)) {
+            case "costume & make-up":
                 return JobType.COSTUME_MAKEUP;
-            }
-            if ("crew".equalsIgnoreCase(department)) {
+            case "crew":
                 return JobType.CREW;
-            }
-            if ("visual effects".equalsIgnoreCase(department)) {
+            case "visual effects":
                 return JobType.EFFECTS;
-            }
-            if ("lighting".equalsIgnoreCase(department)) {
+            case "lighting":
                 return JobType.LIGHTING;
-            }
-
-            LOG.debug("Unknown department '{}'", department);
-            return JobType.UNKNOWN;
+            default:
+                LOG.debug("Unknown department '{}'", department);
+                return JobType.UNKNOWN;
         }
-
-        LOG.debug("Unknown person type: '{}'", personType);
-        return null;
     }
 
     @Override
@@ -470,7 +493,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         if (!ignorePresentId && StringUtils.isNotBlank(dto.getId(SCANNER_ID))) {
             return Boolean.TRUE;
         }
-        
+
         LOG.trace("Scanning NFO for TheMovieDb ID");
 
         try {
@@ -485,7 +508,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         } catch (Exception ex) {
             LOG.trace("NFO scanning error", ex);
         }
-        
+
         LOG.debug("No TheMovieDb ID found in NFO");
         return Boolean.FALSE;
     }
