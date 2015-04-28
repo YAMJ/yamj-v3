@@ -372,7 +372,7 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" or (c.target_api is not null and lower(c.target_api)='").append(country).append("')");
             sbSQL.append(" or (c.target_xml is not null and lower(c.target_xml)='").append(country).append("')))");
         }
-        
+
         // check studio
         if (params.includeCertification() || params.excludeCertification()) {
             int certId = params.getCertificationId();
@@ -435,7 +435,7 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append("AND lower(a.event)='").append(awardName).append("')");
             }
         }
-        
+
         // check video source
         if (params.includeVideoSource() || params.excludeVideoSource()) {
             String videosource = params.getVideoSource();
@@ -705,7 +705,7 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append("AND lower(a.event)='").append(awardName).append("')");
             }
         }
-        
+
         // check certification
         if (params.includeCertification() || params.excludeCertification()) {
             int certId = params.getCertificationId();
@@ -977,7 +977,7 @@ public class ApiDao extends HibernateDao {
         if (params.includeAward() || params.excludeAward()) {
             String awardName = params.getAwardName();
             System.err.print("awardName --> " + awardName);
-            
+
             if (params.includeAward()) {
                 sbSQL.append(" AND exists(");
             } else {
@@ -997,7 +997,7 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append("AND lower(a.event)='").append(awardName).append("')");
             }
         }
-        
+
         // check certification
         if (params.includeCertification() || params.excludeCertification()) {
             int certId = params.getCertificationId();
@@ -1826,7 +1826,7 @@ public class ApiDao extends HibernateDao {
                             episode.addCast(entry);
                         } else if (amount > 0) {
                             episode.addCast(entry);
-                            amount = Integer.valueOf(amount - 1);
+                            amount--;
                             jobMap.put(entry.getJobType(), amount);
                         }
                     }
@@ -1896,7 +1896,7 @@ public class ApiDao extends HibernateDao {
                 LOG.trace("Adding countries for ID {}", options.getId());
                 video.setCountries(getCountriesForId(type, options.getId()));
             }
-            
+
             if (params.hasDataItem(DataItem.CERTIFICATION)) {
                 LOG.trace("Adding certifications for ID {}", options.getId());
                 video.setCertifications(getCertificationsForId(type, options.getId()));
@@ -1945,7 +1945,7 @@ public class ApiDao extends HibernateDao {
                         video.addCast(entry);
                     } else if (amount > 0) {
                         video.addCast(entry);
-                        amount = Integer.valueOf(amount - 1);
+                        amount--;
                         jobMap.put(entry.getJobType(), amount);
                     }
                 }
@@ -2250,16 +2250,16 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("WHERE c.videodata_id=:id ");
         }
         sqlScalars.addToSql("ORDER BY year, event");
-        
+
         sqlScalars.addScalar("event", StringType.INSTANCE);
         sqlScalars.addScalar("category", StringType.INSTANCE);
         sqlScalars.addScalar("source", StringType.INSTANCE);
         sqlScalars.addScalar("year", IntegerType.INSTANCE);
         sqlScalars.addScalar("won", BooleanType.INSTANCE);
         sqlScalars.addScalar("nominated", BooleanType.INSTANCE);
-        
+
         sqlScalars.addParameters(ID, id);
-        
+
         return executeQueryWithTransform(ApiAwardDTO.class, sqlScalars, null);
     }
 
@@ -2687,7 +2687,7 @@ public class ApiDao extends HibernateDao {
      */
     @SuppressWarnings("unused")
     private static <T extends AbstractApiIdentifiableDTO> Map<Long, T> generateIdMap(List<T> idList) {
-        Map<Long, T> results = new HashMap<Long, T>(idList.size());
+        Map<Long, T> results = new HashMap<>(idList.size());
 
         for (T idSingle : idList) {
             results.put(idSingle.getId(), idSingle);
@@ -2757,10 +2757,10 @@ public class ApiDao extends HibernateDao {
         }
 
         ApiBoxedSetDTO boxedSet = boxsets.get(0);
-        if (boxedSet.getMemberCount() == null || boxedSet.getMemberCount().intValue() <= 0) {
+        if (boxedSet.getMemberCount() == null || boxedSet.getMemberCount() <= 0) {
             return boxedSet;
         }
-        
+
         if (options.hasDataItem(DataItem.MEMBER)) {
             // get members
             sqlScalars = new SqlScalars();
@@ -2898,7 +2898,6 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("select distinct upper(left(vd.title_sort,1)) as name ");
             sbSQL.append("from videodata vd ");
             sbSQL.append("where vd.episode >= 0 ");
-            appendUnion = true;
         }
 
         sbSQL.append("ORDER BY name ");
