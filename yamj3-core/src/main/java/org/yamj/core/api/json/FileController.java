@@ -45,7 +45,7 @@ public class FileController {
     private StagingService stagingService;
     @Autowired
     private CommonStorageService commonStorageService;
-    
+
     /**
      * Mark a stage file as deleted.
      *
@@ -112,7 +112,7 @@ public class FileController {
         Long id = options.getId();
         if (id != null && id > 0L) {
             LOG.info("Watched file '{}'", id);
-            boolean result = this.commonStorageService.toogleWatchedStatus(id, true, true);
+            boolean result = commonStorageService.toogleWatchedStatus(id, true, true);
             if (result) {
                 status.setStatus(200);
                 status.setMessage("Successfully marked file '" + id + "' as watched");

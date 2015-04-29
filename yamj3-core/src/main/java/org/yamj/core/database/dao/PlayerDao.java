@@ -108,36 +108,6 @@ public class PlayerDao extends HibernateDao {
         storeEntity(player);
     }
 
-//    public List<PlayerInfo> getPlayerEntries(OptionsPlayer options) {
-//        return (List<PlayerInfo>) currentSession().byNaturalId(PlayerInfo.class)
-//                .using("name", options.getSearch())
-//                .load();
-//    }
-//    public List<PlayerInfo> getPlayerEntries(OptionsPlayer options) {
-//        SqlScalars sqlScalars = new SqlScalars();
-//
-//        sqlScalars.addToSql("SELECT id, name, device_type AS deviceType, ip_address AS ipAddress");
-//        sqlScalars.addToSql("FROM player_info");
-//        // TODO: Add where clause
-//        sqlScalars.addToSql(options.getSearchString(true));
-//        sqlScalars.addToSql(options.getSortString());
-//
-//        sqlScalars.addScalar("id", IntegerType.INSTANCE);
-//        sqlScalars.addScalar("name", StringType.INSTANCE);
-//        sqlScalars.addScalar("deviceType", StringType.INSTANCE);
-//        sqlScalars.addScalar("ipAddress", StringType.INSTANCE);
-//
-//        List<PlayerInfo> players = executeQueryWithTransform(PlayerInfo.class, sqlScalars, null);
-//        return players;
-//    }
-//
-//    public List<PlayerInfo> getPlayerEntries(String playerName) {
-//        OptionsPlayer options = new OptionsPlayer();
-//        options.setPlayer(playerName);
-//        // Make the search exact
-//        options.setMode("EXACT");
-//        return getPlayerEntries(options);
-//    }
     /**
      * Delete keys from the database
      *

@@ -40,7 +40,13 @@ import org.yamj.core.api.model.dto.ApiTargetDTO;
 import org.yamj.core.api.options.OptionsRating;
 import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.BoxedSet;
+import org.yamj.core.database.model.Certification;
+import org.yamj.core.database.model.Country;
+import org.yamj.core.database.model.Genre;
+import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.award.Award;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
@@ -97,7 +103,7 @@ public class CommonDao extends HibernateDao {
             } else {
                 sqlScalars.addToSql("JOIN series_genres sg ON g.id=sg.genre_id ");
             }
-        } 
+        }
         if (options.getUsed() != null && options.getUsed()) {
             sqlScalars.addToSql("WHERE (exists (select 1 from videodata_genres vg where vg.genre_id=g.id) ");
             sqlScalars.addToSql(" or exists (select 1 from series_genres sg where sg.genre_id=g.id)) ");
@@ -162,7 +168,7 @@ public class CommonDao extends HibernateDao {
             } else {
                 sqlScalars.addToSql("JOIN series_studios ss ON stu.id=ss.studio_id ");
             }
-        } 
+        }
         if (options.getUsed() != null && options.getUsed()) {
             sqlScalars.addToSql("WHERE (exists (select 1 from videodata_studios vs where vs.studio_id=stu.id) ");
             sqlScalars.addToSql(" or exists (select 1 from series_studios ss where ss.studio_id=stu.id)) ");
@@ -181,9 +187,9 @@ public class CommonDao extends HibernateDao {
     public Country getCountry(String name) {
         return getByNaturalIdCaseInsensitive(Country.class, "name", name);
     }
-  
+
     public synchronized void storeNewCountry(String name, String targetXml) {
-      Country country = this.getCountry(name);
+        Country country = this.getCountry(name);
         if (country == null) {
             // create new country
             country = new Country();
@@ -195,10 +201,10 @@ public class CommonDao extends HibernateDao {
 
     public List<ApiTargetDTO> getCountries(ApiWrapperList<ApiTargetDTO> wrapper) {
         OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
-  
+
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addScalar("name", StringType.INSTANCE);
-  
+
         sqlScalars.addToSql("SELECT DISTINCT ");
         if (options.getFull()) {
             sqlScalars.addToSql("c.id as id, c.name as name, ");
@@ -207,7 +213,7 @@ public class CommonDao extends HibernateDao {
             sqlScalars.addToSql(" WHEN c.target_xml is not null THEN c.target_xml ");
             sqlScalars.addToSql(" ELSE c.name ");
             sqlScalars.addToSql("END as target ");
-  
+
             sqlScalars.addScalar("id", LongType.INSTANCE);
             sqlScalars.addScalar("target", StringType.INSTANCE);
         } else {
@@ -218,7 +224,7 @@ public class CommonDao extends HibernateDao {
             sqlScalars.addToSql("END as name ");
         }
         sqlScalars.addToSql("FROM country c ");
-  
+
         boolean addWhere = true;
         if (options.getType() != null) {
             if (MetaDataType.MOVIE == options.getType()) {
@@ -226,16 +232,16 @@ public class CommonDao extends HibernateDao {
             } else {
                 sqlScalars.addToSql("JOIN series_countries sc ON c.id=sc.country_id ");
             }
-        } 
+        }
         if (options.getUsed() != null && options.getUsed()) {
             sqlScalars.addToSql("WHERE (exists (select 1 from videodata_countries vc where vc.country_id=c.id) ");
             sqlScalars.addToSql(" or exists (select 1 from series_countries sc where sc.country_id=c.id)) ");
             addWhere = false;
         }
-  
+
         sqlScalars.addToSql(options.getSearchString(addWhere));
         sqlScalars.addToSql(options.getSortString());
-  
+
         return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, wrapper);
     }
 
@@ -253,13 +259,13 @@ public class CommonDao extends HibernateDao {
         sqlScalars.addToSql("AND v.id = vc.data_id");
         sqlScalars.addToSql("AND vc.country_id=c.id");
         sqlScalars.addToSql("AND lower(m.file_name)=:filename");
-  
+
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
         sqlScalars.addScalar("target", StringType.INSTANCE);
-  
+
         sqlScalars.addParameters("filename", filename.toLowerCase());
-  
+
         return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, wrapper);
     }
 
@@ -273,7 +279,7 @@ public class CommonDao extends HibernateDao {
         params.put("country", country.toLowerCase());
         params.put("certificate", certificate.toLowerCase());
 
-        return (Certification)this.findUniqueByNamedParameters(sb, params);
+        return (Certification) this.findUniqueByNamedParameters(sb, params);
     }
 
     public synchronized void storeNewCertification(String country, String certificate) {
@@ -313,7 +319,7 @@ public class CommonDao extends HibernateDao {
     }
 
     public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
-      OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
+        OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
 
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT DISTINCT cert.id, cert.country, cert.certificate ");
@@ -475,20 +481,25 @@ public class CommonDao extends HibernateDao {
     }
 
     public Award getAward(String event, String category, String source) {
-        return (Award)currentSession()
+        return (Award) currentSession()
                 .byNaturalId(Award.class)
                 .using("event", event)
                 .using("category", category)
                 .using("sourceDb", source)
                 .load();
     }
-  
+
     public synchronized void storeNewAward(String event, String category, String source) {
-      Award award = this.getAward(event, category, source);
+        Award award = this.getAward(event, category, source);
         if (award == null) {
             // create new award event
             award = new Award(event, category, source);
             this.saveEntity(award);
         }
     }
+
+    public VideoData getVideoData(Long id) {
+        return getById(VideoData.class, id);
+    }
+
 }

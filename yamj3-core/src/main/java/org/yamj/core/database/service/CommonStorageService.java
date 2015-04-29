@@ -418,6 +418,7 @@ public class CommonStorageService {
         return this.toogleWatchedStatus(stageFile, watched, apiCall);
     }
 
+    @Transactional
     public boolean toogleWatchedStatus(StageFile stageFile, boolean watched, boolean apiCall) {
         if (stageFile == null) {
             return false;
@@ -428,8 +429,11 @@ public class CommonStorageService {
         if (StatusType.DUPLICATE.equals(stageFile.getStatus())) {
             return false;
         }
+        return this.toggleWatchedStatus(stageFile.getMediaFile(), watched, apiCall);
+    }
 
-        MediaFile mediaFile = stageFile.getMediaFile();
+    @Transactional
+    public boolean toggleWatchedStatus(MediaFile mediaFile, boolean watched, boolean apiCall) {
         if (mediaFile == null) {
             return false;
         }
@@ -440,7 +444,8 @@ public class CommonStorageService {
         } else {
             mediaFile.setWatchedFile(watched);
         }
-        LOG.debug("Mark as {} {}: {}", (apiCall ? "api" : "file"), (watched ? "watched" : "unwatched"), mediaFile);
+        
+        LOG.debug("Mark media file as {} {}: {}", (apiCall ? "api" : "file"), (watched ? "watched" : "unwatched"), mediaFile);
         this.stagingDao.updateEntity(mediaFile);
 
         if (mediaFile.isExtra()) {
@@ -448,18 +453,18 @@ public class CommonStorageService {
             return true;
         }
 
-        // determine watch status for each video data which is no extra
+        // determine watch status for each video data which is not an extra
         for (VideoData videoData : mediaFile.getVideoDatas()) {
             boolean watchedAll = MetadataTools.allMediaFilesWatched(videoData, apiCall);
             if (apiCall) {
                 if (videoData.isWatchedApi() != watchedAll) {
                     videoData.setWatchedApi(watchedAll);
-                    LOG.debug("Mark as api {}: {}", (watchedAll ? "watched" : "unwatched"), videoData);
+                    LOG.debug("Mark video as api {}: {}", (watchedAll ? "watched" : "unwatched"), videoData);
                     this.stagingDao.updateEntity(videoData);
                 }
             } else if (videoData.isWatchedFile() != watchedAll) {
                 videoData.setWatchedFile(watchedAll);
-                LOG.debug("Mark as file {}: {}", (watchedAll ? "watched" : "unwatched"), videoData);
+                LOG.debug("Mark video as file {}: {}", (watchedAll ? "watched" : "unwatched"), videoData);
                 this.stagingDao.updateEntity(videoData);
             }
         }

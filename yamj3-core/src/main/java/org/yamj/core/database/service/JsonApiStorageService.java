@@ -54,6 +54,7 @@ import org.yamj.core.database.model.Configuration;
 import org.yamj.core.database.model.Country;
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.player.PlayerInfo;
 
 @Service("jsonApiStorageService")
@@ -70,10 +71,6 @@ public class JsonApiStorageService {
     private ConfigService configService;
     @Autowired
     private PlayerDao playerDao;
-
-    public <T> T getEntityById(Class<T> entityClass, Serializable id) {
-        return commonDao.getById(entityClass, id);
-    }
 
     public List<Configuration> getConfiguration(String property) {
         return configService.getConfiguration(property);
@@ -231,7 +228,15 @@ public class JsonApiStorageService {
         apiDao.getSeriesInfo(wrapper);
     }
 
-    // Player methods
+    public VideoData getVideoData(Long id) {
+        return commonDao.getVideoData(id);
+    }
+
+    public void updateVideoData(VideoData videoData) {
+        commonDao.updateEntity(videoData);
+    }
+
+    //<editor-fold defaultstate="collapsed" desc="Player methods">
     public PlayerInfo getPlayerInfo(String playerName) {
         return playerDao.getPlayerInfo(playerName);
     }
@@ -262,7 +267,9 @@ public class JsonApiStorageService {
     public void storePlayer(PlayerInfo player) {
         playerDao.storePlayer(player);
     }
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Genre methods">
     @Transactional
     public boolean addGenre(String name, String targetApi) {
         Genre genre = commonDao.getGenre(name);
@@ -296,7 +303,9 @@ public class JsonApiStorageService {
         this.commonDao.updateEntity(genre);
         return true;
     }
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Country methods">
     @Transactional
     public boolean addCountry(String name, String targetApi) {
         Country country = commonDao.getCountry(name);
@@ -330,4 +339,6 @@ public class JsonApiStorageService {
         this.commonDao.updateEntity(country);
         return true;
     }
+    //</editor-fold>
+
 }

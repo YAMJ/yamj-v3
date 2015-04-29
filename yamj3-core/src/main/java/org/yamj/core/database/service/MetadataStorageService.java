@@ -115,7 +115,7 @@ public class MetadataStorageService {
         final StringBuilder sb = new StringBuilder();
         sb.append("from VideoData vd ");
         sb.append("where vd.id = :id ");
-        
+
         List<VideoData> objects = this.commonDao.findById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
@@ -140,11 +140,11 @@ public class MetadataStorageService {
 
     /**
      * Store associated entities, like genres or cast.
-     * 
+     *
      * @param videoData
      */
     public void storeAssociatedEntities(VideoData videoData) {
-        
+
         if (CollectionUtils.isNotEmpty(videoData.getGenreNames())) {
             // store new genres
             for (String genreName : videoData.getGenreNames()) {
@@ -157,7 +157,7 @@ public class MetadataStorageService {
                 }
             }
         }
-        
+
         if (CollectionUtils.isNotEmpty(videoData.getStudioNames())) {
             // store new studios
             for (String studioName : videoData.getStudioNames()) {
@@ -169,7 +169,7 @@ public class MetadataStorageService {
                 }
             }
         }
-        
+
         if (CollectionUtils.isNotEmpty(videoData.getCountryNames())) {
             // store new countries
             for (String countryName : videoData.getCountryNames()) {
@@ -194,7 +194,7 @@ public class MetadataStorageService {
                 }
             }
         }
-        
+
         if (CollectionUtils.isNotEmpty(videoData.getCreditDTOS())) {
             // store persons
             for (CreditDTO creditDTO : videoData.getCreditDTOS()) {
@@ -206,7 +206,7 @@ public class MetadataStorageService {
                 }
             }
         }
-        
+
         if (MapUtils.isNotEmpty(videoData.getSetInfos())) {
             // store boxed sets
             for (String boxedSetName : videoData.getSetInfos().keySet()) {
@@ -234,7 +234,7 @@ public class MetadataStorageService {
 
     /**
      * Store associated entities, like genres or cast.
-     * 
+     *
      * @param series
      */
     public void storeAssociatedEntities(Series series) {
@@ -251,7 +251,7 @@ public class MetadataStorageService {
                 }
             }
         }
-        
+
         if (CollectionUtils.isNotEmpty(series.getStudioNames())) {
             // store new studios
             for (String studioName : series.getStudioNames()) {
@@ -288,7 +288,7 @@ public class MetadataStorageService {
                 }
             }
         }
-        
+
         if (CollectionUtils.isNotEmpty(series.getAwardDTOS())) {
           // store award events
           for (AwardDTO awardDTO : series.getAwardDTOS()) {
@@ -300,7 +300,7 @@ public class MetadataStorageService {
               }
           }
       }
-        
+
         for (Season season : series.getSeasons()) {
             for (VideoData videoData : season.getVideoDatas()) {
                 this.storeAssociatedEntities(videoData);
@@ -330,19 +330,19 @@ public class MetadataStorageService {
     public void updateScannedPersonFilmography(Person person) {
         // update entity
         metadataDao.updateEntity(person);
-        
+
         if (!StatusType.DONE.equals(person.getFilmographyStatus())) {
             // filmography must have been scanned
             return;
         }
-        
+
         // NOTE: participations are stored by cascade
-        
+
         // holds the participations to delete
         Set<FilmParticipation> deletions = new HashSet<>();
-        
+
         for (FilmParticipation filmo : person.getFilmography()) {
-            
+
             FilmParticipation newFilmo = null;
             for (FilmParticipation fp : person.getNewFilmography()) {
                 if (filmo.equals(fp)) {
@@ -350,7 +350,7 @@ public class MetadataStorageService {
                     break;
                 }
             }
-            
+
             if (newFilmo == null) {
                 // actual participation should be deleted
                 deletions.add(filmo);
@@ -361,7 +361,7 @@ public class MetadataStorageService {
                 person.getNewFilmography().remove(filmo);
             }
         }
-        
+
         // delete old participations
         person.getFilmography().removeAll(deletions);
         // store new participations
@@ -390,20 +390,20 @@ public class MetadataStorageService {
 
         // update cast and crew
         updateCastCrew(videoData);
-        
+
         // update boxed sets
         updateBoxedSets(videoData);
-        
+
         // update certifications
         updateCertifications(videoData);
-        
+
         // update awards
         updateAwards(videoData);
-        
+
         // update artwork
         updateLocatedArtwork(videoData);
     }
-    
+
     @Transactional
     public void updateScannedMetaData(Series series) {
         // update entity
@@ -421,13 +421,13 @@ public class MetadataStorageService {
 
         // update certifications
         updateCertifications(series);
-        
+
         // update awards
         updateAwards(series);
-        
+
         // update artwork
         updateLocatedArtwork(series);
-        
+
         // update underlying seasons and episodes
         for (Season season : series.getSeasons()) {
             season.setLastScanned(series.getLastScanned());
@@ -518,7 +518,7 @@ public class MetadataStorageService {
         }
         series.setStudios(studios);
     }
-    
+
     /**
      * Update countries for VideoData from the database
      *
@@ -618,7 +618,7 @@ public class MetadataStorageService {
                 movieAward.setWon(dto.isWon());
                 movieAward.setNominated(dto.isNominated());
                 int index = videoData.getMovieAwards().indexOf(movieAward);
-                
+
                 if (index < 0) {
                     // new award
                     videoData.getMovieAwards().add(movieAward);
@@ -652,7 +652,7 @@ public class MetadataStorageService {
                 seriesAward.setWon(dto.isWon());
                 seriesAward.setNominated(dto.isNominated());
                 int index = series.getSeriesAwards().indexOf(seriesAward);
-                
+
                 if (index < 0) {
                     // new award
                     series.getSeriesAwards().add(seriesAward);
@@ -678,7 +678,7 @@ public class MetadataStorageService {
         }
 
         for (Entry<String,Integer> entry : videoData.getSetInfos().entrySet()) {
-            
+
             BoxedSetOrder boxedSetOrder = null;
             for (BoxedSetOrder stored : videoData.getBoxedSets()) {
                 if (StringUtils.equalsIgnoreCase(stored.getBoxedSet().getName(), entry.getKey())) {
@@ -686,7 +686,7 @@ public class MetadataStorageService {
                     break;
                 }
             }
-            
+
             if (boxedSetOrder == null) {
                 // create new videoSet
                 BoxedSet boxedSet = commonDao.getBoxedSet(entry.getKey());
@@ -695,7 +695,7 @@ public class MetadataStorageService {
                     boxedSetOrder.setVideoData(videoData);
                     boxedSetOrder.setBoxedSet(boxedSet);
                     if (entry.getValue() != null) {
-                        boxedSetOrder.setOrdering(entry.getValue().intValue());
+                        boxedSetOrder.setOrdering(entry.getValue());
                     }
                     videoData.addBoxedSet(boxedSetOrder);
                     this.commonDao.saveEntity(boxedSetOrder);
@@ -704,9 +704,9 @@ public class MetadataStorageService {
                 if (entry.getValue() == null) {
                     boxedSetOrder.setOrdering(-1);
                 } else {
-                    boxedSetOrder.setOrdering(entry.getValue().intValue());
+                    boxedSetOrder.setOrdering(entry.getValue());
                 }
-                this.commonDao.updateEntity(boxedSetOrder);                
+                this.commonDao.updateEntity(boxedSetOrder);
             }
         }
     }
@@ -723,7 +723,7 @@ public class MetadataStorageService {
 
         List<CastCrew> deleteCredits = new ArrayList<>(videoData.getCredits());
         int ordering = 0; // ordering counter
-        
+
         for (CreditDTO dto : videoData.getCreditDTOS()) {
             String identifier = MetadataTools.cleanIdentifier(dto.getName());
             CastCrew castCrew = this.metadataDao.getCastCrew(videoData, dto.getJobType(), identifier);
@@ -731,7 +731,7 @@ public class MetadataStorageService {
             if (castCrew == null) {
                 // retrieve person
                 Person person = metadataDao.getPerson(identifier);
-                
+
                 if (person == null) {
                     LOG.warn("Person '{}' not found, skipping", dto.getName());
                     // continue with next cast entry
@@ -758,7 +758,7 @@ public class MetadataStorageService {
         // delete orphans
         videoData.getCredits().removeAll(deleteCredits);
     }
-    
+
     private void updateLocatedArtwork(VideoData videoData) {
         if (MapUtils.isNotEmpty(videoData.getPosterURLS())) {
             Artwork artwork = videoData.getArtwork(ArtworkType.POSTER);
@@ -790,7 +790,7 @@ public class MetadataStorageService {
             located.setHashCode(ArtworkTools.getUrlHashCode(entry.getKey()));
             located.setPriority(5);
             located.setStatus(StatusType.NEW);
-            
+
             if (!artwork.getArtworkLocated().contains(located)) {
                 // not present until now
                 artworkDao.saveEntity(located);
@@ -798,7 +798,7 @@ public class MetadataStorageService {
             }
         }
     }
-    
+
     @Transactional
     public void errorVideoData(Long id) {
         VideoData videoData = metadataDao.getById(VideoData.class, id);
@@ -834,7 +834,7 @@ public class MetadataStorageService {
             metadataDao.updateEntity(person);
         }
     }
-    
+
     @Transactional
     public void recheckMovie(Date compareDate) {
         StringBuilder sql = new StringBuilder();
@@ -842,7 +842,7 @@ public class MetadataStorageService {
         sql.append("where vd.status not in ('NEW','UPDATED') ");
         sql.append("and (vd.lastScanned is null or vd.lastScanned<=:compareDate) ");
         sql.append("and vd.episode<0 ");
-        
+
         Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
         this.commonDao.executeUpdate(sql, params);
     }
@@ -853,9 +853,9 @@ public class MetadataStorageService {
         sql.append("update Series ser set ser.status='UPDATED' ");
         sql.append("where ser.status not in ('NEW','UPDATED') ");
         sql.append("and (ser.lastScanned is null or ser.lastScanned<=:compareDate) ");
-        
+
         // TODO: what is with season and episodes?
-        
+
         Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
         this.commonDao.executeUpdate(sql, params);
     }
@@ -866,7 +866,7 @@ public class MetadataStorageService {
         sql.append("update Person p set p.status='UPDATED',p.filmographyStatus='NEW' ");
         sql.append("where p.status not in ('NEW','UPDATED') ");
         sql.append("and (p.lastScanned is null or p.lastScanned<=:compareDate) ");
-        
+
         Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
         this.commonDao.executeUpdate(sql, params);
     }

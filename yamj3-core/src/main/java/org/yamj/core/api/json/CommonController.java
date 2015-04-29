@@ -28,10 +28,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.model.ApiStatus;
-import org.yamj.core.api.model.dto.*;
+import org.yamj.core.api.model.dto.ApiAwardDTO;
+import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
+import org.yamj.core.api.model.dto.ApiNameDTO;
+import org.yamj.core.api.model.dto.ApiRatingDTO;
+import org.yamj.core.api.model.dto.ApiTargetDTO;
 import org.yamj.core.api.options.OptionsBoxedSet;
+import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.options.OptionsMultiType;
 import org.yamj.core.api.options.OptionsRating;
 import org.yamj.core.api.options.OptionsSingleType;
@@ -41,6 +51,7 @@ import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Country;
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
@@ -50,7 +61,7 @@ public class CommonController {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommonController.class);
     @Autowired
-    private JsonApiStorageService jsonApiStorageService;
+    private JsonApiStorageService jsonApi;
 
     //<editor-fold defaultstate="collapsed" desc="Watched Methods">
     @RequestMapping("/watched")
@@ -67,9 +78,52 @@ public class CommonController {
             percentage = amount;
         }
 
-        LOG.info("Received watched command for '{}' to value '{}'", filename, percentage);
+        LOG.info("Received watched command for filename '{}' to amount '{}'", filename, percentage);
         // TODO: Add write to database command
-        return new ApiStatus(200, "Watch command successful");
+        if (StringUtils.isBlank(filename)) {
+            return new ApiStatus(400, "No filename for watched command");
+        } else {
+            return new ApiStatus(200, "Watch command successful");
+        }
+    }
+
+    @RequestMapping("/watched/movie/{id}")
+    public ApiStatus markWatchedMovie(@ModelAttribute("options") OptionsId options) {
+        return updateWatched(options.getId(), true);
+    }
+
+    @RequestMapping("/unwatched/movie/{id}")
+    public ApiStatus markUnwatchedMovie(@ModelAttribute("options") OptionsId options) {
+        return updateWatched(options.getId(), false);
+    }
+
+    private ApiStatus updateWatched(Long id, boolean watched) {
+        if (id != null && id > 0L) {
+            VideoData video = jsonApi.getVideoData(id);
+
+            // Check to see if the status is the same
+            if (video.isWatchedApi() == watched) {
+                LOG.info("Watched status for {}-{} is already {}, not changing", video.getId(), video.getTitle(), watched(watched));
+                return new ApiStatus(200, "Watched status of '" + watched(watched) + "' unchanged");
+            }
+
+            LOG.info("Setting watched status for {}-{} to {} from {}",
+                    video.getId(),
+                    video.getTitle(),
+                    watched(watched),
+                    watched(video.isWatchedApi()));
+
+            video.setWatchedApi(watched);
+            jsonApi.updateVideoData(video);
+
+            return new ApiStatus(200, "Sucessfully update watch status for " + video.getId() + "-" + video.getTitle() + " to " + watched(video.isWatchedApi()));
+        } else {
+            return new ApiStatus(400, "No ID provided");
+        }
+    }
+
+    private String watched(boolean watched) {
+        return watched ? "watched" : "unwatched";
     }
     //</editor-fold>
 
@@ -78,7 +132,7 @@ public class CommonController {
     public ApiWrapperList<ApiTargetDTO> getGenreFilename(@RequestParam(required = true, defaultValue = "") String filename) {
         LOG.info("Getting genres for filename '{}'", filename);
         ApiWrapperList<ApiTargetDTO> wrapper = new ApiWrapperList<>();
-        List<ApiTargetDTO> results = jsonApiStorageService.getGenreFilename(wrapper, filename);
+        List<ApiTargetDTO> results = jsonApi.getGenreFilename(wrapper, filename);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
         return wrapper;
@@ -90,10 +144,10 @@ public class CommonController {
         ApiWrapperSingle<ApiTargetDTO> wrapper = new ApiWrapperSingle<>();
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting genre with ID '{}'", name);
-            genre = jsonApiStorageService.getGenre(Long.parseLong(name));
+            genre = jsonApi.getGenre(Long.parseLong(name));
         } else {
             LOG.info("Getting genre with name '{}'", name);
-            genre = jsonApiStorageService.getGenre(name);
+            genre = jsonApi.getGenre(name);
         }
         if (genre != null) {
             wrapper.setResult(new ApiTargetDTO(genre));
@@ -101,19 +155,19 @@ public class CommonController {
         wrapper.setStatusCheck();
         return wrapper;
     }
-    
+
     @RequestMapping("/genres/list")
     public ApiWrapperList<ApiTargetDTO> getGenres(@ModelAttribute("options") OptionsSingleType options) {
         LOG.info("Getting genre list: used={}, full={}", options.getUsed(), options.getFull());
 
         ApiWrapperList<ApiTargetDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        List<ApiTargetDTO> results = jsonApiStorageService.getGenres(wrapper);
+        List<ApiTargetDTO> results = jsonApi.getGenres(wrapper);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
         return wrapper;
     }
-    
+
     @RequestMapping("/genres/add")
     public ApiStatus genreAdd(
             @RequestParam(required = true, defaultValue = "") String name,
@@ -122,7 +176,7 @@ public class CommonController {
         ApiStatus status = new ApiStatus();
         if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(target)) {
             LOG.info("Adding genre '{}' with target '{}'", name, target);
-            boolean result = this.jsonApiStorageService.addGenre(name, target);
+            boolean result = this.jsonApi.addGenre(name, target);
             if (result) {
                 status.setStatus(200);
                 status.setMessage("Successfully added genre '" + name + "' with target '" + target + "'");
@@ -145,14 +199,14 @@ public class CommonController {
         ApiStatus status = new ApiStatus();
         if (StringUtils.isNotBlank(name)) {
             LOG.info("Updating genre '{}' with target '{}'", name, target);
-            
+
             boolean result;
             if (StringUtils.isNumeric(name)) {
-                result = this.jsonApiStorageService.updateGenre(Long.valueOf(name), target);
+                result = this.jsonApi.updateGenre(Long.valueOf(name), target);
             } else {
-                result = this.jsonApiStorageService.updateGenre(name, target);
+                result = this.jsonApi.updateGenre(name, target);
             }
-            
+
             if (result) {
                 status.setStatus(200);
                 status.setMessage("Successfully updated genre '" + name + "' with target '" + target + "'");
@@ -175,10 +229,10 @@ public class CommonController {
         ApiWrapperSingle<Studio> wrapper = new ApiWrapperSingle<>();
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting studio with ID '{}'", name);
-            studio = jsonApiStorageService.getStudio(Long.parseLong(name));
+            studio = jsonApi.getStudio(Long.parseLong(name));
         } else {
             LOG.info("Getting studio '{}'", name);
-            studio = jsonApiStorageService.getStudio(name);
+            studio = jsonApi.getStudio(name);
         }
         wrapper.setResult(studio);
         wrapper.setStatusCheck();
@@ -191,7 +245,7 @@ public class CommonController {
 
         ApiWrapperList<Studio> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        List<Studio> results = jsonApiStorageService.getStudios(wrapper);
+        List<Studio> results = jsonApi.getStudios(wrapper);
         wrapper.setResults(results);
         wrapper.setStatus(new ApiStatus(200, "OK"));
 
@@ -204,7 +258,7 @@ public class CommonController {
     public ApiWrapperList<ApiTargetDTO> getCountryFilename(@RequestParam(required = true, defaultValue = "") String filename) {
         LOG.info("Getting countries for filename '{}'", filename);
         ApiWrapperList<ApiTargetDTO> wrapper = new ApiWrapperList<>();
-        List<ApiTargetDTO> results = jsonApiStorageService.getCountryFilename(wrapper, filename);
+        List<ApiTargetDTO> results = jsonApi.getCountryFilename(wrapper, filename);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
         return wrapper;
@@ -216,10 +270,10 @@ public class CommonController {
         ApiWrapperSingle<ApiTargetDTO> wrapper = new ApiWrapperSingle<>();
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting country with ID '{}'", name);
-            country = jsonApiStorageService.getCountry(Long.parseLong(name));
+            country = jsonApi.getCountry(Long.parseLong(name));
         } else {
             LOG.info("Getting country with name '{}'", name);
-            country = jsonApiStorageService.getCountry(name);
+            country = jsonApi.getCountry(name);
         }
         if (country != null) {
             wrapper.setResult(new ApiTargetDTO(country));
@@ -227,19 +281,19 @@ public class CommonController {
         wrapper.setStatusCheck();
         return wrapper;
     }
-    
+
     @RequestMapping("/countries/list")
     public ApiWrapperList<ApiTargetDTO> getCountries(@ModelAttribute("options") OptionsSingleType options) {
         LOG.info("Getting contries list: used={}, full={}", options.getUsed(), options.getFull());
 
         ApiWrapperList<ApiTargetDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        List<ApiTargetDTO> results = jsonApiStorageService.getCountries(wrapper);
+        List<ApiTargetDTO> results = jsonApi.getCountries(wrapper);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
         return wrapper;
     }
-    
+
     @RequestMapping("/countries/add")
     public ApiStatus countryAdd(
             @RequestParam(required = true, defaultValue = "") String name,
@@ -248,7 +302,7 @@ public class CommonController {
         ApiStatus status = new ApiStatus();
         if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(target)) {
             LOG.info("Adding country '{}' with target '{}'", name, target);
-            boolean result = this.jsonApiStorageService.addCountry(name, target);
+            boolean result = this.jsonApi.addCountry(name, target);
             if (result) {
                 status.setStatus(200);
                 status.setMessage("Successfully added country '" + name + "' with target '" + target + "'");
@@ -271,14 +325,14 @@ public class CommonController {
         ApiStatus status = new ApiStatus();
         if (StringUtils.isNotBlank(name)) {
             LOG.info("Updating country '{}' with target '{}'", name, target);
-            
+
             boolean result;
             if (StringUtils.isNumeric(name)) {
-                result = this.jsonApiStorageService.updateCountry(Long.valueOf(name), target);
+                result = this.jsonApi.updateCountry(Long.valueOf(name), target);
             } else {
-                result = this.jsonApiStorageService.updateCountry(name, target);
+                result = this.jsonApi.updateCountry(name, target);
             }
-            
+
             if (result) {
                 status.setStatus(200);
                 status.setMessage("Successfully updated country '" + name + "' with target '" + target + "'");
@@ -301,7 +355,7 @@ public class CommonController {
 
         ApiWrapperList<ApiAwardDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        wrapper.setResults(jsonApiStorageService.getAwards(wrapper));
+        wrapper.setResults(jsonApi.getAwards(wrapper));
         wrapper.setStatusCheck();
         return wrapper;
     }
@@ -314,12 +368,12 @@ public class CommonController {
 
         ApiWrapperList<Certification> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        wrapper.setResults(jsonApiStorageService.getCertifications(wrapper));
+        wrapper.setResults(jsonApi.getCertifications(wrapper));
         wrapper.setStatusCheck();
         return wrapper;
     }
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="VideoSource Methods">
     @RequestMapping("/videosources/list")
     public ApiWrapperList<ApiNameDTO> getVideoSources(@ModelAttribute("options") OptionsSingleType options) {
@@ -327,7 +381,7 @@ public class CommonController {
 
         ApiWrapperList<ApiNameDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        wrapper.setResults(jsonApiStorageService.getVideoSources(wrapper));
+        wrapper.setResults(jsonApi.getVideoSources(wrapper));
         wrapper.setStatusCheck();
         return wrapper;
     }
@@ -340,7 +394,7 @@ public class CommonController {
 
         ApiWrapperList<ApiRatingDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        wrapper.setResults(jsonApiStorageService.getRatings(wrapper));
+        wrapper.setResults(jsonApi.getRatings(wrapper));
         wrapper.setStatusCheck();
         return wrapper;
     }
@@ -353,7 +407,7 @@ public class CommonController {
 
         ApiWrapperList<ApiNameDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        wrapper.setResults(jsonApiStorageService.getAlphabeticals(wrapper));
+        wrapper.setResults(jsonApi.getAlphabeticals(wrapper));
         wrapper.setStatusCheck();
         return wrapper;
     }
@@ -366,19 +420,19 @@ public class CommonController {
 
         ApiWrapperList<ApiBoxedSetDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        wrapper.setResults(jsonApiStorageService.getBoxedSets(wrapper));
+        wrapper.setResults(jsonApi.getBoxedSets(wrapper));
         wrapper.setStatus(new ApiStatus(200, "OK"));
 
         return wrapper;
     }
-    
+
     @RequestMapping("/boxset/{id}")
     public ApiWrapperSingle<ApiBoxedSetDTO> getBoxSet(@ModelAttribute("options") OptionsBoxedSet options) {
         LOG.info("Getting boxset with {}", options.toString());
 
         ApiWrapperSingle<ApiBoxedSetDTO> wrapper = new ApiWrapperSingle<>();
         wrapper.setOptions(options);
-        wrapper.setResult(jsonApiStorageService.getBoxedSet(wrapper));
+        wrapper.setResult(jsonApi.getBoxedSet(wrapper));
         wrapper.setStatusCheck();
         return wrapper;
     }

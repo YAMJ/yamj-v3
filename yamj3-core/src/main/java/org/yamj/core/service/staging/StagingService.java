@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.staging;
 
-import org.yamj.core.service.file.FileTools;
-
 import java.io.File;
 import java.math.BigInteger;
 import java.util.Calendar;
@@ -43,8 +41,13 @@ import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.StagingDao;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Library;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.StageDirectory;
+import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.mediaimport.FilenameScanner;
 
 @Service("stagingService")
@@ -139,7 +142,7 @@ public class StagingService {
 
                 // set changeable values in stage file
                 setChangeableValues(stageFile, stageFileDTO);
-                
+
                 LOG.debug("New {} file: {}", stageFile.getFileType().name().toLowerCase(), stageFile.getFullPath());
                 stagingDao.saveEntity(stageFile);
             } else {
@@ -148,8 +151,8 @@ public class StagingService {
 
                     // set changeable values in stage file
                     setChangeableValues(stageFile, stageFileDTO);
-                    
-                    if (StatusType.NEW.equals(stageFile.getStatus())) { 
+
+                    if (StatusType.NEW.equals(stageFile.getStatus())) {
                         // leave NEW status as NEW
                     }  else if (StatusType.DUPLICATE.equals(stageFile.getStatus())) {
                         // leave DUPLICATE status as DUPLICATE
@@ -158,14 +161,14 @@ public class StagingService {
                         // mark stage file as updated
                         stageFile.setStatus(StatusType.UPDATED);
                     }
-                    
+
                     LOG.debug("Updated {} file: {}", stageFile.getFileType().name().toLowerCase(), stageFile.getFullPath());
                     stagingDao.updateEntity(stageFile);
                 }
             }
         }
     }
-    
+
     private static void setChangeableValues(StageFile stageFile, StageFileDTO stageFileDTO) {
         stageFile.setFileDate(getDateWithoutMilliseconds(stageFileDTO.getFileDate()));
         stageFile.setFileSize(stageFileDTO.getFileSize());
@@ -186,7 +189,7 @@ public class StagingService {
         cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
     }
-    
+
     @Transactional
     public List<StageFile> getValidNFOFiles(VideoData videoData) {
         // read NFO files for movies
@@ -203,7 +206,7 @@ public class StagingService {
     public void updateStageFile(StageFile stageFile) {
         this.stagingDao.updateEntity(stageFile);
     }
-    
+
     @Transactional
     public boolean deleteStageFile(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
@@ -241,7 +244,7 @@ public class StagingService {
         BigInteger count = this.stagingDao.countWatchedFiles(videoFile, watchedFolderName, checkLibrary);
         return (count != null && count.intValue()>0);
     }
-    
+
     public List<StageFile> findWatchedVideoFiles(StageFile watchedFile) {
         String videoBaseName = FilenameUtils.getBaseName(watchedFile.getBaseName());
         String videoExtension = FilenameUtils.getExtension(watchedFile.getBaseName());
@@ -256,7 +259,7 @@ public class StagingService {
 
         List<StageFile> videoFiles;
         if (FileTools.isWithinSpecialFolder(watchedFile, watchedFolderName)) {
-            
+
             Library library = null;
             if (this.configService.getBooleanProperty("yamj3.librarycheck.folder.watched", Boolean.TRUE)) {
                 library = watchedFile.getStageDirectory().getLibrary();
@@ -278,13 +281,13 @@ public class StagingService {
             // remove extension cause that was the language
             videoBaseName = FilenameUtils.removeExtension(videoBaseName);
         }
-        
+
         // get the name used for SUBTITLE directories
         String subtitleFolderName = PropertyTools.getProperty("yamj3.folder.name.subtitle");
 
         List<StageFile> videoFiles;
         if (FileTools.isWithinSpecialFolder(subtitleFile, subtitleFolderName)) {
-            
+
             Library library = null;
             if (this.configService.getBooleanProperty("yamj3.librarycheck.folder.subtitle", Boolean.TRUE)) {
                 library = subtitleFile.getStageDirectory().getLibrary();
