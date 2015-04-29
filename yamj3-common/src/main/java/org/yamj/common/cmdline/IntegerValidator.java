@@ -30,6 +30,9 @@ public class IntegerValidator extends OptionValidator {
     /**
      * Validate an integer option.
      *
+     * @param cmdlineParser
+     * @param parsedOption
+     * @throws org.yamj.common.cmdline.CmdLineException
      * @see OptionValidator#validate(CmdLineParser, ParsedOption)
      */
     @Override
@@ -37,9 +40,9 @@ public class IntegerValidator extends OptionValidator {
         try {
             Integer.parseInt(parsedOption.getValue());
         } catch (final NullPointerException npe) {
-            throw new CmdLineException("NULL value passed");
+            throw new CmdLineException("NULL value passed", npe);
         } catch (final NumberFormatException nfe) {
-            throw new CmdLineException("Parameter " + parsedOption.getValue() + " should be an integer number");
+            throw new CmdLineException("Parameter " + parsedOption.getValue() + " should be an integer number", nfe);
         }
     }
 }

@@ -65,7 +65,7 @@ public class EnumValidator extends OptionValidator {
                         + parsedOption.getParent().toString(cmdlineParser) + "'");
             }
         } catch (final NullPointerException npe) {
-            throw new CmdLineException("NULL value passed");
+            throw new CmdLineException("NULL value passed", npe);
         }
     }
 

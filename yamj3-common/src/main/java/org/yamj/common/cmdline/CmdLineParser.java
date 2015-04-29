@@ -25,6 +25,8 @@ package org.yamj.common.cmdline;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The command line parser.
@@ -38,11 +40,11 @@ public final class CmdLineParser {
     /**
      * Holds the command line options
      */
-    private final LinkedList<CmdLineOption> options = new LinkedList<>();
+    private final List<CmdLineOption> options = new LinkedList<>();
     /**
      * Holds the parsed options
      */
-    private final HashMap<String, ParsedOption> parsedOptions = new HashMap<>();
+    private final Map<String, ParsedOption> parsedOptions = new HashMap<>();
 
     /**
      * Create a new command line parser.
@@ -174,7 +176,7 @@ public final class CmdLineParser {
                 if (value != null && value.startsWith("\\-")) {
                     value = value.substring(1);
                 }
-                ParsedOption newOption = new ParsedOption(option, value, (value != null));
+                ParsedOption newOption = new ParsedOption(option, value, value != null);
                 option.getValidator().validate(this, newOption);
                 this.parsedOptions.put(option.getName(), newOption);
             }

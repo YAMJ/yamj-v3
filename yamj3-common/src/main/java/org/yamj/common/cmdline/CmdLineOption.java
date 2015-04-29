@@ -23,6 +23,7 @@
 package org.yamj.common.cmdline;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * A new command line option to define the option.
@@ -52,11 +53,11 @@ public final class CmdLineOption {
     /**
      * List of required options
      */
-    private LinkedList<CmdLineOption> requiredOptions = null;
+    private List<CmdLineOption> requiredOptions = null;
     /**
      * List of excluded options
      */
-    private LinkedList<CmdLineOption> excludedOptions = null;
+    private List<CmdLineOption> excludedOptions = null;
     /**
      * The validator to use for this option
      */
@@ -204,7 +205,7 @@ public final class CmdLineOption {
      *
      * @return the excluded options
      */
-    public LinkedList<CmdLineOption> getExcludedOptions() {
+    public List<CmdLineOption> getExcludedOptions() {
         return this.excludedOptions;
     }
 
@@ -284,7 +285,7 @@ public final class CmdLineOption {
      *
      * @return the required options
      */
-    public LinkedList<CmdLineOption> getRequiredOptions() {
+    public List<CmdLineOption> getRequiredOptions() {
         return this.requiredOptions;
     }
 
@@ -370,8 +371,8 @@ public final class CmdLineOption {
             sb.append("]");
         }
         if (this.hasRequiredOptions()) {
-            for (int i = 0; i < this.requiredOptions.size(); i++) {
-                sb.append(this.requiredOptions.get(i));
+            for (CmdLineOption requiredOption : this.requiredOptions) {
+                sb.append(requiredOption);
             }
         }
         sb.append(this.isRequired ? ">" : "]");
