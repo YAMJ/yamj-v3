@@ -65,7 +65,7 @@ public class Start {
         PropertyConfigurator.configure("config/log4j-core.properties");
 
         YamjInfo yi = new YamjInfo(YamjInfoBuild.JETTY);
-        yi.printHeader(LOG);
+        yi.printHeader();
 
         CmdLineParser parser = getCmdLineParser();
         ExitType status;

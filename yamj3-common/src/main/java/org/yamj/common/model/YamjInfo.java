@@ -143,11 +143,12 @@ public class YamjInfo {
         }
     }
 
-    private Boolean asBoolean(final String valueToConvert) {
+    private boolean asBoolean(final String valueToConvert) {
         if (StringUtils.isNotBlank(valueToConvert)) {
             return Boolean.parseBoolean(StringUtils.trimToEmpty(valueToConvert));
         }
-        return null;
+        // Return "true" if the input is invalid
+        return true;
     }
 
     public String getProjectName() {
@@ -265,50 +266,33 @@ public class YamjInfo {
     /**
      * Output the header information to the log file
      *
-     * @param log
      */
-    public void printHeader(Logger log) {
+    public void printHeader() {
         if (StringUtils.isNotBlank(projectName)) {
             // just print out if project name has been set
-            log.info("{} {}", projectName, projectVersion);
-            log.info("{} {}", StringUtils.repeat("~", projectName.length()), StringUtils.repeat("~", projectVersion.length()));
-            log.info("{}", moduleName);
-            log.info("");
-            log.info("  Revision: {}", buildRevision);
-            log.info("Build Time: {}", getBuildDate());
-            log.info("      Java: {}", javaVersion);
-            log.info("");
+            LOG.info("{} {}", projectName, projectVersion);
+            LOG.info("{} {}", StringUtils.repeat("~", projectName.length()), StringUtils.repeat("~", projectVersion.length()));
+            LOG.info("{}", moduleName);
+            LOG.info("");
+            LOG.info("  Revision: {}", buildRevision);
+            LOG.info("Build Time: {}", getBuildDate());
+            LOG.info("      Java: {}", javaVersion);
+            LOG.info("");
         }
     }
 
     /**
-     * Output the header information to the log file
-     *
-     */
-    public void printHeader() {
-        printHeader(LOG);
-    }
-
-    /**
      * Display some information on the system
+     *
      */
     public void printSystemInfo() {
-        printSystemInfo(LOG);
-    }
-
-    /**
-     * Display some information on the system
-     *
-     * @param log
-     */
-    public void printSystemInfo(Logger log) {
-        log.info("Operating System: {}", osName);
-        log.info("         Version: {}", osVersion);
-        log.info("    Architecture: {}", osArch);
-        log.info(" Processor Cores: {}", processorCores);
-        log.info("");
-        log.info("Core Start Time : {}", getStartUpTime());
-        log.info("Core Uptime     : {}", getUptime());
+        LOG.info("Operating System: {}", osName);
+        LOG.info("         Version: {}", osVersion);
+        LOG.info("    Architecture: {}", osArch);
+        LOG.info(" Processor Cores: {}", processorCores);
+        LOG.info("");
+        LOG.info("Core Start Time : {}", getStartUpTime());
+        LOG.info("Core Uptime     : {}", getUptime());
     }
 
     /**

@@ -60,7 +60,7 @@ public final class FileScanner {
         }
 
         YamjInfo yi = new YamjInfo(YamjInfoBuild.FILESCANNER);
-        yi.printHeader(LOG);
+        yi.printHeader();
         CmdLineParser parser = getCmdLineParser();
 
         ExitType status;
