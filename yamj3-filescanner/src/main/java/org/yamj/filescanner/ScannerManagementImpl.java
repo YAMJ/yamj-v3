@@ -197,6 +197,11 @@ public class ScannerManagementImpl implements ScannerManagement {
 
         if (StringUtils.isNotBlank(directoryProperty)) {
             LOG.info("Adding directory from command line: {}", directoryProperty);
+
+            File temp = new File(directoryProperty);
+            directoryProperty = FilenameUtils.normalizeNoEndSeparator(temp.getAbsolutePath());
+            LOG.info("Corrected path: {}", directoryProperty);
+
             libraryCollection.addLibraryDirectory(directoryProperty, watchEnabled);
         }
 
