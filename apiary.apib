@@ -1995,10 +1995,10 @@ GET /api/person/episode
 
 
 --
-Other
+Watched
+Commands to mark videos as watched and unwatched
 --
-
-Mark a video file as watched with an optional percentage
+Mark a movie as watched.
 ***
 **Required Parameters**
 
@@ -2006,26 +2006,188 @@ Mark a video file as watched with an optional percentage
     <col width="20%">
     <col width="80%">
     <tr>
-        <td>filename</td>
-        <td>The filename of the video to mark as watched</td>
+        <td>id</td>
+        <td>The ID of the movie to mark as watched</td>
     </tr>
 </table>
 
-**Optional Parameters**
+
+GET /api/watched/movie/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Watched status for MOVIE ID: 7-Avengers Assemble changed to watched"
+}
+
+Mark a movie as unwatched.
+***
+**Required Parameters**
 
 <table width="100%">
     <col width="20%">
     <col width="80%">
     <tr>
-        <td>amount</td>
-        <td>A percentage amount that the video has been watched</td>
+        <td>id</td>
+        <td>The ID of the movie to mark as unwatched</td>
     </tr>
 </table>
 
-GET /api/watched
+
+GET /api/unwatched/movie/{id}
 < 200
 < Content-Type: application/json
-{}
+{
+    "status": 200,
+    "message": "Watched status for MOVIE ID: 7-Avengers Assemble changed to unwatched"
+}
+
+
+Mark a series as watched.
+
+<i>Note</i>: All episodes in the series will be marked as watched.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the series to mark as watched</td>
+    </tr>
+</table>
+
+
+GET /api/watched/series/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Watched status for SERIES ID: 1 set to 'watched'. 1 were set to watched, 5 were already watched"
+}
+
+Mark a series as unwatched.
+
+<i>Note</i>: All episodes in the series will be marked as unwatched.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the series to mark as unwatched</td>
+    </tr>
+</table>
+
+
+GET /api/unwatched/series/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Watched status for SERIES ID: 1 set to 'unwatched'. 6 were set to unwatched, 0 were already unwatched"
+}
+
+Mark a season as watched.
+
+<i>Note</i>: All episodes in the season will be marked as watched.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the season to mark as watched</td>
+    </tr>
+</table>
+
+
+GET /api/watched/season/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Watched status for SEASON ID: 1 set to watched. 3 were set to watched, 3 were already watched"
+}
+
+Mark a season as unwatched.
+
+<i>Note</i>: All episodes in the season will be marked as unwatched.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the season to mark as unwatched</td>
+    </tr>
+</table>
+
+
+GET /api/unwatched/season/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Watched status for SEASON ID: 1 set to unwatched. 6 were set to unwatched, 0 were already unwatched"
+}
+
+Mark a episode as watched.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the episode to mark as watched</td>
+    </tr>
+</table>
+
+
+GET /api/watched/episode/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Watched status for EPISODE ID: 1-Chuck Versus the Intersect changed to watched"
+}
+
+Mark a episode as unwatched.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the episode to mark as unwatched</td>
+    </tr>
+</table>
+
+
+GET /api/unwatched/episode/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Watched status for EPISODE ID: 1-Chuck Versus the Intersect changed to unwatched"
+}
+
+
+
+--
+Other
+--
 
 
 Get information on a single genre
