@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiAwardDTO;
 import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
@@ -51,7 +52,6 @@ import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Country;
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @Controller
@@ -64,66 +64,48 @@ public class CommonController {
     private JsonApiStorageService jsonApi;
 
     //<editor-fold defaultstate="collapsed" desc="Watched Methods">
-    @RequestMapping("/watched")
-    public ApiStatus markWatched(
-            @RequestParam(required = true, defaultValue = "") String filename,
-            @RequestParam(required = false, defaultValue = "-1") Integer amount) {
-
-        int percentage;
-        if (amount < 0) {
-            percentage = 0;
-        } else if (amount > 100) {
-            percentage = 100;
-        } else {
-            percentage = amount;
-        }
-
-        LOG.info("Received watched command for filename '{}' to amount '{}'", filename, percentage);
-        // TODO: Add write to database command
-        if (StringUtils.isBlank(filename)) {
-            return new ApiStatus(400, "No filename for watched command");
-        } else {
-            return new ApiStatus(200, "Watch command successful");
-        }
-    }
-
     @RequestMapping("/watched/movie/{id}")
     public ApiStatus markWatchedMovie(@ModelAttribute("options") OptionsId options) {
-        return updateWatched(options.getId(), true);
+        return jsonApi.updateWatchedSingle(MetaDataType.MOVIE, options.getId(), true);
     }
 
     @RequestMapping("/unwatched/movie/{id}")
     public ApiStatus markUnwatchedMovie(@ModelAttribute("options") OptionsId options) {
-        return updateWatched(options.getId(), false);
+        return jsonApi.updateWatchedSingle(MetaDataType.MOVIE, options.getId(), false);
     }
 
-    private ApiStatus updateWatched(Long id, boolean watched) {
-        if (id != null && id > 0L) {
-            VideoData video = jsonApi.getVideoData(id);
-
-            // Check to see if the status is the same
-            if (video.isWatchedApi() == watched) {
-                LOG.info("Watched status for {}-{} is already {}, not changing", video.getId(), video.getTitle(), watched(watched));
-                return new ApiStatus(200, "Watched status of '" + watched(watched) + "' unchanged");
-            }
-
-            LOG.info("Setting watched status for {}-{} to {} from {}",
-                    video.getId(),
-                    video.getTitle(),
-                    watched(watched),
-                    watched(video.isWatchedApi()));
-
-            video.setWatchedApi(watched);
-            jsonApi.updateVideoData(video);
-
-            return new ApiStatus(200, "Sucessfully update watch status for " + video.getId() + "-" + video.getTitle() + " to " + watched(video.isWatchedApi()));
-        } else {
-            return new ApiStatus(400, "No ID provided");
-        }
+    @RequestMapping("/watched/series/{id}")
+    public ApiStatus markWatchedSeries(@ModelAttribute("options") OptionsId options) {
+        List<Long> list = jsonApi.getSeriesVideoIds(options.getId());
+        return jsonApi.updateWatchedList(MetaDataType.SERIES, list, true, options.getId());
     }
 
-    private String watched(boolean watched) {
-        return watched ? "watched" : "unwatched";
+    @RequestMapping("/unwatched/series/{id}")
+    public ApiStatus markUnwatchedSeries(@ModelAttribute("options") OptionsId options) {
+        List<Long> list = jsonApi.getSeriesVideoIds(options.getId());
+        return jsonApi.updateWatchedList(MetaDataType.SERIES, list, false, options.getId());
+    }
+
+    @RequestMapping("/watched/season/{id}")
+    public ApiStatus markWatchedSeason(@ModelAttribute("options") OptionsId options) {
+        List<Long> list = jsonApi.getSeasonVideoIds(options.getId());
+        return jsonApi.updateWatchedList(MetaDataType.SEASON, list, true, options.getId());
+    }
+
+    @RequestMapping("/unwatched/season/{id}")
+    public ApiStatus markUnwatchedSeason(@ModelAttribute("options") OptionsId options) {
+        List<Long> list = jsonApi.getSeasonVideoIds(options.getId());
+        return jsonApi.updateWatchedList(MetaDataType.SEASON, list, false, options.getId());
+    }
+
+    @RequestMapping("/watched/episode/{id}")
+    public ApiStatus markWatchedEpisode(@ModelAttribute("options") OptionsId options) {
+        return jsonApi.updateWatchedSingle(MetaDataType.EPISODE, options.getId(), true);
+    }
+
+    @RequestMapping("/unwatched/episode/{id}")
+    public ApiStatus markUnwatchedEpisode(@ModelAttribute("options") OptionsId options) {
+        return jsonApi.updateWatchedSingle(MetaDataType.EPISODE, options.getId(), false);
     }
     //</editor-fold>
 

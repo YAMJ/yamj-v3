@@ -502,4 +502,32 @@ public class CommonDao extends HibernateDao {
         return getById(VideoData.class, id);
     }
 
+    public List<Long> getSeasonVideoIds(Long id) {
+        SqlScalars sqlScalars = new SqlScalars();
+
+        sqlScalars.addToSql("SELECT DISTINCT vid.id ");
+        sqlScalars.addToSql("FROM season sea, videodata vid ");
+        sqlScalars.addToSql("WHERE vid.season_id=sea.id ");
+        sqlScalars.addToSql("AND sea.id=:id ");
+
+        sqlScalars.addParameters("id", id);
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        return executeQueryWithTransform(Long.class, sqlScalars, null);
+    }
+
+    public List<Long> getSeriesVideoIds(Long id) {
+        // add scalars
+        SqlScalars sqlScalars = new SqlScalars();
+
+        sqlScalars.addToSql("SELECT DISTINCT vid.id ");
+        sqlScalars.addToSql("FROM videodata vid, series ser, season sea ");
+        sqlScalars.addToSql("WHERE vid.season_id=sea.id ");
+        sqlScalars.addToSql("and sea.series_id=ser.id ");
+        sqlScalars.addToSql("AND sea.id=:id ");
+
+        sqlScalars.addParameters("id", id);
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        return executeQueryWithTransform(Long.class, sqlScalars, null);
+    }
+
 }

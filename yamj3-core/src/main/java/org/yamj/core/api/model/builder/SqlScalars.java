@@ -39,7 +39,7 @@ public final class SqlScalars {
 
     private StringBuilder sql;
     private Map<String, BasicType> scalars;
-    private Map<String, Object> parameters;
+    private final Map<String, Object> parameters;
     private SQLQuery query = null;
 
     public SqlScalars() {

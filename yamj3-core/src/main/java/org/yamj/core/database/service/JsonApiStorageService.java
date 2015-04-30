@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
@@ -212,30 +213,6 @@ public class JsonApiStorageService {
     }
     //</editor-fold>
 
-    public void getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
-        apiDao.getEpisodeList(wrapper);
-    }
-
-    public void getSingleVideo(ApiWrapperSingle<ApiVideoDTO> wrapper) {
-        apiDao.getSingleVideo(wrapper);
-    }
-
-    public List<CountGeneric> getJobCount(List<String> requiredJobs) {
-        return apiDao.getJobCount(requiredJobs);
-    }
-
-    public void getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper) {
-        apiDao.getSeriesInfo(wrapper);
-    }
-
-    public VideoData getVideoData(Long id) {
-        return commonDao.getVideoData(id);
-    }
-
-    public void updateVideoData(VideoData videoData) {
-        commonDao.updateEntity(videoData);
-    }
-
     //<editor-fold defaultstate="collapsed" desc="Player methods">
     public PlayerInfo getPlayerInfo(String playerName) {
         return playerDao.getPlayerInfo(playerName);
@@ -339,6 +316,114 @@ public class JsonApiStorageService {
         this.commonDao.updateEntity(country);
         return true;
     }
+
     //</editor-fold>
+    public void getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
+        apiDao.getEpisodeList(wrapper);
+    }
+
+    public void getSingleVideo(ApiWrapperSingle<ApiVideoDTO> wrapper) {
+        apiDao.getSingleVideo(wrapper);
+    }
+
+    public List<CountGeneric> getJobCount(List<String> requiredJobs) {
+        return apiDao.getJobCount(requiredJobs);
+    }
+
+    public void getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper) {
+        apiDao.getSeriesInfo(wrapper);
+    }
+
+    public VideoData getVideoData(Long id) {
+        return commonDao.getVideoData(id);
+    }
+
+    public void updateVideoData(VideoData videoData) {
+        commonDao.storeEntity(videoData);
+    }
+
+    public List<Long> getSeasonVideoIds(Long id) {
+        return commonDao.getSeasonVideoIds(id);
+    }
+
+    public List<Long> getSeriesVideoIds(Long id) {
+        return commonDao.getSeriesVideoIds(id);
+    }
+
+    /**
+     * Update a single videodata record
+     *
+     * @param type
+     * @param id
+     * @param watched
+     * @return
+     */
+    @Transactional
+    public ApiStatus updateWatchedSingle(MetaDataType type, Long id, boolean watched) {
+        if (id != null && id > 0L) {
+            VideoData video = commonDao.getVideoData(id);
+
+            StringBuilder sb = new StringBuilder("Watched status for ");
+            sb.append(type).append(" ID: ").append(video.getId());
+            sb.append("-").append(video.getTitle());
+
+            // Check to see if the status is the same
+            if (video.isWatchedApi() == watched) {
+                sb.append(" is already '").append(watched(watched)).append("' unchanged");
+                return new ApiStatus(200, sb.toString());
+            }
+
+            // Set the watched status and update the video
+            video.setWatchedApi(watched);
+            commonDao.storeEntity(video);
+
+            sb.append(" changed to ").append(watched(video.isWatchedApi()));
+            return new ApiStatus(200, sb.toString());
+        } else {
+            return new ApiStatus(400, "No " + type + " ID provided");
+        }
+    }
+
+    /**
+     * Update a list of videodata records
+     *
+     * @param type
+     * @param ids
+     * @param watched
+     * @param sourceId
+     * @return
+     */
+    @Transactional
+    public ApiStatus updateWatchedList(MetaDataType type, List<Long> ids, boolean watched, Long sourceId) {
+        int watchedCount = 0;
+        int unwatchedCount = 0;
+
+        for (Long id : ids) {
+            VideoData video = commonDao.getVideoData(id);
+            if (video.isWatched()) {
+                watchedCount++;
+            } else {
+                unwatchedCount++;
+            }
+
+            if (video.isWatchedApi() != watched) {
+                // Set the watched status and update the video
+                video.setWatchedApi(watched);
+                commonDao.storeEntity(video);
+            }
+        }
+
+        StringBuilder sb = new StringBuilder("Watched status for ");
+        sb.append(type).append(" ID: ").append(sourceId);
+        sb.append(" set to '").append(watched(watched)).append("'. ");
+        sb.append(watchedCount).append(" were set to ").append(watched(watched)).append(", ");
+        sb.append(unwatchedCount).append(" were already ").append(watched(watched));
+
+        return new ApiStatus(200, sb.toString());
+    }
+
+    private String watched(boolean watched) {
+        return watched ? "watched" : "unwatched";
+    }
 
 }

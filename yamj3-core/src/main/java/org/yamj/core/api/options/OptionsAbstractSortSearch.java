@@ -305,7 +305,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
                             if (vals.length > 1) {
                                 try {
                                     amount = Integer.parseInt(vals[1]);
-                                    if (amount.intValue() <= 0) {
+                                    if (amount <= 0) {
                                         // ignore jobs <= 0
                                         jobType = null;
                                     }
@@ -339,6 +339,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     /**
      * Get a list of the video types to search for
      *
+     * @param type
      * @return
      */
     protected List<MetaDataType> splitTypes(String type) {

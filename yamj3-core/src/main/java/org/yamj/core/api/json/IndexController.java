@@ -30,7 +30,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
@@ -78,7 +82,7 @@ public class IndexController {
         List<CountTimestamp> results = new ArrayList<>();
         List<MetaDataType> requiredTypes = new ArrayList<>();
 
-        if (type.toLowerCase().indexOf("all") < 0) {
+        if (!type.toLowerCase().contains("all")) {
             for (String stringType : StringUtils.split(type, ",")) {
                 requiredTypes.add(MetaDataType.fromString(stringType));
             }
@@ -104,7 +108,7 @@ public class IndexController {
     public List<CountGeneric> getJobs(@RequestParam(required = false, defaultValue = "all") String job) {
         List<CountGeneric> results;
 
-        if (StringUtils.isNotBlank(job) && job.toLowerCase().indexOf("all") < 0) {
+        if (StringUtils.isNotBlank(job) && !job.toLowerCase().contains("all")) {
             List<String> requiredJobs = Arrays.asList(StringUtils.split(job, ","));
             results = jsonApiStorageService.getJobCount(requiredJobs);
         } else {
