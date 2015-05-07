@@ -374,7 +374,6 @@ public class ScannerManagementImpl implements ScannerManagement {
                         LOG.debug("Exclusion file '{}' found, will exclude all {} file types", lcFilename, DIR_EXCLUSIONS.get(lcFilename).toString());
                         exclusions.addAll(DIR_EXCLUSIONS.get(lcFilename));
                         // Skip to the next file, theres no need of further processing
-                        continue;
                     }
                 } else {
                     // First directory we find, we can stop (because we sorted the files first)

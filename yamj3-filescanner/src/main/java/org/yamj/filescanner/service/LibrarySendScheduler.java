@@ -27,6 +27,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 import org.slf4j.Logger;
@@ -59,11 +61,27 @@ public class LibrarySendScheduler {
     @Resource(name = "taskExecutor")
     private ThreadPoolTaskExecutor yamjExecutor;
 
+    /**
+     * Set some executor properties
+     */
+    @PostConstruct
+    public void init() {
+        yamjExecutor.setWaitForTasksToCompleteOnShutdown(true);
+        yamjExecutor.setThreadNamePrefix("LibrarySendTask-");
+    }
+
+    /**
+     * Clean up the service before exiting
+     */
+    @PreDestroy
+    public void cleanUp() {
+        LOG.info("LibrarySendScheduler is exiting.");
+        yamjExecutor.shutdown();
+    }
+
     @Async
     @Scheduled(initialDelay = 10000, fixedDelay = 15000)
     public void sendLibraries() {
-        yamjExecutor.setWaitForTasksToCompleteOnShutdown(true);
-
         if (retryCount.get() > RETRY_MAX) {
             LOG.info("Maximum number of retries ({}) exceeded. No further processing attempted.", RETRY_MAX);
             for (Library library : libraryCollection.getLibraries()) {
@@ -87,7 +105,12 @@ public class LibrarySendScheduler {
                     LOG.info("    {}: {}", entry.getKey(), entry.getValue().isDone() ? entry.getValue().get() : "Being processed");
 
                     if (checkStatus(library, entry.getValue(), entry.getKey())) {
-                        LOG.debug("Successfully sent file to server, resetting retry count to 0 from {}.", retryCount.getAndSet(0));
+                        if (retryCount.get() > 0) {
+                            LOG.debug("Successfully sent file to server, resetting retry count to 0 from {}.", retryCount.getAndSet(0));
+                        } else {
+                            LOG.debug("Successfully sent file to server.");
+                            retryCount.set(0);
+                        }
                     } else {
                         // Make sure this is set to false
                         library.setSendingComplete(Boolean.FALSE);
@@ -96,13 +119,15 @@ public class LibrarySendScheduler {
                     }
                 }
 
-                // Close the executor to force the completion of all the tasks
-                yamjExecutor.shutdown();
-
-                // When we reach this point we should have completed the library sending
-                LOG.info("Sending complete for {}", library.getImportDTO().getBaseDirectory());
-                library.setSendingComplete(Boolean.TRUE);
-                library.getStatistics().setTime(TimeType.SENDING_END);
+                // Don't stop sending until the scanning is completed and there are no running tasks
+                if (library.isScanningComplete() && runningCount.get() > 0) {
+                    // When we reach this point we should have completed the library sending
+                    LOG.info("Sending complete for {}", library.getImportDTO().getBaseDirectory());
+                    library.setSendingComplete(Boolean.TRUE);
+                    library.getStatistics().setTime(TimeType.SENDING_END);
+                } else {
+                    LOG.info("  {}: Scanning and/or sending ({} left) is not complete. Waiting for more files to send.", library.getImportDTO().getBaseDirectory(), runningCount.get());
+                }
             } catch (InterruptedException ex) {
                 LOG.info("InterruptedException: {}", ex.getMessage());
             } catch (ExecutionException ex) {
