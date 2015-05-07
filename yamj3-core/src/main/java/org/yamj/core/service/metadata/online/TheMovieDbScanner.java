@@ -458,7 +458,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
     }
 
     private static JobType retrieveJobType(String department) {
-        switch (department) {
+        switch (department.toLowerCase()) {
             case "writing":
                 return JobType.WRITER;
             case "directing":
