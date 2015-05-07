@@ -34,7 +34,7 @@ import org.yamj.core.tools.MetadataTools;
  *
  * @author Stuart
  */
-@JsonInclude(Include.NON_DEFAULT) 
+@JsonInclude(Include.NON_DEFAULT)
 public class ApiFileDTO extends AbstractApiIdentifiableDTO {
 
     private Boolean extra;
@@ -180,10 +180,10 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
 
     public void setRuntime(Integer runtime) {
         if (runtime != null) {
-            this.runtime = MetadataTools.formatRuntime(runtime.intValue());
+            this.runtime = MetadataTools.formatRuntime(runtime);
         }
     }
-    
+
     public String getVideoSource() {
         return videoSource;
     }
@@ -199,7 +199,7 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
-    
+
     public Long getFileId() {
         return fileId;
     }
@@ -222,10 +222,10 @@ public class ApiFileDTO extends AbstractApiIdentifiableDTO {
 
     public void setFileSize(Long fileSize) {
         if (fileSize != null) {
-            this.fileSize = MetadataTools.formatFileSize(fileSize.longValue());
+            this.fileSize = MetadataTools.formatFileSize(fileSize);
         }
     }
-    
+
     public Long getSeason() {
         return season;
     }

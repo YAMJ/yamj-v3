@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import org.yamj.common.type.MetaDataType;
 
 /**
- * List of the options available for the genres
+ * List of the options available for the type
  *
  * @author modmax
  */
@@ -37,7 +37,7 @@ public class OptionsSingleType extends OptionsAbstractSortSearch {
     private Boolean used = Boolean.TRUE;
     private Boolean full = Boolean.FALSE;
     private MetaDataType type;
-    
+
     public Boolean getUsed() {
         return used;
     }

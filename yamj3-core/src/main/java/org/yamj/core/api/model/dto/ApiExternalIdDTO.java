@@ -20,37 +20,34 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api.options;
+package org.yamj.core.api.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.List;
-import org.yamj.common.type.MetaDataType;
 
 /**
- * List of the options available for the type
  *
- * @author modmax
+ * @author Stuart
  */
 @JsonInclude(Include.NON_DEFAULT)
-public class OptionsMultiType extends OptionsAbstractSortSearch {
+public class ApiExternalIdDTO extends AbstractApiIdentifiableDTO {
 
-    private String type;
+    private String externalId;
+    private String sourceDb;
 
-    public String getType() {
-        return type;
+    public String getExternalId() {
+        return externalId;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
     }
 
-    /**
-     * Split the video types
-     *
-     * @return
-     */
-    public List<MetaDataType> splitTypes() {
-        return this.splitTypes(type);
+    public String getSourceDb() {
+        return sourceDb;
+    }
+
+    public void setSourceDb(String sourceDb) {
+        this.sourceDb = sourceDb;
     }
 }

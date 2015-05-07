@@ -36,6 +36,7 @@ import org.yamj.core.api.model.dto.ApiArtworkDTO;
 import org.yamj.core.api.model.dto.ApiAwardDTO;
 import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
 import org.yamj.core.api.model.dto.ApiEpisodeDTO;
+import org.yamj.core.api.model.dto.ApiExternalIdDTO;
 import org.yamj.core.api.model.dto.ApiNameDTO;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.model.dto.ApiRatingDTO;
@@ -350,6 +351,7 @@ public class JsonApiStorageService {
         return commonDao.getSeriesVideoIds(id);
     }
 
+    //<editor-fold defaultstate="collapsed" desc="Watched methods">
     /**
      * Update a single videodata record
      *
@@ -424,6 +426,11 @@ public class JsonApiStorageService {
 
     private String watched(boolean watched) {
         return watched ? "watched" : "unwatched";
+    }
+    //</editor-fold>
+
+    public void getExternalIds(ApiWrapperList<ApiExternalIdDTO> wrapper) {
+        apiDao.getExternalIds(wrapper);
     }
 
 }

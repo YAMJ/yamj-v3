@@ -71,12 +71,13 @@ import org.yamj.core.database.model.type.OverrideFlag;
 
 @Entity
 @Table(name = "videodata",
-       uniqueConstraints = @UniqueConstraint(name = "UIX_VIDEODATA_NATURALID", columnNames = {"identifier"}),
-       indexes = {@Index(name = "IX_VIDEODATA_TITLE", columnList = "title"),
-                  @Index(name = "IX_VIDEODATA_STATUS", columnList = "status"),
-                  @Index(name = "IX_VIDEODATA_PUBLICATIONYEAR", columnList = "publication_year")}
+        uniqueConstraints = @UniqueConstraint(name = "UIX_VIDEODATA_NATURALID", columnNames = {"identifier"}),
+        indexes = {
+            @Index(name = "IX_VIDEODATA_TITLE", columnList = "title"),
+            @Index(name = "IX_VIDEODATA_STATUS", columnList = "status"),
+            @Index(name = "IX_VIDEODATA_PUBLICATIONYEAR", columnList = "publication_year")}
 )
-@SuppressWarnings({"unused","deprecation"})
+@SuppressWarnings({"unused", "deprecation"})
 public class VideoData extends AbstractMetadata {
 
     private static final long serialVersionUID = 885531396557944590L;
@@ -201,22 +202,22 @@ public class VideoData extends AbstractMetadata {
     private Set<String> countryNames;
 
     @Transient
-    private Map<String, String> certificationInfos = new HashMap<>(0);
+    private final Map<String, String> certificationInfos = new HashMap<>(0);
 
     @Transient
-    private Map<String, Integer> setInfos = new HashMap<>(0);
+    private final Map<String, Integer> setInfos = new HashMap<>(0);
 
     @Transient
-    private Set<CreditDTO> creditDTOS = new LinkedHashSet<>(0);
+    private final Set<CreditDTO> creditDTOS = new LinkedHashSet<>(0);
 
     @Transient
-    private Map<String, String> posterURLS = new HashMap<>(0);
+    private final Map<String, String> posterURLS = new HashMap<>(0);
 
     @Transient
-    private Map<String, String> fanartURLS = new HashMap<>(0);
+    private final Map<String, String> fanartURLS = new HashMap<>(0);
 
     @Transient
-    private Set<AwardDTO> awardDTOS = new HashSet<>(0);
+    private final Set<AwardDTO> awardDTOS = new HashSet<>(0);
 
     // CONSTRUCTORS
     public VideoData() {
@@ -373,7 +374,7 @@ public class VideoData extends AbstractMetadata {
 
     public void addRating(String sourceDb, int rating) {
         if (StringUtils.isNotBlank(sourceDb) && (rating >= 0)) {
-            this.ratings.put(sourceDb, Integer.valueOf(rating));
+            this.ratings.put(sourceDb, rating);
         }
     }
 
@@ -417,7 +418,7 @@ public class VideoData extends AbstractMetadata {
     }
 
     public Set<Studio> getStudios() {
-      return studios;
+        return studios;
     }
 
     public void setStudios(Set<Studio> studios) {
@@ -637,18 +638,18 @@ public class VideoData extends AbstractMetadata {
             return;
         }
 
-        for (AwardDTO award: awards) {
-           if (StringUtils.isBlank(award.getEvent()) || StringUtils.isBlank(award.getCategory()) || award.getYear()<=0) {
-               // event, category and year must be given
-               continue;
-           }
-           award.setSource(source);
-           this.awardDTOS.add(award);
+        for (AwardDTO award : awards) {
+            if (StringUtils.isBlank(award.getEvent()) || StringUtils.isBlank(award.getCategory()) || award.getYear() <= 0) {
+                // event, category and year must be given
+                continue;
+            }
+            award.setSource(source);
+            this.awardDTOS.add(award);
         }
     }
 
     public void addAward(String event, String category, int year, String source) {
-        if (StringUtils.isNotBlank(event) && StringUtils.isNotBlank(category) && year>0 && StringUtils.isNotBlank(source)) {
+        if (StringUtils.isNotBlank(event) && StringUtils.isNotBlank(category) && year > 0 && StringUtils.isNotBlank(source)) {
             this.awardDTOS.add(new AwardDTO(event, category, year, source).setWon(true));
         }
     }
