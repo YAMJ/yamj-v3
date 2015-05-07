@@ -135,7 +135,7 @@ public class CommonDao extends HibernateDao {
         sqlScalars.addScalar("name", StringType.INSTANCE);
         sqlScalars.addScalar("target", StringType.INSTANCE);
 
-        sqlScalars.addParameters("filename", filename.toLowerCase());
+        sqlScalars.addParameter("filename", filename.toLowerCase());
 
         return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, wrapper);
     }
@@ -264,7 +264,7 @@ public class CommonDao extends HibernateDao {
         sqlScalars.addScalar("name", StringType.INSTANCE);
         sqlScalars.addScalar("target", StringType.INSTANCE);
 
-        sqlScalars.addParameters("filename", filename.toLowerCase());
+        sqlScalars.addParameter("filename", filename.toLowerCase());
 
         return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, wrapper);
     }
@@ -510,7 +510,7 @@ public class CommonDao extends HibernateDao {
         sqlScalars.addToSql("WHERE vid.season_id=sea.id ");
         sqlScalars.addToSql("AND sea.id=:id ");
 
-        sqlScalars.addParameters("id", id);
+        sqlScalars.addParameter("id", id);
         sqlScalars.addScalar("id", LongType.INSTANCE);
         return executeQueryWithTransform(Long.class, sqlScalars, null);
     }
@@ -525,7 +525,7 @@ public class CommonDao extends HibernateDao {
         sqlScalars.addToSql("and sea.series_id=ser.id ");
         sqlScalars.addToSql("AND sea.id=:id ");
 
-        sqlScalars.addParameters("id", id);
+        sqlScalars.addParameter("id", id);
         sqlScalars.addScalar("id", LongType.INSTANCE);
         return executeQueryWithTransform(Long.class, sqlScalars, null);
     }

@@ -37,7 +37,7 @@ import org.yamj.core.api.model.dto.ApiExternalIdDTO;
 import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
 import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.core.api.options.OptionsEpisode;
-import org.yamj.core.api.options.OptionsId;
+import org.yamj.core.api.options.OptionsExternalId;
 import org.yamj.core.api.options.OptionsIdArtwork;
 import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.core.api.wrapper.ApiWrapperList;
@@ -166,8 +166,11 @@ public class VideoController {
      * @param options
      * @return
      */
-    @RequestMapping("/externalids/{id}")
-    public ApiWrapperList<ApiExternalIdDTO> getExternalIds(@ModelAttribute("options") OptionsId options) {
+    @RequestMapping("/externalids")
+    public ApiWrapperList<ApiExternalIdDTO> getExternalIds(@ModelAttribute("options") OptionsExternalId options) {
+        LOG.info("Getting External IDs for VideoData ID: {}, SourceDb: {}, ExternalID: {}",
+                options.getId(), options.getSourcedb(), options.getExternalid());
+
         ApiWrapperList<ApiExternalIdDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
         jsonApi.getExternalIds(wrapper);

@@ -361,7 +361,7 @@ public class IndexParams {
 
     public void addScalarParameters(SqlScalars sqlScalars) {
         for (Entry<String, Object> entry : parameters.entrySet()) {
-            sqlScalars.addParameters(entry.getKey(), entry.getValue());
+            sqlScalars.addParameter(entry.getKey(), entry.getValue());
         }
     }
 }

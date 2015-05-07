@@ -1393,6 +1393,65 @@ GET /api/video/episodes?series={}&season={}
 }
 
 
+Get the external IDs for a video ID or find the video id from an external ID.
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The Video ID of the video to get.<br>
+        Leave blank to search by source or external ID.</td>
+    </tr>
+    <tr>
+        <td>sourcedb</td>
+        <td>The source database to get information for.<br>
+        For example: imdb, tmdb, etc.</td>
+    </tr>
+    <tr>
+        <td>externalid</td>
+        <td>The External ID to search for.<br>
+        This should be the full ID from the source site, e.g. tt123456.</td>
+    </tr>
+</table>
+__Example 1__: `http://localhost:8888/yamj3/api/video/externalids?id=8
+
+Gets all the External IDs for Video ID 8
+
+__Example 2__: `http://localhost:8888/yamj3/api/video/externalids?sourcedb=imdb&externalid=tt123456
+
+Search the external IDs for the video with the IMDB reference `tt123456`
+
+GET /api/video/episodes?series={}&season={}
+< 200
+< Content-Type: application/json
+{
+	"count": 1,
+	"totalCount": 1,
+	"queryDuration": "9ms",
+	"queryTime": "2015-05-07 14:33:11 +0100",
+	"status": {
+		"status": 200,
+		"message": "OK"
+	},
+	"options": {
+		"externalid": "tt1375666"
+	},
+	"baseArtworkUrl": "http://141.196.104.13:8888/artwork/",
+	"baseMediainfoUrl": "http://141.196.104.13:8888/mediainfo/",
+	"basePhotoUrl": "http://141.196.104.13:8888/photo/",
+	"results": [
+		{
+			"id": 8,
+			"externalid": "tt1375666",
+			"sourcedb": "imdb"
+		}
+	]
+}
+
+
 --
 Artwork
 --

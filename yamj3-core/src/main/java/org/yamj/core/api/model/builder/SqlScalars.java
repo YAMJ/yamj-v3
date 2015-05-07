@@ -139,7 +139,7 @@ public final class SqlScalars {
      * @param param
      * @param value
      */
-    public void addParameters(String param, Object value) {
+    public void addParameter(String param, Object value) {
         this.parameters.put(param, value);
     }
 

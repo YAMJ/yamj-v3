@@ -20,17 +20,18 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api.model.dto;
+package org.yamj.core.api.options;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
+ * List of the options available for the indexes
  *
- * @author Stuart
+ * @author stuart.boston
  */
 @JsonInclude(Include.NON_DEFAULT)
-public class ApiExternalIdDTO extends AbstractApiIdentifiableDTO {
+public class OptionsExternalId extends OptionsId {
 
     private String externalid;
     private String sourcedb;
@@ -50,4 +51,5 @@ public class ApiExternalIdDTO extends AbstractApiIdentifiableDTO {
     public void setSourcedb(String sourcedb) {
         this.sourcedb = sourcedb;
     }
+
 }
