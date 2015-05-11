@@ -458,6 +458,11 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
     }
 
     private static JobType retrieveJobType(String department) {
+        if (StringUtils.isBlank(department)) {
+            LOG.debug("No department found");
+            return JobType.UNKNOWN;
+        }
+
         switch (department.toLowerCase()) {
             case "writing":
                 return JobType.WRITER;
