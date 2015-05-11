@@ -274,7 +274,7 @@ public class YamjInfo {
             LOG.info("{} {}", StringUtils.repeat("~", projectName.length()), StringUtils.repeat("~", projectVersion.length()));
             LOG.info("{}", moduleName);
             LOG.info("");
-            LOG.info("  Revision: {}", buildRevision);
+            LOG.info("  Revision: {} {}", buildRevision, buildDirty ? "(custom build)" : "");
             LOG.info("Build Time: {}", getBuildDate());
             LOG.info("      Java: {}", javaVersion);
             LOG.info("");

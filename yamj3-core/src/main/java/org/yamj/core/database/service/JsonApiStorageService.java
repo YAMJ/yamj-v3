@@ -317,8 +317,8 @@ public class JsonApiStorageService {
         this.commonDao.updateEntity(country);
         return true;
     }
-
     //</editor-fold>
+
     public void getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
         apiDao.getEpisodeList(wrapper);
     }
@@ -431,6 +431,16 @@ public class JsonApiStorageService {
 
     public void getExternalIds(ApiWrapperList<ApiExternalIdDTO> wrapper) {
         apiDao.getExternalIds(wrapper);
+    }
+
+    @Transactional(readOnly = false)
+    public void updateExternalId(Long id, String sourcedb, String externalid) {
+        apiDao.updateExternalId(id, sourcedb, externalid);
+    }
+
+    @Transactional(readOnly = false)
+    public void deleteExternalId(Long id, String sourcedb) {
+        apiDao.deleteExternalId(id, sourcedb);
     }
 
 }

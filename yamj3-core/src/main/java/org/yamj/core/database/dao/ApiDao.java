@@ -82,6 +82,7 @@ import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.model.type.JobType;
@@ -2947,6 +2948,11 @@ public class ApiDao extends HibernateDao {
         return executeQueryWithTransform(ApiNameDTO.class, sqlScalars, wrapper);
     }
 
+    /**
+     * Get a list of the external IDs
+     *
+     * @param wrapper
+     */
     public void getExternalIds(ApiWrapperList<ApiExternalIdDTO> wrapper) {
         OptionsExternalId options = (OptionsExternalId) wrapper.getOptions();
         SqlScalars sqlScalars = new SqlScalars();
@@ -2979,4 +2985,54 @@ public class ApiDao extends HibernateDao {
         wrapper.setStatusCheck();
     }
 
+    /**
+     * Update an external ID to a new value
+     *
+     * @param id
+     * @param sourcedb
+     * @param externalid
+     */
+    public void updateExternalId(Long id, String sourcedb, String externalid) {
+        VideoData vd = getById(VideoData.class, id);
+
+        String current = vd.getSourceDbId(sourcedb);
+        if (StringUtils.isNotBlank(current)) {
+            LOG.info("Updating '{}' ID from '{}' to '{}' for {}-{}", sourcedb, current, externalid, vd.getId(), vd.getTitle());
+        } else {
+            LOG.info("Adding '{}' ID '{}' to {}-{}", sourcedb, externalid, vd.getId(), vd.getTitle());
+        }
+
+        // Update the source ID
+        vd.setSourceDbId(sourcedb, externalid);
+
+        // Update the videodata table, set status to UPDATED
+        vd.setStatus(StatusType.UPDATED);
+        mergeEntity(vd);
+    }
+
+    /**
+     * Delete an external ID
+     *
+     * @param id
+     * @param sourcedb
+     */
+    public void deleteExternalId(Long id, String sourcedb) {
+        // Delete from the videodata_ids table
+        VideoData vd = getById(VideoData.class, id);
+        LOG.info("Deleting '{}' ID(s) from {}-{}", StringUtils.isNotBlank(sourcedb) ? sourcedb : "ALL", vd.getId(), vd.getTitle());
+
+        if (StringUtils.isNotBlank(sourcedb)) {
+            // Remove a single entry
+            String removed = vd.getSourceDbIdMap().remove(sourcedb);
+            LOG.info("Removed '{}' ID value '{}' from {}-{}", sourcedb, removed, vd.getId(), vd.getTitle());
+        } else {
+            // Remove all entries
+            LOG.info("Removing {} ID entries from {}-{}", vd.getSourceDbIdMap().size(), vd.getId(), vd.getTitle());
+            vd.getSourceDbIdMap().clear();
+        }
+
+        // Update the videodata table, set status to UPDATED
+        vd.setStatus(StatusType.UPDATED);
+        mergeEntity(vd);
+    }
 }

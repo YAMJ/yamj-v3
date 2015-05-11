@@ -30,6 +30,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yamj.core.api.model.builder.DataItem;
 import org.yamj.core.api.model.dto.ApiEpisodeDTO;
@@ -146,6 +147,12 @@ public class VideoController {
         return wrapper;
     }
 
+    /**
+     * Get information on episodes
+     *
+     * @param options
+     * @return
+     */
     @RequestMapping("/episodes")
     public ApiWrapperList<ApiEpisodeDTO> getEpisodes(@ModelAttribute("options") OptionsEpisode options) {
         LOG.info("Getting episodes for seriesId '{}', seasonId '{}', season '{}'",
@@ -177,4 +184,35 @@ public class VideoController {
         wrapper.setStatusCheck();
         return wrapper;
     }
+
+    /**
+     * Add or update an external id to the video
+     *
+     * @param id
+     * @param sourcedb
+     * @param externalid
+     */
+    @RequestMapping("/externalids/update")
+    public void updateExternalId(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb,
+            @RequestParam(required = true) String externalid) {
+        LOG.info("Add/Update Source: '{}' ExternalID: '{}' to ID: {}", sourcedb, externalid, id);
+        jsonApi.updateExternalId(id, sourcedb, externalid);
+    }
+
+    /**
+     * Delete one or all of the external IDs from the video
+     *
+     * @param id
+     * @param sourcedb
+     */
+    @RequestMapping("/externalids/delete")
+    public void deleteExternalId(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = false, defaultValue = "") String sourcedb) {
+        LOG.info("Deleting Source: '{}' from ID: {}", sourcedb, id);
+        jsonApi.deleteExternalId(id, sourcedb);
+    }
+
 }
