@@ -1397,6 +1397,8 @@ Get the external IDs for a video ID or find the video id from an external ID.
 ***
 **Optional Parameters**
 
+Although these are listed as optional, one or more must be used.
+
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1416,15 +1418,15 @@ Get the external IDs for a video ID or find the video id from an external ID.
         This should be the full ID from the source site, e.g. tt123456.</td>
     </tr>
 </table>
-__Example 1__: `http://localhost:8888/yamj3/api/video/externalids?id=8
+__Example 1__: `http://localhost:8888/yamj3/api/video/externalids?id=8`
 
 Gets all the External IDs for Video ID 8
 
-__Example 2__: `http://localhost:8888/yamj3/api/video/externalids?sourcedb=imdb&externalid=tt123456
+__Example 2__: `http://localhost:8888/yamj3/api/video/externalids?sourcedb=imdb&externalid=tt123456`
 
 Search the external IDs for the video with the IMDB reference `tt123456`
 
-GET /api/video/episodes?series={}&season={}
+GET /api/video/externalids?id={}&sourcedb={}&externalid={}
 < 200
 < Content-Type: application/json
 {
@@ -1449,6 +1451,68 @@ GET /api/video/episodes?series={}&season={}
 			"sourcedb": "imdb"
 		}
 	]
+}
+
+
+Add or Update the external IDs for a video ID.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The Video ID of the video to add/update the external ID for.</td>
+    </tr>
+    <tr>
+        <td>sourcedb</td>
+        <td>The source database of the external ID.<br>
+        For example: imdb, tmdb, etc.</td>
+    </tr>
+    <tr>
+        <td>externalid</td>
+        <td>The External ID to add/update to.<br>
+        This should be the full ID from the source site, e.g. tt123456.</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/video/externalids/update?id=8&sourcedb=imdb&externalid=tt123456`
+
+
+GET /api/video/externalids/update?id={}&sourcedb={}&externalid={}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Successfully updated 'test' ID to '12345' for 81 - Captain America: The First Avenger"
+}
+
+
+Get the external IDs for a video ID or find the video id from an external ID.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The Video ID of the video to delete the external ID for.</td>
+    </tr>
+    <tr>
+        <td>sourcedb</td>
+        <td>The source database of the external ID to delete.<br>
+        For example: imdb, tmdb, etc.</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/video/externalids/delete?id=81&sourcedb=test`
+
+GET /api/video/externalids/delete?id={}&sourcedb={}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Successfully deleted 'test' ID for 81 - Captain America: The First Avenger"
 }
 
 
