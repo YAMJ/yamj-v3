@@ -434,13 +434,13 @@ public class JsonApiStorageService {
     }
 
     @Transactional(readOnly = false)
-    public void updateExternalId(Long id, String sourcedb, String externalid) {
-        apiDao.updateExternalId(id, sourcedb, externalid);
+    public ApiStatus updateExternalId(Long id, String sourcedb, String externalid) {
+        return apiDao.updateExternalId(id, sourcedb, externalid);
     }
 
     @Transactional(readOnly = false)
-    public void deleteExternalId(Long id, String sourcedb) {
-        apiDao.deleteExternalId(id, sourcedb);
+    public ApiStatus deleteExternalId(Long id, String sourcedb) {
+        return apiDao.deleteExternalId(id, sourcedb);
     }
 
 }

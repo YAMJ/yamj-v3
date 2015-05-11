@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.builder.DataItem;
@@ -2736,8 +2737,7 @@ public class ApiDao extends HibernateDao {
     }
 
     /**
-     * Take a list and generate a map of the ID and a list of the items for that
-     * ID
+     * Take a list and generate a map of the ID and a list of the items for that ID
      *
      * @param <T> Source type
      * @param idList List of the source type
@@ -2991,8 +2991,9 @@ public class ApiDao extends HibernateDao {
      * @param id
      * @param sourcedb
      * @param externalid
+     * @return
      */
-    public void updateExternalId(Long id, String sourcedb, String externalid) {
+    public ApiStatus updateExternalId(Long id, String sourcedb, String externalid) {
         VideoData vd = getById(VideoData.class, id);
 
         String current = vd.getSourceDbId(sourcedb);
@@ -3008,6 +3009,8 @@ public class ApiDao extends HibernateDao {
         // Update the videodata table, set status to UPDATED
         vd.setStatus(StatusType.UPDATED);
         mergeEntity(vd);
+
+        return new ApiStatus(200, "Successfully updated '" + sourcedb + "' ID to '" + externalid + "' for " + vd.getId() + " - " + vd.getTitle());
     }
 
     /**
@@ -3015,8 +3018,9 @@ public class ApiDao extends HibernateDao {
      *
      * @param id
      * @param sourcedb
+     * @return
      */
-    public void deleteExternalId(Long id, String sourcedb) {
+    public ApiStatus deleteExternalId(Long id, String sourcedb) {
         // Delete from the videodata_ids table
         VideoData vd = getById(VideoData.class, id);
         LOG.info("Deleting '{}' ID(s) from {}-{}", StringUtils.isNotBlank(sourcedb) ? sourcedb : "ALL", vd.getId(), vd.getTitle());
@@ -3034,5 +3038,6 @@ public class ApiDao extends HibernateDao {
         // Update the videodata table, set status to UPDATED
         vd.setStatus(StatusType.UPDATED);
         mergeEntity(vd);
+        return new ApiStatus(200, "Successfully deleted '" + sourcedb + "' ID for " + vd.getId() + " - " + vd.getTitle());
     }
 }

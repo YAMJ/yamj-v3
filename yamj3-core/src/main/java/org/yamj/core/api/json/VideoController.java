@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.builder.DataItem;
 import org.yamj.core.api.model.dto.ApiEpisodeDTO;
 import org.yamj.core.api.model.dto.ApiExternalIdDTO;
@@ -191,14 +192,15 @@ public class VideoController {
      * @param id
      * @param sourcedb
      * @param externalid
+     * @return
      */
     @RequestMapping("/externalids/update")
-    public void updateExternalId(
+    public ApiStatus updateExternalId(
             @RequestParam(required = true) Long id,
             @RequestParam(required = true) String sourcedb,
             @RequestParam(required = true) String externalid) {
         LOG.info("Add/Update Source: '{}' ExternalID: '{}' to ID: {}", sourcedb, externalid, id);
-        jsonApi.updateExternalId(id, sourcedb, externalid);
+        return jsonApi.updateExternalId(id, sourcedb, externalid);
     }
 
     /**
@@ -206,13 +208,14 @@ public class VideoController {
      *
      * @param id
      * @param sourcedb
+     * @return
      */
     @RequestMapping("/externalids/delete")
-    public void deleteExternalId(
+    public ApiStatus deleteExternalId(
             @RequestParam(required = true) Long id,
             @RequestParam(required = false, defaultValue = "") String sourcedb) {
         LOG.info("Deleting Source: '{}' from ID: {}", sourcedb, id);
-        jsonApi.deleteExternalId(id, sourcedb);
+        return jsonApi.deleteExternalId(id, sourcedb);
     }
 
 }
