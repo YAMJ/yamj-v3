@@ -23,28 +23,50 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import java.util.*;
-import javax.persistence.*;
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.Lob;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.*;
-import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.MapKeyType;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
 @Entity
 @Table(name = "person",
-       uniqueConstraints = @UniqueConstraint(name = "UIX_PERSON_NATURALID", columnNames = {"identifier"}),
-       indexes = {@Index(name = "IX_PERSON_STATUS", columnList = "status"),
-                  @Index(name = "IX_PERSON_FILMOGRAPHY_STATUS", columnList = "filmography_status"),
-                  @Index(name = "IX_PERSON_NAME", columnList = "name")}
+        uniqueConstraints = @UniqueConstraint(name = "UIX_PERSON_NATURALID", columnNames = {"identifier"}),
+        indexes = {
+            @Index(name = "IX_PERSON_STATUS", columnList = "status"),
+            @Index(name = "IX_PERSON_FILMOGRAPHY_STATUS", columnList = "filmography_status"),
+            @Index(name = "IX_PERSON_NAME", columnList = "name")}
 )
-@SuppressWarnings({"unused","deprecation"})
+@SuppressWarnings({"unused", "deprecation"})
 public class Person extends AbstractAuditable implements IScannable, Serializable {
 
     private static final long serialVersionUID = 660066902996412843L;
@@ -84,8 +106,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     private String biography;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "person_ids", joinColumns = @JoinColumn(name = "person_id"))
-    @ForeignKey(name = "FK_PERSON_SOURCEIDS")
+    @JoinTable(name = "person_ids", joinColumns = @JoinColumn(name = "person_id", foreignKey = @ForeignKey(name = "FK_PERSON_SOURCEIDS")))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 40)
@@ -103,8 +124,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     private int retries = 0;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "person_override", joinColumns = @JoinColumn(name = "person_id"))
-    @ForeignKey(name = "FK_PERSON_OVERRIDE")
+    @JoinTable(name = "person_override", joinColumns = @JoinColumn(name = "person_id", foreignKey = @ForeignKey(name = "FK_PERSON_OVERRIDE")))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
@@ -190,7 +210,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
             setOverrideFlag(OverrideFlag.LASTNAME, source);
         }
     }
-    
+
     public Date getBirthDay() {
         return birthDay;
     }

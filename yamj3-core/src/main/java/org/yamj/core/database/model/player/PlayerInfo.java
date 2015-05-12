@@ -59,9 +59,9 @@ public class PlayerInfo extends AbstractIdentifiable implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinTable(name = "playerinfo_playerpath",
             joinColumns = {
-                @JoinColumn(foreignKey = @ForeignKey(name = "FK_PLAYERPATH_INFO"), name = "player_info_id")},
+                @JoinColumn(name = "player_info_id", foreignKey = @ForeignKey(name = "FK_PLAYERPATH_INFO"))},
             inverseJoinColumns = {
-                @JoinColumn(foreignKey = @ForeignKey(name = "FK_PLAYERPATH_PATH"),name = "player_path_id")})
+                @JoinColumn(name = "player_path_id", foreignKey = @ForeignKey(name = "FK_PLAYERPATH_PATH"))})
     private List<PlayerPath> paths = new ArrayList<>();
 
     public String getName() {

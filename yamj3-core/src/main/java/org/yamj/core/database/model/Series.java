@@ -37,6 +37,7 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -53,7 +54,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.MapKeyType;
 import org.hibernate.annotations.Type;
 import org.yamj.core.database.model.award.SeriesAward;
@@ -63,11 +63,12 @@ import org.yamj.core.database.model.type.OverrideFlag;
 
 @Entity
 @Table(name = "series",
-       uniqueConstraints = @UniqueConstraint(name = "UIX_SERIES_NATURALID", columnNames = {"identifier"}),
-       indexes = {@Index(name = "IX_SERIES_TITLE", columnList = "title"),
-                  @Index(name = "IX_SERIES_STATUS", columnList = "status")}
+        uniqueConstraints = @UniqueConstraint(name = "UIX_SERIES_NATURALID", columnNames = {"identifier"}),
+        indexes = {
+            @Index(name = "IX_SERIES_TITLE", columnList = "title"),
+            @Index(name = "IX_SERIES_STATUS", columnList = "status")}
 )
-@SuppressWarnings({"unused","deprecation"})
+@SuppressWarnings({"unused", "deprecation"})
 public class Series extends AbstractMetadata {
 
     private static final long serialVersionUID = -5782361288021493423L;
@@ -82,24 +83,21 @@ public class Series extends AbstractMetadata {
     private String skipOnlineScans;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "series_ids", joinColumns = @JoinColumn(name = "series_id"))
-    @ForeignKey(name = "FK_SERIES_SOURCEIDS")
+    @JoinTable(name = "series_ids", joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIES_SOURCEIDS")))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "series_ratings", joinColumns = @JoinColumn(name = "series_id"))
-    @ForeignKey(name = "FK_SERIES_RATINGS")
+    @JoinTable(name = "series_ratings", joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIES_RATINGS")))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "series_override", joinColumns = @JoinColumn(name = "series_id"))
-    @ForeignKey(name = "FK_SERIES_OVERRIDE")
+    @JoinTable(name = "series_override", joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIES_OVERRIDE")))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
@@ -113,31 +111,27 @@ public class Series extends AbstractMetadata {
     private List<Artwork> artworks = new ArrayList<>(0);
 
     @ManyToMany
-    @ForeignKey(name = "FK_SERIESGENRES_SERIES", inverseName = "FK_SERIESGENRES_GENRE")
     @JoinTable(name = "series_genres",
-            joinColumns = @JoinColumn(name = "series_id"),
-            inverseJoinColumns = @JoinColumn(name = "genre_id"))
+            joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESGENRES_SERIES")),
+            inverseJoinColumns = @JoinColumn(name = "genre_id", foreignKey = @ForeignKey(name = "FK_SERIESGENRES_GENRE")))
     private Set<Genre> genres = new HashSet<>(0);
 
     @ManyToMany
-    @ForeignKey(name = "FK_SERIESSTUDIOS_SERIES", inverseName = "FK_SERIESSTUDIOS_STUDIO")
     @JoinTable(name = "series_studios",
-            joinColumns = @JoinColumn(name = "series_id"),
-            inverseJoinColumns = @JoinColumn(name = "studio_id"))
+            joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESSTUDIOS_SERIES")),
+            inverseJoinColumns = @JoinColumn(name = "studio_id", foreignKey = @ForeignKey(name = "FK_SERIESSTUDIOS_STUDIO")))
     private Set<Studio> studios = new HashSet<>(0);
 
     @ManyToMany
-    @ForeignKey(name = "FK_SERIESCOUNTRIES_SERIES", inverseName = "FK_SERIESCOUNTRIES_COUNTRY")
     @JoinTable(name = "series_countries",
-            joinColumns = @JoinColumn(name = "series_id"),
-            inverseJoinColumns = @JoinColumn(name = "country_id"))
+            joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESCOUNTRIES_SERIES")),
+            inverseJoinColumns = @JoinColumn(name = "country_id", foreignKey = @ForeignKey(name = "FK_SERIESCOUNTRIES_COUNTRY")))
     private Set<Country> countries = new HashSet<>(0);
 
     @ManyToMany
-    @ForeignKey(name = "FK_SERIESCERTS_SERIES", inverseName = "FK_SERIESCERTS_CERTIFICATION")
     @JoinTable(name = "series_certifications",
-            joinColumns = @JoinColumn(name = "series_id"),
-            inverseJoinColumns = @JoinColumn(name = "cert_id"))
+            joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESCERTS_SERIES")),
+            inverseJoinColumns = @JoinColumn(name = "cert_id", foreignKey = @ForeignKey(name = "FK_SERIESCERTS_CERTIFICATION")))
     private Set<Certification> certifications = new HashSet<>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "seriesAwardPK.series")
@@ -153,16 +147,16 @@ public class Series extends AbstractMetadata {
     private Set<String> countryNames;
 
     @Transient
-    private Map<String, String> certificationInfos = new HashMap<>(0);
+    private final Map<String, String> certificationInfos = new HashMap<>(0);
 
     @Transient
-    private Map<String, String> posterURLS = new HashMap<>(0);
+    private final Map<String, String> posterURLS = new HashMap<>(0);
 
     @Transient
-    private Map<String, String> fanartURLS = new HashMap<>(0);
+    private final Map<String, String> fanartURLS = new HashMap<>(0);
 
     @Transient
-    private Set<AwardDTO> awardDTOS = new HashSet<>(0);
+    private final Set<AwardDTO> awardDTOS = new HashSet<>(0);
 
     // CONSTRUCTORS
     public Series() {
@@ -247,7 +241,7 @@ public class Series extends AbstractMetadata {
 
     public void addRating(String sourceDb, int rating) {
         if (StringUtils.isNotBlank(sourceDb) && (rating >= 0)) {
-            this.ratings.put(sourceDb, Integer.valueOf(rating));
+            this.ratings.put(sourceDb, rating);
         }
     }
 
@@ -435,18 +429,18 @@ public class Series extends AbstractMetadata {
             return;
         }
 
-        for (AwardDTO award: awards) {
-           if (StringUtils.isBlank(award.getEvent()) || StringUtils.isBlank(award.getCategory()) || award.getYear()<=0) {
-               // event, category and year must be given
-               continue;
-           }
-           award.setSource(source);
-           this.awardDTOS.add(award);
+        for (AwardDTO award : awards) {
+            if (StringUtils.isBlank(award.getEvent()) || StringUtils.isBlank(award.getCategory()) || award.getYear() <= 0) {
+                // event, category and year must be given
+                continue;
+            }
+            award.setSource(source);
+            this.awardDTOS.add(award);
         }
     }
 
     public void addAward(String event, String category, int year, String source) {
-        if (StringUtils.isNotBlank(event) && StringUtils.isNotBlank(category) && year>0 && StringUtils.isNotBlank(source)) {
+        if (StringUtils.isNotBlank(event) && StringUtils.isNotBlank(category) && year > 0 && StringUtils.isNotBlank(source)) {
             this.awardDTOS.add(new AwardDTO(event, category, year, source).setWon(true));
         }
     }

@@ -25,22 +25,31 @@ package org.yamj.core.database.model;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.*;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.*;
-import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
 
 @Entity
 @Table(name = "mediafile",
-    uniqueConstraints= @UniqueConstraint(name="UIX_MEDIAFILE_NATURALID", columnNames={"file_name"})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_MEDIAFILE_NATURALID", columnNames = {"file_name"})
 )
-@SuppressWarnings({"unused","deprecation"})
+@SuppressWarnings({"unused", "deprecation"})
 public class MediaFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 8411423609119475972L;
@@ -100,10 +109,10 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     @Column(name = "episode_count", nullable = false)
     private int episodeCount = 0;
 
-    @Column(name =  "watched_file", nullable = false)
+    @Column(name = "watched_file", nullable = false)
     private boolean watchedFile = false;
 
-    @Column(name =  "watched_api", nullable = false)
+    @Column(name = "watched_api", nullable = false)
     private boolean watchedApi = false;
 
     @Type(type = "statusType")
@@ -112,24 +121,23 @@ public class MediaFile extends AbstractAuditable implements Serializable {
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "mediafile_videodata",
-               joinColumns = @JoinColumn(name = "mediafile_id"),
-               inverseJoinColumns = {@JoinColumn(name = "videodata_id")})
-    @ForeignKey(name = "FK_REL_MEDIAFILE_VIDEODATA", inverseName = "FK_REL_VIDEODATA_MEDIAFILE")
+            joinColumns = @JoinColumn(name = "mediafile_id", foreignKey = @ForeignKey(name = "FK_REL_MEDIAFILE_VIDEODATA")),
+            inverseJoinColumns = {
+                @JoinColumn(name = "videodata_id", foreignKey = @ForeignKey(name = "FK_REL_VIDEODATA_MEDIAFILE"))})
     private Set<VideoData> videoDatas = new HashSet<>(0);
 
     @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "mediaFile")
     private Set<StageFile> stageFiles = new HashSet<>(0);
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true,  mappedBy = "mediaFile")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "mediaFile")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<AudioCodec> audioCodecs = new HashSet<>(0);
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true,  mappedBy = "mediaFile")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "mediaFile")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Subtitle> subtitles = new HashSet<>(0);
 
     // GETTER and SETTER
-
     public String getFileName() {
         return fileName;
     }
@@ -339,12 +347,10 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     }
 
     // TRANSIENT METHODS
-
     public StageFile getVideoFile() {
         for (StageFile stageFile : getStageFiles()) {
             if (FileType.VIDEO.equals(stageFile.getFileType())
-                && !StatusType.DUPLICATE.equals(stageFile.getStatus()))
-            {
+                    && !StatusType.DUPLICATE.equals(stageFile.getStatus())) {
                 return stageFile;
             }
         }
@@ -370,7 +376,6 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     }
 
     // EQUALITY CHECKS
-
     @Override
     public int hashCode() {
         return new HashCodeBuilder()

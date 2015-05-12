@@ -22,18 +22,37 @@
  */
 package org.yamj.core.database.model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import javax.persistence.*;
+import java.util.Set;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.*;
-import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.MapKeyType;
+import org.hibernate.annotations.Type;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
@@ -58,24 +77,21 @@ public class Season extends AbstractMetadata {
     private int publicationYear = -1;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "season_ids", joinColumns = @JoinColumn(name = "season_id"))
-    @ForeignKey(name = "FK_SEASON_SOURCEIDS")
+    @JoinTable(name = "season_ids", joinColumns = @JoinColumn(name = "season_id", foreignKey = @ForeignKey(name = "FK_SEASON_SOURCEIDS")))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "season_ratings", joinColumns = @JoinColumn(name = "season_id"))
-    @ForeignKey(name = "FK_SEASON_RATINGS")
+    @JoinTable(name = "season_ratings", joinColumns = @JoinColumn(name = "season_id", foreignKey = @ForeignKey(name = "FK_SEASON_RATINGS")))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "season_override", joinColumns = @JoinColumn(name = "season_id"))
-    @ForeignKey(name = "FK_SEASON_OVERRIDE")
+    @JoinTable(name = "season_override", joinColumns = @JoinColumn(name = "season_id", foreignKey = @ForeignKey(name = "FK_SEASON_OVERRIDE")))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
@@ -83,9 +99,8 @@ public class Season extends AbstractMetadata {
     private Map<OverrideFlag, String> overrideFlags = new EnumMap<>(OverrideFlag.class);
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_SEASON_SERIES")
     @Fetch(FetchMode.JOIN)
-    @JoinColumn(name = "series_id", nullable = false)
+    @JoinColumn(name = "series_id", nullable = false, foreignKey = @ForeignKey(name = "FK_SEASON_SERIES"))
     private Series series;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "season")
@@ -169,7 +184,7 @@ public class Season extends AbstractMetadata {
 
     public void addRating(String sourceDb, int rating) {
         if (StringUtils.isNotBlank(sourceDb) && (rating >= 0)) {
-            this.ratings.put(sourceDb, Integer.valueOf(rating));
+            this.ratings.put(sourceDb, rating);
         }
     }
 
