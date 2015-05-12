@@ -401,25 +401,19 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             return ScanResult.ERROR;
         }
 
-        // fill in data
+        // Fill in cast data
         Set<FilmParticipation> newFilmography = new HashSet<>();
         for (CreditBasic credit : credits.getCast()) {
-            JobType jobType = retrieveJobType(credit.getDepartment());
-            if (jobType == null) {
-                // job type must be present
-                continue;
-            }
-
             FilmParticipation filmo = null;
             switch (credit.getMediaType()) {
                 case MOVIE:
-                    filmo = convertMovieCreditToFilm((CreditMovieBasic) credit, person, jobType);
+                    filmo = convertMovieCreditToFilm((CreditMovieBasic) credit, person, JobType.ACTOR);
                     break;
                 case TV:
-                    LOG.debug("TV credit information for {} ({}) not used: {}", person.getName(), jobType, credit.toString());
+                    LOG.debug("TV credit information for {} ({}) not used: {}", person.getName(), JobType.ACTOR, credit.toString());
                     break;
                 case EPISODE:
-                    LOG.debug("TV Episode credit information for {} ({}) not used: {}", person.getName(), jobType, credit.toString());
+                    LOG.debug("TV Episode credit information for {} ({}) not used: {}", person.getName(), JobType.ACTOR, credit.toString());
                     break;
                 default:
                     LOG.debug("Unknown media type '{}' for credit {}", credit.getMediaType(), credit.toString());
@@ -429,6 +423,31 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
                 newFilmography.add(filmo);
             }
         }
+
+        // Fill in CREW data
+        for (CreditBasic credit : credits.getCast()) {
+            JobType jobType = retrieveJobType(credit.getDepartment());
+
+            FilmParticipation filmo = null;
+            switch (credit.getMediaType()) {
+                case MOVIE:
+                    filmo = convertMovieCreditToFilm((CreditMovieBasic) credit, person, jobType);
+                    break;
+                case TV:
+                    LOG.debug("TV crew information for {} ({}) not used: {}", person.getName(), jobType, credit.toString());
+                    break;
+                case EPISODE:
+                    LOG.debug("TV Episode crew information for {} ({}) not used: {}", person.getName(), jobType, credit.toString());
+                    break;
+                default:
+                    LOG.debug("Unknown crew media type '{}' for credit {}", credit.getMediaType(), credit.toString());
+            }
+
+            if (filmo != null) {
+                newFilmography.add(filmo);
+            }
+        }
+
         person.setNewFilmography(newFilmography);
 
         return ScanResult.OK;
