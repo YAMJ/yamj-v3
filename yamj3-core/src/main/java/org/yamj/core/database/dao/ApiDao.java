@@ -1952,6 +1952,11 @@ public class ApiDao extends HibernateDao {
                 video.setAwards(getAwardsForId(type, options.getId()));
             }
 
+            if (options.hasDataItem(DataItem.EXTERNALID)) {
+                LOG.trace("Adding Eternal IDs for ID {}", options.getId());
+                video.setExternalids(getExternalIdsForId(options.getId(), null, null));
+            }
+
             if (params.hasDataItem(DataItem.ARTWORK)) {
                 LOG.trace("Adding artwork for ID {}", options.getId());
                 Map<Long, List<ApiArtworkDTO>> artworkList;
@@ -2737,7 +2742,8 @@ public class ApiDao extends HibernateDao {
     }
 
     /**
-     * Take a list and generate a map of the ID and a list of the items for that ID
+     * Take a list and generate a map of the ID and a list of the items for that
+     * ID
      *
      * @param <T> Source type
      * @param idList List of the source type
@@ -2948,6 +2954,40 @@ public class ApiDao extends HibernateDao {
         return executeQueryWithTransform(ApiNameDTO.class, sqlScalars, wrapper);
     }
 
+    //<editor-fold defaultstate="collapsed" desc="External ID Methods">
+    public List<ApiExternalIdDTO> getExternalIdsForId(Long id, String sourcedb, String externalid) {
+        SqlScalars sqlScalars = sqlExternalIds(id, sourcedb, externalid);
+        return executeQueryWithTransform(ApiExternalIdDTO.class, sqlScalars, null);
+    }
+
+    private SqlScalars sqlExternalIds(Long id, String sourcedb, String externalid) {
+        SqlScalars sqlScalars = new SqlScalars();
+
+        sqlScalars.addToSql("SELECT videodata_id AS id, sourcedb_id AS externalid, sourcedb AS sourcedb");
+        sqlScalars.addToSql("FROM videodata_ids vi");
+        sqlScalars.addToSql("WHERE 1=1");
+
+        if (id != null && id > 0) {
+            sqlScalars.addToSql("AND vi.videodata_id=:id");
+            sqlScalars.addParameter("id", id);
+        }
+
+        if (StringUtils.isNotBlank(sourcedb)) {
+            sqlScalars.addToSql("AND vi.sourcedb=:sourcedb");
+            sqlScalars.addParameter("sourcedb", sourcedb);
+        }
+
+        if (StringUtils.isNotBlank(externalid)) {
+            sqlScalars.addToSql("AND vi.sourcedb_id=:externalid");
+            sqlScalars.addParameter("externalid", externalid);
+        }
+
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("externalid", StringType.INSTANCE);
+        sqlScalars.addScalar("sourcedb", StringType.INSTANCE);
+        return sqlScalars;
+    }
+
     /**
      * Get a list of the external IDs
      *
@@ -2955,31 +2995,7 @@ public class ApiDao extends HibernateDao {
      */
     public void getExternalIds(ApiWrapperList<ApiExternalIdDTO> wrapper) {
         OptionsExternalId options = (OptionsExternalId) wrapper.getOptions();
-        SqlScalars sqlScalars = new SqlScalars();
-
-        sqlScalars.addToSql("SELECT videodata_id AS id, sourcedb_id AS externalid, sourcedb AS sourcedb");
-        sqlScalars.addToSql("FROM videodata_ids vi");
-        sqlScalars.addToSql("WHERE 1=1");
-
-        if (options.getId() != null && options.getId() > 0) {
-            sqlScalars.addToSql("AND vi.videodata_id=:id");
-            sqlScalars.addParameter("id", options.getId());
-        }
-
-        if (StringUtils.isNotBlank(options.getSourcedb())) {
-            sqlScalars.addToSql("AND vi.sourcedb=:sourcedb");
-            sqlScalars.addParameter("sourcedb", options.getSourcedb());
-        }
-
-        if (StringUtils.isNotBlank(options.getExternalid())) {
-            sqlScalars.addToSql("AND vi.sourcedb_id=:externalid");
-            sqlScalars.addParameter("externalid", options.getExternalid());
-        }
-
-        sqlScalars.addScalar("id", LongType.INSTANCE);
-        sqlScalars.addScalar("externalid", StringType.INSTANCE);
-        sqlScalars.addScalar("sourcedb", StringType.INSTANCE);
-
+        SqlScalars sqlScalars = sqlExternalIds(options.getId(), options.getSourcedb(), options.getExternalid());
         List<ApiExternalIdDTO> result = executeQueryWithTransform(ApiExternalIdDTO.class, sqlScalars, wrapper);
         wrapper.setResults(result);
         wrapper.setStatusCheck();
@@ -3040,4 +3056,5 @@ public class ApiDao extends HibernateDao {
         mergeEntity(vd);
         return new ApiStatus(200, "Successfully deleted '" + sourcedb + "' ID for " + vd.getId() + " - " + vd.getTitle());
     }
+    //</editor-fold>
 }

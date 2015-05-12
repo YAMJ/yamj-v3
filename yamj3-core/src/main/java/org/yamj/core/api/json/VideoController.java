@@ -171,13 +171,23 @@ public class VideoController {
     /**
      * Get the list of external IDs for a video
      *
-     * @param options
+     * @param id
+     * @param sourcedb
+     * @param externalid
      * @return
      */
     @RequestMapping("/externalids")
-    public ApiWrapperList<ApiExternalIdDTO> getExternalIds(@ModelAttribute("options") OptionsExternalId options) {
+    public ApiWrapperList<ApiExternalIdDTO> getExternalIds(
+            @RequestParam(required = false) Long id,
+            @RequestParam(required = false) String sourcedb,
+            @RequestParam(required = false) String externalid) {
         LOG.info("Getting External IDs for VideoData ID: {}, SourceDb: {}, ExternalID: {}",
-                options.getId(), options.getSourcedb(), options.getExternalid());
+                id, sourcedb, externalid);
+
+        OptionsExternalId options = new OptionsExternalId();
+        options.setId(id);
+        options.setSourcedb(sourcedb);
+        options.setExternalid(externalid);
 
         ApiWrapperList<ApiExternalIdDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
@@ -198,7 +208,8 @@ public class VideoController {
     public ApiStatus updateExternalId(
             @RequestParam(required = true) Long id,
             @RequestParam(required = true) String sourcedb,
-            @RequestParam(required = true) String externalid) {
+            @RequestParam(required = true) String externalid
+    ) {
         LOG.info("Add/Update Source: '{}' ExternalID: '{}' to ID: {}", sourcedb, externalid, id);
         return jsonApi.updateExternalId(id, sourcedb, externalid);
     }
@@ -213,7 +224,8 @@ public class VideoController {
     @RequestMapping("/externalids/delete")
     public ApiStatus deleteExternalId(
             @RequestParam(required = true) Long id,
-            @RequestParam(required = false, defaultValue = "") String sourcedb) {
+            @RequestParam(required = false, defaultValue = "") String sourcedb
+    ) {
         LOG.info("Deleting Source: '{}' from ID: {}", sourcedb, id);
         return jsonApi.deleteExternalId(id, sourcedb);
     }

@@ -24,7 +24,11 @@ package org.yamj.core.api.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.Certification;
@@ -37,7 +41,7 @@ import org.yamj.core.tools.MetadataTools;
  *
  * @author stuart.boston
  */
-@JsonInclude(Include.NON_DEFAULT) 
+@JsonInclude(Include.NON_DEFAULT)
 public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     private MetaDataType videoType;
@@ -64,7 +68,8 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<>(ArtworkType.class);
     private List<ApiFileDTO> files = new ArrayList<>();
     private final Map<JobType,List<ApiPersonDTO>> cast = new EnumMap<>(JobType.class);
-                    
+    private List<ApiExternalIdDTO> externalids=new ArrayList<>();
+
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public MetaDataType getVideoType() {
         return videoType;
@@ -105,7 +110,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         }
         return count;
     }
-    
+
     public List<ApiTargetDTO> getGenres() {
         return genres;
     }
@@ -113,7 +118,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     public int getGenreCount() {
         return genres.size();
     }
-    
+
     public List<Studio> getStudios() {
         return studios;
     }
@@ -125,7 +130,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     public List<ApiTargetDTO> getCountries() {
         return countries;
     }
-  
+
     public int getCountriesCount() {
         return countries.size();
     }
@@ -193,6 +198,10 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     public List<ApiFileDTO> getFiles() {
         return files;
     }
+
+    public List<ApiExternalIdDTO> getExternalids() {
+        return externalids;
+    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Setter Methods">
@@ -236,7 +245,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
             addCast(acdto);
         }
     }
-    
+
     public void setGenres(List<ApiTargetDTO> genres) {
         this.genres = genres;
     }
@@ -256,7 +265,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     public void setRatings(List<ApiRatingDTO> ratings) {
         this.ratings = ratings;
     }
-    
+
     public void setAwards(List<ApiAwardDTO> awards) {
         this.awards = awards;
     }
@@ -304,7 +313,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     public void setWatched(Boolean watched) {
         this.watched = watched;
     }
-    
+
     public String getNewest() {
         return MetadataTools.formatDateLong(this.newest);
     }
@@ -315,6 +324,10 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public void setFiles(List<ApiFileDTO> files) {
         this.files = files;
+    }
+
+    public void setExternalids(List<ApiExternalIdDTO> externalids) {
+        this.externalids = externalids;
     }
     //</editor-fold>
 
