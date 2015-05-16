@@ -46,11 +46,20 @@ public class OptionsMultiType extends OptionsAbstractSortSearch {
     }
 
     /**
-     * Split the video types
+     * Get the filtered types
      *
      * @return
      */
     public List<MetaDataType> splitTypes() {
         return this.splitTypes(type);
+    }
+
+    /**
+     * Get the meta data types
+     *
+     * @return
+     */
+    public List<MetaDataType> getMetaDataTypes() {
+        return this.getMetaDataTypes(type);
     }
 }

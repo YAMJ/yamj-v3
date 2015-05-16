@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -60,9 +61,9 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     @JsonIgnore
     private List<DataItem> dataitemList;
     @JsonIgnore
-    private Map<JobType,Integer> jobTypes;
+    private Map<JobType, Integer> jobTypes;
     @JsonIgnore
-    private List<MetaDataType> videoTypes;
+    private List<MetaDataType> metaDataTypes;
     @JsonIgnore
     private boolean allJobTypes;
 
@@ -139,7 +140,6 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
         }
         return sb.toString();
     }
-
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Search Setters/Getters">
@@ -281,8 +281,8 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
         return this.allJobTypes;
     }
 
-    public Map<JobType,Integer> splitJobs() {
-        if (jobTypes == null ) {
+    public Map<JobType, Integer> splitJobs() {
+        if (jobTypes == null) {
             jobTypes = new EnumMap<>(JobType.class);
             if (CollectionUtils.isEmpty(jobs)) {
                 jobTypes = Collections.emptyMap();
@@ -318,7 +318,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
                         }
                     }
                     if (jobType != null) {
-                        jobTypes.put(jobType,amount);
+                        jobTypes.put(jobType, amount);
                     }
                 }
             }
@@ -336,35 +336,47 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     }
     //</editor-fold>
 
+    protected List<MetaDataType> getMetaDataTypes(String type) {
+        List<MetaDataType> types = new ArrayList<>();
+        if (StringUtils.isEmpty(type) || StringUtils.containsIgnoreCase(type, "ALL")) {
+            types.addAll(Arrays.asList(MetaDataType.values()));
+        } else {
+            for (String param : StringUtils.split(type, ",")) {
+                MetaDataType mdt = MetaDataType.fromString(param);
+                if (mdt != MetaDataType.UNKNOWN) {
+                    types.add(mdt);
+                }
+            }
+        }
+
+        return types;
+    }
+
     /**
-     * Get a list of the video types to search for
+     * Get a list of the meta data types to search for
+     *
+     * Note: This limits the ALL/blank type to Movie, Series & Season
      *
      * @param type
      * @return
      */
     protected List<MetaDataType> splitTypes(String type) {
-        if (CollectionUtils.isEmpty(videoTypes)) {
-            videoTypes = new ArrayList<>();
+        if (CollectionUtils.isEmpty(metaDataTypes)) {
+            metaDataTypes = new ArrayList<>();
             if (StringUtils.isEmpty(type) || StringUtils.containsIgnoreCase(type, "ALL")) {
-                videoTypes.add(MetaDataType.MOVIE);
-                videoTypes.add(MetaDataType.SERIES);
-                videoTypes.add(MetaDataType.SEASON);
+                metaDataTypes.add(MetaDataType.MOVIE);
+                metaDataTypes.add(MetaDataType.SERIES);
+                metaDataTypes.add(MetaDataType.SEASON);
             } else {
                 for (String param : StringUtils.split(type, ",")) {
-                    // validate that the string passed is a correct artwork type
+                    // validate that the string passed is a correct type
                     MetaDataType mdt = MetaDataType.fromString(param);
-                    if (MetaDataType.SERIES == mdt) {
-                        videoTypes.add(mdt);
-                    } else if (MetaDataType.SEASON == mdt) {
-                        videoTypes.add(mdt);
-                    } else if (MetaDataType.MOVIE == mdt) {
-                        videoTypes.add(mdt);
-                    } else if (MetaDataType.EPISODE == mdt) {
-                        videoTypes.add(mdt);
+                    if (mdt != MetaDataType.UNKNOWN) {
+                        metaDataTypes.add(mdt);
                     }
                 }
             }
         }
-        return videoTypes;
+        return metaDataTypes;
     }
 }

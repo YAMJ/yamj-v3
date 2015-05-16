@@ -2742,8 +2742,7 @@ public class ApiDao extends HibernateDao {
     }
 
     /**
-     * Take a list and generate a map of the ID and a list of the items for that
-     * ID
+     * Take a list and generate a map of the ID and a list of the items for that ID
      *
      * @param <T> Source type
      * @param idList List of the source type
@@ -2902,7 +2901,7 @@ public class ApiDao extends HibernateDao {
 
     public List<ApiNameDTO> getAlphabeticals(ApiWrapperList<ApiNameDTO> wrapper) {
         OptionsMultiType options = (OptionsMultiType) wrapper.getOptions();
-        List<MetaDataType> mdt = options.splitTypes();
+        List<MetaDataType> mdt = options.getMetaDataTypes();
 
         StringBuilder sbSQL = new StringBuilder();
         boolean appendUnion = false;
@@ -2943,6 +2942,24 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("SELECT distinct upper(left(vd.title_sort,1)) as name ");
             sbSQL.append("from videodata vd ");
             sbSQL.append("where vd.episode >= 0 ");
+            appendUnion = true;
+        }
+
+        // add the Person entries
+        if (mdt.contains(MetaDataType.PERSON)) {
+            if (appendUnion) {
+                sbSQL.append(SQL_UNION);
+            }
+
+            sbSQL.append("SELECT distinct upper(left(p.last_name,1)) as name ");
+            sbSQL.append("FROM person p ");
+            sbSQL.append("WHERE p.last_name IS NOT NULL ");
+            sbSQL.append("AND LEFT(p.last_name,1) NOT IN ('''','\"') ");
+        }
+
+        // If there were no types added, then return an empty list
+        if (sbSQL.length() == 0) {
+            return Collections.emptyList();
         }
 
         sbSQL.append("ORDER BY name ");
