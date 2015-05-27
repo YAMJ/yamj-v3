@@ -3,6 +3,8 @@ YAMJ-v3
 
 Main Project for YAMJ v3
 
+[![Build Status](http://jenkins.omertron.com/job/YAMJv3/badge/icon)](http://jenkins.omertron.com/job/YAMJv3)
+
 Modules
 -------
 ### yamj3-common:
