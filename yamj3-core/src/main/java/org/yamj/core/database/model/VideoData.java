@@ -22,37 +22,9 @@
  */
 package org.yamj.core.database.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -77,7 +49,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
             @Index(name = "IX_VIDEODATA_STATUS", columnList = "status"),
             @Index(name = "IX_VIDEODATA_PUBLICATIONYEAR", columnList = "publication_year")}
 )
-@SuppressWarnings({"unused", "deprecation"})
+@SuppressWarnings("unused")
 public class VideoData extends AbstractMetadata {
 
     private static final long serialVersionUID = 885531396557944590L;

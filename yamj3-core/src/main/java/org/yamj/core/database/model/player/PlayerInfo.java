@@ -26,21 +26,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import org.hibernate.annotations.NaturalId;
 import org.yamj.core.database.model.AbstractIdentifiable;
 
 @Entity
 @Table(name = "player_info")
-@SuppressWarnings("deprecation")
 public class PlayerInfo extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 2906323039735788880L;

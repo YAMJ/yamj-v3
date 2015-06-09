@@ -25,17 +25,7 @@ package org.yamj.core.database.model;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
@@ -49,7 +39,7 @@ import org.yamj.core.database.model.type.FileType;
 @Table(name = "mediafile",
         uniqueConstraints = @UniqueConstraint(name = "UIX_MEDIAFILE_NATURALID", columnNames = {"file_name"})
 )
-@SuppressWarnings({"unused", "deprecation"})
+@SuppressWarnings("unused")
 public class MediaFile extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = 8411423609119475972L;

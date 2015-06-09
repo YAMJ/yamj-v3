@@ -83,7 +83,6 @@ public class YamjInfo {
         this(YamjInfoBuild.COMMON);
     }
 
-    @SuppressWarnings("rawtypes")
     public YamjInfo(YamjInfoBuild yamjInfoBuild) {
         // YAMJ Stuff
         processPropertiesFile(yamjInfoBuild.getFilename());
@@ -122,8 +121,7 @@ public class YamjInfo {
 
     private void processPropertiesFile(String filename) {
         Properties properties = new Properties();
-        try {
-            InputStream res = getClass().getClassLoader().getResourceAsStream(filename);
+        try (InputStream res = getClass().getClassLoader().getResourceAsStream(filename)) {
             if (res == null) {
                 LOG.warn("Unable to open '{}' file", filename);
             } else {
@@ -143,7 +141,7 @@ public class YamjInfo {
         }
     }
 
-    private boolean asBoolean(final String valueToConvert) {
+    private static boolean asBoolean(final String valueToConvert) {
         if (StringUtils.isNotBlank(valueToConvert)) {
             return Boolean.parseBoolean(StringUtils.trimToEmpty(valueToConvert));
         }

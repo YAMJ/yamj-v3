@@ -32,17 +32,7 @@ import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.dto.ApiArtworkDTO;
-import org.yamj.core.api.model.dto.ApiAwardDTO;
-import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
-import org.yamj.core.api.model.dto.ApiEpisodeDTO;
-import org.yamj.core.api.model.dto.ApiExternalIdDTO;
-import org.yamj.core.api.model.dto.ApiNameDTO;
-import org.yamj.core.api.model.dto.ApiPersonDTO;
-import org.yamj.core.api.model.dto.ApiRatingDTO;
-import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
-import org.yamj.core.api.model.dto.ApiTargetDTO;
-import org.yamj.core.api.model.dto.ApiVideoDTO;
+import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
@@ -51,12 +41,7 @@ import org.yamj.core.database.dao.ApiDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.MediaDao;
 import org.yamj.core.database.dao.PlayerDao;
-import org.yamj.core.database.model.Certification;
-import org.yamj.core.database.model.Configuration;
-import org.yamj.core.database.model.Country;
-import org.yamj.core.database.model.Genre;
-import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;
 
 @Service("jsonApiStorageService")
@@ -381,9 +366,9 @@ public class JsonApiStorageService {
 
             sb.append(" changed to ").append(watched(video.isWatchedApi()));
             return new ApiStatus(200, sb.toString());
-        } else {
-            return new ApiStatus(400, "No " + type + " ID provided");
         }
+        
+        return new ApiStatus(400, "No " + type + " ID provided");
     }
 
     /**
@@ -424,7 +409,7 @@ public class JsonApiStorageService {
         return new ApiStatus(200, sb.toString());
     }
 
-    private String watched(boolean watched) {
+    private static String watched(boolean watched) {
         return watched ? "watched" : "unwatched";
     }
     //</editor-fold>

@@ -22,17 +22,14 @@
  */
 package org.yamj.common.model;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.joda.time.DateTime;
-import org.junit.After;
-import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.BasicConfigurator;
+import org.joda.time.DateTime;
+import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.PropertyTools;
@@ -54,14 +51,17 @@ public class YamjInfoTest {
 
     @AfterClass
     public static void tearDownClass() {
+        // nothing to do
     }
 
     @Before
     public void setUp() {
+        // nothing to do
     }
 
     @After
     public void tearDown() {
+        // nothing to do
     }
 
     /**

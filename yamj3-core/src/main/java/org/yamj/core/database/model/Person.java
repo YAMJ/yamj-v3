@@ -23,38 +23,17 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import javax.persistence.*;
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.Lob;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.MapKeyType;
-import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
@@ -66,7 +45,7 @@ import org.yamj.core.database.model.type.OverrideFlag;
             @Index(name = "IX_PERSON_FILMOGRAPHY_STATUS", columnList = "filmography_status"),
             @Index(name = "IX_PERSON_NAME", columnList = "name")}
 )
-@SuppressWarnings({"unused", "deprecation"})
+@SuppressWarnings("unused")
 public class Person extends AbstractAuditable implements IScannable, Serializable {
 
     private static final long serialVersionUID = 660066902996412843L;

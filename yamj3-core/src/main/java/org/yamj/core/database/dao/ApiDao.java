@@ -22,25 +22,11 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.type.BooleanType;
-import org.hibernate.type.DateType;
-import org.hibernate.type.FloatType;
-import org.hibernate.type.IntegerType;
-import org.hibernate.type.LongType;
-import org.hibernate.type.StringType;
-import org.hibernate.type.TimestampType;
+import org.hibernate.type.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -53,32 +39,8 @@ import org.yamj.core.api.model.builder.DataItem;
 import org.yamj.core.api.model.builder.DataItemTools;
 import org.yamj.core.api.model.builder.IndexParams;
 import org.yamj.core.api.model.builder.SqlScalars;
-import org.yamj.core.api.model.dto.AbstractApiIdentifiableDTO;
-import org.yamj.core.api.model.dto.ApiArtworkDTO;
-import org.yamj.core.api.model.dto.ApiAudioCodecDTO;
-import org.yamj.core.api.model.dto.ApiAwardDTO;
-import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
-import org.yamj.core.api.model.dto.ApiBoxedSetMemberDTO;
-import org.yamj.core.api.model.dto.ApiEpisodeDTO;
-import org.yamj.core.api.model.dto.ApiExternalIdDTO;
-import org.yamj.core.api.model.dto.ApiFileDTO;
-import org.yamj.core.api.model.dto.ApiFilmographyDTO;
-import org.yamj.core.api.model.dto.ApiNameDTO;
-import org.yamj.core.api.model.dto.ApiPersonDTO;
-import org.yamj.core.api.model.dto.ApiRatingDTO;
-import org.yamj.core.api.model.dto.ApiSeasonInfoDTO;
-import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
-import org.yamj.core.api.model.dto.ApiSubtitleDTO;
-import org.yamj.core.api.model.dto.ApiTargetDTO;
-import org.yamj.core.api.model.dto.ApiVideoDTO;
-import org.yamj.core.api.options.OptionsBoxedSet;
-import org.yamj.core.api.options.OptionsEpisode;
-import org.yamj.core.api.options.OptionsExternalId;
-import org.yamj.core.api.options.OptionsId;
-import org.yamj.core.api.options.OptionsIdArtwork;
-import org.yamj.core.api.options.OptionsIndexArtwork;
-import org.yamj.core.api.options.OptionsIndexVideo;
-import org.yamj.core.api.options.OptionsMultiType;
+import org.yamj.core.api.model.dto.*;
+import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Certification;
@@ -2977,7 +2939,7 @@ public class ApiDao extends HibernateDao {
         return executeQueryWithTransform(ApiExternalIdDTO.class, sqlScalars, null);
     }
 
-    private SqlScalars sqlExternalIds(Long id, String sourcedb, String externalid) {
+    private static SqlScalars sqlExternalIds(Long id, String sourcedb, String externalid) {
         SqlScalars sqlScalars = new SqlScalars();
 
         sqlScalars.addToSql("SELECT videodata_id AS id, sourcedb_id AS externalid, sourcedb AS sourcedb");
