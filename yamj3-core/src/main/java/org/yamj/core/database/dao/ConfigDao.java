@@ -48,8 +48,6 @@ public class ConfigDao extends HibernateDao {
         query.setCacheable(true);
 
         HashMap<String, String> config = new HashMap<>();
-        
-        @SuppressWarnings("unchecked")
         List<Object[]> objects = query.list();
         for (Object[] object : objects) {
             String key = convertRowElementToString(object[0]);
@@ -81,7 +79,6 @@ public class ConfigDao extends HibernateDao {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public List<Configuration> getConfigurationEntries(OptionsConfig options) {
         StringBuilder sbSQL = new StringBuilder("from Configuration");
 

@@ -50,7 +50,6 @@ public class ArtworkDao extends HibernateDao {
                 .load();
     }
 
-    @SuppressWarnings("unchecked")
     public List<ArtworkProfile> getPreProcessArtworkProfiles(ArtworkType artworkType, MetaDataType metaDataType) {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(ArtworkProfile.class);
@@ -86,7 +85,6 @@ public class ArtworkDao extends HibernateDao {
 
         List<QueueDTO> queueElements = new ArrayList<>();
         
-        @SuppressWarnings("unchecked")
         List<Object[]> objects = query.list();
         for (Object[] object : objects) {
             QueueDTO queueElement = new QueueDTO();
@@ -137,8 +135,6 @@ public class ArtworkDao extends HibernateDao {
         }
 
         List<QueueDTO> queueElements = new ArrayList<>();
-        
-        @SuppressWarnings("unchecked")
         List<Object[]> objects = query.list();
         for (Object[] object : objects) {
             QueueDTO queueElement = new QueueDTO();
@@ -154,7 +150,6 @@ public class ArtworkDao extends HibernateDao {
         return queueElements;
     }
 
-    @SuppressWarnings("unchecked")
     public List<Artwork> getBoxedSetArtwork(String boxedSetName, ArtworkType artworkType) {
         Criteria criteria = currentSession().createCriteria(Artwork.class);
         criteria.add(Restrictions.eq("artworkType", artworkType));

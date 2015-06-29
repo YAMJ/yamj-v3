@@ -88,7 +88,6 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
     /**
      * @return @see UserType#returnedClass()
      */
-    @SuppressWarnings("rawtypes")
     @Override
     public Class returnedClass() {
         return this.enumClass;

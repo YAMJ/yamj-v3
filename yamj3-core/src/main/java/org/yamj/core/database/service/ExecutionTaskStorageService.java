@@ -71,7 +71,6 @@ public class ExecutionTaskStorageService {
         }
     }
     
-    @SuppressWarnings("unchecked")
     @Transactional(readOnly = true)
     public List<ExecutionTask> getTasksForExecution() {
         String query = "from ExecutionTask et where et.nextExecution <= :actualDate";

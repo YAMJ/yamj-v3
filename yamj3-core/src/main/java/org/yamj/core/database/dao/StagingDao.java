@@ -23,13 +23,7 @@
 package org.yamj.core.database.dao;
 
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
@@ -40,11 +34,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.Library;
-import org.yamj.core.database.model.StageDirectory;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.hibernate.HibernateDao;
@@ -90,7 +80,6 @@ public class StagingDao extends HibernateDao {
         return (Long) criteria.uniqueResult();
     }
 
-    @SuppressWarnings("unchecked")
     public List<StageDirectory> getRootDirectories() {
         Criteria criteria = currentSession().createCriteria(StageDirectory.class);
         criteria.add(Restrictions.isNull("parentDirectory"));
@@ -99,7 +88,6 @@ public class StagingDao extends HibernateDao {
         return criteria.list();
     }
 
-    @SuppressWarnings("unchecked")
     public List<StageDirectory> getChildDirectories(StageDirectory stageDirectory) {
         if (stageDirectory == null) {
             return Collections.emptyList();
@@ -116,7 +104,6 @@ public class StagingDao extends HibernateDao {
         return this.findVideoDatas(null, stageDirectory);
     }
 
-    @SuppressWarnings("unchecked")
     public List<VideoData> findVideoDatas(String baseName, StageDirectory stageDirectory) {
         if (stageDirectory == null) {
             return Collections.emptyList();
@@ -148,7 +135,6 @@ public class StagingDao extends HibernateDao {
         return query.list();
     }
 
-    @SuppressWarnings("unchecked")
     public List<VideoData> findVideoDatas(String baseName, Library library) {
         if (library == null) {
             return Collections.emptyList();
@@ -177,7 +163,6 @@ public class StagingDao extends HibernateDao {
         return query.list();
     }
 
-    @SuppressWarnings("unchecked")
     public List<VideoData> findVideoDatas(Collection<StageDirectory> stageDirectories) {
         if (CollectionUtils.isEmpty(stageDirectories)) {
             return Collections.emptyList();
@@ -226,7 +211,6 @@ public class StagingDao extends HibernateDao {
         return (StageFile) query.uniqueResult();
     }
 
-    @SuppressWarnings("unchecked")
     public List<StageFile> getValidNFOFilesForVideo(long videoDataId) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT distinct sf ");
@@ -252,7 +236,6 @@ public class StagingDao extends HibernateDao {
         return query.list();
     }
 
-    @SuppressWarnings("unchecked")
     public List<StageFile> getValidNFOFilesForSeries(long seriesId) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT distinct sf ");
@@ -284,7 +267,6 @@ public class StagingDao extends HibernateDao {
         return this.findMatchingArtworksForVideo(artworkType, null, stageDirectory);
     }
 
-    @SuppressWarnings("unchecked")
     public Set<Artwork> findMatchingArtworksForVideo(ArtworkType artworkType, String baseName, StageDirectory stageDirectory) {
         // NOTE: union not supported in HQL, so each query has to be executed
         //       and mapped into a set to have uniqueness
@@ -347,7 +329,6 @@ public class StagingDao extends HibernateDao {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     public Set<Artwork> findMatchingArtworksForVideo(ArtworkType artworkType, String baseName, Library library) {
         // NOTE: union not supported in HQL, so each query has to be executed
         //       and mapped into a set to have uniqueness
@@ -415,7 +396,6 @@ public class StagingDao extends HibernateDao {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     public List<StageFile> findStageFiles(FileType fileType, String searchName, String searchExtension, StageDirectory stageDirectory) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT distinct sf ");
@@ -443,7 +423,6 @@ public class StagingDao extends HibernateDao {
         return query.list();
     }
 
-    @SuppressWarnings("unchecked")
     public List<StageFile> findStageFiles(FileType fileType, String searchName, String searchExtension, Library library) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT distinct sf ");
@@ -478,7 +457,6 @@ public class StagingDao extends HibernateDao {
         return query.list();
     }
 
-    @SuppressWarnings("unchecked")
     public List<StageFile> findStageFilesInSpecialFolder(FileType fileType, String folderName, Library library, Collection<String> searchNames) {
         if (StringUtils.isBlank(folderName) || CollectionUtils.isEmpty(searchNames)) {
             return Collections.emptyList();
