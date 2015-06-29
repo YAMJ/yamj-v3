@@ -46,7 +46,7 @@ public class ApiStatus {
     }
 
     /**
-     * The status of the response. Should be one of<br>
+     * The status of the response. Should be one of:<br>
      * 1xx - Provisional status<br>
      * 2xx - Success<br>
      * 4xx - Client error<br>
