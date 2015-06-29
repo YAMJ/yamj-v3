@@ -62,6 +62,8 @@ public class MetadataDao extends HibernateDao {
         }
 
         List<QueueDTO> queueElements = new ArrayList<>();
+        
+        @SuppressWarnings("unchecked")
         List<Object[]> objects = query.list();
         for (Object[] object : objects) {
             QueueDTO queueElement = new QueueDTO();
@@ -151,6 +153,7 @@ public class MetadataDao extends HibernateDao {
         return (CastCrew) query.uniqueResult();
     }
 
+    @SuppressWarnings("unchecked")
     public List<Artwork> findPersonArtworks(String identifier) {
         StringBuilder sb = new StringBuilder();
         sb.append("select a ");

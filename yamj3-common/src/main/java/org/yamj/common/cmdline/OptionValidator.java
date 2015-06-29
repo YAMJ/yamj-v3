@@ -32,7 +32,6 @@ public class OptionValidator {
      *
      * @see OptionValidator#validate(CmdLineParser, ParsedOption)
      */
-    @SuppressWarnings("unused")
     public void validate(final CmdLineParser cmdlineparser, final ParsedOption parsedoption) throws CmdLineException {
         // do nothing
     }

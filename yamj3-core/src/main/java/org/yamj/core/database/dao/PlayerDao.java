@@ -73,6 +73,7 @@ public class PlayerDao extends HibernateDao {
      *
      * @return
      */
+    @SuppressWarnings("unchecked")
     public List<PlayerInfo> getPlayerList() {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(PlayerInfo.class);
@@ -81,6 +82,7 @@ public class PlayerDao extends HibernateDao {
         return criteria.list();
     }
 
+    @SuppressWarnings("unchecked")
     public List<PlayerInfo> getPlayerList(OptionsPlayer options) {
         Criteria criteria = currentSession().createCriteria(PlayerInfo.class);
 

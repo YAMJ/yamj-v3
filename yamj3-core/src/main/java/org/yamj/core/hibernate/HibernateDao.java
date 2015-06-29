@@ -445,7 +445,7 @@ public abstract class HibernateDao {
      * @param wrapper
      * @return
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public <T> List<T> executeQueryWithTransform(Class T, SqlScalars sqlScalars, IApiWrapper wrapper) {
         SQLQuery query = sqlScalars.createSqlQuery(currentSession());
         query.setReadOnly(true);

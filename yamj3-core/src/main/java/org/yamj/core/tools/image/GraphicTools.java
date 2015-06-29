@@ -23,7 +23,12 @@
 package org.yamj.core.tools.image;
 
 import com.jhlabs.image.PerspectiveFilter;
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GradientPaint;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -156,7 +161,6 @@ public final class GraphicTools {
         return bi;
     }
 
-    @SuppressWarnings("unused")
     public static BufferedImage scaleToSizeBestFit(int nMaxWidth, int nMaxHeight, BufferedImage imgSrc) {
         // determine thumbnail size from WIDTH and HEIGHT
         int imageWidth = imgSrc.getWidth(null);

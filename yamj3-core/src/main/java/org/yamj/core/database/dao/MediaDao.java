@@ -58,6 +58,8 @@ public class MediaDao extends HibernateDao {
         }
 
         List<QueueDTO> queueElements = new ArrayList<>();
+        
+        @SuppressWarnings("unchecked")
         List<Object[]> objects = query.list();
         for (Object[] object : objects) {
             QueueDTO queueElement = new QueueDTO();

@@ -23,7 +23,11 @@
 package org.yamj.core.service.file;
 
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -192,6 +196,7 @@ public class FileStorageService {
                         ZipFile zf = new ZipFile(zipFilename);
 
                         // Get a list of the files in the zip
+                        @SuppressWarnings("unchecked")
                         List<FileHeader> fileHeaderList = zf.getFileHeaders();
                         // Get the first file
                         String tempFilename = fileHeaderList.get(0).getFileName();

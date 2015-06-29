@@ -34,7 +34,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.ArtworkDao;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.ArtworkGenerated;
+import org.yamj.core.database.model.ArtworkLocated;
+import org.yamj.core.database.model.ArtworkProfile;
+import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 
@@ -168,6 +172,7 @@ public class ArtworkStorageService {
         sb.append("LEFT OUTER JOIN FETCH art.artworkLocated ");
         sb.append("WHERE art.id = :id");
 
+        @SuppressWarnings("unchecked")
         List<Artwork> objects = this.artworkDao.findById(sb, id);
         Artwork artwork = DataAccessUtils.requiredUniqueResult(objects);
 
@@ -220,6 +225,7 @@ public class ArtworkStorageService {
         sb.append("LEFT OUTER JOIN FETCH loc.stageFile ");
         sb.append("WHERE loc.id = :id");
 
+        @SuppressWarnings("unchecked")
         List<ArtworkLocated> objects = this.artworkDao.findById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }

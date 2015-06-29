@@ -88,6 +88,7 @@ public class EnumIntUserType implements EnhancedUserType, ParameterizedType {
     /**
      * @return @see UserType#returnedClass()
      */
+    @SuppressWarnings("rawtypes")
     @Override
     public Class returnedClass() {
         return this.enumClass;
