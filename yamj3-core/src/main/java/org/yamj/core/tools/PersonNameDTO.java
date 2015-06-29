@@ -34,7 +34,7 @@ public final class PersonNameDTO {
     private String lastName;
   
     public PersonNameDTO(String name) {
-        this.name = name;
+        this.name = fixName(name);
     }
     
     public String getName() {
@@ -47,7 +47,7 @@ public final class PersonNameDTO {
   
     public void setFirstName(String firstName) {
         if (StringUtils.isNotBlank(firstName)) {
-            this.firstName = firstName;
+            this.firstName = fixName(firstName);
         }
     }
   
@@ -57,12 +57,16 @@ public final class PersonNameDTO {
   
     public void setLastName(String lastName) {
         if (StringUtils.isNotBlank(lastName)) {
-            this.lastName = lastName;
+            this.lastName = fixName(lastName);
         }
     }
 
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    }
+    
+    private static String fixName(final String input) {
+    	return StringUtils.replace(input, "\"", "'");
     }
 }
