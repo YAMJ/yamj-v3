@@ -61,7 +61,6 @@ public class MediaStorageService {
         sb.append("left outer join fetch mf.stageFiles ");
         sb.append("where mf.id = :id" );
 
-        @SuppressWarnings("unchecked")
         List<MediaFile> objects = this.mediaDao.findById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }

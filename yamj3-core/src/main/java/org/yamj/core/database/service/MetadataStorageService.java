@@ -22,15 +22,8 @@
  */
 package org.yamj.core.database.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,20 +38,7 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.MetadataDao;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.BoxedSet;
-import org.yamj.core.database.model.BoxedSetOrder;
-import org.yamj.core.database.model.CastCrew;
-import org.yamj.core.database.model.Certification;
-import org.yamj.core.database.model.Country;
-import org.yamj.core.database.model.FilmParticipation;
-import org.yamj.core.database.model.Genre;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.award.Award;
 import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.award.SeriesAward;
@@ -136,7 +116,6 @@ public class MetadataStorageService {
         sb.append("from VideoData vd ");
         sb.append("where vd.id = :id ");
 
-        @SuppressWarnings("unchecked")
         List<VideoData> objects = this.commonDao.findById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }
@@ -149,7 +128,6 @@ public class MetadataStorageService {
         sb.append("join fetch sea.videoDatas vd ");
         sb.append("where ser.id = :id ");
 
-        @SuppressWarnings("unchecked")
         List<Series> objects = this.commonDao.findById(sb, id);
         return DataAccessUtils.requiredUniqueResult(objects);
     }

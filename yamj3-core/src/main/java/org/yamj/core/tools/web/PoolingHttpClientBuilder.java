@@ -104,6 +104,7 @@ public class PoolingHttpClientBuilder {
       this.maxDownloadSlots = maxDownloadSlots;
     }
 
+    @SuppressWarnings("resource")
     public PoolingHttpClient build() {
         // create proxy
         HttpHost proxy = null;

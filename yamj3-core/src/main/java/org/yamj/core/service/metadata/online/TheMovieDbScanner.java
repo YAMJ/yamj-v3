@@ -32,11 +32,7 @@ import com.omertron.themoviedbapi.model.movie.ProductionCompany;
 import com.omertron.themoviedbapi.model.movie.ProductionCountry;
 import com.omertron.themoviedbapi.model.person.PersonCreditList;
 import com.omertron.themoviedbapi.model.person.PersonInfo;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -375,7 +371,6 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         return configServiceWrapper.getBooleanProperty("themoviedb.person.filmography", false);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ScanResult scanFilmography(Person person) {
         PersonCreditList<CreditBasic> credits = null;

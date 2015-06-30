@@ -22,13 +22,8 @@
  */
 package org.yamj.core.database.service;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,17 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.StagingDao;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.ArtworkGenerated;
-import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.BoxedSet;
-import org.yamj.core.database.model.MediaFile;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.StageDirectory;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.file.FileStorageService;
@@ -69,7 +54,6 @@ public class CommonStorageService {
     @Autowired
     private StagingService stagingService;
 
-    @SuppressWarnings("unchecked")
     @Transactional(readOnly = true)
     public List<Long> getStageFilesToDelete() {
         final StringBuilder sb = new StringBuilder();
@@ -353,7 +337,6 @@ public class CommonStorageService {
         this.stagingDao.deleteEntity(generated);
     }
 
-    @SuppressWarnings("unchecked")
     @Transactional(readOnly = true)
     public List<Long> getOrphanPersons() {
         final StringBuilder query = new StringBuilder();
@@ -377,7 +360,6 @@ public class CommonStorageService {
         return filesToDelete;
     }
 
-    @SuppressWarnings("unchecked")
     @Transactional(readOnly = true)
     public List<Long> getOrphanBoxedSets() {
         final StringBuilder query = new StringBuilder();
