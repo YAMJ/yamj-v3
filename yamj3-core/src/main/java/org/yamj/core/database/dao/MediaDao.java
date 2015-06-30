@@ -91,13 +91,7 @@ public class MediaDao extends HibernateDao {
         } 
         
         sqlScalars.addToSql("WHERE mf.video_source is not null ");
-        sqlScalars.addToSql("ORDER BY mf.video_source ");
-       
-        if ("DESC".equalsIgnoreCase(options.getSortdir())) {
-            sqlScalars.addToSql("DESC");
-        } else {
-            sqlScalars.addToSql("ASC");
-        }
+        sqlScalars.addToSql(options.getSortString("mf.video_source"));
         
         sqlScalars.addScalar("name", StringType.INSTANCE);
 

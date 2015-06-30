@@ -2918,8 +2918,7 @@ public class ApiDao extends HibernateDao {
             return Collections.emptyList();
         }
 
-        sbSQL.append("ORDER BY name ");
-        sbSQL.append("DESC".equalsIgnoreCase(options.getSortdir()) ? "DESC" : "ASC");
+        sbSQL.append(options.getSortString("name"));
 
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
         sqlScalars.addScalar("name", StringType.INSTANCE);
