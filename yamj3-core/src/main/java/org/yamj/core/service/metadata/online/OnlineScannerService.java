@@ -304,10 +304,10 @@ public class OnlineScannerService {
      */
     public boolean isFilmographyScanEnabled() {
         IFilmographyScanner filmographyScanner = registeredFilmographyScanner.get(PERSON_SCANNER);
-        if (filmographyScanner == null) {
-            return false;
-        }
-        return filmographyScanner.isFilmographyScanEnabled();
+        final boolean scanFilmo = (filmographyScanner == null ? false : filmographyScanner.isFilmographyScanEnabled());
+        filmographyScanner = registeredFilmographyScanner.get(PERSON_SCANNER_ALT);
+        final boolean scanFilmoAlt = (filmographyScanner == null ? false : filmographyScanner.isFilmographyScanEnabled());
+        return (scanFilmo || scanFilmoAlt);
     }
 
     /**
@@ -317,21 +317,34 @@ public class OnlineScannerService {
      */
     public void scanFilmography(Person person) {
         ScanResult scanResult;
+        final IFilmographyScanner filmographyScanner = registeredFilmographyScanner.get(PERSON_SCANNER);
+        final IFilmographyScanner filmographyScannerAlt = registeredFilmographyScanner.get(PERSON_SCANNER_ALT);
         
-        IFilmographyScanner filmographyScanner = registeredFilmographyScanner.get(PERSON_SCANNER);
-        if (filmographyScanner == null) {
-            LOG.error("Filmography scanner '{}' not registered", PERSON_SCANNER);
+        if (filmographyScanner == null && filmographyScannerAlt==null) {
+            LOG.error("No Filmography scanner registered");
             scanResult = ScanResult.ERROR;
         } else {
-            LOG.info("Scanning for filmography of person {}-'{}' using {}", person.getId(), person.getName(), PERSON_SCANNER);
-    
-            // scan person data
-            try {
-                scanResult = filmographyScanner.scanFilmography(person);
-            } catch (Exception error) {
+            IFilmographyScanner enabledFilmographyScanner = null;
+            if (filmographyScanner != null && filmographyScanner.isFilmographyScanEnabled()) {
+                enabledFilmographyScanner = filmographyScanner;
+            } else if (filmographyScannerAlt != null && filmographyScannerAlt.isFilmographyScanEnabled()) {
+                enabledFilmographyScanner = filmographyScannerAlt;
+            }
+            
+            if (enabledFilmographyScanner == null) {
+                LOG.error("No scanner enabled for scanning filmography");
                 scanResult = ScanResult.ERROR;
-                LOG.error("Failed scanning person filmography (ID '{}') data with scanner {} ", person.getId(), PERSON_SCANNER);
-                LOG.warn("Scanning error", error);
+            } else {
+                LOG.info("Scanning for filmography of person {}-'{}' using {}", person.getId(), person.getName(), PERSON_SCANNER);
+        
+                // scan person data
+                try {
+                    scanResult = enabledFilmographyScanner.scanFilmography(person);
+                } catch (Exception error) {
+                    scanResult = ScanResult.ERROR;
+                    LOG.error("Failed scanning person filmography (ID '{}') data with scanner {} ", person.getId(), PERSON_SCANNER);
+                    LOG.warn("Scanning error", error);
+                }
             }
         }
         
