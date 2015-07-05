@@ -69,7 +69,7 @@ public class TheMovieDbApiWrapper {
                 } else {
                     relDate = "";
                 }
-                LOG.debug("Checking {} {{})", m.getTitle(), relDate);
+                LOG.debug("Checking {} ({})", m.getTitle(), relDate);
                 if (Compare.movies(m, title, String.valueOf(year), searchMatch)) {
                     movieDb = m;
                     break;
