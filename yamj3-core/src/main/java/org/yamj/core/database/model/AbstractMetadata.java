@@ -24,7 +24,10 @@ package org.yamj.core.database.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
@@ -76,6 +79,9 @@ public abstract class AbstractMetadata extends AbstractAuditable
     @Column(name = "retries", nullable = false)
     private int retries = 0;
 
+    @Transient
+    private Set<String> changedSourceDbs;
+    
     // GETTER and SETTER
     
     @Override
@@ -226,6 +232,19 @@ public abstract class AbstractMetadata extends AbstractAuditable
     @Override
     public boolean isMovie() {
         return false;
+    }
+
+    protected final void addChangedSourceDb(String sourceDb) {
+        if (changedSourceDbs == null) changedSourceDbs = new HashSet<>();
+        changedSourceDbs.add(sourceDb);
+    }
+
+    public final boolean hasChangedSourceDbs() {
+        return CollectionUtils.isNotEmpty(changedSourceDbs);
+    }
+    
+    public final Set<String> getChangedSourceDbs() {
+        return changedSourceDbs;
     }
 
     // ABSTRACT DECLARATIONS

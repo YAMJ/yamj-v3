@@ -25,13 +25,15 @@ package org.yamj.core.database.model;
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.MapKeyType;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.*;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
@@ -150,7 +152,11 @@ public class Season extends AbstractMetadata {
         }
         String newId = id.trim();
         String oldId = this.sourceDbIdMap.put(sourceDb, newId);
-        return (!StringUtils.equals(oldId, newId));
+        final boolean changed = !StringUtils.equals(oldId, newId);
+        if (oldId != null && changed) {
+            addChangedSourceDb(sourceDb);
+        }
+        return changed;
     }
 
     public Map<String, Integer> getRatings() {
