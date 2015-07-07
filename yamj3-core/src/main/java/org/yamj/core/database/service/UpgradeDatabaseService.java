@@ -62,5 +62,13 @@ public class UpgradeDatabaseService {
         } catch (Exception ex) {
             LOG.warn("Failed upgrade 'patchAllocineWonAwards'", ex);
         }
+
+        // Issues: #195
+        // Date:   07.07.2015
+        try {
+            upgradeDatabaseDao.patchFilmographyConfig();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchFilmographyConfig'", ex);
+        }
     }
 }

@@ -25,8 +25,6 @@ package org.yamj.core.service.metadata.online;
 import org.yamj.core.database.model.Person;
 
 public interface IFilmographyScanner extends IPersonScanner {
-
-    boolean isFilmographyScanEnabled();
     
     ScanResult scanFilmography(Person person);
 }

@@ -653,11 +653,6 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
     }
 
     @Override
-    public boolean isFilmographyScanEnabled() {
-        return configServiceWrapper.getBooleanProperty("allocine.person.filmography", false);
-    }
-
-    @Override
     public ScanResult scanFilmography(Person person) {
         FilmographyInfos  filmographyInfos = null;
         try {
@@ -721,6 +716,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
             filmo.setReleaseState(StringUtils.trimToNull(participance.getReleaseState()));
             newFilmography.add(filmo);
         }
+        
         person.setNewFilmography(newFilmography);
         
         return ScanResult.OK;

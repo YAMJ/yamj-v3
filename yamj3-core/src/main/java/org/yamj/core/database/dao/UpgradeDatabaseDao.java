@@ -130,4 +130,17 @@ public class UpgradeDatabaseDao extends HibernateDao {
         sb.append("AND sa.won=0");
         currentSession().createSQLQuery(sb.toString()).executeUpdate();
     }
+
+    /**
+     * Issues: #195
+     * Date:   07.07.2015
+     */
+    public void patchFilmographyConfig() {
+        currentSession()
+            .createSQLQuery("DELETE FROM configuration WHERE config_key='allocine.person.filmography'")
+            .executeUpdate();
+        currentSession()
+        	.createSQLQuery("DELETE FROM configuration WHERE config_key='themoviedb.person.filmography'")
+        	.executeUpdate();
+    }
 }

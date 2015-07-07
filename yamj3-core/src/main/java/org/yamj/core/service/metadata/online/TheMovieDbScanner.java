@@ -22,10 +22,7 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.omertron.themoviedbapi.model.credits.CreditBasic;
-import com.omertron.themoviedbapi.model.credits.CreditMovieBasic;
-import com.omertron.themoviedbapi.model.credits.MediaCreditCast;
-import com.omertron.themoviedbapi.model.credits.MediaCreditCrew;
+import com.omertron.themoviedbapi.model.credits.*;
 import com.omertron.themoviedbapi.model.media.MediaCreditList;
 import com.omertron.themoviedbapi.model.movie.MovieInfo;
 import com.omertron.themoviedbapi.model.movie.ProductionCompany;
@@ -364,11 +361,6 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         }
 
         return newBio.trim();
-    }
-
-    @Override
-    public boolean isFilmographyScanEnabled() {
-        return configServiceWrapper.getBooleanProperty("themoviedb.person.filmography", false);
     }
 
     @Override
