@@ -456,7 +456,7 @@ public class JsonApiStorageService {
         if (skipOnlineScans == null) {
             skipped = new ArrayList<>(1);
         } else {
-            skipped = Arrays.asList(skipOnlineScans.split(";"));
+            skipped = new ArrayList<>(Arrays.asList(skipOnlineScans.split(";")));
         }
 
         if (disable) {
@@ -464,7 +464,7 @@ public class JsonApiStorageService {
         } else {
             skipped.remove(sourcedb.trim());
         }
-        return StringUtils.join(skipped, ';');
+        return StringUtils.trimToNull(StringUtils.join(skipped, ';'));
     }
     
     public void getExternalIds(ApiWrapperList<ApiExternalIdDTO> wrapper) {
