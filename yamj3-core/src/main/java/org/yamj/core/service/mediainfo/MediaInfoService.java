@@ -55,7 +55,7 @@ import org.yamj.core.tools.LanguageTools;
 @Service("mediaInfoService")
 public class MediaInfoService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LanguageTools.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MediaInfoService.class);
 
     private static final Pattern PATTERN_CHANNELS = Pattern.compile(".*(\\d{1,2}).*");
     // mediaInfo command line, depend on OS
