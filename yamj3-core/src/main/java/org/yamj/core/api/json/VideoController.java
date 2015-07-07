@@ -27,21 +27,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.builder.DataItem;
-import org.yamj.core.api.model.dto.ApiEpisodeDTO;
-import org.yamj.core.api.model.dto.ApiExternalIdDTO;
-import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
-import org.yamj.core.api.model.dto.ApiVideoDTO;
-import org.yamj.core.api.options.OptionsEpisode;
-import org.yamj.core.api.options.OptionsExternalId;
-import org.yamj.core.api.options.OptionsIdArtwork;
-import org.yamj.core.api.options.OptionsIndexVideo;
+import org.yamj.core.api.model.dto.*;
+import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -57,8 +48,6 @@ public class VideoController {
 
     /**
      * Get information on a movie
-     *
-     * TODO: Allow genres to be added to the returned data
      *
      * @param options
      * @return
@@ -76,6 +65,38 @@ public class VideoController {
         }
         wrapper.setStatusCheck();
         return wrapper;
+    }
+
+    /**
+     * Enable online scan for one movie.
+     */
+    @RequestMapping("/movie/enableonlinescan")
+    public ApiStatus enableMovieOnlineScan(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb) 
+    {
+        if (id <= 0L) {
+            return new ApiStatus(410, "Not a valid ID");            
+        }
+        
+        LOG.info("Enable {} online scan for movie with ID '{}'", sourcedb, id);
+        return jsonApi.updateOnlineScan(MetaDataType.MOVIE, id, sourcedb, false);
+    }
+
+    /**
+     * Disable online scan for one movie.
+     */
+    @RequestMapping("/movie/disableonlinescan")
+    public ApiStatus disableMovieOnlineScan(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb) 
+    {
+        if (id <= 0L) {
+            return new ApiStatus(410, "Not a valid ID");            
+        }
+        
+        LOG.info("Disable {} online scan for movie with ID '{}'", sourcedb, id);
+        return jsonApi.updateOnlineScan(MetaDataType.MOVIE, id, sourcedb, true);
     }
 
     /**
@@ -99,6 +120,38 @@ public class VideoController {
         }
         wrapper.setStatusCheck();
         return wrapper;
+    }
+
+    /**
+     * Enable online scan for one movie.
+     */
+    @RequestMapping("/series/enableonlinescan")
+    public ApiStatus enableSeriesOnlineScan(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb) 
+    {
+        if (id <= 0L) {
+            return new ApiStatus(410, "Not a valid ID");            
+        }
+        
+        LOG.info("Enable {} online scan for series with ID '{}'", sourcedb, id);
+        return jsonApi.updateOnlineScan(MetaDataType.SERIES, id, sourcedb, false);
+    }
+
+    /**
+     * Disable online scan for one movie.
+     */
+    @RequestMapping("/series/disableonlinescan")
+    public ApiStatus disableSeriesOnlineScan(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb) 
+    {
+        if (id <= 0L) {
+            return new ApiStatus(410, "Not a valid ID");            
+        }
+        
+        LOG.info("Disable {} online scan for series with ID '{}'", sourcedb, id);
+        return jsonApi.updateOnlineScan(MetaDataType.SERIES, id, sourcedb, true);
     }
 
     /**

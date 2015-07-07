@@ -23,6 +23,8 @@
 package org.yamj.core.database.service;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +39,7 @@ import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.configuration.ConfigService;
-import org.yamj.core.database.dao.ApiDao;
-import org.yamj.core.database.dao.CommonDao;
-import org.yamj.core.database.dao.MediaDao;
-import org.yamj.core.database.dao.PlayerDao;
+import org.yamj.core.database.dao.*;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;
 
@@ -414,16 +413,70 @@ public class JsonApiStorageService {
     }
     //</editor-fold>
 
+    @Transactional
+    public ApiStatus updateOnlineScan(MetaDataType type, Long id, String sourcedb, boolean disable) {
+        if (MetaDataType.SERIES == type) {
+            Series series = commonDao.getSeries(id);
+            if (series == null) {
+                return new ApiStatus(400, "Series for ID " + id + " not found");
+            }
+            series.setSkipOnlineScans(rebuildSkipOnlineScans(series.getSkipOnlineScans(), sourcedb, disable));
+            commonDao.updateEntity(series);
+        } else {
+            VideoData videoData = commonDao.getVideoData(id);
+            if (videoData == null) {
+                return new ApiStatus(400, "VideoData for ID " + id + " not found");
+            }
+            videoData.setSkipOnlineScans(rebuildSkipOnlineScans(videoData.getSkipOnlineScans(), sourcedb, disable));
+            commonDao.updateEntity(videoData);
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append(disable?"Disabled ":"Enabled ");
+        sb.append(sourcedb);
+        sb.append(" online scan for "); 
+        sb.append(type).append(" ID: ").append(id);
+        
+        return new ApiStatus(200, sb.toString());
+    }
+
+    private static String rebuildSkipOnlineScans(String skipOnlineScans, String sourcedb, boolean disable) {
+        if (StringUtils.trimToNull(sourcedb) == null) {
+            return skipOnlineScans;
+        }
+        
+        if ("all".equalsIgnoreCase(sourcedb)) {
+            if (disable) {
+                return "all";
+            }
+            return null;
+        }
+        
+        List<String> skipped;
+        if (skipOnlineScans == null) {
+            skipped = new ArrayList<>(1);
+        } else {
+            skipped = Arrays.asList(skipOnlineScans.split(";"));
+        }
+
+        if (disable) {
+            if (!skipped.contains(sourcedb.trim())) skipped.add(sourcedb.trim());
+        } else {
+            skipped.remove(sourcedb.trim());
+        }
+        return StringUtils.join(skipped, ';');
+    }
+    
     public void getExternalIds(ApiWrapperList<ApiExternalIdDTO> wrapper) {
         apiDao.getExternalIds(wrapper);
     }
 
-    @Transactional(readOnly = false)
+    @Transactional
     public ApiStatus updateExternalId(Long id, String sourcedb, String externalid) {
         return apiDao.updateExternalId(id, sourcedb, externalid);
     }
 
-    @Transactional(readOnly = false)
+    @Transactional
     public ApiStatus deleteExternalId(Long id, String sourcedb) {
         return apiDao.deleteExternalId(id, sourcedb);
     }

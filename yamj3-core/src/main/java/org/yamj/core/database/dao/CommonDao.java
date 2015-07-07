@@ -40,13 +40,7 @@ import org.yamj.core.api.model.dto.ApiTargetDTO;
 import org.yamj.core.api.options.OptionsRating;
 import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.BoxedSet;
-import org.yamj.core.database.model.Certification;
-import org.yamj.core.database.model.Country;
-import org.yamj.core.database.model.Genre;
-import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.award.Award;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
@@ -500,6 +494,10 @@ public class CommonDao extends HibernateDao {
 
     public VideoData getVideoData(Long id) {
         return getById(VideoData.class, id);
+    }
+
+    public Series getSeries(Long id) {
+        return getById(Series.class, id);
     }
 
     public List<Long> getSeasonVideoIds(Long id) {
