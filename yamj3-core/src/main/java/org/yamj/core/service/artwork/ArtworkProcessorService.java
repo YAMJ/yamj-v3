@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.artwork;
 
-import org.yamj.core.service.file.FileTools;
-
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -45,6 +43,7 @@ import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ImageFormat;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.service.file.FileStorageService;
+import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.tools.image.GraphicTools;
 
@@ -211,22 +210,19 @@ public class ArtworkProcessorService {
         float ratio = profile.getRatio();
         float rcqFactor = profile.getRounderCornerQuality();
 
-        boolean skipResize = false;
-        if (origWidth < profile.getWidth() && origHeight < profile.getWidth()) {
-            //Perhaps better: if (origWidth == imageWidth && origHeight == imageHeight && !addHDLogo && !addLanguage) {
-            skipResize = true;
-        }
-
-        // fit image to size
         if (profile.isNormalize()) {
-            if (skipResize) {
+            if (origWidth < profile.getWidth() && origHeight < profile.getWidth()) {
+            	// normalize image if below profile settings
                 bi = GraphicTools.scaleToSizeNormalized((int) (origHeight * rcqFactor * ratio), (int) (origHeight * rcqFactor), bi);
             } else {
+            	// normalize image
                 bi = GraphicTools.scaleToSizeNormalized((int) (profile.getWidth() * rcqFactor), (int) (profile.getHeight() * rcqFactor), bi);
             }
         } else if (profile.isStretch()) {
+        	// stretch image
             bi = GraphicTools.scaleToSizeStretch((int) (profile.getWidth() * rcqFactor), (int) (profile.getHeight() * rcqFactor), bi);
-        } else if (!skipResize) {
+        } else if ((origWidth != profile.getWidth()) || (origHeight != profile.getHeight())) {
+        	// scale image to given size
             bi = GraphicTools.scaleToSize((int) (profile.getWidth() * rcqFactor), (int) (profile.getHeight() * rcqFactor), bi);
         }
 
