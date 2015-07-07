@@ -116,6 +116,14 @@ public class ArtworkStorageService {
                     // just store if not contained before
                     artwork.getArtworkLocated().add(located);
                     this.artworkDao.saveEntity(located);
+                } else {
+                    // find matching stored located artwork and update status if needed
+                   for (ArtworkLocated stored : artwork.getArtworkLocated()) {
+                       if (stored.equals(located) && StatusType.DELETED.equals(stored.getStatus())) {
+                           stored.setStatus(StatusType.UPDATED);
+                           this.artworkDao.updateEntity(stored);
+                       }
+                   }
                 }
             }
         }

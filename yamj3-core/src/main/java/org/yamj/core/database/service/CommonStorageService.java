@@ -338,6 +338,38 @@ public class CommonStorageService {
     }
 
     @Transactional(readOnly = true)
+    public List<Long> getArtworkLocatedToDelete() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("SELECT al.id FROM ArtworkLocated al ");
+        sb.append("WHERE al.status = :delete ");
+
+        Map<String, Object> params = Collections.singletonMap("delete", (Object) StatusType.DELETED);
+        return stagingDao.findByNamedParameters(sb, params);
+    }
+
+    @Transactional
+    public Set<String> deleteArtworkLocated(Long id) {
+        Set<String> filesToDelete = new HashSet<>();
+        ArtworkLocated located = this.stagingDao.getById(ArtworkLocated.class, id);
+
+        LOG.debug("Delete: {}", located);
+
+        if (located != null) {
+            Artwork artwork = located.getArtwork();
+            artwork.getArtworkLocated().remove(located);
+            this.delete(artwork, located, filesToDelete);
+
+            // if no located artwork exists anymore then set status of artwork to NEW
+            if (CollectionUtils.isEmpty(located.getArtwork().getArtworkLocated())) {
+                artwork.setStatus(StatusType.NEW);
+                this.stagingDao.updateEntity(artwork);
+            }
+        }
+
+        return filesToDelete;
+    }
+
+    @Transactional(readOnly = true)
     public List<Long> getOrphanPersons() {
         final StringBuilder query = new StringBuilder();
         query.append("SELECT p.id FROM Person p ");

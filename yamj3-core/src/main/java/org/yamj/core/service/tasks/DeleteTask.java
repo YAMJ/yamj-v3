@@ -87,6 +87,25 @@ public class DeleteTask implements ITask {
             LOG.warn("Failed to retrieve stage files to delete", ex);
         }
 
+        try {
+            List<Long> ids = this.commonStorageService.getArtworkLocatedToDelete();
+            if (CollectionUtils.isEmpty(ids)) {
+                LOG.trace("No located artwork found to delete");
+            } else {
+                // delete stage files
+                for (Long id : ids) {
+                    try {
+                        filesToDelete.addAll(this.commonStorageService.deleteArtworkLocated(id));
+                    } catch (Exception ex) {
+                        LOG.warn("Failed to delete located artwork ID: {}", id);
+                        LOG.error("Deletion error", ex);
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            LOG.warn("Failed to retrieve located artworks to delete", ex);
+        }
+
         // delete orphan persons if allowed
         if (this.configService.getBooleanProperty("yamj3.delete.orphan.person", Boolean.TRUE)) {
             try {
