@@ -22,7 +22,10 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.omertron.themoviedbapi.model.credits.*;
+import com.omertron.themoviedbapi.model.credits.CreditBasic;
+import com.omertron.themoviedbapi.model.credits.CreditMovieBasic;
+import com.omertron.themoviedbapi.model.credits.MediaCreditCast;
+import com.omertron.themoviedbapi.model.credits.MediaCreditCrew;
 import com.omertron.themoviedbapi.model.media.MediaCreditList;
 import com.omertron.themoviedbapi.model.movie.MovieInfo;
 import com.omertron.themoviedbapi.model.movie.ProductionCompany;
@@ -103,13 +106,11 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         if (!StringUtils.isNumeric(tmdbId)) {
             LOG.debug("No TMDb id found for '{}', searching title with year {}", videoData.getTitle(), videoData.getPublicationYear());
             tmdbId = tmdbApiWrapper.getMovieDbId(videoData.getTitle(), videoData.getPublicationYear(), throwTempError);
-            videoData.setSourceDbId(SCANNER_ID, tmdbId);
         }
 
         if (!StringUtils.isNumeric(tmdbId) && StringUtils.isNotBlank(videoData.getTitleOriginal())) {
             LOG.debug("No TMDb id found for '{}', searching original title with year {}", videoData.getTitleOriginal(), videoData.getPublicationYear());
             tmdbId = tmdbApiWrapper.getMovieDbId(videoData.getTitleOriginal(), videoData.getPublicationYear(), throwTempError);
-            videoData.setSourceDbId(SCANNER_ID, tmdbId);
         }
 
         if (StringUtils.isNumeric(tmdbId)) {

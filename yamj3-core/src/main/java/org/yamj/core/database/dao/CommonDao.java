@@ -496,8 +496,16 @@ public class CommonDao extends HibernateDao {
         return getById(VideoData.class, id);
     }
 
+    public Season getSeason(Long id) {
+        return getById(Season.class, id);
+    }
+    
     public Series getSeries(Long id) {
         return getById(Series.class, id);
+    }
+
+    public Person getPerson(Long id) {
+        return getById(Person.class, id);
     }
 
     public List<Long> getSeasonVideoIds(Long id) {

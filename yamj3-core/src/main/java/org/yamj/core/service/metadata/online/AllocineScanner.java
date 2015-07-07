@@ -94,6 +94,11 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         if (StringUtils.isBlank(allocineId)) {
             allocineId = allocineApiWrapper.getAllocineMovieId(videoData.getTitle(), videoData.getYear(), throwTempError);
 
+            if (StringUtils.isBlank(allocineId) && StringUtils.isNotBlank(videoData.getTitleOriginal())) {
+                // try with original title
+                allocineId = allocineApiWrapper.getAllocineMovieId(videoData.getTitleOriginal(), videoData.getYear(), throwTempError);
+            }
+            
             if (StringUtils.isBlank(allocineId)) {
                 // try search engines
                 searchEngingeLock.lock();
@@ -266,6 +271,11 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         
         if (StringUtils.isBlank(allocineId)) {
             allocineId = allocineApiWrapper.getAllocineSeriesId(series.getTitle(), series.getYear(), throwTempError);
+
+            if (StringUtils.isBlank(allocineId) && StringUtils.isNotBlank(series.getTitleOriginal())) {
+                // try with original title
+                allocineId = allocineApiWrapper.getAllocineMovieId(series.getTitleOriginal(), series.getYear(), throwTempError);
+            }
 
             if (StringUtils.isBlank(allocineId)) {
                 // try search engines

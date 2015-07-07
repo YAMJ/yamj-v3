@@ -28,24 +28,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
-import org.yamj.core.api.model.dto.ApiAwardDTO;
-import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
-import org.yamj.core.api.model.dto.ApiNameDTO;
-import org.yamj.core.api.model.dto.ApiRatingDTO;
-import org.yamj.core.api.model.dto.ApiTargetDTO;
-import org.yamj.core.api.options.OptionsBoxedSet;
-import org.yamj.core.api.options.OptionsId;
-import org.yamj.core.api.options.OptionsMultiType;
-import org.yamj.core.api.options.OptionsRating;
-import org.yamj.core.api.options.OptionsSingleType;
+import org.yamj.core.api.model.dto.*;
+import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Certification;
@@ -106,6 +93,38 @@ public class CommonController {
     @RequestMapping("/unwatched/episode/{id}")
     public ApiStatus markUnwatchedEpisode(@ModelAttribute("options") OptionsId options) {
         return jsonApi.updateWatchedSingle(MetaDataType.EPISODE, options.getId(), false);
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Rescan Methods">
+    @RequestMapping("/rescan/movie/{id}")
+    public ApiStatus rescanMovie(@ModelAttribute("options") OptionsId options) {
+        return jsonApi.rescanSingle(MetaDataType.MOVIE, options.getId());
+    }
+
+    @RequestMapping("/rescan/series/{id}")
+    public ApiStatus rescanSeries(@ModelAttribute("options") OptionsId options) {
+        return jsonApi.rescanSingle(MetaDataType.SERIES, options.getId());
+    }
+
+    @RequestMapping("/rescan/season/{id}")
+    public ApiStatus rescanSeason(@ModelAttribute("options") OptionsId options) {
+        return jsonApi.rescanSingle(MetaDataType.SEASON, options.getId());
+    }
+
+    @RequestMapping("/rescan/episode/{id}")
+    public ApiStatus rescanEpisode(@ModelAttribute("options") OptionsId options) {
+        return jsonApi.rescanSingle(MetaDataType.EPISODE, options.getId());
+    }
+
+    @RequestMapping("/rescan/person/{id}")
+    public ApiStatus rescanPerson(@ModelAttribute("options") OptionsId options) {
+        return jsonApi.rescanSingle(MetaDataType.PERSON, options.getId());
+    }
+
+    @RequestMapping("/rescan/filmography/{id}")
+    public ApiStatus rescanFilmography(@ModelAttribute("options") OptionsId options) {
+        return jsonApi.rescanSingle(MetaDataType.FILMOGRAPHY, options.getId());
     }
     //</editor-fold>
 

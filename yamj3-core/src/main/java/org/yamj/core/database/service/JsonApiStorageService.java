@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
@@ -39,7 +40,10 @@ import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.configuration.ConfigService;
-import org.yamj.core.database.dao.*;
+import org.yamj.core.database.dao.ApiDao;
+import org.yamj.core.database.dao.CommonDao;
+import org.yamj.core.database.dao.MediaDao;
+import org.yamj.core.database.dao.PlayerDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;
 
@@ -385,17 +389,19 @@ public class JsonApiStorageService {
         int unwatchedCount = 0;
 
         for (Long id : ids) {
-            VideoData video = commonDao.getVideoData(id);
-            if (video.isWatched()) {
-                watchedCount++;
-            } else {
-                unwatchedCount++;
-            }
-
-            if (video.isWatchedApi() != watched) {
-                // Set the watched status and update the video
-                video.setWatchedApi(watched);
-                commonDao.storeEntity(video);
+            VideoData videoData = commonDao.getVideoData(id);
+            if (videoData != null) {
+                if (videoData.isWatched()) {
+                    watchedCount++;
+                } else {
+                    unwatchedCount++;
+                }
+    
+                if (videoData.isWatchedApi() != watched) {
+                    // Set the watched status and update the video
+                    videoData.setWatchedApi(watched);
+                    commonDao.updateEntity(videoData);
+                }
             }
         }
 
@@ -413,6 +419,89 @@ public class JsonApiStorageService {
     }
     //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Rescan methods">
+    /**
+     * Set status of single metadata to UPDATED.
+     *
+     * @param type
+     * @param id
+     * @return
+     */
+    @Transactional
+    public ApiStatus rescanSingle(MetaDataType type, Long id) {
+        boolean rescan = false;
+        
+        if (id != null && id > 0L) {
+            switch (type) {
+                case PERSON:
+                    Person person = commonDao.getPerson(id);
+                    if (person != null) {
+                        person.setStatus(StatusType.UPDATED);
+                        commonDao.updateEntity(person);
+                        rescan = true;
+                    }
+                    break;
+                case FILMOGRAPHY:
+                    person = commonDao.getPerson(id);
+                    if (person != null) {
+                        person.setFilmographyStatus(StatusType.UPDATED);
+                        commonDao.updateEntity(person);
+                        rescan = true;
+                    }
+                    break;
+                case SERIES:
+                    Series series = commonDao.getSeries(id);
+                    if (series != null) {
+                        series.setStatus(StatusType.UPDATED);
+                        commonDao.updateEntity(series);
+                        rescan = true;
+                        for (Season season : series.getSeasons()) {
+                            season.setStatus(StatusType.UPDATED);
+                            commonDao.updateEntity(season);
+                            for (VideoData episode : season.getVideoDatas()) {
+                                episode.setStatus(StatusType.UPDATED);
+                                commonDao.updateEntity(episode);
+                            }
+                        }
+                    }
+                    break;
+                case SEASON:
+                    Season season = commonDao.getSeason(id);
+                    if (season != null) {
+                        season.setStatus(StatusType.UPDATED);
+                        commonDao.updateEntity(season);
+                        for (VideoData episode : season.getVideoDatas()) {
+                            episode.setStatus(StatusType.UPDATED);
+                            commonDao.updateEntity(episode);
+                        }
+                        rescan = true;
+                    }
+                    break;
+                default:
+                    VideoData videoData = commonDao.getVideoData(id);
+                    if (videoData != null) {
+                        videoData.setStatus(StatusType.UPDATED);
+                        commonDao.updateEntity(videoData);
+                        rescan = true;
+                    }
+                    break;
+            }
+            
+            if (rescan) {
+                StringBuilder sb = new StringBuilder("Rescan ");
+                sb.append(type).append(" ID: ").append(id);
+                return new ApiStatus(200, sb.toString());
+            }
+            
+            StringBuilder sb = new StringBuilder("No ");
+            sb.append(type).append(" found for rescanning ID: ").append(id);
+            return new ApiStatus(404, sb.toString());
+        }
+
+        return new ApiStatus(410, "No valid " + type + " ID provided");
+    }
+    //</editor-fold>
+    
     @Transactional
     public ApiStatus updateOnlineScan(MetaDataType type, Long id, String sourcedb, boolean disable) {
         if (MetaDataType.SERIES == type) {
