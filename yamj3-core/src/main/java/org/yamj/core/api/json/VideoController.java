@@ -123,7 +123,7 @@ public class VideoController {
     }
 
     /**
-     * Enable online scan for one movie.
+     * Enable online scan for one series.
      */
     @RequestMapping("/series/enableonlinescan")
     public ApiStatus enableSeriesOnlineScan(
@@ -139,7 +139,7 @@ public class VideoController {
     }
 
     /**
-     * Disable online scan for one movie.
+     * Disable online scan for one series.
      */
     @RequestMapping("/series/disableonlinescan")
     public ApiStatus disableSeriesOnlineScan(
