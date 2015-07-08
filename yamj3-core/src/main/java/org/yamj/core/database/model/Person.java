@@ -303,6 +303,11 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         return (!StringUtils.equals(oldId, newId));
     }
 
+    @Override
+    public String removeSourceDbId(String sourceDb) {
+        return this.sourceDbIdMap.remove(sourceDb);
+    }
+    
     public StatusType getStatus() {
         return status;
     }

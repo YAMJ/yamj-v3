@@ -80,7 +80,7 @@ public abstract class AbstractMetadata extends AbstractAuditable
     private int retries = 0;
 
     @Transient
-    private Set<String> changedSourceDbs;
+    private Set<String> modifiedSources;
     
     // GETTER and SETTER
     
@@ -212,17 +212,17 @@ public abstract class AbstractMetadata extends AbstractAuditable
         return false;
     }
 
-    protected final void addChangedSourceDb(String sourceDb) {
-        if (changedSourceDbs == null) changedSourceDbs = new HashSet<>();
-        changedSourceDbs.add(sourceDb);
+    protected final void addModifiedSource(String sourceDb) {
+        if (modifiedSources == null) modifiedSources = new HashSet<>();
+        modifiedSources.add(sourceDb);
     }
 
-    public final boolean hasChangedSourceDbs() {
-        return CollectionUtils.isNotEmpty(changedSourceDbs);
+    public final boolean hasModifiedSource() {
+        return CollectionUtils.isNotEmpty(modifiedSources);
     }
     
-    public final Set<String> getChangedSourceDbs() {
-        return changedSourceDbs;
+    public final Set<String> getModifiedSources() {
+        return modifiedSources;
     }
 
     // ABSTRACT DECLARATIONS

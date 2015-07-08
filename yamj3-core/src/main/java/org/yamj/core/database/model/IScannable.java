@@ -31,6 +31,8 @@ public interface IScannable {
 
     boolean setSourceDbId(String sourceDb, String id);
 
+    String removeSourceDbId(String sourceDb);
+    
     String getOverrideSource(OverrideFlag overrideFlag);
 
     void setOverrideFlag(OverrideFlag overrideFlag, String sourceDb);
