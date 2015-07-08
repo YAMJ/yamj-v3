@@ -86,20 +86,21 @@ public abstract class AbstractMetadata extends AbstractAuditable
     
     @Override
     public final boolean isSkippedOnlineScan(String sourceDb) {
-        String skipped = getSkipOnlineScans();
-        if (StringUtils.isBlank(skipped)) {
+        Set<String> skipped = getSkippedOnlineScans();
+        if (CollectionUtils.isEmpty(skipped)) {
             // nothing to skip
             return false;
         }
         
-        if ("all".equalsIgnoreCase(skipped)) {
-            // all online scans are skipped
-            return true;
-        }
-       
-        if (StringUtils.containsIgnoreCase(skipped, sourceDb)) {
-            // skipped for explicit source
-            return true;
+        for (String skip : skipped) {
+            if (skip.equalsIgnoreCase("all")) {
+                // all online scans are skipped
+                return true;
+            }
+            if (skip.equalsIgnoreCase(sourceDb)) {
+                // skipped for explicit source
+                return true;
+            }
         }
         
         // nothing skipped
@@ -249,7 +250,7 @@ public abstract class AbstractMetadata extends AbstractAuditable
 
     // ABSTRACT DECLARATIONS
     
-    abstract String getSkipOnlineScans();
+    abstract Set<String> getSkippedOnlineScans();
     
     abstract boolean removeOverrideSource(String source);
 }

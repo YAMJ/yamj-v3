@@ -23,9 +23,8 @@
 package org.yamj.core.database.service;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -509,14 +508,18 @@ public class JsonApiStorageService {
             if (series == null) {
                 return new ApiStatus(400, "Series for ID " + id + " not found");
             }
-            series.setSkipOnlineScans(rebuildSkipOnlineScans(series.getSkipOnlineScans(), sourcedb, disable));
+            final Set<String> skippedOnlineScans = series.getSkippedOnlineScans();
+            enhanceSkippedOnlineScans(skippedOnlineScans, sourcedb, disable);
+            series.setSkippedOnlineScans(skippedOnlineScans);
             commonDao.updateEntity(series);
         } else {
             VideoData videoData = commonDao.getVideoData(id);
             if (videoData == null) {
                 return new ApiStatus(400, "VideoData for ID " + id + " not found");
             }
-            videoData.setSkipOnlineScans(rebuildSkipOnlineScans(videoData.getSkipOnlineScans(), sourcedb, disable));
+            final Set<String> skippedOnlineScans = videoData.getSkippedOnlineScans();
+            enhanceSkippedOnlineScans(skippedOnlineScans, sourcedb, disable);
+            videoData.setSkippedOnlineScans(skippedOnlineScans);
             commonDao.updateEntity(videoData);
         }
         
@@ -529,31 +532,20 @@ public class JsonApiStorageService {
         return new ApiStatus(200, sb.toString());
     }
 
-    private static String rebuildSkipOnlineScans(String skipOnlineScans, String sourcedb, boolean disable) {
+    private static void enhanceSkippedOnlineScans(Set<String> skippedOnlineScans, String sourcedb, boolean disable) {
         if (StringUtils.trimToNull(sourcedb) == null) {
-            return skipOnlineScans;
+            // nothing to change
+            return;
         }
         
         if ("all".equalsIgnoreCase(sourcedb)) {
-            if (disable) {
-                return "all";
-            }
-            return null;
-        }
-        
-        List<String> skipped;
-        if (skipOnlineScans == null) {
-            skipped = new ArrayList<>(1);
+            skippedOnlineScans.clear();
+            if (disable) skippedOnlineScans.add("all");
+        } else if (disable) {
+            skippedOnlineScans.add(sourcedb.trim());            
         } else {
-            skipped = new ArrayList<>(Arrays.asList(skipOnlineScans.split(";")));
+            skippedOnlineScans.remove(sourcedb.trim());            
         }
-
-        if (disable) {
-            if (!skipped.contains(sourcedb.trim())) skipped.add(sourcedb.trim());
-        } else {
-            skipped.remove(sourcedb.trim());
-        }
-        return StringUtils.trimToNull(StringUtils.join(skipped, ';'));
     }
     
     public void getExternalIds(ApiWrapperList<ApiExternalIdDTO> wrapper) {

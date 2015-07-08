@@ -32,7 +32,7 @@ public final class InfoDTO {
 
     private boolean changed = false;
     private boolean tvShow = false;
-    private List<String> skipOnlineScans = new ArrayList<>(0);
+    private Set<String> skippedOnlineScans = new HashSet<>(0);
     private Map<String, String> ids = new HashMap<>(2);
     private Map<String, Integer> setInfos = new HashMap<>(2);
     private Map<String, String> certificationInfos = new HashMap<>(1);
@@ -77,16 +77,12 @@ public final class InfoDTO {
     }
 
     public void setSkipAllOnlineScans() {
-        this.skipOnlineScans.clear();
-        this.skipOnlineScans.add("all");
+        this.skippedOnlineScans.add("all");
         this.changed = true;
     }
     
-    public String getSkipOnlineScans() {
-        if (this.skipOnlineScans.isEmpty()) {
-            return null;
-        }
-        return StringUtils.join(this.skipOnlineScans, ";");
+    public Set<String> getSkippedOnlineScans() {
+        return skippedOnlineScans;
     }
 
     public Map<String, String> getIds() {
@@ -104,13 +100,9 @@ public final class InfoDTO {
     public void addId(String sourceDb, String sourceId) {
         if (StringUtils.isNotBlank(sourceDb) && StringUtils.isNotBlank(sourceId)) {
             if ("-1".equals(sourceId)) {
-                // skip online scan
-                if (!this.skipOnlineScans.contains("all")) {
-                    this.skipOnlineScans.add(sourceDb);
-                }
+                this.skippedOnlineScans.add(sourceDb);
             } else {
                 this.ids.put(sourceDb, sourceId);
-                this.skipOnlineScans.remove(sourceDb);
             }
             this.changed = true;
         }

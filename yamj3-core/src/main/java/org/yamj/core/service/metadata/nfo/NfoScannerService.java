@@ -57,7 +57,6 @@ public class NfoScannerService {
         // get the stage files
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(videoData);
         if (CollectionUtils.isEmpty(stageFiles)) {
-            videoData.setSkipOnlineScans(null);
             videoData.setWatchedNfo(false);
             return;
         }
@@ -81,8 +80,12 @@ public class NfoScannerService {
             for (Entry<String,String> entry : infoDTO.getIds().entrySet()) {
                 videoData.setSourceDbId(entry.getKey(), entry.getValue());
             }
-            // reset skip online scans
-            videoData.setSkipOnlineScans(infoDTO.getSkipOnlineScans());
+            // merge skipped online scans
+            if (CollectionUtils.isNotEmpty(infoDTO.getSkippedOnlineScans())) {
+                Set<String> skippedOnlineScans = videoData.getSkippedOnlineScans();
+                skippedOnlineScans.addAll(infoDTO.getSkippedOnlineScans());
+                videoData.setSkippedOnlineScans(skippedOnlineScans);
+            }
             // set top 250
             videoData.setTopRank(infoDTO.getTop250());
             // set rating
@@ -169,8 +172,6 @@ public class NfoScannerService {
         // get the stage files
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(series);
         if (CollectionUtils.isEmpty(stageFiles)) {
-            series.setSkipOnlineScans(null);
-
             for (Season season : series.getSeasons()) {
                 if (season.removeOverrideSource(SCANNER_ID)) {
                     season.setStatus(StatusType.UPDATED);
@@ -206,8 +207,12 @@ public class NfoScannerService {
             for (Entry<String,String> entry : infoDTO.getIds().entrySet()) {
                 series.setSourceDbId(entry.getKey(), entry.getValue());
             }
-            // reset skip online scans
-            series.setSkipOnlineScans(infoDTO.getSkipOnlineScans());
+            // merge skipped online scans
+            if (CollectionUtils.isNotEmpty(infoDTO.getSkippedOnlineScans())) {
+                Set<String> skippedOnlineScans = series.getSkippedOnlineScans();
+                skippedOnlineScans.addAll(infoDTO.getSkippedOnlineScans());
+                series.setSkippedOnlineScans(skippedOnlineScans);
+            }
             // set last scan date
             series.setLastScanned(new Date(System.currentTimeMillis()));
             // set sort title
