@@ -338,13 +338,18 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     }
 
     @Override
-    public void setOverrideFlag(OverrideFlag overrideFlag, String source) {
-        this.overrideFlags.put(overrideFlag, source.toLowerCase());
+    public void setOverrideFlag(OverrideFlag overrideFlag, String sourceDb) {
+        this.overrideFlags.put(overrideFlag, sourceDb.toLowerCase());
     }
 
     @Override
     public String getOverrideSource(OverrideFlag overrideFlag) {
         return overrideFlags.get(overrideFlag);
+    }
+
+    @Override
+    public boolean isSkippedScan(String sourceDb) {
+        return false;
     }
 
     public StatusType getFilmographyStatus() {

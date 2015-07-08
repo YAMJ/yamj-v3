@@ -24,7 +24,6 @@ package org.yamj.core.database.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,10 +38,7 @@ import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.configuration.ConfigService;
-import org.yamj.core.database.dao.ApiDao;
-import org.yamj.core.database.dao.CommonDao;
-import org.yamj.core.database.dao.MediaDao;
-import org.yamj.core.database.dao.PlayerDao;
+import org.yamj.core.database.dao.*;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;
 
@@ -502,50 +498,38 @@ public class JsonApiStorageService {
     //</editor-fold>
     
     @Transactional
-    public ApiStatus updateOnlineScan(MetaDataType type, Long id, String sourcedb, boolean disable) {
+    public ApiStatus updateOnlineScan(MetaDataType type, Long id, String sourceDb, boolean disable) {
         if (MetaDataType.SERIES == type) {
             Series series = commonDao.getSeries(id);
             if (series == null) {
-                return new ApiStatus(400, "Series for ID " + id + " not found");
+                return new ApiStatus(404, "Series for ID " + id + " not found");
             }
-            final Set<String> skippedOnlineScans = series.getSkippedOnlineScans();
-            enhanceSkippedOnlineScans(skippedOnlineScans, sourcedb, disable);
-            series.setSkippedOnlineScans(skippedOnlineScans);
+            if (disable) {
+                series.disableApiScan(sourceDb);
+            } else {
+                series.enableApiScan(sourceDb);
+            }
             commonDao.updateEntity(series);
         } else {
             VideoData videoData = commonDao.getVideoData(id);
             if (videoData == null) {
-                return new ApiStatus(400, "VideoData for ID " + id + " not found");
+                return new ApiStatus(404, "VideoData for ID " + id + " not found");
             }
-            final Set<String> skippedOnlineScans = videoData.getSkippedOnlineScans();
-            enhanceSkippedOnlineScans(skippedOnlineScans, sourcedb, disable);
-            videoData.setSkippedOnlineScans(skippedOnlineScans);
+            if (disable) {
+                videoData.disableApiScan(sourceDb);
+            } else {
+                videoData.enableApiScan(sourceDb);
+            }
             commonDao.updateEntity(videoData);
         }
         
         StringBuilder sb = new StringBuilder();
         sb.append(disable?"Disabled ":"Enabled ");
-        sb.append(sourcedb);
+        sb.append(sourceDb);
         sb.append(" online scan for "); 
         sb.append(type).append(" ID: ").append(id);
         
         return new ApiStatus(200, sb.toString());
-    }
-
-    private static void enhanceSkippedOnlineScans(Set<String> skippedOnlineScans, String sourcedb, boolean disable) {
-        if (StringUtils.trimToNull(sourcedb) == null) {
-            // nothing to change
-            return;
-        }
-        
-        if ("all".equalsIgnoreCase(sourcedb)) {
-            skippedOnlineScans.clear();
-            if (disable) skippedOnlineScans.add("all");
-        } else if (disable) {
-            skippedOnlineScans.add(sourcedb.trim());            
-        } else {
-            skippedOnlineScans.remove(sourcedb.trim());            
-        }
     }
     
     public void getExternalIds(ApiWrapperList<ApiExternalIdDTO> wrapper) {

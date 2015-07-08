@@ -107,18 +107,19 @@ public class OnlineScannerService {
             LOG.error("Movie scanner '{}' not registered", MOVIE_SCANNER);
             scanResult = ScanResult.ERROR;
         } else {
-            LOG.info("Scanning movie data for '{}' using {}", videoData.getTitle(), MOVIE_SCANNER);
 
             // scan video data
             try {
-                if (videoData.isSkippedOnlineScan(movieScanner.getScannerName())) {
+                if (videoData.isSkippedScan(movieScanner.getScannerName())) {
+                    LOG.warn("Movie scan skipped for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
                     scanResult = ScanResult.SKIPPED;
                 } else {
+                    LOG.info("Scanning movie data for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
                     scanResult = movieScanner.scan(videoData);
                 }
             } catch (Exception error) {
                 scanResult = ScanResult.ERROR;
-                LOG.error("Failed scanning movie with {} scanner", MOVIE_SCANNER);
+                LOG.error("Failed scanning movie with {} scanner", movieScanner.getScannerName());
                 LOG.warn("Scanning error", error);
             }
         }
@@ -128,13 +129,16 @@ public class OnlineScannerService {
         if (!ScanResult.OK.equals(scanResult) || useAlternate) {
             movieScanner = registeredMovieScanner.get(MOVIE_SCANNER_ALT);
 
-            if (movieScanner != null && !videoData.isSkippedOnlineScan(movieScanner.getScannerName())) {
-                LOG.info("Alternate scanning movie data for '{}' using {}", videoData.getTitle(), MOVIE_SCANNER_ALT);
+            if (movieScanner != null && !videoData.isSkippedScan(movieScanner.getScannerName())) {
+                LOG.info("Alternate scanning movie data for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
 
                 try {
                     movieScanner.scan(videoData);
                 } catch (Exception error) {
-                    LOG.error("Failed scanning movie with {} alternate scanner", MOVIE_SCANNER_ALT);
+                    // set to ERROR if previous scanner has been skipped
+                    if (ScanResult.SKIPPED.equals(scanResult)) scanResult = ScanResult.ERROR;
+                    
+                    LOG.error("Failed scanning movie with {} alternate scanner", movieScanner.getScannerName());
                     LOG.warn("Alternate scanning error", error);
                 }
             }
@@ -146,7 +150,7 @@ public class OnlineScannerService {
             videoData.setRetries(0);
             videoData.setStatus(StatusType.DONE);
         } else if (ScanResult.SKIPPED.equals(scanResult)) {
-            LOG.warn("Movie {}-'{}', skipped", videoData.getId(), videoData.getTitle());
+            LOG.debug("Movie {}-'{}', skipped", videoData.getId(), videoData.getTitle());
             videoData.setRetries(0);
             videoData.setStatus(StatusType.DONE);
         } else if (ScanResult.MISSING_ID.equals(scanResult)) {
@@ -176,18 +180,19 @@ public class OnlineScannerService {
             LOG.error("Series scanner '{}' not registered", SERIES_SCANNER);
             scanResult = ScanResult.ERROR;
         } else {
-            LOG.info("Scanning series data for '{}' using {}", series.getTitle(), SERIES_SCANNER);
 
             // scan series
             try {
-                if (series.isSkippedOnlineScan(seriesScanner.getScannerName())) {
+                if (series.isSkippedScan(seriesScanner.getScannerName())) {
+                    LOG.warn("Series scan skipped for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
                     scanResult = ScanResult.SKIPPED;
                 } else {
+                    LOG.info("Scanning series data for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
                     scanResult = seriesScanner.scan(series);
                 }
             } catch (Exception error) {
                 scanResult = ScanResult.ERROR;
-                LOG.error("Failed scanning series data with {} scanner", SERIES_SCANNER);
+                LOG.error("Failed scanning series data with {} scanner", seriesScanner.getScannerName());
                 LOG.warn("Scanning error", error);
             }
         }
@@ -197,13 +202,17 @@ public class OnlineScannerService {
         if (!ScanResult.OK.equals(scanResult) || useAlternate) {
             seriesScanner = registeredSeriesScanner.get(SERIES_SCANNER_ALT);
 
-            if (seriesScanner != null && !series.isSkippedOnlineScan(seriesScanner.getScannerName())) {
-                LOG.info("Alternate scanning series data for '{}' using {}", series.getTitle(), SERIES_SCANNER_ALT);
+            if (seriesScanner != null && !series.isSkippedScan(seriesScanner.getScannerName())) {
+                LOG.info("Alternate scanning series data for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
 
                 try {
+                    
                     seriesScanner.scan(series);
                 } catch (Exception error) {
-                    LOG.error("Failed scanning series data with {} alternate scanner", SERIES_SCANNER_ALT);
+                    // set to ERROR if previous scanner has been skipped
+                    if (ScanResult.SKIPPED.equals(scanResult)) scanResult = ScanResult.ERROR;
+                        
+                    LOG.error("Failed scanning series data with {} alternate scanner", seriesScanner.getScannerName());
                     LOG.warn("Alternate scanning error", error);
                 }
             }
@@ -215,7 +224,7 @@ public class OnlineScannerService {
             series.setRetries(0);
             series.setStatus(StatusType.DONE);
         } else if (ScanResult.SKIPPED.equals(scanResult)) {
-            LOG.warn("Series {}-'{}', skipped", series.getId(), series.getTitle());
+            LOG.debug("Series {}-'{}', skipped", series.getId(), series.getTitle());
             series.setRetries(0);
             series.setStatus(StatusType.DONE);
        } else if (ScanResult.MISSING_ID.equals(scanResult)) {
@@ -245,14 +254,14 @@ public class OnlineScannerService {
             LOG.error("Person scanner '{}' not registered", PERSON_SCANNER);
             scanResult = ScanResult.ERROR;
         } else {
-            LOG.info("Scanning for information on person {}-'{}' using {}", person.getId(), person.getName(), PERSON_SCANNER);
+            LOG.info("Scanning for information on person '{}' using {}", person.getId(), person.getName(), personScanner.getScannerName());
     
             // scan person data
             try {
                 scanResult = personScanner.scan(person);
             } catch (Exception error) {
                 scanResult = ScanResult.ERROR;
-                LOG.error("Failed scanning person (ID '{}') data with scanner {} ", person.getId(), PERSON_SCANNER);
+                LOG.error("Failed scanning person (ID '{}') data with scanner {} ", person.getId(), personScanner.getScannerName());
                 LOG.warn("Scanning error", error);
             }
         }
@@ -263,12 +272,12 @@ public class OnlineScannerService {
             personScanner = registeredPersonScanner.get(PERSON_SCANNER_ALT);
 
             if (personScanner != null) {
-                LOG.info("Alternate scanning for information on person {}-'{}' using {}", person.getId(), person.getName(), PERSON_SCANNER_ALT);
+                LOG.info("Alternate scanning for information on person {}-'{}' using {}", person.getId(), person.getName(), personScanner.getScannerName());
 
                 try {
                     personScanner.scan(person);
                 } catch (Exception error) {
-                    LOG.error("Failed scanning person (ID '{}') data with alternate scanner {}", person.getId(), PERSON_SCANNER_ALT);
+                    LOG.error("Failed scanning person (ID '{}') data with alternate scanner {}", person.getId(), personScanner.getScannerName());
                     LOG.warn("Alternate scanning error", error);
                 }
             }
@@ -281,7 +290,7 @@ public class OnlineScannerService {
             person.setStatus(StatusType.DONE);
             person.setFilmographyStatus(StatusType.NEW);
         } else if (ScanResult.SKIPPED.equals(scanResult)) {
-            LOG.warn("Person {}-'{}', skipped", person.getId(), person.getName());
+            LOG.debug("Person {}-'{}', skipped", person.getId(), person.getName());
             person.setRetries(0);
             person.setStatus(StatusType.DONE);
             person.setFilmographyStatus(StatusType.NEW);
@@ -321,14 +330,14 @@ public class OnlineScannerService {
             LOG.error("Filmography scanner '{}' not registered", FILMOGRAPHY_SCANNER);
             scanResult = ScanResult.ERROR;
         } else {
-        	LOG.info("Scanning for filmography of person {}-'{}' using {}", person.getId(), person.getName(), FILMOGRAPHY_SCANNER);
+        	LOG.info("Scanning for filmography of person '{}' using {}", person.getId(), person.getName(), filmographyScanner.getScannerName());
 
             // scan filmography
             try {
                 scanResult = filmographyScanner.scanFilmography(person);
             } catch (Exception error) {
                 scanResult = ScanResult.ERROR;
-                LOG.error("Failed scanning person filmography (ID '{}') data with scanner {} ", person.getId(), FILMOGRAPHY_SCANNER);
+                LOG.error("Failed scanning person filmography (ID '{}') data with scanner {} ", person.getId(), filmographyScanner.getScannerName());
                 LOG.warn("Scanning error", error);
             }
         }
@@ -338,12 +347,12 @@ public class OnlineScannerService {
         	filmographyScanner = registeredFilmographyScanner.get(FILMOGRAPHY_SCANNER_ALT);
 
             if (filmographyScanner != null) {
-            	LOG.info("Alternate scanning for filmography of person {}-'{}' using {}", person.getId(), person.getName(), FILMOGRAPHY_SCANNER_ALT);
+            	LOG.info("Alternate scanning for filmography of person {}-'{}' using {}", person.getId(), person.getName(), filmographyScanner.getScannerName());
 
                 try {
                 	filmographyScanner.scanFilmography(person);
                 } catch (Exception error) {
-                    LOG.error("Failed scanning person filmography (ID '{}') data with alternate scanner {} ", person.getId(), FILMOGRAPHY_SCANNER_ALT);
+                    LOG.error("Failed scanning person filmography (ID '{}') data with alternate scanner {} ", person.getId(), filmographyScanner.getScannerName());
                     LOG.warn("Alternate scanning error", error);
                 }
             }

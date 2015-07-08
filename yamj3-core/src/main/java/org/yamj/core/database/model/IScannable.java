@@ -33,9 +33,11 @@ public interface IScannable {
 
     String getOverrideSource(OverrideFlag overrideFlag);
 
-    void setOverrideFlag(OverrideFlag overrideFlag, String source);
+    void setOverrideFlag(OverrideFlag overrideFlag, String sourceDb);
     
     Date getLastScanned();
     
     int getRetries();
+    
+    boolean isSkippedScan(String sourceDb);
 }

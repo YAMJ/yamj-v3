@@ -25,8 +25,6 @@ package org.yamj.core.database.model;
 import org.yamj.common.type.StatusType;
 
 public interface IMetadata extends IScannable {
-
-    boolean isSkippedOnlineScan(String sourceDb);
     
     String getTitle();
 

@@ -39,36 +39,20 @@ public class UpgradeDatabaseService {
 
     @PostConstruct
     public void init() {
-        // Issues: #151
-        // Date:   28.01.2015
-        try {
-            upgradeDatabaseDao.patchCountryOverrideFlag();
-        } catch (Exception ex) {
-            LOG.trace("Failed upgrade 'patchCountryOverrideFlag'", ex);
-        }
-
-        // Issues: #150, #151
-        // Date:   28.01.2015
-        try {
-            upgradeDatabaseDao.patchVideoDataCountries();
-        } catch (Exception ex) {
-            LOG.trace("Failed upgrade 'patchVideoDataCountries'", ex);
-        }
-
-        // Issues: none
-        // Date:   02.02.2015
-        try {
-            upgradeDatabaseDao.patchAllocineWonAwards();
-        } catch (Exception ex) {
-            LOG.warn("Failed upgrade 'patchAllocineWonAwards'", ex);
-        }
-
         // Issues: #195
         // Date:   07.07.2015
         try {
             upgradeDatabaseDao.patchFilmographyConfig();
         } catch (Exception ex) {
             LOG.warn("Failed upgrade 'patchFilmographyConfig'", ex);
+        }
+
+        // Issues: #218
+        // Date:   08.07.2015
+        try {
+            upgradeDatabaseDao.patchSkipOnlineScans();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchAllocineWonAwards'", ex);
         }
     }
 }

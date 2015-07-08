@@ -972,7 +972,6 @@ public class ApiDao extends HibernateDao {
         // check award
         if (params.includeAward() || params.excludeAward()) {
             String awardName = params.getAwardName();
-            System.err.print("awardName --> " + awardName);
 
             if (params.includeAward()) {
                 sbSQL.append(" AND exists(");
@@ -2752,7 +2751,6 @@ public class ApiDao extends HibernateDao {
 
         List<ApiBoxedSetDTO> boxsets = executeQueryWithTransform(ApiBoxedSetDTO.class, sqlScalars, wrapper);
         if (CollectionUtils.isEmpty(boxsets)) {
-            System.err.println("isEmpty");
             return null;
         }
 

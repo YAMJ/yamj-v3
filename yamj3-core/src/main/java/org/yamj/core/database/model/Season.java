@@ -25,13 +25,15 @@ package org.yamj.core.database.model;
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.MapKeyType;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.*;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
@@ -125,11 +127,6 @@ public class Season extends AbstractMetadata {
         }
     }
 
-    @Override
-    public Set<String> getSkippedOnlineScans() {
-        return null;
-    }
-
     private Map<String, String> getSourceDbIdMap() {
         return sourceDbIdMap;
     }
@@ -180,8 +177,8 @@ public class Season extends AbstractMetadata {
     }
 
     @Override
-    public void setOverrideFlag(OverrideFlag overrideFlag, String source) {
-        this.overrideFlags.put(overrideFlag, source.toLowerCase());
+    public void setOverrideFlag(OverrideFlag overrideFlag, String sourceDb) {
+        this.overrideFlags.put(overrideFlag, sourceDb.toLowerCase());
     }
 
     @Override
@@ -190,16 +187,21 @@ public class Season extends AbstractMetadata {
     }
 
     @Override
-    public boolean removeOverrideSource(final String source) {
+    public boolean removeOverrideSource(final String sourceDb) {
         boolean removed = false;
         for (Iterator<Entry<OverrideFlag, String>> it = this.overrideFlags.entrySet().iterator(); it.hasNext();) {
             Entry<OverrideFlag,String> e = it.next();
-            if (StringUtils.endsWithIgnoreCase(e.getValue(), source)) {
+            if (StringUtils.endsWithIgnoreCase(e.getValue(), sourceDb)) {
                 it.remove();
                 removed = true;
             }
         }
         return removed;
+    }
+
+    @Override
+    public boolean isSkippedScan(String sourceDb) {
+        return getSeries().isSkippedScan(sourceDb);
     }
 
     public Series getSeries() {

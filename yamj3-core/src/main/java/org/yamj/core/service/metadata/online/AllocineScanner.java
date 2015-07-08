@@ -534,8 +534,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
                     videoData.setReleaseDate(releaseDate, SCANNER_ID);
                 }
                 
-                //  add credits
-                videoData.addCreditDTOS(parseCredits(castMembers));
+                //  parse credits
+                parseCredits(videoData, castMembers);
 
                 // mark episode as done
                 videoData.setTvEpisodeDone();
@@ -543,8 +543,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         }
     }
 
-    private Set<CreditDTO> parseCredits(List<CastMember> castMembers) {
-        Set<CreditDTO> result = new LinkedHashSet<>();
+    private void parseCredits(VideoData videoData, List<CastMember> castMembers) {
 
         if (CollectionUtils.isNotEmpty(castMembers)) {
             for (CastMember member: castMembers) {
@@ -560,19 +559,18 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
                         credit = createCredit(member, JobType.GUEST_STAR);
                     }
                     credit.setRole(member.getRole());
-                    result.add(credit);
+                    videoData.addCreditDTO(credit);
                 } else if (member.isDirector() && configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
-                    result.add(createCredit(member, JobType.DIRECTOR));
+                    videoData.addCreditDTO(createCredit(member, JobType.DIRECTOR));
                 } else if (member.isWriter() && configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
-                    result.add(createCredit(member, JobType.WRITER));
+                    videoData.addCreditDTO(createCredit(member, JobType.WRITER));
                 } else if (member.isCamera() && configServiceWrapper.isCastScanEnabled(JobType.CAMERA)) {
-                    result.add(createCredit(member, JobType.CAMERA));
+                    videoData.addCreditDTO(createCredit(member, JobType.CAMERA));
                 } else if (member.isProducer() && configServiceWrapper.isCastScanEnabled(JobType.PRODUCER)) {
-                    result.add(createCredit(member, JobType.PRODUCER));
+                    videoData.addCreditDTO(createCredit(member, JobType.PRODUCER));
                 }
             }
         }
-        return result;
     }
     
     private static CreditDTO createCredit(CastMember member, JobType jobType) {

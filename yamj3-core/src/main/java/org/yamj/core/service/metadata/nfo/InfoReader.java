@@ -32,19 +32,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.file.FileTools;
-import org.yamj.core.service.metadata.online.ImdbScanner;
-import org.yamj.core.service.metadata.online.OnlineScannerService;
-import org.yamj.core.service.metadata.online.TheMovieDbScanner;
-import org.yamj.core.service.metadata.online.TheTVDbScanner;
+import org.yamj.core.service.metadata.online.*;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.xml.DOMHelper;
@@ -417,7 +411,7 @@ public final class InfoReader {
                     if (StringUtils.isBlank(movieDb)) {
                         if ("-1".equals(movieId)) {
                             // skip all scans
-                            dto.setSkipAllOnlineScans();
+                            dto.setSkipAllScans();
                         } else {
                             // choose default scanner id
                             if (isTV) {

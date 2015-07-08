@@ -315,7 +315,7 @@ public final class OverrideTools {
 
         // check actual priority
         int actualPrio = priorities.indexOf(actualSource.toLowerCase());
-        if ((actualPrio == -1) || (newPrio <= actualPrio)) {
+        if ((actualPrio == -1) || (newPrio <= actualPrio) || scannable.isSkippedScan(actualSource)) {
             // -> new source has higher priority
             return Boolean.TRUE;
         }

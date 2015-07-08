@@ -939,7 +939,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                     tmpString = tmpString.substring(tmpString.indexOf('>') + 1).trim();
                     int year = NumberUtils.isNumber(tmpString) ? Integer.parseInt(tmpString) : -1;
   
-                    System.err.println(awardBlock);
                     boolean awardWon = true;
                     for (String outcomeBlock : HTMLTools.extractHtmlTags(awardBlock, "<table class=", null, "<tr>", "</tr>")) {
                         String outcome = HTMLTools.extractTag(outcomeBlock, "<b>", "</b>");

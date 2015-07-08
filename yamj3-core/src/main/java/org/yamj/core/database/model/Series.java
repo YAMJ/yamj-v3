@@ -25,15 +25,17 @@ package org.yamj.core.database.model;
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.MapKeyType;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.*;
 import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -57,8 +59,11 @@ public class Series extends AbstractMetadata {
     @Column(name = "end_year")
     private int endYear = -1;
 
-    @Column(name = "skip_online_scans", length = 255)
-    private String skipOnlineScans;
+    @Column(name = "skip_scan_nfo", length = 255)
+    private String skipScanNfo;
+
+    @Column(name = "skip_scan_api", length = 255)
+    private String skipScanApi;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "series_ids", joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIES_SOURCEIDS")))
@@ -177,33 +182,6 @@ public class Series extends AbstractMetadata {
         }
     }
 
-    private String getSkipOnlineScans() {
-        return skipOnlineScans;
-    }
-
-    private void setSkipOnlineScans(String skipOnlineScans) {
-        this.skipOnlineScans = skipOnlineScans;
-    }
-
-    @Override
-    public Set<String> getSkippedOnlineScans() {
-        final HashSet<String> skippedOnlineScans = new HashSet<>();
-        if (StringUtils.isNotBlank(getSkipOnlineScans())) {
-            skippedOnlineScans.addAll(Arrays.asList(getSkipOnlineScans().split(";")));
-        }
-        return skippedOnlineScans;
-    }
-
-    public void setSkippedOnlineScans(Set<String> skippeOnlineScans) {
-        if (CollectionUtils.isEmpty(skippeOnlineScans)) {
-            setSkipOnlineScans(null);
-        } else if (skippeOnlineScans.contains("all")) {
-            setSkipOnlineScans("all");
-        } else {
-            setSkipOnlineScans(StringUtils.join(skippeOnlineScans, ';'));
-        }
-    }
-    
     public Map<String, String> getSourceDbIdMap() {
         return sourceDbIdMap;
     }
@@ -230,6 +208,22 @@ public class Series extends AbstractMetadata {
         }
         return changed;
     }
+    
+    private String getSkipScanNfo() {
+        return skipScanNfo;
+    }
+
+    private void setSkipScanNfo(String skipScanNfo) {
+        this.skipScanNfo = skipScanNfo;
+    }
+
+    private String getSkipScanApi() {
+        return skipScanApi;
+    }
+
+    private void setSkipScanApi(String skipScanApi) {
+        this.skipScanApi = skipScanApi;
+    }
 
     public Map<String, Integer> getRatings() {
         return ratings;
@@ -254,8 +248,8 @@ public class Series extends AbstractMetadata {
     }
 
     @Override
-    public void setOverrideFlag(OverrideFlag overrideFlag, String source) {
-        this.overrideFlags.put(overrideFlag, source.toLowerCase());
+    public void setOverrideFlag(OverrideFlag overrideFlag, String sourceDb) {
+        this.overrideFlags.put(overrideFlag, sourceDb.toLowerCase());
     }
 
     @Override
@@ -264,16 +258,72 @@ public class Series extends AbstractMetadata {
     }
 
     @Override
-    public boolean removeOverrideSource(final String source) {
+    public boolean removeOverrideSource(final String sourceDb) {
         boolean removed = false;
         for (Iterator<Entry<OverrideFlag, String>> it = this.overrideFlags.entrySet().iterator(); it.hasNext();) {
             Entry<OverrideFlag, String> e = it.next();
-            if (StringUtils.endsWithIgnoreCase(e.getValue(), source)) {
+            if (StringUtils.endsWithIgnoreCase(e.getValue(), sourceDb)) {
                 it.remove();
                 removed = true;
             }
         }
         return removed;
+    }
+
+    @Override
+    public boolean isSkippedScan(String sourceDb) {
+        if (getSkipScanNfo() == null && getSkipScanApi() == null) return false;
+        if ("all".equalsIgnoreCase(getSkipScanNfo())) return true;
+        if ("all".equalsIgnoreCase(getSkipScanApi())) return true;
+        if (StringUtils.containsIgnoreCase(getSkipScanNfo(), sourceDb)) return true;
+        if (StringUtils.containsIgnoreCase(getSkipScanApi(), sourceDb)) return true;
+        return false;
+    }
+
+    public void setSkippendScansNfo(Set<String> skippedScans) {
+        if (CollectionUtils.isEmpty(skippedScans)) {
+            setSkipScanNfo(null);
+        } else {
+            setSkipScanNfo(StringUtils.join(skippedScans, ';'));
+        }
+    }
+
+    public void enableApiScan(String sourceDb) {
+        if (sourceDb == null) return;
+        if (getSkipScanApi() == null) return;
+        
+        if ("all".equalsIgnoreCase(sourceDb)) {
+            setSkipScanApi(null);
+        } else {
+            HashSet<String> skipScans = new HashSet<>();
+            for (String skipped : getSkipScanApi().split(";")) {
+                if (!skipped.equalsIgnoreCase(sourceDb)) {
+                    // add skipped scan if not enabled
+                    skipScans.add(skipped);
+                }
+            }
+            if (CollectionUtils.isEmpty(skipScans)) {
+                setSkipScanApi(null);
+            } else {
+                setSkipScanApi(StringUtils.join(skipScans, ';'));
+            }
+        }
+    }
+
+    public void disableApiScan(String sourceDb) {
+        if (sourceDb == null) return;
+        
+        if ("all".equalsIgnoreCase(sourceDb)) {
+            setSkipScanApi("all");
+        } else if (getSkipScanApi() == null) {
+            setSkipScanApi(sourceDb);
+        } else if ("all".equalsIgnoreCase(getSkipScanApi())) {
+            // nothing to do if already all scans are skipped
+        } else {
+            final HashSet<String> skipScans = new HashSet<>(Arrays.asList(getSkipScanApi().split(";")));
+            skipScans.add(sourceDb);
+            setSkipScanApi(StringUtils.join(skipScans, ';'));
+        }
     }
 
     public Set<Season> getSeasons() {

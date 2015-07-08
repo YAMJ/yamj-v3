@@ -65,73 +65,6 @@ public class UpgradeDatabaseDao extends HibernateDao {
     }
 
     /**
-     * Issues: #151
-     * Date:   28.01.2015
-     */
-    public void patchCountryOverrideFlag() {
-        currentSession()
-            .createSQLQuery("UPDATE videodata_override SET flag='COUNTRIES' WHERE flag='COUNTRY'")
-            .executeUpdate();
-    }
-    
-    /**
-     * Issues: #150, #151
-     * Date:   28.01.2015
-     */
-    public void patchVideoDataCountries() {
-        // check if patch is needed
-        if (!existsColumn("videodata", "country")) return;
-        
-        // insert countries from existing video data country
-        StringBuilder sb = new StringBuilder();
-        sb.append("INSERT INTO country(name) ");
-        sb.append("SELECT distinct vd.country FROM videodata vd ");
-        sb.append("WHERE vd.country is not null ");
-        sb.append("AND not exists(select 1 from country c where c.name=vd.country)");
-        currentSession().createSQLQuery(sb.toString()).executeUpdate();
-        
-        // make dependencies between video data and country
-        sb.setLength(0);
-        sb.append("INSERT INTO videodata_countries(data_id, country_id) ");
-        sb.append("SELECT vd.id,c.id ");
-        sb.append("FROM videodata vd, country c ");
-        sb.append("WHERE vd.country=c.name ");
-        sb.append("AND not exists(select 1 from videodata_countries vc where vc.data_id=vd.id and vc.country_id=c.id)");
-        currentSession().createSQLQuery(sb.toString()).executeUpdate();
-        
-        // drop obsolete column country
-        sb.setLength(0);
-        sb.append("ALTER TABLE videodata DROP column country");
-        currentSession().createSQLQuery(sb.toString()).executeUpdate();
-    }
-
-    /**
-     * Issues: none
-     * Date:   02.02.2015
-     */
-    public void patchAllocineWonAwards() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("UPDATE videodata_awards va SET va.won=1 ");
-        sb.append("WHERE EXISTS (");
-        sb.append("  SELECT 1 ");
-        sb.append("  FROM award aw ");
-        sb.append("  WHERE aw.sourcedb='allocine' ");
-        sb.append("  AND aw.id=va.award_id) ");
-        sb.append("AND va.won=0");
-        currentSession().createSQLQuery(sb.toString()).executeUpdate();
-
-        sb.setLength(0);
-        sb.append("UPDATE series_awards sa SET sa.won=1 ");
-        sb.append("WHERE EXISTS (");
-        sb.append("  SELECT 1 ");
-        sb.append("  FROM award aw ");
-        sb.append("  WHERE aw.sourcedb='allocine' ");
-        sb.append("  AND aw.id=sa.award_id) ");
-        sb.append("AND sa.won=0");
-        currentSession().createSQLQuery(sb.toString()).executeUpdate();
-    }
-
-    /**
      * Issues: #195
      * Date:   07.07.2015
      */
@@ -142,5 +75,25 @@ public class UpgradeDatabaseDao extends HibernateDao {
         currentSession()
         	.createSQLQuery("DELETE FROM configuration WHERE config_key='themoviedb.person.filmography'")
         	.executeUpdate();
+    }
+
+    /**
+     * Issues: #218
+     * Date:   08.07.2015
+     */
+    public void patchSkipOnlineScans() {
+        if (existsColumn("videodata", "skip_online_scans")) {
+            StringBuilder sb = new StringBuilder();
+            sb.setLength(0);
+            sb.append("ALTER TABLE videodata DROP skip_online_scans");
+            currentSession().createSQLQuery(sb.toString()).executeUpdate();
+        }
+
+        if (existsColumn("series", "skip_online_scans")) {
+            StringBuilder sb = new StringBuilder();
+            sb.setLength(0);
+            sb.append("ALTER TABLE series DROP skip_online_scans");
+            currentSession().createSQLQuery(sb.toString()).executeUpdate();
+        }
     }
 }

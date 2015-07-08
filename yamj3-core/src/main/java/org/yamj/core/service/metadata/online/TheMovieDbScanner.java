@@ -22,10 +22,7 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.omertron.themoviedbapi.model.credits.CreditBasic;
-import com.omertron.themoviedbapi.model.credits.CreditMovieBasic;
-import com.omertron.themoviedbapi.model.credits.MediaCreditCast;
-import com.omertron.themoviedbapi.model.credits.MediaCreditCrew;
+import com.omertron.themoviedbapi.model.credits.*;
 import com.omertron.themoviedbapi.model.media.MediaCreditList;
 import com.omertron.themoviedbapi.model.movie.MovieInfo;
 import com.omertron.themoviedbapi.model.movie.ProductionCompany;
@@ -214,7 +211,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         }
 
         // CAST
-        if (!this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+        if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
             for (MediaCreditCast person : movieCasts.getCast()) {
                 CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), JobType.ACTOR, person.getName(), person.getCharacter());
                 videoData.addCreditDTO(credit);
@@ -222,7 +219,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         }
 
         // GUEST STARS
-        if (!this.configServiceWrapper.isCastScanEnabled(JobType.GUEST_STAR)) {
+        if (this.configServiceWrapper.isCastScanEnabled(JobType.GUEST_STAR)) {
             for (MediaCreditCast person : movieCasts.getGuestStars()) {
                 CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), JobType.GUEST_STAR, person.getName(), person.getCharacter());
                 videoData.addCreditDTO(credit);

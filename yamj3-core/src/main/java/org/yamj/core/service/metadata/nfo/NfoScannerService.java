@@ -31,10 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
@@ -57,6 +54,7 @@ public class NfoScannerService {
         // get the stage files
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(videoData);
         if (CollectionUtils.isEmpty(stageFiles)) {
+            videoData.setSkippendScansNfo(null);
             videoData.setWatchedNfo(false);
             return;
         }
@@ -80,12 +78,8 @@ public class NfoScannerService {
             for (Entry<String,String> entry : infoDTO.getIds().entrySet()) {
                 videoData.setSourceDbId(entry.getKey(), entry.getValue());
             }
-            // merge skipped online scans
-            if (CollectionUtils.isNotEmpty(infoDTO.getSkippedOnlineScans())) {
-                Set<String> skippedOnlineScans = videoData.getSkippedOnlineScans();
-                skippedOnlineScans.addAll(infoDTO.getSkippedOnlineScans());
-                videoData.setSkippedOnlineScans(skippedOnlineScans);
-            }
+            // reset skipped cans
+            videoData.setSkippendScansNfo(infoDTO.getSkippedScans());
             // set top 250
             videoData.setTopRank(infoDTO.getTop250());
             // set rating
@@ -172,6 +166,8 @@ public class NfoScannerService {
         // get the stage files
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(series);
         if (CollectionUtils.isEmpty(stageFiles)) {
+            series.setSkippendScansNfo(null);
+            
             for (Season season : series.getSeasons()) {
                 if (season.removeOverrideSource(SCANNER_ID)) {
                     season.setStatus(StatusType.UPDATED);
@@ -207,12 +203,8 @@ public class NfoScannerService {
             for (Entry<String,String> entry : infoDTO.getIds().entrySet()) {
                 series.setSourceDbId(entry.getKey(), entry.getValue());
             }
-            // merge skipped online scans
-            if (CollectionUtils.isNotEmpty(infoDTO.getSkippedOnlineScans())) {
-                Set<String> skippedOnlineScans = series.getSkippedOnlineScans();
-                skippedOnlineScans.addAll(infoDTO.getSkippedOnlineScans());
-                series.setSkippedOnlineScans(skippedOnlineScans);
-            }
+            // reset skipped cans
+            series.setSkippendScansNfo(infoDTO.getSkippedScans());
             // set last scan date
             series.setLastScanned(new Date(System.currentTimeMillis()));
             // set sort title
