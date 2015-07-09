@@ -53,6 +53,8 @@ public class JsonApiStorageService {
     @Autowired
     private ApiDao apiDao;
     @Autowired
+    private MetadataDao metadataDao;
+    @Autowired
     private ConfigService configService;
     @Autowired
     private PlayerDao playerDao;
@@ -484,16 +486,20 @@ public class JsonApiStorageService {
             
             if (rescan) {
                 StringBuilder sb = new StringBuilder("Rescan ");
-                sb.append(type).append(" ID: ").append(id);
+                sb.append(type.name().toLowerCase());
+                sb.append(" ID: ");
+                sb.append(id);
                 return new ApiStatus(200, sb.toString());
             }
             
             StringBuilder sb = new StringBuilder("No ");
-            sb.append(type).append(" found for rescanning ID: ").append(id);
+            sb.append(type.name().toLowerCase());
+            sb.append(" found for rescanning ID: ");
+            sb.append(id);
             return new ApiStatus(404, sb.toString());
         }
 
-        return new ApiStatus(410, "No valid " + type + " ID provided");
+        return new ApiStatus(410, "No valid " + type.name().toLowerCase() + " ID provided");
     }
     //</editor-fold>
     
@@ -526,24 +532,98 @@ public class JsonApiStorageService {
         StringBuilder sb = new StringBuilder();
         sb.append(disable?"Disabled ":"Enabled ");
         sb.append(sourceDb);
-        sb.append(" online scan for "); 
-        sb.append(type).append(" ID: ").append(id);
-        
+        sb.append(" scan for "); 
+        sb.append(type.name().toLowerCase());
+        sb.append(" ID: ");
+        sb.append(id);
         return new ApiStatus(200, sb.toString());
     }
-    
-    public void getExternalIds(ApiWrapperList<ApiExternalIdDTO> wrapper) {
-        apiDao.getExternalIds(wrapper);
-    }
 
     @Transactional
-    public ApiStatus updateExternalId(Long id, String sourcedb, String externalid) {
-        return apiDao.updateExternalId(id, sourcedb, externalid);
-    }
+    public ApiStatus updateExternalId(MetaDataType type, Long id, String sourceDb, String sourceDbId) {
+        final boolean removeSource = StringUtils.isBlank(sourceDbId);
+        
+        if (MetaDataType.SERIES.equals(type)) {
+            Series series = commonDao.getSeries(id); 
+            if (series == null) {
+                return new ApiStatus(404, "Series for ID " + id + " not found");
+            }
+            
+            boolean changed;
+            if (removeSource) {
+                changed = series.removeSourceDbId(sourceDb);
+            } else {
+                changed = series.setSourceDbId(sourceDb, sourceDbId);
+            }
+            if (changed) {
+                this.metadataDao.handleModifiedSources(series);
+                series.setStatus(StatusType.UPDATED);
+                this.metadataDao.updateEntity(series);
+            }
+            
+        } else if (MetaDataType.SEASON.equals(type)) {
+            Season season = commonDao.getSeason(id); 
+            if (season == null) {
+                return new ApiStatus(404, "Season for ID " + id + " not found");
+            }
+            
+            boolean changed;
+            if (removeSource) {
+                changed = season.removeSourceDbId(sourceDb);
+            } else {
+                changed = season.setSourceDbId(sourceDb, sourceDbId);
+            }
+            if (changed) {
+                this.metadataDao.handleModifiedSources(season);
+                season.setStatus(StatusType.UPDATED);
+                this.metadataDao.updateEntity(season);
+            }
+            
+        } else if (MetaDataType.PERSON.equals(type)) {
+            Person person = commonDao.getPerson(id); 
+            if (person == null) {
+                return new ApiStatus(404, "Person for ID " + id + " not found");
+            }
 
-    @Transactional
-    public ApiStatus deleteExternalId(Long id, String sourcedb) {
-        return apiDao.deleteExternalId(id, sourcedb);
+            boolean changed;
+            if (removeSource) {
+                changed = person.removeSourceDbId(sourceDb);
+            } else {
+                changed = person.setSourceDbId(sourceDb, sourceDbId);
+            }
+            if (changed) {
+                this.metadataDao.handleModifiedSources(person);
+                person.setStatus(StatusType.UPDATED);
+                this.metadataDao.updateEntity(person);
+            }
+            
+        } else {
+            VideoData videoData = commonDao.getVideoData(id);
+            if (videoData == null) {
+                return new ApiStatus(404, "Video for ID " + id + " not found");
+            }
+            
+            boolean changed;
+            if (removeSource) {
+                changed = videoData.removeSourceDbId(sourceDb);
+            } else {
+                changed = videoData.setSourceDbId(sourceDb, sourceDbId);
+            }
+            if (changed) {
+                this.metadataDao.handleModifiedSources(videoData);
+                videoData.setStatus(StatusType.UPDATED);
+                this.metadataDao.updateEntity(videoData);
+            }
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append(removeSource?"Removed":"Updated");
+        sb.append(" external ID for " );
+        sb.append(sourceDb);
+        sb.append(" for ");
+        sb.append(type.name().toLowerCase());
+        sb.append(" ID: ");
+        sb.append(id);
+        return new ApiStatus(200, sb.toString());
     }
-
 }

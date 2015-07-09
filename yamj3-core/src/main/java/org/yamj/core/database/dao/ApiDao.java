@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.api.model.builder.DataItem;
@@ -45,7 +44,6 @@ import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.model.type.JobType;
@@ -1292,6 +1290,11 @@ public class ApiDao extends HibernateDao {
                 }
             }
 
+            if (options.hasDataItem(DataItem.EXTERNALID)) {
+                LOG.trace("Adding external IDs for ID {}", options.getId());
+                person.setExternalIds(getExternalIdsForId(MetaDataType.PERSON, options.getId()));
+            }
+
             if (options.hasDataItem(DataItem.FILMOGRAPHY_INSIDE)) {
                 LOG.info("Adding filmograpghy inside for '{}'", person.getName());
                 person.setFilmography(getPersonFilmographyInside(person.getId(), options));
@@ -1914,8 +1917,8 @@ public class ApiDao extends HibernateDao {
             }
 
             if (options.hasDataItem(DataItem.EXTERNALID)) {
-                LOG.trace("Adding Eternal IDs for ID {}", options.getId());
-                video.setExternalids(getExternalIdsForId(options.getId(), null, null));
+                LOG.trace("Adding external IDs for ID {}", options.getId());
+                video.setExternalIds(getExternalIdsForId(type, options.getId()));
             }
 
             if (params.hasDataItem(DataItem.ARTWORK)) {
@@ -2651,9 +2654,6 @@ public class ApiDao extends HibernateDao {
         return executeQueryWithTransform(CountGeneric.class, sqlScalars, null);
     }
 
-    /**
-     *
-     */
     public void statSeriesCount() {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT s.id AS seriesId, title, start_year AS seriesYear");
@@ -2705,7 +2705,7 @@ public class ApiDao extends HibernateDao {
     /**
      * Take a list and generate a map of the ID and a list of the items for that ID
      *
-     * @param <T> Source type
+     * @param <T> source type
      * @param idList List of the source type
      * @return
      */
@@ -2744,6 +2744,46 @@ public class ApiDao extends HibernateDao {
     }
     //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="External ID methods">
+    /**
+     * Get list of external IDs for a metadata object.
+     * 
+     * @param type the metadata type
+     * @param id the id of the metadata object
+     * @return
+     */
+    public List<ApiExternalIdDTO> getExternalIdsForId(MetaDataType type, Long id) {
+        SqlScalars sqlScalars = new SqlScalars();
+
+        if (type == MetaDataType.SERIES) {
+            sqlScalars.addToSql("SELECT ids.series_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb");
+            sqlScalars.addToSql("FROM series_ids ids");
+            sqlScalars.addToSql("WHERE ids.series_id=:id");
+        } else if (type == MetaDataType.SEASON) {
+            sqlScalars.addToSql("SELECT ids.season_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb");
+            sqlScalars.addToSql("FROM season_ids ids");
+            sqlScalars.addToSql("WHERE ids.season_id=:id");
+        } else if (type == MetaDataType.PERSON) {
+            sqlScalars.addToSql("SELECT ids.person_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb");
+            sqlScalars.addToSql("FROM person_ids ids");
+            sqlScalars.addToSql("WHERE ids.person_id=:id");
+        } else {
+            sqlScalars.addToSql("SELECT ids.videodata_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb");
+            sqlScalars.addToSql("FROM videodata_ids ids");
+            sqlScalars.addToSql("WHERE ids.videodata_id=:id");
+        }
+        
+        sqlScalars.addParameter("id", id);
+
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("externalId", StringType.INSTANCE);
+        sqlScalars.addScalar("sourcedb", StringType.INSTANCE);
+        
+        return executeQueryWithTransform(ApiExternalIdDTO.class, sqlScalars, null);
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="BoxSet methods">
     public List<ApiBoxedSetDTO> getBoxedSets(ApiWrapperList<ApiBoxedSetDTO> wrapper) {
         OptionsBoxedSet options = (OptionsBoxedSet) wrapper.getOptions();
         SqlScalars sqlScalars = generateSqlForBoxedSet(options);
@@ -2858,6 +2898,7 @@ public class ApiDao extends HibernateDao {
 
         return sqlScalars;
     }
+    //</editor-fold>
 
     public List<ApiNameDTO> getAlphabeticals(ApiWrapperList<ApiNameDTO> wrapper) {
         OptionsMultiType options = (OptionsMultiType) wrapper.getOptions();
@@ -2929,108 +2970,4 @@ public class ApiDao extends HibernateDao {
 
         return executeQueryWithTransform(ApiNameDTO.class, sqlScalars, wrapper);
     }
-
-    //<editor-fold defaultstate="collapsed" desc="External ID Methods">
-    public List<ApiExternalIdDTO> getExternalIdsForId(Long id, String sourcedb, String externalid) {
-        SqlScalars sqlScalars = sqlExternalIds(id, sourcedb, externalid);
-        return executeQueryWithTransform(ApiExternalIdDTO.class, sqlScalars, null);
-    }
-
-    private static SqlScalars sqlExternalIds(Long id, String sourcedb, String externalid) {
-        SqlScalars sqlScalars = new SqlScalars();
-
-        sqlScalars.addToSql("SELECT videodata_id AS id, sourcedb_id AS externalid, sourcedb AS sourcedb");
-        sqlScalars.addToSql("FROM videodata_ids vi");
-        sqlScalars.addToSql("WHERE 1=1");
-
-        if (id != null && id > 0) {
-            sqlScalars.addToSql("AND vi.videodata_id=:id");
-            sqlScalars.addParameter("id", id);
-        }
-
-        if (StringUtils.isNotBlank(sourcedb)) {
-            sqlScalars.addToSql("AND vi.sourcedb=:sourcedb");
-            sqlScalars.addParameter("sourcedb", sourcedb);
-        }
-
-        if (StringUtils.isNotBlank(externalid)) {
-            sqlScalars.addToSql("AND vi.sourcedb_id=:externalid");
-            sqlScalars.addParameter("externalid", externalid);
-        }
-
-        sqlScalars.addScalar("id", LongType.INSTANCE);
-        sqlScalars.addScalar("externalid", StringType.INSTANCE);
-        sqlScalars.addScalar("sourcedb", StringType.INSTANCE);
-        return sqlScalars;
-    }
-
-    /**
-     * Get a list of the external IDs
-     *
-     * @param wrapper
-     */
-    public void getExternalIds(ApiWrapperList<ApiExternalIdDTO> wrapper) {
-        OptionsExternalId options = (OptionsExternalId) wrapper.getOptions();
-        SqlScalars sqlScalars = sqlExternalIds(options.getId(), options.getSourcedb(), options.getExternalid());
-        List<ApiExternalIdDTO> result = executeQueryWithTransform(ApiExternalIdDTO.class, sqlScalars, wrapper);
-        wrapper.setResults(result);
-        wrapper.setStatusCheck();
-    }
-
-    /**
-     * Update an external ID to a new value
-     *
-     * @param id
-     * @param sourcedb
-     * @param externalid
-     * @return
-     */
-    public ApiStatus updateExternalId(Long id, String sourcedb, String externalid) {
-        VideoData vd = getById(VideoData.class, id);
-
-        String current = vd.getSourceDbId(sourcedb);
-        if (StringUtils.isNotBlank(current)) {
-            LOG.info("Updating '{}' ID from '{}' to '{}' for {}-{}", sourcedb, current, externalid, vd.getId(), vd.getTitle());
-        } else {
-            LOG.info("Adding '{}' ID '{}' to {}-{}", sourcedb, externalid, vd.getId(), vd.getTitle());
-        }
-
-        // Update the source ID
-        vd.setSourceDbId(sourcedb, externalid);
-
-        // Update the videodata table, set status to UPDATED
-        vd.setStatus(StatusType.UPDATED);
-        mergeEntity(vd);
-
-        return new ApiStatus(200, "Successfully updated '" + sourcedb + "' ID to '" + externalid + "' for " + vd.getId() + " - " + vd.getTitle());
-    }
-
-    /**
-     * Delete an external ID
-     *
-     * @param id
-     * @param sourcedb
-     * @return
-     */
-    public ApiStatus deleteExternalId(Long id, String sourcedb) {
-        // Delete from the videodata_ids table
-        VideoData vd = getById(VideoData.class, id);
-        LOG.info("Deleting '{}' ID(s) from {}-{}", StringUtils.isNotBlank(sourcedb) ? sourcedb : "ALL", vd.getId(), vd.getTitle());
-
-        if (StringUtils.isNotBlank(sourcedb)) {
-            // Remove a single entry
-            String removed = vd.removeSourceDbId(sourcedb);
-            LOG.info("Removed '{}' ID value '{}' from {}-{}", sourcedb, removed, vd.getId(), vd.getTitle());
-        } else {
-            // Remove all entries
-            LOG.info("Removing {} ID entries from {}-{}", vd.getSourceDbIdMap().size(), vd.getId(), vd.getTitle());
-            vd.getSourceDbIdMap().clear();
-        }
-
-        // Update the videodata table, set status to UPDATED
-        vd.setStatus(StatusType.UPDATED);
-        mergeEntity(vd);
-        return new ApiStatus(200, "Successfully deleted '" + sourcedb + "' ID for " + vd.getId() + " - " + vd.getTitle());
-    }
-    //</editor-fold>
 }

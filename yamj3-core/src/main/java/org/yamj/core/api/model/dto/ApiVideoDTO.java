@@ -24,11 +24,7 @@ package org.yamj.core.api.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.Certification;
@@ -59,16 +55,16 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private Long episode;
     private Boolean watched;
     private Date newest;
-    private List<ApiTargetDTO> genres = new ArrayList<>();
-    private List<Studio> studios = new ArrayList<>();
-    private List<ApiTargetDTO> countries = new ArrayList<>();
-    private List<Certification> certifications = new ArrayList<>();
+    private List<ApiTargetDTO> genres = new ArrayList<>(0);
+    private List<Studio> studios = new ArrayList<>(0);
+    private List<ApiTargetDTO> countries = new ArrayList<>(0);
+    private List<Certification> certifications = new ArrayList<>(0);
     private List<ApiRatingDTO> ratings = new ArrayList<>();
-    private List<ApiAwardDTO> awards = new ArrayList<>();
+    private List<ApiAwardDTO> awards = new ArrayList<>(0);
     private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<>(ArtworkType.class);
-    private List<ApiFileDTO> files = new ArrayList<>();
+    private List<ApiFileDTO> files = new ArrayList<>(0);
     private final Map<JobType,List<ApiPersonDTO>> cast = new EnumMap<>(JobType.class);
-    private List<ApiExternalIdDTO> externalids=new ArrayList<>();
+    private List<ApiExternalIdDTO> externalIds = new ArrayList<>(0);
 
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public MetaDataType getVideoType() {
@@ -199,8 +195,8 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         return files;
     }
 
-    public List<ApiExternalIdDTO> getExternalids() {
-        return externalids;
+    public List<ApiExternalIdDTO> getExternalIds() {
+        return externalIds;
     }
     //</editor-fold>
 
@@ -326,8 +322,8 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         this.files = files;
     }
 
-    public void setExternalids(List<ApiExternalIdDTO> externalids) {
-        this.externalids = externalids;
+    public void setExternalIds(List<ApiExternalIdDTO> externalIds) {
+        this.externalIds = externalIds;
     }
     //</editor-fold>
 

@@ -50,6 +50,8 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     private String role;
     private List<ApiArtworkDTO> artwork = new ArrayList<>(0);
     private List<ApiFilmographyDTO> filmography = new ArrayList<>(0);
+    private List<ApiExternalIdDTO> externalIds = new ArrayList<>(0);
+    
     @JsonIgnore
     private JobType jobType;
 
@@ -155,6 +157,15 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
 
     public void setFilmography(List<ApiFilmographyDTO> filmography) {
         this.filmography = filmography;
+    }
+
+    
+    public List<ApiExternalIdDTO> getExternalIds() {
+        return externalIds;
+    }
+
+    public void setExternalIds(List<ApiExternalIdDTO> externalIds) {
+        this.externalIds = externalIds;
     }
 
     public JobType getJobType() {

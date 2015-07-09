@@ -42,13 +42,13 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
     private String outline;
     private Integer year;
     private Boolean watched;
-    private List<ApiTargetDTO> genres = new ArrayList<>();
-    private List<Studio> studios = new ArrayList<>();
-    private List<ApiTargetDTO> countries = new ArrayList<>();
-    private List<Certification> certifications = new ArrayList<>();
-    private List<ApiAwardDTO> awards = new ArrayList<>();
-    private List<ApiRatingDTO> ratings = new ArrayList<>();
-    private List<ApiSeasonInfoDTO> seasonList = new ArrayList<>();
+    private List<ApiTargetDTO> genres = new ArrayList<>(0);
+    private List<Studio> studios = new ArrayList<>(0);
+    private List<ApiTargetDTO> countries = new ArrayList<>(0);
+    private List<Certification> certifications = new ArrayList<>(0);
+    private List<ApiAwardDTO> awards = new ArrayList<>(0);
+    private List<ApiRatingDTO> ratings = new ArrayList<>(0);
+    private List<ApiSeasonInfoDTO> seasonList = new ArrayList<>(0);
     
     private Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<>(ArtworkType.class);
 

@@ -22,6 +22,8 @@
  */
 package org.yamj.core.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  *
  * @author Stuart
@@ -58,6 +60,7 @@ public class ApiStatus {
         this.status = status;
     }
 
+    @JsonIgnore
     public boolean isSuccessful() {
         return (status == 200);
     }

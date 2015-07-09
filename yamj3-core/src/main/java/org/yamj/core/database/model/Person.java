@@ -30,6 +30,7 @@ import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -126,6 +127,9 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @Transient
     private Set<FilmParticipation> newFilmography = new HashSet<>(0);
 
+    @Transient
+    private Set<String> modifiedSources;
+    
     // CONSTRUCTORS
     public Person() {
         super();
@@ -300,12 +304,21 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         }
         String newId = id.trim();
         String oldId = this.sourceDbIdMap.put(sourceDb, newId);
-        return (!StringUtils.equals(oldId, newId));
+        final boolean changed = !StringUtils.equals(oldId, newId);
+        if (oldId != null && changed) {
+            addModifiedSource(sourceDb);
+        }
+        return changed;
     }
 
     @Override
-    public String removeSourceDbId(String sourceDb) {
-        return this.sourceDbIdMap.remove(sourceDb);
+    public boolean removeSourceDbId(String sourceDb) {
+        String removedId = this.sourceDbIdMap.remove(sourceDb);
+        if (removedId != null) {
+            addModifiedSource(sourceDb);
+            return true;
+        }
+        return false;
     }
     
     public StatusType getStatus() {
@@ -400,6 +413,19 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         this.newFilmography = newFilmography;
     }
 
+    protected final void addModifiedSource(String sourceDb) {
+        if (modifiedSources == null) modifiedSources = new HashSet<>(0);
+        modifiedSources.add(sourceDb);
+    }
+
+    public final boolean hasModifiedSource() {
+        return CollectionUtils.isNotEmpty(modifiedSources);
+    }
+    
+    public final Set<String> getModifiedSources() {
+        return modifiedSources;
+    }
+    
     // EQUALITY CHECKS
     @Override
     public int hashCode() {

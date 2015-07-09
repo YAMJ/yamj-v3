@@ -26,16 +26,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
+import org.yamj.core.service.ScanningScheduler;
 
 @Controller
 @ResponseBody
@@ -45,6 +44,8 @@ public class PersonController {
     private static final Logger LOG = LoggerFactory.getLogger(PersonController.class);
     @Autowired
     private JsonApiStorageService jsonApiStorageService;
+    @Autowired
+    private ScanningScheduler scanningScheduler;
 
     @RequestMapping("/{id}")
     public ApiWrapperSingle<ApiPersonDTO> getPersonById(@ModelAttribute("options") OptionsId options) {
@@ -94,5 +95,35 @@ public class PersonController {
             wrapper.setStatusInvalidId();
         }
         return wrapper;
+    }
+
+    /**
+     * Add or update an external id of a series.
+     */
+    @RequestMapping("/updateexternalid")
+    public ApiStatus updateExternalId(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb,
+            @RequestParam(required = true) String externalid
+    ) {
+        LOG.info("Set {} external ID '{}' for person ID {}", sourcedb, externalid, id);
+        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.PERSON, id, sourcedb, externalid);
+        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanPeopleData();
+        return apiStatus;
+        
+    }
+
+    /**
+     * Add or update an external id of a series.
+     */
+    @RequestMapping("/removeexternalid")
+    public ApiStatus removeExternalId(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb
+    ) {
+        LOG.info("Remove {} external ID from person ID {}", sourcedb, id);
+        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.PERSON, id, sourcedb, null);
+        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanPeopleData();
+        return apiStatus;
     }
 }

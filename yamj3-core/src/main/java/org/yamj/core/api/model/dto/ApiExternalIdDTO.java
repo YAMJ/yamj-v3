@@ -32,15 +32,15 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_DEFAULT)
 public class ApiExternalIdDTO extends AbstractApiIdentifiableDTO {
 
-    private String externalid;
+    private String externalId;
     private String sourcedb;
 
-    public String getExternalid() {
-        return externalid;
+    public String getExternalId() {
+        return externalId;
     }
 
-    public void setExternalid(String externalid) {
-        this.externalid = externalid;
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
     }
 
     public String getSourcedb() {

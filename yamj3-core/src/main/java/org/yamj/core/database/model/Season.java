@@ -153,10 +153,13 @@ public class Season extends AbstractMetadata {
     }
 
     @Override
-    public String removeSourceDbId(String sourceDb) {
+    public boolean removeSourceDbId(String sourceDb) {
         String removedId = this.sourceDbIdMap.remove(sourceDb);
-        if (removedId != null) addModifiedSource(sourceDb);
-        return removedId;
+        if (removedId != null) {
+            addModifiedSource(sourceDb);
+            return true;
+        }
+        return false;
     }
     
     public Map<String, Integer> getRatings() {

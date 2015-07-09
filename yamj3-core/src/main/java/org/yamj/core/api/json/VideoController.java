@@ -31,11 +31,16 @@ import org.springframework.web.bind.annotation.*;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.builder.DataItem;
-import org.yamj.core.api.model.dto.*;
-import org.yamj.core.api.options.*;
+import org.yamj.core.api.model.dto.ApiEpisodeDTO;
+import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
+import org.yamj.core.api.model.dto.ApiVideoDTO;
+import org.yamj.core.api.options.OptionsEpisode;
+import org.yamj.core.api.options.OptionsIdArtwork;
+import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
+import org.yamj.core.service.ScanningScheduler;
 
 @Controller
 @ResponseBody
@@ -43,8 +48,11 @@ import org.yamj.core.database.service.JsonApiStorageService;
 public class VideoController {
 
     private static final Logger LOG = LoggerFactory.getLogger(VideoController.class);
+    
     @Autowired
     private JsonApiStorageService jsonApi;
+    @Autowired
+    private ScanningScheduler scanningScheduler;
 
     /**
      * Get information on a movie
@@ -100,6 +108,36 @@ public class VideoController {
     }
 
     /**
+     * Add or update an external id of a movie.
+     */
+    @RequestMapping("/movie/updateexternalid")
+    public ApiStatus updateMovieExternalId(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb,
+            @RequestParam(required = true) String externalid
+    ) {
+        LOG.info("Set {} external ID '{}' for movie ID {}", sourcedb, externalid, id);
+        ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.MOVIE, id, sourcedb, externalid);
+        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
+        return apiStatus;
+        
+    }
+
+    /**
+     * Add or update an external id of a movie.
+     */
+    @RequestMapping("/movie/removeexternalid")
+    public ApiStatus removeMovieExternalId(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb
+    ) {
+        LOG.info("Remove {} external ID from movie ID {}", sourcedb, id);
+        ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.MOVIE, id, sourcedb, null);
+        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
+        return apiStatus;
+    }
+
+    /**
      * Get information on a series
      *
      * TODO: Get associate seasons for the series
@@ -152,6 +190,96 @@ public class VideoController {
         
         LOG.info("Disable {} online scan for series with ID '{}'", sourcedb, id);
         return jsonApi.updateOnlineScan(MetaDataType.SERIES, id, sourcedb, true);
+    } 
+    
+    /**
+     * Add or update an external id of a series.
+     */
+    @RequestMapping("/series/updateexternalid")
+    public ApiStatus updateSeriesExternalId(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb,
+            @RequestParam(required = true) String externalid
+    ) {
+        LOG.info("Set {} external ID '{}' for series ID {}", sourcedb, externalid, id);
+        ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.SERIES, id, sourcedb, externalid);
+        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
+        return apiStatus;
+        
+    }
+
+    /**
+     * Add or update an external id of a series.
+     */
+    @RequestMapping("/series/removeexternalid")
+    public ApiStatus removeSeriesExternalId(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb
+    ) {
+        LOG.info("Remove {} external ID from series ID {}", sourcedb, id);
+        ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.SERIES, id, sourcedb, null);
+        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
+        return apiStatus;
+    }
+
+    /**
+     * Add or update an external id of a series.
+     */
+    @RequestMapping("/season/updateexternalid")
+    public ApiStatus updateSeasonExternalId(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb,
+            @RequestParam(required = true) String externalid
+    ) {
+        LOG.info("Set {} external ID '{}' for season ID {}", sourcedb, externalid, id);
+        ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.SEASON, id, sourcedb, externalid);
+        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
+        return apiStatus;
+        
+    }
+
+    /**
+     * Add or update an external id of a series.
+     */
+    @RequestMapping("/season/removeexternalid")
+    public ApiStatus removeSeasonExternalId(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb
+    ) {
+        LOG.info("Remove {} external ID from season ID {}", sourcedb, id);
+        ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.SEASON, id, sourcedb, null);
+        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
+        return apiStatus;
+    }
+
+    /**
+     * Add or update an external id of a series.
+     */
+    @RequestMapping("/episode/updateexternalid")
+    public ApiStatus updateEpisodeExternalId(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb,
+            @RequestParam(required = true) String externalid
+    ) {
+        LOG.info("Set {} external ID '{}' for episode ID {}", sourcedb, externalid, id);
+        ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.EPISODE, id, sourcedb, externalid);
+        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
+        return apiStatus;
+        
+    }
+
+    /**
+     * Add or update an external id of a series.
+     */
+    @RequestMapping("/episode/removeexternalid")
+    public ApiStatus removeEpisodeExternalId(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb
+    ) {
+        LOG.info("Remove {} external ID from episode ID {}", sourcedb, id);
+        ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.EPISODE, id, sourcedb, null);
+        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
+        return apiStatus;
     }
 
     /**
@@ -220,67 +348,4 @@ public class VideoController {
         wrapper.setStatusCheck();
         return wrapper;
     }
-
-    /**
-     * Get the list of external IDs for a video
-     *
-     * @param id
-     * @param sourcedb
-     * @param externalid
-     * @return
-     */
-    @RequestMapping("/externalids")
-    public ApiWrapperList<ApiExternalIdDTO> getExternalIds(
-            @RequestParam(required = false) Long id,
-            @RequestParam(required = false) String sourcedb,
-            @RequestParam(required = false) String externalid) {
-        LOG.info("Getting External IDs for VideoData ID: {}, SourceDb: {}, ExternalID: {}",
-                id, sourcedb, externalid);
-
-        OptionsExternalId options = new OptionsExternalId();
-        options.setId(id);
-        options.setSourcedb(sourcedb);
-        options.setExternalid(externalid);
-
-        ApiWrapperList<ApiExternalIdDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setOptions(options);
-        jsonApi.getExternalIds(wrapper);
-        wrapper.setStatusCheck();
-        return wrapper;
-    }
-
-    /**
-     * Add or update an external id to the video
-     *
-     * @param id
-     * @param sourcedb
-     * @param externalid
-     * @return
-     */
-    @RequestMapping("/externalids/update")
-    public ApiStatus updateExternalId(
-            @RequestParam(required = true) Long id,
-            @RequestParam(required = true) String sourcedb,
-            @RequestParam(required = true) String externalid
-    ) {
-        LOG.info("Add/Update Source: '{}' ExternalID: '{}' to ID: {}", sourcedb, externalid, id);
-        return jsonApi.updateExternalId(id, sourcedb, externalid);
-    }
-
-    /**
-     * Delete one or all of the external IDs from the video
-     *
-     * @param id
-     * @param sourcedb
-     * @return
-     */
-    @RequestMapping("/externalids/delete")
-    public ApiStatus deleteExternalId(
-            @RequestParam(required = true) Long id,
-            @RequestParam(required = false, defaultValue = "") String sourcedb
-    ) {
-        LOG.info("Deleting Source: '{}' from ID: {}", sourcedb, id);
-        return jsonApi.deleteExternalId(id, sourcedb);
-    }
-
 }

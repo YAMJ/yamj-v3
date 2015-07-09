@@ -330,10 +330,13 @@ public class VideoData extends AbstractMetadata {
     }
 
     @Override
-    public String removeSourceDbId(String sourceDb) {
+    public boolean removeSourceDbId(String sourceDb) {
         String removedId = this.sourceDbIdMap.remove(sourceDb);
-        if (removedId != null) addModifiedSource(sourceDb);
-        return removedId;
+        if (removedId != null) {
+            addModifiedSource(sourceDb);
+            return true;
+        }
+        return false;
     }
 
     private String getSkipScanNfo() {
@@ -399,7 +402,7 @@ public class VideoData extends AbstractMetadata {
 
     @Override
     public boolean isSkippedScan(String sourceDb) {
-        if (getEpisode() <= 0) {
+        if (isMovie()) {
             // skip movie
             if (getSkipScanNfo() == null && getSkipScanApi() == null) return false;
             if ("all".equalsIgnoreCase(getSkipScanNfo())) return true;

@@ -212,9 +212,17 @@ public abstract class AbstractMetadata extends AbstractAuditable
         return false;
     }
 
-    protected final void addModifiedSource(String sourceDb) {
-        if (modifiedSources == null) modifiedSources = new HashSet<>();
-        modifiedSources.add(sourceDb);
+    // TRANSIENT METHODS
+    protected final void addModifiedSource(String source) {
+        if (modifiedSources == null) modifiedSources = new HashSet<>(0);
+        modifiedSources.add(source);
+    }
+
+    public final void addModifiedSources(Set<String> sources) {
+        if (CollectionUtils.isNotEmpty(sources)) {
+            if (modifiedSources == null) modifiedSources = new HashSet<>();
+            modifiedSources.addAll(sources);
+        }
     }
 
     public final boolean hasModifiedSource() {

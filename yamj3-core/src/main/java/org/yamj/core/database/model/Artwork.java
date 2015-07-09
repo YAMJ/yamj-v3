@@ -221,7 +221,7 @@ public class Artwork extends AbstractAuditable implements Serializable {
         sb.append(getArtworkType());
         if (getVideoData() != null) {
             if (Hibernate.isInitialized(getVideoData())) {
-                if (getVideoData().getEpisode() < 0) {
+                if (getVideoData().isMovie()) {
                     sb.append(", movie-id='");
                     sb.append(getVideoData().getIdentifier());
                     sb.append("'");
