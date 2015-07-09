@@ -133,7 +133,10 @@ public class OnlineScannerService {
                 LOG.info("Alternate scanning movie data for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
 
                 try {
-                    movieScanner.scan(videoData);
+                    ScanResult alternateScanResult = movieScanner.scan(videoData);
+                    
+                    // set alternate scan result if main scanner skipped
+                    if (ScanResult.SKIPPED.equals(scanResult)) scanResult = alternateScanResult;
                 } catch (Exception error) {
                     // set to ERROR if previous scanner has been skipped
                     if (ScanResult.SKIPPED.equals(scanResult)) scanResult = ScanResult.ERROR;
@@ -206,8 +209,10 @@ public class OnlineScannerService {
                 LOG.info("Alternate scanning series data for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
 
                 try {
+                    ScanResult alternateScanResult = seriesScanner.scan(series);
                     
-                    seriesScanner.scan(series);
+                    // set alternate scan result if main scanner skipped
+                    if (ScanResult.SKIPPED.equals(scanResult)) scanResult = alternateScanResult;
                 } catch (Exception error) {
                     // set to ERROR if previous scanner has been skipped
                     if (ScanResult.SKIPPED.equals(scanResult)) scanResult = ScanResult.ERROR;
