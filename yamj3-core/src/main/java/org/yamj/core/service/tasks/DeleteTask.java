@@ -32,7 +32,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.yamj.core.configuration.ConfigService;
+import org.yamj.core.database.model.dto.DeletionDTO;
 import org.yamj.core.database.service.CommonStorageService;
+import org.yamj.core.service.ScanningScheduler;
 import org.yamj.core.service.file.FileStorageService;
 
 /**
@@ -52,7 +54,9 @@ public class DeleteTask implements ITask {
     private ConfigService configService;
     @Autowired
     private FileStorageService fileStorageService;
-
+    @Autowired
+    private ScanningScheduler scanningScheduler;
+    
     @Override
     public String getTaskName() {
         return "delete";
@@ -92,15 +96,21 @@ public class DeleteTask implements ITask {
             if (CollectionUtils.isEmpty(ids)) {
                 LOG.trace("No located artwork found to delete");
             } else {
+                boolean updateTrigger = false;
+                
                 // delete stage files
                 for (Long id : ids) {
                     try {
-                        filesToDelete.addAll(this.commonStorageService.deleteArtworkLocated(id));
+                        DeletionDTO dto = this.commonStorageService.deleteArtworkLocated(id);
+                        updateTrigger = (updateTrigger || dto.isUpdateTrigger());
                     } catch (Exception ex) {
                         LOG.warn("Failed to delete located artwork ID: {}", id);
                         LOG.error("Deletion error", ex);
                     }
                 }
+                
+                // trigger artwork scan
+                if (updateTrigger) scanningScheduler.triggerScanArtwork();
             }
         } catch (Exception ex) {
             LOG.warn("Failed to retrieve located artworks to delete", ex);

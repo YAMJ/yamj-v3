@@ -22,28 +22,43 @@
  */
 package org.yamj.core.service;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.mediaimport.MediaImportService;
 import org.yamj.core.tools.ExceptionTools;
 
-@Component
+@Service
 public class ImportScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImportScheduler.class);
     
     @Autowired
     private MediaImportService mediaImportService;
+    @Autowired
+    private ScanningScheduler scanningScheduler;
+    
+    private AtomicBoolean watchProcess = new AtomicBoolean(false);
+
+    @Scheduled(initialDelay = 1000, fixedDelay = 300000)
+    public void triggerProcess() {
+        LOG.trace("Trigger process");
+        watchProcess.set(true);
+    }
 
     @Async
-    @Scheduled(initialDelay = 10000, fixedDelay = 30000)
-    public synchronized void processStageFiles() {
+    @Scheduled(initialDelay = 1000, fixedDelay = 100)
+    public synchronized void runProcess() {
+        if (watchProcess.getAndSet(false)) processStageFiles();
+    }
+
+    private void processStageFiles() {
         Long id = null;
 
         // PROCESS VIDEOS
@@ -55,6 +70,10 @@ public class ImportScheduler {
                     LOG.trace("Process video stage file: {}", id);
                     mediaImportService.processVideo(id);
                     LOG.info("Processed video stage file: {}", id);
+                    
+                    // trigger scan of media files and meta data
+                    scanningScheduler.triggerScanMediaFiles();
+                    scanningScheduler.triggerScanMetaData();
                 }
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
@@ -78,8 +97,11 @@ public class ImportScheduler {
                 id = mediaImportService.getNextStageFileId(FileType.NFO, StatusType.NEW, StatusType.UPDATED);
                 if (id != null) {
                     LOG.trace("Process nfo stage file: {}", id);
-                    mediaImportService.processNfo(id);
+                    boolean done = mediaImportService.processNfo(id);
                     LOG.info("Processed nfo stage file: {}", id);
+
+                    // trigger scan of meta data
+                    if (done) scanningScheduler.triggerScanMetaData();
                 }
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
@@ -103,8 +125,11 @@ public class ImportScheduler {
                 id = mediaImportService.getNextStageFileId(FileType.IMAGE, StatusType.NEW, StatusType.UPDATED);
                 if (id != null) {
                     LOG.trace("Process image stage file: {}", id);
-                    mediaImportService.processImage(id);
+                    boolean done = mediaImportService.processImage(id);
                     LOG.info("Processed image stage file: {}", id);
+
+                    // trigger scan of artwork
+                    if (done) scanningScheduler.triggerScanArtwork();
                 }
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {

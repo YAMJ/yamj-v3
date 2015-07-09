@@ -24,6 +24,7 @@ package org.yamj.core.service;
 
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,8 @@ public class ScanningScheduler {
     private MediaStorageService mediaStorageService;
     @Autowired
     private MediaInfoService mediaInfoService;
+    @Autowired
+    private ArtworkProcessScheduler artworkProcessScheduler;
     
     private boolean messageDisabledMediaFiles = Boolean.FALSE;   // Have we already printed the disabled message
     private boolean messageDisabledMetaData = Boolean.FALSE;     // Have we already printed the disabled message
@@ -68,15 +71,64 @@ public class ScanningScheduler {
     private boolean messageDisabledFilmography = Boolean.FALSE;  // Have we already printed the disabled message
     private boolean messageDisabledArtwork = Boolean.FALSE;      // Have we already printed the disabled message
 
+    private AtomicBoolean watchScanMediaFiles = new AtomicBoolean(false);
+    private AtomicBoolean watchScanMetaData = new AtomicBoolean(false);
+    private AtomicBoolean watchScanPeopleData = new AtomicBoolean(false);
+    private AtomicBoolean watchScanFilmography = new AtomicBoolean(false);
+    private AtomicBoolean watchScanArtwork = new AtomicBoolean(false);
+    
+    @Scheduled(initialDelay = 5000, fixedDelay = 300000)
+    public void triggerAllScans() {
+        LOG.trace("Trigger scan for all");
+        watchScanMediaFiles.set(true);
+        watchScanMetaData.set(true);
+        watchScanPeopleData.set(true);
+        watchScanFilmography.set(true);
+        watchScanArtwork.set(true);
+    }
+    
+    public void triggerScanMediaFiles() {
+        LOG.trace("Trigger scan of media files");
+        watchScanMediaFiles.set(true);
+    }
 
-    @Scheduled(initialDelay = 5000, fixedDelay = 45000)
-    public void scanMediaFiles() {
+    public void triggerScanMetaData() {
+        LOG.trace("Trigger scan of meta data");
+        watchScanMetaData.set(true);
+    }
+    
+    public void triggerScanPeopleData() {
+        LOG.trace("Trigger scan of people data");
+        watchScanPeopleData.set(true);
+    }
+
+    public void triggerScanFilmography() {
+        LOG.trace("Trigger scan of filmogprahy");
+        watchScanFilmography.set(true);
+    }
+
+    public void triggerScanArtwork() {
+        LOG.trace("Trigger scan of artwork");
+        watchScanArtwork.set(true);
+    }
+
+    @Scheduled(initialDelay = 5000, fixedDelay = 100)
+    public void runAllScans() {
+        if (watchScanMediaFiles.get()) scanMediaFiles();
+        if (watchScanMetaData.get()) scanMetaData();
+        if (watchScanPeopleData.get()) scanPeopleData();
+        if (watchScanFilmography.get()) scanFilmography();
+        if (watchScanArtwork.get()) scanArtwork();
+    }
+    
+    private void scanMediaFiles() {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.mediafilescan.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabledMediaFiles) {
                 messageDisabledMediaFiles = Boolean.TRUE;
                 LOG.info("Media file scanning is disabled");
             }
+            watchScanMediaFiles.set(false);
             return;
         }
         if (messageDisabledMediaFiles) {
@@ -88,6 +140,7 @@ public class ScanningScheduler {
         List<QueueDTO> queueElements = mediaStorageService.getMediaFileQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No media files found to scan");
+            watchScanMediaFiles.set(false);
             return;
         }
 
@@ -113,14 +166,16 @@ public class ScanningScheduler {
         LOG.debug("Finished media file scanning");
     }
 
-    @Scheduled(initialDelay = 10000, fixedDelay = 45000)
-    public void scanMetaData() {
+    private void scanMetaData() {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.metadatascan.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabledMetaData) {
                 messageDisabledMetaData = Boolean.TRUE;
                 LOG.info("Metadata scanning is disabled");
             }
+            watchScanMetaData.set(false);
+            // trigger scan for people data
+            watchScanPeopleData.set(true);
             return;
         }
         if (messageDisabledMetaData) {
@@ -132,6 +187,7 @@ public class ScanningScheduler {
         List<QueueDTO> queueElements = metadataStorageService.getMetaDataQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No metadata found to scan");
+            watchScanMetaData.set(false);
             return;
         }
 
@@ -154,17 +210,22 @@ public class ScanningScheduler {
             }
         }
 
+        // trigger scan for people data
+        watchScanPeopleData.set(true);
+        
         LOG.debug("Finished metadata scanning");
     }
 
-    @Scheduled(initialDelay = 20000, fixedDelay = 45000)
-    public void scanPeopleData() {
+    private void scanPeopleData() {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.peoplescan.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabledPeople) {
                 messageDisabledPeople = Boolean.TRUE;
                 LOG.info("People scanning is disabled");
             }
+            watchScanPeopleData.set(false);
+            // trigger scan for filmography
+            watchScanFilmography.set(true);
             return;
         }
         if (messageDisabledPeople) {
@@ -176,6 +237,7 @@ public class ScanningScheduler {
         List<QueueDTO> queueElements = metadataStorageService.getPersonQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No people data found to scan");
+            watchScanPeopleData.set(false);
             return;
         }
 
@@ -198,17 +260,22 @@ public class ScanningScheduler {
             }
         }
 
+        // trigger scan for filmography
+        watchScanFilmography.set(true);
+        
         LOG.debug("Finished people data scanning");
     }
 
-    @Scheduled(initialDelay = 20000, fixedDelay = 45000)
-    public void scanFilmography() {
+    private void scanFilmography() {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.filmographyscan.maxThreads", 1);
         if (maxThreads <= 0 || !this.metadataScannerService.isFilmographyScanEnabled()) { 
             if (!messageDisabledFilmography) {
                 messageDisabledFilmography = Boolean.TRUE;
                 LOG.info("Filmography scanning is disabled");
             }
+            watchScanFilmography.set(false);
+            // trigger scan for artwork
+            watchScanArtwork.set(true);
             return;
         }
         if (messageDisabledFilmography) {
@@ -220,6 +287,7 @@ public class ScanningScheduler {
         List<QueueDTO> queueElements = metadataStorageService.getFilmographyQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No filmography data found to scan");
+            watchScanFilmography.set(false);
             return;
         }
 
@@ -242,17 +310,20 @@ public class ScanningScheduler {
             }
         }
 
+        // trigger scan for artwork
+        watchScanArtwork.set(true);
+        
         LOG.debug("Finished filmography data scanning");
     }
 
-    @Scheduled(initialDelay = 30000, fixedDelay = 45000)
-    public void scanArtwork() {
+    private void scanArtwork() {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.artworkscan.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabledArtwork) {
                 messageDisabledArtwork = Boolean.TRUE;
                 LOG.info("Artwork scanning is disabled");
             }
+            watchScanArtwork.set(false);
             return;
         }
         if (messageDisabledArtwork) {
@@ -264,6 +335,7 @@ public class ScanningScheduler {
         List<QueueDTO> queueElements = artworkStorageService.getArtworkQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No artwork found to scan");
+            watchScanArtwork.set(false);
             return;
         }
 
@@ -286,6 +358,9 @@ public class ScanningScheduler {
             }
         }
 
+        // trigger artwork processing
+        this.artworkProcessScheduler.triggerProcess();
+        
         LOG.debug("Finished artwork scanning");
     }
 }

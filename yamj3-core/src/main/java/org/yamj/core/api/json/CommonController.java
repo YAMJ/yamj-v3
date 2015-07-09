@@ -35,11 +35,9 @@ import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
-import org.yamj.core.database.model.Certification;
-import org.yamj.core.database.model.Country;
-import org.yamj.core.database.model.Genre;
-import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.service.JsonApiStorageService;
+import org.yamj.core.service.ScanningScheduler;
 
 @Controller
 @ResponseBody
@@ -49,6 +47,8 @@ public class CommonController {
     private static final Logger LOG = LoggerFactory.getLogger(CommonController.class);
     @Autowired
     private JsonApiStorageService jsonApi;
+    @Autowired 
+    private ScanningScheduler scanningScheduler;
 
     //<editor-fold defaultstate="collapsed" desc="Watched Methods">
     @RequestMapping("/watched/movie/{id}")
@@ -99,32 +99,44 @@ public class CommonController {
     //<editor-fold defaultstate="collapsed" desc="Rescan Methods">
     @RequestMapping("/rescan/movie/{id}")
     public ApiStatus rescanMovie(@ModelAttribute("options") OptionsId options) {
-        return jsonApi.rescanSingle(MetaDataType.MOVIE, options.getId());
+        ApiStatus apiStatus = jsonApi.rescanSingle(MetaDataType.MOVIE, options.getId());
+        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanMetaData();
+        return apiStatus;
     }
 
     @RequestMapping("/rescan/series/{id}")
     public ApiStatus rescanSeries(@ModelAttribute("options") OptionsId options) {
-        return jsonApi.rescanSingle(MetaDataType.SERIES, options.getId());
+        ApiStatus apiStatus = jsonApi.rescanSingle(MetaDataType.SERIES, options.getId());
+        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanMetaData();
+        return apiStatus;
     }
 
     @RequestMapping("/rescan/season/{id}")
     public ApiStatus rescanSeason(@ModelAttribute("options") OptionsId options) {
-        return jsonApi.rescanSingle(MetaDataType.SEASON, options.getId());
+        ApiStatus apiStatus = jsonApi.rescanSingle(MetaDataType.SEASON, options.getId());
+        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanMetaData();
+        return apiStatus;
     }
 
     @RequestMapping("/rescan/episode/{id}")
     public ApiStatus rescanEpisode(@ModelAttribute("options") OptionsId options) {
-        return jsonApi.rescanSingle(MetaDataType.EPISODE, options.getId());
+        ApiStatus apiStatus = jsonApi.rescanSingle(MetaDataType.EPISODE, options.getId());
+        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanMetaData();
+        return apiStatus;
     }
 
     @RequestMapping("/rescan/person/{id}")
     public ApiStatus rescanPerson(@ModelAttribute("options") OptionsId options) {
-        return jsonApi.rescanSingle(MetaDataType.PERSON, options.getId());
+        ApiStatus apiStatus = jsonApi.rescanSingle(MetaDataType.PERSON, options.getId());
+        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanPeopleData();
+        return apiStatus;
     }
 
     @RequestMapping("/rescan/filmography/{id}")
     public ApiStatus rescanFilmography(@ModelAttribute("options") OptionsId options) {
-        return jsonApi.rescanSingle(MetaDataType.FILMOGRAPHY, options.getId());
+        ApiStatus apiStatus = jsonApi.rescanSingle(MetaDataType.FILMOGRAPHY, options.getId());
+        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanFilmography();
+        return apiStatus;
     }
     //</editor-fold>
 

@@ -24,10 +24,12 @@ package org.yamj.core.service;
 
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigService;
@@ -49,8 +51,20 @@ public class ArtworkProcessScheduler {
     private ArtworkProcessorService artworkProcessorService;
 
     private boolean messageDisabled = Boolean.FALSE;    // Have we already printed the disabled message
+    private AtomicBoolean watchProcess = new AtomicBoolean(false);
 
-    @Scheduled(initialDelay = 30000, fixedDelay = 60000)
+    @Scheduled(initialDelay = 30000, fixedDelay = 300000)
+    public void triggerProcess() {
+        LOG.trace("Trigger process");
+        watchProcess.set(true);
+    }
+
+    @Async
+    @Scheduled(initialDelay = 30000, fixedDelay = 200)
+    public synchronized void runProcess() {
+        if (watchProcess.getAndSet(false)) processArtwork();
+    }
+    
     public void processArtwork() {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.artworkprocess.maxThreads", 1);
         if (maxThreads <= 0) {

@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.dto.DeletionDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.file.FileStorageService;
@@ -348,12 +349,13 @@ public class CommonStorageService {
     }
 
     @Transactional
-    public Set<String> deleteArtworkLocated(Long id) {
+    public DeletionDTO deleteArtworkLocated(Long id) {
         Set<String> filesToDelete = new HashSet<>();
         ArtworkLocated located = this.stagingDao.getById(ArtworkLocated.class, id);
 
         LOG.debug("Delete: {}", located);
 
+        boolean updateTrigger = false;
         if (located != null) {
             Artwork artwork = located.getArtwork();
             artwork.getArtworkLocated().remove(located);
@@ -363,10 +365,11 @@ public class CommonStorageService {
             if (CollectionUtils.isEmpty(located.getArtwork().getArtworkLocated())) {
                 artwork.setStatus(StatusType.NEW);
                 this.stagingDao.updateEntity(artwork);
+                updateTrigger = true;
             }
         }
 
-        return filesToDelete;
+        return new DeletionDTO(filesToDelete, updateTrigger);
     }
 
     @Transactional(readOnly = true)

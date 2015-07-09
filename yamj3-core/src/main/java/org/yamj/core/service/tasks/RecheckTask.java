@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.service.MetadataStorageService;
+import org.yamj.core.service.ScanningScheduler;
 
 /**
  * Task for checking if video, series or person is older than x days
@@ -46,6 +47,8 @@ public class RecheckTask implements ITask {
     private ConfigService configService;
     @Autowired
     private MetadataStorageService metadataStorageService;
+    @Autowired
+    private ScanningScheduler scanningScheduler;
     
     @Override
     public String getTaskName() {
@@ -64,16 +67,23 @@ public class RecheckTask implements ITask {
         int recheck = this.configService.getIntProperty("yamj3.recheck.movie.maxDays", 45);
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_MONTH, (0-recheck));
-        this.metadataStorageService.recheckMovie(cal.getTime());
+        boolean updatedMovies = this.metadataStorageService.recheckMovie(cal.getTime());
 
         recheck = this.configService.getIntProperty("yamj3.recheck.tvshow.maxDays", 45);
         cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_MONTH, (0-recheck));
-        this.metadataStorageService.recheckTvShow(cal.getTime());
+        boolean updatedSeries = this.metadataStorageService.recheckTvShow(cal.getTime());
 
         recheck = this.configService.getIntProperty("yamj3.recheck.person.maxDays", 90);
         cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_MONTH, (0-recheck));
-        this.metadataStorageService.recheckPerson(cal.getTime());
+        boolean updatedPersons = this.metadataStorageService.recheckPerson(cal.getTime());
+        
+        if (updatedMovies || updatedSeries) {
+            scanningScheduler.triggerScanMetaData();
+        }
+        if (updatedPersons) {
+            scanningScheduler.triggerScanPeopleData();
+        }
     }
 }

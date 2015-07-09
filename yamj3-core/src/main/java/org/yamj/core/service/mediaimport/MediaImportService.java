@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.mediaimport;
 
-import org.yamj.core.service.file.FileTools;
-
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -38,15 +36,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigServiceWrapper;
-import org.yamj.core.database.dao.ArtworkDao;
-import org.yamj.core.database.dao.MediaDao;
-import org.yamj.core.database.dao.MetadataDao;
-import org.yamj.core.database.dao.StagingDao;
+import org.yamj.core.database.dao.*;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.MetadataStorageService;
+import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.Constants;
 import org.yamj.core.tools.LanguageTools;
@@ -570,7 +566,7 @@ public class MediaImportService {
     }
 
     @Transactional
-    public void processNfo(long id) {
+    public boolean processNfo(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
         LOG.info("Process nfo {}-'{}'", stageFile.getId(), stageFile.getFileName());
 
@@ -580,7 +576,7 @@ public class MediaImportService {
             stageFile.setStatus(StatusType.INVALID);
             stagingDao.updateEntity(stageFile);
             // nothing to do anymore
-            return;
+            return false;
         }
 
         // process new NFO
@@ -592,7 +588,6 @@ public class MediaImportService {
         }
         stagingDao.updateEntity(stageFile);
 
-        // update meta-data for NFO scan
         for (NfoRelation nfoRelation : stageFile.getNfoRelations()) {
             VideoData videoData = nfoRelation.getNfoRelationPK().getVideoData();
             if (videoData.isMovie()) {
@@ -615,6 +610,9 @@ public class MediaImportService {
                 LOG.debug("Marked series {}-'{}' as updated", series.getId(), series.getTitle());
             }
         }
+        
+        // return true if NFO file has relations to videos
+        return CollectionUtils.isNotEmpty(stageFile.getNfoRelations());
     }
 
     private boolean processNfoFile(StageFile stageFile) {
@@ -641,9 +639,9 @@ public class MediaImportService {
                 videoData.addNfoRelation(nfoRelation);
 
                 LOG.trace("Stored new NFO relation: stageFile={}, videoData={}", stageFile.getId(), videoData.getId());
-
             }
         }
+        
         return true;
     }
 
@@ -744,7 +742,7 @@ public class MediaImportService {
     }
 
     @Transactional
-    public void processImage(long id) {
+    public boolean processImage(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
         LOG.info("Process image {}-'{}'", stageFile.getId(), stageFile.getFileName());
 
@@ -767,6 +765,8 @@ public class MediaImportService {
             stageFile.setStatus(StatusType.NOTFOUND);
         }
         stagingDao.updateEntity(stageFile);
+        
+        return (found || updated);
     }
 
     private boolean processImageFile(StageFile stageFile) {

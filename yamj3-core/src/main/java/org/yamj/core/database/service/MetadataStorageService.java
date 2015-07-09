@@ -836,7 +836,7 @@ public class MetadataStorageService {
     }
 
     @Transactional
-    public void recheckMovie(Date compareDate) {
+    public boolean recheckMovie(Date compareDate) {
         StringBuilder sql = new StringBuilder();
         sql.append("update VideoData vd set vd.status='UPDATED' ");
         sql.append("where vd.status not in ('NEW','UPDATED') ");
@@ -844,11 +844,12 @@ public class MetadataStorageService {
         sql.append("and vd.episode<0 ");
 
         Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
-        this.commonDao.executeUpdate(sql, params);
+        int updated = this.commonDao.executeUpdate(sql, params);
+        return (updated > 0);
     }
 
     @Transactional
-    public void recheckTvShow(Date compareDate) {
+    public boolean recheckTvShow(Date compareDate) {
         StringBuilder sql = new StringBuilder();
         sql.append("update Series ser set ser.status='UPDATED' ");
         sql.append("where ser.status not in ('NEW','UPDATED') ");
@@ -857,17 +858,19 @@ public class MetadataStorageService {
         // TODO: what is with season and episodes?
 
         Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
-        this.commonDao.executeUpdate(sql, params);
+        int updated = this.commonDao.executeUpdate(sql, params);
+        return (updated > 0);
     }
 
     @Transactional
-    public void recheckPerson(Date compareDate) {
+    public boolean recheckPerson(Date compareDate) {
         StringBuilder sql = new StringBuilder();
         sql.append("update Person p set p.status='UPDATED',p.filmographyStatus='NEW' ");
         sql.append("where p.status not in ('NEW','UPDATED') ");
         sql.append("and (p.lastScanned is null or p.lastScanned<=:compareDate) ");
 
         Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
-        this.commonDao.executeUpdate(sql, params);
+        int updated = this.commonDao.executeUpdate(sql, params);
+        return (updated > 0);
     }
 }

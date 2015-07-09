@@ -20,53 +20,40 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api.model;
+package org.yamj.core.database.model.dto;
 
-/**
- *
- * @author Stuart
- */
-public class ApiStatus {
+import java.util.Set;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
-    private int status;
-    private String message;
+public class DeletionDTO {
 
-    public ApiStatus() {
-        this.status = 100;
-        this.message = "Unknown status";
+    private final Set<String> filesToDelete;
+    private boolean updateTrigger = false;
+    
+    public DeletionDTO(Set<String> filesToDelete) {
+        this.filesToDelete = filesToDelete;
     }
 
-    public ApiStatus(int status, String message) {
-        this.status = status;
-        this.message = message;
+    public DeletionDTO(Set<String> filesToDelete, boolean updateTrigger) {
+        this(filesToDelete);
+        this.updateTrigger = updateTrigger;
     }
 
-    public int getStatus() {
-        return status;
+    public Set<String> getFilesToDelete() {
+        return filesToDelete;
+    }
+    
+    public boolean isUpdateTrigger() {
+        return updateTrigger;
     }
 
-    /**
-     * The status of the response. Should be one of:<br>
-     * 1xx - Provisional status<br>
-     * 2xx - Success<br>
-     * 4xx - Client error<br>
-     * 5xx - Server error<br>
-     *
-     * @param status
-     */
-    public void setStatus(int status) {
-        this.status = status;
+    public void setUpdateTrigger(boolean updateTrigger) {
+        this.updateTrigger = updateTrigger;
     }
 
-    public boolean isSuccessful() {
-        return (status == 200);
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SIMPLE_STYLE);
     }
 }
