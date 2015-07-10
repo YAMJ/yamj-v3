@@ -600,6 +600,10 @@ public class JsonApiStorageService {
             VideoData videoData = commonDao.getVideoData(id);
             if (videoData == null) {
                 return new ApiStatus(404, "Video for ID " + id + " not found");
+            } else if (MetaDataType.EPISODE.equals(type) && videoData.isMovie()) {
+                return new ApiStatus(404, "Episode for ID " + id + " not found");
+            } else if (MetaDataType.MOVIE.equals(type) && !videoData.isMovie()) {
+                return new ApiStatus(404, "Movie for ID " + id + " not found");
             }
             
             if (resetSourceDbId(videoData, sourceDb, sourceDbId)) {
