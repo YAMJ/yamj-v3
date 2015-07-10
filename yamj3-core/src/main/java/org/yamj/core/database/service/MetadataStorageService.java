@@ -46,6 +46,7 @@ import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.artwork.ArtworkTools;
 import org.yamj.core.tools.CountryXmlTools;
 import org.yamj.core.tools.GenreXmlTools;
@@ -872,5 +873,155 @@ public class MetadataStorageService {
         Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
         int updated = this.commonDao.executeUpdate(sql, params);
         return (updated > 0);
+    }
+
+    public void handleModifiedSources(VideoData videoData) {
+        if (videoData.hasModifiedSource()) { 
+            
+            // mark located artwork as deleted
+            markLocatedArtworkAsDeleted(videoData.getArtworks(), videoData.getModifiedSources());
+
+            // clear common dependencies
+            videoData.getCredits().clear();
+            videoData.getBoxedSets().clear();
+            videoData.getMovieAwards().clear();
+            videoData.getCertifications().clear();
+
+            // clear source based values
+            for (String source : videoData.getModifiedSources()) {
+                if (source.equals(videoData.getOverrideSource(OverrideFlag.GENRES))) {
+                    videoData.getGenres().clear();
+                }
+                if (source.equals(videoData.getOverrideSource(OverrideFlag.STUDIOS))) {
+                    videoData.getStudios().clear();
+                }
+                if (source.equals(videoData.getOverrideSource(OverrideFlag.COUNTRIES))) {
+                    videoData.getCountries().clear();
+                }
+
+                // remove ratings for source
+                videoData.removeRating(source);
+                
+                // TODO handle instance variables
+
+                // at least remove override source
+                videoData.removeOverrideSource(source);
+            }
+        }
+        
+        videoData.setStatus(StatusType.UPDATED);
+        this.commonDao.updateEntity(videoData);
+    }
+
+    public void handleModifiedSources(Season season) {
+        if (season.hasModifiedSource()) { 
+            
+            // mark located artwork as deleted
+            markLocatedArtworkAsDeleted(season.getArtworks(), season.getModifiedSources());
+    
+            // clear source based values
+            for (String source : season.getModifiedSources()) {
+                
+                // remove ratings for source
+                season.removeRating(source);
+                
+                // TODO handle instance variables
+
+                // at least remove override source
+                season.removeOverrideSource(source);
+            }
+    
+            for (VideoData videoData : season.getVideoDatas()) {
+                for (String sourceDb : season.getModifiedSources()) {
+                    videoData.removeSourceDbId(sourceDb);
+                }
+                // merge modified sources, cause episodes may have no own source IDs
+                videoData.addModifiedSources(season.getModifiedSources());
+                handleModifiedSources(videoData);
+            }
+        }
+        
+        season.setStatus(StatusType.UPDATED);
+        this.metadataDao.updateEntity(season);
+    }
+
+    public void handleModifiedSources(Series series) {
+        if (series.hasModifiedSource()) { 
+            
+            // mark located artwork as deleted
+            markLocatedArtworkAsDeleted(series.getArtworks(), series.getModifiedSources());
+
+            // clear common dependencies
+            series.getBoxedSets().clear();
+            series.getSeriesAwards().clear();
+            series.getCertifications().clear();
+
+            // clear source based values
+            for (String source : series.getModifiedSources()) {
+                if (source.equals(series.getOverrideSource(OverrideFlag.GENRES))) {
+                    series.getGenres().clear();
+                }
+                if (source.equals(series.getOverrideSource(OverrideFlag.STUDIOS))) {
+                    series.getStudios().clear();
+                }
+                if (source.equals(series.getOverrideSource(OverrideFlag.COUNTRIES))) {
+                    series.getCountries().clear();
+                }
+
+                // remove ratings for source
+                series.removeRating(source);
+                
+                // TODO handle instance variables
+
+                // at least remove override source
+                series.removeOverrideSource(source);
+            }
+
+            for (Season season : series.getSeasons()) {
+                for (String sourceDb : series.getModifiedSources()) {
+                    season.removeSourceDbId(sourceDb);
+                }
+                // merge modified sources, cause season may have no own source IDs
+                season.addModifiedSources(series.getModifiedSources());
+                handleModifiedSources(season);
+            }
+        }
+
+        series.setStatus(StatusType.UPDATED);
+        this.commonDao.updateEntity(series);
+    }
+
+    public void handleModifiedSources(Person person) {
+        if (person.hasModifiedSource()) { 
+            
+            // mark located artwork as deleted
+            markLocatedArtworkAsDeleted(person.getPhoto(), person.getModifiedSources());
+            
+            // clear dependencies
+            person.getFilmography().clear();
+            
+            // TODO handle modified sources
+        }
+
+        person.setStatus(StatusType.UPDATED);
+        this.commonDao.updateEntity(person);
+    }
+
+    private void markLocatedArtworkAsDeleted(List<Artwork> artworks, Set<String> sources) {
+        for (Artwork artwork : artworks) {
+            markLocatedArtworkAsDeleted(artwork, sources);
+       }
+    }
+
+    private void markLocatedArtworkAsDeleted(Artwork artwork, Set<String> sources) {
+        artwork.setStatus(StatusType.UPDATED);
+        this.commonDao.updateEntity(artwork);
+        
+        for (ArtworkLocated located : artwork.getArtworkLocated()) {
+            if (located.getUrl() != null && sources.contains(located.getSource())) {
+                located.setStatus(StatusType.DELETED);
+                this.commonDao.updateEntity(located);
+            }
+        }
     }
 }

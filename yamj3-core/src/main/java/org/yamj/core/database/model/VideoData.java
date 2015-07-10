@@ -25,15 +25,17 @@ package org.yamj.core.database.model;
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.MapKeyType;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.dto.AwardDTO;
@@ -151,10 +153,10 @@ public class VideoData extends AbstractMetadata {
     private List<CastCrew> credits = new ArrayList<>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
-    private List<BoxedSetOrder> boxedSets = new ArrayList<>(0);
+    private List<Artwork> artworks = new ArrayList<>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
-    private List<Artwork> artworks = new ArrayList<>(0);
+    private List<BoxedSetOrder> boxedSets = new ArrayList<>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "nfoRelationPK.videoData")
     private List<NfoRelation> nfoRelations = new ArrayList<>(0);
@@ -369,6 +371,12 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
+    public void removeRating(String sourceDb) {
+        if (StringUtils.isNotBlank(sourceDb)) {
+            this.ratings.remove(sourceDb);
+        }
+    }
+    
     private Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }

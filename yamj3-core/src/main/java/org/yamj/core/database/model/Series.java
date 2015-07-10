@@ -25,15 +25,17 @@ package org.yamj.core.database.model;
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.MapKeyType;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.*;
 import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -85,12 +87,6 @@ public class Series extends AbstractMetadata {
     @Column(name = "source", length = 30, nullable = false)
     private Map<OverrideFlag, String> overrideFlags = new EnumMap<>(OverrideFlag.class);
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
-    private Set<Season> seasons = new HashSet<>(0);
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
-    private List<Artwork> artworks = new ArrayList<>(0);
-
     @ManyToMany
     @JoinTable(name = "series_genres",
             joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESGENRES_SERIES")),
@@ -114,6 +110,15 @@ public class Series extends AbstractMetadata {
             joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESCERTS_SERIES")),
             inverseJoinColumns = @JoinColumn(name = "cert_id", foreignKey = @ForeignKey(name = "FK_SERIESCERTS_CERTIFICATION")))
     private Set<Certification> certifications = new HashSet<>(0);
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
+    private Set<Season> seasons = new HashSet<>(0);
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
+    private List<Artwork> artworks = new ArrayList<>(0);
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")
+    private List<BoxedSetOrder> boxedSets = new ArrayList<>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "seriesAwardPK.series")
     private List<SeriesAward> seriesAwards = new ArrayList<>(0);
@@ -233,7 +238,7 @@ public class Series extends AbstractMetadata {
         this.skipScanApi = skipScanApi;
     }
 
-    public Map<String, Integer> getRatings() {
+    private Map<String, Integer> getRatings() {
         return ratings;
     }
 
@@ -244,6 +249,12 @@ public class Series extends AbstractMetadata {
     public void addRating(String sourceDb, int rating) {
         if (StringUtils.isNotBlank(sourceDb) && (rating >= 0)) {
             this.ratings.put(sourceDb, rating);
+        }
+    }
+
+    public void removeRating(String sourceDb) {
+        if (StringUtils.isNotBlank(sourceDb)) {
+            this.ratings.remove(sourceDb);
         }
     }
 
@@ -357,6 +368,18 @@ public class Series extends AbstractMetadata {
 
     private void setArtworks(List<Artwork> artworks) {
         this.artworks = artworks;
+    }
+
+    public List<BoxedSetOrder> getBoxedSets() {
+        return boxedSets;
+    }
+
+    private void setBoxedSets(List<BoxedSetOrder> boxedSets) {
+        this.boxedSets = boxedSets;
+    }
+
+    public void addBoxedSet(BoxedSetOrder boxedSet) {
+        this.boxedSets.add(boxedSet);
     }
 
     public Set<Genre> getGenres() {

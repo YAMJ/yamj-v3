@@ -41,6 +41,8 @@ import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.*;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;
+import org.yamj.core.database.model.type.SourceType;
+import org.yamj.core.service.metadata.online.OnlineScannerService;
 
 @Service("jsonApiStorageService")
 @Transactional(readOnly = true)
@@ -53,11 +55,13 @@ public class JsonApiStorageService {
     @Autowired
     private ApiDao apiDao;
     @Autowired
-    private MetadataDao metadataDao;
+    private PlayerDao playerDao;
     @Autowired
     private ConfigService configService;
     @Autowired
-    private PlayerDao playerDao;
+    private MetadataStorageService metadataStorageService;
+    @Autowired
+    private OnlineScannerService onlineScannerService;
 
     public List<Configuration> getConfiguration(String property) {
         return configService.getConfiguration(property);
@@ -505,6 +509,17 @@ public class JsonApiStorageService {
     
     @Transactional
     public ApiStatus updateOnlineScan(MetaDataType type, Long id, String sourceDb, boolean disable) {
+
+        // first check if source is valid
+        if (SourceType.UNKNOWN.equals(onlineScannerService.determineSourceType(type, sourceDb))) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("The sourceDb ");
+            sb.append(sourceDb);
+            sb.append(" is not valid for " );
+            sb.append(type.name().toLowerCase());
+            return new ApiStatus(409, sb.toString());
+        }
+        
         if (MetaDataType.SERIES == type) {
             Series series = commonDao.getSeries(id);
             if (series == null) {
@@ -541,83 +556,59 @@ public class JsonApiStorageService {
 
     @Transactional
     public ApiStatus updateExternalId(MetaDataType type, Long id, String sourceDb, String sourceDbId) {
-        final boolean removeSource = StringUtils.isBlank(sourceDbId);
-        
-        if (MetaDataType.SERIES.equals(type)) {
+        // determine source type
+        SourceType sourceType = onlineScannerService.determineSourceType(type, sourceDb);
+
+        // check if source is valid
+        if (SourceType.UNKNOWN.equals(sourceType)) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("The sourceDb ");
+            sb.append(sourceDb);
+            sb.append(" is not valid for " );
+            sb.append(type.name().toLowerCase());
+            return new ApiStatus(409, sb.toString());
+        }
+
+        if (MetaDataType.PERSON.equals(type)) {
+            Person person = commonDao.getPerson(id); 
+            if (person == null) {
+                return new ApiStatus(404, "Person for ID " + id + " not found");
+            }
+    
+            if (resetSourceDbId(person, sourceDb, sourceDbId)) {
+                this.metadataStorageService.handleModifiedSources(person);
+            }
+        } else if (MetaDataType.SERIES.equals(type)) {
             Series series = commonDao.getSeries(id); 
             if (series == null) {
                 return new ApiStatus(404, "Series for ID " + id + " not found");
             }
             
-            boolean changed;
-            if (removeSource) {
-                changed = series.removeSourceDbId(sourceDb);
-            } else {
-                changed = series.setSourceDbId(sourceDb, sourceDbId);
+            if (resetSourceDbId(series, sourceDb, sourceDbId)) {
+                this.metadataStorageService.handleModifiedSources(series);
             }
-            if (changed) {
-                this.metadataDao.handleModifiedSources(series);
-                series.setStatus(StatusType.UPDATED);
-                this.metadataDao.updateEntity(series);
-            }
-            
         } else if (MetaDataType.SEASON.equals(type)) {
             Season season = commonDao.getSeason(id); 
             if (season == null) {
                 return new ApiStatus(404, "Season for ID " + id + " not found");
             }
-            
-            boolean changed;
-            if (removeSource) {
-                changed = season.removeSourceDbId(sourceDb);
-            } else {
-                changed = season.setSourceDbId(sourceDb, sourceDbId);
-            }
-            if (changed) {
-                this.metadataDao.handleModifiedSources(season);
-                season.setStatus(StatusType.UPDATED);
-                this.metadataDao.updateEntity(season);
-            }
-            
-        } else if (MetaDataType.PERSON.equals(type)) {
-            Person person = commonDao.getPerson(id); 
-            if (person == null) {
-                return new ApiStatus(404, "Person for ID " + id + " not found");
-            }
 
-            boolean changed;
-            if (removeSource) {
-                changed = person.removeSourceDbId(sourceDb);
-            } else {
-                changed = person.setSourceDbId(sourceDb, sourceDbId);
+            if (resetSourceDbId(season, sourceDb, sourceDbId)) {
+                this.metadataStorageService.handleModifiedSources(season);
             }
-            if (changed) {
-                this.metadataDao.handleModifiedSources(person);
-                person.setStatus(StatusType.UPDATED);
-                this.metadataDao.updateEntity(person);
-            }
-            
         } else {
             VideoData videoData = commonDao.getVideoData(id);
             if (videoData == null) {
                 return new ApiStatus(404, "Video for ID " + id + " not found");
             }
             
-            boolean changed;
-            if (removeSource) {
-                changed = videoData.removeSourceDbId(sourceDb);
-            } else {
-                changed = videoData.setSourceDbId(sourceDb, sourceDbId);
-            }
-            if (changed) {
-                this.metadataDao.handleModifiedSources(videoData);
-                videoData.setStatus(StatusType.UPDATED);
-                this.metadataDao.updateEntity(videoData);
+            if (resetSourceDbId(videoData, sourceDb, sourceDbId)) {
+                this.metadataStorageService.handleModifiedSources(videoData);
             }
         }
         
         StringBuilder sb = new StringBuilder();
-        sb.append(removeSource?"Removed":"Updated");
+        sb.append(StringUtils.isBlank(sourceDbId)?"Removed":"Updated");
         sb.append(" external ID for " );
         sb.append(sourceDb);
         sb.append(" for ");
@@ -625,5 +616,15 @@ public class JsonApiStorageService {
         sb.append(" ID: ");
         sb.append(id);
         return new ApiStatus(200, sb.toString());
+    }
+    
+    private static boolean resetSourceDbId(IScannable scannable, String sourceDb, String sourceDbId) {
+        final boolean changed;
+        if (StringUtils.isBlank(sourceDbId)) {
+            changed = scannable.removeSourceDbId(sourceDb);
+        } else {
+            changed = scannable.setSourceDbId(sourceDb, sourceDbId);
+        }
+        return changed;
     }
 }

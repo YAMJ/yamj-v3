@@ -30,11 +30,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.type.SourceType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 
 @Service("onlineScannerService")
@@ -421,5 +423,50 @@ public class OnlineScannerService {
         }
         
         return foundInfo;
+    }
+    
+    public SourceType determineSourceType(MetaDataType type, String source) {
+        switch(type) {
+            case SERIES:
+            case SEASON:
+            case EPISODE:
+                if (!registeredSeriesScanner.containsKey(source)) {
+                    return SourceType.UNKNOWN;
+                }
+                if (SERIES_SCANNER.equals(source)) {
+                    return SourceType.MAIN;
+                }
+                if (SERIES_SCANNER_ALT.equals(source)) {
+                    return SourceType.ALTERNATE;
+                }
+                return SourceType.KNOWN;
+                                
+            case MOVIE:
+                if (!registeredMovieScanner.containsKey(source)) {
+                    return SourceType.UNKNOWN;
+                }
+                if (MOVIE_SCANNER.equals(source)) {
+                    return SourceType.MAIN;
+                }
+                if (MOVIE_SCANNER_ALT.equals(source)) {
+                    return SourceType.ALTERNATE;
+                }
+                return SourceType.KNOWN;
+                
+            case PERSON:
+                if (!registeredPersonScanner.containsKey(source)) {
+                    return SourceType.UNKNOWN;
+                }
+                if (PERSON_SCANNER.equals(source)) {
+                    return SourceType.MAIN;
+                }
+                if (PERSON_SCANNER_ALT.equals(source)) {
+                    return SourceType.ALTERNATE;
+                }
+                return SourceType.KNOWN;
+                
+            default:
+                return SourceType.UNKNOWN;
+        }
     }
 }
