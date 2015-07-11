@@ -53,14 +53,14 @@ public class ArtworkProcessScheduler {
     private boolean messageDisabled = Boolean.FALSE;    // Have we already printed the disabled message
     private AtomicBoolean watchProcess = new AtomicBoolean(false);
 
-    @Scheduled(initialDelay = 30000, fixedDelay = 300000)
+    @Scheduled(initialDelay = 5000, fixedDelay = 300000)
     public void triggerProcess() {
         LOG.trace("Trigger process");
         watchProcess.set(true);
     }
 
     @Async
-    @Scheduled(initialDelay = 30000, fixedDelay = 200)
+    @Scheduled(initialDelay = 6000, fixedDelay = 1000)
     public synchronized void runProcess() {
         if (watchProcess.getAndSet(false)) processArtwork();
     }

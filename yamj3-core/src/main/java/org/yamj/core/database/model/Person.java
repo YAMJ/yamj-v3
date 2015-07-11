@@ -22,21 +22,19 @@
  */
 package org.yamj.core.database.model;
 
-import java.io.Serializable;
 import java.util.*;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.Index;
-import javax.persistence.Table;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.MapKeyType;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
+import org.yamj.core.tools.MetadataTools;
+import org.yamj.core.tools.PersonNameDTO;
 
 @Entity
 @Table(name = "person",
@@ -47,13 +45,9 @@ import org.yamj.core.database.model.type.OverrideFlag;
             @Index(name = "IX_PERSON_NAME", columnList = "name")}
 )
 @SuppressWarnings("unused")
-public class Person extends AbstractAuditable implements IScannable, Serializable {
+public class Person extends AbstractScannable {
 
     private static final long serialVersionUID = 660066902996412843L;
-
-    @NaturalId
-    @Column(name = "identifier", nullable = false, length = 255)
-    private String identifier;
 
     @Column(name = "name", nullable = false, length = 255)
     private String name;
@@ -92,17 +86,6 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @Column(name = "sourcedb_id", length = 40)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);
 
-    @Type(type = "statusType")
-    @Column(name = "status", nullable = false, length = 30)
-    private StatusType status;
-
-    @Temporal(value = TemporalType.TIMESTAMP)
-    @Column(name = "last_scanned")
-    private Date lastScanned;
-
-    @Column(name = "retries", nullable = false)
-    private int retries = 0;
-
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "person_override", joinColumns = @JoinColumn(name = "person_id", foreignKey = @ForeignKey(name = "FK_PERSON_OVERRIDE")))
     @Fetch(FetchMode.SELECT)
@@ -127,27 +110,17 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     @Transient
     private Set<FilmParticipation> newFilmography = new HashSet<>(0);
 
-    @Transient
-    private Set<String> modifiedSources;
-    
     // CONSTRUCTORS
+    
     public Person() {
         super();
     }
 
     public Person(String identifier) {
-        super();
-        this.identifier = identifier;
+        super(identifier);
     }
 
     // GETTER and SETTER
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    private void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
 
     public String getName() {
         return name;
@@ -164,6 +137,13 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         }
     }
 
+    public void removeName(String source) {
+        if (hasOverrideSource(OverrideFlag.NAME, source)) {
+            this.name = getIdentifier();
+            removeOverrideFlag(OverrideFlag.NAME);
+        }
+    }
+
     public String getFirstName() {
         return firstName;
     }
@@ -173,9 +153,15 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     }
 
     public void setFirstName(String firstName, String source) {
-        if (StringUtils.isNotBlank(firstName)) {
-            this.firstName = firstName.trim();
-            setOverrideFlag(OverrideFlag.FIRSTNAME, source);
+        this.firstName = StringUtils.trimToNull(firstName);
+        setOverrideFlag(OverrideFlag.FIRSTNAME, source);
+    }
+
+    public void removeFirstName(String source) {
+        if (hasOverrideSource(OverrideFlag.FIRSTNAME, source)) {
+            PersonNameDTO dto = MetadataTools.splitFullName(getIdentifier());
+            this.firstName = dto.getFirstName();
+            removeOverrideFlag(OverrideFlag.FIRSTNAME);
         }
     }
 
@@ -188,12 +174,18 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     }
 
     public void setLastName(String lastName, String source) {
-        if (StringUtils.isNotBlank(lastName)) {
-            this.lastName = lastName.trim();
-            setOverrideFlag(OverrideFlag.LASTNAME, source);
-        }
+        this.lastName = StringUtils.trimToNull(lastName);
+        setOverrideFlag(OverrideFlag.LASTNAME, source);
     }
 
+    public void removeLastName(String source) {
+        if (hasOverrideSource(OverrideFlag.LASTNAME, source)) {
+            PersonNameDTO dto = MetadataTools.splitFullName(getIdentifier());
+            this.lastName = dto.getLastName();
+            removeOverrideFlag(OverrideFlag.LASTNAME);
+        }
+    }
+    
     public Date getBirthDay() {
         return birthDay;
     }
@@ -206,6 +198,13 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         if (birthDay != null) {
             this.birthDay = birthDay;
             setOverrideFlag(OverrideFlag.BIRTHDAY, source);
+        }
+    }
+
+    public void removeBirthDay(String source) {
+        if (hasOverrideSource(OverrideFlag.BIRTHDAY, source)) {
+            this.birthDay = null;
+            removeOverrideFlag(OverrideFlag.BIRTHDAY);
         }
     }
 
@@ -224,6 +223,13 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         }
     }
 
+    public void removeBirthPlace(String source) {
+        if (hasOverrideSource(OverrideFlag.BIRTHPLACE, source)) {
+            this.birthPlace = null;
+            removeOverrideFlag(OverrideFlag.BIRTHPLACE);
+        }
+    }
+
     public String getBirthName() {
         return birthName;
     }
@@ -236,6 +242,13 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         if (StringUtils.isNotBlank(birthName)) {
             this.birthName = birthName.trim();
             setOverrideFlag(OverrideFlag.BIRTHNAME, source);
+        }
+    }
+
+    public  void removeBirthName(String source) {
+        if (hasOverrideSource(OverrideFlag.BIRTHNAME, source)) {
+            this.birthName = null;
+            removeOverrideFlag(OverrideFlag.BIRTHNAME);
         }
     }
 
@@ -254,6 +267,13 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         }
     }
 
+    public void removeDeathDay(String source) {
+        if (hasOverrideSource(OverrideFlag.DEATHDAY, source)) {
+            this.deathDay = null;
+            removeOverrideFlag(OverrideFlag.DEATHDAY);
+        }
+    }
+
     public String getDeathPlace() {
         return deathPlace;
     }
@@ -266,6 +286,13 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         if (StringUtils.isNotBlank(deathPlace)) {
             this.deathPlace = deathPlace.trim();
             setOverrideFlag(OverrideFlag.DEATHPLACE, source);
+        }
+    }
+
+    public void removeDeathPlace(String source) {
+        if (hasOverrideSource(OverrideFlag.DEATHPLACE, source)) {
+            this.deathPlace = null;
+            removeOverrideFlag(OverrideFlag.DEATHPLACE);
         }
     }
 
@@ -284,13 +311,16 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
         }
     }
 
-    private Map<String, String> getSourceDbIdMap() {
-        return sourceDbIdMap;
+    public void removeBiography(String source) {
+        if (hasOverrideSource(OverrideFlag.BIOGRAPHY, source)) {
+            this.biography = null;
+            removeOverrideFlag(OverrideFlag.BIOGRAPHY);
+        }
     }
 
     @Override
-    public String getSourceDbId(String sourceDb) {
-        return sourceDbIdMap.get(sourceDb);
+    protected Map<String, String> getSourceDbIdMap() {
+        return sourceDbIdMap;
     }
 
     private void setSourceDbIdMap(Map<String, String> sourceDbIdMap) {
@@ -298,71 +328,12 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     }
 
     @Override
-    public boolean setSourceDbId(String sourceDb, String id) {
-        if (StringUtils.isBlank(sourceDb) || StringUtils.isBlank(id)) {
-            return false;
-        }
-        String newId = id.trim();
-        String oldId = this.sourceDbIdMap.put(sourceDb, newId);
-        final boolean changed = !StringUtils.equals(oldId, newId);
-        if (oldId != null && changed) {
-            addModifiedSource(sourceDb);
-        }
-        return changed;
-    }
-
-    @Override
-    public boolean removeSourceDbId(String sourceDb) {
-        String removedId = this.sourceDbIdMap.remove(sourceDb);
-        if (removedId != null) {
-            addModifiedSource(sourceDb);
-            return true;
-        }
-        return false;
-    }
-    
-    public StatusType getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusType status) {
-        this.status = status;
-    }
-
-    @Override
-    public Date getLastScanned() {
-        return lastScanned;
-    }
-
-    public void setLastScanned(Date lastScanned) {
-        this.lastScanned = lastScanned;
-    }
-
-    @Override
-    public int getRetries() {
-        return retries;
-    }
-
-    public void setRetries(int retries) {
-        this.retries = retries;
-    }
-
-    public Map<OverrideFlag, String> getOverrideFlags() {
+    protected Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
 
-    public void setOverrideFlags(Map<OverrideFlag, String> overrideFlags) {
+    private void setOverrideFlags(Map<OverrideFlag, String> overrideFlags) {
         this.overrideFlags = overrideFlags;
-    }
-
-    @Override
-    public void setOverrideFlag(OverrideFlag overrideFlag, String sourceDb) {
-        this.overrideFlags.put(overrideFlag, sourceDb.toLowerCase());
-    }
-
-    @Override
-    public String getOverrideSource(OverrideFlag overrideFlag) {
-        return overrideFlags.get(overrideFlag);
     }
 
     @Override
@@ -395,6 +366,7 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     }
 
     // TRANSIENT METHODS
+    
     public Map<String, String> getPhotoURLS() {
         return photoURLS;
     }
@@ -412,21 +384,9 @@ public class Person extends AbstractAuditable implements IScannable, Serializabl
     public void setNewFilmography(Set<FilmParticipation> newFilmography) {
         this.newFilmography = newFilmography;
     }
-
-    protected final void addModifiedSource(String sourceDb) {
-        if (modifiedSources == null) modifiedSources = new HashSet<>(0);
-        modifiedSources.add(sourceDb);
-    }
-
-    public final boolean hasModifiedSource() {
-        return CollectionUtils.isNotEmpty(modifiedSources);
-    }
-    
-    public final Set<String> getModifiedSources() {
-        return modifiedSources;
-    }
     
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()

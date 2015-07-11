@@ -25,17 +25,15 @@ package org.yamj.core.database.model;
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.Index;
-import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.MapKeyType;
+import org.hibernate.annotations.Type;
 import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -145,16 +143,17 @@ public class Series extends AbstractMetadata {
     private final Set<AwardDTO> awardDTOS = new HashSet<>(0);
 
     // CONSTRUCTORS
+    
     public Series() {
         super();
     }
 
     public Series(String identifier) {
-        super();
-        setIdentifier(identifier);
+        super(identifier);
     }
 
     // GETTER and SETTER
+
     public int getStartYear() {
         return startYear;
     }
@@ -167,6 +166,15 @@ public class Series extends AbstractMetadata {
         if (startYear > 0) {
             this.startYear = startYear;
             setOverrideFlag(OverrideFlag.YEAR, source);
+        }
+    }
+
+    public void removeStartYear(String source) {
+        if (hasOverrideSource(OverrideFlag.YEAR, source)) {
+            String[] splitted = this.getIdentifier().split("_");
+            int splitYear = Integer.parseInt(splitted[1]);
+            this.startYear = (splitYear > 0 ? splitYear : -1); 
+            removeOverrideFlag(OverrideFlag.YEAR);
         }
     }
 
@@ -185,41 +193,20 @@ public class Series extends AbstractMetadata {
         }
     }
 
+    public void removeEndYear(String source) {
+        if (hasOverrideSource(OverrideFlag.YEAR, source)) {
+            this.endYear = -1;
+            removeOverrideFlag(OverrideFlag.YEAR);
+        }
+    }
+    
+    @Override
     public Map<String, String> getSourceDbIdMap() {
         return sourceDbIdMap;
     }
 
-    @Override
-    public String getSourceDbId(String sourceDb) {
-        return sourceDbIdMap.get(sourceDb);
-    }
-
     public void setSourceDbIdMap(Map<String, String> sourceDbIdMap) {
         this.sourceDbIdMap = sourceDbIdMap;
-    }
-
-    @Override
-    public boolean setSourceDbId(String sourceDb, String id) {
-        if (StringUtils.isBlank(sourceDb) || StringUtils.isBlank(id)) {
-            return false;
-        }
-        String newId = id.trim();
-        String oldId = this.sourceDbIdMap.put(sourceDb, newId);
-        final boolean changed = !StringUtils.equals(oldId, newId);
-        if (oldId != null && changed) {
-            addModifiedSource(sourceDb);
-        }
-        return changed;
-    }
-    
-    @Override
-    public boolean removeSourceDbId(String sourceDb) {
-        String removedId = this.sourceDbIdMap.remove(sourceDb);
-        if (removedId != null) {
-            addModifiedSource(sourceDb);
-            return true;
-        }
-        return false;
     }
     
     private String getSkipScanNfo() {
@@ -258,35 +245,13 @@ public class Series extends AbstractMetadata {
         }
     }
 
-    public Map<OverrideFlag, String> getOverrideFlags() {
+    @Override
+    protected Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
 
     private void setOverrideFlags(Map<OverrideFlag, String> overrideFlags) {
         this.overrideFlags = overrideFlags;
-    }
-
-    @Override
-    public void setOverrideFlag(OverrideFlag overrideFlag, String sourceDb) {
-        this.overrideFlags.put(overrideFlag, sourceDb.toLowerCase());
-    }
-
-    @Override
-    public String getOverrideSource(OverrideFlag overrideFlag) {
-        return overrideFlags.get(overrideFlag);
-    }
-
-    @Override
-    public boolean removeOverrideSource(final String sourceDb) {
-        boolean removed = false;
-        for (Iterator<Entry<OverrideFlag, String>> it = this.overrideFlags.entrySet().iterator(); it.hasNext();) {
-            Entry<OverrideFlag, String> e = it.next();
-            if (StringUtils.endsWithIgnoreCase(e.getValue(), sourceDb)) {
-                it.remove();
-                removed = true;
-            }
-        }
-        return removed;
     }
 
     @Override
@@ -423,6 +388,7 @@ public class Series extends AbstractMetadata {
     }
 
     // TRANSIENTS METHODS
+    
     public Set<String> getGenreNames() {
         return genreNames;
     }
@@ -527,6 +493,7 @@ public class Series extends AbstractMetadata {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()

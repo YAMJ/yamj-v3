@@ -25,17 +25,15 @@ package org.yamj.core.database.model;
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.Index;
-import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.MapKeyType;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.dto.AwardDTO;
@@ -192,16 +190,39 @@ public class VideoData extends AbstractMetadata {
     private final Set<AwardDTO> awardDTOS = new HashSet<>(0);
 
     // CONSTRUCTORS
+    
     public VideoData() {
         super();
     }
 
     public VideoData(String identifier) {
-        super();
-        setIdentifier(identifier);
+        super(identifier);
     }
 
     // GETTER and SETTER
+
+    @Override
+    public void removeTitle(String source) {
+        if (hasOverrideSource(OverrideFlag.TITLE, source)) {
+            if (isMovie()) { // just for movies
+                String[] splitted = getIdentifier().split("_");
+                setTitle(splitted[0]);
+            }
+            removeOverrideFlag(OverrideFlag.TITLE);
+        }
+    }
+
+    @Override
+    public void removeTitleOriginal(String source) {
+        if (hasOverrideSource(OverrideFlag.ORIGINALTITLE, source)) {
+            if (isMovie()) { // just for movies
+                String[] splitted = getIdentifier().split("_");
+                setTitleOriginal(splitted[0]);
+            }
+            removeOverrideFlag(OverrideFlag.ORIGINALTITLE);
+        }
+    }
+
     public int getPublicationYear() {
         return publicationYear;
     }
@@ -214,6 +235,17 @@ public class VideoData extends AbstractMetadata {
         if (publicationYear > 0) {
             this.publicationYear = publicationYear;
             setOverrideFlag(OverrideFlag.YEAR, source);
+        }
+    }
+
+    public void removePublicationYear(String source) {
+        if (hasOverrideSource(OverrideFlag.YEAR, source)) {
+            if (isMovie()) { // just for movies
+                String[] splitted = this.getIdentifier().split("_");
+                int splitYear = Integer.parseInt(splitted[1]);
+                this.publicationYear = (splitYear > 0 ? splitYear : -1); 
+            }
+            removeOverrideFlag(OverrideFlag.YEAR);
         }
     }
 
@@ -240,6 +272,13 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
+    public void removeReleaseDate(String source) {
+        if (hasOverrideSource(OverrideFlag.RELEASEDATE, source)) {
+            this.releaseDate = null;
+            removeOverrideFlag(OverrideFlag.RELEASEDATE);
+        }
+    }
+
     public int getTopRank() {
         return topRank;
     }
@@ -250,6 +289,10 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
+    public void removeTopRank() {
+        this.topRank = -1;
+    }
+    
     public String getTagline() {
         return tagline;
     }
@@ -262,6 +305,13 @@ public class VideoData extends AbstractMetadata {
         if (StringUtils.isNotBlank(tagline)) {
             this.tagline = tagline.trim();
             setOverrideFlag(OverrideFlag.TAGLINE, source);
+        }
+    }
+
+    public void removeTagline(String source) {
+        if (hasOverrideSource(OverrideFlag.TAGLINE, source)) {
+            this.tagline = null;
+            removeOverrideFlag(OverrideFlag.TAGLINE);
         }
     }
 
@@ -280,13 +330,16 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
-    public Map<String, String> getSourceDbIdMap() {
-        return sourceDbIdMap;
+    public void removeQuote(String source) {
+        if (hasOverrideSource(OverrideFlag.QUOTE, source)) {
+            this.quote = null;
+            removeOverrideFlag(OverrideFlag.QUOTE);
+        }
     }
 
     @Override
-    public String getSourceDbId(String sourceDb) {
-        return sourceDbIdMap.get(sourceDb);
+    public Map<String, String> getSourceDbIdMap() {
+        return sourceDbIdMap;
     }
 
     public void setSourceDbIdMap(Map<String, String> sourceDbIdMap) {
@@ -315,30 +368,6 @@ public class VideoData extends AbstractMetadata {
 
     public void setWatchedApi(boolean watchedApi) {
         this.watchedApi = watchedApi;
-    }
-
-    @Override
-    public boolean setSourceDbId(String sourceDb, String id) {
-        if (StringUtils.isBlank(sourceDb) || StringUtils.isBlank(id)) {
-            return false;
-        }
-        String newId = id.trim();
-        String oldId = this.sourceDbIdMap.put(sourceDb, newId);
-        final boolean changed = !StringUtils.equals(oldId, newId);
-        if (oldId != null && changed) {
-            addModifiedSource(sourceDb);
-        }
-        return changed;
-    }
-
-    @Override
-    public boolean removeSourceDbId(String sourceDb) {
-        String removedId = this.sourceDbIdMap.remove(sourceDb);
-        if (removedId != null) {
-            addModifiedSource(sourceDb);
-            return true;
-        }
-        return false;
     }
 
     private String getSkipScanNfo() {
@@ -376,36 +405,14 @@ public class VideoData extends AbstractMetadata {
             this.ratings.remove(sourceDb);
         }
     }
-    
-    private Map<OverrideFlag, String> getOverrideFlags() {
+   
+    @Override
+    protected Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
 
     private void setOverrideFlags(Map<OverrideFlag, String> overrideFlags) {
         this.overrideFlags = overrideFlags;
-    }
-
-    @Override
-    public void setOverrideFlag(OverrideFlag overrideFlag, String source) {
-        this.overrideFlags.put(overrideFlag, source.toLowerCase());
-    }
-
-    @Override
-    public String getOverrideSource(OverrideFlag overrideFlag) {
-        return overrideFlags.get(overrideFlag);
-    }
-
-    @Override
-    public boolean removeOverrideSource(final String sourceDb) {
-        boolean removed = false;
-        for (Iterator<Entry<OverrideFlag, String>> it = this.overrideFlags.entrySet().iterator(); it.hasNext();) {
-            Entry<OverrideFlag, String> e = it.next();
-            if (StringUtils.endsWithIgnoreCase(e.getValue(), sourceDb)) {
-                it.remove();
-                removed = true;
-            }
-        }
-        return removed;
     }
 
     @Override
@@ -579,6 +586,7 @@ public class VideoData extends AbstractMetadata {
     }
 
     // TRANSIENTS METHODS
+   
     public boolean isWatched() {
         return (this.watchedNfo || this.watchedFile || this.watchedApi);
     }
@@ -715,6 +723,7 @@ public class VideoData extends AbstractMetadata {
     }
 
     // TV CHECKS
+    
     public boolean isTvEpisodeDone(String sourceDb) {
         if (StringUtils.isBlank(this.getSourceDbId(sourceDb))) {
             // not done if episode ID not set
@@ -724,12 +733,12 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void setTvEpisodeDone() {
-        super.setLastScanned(new Date(System.currentTimeMillis()));
+        setLastScanned(new Date(System.currentTimeMillis()));
         this.setStatus(StatusType.TEMP_DONE);
     }
 
     public void setTvEpisodeNotFound() {
-        super.setLastScanned(new Date(System.currentTimeMillis()));
+        setLastScanned(new Date(System.currentTimeMillis()));
         if (StatusType.DONE.equals(this.getStatus())) {
             // do not reset done
             return;
@@ -751,6 +760,7 @@ public class VideoData extends AbstractMetadata {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()

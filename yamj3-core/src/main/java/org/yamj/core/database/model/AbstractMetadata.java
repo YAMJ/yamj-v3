@@ -22,16 +22,10 @@
  */
 package org.yamj.core.database.model;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import javax.persistence.*;
-import org.apache.commons.collections.CollectionUtils;
+import javax.persistence.Column;
+import javax.persistence.Lob;
+import javax.persistence.MappedSuperclass;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.Type;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
 /**
@@ -39,17 +33,10 @@ import org.yamj.core.database.model.type.OverrideFlag;
  */
 @MappedSuperclass
 @SuppressWarnings("unused")
-public abstract class AbstractMetadata extends AbstractAuditable
-        implements IMetadata, Serializable {
+public abstract class AbstractMetadata extends AbstractScannable
+        implements IMetadata {
 
     private static final long serialVersionUID = -556558470067852056L;
-    
-    /**
-     * This will be generated from a scanned file name.
-     */
-    @NaturalId
-    @Column(name = "identifier", length = 200, nullable = false)
-    private String identifier;
     
     @Column(name = "title", nullable = false, length = 255)
     private String title;
@@ -68,36 +55,24 @@ public abstract class AbstractMetadata extends AbstractAuditable
     @Column(name = "outline", length = 50000)
     private String outline;
     
-    @Type(type = "statusType")
-    @Column(name = "status", nullable = false, length = 30)
-    private StatusType status;
+    // CONSTRUCTORS
     
-    @Temporal(value = TemporalType.TIMESTAMP)
-    @Column(name = "last_scanned")
-    private Date lastScanned;
-
-    @Column(name = "retries", nullable = false)
-    private int retries = 0;
-
-    @Transient
-    private Set<String> modifiedSources;
+    public AbstractMetadata() {
+        super();
+    }
+    
+    public AbstractMetadata(String identifier) {
+        super(identifier);
+    }
     
     // GETTER and SETTER
     
-    public final String getIdentifier() {
-        return identifier;
-    }
-
-    protected final void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
     @Override
     public final String getTitle() {
         return title;
     }
 
-    private final void setTitle(String title) {
+    protected final void setTitle(String title) {
         this.title = title;
     }
 
@@ -108,12 +83,20 @@ public abstract class AbstractMetadata extends AbstractAuditable
         }
     }
 
+    public void removeTitle(String source) {
+        if (hasOverrideSource(OverrideFlag.TITLE, source)) {
+            String[] splitted = this.getIdentifier().split("_");
+            this.title = splitted[0];
+            removeOverrideFlag(OverrideFlag.TITLE);
+        }
+    }
+
     @Override
     public final String getTitleOriginal() {
         return titleOriginal;
     }
 
-    private final void setTitleOriginal(String titleOriginal) {
+    protected final void setTitleOriginal(String titleOriginal) {
         this.titleOriginal = titleOriginal;
     }
 
@@ -121,6 +104,14 @@ public abstract class AbstractMetadata extends AbstractAuditable
         if (StringUtils.isNotBlank(titleOriginal)) {
             this.titleOriginal = titleOriginal.trim();
             setOverrideFlag(OverrideFlag.ORIGINALTITLE, source);
+        }
+    }
+
+    public void removeTitleOriginal(String source) {
+        if (hasOverrideSource(OverrideFlag.ORIGINALTITLE, source)) {
+            String[] splitted = this.getIdentifier().split("_");
+            this.titleOriginal = splitted[0];
+            removeOverrideFlag(OverrideFlag.ORIGINALTITLE);
         }
     }
 
@@ -148,6 +139,13 @@ public abstract class AbstractMetadata extends AbstractAuditable
         }
     }
 
+    public final void removePlot(String source) {
+        if (hasOverrideSource(OverrideFlag.PLOT, source)) {
+            this.outline = null;
+            removeOverrideFlag(OverrideFlag.PLOT);
+        }
+    }
+
     public final String getOutline() {
         return outline;
     }
@@ -163,33 +161,13 @@ public abstract class AbstractMetadata extends AbstractAuditable
         }
     }
 
-    @Override
-    public final StatusType getStatus() {
-        return status;
-    }
-    
-    public final void setStatus(StatusType status) {
-        this.status = status;
+    public final void removeOutline(String source) {
+        if (hasOverrideSource(OverrideFlag.OUTLINE, source)) {
+            this.outline = null;
+            removeOverrideFlag(OverrideFlag.OUTLINE);
+        }
     }
 
-    @Override
-    public final Date getLastScanned() {
-        return lastScanned;
-    }
-
-    public final void setLastScanned(Date lastScanned) {
-        this.lastScanned = lastScanned;
-    }
-
-    @Override
-    public final int getRetries() {
-        return retries;
-    }
-
-    public final void setRetries(int retries) {
-        this.retries = retries;
-    }
-    
     @Override
     public final int getYear() {
         if (this instanceof VideoData) {
@@ -211,29 +189,4 @@ public abstract class AbstractMetadata extends AbstractAuditable
     public boolean isMovie() {
         return false;
     }
-
-    // TRANSIENT METHODS
-    protected final void addModifiedSource(String source) {
-        if (modifiedSources == null) modifiedSources = new HashSet<>(0);
-        modifiedSources.add(source);
-    }
-
-    public final void addModifiedSources(Set<String> sources) {
-        if (CollectionUtils.isNotEmpty(sources)) {
-            if (modifiedSources == null) modifiedSources = new HashSet<>();
-            modifiedSources.addAll(sources);
-        }
-    }
-
-    public final boolean hasModifiedSource() {
-        return CollectionUtils.isNotEmpty(modifiedSources);
-    }
-    
-    public final Set<String> getModifiedSources() {
-        return modifiedSources;
-    }
-
-    // ABSTRACT DECLARATIONS
-    
-    abstract boolean removeOverrideSource(String sourceDb);
 }

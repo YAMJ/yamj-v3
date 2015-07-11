@@ -31,7 +31,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
@@ -210,6 +213,7 @@ public class NfoScannerService {
             // set sort title
             series.setTitleSort(infoDTO.getTitleSort());
             
+            // set video values
             if (OverrideTools.checkOverwriteTitle(series, SCANNER_ID)) {
                 series.setTitle(infoDTO.getTitle(), SCANNER_ID);
             }

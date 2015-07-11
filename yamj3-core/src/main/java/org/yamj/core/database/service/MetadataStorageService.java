@@ -851,15 +851,28 @@ public class MetadataStorageService {
 
     @Transactional
     public boolean recheckTvShow(Date compareDate) {
+        Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
+        int updated = 0;
+        
         StringBuilder sql = new StringBuilder();
         sql.append("update Series ser set ser.status='UPDATED' ");
         sql.append("where ser.status not in ('NEW','UPDATED') ");
         sql.append("and (ser.lastScanned is null or ser.lastScanned<=:compareDate) ");
+        updated += this.commonDao.executeUpdate(sql, params);
 
-        // TODO: what is with season and episodes?
+        sql.setLength(0);
+        sql.append("update Season sea set sea.status='UPDATED' ");
+        sql.append("where sea.status not in ('NEW','UPDATED') ");
+        sql.append("and (sea.lastScanned is null or sea.lastScanned<=:compareDate) ");
+        updated += this.commonDao.executeUpdate(sql, params);
 
-        Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
-        int updated = this.commonDao.executeUpdate(sql, params);
+        sql.setLength(0);
+        sql.append("update VideoData vd set vd.status='UPDATED' ");
+        sql.append("where vd.status not in ('NEW','UPDATED') ");
+        sql.append("and (vd.lastScanned is null or vd.lastScanned<=:compareDate) ");
+        sql.append("and vd.episode>=0 ");
+        updated += this.commonDao.executeUpdate(sql, params);
+        
         return (updated > 0);
     }
 
@@ -881,7 +894,7 @@ public class MetadataStorageService {
             // mark located artwork as deleted
             markLocatedArtworkAsDeleted(videoData.getArtworks(), videoData.getModifiedSources());
 
-            // clear common dependencies
+            // clear dependencies
             videoData.getCredits().clear();
             videoData.getBoxedSets().clear();
             videoData.getMovieAwards().clear();
@@ -889,6 +902,7 @@ public class MetadataStorageService {
 
             // clear source based values
             for (String source : videoData.getModifiedSources()) {
+                
                 if (source.equals(videoData.getOverrideSource(OverrideFlag.GENRES))) {
                     videoData.getGenres().clear();
                 }
@@ -899,12 +913,19 @@ public class MetadataStorageService {
                     videoData.getCountries().clear();
                 }
 
-                // remove ratings for source
+                // remove instance variables
+                videoData.removeTitle(source);
+                videoData.removeTitleOriginal(source);
+                videoData.removePublicationYear(source);
+                videoData.removeReleaseDate(source);
+                videoData.removePlot(source);
+                videoData.removeOutline(source);
+                videoData.removeTagline(source);
+                videoData.removeQuote(source);
                 videoData.removeRating(source);
-                
-                // TODO handle instance variables
+                videoData.removeTopRank();
 
-                // at least remove override source
+                // remove override source at all
                 videoData.removeOverrideSource(source);
             }
         }
@@ -921,13 +942,16 @@ public class MetadataStorageService {
     
             // clear source based values
             for (String source : season.getModifiedSources()) {
-                
-                // remove ratings for source
-                season.removeRating(source);
-                
-                // TODO handle instance variables
 
-                // at least remove override source
+                // remove instance variables
+                season.removeTitle(source);
+                season.removeTitleOriginal(source);
+                season.removePublicationYear(source);
+                season.removePlot(source);
+                season.removeOutline(source);
+                season.removeRating(source);
+
+                // remove override source at all
                 season.removeOverrideSource(source);
             }
     
@@ -951,13 +975,14 @@ public class MetadataStorageService {
             // mark located artwork as deleted
             markLocatedArtworkAsDeleted(series.getArtworks(), series.getModifiedSources());
 
-            // clear common dependencies
+            // clear dependencies
             series.getBoxedSets().clear();
             series.getSeriesAwards().clear();
             series.getCertifications().clear();
 
             // clear source based values
             for (String source : series.getModifiedSources()) {
+                
                 if (source.equals(series.getOverrideSource(OverrideFlag.GENRES))) {
                     series.getGenres().clear();
                 }
@@ -968,12 +993,16 @@ public class MetadataStorageService {
                     series.getCountries().clear();
                 }
 
-                // remove ratings for source
+                // remove instance variables
+                series.removeTitle(source);
+                series.removeTitleOriginal(source);
+                series.removeStartYear(source);
+                series.removeEndYear(source);
+                series.removePlot(source);
+                series.removeOutline(source);
                 series.removeRating(source);
-                
-                // TODO handle instance variables
 
-                // at least remove override source
+                // remove override source at all
                 series.removeOverrideSource(source);
             }
 
@@ -1000,7 +1029,23 @@ public class MetadataStorageService {
             // clear dependencies
             person.getFilmography().clear();
             
-            // TODO handle modified sources
+            // clear source based values
+            for (String source : person.getModifiedSources()) {
+                
+                // remove instance variables
+                person.removeName(source);
+                person.removeFirstName(source);
+                person.removeLastName(source);
+                person.removeBirthDay(source);
+                person.removeBirthPlace(source);
+                person.removeBirthName(source);
+                person.removeDeathDay(source);
+                person.removeDeathPlace(source);
+                person.removeBiography(source);
+                
+                // remove override source at all
+                person.removeOverrideSource(source);
+            }
         }
 
         person.setStatus(StatusType.UPDATED);

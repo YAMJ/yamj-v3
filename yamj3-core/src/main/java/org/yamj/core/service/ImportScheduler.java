@@ -53,7 +53,7 @@ public class ImportScheduler {
     }
 
     @Async
-    @Scheduled(initialDelay = 1000, fixedDelay = 100)
+    @Scheduled(initialDelay = 2000, fixedDelay = 1000)
     public synchronized void runProcess() {
         if (watchProcess.getAndSet(false)) processStageFiles();
     }

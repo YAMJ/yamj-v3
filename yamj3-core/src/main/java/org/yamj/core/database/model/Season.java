@@ -23,17 +23,14 @@
 package org.yamj.core.database.model;
 
 import java.util.*;
-import java.util.Map.Entry;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.Index;
-import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.MapKeyType;
+import org.hibernate.annotations.Type;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
@@ -97,10 +94,8 @@ public class Season extends AbstractMetadata {
     }
 
     public Season(String identifier) {
-        super();
-        setIdentifier(identifier);
+        super(identifier);
     }
-
 
     // GETTER and SETTER
 
@@ -127,41 +122,20 @@ public class Season extends AbstractMetadata {
         }
     }
 
-    private Map<String, String> getSourceDbIdMap() {
-        return sourceDbIdMap;
+    public final void removePublicationYear(String source) {
+        if (hasOverrideSource(OverrideFlag.YEAR, source)) {
+            this.publicationYear = -1;
+            removeOverrideFlag(OverrideFlag.YEAR);
+        }
     }
 
     @Override
-    public String getSourceDbId(String sourceDb) {
-        return sourceDbIdMap.get(sourceDb);
+    protected Map<String, String> getSourceDbIdMap() {
+        return sourceDbIdMap;
     }
 
     private void setSourceDbIdMap(Map<String, String> sourceDbIdMap) {
         this.sourceDbIdMap = sourceDbIdMap;
-    }
-
-    @Override
-    public boolean setSourceDbId(String sourceDb, String id) {
-        if (StringUtils.isBlank(sourceDb) || StringUtils.isBlank(id)) {
-            return false;
-        }
-        String newId = id.trim();
-        String oldId = this.sourceDbIdMap.put(sourceDb, newId);
-        final boolean changed = !StringUtils.equals(oldId, newId);
-        if (oldId != null && changed) {
-            addModifiedSource(sourceDb);
-        }
-        return changed;
-    }
-
-    @Override
-    public boolean removeSourceDbId(String sourceDb) {
-        String removedId = this.sourceDbIdMap.remove(sourceDb);
-        if (removedId != null) {
-            addModifiedSource(sourceDb);
-            return true;
-        }
-        return false;
     }
     
     private Map<String, Integer> getRatings() {
@@ -184,35 +158,13 @@ public class Season extends AbstractMetadata {
         }
     }
 
-    private Map<OverrideFlag, String> getOverrideFlags() {
+    @Override
+    protected Map<OverrideFlag, String> getOverrideFlags() {
         return overrideFlags;
     }
 
     private void setOverrideFlags(Map<OverrideFlag, String> overrideFlags) {
         this.overrideFlags = overrideFlags;
-    }
-
-    @Override
-    public void setOverrideFlag(OverrideFlag overrideFlag, String sourceDb) {
-        this.overrideFlags.put(overrideFlag, sourceDb.toLowerCase());
-    }
-
-    @Override
-    public String getOverrideSource(OverrideFlag overrideFlag) {
-        return overrideFlags.get(overrideFlag);
-    }
-
-    @Override
-    public boolean removeOverrideSource(final String sourceDb) {
-        boolean removed = false;
-        for (Iterator<Entry<OverrideFlag, String>> it = this.overrideFlags.entrySet().iterator(); it.hasNext();) {
-            Entry<OverrideFlag,String> e = it.next();
-            if (StringUtils.endsWithIgnoreCase(e.getValue(), sourceDb)) {
-                it.remove();
-                removed = true;
-            }
-        }
-        return removed;
     }
 
     @Override
@@ -264,6 +216,8 @@ public class Season extends AbstractMetadata {
         this.setStatus(StatusType.DONE);
     }
 
+    // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()

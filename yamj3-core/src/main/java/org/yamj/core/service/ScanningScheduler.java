@@ -77,7 +77,7 @@ public class ScanningScheduler {
     private AtomicBoolean watchScanFilmography = new AtomicBoolean(false);
     private AtomicBoolean watchScanArtwork = new AtomicBoolean(false);
     
-    @Scheduled(initialDelay = 5000, fixedDelay = 300000)
+    @Scheduled(initialDelay = 1000, fixedDelay = 300000)
     public void triggerAllScans() {
         LOG.trace("Trigger scan for all");
         watchScanMediaFiles.set(true);
@@ -112,7 +112,7 @@ public class ScanningScheduler {
         watchScanArtwork.set(true);
     }
 
-    @Scheduled(initialDelay = 5000, fixedDelay = 100)
+    @Scheduled(initialDelay = 2000, fixedDelay = 1000)
     public void runAllScans() {
         if (watchScanMediaFiles.get()) scanMediaFiles();
         if (watchScanMetaData.get()) scanMetaData();

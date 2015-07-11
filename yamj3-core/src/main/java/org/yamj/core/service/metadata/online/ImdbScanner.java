@@ -306,13 +306,13 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         final String headerXml = HTMLTools.extractTag(xml, "<h1 class=\"header\">", "</h1>");
 
         // TITLE
-        String title = parseTitle(headerXml);
+        final String title = parseTitle(headerXml);
         if (OverrideTools.checkOverwriteTitle(series, SCANNER_ID)) {
             series.setTitle(title, SCANNER_ID);
         }
 
         // ORIGINAL TITLE
-        String titleOriginal = parseOriginalTitle(headerXml);
+        final String titleOriginal = parseOriginalTitle(headerXml);
         if (OverrideTools.checkOverwriteOriginalTitle(series, SCANNER_ID)) {
             series.setTitleOriginal(titleOriginal, SCANNER_ID);
         }

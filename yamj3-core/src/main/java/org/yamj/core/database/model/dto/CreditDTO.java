@@ -88,9 +88,7 @@ public class CreditDTO {
     }
 
     public final void setFirstName(String firstName) {
-        if (StringUtils.isNotBlank(firstName)) {
-            this.firstName = firstName.trim();
-        }
+        this.firstName = StringUtils.trimToNull(firstName);
     }
 
     public String getLastName() {
@@ -98,9 +96,7 @@ public class CreditDTO {
     }
 
     public final void setLastName(String lastName) {
-        if (StringUtils.isNotBlank(lastName)) {
-            this.lastName = lastName.trim();
-        }
+        this.lastName = StringUtils.trimToNull(lastName);
     }
 
     public String getRole() {
@@ -118,9 +114,7 @@ public class CreditDTO {
     }
 
     public void setRealName(String realName) {
-        if (StringUtils.isNotBlank(realName)) {
-            this.realName = realName.trim();
-        }
+        this.realName = StringUtils.trimToNull(realName);
     }
 
     public Set<String> getPhotoURLS() {
