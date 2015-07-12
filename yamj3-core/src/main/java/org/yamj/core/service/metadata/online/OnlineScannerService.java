@@ -349,7 +349,8 @@ public class OnlineScannerService {
             }
         }
         
-        // alternate scanning if main scanner failed or not registered; no alternate scanning can be forced
+        // alternate scanning if main scanner failed or not registered
+        // NOTE: no alternate scanning can be forced cause that would reset the filmography from main scanner
         if (!ScanResult.OK.equals(scanResult)) {
         	filmographyScanner = registeredFilmographyScanner.get(FILMOGRAPHY_SCANNER_ALT);
 
@@ -374,6 +375,10 @@ public class OnlineScannerService {
             LOG.warn("Person filmography {}-'{}', skipped", person.getId(), person.getName());
             person.setRetries(0);
             person.setFilmographyStatus(StatusType.DONE);
+        } else if (ScanResult.NO_RESULT.equals(scanResult)) {
+            LOG.warn("Person filmography {}-'{}', no results", person.getId(), person.getName());
+            person.setRetries(0);
+            person.setFilmographyStatus(StatusType.NOTFOUND);
         } else if (ScanResult.MISSING_ID.equals(scanResult)) {
             LOG.warn("Person filmography {}-'{}', not found", person.getId(), person.getName());
             person.setRetries(0);

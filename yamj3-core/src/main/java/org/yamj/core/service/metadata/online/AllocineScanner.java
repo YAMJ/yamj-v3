@@ -683,6 +683,9 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         if (filmographyInfos == null || filmographyInfos.isNotValid()) {
             LOG.error("Can't find filmography for person '{}'", person.getName());
             return ScanResult.ERROR;
+        } else if (CollectionUtils.isEmpty(filmographyInfos.getParticipances())) {
+            LOG.error("No filmography present for person '{}'", person.getName());
+            return ScanResult.NO_RESULT;
         }
         
         Set<FilmParticipation> newFilmography = new HashSet<>();

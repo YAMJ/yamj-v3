@@ -29,5 +29,6 @@ public enum ScanResult {
     ERROR,       // scanning error
     SKIPPED,     // skipped scan (by settings or NFO)
     RETRY,       // scan should be retried
+    NO_RESULT,   // scan without results
     OK;          // scan successful
 }

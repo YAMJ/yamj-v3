@@ -22,7 +22,10 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.omertron.themoviedbapi.model.credits.*;
+import com.omertron.themoviedbapi.model.credits.CreditBasic;
+import com.omertron.themoviedbapi.model.credits.CreditMovieBasic;
+import com.omertron.themoviedbapi.model.credits.MediaCreditCast;
+import com.omertron.themoviedbapi.model.credits.MediaCreditCrew;
 import com.omertron.themoviedbapi.model.media.MediaCreditList;
 import com.omertron.themoviedbapi.model.movie.MovieInfo;
 import com.omertron.themoviedbapi.model.movie.ProductionCompany;
@@ -385,6 +388,9 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         if (credits == null) {
             LOG.error("Can't find filmography for person '{}'", person.getName());
             return ScanResult.ERROR;
+        } else if (CollectionUtils.isEmpty(credits.getCast())) {
+            LOG.error("No filmography present for person '{}'", person.getName());
+            return ScanResult.NO_RESULT;
         }
 
         // Fill in cast data
