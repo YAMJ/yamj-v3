@@ -323,6 +323,7 @@ public class MetadataStorageService {
         }
 
         // update entity
+        person.fixScannedValues();
         person.setLastScanned(new Date(System.currentTimeMillis()));
         metadataDao.updateEntity(person);
     }

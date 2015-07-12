@@ -491,7 +491,7 @@ public final class MetadataTools {
             fixed = StringUtils.join(characters.toArray(), " / ");
         }
 
-        return fixed;
+        return fixScannedValue(fixed);
     }
 
     /**
@@ -639,5 +639,9 @@ public final class MetadataTools {
         }
         
         return dto;
+    }
+    
+    public static String fixScannedValue(String value) {
+        return StringUtils.replace(value, "\"", "'");
     }
 }

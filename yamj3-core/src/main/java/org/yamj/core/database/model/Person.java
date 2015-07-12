@@ -384,7 +384,17 @@ public class Person extends AbstractScannable {
     public void setNewFilmography(Set<FilmParticipation> newFilmography) {
         this.newFilmography = newFilmography;
     }
-    
+
+    public void fixScannedValues() {
+        this.name = MetadataTools.fixScannedValue(this.name);
+        this.firstName = MetadataTools.fixScannedValue(this.firstName);
+        this.lastName = MetadataTools.fixScannedValue(this.lastName);
+        this.birthName = MetadataTools.fixScannedValue(this.birthName);
+        this.birthPlace = MetadataTools.fixScannedValue(this.birthPlace);
+        this.deathPlace = MetadataTools.fixScannedValue(this.deathPlace);
+        this.biography = MetadataTools.fixScannedValue(this.biography);
+    }
+
     // EQUALITY CHECKS
     
     @Override
