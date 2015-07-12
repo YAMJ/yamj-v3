@@ -61,7 +61,6 @@ public final class MetadataTools {
     private static final DecimalFormat FILESIZE_FORMAT_1;
     private static final DecimalFormat FILESIZE_FORMAT_2;
     private static final boolean IDENT_TRANSLITERATE;
-    private static final boolean IDENT_CLEAN;
     private static final Transliterator TRANSLITERATOR;
 
     private static final String dateFormat = PropertyTools.getProperty("yamj3.date.format", "yyyy-MM-dd");
@@ -71,9 +70,7 @@ public final class MetadataTools {
     }
 
     static {
-        // identifier cleaning
         IDENT_TRANSLITERATE = PropertyTools.getBooleanProperty("yamj3.identifier.transliterate", Boolean.FALSE);
-        IDENT_CLEAN = PropertyTools.getBooleanProperty("yamj3.identifier.clean", Boolean.TRUE);
 
         // Populate the charReplacementMap
         String temp = PropertyTools.getProperty("indexing.character.replacement", "");
@@ -529,20 +526,20 @@ public final class MetadataTools {
         if (IDENT_TRANSLITERATE) {
             result = TRANSLITERATOR.transliterate(result);
         }
-        if (IDENT_CLEAN) {
-            // format ß to ss
-            result = result.replaceAll("ß", "ss");
-            // remove all accents from letters
-            result = StringUtils.stripAccents(result);
-            // capitalize first letter
-            result = WordUtils.capitalize(result, CLEAN_DELIMITERS);
-            // remove punctuation and symbols
-            result = result.replaceAll("[\\p{Po}|\\p{S}]", "");
-            // just leave characters and digits
-            result = CLEAN_STRING_PATTERN.matcher(result).replaceAll(" ").trim();
-            // remove double whitespaces
-            result = result.replaceAll("^ +| +$|( ){2,}", "$1");
-        }
+        
+        // format ß to ss
+        result = result.replaceAll("ß", "ss");
+        // remove all accents from letters
+        result = StringUtils.stripAccents(result);
+        // capitalize first letter
+        result = WordUtils.capitalize(result, CLEAN_DELIMITERS);
+        // remove punctuation and symbols
+        result = result.replaceAll("[\\p{Po}|\\p{S}]", "");
+        // just leave characters and digits
+        result = CLEAN_STRING_PATTERN.matcher(result).replaceAll(" ").trim();
+        // remove double whitespaces
+        result = result.replaceAll("^ +| +$|( ){2,}", "$1");
+        
         return result;
     }
 
