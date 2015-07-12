@@ -298,7 +298,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
                 person.setName(nameDTO.getName(), SCANNER_ID);
             }
-            if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
+            if (OverrideTools.checkOverwriteFirstName(person, SCANNER_ID)) {
                 person.setFirstName(nameDTO.getFirstName(), SCANNER_ID);
             }
             if (OverrideTools.checkOverwriteLastName(person, SCANNER_ID)) {

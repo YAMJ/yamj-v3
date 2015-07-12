@@ -1268,7 +1268,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
                 person.setName(nameDTO.getName(), SCANNER_ID);
             }
-            if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
+            if (OverrideTools.checkOverwriteFirstName(person, SCANNER_ID)) {
                 person.setFirstName(nameDTO.getFirstName(), SCANNER_ID);
             }
             if (OverrideTools.checkOverwriteLastName(person, SCANNER_ID)) {
@@ -1378,6 +1378,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         if (OverrideTools.checkOverwriteBiography(person, SCANNER_ID)) {
             if (bio.contains(">Mini Bio (1)</h4>")) {
                 String biography = HTMLTools.extractTag(bio, ">Mini Bio (1)</h4>", "<em>- IMDb Mini Biography");
+                if (StringUtils.isBlank(biography) && bio.contains("<a name=\"trivia\">")) {
+                    biography = HTMLTools.extractTag(bio, ">Mini Bio (1)</h4>", "<a name=\"trivia\">");
+                }
                 person.setBiography(HTMLTools.removeHtmlTags(biography), SCANNER_ID);
             }
         }
