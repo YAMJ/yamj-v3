@@ -141,7 +141,7 @@ public abstract class AbstractMetadata extends AbstractScannable
 
     public final void removePlot(String source) {
         if (hasOverrideSource(OverrideFlag.PLOT, source)) {
-            this.outline = null;
+            this.plot = null;
             removeOverrideFlag(OverrideFlag.PLOT);
         }
     }
