@@ -22,19 +22,15 @@
  */
 package org.yamj.core.api.model.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 /**
- *
  * @author Stuart
  */
-@JsonInclude(Include.NON_DEFAULT)
 public class ApiExternalIdDTO extends AbstractApiIdentifiableDTO {
 
     private String externalId;
     private String sourcedb;
-
+    private boolean skipped;
+    
     public String getExternalId() {
         return externalId;
     }
@@ -49,5 +45,13 @@ public class ApiExternalIdDTO extends AbstractApiIdentifiableDTO {
 
     public void setSourcedb(String sourcedb) {
         this.sourcedb = sourcedb;
+    }
+
+    public boolean isSkipped() {
+        return skipped;
+    }
+
+    public void setSkipped(boolean skipped) {
+        this.skipped = skipped;
     }
 }

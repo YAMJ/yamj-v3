@@ -34,20 +34,14 @@ import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.builder.DataItem;
-import org.yamj.core.api.model.builder.DataItemTools;
-import org.yamj.core.api.model.builder.IndexParams;
-import org.yamj.core.api.model.builder.SqlScalars;
+import org.yamj.core.api.model.builder.*;
 import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.database.model.type.FileType;
-import org.yamj.core.database.model.type.JobType;
-import org.yamj.core.database.model.type.ParticipationType;
+import org.yamj.core.database.model.type.*;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Repository("apiDao")
@@ -1850,7 +1844,7 @@ public class ApiDao extends HibernateDao {
         MetaDataType type = MetaDataType.fromString(options.getType());
 
         if (CollectionUtils.isNotEmpty(params.getDataItems())) {
-            LOG.debug("Getting additional data items: {} ", params.getDataItems());
+            LOG.trace("Getting additional data items: {} ", params.getDataItems());
         }
 
         String sql;
@@ -1863,7 +1857,7 @@ public class ApiDao extends HibernateDao {
         } else {
             throw new UnsupportedOperationException("Unable to process type '" + type + "' (Original: '" + options.getType() + "')");
         }
-        LOG.debug("SQL for {}-{}: {}", type, params.getId(), sql);
+        LOG.trace("SQL for {}-{}: {}", type, params.getId(), sql);
 
         SqlScalars sqlScalars = new SqlScalars(sql);
 
@@ -1882,7 +1876,7 @@ public class ApiDao extends HibernateDao {
         params.addScalarParameters(sqlScalars);
 
         List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
-        LOG.debug("Found {} results for ID {}", queryResults.size(), params.getId());
+        LOG.trace("Found {} results for ID {}", queryResults.size(), params.getId());
         if (CollectionUtils.isNotEmpty(queryResults)) {
             ApiVideoDTO video = queryResults.get(0);
 
@@ -1959,7 +1953,7 @@ public class ApiDao extends HibernateDao {
                     }
                 }
             } else if (options.isAllJobTypes()) {
-                LOG.debug("Adding all jobs for ID {}", options.getId());
+                LOG.trace("Adding all jobs for ID {}", options.getId());
                 video.setCast(getCastForId(type, options.getId(), params.getDataItems(), null));
             }
 
@@ -2756,21 +2750,23 @@ public class ApiDao extends HibernateDao {
         SqlScalars sqlScalars = new SqlScalars();
 
         if (type == MetaDataType.SERIES) {
-            sqlScalars.addToSql("SELECT ids.series_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb");
-            sqlScalars.addToSql("FROM series_ids ids");
-            sqlScalars.addToSql("WHERE ids.series_id=:id");
+            sqlScalars.addToSql("SELECT ids.series_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb,");
+            sqlScalars.addToSql("concat(coalesce(ser.skip_scan_api,''),';',coalesce(ser.skip_scan_nfo,'')) like concat('%',ids.sourcedb,'%') as skipped");
+            sqlScalars.addToSql("FROM series ser, series_ids ids");
+            sqlScalars.addToSql("WHERE ser.id=:id AND ids.series_id=ser.id");
         } else if (type == MetaDataType.SEASON) {
-            sqlScalars.addToSql("SELECT ids.season_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb");
+            sqlScalars.addToSql("SELECT ids.season_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb, 0 as skipped");
             sqlScalars.addToSql("FROM season_ids ids");
             sqlScalars.addToSql("WHERE ids.season_id=:id");
         } else if (type == MetaDataType.PERSON) {
-            sqlScalars.addToSql("SELECT ids.person_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb");
+            sqlScalars.addToSql("SELECT ids.person_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb, 0 as skipped");
             sqlScalars.addToSql("FROM person_ids ids");
             sqlScalars.addToSql("WHERE ids.person_id=:id");
         } else {
-            sqlScalars.addToSql("SELECT ids.videodata_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb");
-            sqlScalars.addToSql("FROM videodata_ids ids");
-            sqlScalars.addToSql("WHERE ids.videodata_id=:id");
+            sqlScalars.addToSql("SELECT ids.videodata_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb,");
+            sqlScalars.addToSql("concat(coalesce(vd.skip_scan_api,''),';',coalesce(vd.skip_scan_nfo,'')) like concat('%',ids.sourcedb,'%') as skipped");
+            sqlScalars.addToSql("FROM videodata vd, videodata_ids ids");
+            sqlScalars.addToSql("WHERE vd.id=:id AND ids.videodata_id=vd.id");
         }
         
         sqlScalars.addParameter("id", id);
@@ -2778,6 +2774,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("id", LongType.INSTANCE);
         sqlScalars.addScalar("externalId", StringType.INSTANCE);
         sqlScalars.addScalar("sourcedb", StringType.INSTANCE);
+        sqlScalars.addScalar("skipped", BooleanType.INSTANCE);
         
         return executeQueryWithTransform(ApiExternalIdDTO.class, sqlScalars, null);
     }
