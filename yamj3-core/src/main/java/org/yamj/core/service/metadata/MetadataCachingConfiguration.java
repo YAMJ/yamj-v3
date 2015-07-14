@@ -3,6 +3,8 @@ package org.yamj.core.service.metadata;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.PersistenceConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurer;
@@ -11,17 +13,18 @@ import org.springframework.cache.ehcache.EhCacheCacheManager;
 import org.springframework.cache.interceptor.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 @Configuration
 @EnableCaching
 public class MetadataCachingConfiguration implements CachingConfigurer {
 
+    private static final Logger LOG = LoggerFactory.getLogger(MetadataCachingConfiguration.class);
+
     private static final String DEFAULT = "default";
     private static final String ALLOCINE_SEARCH = "allocineSearchCache";
     private static final String ALLOCINE_INFO = "allocineInfoCache";
     private static final String TVDB = "tvdbCache";
-    
-    private CacheManager cacheManager = null;
     
     @Bean(destroyMethod="shutdown")
     public net.sf.ehcache.CacheManager ehCacheManager() {
@@ -33,13 +36,12 @@ public class MetadataCachingConfiguration implements CachingConfigurer {
                 .cache(cacheConfig(TVDB, 500, 1800,  MemoryStoreEvictionPolicy.LRU)));
     }
 
+    @Scope
     @Bean
     @Override
     public CacheManager cacheManager() {
-        if (cacheManager == null) {
-           cacheManager = new EhCacheCacheManager(ehCacheManager());
-        } 
-        return cacheManager;
+        LOG.trace("Create new cache manager using ehcache");
+        return new EhCacheCacheManager(ehCacheManager());
     }
 
     @Override
@@ -72,16 +74,16 @@ public class MetadataCachingConfiguration implements CachingConfigurer {
 
     @Bean
     public Cache allocineSearchCache() {
-        return cacheManager.getCache(ALLOCINE_SEARCH);
+        return cacheManager().getCache(ALLOCINE_SEARCH);
     }
 
     @Bean
     public Cache allocineInfoCache() {
-        return cacheManager.getCache(ALLOCINE_INFO);
+        return cacheManager().getCache(ALLOCINE_INFO);
     }
 
     @Bean
     public Cache tvdbCache() {
-        return cacheManager.getCache(TVDB);
+        return cacheManager().getCache(TVDB);
     }
 }

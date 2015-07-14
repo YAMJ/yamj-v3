@@ -24,17 +24,22 @@ package org.yamj.core.remote.service;
 
 import static org.junit.Assert.assertTrue;
 
-import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.common.remote.service.GitHubService;
 
-public class GitHubServiceImplTest {
+@ContextConfiguration(locations = {"classpath:spring-test.xml"})
+public class GitHubServiceImplTest extends AbstractJUnit4SpringContextTests {
 
     private static final Logger LOG = LoggerFactory.getLogger(GitHubServiceImplTest.class);
-    @Resource(name = "githubService")
-    private GitHubServiceImpl github;
+    
+    @Autowired
+    private GitHubService gitHubService;
 
     /**
      * Test of pushDate method, of class GitHubServiceImpl.
@@ -42,7 +47,7 @@ public class GitHubServiceImplTest {
     @Test
     public void testPushDate() {
         LOG.info("pushDate");
-        String result = github.pushDate();
+        String result = gitHubService.pushDate();
         LOG.info("Got result: '{}'", result);
         assertTrue("Returned date is blank", StringUtils.isNotBlank(result));
     }

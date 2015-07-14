@@ -65,7 +65,7 @@ public class ArtworkProcessScheduler {
         if (watchProcess.getAndSet(false)) processArtwork();
     }
     
-    public void processArtwork() {
+    private void processArtwork() {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.artworkprocess.maxThreads", 1);
         if (maxThreads <= 0) {
             if (!messageDisabled) {

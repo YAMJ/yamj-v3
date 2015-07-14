@@ -33,24 +33,6 @@
         <property name="coreProperties" ref="dynamicProperties"/>
     </bean>
 
-    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
-        <property name="configLocation" value="file:src/main/webapp/WEB-INF/ehcache.xml"/>
-        <property name="shared" value="true"/>
-    </bean>
-  
-    <bean id="allocineSearchCache" class="net.sf.ehcache.Cache" factory-bean="cacheManager" factory-method="getCache">
-        <constructor-arg value="allocineSearchCache" />          
-    </bean>
-
-    <bean id="allocineInfoCache" class="net.sf.ehcache.Cache" factory-bean="cacheManager" factory-method="getCache">
-        <constructor-arg value="allocineInfoCache" />          
-    </bean>
-
-    <bean id="tvdbCache" class="net.sf.ehcache.Cache" factory-bean="cacheManager" factory-method="getCache">
-        <constructor-arg value="tvdbCache" />          
-    </bean>
-    
-    <import resource="file:src/main/webapp/WEB-INF/spring/connection.xml"/>
     <import resource="file:src/main/webapp/WEB-INF/spring/database.xml"/>
 
 </beans>

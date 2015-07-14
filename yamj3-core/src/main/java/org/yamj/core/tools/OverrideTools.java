@@ -59,7 +59,8 @@ public final class OverrideTools {
     private static final String DEFAULT_PLUGIN_MOVIE_SERIES = "api,nfo,plugin_movie,plugin_series,alternate_movie,alternate_series";
     private static final String DEFAULT_PLUGIN_SERIES = "api,nfo,plugin_series,alternate_series";
     private static final String DEFAULT_PLUGIN_PERSON = "api,nfo,plugin_person,alternate_person";
-
+    private static final String APPEND_FILENAME = ",filename";
+    
     static {
         String sources;
 
@@ -109,18 +110,18 @@ public final class OverrideTools {
         sources = PropertyTools.getProperty("priority.videodata.tagline", DEFAULT_PLUGIN_MOVIE_SERIES);
         putVideodataPriorities(OverrideFlag.TAGLINE, sources);
         // title
-        sources = PropertyTools.getProperty("priority.videodata.title", DEFAULT_PLUGIN_MOVIE_SERIES+",filename");
+        sources = PropertyTools.getProperty("priority.videodata.title", DEFAULT_PLUGIN_MOVIE_SERIES + APPEND_FILENAME);
         putVideodataPriorities(OverrideFlag.TITLE, sources);
-        sources = PropertyTools.getProperty("priority.series.title", DEFAULT_PLUGIN_SERIES+"filename");
+        sources = PropertyTools.getProperty("priority.series.title", DEFAULT_PLUGIN_SERIES + APPEND_FILENAME);
         putSeriesPriorities(OverrideFlag.TITLE, sources);
-        sources = PropertyTools.getProperty("priority.season.title", DEFAULT_PLUGIN_SERIES+"filename");
+        sources = PropertyTools.getProperty("priority.season.title", DEFAULT_PLUGIN_SERIES + APPEND_FILENAME);
         putSeasonPriorities(OverrideFlag.TITLE, sources);
         // year
-        sources = PropertyTools.getProperty("priority.videodata.year", DEFAULT_PLUGIN_MOVIE_SERIES+"filename");
+        sources = PropertyTools.getProperty("priority.videodata.year", DEFAULT_PLUGIN_MOVIE_SERIES + APPEND_FILENAME);
         putVideodataPriorities(OverrideFlag.YEAR, sources);
-        sources = PropertyTools.getProperty("priority.series.year", DEFAULT_PLUGIN_SERIES+"filename");
+        sources = PropertyTools.getProperty("priority.series.year", DEFAULT_PLUGIN_SERIES + APPEND_FILENAME);
         putSeriesPriorities(OverrideFlag.YEAR, sources);
-        sources = PropertyTools.getProperty("priority.season.year", DEFAULT_PLUGIN_SERIES+"filename");
+        sources = PropertyTools.getProperty("priority.season.year", DEFAULT_PLUGIN_SERIES + APPEND_FILENAME);
         putSeasonPriorities(OverrideFlag.YEAR, sources);
 
         // person priorities
