@@ -25,15 +25,7 @@ package org.yamj.core.api.options;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
@@ -63,7 +55,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     @JsonIgnore
     private Map<JobType, Integer> jobTypes;
     @JsonIgnore
-    private List<MetaDataType> metaDataTypes;
+    private Set<MetaDataType> metaDataTypes;
     @JsonIgnore
     private boolean allJobTypes;
 
@@ -336,8 +328,8 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     }
     //</editor-fold>
 
-    protected List<MetaDataType> getMetaDataTypes(String type) {
-        List<MetaDataType> types = new ArrayList<>();
+    protected Set<MetaDataType> getMetaDataTypes(String type) {
+        HashSet<MetaDataType> types = new  HashSet<>();
         if (StringUtils.isEmpty(type) || StringUtils.containsIgnoreCase(type, "ALL")) {
             types.addAll(Arrays.asList(MetaDataType.values()));
         } else {
@@ -360,9 +352,9 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
      * @param type
      * @return
      */
-    protected List<MetaDataType> splitTypes(String type) {
+    protected Set<MetaDataType> splitTypes(String type) {
         if (CollectionUtils.isEmpty(metaDataTypes)) {
-            metaDataTypes = new ArrayList<>();
+            metaDataTypes = new HashSet<>();
             if (StringUtils.isEmpty(type) || StringUtils.containsIgnoreCase(type, "ALL")) {
                 metaDataTypes.add(MetaDataType.MOVIE);
                 metaDataTypes.add(MetaDataType.SERIES);

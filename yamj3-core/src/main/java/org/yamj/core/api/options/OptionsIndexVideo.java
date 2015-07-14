@@ -24,8 +24,8 @@ package org.yamj.core.api.options;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.yamj.common.type.MetaDataType;
 
 /**
@@ -100,7 +100,7 @@ public class OptionsIndexVideo extends OptionsIdArtwork {
      * 
      * @return
      */
-    public List<MetaDataType> splitTypes() {
+    public Set<MetaDataType> splitTypes() {
         return this.splitTypes(type);
     }
 }

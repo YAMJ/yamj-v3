@@ -159,7 +159,7 @@ public class ApiDao extends HibernateDao {
      * @return
      */
     private static String generateSqlForVideoList(IndexParams params) {
-        List<MetaDataType> mdt = params.getMetaDataTypes();
+        Set<MetaDataType> mdt = params.getMetaDataTypes();
         LOG.debug("Getting video list for types: {}", mdt);
         if (CollectionUtils.isNotEmpty(params.getDataItems())) {
             LOG.debug("Additional data items requested: {}", params.getDataItems());
@@ -2899,7 +2899,7 @@ public class ApiDao extends HibernateDao {
 
     public List<ApiNameDTO> getAlphabeticals(ApiWrapperList<ApiNameDTO> wrapper) {
         OptionsMultiType options = (OptionsMultiType) wrapper.getOptions();
-        List<MetaDataType> mdt = options.getMetaDataTypes();
+        Set<MetaDataType> mdt = options.getMetaDataTypes();
 
         StringBuilder sbSQL = new StringBuilder();
         boolean appendUnion = false;
@@ -2966,5 +2966,129 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("name", StringType.INSTANCE);
 
         return executeQueryWithTransform(ApiNameDTO.class, sqlScalars, wrapper);
+    }
+
+    public List<ApiYearDecadeDTO> getYears(ApiWrapperList<ApiYearDecadeDTO> wrapper) {
+        OptionsMultiType options = (OptionsMultiType) wrapper.getOptions();
+        Set<MetaDataType> mdt = options.getMetaDataTypes();
+
+        StringBuilder sbSQL = new StringBuilder();
+        boolean appendUnion = false;
+
+        // add the movie entries
+        if (mdt.contains(MetaDataType.MOVIE)) {
+            sbSQL.append("SELECT DISTINCT vd.publication_year AS year ");
+            sbSQL.append("FROM videodata vd ");
+            sbSQL.append("WHERE vd.episode < 0 ");
+            sbSQL.append("AND vd.publication_year > 0" );
+            appendUnion = true;
+        }
+
+        // add the TV series entries
+        if (mdt.contains(MetaDataType.SERIES)) {
+            if (appendUnion) {
+                sbSQL.append(SQL_UNION);
+            }
+            sbSQL.append("SELECT DISTINCT ser.start_year as year ");
+            sbSQL.append("FROM series ser ");
+            sbSQL.append("WHERE ser.start_year > 0 ");
+            appendUnion = true;
+        }
+
+        // add the TV season entries
+        if (mdt.contains(MetaDataType.SEASON)) {
+            if (appendUnion) {
+                sbSQL.append(SQL_UNION);
+            }
+            sbSQL.append("SELECT DISTINCT sea.publication_year AS year ");
+            sbSQL.append("FROM season sea ");
+            sbSQL.append("WHERE sea.publication_year > 0" );
+            appendUnion = true;
+        }
+
+        // add the TV episode entries
+        if (mdt.contains(MetaDataType.EPISODE)) {
+            if (appendUnion) {
+                sbSQL.append(SQL_UNION);
+            }
+            sbSQL.append("SELECT DISTINCT vd.publication_year AS year ");
+            sbSQL.append("FROM videodata vd ");
+            sbSQL.append("WHERE vd.episode >= 0 ");
+            sbSQL.append("AND vd.publication_year > 0" );
+        }
+
+        // If there were no types added, then return an empty list
+        if (sbSQL.length() == 0) {
+            return Collections.emptyList();
+        }
+
+        sbSQL.append(options.getSortString("year"));
+
+        SqlScalars sqlScalars = new SqlScalars(sbSQL);
+        sqlScalars.addScalar("year", IntegerType.INSTANCE);
+
+        return executeQueryWithTransform(ApiYearDecadeDTO.class, sqlScalars, wrapper);
+    }
+
+    public List<ApiYearDecadeDTO> getDecades(ApiWrapperList<ApiYearDecadeDTO> wrapper) {
+        OptionsMultiType options = (OptionsMultiType) wrapper.getOptions();
+        Set<MetaDataType> mdt = options.getMetaDataTypes();
+
+        StringBuilder sbSQL = new StringBuilder();
+        boolean appendUnion = false;
+
+        // add the movie entries
+        if (mdt.contains(MetaDataType.MOVIE)) {
+            sbSQL.append("SELECT DISTINCT CONCAT(LEFT(vd.publication_year,3),'0') AS decade ");
+            sbSQL.append("FROM videodata vd ");
+            sbSQL.append("WHERE vd.episode < 0 ");
+            sbSQL.append("AND vd.publication_year > 0" );
+            appendUnion = true;
+        }
+
+        // add the TV series entries
+        if (mdt.contains(MetaDataType.SERIES)) {
+            if (appendUnion) {
+                sbSQL.append(SQL_UNION);
+            }
+            sbSQL.append("SELECT DISTINCT CONCAT(LEFT(ser.start_year,3),'0') as decade ");
+            sbSQL.append("FROM series ser ");
+            sbSQL.append("WHERE ser.start_year > 0 ");
+            appendUnion = true;
+        }
+
+        // add the TV season entries
+        if (mdt.contains(MetaDataType.SEASON)) {
+            if (appendUnion) {
+                sbSQL.append(SQL_UNION);
+            }
+            sbSQL.append("SELECT DISTINCT CONCAT(LEFT(sea.publication_year,3),'0') AS decade ");
+            sbSQL.append("FROM season sea ");
+            sbSQL.append("WHERE sea.publication_year > 0" );
+            appendUnion = true;
+        }
+
+        // add the TV episode entries
+        if (mdt.contains(MetaDataType.EPISODE)) {
+            if (appendUnion) {
+                sbSQL.append(SQL_UNION);
+            }
+            sbSQL.append("SELECT DISTINCT CONCAT(LEFT(vd.publication_year,3),'0') AS decade ");
+            sbSQL.append("FROM videodata vd ");
+            sbSQL.append("WHERE vd.episode >= 0 ");
+            sbSQL.append("AND vd.publication_year > 0" );
+        }
+
+        // If there were no types added, then return an empty list
+        if (sbSQL.length() == 0) {
+            return Collections.emptyList();
+        }
+
+        sbSQL.append(options.getSortString("decade"));
+
+        SqlScalars sqlScalars = new SqlScalars(sbSQL);
+        sqlScalars.addScalar("decade", IntegerType.INSTANCE);
+
+        return executeQueryWithTransform(ApiYearDecadeDTO.class, sqlScalars, wrapper);
     }
 }

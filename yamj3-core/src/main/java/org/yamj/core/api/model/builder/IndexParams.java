@@ -71,7 +71,7 @@ public class IndexParams {
         this.dataItems = options.splitDataItems();
     }
 
-    public List<MetaDataType> getMetaDataTypes() {
+    public Set<MetaDataType> getMetaDataTypes() {
         return options.splitTypes();
     }
 

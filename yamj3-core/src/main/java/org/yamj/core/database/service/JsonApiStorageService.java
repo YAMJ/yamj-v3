@@ -631,4 +631,15 @@ public class JsonApiStorageService {
         }
         return changed;
     }
+    
+    
+    //<editor-fold defaultstate="collapsed" desc="Year/Decade Methods">
+    public List<ApiYearDecadeDTO> getYears(ApiWrapperList<ApiYearDecadeDTO> wrapper) {
+        return apiDao.getYears(wrapper);
+    }
+
+    public List<ApiYearDecadeDTO> getDecades(ApiWrapperList<ApiYearDecadeDTO> wrapper) {
+        return apiDao.getDecades(wrapper);
+    }
+    //</editor-fold>
 }

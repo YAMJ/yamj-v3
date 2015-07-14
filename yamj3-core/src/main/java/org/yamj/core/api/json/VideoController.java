@@ -31,12 +31,8 @@ import org.springframework.web.bind.annotation.*;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.builder.DataItem;
-import org.yamj.core.api.model.dto.ApiEpisodeDTO;
-import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
-import org.yamj.core.api.model.dto.ApiVideoDTO;
-import org.yamj.core.api.options.OptionsEpisode;
-import org.yamj.core.api.options.OptionsIdArtwork;
-import org.yamj.core.api.options.OptionsIndexVideo;
+import org.yamj.core.api.model.dto.*;
+import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -347,5 +343,41 @@ public class VideoController {
         jsonApi.getEpisodeList(wrapper);
         wrapper.setStatusCheck();
         return wrapper;
+    }
+    
+    /**
+     * Get list with years.
+     *
+     * @param options
+     * @return
+     */
+    @RequestMapping("/years/list")
+    public ApiWrapperList<ApiYearDecadeDTO> getYears(@ModelAttribute("options") OptionsMultiType options) {
+        LOG.info("Getting year list with {}", options.toString());
+
+        ApiWrapperList<ApiYearDecadeDTO> wrapper = new ApiWrapperList<>();
+        wrapper.setOptions(options);
+        wrapper.setResults(jsonApi.getYears(wrapper));
+        wrapper.setStatusCheck();
+        return wrapper;
+        
+    }
+
+    /**
+     * Get list with decades.
+     *
+     * @param options
+     * @return
+     */
+    @RequestMapping("/decades/list")
+    public ApiWrapperList<ApiYearDecadeDTO> getDecades(@ModelAttribute("options") OptionsMultiType options) {
+        LOG.info("Getting decade list with {}", options.toString());
+
+        ApiWrapperList<ApiYearDecadeDTO> wrapper = new ApiWrapperList<>();
+        wrapper.setOptions(options);
+        wrapper.setResults(jsonApi.getDecades(wrapper));
+        wrapper.setStatusCheck();
+        return wrapper;
+        
     }
 }

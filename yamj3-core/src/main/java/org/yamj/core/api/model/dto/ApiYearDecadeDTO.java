@@ -20,46 +20,30 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.api.options;
+package org.yamj.core.api.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.Set;
-import org.yamj.common.type.MetaDataType;
 
-/**
- * List of the options available for the type
- *
- * @author modmax
- */
 @JsonInclude(Include.NON_DEFAULT)
-public class OptionsMultiType extends OptionsAbstractSortSearch {
+public class ApiYearDecadeDTO extends AbstractApiDTO {
 
-    private String type;
+    private Integer year = -1;
+    private Integer decade = -1;
 
-    public String getType() {
-        return type;
+    public Integer getYear() {
+        return year;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setYear(Integer year) {
+        this.year = year;
     }
 
-    /**
-     * Get the filtered types
-     *
-     * @return
-     */
-    public Set<MetaDataType> splitTypes() {
-        return this.splitTypes(type);
+    public Integer getDecade() {
+        return decade;
     }
 
-    /**
-     * Get the meta data types
-     *
-     * @return
-     */
-    public Set<MetaDataType> getMetaDataTypes() {
-        return this.getMetaDataTypes(type);
+    public void setDecade(Integer decade) {
+        this.decade = decade;
     }
 }
