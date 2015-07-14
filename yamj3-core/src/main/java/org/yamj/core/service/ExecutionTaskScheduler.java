@@ -26,11 +26,11 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.yamj.core.database.model.ExecutionTask;
 import org.yamj.core.service.tasks.ExecutionTaskService;
 
-@Service
+@Component
 public class ExecutionTaskScheduler {
 
     private static final ReentrantLock PROCESS_LOCK = new ReentrantLock();

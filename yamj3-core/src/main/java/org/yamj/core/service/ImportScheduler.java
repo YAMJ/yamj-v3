@@ -28,13 +28,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.mediaimport.MediaImportService;
 import org.yamj.core.tools.ExceptionTools;
 
-@Service
+@Component
 public class ImportScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImportScheduler.class);

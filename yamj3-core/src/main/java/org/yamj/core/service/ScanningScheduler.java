@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.ArtworkStorageService;
@@ -43,7 +43,7 @@ import org.yamj.core.service.mediainfo.MediaInfoService;
 import org.yamj.core.service.metadata.MetadataScannerRunner;
 import org.yamj.core.service.metadata.MetadataScannerService;
 
-@Service
+@Component
 public class ScanningScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ScanningScheduler.class);
