@@ -40,6 +40,8 @@ public class OptionsIndexVideo extends OptionsIdArtwork {
     private String exclude;
     private Boolean watched;
     private String type;
+    private Integer yearStart;
+    private Integer yearEnd;
     
     public String getInclude() {
         return include;
@@ -77,6 +79,22 @@ public class OptionsIndexVideo extends OptionsIdArtwork {
         this.type = type;
     }
     
+    public Integer getYearStart() {
+        return yearStart;
+    }
+
+    public void setYearStart(Integer yearStart) {
+        this.yearStart = yearStart;
+    }
+
+    public Integer getYearEnd() {
+        return yearEnd;
+    }
+
+    public void setYearEnd(Integer yearEnd) {
+        this.yearEnd = yearEnd;
+    }
+
     /**
      * Split the include list into a map of values
      *

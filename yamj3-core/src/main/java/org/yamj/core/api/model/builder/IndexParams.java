@@ -51,19 +51,11 @@ public class IndexParams {
     private final List<DataItem> dataItems;
     private final Map<String, Object> parameters = new HashMap<>();
 
-    private int certificationId = -1;
-    private String year;
-    private String genreName;
-    private String studioName;
-    private String countryName;
-    private String awardName;
-    private String videoSource;
     private String ratingSource;
     private int ratingValue;
     private String newestSource;
     private Date newestDate;
-    private int boxSetId = -1;
-
+    
     public IndexParams(OptionsIndexVideo options) {
         this.options = options;
         this.includes = options.splitIncludes();
@@ -109,14 +101,21 @@ public class IndexParams {
     }
 
     public String getYear() {
-        if (year == null) {
-            if (includeYear()) {
-                year = includes.get(YEAR);
-            } else {
-                year = excludes.get(YEAR);
-            }
+        if (includeYear()) {
+            return includes.get(YEAR);
         }
-        return year;
+        return excludes.get(YEAR);
+    }
+
+    public int getYearStart() {
+        return (options.getYearStart() == null ? -1 : options.getYearStart().intValue());
+    }
+
+    public int getYearEnd() {
+        if (options.getYearEnd() != null && options.getYearEnd().intValue() < getYearStart()) {
+            return getYearStart();
+        }
+        return (options.getYearEnd() == null ? -1 : options.getYearEnd().intValue());
     }
 
     // genre check
@@ -129,14 +128,10 @@ public class IndexParams {
     }
 
     public String getGenreName() {
-        if (genreName == null) {
-            if (includeGenre()) {
-                genreName = includes.get(GENRE);
-            } else {
-                genreName = excludes.get(GENRE);
-            }
+        if (includeGenre()) {
+            return includes.get(GENRE);
         }
-        return genreName;
+        return excludes.get(GENRE);
     }
 
     // studio check
@@ -149,14 +144,10 @@ public class IndexParams {
     }
 
     public String getStudioName() {
-        if (studioName == null) {
-            if (includeStudio()) {
-                studioName = includes.get(STUDIO);
-            } else {
-                studioName = excludes.get(STUDIO);
-            }
+        if (includeStudio()) {
+            return includes.get(STUDIO);
         }
-        return studioName;
+        return excludes.get(STUDIO);
     }
 
     // country check
@@ -169,14 +160,10 @@ public class IndexParams {
     }
 
     public String getCountryName() {
-        if (countryName == null) {
-            if (includeCountry()) {
-                countryName = includes.get(COUNTRY);
-            } else {
-                countryName = excludes.get(COUNTRY);
-            }
+        if (includeCountry()) {
+            return includes.get(COUNTRY);
         }
-        return countryName;
+        return excludes.get(COUNTRY);
     }
 
     // award check
@@ -189,14 +176,10 @@ public class IndexParams {
     }
 
     public String getAwardName() {
-        if (awardName == null) {
-            if (includeAward()) {
-                awardName = includes.get(AWARD);
-            } else {
-                awardName = excludes.get(AWARD);
-            }
+        if (includeAward()) {
+            return includes.get(AWARD);
         }
-        return awardName;
+        return excludes.get(AWARD);
     }
     
     // certification check
@@ -209,14 +192,10 @@ public class IndexParams {
     }
 
     public int getCertificationId() {
-        if (certificationId == -1) {
-            if (includeCertification()) {
-                certificationId = NumberUtils.toInt(includes.get(CERTIFICATION), -1);
-            } else {
-                certificationId = NumberUtils.toInt(excludes.get(CERTIFICATION), -1);
-            }
+        if (includeCertification()) {
+            return NumberUtils.toInt(includes.get(CERTIFICATION), -1);
         }
-        return certificationId;
+        return NumberUtils.toInt(excludes.get(CERTIFICATION), -1);
     }
 
     // video source check
@@ -229,14 +208,10 @@ public class IndexParams {
     }
 
     public String getVideoSource() {
-        if (videoSource == null) {
-            if (includeVideoSource()) {
-                videoSource = includes.get(VIDEOSOURCE);
-            } else {
-                videoSource = excludes.get(VIDEOSOURCE);
-            }
+        if (includeVideoSource()) {
+            return includes.get(VIDEOSOURCE);
         }
-        return videoSource;
+        return excludes.get(VIDEOSOURCE);
     }
 
     // video source check
@@ -249,14 +224,10 @@ public class IndexParams {
     }
 
     public int getBoxSetId() {
-        if (boxSetId < 0) {
-            if (includeBoxedSet()) {
-                boxSetId = NumberUtils.toInt(includes.get(BOXSET), -1);
-            } else {
-                boxSetId = NumberUtils.toInt(excludes.get(BOXSET), -1);
-            }
+        if (includeBoxedSet()) {
+            return NumberUtils.toInt(includes.get(BOXSET), -1);
         }
-        return boxSetId;
+        return NumberUtils.toInt(excludes.get(BOXSET), -1);
     }
 
     // rating check

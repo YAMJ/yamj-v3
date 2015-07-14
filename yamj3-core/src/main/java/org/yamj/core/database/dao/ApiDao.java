@@ -268,6 +268,12 @@ public class ApiDao extends HibernateDao {
         } else if (params.excludeYear()) {
             sbSQL.append(" AND vd.publication_year!=").append(params.getYear());
         }
+        if (params.getYearStart() > 0) {
+            sbSQL.append(" AND vd.publication_year>=").append(params.getYearStart());
+        }
+        if (params.getYearEnd() > 0) {
+            sbSQL.append(" AND vd.publication_year<=").append(params.getYearEnd());
+        }
 
         if (params.getWatched() != null) {
             if (params.getWatched()) {
@@ -604,6 +610,12 @@ public class ApiDao extends HibernateDao {
         } else if (params.excludeYear()) {
             sbSQL.append(" AND ser.start_year!=").append(params.getYear());
         }
+        if (params.getYearStart() > 0) {
+            sbSQL.append(" AND ser.start_year>=").append(params.getYearStart());
+        }
+        if (params.getYearEnd() > 0) {
+            sbSQL.append(" AND ser.start_year<=").append(params.getYearEnd());
+        }
 
         if (params.getWatched() != null) {
             if (params.getWatched()) {
@@ -894,7 +906,13 @@ public class ApiDao extends HibernateDao {
         } else if (params.excludeYear()) {
             sbSQL.append(" AND sea.publication_year!=").append(params.getYear());
         }
-
+        if (params.getYearStart() > 0) {
+            sbSQL.append(" AND sea.publication_year>=").append(params.getYearStart());
+        }
+        if (params.getYearEnd() > 0) {
+            sbSQL.append(" AND sea.publication_year<=").append(params.getYearEnd());
+        }
+        
         // check watched
         if (params.getWatched() != null) {
             if (params.getWatched()) {
