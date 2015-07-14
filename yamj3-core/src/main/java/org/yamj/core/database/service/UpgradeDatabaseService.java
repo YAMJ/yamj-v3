@@ -52,7 +52,7 @@ public class UpgradeDatabaseService {
         try {
             upgradeDatabaseDao.patchSkipOnlineScans();
         } catch (Exception ex) {
-            LOG.warn("Failed upgrade 'patchAllocineWonAwards'", ex);
+            LOG.warn("Failed upgrade 'patchSkipOnlineScans'", ex);
         }
     }
 }
