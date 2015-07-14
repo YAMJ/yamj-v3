@@ -24,28 +24,23 @@ package org.yamj.core.service.metadata.online;
 
 import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.thetvdbapi.TvDbException;
-import com.omertron.thetvdbapi.model.Actor;
-import com.omertron.thetvdbapi.model.Banners;
-import com.omertron.thetvdbapi.model.Episode;
-import com.omertron.thetvdbapi.model.Series;
+import com.omertron.thetvdbapi.model.*;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import javax.annotation.Resource;
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
 import org.springframework.stereotype.Service;
 import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.tools.web.ResponseTools;
 import org.yamj.core.tools.web.TemporaryUnavailableException;
 
-@Service("tvdbApiWrapper")
+@Service
 public class TheTVDbApiWrapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheTVDbApiWrapper.class);
@@ -54,7 +49,7 @@ public class TheTVDbApiWrapper {
     private final Lock seriesLock = new ReentrantLock(true);
     private final Lock bannersLock = new ReentrantLock(true);
 
-    @Resource(name="tvdbCache")
+    @Autowired
     private Cache tvdbCache;
     @Autowired
     private ConfigService configService;
@@ -63,23 +58,20 @@ public class TheTVDbApiWrapper {
 
     public Banners getBanners(String id) {
         String cacheKey = "banners###"+id;
-        Element cachedValue = tvdbCache.get(cacheKey);
+        Banners banners = tvdbCache.get(cacheKey, Banners.class);
         
-        Banners banners = null;
-        if (cachedValue == null) {
+        if (banners == null) {
             bannersLock.lock();
             try {
                 // retrieve banners from TheTVDb
                 banners = tvdbApi.getBanners(id);
-                tvdbCache.putIfAbsent(new Element(cacheKey, banners));
+                tvdbCache.putIfAbsent(cacheKey, banners);
             } catch (TvDbException ex) {
                 LOG.error("Failed to get banners using TVDb ID {}: {}", id, ex.getMessage());
                 LOG.trace("TheTVDb error" , ex);
             } finally {
                 bannersLock.unlock();
             }
-        } else {
-            banners = (Banners)cachedValue.getObjectValue();
         }
         
         return (banners == null ? new Banners() : banners);
@@ -103,10 +95,9 @@ public class TheTVDbApiWrapper {
      */
     public Series getSeries(String id, boolean throwTempError) {
         String cacheKey = "series###"+id;
-        Element cachedValue = tvdbCache.get(cacheKey);
+        Series series = tvdbCache.get(cacheKey, Series.class);
 
-        Series series;
-        if (cachedValue == null) {
+        if (series == null) {
             seriesLock.lock();
             try {
                 String defaultLanguage = configService.getProperty("thetvdb.language", "en");
@@ -122,7 +113,7 @@ public class TheTVDbApiWrapper {
                     series = new Series();
                 }
 
-                tvdbCache.putIfAbsent(new Element(cacheKey, series));
+                tvdbCache.putIfAbsent(cacheKey, series);
             } catch (TvDbException ex) {
                 if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                     throw new TemporaryUnavailableException("TheTVDb service temporary not available: " + ex.getResponseCode(), ex);
@@ -133,8 +124,6 @@ public class TheTVDbApiWrapper {
             } finally {
                 seriesLock.unlock();
             }
-        } else {
-            series = (Series)cachedValue.getObjectValue();
         }
         
         return series;
@@ -183,7 +172,7 @@ public class TheTVDbApiWrapper {
                         tvdbId = series.getId();
                         Series gotSeries = tvdbApi.getSeries(tvdbId, usedDefault ? defaultLanguage : altLanguage);
                         if (gotSeries != null) {
-                            tvdbCache.put(new Element("series###"+tvdbId, gotSeries));
+                            tvdbCache.put("series###"+tvdbId, gotSeries);
                         }
                     }
                 }
@@ -213,13 +202,11 @@ public class TheTVDbApiWrapper {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     public List<Episode> getSeasonEpisodes(String id, int season) {
         String cacheKey = ("episodes###" + id + "###" + season);
-        Element cachedValue = tvdbCache.get(cacheKey);
+        List<Episode> episodeList = tvdbCache.get(cacheKey, List.class);
         
-        List<Episode> episodeList = null;
-        if (cachedValue == null) {
+        if (episodeList == null) {
             try {
                 String defaultLanguage = configService.getProperty("thetvdb.language", "en");
                 String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
@@ -231,15 +218,14 @@ public class TheTVDbApiWrapper {
                 }
                 
                 if (CollectionUtils.isNotEmpty(episodeList)) {
-                    this.tvdbCache.put(new Element(cacheKey, episodeList));
+                    this.tvdbCache.put(cacheKey, episodeList);
                 }
             } catch (TvDbException ex) {
                 LOG.error("Failed to get episodes for TVDb ID {} and season {}: {}", id, season, ex.getMessage());
                 LOG.trace("TheTVDb error" , ex);
             }
-        } else {
-            episodeList = (List<Episode>)cachedValue.getObjectValue();
         }
+        
         return episodeList;
     }
 }

@@ -27,17 +27,16 @@ import com.moviejukebox.allocine.AllocineException;
 import com.moviejukebox.allocine.model.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import javax.annotation.Resource;
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
 import org.springframework.stereotype.Service;
 import org.yamj.core.tools.web.ResponseTools;
 import org.yamj.core.tools.web.TemporaryUnavailableException;
 
-@Service("allocineApiWrapper")
+@Service
 public class AllocineApiWrapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(AllocineApiWrapper.class);
@@ -46,23 +45,22 @@ public class AllocineApiWrapper {
     private final Lock searchSeriesLock = new ReentrantLock(true);
     private final Lock searchPersonLock = new ReentrantLock(true);
     
-    @Resource(name="allocineSearchCache")
+    @Autowired
     private Cache allocineSearchCache;
-    @Resource(name="allocineInfoCache")
+    @Autowired
     private Cache allocineInfoCache;
-    @Resource(name="allocineApi")
+    @Autowired
     private AllocineApi allocineApi;
 
     public String getAllocineMovieId(String title, int year, boolean throwTempError) {
         final String cacheKey = "movie###" + title;
-        final Element cacheValue = allocineSearchCache.get(cacheKey);
+        Search search = allocineSearchCache.get(cacheKey, Search.class);
         
-        Search search;
-        if (cacheValue == null) {
+        if (search == null) {
             searchMoviesLock.lock();
             try {
                 search = allocineApi.searchMovies(title);
-                allocineSearchCache.putIfAbsent(new Element(cacheKey, search));
+                allocineSearchCache.putIfAbsent(cacheKey, search);
             } catch (AllocineException ex) {
                 if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                     throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
@@ -73,8 +71,6 @@ public class AllocineApiWrapper {
             } finally {
                 searchMoviesLock.unlock();
             }
-        } else {
-            search = (Search)cacheValue.getObjectValue();
         }
         
         if (!search.isValid()) {
@@ -110,14 +106,13 @@ public class AllocineApiWrapper {
 
     public String getAllocineSeriesId(String title, int year, boolean throwTempError) {
         final String cacheKey = "series###" + title;
-        final Element cacheValue = allocineSearchCache.get(cacheKey);
+        Search search = allocineSearchCache.get(cacheKey, Search.class);
         
-        Search search;
-        if (cacheValue == null) {
+        if (search == null) {
             searchSeriesLock.lock();
             try {
                 search = allocineApi.searchTvSeries(title);
-                allocineSearchCache.putIfAbsent(new Element(cacheKey, search));
+                allocineSearchCache.putIfAbsent(cacheKey, search);
             } catch (AllocineException ex) {
                 if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                     throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
@@ -128,8 +123,6 @@ public class AllocineApiWrapper {
             } finally {
               searchSeriesLock.unlock();
             }
-        } else {
-            search = (Search)cacheValue.getObjectValue();
         }      
 
         if (!search.isValid()) {
@@ -169,14 +162,13 @@ public class AllocineApiWrapper {
 
     public String getAllocinePersonId(String name, boolean throwTempError) {
         final String cacheKey = "person###" + name;
-        final Element cacheValue = allocineSearchCache.get(cacheKey);
+        Search search = allocineSearchCache.get(cacheKey, Search.class);
         
-        Search search;
-        if (cacheValue == null) {
+        if (search == null) {
             searchPersonLock.lock();
             try {
                 search = allocineApi.searchPersons(name);
-                allocineSearchCache.putIfAbsent(new Element(cacheKey, search));
+                allocineSearchCache.putIfAbsent(cacheKey, search);
             } catch (AllocineException ex) {
                 if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                     throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
@@ -187,8 +179,6 @@ public class AllocineApiWrapper {
             } finally {
                 searchPersonLock.unlock();
             }
-        } else {
-            search = (Search)cacheValue.getObjectValue();
         }          
         
         if (!search.isValid()) {
@@ -220,14 +210,13 @@ public class AllocineApiWrapper {
     }
 
     public MovieInfos getMovieInfos(String allocineId, boolean throwTempError) {
-        Element cacheValue = allocineInfoCache.get(allocineId);
-        MovieInfos movieInfos = null;
-        if (cacheValue == null) {
+        MovieInfos movieInfos = allocineInfoCache.get(allocineId, MovieInfos.class);
+        if (movieInfos == null) {
             try {
                 movieInfos = allocineApi.getMovieInfos(allocineId);
                 if (movieInfos != null && movieInfos.isValid()) {
                     // add to the cache
-                    allocineInfoCache.putIfAbsent(new Element(allocineId, movieInfos));
+                    allocineInfoCache.putIfAbsent(allocineId, movieInfos);
                 }
             } catch (AllocineException ex) {
                 if (throwTempError && ResponseTools.isTemporaryError(ex)) {
@@ -236,22 +225,19 @@ public class AllocineApiWrapper {
                 LOG.error("Failed retrieving Allocine infos for movie id {}: {}", allocineId, ex.getMessage());
                 LOG.trace("Allocine error" , ex);
             }
-        } else {
-            movieInfos = (MovieInfos)cacheValue.getObjectValue(); 
         }
         
         return movieInfos;
     }
 
     public TvSeriesInfos getTvSeriesInfos(String allocineId, boolean throwTempError) {
-        Element cacheValue = allocineInfoCache.get(allocineId);
-        TvSeriesInfos tvSeriesInfos = null;
-        if (cacheValue == null) {
+        TvSeriesInfos tvSeriesInfos = allocineInfoCache.get(allocineId, TvSeriesInfos.class);
+        if (tvSeriesInfos == null) {
             try {
                 tvSeriesInfos = allocineApi.getTvSeriesInfos(allocineId);
                 if (tvSeriesInfos != null && tvSeriesInfos.isValid()) {
                     // add to the cache
-                    allocineInfoCache.putIfAbsent(new Element(allocineId, tvSeriesInfos));
+                    allocineInfoCache.putIfAbsent(allocineId, tvSeriesInfos);
                 }
             } catch (AllocineException ex) {
                 if (throwTempError && ResponseTools.isTemporaryError(ex)) {
@@ -260,8 +246,6 @@ public class AllocineApiWrapper {
                 LOG.error("Failed retrieving Allocine infos for series id {}: {}", allocineId, ex.getMessage());
                 LOG.trace("Allocine error" , ex);
             }
-        } else {
-            tvSeriesInfos = (TvSeriesInfos)cacheValue.getObjectValue(); 
         }
         return tvSeriesInfos;
     }
