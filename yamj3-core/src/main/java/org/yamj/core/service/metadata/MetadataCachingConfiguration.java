@@ -1,4 +1,4 @@
-package org.yamj.core;
+package org.yamj.core.service.metadata;
 
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.PersistenceConfiguration;
@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableCaching
-public class CachingConfiguration implements CachingConfigurer {
+public class MetadataCachingConfiguration implements CachingConfigurer {
 
     private static final String DEFAULT = "default";
     private static final String ALLOCINE_SEARCH = "allocineSearchCache";
