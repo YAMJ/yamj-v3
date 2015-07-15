@@ -112,19 +112,7 @@ public class ArtworkStorageService {
             this.artworkDao.storeAll(locatedArtworks);
         } else if (CollectionUtils.isNotEmpty(locatedArtworks)) {
             for (ArtworkLocated located : locatedArtworks) {
-                if (!artwork.getArtworkLocated().contains(located)) {
-                    // just store if not contained before
-                    artwork.getArtworkLocated().add(located);
-                    this.artworkDao.saveEntity(located);
-                } else {
-                    // find matching stored located artwork and update status if needed
-                   for (ArtworkLocated stored : artwork.getArtworkLocated()) {
-                       if (stored.equals(located) && StatusType.DELETED.equals(stored.getStatus())) {
-                           stored.setStatus(StatusType.UPDATED);
-                           this.artworkDao.updateEntity(stored);
-                       }
-                   }
-                }
+                this.artworkDao.saveArtworkLocated(artwork, located);
             }
         }
 
@@ -147,7 +135,7 @@ public class ArtworkStorageService {
         // update artwork in database
         this.artworkDao.updateEntity(artwork);
     }
-    
+        
     @Transactional(readOnly = true)
     public List<QueueDTO> getArtworkQueueForScanning(final int maxResults) {
         final StringBuilder sql = new StringBuilder();

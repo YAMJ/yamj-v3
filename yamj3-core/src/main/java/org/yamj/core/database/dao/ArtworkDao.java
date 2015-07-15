@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
@@ -153,5 +154,22 @@ public class ArtworkDao extends HibernateDao {
         criteria = criteria.createAlias("boxedSet", "bs");
         criteria.add(Restrictions.ilike("bs.name", boxedSetName.toLowerCase()));
         return criteria.list();
+    }
+
+    public void saveArtworkLocated(Artwork artwork, ArtworkLocated located) {
+        if (!artwork.getArtworkLocated().contains(located)) {
+            // just store if not contained before
+            artwork.getArtworkLocated().add(located);
+            this.saveEntity(located);
+        } else {
+            // find matching stored located artwork and update status if needed
+            for (ArtworkLocated stored : artwork.getArtworkLocated()) {
+                if (stored.equals(located) && StatusType.DELETED.equals(stored.getStatus())) {
+                    stored.setStatus(StatusType.UPDATED);
+                    this.updateEntity(stored);
+                    break;
+                }
+            }
+        }
     }
 }

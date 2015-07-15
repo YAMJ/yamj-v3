@@ -792,12 +792,8 @@ public class MetadataStorageService {
             located.setHashCode(ArtworkTools.getUrlHashCode(entry.getKey()));
             located.setPriority(5);
             located.setStatus(StatusType.NEW);
-
-            if (!artwork.getArtworkLocated().contains(located)) {
-                // not present until now
-                artworkDao.saveEntity(located);
-                artwork.getArtworkLocated().add(located);
-            }
+            
+            artworkDao.saveArtworkLocated(artwork, located);
         }
     }
 
