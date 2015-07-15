@@ -38,7 +38,7 @@
         </property>
     </bean>
 
-    <bean id="configService" class="org.yamj.core.configuration.ConfigService">
+    <bean id="configService" class="org.yamj.core.config.ConfigService">
         <property name="configDao" ref="configDao"/>
         <property name="coreProperties" ref="dynamicProperties"/>
     </bean>

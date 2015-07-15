@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.staging;
 
+import org.yamj.core.config.ConfigService;
+
 import java.io.File;
 import java.math.BigInteger;
 import java.util.Calendar;
@@ -39,7 +41,6 @@ import org.yamj.common.dto.StageDirectoryDTO;
 import org.yamj.common.dto.StageFileDTO;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.Library;
 import org.yamj.core.database.model.Series;

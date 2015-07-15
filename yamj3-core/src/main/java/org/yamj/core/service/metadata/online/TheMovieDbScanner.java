@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.core.config.ConfigServiceWrapper;
+
 import com.omertron.themoviedbapi.model.credits.CreditBasic;
 import com.omertron.themoviedbapi.model.credits.CreditMovieBasic;
 import com.omertron.themoviedbapi.model.credits.MediaCreditCast;
@@ -40,7 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.FilmParticipation;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.VideoData;

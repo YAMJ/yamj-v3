@@ -9,7 +9,7 @@ import org.yamj.common.remote.service.GitHubService;
 import org.yamj.common.remote.service.SystemInfoService;
 
 @Configuration
-public class RemoteConfiguration  {
+public class RemoteServiceConfiguration  {
 
     @Autowired
     private SystemInfoService systemInfoService;

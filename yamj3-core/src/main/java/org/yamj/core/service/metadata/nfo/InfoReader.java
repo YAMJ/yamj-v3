@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
+import org.yamj.core.config.ConfigServiceWrapper;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,7 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.*;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.file.FileTools;

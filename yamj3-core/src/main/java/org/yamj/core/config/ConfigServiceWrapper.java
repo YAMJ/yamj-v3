@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.configuration;
+package org.yamj.core.config;
 
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;

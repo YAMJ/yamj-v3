@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.artwork;
 
+import org.yamj.core.config.ConfigServiceWrapper;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.configuration.ConfigServiceWrapper;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.Person;

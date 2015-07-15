@@ -22,6 +22,8 @@
  */
 package org.yamj.core.pages;
 
+import org.yamj.core.config.ConfigService;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -41,7 +43,6 @@ import org.yamj.core.api.json.IndexController;
 import org.yamj.core.api.json.SystemInfoController;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.Skin;
-import org.yamj.core.configuration.ConfigService;
 import org.yamj.core.database.model.Configuration;
 import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
