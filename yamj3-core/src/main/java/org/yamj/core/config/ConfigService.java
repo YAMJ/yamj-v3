@@ -29,10 +29,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.stereotype.Service;
 import org.yamj.core.api.options.OptionsConfig;
 import org.yamj.core.database.dao.ConfigDao;
 import org.yamj.core.database.model.Configuration;
 
+@Service("configService")
 public class ConfigService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigService.class);
@@ -44,13 +46,9 @@ public class ConfigService {
     private ConfigDao configDao;
 
     @Required
-    public void setConfigDao(ConfigDao configDao) {
-        this.configDao = configDao;
-    }
-
-    @Required
-    public void setCoreProperties(Properties properties) {
-        for (Entry<Object, Object> entry : properties.entrySet()) {
+    @Autowired
+    public void setDynamicProperties(Properties dynamicProperties) {
+        for (Entry<Object, Object> entry : dynamicProperties.entrySet()) {
             cachedProperties.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
         }
     }
