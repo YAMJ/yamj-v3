@@ -744,7 +744,10 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
      */
     private static int parseRating(String rating) {
         StringTokenizer st = new StringTokenizer(rating, "/ ()");
-        return MetadataTools.parseRating(st.nextToken());
+        if (st.hasMoreTokens()) {
+            return MetadataTools.parseRating(st.nextToken());
+        }
+        return -1;
     }
 
     private static Set<String> parseGenres(String xml) {
@@ -913,7 +916,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                             "<a href=\"/search/title?certificates=", HTML_A_END);
                     for (String country : countries) {
                         String certificate = getPreferredValue(tags, true, country);
-                        certificationInfos.put(country, certificate);
+                        if (StringUtils.isNotBlank(certificate)) {
+                            certificationInfos.put(country, certificate);
+                        }
                     }
                 }
             }

@@ -319,9 +319,9 @@ public final class HTMLTools {
         throw new UnsupportedOperationException("Utility class");
     }
 
-    public static String decodeHtml(String source) {
-        if (null == source || 0 == source.length()) {
-            return source;
+    public static String decodeHtml(String src) {
+        if (StringUtils.isEmpty(src)) {
+            return StringUtils.EMPTY;
         }
 
         int currentIndex = 0;
@@ -330,10 +330,10 @@ public final class HTMLTools {
 
         StringBuilder result = null;
 
-        while (currentIndex <= source.length()) {
-            delimiterStartIndex = source.indexOf('&', currentIndex);
+        while (currentIndex <= src.length()) {
+            delimiterStartIndex = src.indexOf('&', currentIndex);
             if (delimiterStartIndex != -1) {
-                delimiterEndIndex = source.indexOf(';', delimiterStartIndex + 1);
+                delimiterEndIndex = src.indexOf(';', delimiterStartIndex + 1);
                 if (delimiterEndIndex != -1) {
                     // ensure that the string builder is setup correctly
                     if (null == result) {
@@ -342,11 +342,11 @@ public final class HTMLTools {
 
                     // add the text that leads up to this match
                     if (delimiterStartIndex > currentIndex) {
-                        result.append(source.substring(currentIndex, delimiterStartIndex));
+                        result.append(src.substring(currentIndex, delimiterStartIndex));
                     }
 
                     // add the decoded entity
-                    String entity = source.substring(delimiterStartIndex, delimiterEndIndex + 1);
+                    String entity = src.substring(delimiterStartIndex, delimiterEndIndex + 1);
 
                     currentIndex = delimiterEndIndex + 1;
 
@@ -385,16 +385,17 @@ public final class HTMLTools {
         }
 
         if (null == result) {
-            return source;
-        } else if (currentIndex < source.length()) {
-            result.append(source.substring(currentIndex));
-        }
+            return src;
+        } 
 
+        if (currentIndex < src.length()) {
+            result.append(src.substring(currentIndex));
+        }
         return result.toString();
     }
 
     public static String decodeUrl(String url) {
-        if (url != null && url.length() != 0) {
+        if (StringUtils.isNotBlank(url)) {
             try {
                 return URLDecoder.decode(url, "UTF-8");
             } catch (UnsupportedEncodingException ignored) {
@@ -407,7 +408,7 @@ public final class HTMLTools {
     public static String encodeUrl(String url) {
         String returnUrl = url;
 
-        if (url != null && url.length() != 0) {
+        if (StringUtils.isNotBlank(url)) {
             try {
                 returnUrl = URLEncoder.encode(url, "UTF-8");
                 returnUrl = returnUrl.replace("+", "%20"); // why does URLEncoder do that??!!
@@ -419,7 +420,7 @@ public final class HTMLTools {
     }
 
     public static String encodeUrlPath(String url) {
-        if (url != null && url.length() != 0) {
+        if (StringUtils.isNotBlank(url)) {
             int slash = url.lastIndexOf('/');
             String parentPart = "";
             if (slash != -1) {
@@ -432,7 +433,7 @@ public final class HTMLTools {
 
     public static List<String> extractHtmlTags(String src, String sectionStart, String sectionEnd, String startTag, String endTag) {
         ArrayList<String> tags = new ArrayList<>();
-        if (src == null) {
+        if (StringUtils.isEmpty(src)) {
             return tags;
         }
 
@@ -489,7 +490,7 @@ public final class HTMLTools {
     }
 
     public static String extractTag(String src, String findStr, int skip, String separator, boolean checkDirty) {
-        if (src == null) {
+        if (StringUtils.isEmpty(src)) {
             return StringUtils.EMPTY;
         }
 
@@ -514,7 +515,7 @@ public final class HTMLTools {
     }
 
     public static String extractTag(String src, String startStr, String endStr) {
-        if (src == null) {
+        if (StringUtils.isEmpty(src)) {
             return StringUtils.EMPTY;
         }
         
@@ -550,7 +551,7 @@ public final class HTMLTools {
 
     public static List<String> extractTags(String src, String sectionStart, String sectionEnd, String startTag, String endTag, boolean forceCloseTag) {
         ArrayList<String> tags = new ArrayList<>();
-        if (src == null) {
+        if (StringUtils.isEmpty(src)) {
             return tags;
         }
 
@@ -621,7 +622,7 @@ public final class HTMLTools {
      * @return string from html text which is plain text without html tags
      */
     public static String getTextAfterElem(String src, String findStr, int skip, int fromIndex) {
-        if (src == null) {
+        if (StringUtils.isEmpty(src)) {
             return StringUtils.EMPTY;
         }
 
@@ -650,16 +651,20 @@ public final class HTMLTools {
     }
 
     public static String replaceHtmlTags(String src, String replacement) {
-        if (src == null) {
+        if (StringUtils.isEmpty(src)) {
             return StringUtils.EMPTY;
         }
 
         return src.replaceAll("\\<.*?>", replacement);
     }
 
-    public static String stripTags(String s) {
+    public static String stripTags(String src) {
+        if (StringUtils.isEmpty(src)) {
+            return StringUtils.EMPTY;
+        }
+        
         Pattern stripTagsRegex = Pattern.compile("([^\\<]*)(?:\\<[^\\>]*\\>)?");
-        Matcher m = stripTagsRegex.matcher(s);
+        Matcher m = stripTagsRegex.matcher(src);
 
         StringBuilder res = new StringBuilder();
         while (m.find()) {
