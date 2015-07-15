@@ -35,9 +35,8 @@ import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.CommonHttpClient;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.common.tools.PropertyTools;
-import org.yamj.core.tools.web.HTMLTools;
-import org.yamj.core.tools.web.ResponseTools;
-import org.yamj.core.tools.web.TemporaryUnavailableException;
+import org.yamj.core.web.HTMLTools;
+import org.yamj.core.web.ResponseTools;
 
 public class SearchEngineTools {
 

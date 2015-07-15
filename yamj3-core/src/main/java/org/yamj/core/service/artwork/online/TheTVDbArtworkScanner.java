@@ -22,12 +22,7 @@
  */
 package org.yamj.core.service.artwork.online;
 
-import org.yamj.core.config.ConfigService;
-
-import com.omertron.thetvdbapi.model.Banner;
-import com.omertron.thetvdbapi.model.BannerType;
-import com.omertron.thetvdbapi.model.Banners;
-import com.omertron.thetvdbapi.model.Episode;
+import com.omertron.thetvdbapi.model.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;

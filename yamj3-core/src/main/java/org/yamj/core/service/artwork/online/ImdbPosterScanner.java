@@ -37,8 +37,8 @@ import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.artwork.ArtworkTools.HashCodeType;
 import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.service.metadata.online.ImdbSearchEngine;
-import org.yamj.core.tools.web.PoolingHttpClient;
-import org.yamj.core.tools.web.ResponseTools;
+import org.yamj.core.web.PoolingHttpClient;
+import org.yamj.core.web.ResponseTools;
 
 @Service("imdbPosterScanner")
 public class ImdbPosterScanner implements IMoviePosterScanner {

@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.config.ConfigServiceWrapper;
-
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -35,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
@@ -42,7 +41,9 @@ import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
-import org.yamj.core.tools.web.*;
+import org.yamj.core.web.HTMLTools;
+import org.yamj.core.web.PoolingHttpClient;
+import org.yamj.core.web.ResponseTools;
 
 @Service("ofdbScanner")
 public class OfdbScanner implements IMovieScanner {

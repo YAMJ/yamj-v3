@@ -24,10 +24,7 @@ package org.yamj.core.tools.player;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -47,7 +44,7 @@ import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.tools.player.davidbox.DavidBoxPlayerPath;
 import org.yamj.core.tools.player.davidbox.DavidBoxWrapper;
-import org.yamj.core.tools.web.ResponseTools;
+import org.yamj.core.web.ResponseTools;
 
 /**
  * Functions for finding information on players

@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.config.ConfigService;
-
 import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.thetvdbapi.TvDbException;
 import com.omertron.thetvdbapi.model.*;
@@ -38,8 +36,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.stereotype.Service;
-import org.yamj.core.tools.web.ResponseTools;
-import org.yamj.core.tools.web.TemporaryUnavailableException;
+import org.yamj.core.config.ConfigService;
+import org.yamj.core.web.ResponseTools;
 
 @Service
 public class TheTVDbApiWrapper {

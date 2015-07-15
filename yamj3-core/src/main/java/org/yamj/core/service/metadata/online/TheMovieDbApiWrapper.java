@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.config.ConfigService;
-
 import com.omertron.themoviedbapi.Compare;
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
@@ -39,8 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.core.tools.web.ResponseTools;
-import org.yamj.core.tools.web.TemporaryUnavailableException;
+import org.yamj.core.config.ConfigService;
+import org.yamj.core.web.ResponseTools;
 
 @Service("tmdbApiWrapper")
 public class TheMovieDbApiWrapper {

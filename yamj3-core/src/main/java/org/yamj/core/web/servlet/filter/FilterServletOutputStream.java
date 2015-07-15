@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.tools.web.servlet.filter;
+package org.yamj.core.web.servlet.filter;
 
 import java.io.DataOutputStream;
 import java.io.IOException;

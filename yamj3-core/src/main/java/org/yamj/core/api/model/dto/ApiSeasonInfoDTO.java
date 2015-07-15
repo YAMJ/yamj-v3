@@ -22,10 +22,7 @@
  */
 package org.yamj.core.api.model.dto;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.yamj.core.database.model.type.ArtworkType;
 
 public class ApiSeasonInfoDTO extends AbstractApiDTO {

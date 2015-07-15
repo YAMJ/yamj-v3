@@ -35,8 +35,8 @@ import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
-import org.yamj.core.tools.web.PoolingHttpClient;
-import org.yamj.core.tools.web.ResponseTools;
+import org.yamj.core.web.PoolingHttpClient;
+import org.yamj.core.web.ResponseTools;
 
 @Service("yahooPosterScanner")
 public class YahooPosterScanner implements IMoviePosterScanner {

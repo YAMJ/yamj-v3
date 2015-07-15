@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.tasks;
 
-import org.yamj.core.config.ConfigService;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.dto.DeletionDTO;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.service.ScanningScheduler;

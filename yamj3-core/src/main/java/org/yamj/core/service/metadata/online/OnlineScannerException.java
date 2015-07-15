@@ -20,17 +20,19 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.tools.web;
+package org.yamj.core.service.metadata.online;
 
-public class TemporaryUnavailableException extends RuntimeException {
+import java.io.IOException;
 
-    private static final long serialVersionUID = 4086445472382776571L;
+public class OnlineScannerException extends IOException {
 
-    public TemporaryUnavailableException(String message) {
+    private static final long serialVersionUID = 8612946804316033116L;
+
+    public OnlineScannerException(String message) {
         super(message);
     }
 
-    public TemporaryUnavailableException(String message, Throwable cause) {
+    public OnlineScannerException(String message, Throwable cause) {
         super(message, cause);
     }
 }

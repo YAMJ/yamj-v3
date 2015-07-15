@@ -1,4 +1,4 @@
-package org.yamj.core.tools.web;
+package org.yamj.core.web;
 
 import com.moviejukebox.allocine.AllocineApi;
 import com.omertron.fanarttvapi.FanartTvApi;
@@ -54,7 +54,7 @@ public class WebConfiguration  {
     private int socketTimeout;
     
     @Value("${yamj3.http.connections.maxTotal:20}")
-    private int connectionsMaxTotal = 20;
+    private int connectionsMaxTotal;
     
     @Value("${yamj3.http.connections.maxPerRoute:1}")
     private int connectionsMaxPerRoute;

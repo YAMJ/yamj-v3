@@ -26,15 +26,9 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import javax.annotation.PostConstruct;
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
+import javax.imageio.*;
 import javax.imageio.stream.FileImageOutputStream;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -51,7 +45,7 @@ import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.api.model.Skin;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.type.ImageFormat;
-import org.yamj.core.tools.web.PoolingHttpClient;
+import org.yamj.core.web.PoolingHttpClient;
 
 @Service("fileStorageService")
 public class FileStorageService {

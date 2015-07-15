@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.config.ConfigService;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;

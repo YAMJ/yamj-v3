@@ -22,8 +22,6 @@
  */
 package org.yamj.core.database.service;
 
-import org.yamj.core.config.ConfigService;
-
 import java.io.Serializable;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +37,7 @@ import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
+import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.dao.*;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;

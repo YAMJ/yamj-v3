@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.tools.web;
+package org.yamj.core.web;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;

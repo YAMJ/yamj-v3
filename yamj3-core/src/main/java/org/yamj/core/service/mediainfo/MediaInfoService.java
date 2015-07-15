@@ -22,12 +22,7 @@
  */
 package org.yamj.core.service.mediainfo;
 
-import org.yamj.core.service.file.FileTools;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,12 +37,10 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.tools.DateTimeTools;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.AudioCodec;
-import org.yamj.core.database.model.MediaFile;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.Subtitle;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.MediaStorageService;
+import org.yamj.core.service.file.FileTools;
 import org.yamj.core.tools.AspectRatioTools;
 import org.yamj.core.tools.Constants;
 import org.yamj.core.tools.LanguageTools;

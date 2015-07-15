@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.staging;
 
-import org.yamj.core.config.ConfigService;
-
 import java.io.File;
 import java.math.BigInteger;
 import java.util.Calendar;
@@ -41,12 +39,9 @@ import org.yamj.common.dto.StageDirectoryDTO;
 import org.yamj.common.dto.StageFileDTO;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.dao.StagingDao;
-import org.yamj.core.database.model.Library;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.StageDirectory;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.mediaimport.FilenameScanner;

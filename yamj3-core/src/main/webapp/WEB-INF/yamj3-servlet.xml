@@ -43,8 +43,6 @@
         <property name="coreProperties" ref="dynamicProperties"/>
     </bean>
 
-    <import resource="spring/database.xml"/>
-
     <!-- Forwards requests to the "/" resource to the "home" view -->
     <mvc:view-controller path="/" view-name="index"/>
 

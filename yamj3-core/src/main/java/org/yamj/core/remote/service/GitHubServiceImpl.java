@@ -37,8 +37,8 @@ import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.common.remote.service.GitHubService;
 import org.yamj.common.tools.ClassTools;
 import org.yamj.common.tools.DateTimeTools;
-import org.yamj.core.tools.web.PoolingHttpClient;
-import org.yamj.core.tools.web.ResponseTools;
+import org.yamj.core.web.PoolingHttpClient;
+import org.yamj.core.web.ResponseTools;
 
 /**
  * Calls GitHub to determine the last code update

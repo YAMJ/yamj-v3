@@ -24,10 +24,7 @@ package org.yamj.core.service.metadata.nfo;
 
 import java.util.Date;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.builder.*;
 
 /**
  * Class to hold the episode information scraped from the XBMC style TV Episode

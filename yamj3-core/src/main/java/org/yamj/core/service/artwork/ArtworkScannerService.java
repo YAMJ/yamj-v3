@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.artwork;
 
-import org.yamj.core.config.ConfigServiceWrapper;
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,22 +31,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.config.ConfigServiceWrapper;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.ArtworkLocatorService;
 import org.yamj.core.database.service.ArtworkStorageService;
-import org.yamj.core.service.artwork.online.IMovieFanartScanner;
-import org.yamj.core.service.artwork.online.IMoviePosterScanner;
-import org.yamj.core.service.artwork.online.IPhotoScanner;
-import org.yamj.core.service.artwork.online.ITvShowBannerScanner;
-import org.yamj.core.service.artwork.online.ITvShowFanartScanner;
-import org.yamj.core.service.artwork.online.ITvShowPosterScanner;
-import org.yamj.core.service.artwork.online.ITvShowVideoImageScanner;
+import org.yamj.core.service.artwork.online.*;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 import org.yamj.core.service.metadata.online.TheTVDbScanner;

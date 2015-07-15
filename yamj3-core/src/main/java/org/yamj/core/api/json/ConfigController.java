@@ -22,8 +22,6 @@
  */
 package org.yamj.core.api.json;
 
-import org.yamj.core.config.ConfigService;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.options.OptionsConfig;
 import org.yamj.core.api.wrapper.ApiWrapperList;
+import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.Configuration;
 
 @Controller
