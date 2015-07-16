@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigService;
+import org.yamj.core.database.model.BoxedSet;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
@@ -47,7 +48,8 @@ import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 
 @Service("tmdbArtworkScanner")
 public class TheMovieDbArtworkScanner implements
-        IMoviePosterScanner, IMovieFanartScanner, IPhotoScanner {
+        IMoviePosterScanner, IMovieFanartScanner, IPhotoScanner,
+        IBoxedSetPosterScanner, IBoxedSetFanartScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbArtworkScanner.class);
     private static final String DEFAULT_POSTER_SIZE = "original";
@@ -104,6 +106,18 @@ public class TheMovieDbArtworkScanner implements
         if (StringUtils.isNumeric(tmdbId)) {
             return getFilteredArtwork(tmdbId, LANGUAGE_NONE, ArtworkType.PROFILE, DEFAULT_PHOTO_SIZE);
         }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getFanarts(BoxedSet boxedSet) {
+        // TODO get boxed set fanart from TMDB
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getPosters(BoxedSet boxedSet) {
+        // TODO get boxed set posters from TMDB
         return Collections.emptyList();
     }
 

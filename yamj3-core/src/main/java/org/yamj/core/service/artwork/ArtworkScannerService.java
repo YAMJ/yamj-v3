@@ -55,6 +55,8 @@ public class ArtworkScannerService {
     private final HashMap<String, ITvShowBannerScanner> registeredTvShowBannerScanner = new HashMap<>();
     private final HashMap<String, ITvShowVideoImageScanner> registeredTvShowVideoImageScanner = new HashMap<>();
     private final HashMap<String, IPhotoScanner> registeredPhotoScanner = new HashMap<>();
+    private final HashMap<String, IBoxedSetPosterScanner> registeredBoxedSetPosterScanner = new HashMap<>();
+    private final HashMap<String, IBoxedSetFanartScanner> registeredBoxedSetFanartScanner = new HashMap<>();
     
     @Autowired
     private ArtworkLocatorService artworkLocatorService;
@@ -91,6 +93,14 @@ public class ArtworkScannerService {
         if (artworkScanner instanceof IPhotoScanner) {
             LOG.trace("Registered photo scanner: {}", artworkScanner.getScannerName().toLowerCase());
             registeredPhotoScanner.put(artworkScanner.getScannerName().toLowerCase(), (IPhotoScanner)artworkScanner);
+        }
+        if (artworkScanner instanceof IBoxedSetPosterScanner) {
+            LOG.trace("Registered boxed set poster scanner: {}", artworkScanner.getScannerName().toLowerCase());
+            registeredBoxedSetPosterScanner.put(artworkScanner.getScannerName().toLowerCase(), (IBoxedSetPosterScanner)artworkScanner);
+        }
+        if (artworkScanner instanceof IBoxedSetFanartScanner) {
+            LOG.trace("Registered boxed set fanart scanner: {}", artworkScanner.getScannerName().toLowerCase());
+            registeredBoxedSetFanartScanner.put(artworkScanner.getScannerName().toLowerCase(), (IBoxedSetFanartScanner)artworkScanner);
         }
     }
 
