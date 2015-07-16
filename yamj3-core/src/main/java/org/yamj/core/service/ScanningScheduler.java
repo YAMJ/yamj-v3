@@ -174,7 +174,6 @@ public class ScanningScheduler {
                 LOG.info("Metadata scanning is disabled");
             }
             watchScanMetaData.set(false);
-            // trigger scan for people data
             watchScanPeopleData.set(true);
             return;
         }
@@ -188,6 +187,7 @@ public class ScanningScheduler {
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No metadata found to scan");
             watchScanMetaData.set(false);
+            watchScanPeopleData.set(true);
             return;
         }
 
@@ -224,7 +224,6 @@ public class ScanningScheduler {
                 LOG.info("People scanning is disabled");
             }
             watchScanPeopleData.set(false);
-            // trigger scan for filmography
             watchScanFilmography.set(true);
             return;
         }
@@ -238,6 +237,7 @@ public class ScanningScheduler {
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No people data found to scan");
             watchScanPeopleData.set(false);
+            watchScanFilmography.set(true);
             return;
         }
 
@@ -274,7 +274,6 @@ public class ScanningScheduler {
                 LOG.info("Filmography scanning is disabled");
             }
             watchScanFilmography.set(false);
-            // trigger scan for artwork
             watchScanArtwork.set(true);
             return;
         }
@@ -288,6 +287,7 @@ public class ScanningScheduler {
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No filmography data found to scan");
             watchScanFilmography.set(false);
+            watchScanArtwork.set(true);
             return;
         }
 

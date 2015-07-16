@@ -47,6 +47,7 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.artwork.ArtworkTools.HashCodeType;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
+import org.yamj.core.tools.MetadataTools;
 
 @Service("tmdbArtworkScanner")
 public class TheMovieDbArtworkScanner implements
@@ -54,9 +55,7 @@ public class TheMovieDbArtworkScanner implements
         IBoxedSetPosterScanner, IBoxedSetFanartScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbArtworkScanner.class);
-    private static final String DEFAULT_POSTER_SIZE = "original";
-    private static final String DEFAULT_FANART_SIZE = "original";
-    private static final String DEFAULT_PHOTO_SIZE = "original";
+    private static final String DEFAULT_SIZE = "original";
     private static final String LANGUAGE_NONE = "";
     private static final String LANGUAGE_EN = "en";
 
@@ -88,44 +87,85 @@ public class TheMovieDbArtworkScanner implements
     public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
         String tmdbId = tmdbScanner.getMovieId(videoData);
         String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
-        return getFilteredArtwork(tmdbId, defaultLanguage, MetaDataType.MOVIE, ArtworkType.POSTER, DEFAULT_POSTER_SIZE);
+        return getFilteredArtwork(tmdbId, defaultLanguage, MetaDataType.MOVIE, ArtworkType.POSTER, DEFAULT_SIZE);
     }
 
     @Override
     public List<ArtworkDetailDTO> getFanarts(VideoData videoData) {
         String tmdbId = tmdbScanner.getMovieId(videoData);
         String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
-        return getFilteredArtwork(tmdbId, defaultLanguage, MetaDataType.MOVIE, ArtworkType.BACKDROP, DEFAULT_FANART_SIZE);
+        return getFilteredArtwork(tmdbId, defaultLanguage, MetaDataType.MOVIE, ArtworkType.BACKDROP, DEFAULT_SIZE);
     }
 
     @Override
     public List<ArtworkDetailDTO> getPhotos(Person person) {
         String tmdbId = tmdbScanner.getPersonId(person);
-        return getFilteredArtwork(tmdbId, LANGUAGE_NONE, MetaDataType.PERSON, ArtworkType.PROFILE, DEFAULT_PHOTO_SIZE);
+        return getFilteredArtwork(tmdbId, LANGUAGE_NONE, MetaDataType.PERSON, ArtworkType.PROFILE, DEFAULT_SIZE);
     }
 
     @Override
     public List<ArtworkDetailDTO> getPosters(BoxedSet boxedSet) {
         String tmdbId = boxedSet.getSourceDbId(getScannerName());
+        String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
+        
         if (StringUtils.isNumeric(tmdbId)) {
-            String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
-            return getFilteredArtwork(tmdbId, defaultLanguage, MetaDataType.BOXSET, ArtworkType.POSTER, DEFAULT_POSTER_SIZE);
+            return getFilteredArtwork(tmdbId, defaultLanguage, MetaDataType.BOXSET, ArtworkType.POSTER, DEFAULT_SIZE);
         }
-        // TODO get boxed set by checking movie/series
+        
+        com.omertron.themoviedbapi.model.collection.Collection collection = findCollection(boxedSet, defaultLanguage);
+        if (collection != null) {
+            boxedSet.setSourceDbId(getScannerName(), String.valueOf(collection.getId()));
+            // TODO rename collection?
+            return this.getFilteredArtwork(collection.getId(), defaultLanguage, MetaDataType.BOXSET, ArtworkType.POSTER, DEFAULT_SIZE);
+        }
+        
         return Collections.emptyList();
     }
 
     @Override
     public List<ArtworkDetailDTO> getFanarts(BoxedSet boxedSet) {
         String tmdbId = boxedSet.getSourceDbId(getScannerName());
+        String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
+        
         if (StringUtils.isNumeric(tmdbId)) {
-            String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
-            return getFilteredArtwork(tmdbId, defaultLanguage, MetaDataType.BOXSET, ArtworkType.BACKDROP, DEFAULT_POSTER_SIZE);
+            return getFilteredArtwork(tmdbId, defaultLanguage, MetaDataType.BOXSET, ArtworkType.BACKDROP, DEFAULT_SIZE);
         }
-        // TODO get boxed set by checking movie/series
+        
+        com.omertron.themoviedbapi.model.collection.Collection collection = findCollection(boxedSet, defaultLanguage);
+        if (collection != null) {
+            boxedSet.setSourceDbId(getScannerName(), String.valueOf(collection.getId()));
+            // TODO rename collection?
+            return this.getFilteredArtwork(collection.getId(), defaultLanguage, MetaDataType.BOXSET, ArtworkType.BACKDROP, DEFAULT_SIZE);
+        }
+        
         return Collections.emptyList();
     }
 
+    public com.omertron.themoviedbapi.model.collection.Collection findCollection(BoxedSet boxedSet, String language) {
+        try {
+            ResultList<com.omertron.themoviedbapi.model.collection.Collection> resultList = tmdbApi.searchCollection(boxedSet.getName(), 0, language);
+            if (resultList.isEmpty() && !StringUtils.equalsIgnoreCase(language, LANGUAGE_EN)) {
+                resultList = tmdbApi.searchCollection(boxedSet.getName(), 0, LANGUAGE_EN);
+            }
+
+            for (com.omertron.themoviedbapi.model.collection.Collection collection : resultList.getResults()) {
+                // 1. check name
+                String boxedSetName = MetadataTools.cleanIdentifier(boxedSet.getName());
+                String collectionName = MetadataTools.cleanIdentifier(collection.getName());
+                if (StringUtils.equalsIgnoreCase(boxedSetName, collectionName)) {
+                    // found matching collection
+                    return collection;
+                }
+
+                
+                // 2. TODO find matching collection based on the collection members (not supported by TMDbApi until now)
+            }
+        } catch (MovieDbException ex) {
+            LOG.error("Failed retrieving collection for boxed set: {}", boxedSet.getName());
+            LOG.warn("TheMovieDb error", ex);
+        }
+        return null;
+    }
 
     /**
      * Get a list of the artwork for a movie.
@@ -133,48 +173,66 @@ public class TheMovieDbArtworkScanner implements
      * This will get all the artwork for a specified language and the blank
      * languages as well
      *
-     * @param id
+     * @param tmdbId
      * @param language
+     * @param metaDataType
      * @param artworkType
      * @param artworkSize
      * @return
      */
-    private List<ArtworkDetailDTO> getFilteredArtwork(String id, String language, MetaDataType metaDataType, ArtworkType artworkType, String artworkSize) {
+    private List<ArtworkDetailDTO> getFilteredArtwork(String tmdbId, String language, MetaDataType metaDataType, ArtworkType artworkType, String artworkSize) {
+        if (StringUtils.isNumeric(tmdbId)) {
+            return this.getFilteredArtwork(Integer.parseInt(tmdbId), language, metaDataType, artworkType, artworkSize);
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Get a list of the artwork for a movie.
+     *
+     * This will get all the artwork for a specified language and the blank
+     * languages as well
+     *
+     * @param tmdbId
+     * @param language
+     * @param metaDataType
+     * @param artworkType
+     * @param artworkSize
+     * @return
+     */
+    private List<ArtworkDetailDTO> getFilteredArtwork(int tmdbId, String language, MetaDataType metaDataType, ArtworkType artworkType, String artworkSize) {
         List<ArtworkDetailDTO> dtos = new ArrayList<>();
-        if (StringUtils.isNumeric(id)) {
-            int tmdbId = Integer.parseInt(id);
-            try {
-                ResultList<Artwork> results = getArtworksFromTMDb(tmdbId, metaDataType);
+        try {
+            ResultList<Artwork> results = getArtworksFromTMDb(tmdbId, metaDataType);
+            
+            if (results == null || results.isEmpty()) {
+                LOG.debug("Got no {} artworks from TMDb for id {}", artworkType, tmdbId);
+            } else {
+                List<Artwork> artworkList = results.getResults();
+                LOG.debug("Got {} {} artworks from TMDb for id {}", artworkList.size(), artworkType, tmdbId);
                 
-                if (results == null || results.isEmpty()) {
-                    LOG.debug("Got no {} artworks from TMDb for id {}", artworkType, tmdbId);
-                } else {
-                    List<Artwork> artworkList = results.getResults();
-                    LOG.debug("Got {} {} artworks from TMDb for id {}", artworkList.size(), artworkType, tmdbId);
-                    
+                for (Artwork artwork : artworkList) {
+                    if (artwork.getArtworkType() == artworkType
+                            && (StringUtils.isBlank(artwork.getLanguage())
+                            || StringUtils.equalsIgnoreCase(artwork.getLanguage(), language))) 
+                    {
+                        this.addArtworkDTO(dtos, artwork, artworkType, artworkSize);
+                    }
+                }
+                
+                if (dtos.isEmpty() && !StringUtils.equalsIgnoreCase(language, LANGUAGE_EN)) {
+                    // retrieve by english language
                     for (Artwork artwork : artworkList) {
-                        if (artwork.getArtworkType() == artworkType
-                                && (StringUtils.isBlank(artwork.getLanguage())
-                                || StringUtils.equalsIgnoreCase(artwork.getLanguage(), language))) 
-                        {
+                        if (artwork.getArtworkType() == artworkType && StringUtils.equalsIgnoreCase(artwork.getLanguage(), LANGUAGE_EN)) {
                             this.addArtworkDTO(dtos, artwork, artworkType, artworkSize);
                         }
                     }
-                    
-                    if (dtos.isEmpty() && !StringUtils.equalsIgnoreCase(language, LANGUAGE_EN)) {
-                        // retrieve by english language
-                        for (Artwork artwork : artworkList) {
-                            if (artwork.getArtworkType() == artworkType && StringUtils.equalsIgnoreCase(artwork.getLanguage(), LANGUAGE_EN)) {
-                                this.addArtworkDTO(dtos, artwork, artworkType, artworkSize);
-                            }
-                        }
-                    }
-                    LOG.debug("Found {} {} artworks for TMDb id {} and language '{}'", dtos.size(), artworkType, tmdbId, language);
                 }
-            } catch (MovieDbException ex) {
-                LOG.error("Failed retrieving {} artworks for movie id {}: {}", artworkType, tmdbId, ex.getMessage());
-                LOG.warn("TheMovieDb error", ex);
+                LOG.debug("Found {} {} artworks for TMDb id {} and language '{}'", dtos.size(), artworkType, tmdbId, language);
             }
+        } catch (MovieDbException ex) {
+            LOG.error("Failed retrieving {} artworks for movie id {}: {}", artworkType, tmdbId, ex.getMessage());
+            LOG.warn("TheMovieDb error", ex);
         }
         return dtos;
     }

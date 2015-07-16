@@ -62,7 +62,7 @@ public class ArtworkProcessScheduler {
     @Async
     @Scheduled(initialDelay = 6000, fixedDelay = 1000)
     public synchronized void runProcess() {
-        if (watchProcess.getAndSet(false)) processArtwork();
+        if (watchProcess.get()) processArtwork();
     }
     
     private void processArtwork() {
@@ -72,6 +72,7 @@ public class ArtworkProcessScheduler {
                 messageDisabled = Boolean.TRUE;
                 LOG.info("Artwork processing is disabled");
             }
+            watchProcess.set(false);
             return;
         }
         messageDisabled = Boolean.FALSE;
@@ -80,6 +81,7 @@ public class ArtworkProcessScheduler {
         List<QueueDTO> queueElements = artworkStorageService.getArtworLocatedQueue(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No artwork found to process");
+            watchProcess.set(false);
             return;
         }
 
