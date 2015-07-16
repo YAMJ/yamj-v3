@@ -340,6 +340,7 @@ public class Person extends AbstractScannable {
 
     @Override
     public boolean isSkippedScan(String sourceDb) {
+        // no skipping of scans right now
         return false;
     }
 

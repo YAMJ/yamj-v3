@@ -40,6 +40,6 @@ public interface IScannable {
     Date getLastScanned();
     
     int getRetries();
-    
+
     boolean isSkippedScan(String sourceDb);
 }

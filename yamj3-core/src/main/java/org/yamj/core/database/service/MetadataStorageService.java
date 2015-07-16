@@ -762,6 +762,10 @@ public class MetadataStorageService {
     }
 
     private void updateLocatedArtwork(VideoData videoData) {
+        if (videoData.hasModifiedSource()) {
+            this.artworkDao.markLocatedArtworkAsDeleted(videoData.getArtworks(), videoData.getModifiedSources());
+        }
+        
         if (MapUtils.isNotEmpty(videoData.getPosterURLS())) {
             Artwork artwork = videoData.getArtwork(ArtworkType.POSTER);
             updateLocatedArtwork(artwork, videoData.getPosterURLS());
@@ -773,6 +777,16 @@ public class MetadataStorageService {
     }
 
     private void updateLocatedArtwork(Series series) {
+        if (series.hasModifiedSource()) {
+            this.artworkDao.markLocatedArtworkAsDeleted(series.getArtworks(), series.getModifiedSources());
+            for (Season season : series.getSeasons()) {
+                this.artworkDao.markLocatedArtworkAsDeleted(season.getArtworks(), series.getModifiedSources());
+                for (VideoData videoData : season.getVideoDatas()) {
+                    this.artworkDao.markLocatedArtworkAsDeleted(videoData.getArtworks(), series.getModifiedSources());
+                }
+            }
+        }
+        
         if (MapUtils.isNotEmpty(series.getPosterURLS())) {
             Artwork artwork = series.getArtwork(ArtworkType.POSTER);
             updateLocatedArtwork(artwork, series.getPosterURLS());
@@ -889,7 +903,7 @@ public class MetadataStorageService {
         if (videoData.hasModifiedSource()) { 
             
             // mark located artwork as deleted
-            markLocatedArtworkAsDeleted(videoData.getArtworks(), videoData.getModifiedSources());
+            this.artworkDao.markLocatedArtworkAsDeleted(videoData.getArtworks(), videoData.getModifiedSources());
 
             // clear dependencies
             videoData.getCredits().clear();
@@ -935,7 +949,7 @@ public class MetadataStorageService {
         if (season.hasModifiedSource()) { 
             
             // mark located artwork as deleted
-            markLocatedArtworkAsDeleted(season.getArtworks(), season.getModifiedSources());
+            this.artworkDao.markLocatedArtworkAsDeleted(season.getArtworks(), season.getModifiedSources());
     
             // clear source based values
             for (String source : season.getModifiedSources()) {
@@ -970,7 +984,7 @@ public class MetadataStorageService {
         if (series.hasModifiedSource()) { 
             
             // mark located artwork as deleted
-            markLocatedArtworkAsDeleted(series.getArtworks(), series.getModifiedSources());
+            this.artworkDao.markLocatedArtworkAsDeleted(series.getArtworks(), series.getModifiedSources());
 
             // clear dependencies
             series.getBoxedSets().clear();
@@ -1021,7 +1035,7 @@ public class MetadataStorageService {
         if (person.hasModifiedSource()) { 
             
             // mark located artwork as deleted
-            markLocatedArtworkAsDeleted(person.getPhoto(), person.getModifiedSources());
+            this.artworkDao.markLocatedArtworkAsDeleted(person.getPhoto(), person.getModifiedSources());
             
             // clear dependencies
             person.getFilmography().clear();
@@ -1047,23 +1061,5 @@ public class MetadataStorageService {
 
         person.setStatus(StatusType.UPDATED);
         this.commonDao.updateEntity(person);
-    }
-
-    private void markLocatedArtworkAsDeleted(List<Artwork> artworks, Set<String> sources) {
-        for (Artwork artwork : artworks) {
-            markLocatedArtworkAsDeleted(artwork, sources);
-       }
-    }
-
-    private void markLocatedArtworkAsDeleted(Artwork artwork, Set<String> sources) {
-        artwork.setStatus(StatusType.UPDATED);
-        this.commonDao.updateEntity(artwork);
-        
-        for (ArtworkLocated located : artwork.getArtworkLocated()) {
-            if (located.getUrl() != null && sources.contains(located.getSource())) {
-                located.setStatus(StatusType.DELETED);
-                this.commonDao.updateEntity(located);
-            }
-        }
     }
 }

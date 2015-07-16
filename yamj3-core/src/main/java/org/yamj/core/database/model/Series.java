@@ -256,6 +256,12 @@ public class Series extends AbstractMetadata {
         this.overrideFlags = overrideFlags;
     }
 
+    public boolean isAllScansSkipped() {
+        if ("all".equalsIgnoreCase(getSkipScanNfo())) return true;
+        if ("all".equalsIgnoreCase(getSkipScanApi())) return true;
+        return false;
+    }
+
     @Override
     public boolean isSkippedScan(String sourceDb) {
         if (getSkipScanNfo() == null && getSkipScanApi() == null) return false;

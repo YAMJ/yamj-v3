@@ -78,8 +78,19 @@ public class NfoScannerService {
             for (Entry<String,String> entry : infoDTO.getIds().entrySet()) {
                 videoData.setSourceDbId(entry.getKey(), entry.getValue());
             }
-            // reset skipped cans
+            
+            
+            // add skipped scans to modified sources if they are not skipped before NFO reading
+            if (!videoData.isAllScansSkipped()) {
+                for (String skippedSourceDb : infoDTO.getSkippedScans()) {
+                    if (!"all".equalsIgnoreCase(skippedSourceDb) && !videoData.isSkippedScan(skippedSourceDb)) {
+                        videoData.addModifiedSource(skippedSourceDb);
+                    }
+                }
+            }
+            // reset skipped scans
             videoData.setSkippendScansNfo(infoDTO.getSkippedScans());
+            
             // set top 250
             videoData.setTopRank(infoDTO.getTop250());
             // set rating
@@ -198,13 +209,28 @@ public class NfoScannerService {
         }
 
         if (infoDTO.isChanged()) {
-
             // set series IDs
             for (Entry<String,String> entry : infoDTO.getIds().entrySet()) {
                 series.setSourceDbId(entry.getKey(), entry.getValue());
             }
-            // reset skipped cans
+            
+            // add skipped scans to modified sources if they are not skipped before NFO reading
+            if (!series.isAllScansSkipped()) {
+                for (String skippedSourceDb : infoDTO.getSkippedScans()) {
+                    if (!"all".equalsIgnoreCase(skippedSourceDb) && !series.isSkippedScan(skippedSourceDb)) {
+                        series.addModifiedSource(skippedSourceDb);
+                        for (Season season : series.getSeasons()) {
+                            season.addModifiedSource(skippedSourceDb);
+                            for (VideoData videoData : season.getVideoDatas()) {
+                                videoData.addModifiedSource(skippedSourceDb);
+                            }
+                        }
+                    }
+                }
+            }
+            // reset skipped scans
             series.setSkippendScansNfo(infoDTO.getSkippedScans());
+            
             // set last scan date
             series.setLastScanned(new Date(System.currentTimeMillis()));
             // set sort title

@@ -113,9 +113,11 @@ public abstract class AbstractScannable extends AbstractAuditable
 
     // TRANSIENT METHODS
     
-    protected final void addModifiedSource(String source) {
-        if (modifiedSources == null) modifiedSources = new HashSet<>(0);
-        modifiedSources.add(source);
+    public final void addModifiedSource(String source) {
+        if (!"all".equalsIgnoreCase(source)) {
+            if (modifiedSources == null) modifiedSources = new HashSet<>(0);
+            modifiedSources.add(source);
+        }
     }
 
     public final void addModifiedSources(Set<String> sources) {
