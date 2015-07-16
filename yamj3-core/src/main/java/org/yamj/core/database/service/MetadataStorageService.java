@@ -210,7 +210,7 @@ public class MetadataStorageService {
             // store boxed sets
             for (BoxedSetDTO boxedSetDTO : videoData.getBoxedSetDTOS()) {
                 try {
-                    this.commonDao.storeBoxedSet(boxedSetDTO);
+                    this.commonDao.storeNewBoxedSet(boxedSetDTO);
                 } catch (Exception ex) {
                     LOG.error("Failed to store boxed set '{}', error: {}", boxedSetDTO.getName(), ex.getMessage());
                     LOG.trace("Storage error", ex);
@@ -222,7 +222,7 @@ public class MetadataStorageService {
             // store award events
             for (AwardDTO awardDTO : videoData.getAwardDTOS()) {
                 try {
-                    this.commonDao.storeNewAward(awardDTO.getEvent(), awardDTO.getCategory(), awardDTO.getSource());
+                    this.commonDao.storeNewAward(awardDTO);
                 } catch (Exception ex) {
                     LOG.error("Failed to store award '{}'-'{}', error: {}", awardDTO.getEvent(), awardDTO.getCategory(), ex.getMessage());
                     LOG.trace("Storage error", ex);
@@ -292,7 +292,7 @@ public class MetadataStorageService {
             // store boxed sets
             for (BoxedSetDTO boxedSetDTO : series.getBoxedSetDTOS()) {
                 try {
-                    this.commonDao.storeBoxedSet(boxedSetDTO);
+                    this.commonDao.storeNewBoxedSet(boxedSetDTO);
                 } catch (Exception ex) {
                     LOG.error("Failed to store boxed set '{}', error: {}", boxedSetDTO.getName(), ex.getMessage());
                     LOG.trace("Storage error", ex);
@@ -304,7 +304,7 @@ public class MetadataStorageService {
           // store award events
           for (AwardDTO awardDTO : series.getAwardDTOS()) {
               try {
-                  this.commonDao.storeNewAward(awardDTO.getEvent(), awardDTO.getCategory(), awardDTO.getSource());
+                  this.commonDao.storeNewAward(awardDTO);
               } catch (Exception ex) {
                   LOG.error("Failed to store award '{}'-'{}', error: {}", awardDTO.getEvent(), awardDTO.getCategory(), ex.getMessage());
                   LOG.trace("Storage error", ex);
@@ -380,7 +380,7 @@ public class MetadataStorageService {
         person.getFilmography().addAll(person.getNewFilmography());
     }
 
-    @Transactional
+    @Transactional(timeout=120)
     public void updateScannedMetaData(VideoData videoData) {
         // replace temporary done
         if (StatusType.TEMP_DONE.equals(videoData.getStatus())) {
@@ -416,7 +416,7 @@ public class MetadataStorageService {
         updateLocatedArtwork(videoData);
     }
 
-    @Transactional
+    @Transactional(timeout=120)
     public void updateScannedMetaData(Series series) {
         // update entity
         series.setLastScanned(new Date(System.currentTimeMillis()));
@@ -624,7 +624,7 @@ public class MetadataStorageService {
         List<MovieAward> deleteAwards = new ArrayList<>(videoData.getMovieAwards());
 
         for (AwardDTO dto : videoData.getAwardDTOS()) {
-            Award award = this.commonDao.getAward(dto.getEvent(), dto.getCategory(), dto.getSource());
+            Award award = this.commonDao.getAward(dto);
             if (award != null) {
                 MovieAward movieAward = new MovieAward(videoData, award, dto.getYear());
                 movieAward.setWon(dto.isWon());
@@ -658,7 +658,7 @@ public class MetadataStorageService {
         List<SeriesAward> deleteAwards = new ArrayList<>(series.getSeriesAwards());
 
         for (AwardDTO dto : series.getAwardDTOS()) {
-            Award award = this.commonDao.getAward(dto.getEvent(), dto.getCategory(), dto.getSource());
+            Award award = this.commonDao.getAward(dto);
             if (award != null) {
                 SeriesAward seriesAward = new SeriesAward(series, award, dto.getYear());
                 seriesAward.setWon(dto.isWon());
@@ -963,11 +963,18 @@ public class MetadataStorageService {
             // clear dependencies
             videoData.getCredits().clear();
             videoData.getBoxedSets().clear();
-            videoData.getMovieAwards().clear();
             videoData.getCertifications().clear();
 
             // clear source based values
             for (String source : videoData.getModifiedSources()) {
+                
+                Iterator<MovieAward> awardIter = videoData.getMovieAwards().iterator();
+                while (awardIter.hasNext()) {
+                    MovieAward award = awardIter.next();
+                    if (source.equals(award.getMovieAwardPK().getAward().getSourceDb())) {
+                        awardIter.remove();
+                    }
+                }
                 
                 if (source.equals(videoData.getOverrideSource(OverrideFlag.GENRES))) {
                     videoData.getGenres().clear();
@@ -1043,11 +1050,18 @@ public class MetadataStorageService {
 
             // clear dependencies
             series.getBoxedSets().clear();
-            series.getSeriesAwards().clear();
             series.getCertifications().clear();
 
             // clear source based values
             for (String source : series.getModifiedSources()) {
+                
+                Iterator<SeriesAward> awardIter = series.getSeriesAwards().iterator();
+                while (awardIter.hasNext()) {
+                    SeriesAward award = awardIter.next();
+                    if (source.equals(award.getSeriesAwardPK().getAward().getSourceDb())) {
+                        awardIter.remove();
+                    }
+                }
                 
                 if (source.equals(series.getOverrideSource(OverrideFlag.GENRES))) {
                     series.getGenres().clear();

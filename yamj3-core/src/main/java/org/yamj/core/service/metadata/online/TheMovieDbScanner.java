@@ -239,7 +239,6 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         // store collection as boxed set
         com.omertron.themoviedbapi.model.collection.Collection collection = movieDb.getBelongsToCollection();
         if (collection != null) {
-            System.err.println("COLLECTION: " + collection.getName());
             videoData.addBoxedSetDTO(SCANNER_ID, collection.getName(), -1, String.valueOf(collection.getId()));
         }
         

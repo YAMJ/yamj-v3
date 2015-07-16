@@ -42,6 +42,7 @@ import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.award.Award;
+import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
@@ -348,7 +349,7 @@ public class CommonDao extends HibernateDao {
         return getByNaturalIdCaseInsensitive(BoxedSet.class, "name", name);
     }
 
-    public synchronized void storeBoxedSet(BoxedSetDTO boxedSetDTO) {
+    public synchronized void storeNewBoxedSet(BoxedSetDTO boxedSetDTO) {
         BoxedSet boxedSet = this.getBoxedSet(boxedSetDTO.getName());
         if (boxedSet == null) {
             // create new boxed set
@@ -481,20 +482,20 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiRatingDTO.class, sqlScalars, wrapper);
     }
 
-    public Award getAward(String event, String category, String source) {
+    public Award getAward(AwardDTO awardDTO) {
         return (Award) currentSession()
                 .byNaturalId(Award.class)
-                .using("event", event)
-                .using("category", category)
-                .using("sourceDb", source)
+                .using("event", awardDTO.getEvent())
+                .using("category", awardDTO.getCategory())
+                .using("sourceDb", awardDTO.getSource())
                 .load();
     }
 
-    public synchronized void storeNewAward(String event, String category, String source) {
-        Award award = this.getAward(event, category, source);
+    public synchronized void storeNewAward(AwardDTO awardDTO) {
+        Award award = this.getAward(awardDTO);
         if (award == null) {
             // create new award event
-            award = new Award(event, category, source);
+            award = new Award(awardDTO.getEvent(), awardDTO.getCategory(), awardDTO.getSource());
             this.saveEntity(award);
         }
     }

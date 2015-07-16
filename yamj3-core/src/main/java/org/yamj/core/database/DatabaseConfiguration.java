@@ -154,7 +154,7 @@ public class DatabaseConfiguration  {
         props.put("hibernate.show_sql", showSql);
         props.put("hibernate.generate_statistics", generateStatistics);
         props.put("hibernate.hbm2ddl.auto", hbm2ddlAuto);
-        props.put("hibernate.connection.isolation", 4);
+        props.put("hibernate.connection.isolation", TRANSACTION_READ_COMMITTED);
         props.put("hibernate.use_sql_comments", true);
         props.put("hibernate.cache.use_query_cache", false);
         props.put("hibernate.cache.use_second_level_cache", false);
