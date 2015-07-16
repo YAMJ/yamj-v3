@@ -106,7 +106,9 @@ public class ConfigServiceWrapper {
 
         if (ArtworkType.POSTER == artwork.getArtworkType() || ArtworkType.FANART == artwork.getArtworkType()) {
             sb.append(".");
-            if (artwork.getVideoData() != null) {
+            if (artwork.getBoxedSet() != null) {
+                sb.append("boxset");
+            } else if (artwork.getVideoData() != null) {
                 sb.append("movie");
             } else if (artwork.getSeason() != null) {
                 sb.append("tvshow.season");

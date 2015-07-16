@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata;
+package org.yamj.core;
 
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.PersistenceConfiguration;
@@ -39,14 +39,15 @@ import org.springframework.context.annotation.Scope;
 
 @Configuration
 @EnableCaching
-public class MetadataCachingConfiguration implements CachingConfigurer {
+public class CachingConfiguration implements CachingConfigurer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MetadataCachingConfiguration.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CachingConfiguration.class);
 
     private static final String DEFAULT = "default";
     private static final String ALLOCINE_SEARCH = "allocineSearchCache";
     private static final String ALLOCINE_INFO = "allocineInfoCache";
     private static final String TVDB = "tvdbCache";
+    private static final String TMDB_ARTWORK = "tmdbArtworkCache";
     
     @Bean(destroyMethod="shutdown")
     public net.sf.ehcache.CacheManager ehCacheManager() {
@@ -55,7 +56,8 @@ public class MetadataCachingConfiguration implements CachingConfigurer {
                 .defaultCache(cacheConfig(DEFAULT, 1000, 600, MemoryStoreEvictionPolicy.LRU))
                 .cache(cacheConfig(ALLOCINE_SEARCH, 100, 300,  MemoryStoreEvictionPolicy.LFU))
                 .cache(cacheConfig(ALLOCINE_INFO, 400, 1800,  MemoryStoreEvictionPolicy.LRU))
-                .cache(cacheConfig(TVDB, 500, 1800,  MemoryStoreEvictionPolicy.LRU)));
+                .cache(cacheConfig(TVDB, 500, 1800,  MemoryStoreEvictionPolicy.LRU))
+                .cache(cacheConfig(TMDB_ARTWORK, 100, 1800,  MemoryStoreEvictionPolicy.LFU)));
     }
 
     @Scope
@@ -106,6 +108,11 @@ public class MetadataCachingConfiguration implements CachingConfigurer {
 
     @Bean
     public Cache tvdbCache() {
+        return cacheManager().getCache(TVDB);
+    }
+
+    @Bean
+    public Cache tmdbArtworkCache() {
         return cacheManager().getCache(TVDB);
     }
 }
