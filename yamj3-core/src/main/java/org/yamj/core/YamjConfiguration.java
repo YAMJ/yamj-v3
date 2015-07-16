@@ -40,8 +40,8 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.hibernate.HibernateAwareObjectMapper;
 
+
 @Configuration
-@EnableWebMvc
 @EnableScheduling
 @ComponentScan(basePackages = {"org.yamj.core"})
 public class YamjConfiguration extends WebMvcConfigurationSupport {
@@ -62,14 +62,13 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
     }
  
     @Override
-    public void addViewControllers(ViewControllerRegistry registry){
+    public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/").setViewName("index");
     }
 
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.add(new MappingJackson2HttpMessageConverter(new HibernateAwareObjectMapper()));
-        addDefaultHttpMessageConverters(converters);
     }
 
     @Bean
