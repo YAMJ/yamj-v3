@@ -39,6 +39,7 @@ import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.dto.AwardDTO;
+import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
@@ -177,7 +178,7 @@ public class VideoData extends AbstractMetadata {
     private final Map<String, String> certificationInfos = new HashMap<>(0);
 
     @Transient
-    private final Map<String, Integer> setInfos = new HashMap<>(0);
+    private final Set<BoxedSetDTO> boxedSetDTOS = new HashSet<>(0);
 
     @Transient
     private final Set<CreditDTO> creditDTOS = new LinkedHashSet<>(0);
@@ -669,19 +670,21 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
-    public Map<String, Integer> getSetInfos() {
-        return setInfos;
+    public Set<BoxedSetDTO> getBoxedSetDTOS() {
+        return boxedSetDTOS;
     }
 
-    public void addSetInfo(String setName, Integer ordering) {
-        if (StringUtils.isNotBlank(setName)) {
-            this.setInfos.put(setName, ordering);
-        }
+    public void addBoxedSetDTO(String source, String name) {
+        this.addBoxedSetDTO(source, name, null, null);
     }
 
-    public void addSetInfos(Map<String, Integer> setInfos) {
-        if (MapUtils.isNotEmpty(setInfos)) {
-            this.setInfos.putAll(setInfos);
+    public void addBoxedSetDTO(String source, String name, Integer ordering) {
+        this.addBoxedSetDTO(source, name, ordering, null);
+    }
+
+    public void addBoxedSetDTO(String source, String name, Integer ordering, String sourceId) {
+        if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(name)) {
+            this.boxedSetDTOS.add(new BoxedSetDTO(source, name, ordering, sourceId));
         }
     }
 

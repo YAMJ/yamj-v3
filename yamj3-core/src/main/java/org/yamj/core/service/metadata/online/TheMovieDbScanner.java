@@ -161,7 +161,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         }
 
         if (OverrideTools.checkOverwriteTagline(videoData, SCANNER_ID)) {
-            videoData.setOutline(StringUtils.trim(movieDb.getTagline()), SCANNER_ID);
+            videoData.setTagline(StringUtils.trim(movieDb.getTagline()), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
@@ -237,6 +237,13 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             videoData.addCreditDTO(credit);
         }
 
+        // store collection as boxed set
+        com.omertron.themoviedbapi.model.collection.Collection collection = movieDb.getBelongsToCollection();
+        if (collection != null) {
+            System.err.println("COLLECTION: " + collection.getName());
+            videoData.addBoxedSetDTO(SCANNER_ID, collection.getName(), -1, String.valueOf(collection.getId()));
+        }
+        
         return ScanResult.OK;
     }
 

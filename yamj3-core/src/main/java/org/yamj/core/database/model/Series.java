@@ -38,6 +38,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.AwardDTO;
+import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
@@ -134,6 +135,9 @@ public class Series extends AbstractMetadata {
 
     @Transient
     private final Map<String, String> certificationInfos = new HashMap<>(0);
+
+    @Transient
+    private final Set<BoxedSetDTO> boxedSetDTOS = new HashSet<>(0);
 
     @Transient
     private final Map<String, String> posterURLS = new HashMap<>(0);
@@ -455,6 +459,24 @@ public class Series extends AbstractMetadata {
         }
     }
 
+    public Set<BoxedSetDTO> getBoxedSetDTOS() {
+        return boxedSetDTOS;
+    }
+
+    public void addBoxedSetDTO(String source, String name) {
+        this.addBoxedSetDTO(source, name, null, null);
+    }
+
+    public void addBoxedSetDTO(String source, String name, Integer ordering) {
+        this.addBoxedSetDTO(source, name, ordering, null);
+    }
+
+    public void addBoxedSetDTO(String source, String name, Integer ordering, String sourceId) {
+        if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(name)) {
+            this.boxedSetDTOS.add(new BoxedSetDTO(source, name, ordering, sourceId));
+        }
+    }
+    
     public Map<String, String> getPosterURLS() {
         return posterURLS;
     }

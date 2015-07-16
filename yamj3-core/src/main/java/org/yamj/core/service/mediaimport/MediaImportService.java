@@ -235,7 +235,7 @@ public class MediaImportService {
             if (MapUtils.isNotEmpty(dto.getSetMap())) {
                 for (Entry<String, Integer> entry : dto.getSetMap().entrySet()) {
                     // add boxed set to video data
-                    videoData.addSetInfo(entry.getKey(), entry.getValue());
+                    videoData.addBoxedSetDTO(MEDIA_SOURCE, entry.getKey(), entry.getValue());
                 }
 
                 // store associated entities (only sets right now)
@@ -295,6 +295,19 @@ public class MediaImportService {
                             banner.setStatus(StatusType.NEW);
                             banner.setSeries(series);
                             metadataDao.saveEntity(banner);
+                        }
+
+                        // boxed set handling
+                        if (MapUtils.isNotEmpty(dto.getSetMap())) {
+                            for (Entry<String, Integer> entry : dto.getSetMap().entrySet()) {
+                                // add boxed set to video data
+                                series.addBoxedSetDTO(MEDIA_SOURCE, entry.getKey(), entry.getValue());
+                            }
+
+                            // store associated entities (only sets right now)
+                            this.metadataStorageService.storeAssociatedEntities(series);
+                            // updated boxed sets for video data
+                            this.metadataStorageService.updateBoxedSets(series);
                         }
 
                         season = new Season(seasonIdentifier);

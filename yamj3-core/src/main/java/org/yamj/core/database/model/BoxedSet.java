@@ -23,16 +23,18 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import javax.persistence.*;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "boxed_set",
         uniqueConstraints = @UniqueConstraint(name = "UIX_BOXEDSET_NATURALID", columnNames = {"name"})
 )
+@SuppressWarnings("unused")
 public class BoxedSet extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 3074855702659953694L;
@@ -43,6 +45,13 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "boxedSet")
     private List<Artwork> artworks = new ArrayList<>(0);
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @JoinTable(name = "boxed_set_ids", joinColumns = @JoinColumn(name = "boxedset_id", foreignKey = @ForeignKey(name = "FK_BOXEDSET_SOURCEIDS")))
+    @Fetch(FetchMode.SELECT)
+    @MapKeyColumn(name = "sourcedb", length = 40)
+    @Column(name = "sourcedb_id", length = 200, nullable = false)
+    private Map<String, String> sourceDbIdMap = new HashMap<>(0);
 
     // GETTER and SETTER
     public String getName() {
@@ -61,6 +70,32 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
         this.artworks = artworks;
     }
 
+    private Map<String, String> getSourceDbIdMap() {
+        return sourceDbIdMap;
+    }
+
+    private void setSourceDbIdMap(Map<String, String> sourceDbIdMap) {
+        this.sourceDbIdMap = sourceDbIdMap;
+    }
+    
+    public final String getSourceDbId(String sourceDb) {
+        return getSourceDbIdMap().get(sourceDb);
+    }
+    
+    public final boolean setSourceDbId(String sourceDb, String id) {
+        if (StringUtils.isBlank(sourceDb) || StringUtils.isBlank(id)) {
+            return false;
+        }
+        String newId = id.trim();
+        String oldId = getSourceDbIdMap().put(sourceDb, newId);
+        return !StringUtils.equals(oldId, newId);
+    }
+
+    public final boolean removeSourceDbId(String sourceDb) {
+        String removedId = getSourceDbIdMap().remove(sourceDb);
+        return (removedId != null);
+    }
+    
     // EQUALITY CHECKS
     @Override
     public int hashCode() {

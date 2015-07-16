@@ -147,7 +147,9 @@ public class NfoScannerService {
             videoData.setCertificationInfos(infoDTO.getCertificationInfos());
 
             // add boxed sets
-            videoData.addSetInfos(infoDTO.getSetInfos());
+            for (Entry<String, Integer> entry : infoDTO.getSetInfos().entrySet()) {
+                videoData.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue());
+            }
 
             // add credit DTOs for update in database
             videoData.addCreditDTOS(infoDTO.getCredits());
@@ -258,6 +260,11 @@ public class NfoScannerService {
 
             // add certifications
             series.setCertificationInfos(infoDTO.getCertificationInfos());
+            
+            // add boxed sets
+            for (Entry<String, Integer> entry : infoDTO.getSetInfos().entrySet()) {
+                series.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue());
+            }
             
             for (Season season : series.getSeasons()) {
                 // remove override source for NFO

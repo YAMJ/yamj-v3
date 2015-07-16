@@ -42,6 +42,7 @@ import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.award.Award;
+import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
 
@@ -347,12 +348,15 @@ public class CommonDao extends HibernateDao {
         return getByNaturalIdCaseInsensitive(BoxedSet.class, "name", name);
     }
 
-    public synchronized void storeNewBoxedSet(String name) {
-        BoxedSet boxedSet = this.getBoxedSet(name);
+    public synchronized void storeBoxedSet(BoxedSetDTO boxedSetDTO) {
+        BoxedSet boxedSet = this.getBoxedSet(boxedSetDTO.getName());
         if (boxedSet == null) {
             // create new boxed set
             boxedSet = new BoxedSet();
-            boxedSet.setName(name);
+            boxedSet.setName(boxedSetDTO.getName());
+            if (boxedSetDTO.getSourceId() != null) {
+                boxedSet.setSourceDbId(boxedSetDTO.getSource(), boxedSetDTO.getSourceId());
+            }
             this.saveEntity(boxedSet);
 
             // create new poster artwork entry
@@ -375,6 +379,9 @@ public class CommonDao extends HibernateDao {
             banner.setStatus(StatusType.NEW);
             banner.setBoxedSet(boxedSet);
             this.saveEntity(banner);
+        } else if (boxedSetDTO.getSourceId() != null) {
+            boxedSet.setSourceDbId(boxedSetDTO.getSource(), boxedSetDTO.getSourceId());
+            this.updateEntity(boxedSet);
         }
     }
 

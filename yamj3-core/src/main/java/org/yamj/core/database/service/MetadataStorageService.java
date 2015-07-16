@@ -42,9 +42,7 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.award.Award;
 import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.award.SeriesAward;
-import org.yamj.core.database.model.dto.AwardDTO;
-import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.dto.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.artwork.ArtworkTools;
@@ -208,13 +206,13 @@ public class MetadataStorageService {
             }
         }
 
-        if (MapUtils.isNotEmpty(videoData.getSetInfos())) {
+        if (CollectionUtils.isNotEmpty(videoData.getBoxedSetDTOS())) {
             // store boxed sets
-            for (String boxedSetName : videoData.getSetInfos().keySet()) {
+            for (BoxedSetDTO boxedSetDTO : videoData.getBoxedSetDTOS()) {
                 try {
-                    this.commonDao.storeNewBoxedSet(boxedSetName);
+                    this.commonDao.storeBoxedSet(boxedSetDTO);
                 } catch (Exception ex) {
-                    LOG.error("Failed to store boxed set '{}', error: {}", boxedSetName, ex.getMessage());
+                    LOG.error("Failed to store boxed set '{}', error: {}", boxedSetDTO.getName(), ex.getMessage());
                     LOG.trace("Storage error", ex);
                 }
             }
@@ -290,6 +288,18 @@ public class MetadataStorageService {
             }
         }
 
+        if (CollectionUtils.isNotEmpty(series.getBoxedSetDTOS())) {
+            // store boxed sets
+            for (BoxedSetDTO boxedSetDTO : series.getBoxedSetDTOS()) {
+                try {
+                    this.commonDao.storeBoxedSet(boxedSetDTO);
+                } catch (Exception ex) {
+                    LOG.error("Failed to store boxed set '{}', error: {}", boxedSetDTO.getName(), ex.getMessage());
+                    LOG.trace("Storage error", ex);
+                }
+            }
+        }
+        
         if (CollectionUtils.isNotEmpty(series.getAwardDTOS())) {
           // store award events
           for (AwardDTO awardDTO : series.getAwardDTOS()) {
@@ -675,15 +685,15 @@ public class MetadataStorageService {
      * @param videoData
      */
     public void updateBoxedSets(VideoData videoData) {
-        if (MapUtils.isEmpty(videoData.getSetInfos())) {
+        if (CollectionUtils.isEmpty(videoData.getBoxedSetDTOS())) {
             return;
         }
 
-        for (Entry<String,Integer> entry : videoData.getSetInfos().entrySet()) {
+        for (BoxedSetDTO boxedSetDTO : videoData.getBoxedSetDTOS()) {
 
             BoxedSetOrder boxedSetOrder = null;
             for (BoxedSetOrder stored : videoData.getBoxedSets()) {
-                if (StringUtils.equalsIgnoreCase(stored.getBoxedSet().getName(), entry.getKey())) {
+                if (StringUtils.equalsIgnoreCase(stored.getBoxedSet().getName(), boxedSetDTO.getName())) {
                     boxedSetOrder = stored;
                     break;
                 }
@@ -691,22 +701,67 @@ public class MetadataStorageService {
 
             if (boxedSetOrder == null) {
                 // create new videoSet
-                BoxedSet boxedSet = commonDao.getBoxedSet(entry.getKey());
+                BoxedSet boxedSet = commonDao.getBoxedSet(boxedSetDTO.getName());
                 if (boxedSet != null) {
                     boxedSetOrder = new BoxedSetOrder();
                     boxedSetOrder.setVideoData(videoData);
                     boxedSetOrder.setBoxedSet(boxedSet);
-                    if (entry.getValue() != null) {
-                        boxedSetOrder.setOrdering(entry.getValue());
+                    if (boxedSetDTO.getOrdering() != null) {
+                        boxedSetOrder.setOrdering(boxedSetDTO.getOrdering());
                     }
+                    
                     videoData.addBoxedSet(boxedSetOrder);
                     this.commonDao.saveEntity(boxedSetOrder);
                 }
             } else {
-                if (entry.getValue() == null) {
+                if (boxedSetDTO.getOrdering() == null) {
                     boxedSetOrder.setOrdering(-1);
                 } else {
-                    boxedSetOrder.setOrdering(entry.getValue());
+                    boxedSetOrder.setOrdering(boxedSetDTO.getOrdering());
+                }
+                this.commonDao.updateEntity(boxedSetOrder);
+            }
+        }
+    }
+
+    /**
+     * Update boxed sets
+     *
+     * @param series
+     */
+    public void updateBoxedSets(Series series) {
+        if (CollectionUtils.isEmpty(series.getBoxedSetDTOS())) {
+            return;
+        }
+
+        for (BoxedSetDTO boxedSetDTO : series.getBoxedSetDTOS()) {
+
+            BoxedSetOrder boxedSetOrder = null;
+            for (BoxedSetOrder stored : series.getBoxedSets()) {
+                if (StringUtils.equalsIgnoreCase(stored.getBoxedSet().getName(), boxedSetDTO.getName())) {
+                    boxedSetOrder = stored;
+                    break;
+                }
+            }
+
+            if (boxedSetOrder == null) {
+                // create new videoSet
+                BoxedSet boxedSet = commonDao.getBoxedSet(boxedSetDTO.getName());
+                if (boxedSet != null) {
+                    boxedSetOrder = new BoxedSetOrder();
+                    boxedSetOrder.setSeries(series);
+                    boxedSetOrder.setBoxedSet(boxedSet);
+                    if (boxedSetDTO.getOrdering() != null) {
+                        boxedSetOrder.setOrdering(boxedSetDTO.getOrdering());
+                    }
+                    series.addBoxedSet(boxedSetOrder);
+                    this.commonDao.saveEntity(boxedSetOrder);
+                }
+            } else {
+                if (boxedSetDTO.getOrdering() == null) {
+                    boxedSetOrder.setOrdering(-1);
+                } else {
+                    boxedSetOrder.setOrdering(boxedSetDTO.getOrdering());
                 }
                 this.commonDao.updateEntity(boxedSetOrder);
             }
