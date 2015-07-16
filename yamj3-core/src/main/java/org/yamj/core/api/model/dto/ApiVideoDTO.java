@@ -65,6 +65,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private List<ApiFileDTO> files = new ArrayList<>(0);
     private final Map<JobType,List<ApiPersonDTO>> cast = new EnumMap<>(JobType.class);
     private List<ApiExternalIdDTO> externalIds = new ArrayList<>(0);
+    private List<ApiBoxedSetDTO> boxedSets = new ArrayList<>(0);
 
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public MetaDataType getVideoType() {
@@ -198,6 +199,15 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     public List<ApiExternalIdDTO> getExternalIds() {
         return externalIds;
     }
+    
+    public List<ApiBoxedSetDTO> getBoxedSets() {
+        return boxedSets;
+    }
+    
+    public int getBoxedSetCount() {
+        return boxedSets.size();
+    }
+    
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Setter Methods">
@@ -324,6 +334,10 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public void setExternalIds(List<ApiExternalIdDTO> externalIds) {
         this.externalIds = externalIds;
+    }
+    
+    public void setBoxedSets(List<ApiBoxedSetDTO> boxedSets) {
+        this.boxedSets = boxedSets;
     }
     //</editor-fold>
 

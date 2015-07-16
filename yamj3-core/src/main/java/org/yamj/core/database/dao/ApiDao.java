@@ -159,6 +159,13 @@ public class ApiDao extends HibernateDao {
                 }
             }
 
+            if (options.hasDataItem(DataItem.BOXEDSET)) {
+                LOG.trace("Adding boxed sets to index videos");
+                for (ApiVideoDTO video : queryResults) {
+                    video.setBoxedSets(this.getBoxedSetsForId(video.getVideoType(), video.getId()));
+                }
+            }
+
             if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
                 // Create and populate the ID list
                 Map<MetaDataType, List<Long>> ids = new EnumMap<>(MetaDataType.class);
@@ -1983,6 +1990,11 @@ public class ApiDao extends HibernateDao {
                 video.setExternalIds(getExternalIdsForId(type, options.getId()));
             }
 
+            if (options.hasDataItem(DataItem.BOXEDSET)) {
+                LOG.trace("Adding boxed sets for ID {}", options.getId());
+                video.setBoxedSets(getBoxedSetsForId(type, options.getId()));
+            }
+            
             if (params.hasDataItem(DataItem.ARTWORK)) {
                 LOG.trace("Adding artwork for ID {}", options.getId());
                 Map<Long, List<ApiArtworkDTO>> artworkList;
@@ -2814,7 +2826,7 @@ public class ApiDao extends HibernateDao {
      * @param id the id of the metadata object
      * @return
      */
-    public List<ApiExternalIdDTO> getExternalIdsForId(MetaDataType type, Long id) {
+    private List<ApiExternalIdDTO> getExternalIdsForId(MetaDataType type, Long id) {
         SqlScalars sqlScalars = new SqlScalars();
 
         if (type == MetaDataType.SERIES) {
@@ -2837,9 +2849,9 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("WHERE vd.id=:id AND ids.videodata_id=vd.id");
         }
         
-        sqlScalars.addParameter("id", id);
+        sqlScalars.addParameter(ID, id);
 
-        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar(ID, LongType.INSTANCE);
         sqlScalars.addScalar("externalId", StringType.INSTANCE);
         sqlScalars.addScalar("sourcedb", StringType.INSTANCE);
         sqlScalars.addScalar("skipped", BooleanType.INSTANCE);
@@ -2849,6 +2861,31 @@ public class ApiDao extends HibernateDao {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="BoxSet methods">
+    private List<ApiBoxedSetDTO> getBoxedSetsForId(MetaDataType type, Long id) {
+        SqlScalars sqlScalars = new SqlScalars();
+        sqlScalars.addToSql("SELECT DISTINCT bs.id, bs.name");
+        sqlScalars.addToSql("FROM boxed_set bs");
+        sqlScalars.addToSql("JOIN boxed_set_order bo ON bs.id=bo.boxedset_id");
+        if (type == MetaDataType.SERIES) {
+            sqlScalars.addToSql("WHERE bo.series_id=:id");
+        } else if (type == MetaDataType.SEASON) {
+            sqlScalars.addToSql("JOIN season sea ON sea.series_id=bo.series_id AND sea.id=:id");
+        } else if (type == MetaDataType.EPISODE) {
+            sqlScalars.addToSql("JOIN season sea ON sea.series_id=bo.series_id");
+            sqlScalars.addToSql("JOIN videodata vd ON vd.season_id=sea.id AND vd.id=:id");
+        } else {
+            // defaults to movie
+            sqlScalars.addToSql("WHERE bo.videodata_id=:id");
+        }
+
+        sqlScalars.addParameter(ID, id);
+        
+        sqlScalars.addScalar(ID, LongType.INSTANCE);
+        sqlScalars.addScalar("name", StringType.INSTANCE);
+
+        return executeQueryWithTransform(ApiBoxedSetDTO.class, sqlScalars, null);
+    }
+    
     public List<ApiBoxedSetDTO> getBoxedSets(ApiWrapperList<ApiBoxedSetDTO> wrapper) {
         OptionsBoxedSet options = (OptionsBoxedSet) wrapper.getOptions();
         SqlScalars sqlScalars = generateSqlForBoxedSet(options);

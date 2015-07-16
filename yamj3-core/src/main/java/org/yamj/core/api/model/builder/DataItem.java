@@ -47,7 +47,8 @@ public enum DataItem {
     FILES(false),
     AWARD(false),
     UNKNOWN(false),
-    EXTERNALID(false);
+    EXTERNALID(false),
+    BOXEDSET(false);
 
     private final boolean column; // Is the DataItem a column or a collection (e.g. artwork, genres, etc)
 
