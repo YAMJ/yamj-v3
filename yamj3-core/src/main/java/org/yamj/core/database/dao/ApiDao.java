@@ -103,12 +103,62 @@ public class ApiDao extends HibernateDao {
         // add additional parameters
         params.addScalarParameters(sqlScalars);
 
-        DataItemTools.addDataItemScalars(sqlScalars, options.splitDataItems());
+        DataItemTools.addDataItemScalars(sqlScalars, params.getDataItems());
 
         List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
         wrapper.setResults(queryResults);
 
         if (CollectionUtils.isNotEmpty(queryResults)) {
+            
+            if (params.hasDataItem(DataItem.GENRE)) {
+                LOG.trace("Adding genres to index videos");
+                for (ApiVideoDTO video : queryResults) {
+                    video.setGenres(this.getGenresForId(video.getVideoType(), video.getId()));
+                }
+            }
+
+            if (params.hasDataItem(DataItem.STUDIO)) {
+                LOG.trace("Adding studios to index videos");
+                for (ApiVideoDTO video : queryResults) {
+                    video.setStudios(this.getStudiosForId(video.getVideoType(), video.getId()));
+                }
+            }
+
+            if (options.hasDataItem(DataItem.COUNTRY)) {
+                LOG.trace("Adding countries to index videos");
+                for (ApiVideoDTO video : queryResults) {
+                    video.setCountries(this.getCountriesForId(video.getVideoType(), video.getId()));
+                }
+            }
+
+            if (params.hasDataItem(DataItem.CERTIFICATION)) {
+                LOG.trace("Adding certifications to index videos");
+                for (ApiVideoDTO video : queryResults) {
+                    video.setCertifications(this.getCertificationsForId(video.getVideoType(), video.getId()));
+                }
+            }
+
+            if (params.hasDataItem(DataItem.RATING)) {
+                LOG.trace("Adding ratings to index videos");
+                for (ApiVideoDTO video : queryResults) {
+                    video.setRatings(this.getRatingsForId(video.getVideoType(), video.getId()));
+                }
+            }
+
+            if (options.hasDataItem(DataItem.AWARD)) {
+                LOG.trace("Adding awards to index videos");
+                for (ApiVideoDTO video : queryResults) {
+                    video.setAwards(this.getAwardsForId(video.getVideoType(), video.getId()));
+                }
+            }
+
+            if (options.hasDataItem(DataItem.EXTERNALID)) {
+                LOG.trace("Adding external IDs to index videos");
+                for (ApiVideoDTO video : queryResults) {
+                    video.setExternalIds(this.getExternalIdsForId(video.getVideoType(), video.getId()));
+                }
+            }
+
             if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
                 // Create and populate the ID list
                 Map<MetaDataType, List<Long>> ids = new EnumMap<>(MetaDataType.class);
@@ -118,11 +168,11 @@ public class ApiDao extends HibernateDao {
 
                 Map<String, ApiVideoDTO> results = new HashMap<>();
 
-                for (ApiVideoDTO single : queryResults) {
+                for (ApiVideoDTO video : queryResults) {
                     // Add the item to the map for further processing
-                    results.put(ApiArtworkDTO.makeKey(single), single);
+                    results.put(ApiArtworkDTO.makeKey(video), video);
                     // Add the ID to the list
-                    ids.get(single.getVideoType()).add(single.getId());
+                    ids.get(video.getVideoType()).add(video.getId());
                 }
 
                 boolean foundArtworkIds = Boolean.FALSE;    // Check to see that we have artwork to find
@@ -2117,7 +2167,7 @@ public class ApiDao extends HibernateDao {
      * @param id
      * @return
      */
-    public List<ApiTargetDTO> getGenresForId(MetaDataType type, Long id) {
+    private List<ApiTargetDTO> getGenresForId(MetaDataType type, Long id) {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT DISTINCT ");
         sqlScalars.addToSql("CASE ");
