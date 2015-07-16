@@ -74,8 +74,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         LOG.info("Initialize TheMovieDb scanner");
 
         // register this scanner
-        onlineScannerService.registerMovieScanner(this);
-        onlineScannerService.registerPersonScanner(this);
+        onlineScannerService.registerMetadataScanner(this);
     }
 
     @Override

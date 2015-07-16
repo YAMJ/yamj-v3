@@ -26,9 +26,8 @@ import java.util.List;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
-import org.yamj.core.service.metadata.online.IOnlineScanner;
 
-public interface ITvShowFanartScanner extends IOnlineScanner {
+public interface ITvShowFanartScanner extends IArtworkScanner {
 
     List<ArtworkDetailDTO> getFanarts(Season season);
 

@@ -94,9 +94,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         charset = Charset.forName("UTF-8");
 
         // register this scanner
-        onlineScannerService.registerMovieScanner(this);
-        onlineScannerService.registerSeriesScanner(this);
-        onlineScannerService.registerPersonScanner(this);
+        onlineScannerService.registerMetadataScanner(this);
     }
 
     @Override

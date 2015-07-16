@@ -77,9 +77,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IFilmogra
         
         searchEngineTools = new SearchEngineTools(httpClient, "fr");
        
-        onlineScannerService.registerMovieScanner(this);
-        onlineScannerService.registerSeriesScanner(this);
-        onlineScannerService.registerPersonScanner(this);
+        // register this scanner
+        onlineScannerService.registerMetadataScanner(this);
     }
 
     @Override

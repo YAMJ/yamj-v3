@@ -57,7 +57,7 @@ public class YahooPosterScanner implements IMoviePosterScanner {
     public void init() {
         LOG.info("Initialize Yahoo poster scanner");
 
-        artworkScannerService.registerMoviePosterScanner(this);
+        artworkScannerService.registerArtworkScanner(this);
     }
 
     @Override

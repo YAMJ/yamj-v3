@@ -82,7 +82,7 @@ public class OfdbScanner implements IMovieScanner {
         searchEngineTools.setSearchSites("google");
 
         // register this scanner
-        onlineScannerService.registerMovieScanner(this);
+        onlineScannerService.registerMetadataScanner(this);
     }
 
     @Override

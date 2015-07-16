@@ -20,13 +20,9 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork.online;
+package org.yamj.core.service.metadata.online;
 
-import java.util.List;
-import org.yamj.core.database.model.BoxedSet;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
-
-public interface IBoxedSetFanartScanner extends IArtworkScanner {
-
-    List<ArtworkDetailDTO> getFanarts(BoxedSet boxedSet);
+public interface IMetadataScanner extends IOnlineScanner {
+    
+    // just a marker
 }

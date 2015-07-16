@@ -62,7 +62,7 @@ public class ImdbPosterScanner implements IMoviePosterScanner {
         LOG.info("Initialize IMDb poster scanner");
 
         // register this scanner
-        artworkScannerService.registerMoviePosterScanner(this);
+        artworkScannerService.registerArtworkScanner(this);
     }
 
     @Override

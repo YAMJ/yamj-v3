@@ -58,8 +58,7 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
         LOG.info("Initialize FanartTV artwork scanner");
 
         // register this scanner
-        artworkScannerService.registerMoviePosterScanner(this);
-        artworkScannerService.registerMovieFanartScanner(this);
+        artworkScannerService.registerArtworkScanner(this);
     }
 
     @Override

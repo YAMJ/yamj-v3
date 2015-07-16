@@ -24,7 +24,7 @@ package org.yamj.core.service.metadata.online;
 
 import org.yamj.core.database.model.Person;
 
-public interface IPersonScanner extends IOnlineScanner {
+public interface IPersonScanner extends IMetadataScanner {
 
     String getPersonId(Person person);
 

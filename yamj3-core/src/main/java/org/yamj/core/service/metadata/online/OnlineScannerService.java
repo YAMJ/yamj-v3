@@ -61,38 +61,26 @@ public class OnlineScannerService {
     private ConfigService configService;
     
     /**
-     * Register a movie scanner
+     * Register a metadata scanner
      *
-     * @param movieScanner
+     * @param metadataScanner
      */
-    public void registerMovieScanner(IMovieScanner movieScanner) {
-        LOG.trace("Registered movie scanner: {}", movieScanner.getScannerName().toLowerCase());
-        registeredMovieScanner.put(movieScanner.getScannerName().toLowerCase(), movieScanner);
-    }
-
-    /**
-     * Register TV series scanner
-     *
-     * @param seriesScanner
-     */
-    public void registerSeriesScanner(ISeriesScanner seriesScanner) {
-        LOG.trace("Registered series scanner: {}", seriesScanner.getScannerName().toLowerCase());
-        registeredSeriesScanner.put(seriesScanner.getScannerName().toLowerCase(), seriesScanner);
-    }
-
-    /**
-     * Register person scanner
-     *
-     * @param personScanner
-     */
-    public void registerPersonScanner(IPersonScanner personScanner) {
-        LOG.trace("Registered person scanner: {}", personScanner.getScannerName().toLowerCase());
-        registeredPersonScanner.put(personScanner.getScannerName().toLowerCase(), personScanner);
-        
-        if (personScanner instanceof IFilmographyScanner) {
-            IFilmographyScanner filmographyScanner = (IFilmographyScanner)personScanner;
-            LOG.trace("Registered filmography scanner: {}", filmographyScanner.getScannerName().toLowerCase());
-            registeredFilmographyScanner.put(filmographyScanner.getScannerName().toLowerCase(), filmographyScanner);
+    public void registerMetadataScanner(IMetadataScanner metadataScanner) {
+        if (metadataScanner instanceof IMovieScanner) {
+            LOG.trace("Registered movie scanner: {}", metadataScanner.getScannerName().toLowerCase());
+            registeredMovieScanner.put(metadataScanner.getScannerName().toLowerCase(), (IMovieScanner)metadataScanner);
+        }
+        if (metadataScanner instanceof ISeriesScanner) {
+            LOG.trace("Registered series scanner: {}", metadataScanner.getScannerName().toLowerCase());
+            registeredSeriesScanner.put(metadataScanner.getScannerName().toLowerCase(), (ISeriesScanner)metadataScanner);
+        }
+        if (metadataScanner instanceof IPersonScanner) {
+            LOG.trace("Registered person scanner: {}", metadataScanner.getScannerName().toLowerCase());
+            registeredPersonScanner.put(metadataScanner.getScannerName().toLowerCase(), (IPersonScanner)metadataScanner);
+        }
+        if (metadataScanner instanceof IFilmographyScanner) {
+            LOG.trace("Registered filmography scanner: {}", metadataScanner.getScannerName().toLowerCase());
+            registeredFilmographyScanner.put(metadataScanner.getScannerName().toLowerCase(), (IFilmographyScanner)metadataScanner);
         }
     }
     

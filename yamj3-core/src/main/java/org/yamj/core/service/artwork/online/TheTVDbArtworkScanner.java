@@ -68,10 +68,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
         LOG.info("Initialize TheTVDb artwork scanner");
 
         // register this scanner
-        artworkScannerService.registerTvShowPosterScanner(this);
-        artworkScannerService.registerTvShowFanartScanner(this);
-        artworkScannerService.registerTvShowBannerScanner(this);
-        artworkScannerService.registerTvShowVideoImageScanner(this);
+        artworkScannerService.registerArtworkScanner(this);
     }
 
     @Override

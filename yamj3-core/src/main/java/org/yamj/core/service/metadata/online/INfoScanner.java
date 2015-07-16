@@ -24,7 +24,7 @@ package org.yamj.core.service.metadata.online;
 
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 
-public interface INfoScanner extends IOnlineScanner {
+public interface INfoScanner extends IMetadataScanner {
 
     public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId);
 }

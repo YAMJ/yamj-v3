@@ -75,9 +75,7 @@ public class TheMovieDbArtworkScanner implements
         LOG.info("Initialize TheMovieDb artwork scanner");
 
         // register this scanner
-        artworkScannerService.registerMoviePosterScanner(this);
-        artworkScannerService.registerMovieFanartScanner(this);
-        artworkScannerService.registerPhotoScanner(this);
+        artworkScannerService.registerArtworkScanner(this);
     }
 
     @Override

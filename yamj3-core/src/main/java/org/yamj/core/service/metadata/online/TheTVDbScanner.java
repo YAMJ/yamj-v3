@@ -65,7 +65,7 @@ public class TheTVDbScanner implements ISeriesScanner {
         LOG.info("Initialize TheTVDb scanner");
         
         // register this scanner
-        onlineScannerService.registerSeriesScanner(this);
+        onlineScannerService.registerMetadataScanner(this);
     }
 
     @Override

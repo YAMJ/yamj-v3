@@ -25,9 +25,8 @@ package org.yamj.core.service.artwork.online;
 import java.util.List;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
-import org.yamj.core.service.metadata.online.IOnlineScanner;
 
-public interface IMovieFanartScanner extends IOnlineScanner {
+public interface IMovieFanartScanner extends IArtworkScanner {
 
     List<ArtworkDetailDTO> getFanarts(VideoData videoData);
 }
