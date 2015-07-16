@@ -19,6 +19,18 @@
         <skipTests>true</skipTests>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!--  database versions -->
+        <mysql.version>5.1.35</mysql.version>
+        <derby.version>10.11.1.1</derby.version>
+        <hsqldb.version>2.3.3</hsqldb.version>
+        <!-- other stuff -->
+        <ehcache.version>2.6.11</ehcache.version>
+        <datetime.version>3.0.2</datetime.version>
+        <!-- api versions -->
+        <themoviedbapi.version>4.1-SNAPSHOT</themoviedbapi.version>
+        <thetvdbapi.version>1.8-SNAPSHOT</thetvdbapi.version>
+        <fanarttvapi.version>3.2-SNAPSHOT</fanarttvapi.version>
+        <allocineapi.version>1.5-SNAPSHOT</allocineapi.version>
     </properties>
 
     <dependencies>
@@ -79,7 +91,7 @@
         <dependency>
             <groupId>org.pojava</groupId>
             <artifactId>datetime</artifactId>
-            <version>3.0.1</version>
+            <version>${datetime.version}</version>
         </dependency>
         <dependency>
             <groupId>com.ibm.icu</groupId>
@@ -89,7 +101,7 @@
         <dependency>
             <groupId>net.sf.ehcache</groupId>
             <artifactId>ehcache-core</artifactId>
-            <version>2.6.10</version>
+            <version>${ehcache.version}</version>
         </dependency>
         <!--APACHE COMMONS-->
         <dependency>
@@ -115,17 +127,27 @@
         </dependency>
         <!-- DATABASE -->
         <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
-            <version>10.11.1.1</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.35</version>
+            <version>${mysql.version}</version>
             <scope>runtime</scope>
         </dependency>
+        <!--
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>${hsqldb.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+         -->        
+        <!--
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>${derby.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+         -->        
         <!-- TEST -->
         <dependency>
             <groupId>junit</groupId>
@@ -136,27 +158,22 @@
         <dependency>
             <groupId>com.omertron</groupId>
             <artifactId>themoviedbapi</artifactId>
-            <version>4.1-SNAPSHOT</version>
+            <version>${themoviedbapi.version}</version>
         </dependency>
         <dependency>
             <groupId>com.omertron</groupId>
             <artifactId>thetvdbapi</artifactId>
-            <version>1.8-SNAPSHOT</version>
+            <version>${thetvdbapi.version}</version>
         </dependency>
         <dependency>
             <groupId>com.omertron</groupId>
             <artifactId>fanarttvapi</artifactId>
-            <version>3.2-SNAPSHOT</version>
+            <version>${fanarttvapi.version}</version>
         </dependency>
         <dependency>
             <groupId>com.moviejukebox</groupId>
             <artifactId>allocine-api</artifactId>
-            <version>1.5-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.yamj</groupId>
-            <artifactId>api-common</artifactId>
-            <version>1.4</version>
+            <version>${allocineapi.version}</version>
         </dependency>
         <!--JACKSON JSON-->
         <dependency>
