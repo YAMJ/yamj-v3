@@ -104,10 +104,24 @@ public class CommonController {
         return apiStatus;
     }
 
+    @RequestMapping("/rescan/movie/artwork/{id}")
+    public ApiStatus rescanMovieArtwork(@ModelAttribute("options") OptionsId options) {
+        ApiStatus apiStatus = jsonApi.rescanArtwork(MetaDataType.MOVIE, options.getId());
+        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
+        return apiStatus;
+    }
+    
     @RequestMapping("/rescan/series/{id}")
     public ApiStatus rescanSeries(@ModelAttribute("options") OptionsId options) {
         ApiStatus apiStatus = jsonApi.rescanSingle(MetaDataType.SERIES, options.getId());
         if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanMetaData();
+        return apiStatus;
+    }
+
+    @RequestMapping("/rescan/series/artwork/{id}")
+    public ApiStatus rescanSeriesArtwork(@ModelAttribute("options") OptionsId options) {
+        ApiStatus apiStatus = jsonApi.rescanArtwork(MetaDataType.SERIES, options.getId());
+        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
         return apiStatus;
     }
 
@@ -118,10 +132,24 @@ public class CommonController {
         return apiStatus;
     }
 
+    @RequestMapping("/rescan/season/artwork/{id}")
+    public ApiStatus rescanSeasonArtwork(@ModelAttribute("options") OptionsId options) {
+        ApiStatus apiStatus = jsonApi.rescanArtwork(MetaDataType.SEASON, options.getId());
+        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
+        return apiStatus;
+    }
+
     @RequestMapping("/rescan/episode/{id}")
     public ApiStatus rescanEpisode(@ModelAttribute("options") OptionsId options) {
         ApiStatus apiStatus = jsonApi.rescanSingle(MetaDataType.EPISODE, options.getId());
         if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanMetaData();
+        return apiStatus;
+    }
+
+    @RequestMapping("/rescan/episode/artwork/{id}")
+    public ApiStatus rescanEpisodeArtwork(@ModelAttribute("options") OptionsId options) {
+        ApiStatus apiStatus = jsonApi.rescanArtwork(MetaDataType.EPISODE, options.getId());
+        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
         return apiStatus;
     }
 
@@ -132,10 +160,24 @@ public class CommonController {
         return apiStatus;
     }
 
+    @RequestMapping("/rescan/person/artwork/{id}")
+    public ApiStatus rescanPersonArtwork(@ModelAttribute("options") OptionsId options) {
+        ApiStatus apiStatus = jsonApi.rescanArtwork(MetaDataType.PERSON, options.getId());
+        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
+        return apiStatus;
+    }
+
     @RequestMapping("/rescan/filmography/{id}")
     public ApiStatus rescanFilmography(@ModelAttribute("options") OptionsId options) {
         ApiStatus apiStatus = jsonApi.rescanSingle(MetaDataType.FILMOGRAPHY, options.getId());
         if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanFilmography();
+        return apiStatus;
+    }
+    
+    @RequestMapping("/rescan/boxset/artwork/{id}")
+    public ApiStatus rescanBoxedSetArtwork(@ModelAttribute("options") OptionsId options) {
+        ApiStatus apiStatus = jsonApi.rescanArtwork(MetaDataType.BOXSET, options.getId());
+        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
         return apiStatus;
     }
     //</editor-fold>

@@ -39,6 +39,7 @@ import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
+import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.model.type.*;
@@ -3198,5 +3199,16 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("decade", IntegerType.INSTANCE);
 
         return executeQueryWithTransform(ApiYearDecadeDTO.class, sqlScalars, wrapper);
+    }
+    
+    public void rescanArtwork(List<Artwork> artworks) {
+        for (Artwork artwork : artworks) {
+            this.rescanArtwork(artwork);
+        }
+    }
+
+    public void rescanArtwork(Artwork artwork) {
+        artwork.setStatus(StatusType.UPDATED);
+        this.updateEntity(artwork);
     }
 }

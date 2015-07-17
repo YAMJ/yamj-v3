@@ -345,6 +345,10 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(Certification.class, sqlScalars, wrapper);
     }
 
+    public BoxedSet getBoxedSet(Long id) {
+        return getById(BoxedSet.class, id);
+    }
+
     public BoxedSet getBoxedSet(String name) {
         return getByNaturalIdCaseInsensitive(BoxedSet.class, "name", name);
     }

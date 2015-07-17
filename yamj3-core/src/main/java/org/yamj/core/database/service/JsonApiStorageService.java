@@ -53,6 +53,8 @@ public class JsonApiStorageService {
     @Autowired
     private MediaDao mediaDao;
     @Autowired
+    private ApiDao artworkDao;
+    @Autowired
     private ApiDao apiDao;
     @Autowired
     private PlayerDao playerDao;
@@ -478,7 +480,8 @@ public class JsonApiStorageService {
                         rescan = true;
                     }
                     break;
-                default:
+                case MOVIE:
+                case EPISODE:
                     VideoData videoData = commonDao.getVideoData(id);
                     if (videoData != null) {
                         videoData.setStatus(StatusType.UPDATED);
@@ -486,12 +489,15 @@ public class JsonApiStorageService {
                         rescan = true;
                     }
                     break;
+                default:
+                    // nothing to rescan
+                    break;
             }
             
             if (rescan) {
                 StringBuilder sb = new StringBuilder("Rescan ");
                 sb.append(type.name().toLowerCase());
-                sb.append(" ID: ");
+                sb.append(" for ID: ");
                 sb.append(id);
                 return new ApiStatus(200, sb.toString());
             }
@@ -499,6 +505,78 @@ public class JsonApiStorageService {
             StringBuilder sb = new StringBuilder("No ");
             sb.append(type.name().toLowerCase());
             sb.append(" found for rescanning ID: ");
+            sb.append(id);
+            return new ApiStatus(404, sb.toString());
+        }
+
+        return new ApiStatus(410, "No valid " + type.name().toLowerCase() + " ID provided");
+    }
+
+    /**
+     * Set status of single metadata to UPDATED.
+     *
+     * @param type
+     * @param id
+     * @return
+     */
+    @Transactional
+    public ApiStatus rescanArtwork(MetaDataType type, Long id) {
+        boolean rescan = false;
+        
+        if (id != null && id > 0L) {
+            switch (type) {
+                case PERSON:
+                    Person person = commonDao.getPerson(id);
+                    if (person != null) {
+                        this.artworkDao.rescanArtwork(person.getPhoto());
+                        rescan = true;
+                    }
+                    break;
+                case SERIES:
+                    Series series = commonDao.getSeries(id);
+                    if (series != null) {
+                        this.artworkDao.rescanArtwork(series.getArtworks());
+                        rescan = true;
+                    }
+                    break;
+                case SEASON:
+                    Season season = commonDao.getSeason(id);
+                    if (season != null) {
+                        this.artworkDao.rescanArtwork(season.getArtworks());
+                        rescan = true;
+                    }
+                    break;
+                case BOXSET:
+                    BoxedSet boxedSet = commonDao.getBoxedSet(id);
+                    if (boxedSet != null) {
+                        this.artworkDao.rescanArtwork(boxedSet.getArtworks());
+                        rescan = true;
+                    }
+                    break;
+                case MOVIE:
+                case EPISODE:
+                    VideoData videoData = commonDao.getVideoData(id);
+                    if (videoData != null) {
+                        this.artworkDao.rescanArtwork(videoData.getArtworks());
+                        rescan = true;
+                    }
+                    break;
+                default:
+                    // nothing to rescan
+                    break;
+            }
+            
+            if (rescan) {
+                StringBuilder sb = new StringBuilder("Rescan ");
+                sb.append(type.name().toLowerCase());
+                sb.append(" artwork for ID: ");
+                sb.append(id);
+                return new ApiStatus(200, sb.toString());
+            }
+            
+            StringBuilder sb = new StringBuilder("No ");
+            sb.append(type.name().toLowerCase());
+            sb.append(" found for artwork rescanning ID: ");
             sb.append(id);
             return new ApiStatus(404, sb.toString());
         }
