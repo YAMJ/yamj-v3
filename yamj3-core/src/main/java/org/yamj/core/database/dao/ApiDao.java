@@ -159,7 +159,7 @@ public class ApiDao extends HibernateDao {
                 }
             }
 
-            if (options.hasDataItem(DataItem.BOXEDSET)) {
+            if (options.hasDataItem(DataItem.BOXSET)) {
                 LOG.trace("Adding boxed sets to index videos");
                 for (ApiVideoDTO video : queryResults) {
                     video.setBoxedSets(this.getBoxedSetsForId(video.getVideoType(), video.getId()));
@@ -1990,7 +1990,7 @@ public class ApiDao extends HibernateDao {
                 video.setExternalIds(getExternalIdsForId(type, options.getId()));
             }
 
-            if (options.hasDataItem(DataItem.BOXEDSET)) {
+            if (options.hasDataItem(DataItem.BOXSET)) {
                 LOG.trace("Adding boxed sets for ID {}", options.getId());
                 video.setBoxedSets(getBoxedSetsForId(type, options.getId()));
             }
@@ -2863,7 +2863,8 @@ public class ApiDao extends HibernateDao {
     //<editor-fold defaultstate="collapsed" desc="BoxSet methods">
     private List<ApiBoxedSetDTO> getBoxedSetsForId(MetaDataType type, Long id) {
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT DISTINCT bs.id, bs.name");
+        sqlScalars.addToSql("SELECT bs.id, bs.name,");
+        sqlScalars.addToSql("(select count(bo2.id) from boxed_set_order bo2 where bo2.boxedset_id=bs.id) as memberCount");
         sqlScalars.addToSql("FROM boxed_set bs");
         sqlScalars.addToSql("JOIN boxed_set_order bo ON bs.id=bo.boxedset_id");
         if (type == MetaDataType.SERIES) {
@@ -2877,11 +2878,13 @@ public class ApiDao extends HibernateDao {
             // defaults to movie
             sqlScalars.addToSql("WHERE bo.videodata_id=:id");
         }
-
+        sqlScalars.addToSql("GROUP BY bs.id, bs.name");
+        
         sqlScalars.addParameter(ID, id);
         
         sqlScalars.addScalar(ID, LongType.INSTANCE);
         sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar("memberCount", IntegerType.INSTANCE);
 
         return executeQueryWithTransform(ApiBoxedSetDTO.class, sqlScalars, null);
     }

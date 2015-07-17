@@ -226,7 +226,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
 
         // CREW
         for (MediaCreditCrew person : movieCasts.getCrew()) {
-            JobType jobType = retrieveJobType(person.getDepartment());
+            JobType jobType = retrieveJobType(person.getName(), person.getDepartment());
             if (!this.configServiceWrapper.isCastScanEnabled(jobType)) {
                 // scan not enabled for that job
                 continue;
@@ -403,10 +403,10 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
                     filmo = convertMovieCreditToFilm((CreditMovieBasic) credit, person, JobType.ACTOR);
                     break;
                 case TV:
-                    LOG.debug("TV credit information for {} ({}) not used: {}", person.getName(), JobType.ACTOR, credit.toString());
+                    LOG.trace("TV credit information for {} ({}) not used: {}", person.getName(), JobType.ACTOR, credit.toString());
                     break;
                 case EPISODE:
-                    LOG.debug("TV Episode credit information for {} ({}) not used: {}", person.getName(), JobType.ACTOR, credit.toString());
+                    LOG.trace("TV Episode credit information for {} ({}) not used: {}", person.getName(), JobType.ACTOR, credit.toString());
                     break;
                 default:
                     LOG.debug("Unknown media type '{}' for credit {}", credit.getMediaType(), credit.toString());
@@ -419,7 +419,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
 
         // Fill in CREW data
         for (CreditBasic credit : credits.getCast()) {
-            JobType jobType = retrieveJobType(credit.getDepartment());
+            JobType jobType = retrieveJobType(person.getName(), credit.getDepartment());
 
             FilmParticipation filmo = null;
             switch (credit.getMediaType()) {
@@ -427,10 +427,10 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
                     filmo = convertMovieCreditToFilm((CreditMovieBasic) credit, person, jobType);
                     break;
                 case TV:
-                    LOG.debug("TV crew information for {} ({}) not used: {}", person.getName(), jobType, credit.toString());
+                    LOG.trace("TV crew information for {} ({}) not used: {}", person.getName(), jobType, credit.toString());
                     break;
                 case EPISODE:
-                    LOG.debug("TV Episode crew information for {} ({}) not used: {}", person.getName(), jobType, credit.toString());
+                    LOG.trace("TV Episode crew information for {} ({}) not used: {}", person.getName(), jobType, credit.toString());
                     break;
                 default:
                     LOG.debug("Unknown crew media type '{}' for credit {}", credit.getMediaType(), credit.toString());
@@ -469,9 +469,9 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
         return filmo;
     }
 
-    private static JobType retrieveJobType(String department) {
+    private static JobType retrieveJobType(String personName, String department) {
         if (StringUtils.isBlank(department)) {
-            LOG.debug("No department found");
+            LOG.trace("No department found for person '{}'", personName);
             return JobType.UNKNOWN;
         }
 
@@ -499,7 +499,7 @@ public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
             case "lighting":
                 return JobType.LIGHTING;
             default:
-                LOG.debug("Unknown department '{}'", department);
+                LOG.debug("Unknown department '{}' for person '{}'", department, personName);
                 return JobType.UNKNOWN;
         }
     }
