@@ -170,10 +170,6 @@ public class MetadataScannerService {
         }
     }
 
-    public boolean isFilmographyScanEnabled() {
-        return this.onlineScannerService.isFilmographyScanEnabled();
-    }
-
     /**
      * Scan the data site for information on the person
      *

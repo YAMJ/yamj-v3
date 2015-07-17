@@ -304,15 +304,6 @@ public class OnlineScannerService {
     }
 
     /**
-     * Check if filmography scan is enabled.
-     * 
-     * @return true, if filmography scanner has been set, else false
-     */
-    public boolean isFilmographyScanEnabled() {
-    	return (registeredFilmographyScanner.get(FILMOGRAPHY_SCANNER) != null);
-    }
-
-    /**
      * Scan a person.
      * 
      * @param person

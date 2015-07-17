@@ -50,7 +50,7 @@ import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.PersonNameDTO;
 
 @Service("tmdbScanner")
-public class TheMovieDbScanner implements IMovieScanner, IFilmographyScanner {
+public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, IFilmographyScanner {
 
     public static final String SCANNER_ID = "tmdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbScanner.class);

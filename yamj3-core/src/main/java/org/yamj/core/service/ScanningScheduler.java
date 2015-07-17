@@ -268,7 +268,7 @@ public class ScanningScheduler {
 
     private void scanFilmography() {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.filmographyscan.maxThreads", 1);
-        if (maxThreads <= 0 || !this.metadataScannerService.isFilmographyScanEnabled()) { 
+        if (maxThreads <= 0) { 
             if (!messageDisabledFilmography) {
                 messageDisabledFilmography = Boolean.TRUE;
                 LOG.info("Filmography scanning is disabled");
