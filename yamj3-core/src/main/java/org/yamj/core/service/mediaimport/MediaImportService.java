@@ -36,7 +36,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigServiceWrapper;
-import org.yamj.core.database.dao.*;
+import org.yamj.core.database.dao.ArtworkDao;
+import org.yamj.core.database.dao.MediaDao;
+import org.yamj.core.database.dao.MetadataDao;
+import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
@@ -190,7 +193,8 @@ public class MediaImportService {
                 videoData.setStatus(StatusType.NEW);
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);
-
+                videoData.setTrailerStatus(StatusType.NEW);
+                
                 // set watched if media file is NO extra
                 if (!mediaFile.isExtra()) {
                     videoData.setWatchedFile(mediaFile.isWatchedFile());
@@ -268,6 +272,7 @@ public class MediaImportService {
                             series.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
                             series.setSourceDbIdMap(dto.getIdMap());
                             series.setStatus(StatusType.NEW);
+                            series.setTrailerStatus(StatusType.NEW);
 
                             // set sort title
                             MetadataTools.setSortTitle(series, prefixes);
@@ -358,6 +363,7 @@ public class MediaImportService {
                     videoData.setEpisode(episode);
                     mediaFile.addVideoData(videoData);
                     videoData.addMediaFile(mediaFile);
+                    videoData.setTrailerStatus(StatusType.NEW);
 
                     // set sort title
                     MetadataTools.setSortTitle(videoData, prefixes);

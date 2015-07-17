@@ -195,12 +195,7 @@ public class ArtworkStorageService {
 
     @Transactional(readOnly = true)
     public List<QueueDTO> getArtworLocatedQueue(final int maxResults) {
-        final StringBuilder sql = new StringBuilder();
-        sql.append("SELECT DISTINCT loc.id, loc.create_timestamp, loc.update_timestamp ");
-        sql.append("FROM artwork_located loc ");
-        sql.append("WHERE loc.status in ('NEW','UPDATED')");
-
-        return artworkDao.getArtworkLocatedQueue(sql, maxResults);
+        return artworkDao.getArtworkLocatedQueue(maxResults);
     }
 
     @Transactional(readOnly = true)

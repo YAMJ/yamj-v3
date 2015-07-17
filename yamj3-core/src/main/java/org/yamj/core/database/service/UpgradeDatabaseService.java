@@ -54,5 +54,13 @@ public class UpgradeDatabaseService {
         } catch (Exception ex) {
             LOG.warn("Failed upgrade 'patchSkipOnlineScans'", ex);
         }
+
+        // Issues: #222
+        // Date:   18.07.2015
+        try {
+            upgradeDatabaseDao.patchTrailers();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchTrailers'", ex);
+        }
     }
 }

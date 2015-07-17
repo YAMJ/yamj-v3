@@ -25,17 +25,15 @@ package org.yamj.core.database.model;
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.Index;
-import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.MapKeyType;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.dto.AwardDTO;
@@ -92,6 +90,14 @@ public class VideoData extends AbstractMetadata {
 
     @Column(name = "skip_scan_api", length = 255)
     private String skipScanApi;
+
+    @Type(type = "statusType")
+    @Column(name = "trailer_status", nullable = false, length = 30)
+    private StatusType trailerStatus;
+
+    @Temporal(value = TemporalType.TIMESTAMP)
+    @Column(name = "trailer_last_scanned")
+    private Date trailerLastScanned;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_ids",
@@ -164,6 +170,9 @@ public class VideoData extends AbstractMetadata {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "movieAwardPK.videoData")
     private List<MovieAward> movieAwards = new ArrayList<>(0);
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "videoData")
+    private List<Trailer> trailers = new ArrayList<>(0);
 
     @Transient
     private Set<String> genreNames;
@@ -485,6 +494,22 @@ public class VideoData extends AbstractMetadata {
         }
     }
 
+    public StatusType getTrailerStatus() {
+        return trailerStatus;
+    }
+
+    public void setTrailerStatus(StatusType trailerStatus) {
+        this.trailerStatus = trailerStatus;
+    }
+
+    public Date getTrailerLastScanned() {
+        return trailerLastScanned;
+    }
+
+    public void setTrailerLastScanned(Date trailerLastScanned) {
+        this.trailerLastScanned = trailerLastScanned;
+    }
+    
     public Set<Genre> getGenres() {
         return genres;
     }
@@ -594,7 +619,15 @@ public class VideoData extends AbstractMetadata {
         this.movieAwards = movieAwards;
     }
 
-    // TRANSIENTS METHODS
+    public List<Trailer> getTrailers() {
+        return trailers;
+    }
+
+    public void setTrailers(List<Trailer> trailers) {
+        this.trailers = trailers;
+    }
+    
+    // TRANSIENT METHODS
    
     public boolean isWatched() {
         return (this.watchedNfo || this.watchedFile || this.watchedApi);

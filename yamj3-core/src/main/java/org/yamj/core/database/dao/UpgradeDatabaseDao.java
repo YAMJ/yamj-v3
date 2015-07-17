@@ -96,4 +96,22 @@ public class UpgradeDatabaseDao extends HibernateDao {
             currentSession().createSQLQuery(sb.toString()).executeUpdate();
         }
     }
+
+    /**
+     * Issues: #222
+     * Date:   18.07.2015
+     */
+    public void patchTrailers() {
+        if (existsColumn("videodata", "trailer_status")) {
+            currentSession()
+            .createSQLQuery("UPDATE videodata set trailer_status = 'NEW' where trailer_status=''")
+            .executeUpdate();
+        }
+
+        if (existsColumn("series", "trailer_status")) {
+            currentSession()
+            .createSQLQuery("UPDATE series set trailer_status = 'NEW' where trailer_status=''")
+            .executeUpdate();
+        }
+    }
 }

@@ -25,15 +25,13 @@ package org.yamj.core.database.model;
 import java.io.Serializable;
 import java.util.*;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.Index;
-import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
 
@@ -88,6 +86,9 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "stageFile")
     private Set<Subtitle> subtitles = new HashSet<>(0);
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "stageFile")
+    private List<Trailer> trailers = new ArrayList<>(0);
 
     @Lob
     @Column(name = "content")
@@ -207,7 +208,16 @@ public class StageFile extends AbstractAuditable implements Serializable {
         this.subtitles = subtitles;
     }
 
+    public List<Trailer> getTrailers() {
+        return trailers;
+    }
+
+    public void setTrailers(List<Trailer> trailers) {
+        this.trailers = trailers;
+    }
+
     // TRANSIENT METHODS
+    
     public String getFileName() {
         return this.getBaseName() + "." + this.getExtension();
     }

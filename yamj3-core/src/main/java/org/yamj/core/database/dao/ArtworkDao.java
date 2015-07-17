@@ -22,7 +22,10 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -30,7 +33,10 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.ArtworkGenerated;
+import org.yamj.core.database.model.ArtworkLocated;
+import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -122,7 +128,12 @@ public class ArtworkDao extends HibernateDao {
         return (ArtworkGenerated) criteria.uniqueResult();
     }
     
-    public List<QueueDTO> getArtworkLocatedQueue(final CharSequence sql, final int maxResults) {
+    public List<QueueDTO> getArtworkLocatedQueue(final int maxResults) {
+        final StringBuilder sql = new StringBuilder();
+        sql.append("SELECT DISTINCT loc.id, loc.create_timestamp, loc.update_timestamp ");
+        sql.append("FROM artwork_located loc ");
+        sql.append("WHERE loc.status in ('NEW','UPDATED')");
+        
         SQLQuery query = currentSession().createSQLQuery(sql.toString());
         query.setReadOnly(true);
         query.setCacheable(true);

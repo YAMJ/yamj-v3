@@ -36,12 +36,15 @@ import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.database.service.MediaStorageService;
 import org.yamj.core.database.service.MetadataStorageService;
+import org.yamj.core.database.service.TrailerStorageService;
 import org.yamj.core.service.artwork.ArtworkScannerRunner;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.mediainfo.MediaInfoRunner;
 import org.yamj.core.service.mediainfo.MediaInfoService;
 import org.yamj.core.service.metadata.MetadataScannerRunner;
 import org.yamj.core.service.metadata.MetadataScannerService;
+import org.yamj.core.service.trailer.TrailerScannerRunner;
+import org.yamj.core.service.trailer.TrailerScannerService;
 
 @Component
 public class ScanningScheduler {
@@ -55,27 +58,35 @@ public class ScanningScheduler {
     @Autowired
     private MetadataScannerService metadataScannerService;
     @Autowired
+    private ArtworkScannerService artworkScannerService;
+    @Autowired
     private ArtworkStorageService artworkStorageService;
     @Autowired
-    private ArtworkScannerService artworkScannerService;
+    private ArtworkProcessScheduler artworkProcessScheduler;
     @Autowired
     private MediaStorageService mediaStorageService;
     @Autowired
     private MediaInfoService mediaInfoService;
     @Autowired
-    private ArtworkProcessScheduler artworkProcessScheduler;
+    private TrailerScannerService trailerScannerService;
+    @Autowired
+    private TrailerStorageService trailerStorageService;
+    @Autowired
+    private TrailerProcessScheduler trailerProcessScheduler;
     
     private boolean messageDisabledMediaFiles = Boolean.FALSE;   // Have we already printed the disabled message
     private boolean messageDisabledMetaData = Boolean.FALSE;     // Have we already printed the disabled message
     private boolean messageDisabledPeople = Boolean.FALSE;       // Have we already printed the disabled message
     private boolean messageDisabledFilmography = Boolean.FALSE;  // Have we already printed the disabled message
     private boolean messageDisabledArtwork = Boolean.FALSE;      // Have we already printed the disabled message
+    private boolean messageDisabledTrailer = Boolean.FALSE;      // Have we already printed the disabled message
 
     private AtomicBoolean watchScanMediaFiles = new AtomicBoolean(false);
     private AtomicBoolean watchScanMetaData = new AtomicBoolean(false);
     private AtomicBoolean watchScanPeopleData = new AtomicBoolean(false);
     private AtomicBoolean watchScanFilmography = new AtomicBoolean(false);
     private AtomicBoolean watchScanArtwork = new AtomicBoolean(false);
+    private AtomicBoolean watchScanTrailer = new AtomicBoolean(false);
     
     @Scheduled(initialDelay = 1000, fixedDelay = 300000)
     public void triggerAllScans() {
@@ -85,6 +96,7 @@ public class ScanningScheduler {
         watchScanPeopleData.set(true);
         watchScanFilmography.set(true);
         watchScanArtwork.set(true);
+        watchScanTrailer.set(true);
     }
     
     public void triggerScanMediaFiles() {
@@ -112,6 +124,11 @@ public class ScanningScheduler {
         watchScanArtwork.set(true);
     }
 
+    public void triggerScanTrailer() {
+        LOG.trace("Trigger scan of trailer");
+        watchScanTrailer.set(true);
+    }
+
     @Scheduled(initialDelay = 2000, fixedDelay = 1000)
     public void runAllScans() {
         if (watchScanMediaFiles.get()) scanMediaFiles();
@@ -119,6 +136,7 @@ public class ScanningScheduler {
         if (watchScanPeopleData.get()) scanPeopleData();
         if (watchScanFilmography.get()) scanFilmography();
         if (watchScanArtwork.get()) scanArtwork();
+        if (watchScanTrailer.get()) scanTrailer();
     }
     
     private void scanMediaFiles() {
@@ -175,6 +193,7 @@ public class ScanningScheduler {
             }
             watchScanMetaData.set(false);
             watchScanPeopleData.set(true);
+            watchScanTrailer.set(true);
             return;
         }
         if (messageDisabledMetaData) {
@@ -188,6 +207,7 @@ public class ScanningScheduler {
             LOG.trace("No metadata found to scan");
             watchScanMetaData.set(false);
             watchScanPeopleData.set(true);
+            watchScanTrailer.set(true);
             return;
         }
 
@@ -210,8 +230,9 @@ public class ScanningScheduler {
             }
         }
 
-        // trigger scan for people data
+        // trigger scan for people data and trailer
         watchScanPeopleData.set(true);
+        watchScanTrailer.set(true);
         
         LOG.debug("Finished metadata scanning");
     }
@@ -362,5 +383,53 @@ public class ScanningScheduler {
         this.artworkProcessScheduler.triggerProcess();
         
         LOG.debug("Finished artwork scanning");
+    }
+
+    private void scanTrailer() {
+        int maxThreads = configService.getIntProperty("yamj3.scheduler.trailerscan.maxThreads", 1);
+        if (maxThreads <= 0) {
+            if (!messageDisabledTrailer) {
+                messageDisabledTrailer = Boolean.TRUE;
+                LOG.info("Trailer scanning is disabled");
+            }
+            watchScanTrailer.set(false);
+            return;
+        }
+        if (messageDisabledTrailer) {
+            LOG.info("Trailer scanning is enabled");
+        }
+        messageDisabledTrailer = Boolean.FALSE;
+
+        int maxResults = configService.getIntProperty("yamj3.scheduler.trailerscan.maxResults", 30);
+        List<QueueDTO> queueElements = trailerStorageService.getTrailerQueueForScanning(maxResults);
+        if (CollectionUtils.isEmpty(queueElements)) {
+            LOG.trace("No trailer found to scan");
+            watchScanArtwork.set(false);
+            return;
+        }
+
+        LOG.info("Found {} trailer objects to process; scan with {} threads", queueElements.size(), maxThreads);
+        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
+
+        ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
+        for (int i = 0; i < maxThreads; i++) {
+            TrailerScannerRunner worker = new TrailerScannerRunner(queue, trailerScannerService);
+            executor.execute(worker);
+        }
+        executor.shutdown();
+
+        // run until all workers have finished
+        while (!executor.isTerminated()) {
+            try {
+                TimeUnit.SECONDS.sleep(5);
+            } catch (InterruptedException ignore) {
+                // ignore error which is expected
+            }
+        }
+
+        // trigger trailer processing
+        this.trailerProcessScheduler.triggerProcess();
+        
+        LOG.debug("Finished trailer scanning");
     }
 }
