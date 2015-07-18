@@ -31,6 +31,7 @@
         <thetvdbapi.version>1.8-SNAPSHOT</thetvdbapi.version>
         <fanarttvapi.version>3.2-SNAPSHOT</fanarttvapi.version>
         <allocineapi.version>1.5-SNAPSHOT</allocineapi.version>
+        <httpclient.version>4.5</httpclient.version>
     </properties>
 
     <dependencies>
@@ -102,6 +103,11 @@
             <groupId>net.sf.ehcache</groupId>
             <artifactId>ehcache-core</artifactId>
             <version>${ehcache.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
         </dependency>
         <!--APACHE COMMONS-->
         <dependency>
