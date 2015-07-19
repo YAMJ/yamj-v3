@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.Trailer;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.TrailerStorageService;
@@ -50,7 +51,9 @@ public class TrailerProcessorService {
     private TrailerStorageService trailerStorageService;
     @Autowired
     private FileStorageService fileStorageService;
-
+    @Autowired
+    private ConfigService configService;
+    
     private File tempDir;
     
     @PostConstruct
@@ -64,13 +67,19 @@ public class TrailerProcessorService {
             // nothing to do
             return;
         }
-
         
         Trailer trailer = trailerStorageService.getRequiredTrailer(queueElement.getId());
         LOG.debug("Process trailer: {}", trailer);
 
         if (trailer.getStageFile() != null) {
             // local scanned trailers will not be processed further on
+            trailer.setStatus(StatusType.DONE);
+            trailerStorageService.updateTrailer(trailer);
+            return;
+        }
+
+        if (configService.getBooleanProperty("yamj3.trailer.download", Boolean.FALSE)) {
+            LOG.trace("Trailer download is disabled");
             trailer.setStatus(StatusType.DONE);
             trailerStorageService.updateTrailer(trailer);
             return;
