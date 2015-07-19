@@ -26,6 +26,7 @@ import com.omertron.themoviedbapi.Compare;
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.enumeration.SearchType;
+import com.omertron.themoviedbapi.model.credits.CreditBasic;
 import com.omertron.themoviedbapi.model.media.MediaCreditList;
 import com.omertron.themoviedbapi.model.movie.MovieInfo;
 import com.omertron.themoviedbapi.model.person.PersonCreditList;
@@ -190,7 +191,7 @@ public class TheMovieDbApiWrapper {
         return null;
     }
 
-    public PersonCreditList getPersonCredits(int tmdbId, boolean throwTempError) {
+    public PersonCreditList<CreditBasic> getPersonCredits(int tmdbId, boolean throwTempError) {
         try {
             String defaultLanguage = configService.getProperty("themoviedb.language", "en");
             return tmdbApi.getPersonCombinedCredits(tmdbId, defaultLanguage);
