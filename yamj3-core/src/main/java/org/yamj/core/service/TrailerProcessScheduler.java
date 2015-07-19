@@ -28,7 +28,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.yamj.core.config.ConfigService;
@@ -54,8 +53,8 @@ public class TrailerProcessScheduler {
         watchProcess.set(true);
     }
 
-    @Async
-    @Scheduled(initialDelay = 6000, fixedDelay = 1000)
+    //@Async
+    //@Scheduled(initialDelay = 6000, fixedDelay = 1000)
     public synchronized void runProcess() {
         if (watchProcess.get()) processTrailer();
     }

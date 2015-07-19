@@ -53,10 +53,10 @@ public class WebConfiguration  {
 
     @Value("${yamj3.http.systemProperties:false}")
     private boolean systemProperties;
-    
+
     @Value("${yamj3.http.proxyHost:null}")
     private String proxyHost;
-    
+  
     @Value("${yamj3.http.proxyPort:0}")
     private int proxyPort;
 
@@ -84,6 +84,8 @@ public class WebConfiguration  {
     @Value("${yamj3.http.maxDownloadSlots:null}")
     private String maxDownloadSlots;
 
+    @Value("${yamj3.http.randomUserAgent:true}")
+    private boolean randomUserAgent;
 
     @Value("${APIKEY.themoviedb}")
     private String theMovieDbApiKey;
@@ -103,9 +105,9 @@ public class WebConfiguration  {
     @Value("${APIKEY.allocine.secretKey}")
     private String allocineApiSecretKey;
 
-    
     @Scope
     @Bean(destroyMethod="close")
+    @SuppressWarnings("resource")
     public PoolingHttpClient poolingHttpClient() {
         LOG.trace("Create new pooling http client");
         
@@ -152,6 +154,7 @@ public class WebConfiguration  {
 
         // build the client
         PoolingHttpClient wrapper = new PoolingHttpClient(builder.build(), connManager);
+        wrapper.setRandomUserAgent(randomUserAgent);
         wrapper.addGroupLimit(".*", 1); // default limit, can be overwritten
         
         if (StringUtils.isNotBlank(maxDownloadSlots)) {

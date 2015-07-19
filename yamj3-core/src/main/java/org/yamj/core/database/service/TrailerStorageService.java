@@ -22,6 +22,7 @@
  */
 package org.yamj.core.database.service;
 
+import java.util.Date;
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,7 +125,22 @@ public class TrailerStorageService {
             // no trailers presents; just store all
             this.trailerDao.storeAll(trailers);
         } else if (CollectionUtils.isNotEmpty(trailers)) {
-            // TODO save each trailer
+            for (Trailer trailer : trailers) {
+                if (!videoData.getTrailers().contains(trailer)) {
+                    // just store if not contained before
+                    videoData.getTrailers().add(trailer);
+                    trailerDao.saveEntity(trailer);
+                } else {
+                    // find matching stored trailer and update status if needed
+                    for (Trailer stored : videoData.getTrailers()) {
+                        if (stored.equals(trailer) && StatusType.DELETED.equals(stored.getStatus())) {
+                            stored.setStatus(StatusType.UPDATED);
+                            trailerDao.updateEntity(stored);
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         // update not found stage files to DONE
@@ -137,6 +153,7 @@ public class TrailerStorageService {
         }
         
         // set status of video data
+        videoData.setTrailerLastScanned(new Date(System.currentTimeMillis()));
         if (CollectionUtils.isEmpty(trailers) && CollectionUtils.isEmpty(videoData.getTrailers())) {
             videoData.setTrailerStatus(StatusType.NOTFOUND);
         } else {
@@ -153,7 +170,22 @@ public class TrailerStorageService {
             // no trailers presents; just store all
             this.trailerDao.storeAll(trailers);
         } else if (CollectionUtils.isNotEmpty(trailers)) {
-            // TODO save each trailer
+            for (Trailer trailer : trailers) {
+                if (!series.getTrailers().contains(trailer)) {
+                    // just store if not contained before
+                    series.getTrailers().add(trailer);
+                    trailerDao.saveEntity(trailer);
+                } else {
+                    // find matching stored trailer and update status if needed
+                    for (Trailer stored : series.getTrailers()) {
+                        if (stored.equals(trailer) && StatusType.DELETED.equals(stored.getStatus())) {
+                            stored.setStatus(StatusType.UPDATED);
+                            trailerDao.updateEntity(stored);
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         // update not found stage files to DONE
@@ -166,6 +198,7 @@ public class TrailerStorageService {
         }
         
         // set status of series
+        series.setTrailerLastScanned(new Date(System.currentTimeMillis()));
         if (CollectionUtils.isEmpty(trailers) && CollectionUtils.isEmpty(series.getTrailers())) {
             series.setTrailerStatus(StatusType.NOTFOUND);
         } else {

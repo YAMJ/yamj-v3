@@ -25,26 +25,29 @@ package org.yamj.core.service.trailer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.Trailer;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.dto.TrailerDTO;
 import org.yamj.core.database.service.TrailerStorageService;
 import org.yamj.core.service.trailer.online.IMovieTrailerScanner;
 import org.yamj.core.service.trailer.online.ISeriesTrailerScanner;
 import org.yamj.core.service.trailer.online.ITrailerScanner;
+import org.yamj.core.service.trailer.online.YouTubeTrailerScanner;
 
 @Service("trailerScannerService")
 public class TrailerScannerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrailerScannerService.class);
-    private static final String USE_SCANNER_FOR = "Use {} scanner for {}";
     
     private final HashMap<String, IMovieTrailerScanner> registeredMovieTrailerScanner = new HashMap<>();
     private final HashMap<String, ISeriesTrailerScanner> registeredSeriesTrailerScanner = new HashMap<>();
@@ -116,8 +119,44 @@ public class TrailerScannerService {
         }
 
         LOG.trace("Scan online for trailer of movie {}-'{}'", videoData.getId(), videoData.getTitle());
-        // TODO
-    }
+
+        List<TrailerDTO> trailerDTOs = null;
+        for (String prio : this.configService.getPropertyAsList("yamj3.trailer.scanner.movie.priorities", YouTubeTrailerScanner.SCANNER_ID)) {
+            IMovieTrailerScanner scanner = registeredMovieTrailerScanner.get(prio);
+            if (scanner != null) {
+                LOG.debug("Scanning movie trailers for '{}' using {}", videoData.getTitle(), scanner.getScannerName());
+                trailerDTOs = scanner.getTrailers(videoData);
+                if (CollectionUtils.isNotEmpty(trailerDTOs)) {
+                    break;
+                }
+            } else {
+                LOG.warn("Desired movie trailer scanner {} not registerd", prio);
+            }
+        }
+
+        if (CollectionUtils.isEmpty(trailerDTOs)) {
+            LOG.info("No trailers found for movie {}-'{}'", videoData.getId(), videoData.getTitle());
+            return;
+        }
+
+        int maxResults = this.configService.getIntProperty("yamj3.trailer.scanner.movie.maxResults", 5);
+        if (maxResults > 0 && trailerDTOs.size() > maxResults) {
+            LOG.info("Limited movie trailers to {}, actually retrieved {} for {}-'{}'", maxResults, trailerDTOs.size(), videoData.getId(), videoData.getTitle());
+            trailerDTOs = trailerDTOs.subList(0, maxResults);
+        } else {
+            LOG.info("Found {} trailers for movie {}-'{}'", trailerDTOs.size(), videoData.getId(), videoData.getTitle());
+        }
+
+        // create trailers
+        for (TrailerDTO dto : trailerDTOs) {
+            Trailer trailer = new Trailer();
+            trailer.setVideoData(videoData);
+            trailer.setSource(dto.getSource());
+            trailer.setUrl(dto.getUrl());
+            trailer.setStatus(StatusType.NEW);
+            trailers.add(trailer);
+        }
+     }
 
     private void scanTrailerLocal(Series series, List<Trailer> trailers) {
         if (!configService.getBooleanProperty("yamj3.trailer.scan.local.series", Boolean.TRUE)) {
@@ -136,7 +175,43 @@ public class TrailerScannerService {
         }
 
         LOG.trace("Scan online for trailer of series {}-'{}'", series.getId(), series.getTitle());
-        // TODO
+
+        List<TrailerDTO> trailerDTOs = null;
+        for (String prio : this.configService.getPropertyAsList("yamj3.trailer.scanner.series.priorities", YouTubeTrailerScanner.SCANNER_ID)) {
+            ISeriesTrailerScanner scanner = registeredSeriesTrailerScanner.get(prio);
+            if (scanner != null) {
+                LOG.debug("Scanning series trailers for '{}' using {}", series.getTitle(), scanner.getScannerName());
+                trailerDTOs = scanner.getTrailers(series);
+                if (CollectionUtils.isNotEmpty(trailerDTOs)) {
+                    break;
+                }
+            } else {
+                LOG.warn("Desired series trailer scanner {} not registerd", prio);
+            }
+        }
+
+        if (CollectionUtils.isEmpty(trailerDTOs)) {
+            LOG.info("No trailers found for series {}-'{}'", series.getId(), series.getTitle());
+            return;
+        }
+
+        int maxResults = this.configService.getIntProperty("yamj3.trailer.scanner.series.maxResults", 5);
+        if (maxResults > 0 && trailerDTOs.size() > maxResults) {
+            LOG.info("Limited series trailers to {}, actually retrieved {} for {}-'{}'", maxResults, trailerDTOs.size(), series.getId(), series.getTitle());
+            trailerDTOs = trailerDTOs.subList(0, maxResults);
+        } else {
+            LOG.info("Found {} trailers for series {}-'{}'", trailerDTOs.size(), series.getId(), series.getTitle());
+        }
+
+        // create trailers
+        for (TrailerDTO dto : trailerDTOs) {
+            Trailer trailer = new Trailer();
+            trailer.setSeries(series);
+            trailer.setSource(dto.getSource());
+            trailer.setUrl(dto.getUrl());
+            trailer.setStatus(StatusType.NEW);
+            trailers.add(trailer);
+        }
     }
 
     public void processingError(QueueDTO queueElement) {

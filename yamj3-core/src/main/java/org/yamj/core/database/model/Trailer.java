@@ -64,6 +64,9 @@ public class Trailer extends AbstractAuditable implements Serializable {
     @Column(name = "url", length = 255)
     private String url;
 
+    @Column(name = "source", nullable = false, length = 50)
+    private String source;
+
     @Column(name = "cache_filename", length = 255)
     private String cacheFilename;
 
@@ -105,6 +108,14 @@ public class Trailer extends AbstractAuditable implements Serializable {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 
     public String getCacheFilename() {

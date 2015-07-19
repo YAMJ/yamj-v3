@@ -29,17 +29,22 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class TrailerDTO {
 
+    private final String source;
     private final String url;
     private final String title;
 
-    public TrailerDTO(String url) {
-        this.url = url;
-        this.title = null;
-      }
+    public TrailerDTO(String source, String url) {
+        this(source, url, null);
+    }
 
-    public TrailerDTO(String url, String title) {
-      this.url = url;
-      this.title = title;
+    public TrailerDTO(String source, String url, String title) {
+        this.source = source;
+        this.url = url;
+        this.title = title;
+    }
+
+    public String getSource() {
+        return source;
     }
 
     public String getUrl() {
@@ -53,6 +58,7 @@ public class TrailerDTO {
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
+                .append(getSource())
                 .append(getUrl())
                 .toHashCode();
     }
@@ -62,6 +68,7 @@ public class TrailerDTO {
         if (obj instanceof TrailerDTO) {
             final TrailerDTO other = (TrailerDTO) obj;
             return new EqualsBuilder()
+                    .append(getSource(), other.getSource())
                     .append(getUrl(), other.getUrl())
                     .isEquals();
         }
