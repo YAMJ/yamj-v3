@@ -38,7 +38,10 @@ import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.config.ConfigService;
-import org.yamj.core.database.dao.*;
+import org.yamj.core.database.dao.ApiDao;
+import org.yamj.core.database.dao.CommonDao;
+import org.yamj.core.database.dao.MediaDao;
+import org.yamj.core.database.dao.PlayerDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.type.SourceType;
@@ -456,6 +459,7 @@ public class JsonApiStorageService {
                     Series series = commonDao.getSeries(id);
                     if (series != null) {
                         series.setStatus(StatusType.UPDATED);
+                        series.setTrailerStatus(StatusType.UPDATED);
                         commonDao.updateEntity(series);
                         rescan = true;
                         for (Season season : series.getSeasons()) {
@@ -485,6 +489,9 @@ public class JsonApiStorageService {
                     VideoData videoData = commonDao.getVideoData(id);
                     if (videoData != null) {
                         videoData.setStatus(StatusType.UPDATED);
+                        if (videoData.isMovie()) {
+                            videoData.setTrailerStatus(StatusType.UPDATED);
+                        }
                         commonDao.updateEntity(videoData);
                         rescan = true;
                     }
