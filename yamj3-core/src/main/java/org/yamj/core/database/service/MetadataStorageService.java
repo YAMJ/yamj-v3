@@ -136,8 +136,12 @@ public class MetadataStorageService {
 
     @Transactional(readOnly = true)
     public Person getRequiredPerson(Long id) {
-        // later on there it could be necessary to fetch associated entities
-        return metadataDao.getById(Person.class, id);
+        final StringBuilder sb = new StringBuilder();
+        sb.append("from Person p ");
+        sb.append("where p.id = :id ");
+
+        List<Person> objects = this.commonDao.findById(sb, id);
+        return DataAccessUtils.requiredUniqueResult(objects);
     }
 
     /**
@@ -324,6 +328,11 @@ public class MetadataStorageService {
 
     @Transactional
     public void updateScannedPerson(Person person) {
+        // update entity
+        person.fixScannedValues();
+        person.setLastScanned(new Date(System.currentTimeMillis()));
+        metadataDao.updateEntity(person);
+
         // store artwork
         Artwork photo = person.getPhoto();
         if (photo == null) {
@@ -335,10 +344,8 @@ public class MetadataStorageService {
             this.artworkDao.saveEntity(photo);
         }
 
-        // update entity
-        person.fixScannedValues();
-        person.setLastScanned(new Date(System.currentTimeMillis()));
-        metadataDao.updateEntity(person);
+        // update artwork
+        this.updateLocatedArtwork(person);
     }
 
     @Transactional
@@ -852,6 +859,17 @@ public class MetadataStorageService {
         if (MapUtils.isNotEmpty(series.getFanartURLS())) {
             Artwork artwork = series.getArtwork(ArtworkType.FANART);
             updateLocatedArtwork(artwork, series.getFanartURLS());
+        }
+    }
+
+    private void updateLocatedArtwork(Person person) {
+        if (person.hasModifiedSource()) {
+            this.artworkDao.markLocatedArtworkAsDeleted(person.getPhoto(), person.getModifiedSources());
+        }
+        
+        if (MapUtils.isNotEmpty(person.getPhotoURLS())) {
+            Artwork artwork = person.getPhoto();
+            updateLocatedArtwork(artwork, person.getPhotoURLS());
         }
     }
 

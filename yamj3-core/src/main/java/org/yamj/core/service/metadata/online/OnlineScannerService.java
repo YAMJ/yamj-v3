@@ -49,7 +49,7 @@ public class OnlineScannerService {
     public static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.alternate", "");
     public static final String PERSON_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.person", "tmdb");
     public static final String PERSON_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.person.alternate", "");
-    public static final String FILMOGRAPHY_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.filmography", "");
+    public static final String FILMOGRAPHY_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.filmography", "tmdb");
     public static final String FILMOGRAPHY_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.filmography.alternate", "");
     
     private final HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<>();
@@ -249,7 +249,7 @@ public class OnlineScannerService {
             LOG.error("Person scanner '{}' not registered", PERSON_SCANNER);
             scanResult = ScanResult.ERROR;
         } else {
-            LOG.info("Scanning for information on person '{}' using {}", person.getId(), person.getName(), personScanner.getScannerName());
+            LOG.info("Scanning for information on person '{}' using {}", person.getName(), personScanner.getScannerName());
     
             // scan person data
             try {
@@ -267,7 +267,7 @@ public class OnlineScannerService {
             personScanner = registeredPersonScanner.get(PERSON_SCANNER_ALT);
 
             if (personScanner != null) {
-                LOG.info("Alternate scanning for information on person {}-'{}' using {}", person.getId(), person.getName(), personScanner.getScannerName());
+                LOG.info("Alternate scanning for information on person '{}' using {}", person.getName(), personScanner.getScannerName());
 
                 try {
                     personScanner.scan(person);
@@ -316,7 +316,7 @@ public class OnlineScannerService {
             LOG.error("Filmography scanner '{}' not registered", FILMOGRAPHY_SCANNER);
             scanResult = ScanResult.ERROR;
         } else {
-        	LOG.info("Scanning for filmography of person '{}' using {}", person.getId(), person.getName(), filmographyScanner.getScannerName());
+        	LOG.info("Scanning for filmography of person '{}' using {}", person.getName(), filmographyScanner.getScannerName());
 
             // scan filmography
             try {
@@ -334,7 +334,7 @@ public class OnlineScannerService {
         	filmographyScanner = registeredFilmographyScanner.get(FILMOGRAPHY_SCANNER_ALT);
 
             if (filmographyScanner != null) {
-            	LOG.info("Alternate scanning for filmography of person {}-'{}' using {}", person.getId(), person.getName(), filmographyScanner.getScannerName());
+            	LOG.info("Alternate scanning for filmography of person '{}' using {}", person.getName(), filmographyScanner.getScannerName());
 
                 try {
                 	filmographyScanner.scanFilmography(person);
