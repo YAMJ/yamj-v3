@@ -24,6 +24,7 @@ package org.yamj.core.database.service;
 
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,19 +73,19 @@ public class ArtworkLocatorService {
             
             // same name than video file
             if (ArtworkType.POSTER == artworkType) {
-                artworkNames.add(videoFile.getBaseName().toLowerCase());
-                artworkNames.add(videoFile.getBaseName().toLowerCase() + ".poster");
-                artworkNames.add(videoFile.getBaseName().toLowerCase() + "-poster");
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName()).toLowerCase());
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".poster"));
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-poster"));
             } else if (ArtworkType.FANART == artworkType) {
-                artworkNames.add(videoFile.getBaseName().toLowerCase() + ".fanart");
-                artworkNames.add(videoFile.getBaseName().toLowerCase() + "-fanart");
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".fanart"));
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-fanart"));
             } else if (ArtworkType.BANNER == artworkType) {
-                artworkNames.add(videoFile.getBaseName().toLowerCase() + ".banner");
-                artworkNames.add(videoFile.getBaseName().toLowerCase() + "-banner");
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".banner"));
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-banner"));
             }
             
             // same name as directory
-            String directoryName = videoFile.getStageDirectory().getDirectoryName().toLowerCase();
+            String directoryName = StringEscapeUtils.escapeSql(videoFile.getStageDirectory().getDirectoryName().toLowerCase());
             if (ArtworkType.POSTER == artworkType) {
                 artworkNames.add(directoryName);
                 artworkNames.add(directoryName + ".poster");
@@ -104,15 +105,15 @@ public class ArtworkLocatorService {
         Set<String> artworkNames = new HashSet<>();
         for (StageFile videoFile : videoFiles) {
             if (ArtworkType.POSTER == artworkType) {
-                artworkNames.add(videoFile.getBaseName().toLowerCase());
-                artworkNames.add(videoFile.getBaseName().toLowerCase() + ".poster");
-                artworkNames.add(videoFile.getBaseName().toLowerCase() + "-poster");
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase()));
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".poster"));
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-poster"));
             } else if (ArtworkType.FANART == artworkType) {
-                artworkNames.add(videoFile.getBaseName().toLowerCase() + ".fanart");
-                artworkNames.add(videoFile.getBaseName().toLowerCase() + "-fanart");
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".fanart"));
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-fanart"));
             } else if (ArtworkType.BANNER == artworkType) {
-                artworkNames.add(videoFile.getBaseName().toLowerCase() + ".banner");
-                artworkNames.add(videoFile.getBaseName().toLowerCase() + "-banner");
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".banner"));
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-banner"));
             }
         }
         return artworkNames;
@@ -182,7 +183,7 @@ public class ArtworkLocatorService {
         final StringBuilder sb = new StringBuilder();
         sb.append("select distinct f from StageFile f ");
         sb.append("where lower(f.baseName) like 'set_");
-        sb.append(boxedSet.getName().toLowerCase());
+        sb.append(StringEscapeUtils.escapeSql(boxedSet.getName().toLowerCase()));
         sb.append("_%' ");
         if (ArtworkType.FANART == artworkType) {
             sb.append(" and lower(f.baseName) like '%fanart' ");
@@ -262,9 +263,9 @@ public class ArtworkLocatorService {
         List<StageFile> artworks;
 
         Set<String> artworkNames = new HashSet<>();
-        artworkNames.add(person.getName().toLowerCase());
-        artworkNames.add(person.getName().toLowerCase() + ".photo");
-        artworkNames.add(person.getName().toLowerCase() + "-photo");
+        artworkNames.add(StringEscapeUtils.escapeSql(person.getName().toLowerCase()));
+        artworkNames.add(StringEscapeUtils.escapeSql(person.getName().toLowerCase() + ".photo"));
+        artworkNames.add(StringEscapeUtils.escapeSql(person.getName().toLowerCase() + "-photo"));
         artworkNames.add(person.getIdentifier().toLowerCase());
         artworkNames.add(person.getIdentifier().toLowerCase() + ".photo");
         artworkNames.add(person.getIdentifier().toLowerCase() + "-photo");

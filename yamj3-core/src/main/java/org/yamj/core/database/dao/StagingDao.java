@@ -24,6 +24,7 @@ package org.yamj.core.database.dao;
 
 import java.math.BigInteger;
 import java.util.*;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
@@ -484,7 +485,7 @@ public class StagingDao extends HibernateDao {
         sb.append("AND sf.status != :deleted ");
         sb.append("AND lower(sf.baseName) in (:searchNames) ");
 
-        String dirFragment = FileTools.getPathFragment(folderName).toLowerCase();
+        String dirFragment = StringEscapeUtils.escapeSql(FileTools.getPathFragment(folderName).toLowerCase());
         sb.append("AND (lower(sd.directoryName)=:folderName or lower(sd.directoryPath) like '%").append(dirFragment).append("%') ");
 
         return this.findByNamedParameters(sb, params);
@@ -498,7 +499,7 @@ public class StagingDao extends HibernateDao {
         if (StringUtils.isBlank(folderName)) {
             sb.append(" sd.id=:dirId ");
         } else {
-            String dirFragment = FileTools.getPathFragment(folderName).toLowerCase();
+            String dirFragment = StringEscapeUtils.escapeSql(FileTools.getPathFragment(folderName).toLowerCase());
             sb.append(" (sd.id=:dirId or lower(sd.directory_name)=:dirName or lower(sd.directory_path) like '%").append(dirFragment).append("%') ");
         }
         if (checkLibrary) {
@@ -514,11 +515,11 @@ public class StagingDao extends HibernateDao {
             query.setLong("libraryId", videoFile.getStageDirectory().getLibrary().getId());
         }
         query.setString("watched", FileType.WATCHED.toString());
-        query.setString("check1", videoFile.getBaseName().toLowerCase());
-        query.setString("check2", videoFile.getFileName().toLowerCase());
+        query.setString("check1", StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase()));
+        query.setString("check2", StringEscapeUtils.escapeSql(videoFile.getFileName().toLowerCase()));
         query.setString("deleted", StatusType.DELETED.toString());
         if (StringUtils.isNotBlank(folderName)) {
-            query.setString("dirName", folderName.toLowerCase());
+            query.setString("dirName", StringEscapeUtils.escapeSql(folderName.toLowerCase()));
         }
 
         return (BigInteger) query.uniqueResult();

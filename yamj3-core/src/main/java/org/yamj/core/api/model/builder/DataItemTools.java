@@ -24,6 +24,7 @@ package org.yamj.core.api.model.builder;
 
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.StringType;
 import org.slf4j.Logger;
@@ -64,7 +65,7 @@ public class DataItemTools {
                     sbSQL.append(", ").append(tablePrefix).append(".top_rank as topRank");
                 } else {
                     // default approach
-                    sbSQL.append(", ").append(tablePrefix).append(".").append(item.toString().toLowerCase());
+                    sbSQL.append(", ").append(tablePrefix).append(".").append(StringEscapeUtils.escapeSql(item.toString().toLowerCase()));
                 }
             }
         } else {

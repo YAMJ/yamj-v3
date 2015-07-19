@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.builder.DataItem;
@@ -214,14 +215,14 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
             sb.append(field).append(") LIKE '");
 
             if (StringUtils.equalsIgnoreCase("START", mode)) {
-                sb.append(search.toLowerCase()).append("%");
+                sb.append(StringEscapeUtils.escapeSql(search).toLowerCase()).append("%");
             } else if (StringUtils.equalsIgnoreCase("END", mode)) {
-                sb.append("%").append(search.toLowerCase());
+                sb.append("%").append(StringEscapeUtils.escapeSql(search).toLowerCase());
             } else if (StringUtils.equalsIgnoreCase("EXACT", mode)) {
-                sb.append(search.toLowerCase());
+                sb.append(StringEscapeUtils.escapeSql(search).toLowerCase());
             } else {
                 // Default to ANY
-                sb.append("%").append(search.toLowerCase()).append("%");
+                sb.append("%").append(StringEscapeUtils.escapeSql(search).toLowerCase()).append("%");
             }
             sb.append("'");
         }
