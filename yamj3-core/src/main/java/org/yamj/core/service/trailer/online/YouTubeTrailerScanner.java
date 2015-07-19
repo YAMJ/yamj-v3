@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +87,7 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
             })
             .setApplicationName("youtube-yamj3-search")
             .build();
-
+        
         // register this scanner
         trailerScannerService.registerTrailerScanner(this);
     }
@@ -95,27 +96,26 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
     public List<TrailerDTO> getTrailers(VideoData videoData) {
         try {
             StringBuilder query = new StringBuilder();
-            if (videoData.getTitleOriginal() != null) {
-                query.append(videoData.getTitleOriginal());
-            } else {
-                query.append(videoData.getTitle());
-            }
+            query.append(videoData.getTitle());
             if (videoData.getYear() > 0) {
                 query.append(" ").append(videoData.getYear());
             }
             query.append(" trailer");
-            
+
+            String additionalSearch = configService.getProperty("youtube.trailer.additionalSearch");
+            if (StringUtils.isNotBlank(additionalSearch)) {
+                query.append(" ").append(additionalSearch);
+            }
+
             // define the API request for retrieving search results
             YouTube.Search.List search = youtube.search().list("id,snippet");
             search.setKey(youtubeApiKey);
             search.setQ(query.toString());
             search.setType("video");
-            search.setMaxResults(configService.getLongProperty("youtube.trailer.maxtrailers", 2));
-
+            search.setMaxResults(configService.getLongProperty("youtube.trailer.maxtrailers", 5));
+            
             if (configService.getBooleanProperty("youtube.trailer.hdwanted", Boolean.TRUE)) {
                 search.setVideoDefinition("high");
-            } else {
-                search.setVideoDefinition("standard");
             }
             
             SearchListResponse searchResponse = search.execute();

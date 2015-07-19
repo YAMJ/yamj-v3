@@ -34,7 +34,10 @@ import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.builder.*;
+import org.yamj.core.api.model.builder.DataItem;
+import org.yamj.core.api.model.builder.DataItemTools;
+import org.yamj.core.api.model.builder.IndexParams;
+import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
@@ -42,7 +45,10 @@ import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.type.*;
+import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Repository("apiDao")
@@ -125,7 +131,7 @@ public class ApiDao extends HibernateDao {
                 }
             }
 
-            if (options.hasDataItem(DataItem.COUNTRY)) {
+            if (params.hasDataItem(DataItem.COUNTRY)) {
                 LOG.trace("Adding countries to index videos");
                 for (ApiVideoDTO video : queryResults) {
                     video.setCountries(this.getCountriesForId(video.getVideoType(), video.getId()));
@@ -146,27 +152,34 @@ public class ApiDao extends HibernateDao {
                 }
             }
 
-            if (options.hasDataItem(DataItem.AWARD)) {
+            if (params.hasDataItem(DataItem.AWARD)) {
                 LOG.trace("Adding awards to index videos");
                 for (ApiVideoDTO video : queryResults) {
                     video.setAwards(this.getAwardsForId(video.getVideoType(), video.getId()));
                 }
             }
 
-            if (options.hasDataItem(DataItem.EXTERNALID)) {
+            if (params.hasDataItem(DataItem.EXTERNALID)) {
                 LOG.trace("Adding external IDs to index videos");
                 for (ApiVideoDTO video : queryResults) {
                     video.setExternalIds(this.getExternalIdsForId(video.getVideoType(), video.getId()));
                 }
             }
 
-            if (options.hasDataItem(DataItem.BOXSET)) {
+            if (params.hasDataItem(DataItem.BOXSET)) {
                 LOG.trace("Adding boxed sets to index videos");
                 for (ApiVideoDTO video : queryResults) {
                     video.setBoxedSets(this.getBoxedSetsForId(video.getVideoType(), video.getId()));
                 }
             }
 
+            if (params.hasDataItem(DataItem.TRAILER)) {
+                LOG.trace("Adding trailers to index videos");
+                for (ApiVideoDTO video : queryResults) {
+                    video.setTrailers(this.getTrailersForId(video.getVideoType(), video.getId()));
+                }
+            }
+            
             if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
                 // Create and populate the ID list
                 Map<MetaDataType, List<Long>> ids = new EnumMap<>(MetaDataType.class);
@@ -2015,6 +2028,11 @@ public class ApiDao extends HibernateDao {
                 video.setFiles(getFilesForId(type, options.getId()));
             }
 
+            if (params.hasDataItem(DataItem.TRAILER)) {
+                LOG.trace("Adding trailers for ID {}", options.getId());
+                video.setTrailers(getTrailersForId(type, options.getId()));
+            }
+
             if (MapUtils.isNotEmpty(options.splitJobs())) {
                 Set<String> jobs = options.getJobTypesAsSet();
                 LOG.trace("Adding jobs for ID {}: {}", options.getId(), jobs);
@@ -2133,6 +2151,45 @@ public class ApiDao extends HibernateDao {
             }
         }
         return results;
+    }
+
+    /**
+     * Get a list of the files associated with a video ID.
+     *
+     * @param type
+     * @param id
+     * @return
+     */
+    private List<ApiTrailerDTO> getTrailersForId(MetaDataType type, Long id) {
+        if (MetaDataType.SERIES != type && MetaDataType.MOVIE != type) {
+            // just for movies and series
+            return Collections.emptyList();
+        }
+        
+        // Build the SQL statement
+        StringBuilder sbSQL = new StringBuilder();
+        sbSQL.append("SELECT t.id, t.title, t.url, t.source, t.cache_dir as cacheDir, t.cache_filename as cacheFilename ");
+        sbSQL.append("FROM trailer t ");
+
+        if (type == MetaDataType.SERIES) {
+            sbSQL.append("WHERE t.series_id=:id ");
+        } else {
+            sbSQL.append("WHERE t.videodata_id=:id ");
+        }
+        sbSQL.append(" and t.status ='");
+        sbSQL.append(StatusType.DONE);
+        sbSQL.append("' order by t.id");
+        
+        SqlScalars sqlScalars = new SqlScalars(sbSQL);
+        sqlScalars.addScalar(ID, LongType.INSTANCE);
+        sqlScalars.addScalar(TITLE, StringType.INSTANCE);
+        sqlScalars.addScalar("url", StringType.INSTANCE);
+        sqlScalars.addScalar("source", StringType.INSTANCE);
+        sqlScalars.addScalar("cacheDir", StringType.INSTANCE);
+        sqlScalars.addScalar("cacheFilename", StringType.INSTANCE);
+        sqlScalars.addParameter(ID, id);
+
+        return executeQueryWithTransform(ApiTrailerDTO.class, sqlScalars, null);
     }
 
     private List<ApiAudioCodecDTO> getAudioCodecs(long mediaFileId) {

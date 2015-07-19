@@ -42,7 +42,10 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.award.Award;
 import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.award.SeriesAward;
-import org.yamj.core.database.model.dto.*;
+import org.yamj.core.database.model.dto.AwardDTO;
+import org.yamj.core.database.model.dto.BoxedSetDTO;
+import org.yamj.core.database.model.dto.CreditDTO;
+import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.artwork.ArtworkTools;
@@ -964,7 +967,11 @@ public class MetadataStorageService {
             videoData.getCredits().clear();
             videoData.getBoxedSets().clear();
             videoData.getCertifications().clear();
-
+            
+            for (Trailer trailer : videoData.getTrailers()) {
+                trailer.setStatus(StatusType.DELETED);
+            }
+            
             // clear source based values
             for (String source : videoData.getModifiedSources()) {
                 
@@ -1052,6 +1059,10 @@ public class MetadataStorageService {
             series.getBoxedSets().clear();
             series.getCertifications().clear();
 
+            for (Trailer trailer : series.getTrailers()) {
+                trailer.setStatus(StatusType.DELETED);
+            }
+            
             // clear source based values
             for (String source : series.getModifiedSources()) {
                 

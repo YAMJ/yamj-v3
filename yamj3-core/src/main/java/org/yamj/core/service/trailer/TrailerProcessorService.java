@@ -78,13 +78,6 @@ public class TrailerProcessorService {
             return;
         }
 
-        if (configService.getBooleanProperty("yamj3.trailer.download", Boolean.FALSE)) {
-            LOG.trace("Trailer download is disabled");
-            trailer.setStatus(StatusType.DONE);
-            trailerStorageService.updateTrailer(trailer);
-            return;
-        }
-
         File tempFile;
         try {
             URL web = new URL(trailer.getUrl());

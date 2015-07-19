@@ -386,7 +386,7 @@ public class ScanningScheduler {
     }
 
     private void scanTrailer() {
-        int maxThreads = configService.getIntProperty("yamj3.scheduler.trailerscan.maxThreads", 1);
+        int maxThreads = configService.getIntProperty("yamj3.scheduler.trailerscan.maxThreads", 0);
         if (maxThreads <= 0) {
             if (!messageDisabledTrailer) {
                 messageDisabledTrailer = Boolean.TRUE;

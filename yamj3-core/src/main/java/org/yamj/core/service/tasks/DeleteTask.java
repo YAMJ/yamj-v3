@@ -26,11 +26,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.PostConstruct;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.dto.DeletionDTO;
 import org.yamj.core.database.service.CommonStorageService;
@@ -102,6 +102,9 @@ public class DeleteTask implements ITask {
                 for (Long id : ids) {
                     try {
                         DeletionDTO dto = this.commonStorageService.deleteArtworkLocated(id);
+                        if (CollectionUtils.isNotEmpty(dto.getFilesToDelete())) {
+                            filesToDelete.addAll(dto.getFilesToDelete());
+                        }
                         updateTrigger = (updateTrigger || dto.isUpdateTrigger());
                     } catch (Exception ex) {
                         LOG.warn("Failed to delete located artwork ID: {}", id);
@@ -114,6 +117,33 @@ public class DeleteTask implements ITask {
             }
         } catch (Exception ex) {
             LOG.warn("Failed to retrieve located artworks to delete", ex);
+        }
+
+        try {
+            List<Long> ids = this.commonStorageService.getTrailersToDelete();
+            if (CollectionUtils.isEmpty(ids)) {
+                LOG.trace("No trailers found to delete");
+            } else {
+                boolean updateTrigger = false;
+                
+                // delete stage files
+                for (Long id : ids) {
+                    try {
+                        String fileToDelete  = this.commonStorageService.deleteTrailer(id);
+                        if (fileToDelete != null) {
+                           filesToDelete.add(fileToDelete);
+                        }
+                    } catch (Exception ex) {
+                        LOG.warn("Failed to delete trailer ID: {}", id);
+                        LOG.error("Deletion error", ex);
+                    }
+                }
+                
+                // trigger artwork scan
+                if (updateTrigger) scanningScheduler.triggerScanArtwork();
+            }
+        } catch (Exception ex) {
+            LOG.warn("Failed to retrieve trailers to delete", ex);
         }
 
         // delete orphan persons if allowed

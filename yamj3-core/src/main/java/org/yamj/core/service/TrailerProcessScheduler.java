@@ -66,7 +66,7 @@ public class TrailerProcessScheduler {
     }
     
     private void processTrailer() {
-        int maxThreads = configService.getIntProperty("yamj3.scheduler.trailerprocess.maxThreads", 1);
+        int maxThreads = configService.getIntProperty("yamj3.scheduler.trailerprocess.maxThreads", 0);
         if (maxThreads <= 0) {
             if (!messageDisabled) {
                 messageDisabled = Boolean.TRUE;

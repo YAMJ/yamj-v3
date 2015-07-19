@@ -82,7 +82,7 @@ public class CommonStorageService {
             return Collections.emptySet();
         }
         if (StatusType.DELETED != stageFile.getStatus()) {
-            // status must still be DELETE
+            // status must still be DELETED
             return Collections.emptySet();
         }
 
@@ -590,5 +590,31 @@ public class CommonStorageService {
         sb.append("WHERE not exists (select 1 from videodata_certifications vc where vc.cert_id=id) ");
         sb.append("AND not exists (select 1 from series_certifications sc where sc.cert_id=id) ");
         return this.stagingDao.executeSqlUpdate(sb);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> getTrailersToDelete() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("SELECT t.id FROM Trailer t ");
+        sb.append("WHERE t.status = :delete ");
+
+        Map<String, Object> params = Collections.singletonMap("delete", (Object) StatusType.DELETED);
+        return stagingDao.findByNamedParameters(sb, params);
+    }
+
+    @Transactional
+    public String deleteTrailer(Long id) {
+        // get the trailer
+        Trailer trailer = this.stagingDao.getById(Trailer.class, id);
+
+        String fileToDelete = null;
+        if (trailer != null) {
+            if (StringUtils.isNotBlank(trailer.getCacheFilename())) {
+                String filename = FilenameUtils.concat(trailer.getCacheDirectory(), trailer.getCacheFilename());
+                fileToDelete = this.fileStorageService.getStorageDir(StorageType.TRAILER, filename);
+            }
+            stagingDao.deleteEntity(trailer);
+        }
+        return fileToDelete;
     }
 }
