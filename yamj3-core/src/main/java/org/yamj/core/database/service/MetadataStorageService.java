@@ -970,6 +970,7 @@ public class MetadataStorageService {
             
             for (Trailer trailer : videoData.getTrailers()) {
                 trailer.setStatus(StatusType.DELETED);
+                this.commonDao.updateEntity(trailer);
             }
             
             // clear source based values
@@ -1061,6 +1062,7 @@ public class MetadataStorageService {
 
             for (Trailer trailer : series.getTrailers()) {
                 trailer.setStatus(StatusType.DELETED);
+                this.commonDao.updateEntity(trailer);
             }
             
             // clear source based values
