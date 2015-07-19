@@ -27,5 +27,6 @@ public enum StorageType {
     ARTWORK,
     PHOTO,
     MEDIAINFO,
-    SKIN;
+    SKIN,
+    TRAILER;
 }

@@ -153,6 +153,8 @@ public class TrailerScannerService {
             trailer.setVideoData(videoData);
             trailer.setSource(dto.getSource());
             trailer.setUrl(dto.getUrl());
+            trailer.setTitle(dto.getTitle());
+            trailer.setSourceHash(dto.getSourceHash());
             trailer.setStatus(StatusType.NEW);
             trailers.add(trailer);
         }
@@ -209,6 +211,7 @@ public class TrailerScannerService {
             trailer.setSeries(series);
             trailer.setSource(dto.getSource());
             trailer.setUrl(dto.getUrl());
+            trailer.setSourceHash(dto.getSourceHash());
             trailer.setStatus(StatusType.NEW);
             trailers.add(trailer);
         }

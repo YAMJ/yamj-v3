@@ -67,6 +67,9 @@ public class Trailer extends AbstractAuditable implements Serializable {
     @Column(name = "source", nullable = false, length = 50)
     private String source;
 
+    @Column(name = "source_hash", nullable = false, length = 100)
+    private String sourceHash;
+
     @Column(name = "cache_filename", length = 255)
     private String cacheFilename;
 
@@ -76,6 +79,9 @@ public class Trailer extends AbstractAuditable implements Serializable {
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
+
+    @Column(name = "title", length = 255)
+    private String title;
 
     // GETTER and SETTER
     public VideoData getVideoData() {
@@ -118,6 +124,14 @@ public class Trailer extends AbstractAuditable implements Serializable {
         this.source = source;
     }
 
+    public String getSourceHash() {
+        return sourceHash;
+    }
+
+    public void setSourceHash(String sourceHash) {
+        this.sourceHash = sourceHash;
+    }
+
     public String getCacheFilename() {
         return cacheFilename;
     }
@@ -140,6 +154,14 @@ public class Trailer extends AbstractAuditable implements Serializable {
 
     public void setStatus(StatusType status) {
         this.status = status;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     // EQUALITY CHECKS

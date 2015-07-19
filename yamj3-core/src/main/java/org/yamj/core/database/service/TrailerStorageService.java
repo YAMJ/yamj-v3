@@ -120,6 +120,11 @@ public class TrailerStorageService {
     }
 
     @Transactional
+    public void updateTrailer(Trailer trailer) {
+        this.trailerDao.updateEntity(trailer);
+    }
+
+    @Transactional
     public void updateTrailer(VideoData videoData, List<Trailer> trailers) {
         if (CollectionUtils.isEmpty(videoData.getTrailers())) {
             // no trailers presents; just store all

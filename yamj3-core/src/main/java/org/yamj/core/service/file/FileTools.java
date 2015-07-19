@@ -179,6 +179,17 @@ public class FileTools {
      * @return
      */
     public static boolean copyFile(File src, File dst) {
+        return copyFile(src, dst, false);
+    }
+    
+    /**
+     * Copy the source file to the destination
+     *
+     * @param src
+     * @param dst
+     * @return
+     */
+    public static boolean copyFile(File src, File dst, boolean deleteSource) {
         boolean returnValue = Boolean.FALSE;
 
         if (!src.exists()) {
@@ -199,6 +210,15 @@ public class FileTools {
                 while (p < s) {
                     p += inChannel.transferTo(p, 1024 * 1024, outChannel);
                 }
+                
+                if (deleteSource) {
+                    try  {
+                        src.delete();
+                    } catch (Exception ignore)  {
+                        // ignore any error
+                    }
+                }
+                
                 return Boolean.TRUE;
             } catch (IOException error) {
                 LOG.error("Failed copying file '{}' to '{}'", src, dst);

@@ -32,7 +32,8 @@ public class TrailerDTO {
     private final String source;
     private final String url;
     private final String title;
-
+    private final String sourceHash;
+    
     public TrailerDTO(String source, String url) {
         this(source, url, null);
     }
@@ -41,6 +42,16 @@ public class TrailerDTO {
         this.source = source;
         this.url = url;
         this.title = title;
+        
+        int iHashCode = url.hashCode();
+        this.sourceHash = String.valueOf(iHashCode < 0 ? 0-iHashCode : iHashCode);
+    }
+
+    public TrailerDTO(String source, String url, String title, String sourceHash) {
+        this.source = source;
+        this.url = url;
+        this.title = title;
+        this.sourceHash = sourceHash;
     }
 
     public String getSource() {
@@ -53,6 +64,10 @@ public class TrailerDTO {
 
     public String getTitle() {
         return title;
+    }
+
+    public String getSourceHash() {
+        return sourceHash;
     }
 
     @Override

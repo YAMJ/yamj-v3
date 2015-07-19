@@ -128,7 +128,10 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
                 for (SearchResult item : searchResponse.getItems()) {
                     ResourceId resourceId = item.getId();
                     if (resourceId.getKind().equals("youtube#video")) {
-                        trailers.add(new TrailerDTO(SCANNER_ID, TRAILER_BASE_URL + resourceId.getVideoId(), item.getSnippet().getTitle())); 
+                        trailers.add(new TrailerDTO(SCANNER_ID,
+                                        TRAILER_BASE_URL + resourceId.getVideoId(),
+                                        item.getSnippet().getTitle(),
+                                        resourceId.getVideoId()));
                     }
                 }
                 return trailers;

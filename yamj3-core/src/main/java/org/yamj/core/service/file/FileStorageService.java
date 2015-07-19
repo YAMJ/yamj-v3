@@ -26,9 +26,15 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import javax.annotation.PostConstruct;
-import javax.imageio.*;
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -58,6 +64,8 @@ public class FileStorageService {
     private String storagePathMediaInfo;
     private String storagePathPhoto;
     private String storagePathSkin;
+    private String storagePathTrailer;
+    
     @Autowired
     private PoolingHttpClient httpClient;
 
@@ -103,7 +111,15 @@ public class FileStorageService {
         this.storagePathSkin = FilenameUtils.normalizeNoEndSeparator(FilenameUtils.concat(this.storageResourceDir, value), true);
         this.storagePathSkin += "/";
         LOG.info("Skins storage path set to '{}'", this.storagePathSkin);
-    }
+
+        value = PropertyTools.getProperty("yamj3.file.storage.trailer");
+        if (StringUtils.isBlank(value)) {
+            throw new IllegalArgumentException("Property 'yamj3.file.storage.trailer' not set");
+        }
+        this.storagePathTrailer = FilenameUtils.normalizeNoEndSeparator(FilenameUtils.concat(this.storageResourceDir, value), true);
+        this.storagePathTrailer += "/";
+        LOG.info("Trailer storage path set to '{}'", this.storagePathSkin);
+}
 
     public boolean store(StorageType type, String filename, URL url) throws IOException {
         LOG.debug("Store file {}; source url: {}", filename, url.toString());
@@ -128,6 +144,16 @@ public class FileStorageService {
         File src = new File(stageFile.getFullPath());
         File dst = getFile(type, filename);
         return FileTools.copyFile(src, dst);
+    }
+
+    public boolean store(StorageType type, String filename, File sourceFile) {
+        return this.store(type, filename, sourceFile, false);
+    }
+
+    public boolean store(StorageType type, String filename, File sourceFile, boolean deleteSource) {
+        LOG.debug("Store file {}; source file: {}", filename, sourceFile.getAbsolutePath());
+        File dst = getFile(type, filename);
+        return FileTools.copyFile(sourceFile, dst, deleteSource);
     }
 
     public void storeImage(String filename, StorageType type, BufferedImage bi, ImageFormat imageFormat, int quality) throws Exception {
@@ -271,6 +297,8 @@ public class FileStorageService {
             storageDir = FilenameUtils.concat(this.storagePathMediaInfo, path);
         } else if (StorageType.SKIN == type) {
             storageDir = FilenameUtils.concat(this.storagePathSkin, path);
+        } else if (StorageType.TRAILER == type) {
+            storageDir = FilenameUtils.concat(this.storagePathTrailer, path);
         } else {
             throw new IllegalArgumentException("Unknown storage type " + type);
         }
@@ -335,5 +363,9 @@ public class FileStorageService {
 
     public String getStoragePathSkin() {
         return storagePathSkin;
+    }
+
+    public String getStoragePathTrailer() {
+        return storagePathTrailer;
     }
 }

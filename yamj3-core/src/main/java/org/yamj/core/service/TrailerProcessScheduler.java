@@ -23,16 +23,20 @@
 package org.yamj.core.service;
 
 import java.util.List;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.TrailerStorageService;
+import org.yamj.core.service.trailer.TrailerProcessRunner;
+import org.yamj.core.service.trailer.TrailerProcessorService;
 
 @Component
 public class TrailerProcessScheduler {
@@ -43,7 +47,9 @@ public class TrailerProcessScheduler {
     private ConfigService configService;
     @Autowired
     private TrailerStorageService trailerStorageService;
-
+    @Autowired
+    private TrailerProcessorService trailerProcessorService;
+    
     private boolean messageDisabled = Boolean.FALSE;    // Have we already printed the disabled message
     private AtomicBoolean watchProcess = new AtomicBoolean(false);
 
@@ -53,8 +59,8 @@ public class TrailerProcessScheduler {
         watchProcess.set(true);
     }
 
-    //@Async
-    //@Scheduled(initialDelay = 6000, fixedDelay = 1000)
+    @Async
+    @Scheduled(initialDelay = 6000, fixedDelay = 1000)
     public synchronized void runProcess() {
         if (watchProcess.get()) processTrailer();
     }
@@ -80,12 +86,11 @@ public class TrailerProcessScheduler {
         }
 
         LOG.info("Found {} trailer objects to process; process with {} threads", queueElements.size(), maxThreads);
-        /** TODO
         BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {
-            ArtworkProcessRunner worker = new ArtworkProcessRunner(queue, artworkProcessorService);
+            TrailerProcessRunner worker = new TrailerProcessRunner(queue, trailerProcessorService);
             executor.execute(worker);
         }
         executor.shutdown();
@@ -98,7 +103,6 @@ public class TrailerProcessScheduler {
                 // interrupt in sleep can be ignored
             }
         }
-         */
         
         LOG.debug("Finished trailer processing");
     }

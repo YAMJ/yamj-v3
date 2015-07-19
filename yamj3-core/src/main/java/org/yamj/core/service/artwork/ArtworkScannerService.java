@@ -620,7 +620,7 @@ public class ArtworkScannerService {
             located.setSource("file");
             located.setPriority(1);
             located.setStageFile(stageFile);
-            located.setHashCode(stageFile.getArtworkHashCode());
+            located.setHashCode(stageFile.getHashCode());
 
             if (FileTools.isFileReadable(stageFile)) {
                 located.setStatus(StatusType.NEW);

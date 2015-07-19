@@ -940,7 +940,7 @@ public class MediaImportService {
             located.setStageFile(stageFile);
 
             if (!artwork.getArtworkLocated().contains(located)) {
-                located.setHashCode(stageFile.getArtworkHashCode());
+                located.setHashCode(stageFile.getHashCode());
 
                 if (FileTools.isFileReadable(stageFile)) {
                     located.setStatus(StatusType.NEW);
