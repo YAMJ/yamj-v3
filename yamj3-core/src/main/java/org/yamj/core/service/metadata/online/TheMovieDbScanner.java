@@ -22,15 +22,23 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.omertron.themoviedbapi.model.credits.*;
+import com.omertron.themoviedbapi.model.credits.CreditBasic;
+import com.omertron.themoviedbapi.model.credits.CreditMovieBasic;
+import com.omertron.themoviedbapi.model.credits.MediaCreditCast;
+import com.omertron.themoviedbapi.model.credits.MediaCreditCrew;
 import com.omertron.themoviedbapi.model.media.MediaCreditList;
 import com.omertron.themoviedbapi.model.movie.MovieInfo;
 import com.omertron.themoviedbapi.model.movie.ProductionCompany;
 import com.omertron.themoviedbapi.model.movie.ProductionCountry;
 import com.omertron.themoviedbapi.model.person.PersonCreditList;
 import com.omertron.themoviedbapi.model.person.PersonInfo;
+import com.omertron.themoviedbapi.model.tv.TVEpisodeInfo;
 import com.omertron.themoviedbapi.model.tv.TVInfo;
-import java.util.*;
+import com.omertron.themoviedbapi.model.tv.TVSeasonInfo;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -161,18 +169,14 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         if (OverrideTools.checkOverwriteTagline(videoData, SCANNER_ID)) {
             videoData.setTagline(movieDb.getTagline(), SCANNER_ID);
         }
-
-        if (OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
-            Set<String> countryNames = new LinkedHashSet<>();
-            for (ProductionCountry country : movieDb.getProductionCountries()) {
-                countryNames.add(country.getName());
-            }
-            videoData.setCountryNames(countryNames, SCANNER_ID);
+        
+        if (movieDb.getVoteAverage() > 0) {
+            videoData.addRating(SCANNER_ID, Float.valueOf(movieDb.getVoteAverage() * 10).intValue());
         }
 
         String releaseDateString = movieDb.getReleaseDate();
         if (StringUtils.isNotBlank(releaseDateString) && !"1900-01-01".equals(releaseDateString)) {
-            Date releaseDate = MetadataTools.parseToDate(releaseDateString);
+            final Date releaseDate = MetadataTools.parseToDate(releaseDateString);
             if (releaseDate != null) {
                 if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
                     videoData.setReleaseDate(releaseDate, SCANNER_ID);
@@ -183,28 +187,32 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             }
         }
 
-        if (CollectionUtils.isNotEmpty(movieDb.getGenres())) {
-            if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
-                Set<String> genreNames = new HashSet<>();
-                for (com.omertron.themoviedbapi.model.Genre genre : movieDb.getGenres()) {
-                    if (StringUtils.isNotBlank(genre.getName())) {
-                        genreNames.add(StringUtils.trim(genre.getName()));
-                    }
-                }
-                videoData.setGenreNames(genreNames, SCANNER_ID);
+        if (CollectionUtils.isNotEmpty(movieDb.getProductionCountries()) && OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
+            final Set<String> countryNames = new HashSet<>(movieDb.getProductionCountries().size());
+            for (ProductionCountry country : movieDb.getProductionCountries()) {
+                countryNames.add(country.getName());
             }
+            videoData.setCountryNames(countryNames, SCANNER_ID);
         }
 
-        if (CollectionUtils.isNotEmpty(movieDb.getProductionCompanies())) {
-            if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
-                Set<String> studioNames = new HashSet<>();
-                for (ProductionCompany company : movieDb.getProductionCompanies()) {
-                    if (StringUtils.isNotBlank(company.getName())) {
-                        studioNames.add(StringUtils.trim(company.getName()));
-                    }
+        if (CollectionUtils.isNotEmpty(movieDb.getGenres()) && OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
+            final Set<String> genreNames = new HashSet<>(movieDb.getGenres().size());
+            for (com.omertron.themoviedbapi.model.Genre genre : movieDb.getGenres()) {
+                if (StringUtils.isNotBlank(genre.getName())) {
+                    genreNames.add(StringUtils.trim(genre.getName()));
                 }
-                videoData.setStudioNames(studioNames, SCANNER_ID);
             }
+            videoData.setGenreNames(genreNames, SCANNER_ID);
+        }
+
+        if (CollectionUtils.isNotEmpty(movieDb.getProductionCompanies()) && OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
+            final Set<String> studioNames = new HashSet<>(movieDb.getProductionCompanies().size());
+            for (ProductionCompany company : movieDb.getProductionCompanies()) {
+                if (StringUtils.isNotBlank(company.getName())) {
+                    studioNames.add(StringUtils.trim(company.getName()));
+                }
+            }
+            videoData.setStudioNames(studioNames, SCANNER_ID);
         }
 
         // CAST
@@ -283,7 +291,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                 return ScanResult.MISSING_ID;
             }
 
-            tvInfo = tmdbApiWrapper.getTVInfo(Integer.parseInt(tmdbId), throwTempError);
+            tvInfo = tmdbApiWrapper.getSeriesInfo(Integer.parseInt(tmdbId), throwTempError);
         } catch (TemporaryUnavailableException ex) {
             // check retry
             int maxRetries = configServiceWrapper.getIntProperty("themoviedb.maxRetries.tvshow", 0);
@@ -296,7 +304,11 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             LOG.error("Can't find informations for series '{}'", series.getTitle());
             return ScanResult.ERROR;
         }
-        
+
+        if (OverrideTools.checkOverwriteTitle(series, SCANNER_ID)) {
+            series.setTitleOriginal(tvInfo.getName(), SCANNER_ID);
+        }
+
         if (OverrideTools.checkOverwriteOriginalTitle(series, SCANNER_ID)) {
             series.setTitleOriginal(tvInfo.getOriginalName(), SCANNER_ID);
         }
@@ -309,25 +321,200 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             series.setOutline(tvInfo.getOverview(), SCANNER_ID);
         }
 
-        if (CollectionUtils.isNotEmpty(tvInfo.getOriginCountry()) && OverrideTools.checkOverwriteCountries(series, SCANNER_ID)) {
-            Set<String> countries = new LinkedHashSet<>(tvInfo.getOriginCountry());
-            series.setCountryNames(countries, SCANNER_ID);
+        if (tvInfo.getVoteAverage() > 0) {
+            series.addRating(SCANNER_ID, Float.valueOf(tvInfo.getVoteAverage() * 10).intValue());
         }
 
-        // TODO evaluate following fields
-        tvInfo.getAlternativeTitles();
+        if (CollectionUtils.isNotEmpty(tvInfo.getOriginCountry()) && OverrideTools.checkOverwriteCountries(series, SCANNER_ID)) {
+            final Set<String> countryNames = new HashSet<>(tvInfo.getOriginCountry());
+            series.setCountryNames(countryNames, SCANNER_ID);
+        }
+
+        if (CollectionUtils.isNotEmpty(tvInfo.getGenres()) && OverrideTools.checkOverwriteGenres(series, SCANNER_ID)) {
+            final Set<String> genreNames = new HashSet<>(tvInfo.getGenres().size());
+            for (com.omertron.themoviedbapi.model.Genre genre :  tvInfo.getGenres()) {
+                genreNames.add(genre.getName());
+            }
+            series.setGenreNames(genreNames, SCANNER_ID);
+        }
         
-        tvInfo.getProductionCompanies();
+        if (CollectionUtils.isNotEmpty(tvInfo.getProductionCompanies()) && OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
+            final Set<String> studioNames = new HashSet<>(tvInfo.getProductionCompanies().size());
+            for (ProductionCompany company : tvInfo.getProductionCompanies()) {
+                studioNames.add(company.getName());
+            }
+            series.setStudioNames(studioNames, SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteYear(series, SCANNER_ID)) {
+            if (StringUtils.isNotBlank(tvInfo.getFirstAirDate()) && !"1900-01-01".equals(tvInfo.getFirstAirDate())) {
+                final Date date = MetadataTools.parseToDate(tvInfo.getFirstAirDate());
+                series.setStartYear(MetadataTools.extractYearAsInt(date), SCANNER_ID);
+            }
+            if (StringUtils.isNotBlank(tvInfo.getLastAirDate()) && !"1900-01-01".equals(tvInfo.getLastAirDate())) {
+                final Date date = MetadataTools.parseToDate(tvInfo.getLastAirDate());
+                series.setEndYear(MetadataTools.extractYearAsInt(date), SCANNER_ID);
+            }
+        }
+
+        // SCAN SEASONS
+        scanSeasons(series, tvInfo);
         
-        tvInfo.getFirstAirDate();
-        tvInfo.getLastAirDate();
+        return ScanResult.OK;
+    }
+    
+    private void scanSeasons(Series series, TVInfo tvInfo) {
         
-        tvInfo.getRating();
-        
-        tvInfo.getContentRatings();
-        
-        // TODO scan season and episodes
-        return ScanResult.ERROR;
+        for (Season season : series.getSeasons()) {
+
+            TVSeasonInfo seasonInfo = tmdbApiWrapper.getSeasonInfo(tvInfo.getId(), season.getSeason(), false);
+            MediaCreditList mediaCreditList = tmdbApiWrapper.getSeasonCredits(tvInfo.getId(), season.getSeason(), false);
+
+            // use values from series
+            if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
+                if (seasonInfo == null) {
+                    season.setTitle(tvInfo.getName(), SCANNER_ID);
+                } else {
+                    season.setTitle(seasonInfo.getName(), SCANNER_ID);
+                }
+            }
+            if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
+                season.setTitle(tvInfo.getOriginalName(), SCANNER_ID);
+            }
+            if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
+                if (seasonInfo == null) {
+                    season.setPlot(tvInfo.getOverview(), SCANNER_ID);
+                } else {
+                    season.setPlot(seasonInfo.getOverview(), SCANNER_ID);
+                }
+            }
+            if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
+                if (seasonInfo == null) {
+                    season.setOutline(tvInfo.getOverview(), SCANNER_ID);
+                } else {
+                    season.setOutline(seasonInfo.getOverview(), SCANNER_ID);
+                }
+            }
+
+            if (seasonInfo != null) {
+                
+                if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
+                    if (StringUtils.isNotBlank(seasonInfo.getAirDate()) && !"1900-01-01".equals(seasonInfo.getAirDate())) {
+                        final Date date = MetadataTools.parseToDate(seasonInfo.getAirDate());
+                        season.setPublicationYear(MetadataTools.extractYearAsInt(date), SCANNER_ID);
+                    }
+                }
+                
+                season.setSourceDbId(SCANNER_ID, String.valueOf(seasonInfo.getId()));
+            }
+
+            // mark season as done
+            season.setTvSeasonDone();
+
+            // scan episodes
+            scanEpisodes(season, seasonInfo, mediaCreditList);
+        }
+    }
+    
+    private void scanEpisodes(Season season, TVSeasonInfo seasonInfo, MediaCreditList mediaCreditList) {
+        if (season.isTvEpisodesScanned(SCANNER_ID)) {
+            // nothing to do anymore
+            return;
+        }
+
+        for (VideoData videoData : season.getVideoDatas()) {
+            if (videoData.isTvEpisodeDone(SCANNER_ID)) {
+                // nothing to do if already done
+                continue;
+            }
+
+            // get the episode
+            TVEpisodeInfo episode = null;
+            if (seasonInfo != null) {
+                for (TVEpisodeInfo check : seasonInfo.getEpisodes()) {
+                    if (check.getSeasonNumber() == season.getSeason() && check.getEpisodeNumber() == videoData.getEpisode()) {
+                        episode = check;
+                        break;
+                    }
+                }
+            }
+            
+            if (episode == null) {
+                // mark episode as not found
+                videoData.setTvEpisodeNotFound();
+            } else {
+                videoData.setSourceDbId(SCANNER_ID, String.valueOf(episode.getId()));
+
+                if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
+                    videoData.setTitle(episode.getName(), SCANNER_ID);
+                }
+
+                if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
+                    videoData.setPlot(episode.getOverview(), SCANNER_ID);
+                }
+
+                if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
+                    videoData.setOutline(episode.getOverview(), SCANNER_ID);
+                }
+                
+                if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
+                    if (StringUtils.isNotBlank(episode.getAirDate()) && !"1900-01-01".equals(episode.getAirDate())) {
+                        Date releaseDate = MetadataTools.parseToDate(episode.getAirDate());
+                        videoData.setReleaseDate(releaseDate, SCANNER_ID);
+                    }
+                }
+
+                // CAST
+                if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+                    if (mediaCreditList != null && CollectionUtils.isNotEmpty(mediaCreditList.getCast())) {
+                        for (MediaCreditCast person : mediaCreditList.getCast()) {
+                            CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), JobType.ACTOR, person.getName(), person.getCharacter());
+                            videoData.addCreditDTO(credit);
+                        }
+                    }
+                }
+                
+                // GUEST STARS
+                if (this.configServiceWrapper.isCastScanEnabled(JobType.GUEST_STAR)) {
+                    if (mediaCreditList != null && CollectionUtils.isNotEmpty(mediaCreditList.getGuestStars())) {
+                        for (MediaCreditCast person : mediaCreditList.getGuestStars()) {
+                            CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), JobType.GUEST_STAR, person.getName(), person.getCharacter());
+                            videoData.addCreditDTO(credit);
+                        }
+                    }
+                    for (MediaCreditCast person : episode.getGuestStars()) {
+                        CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), JobType.GUEST_STAR, person.getName(), person.getCharacter());
+                        videoData.addCreditDTO(credit);
+                    }
+                }
+                
+                // CREW
+                if (mediaCreditList != null && CollectionUtils.isNotEmpty(mediaCreditList.getCrew())) {
+                    for (MediaCreditCrew person : mediaCreditList.getCrew()) {
+                        JobType jobType = retrieveJobType(person.getName(), person.getDepartment());
+                        if (!this.configServiceWrapper.isCastScanEnabled(jobType)) {
+                            // scan not enabled for that job
+                            continue;
+                        }
+                        CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), jobType, person.getName(), person.getJob());
+                        videoData.addCreditDTO(credit);
+                    }
+                }
+                
+                for (MediaCreditCrew person : episode.getCrew()) {
+                    JobType jobType = retrieveJobType(person.getName(), person.getDepartment());
+                    if (!this.configServiceWrapper.isCastScanEnabled(jobType)) {
+                        // scan not enabled for that job
+                        continue;
+                    }
+                    CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), jobType, person.getName(), person.getJob());
+                    videoData.addCreditDTO(credit);
+                }
+
+                // mark episode as done
+                videoData.setTvEpisodeDone();
+            }
+        }
     }
     
     @Override

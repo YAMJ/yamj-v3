@@ -30,9 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import org.yamj.core.database.model.FilmParticipation;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.dto.CreditDTO;
 
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
 public class TheMovieDbScannerTest extends AbstractJUnit4SpringContextTests {
@@ -70,11 +69,33 @@ public class TheMovieDbScannerTest extends AbstractJUnit4SpringContextTests {
     }
 
     @Test
-    public void testFindSeriesId() {
-        LOG.info("testFindSeriesId");
+    public void testGetSeriesId() {
+        LOG.info("testGetSeriesId");
         Series series = new Series();
         series.setTitle("Game Of Thrones - Das Lied von Eis und Feuer", SCANNER_ID);
         String id = tmdbScanner.getSeriesId(series);
         assertEquals("1399", id);
+    }
+
+    @Test
+    public void testScanSeries() {
+        LOG.info("testScanSeries");
+        Series series = new Series();
+        series.setSourceDbId(SCANNER_ID, "1399");
+        Season season = new Season();
+        season.setSeason(1);
+        season.setSeries(series);
+        series.getSeasons().add(season);
+        VideoData episode = new VideoData();
+        episode.setEpisode(5);
+        episode.setSeason(season);
+        season.getVideoDatas().add(episode);
+        tmdbScanner.scan(series);
+        
+        System.err.println(episode.getTitle());
+        for (CreditDTO credit : episode.getCreditDTOS()) {
+            System.err.println(credit);
+        }
+        
     }
 }

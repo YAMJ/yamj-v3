@@ -34,6 +34,7 @@ import com.omertron.themoviedbapi.model.person.PersonFind;
 import com.omertron.themoviedbapi.model.person.PersonInfo;
 import com.omertron.themoviedbapi.model.tv.TVBasic;
 import com.omertron.themoviedbapi.model.tv.TVInfo;
+import com.omertron.themoviedbapi.model.tv.TVSeasonInfo;
 import com.omertron.themoviedbapi.results.ResultList;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -215,7 +216,7 @@ public class TheMovieDbApiWrapper {
         return movieDb;
     }
 
-    public TVInfo getTVInfo(int tmdbId, boolean throwTempError) {
+    public TVInfo getSeriesInfo(int tmdbId, boolean throwTempError) {
         TVInfo tvInfo = null;
         try {
             String defaultLanguage = configService.getProperty("themoviedb.language", "en");
@@ -228,6 +229,35 @@ public class TheMovieDbApiWrapper {
             LOG.trace("TheMovieDb error", ex);
         }
         return tvInfo;
+    }
+
+    public TVSeasonInfo getSeasonInfo(int tmdbId, int season, boolean throwTempError) {
+        TVSeasonInfo tvSeasonInfo = null;
+        try {
+            String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+            tvSeasonInfo = tmdbApi.getSeasonInfo(tmdbId, season, defaultLanguage);
+        } catch (MovieDbException ex) {
+            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+                throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
+            }
+            LOG.error("Failed to get episodes using TMDb ID {} and season {}: {}", tmdbId, season, ex.getMessage());
+            LOG.trace("TheMovieDb error", ex);
+        }
+        return tvSeasonInfo;
+    }
+
+    public MediaCreditList getSeasonCredits(int tmdbId, int season, boolean throwTempError) {
+        MediaCreditList mediaCreditList = null;
+        try {
+            mediaCreditList = tmdbApi.getSeasonCredits(tmdbId, season);
+        } catch (MovieDbException ex) {
+            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+                throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
+            }
+            LOG.error("Failed to get credits using TMDb ID {} and season {}: {}", tmdbId, season, ex.getMessage());
+            LOG.trace("TheMovieDb error", ex);
+        }
+        return mediaCreditList;
     }
 
     public MovieInfo getMovieInfoByIMDB(String imdbId, boolean throwTempError) {
