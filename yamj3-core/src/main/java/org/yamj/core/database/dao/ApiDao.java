@@ -34,14 +34,20 @@ import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.builder.*;
+import org.yamj.core.api.model.builder.DataItem;
+import org.yamj.core.api.model.builder.DataItemTools;
+import org.yamj.core.api.model.builder.IndexParams;
+import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.type.*;
+import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Repository("apiDao")
@@ -2890,9 +2896,10 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("FROM season_ids ids");
             sqlScalars.addToSql("WHERE ids.season_id=:id");
         } else if (type == MetaDataType.PERSON) {
-            sqlScalars.addToSql("SELECT ids.person_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb, 0 as skipped");
-            sqlScalars.addToSql("FROM person_ids ids");
-            sqlScalars.addToSql("WHERE ids.person_id=:id");
+            sqlScalars.addToSql("SELECT ids.person_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb,");
+            sqlScalars.addToSql("coalesce(p.skip_scan_api,'') like concat('%',ids.sourcedb,'%') as skipped");
+            sqlScalars.addToSql("FROM person p, person_ids ids");
+            sqlScalars.addToSql("WHERE p.id=:id AND ids.person_id=p.id");
         } else {
             sqlScalars.addToSql("SELECT ids.videodata_id AS id, ids.sourcedb_id AS externalId, ids.sourcedb AS sourcedb,");
             sqlScalars.addToSql("concat(coalesce(vd.skip_scan_api,''),';',coalesce(vd.skip_scan_nfo,'')) like concat('%',ids.sourcedb,'%') as skipped");
