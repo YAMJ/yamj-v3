@@ -34,21 +34,14 @@ import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.builder.DataItem;
-import org.yamj.core.api.model.builder.DataItemTools;
-import org.yamj.core.api.model.builder.IndexParams;
-import org.yamj.core.api.model.builder.SqlScalars;
+import org.yamj.core.api.model.builder.*;
 import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
-import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.database.model.type.FileType;
-import org.yamj.core.database.model.type.JobType;
-import org.yamj.core.database.model.type.ParticipationType;
+import org.yamj.core.database.model.type.*;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Repository("apiDao")
@@ -3256,16 +3249,5 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("decade", IntegerType.INSTANCE);
 
         return executeQueryWithTransform(ApiYearDecadeDTO.class, sqlScalars, wrapper);
-    }
-    
-    public void rescanArtwork(List<Artwork> artworks) {
-        for (Artwork artwork : artworks) {
-            this.rescanArtwork(artwork);
-        }
-    }
-
-    public void rescanArtwork(Artwork artwork) {
-        artwork.setStatus(StatusType.UPDATED);
-        this.updateEntity(artwork);
     }
 }

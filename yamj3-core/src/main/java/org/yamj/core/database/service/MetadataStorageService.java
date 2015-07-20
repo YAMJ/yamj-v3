@@ -825,7 +825,7 @@ public class MetadataStorageService {
 
     private void updateLocatedArtwork(VideoData videoData) {
         if (videoData.hasModifiedSource()) {
-            this.artworkDao.markLocatedArtworkAsDeleted(videoData.getArtworks(), videoData.getModifiedSources());
+            this.commonDao.markAsDeleted(videoData.getArtworks(), videoData.getModifiedSources());
         }
         
         if (MapUtils.isNotEmpty(videoData.getPosterURLS())) {
@@ -840,11 +840,11 @@ public class MetadataStorageService {
 
     private void updateLocatedArtwork(Series series) {
         if (series.hasModifiedSource()) {
-            this.artworkDao.markLocatedArtworkAsDeleted(series.getArtworks(), series.getModifiedSources());
+            this.commonDao.markAsDeleted(series.getArtworks(), series.getModifiedSources());
             for (Season season : series.getSeasons()) {
-                this.artworkDao.markLocatedArtworkAsDeleted(season.getArtworks(), series.getModifiedSources());
+                this.commonDao.markAsDeleted(season.getArtworks(), series.getModifiedSources());
                 for (VideoData videoData : season.getVideoDatas()) {
-                    this.artworkDao.markLocatedArtworkAsDeleted(videoData.getArtworks(), series.getModifiedSources());
+                    this.commonDao.markAsDeleted(videoData.getArtworks(), series.getModifiedSources());
                 }
             }
         }
@@ -861,7 +861,7 @@ public class MetadataStorageService {
 
     private void updateLocatedArtwork(Person person) {
         if (person.hasModifiedSource()) {
-            this.artworkDao.markLocatedArtworkAsDeleted(person.getPhoto(), person.getModifiedSources());
+            this.commonDao.markAsDeleted(person.getPhoto(), person.getModifiedSources());
         }
         
         if (MapUtils.isNotEmpty(person.getPhotoURLS())) {
@@ -976,17 +976,14 @@ public class MetadataStorageService {
         if (videoData.hasModifiedSource()) { 
             
             // mark located artwork as deleted
-            this.artworkDao.markLocatedArtworkAsDeleted(videoData.getArtworks(), videoData.getModifiedSources());
+            this.commonDao.markAsDeleted(videoData.getArtworks(), videoData.getModifiedSources());
+            // mark trailers as deleted
+            this.commonDao.markAsDeleted(videoData.getTrailers());
 
             // clear dependencies
             videoData.getCredits().clear();
             videoData.getBoxedSets().clear();
             videoData.getCertifications().clear();
-            
-            for (Trailer trailer : videoData.getTrailers()) {
-                trailer.setStatus(StatusType.DELETED);
-                this.commonDao.updateEntity(trailer);
-            }
             
             // clear source based values
             for (String source : videoData.getModifiedSources()) {
@@ -1034,7 +1031,7 @@ public class MetadataStorageService {
         if (season.hasModifiedSource()) { 
             
             // mark located artwork as deleted
-            this.artworkDao.markLocatedArtworkAsDeleted(season.getArtworks(), season.getModifiedSources());
+            this.commonDao.markAsDeleted(season.getArtworks(), season.getModifiedSources());
     
             // clear source based values
             for (String source : season.getModifiedSources()) {
@@ -1069,16 +1066,13 @@ public class MetadataStorageService {
         if (series.hasModifiedSource()) { 
             
             // mark located artwork as deleted
-            this.artworkDao.markLocatedArtworkAsDeleted(series.getArtworks(), series.getModifiedSources());
+            this.commonDao.markAsDeleted(series.getArtworks(), series.getModifiedSources());
+            // mark trailers as deleted
+            this.commonDao.markAsDeleted(series.getTrailers());
 
             // clear dependencies
             series.getBoxedSets().clear();
             series.getCertifications().clear();
-
-            for (Trailer trailer : series.getTrailers()) {
-                trailer.setStatus(StatusType.DELETED);
-                this.commonDao.updateEntity(trailer);
-            }
             
             // clear source based values
             for (String source : series.getModifiedSources()) {
@@ -1132,7 +1126,7 @@ public class MetadataStorageService {
         if (person.hasModifiedSource()) { 
             
             // mark located artwork as deleted
-            this.artworkDao.markLocatedArtworkAsDeleted(person.getPhoto(), person.getModifiedSources());
+            this.commonDao.markAsDeleted(person.getPhoto(), person.getModifiedSources());
             
             // clear dependencies
             person.getFilmography().clear();
@@ -1157,7 +1151,7 @@ public class MetadataStorageService {
         }
 
         person.setStatus(StatusType.UPDATED);
-        person.setFilmographyStatus(StatusType.UPDATED);
+        person.setFilmographyStatus(StatusType.NEW);
         this.commonDao.updateEntity(person);
     }
 }

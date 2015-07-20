@@ -53,7 +53,7 @@ public class JsonApiStorageService {
     @Autowired
     private MediaDao mediaDao;
     @Autowired
-    private ApiDao artworkDao;
+    private ArtworkDao artworkDao;
     @Autowired
     private ApiDao apiDao;
     @Autowired
@@ -437,11 +437,10 @@ public class JsonApiStorageService {
         if (id != null && id > 0L) {
             switch (type) {
                 case PERSON:
-                    Person person = commonDao.getPerson(id);
+                    Person person = commonDao.getById(Person.class, id);
                     if (person != null) {
-                        artworkDao.rescanArtwork(person.getPhoto());
-                        person.setStatus(StatusType.UPDATED);
-                        commonDao.updateEntity(person);
+                        commonDao.markAsUpdated(person.getPhoto());
+                        commonDao.markAsUpdated(person);
                         rescan = true;
                     }
                     break;
@@ -456,19 +455,15 @@ public class JsonApiStorageService {
                 case SERIES:
                     Series series = commonDao.getSeries(id);
                     if (series != null) {
-                        artworkDao.rescanArtwork(series.getArtworks());
-                        series.setStatus(StatusType.UPDATED);
-                        series.setTrailerStatus(StatusType.UPDATED);
-                        commonDao.updateEntity(series);
+                        commonDao.markAsUpdated(series.getArtworks());
+                        commonDao.markAsUpdated(series);
                         rescan = true;
                         for (Season season : series.getSeasons()) {
-                            artworkDao.rescanArtwork(season.getArtworks());
-                            season.setStatus(StatusType.UPDATED);
-                            commonDao.updateEntity(season);
+                            commonDao.markAsUpdated(season.getArtworks());
+                            commonDao.markAsUpdated(season);
                             for (VideoData episode : season.getVideoDatas()) {
-                                artworkDao.rescanArtwork(episode.getArtworks());
-                                episode.setStatus(StatusType.UPDATED);
-                                commonDao.updateEntity(episode);
+                                commonDao.markAsUpdated(episode.getArtworks());
+                                commonDao.markAsUpdated(episode);
                             }
                         }
                     }
@@ -476,13 +471,11 @@ public class JsonApiStorageService {
                 case SEASON:
                     Season season = commonDao.getSeason(id);
                     if (season != null) {
-                        artworkDao.rescanArtwork(season.getArtworks());
-                        season.setStatus(StatusType.UPDATED);
-                        commonDao.updateEntity(season);
+                        commonDao.markAsUpdated(season.getArtworks());
+                        commonDao.markAsUpdated(season);
                         for (VideoData episode : season.getVideoDatas()) {
-                            artworkDao.rescanArtwork(episode.getArtworks());
-                            episode.setStatus(StatusType.UPDATED);
-                            commonDao.updateEntity(episode);
+                            commonDao.markAsUpdated(episode.getArtworks());
+                            commonDao.markAsUpdated(episode);
                         }
                         rescan = true;
                     }
@@ -491,12 +484,8 @@ public class JsonApiStorageService {
                 case EPISODE:
                     VideoData videoData = commonDao.getVideoData(id);
                     if (videoData != null) {
-                        artworkDao.rescanArtwork(videoData.getArtworks());
-                        videoData.setStatus(StatusType.UPDATED);
-                        if (videoData.isMovie()) {
-                            videoData.setTrailerStatus(StatusType.UPDATED);
-                        }
-                        commonDao.updateEntity(videoData);
+                        commonDao.markAsUpdated(videoData.getArtworks());
+                        commonDao.markAsUpdated(videoData);
                         rescan = true;
                     }
                     break;
@@ -537,30 +526,30 @@ public class JsonApiStorageService {
         if (id != null && id > 0L) {
             switch (type) {
                 case PERSON:
-                    Person person = commonDao.getPerson(id);
+                    Person person = commonDao.getById(Person.class, id);
                     if (person != null) {
-                        this.artworkDao.rescanArtwork(person.getPhoto());
+                        this.commonDao.markAsUpdated(person.getPhoto());
                         rescan = true;
                     }
                     break;
                 case SERIES:
                     Series series = commonDao.getSeries(id);
                     if (series != null) {
-                        this.artworkDao.rescanArtwork(series.getArtworks());
+                        this.commonDao.markAsUpdated(series.getArtworks());
                         rescan = true;
                     }
                     break;
                 case SEASON:
                     Season season = commonDao.getSeason(id);
                     if (season != null) {
-                        this.artworkDao.rescanArtwork(season.getArtworks());
+                        this.commonDao.markAsUpdated(season.getArtworks());
                         rescan = true;
                     }
                     break;
                 case BOXSET:
                     BoxedSet boxedSet = commonDao.getBoxedSet(id);
                     if (boxedSet != null) {
-                        this.artworkDao.rescanArtwork(boxedSet.getArtworks());
+                        this.commonDao.markAsUpdated(boxedSet.getArtworks());
                         rescan = true;
                     }
                     break;
@@ -568,7 +557,7 @@ public class JsonApiStorageService {
                 case EPISODE:
                     VideoData videoData = commonDao.getVideoData(id);
                     if (videoData != null) {
-                        this.artworkDao.rescanArtwork(videoData.getArtworks());
+                        this.commonDao.markAsUpdated(videoData.getArtworks());
                         rescan = true;
                     }
                     break;
@@ -659,7 +648,7 @@ public class JsonApiStorageService {
         }
 
         if (MetaDataType.PERSON.equals(type)) {
-            Person person = commonDao.getPerson(id); 
+            Person person = commonDao.getById(Person.class, id);
             if (person == null) {
                 return new ApiStatus(404, "Person for ID " + id + " not found");
             }
@@ -668,7 +657,7 @@ public class JsonApiStorageService {
                 this.metadataStorageService.handleModifiedSources(person);
             }
         } else if (MetaDataType.SERIES.equals(type)) {
-            Series series = commonDao.getSeries(id); 
+            Series series =  commonDao.getById(Series.class, id);
             if (series == null) {
                 return new ApiStatus(404, "Series for ID " + id + " not found");
             }
@@ -677,7 +666,7 @@ public class JsonApiStorageService {
                 this.metadataStorageService.handleModifiedSources(series);
             }
         } else if (MetaDataType.SEASON.equals(type)) {
-            Season season = commonDao.getSeason(id); 
+            Season season = commonDao.getById(Season.class, id);
             if (season == null) {
                 return new ApiStatus(404, "Season for ID " + id + " not found");
             }
@@ -686,7 +675,7 @@ public class JsonApiStorageService {
                 this.metadataStorageService.handleModifiedSources(season);
             }
         } else {
-            VideoData videoData = commonDao.getVideoData(id);
+            VideoData videoData = commonDao.getById(VideoData.class, id);
             if (videoData == null) {
                 return new ApiStatus(404, "Video for ID " + id + " not found");
             } else if (MetaDataType.EPISODE.equals(type) && videoData.isMovie()) {

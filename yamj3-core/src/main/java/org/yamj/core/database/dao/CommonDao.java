@@ -22,9 +22,7 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.LongType;
@@ -548,4 +546,107 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(Long.class, sqlScalars, null);
     }
 
+
+    public void markAsDeleted(List<Artwork> artworks, Set<String> sources) {
+        for (Artwork artwork : artworks) {
+            markAsDeleted(artwork, sources);
+       }
+    }
+
+    public void markAsDeleted(Artwork artwork, Set<String> sources) {
+        markAsUpdated(artwork);
+        for (ArtworkLocated located : artwork.getArtworkLocated()) {
+            if (located.getUrl() != null 
+                && sources.contains(located.getSource())
+                && !StatusType.DELETED.equals(artwork.getStatus()))
+            {
+                located.setStatus(StatusType.DELETED);
+                this.updateEntity(located);
+            }
+        }
+    }
+
+    public void markAsDeleted(List<Trailer> trailers) {
+        for (Trailer trailer : trailers) {
+            markAsDeleted(trailer);
+       }
+    }
+
+    public void markAsDeleted(Trailer trailer) {
+        if (!StatusType.DELETED.equals(trailer.getStatus())) {
+            trailer.setStatus(StatusType.DELETED);
+            this.updateEntity(trailer);
+        }
+    }
+    
+    public void markAsUpdated(List<Artwork> artworks) {
+        for (Artwork artwork : artworks) {
+            this.markAsUpdated(artwork);
+        }
+    }
+
+    public void markAsUpdated(Artwork artwork) {
+        if (!StatusType.NEW.equals(artwork.getStatus()) && !StatusType.UPDATED.equals(artwork.getStatus())) {
+            artwork.setStatus(StatusType.UPDATED);
+            this.updateEntity(artwork);
+        }
+    }
+
+    public void markAsUpdated(Person person) {
+        if (!StatusType.NEW.equals(person.getStatus()) && !StatusType.UPDATED.equals(person.getStatus())) {
+            person.setStatus(StatusType.UPDATED);
+            if (!StatusType.NEW.equals(person.getFilmographyStatus()) && !StatusType.UPDATED.equals(person.getFilmographyStatus())) {
+                person.setFilmographyStatus(StatusType.UPDATED);
+            }
+            this.updateEntity(person);
+        }
+    }
+
+    public void markAsUpdatedForFilmography(Person person) {
+        if (!StatusType.NEW.equals(person.getFilmographyStatus()) && !StatusType.UPDATED.equals(person.getFilmographyStatus())) {
+            person.setFilmographyStatus(StatusType.UPDATED);
+            this.updateEntity(person);
+        }
+    }
+
+    public void markAsUpdated(VideoData videoData) {
+        if (!StatusType.NEW.equals(videoData.getStatus()) && !StatusType.UPDATED.equals(videoData.getStatus())) {
+            videoData.setStatus(StatusType.UPDATED);
+            if (!StatusType.NEW.equals(videoData.getTrailerStatus()) && !StatusType.UPDATED.equals(videoData.getTrailerStatus())) {
+                videoData.setTrailerStatus(StatusType.UPDATED);
+            }
+            this.updateEntity(videoData);
+        }
+    }
+
+    public void markAsUpdatedForTrailers(VideoData videoData) {
+        if (!StatusType.NEW.equals(videoData.getTrailerStatus()) && !StatusType.UPDATED.equals(videoData.getTrailerStatus())) {
+            videoData.setTrailerStatus(StatusType.UPDATED);
+            this.updateEntity(videoData);
+        }
+    }
+
+    public void markAsUpdated(Season season) {
+        if (!StatusType.NEW.equals(season.getStatus()) && !StatusType.UPDATED.equals(season.getStatus())) {
+            season.setStatus(StatusType.UPDATED);
+            this.updateEntity(season);
+        }
+    }
+
+    public void markAsUpdated(Series series) {
+        if (!StatusType.NEW.equals(series.getStatus()) && !StatusType.UPDATED.equals(series.getStatus())) {
+            series.setStatus(StatusType.UPDATED);
+            if (!StatusType.NEW.equals(series.getTrailerStatus()) && !StatusType.UPDATED.equals(series.getTrailerStatus())) {
+                series.setTrailerStatus(StatusType.UPDATED);
+            }
+            this.updateEntity(series);
+        }
+    }
+
+    public void markAsUpdatedForTrailers(Series series) {
+        if (!StatusType.NEW.equals(series.getTrailerStatus()) && !StatusType.UPDATED.equals(series.getTrailerStatus())) {
+            series.setTrailerStatus(StatusType.UPDATED);
+            this.updateEntity(series);
+        }
+    }
 }

@@ -31,10 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.TrailerDao;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.Trailer;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 
 @Service("trailerStorageService")
@@ -138,9 +135,8 @@ public class TrailerStorageService {
                 } else {
                     // find matching stored trailer and update status if needed
                     for (Trailer stored : videoData.getTrailers()) {
-                        if (stored.equals(trailer) && StatusType.DELETED.equals(stored.getStatus())) {
-                            stored.setStatus(StatusType.UPDATED);
-                            trailerDao.updateEntity(stored);
+                        if (stored.equals(trailer)) {
+                            trailerDao.markDeletedAsUpdated(trailer);
                             break;
                         }
                     }
@@ -183,9 +179,8 @@ public class TrailerStorageService {
                 } else {
                     // find matching stored trailer and update status if needed
                     for (Trailer stored : series.getTrailers()) {
-                        if (stored.equals(trailer) && StatusType.DELETED.equals(stored.getStatus())) {
-                            stored.setStatus(StatusType.UPDATED);
-                            trailerDao.updateEntity(stored);
+                        if (stored.equals(trailer)) {
+                            trailerDao.markDeletedAsUpdated(trailer);
                             break;
                         }
                     }

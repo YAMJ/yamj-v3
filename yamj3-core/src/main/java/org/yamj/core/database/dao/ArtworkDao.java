@@ -25,7 +25,6 @@ package org.yamj.core.database.dao;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -33,10 +32,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.ArtworkGenerated;
-import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.ArtworkProfile;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -165,42 +161,21 @@ public class ArtworkDao extends HibernateDao {
         return criteria.list();
     }
 
-    public void saveArtworkLocated(Artwork artwork, ArtworkLocated located) {
-        if (!artwork.getArtworkLocated().contains(located)) {
+    public void saveArtworkLocated(Artwork artwork, ArtworkLocated scannedLocated) {
+        if (!artwork.getArtworkLocated().contains(scannedLocated)) {
             // just store if not contained before
-            artwork.getArtworkLocated().add(located);
-            this.saveEntity(located);
+            artwork.getArtworkLocated().add(scannedLocated);
+            this.saveEntity(scannedLocated);
         } else {
             // find matching stored located artwork and update status if needed
             for (ArtworkLocated stored : artwork.getArtworkLocated()) {
-                if (stored.equals(located) && StatusType.DELETED.equals(stored.getStatus())) {
-                    stored.setStatus(StatusType.UPDATED);
-                    this.updateEntity(stored);
+                if (stored.equals(scannedLocated)) {
+                    if (StatusType.DELETED.equals(stored.getStatus())) {
+                        stored.setStatus(StatusType.UPDATED);
+                        this.updateEntity(stored);
+                    }
                     break;
                 }
-            }
-        }
-    }
-
-    public void markLocatedArtworkAsDeleted(List<Artwork> artworks, Set<String> sources) {
-        for (Artwork artwork : artworks) {
-            markLocatedArtworkAsDeleted(artwork, sources);
-       }
-    }
-
-    public void markLocatedArtworkAsDeleted(Artwork artwork, Set<String> sources) {
-        // nothing to do if status is NEW cause then no located artwork fetched
-        if (StatusType.NEW.equals(artwork.getStatus())) return;
-
-        if (!StatusType.UPDATED.equals(artwork.getStatus())) {
-            artwork.setStatus(StatusType.UPDATED);
-            this.updateEntity(artwork);
-        }
-        
-        for (ArtworkLocated located : artwork.getArtworkLocated()) {
-            if (located.getUrl() != null && sources.contains(located.getSource())) {
-                located.setStatus(StatusType.DELETED);
-                this.updateEntity(located);
             }
         }
     }
