@@ -38,10 +38,7 @@ import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.config.ConfigService;
-import org.yamj.core.database.dao.ApiDao;
-import org.yamj.core.database.dao.CommonDao;
-import org.yamj.core.database.dao.MediaDao;
-import org.yamj.core.database.dao.PlayerDao;
+import org.yamj.core.database.dao.*;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.type.SourceType;
@@ -442,6 +439,7 @@ public class JsonApiStorageService {
                 case PERSON:
                     Person person = commonDao.getPerson(id);
                     if (person != null) {
+                        artworkDao.rescanArtwork(person.getPhoto());
                         person.setStatus(StatusType.UPDATED);
                         commonDao.updateEntity(person);
                         rescan = true;
@@ -458,14 +456,17 @@ public class JsonApiStorageService {
                 case SERIES:
                     Series series = commonDao.getSeries(id);
                     if (series != null) {
+                        artworkDao.rescanArtwork(series.getArtworks());
                         series.setStatus(StatusType.UPDATED);
                         series.setTrailerStatus(StatusType.UPDATED);
                         commonDao.updateEntity(series);
                         rescan = true;
                         for (Season season : series.getSeasons()) {
+                            artworkDao.rescanArtwork(season.getArtworks());
                             season.setStatus(StatusType.UPDATED);
                             commonDao.updateEntity(season);
                             for (VideoData episode : season.getVideoDatas()) {
+                                artworkDao.rescanArtwork(episode.getArtworks());
                                 episode.setStatus(StatusType.UPDATED);
                                 commonDao.updateEntity(episode);
                             }
@@ -475,9 +476,11 @@ public class JsonApiStorageService {
                 case SEASON:
                     Season season = commonDao.getSeason(id);
                     if (season != null) {
+                        artworkDao.rescanArtwork(season.getArtworks());
                         season.setStatus(StatusType.UPDATED);
                         commonDao.updateEntity(season);
                         for (VideoData episode : season.getVideoDatas()) {
+                            artworkDao.rescanArtwork(episode.getArtworks());
                             episode.setStatus(StatusType.UPDATED);
                             commonDao.updateEntity(episode);
                         }
@@ -488,6 +491,7 @@ public class JsonApiStorageService {
                 case EPISODE:
                     VideoData videoData = commonDao.getVideoData(id);
                     if (videoData != null) {
+                        artworkDao.rescanArtwork(videoData.getArtworks());
                         videoData.setStatus(StatusType.UPDATED);
                         if (videoData.isMovie()) {
                             videoData.setTrailerStatus(StatusType.UPDATED);

@@ -42,10 +42,7 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.award.Award;
 import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.award.SeriesAward;
-import org.yamj.core.database.model.dto.AwardDTO;
-import org.yamj.core.database.model.dto.BoxedSetDTO;
-import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.dto.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.artwork.ArtworkTools;
@@ -1160,6 +1157,7 @@ public class MetadataStorageService {
         }
 
         person.setStatus(StatusType.UPDATED);
+        person.setFilmographyStatus(StatusType.UPDATED);
         this.commonDao.updateEntity(person);
     }
 }
