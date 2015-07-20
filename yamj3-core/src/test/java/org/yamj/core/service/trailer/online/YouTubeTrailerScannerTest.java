@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.trailer;
+package org.yamj.core.service.trailer.online;
 
 import java.util.List;
 import org.junit.Test;
