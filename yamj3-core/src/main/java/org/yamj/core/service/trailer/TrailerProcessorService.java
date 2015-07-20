@@ -77,6 +77,12 @@ public class TrailerProcessorService {
             trailerStorageService.updateTrailer(trailer);
             return;
         }
+        if (!configService.getBooleanProperty("yamj3.trailer.download", Boolean.TRUE)) {
+            // no trailer download
+            trailer.setStatus(StatusType.DONE);
+            trailerStorageService.updateTrailer(trailer);
+            return;
+        }
 
         File tempFile;
         try {

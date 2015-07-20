@@ -343,10 +343,6 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(Certification.class, sqlScalars, wrapper);
     }
 
-    public BoxedSet getBoxedSet(Long id) {
-        return getById(BoxedSet.class, id);
-    }
-
     public BoxedSet getBoxedSet(String name) {
         return getByNaturalIdCaseInsensitive(BoxedSet.class, "name", name);
     }
@@ -500,22 +496,6 @@ public class CommonDao extends HibernateDao {
             award = new Award(awardDTO.getEvent(), awardDTO.getCategory(), awardDTO.getSource());
             this.saveEntity(award);
         }
-    }
-
-    public VideoData getVideoData(Long id) {
-        return getById(VideoData.class, id);
-    }
-
-    public Season getSeason(Long id) {
-        return getById(Season.class, id);
-    }
-    
-    public Series getSeries(Long id) {
-        return getById(Series.class, id);
-    }
-
-    public Person getPerson(Long id) {
-        return getById(Person.class, id);
     }
 
     public List<Long> getSeasonVideoIds(Long id) {
