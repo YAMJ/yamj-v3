@@ -2944,7 +2944,24 @@ public class ApiDao extends HibernateDao {
         OptionsBoxedSet options = (OptionsBoxedSet) wrapper.getOptions();
         SqlScalars sqlScalars = generateSqlForBoxedSet(options);
 
-        return executeQueryWithTransform(ApiBoxedSetDTO.class, sqlScalars, wrapper);
+        List<ApiBoxedSetDTO> boxedSets = executeQueryWithTransform(ApiBoxedSetDTO.class, sqlScalars, wrapper);
+        
+        if (options.hasDataItem(DataItem.ARTWORK)) {
+            for (ApiBoxedSetDTO boxedSet : boxedSets) {
+                Map<Long, List<ApiArtworkDTO>> artworkList;
+                if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
+                    artworkList = getArtworkForId(MetaDataType.BOXSET, boxedSet.getId(), options.getArtworkTypes());
+                } else {
+                    artworkList = getArtworkForId(MetaDataType.BOXSET, boxedSet.getId());
+                }
+    
+                if (artworkList.containsKey(boxedSet.getId())) {
+                    boxedSet.setArtwork(artworkList.get(boxedSet.getId()));
+                }
+            }
+        }
+        
+        return boxedSets;
     }
 
     public ApiBoxedSetDTO getBoxedSet(ApiWrapperSingle<ApiBoxedSetDTO> wrapper) {
@@ -2955,12 +2972,10 @@ public class ApiDao extends HibernateDao {
         if (CollectionUtils.isEmpty(boxsets)) {
             return null;
         }
-
+        
+        // get the first boxed set which has been retrieved by the given id
         ApiBoxedSetDTO boxedSet = boxsets.get(0);
-        if (boxedSet.getMemberCount() == null || boxedSet.getMemberCount() <= 0) {
-            return boxedSet;
-        }
-
+        
         if (options.hasDataItem(DataItem.MEMBER)) {
             // get members
             sqlScalars = new SqlScalars();
