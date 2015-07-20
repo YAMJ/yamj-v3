@@ -33,6 +33,7 @@ import com.omertron.themoviedbapi.model.person.PersonCreditList;
 import com.omertron.themoviedbapi.model.person.PersonFind;
 import com.omertron.themoviedbapi.model.person.PersonInfo;
 import com.omertron.themoviedbapi.model.tv.TVBasic;
+import com.omertron.themoviedbapi.model.tv.TVInfo;
 import com.omertron.themoviedbapi.results.ResultList;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -212,6 +213,21 @@ public class TheMovieDbApiWrapper {
             LOG.trace("TheMovieDb error", ex);
         }
         return movieDb;
+    }
+
+    public TVInfo getTVInfo(int tmdbId, boolean throwTempError) {
+        TVInfo tvInfo = null;
+        try {
+            String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+            tvInfo = tmdbApi.getTVInfo(tmdbId, defaultLanguage);
+        } catch (MovieDbException ex) {
+            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+                throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
+            }
+            LOG.error("Failed to get series info using TMDb ID {}: {}", tmdbId, ex.getMessage());
+            LOG.trace("TheMovieDb error", ex);
+        }
+        return tvInfo;
     }
 
     public MovieInfo getMovieInfoByIMDB(String imdbId, boolean throwTempError) {

@@ -29,6 +29,7 @@ import com.omertron.themoviedbapi.model.movie.ProductionCompany;
 import com.omertron.themoviedbapi.model.movie.ProductionCountry;
 import com.omertron.themoviedbapi.model.person.PersonCreditList;
 import com.omertron.themoviedbapi.model.person.PersonInfo;
+import com.omertron.themoviedbapi.model.tv.TVInfo;
 import java.util.*;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
@@ -146,19 +147,19 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         videoData.setSourceDbId(ImdbScanner.SCANNER_ID, StringUtils.trim(movieDb.getImdbID()));
 
         if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
-            videoData.setTitle(StringUtils.trim(movieDb.getTitle()), SCANNER_ID);
+            videoData.setTitle(movieDb.getTitle(), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-            videoData.setPlot(StringUtils.trim(movieDb.getOverview()), SCANNER_ID);
+            videoData.setPlot(movieDb.getOverview(), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-            videoData.setOutline(StringUtils.trim(movieDb.getOverview()), SCANNER_ID);
+            videoData.setOutline(movieDb.getOverview(), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteTagline(videoData, SCANNER_ID)) {
-            videoData.setTagline(StringUtils.trim(movieDb.getTagline()), SCANNER_ID);
+            videoData.setTagline(movieDb.getTagline(), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
@@ -272,8 +273,61 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
     @Override
     public ScanResult scan(Series series) {
-        // TODO
-        return ScanResult.MISSING_ID;
+        TVInfo tvInfo = null;
+        try {
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("themoviedb.throwError.tempUnavailable", Boolean.TRUE);
+            String tmdbId = getSeriesId(series, throwTempError);
+
+            if (!StringUtils.isNumeric(tmdbId)) {
+                LOG.debug("TMDb id not available '{}'", series.getTitle());
+                return ScanResult.MISSING_ID;
+            }
+
+            tvInfo = tmdbApiWrapper.getTVInfo(Integer.parseInt(tmdbId), throwTempError);
+        } catch (TemporaryUnavailableException ex) {
+            // check retry
+            int maxRetries = configServiceWrapper.getIntProperty("themoviedb.maxRetries.tvshow", 0);
+            if (series.getRetries() < maxRetries) {
+                return ScanResult.RETRY;
+            }
+        }
+
+        if (tvInfo == null) {
+            LOG.error("Can't find informations for series '{}'", series.getTitle());
+            return ScanResult.ERROR;
+        }
+        
+        if (OverrideTools.checkOverwriteOriginalTitle(series, SCANNER_ID)) {
+            series.setTitleOriginal(tvInfo.getOriginalName(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwritePlot(series, SCANNER_ID)) {
+            series.setPlot(tvInfo.getOverview(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteOutline(series, SCANNER_ID)) {
+            series.setOutline(tvInfo.getOverview(), SCANNER_ID);
+        }
+
+        if (CollectionUtils.isNotEmpty(tvInfo.getOriginCountry()) && OverrideTools.checkOverwriteCountries(series, SCANNER_ID)) {
+            Set<String> countries = new LinkedHashSet<>(tvInfo.getOriginCountry());
+            series.setCountryNames(countries, SCANNER_ID);
+        }
+
+        // TODO evaluate following fields
+        tvInfo.getAlternativeTitles();
+        
+        tvInfo.getProductionCompanies();
+        
+        tvInfo.getFirstAirDate();
+        tvInfo.getLastAirDate();
+        
+        tvInfo.getRating();
+        
+        tvInfo.getContentRatings();
+        
+        // TODO scan season and episodes
+        return ScanResult.ERROR;
     }
     
     @Override
