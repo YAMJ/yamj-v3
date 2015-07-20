@@ -168,6 +168,48 @@ public abstract class AbstractScannable extends AbstractAuditable
         return false;
     }
     
+    abstract String getSkipScanApi();
+
+    abstract void setSkipScanApi(String skipScanApi);
+    
+    public final void enableApiScan(String sourceDb) {
+        if (sourceDb == null) return;
+        if (getSkipScanApi() == null) return;
+        
+        if ("all".equalsIgnoreCase(sourceDb)) {
+            setSkipScanApi(null);
+        } else {
+            HashSet<String> skipScans = new HashSet<>();
+            for (String skipped : getSkipScanApi().split(";")) {
+                if (!skipped.equalsIgnoreCase(sourceDb)) {
+                    // add skipped scan if not enabled
+                    skipScans.add(skipped);
+                }
+            }
+            if (CollectionUtils.isEmpty(skipScans)) {
+                setSkipScanApi(null);
+            } else {
+                setSkipScanApi(StringUtils.join(skipScans, ';'));
+            }
+        }
+    }
+
+    public final void disableApiScan(String sourceDb) {
+        if (sourceDb == null) return;
+        
+        if ("all".equalsIgnoreCase(sourceDb)) {
+            setSkipScanApi("all");
+        } else if (getSkipScanApi() == null) {
+            setSkipScanApi(sourceDb);
+        } else if ("all".equalsIgnoreCase(getSkipScanApi())) {
+            // nothing to do if already all scans are skipped
+        } else {
+            final HashSet<String> skipScans = new HashSet<>(Arrays.asList(getSkipScanApi().split(";")));
+            skipScans.add(sourceDb);
+            setSkipScanApi(StringUtils.join(skipScans, ';'));
+        }
+    }
+
     // OVERRIDE METHODS
 
     abstract Map<OverrideFlag, String> getOverrideFlags();

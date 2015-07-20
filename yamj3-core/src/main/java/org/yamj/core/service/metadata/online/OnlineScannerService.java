@@ -253,7 +253,13 @@ public class OnlineScannerService {
     
             // scan person data
             try {
-                scanResult = personScanner.scan(person);
+                if (person.isSkippedScan(personScanner.getScannerName())) {
+                    LOG.warn("Person scan skipped for '{}' using {}", person.getName(), personScanner.getScannerName());
+                    scanResult = ScanResult.SKIPPED;
+                } else {
+                    LOG.info("Scanning person data for '{}' using {}", person.getName(), personScanner.getScannerName());
+                    scanResult = personScanner.scan(person);
+                }
             } catch (Exception error) {
                 scanResult = ScanResult.ERROR;
                 LOG.error("Failed scanning person (ID '{}') data with scanner {} ", person.getId(), personScanner.getScannerName());
@@ -266,12 +272,18 @@ public class OnlineScannerService {
         if (!ScanResult.OK.equals(scanResult) || useAlternate) {
             personScanner = registeredPersonScanner.get(PERSON_SCANNER_ALT);
 
-            if (personScanner != null) {
+            if (personScanner != null && !person.isSkippedScan(personScanner.getScannerName())) {
                 LOG.info("Alternate scanning for information on person '{}' using {}", person.getName(), personScanner.getScannerName());
 
                 try {
-                    personScanner.scan(person);
+                    ScanResult alternateScanResult = personScanner.scan(person);
+                    
+                    // set alternate scan result if main scanner skipped
+                    if (ScanResult.SKIPPED.equals(scanResult)) scanResult = alternateScanResult;
                 } catch (Exception error) {
+                    // set to ERROR if previous scanner has been skipped
+                    if (ScanResult.SKIPPED.equals(scanResult)) scanResult = ScanResult.ERROR;
+                    
                     LOG.error("Failed scanning person (ID '{}') data with alternate scanner {}", person.getId(), personScanner.getScannerName());
                     LOG.warn("Alternate scanning error", error);
                 }
@@ -320,7 +332,13 @@ public class OnlineScannerService {
 
             // scan filmography
             try {
-                scanResult = filmographyScanner.scanFilmography(person);
+                if (person.isSkippedScan(filmographyScanner.getScannerName())) {
+                    LOG.warn("Filmography scan skipped for '{}' using {}", person.getName(), filmographyScanner.getScannerName());
+                    scanResult = ScanResult.SKIPPED;
+                } else {
+                    LOG.info("Scanning filmography data for '{}' using {}", person.getName(), filmographyScanner.getScannerName());
+                    scanResult = filmographyScanner.scanFilmography(person);
+                }
             } catch (Exception error) {
                 scanResult = ScanResult.ERROR;
                 LOG.error("Failed scanning person filmography (ID '{}') data with scanner {} ", person.getId(), filmographyScanner.getScannerName());
@@ -333,12 +351,18 @@ public class OnlineScannerService {
         if (!ScanResult.OK.equals(scanResult)) {
         	filmographyScanner = registeredFilmographyScanner.get(FILMOGRAPHY_SCANNER_ALT);
 
-            if (filmographyScanner != null) {
+            if (filmographyScanner != null && !person.isSkippedScan(filmographyScanner.getScannerName())) {
             	LOG.info("Alternate scanning for filmography of person '{}' using {}", person.getName(), filmographyScanner.getScannerName());
 
                 try {
-                	filmographyScanner.scanFilmography(person);
+                    ScanResult alternateScanResult = filmographyScanner.scanFilmography(person);
+                    
+                    // set alternate scan result if main scanner skipped
+                    if (ScanResult.SKIPPED.equals(scanResult)) scanResult = alternateScanResult;
                 } catch (Exception error) {
+                    // set to ERROR if previous scanner has been skipped
+                    if (ScanResult.SKIPPED.equals(scanResult)) scanResult = ScanResult.ERROR;
+                            
                     LOG.error("Failed scanning person filmography (ID '{}') data with alternate scanner {} ", person.getId(), filmographyScanner.getScannerName());
                     LOG.warn("Alternate scanning error", error);
                 }

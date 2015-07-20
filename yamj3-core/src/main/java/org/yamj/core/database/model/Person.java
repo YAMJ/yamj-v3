@@ -24,13 +24,15 @@ package org.yamj.core.database.model;
 
 import java.util.*;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.MapKeyType;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.tools.MetadataTools;
@@ -79,6 +81,9 @@ public class Person extends AbstractScannable {
     @Column(name = "biography", length = 50000)
     private String biography;
 
+    @Column(name = "skip_scan_api", length = 255)
+    private String skipScanApi;
+    
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "person_ids", joinColumns = @JoinColumn(name = "person_id", foreignKey = @ForeignKey(name = "FK_PERSON_SOURCEIDS")))
     @Fetch(FetchMode.SELECT)
@@ -337,11 +342,22 @@ public class Person extends AbstractScannable {
     }
 
     @Override
-    public boolean isSkippedScan(String sourceDb) {
-        // no skipping of scans right now
-        return false;
+    protected String getSkipScanApi() {
+        return skipScanApi;
     }
 
+    @Override
+    protected void setSkipScanApi(String skipScanApi) {
+        this.skipScanApi = skipScanApi;
+    }
+    
+    @Override
+    public boolean isSkippedScan(String sourceDb) {
+        if ("all".equalsIgnoreCase(getSkipScanApi())) return true;
+        if (StringUtils.containsIgnoreCase(getSkipScanApi(), sourceDb)) return true;
+        return false;
+    }
+    
     public StatusType getFilmographyStatus() {
         return filmographyStatus;
     }

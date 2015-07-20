@@ -587,8 +587,19 @@ public class JsonApiStorageService {
             sb.append(type.name().toLowerCase());
             return new ApiStatus(409, sb.toString());
         }
-        
-        if (MetaDataType.SERIES == type) {
+
+        if (MetaDataType.PERSON == type) {
+            Person person = commonDao.getById(Person.class, id);
+            if (person == null) {
+                return new ApiStatus(404, "Person for ID " + id + " not found");
+            }
+            if (disable) {
+                person.disableApiScan(sourceDb);
+            } else {
+                person.enableApiScan(sourceDb);
+            }
+            commonDao.updateEntity(person);
+        } else if (MetaDataType.SERIES == type) {
             Series series = commonDao.getById(Series.class, id);
             if (series == null) {
                 return new ApiStatus(404, "Series for ID " + id + " not found");

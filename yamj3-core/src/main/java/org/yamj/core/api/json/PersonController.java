@@ -126,4 +126,36 @@ public class PersonController {
         if (apiStatus.isSuccessful()) scanningScheduler.triggerScanPeopleData();
         return apiStatus;
     }
+
+    /**
+     * Enable online scan for one person.
+     */
+    @RequestMapping("/enableonlinescan")
+    public ApiStatus enableOnlineScan(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb) 
+    {
+        if (id <= 0L) {
+            return new ApiStatus(410, "Not a valid ID");            
+        }
+        
+        LOG.info("Enable {} online scan for person with ID '{}'", sourcedb, id);
+        return jsonApiStorageService.updateOnlineScan(MetaDataType.PERSON, id, sourcedb, false);
+    }
+
+    /**
+     * Disable online scan for one person.
+     */
+    @RequestMapping("/disableonlinescan")
+    public ApiStatus disableOnlineScan(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) String sourcedb) 
+    {
+        if (id <= 0L) {
+            return new ApiStatus(410, "Not a valid ID");            
+        }
+        
+        LOG.info("Disable {} online scan for person with ID '{}'", sourcedb, id);
+        return jsonApiStorageService.updateOnlineScan(MetaDataType.PERSON, id, sourcedb, true);
+    }
 }
