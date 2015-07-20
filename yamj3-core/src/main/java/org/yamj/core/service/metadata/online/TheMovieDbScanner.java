@@ -38,9 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigServiceWrapper;
-import org.yamj.core.database.model.FilmParticipation;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.ParticipationType;
@@ -50,7 +48,7 @@ import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.PersonNameDTO;
 
 @Service("tmdbScanner")
-public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, IFilmographyScanner {
+public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, IFilmographyScanner {
 
     public static final String SCANNER_ID = "tmdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbScanner.class);
@@ -100,12 +98,12 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, IFilmog
 
         if (!StringUtils.isNumeric(tmdbId)) {
             LOG.debug("No TMDb id found for '{}', searching title with year {}", videoData.getTitle(), videoData.getPublicationYear());
-            tmdbId = tmdbApiWrapper.getMovieDbId(videoData.getTitle(), videoData.getPublicationYear(), throwTempError);
+            tmdbId = tmdbApiWrapper.getMovieId(videoData.getTitle(), videoData.getPublicationYear(), throwTempError);
         }
 
         if (!StringUtils.isNumeric(tmdbId) && StringUtils.isNotBlank(videoData.getTitleOriginal())) {
             LOG.debug("No TMDb id found for '{}', searching original title with year {}", videoData.getTitleOriginal(), videoData.getPublicationYear());
-            tmdbId = tmdbApiWrapper.getMovieDbId(videoData.getTitleOriginal(), videoData.getPublicationYear(), throwTempError);
+            tmdbId = tmdbApiWrapper.getMovieId(videoData.getTitleOriginal(), videoData.getPublicationYear(), throwTempError);
         }
 
         if (StringUtils.isNumeric(tmdbId)) {
@@ -245,6 +243,39 @@ public class TheMovieDbScanner implements IMovieScanner, IPersonScanner, IFilmog
         return ScanResult.OK;
     }
 
+    @Override
+    public String getSeriesId(Series series) {
+        return getSeriesId(series, false);
+    }
+
+    private String getSeriesId(Series series, boolean throwTempError) {
+        String tmdbId = series.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNumeric(tmdbId)) {
+            return tmdbId;
+        }
+
+        LOG.debug("No TMDb id found for '{}', searching title with year {}", series.getTitle(), series.getStartYear());
+        tmdbId = tmdbApiWrapper.getSeriesId(series.getTitle(), series.getStartYear(), throwTempError);
+
+        if (!StringUtils.isNumeric(tmdbId) && StringUtils.isNotBlank(series.getTitleOriginal())) {
+            LOG.debug("No TMDb id found for '{}', searching original title with year {}", series.getTitleOriginal(), series.getStartYear());
+            tmdbId = tmdbApiWrapper.getMovieId(series.getTitleOriginal(), series.getStartYear(), throwTempError);
+        }
+
+        if (StringUtils.isNumeric(tmdbId)) {
+            series.setSourceDbId(SCANNER_ID, tmdbId);
+            return tmdbId;
+        }
+
+        return null;
+    }
+
+    @Override
+    public ScanResult scan(Series series) {
+        // TODO
+        return ScanResult.MISSING_ID;
+    }
+    
     @Override
     public String getPersonId(Person person) {
         return getPersonId(person, false);

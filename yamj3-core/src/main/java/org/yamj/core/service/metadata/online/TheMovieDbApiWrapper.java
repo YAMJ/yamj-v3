@@ -32,6 +32,7 @@ import com.omertron.themoviedbapi.model.movie.MovieInfo;
 import com.omertron.themoviedbapi.model.person.PersonCreditList;
 import com.omertron.themoviedbapi.model.person.PersonFind;
 import com.omertron.themoviedbapi.model.person.PersonInfo;
+import com.omertron.themoviedbapi.model.tv.TVBasic;
 import com.omertron.themoviedbapi.results.ResultList;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -51,11 +52,12 @@ public class TheMovieDbApiWrapper {
     @Autowired
     private TheMovieDbApi tmdbApi;
 
-    public String getMovieDbId(String title, int year, boolean throwTempError) {
+    public String getMovieId(String title, int year, boolean throwTempError) {
         String defaultLanguage = configService.getProperty("themoviedb.language", "en");
         boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
         int searchMatch = configService.getIntProperty("themoviedb.searchMatch", 3);
-        MovieInfo movieDb = null;
+        
+        MovieInfo movie = null;
 
         try {
             // Search using movie name
@@ -71,7 +73,7 @@ public class TheMovieDbApiWrapper {
                 }
                 LOG.debug("Checking {} ({})", m.getTitle(), relDate);
                 if (Compare.movies(m, title, String.valueOf(year), searchMatch)) {
-                    movieDb = m;
+                    movie = m;
                     break;
                 }
             }
@@ -83,19 +85,68 @@ public class TheMovieDbApiWrapper {
             LOG.trace("TheMovieDb error", ex);
         }
 
-        if (movieDb != null && movieDb.getId() != 0) {
-            LOG.info("TMDB ID found {} for '{}'", movieDb.getId(), title);
-            return String.valueOf(movieDb.getId());
+        if (movie != null && movie.getId() != 0) {
+            LOG.info("TMDB ID found {} for '{}'", movie.getId(), title);
+            return String.valueOf(movie.getId());
         }
         return null;
     }
 
+    public String getSeriesId(String title, int year, boolean throwTempError) {
+        String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+        
+        String id = null;
+        TVBasic closestTV = null;
+        int closestMatch = Integer.MAX_VALUE;
+        boolean foundTV = Boolean.FALSE;
+
+        try {
+            // Search using movie name
+            ResultList<TVBasic> seriesList = tmdbApi.searchTV(title, 0, defaultLanguage, year, null);
+            LOG.info("Found {} potential matches for {} ({})", seriesList.getResults().size(), title, year);
+            // Iterate over the list until we find a match
+            for (TVBasic tv : seriesList.getResults()) {
+                if (title.equalsIgnoreCase(tv.getName())) {
+                    id = String.valueOf(tv.getId());
+                    foundTV = Boolean.TRUE;
+                    break;
+                }
+                
+                LOG.trace("{}: Checking against '{}'", title, tv.getName());
+                int lhDistance = StringUtils.getLevenshteinDistance(title, tv.getName());
+                LOG.trace("{}: Current closest match is {}, this match is {}", title, closestMatch, lhDistance);
+                if (lhDistance < closestMatch) {
+                    LOG.trace("{}: TMDB ID {} is a better match ", title, tv.getId());
+                    closestMatch = lhDistance;
+                    closestTV = tv;
+                }
+            }
+
+            if (foundTV) {
+                LOG.debug("{}: Matched against TMDB ID: {}", title, id);
+            } else if (closestMatch < Integer.MAX_VALUE && closestTV != null) {
+                id = String.valueOf(closestTV.getId());
+                LOG.debug("{}: Closest match is '{}' differing by {} characters", title, closestTV.getName(), closestMatch);
+            } else {
+                LOG.debug("{}: No match found", title);
+            }
+        } catch (MovieDbException ex) {
+            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+                throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
+            }
+            LOG.error("Failed retrieving TMDb id for series '{}': {}", title, ex.getMessage());
+            LOG.trace("TheMovieDb error", ex);
+        }
+        return id;
+    }
+    
     public String getPersonId(String name, boolean throwTempError) {
+        boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
+
         String id = null;
         PersonFind closestPerson = null;
         int closestMatch = Integer.MAX_VALUE;
         boolean foundPerson = Boolean.FALSE;
-        boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
 
         try {
             ResultList<PersonFind> results = tmdbApi.searchPeople(name, 0, includeAdult, SearchType.PHRASE);

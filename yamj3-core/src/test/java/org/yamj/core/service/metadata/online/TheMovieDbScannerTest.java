@@ -32,6 +32,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.yamj.core.database.model.FilmParticipation;
 import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Series;
 
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
 public class TheMovieDbScannerTest extends AbstractJUnit4SpringContextTests {
@@ -47,7 +48,7 @@ public class TheMovieDbScannerTest extends AbstractJUnit4SpringContextTests {
      */
     @Test
     public void testGetScannerName() {
-        LOG.info("getScannerName");
+        LOG.info("testGetScannerName");
         String result = tmdbScanner.getScannerName();
         assertEquals("Changed scanner name", SCANNER_ID, result);
     }
@@ -55,7 +56,7 @@ public class TheMovieDbScannerTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void testScanFilmography() {
-        LOG.info("scan");
+        LOG.info("testScanFilmography");
         Person person = new Person();
         person.setSourceDbId(SCANNER_ID, "12795");
 
@@ -68,4 +69,12 @@ public class TheMovieDbScannerTest extends AbstractJUnit4SpringContextTests {
         }
     }
 
+    @Test
+    public void testFindSeriesId() {
+        LOG.info("testFindSeriesId");
+        Series series = new Series();
+        series.setTitle("Game Of Thrones - Das Lied von Eis und Feuer", SCANNER_ID);
+        String id = tmdbScanner.getSeriesId(series);
+        assertEquals("1399", id);
+    }
 }
