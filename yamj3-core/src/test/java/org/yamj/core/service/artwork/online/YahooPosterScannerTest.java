@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork;
+package org.yamj.core.service.artwork.online;
 
 import java.util.List;
 import javax.annotation.Resource;

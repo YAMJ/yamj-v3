@@ -48,6 +48,7 @@ import org.yamj.core.web.ResponseTools;
 public class TheMovieDbApiWrapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbApiWrapper.class);
+    private static final String LANGUAGE_EN = "en";
 
     @Autowired
     private ConfigService configService;
@@ -55,7 +56,7 @@ public class TheMovieDbApiWrapper {
     private TheMovieDbApi tmdbApi;
 
     public String getMovieId(String title, int year, boolean throwTempError) {
-        String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+        String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
         boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
         int searchMatch = configService.getIntProperty("themoviedb.searchMatch", 3);
         
@@ -95,7 +96,7 @@ public class TheMovieDbApiWrapper {
     }
 
     public String getSeriesId(String title, int year, boolean throwTempError) {
-        String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+        String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
         
         String id = null;
         TVBasic closestTV = null;
@@ -204,7 +205,7 @@ public class TheMovieDbApiWrapper {
     public MovieInfo getMovieInfoByTMDB(int tmdbId, boolean throwTempError) {
         MovieInfo movieDb = null;
         try {
-            String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+            String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
             movieDb = tmdbApi.getMovieInfo(tmdbId, defaultLanguage);
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
@@ -219,7 +220,7 @@ public class TheMovieDbApiWrapper {
     public TVInfo getSeriesInfo(int tmdbId, boolean throwTempError) {
         TVInfo tvInfo = null;
         try {
-            String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+            String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
             tvInfo = tmdbApi.getTVInfo(tmdbId, defaultLanguage);
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
@@ -234,7 +235,7 @@ public class TheMovieDbApiWrapper {
     public TVSeasonInfo getSeasonInfo(int tmdbId, int season, boolean throwTempError) {
         TVSeasonInfo tvSeasonInfo = null;
         try {
-            String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+            String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
             tvSeasonInfo = tmdbApi.getSeasonInfo(tmdbId, season, defaultLanguage);
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
@@ -263,7 +264,7 @@ public class TheMovieDbApiWrapper {
     public MovieInfo getMovieInfoByIMDB(String imdbId, boolean throwTempError) {
         MovieInfo movieDb = null;
         try {
-            String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+            String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
             movieDb = tmdbApi.getMovieInfoImdb(imdbId, defaultLanguage);
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
@@ -290,7 +291,7 @@ public class TheMovieDbApiWrapper {
 
     public PersonCreditList<CreditBasic> getPersonCredits(int tmdbId, boolean throwTempError) {
         try {
-            String defaultLanguage = configService.getProperty("themoviedb.language", "en");
+            String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
             return tmdbApi.getPersonCombinedCredits(tmdbId, defaultLanguage);
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {

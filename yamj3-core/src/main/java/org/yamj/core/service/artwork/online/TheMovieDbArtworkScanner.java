@@ -40,9 +40,7 @@ import org.springframework.cache.Cache;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.config.ConfigService;
-import org.yamj.core.database.model.BoxedSet;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.artwork.ArtworkTools.HashCodeType;
@@ -52,7 +50,8 @@ import org.yamj.core.tools.MetadataTools;
 @Service("tmdbArtworkScanner")
 public class TheMovieDbArtworkScanner implements
         IMoviePosterScanner, IMovieFanartScanner, IPhotoScanner,
-        IBoxedSetPosterScanner, IBoxedSetFanartScanner {
+        IBoxedSetPosterScanner, IBoxedSetFanartScanner,
+        ITvShowPosterScanner, ITvShowFanartScanner, ITvShowVideoImageScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbArtworkScanner.class);
     private static final String DEFAULT_SIZE = "original";
@@ -97,6 +96,41 @@ public class TheMovieDbArtworkScanner implements
         return getFilteredArtwork(tmdbId, defaultLanguage, MetaDataType.MOVIE, ArtworkType.BACKDROP, DEFAULT_SIZE);
     }
 
+    @Override
+    public List<ArtworkDetailDTO> getPosters(Season season) {
+        String tmdbId = tmdbScanner.getSeriesId(season.getSeries());
+        String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
+        return getFilteredArtwork(tmdbId, season.getSeason(), -1, defaultLanguage, MetaDataType.SEASON, ArtworkType.POSTER, DEFAULT_SIZE);
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getFanarts(Season season) {
+        String tmdbId = tmdbScanner.getSeriesId(season.getSeries());
+        String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
+        return getFilteredArtwork(tmdbId, season.getSeason(), -1, defaultLanguage, MetaDataType.SEASON, ArtworkType.BACKDROP, DEFAULT_SIZE);
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getPosters(Series series) {
+        String tmdbId = tmdbScanner.getSeriesId(series);
+        String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
+        return getFilteredArtwork(tmdbId, defaultLanguage, MetaDataType.SERIES, ArtworkType.POSTER, DEFAULT_SIZE);
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getFanarts(Series series) {
+        String tmdbId = tmdbScanner.getSeriesId(series);
+        String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
+        return getFilteredArtwork(tmdbId, defaultLanguage, MetaDataType.SERIES, ArtworkType.BACKDROP, DEFAULT_SIZE);
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getVideoImages(VideoData videoData) {
+        String tmdbId = tmdbScanner.getSeriesId(videoData.getSeason().getSeries());
+        String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
+        return getFilteredArtwork(tmdbId, videoData.getSeason().getSeason(), videoData.getEpisode(), defaultLanguage, MetaDataType.EPISODE, ArtworkType.STILL, DEFAULT_SIZE);
+    }
+    
     @Override
     public List<ArtworkDetailDTO> getPhotos(Person person) {
         String tmdbId = tmdbScanner.getPersonId(person);
@@ -181,8 +215,27 @@ public class TheMovieDbArtworkScanner implements
      * @return
      */
     private List<ArtworkDetailDTO> getFilteredArtwork(String tmdbId, String language, MetaDataType metaDataType, ArtworkType artworkType, String artworkSize) {
+        return this.getFilteredArtwork(tmdbId, -1, -1, language, metaDataType, artworkType, artworkSize);
+    }
+
+    /**
+     * Get a list of the artwork for a movie.
+     *
+     * This will get all the artwork for a specified language and the blank
+     * languages as well
+     * 
+     * @param tmdbId
+     * @param season
+     * @param episode
+     * @param language
+     * @param metaDataType
+     * @param artworkType
+     * @param artworkSize
+     * @return
+     */
+    private List<ArtworkDetailDTO> getFilteredArtwork(String tmdbId, int season, int episode, String language, MetaDataType metaDataType, ArtworkType artworkType, String artworkSize) {
         if (StringUtils.isNumeric(tmdbId)) {
-            return this.getFilteredArtwork(Integer.parseInt(tmdbId), language, metaDataType, artworkType, artworkSize);
+            return this.getFilteredArtwork(Integer.parseInt(tmdbId), season, episode, language, metaDataType, artworkType, artworkSize);
         }
         return Collections.emptyList();
     }
@@ -194,6 +247,8 @@ public class TheMovieDbArtworkScanner implements
      * languages as well
      *
      * @param tmdbId
+     * @param season
+     * @param episode
      * @param language
      * @param metaDataType
      * @param artworkType
@@ -201,9 +256,28 @@ public class TheMovieDbArtworkScanner implements
      * @return
      */
     private List<ArtworkDetailDTO> getFilteredArtwork(int tmdbId, String language, MetaDataType metaDataType, ArtworkType artworkType, String artworkSize) {
+        return this.getFilteredArtwork(tmdbId, -1, -1, language, metaDataType, artworkType, artworkSize);
+    }
+    
+    /**
+     * Get a list of the artwork for a movie.
+     *
+     * This will get all the artwork for a specified language and the blank
+     * languages as well
+     *
+     * @param tmdbId
+     * @param season
+     * @param episode
+     * @param language
+     * @param metaDataType
+     * @param artworkType
+     * @param artworkSize
+     * @return
+     */
+    private List<ArtworkDetailDTO> getFilteredArtwork(int tmdbId, int season, int episode, String language, MetaDataType metaDataType, ArtworkType artworkType, String artworkSize) {
         List<ArtworkDetailDTO> dtos = new ArrayList<>();
         try {
-            ResultList<Artwork> results = getArtworksFromTMDb(tmdbId, metaDataType);
+            ResultList<Artwork> results = getArtworksFromTMDb(tmdbId, season, episode, metaDataType);
             
             if (results == null || results.isEmpty()) {
                 LOG.debug("Got no {} artworks from TMDb for id {}", artworkType, tmdbId);
@@ -212,6 +286,9 @@ public class TheMovieDbArtworkScanner implements
                 LOG.debug("Got {} {} artworks from TMDb for id {}", artworkList.size(), artworkType, tmdbId);
                 
                 for (Artwork artwork : artworkList) {
+                    URL artworkURL = tmdbApi.createImageUrl(artwork.getFilePath(), artworkSize);
+                    System.err.println(artwork.getId() + ": "+artwork.getArtworkType() + " --- " + artworkURL);
+                    
                     if (artwork.getArtworkType() == artworkType
                             && (StringUtils.isBlank(artwork.getLanguage())
                             || StringUtils.equalsIgnoreCase(artwork.getLanguage(), language))) 
@@ -246,8 +323,8 @@ public class TheMovieDbArtworkScanner implements
             dtos.add(new ArtworkDetailDTO(getScannerName(), url, HashCodeType.PART));
         }
     }
-    
-    private ResultList<Artwork> getArtworksFromTMDb(int tmdbId, MetaDataType metaDataType) throws MovieDbException {
+
+    private ResultList<Artwork> getArtworksFromTMDb(int tmdbId, int season, int episode, MetaDataType metaDataType) throws MovieDbException {
         ResultList<Artwork> results;
         if (MetaDataType.PERSON == metaDataType) {
             String cacheKey = "person###"+tmdbId;
@@ -262,6 +339,30 @@ public class TheMovieDbArtworkScanner implements
             if (results == null || results.isEmpty()) {
                 // use an empty language to get all artwork and then filter it
                 results = tmdbApi.getCollectionImages(tmdbId, LANGUAGE_NONE);
+            }
+            tmdbArtworkCache.putIfAbsent(cacheKey, results);
+        } else if (MetaDataType.SERIES == metaDataType) {
+            String cacheKey = "series###"+tmdbId;
+            results = tmdbArtworkCache.get(cacheKey, ResultList.class);
+            if (results == null || results.isEmpty()) {
+                // use an empty language to get all artwork and then filter it
+                results = tmdbApi.getTVImages(tmdbId, LANGUAGE_NONE);
+            }
+            tmdbArtworkCache.putIfAbsent(cacheKey, results);
+        } else if (MetaDataType.SEASON == metaDataType) {
+            String cacheKey = "season###"+season+"###"+tmdbId;
+            results = tmdbArtworkCache.get(cacheKey, ResultList.class);
+            if (results == null || results.isEmpty()) {
+                // use an empty language to get all artwork and then filter it
+                results = tmdbApi.getSeasonImages(tmdbId, season, LANGUAGE_NONE);
+            }
+            tmdbArtworkCache.putIfAbsent(cacheKey, results);
+        } else if (MetaDataType.EPISODE == metaDataType) {
+            String cacheKey = "episode###"+season+"###"+episode+"###"+tmdbId;
+            results = tmdbArtworkCache.get(cacheKey, ResultList.class);
+            if (results == null || results.isEmpty()) {
+                // use an empty language to get all artwork and then filter it
+                results = tmdbApi.getEpisodeImages(tmdbId, season, episode);
             }
             tmdbArtworkCache.putIfAbsent(cacheKey, results);
         } else {
