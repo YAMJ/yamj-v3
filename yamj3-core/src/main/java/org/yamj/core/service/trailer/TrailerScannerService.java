@@ -39,10 +39,7 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.TrailerDTO;
 import org.yamj.core.database.service.TrailerStorageService;
-import org.yamj.core.service.trailer.online.IMovieTrailerScanner;
-import org.yamj.core.service.trailer.online.ISeriesTrailerScanner;
-import org.yamj.core.service.trailer.online.ITrailerScanner;
-import org.yamj.core.service.trailer.online.YouTubeTrailerScanner;
+import org.yamj.core.service.trailer.online.*;
 
 @Service("trailerScannerService")
 public class TrailerScannerService {
@@ -154,7 +151,7 @@ public class TrailerScannerService {
             trailer.setSource(dto.getSource());
             trailer.setUrl(dto.getUrl());
             trailer.setTitle(dto.getTitle());
-            trailer.setSourceHash(dto.getSourceHash());
+            trailer.setHashCode(dto.getHashCode());
             trailer.setStatus(StatusType.NEW);
             trailers.add(trailer);
         }
@@ -211,7 +208,7 @@ public class TrailerScannerService {
             trailer.setSeries(series);
             trailer.setSource(dto.getSource());
             trailer.setUrl(dto.getUrl());
-            trailer.setSourceHash(dto.getSourceHash());
+            trailer.setHashCode(dto.getHashCode());
             trailer.setStatus(StatusType.NEW);
             trailers.add(trailer);
         }

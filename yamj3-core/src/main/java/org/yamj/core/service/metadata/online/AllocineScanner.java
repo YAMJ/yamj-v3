@@ -49,7 +49,7 @@ import org.yamj.core.web.PoolingHttpClient;
 @Service("allocineScanner")
 public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, IFilmographyScanner {
 
-    private static final String SCANNER_ID = "allocine";
+    public static final String SCANNER_ID = "allocine";
     private static final Logger LOG = LoggerFactory.getLogger(AllocineScanner.class);
 
     private final Lock searchEngingeLock = new ReentrantLock(true);

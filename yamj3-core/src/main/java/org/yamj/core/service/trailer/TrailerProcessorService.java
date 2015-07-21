@@ -140,7 +140,7 @@ public class TrailerProcessorService {
         // 2. source
         sb.append(trailer.getSource());
         sb.append(".");
-        sb.append(trailer.getSourceHash());
+        sb.append(trailer.getHashCode());
         sb.append(".");
         
         // 3. extension

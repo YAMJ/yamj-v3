@@ -22,17 +22,14 @@
  */
 package org.yamj.core.database.model.dto;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.builder.*;
 
 public class TrailerDTO {
 
     private final String source;
     private final String url;
     private final String title;
-    private final String sourceHash;
+    private final String hashCode;;
     
     public TrailerDTO(String source, String url) {
         this(source, url, null);
@@ -44,14 +41,14 @@ public class TrailerDTO {
         this.title = title;
         
         int iHashCode = url.hashCode();
-        this.sourceHash = String.valueOf(iHashCode < 0 ? 0-iHashCode : iHashCode);
+        this.hashCode = String.valueOf(iHashCode < 0 ? 0-iHashCode : iHashCode);
     }
 
-    public TrailerDTO(String source, String url, String title, String sourceHash) {
+    public TrailerDTO(String source, String url, String title, String hashCode) {
         this.source = source;
         this.url = url;
         this.title = title;
-        this.sourceHash = sourceHash;
+        this.hashCode = hashCode;
     }
 
     public String getSource() {
@@ -66,8 +63,8 @@ public class TrailerDTO {
         return title;
     }
 
-    public String getSourceHash() {
-        return sourceHash;
+    public String getHashCode() {
+        return hashCode;
     }
 
     @Override

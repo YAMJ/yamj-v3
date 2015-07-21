@@ -104,14 +104,23 @@ public class UpgradeDatabaseDao extends HibernateDao {
     public void patchTrailers() {
         if (existsColumn("videodata", "trailer_status")) {
             currentSession()
-            .createSQLQuery("UPDATE videodata set trailer_status = 'NEW' where trailer_status=''")
-            .executeUpdate();
+                .createSQLQuery("UPDATE videodata set trailer_status = 'NEW' where trailer_status=''")
+                .executeUpdate();
         }
 
         if (existsColumn("series", "trailer_status")) {
             currentSession()
-            .createSQLQuery("UPDATE series set trailer_status = 'NEW' where trailer_status=''")
-            .executeUpdate();
+                .createSQLQuery("UPDATE series set trailer_status = 'NEW' where trailer_status=''")
+                .executeUpdate();
+        }
+
+        if (existsColumn("trailer", "source_hash")) {
+            currentSession()
+                .createSQLQuery("UPDATE trailer set hash_code=source_hash")
+                .executeUpdate();
+            currentSession()
+                .createSQLQuery("ALTER TABLE trailer DROP source_hash")
+                .executeUpdate();
         }
     }
 }
