@@ -65,39 +65,6 @@ public class UpgradeDatabaseDao extends HibernateDao {
     }
 
     /**
-     * Issues: #195
-     * Date:   07.07.2015
-     */
-    public void patchFilmographyConfig() {
-        currentSession()
-            .createSQLQuery("DELETE FROM configuration WHERE config_key='allocine.person.filmography'")
-            .executeUpdate();
-        currentSession()
-        	.createSQLQuery("DELETE FROM configuration WHERE config_key='themoviedb.person.filmography'")
-        	.executeUpdate();
-    }
-
-    /**
-     * Issues: #218
-     * Date:   08.07.2015
-     */
-    public void patchSkipOnlineScans() {
-        if (existsColumn("videodata", "skip_online_scans")) {
-            StringBuilder sb = new StringBuilder();
-            sb.setLength(0);
-            sb.append("ALTER TABLE videodata DROP skip_online_scans");
-            currentSession().createSQLQuery(sb.toString()).executeUpdate();
-        }
-
-        if (existsColumn("series", "skip_online_scans")) {
-            StringBuilder sb = new StringBuilder();
-            sb.setLength(0);
-            sb.append("ALTER TABLE series DROP skip_online_scans");
-            currentSession().createSQLQuery(sb.toString()).executeUpdate();
-        }
-    }
-
-    /**
      * Issues: #222
      * Date:   18.07.2015
      */
@@ -130,7 +97,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
      */
     public void patchArtworkConfig() {
         currentSession()
-            .createSQLQuery("UPDATE configuration set config_value='plugin_movie,alternate_movie,tmdb,yahoo' where config_key='yamj3.artwork.scanner.poster.movie.priorities'")
+            .createSQLQuery("UPDATE configuration set config_value='plugin_movie,alternate_movie,tmdb,fanarttv,yahoo' where config_key='yamj3.artwork.scanner.poster.movie.priorities'")
             .executeUpdate();
         currentSession()
             .createSQLQuery("UPDATE configuration set config_value='plugin_series,alternate_series,tvdb' where config_key='yamj3.artwork.scanner.poster.tvshow.priorities'")
@@ -139,7 +106,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
             .createSQLQuery("UPDATE configuration set config_value='plugin_movie,alternate_movie,tmdb' where config_key='yamj3.artwork.scanner.poster.boxset.priorities'")
             .executeUpdate();
         currentSession()
-            .createSQLQuery("UPDATE configuration set config_value='plugin_movie,alternate_movie,tmdb' where config_key='yamj3.artwork.scanner.fanart.movie.priorities'")
+            .createSQLQuery("UPDATE configuration set config_value='plugin_movie,alternate_movie,tmdb,fanarttv' where config_key='yamj3.artwork.scanner.fanart.movie.priorities'")
             .executeUpdate();
         currentSession()
             .createSQLQuery("UPDATE configuration set config_value='plugin_series,alternate_series,tvdb' where config_key='yamj3.artwork.scanner.fanart.tvshow.priorities'")

@@ -39,22 +39,6 @@ public class UpgradeDatabaseService {
 
     @PostConstruct
     public void init() {
-        // Issues: #195
-        // Date:   07.07.2015
-        try {
-            upgradeDatabaseDao.patchFilmographyConfig();
-        } catch (Exception ex) {
-            LOG.warn("Failed upgrade 'patchFilmographyConfig'", ex);
-        }
-
-        // Issues: #218
-        // Date:   08.07.2015
-        try {
-            upgradeDatabaseDao.patchSkipOnlineScans();
-        } catch (Exception ex) {
-            LOG.warn("Failed upgrade 'patchSkipOnlineScans'", ex);
-        }
-
         // Issues: #222
         // Date:   18.07.2015
         try {
