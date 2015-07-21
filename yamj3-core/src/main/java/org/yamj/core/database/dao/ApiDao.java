@@ -34,20 +34,14 @@ import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.builder.DataItem;
-import org.yamj.core.api.model.builder.DataItemTools;
-import org.yamj.core.api.model.builder.IndexParams;
-import org.yamj.core.api.model.builder.SqlScalars;
+import org.yamj.core.api.model.builder.*;
 import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.database.model.type.FileType;
-import org.yamj.core.database.model.type.JobType;
-import org.yamj.core.database.model.type.ParticipationType;
+import org.yamj.core.database.model.type.*;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Repository("apiDao")
@@ -2167,7 +2161,7 @@ public class ApiDao extends HibernateDao {
         
         // Build the SQL statement
         StringBuilder sbSQL = new StringBuilder();
-        sbSQL.append("SELECT t.id, t.title, t.url, t.source, t.cache_dir as cacheDir, t.cache_filename as cacheFilename ");
+        sbSQL.append("SELECT t.id, t.title, t.url, t.source, t.hash_code as hashCode, t.cache_dir as cacheDir, t.cache_filename as cacheFilename ");
         sbSQL.append("FROM trailer t ");
 
         if (type == MetaDataType.SERIES) {
@@ -2184,6 +2178,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(TITLE, StringType.INSTANCE);
         sqlScalars.addScalar("url", StringType.INSTANCE);
         sqlScalars.addScalar("source", StringType.INSTANCE);
+        sqlScalars.addScalar("hashCode", StringType.INSTANCE);
         sqlScalars.addScalar("cacheDir", StringType.INSTANCE);
         sqlScalars.addScalar("cacheFilename", StringType.INSTANCE);
         sqlScalars.addParameter(ID, id);

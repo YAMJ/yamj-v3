@@ -71,7 +71,7 @@ public class ArtworkProcessorService {
         }
         LOG.debug("Process located artwork: {}", located);
 
-        if (StringUtils.isBlank(located.getCacheFilename())) {
+        if (StringUtils.isBlank(located.getCacheDirectory()) || StringUtils.isBlank(located.getCacheFilename())) {
             // just processed if cache file name not stored before
             // which means that no original image has been created
             
@@ -125,10 +125,11 @@ public class ArtworkProcessorService {
                 generateImage(located, profile);
             } catch (IOException ex)  {
                 LOG.warn("Original image is not found: {}/{}", located.getCacheDirectory(), located.getCacheFilename());
+                LOG.trace("Image generation error", ex);
                 
                 // reset cache values and mark located artwork and reset to updated
                 located.setCacheDirectory(null);
-                located.setCacheDirectory(null);
+                located.setCacheFilename(null);
                 located.setStatus(StatusType.UPDATED);
 
                 // no further processing for that located image

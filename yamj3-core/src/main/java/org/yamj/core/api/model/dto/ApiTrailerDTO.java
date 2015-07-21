@@ -34,10 +34,16 @@ public class ApiTrailerDTO extends AbstractApiIdentifiableDTO {
     private String url;
     private String source;
     private String title;
-    private String cacheDir = "";
-    private String cacheFilename = "";
-    private String filename = "";
-
+    private String embeddedUrl;
+    private String filename;
+    
+    @JsonIgnore
+    private String hashCode;
+    @JsonIgnore
+    private String cacheDir;
+    @JsonIgnore
+    private String cacheFilename;
+    
     public String getUrl() {
         return url;
     }
@@ -54,6 +60,14 @@ public class ApiTrailerDTO extends AbstractApiIdentifiableDTO {
         this.source = source;
     }
 
+    public String getHashCode() {
+        return hashCode;
+    }
+
+    public void setHashCode(String hashCode) {
+        this.hashCode = hashCode;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -62,36 +76,39 @@ public class ApiTrailerDTO extends AbstractApiIdentifiableDTO {
         this.title = title;
     }
 
-    @JsonIgnore
     public String getCacheDir() {
         return cacheDir;
     }
 
     public void setCacheDir(String cacheDir) {
-        if (StringUtils.isBlank(cacheDir)) {
-            this.cacheDir = "";
-        } else {
-            this.cacheDir = cacheDir;
-        }
+        this.cacheDir = cacheDir;
     }
 
-    @JsonIgnore
     public String getCacheFilename() {
         return cacheFilename;
     }
 
     public void setCacheFilename(String cacheFilename) {
-        if (StringUtils.isBlank(cacheFilename)) {
-            this.cacheFilename = "";
-        } else {
-            this.cacheFilename = cacheFilename;
-        }
+        this.cacheFilename = cacheFilename;
     }
     
     public String getFilename() {
-        if (StringUtils.isBlank(this.filename)) {
-            this.filename = FilenameUtils.normalize(FilenameUtils.concat(this.cacheDir, this.cacheFilename), Boolean.TRUE);
+        if (filename == null && StringUtils.isNotBlank(this.cacheFilename)) {
+            filename = FilenameUtils.normalize(FilenameUtils.concat(this.cacheDir, this.cacheFilename), Boolean.TRUE);
         }
         return filename;
+    }
+
+    public String getEmbeddedUrl() {
+        if (embeddedUrl == null) {
+            if ("youtube".equalsIgnoreCase(source)) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("https://www.youtube.com/embed/");
+                sb.append(hashCode);
+                sb.append("?feature=oembed");
+                embeddedUrl = sb.toString();
+            }
+        }
+        return embeddedUrl;
     }
 }
