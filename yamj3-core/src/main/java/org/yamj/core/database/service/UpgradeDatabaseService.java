@@ -62,5 +62,13 @@ public class UpgradeDatabaseService {
         } catch (Exception ex) {
             LOG.warn("Failed upgrade 'patchTrailers'", ex);
         }
+
+        // Issues: enhancement
+        // Date:   21.07.2015
+        try {
+            upgradeDatabaseDao.patchArtworkConfig();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchArtworkConfig'", ex);
+        }
     }
 }

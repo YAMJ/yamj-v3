@@ -286,9 +286,6 @@ public class TheMovieDbArtworkScanner implements
                 LOG.debug("Got {} {} artworks from TMDb for id {}", artworkList.size(), artworkType, tmdbId);
                 
                 for (Artwork artwork : artworkList) {
-                    URL artworkURL = tmdbApi.createImageUrl(artwork.getFilePath(), artworkSize);
-                    System.err.println(artwork.getId() + ": "+artwork.getArtworkType() + " --- " + artworkURL);
-                    
                     if (artwork.getArtworkType() == artworkType
                             && (StringUtils.isBlank(artwork.getLanguage())
                             || StringUtils.equalsIgnoreCase(artwork.getLanguage(), language))) 
