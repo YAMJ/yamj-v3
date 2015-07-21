@@ -600,7 +600,7 @@ public class ArtworkScannerService {
     private Set<String> determinePriorities(String configkey, Set<String> possibleScanners) {
         final String configValue = this.configServiceWrapper.getProperty(configkey, "");
         Set<String> result = ArtworkTools.determinePriorities(configValue, possibleScanners);
-        LOG.info("{} --> {}", configkey, result);
+        LOG.trace("{} --> {}", configkey, result);
         return result;
     }
 }
