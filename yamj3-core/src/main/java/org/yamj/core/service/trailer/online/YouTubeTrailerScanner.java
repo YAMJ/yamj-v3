@@ -117,6 +117,11 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
                 search.setVideoDefinition("high");
             }
             
+            String regionCode = configService.getProperty("youtube.trailer.region", "DE");
+            if (StringUtils.isNotBlank(regionCode)) {
+                search.setRegionCode(regionCode);
+            }
+            
             SearchListResponse searchResponse = search.execute();
             if (CollectionUtils.isEmpty(searchResponse.getItems())) {
                 LOG.trace("Found no trailers for movie '{}'", videoData.getTitle());
