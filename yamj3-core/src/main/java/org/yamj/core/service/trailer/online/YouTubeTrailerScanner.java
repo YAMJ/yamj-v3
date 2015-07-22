@@ -111,15 +111,20 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
             search.setKey(youtubeApiKey);
             search.setQ(query.toString());
             search.setType("video");
-            search.setMaxResults(configService.getLongProperty("youtube.trailer.maxtrailers", 5));
+            search.setMaxResults(configService.getLongProperty("youtube.trailer.maxResults", 5));
             
             if (configService.getBooleanProperty("youtube.trailer.hdwanted", Boolean.TRUE)) {
                 search.setVideoDefinition("high");
             }
             
-            String regionCode = configService.getProperty("youtube.trailer.region", "DE");
+            String regionCode = configService.getProperty("youtube.trailer.regionCode");
             if (StringUtils.isNotBlank(regionCode)) {
                 search.setRegionCode(regionCode);
+            }
+
+            String relevanceLanguage = configService.getProperty("youtube.trailer.relevanceLanguage");
+            if (StringUtils.isNotBlank(relevanceLanguage)) {
+                search.setRelevanceLanguage(relevanceLanguage);
             }
             
             SearchListResponse searchResponse = search.execute();
