@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.trailer;
 
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -214,6 +216,31 @@ public class TrailerScannerService {
         }
     }
 
+    public URL getDownloadURL(Trailer trailer) {
+        if (trailer.getUrl() == null) {
+            return null;
+        }
+
+        ITrailerScanner trailerScanner;
+        if (trailer.getSeries() != null) {
+            trailerScanner = registeredSeriesTrailerScanner.get(trailer.getSource().toLowerCase());
+        } else {
+            trailerScanner = registeredMovieTrailerScanner.get(trailer.getSource().toLowerCase());
+        }
+        
+        // just return URL if trailer scanner not found
+        if (trailerScanner == null) {
+            try {
+                return new URL(URLEncoder.encode(trailer.getUrl(), "UTF-8"));
+            } catch (Exception e) {
+                LOG.warn("Malformed trailer url '{}'", trailer.getUrl());
+                return null;
+            }
+        }
+        
+        return trailerScanner.getDownloadURL(trailer);
+    }
+    
     public void processingError(QueueDTO queueElement) {
         if (queueElement == null) {
             // nothing to

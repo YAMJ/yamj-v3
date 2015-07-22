@@ -50,6 +50,8 @@ public class TrailerProcessorService {
     @Autowired
     private TrailerStorageService trailerStorageService;
     @Autowired
+    private TrailerScannerService trailerScannerService;
+    @Autowired
     private FileStorageService fileStorageService;
     @Autowired
     private ConfigService configService;
@@ -86,9 +88,10 @@ public class TrailerProcessorService {
 
         File tempFile;
         try {
-            URL web = new URL(trailer.getUrl());
-            VGetParser user = VGet.parser(web);
-            VideoInfo info = user.info(web);
+            // TODO trailerScanner.getDownloadURL(trailer);
+            URL downloadURL = new URL(trailer.getUrl());
+            VGetParser user = VGet.parser(downloadURL);
+            VideoInfo info = user.info(downloadURL);
             VGet v = new VGet(info, tempDir);
             v.download(user);
             tempFile = v.getTarget();

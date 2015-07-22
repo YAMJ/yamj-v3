@@ -25,9 +25,8 @@ package org.yamj.core.service.trailer.online;
 import java.util.List;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.dto.TrailerDTO;
-import org.yamj.core.service.metadata.online.IOnlineScanner;
 
-public interface ISeriesTrailerScanner extends IOnlineScanner {
+public interface ISeriesTrailerScanner extends ITrailerScanner {
 
     List<TrailerDTO> getTrailers(Series Series);
 }
