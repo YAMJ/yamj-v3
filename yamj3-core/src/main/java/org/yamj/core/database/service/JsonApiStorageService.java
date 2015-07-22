@@ -503,7 +503,7 @@ public class JsonApiStorageService {
     }
 
     /**
-     * Set status of single metadata to UPDATED.
+     * Set status of artwork to UPDATED.
      *
      * @param type
      * @param id
@@ -548,6 +548,56 @@ public class JsonApiStorageService {
                     VideoData videoData = commonDao.getById(VideoData.class, id);
                     if (videoData != null) {
                         this.commonDao.markAsUpdated(videoData.getArtworks());
+                        rescan = true;
+                    }
+                    break;
+                default:
+                    // nothing to rescan
+                    break;
+            }
+            
+            if (rescan) {
+                StringBuilder sb = new StringBuilder("Rescan ");
+                sb.append(type.name().toLowerCase());
+                sb.append(" artwork for ID: ");
+                sb.append(id);
+                return new ApiStatus(200, sb.toString());
+            }
+            
+            StringBuilder sb = new StringBuilder("No ");
+            sb.append(type.name().toLowerCase());
+            sb.append(" found for artwork rescanning ID: ");
+            sb.append(id);
+            return new ApiStatus(404, sb.toString());
+        }
+
+        return new ApiStatus(410, "No valid " + type.name().toLowerCase() + " ID provided");
+    }
+    
+    /**
+     * Set status of artwork to UPDATED.
+     *
+     * @param type
+     * @param id
+     * @return
+     */
+    @Transactional
+    public ApiStatus rescanTrailer(MetaDataType type, Long id) {
+        boolean rescan = false;
+        
+        if (id != null && id > 0L) {
+            switch (type) {
+                case SERIES:
+                    Series series = commonDao.getById(Series.class, id);
+                    if (series != null) {
+                        commonDao.markAsUpdatedForTrailers(series);
+                        rescan = true;
+                    }
+                    break;
+                case MOVIE:
+                    VideoData videoData = commonDao.getById(VideoData.class, id);
+                    if (videoData != null) {
+                        commonDao.markAsUpdatedForTrailers(videoData);
                         rescan = true;
                     }
                     break;

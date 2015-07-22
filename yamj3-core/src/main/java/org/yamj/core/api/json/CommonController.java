@@ -35,7 +35,10 @@ import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Certification;
+import org.yamj.core.database.model.Country;
+import org.yamj.core.database.model.Genre;
+import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.service.ScanningScheduler;
 
@@ -110,7 +113,14 @@ public class CommonController {
         if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
         return apiStatus;
     }
-    
+
+    @RequestMapping("/rescan/movie/trailer/{id}")
+    public ApiStatus rescanMovieTrailer(@ModelAttribute("options") OptionsId options) {
+        ApiStatus apiStatus = jsonApi.rescanTrailer(MetaDataType.MOVIE, options.getId());
+        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanTrailer();
+        return apiStatus;
+    }
+
     @RequestMapping("/rescan/series/{id}")
     public ApiStatus rescanSeries(@ModelAttribute("options") OptionsId options) {
         ApiStatus apiStatus = jsonApi.rescanSingle(MetaDataType.SERIES, options.getId());
@@ -122,6 +132,13 @@ public class CommonController {
     public ApiStatus rescanSeriesArtwork(@ModelAttribute("options") OptionsId options) {
         ApiStatus apiStatus = jsonApi.rescanArtwork(MetaDataType.SERIES, options.getId());
         if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
+        return apiStatus;
+    }
+
+    @RequestMapping("/rescan/series/trailer/{id}")
+    public ApiStatus rescanSeriesTrailer(@ModelAttribute("options") OptionsId options) {
+        ApiStatus apiStatus = jsonApi.rescanTrailer(MetaDataType.SERIES, options.getId());
+        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanTrailer();
         return apiStatus;
     }
 
