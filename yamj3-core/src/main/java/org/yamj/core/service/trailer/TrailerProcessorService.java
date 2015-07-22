@@ -162,6 +162,7 @@ public class TrailerProcessorService {
             break;
         default:
             sb.append("mp4");
+            break;
         }
         
         return sb.toString();

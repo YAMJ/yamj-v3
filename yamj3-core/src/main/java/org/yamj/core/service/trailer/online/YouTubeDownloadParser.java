@@ -22,13 +22,13 @@
  */
 package org.yamj.core.service.trailer.online;
 
-import java.io.IOException;
 import java.net.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +43,8 @@ import org.yamj.core.web.PoolingHttpClient;
 public class YouTubeDownloadParser  {
 
     /*
-     * For the complete YouTubeParser; see https://github.com/axet/vget.
-     * YAMJ just needed the download URL parsing; the download itself is done by http client. 
+     * For the complete YouTubeParser see https://github.com/axet/vget.
+     * YAMJ just needs to parse the download; the download itself is done by http client. 
      */
     
     private static final Logger LOG = LoggerFactory.getLogger(YouTubeDownloadParser.class);
@@ -107,6 +107,7 @@ public class YouTubeDownloadParser  {
             put(22, new StreamInfo(Container.MP4, Quality.p720));
             put(18, new StreamInfo(Container.MP4, Quality.p360));
             put(17, new StreamInfo(Container.GP3, Quality.p144));
+            put(13, new StreamInfo(Container.GP3, Quality.p144));
             put(6, new StreamInfo(Container.FLV, Quality.p270));
             put(5, new StreamInfo(Container.FLV, Quality.p240));
         }
@@ -131,9 +132,10 @@ public class YouTubeDownloadParser  {
             return s(b, sig.length());
         }
 
-        String s(int b, int e, int step) {
+        String s(final int begin, final int end, final int step) {
             String str = "";
-            while (b != e) {
+            int b = begin;
+            while (b != end) {
                 str += sig.charAt(b);
                 b += step;
             }
@@ -176,8 +178,9 @@ public class YouTubeDownloadParser  {
                 return s(54) + s(77, 54, -1) + s(39) + s(53, 39, -1) + s(78)
                                 + s(38, 34, -1) + s(0) + s(33, 29, -1) + s(34)
                                 + s(28, 9, -1) + s(29) + s(8, 0, -1) + s(9);
+            default:    
+                throw new RuntimeException("Unable to decrypt signature; key length" + sig.length() + " not supported");
             }
-            throw new RuntimeException("Unable to decrypt signature; key length" + sig.length() + " not supported");
         }
     }
 
@@ -217,12 +220,12 @@ public class YouTubeDownloadParser  {
     private void streamCapture(Set<VideoDownload> videoDownloads, String videoId) throws Exception {
         DigestedResponse response = httpClient.requestContent(TRAILER_BASE_URL + videoId);
         if (response.getStatusCode() != 200) {
-            throw new IOException("Failed to access trailer base");
+            throw new HttpResponseException(response.getStatusCode(), "Failed to access trailer base");
         }
         extractHtmlInfo(videoDownloads, response.getContent());
     }
 
-    private void filter(Set<VideoDownload> videoDownloads, String itag, URL url) {
+    private static void filter(Set<VideoDownload> videoDownloads, String itag, URL url) {
         Integer i = Integer.decode(itag);
         StreamInfo streamInfo = ITAG_MAP.get(i);
         if (streamInfo != null) {
@@ -233,7 +236,7 @@ public class YouTubeDownloadParser  {
     private void extractEmbedded(Set<VideoDownload> videoDownloads, String videoId) throws Exception {
         DigestedResponse response = httpClient.requestContent(TRAILER_INFO_URL + videoId);
         if (response.getStatusCode() != 200) {
-            throw new IOException("Failed to access trailer info page");
+            throw new HttpResponseException(response.getStatusCode(), "Failed to access trailer info page");
         }
 
         Map<String, String> map = getQueryMap(response.getContent());
@@ -263,7 +266,7 @@ public class YouTubeDownloadParser  {
         }
     }
 
-    private void extractHtmlInfo(Set<VideoDownload> videoDownloads, String html) throws Exception {
+    private static void extractHtmlInfo(Set<VideoDownload> videoDownloads, String html) throws Exception {
         
         Matcher ageMatcher = Pattern.compile("(verify_age)").matcher(html);
         if (ageMatcher.find()) throw new RuntimeException("Age restriction, account required");
@@ -335,7 +338,7 @@ public class YouTubeDownloadParser  {
         }
     }
 
-    private void extractUrlEncodedVideos(Set<VideoDownload> videoDownloads, String sline) throws Exception {
+    private static void extractUrlEncodedVideos(Set<VideoDownload> videoDownloads, String sline) throws Exception {
         String[] urlStrings = sline.split("url=");
         for (String urlString : urlStrings) {
             urlString = StringEscapeUtils.unescapeJava(urlString);
