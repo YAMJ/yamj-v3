@@ -34,7 +34,6 @@ public class ApiTrailerDTO extends AbstractApiIdentifiableDTO {
     private String url;
     private String source;
     private String title;
-    private String embeddedUrl;
     private String filename;
     
     @JsonIgnore
@@ -97,18 +96,5 @@ public class ApiTrailerDTO extends AbstractApiIdentifiableDTO {
             filename = FilenameUtils.normalize(FilenameUtils.concat(this.cacheDir, this.cacheFilename), Boolean.TRUE);
         }
         return filename;
-    }
-
-    public String getEmbeddedUrl() {
-        if (embeddedUrl == null) {
-            if ("youtube".equalsIgnoreCase(source)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("https://www.youtube.com/embed/");
-                sb.append(hashCode);
-                sb.append("?feature=oembed");
-                embeddedUrl = sb.toString();
-            }
-        }
-        return embeddedUrl;
     }
 }
