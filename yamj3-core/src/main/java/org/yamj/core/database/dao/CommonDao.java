@@ -22,7 +22,10 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.LongType;
@@ -596,6 +599,13 @@ public class CommonDao extends HibernateDao {
                 videoData.setTrailerStatus(StatusType.UPDATED);
             }
             this.updateEntity(videoData);
+        }
+    }
+
+    public void markAsUpdated(Trailer trailer) {
+        if (!StatusType.NEW.equals(trailer.getStatus()) && !StatusType.UPDATED.equals(trailer.getStatus())) {
+            trailer.setStatus(StatusType.UPDATED);
+            this.updateEntity(trailer);
         }
     }
 

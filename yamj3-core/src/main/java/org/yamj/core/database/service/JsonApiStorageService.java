@@ -445,6 +445,7 @@ public class JsonApiStorageService {
                 case SERIES:
                     Series series = commonDao.getById(Series.class, id);
                     if (series != null) {
+                        commonDao.markAsUpdatedForTrailers(series);
                         commonDao.markAsUpdated(series.getArtworks());
                         commonDao.markAsUpdated(series);
                         rescan = true;
@@ -474,8 +475,18 @@ public class JsonApiStorageService {
                 case EPISODE:
                     VideoData videoData = commonDao.getById(VideoData.class, id);
                     if (videoData != null) {
+                        if (videoData.isMovie()) {
+                            commonDao.markAsUpdatedForTrailers(videoData);
+                        }
                         commonDao.markAsUpdated(videoData.getArtworks());
                         commonDao.markAsUpdated(videoData);
+                        rescan = true;
+                    }
+                    break;
+                case TRAILER:
+                    Trailer trailer= commonDao.getById(Trailer.class, id);
+                    if (trailer != null) {
+                        commonDao.markAsUpdated(trailer);
                         rescan = true;
                     }
                     break;

@@ -197,6 +197,13 @@ public class CommonController {
         if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
         return apiStatus;
     }
+    
+    @RequestMapping("/rescan/trailer/{id}")
+    public ApiStatus rescanTrailer(@ModelAttribute("options") OptionsId options) {
+        ApiStatus apiStatus = jsonApi.rescanSingle(MetaDataType.TRAILER, options.getId());
+        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanTrailer();
+        return apiStatus;
+    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Genre Methods">

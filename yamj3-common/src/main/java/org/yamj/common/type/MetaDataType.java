@@ -58,6 +58,10 @@ public enum MetaDataType {
      */
     BOXSET(false),
     /**
+     * This is a trailer
+     */
+    TRAILER(false),
+    /**
      * The type is unknown
      */
     UNKNOWN(false);
