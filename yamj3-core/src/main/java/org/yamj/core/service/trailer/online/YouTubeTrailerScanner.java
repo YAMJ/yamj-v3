@@ -31,7 +31,6 @@ import com.google.api.services.youtube.model.ResourceId;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -43,7 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigService;
-import org.yamj.core.database.model.Trailer;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.TrailerDTO;
 import org.yamj.core.service.trailer.TrailerScannerService;
@@ -53,7 +51,6 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(YouTubeTrailerScanner.class);
     public static final String SCANNER_ID = "youtube";
-    private static final String TRAILER_BASE_URL = "https://www.youtube.com/watch?v=";
 
     @Value("${APIKEY.youtube:null}")
     private String youtubeApiKey;
@@ -131,7 +128,7 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
                     ResourceId resourceId = item.getId();
                     if (resourceId.getKind().equals("youtube#video")) {
                         trailers.add(new TrailerDTO(SCANNER_ID,
-                                        TRAILER_BASE_URL + resourceId.getVideoId(),
+                                        YouTubeDownloadParser.TRAILER_BASE_URL + resourceId.getVideoId(),
                                         item.getSnippet().getTitle(),
                                         resourceId.getVideoId()));
                     }
@@ -141,12 +138,6 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
         } catch (Exception e) {
             LOG.error("YouTube trailer scanner error: '" + videoData.getTitle() + "'", e);
         }
-        return null;
-    }
-
-    @Override
-    public URL getDownloadURL(Trailer trailer) {
-        // TODO get the download URL by parsing the info page
         return null;
     }
 }

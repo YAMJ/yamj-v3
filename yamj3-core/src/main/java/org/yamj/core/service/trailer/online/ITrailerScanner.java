@@ -22,17 +22,9 @@
  */
 package org.yamj.core.service.trailer.online;
 
-import java.net.URL;
-import org.yamj.core.database.model.Trailer;
 import org.yamj.core.service.metadata.online.IOnlineScanner;
 
 public interface ITrailerScanner extends IOnlineScanner {
-
-    /**
-     * Get the download URL for a trailer.
-     * 
-     * @param trailer the trailer
-     * @return the download URL
-     */
-    URL getDownloadURL(Trailer trailer);
+    
+    // just a marker
 }

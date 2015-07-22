@@ -22,13 +22,8 @@
  */
 package org.yamj.core.service.trailer;
 
-import com.github.axet.vget.VGet;
-import com.github.axet.vget.info.VGetParser;
-import com.github.axet.vget.info.VideoInfo;
 import java.io.File;
 import java.net.URL;
-import javax.annotation.PostConstruct;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,11 +37,14 @@ import org.yamj.core.database.service.TrailerStorageService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.file.StorageType;
+import org.yamj.core.service.trailer.TrailerDownloadDTO.Container;
+import org.yamj.core.service.trailer.online.YouTubeDownloadParser;
 
 @Service("trailerProcessorService")
 public class TrailerProcessorService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrailerProcessorService.class);
+    
     @Autowired
     private TrailerStorageService trailerStorageService;
     @Autowired
@@ -55,14 +53,8 @@ public class TrailerProcessorService {
     private FileStorageService fileStorageService;
     @Autowired
     private ConfigService configService;
-    
-    private File tempDir;
-    
-    @PostConstruct
-    public void init() {
-        // determine temporary directory
-        tempDir = new File(System.getProperty("java.io.tmpdir"));
-    }
+    @Autowired
+    private YouTubeDownloadParser youTubeDownloadParser;
     
     public void processTrailer(QueueDTO queueElement) {
         if (queueElement == null) {
@@ -86,30 +78,41 @@ public class TrailerProcessorService {
             return;
         }
 
-        File tempFile;
-        try {
-            // TODO trailerScanner.getDownloadURL(trailer);
-            URL downloadURL = new URL(trailer.getUrl());
-            VGetParser user = VGet.parser(downloadURL);
-            VideoInfo info = user.info(downloadURL);
-            VGet v = new VGet(info, tempDir);
-            v.download(user);
-            tempFile = v.getTarget();
-        } catch (Exception e) {
-            LOG.error("Download failed for trailer {}-'{}'", trailer.getId(), trailer.getTitle());
-            LOG.trace("Trailer download error", e);
-            trailer.setStatus(StatusType.ERROR);
+        TrailerDownloadDTO dto = null;
+        if ("youtube".equalsIgnoreCase(trailer.getSource())) {
+            // NOTE: for YouTube the hash code is the video ID
+            dto = youTubeDownloadParser.extract(trailer.getHashCode());
+        } else {
+            try {
+                // defaults to MP4 and URL
+                dto = new TrailerDownloadDTO(TrailerDownloadDTO.Container.MP4, new URL(trailer.getUrl()));
+            } catch (Exception e) {
+                LOG.warn("Malformed URL: {}", trailer.getUrl());
+            }
+        }
+        
+        if (dto == null) {
+            // no trailer found
+            trailer.setStatus(StatusType.NOTFOUND);
             trailerStorageService.updateTrailer(trailer);
             return;
         }
 
         // download the trailer
-        String cacheFilename = buildCacheFilename(trailer, tempFile);
+        String cacheFilename = buildCacheFilename(trailer, dto.getContainer());
 
-        boolean stored = fileStorageService.store(StorageType.TRAILER, cacheFilename, tempFile, true);
+        boolean stored = false;
+        try {
+            stored = fileStorageService.store(StorageType.TRAILER, cacheFilename, dto.getUrl());
+            if (!stored) {
+                LOG.error("Failed to store trailer in file cache: {}", cacheFilename);
+            }
+        } catch (Exception e) {
+            LOG.error("Failed to download trailer: " + dto.getUrl(), e);
+        }
+        
         if (!stored) {
-            LOG.error("Failed to store trailer in file cache: {}", cacheFilename);
-            // mark located artwork with error
+            // mark trailer as errorness
             trailer.setStatus(StatusType.ERROR);
             trailerStorageService.updateTrailer(trailer);
             return;
@@ -123,7 +126,7 @@ public class TrailerProcessorService {
         trailerStorageService.updateTrailer(trailer);
     }
 
-    private static String buildCacheFilename(Trailer trailer, File tempFile) {
+    private static String buildCacheFilename(Trailer trailer, Container container) {
         StringBuilder sb = new StringBuilder();
         
         // 1. video name
@@ -147,7 +150,19 @@ public class TrailerProcessorService {
         sb.append(".");
         
         // 3. extension
-        sb.append(FilenameUtils.getExtension(tempFile.getName()));
+        switch (container) {
+        case FLV:
+            sb.append("mp4");
+            break;
+        case WEBM:
+            sb.append("webm");
+            break;
+        case GP3:
+            sb.append("3gp");
+            break;
+        default:
+            sb.append("mp4");
+        }
         
         return sb.toString();
     }
