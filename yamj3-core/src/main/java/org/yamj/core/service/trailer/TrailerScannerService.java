@@ -145,6 +145,7 @@ public class TrailerScannerService {
         }
 
         // create trailers
+        boolean downloadEnabled = configService.getBooleanProperty("yamj3.trailer.download", Boolean.FALSE);
         for (TrailerDTO dto : trailerDTOs) {
             Trailer trailer = new Trailer();
             trailer.setVideoData(videoData);
@@ -152,7 +153,7 @@ public class TrailerScannerService {
             trailer.setUrl(dto.getUrl());
             trailer.setTitle(dto.getTitle());
             trailer.setHashCode(dto.getHashCode());
-            trailer.setStatus(StatusType.NEW);
+            trailer.setStatus(downloadEnabled ? StatusType.NEW : StatusType.DONE);
             trailers.add(trailer);
         }
      }
@@ -203,13 +204,14 @@ public class TrailerScannerService {
         }
 
         // create trailers
+        boolean downloadEnabled = configService.getBooleanProperty("yamj3.trailer.download", Boolean.FALSE);
         for (TrailerDTO dto : trailerDTOs) {
             Trailer trailer = new Trailer();
             trailer.setSeries(series);
             trailer.setSource(dto.getSource());
             trailer.setUrl(dto.getUrl());
             trailer.setHashCode(dto.getHashCode());
-            trailer.setStatus(StatusType.NEW);
+            trailer.setStatus(downloadEnabled ? StatusType.NEW : StatusType.DONE);
             trailers.add(trailer);
         }
     }

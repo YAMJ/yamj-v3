@@ -133,11 +133,10 @@ public class TrailerStorageService {
                     videoData.getTrailers().add(trailer);
                     trailerDao.saveEntity(trailer);
                 } else {
-                    // find matching stored trailer and update status if needed
+                    // find matching stored trailer and reset deleted status
                     for (Trailer stored : videoData.getTrailers()) {
                         if (stored.equals(trailer)) {
-                            // set status of stored trailer to status of created trailer
-                            trailerDao.markDeletedTrailer(stored, trailer.getStatus());
+                            trailerDao.resetDeletionStatus(stored);
                             break;
                         }
                     }
@@ -178,11 +177,10 @@ public class TrailerStorageService {
                     series.getTrailers().add(trailer);
                     trailerDao.saveEntity(trailer);
                 } else {
-                    // find matching stored trailer and update status if needed
+                    // find matching stored trailer and reset deleted status
                     for (Trailer stored : series.getTrailers()) {
                         if (stored.equals(trailer)) {
-                            // set status of stored trailer to status of created trailer
-                            trailerDao.markDeletedTrailer(stored, trailer.getStatus());
+                            trailerDao.resetDeletionStatus(stored);
                             break;
                         }
                     }

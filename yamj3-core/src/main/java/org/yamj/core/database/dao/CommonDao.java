@@ -538,7 +538,7 @@ public class CommonDao extends HibernateDao {
         for (ArtworkLocated located : artwork.getArtworkLocated()) {
             if (located.getUrl() != null 
                 && sources.contains(located.getSource())
-                && !StatusType.DELETED.equals(artwork.getStatus()))
+                && !StatusType.DELETED.equals(located.getStatus()))
             {
                 located.setStatus(StatusType.DELETED);
                 this.updateEntity(located);

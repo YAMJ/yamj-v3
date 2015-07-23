@@ -167,11 +167,11 @@ public class ArtworkDao extends HibernateDao {
             artwork.getArtworkLocated().add(scannedLocated);
             this.saveEntity(scannedLocated);
         } else {
-            // find matching stored located artwork and update status if needed
+            // find matching stored located artwork and reset deletion status
             for (ArtworkLocated stored : artwork.getArtworkLocated()) {
                 if (stored.equals(scannedLocated)) {
                     if (StatusType.DELETED.equals(stored.getStatus())) {
-                        stored.setStatus(StatusType.UPDATED);
+                        stored.setStatus(stored.getPreviousStatus());
                         this.updateEntity(stored);
                     }
                     break;

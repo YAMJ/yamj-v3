@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.Trailer;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.TrailerStorageService;
@@ -52,8 +51,6 @@ public class TrailerProcessorService {
     @Autowired
     private FileStorageService fileStorageService;
     @Autowired
-    private ConfigService configService;
-    @Autowired
     private YouTubeDownloadParser youTubeDownloadParser;
     
     public void processTrailer(QueueDTO queueElement) {
@@ -71,8 +68,8 @@ public class TrailerProcessorService {
             trailerStorageService.updateTrailer(trailer);
             return;
         }
-        if (!configService.getBooleanProperty("yamj3.trailer.download", Boolean.TRUE)) {
-            // no trailer download
+        if (trailer.isCached()) {
+            // no trailer download if already cached
             trailer.setStatus(StatusType.DONE);
             trailerStorageService.updateTrailer(trailer);
             return;

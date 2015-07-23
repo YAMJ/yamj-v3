@@ -107,7 +107,6 @@ public class WebConfiguration  {
 
     @Scope
     @Bean(destroyMethod="close")
-    @SuppressWarnings("resource")
     public PoolingHttpClient poolingHttpClient() {
         LOG.trace("Create new pooling http client");
         

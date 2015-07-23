@@ -791,7 +791,7 @@ public class JsonApiStorageService {
         
         StringBuilder sb = new StringBuilder();
         sb.append("Set status ");
-        sb.append(status);
+        sb.append(trailer.getStatus());
         sb.append(" for trailer ID: ");
         sb.append(trailer.getId());
         return new ApiStatus(200, sb.toString());

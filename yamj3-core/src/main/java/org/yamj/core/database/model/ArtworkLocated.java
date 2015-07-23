@@ -69,6 +69,10 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
 
+    @Type(type = "statusType")
+    @Column(name = "previous_status", nullable = false, length = 30)
+    private StatusType previousStatus;
+
     @Column(name = "hash_code", length = 100)
     private String hashCode;
 
@@ -143,7 +147,20 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     }
 
     public void setStatus(StatusType status) {
+        if (StatusType.DELETED.equals(status)) {
+            setPreviousStatus(this.status);
+        } else {
+            setPreviousStatus(null);
+        }
         this.status = status;
+    }
+
+    public StatusType getPreviousStatus() {
+        return previousStatus;
+    }
+
+    private void setPreviousStatus(StatusType previousStatus) {
+        this.previousStatus = previousStatus;
     }
 
     public String getHashCode() {

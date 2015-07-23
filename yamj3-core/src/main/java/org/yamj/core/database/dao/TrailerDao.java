@@ -112,14 +112,9 @@ public class TrailerDao extends HibernateDao {
         return queueElements;
     }
 
-
-    public void markDeletedTrailer(Trailer trailer, StatusType newStatus) {
+    public void resetDeletionStatus(Trailer trailer) {
         if (StatusType.DELETED.equals(trailer.getStatus())) {
-            if (trailer.isCached()) {
-                trailer.setStatus(StatusType.DONE);
-            } else {
-                trailer.setStatus(newStatus);
-            }
+            trailer.setStatus(trailer.getPreviousStatus());
             this.updateEntity(trailer);
         }
     }
