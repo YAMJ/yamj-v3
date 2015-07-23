@@ -2169,8 +2169,8 @@ public class ApiDao extends HibernateDao {
         } else {
             sbSQL.append("WHERE t.videodata_id=:id ");
         }
-        sbSQL.append(" and t.status not in ('IGNORE','DELETED')");      
-        sbSQL.append("' order by t.id");
+        sbSQL.append("and t.status not in ('IGNORE','DELETED') ");      
+        sbSQL.append("order by t.id ");
         
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
         sqlScalars.addScalar(ID, LongType.INSTANCE);
