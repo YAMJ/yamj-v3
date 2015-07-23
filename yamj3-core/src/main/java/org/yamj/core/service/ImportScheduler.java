@@ -60,8 +60,9 @@ public class ImportScheduler {
 
     private void processStageFiles() {
         Long id = null;
-
+        
         // PROCESS VIDEOS
+        boolean done = false;
         do {
             try {
                 // find next stage file to process
@@ -70,10 +71,7 @@ public class ImportScheduler {
                     LOG.trace("Process video stage file: {}", id);
                     mediaImportService.processVideo(id);
                     LOG.info("Processed video stage file: {}", id);
-                    
-                    // trigger scan of media files and meta data
-                    scanningScheduler.triggerScanMediaFiles();
-                    scanningScheduler.triggerScanMetaData();
+                    done = true;
                 }
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
@@ -89,7 +87,14 @@ public class ImportScheduler {
                 }
             }
         } while (id != null);
-
+        
+        // trigger scan of media files and meta data
+        if (done) {
+            scanningScheduler.triggerScanMediaFiles();
+            scanningScheduler.triggerScanMetaData();
+            done = false;
+        }
+        
         // PROCESS NFOS
         do {
             try {
@@ -97,11 +102,8 @@ public class ImportScheduler {
                 id = mediaImportService.getNextStageFileId(FileType.NFO, StatusType.NEW, StatusType.UPDATED);
                 if (id != null) {
                     LOG.trace("Process nfo stage file: {}", id);
-                    boolean done = mediaImportService.processNfo(id);
+                    done = done || mediaImportService.processNfo(id);
                     LOG.info("Processed nfo stage file: {}", id);
-
-                    // trigger scan of meta data
-                    if (done) scanningScheduler.triggerScanMetaData();
                 }
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
@@ -118,6 +120,12 @@ public class ImportScheduler {
             }
         } while (id != null);
 
+        // trigger scan of meta data
+        if (done) { 
+            scanningScheduler.triggerScanMetaData();
+            done = false;
+        }
+        
         // PROCESS IMAGES
         do {
             try {
@@ -125,11 +133,8 @@ public class ImportScheduler {
                 id = mediaImportService.getNextStageFileId(FileType.IMAGE, StatusType.NEW, StatusType.UPDATED);
                 if (id != null) {
                     LOG.trace("Process image stage file: {}", id);
-                    boolean done = mediaImportService.processImage(id);
+                    done = done || mediaImportService.processImage(id);
                     LOG.info("Processed image stage file: {}", id);
-
-                    // trigger scan of artwork
-                    if (done) scanningScheduler.triggerScanArtwork();
                 }
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
@@ -145,6 +150,12 @@ public class ImportScheduler {
                 }
             }
         } while (id != null);
+
+        // trigger scan of artwork
+        if (done) {
+            scanningScheduler.triggerScanArtwork();
+            done = false;
+        }
 
         // PROCESS WATCHED
         do {
