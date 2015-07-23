@@ -165,6 +165,11 @@ public class Trailer extends AbstractAuditable implements Serializable {
         this.title = title;
     }
 
+    // TRANSIENT METHODS
+    public boolean isCached() {
+        return StringUtils.isNotBlank(cacheFilename);
+    }
+    
     // EQUALITY CHECKS
     @Override
     public int hashCode() {

@@ -84,7 +84,7 @@ public class ArtworkController {
      * @return
      */
     @RequestMapping("/located/ignore/{id}")
-    public ApiStatus deleteLocatedById(@ModelAttribute("options") OptionsId options) {
+    public ApiStatus ignoreLocatedArtwork(@ModelAttribute("options") OptionsId options) {
         ApiStatus status = new ApiStatus();
         Long id = options.getId();
         if (id != null && id > 0L) {

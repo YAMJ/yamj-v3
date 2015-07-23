@@ -30,17 +30,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
-import org.yamj.core.database.model.Certification;
-import org.yamj.core.database.model.Country;
-import org.yamj.core.database.model.Genre;
-import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.service.ScanningScheduler;
+import org.yamj.core.service.TrailerProcessScheduler;
 
 @Controller
 @ResponseBody
@@ -52,7 +51,9 @@ public class CommonController {
     private JsonApiStorageService jsonApi;
     @Autowired 
     private ScanningScheduler scanningScheduler;
-
+    @Autowired
+    private TrailerProcessScheduler trailerProcessScheduler;
+    
     //<editor-fold defaultstate="collapsed" desc="Watched Methods">
     @RequestMapping("/watched/movie/{id}")
     public ApiStatus markWatchedMovie(@ModelAttribute("options") OptionsId options) {
@@ -197,13 +198,26 @@ public class CommonController {
         if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
         return apiStatus;
     }
-    
-    @RequestMapping("/rescan/trailer/{id}")
-    public ApiStatus rescanTrailer(@ModelAttribute("options") OptionsId options) {
-        ApiStatus apiStatus = jsonApi.rescanSingle(MetaDataType.TRAILER, options.getId());
-        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanTrailer();
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Trailer Methods">
+    @RequestMapping("/trailer/delete/{id}")
+    public ApiStatus trailerDelete(@ModelAttribute("options") OptionsId options) {
+        return jsonApi.setTrailerStatus(options.getId(), StatusType.DELETED);
+    }
+
+    @RequestMapping("/trailer/ignore/{id}")
+    public ApiStatus trailerIgnore(@ModelAttribute("options") OptionsId options) {
+        return jsonApi.setTrailerStatus(options.getId(), StatusType.IGNORE);
+    }
+
+    @RequestMapping("/trailer/download/{id}")
+    public ApiStatus trailerDownload(@ModelAttribute("options") OptionsId options) {
+        ApiStatus apiStatus = jsonApi.setTrailerStatus(options.getId(), StatusType.UPDATED);
+        if (apiStatus.isSuccessful()) trailerProcessScheduler.triggerProcess();
         return apiStatus;
     }
+
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Genre Methods">

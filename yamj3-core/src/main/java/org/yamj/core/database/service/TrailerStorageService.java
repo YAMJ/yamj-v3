@@ -136,7 +136,8 @@ public class TrailerStorageService {
                     // find matching stored trailer and update status if needed
                     for (Trailer stored : videoData.getTrailers()) {
                         if (stored.equals(trailer)) {
-                            trailerDao.markDeletedAsUpdated(trailer);
+                            // set status of stored trailer to status of created trailer
+                            trailerDao.markDeletedTrailer(stored, trailer.getStatus());
                             break;
                         }
                     }
@@ -180,7 +181,8 @@ public class TrailerStorageService {
                     // find matching stored trailer and update status if needed
                     for (Trailer stored : series.getTrailers()) {
                         if (stored.equals(trailer)) {
-                            trailerDao.markDeletedAsUpdated(trailer);
+                            // set status of stored trailer to status of created trailer
+                            trailerDao.markDeletedTrailer(stored, trailer.getStatus());
                             break;
                         }
                     }

@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
+import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
@@ -445,7 +446,6 @@ public class JsonApiStorageService {
                 case SERIES:
                     Series series = commonDao.getById(Series.class, id);
                     if (series != null) {
-                        commonDao.markAsUpdatedForTrailers(series);
                         commonDao.markAsUpdated(series.getArtworks());
                         commonDao.markAsUpdated(series);
                         rescan = true;
@@ -475,18 +475,8 @@ public class JsonApiStorageService {
                 case EPISODE:
                     VideoData videoData = commonDao.getById(VideoData.class, id);
                     if (videoData != null) {
-                        if (videoData.isMovie()) {
-                            commonDao.markAsUpdatedForTrailers(videoData);
-                        }
                         commonDao.markAsUpdated(videoData.getArtworks());
                         commonDao.markAsUpdated(videoData);
-                        rescan = true;
-                    }
-                    break;
-                case TRAILER:
-                    Trailer trailer= commonDao.getById(Trailer.class, id);
-                    if (trailer != null) {
-                        commonDao.markAsUpdated(trailer);
                         rescan = true;
                     }
                     break;
@@ -780,6 +770,31 @@ public class JsonApiStorageService {
 
     public List<ApiYearDecadeDTO> getDecades(ApiWrapperList<ApiYearDecadeDTO> wrapper) {
         return apiDao.getDecades(wrapper);
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Trailer Methods">
+    @Transactional
+    public ApiStatus setTrailerStatus(Long id, StatusType status) {
+        Trailer trailer = commonDao.getById(Trailer.class, id);
+        if (trailer == null) {
+            return new ApiStatus(404, "Trailer for ID " + id + " not found");
+        }
+        
+        if (trailer.isCached() && (StatusType.NEW.equals(status) || StatusType.UPDATED.equals(status))) {
+            // no download for already stored trailer
+            trailer.setStatus(StatusType.DONE);
+        } else {
+            trailer.setStatus(status);
+        }
+        commonDao.updateEntity(trailer);
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("Set status ");
+        sb.append(status);
+        sb.append(" for trailer ID: ");
+        sb.append(trailer.getId());
+        return new ApiStatus(200, sb.toString());
     }
     //</editor-fold>
 }

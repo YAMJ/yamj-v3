@@ -22,10 +22,7 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.LongType;
@@ -578,9 +575,7 @@ public class CommonDao extends HibernateDao {
     public void markAsUpdated(Person person) {
         if (!StatusType.NEW.equals(person.getStatus()) && !StatusType.UPDATED.equals(person.getStatus())) {
             person.setStatus(StatusType.UPDATED);
-            if (!StatusType.NEW.equals(person.getFilmographyStatus()) && !StatusType.UPDATED.equals(person.getFilmographyStatus())) {
-                person.setFilmographyStatus(StatusType.UPDATED);
-            }
+            person.setFilmographyStatus(StatusType.UPDATED);
             this.updateEntity(person);
         }
     }
@@ -595,17 +590,10 @@ public class CommonDao extends HibernateDao {
     public void markAsUpdated(VideoData videoData) {
         if (!StatusType.NEW.equals(videoData.getStatus()) && !StatusType.UPDATED.equals(videoData.getStatus())) {
             videoData.setStatus(StatusType.UPDATED);
-            if (!StatusType.NEW.equals(videoData.getTrailerStatus()) && !StatusType.UPDATED.equals(videoData.getTrailerStatus())) {
+            if (videoData.isMovie()) {
                 videoData.setTrailerStatus(StatusType.UPDATED);
             }
             this.updateEntity(videoData);
-        }
-    }
-
-    public void markAsUpdated(Trailer trailer) {
-        if (!StatusType.NEW.equals(trailer.getStatus()) && !StatusType.UPDATED.equals(trailer.getStatus())) {
-            trailer.setStatus(StatusType.UPDATED);
-            this.updateEntity(trailer);
         }
     }
 
@@ -626,9 +614,7 @@ public class CommonDao extends HibernateDao {
     public void markAsUpdated(Series series) {
         if (!StatusType.NEW.equals(series.getStatus()) && !StatusType.UPDATED.equals(series.getStatus())) {
             series.setStatus(StatusType.UPDATED);
-            if (!StatusType.NEW.equals(series.getTrailerStatus()) && !StatusType.UPDATED.equals(series.getTrailerStatus())) {
-                series.setTrailerStatus(StatusType.UPDATED);
-            }
+            series.setTrailerStatus(StatusType.UPDATED);
             this.updateEntity(series);
         }
     }

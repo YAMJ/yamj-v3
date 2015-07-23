@@ -33,10 +33,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.service.ArtworkStorageService;
-import org.yamj.core.database.service.MediaStorageService;
-import org.yamj.core.database.service.MetadataStorageService;
-import org.yamj.core.database.service.TrailerStorageService;
+import org.yamj.core.database.service.*;
 import org.yamj.core.service.artwork.ArtworkScannerRunner;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.mediainfo.MediaInfoRunner;
@@ -404,7 +401,7 @@ public class ScanningScheduler {
         List<QueueDTO> queueElements = trailerStorageService.getTrailerQueueForScanning(maxResults);
         if (CollectionUtils.isEmpty(queueElements)) {
             LOG.trace("No trailer found to scan");
-            watchScanArtwork.set(false);
+            watchScanTrailer.set(false);
             return;
         }
 

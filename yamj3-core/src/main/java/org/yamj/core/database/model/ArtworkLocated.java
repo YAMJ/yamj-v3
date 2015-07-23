@@ -226,6 +226,10 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
         return StatusType.DONE.equals(status) || StatusType.NEW.equals(status) || StatusType.UPDATED.equals(status);
     }
 
+    public boolean isCached() {
+        return StringUtils.isNotBlank(cacheFilename);
+    }
+    
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
