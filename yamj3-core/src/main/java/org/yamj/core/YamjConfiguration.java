@@ -23,7 +23,10 @@
 package org.yamj.core;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
@@ -45,6 +48,8 @@ import org.yamj.core.hibernate.HibernateAwareObjectMapper;
 @EnableScheduling
 @ComponentScan(basePackages = {"org.yamj.core"})
 public class YamjConfiguration extends WebMvcConfigurationSupport {
+
+    private static final Logger LOG = LoggerFactory.getLogger(YamjConfiguration.class);
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -94,8 +99,12 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
 
     @Bean
     public FactoryBean<Properties> dynamicProperties() {
+        final String defLang = Locale.getDefault().getLanguage();
         PropertiesFactoryBean factoryBean = new PropertiesFactoryBean();
-        factoryBean.setLocation(new ClassPathResource("/yamj3-core-dynamic.properties"));
+        factoryBean.setIgnoreResourceNotFound(true);
+        factoryBean.setLocations(new ClassPathResource("/yamj3-core-dynamic.properties"));
+        factoryBean.setLocations(new ClassPathResource("/yamj3-core-dynamic."+defLang+".properties"));
         return factoryBean;
     }
+
 }
