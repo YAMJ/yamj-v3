@@ -101,7 +101,7 @@ public class OnlineScannerService {
             // scan video data
             try {
                 if (videoData.isSkippedScan(movieScanner.getScannerName())) {
-                    LOG.warn("Movie scan skipped for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
+                    LOG.info("Movie scan skipped for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
                     scanResult = ScanResult.SKIPPED;
                 } else {
                     LOG.info("Scanning movie data for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
@@ -143,7 +143,7 @@ public class OnlineScannerService {
             videoData.setRetries(0);
             videoData.setStatus(StatusType.DONE);
         } else if (ScanResult.SKIPPED.equals(scanResult)) {
-            LOG.debug("Movie {}-'{}', skipped", videoData.getId(), videoData.getTitle());
+            LOG.info("Movie {}-'{}', skipped", videoData.getId(), videoData.getTitle());
             videoData.setRetries(0);
             videoData.setStatus(StatusType.DONE);
         } else if (ScanResult.MISSING_ID.equals(scanResult)) {
@@ -151,7 +151,7 @@ public class OnlineScannerService {
             videoData.setRetries(0);
             videoData.setStatus(StatusType.NOTFOUND);
         } else if (ScanResult.RETRY.equals(scanResult)) {
-            LOG.info("Movie {}-'{}', will be retried", videoData.getId(), videoData.getTitle());
+            LOG.debug("Movie {}-'{}', will be retried", videoData.getId(), videoData.getTitle());
             videoData.setRetries(videoData.getRetries()+1);
             videoData.setStatus(StatusType.UPDATED);
         } else {
@@ -219,7 +219,7 @@ public class OnlineScannerService {
             series.setRetries(0);
             series.setStatus(StatusType.DONE);
         } else if (ScanResult.SKIPPED.equals(scanResult)) {
-            LOG.debug("Series {}-'{}', skipped", series.getId(), series.getTitle());
+            LOG.info("Series {}-'{}', skipped", series.getId(), series.getTitle());
             series.setRetries(0);
             series.setStatus(StatusType.DONE);
        } else if (ScanResult.MISSING_ID.equals(scanResult)) {
@@ -227,7 +227,7 @@ public class OnlineScannerService {
             series.setRetries(0);
             series.setStatus(StatusType.NOTFOUND);
        } else if (ScanResult.RETRY.equals(scanResult)) {
-           LOG.info("Series {}-'{}', will be retried", series.getId(), series.getTitle());
+           LOG.debug("Series {}-'{}', will be retried", series.getId(), series.getTitle());
            series.setRetries(series.getRetries()+1);
            series.setStatus(StatusType.UPDATED);
         } else {
@@ -254,7 +254,7 @@ public class OnlineScannerService {
             // scan person data
             try {
                 if (person.isSkippedScan(personScanner.getScannerName())) {
-                    LOG.warn("Person scan skipped for '{}' using {}", person.getName(), personScanner.getScannerName());
+                    LOG.info("Person scan skipped for '{}' using {}", person.getName(), personScanner.getScannerName());
                     scanResult = ScanResult.SKIPPED;
                 } else {
                     LOG.info("Scanning person data for '{}' using {}", person.getName(), personScanner.getScannerName());
@@ -297,7 +297,7 @@ public class OnlineScannerService {
             person.setStatus(StatusType.DONE);
             person.setFilmographyStatus(StatusType.NEW);
         } else if (ScanResult.SKIPPED.equals(scanResult)) {
-            LOG.debug("Person {}-'{}', skipped", person.getId(), person.getName());
+            LOG.info("Person {}-'{}', skipped", person.getId(), person.getName());
             person.setRetries(0);
             person.setStatus(StatusType.DONE);
             person.setFilmographyStatus(StatusType.NEW);
@@ -306,7 +306,7 @@ public class OnlineScannerService {
             person.setRetries(0);
             person.setStatus(StatusType.NOTFOUND);
         } else if (ScanResult.RETRY.equals(scanResult)) {
-            LOG.info("Person {}-'{}', will be retried", person.getId(), person.getName());
+            LOG.debug("Person {}-'{}', will be retried", person.getId(), person.getName());
             person.setRetries(person.getRetries()+1);
             person.setStatus(StatusType.UPDATED);
         } else {
@@ -333,7 +333,7 @@ public class OnlineScannerService {
             // scan filmography
             try {
                 if (person.isSkippedScan(filmographyScanner.getScannerName())) {
-                    LOG.warn("Filmography scan skipped for '{}' using {}", person.getName(), filmographyScanner.getScannerName());
+                    LOG.info("Filmography scan skipped for '{}' using {}", person.getName(), filmographyScanner.getScannerName());
                     scanResult = ScanResult.SKIPPED;
                 } else {
                     LOG.info("Scanning filmography data for '{}' using {}", person.getName(), filmographyScanner.getScannerName());
@@ -375,11 +375,11 @@ public class OnlineScannerService {
             person.setRetries(0);
             person.setFilmographyStatus(StatusType.DONE);
         } else if (ScanResult.SKIPPED.equals(scanResult)) {
-            LOG.warn("Person filmography {}-'{}', skipped", person.getId(), person.getName());
+            LOG.info("Person filmography {}-'{}', skipped", person.getId(), person.getName());
             person.setRetries(0);
             person.setFilmographyStatus(StatusType.DONE);
         } else if (ScanResult.NO_RESULT.equals(scanResult)) {
-            LOG.warn("Person filmography {}-'{}', no results", person.getId(), person.getName());
+            LOG.info("Person filmography {}-'{}', no results", person.getId(), person.getName());
             person.setRetries(0);
             person.setFilmographyStatus(StatusType.NOTFOUND);
         } else if (ScanResult.MISSING_ID.equals(scanResult)) {
@@ -387,7 +387,7 @@ public class OnlineScannerService {
             person.setRetries(0);
             person.setFilmographyStatus(StatusType.NOTFOUND);
         } else if (ScanResult.RETRY.equals(scanResult)) {
-            LOG.info("Person filmography {}-'{}', will be retried", person.getId(), person.getName());
+            LOG.debug("Person filmography {}-'{}', will be retried", person.getId(), person.getName());
             person.setRetries(person.getRetries()+1);
             person.setFilmographyStatus(StatusType.UPDATED);
         } else {

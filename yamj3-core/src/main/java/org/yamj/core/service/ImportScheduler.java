@@ -23,6 +23,7 @@
 package org.yamj.core.service;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,13 +39,14 @@ import org.yamj.core.tools.ExceptionTools;
 public class ImportScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImportScheduler.class);
+    private static final ReentrantLock IMPORT_LOCK = new ReentrantLock();
     
     @Autowired
     private MediaImportService mediaImportService;
     @Autowired
     private ScanningScheduler scanningScheduler;
     
-    private AtomicBoolean watchProcess = new AtomicBoolean(false);
+    private final AtomicBoolean watchProcess = new AtomicBoolean(false);
 
     @Scheduled(initialDelay = 1000, fixedDelay = 300000)
     public void triggerProcess() {
@@ -54,8 +56,18 @@ public class ImportScheduler {
 
     @Async
     @Scheduled(initialDelay = 2000, fixedDelay = 1000)
-    public synchronized void runProcess() {
-        if (watchProcess.getAndSet(false)) processStageFiles();
+    public void runProcess() {
+        if (IMPORT_LOCK.isLocked()) {
+            // do nothing if locked
+            return;
+        }
+
+        IMPORT_LOCK.lock();
+        try {
+            if (watchProcess.getAndSet(false)) processStageFiles();
+        } finally {
+            IMPORT_LOCK.unlock();
+        }
     }
 
     private void processStageFiles() {
@@ -195,7 +207,5 @@ public class ImportScheduler {
                 }
             }
         } while (id != null);
-
-        // PROCESS SUBTITLES
     }
 }

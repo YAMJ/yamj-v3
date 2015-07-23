@@ -33,22 +33,26 @@ import org.yamj.core.service.tasks.ExecutionTaskService;
 @Component
 public class ExecutionTaskScheduler {
 
-    private static final ReentrantLock PROCESS_LOCK = new ReentrantLock();
+    private static final ReentrantLock EXECUTION_TASK_LOCK = new ReentrantLock();
     
     @Autowired
     private ExecutionTaskService executionTaskService;
     
     @Scheduled(initialDelay = 5000, fixedDelay = 60000)
     public void executeTasks() {
-        PROCESS_LOCK.lock();
-
+        if (EXECUTION_TASK_LOCK.isLocked()) {
+            // do nothing if locked
+            return;
+        }
+        
+        EXECUTION_TASK_LOCK.lock();
         try {
             List<ExecutionTask> tasks = this.executionTaskService.getTasksForExecution();
             for (ExecutionTask task : tasks) {
                 executionTaskService.executeTask(task);
             }
         } finally {
-            PROCESS_LOCK.unlock();
+            EXECUTION_TASK_LOCK.unlock();
         }
     }
 }

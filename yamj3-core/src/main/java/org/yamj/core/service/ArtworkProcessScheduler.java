@@ -25,6 +25,7 @@ package org.yamj.core.service;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,7 @@ import org.yamj.core.service.artwork.ArtworkProcessorService;
 public class ArtworkProcessScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkProcessScheduler.class);
+    private static final ReentrantLock ARTWORK_PROCESS_LOCK = new ReentrantLock();
 
     @Autowired
     private ConfigService configService;
@@ -51,7 +53,7 @@ public class ArtworkProcessScheduler {
     private ArtworkProcessorService artworkProcessorService;
 
     private boolean messageDisabled = Boolean.FALSE;    // Have we already printed the disabled message
-    private AtomicBoolean watchProcess = new AtomicBoolean(false);
+    private final AtomicBoolean watchProcess = new AtomicBoolean(false);
 
     @Scheduled(initialDelay = 5000, fixedDelay = 300000)
     public void triggerProcess() {
@@ -61,8 +63,18 @@ public class ArtworkProcessScheduler {
 
     @Async
     @Scheduled(initialDelay = 6000, fixedDelay = 1000)
-    public synchronized void runProcess() {
-        if (watchProcess.get()) processArtwork();
+    public void runProcess() {
+        if (ARTWORK_PROCESS_LOCK.isLocked()) {
+            // do nothing if locked
+            return;
+        }
+
+        ARTWORK_PROCESS_LOCK.lock();
+        try {
+            if (watchProcess.get()) processArtwork();
+        } finally {
+            ARTWORK_PROCESS_LOCK.unlock();
+        }
     }
     
     private void processArtwork() {

@@ -682,7 +682,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             LOG.error("Can't find filmography for person '{}'", person.getName());
             return ScanResult.ERROR;
         } else if (CollectionUtils.isEmpty(filmographyInfos.getParticipances())) {
-            LOG.error("No filmography present for person '{}'", person.getName());
+            LOG.trace("No filmography present for person '{}'", person.getName());
             return ScanResult.NO_RESULT;
         }
         

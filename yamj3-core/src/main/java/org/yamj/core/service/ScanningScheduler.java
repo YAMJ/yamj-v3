@@ -25,6 +25,7 @@ package org.yamj.core.service;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,8 @@ import org.yamj.core.service.trailer.TrailerScannerService;
 public class ScanningScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ScanningScheduler.class);
-    
+    private static final ReentrantLock SCANNING_LOCK = new ReentrantLock();
+
     @Autowired
     private ConfigService configService;
     @Autowired
@@ -78,13 +80,13 @@ public class ScanningScheduler {
     private boolean messageDisabledArtwork = Boolean.FALSE;      // Have we already printed the disabled message
     private boolean messageDisabledTrailer = Boolean.FALSE;      // Have we already printed the disabled message
 
-    private AtomicBoolean watchScanMediaFiles = new AtomicBoolean(false);
-    private AtomicBoolean watchScanMetaData = new AtomicBoolean(false);
-    private AtomicBoolean watchScanPeopleData = new AtomicBoolean(false);
-    private AtomicBoolean watchScanFilmography = new AtomicBoolean(false);
-    private AtomicBoolean watchScanArtwork = new AtomicBoolean(false);
-    private AtomicBoolean watchScanTrailer = new AtomicBoolean(false);
-    
+    private final AtomicBoolean watchScanMediaFiles = new AtomicBoolean(false);
+    private final AtomicBoolean watchScanMetaData = new AtomicBoolean(false);
+    private final AtomicBoolean watchScanPeopleData = new AtomicBoolean(false);
+    private final AtomicBoolean watchScanFilmography = new AtomicBoolean(false);
+    private final AtomicBoolean watchScanArtwork = new AtomicBoolean(false);
+    private final AtomicBoolean watchScanTrailer = new AtomicBoolean(false);
+
     @Scheduled(initialDelay = 1000, fixedDelay = 300000)
     public void triggerAllScans() {
         LOG.trace("Trigger scan for all");
@@ -128,12 +130,22 @@ public class ScanningScheduler {
 
     @Scheduled(initialDelay = 2000, fixedDelay = 1000)
     public void runAllScans() {
-        if (watchScanMediaFiles.get()) scanMediaFiles();
-        if (watchScanMetaData.get()) scanMetaData();
-        if (watchScanPeopleData.get()) scanPeopleData();
-        if (watchScanFilmography.get()) scanFilmography();
-        if (watchScanArtwork.get()) scanArtwork();
-        if (watchScanTrailer.get()) scanTrailer();
+        if (SCANNING_LOCK.isLocked()) {
+            // do nothing if locked
+            return;
+        }
+
+        SCANNING_LOCK.lock();
+        try {
+            if (watchScanMediaFiles.get()) scanMediaFiles();
+            if (watchScanMetaData.get()) scanMetaData();
+            if (watchScanPeopleData.get()) scanPeopleData();
+            if (watchScanFilmography.get()) scanFilmography();
+            if (watchScanArtwork.get()) scanArtwork();
+            if (watchScanTrailer.get()) scanTrailer();
+        } finally {
+            SCANNING_LOCK.unlock();
+        }
     }
     
     private void scanMediaFiles() {

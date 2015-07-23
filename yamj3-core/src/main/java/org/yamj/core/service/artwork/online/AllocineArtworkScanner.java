@@ -20,11 +20,10 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service;
+package org.yamj.core.service.artwork.online;
 
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
-
 import com.moviejukebox.allocine.model.PersonInfos;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Person;
-import org.yamj.core.service.artwork.online.IPhotoScanner;
 import org.yamj.core.service.metadata.online.AllocineApiWrapper;
 import org.yamj.core.service.metadata.online.AllocineScanner;
 
