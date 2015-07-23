@@ -191,7 +191,7 @@ public class TheMovieDbApiWrapper {
     public PersonInfo getPersonInfo(int tmdbId, boolean throwTempError) {
         PersonInfo person = null;
         try {
-            person = tmdbApi.getPersonInfo(tmdbId);
+            person = tmdbApi.getPersonInfo(tmdbId, "combined_credits");
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
