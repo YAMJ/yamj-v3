@@ -70,7 +70,7 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     private StatusType status;
 
     @Type(type = "statusType")
-    @Column(name = "previous_status", nullable = false, length = 30)
+    @Column(name = "previous_status", length = 30)
     private StatusType previousStatus;
 
     @Column(name = "hash_code", length = 100)

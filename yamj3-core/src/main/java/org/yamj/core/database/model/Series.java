@@ -25,17 +25,15 @@ package org.yamj.core.database.model;
 import java.util.*;
 import java.util.Map.Entry;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.Index;
-import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.MapKeyType;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.AwardDTO;
@@ -99,26 +97,26 @@ public class Series extends AbstractMetadata {
 
     @ManyToMany
     @JoinTable(name = "series_genres",
-            joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESGENRES_SERIES")),
-            inverseJoinColumns = @JoinColumn(name = "genre_id", foreignKey = @ForeignKey(name = "FK_SERIESGENRES_GENRE")))
+            joinColumns = {@JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESGENRES_SERIES"))},
+            inverseJoinColumns = {@JoinColumn(name = "genre_id", foreignKey = @ForeignKey(name = "FK_SERIESGENRES_GENRE"))})
     private Set<Genre> genres = new HashSet<>(0);
 
     @ManyToMany
     @JoinTable(name = "series_studios",
-            joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESSTUDIOS_SERIES")),
-            inverseJoinColumns = @JoinColumn(name = "studio_id", foreignKey = @ForeignKey(name = "FK_SERIESSTUDIOS_STUDIO")))
+            joinColumns = {@JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESSTUDIOS_SERIES"))},
+            inverseJoinColumns = {@JoinColumn(name = "studio_id", foreignKey = @ForeignKey(name = "FK_SERIESSTUDIOS_STUDIO"))})
     private Set<Studio> studios = new HashSet<>(0);
 
     @ManyToMany
     @JoinTable(name = "series_countries",
-            joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESCOUNTRIES_SERIES")),
-            inverseJoinColumns = @JoinColumn(name = "country_id", foreignKey = @ForeignKey(name = "FK_SERIESCOUNTRIES_COUNTRY")))
+            joinColumns = {@JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESCOUNTRIES_SERIES"))},
+            inverseJoinColumns = {@JoinColumn(name = "country_id", foreignKey = @ForeignKey(name = "FK_SERIESCOUNTRIES_COUNTRY"))})
     private Set<Country> countries = new HashSet<>(0);
 
     @ManyToMany
     @JoinTable(name = "series_certifications",
-            joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESCERTS_SERIES")),
-            inverseJoinColumns = @JoinColumn(name = "cert_id", foreignKey = @ForeignKey(name = "FK_SERIESCERTS_CERTIFICATION")))
+            joinColumns = {@JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESCERTS_SERIES"))},
+            inverseJoinColumns = {@JoinColumn(name = "cert_id", foreignKey = @ForeignKey(name = "FK_SERIESCERTS_CERTIFICATION"))})
     private Set<Certification> certifications = new HashSet<>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")

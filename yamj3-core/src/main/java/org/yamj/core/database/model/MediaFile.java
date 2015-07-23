@@ -26,13 +26,12 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
 
@@ -112,9 +111,10 @@ public class MediaFile extends AbstractAuditable implements Serializable {
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "mediafile_videodata",
-            joinColumns = @JoinColumn(name = "mediafile_id", foreignKey = @ForeignKey(name = "FK_REL_MEDIAFILE_VIDEODATA")),
-            inverseJoinColumns = {
-                @JoinColumn(name = "videodata_id", foreignKey = @ForeignKey(name = "FK_REL_VIDEODATA_MEDIAFILE"))})
+            joinColumns = {@JoinColumn(name = "mediafile_id", foreignKey = @ForeignKey(name = "FK_REL_MEDIAFILE_VIDEODATA"))},
+            inverseJoinColumns = {@JoinColumn(name = "videodata_id", foreignKey = @ForeignKey(name = "FK_REL_VIDEODATA_MEDIAFILE"))},
+            uniqueConstraints = {@UniqueConstraint(name = "UIX_REL_MEDIAFILE", columnNames = {"mediafile_id", "videodata_id"})})
+            
     private Set<VideoData> videoDatas = new HashSet<>(0);
 
     @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "mediaFile")

@@ -38,6 +38,8 @@ import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
+import org.apache.http.impl.client.cache.CacheConfig;
+import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,6 +109,7 @@ public class WebConfiguration  {
 
     @Scope
     @Bean(destroyMethod="close")
+    @SuppressWarnings("resource")
     public PoolingHttpClient poolingHttpClient() {
         LOG.trace("Create new pooling http client");
         
@@ -134,7 +137,13 @@ public class WebConfiguration  {
         connManager.setMaxTotal(connectionsMaxTotal);
         connManager.setDefaultMaxPerRoute(connectionsMaxPerRoute);
         
-        HttpClientBuilder builder = HttpClientBuilder.create()
+        CacheConfig cacheConfig = CacheConfig.custom()
+                        .setMaxCacheEntries(1000)
+                        .setMaxObjectSize(8192)
+                        .build();
+        
+        HttpClientBuilder builder = CachingHttpClientBuilder.create()
+                .setCacheConfig(cacheConfig)
                 .setConnectionManager(connManager)
                 .setProxy(proxy)
                 .setDefaultCredentialsProvider(credentialsProvider)
