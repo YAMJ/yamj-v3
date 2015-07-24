@@ -166,17 +166,8 @@ public class MediaInfoService {
 
         LOG.debug("Scanning media file {}", stageFile.getFullPath());
 
-        MediaInfoStream stream = null;
         boolean scanned = false;
-        try {
-        	if (StringUtils.isNotBlank(stageFile.getContent())) {
-        		// read from stored content
-        		stream = new MediaInfoStream(stageFile.getContent());
-        	} else {
-        		// read from file
-        		stream = createStream(stageFile.getFullPath());
-        	}
-
+        try (MediaInfoStream stream = (stageFile.getContent() == null ? createStream(stageFile.getFullPath()) : new MediaInfoStream(stageFile.getContent()))) {
             Map<String, String> infosGeneral = new HashMap<>();
             List<Map<String, String>> infosVideo = new ArrayList<>();
             List<Map<String, String>> infosAudio = new ArrayList<>();
@@ -190,10 +181,6 @@ public class MediaInfoService {
         } catch (Exception error) {
             LOG.error("Failed reading mediainfo output: {}", stageFile);
             LOG.warn("MediaInfo error", error);
-        } finally {
-            if (stream != null) {
-                stream.close();
-            }
         }
 
         if (scanned) {

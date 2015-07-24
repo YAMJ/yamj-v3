@@ -22,10 +22,12 @@
  */
 package org.yamj.core.service.mediainfo;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 
-public class MediaInfoStream {
+public class MediaInfoStream implements Closeable  {
 
     private final Process process;
     private final InputStream inputStream;
@@ -44,7 +46,8 @@ public class MediaInfoStream {
         return inputStream;
     }
 
-    public void close() {
+    @Override
+    public void close() throws IOException {
         if (process != null) {
             try {
                 process.waitFor();
