@@ -47,6 +47,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.yamj.api.common.http.WebBrowserUserAgentSelector;
 
 @Configuration
 public class WebConfiguration  {
@@ -85,9 +86,6 @@ public class WebConfiguration  {
 
     @Value("${yamj3.http.maxDownloadSlots:null}")
     private String maxDownloadSlots;
-
-    @Value("${yamj3.http.randomUserAgent:true}")
-    private boolean randomUserAgent;
 
     @Value("${APIKEY.themoviedb}")
     private String theMovieDbApiKey;
@@ -162,7 +160,7 @@ public class WebConfiguration  {
 
         // build the client
         PoolingHttpClient wrapper = new PoolingHttpClient(builder.build(), connManager);
-        wrapper.setRandomUserAgent(randomUserAgent);
+        wrapper.setUserAgentSelector(new WebBrowserUserAgentSelector());
         wrapper.addGroupLimit(".*", 1); // default limit, can be overwritten
         
         if (StringUtils.isNotBlank(maxDownloadSlots)) {
