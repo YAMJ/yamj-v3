@@ -29,7 +29,7 @@ public class TrailerDTO {
     private final String source;
     private final String url;
     private final String title;
-    private final String hashCode;;
+    private final String hashCode;
     
     public TrailerDTO(String source, String url) {
         this(source, url, null);

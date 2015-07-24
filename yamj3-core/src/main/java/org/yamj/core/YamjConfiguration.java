@@ -89,17 +89,20 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
         final String yamjHome = System.getProperty("yamj3.home", ".");
         
         PropertyPlaceholderConfigurer configurer = new PropertyTools();
+        configurer.setIgnoreResourceNotFound(true);
         configurer.setLocations(
                new ClassPathResource("/yamj3-core-static.properties"),
                new FileSystemResource(yamjHome + "/config/yamj3-core-static.properties"),
                new FileSystemResource(yamjHome + "/config/yamj3-core-static.user.properties"));
-        configurer.setIgnoreResourceNotFound(true);
         return configurer;
     }
 
     @Bean
     public FactoryBean<Properties> dynamicProperties() {
+        
         final String defLang = Locale.getDefault().getLanguage();
+        LOG.trace("Using default language: {}", defLang);
+        
         PropertiesFactoryBean factoryBean = new PropertiesFactoryBean();
         factoryBean.setIgnoreResourceNotFound(true);
         factoryBean.setLocations(

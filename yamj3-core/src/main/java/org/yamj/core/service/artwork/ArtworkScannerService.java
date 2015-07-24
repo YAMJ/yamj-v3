@@ -442,6 +442,7 @@ public class ArtworkScannerService {
         createLocatedArtworksOnline(artwork, banners, locatedArtworks);
     }
 
+    @SuppressWarnings("unused")
     private void scanVideoImageLocal(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
         if (!configServiceWrapper.isLocalArtworkScanEnabled(artwork)) {
             LOG.trace("Local episode image scan disabled: {}", artwork);

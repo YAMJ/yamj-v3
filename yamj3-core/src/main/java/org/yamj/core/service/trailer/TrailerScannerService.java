@@ -99,6 +99,7 @@ public class TrailerScannerService {
         this.trailerStorageService.updateTrailer(series, trailers);
     }
 
+    @SuppressWarnings("unused")
     private void scanTrailerLocal(VideoData videoData, List<Trailer> trailers) {
         if (!configService.getBooleanProperty("yamj3.trailer.scan.local.movie", Boolean.TRUE)) {
             LOG.trace("Local movie trailer scan disabled");
@@ -158,6 +159,7 @@ public class TrailerScannerService {
         }
      }
 
+    @SuppressWarnings("unused")
     private void scanTrailerLocal(Series series, List<Trailer> trailers) {
         if (!configService.getBooleanProperty("yamj3.trailer.scan.local.series", Boolean.TRUE)) {
             LOG.trace("Local series trailer scan disabled");

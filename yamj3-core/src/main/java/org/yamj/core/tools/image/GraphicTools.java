@@ -153,7 +153,7 @@ public final class GraphicTools {
         return bi;
     }
 
-    public static BufferedImage scaleToSizeBestFit(int nMaxWidth, int nMaxHeight, BufferedImage imgSrc) {
+    public static BufferedImage scaleToSizeBestFit(int nMaxWidth, BufferedImage imgSrc) {
         // determine thumbnail size from WIDTH and HEIGHT
         int imageWidth = imgSrc.getWidth(null);
         int imageHeight = imgSrc.getHeight(null);
