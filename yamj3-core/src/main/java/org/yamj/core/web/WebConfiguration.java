@@ -185,21 +185,25 @@ public class WebConfiguration  {
 
     @Bean
     public TheMovieDbApi theMovieDbApi() throws Exception  {
+        LOG.trace("Initialize TheMovieDbApi");
         return new TheMovieDbApi(theMovieDbApiKey, poolingHttpClient());
     }
 
     @Bean
     public TheTVDBApi theTvDbApi() {
+        LOG.trace("Initialize TheTVDBApi");
         return new TheTVDBApi(theTVDBApiKey, poolingHttpClient());
     }
 
     @Bean
     public FanartTvApi fanartTvApi() throws Exception  {
+        LOG.trace("Initialize FanartTvApi");
         return new FanartTvApi(fanartTvApiKey, fanartTvApiClientKey, poolingHttpClient());
     }
 
     @Bean
     public AllocineApi allocineApi() throws Exception {
+        LOG.trace("Initialize AllocineApi");
         return new AllocineApi(allocineApiPartnerKey, allocineApiSecretKey, poolingHttpClient());
     }
 }
