@@ -36,6 +36,7 @@ import com.omertron.themoviedbapi.model.tv.TVBasic;
 import com.omertron.themoviedbapi.model.tv.TVInfo;
 import com.omertron.themoviedbapi.model.tv.TVSeasonInfo;
 import com.omertron.themoviedbapi.results.ResultList;
+import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,15 +49,19 @@ import org.yamj.core.web.ResponseTools;
 public class TheMovieDbApiWrapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbApiWrapper.class);
-    private static final String LANGUAGE_EN = "en";
 
     @Autowired
     private ConfigService configService;
     @Autowired
     private TheMovieDbApi tmdbApi;
-
+    @Autowired
+    private Locale yamjLocale;
+    
+    private String getDefaultLanguage() {
+        return configService.getProperty("themoviedb.language", yamjLocale.getLanguage());
+    }
+    
     public String getMovieId(String title, int year, boolean throwTempError) {
-        String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
         boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
         int searchMatch = configService.getIntProperty("themoviedb.searchMatch", 3);
         
@@ -64,7 +69,7 @@ public class TheMovieDbApiWrapper {
 
         try {
             // Search using movie name
-            ResultList<MovieInfo> movieList = tmdbApi.searchMovie(title, 0, defaultLanguage, includeAdult, year, 0, null);
+            ResultList<MovieInfo> movieList = tmdbApi.searchMovie(title, 0, getDefaultLanguage(), includeAdult, year, 0, null);
             LOG.info("Found {} potential matches for {} ({})", movieList.getResults().size(), title, year);
             // Iterate over the list until we find a match
             for (MovieInfo m : movieList.getResults()) {
@@ -96,8 +101,6 @@ public class TheMovieDbApiWrapper {
     }
 
     public String getSeriesId(String title, int year, boolean throwTempError) {
-        String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
-        
         String id = null;
         TVBasic closestTV = null;
         int closestMatch = Integer.MAX_VALUE;
@@ -105,7 +108,7 @@ public class TheMovieDbApiWrapper {
 
         try {
             // Search using movie name
-            ResultList<TVBasic> seriesList = tmdbApi.searchTV(title, 0, defaultLanguage, year, null);
+            ResultList<TVBasic> seriesList = tmdbApi.searchTV(title, 0, getDefaultLanguage(), year, null);
             LOG.info("Found {} potential matches for {} ({})", seriesList.getResults().size(), title, year);
             // Iterate over the list until we find a match
             for (TVBasic tv : seriesList.getResults()) {
@@ -205,8 +208,7 @@ public class TheMovieDbApiWrapper {
     public MovieInfo getMovieInfoByTMDB(int tmdbId, boolean throwTempError) {
         MovieInfo movieDb = null;
         try {
-            String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
-            movieDb = tmdbApi.getMovieInfo(tmdbId, defaultLanguage);
+            movieDb = tmdbApi.getMovieInfo(tmdbId, getDefaultLanguage());
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
@@ -220,8 +222,7 @@ public class TheMovieDbApiWrapper {
     public TVInfo getSeriesInfo(int tmdbId, boolean throwTempError) {
         TVInfo tvInfo = null;
         try {
-            String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
-            tvInfo = tmdbApi.getTVInfo(tmdbId, defaultLanguage);
+            tvInfo = tmdbApi.getTVInfo(tmdbId, getDefaultLanguage());
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
@@ -235,8 +236,7 @@ public class TheMovieDbApiWrapper {
     public TVSeasonInfo getSeasonInfo(int tmdbId, int season, boolean throwTempError) {
         TVSeasonInfo tvSeasonInfo = null;
         try {
-            String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
-            tvSeasonInfo = tmdbApi.getSeasonInfo(tmdbId, season, defaultLanguage);
+            tvSeasonInfo = tmdbApi.getSeasonInfo(tmdbId, season, getDefaultLanguage());
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
@@ -264,8 +264,7 @@ public class TheMovieDbApiWrapper {
     public MovieInfo getMovieInfoByIMDB(String imdbId, boolean throwTempError) {
         MovieInfo movieDb = null;
         try {
-            String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
-            movieDb = tmdbApi.getMovieInfoImdb(imdbId, defaultLanguage);
+            movieDb = tmdbApi.getMovieInfoImdb(imdbId, getDefaultLanguage());
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
@@ -291,8 +290,7 @@ public class TheMovieDbApiWrapper {
 
     public PersonCreditList<CreditBasic> getPersonCredits(int tmdbId, boolean throwTempError) {
         try {
-            String defaultLanguage = configService.getProperty("themoviedb.language", LANGUAGE_EN);
-            return tmdbApi.getPersonCombinedCredits(tmdbId, defaultLanguage);
+            return tmdbApi.getPersonCombinedCredits(tmdbId, getDefaultLanguage());
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);

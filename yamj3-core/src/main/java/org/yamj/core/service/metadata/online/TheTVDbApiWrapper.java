@@ -26,6 +26,7 @@ import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.thetvdbapi.TvDbException;
 import com.omertron.thetvdbapi.model.*;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.collections.CollectionUtils;
@@ -54,7 +55,9 @@ public class TheTVDbApiWrapper {
     private ConfigService configService;
     @Autowired
     private TheTVDBApi tvdbApi;
-
+    @Autowired
+    private Locale yamjLocale;
+    
     public Banners getBanners(String id) {
         String cacheKey = "banners###"+id;
         Banners banners = tvdbCache.get(cacheKey, Banners.class);
@@ -99,8 +102,8 @@ public class TheTVDbApiWrapper {
         if (series == null) {
             seriesLock.lock();
             try {
-                String defaultLanguage = configService.getProperty("thetvdb.language", "en");
-                String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
+                String defaultLanguage = configService.getProperty("thetvdb.language", yamjLocale.getLanguage());
+                String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
 
                 // retrieve series from TheTVDb
                 series = tvdbApi.getSeries(id, defaultLanguage);
@@ -140,8 +143,8 @@ public class TheTVDbApiWrapper {
         if (StringUtils.isNotBlank(title)) {
             seriesLock.lock();
             try {
-                String defaultLanguage = configService.getProperty("thetvdb.language", "en");
-                String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
+                String defaultLanguage = configService.getProperty("thetvdb.language", yamjLocale.getLanguage());
+                String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
 
                 boolean usedDefault = true;
                 List<Series> seriesList = tvdbApi.searchSeries(title, defaultLanguage);
@@ -207,8 +210,8 @@ public class TheTVDbApiWrapper {
         
         if (episodeList == null) {
             try {
-                String defaultLanguage = configService.getProperty("thetvdb.language", "en");
-                String altLanguage = configService.getProperty("thetvdb.language.alternate", "");
+                String defaultLanguage = configService.getProperty("thetvdb.language", yamjLocale.getLanguage());
+                String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
     
                 episodeList = tvdbApi.getSeasonEpisodes(id, season, defaultLanguage);
     

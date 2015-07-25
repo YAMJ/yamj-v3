@@ -54,5 +54,13 @@ public class UpgradeDatabaseService {
         } catch (Exception ex) {
             LOG.warn("Failed upgrade 'patchArtworkConfig'", ex);
         }
+
+        // Issues: #234
+        // Date:   24.07.2015
+        try {
+            upgradeDatabaseDao.patchLocales();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchLocales'", ex);
+        }
     }
 }

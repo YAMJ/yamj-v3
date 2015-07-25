@@ -127,4 +127,20 @@ public class UpgradeDatabaseDao extends HibernateDao {
             .createSQLQuery("UPDATE configuration set config_value='plugin_person,alternate_person,tmdb' where config_key='yamj3.artwork.scanner.photo.priorities'")
             .executeUpdate();
     }
+    
+    /**
+     * Issues: #234
+     * Date:   24.07.2015
+     */
+    public void patchLocales() {
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='' where config_key='themoviedb.language'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='' where config_key='themoviedb.country'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='' where config_key='thetvdb.language'")
+            .executeUpdate();
+    }
 }
