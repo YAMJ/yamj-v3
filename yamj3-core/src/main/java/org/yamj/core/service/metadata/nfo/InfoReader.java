@@ -23,9 +23,7 @@
 package org.yamj.core.service.metadata.nfo;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -35,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.w3c.dom.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigServiceWrapper;
+import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.file.FileTools;
@@ -54,8 +53,12 @@ public final class InfoReader {
     private static final String XML_END = "</";
     private static final String SPLIT_GENRE = "(?<!-)/|,|\\|";  // caters for the case where "-/" is not wanted as part of the split
 
+    private Locale mpaaLocale = new Locale(Locale.ENGLISH.getLanguage(), "MPAA");
+    
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
+    @Autowired
+    private LocaleService localeService;
     @Autowired
     private StagingService stagingService;
     @Autowired
@@ -452,37 +455,38 @@ public final class InfoReader {
             tempCert = DOMHelper.getValueFromElement(eCommon, "mpaa");
             if (StringUtils.isNotBlank(tempCert)) {
                 String mpaa = MetadataTools.processMpaaCertification(tempCert);
-                dto.addCertificatioInfo("MPAA", StringUtils.trimToNull(mpaa));
+                dto.addCertificatioInfo(mpaaLocale, StringUtils.trimToNull(mpaa));
             }
         }
 
         tempCert = DOMHelper.getValueFromElement(eCommon, "certification");
         if (StringUtils.isNotBlank(tempCert)) {
             // scan for given countries
-            List<String> countries = this.configServiceWrapper.getCertificationCountries();
-            for (String country : countries) {
-                int countryPos = StringUtils.lastIndexOfIgnoreCase(tempCert, country);
-                if (countryPos >= 0) {
-                    // We've found the country, so extract just that tag
-                    String certification = tempCert.substring(countryPos);
-                    int pos = certification.indexOf(':');
-                    if (pos > 0) {
-                        int endPos = certification.indexOf("/");
-                        if (endPos > 0) {
-                            // this is in the middle of the string
-                            certification = certification.substring(pos + 1, endPos);
-                        } else {
-                            // this is at the end of the string
-                            certification = certification.substring(pos + 1);
+            for (Locale locale : this.localeService.getCertificationLocales()) {
+                for (String country : this.localeService.getCountryNames(locale)) {
+                    int countryPos = StringUtils.lastIndexOfIgnoreCase(tempCert, country);
+                    if (countryPos >= 0) {
+                        // We've found the country, so extract just that tag
+                        String certification = tempCert.substring(countryPos);
+                        int pos = certification.indexOf(':');
+                        if (pos > 0) {
+                            int endPos = certification.indexOf("/");
+                            if (endPos > 0) {
+                                // this is in the middle of the string
+                                certification = certification.substring(pos + 1, endPos);
+                            } else {
+                                // this is at the end of the string
+                                certification = certification.substring(pos + 1);
+                            }
                         }
+                        dto.addCertificatioInfo(locale, StringUtils.trimToNull(certification));
                     }
-                    dto.addCertificatioInfo(country, StringUtils.trimToNull(certification));
                 }
-
+                
                 if (certificationMPAA && StringUtils.containsIgnoreCase(tempCert, "Rated")) {
                     // extract the MPAA rating from the certification
                     String mpaa = MetadataTools.processMpaaCertification(tempCert);
-                    dto.addCertificatioInfo("MPAA", StringUtils.trimToNull(mpaa));
+                    dto.addCertificatioInfo(mpaaLocale, StringUtils.trimToNull(mpaa));
                 }
             }
         }

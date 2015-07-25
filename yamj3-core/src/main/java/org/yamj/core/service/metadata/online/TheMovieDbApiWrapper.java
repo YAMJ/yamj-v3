@@ -36,13 +36,13 @@ import com.omertron.themoviedbapi.model.tv.TVBasic;
 import com.omertron.themoviedbapi.model.tv.TVInfo;
 import com.omertron.themoviedbapi.model.tv.TVSeasonInfo;
 import com.omertron.themoviedbapi.results.ResultList;
-import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigService;
+import org.yamj.core.config.LocaleService;
 import org.yamj.core.web.ResponseTools;
 
 @Service("tmdbApiWrapper")
@@ -53,12 +53,12 @@ public class TheMovieDbApiWrapper {
     @Autowired
     private ConfigService configService;
     @Autowired
-    private TheMovieDbApi tmdbApi;
+    private LocaleService localeService;
     @Autowired
-    private Locale yamjLocale;
+    private TheMovieDbApi tmdbApi;
     
     private String getDefaultLanguage() {
-        return configService.getProperty("themoviedb.language", yamjLocale.getLanguage());
+        return localeService.getLocaleForConfig("themoviedb").getLanguage();
     }
     
     public String getMovieId(String title, int year, boolean throwTempError) {

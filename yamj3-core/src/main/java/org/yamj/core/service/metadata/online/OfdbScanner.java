@@ -78,7 +78,7 @@ public class OfdbScanner implements IMovieScanner {
 
         charset = Charset.forName("UTF-8");
 
-        searchEngineTools = new SearchEngineTools(httpClient, "de");
+        searchEngineTools = new SearchEngineTools(httpClient, Locale.GERMANY);
         searchEngineTools.setSearchSites("google");
 
         // register this scanner

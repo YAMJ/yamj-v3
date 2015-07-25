@@ -144,22 +144,6 @@ public class ConfigServiceWrapper {
         return value;
     }
 
-    public List<String> getCertificationCountries() {
-        return this.configService.getPropertyAsList("yamj3.certification.countries", "Germany,France,UK,USA");
-    }
-
-    public boolean isCertificationCountryAllowed(String country) {
-        if (StringUtils.isBlank(country)) {
-            return false;
-        }
-        for (String check : getCertificationCountries()) {
-            if (StringUtils.equalsIgnoreCase(country, check)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public List<String> getSortStripPrefixes() {
         return this.configService.getPropertyAsList(
                         "yamj3.sort.strip.prefixes",

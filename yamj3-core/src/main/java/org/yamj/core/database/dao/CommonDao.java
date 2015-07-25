@@ -263,25 +263,25 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, wrapper);
     }
 
-    public Certification getCertification(String country, String certificate) {
+    public Certification getCertification(Locale locale, String certificate) {
         StringBuilder sb = new StringBuilder();
         sb.append("from Certification ");
-        sb.append("where lower(country) = :country ");
+        sb.append("where lower(country_code) = :countryCode ");
         sb.append("and lower(certificate) = :certificate ");
 
         Map<String, Object> params = new HashMap<>();
-        params.put("country", country.toLowerCase());
+        params.put("countryCode", locale.getCountry().toLowerCase());
         params.put("certificate", certificate.toLowerCase());
 
         return (Certification) this.findUniqueByNamedParameters(sb, params);
     }
 
-    public synchronized void storeNewCertification(String country, String certificate) {
-        Certification certification = this.getCertification(country, certificate);
+    public synchronized void storeNewCertification(Locale locale, String certificate) {
+        Certification certification = this.getCertification(locale, certificate);
         if (certification == null) {
             // create new certification
             certification = new Certification();
-            certification.setCountry(country);
+            certification.setCountryCode(locale.getCountry());
             certification.setCertificate(certificate);
             this.saveEntity(certification);
         }

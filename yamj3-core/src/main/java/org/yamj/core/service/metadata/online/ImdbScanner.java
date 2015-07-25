@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.core.config.ConfigServiceWrapper;
+import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
@@ -72,6 +73,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     private static final Pattern PATTERN_PERSON_DOB = Pattern.compile("(\\d{1,2})-(\\d{1,2})");
 
     private Charset charset;
+    private Locale mpaaLocale;
 
     @Autowired
     private PoolingHttpClient httpClient;
@@ -81,6 +83,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     private OnlineScannerService onlineScannerService;
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
+    @Autowired
+    private LocaleService localeService;
 
     @Override
     public String getScannerName() {
@@ -92,7 +96,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         LOG.info("Initialize IMDb scanner");
 
         charset = Charset.forName("UTF-8");
-
+        mpaaLocale =  new Locale(Locale.ENGLISH.getLanguage(), "MPAA");
+        
         // register this scanner
         onlineScannerService.registerMetadataScanner(this);
     }
@@ -882,9 +887,10 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return studios;
     }
 
-    private Map<String, String> parseCertifications(String imdbId) {
-        Map<String, String> certificationInfos = new HashMap<>();
-
+    private Map<Locale, String> parseCertifications(String imdbId) {
+        Map<Locale, String> certificationInfos = new HashMap<>();
+        Locale imdbLocale = localeService.getLocaleForConfig("imdb");
+        
         try {
             DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "parentalguide#certification"), charset);
             if (ResponseTools.isNotOK(response)) {
@@ -902,20 +908,22 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                                 pos = mpaa.indexOf(" for ", start);
                             }
                             if (pos != -1) {
-                                certificationInfos.put("MPAA", mpaa.substring(start, pos));
+                                certificationInfos.put(mpaaLocale, mpaa.substring(start, pos));
                             }
                         }
                     }
                 }
 
-                List<String> countries = this.configServiceWrapper.getCertificationCountries();
-                if (CollectionUtils.isNotEmpty(countries)) {
+                Set<Locale> locales = localeService.getCertificationLocales(imdbLocale);
+                if (CollectionUtils.isNotEmpty(locales)) {
                     List<String> tags = HTMLTools.extractTags(response.getContent(), HTML_H5_START + "Certification" + HTML_H5_END, HTML_DIV_END,
                             "<a href=\"/search/title?certificates=", HTML_A_END);
-                    for (String country : countries) {
-                        String certificate = getPreferredValue(tags, true, country);
-                        if (StringUtils.isNotBlank(certificate)) {
-                            certificationInfos.put(country, certificate);
+                    for (Locale locale : locales) {
+                        for (String country : localeService.getCountryNames(locale)) {
+                            String certificate = getPreferredValue(tags, true, country);
+                            if (StringUtils.isNotBlank(certificate)) {
+                                certificationInfos.put(locale, certificate);
+                            }
                         }
                     }
                 }

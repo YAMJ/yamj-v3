@@ -188,7 +188,7 @@ public class MetadataStorageService {
 
         if (MapUtils.isNotEmpty(videoData.getCertificationInfos())) {
             // store new certifications
-            for (Entry<String,String> entry : videoData.getCertificationInfos().entrySet()) {
+            for (Entry<Locale,String> entry : videoData.getCertificationInfos().entrySet()) {
                 try {
                     this.commonDao.storeNewCertification(entry.getKey(), entry.getValue());
                 } catch (Exception ex) {
@@ -282,7 +282,7 @@ public class MetadataStorageService {
 
         if (MapUtils.isNotEmpty(series.getCertificationInfos())) {
             // store new certifications
-            for (Entry<String,String> entry : series.getCertificationInfos().entrySet()) {
+            for (Entry<Locale,String> entry : series.getCertificationInfos().entrySet()) {
                 try {
                     this.commonDao.storeNewCertification(entry.getKey(), entry.getValue());
                 } catch (Exception ex) {
@@ -589,7 +589,7 @@ public class MetadataStorageService {
         }
 
         Set<Certification> certifications = new LinkedHashSet<>();
-        for (Entry<String,String> entry : videoData.getCertificationInfos().entrySet()) {
+        for (Entry<Locale,String> entry : videoData.getCertificationInfos().entrySet()) {
             Certification certification = commonDao.getCertification(entry.getKey(), entry.getValue());
             if (certification != null) {
                 certifications.add(certification);
@@ -609,7 +609,7 @@ public class MetadataStorageService {
         }
 
         Set<Certification> certifications = new LinkedHashSet<>();
-        for (Entry<String,String> entry : series.getCertificationInfos().entrySet()) {
+        for (Entry<Locale,String> entry : series.getCertificationInfos().entrySet()) {
             Certification certification = commonDao.getCertification(entry.getKey(), entry.getValue());
             if (certification != null) {
                 certifications.add(certification);

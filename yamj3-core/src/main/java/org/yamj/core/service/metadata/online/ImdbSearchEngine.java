@@ -25,6 +25,7 @@ package org.yamj.core.service.metadata.online;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.core.config.ConfigService;
+import org.yamj.core.config.LocaleService;
 import org.yamj.core.web.HTMLTools;
 import org.yamj.core.web.PoolingHttpClient;
 import org.yamj.core.web.ResponseTools;
@@ -61,13 +63,15 @@ public class ImdbSearchEngine {
     private PoolingHttpClient httpClient;
     @Autowired
     private ConfigService configService;
-
+    @Autowired
+    private LocaleService localeService;
+    
     @PostConstruct
     public void init() {
         LOG.info("Initialize IMDb search engine");
 
-        String country = configService.getProperty("imdb.id.search.country", "us");
-        searchEngineTools = new SearchEngineTools(httpClient, country);
+        Locale locale = localeService.getLocaleForConfig("imdb");
+        searchEngineTools = new SearchEngineTools(httpClient, locale);
     }
 
     /**

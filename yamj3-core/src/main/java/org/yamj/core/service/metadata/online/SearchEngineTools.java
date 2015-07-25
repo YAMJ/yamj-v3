@@ -27,6 +27,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.protocol.HTTP;
@@ -53,67 +54,68 @@ public class SearchEngineTools {
     private final Charset charset;
     private final LinkedList<String> searchSites;
 
-    private String country;
     private String searchSuffix = "";
-    private String language;
+    private String country = Locale.US.getCountry();
+    private String language = Locale.US.getLanguage();
     private String googleHost = "www.google.com";
     private String yahooHost = "search.yahoo.com";
     private String bingHost = "www.bing.com";
     private String blekkoHost = "www.blekko.com";
 
     public SearchEngineTools(CommonHttpClient httpClient) {
-        this(httpClient, "us");
+        this(httpClient, Locale.US);
     }
 
-    public SearchEngineTools(CommonHttpClient httpClient, String country) {
-        this(httpClient, country, Charset.forName("UTF-8"));
+    public SearchEngineTools(CommonHttpClient httpClient, Locale locale) {
+        this(httpClient, locale, Charset.forName("UTF-8"));
     }
 
-    public SearchEngineTools(CommonHttpClient httpClient, String country, Charset charset) {
+    public SearchEngineTools(CommonHttpClient httpClient, Locale locale, Charset charset) {
         this.httpClient = httpClient;
         this.charset = charset;
-
+        
         // sites to search for URLs
         searchSites = new LinkedList<>();
         searchSites.addAll(Arrays.asList(PropertyTools.getProperty("yamj3.searchengine.sites", "google,yahoo,bing,blekko").split(",")));
 
         // country specific presets
-        if ("de".equalsIgnoreCase(country)) {
-            this.country = "de";
-            language = "de";
+        
+        if (Locale.GERMANY.getCountry().equalsIgnoreCase(locale.getCountry())) {
+            country = Locale.GERMAN.getCountry();
+            language = Locale.GERMAN.getLanguage();
             googleHost = "www.google.de";
             yahooHost = "de.search.yahoo.com";
-        } else if ("it".equalsIgnoreCase(country)) {
-            this.country = "it";
-            language = "it";
+        } else if (Locale.ITALY.getCountry().equalsIgnoreCase(locale.getCountry())) {
+            country = Locale.ITALY.getCountry();
+            language = Locale.ITALY.getLanguage();
             googleHost = "www.google.it";
             yahooHost = "it.search.yahoo.com";
             bingHost = "it.bing.com";
-        } else if ("se".equalsIgnoreCase(country)) {
-            this.country = "se";
+        } else if ("SE".equalsIgnoreCase(locale.getCountry())) {
+            country = "se";
             language = "sv";
             googleHost = "www.google.se";
             yahooHost = "se.search.yahoo.com";
-        } else if ("pl".equalsIgnoreCase(country)) {
-            this.country = "pl";
+        } else if ("PL".equalsIgnoreCase(locale.getCountry())) {
+            country = "PL";
             language = "pl";
             googleHost = "www.google.pl";
             yahooHost = "pl.search.yahoo.com";
-        } else if ("ru".equalsIgnoreCase(country)) {
-            this.country = "ru";
+        } else if ("RU".equalsIgnoreCase(locale.getCountry())) {
+            country = "RU";
             language = "ru";
             googleHost = "www.google.ru";
             yahooHost = "ru.search.yahoo.com";
-        } else if ("il".equalsIgnoreCase(country)) {
+        } else if ("IL".equalsIgnoreCase(locale.getCountry())) {
             this.country = "il";
             language = "il";
             googleHost = "www.google.co.il";
-        } else if ("fr".equalsIgnoreCase(country)) {
-            this.country = "fr";
-            language = "fr";
+        } else if (Locale.FRANCE.getCountry().equalsIgnoreCase(locale.getCountry())) {
+            country = Locale.FRANCE.getCountry();
+            language = Locale.FRANCE.getLanguage();
             googleHost = "www.google.fr";
-        } else if ("nl".equalsIgnoreCase(country)) {
-            this.country = "nl";
+        } else if ("NL".equalsIgnoreCase(locale.getCountry())) {
+            this.country = "NL";
             language = "nl";
             googleHost = "www.google.nl";
         }

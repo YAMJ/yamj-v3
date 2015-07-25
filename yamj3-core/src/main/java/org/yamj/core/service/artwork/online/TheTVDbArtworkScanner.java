@@ -23,7 +23,9 @@
 package org.yamj.core.service.artwork.online;
 
 import com.omertron.thetvdbapi.model.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigService;
+import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
@@ -50,13 +53,13 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
     @Autowired
     private ConfigService configService;
     @Autowired
+    private LocaleService localeService;
+    @Autowired
     private ArtworkScannerService artworkScannerService;
     @Autowired
     private TheTVDbScanner tvdbScanner;
     @Autowired
     private TheTVDbApiWrapper tvdbApiWrapper;
-    @Autowired
-    private Locale yamjLocale;
     
     @Override
     public String getScannerName() {
@@ -86,7 +89,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
 
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);
-        final String defaultLanguage = configService.getProperty("thetvdb.language", yamjLocale.getLanguage());
+        final String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
         final String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
 
         // find posters
@@ -150,7 +153,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
 
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);
-        final String defaultLanguage = configService.getProperty("thetvdb.language", yamjLocale.getLanguage());
+        String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
         final String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
 
         // find posters
@@ -312,7 +315,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
 
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);
-        final String defaultLanguage = configService.getProperty("thetvdb.language", yamjLocale.getLanguage());
+        final String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
         final String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
         final boolean seasonBannerOnlySeries = configService.getBooleanProperty("thetvdb.season.banner.onlySeries", Boolean.FALSE);
 
@@ -412,7 +415,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
 
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);
-        final String defaultLanguage = configService.getProperty("thetvdb.language", yamjLocale.getLanguage());
+        final String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
         final String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
 
         // find banners

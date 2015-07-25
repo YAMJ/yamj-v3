@@ -25,8 +25,7 @@ package org.yamj.core.service.metadata.online;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.yamj.core.web.PoolingHttpClient;
-
+import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -34,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.core.web.PoolingHttpClient;
 
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
 public class SearchEngineToolsTest extends AbstractJUnit4SpringContextTests {
@@ -70,7 +70,7 @@ public class SearchEngineToolsTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void roundTripOFDB() {
         LOG.info("roundTripOFDB");
-        SearchEngineTools search = new SearchEngineTools(httpClient, "de");
+        SearchEngineTools search = new SearchEngineTools(httpClient, Locale.GERMANY);
         search.setSearchSites("google");
         
         // movie
@@ -93,7 +93,7 @@ public class SearchEngineToolsTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void roundTripAllocine() {
         LOG.info("roundTripAllocine");
-        SearchEngineTools search = new SearchEngineTools(httpClient, "fr");
+        SearchEngineTools search = new SearchEngineTools(httpClient, Locale.FRANCE);
 
         // movie, must set search suffix
         search.setSearchSuffix("/fichefilm_gen_cfilm");

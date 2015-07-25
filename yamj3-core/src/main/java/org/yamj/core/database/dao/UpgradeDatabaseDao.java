@@ -134,6 +134,9 @@ public class UpgradeDatabaseDao extends HibernateDao {
      */
     public void patchLocales() {
         currentSession()
+            .createSQLQuery("DELETE FROM configuration where config_key='imdb.id.search.country'")
+            .executeUpdate();
+        currentSession()
             .createSQLQuery("UPDATE configuration set config_value='' where config_key='themoviedb.language'")
             .executeUpdate();
         currentSession()
@@ -141,6 +144,9 @@ public class UpgradeDatabaseDao extends HibernateDao {
             .executeUpdate();
         currentSession()
             .createSQLQuery("UPDATE configuration set config_value='' where config_key='thetvdb.language'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='DE,FR,GB,US' where config_key='yamj3.certification.countries'")
             .executeUpdate();
     }
 }

@@ -28,7 +28,9 @@ import com.omertron.themoviedbapi.enumeration.ArtworkType;
 import com.omertron.themoviedbapi.model.artwork.Artwork;
 import com.omertron.themoviedbapi.results.ResultList;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -38,6 +40,7 @@ import org.springframework.cache.Cache;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.config.ConfigService;
+import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
@@ -59,6 +62,8 @@ public class TheMovieDbArtworkScanner implements
     @Autowired
     private ConfigService configService;
     @Autowired
+    private LocaleService localeService;
+    @Autowired
     private ArtworkScannerService artworkScannerService;
     @Autowired
     private TheMovieDbScanner tmdbScanner;
@@ -66,11 +71,9 @@ public class TheMovieDbArtworkScanner implements
     private TheMovieDbApi tmdbApi;
     @Autowired
     private Cache tmdbArtworkCache;
-    @Autowired
-    private Locale yamjLocale;
 
     private String getDefaultLanguage() {
-        return configService.getProperty("themoviedb.language", yamjLocale.getLanguage());
+        return localeService.getLocaleForConfig("themoviedb").getLanguage();
     }
 
     @Override

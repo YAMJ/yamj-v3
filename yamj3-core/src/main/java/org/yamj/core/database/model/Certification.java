@@ -30,42 +30,42 @@ import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "certification",
-        uniqueConstraints = @UniqueConstraint(name = "UIX_CERTIFICATION_NATURALID", columnNames = {"country", "certificate"})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_CERTIFICATION_NATURALID", columnNames = {"country_code", "certificate"})
 )
 public class Certification extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 5949467240717893584L;
 
     @NaturalId
-    @Column(name = "country", length = 100, nullable = false)
-    private String country;
+    @Column(name = "country_code", length = 3, nullable = false)
+    private String countryCode;
 
     @NaturalId
     @Column(name = "certificate", nullable = false, length = 255)
     private String certificate;
 
     // GETTER and SETTER
-    public String getCountry() {
-        return country;
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public String getCertificate() {
-        return certificate;
+    public String getCountryCode() {
+        return countryCode;
     }
 
     public void setCertificate(String certificate) {
         this.certificate = certificate;
     }
 
+    public String getCertificate() {
+        return certificate;
+    }
+
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-                .append(getCountry())
+                .append(getCountryCode())
                 .append(getCertificate())
                 .toHashCode();
     }
@@ -88,7 +88,7 @@ public class Certification extends AbstractIdentifiable implements Serializable 
         }
         // check other values
         return new EqualsBuilder()
-                .append(getCountry(), other.getCountry())
+                .append(getCountryCode(), other.getCountryCode())
                 .append(getCertificate(), other.getCertificate())
                 .isEquals();
     }
@@ -98,8 +98,8 @@ public class Certification extends AbstractIdentifiable implements Serializable 
         StringBuilder sb = new StringBuilder();
         sb.append("Certification [ID=");
         sb.append(getId());
-        sb.append(", country=");
-        sb.append(getCountry());
+        sb.append(", countryCode=");
+        sb.append(getCountryCode());
         sb.append(", certificate=");
         sb.append(getCertificate());
         sb.append("]");

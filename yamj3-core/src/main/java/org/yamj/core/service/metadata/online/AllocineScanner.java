@@ -53,7 +53,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     private static final Logger LOG = LoggerFactory.getLogger(AllocineScanner.class);
 
     private final Lock searchEngingeLock = new ReentrantLock(true);
-
+    
     private SearchEngineTools searchEngineTools;
     @Autowired
     private PoolingHttpClient httpClient;
@@ -65,7 +65,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     private ConfigServiceWrapper configServiceWrapper; 
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
-
+    
     @Override
     public String getScannerName() {
         return SCANNER_ID;
@@ -75,8 +75,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     public void init() {
         LOG.info("Initialize Allocine scanner");
         
-        searchEngineTools = new SearchEngineTools(httpClient, "fr");
-       
+        searchEngineTools = new SearchEngineTools(httpClient, Locale.FRANCE);
+        
         // register this scanner
         onlineScannerService.registerMetadataScanner(this);
     }
@@ -198,7 +198,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
       
         // certification
-        videoData.addCertificationInfo("France", movieInfos.getCertification());
+        videoData.addCertificationInfo(Locale.FRANCE, movieInfos.getCertification());
 
         // allocine rating
         videoData.addRating(SCANNER_ID, movieInfos.getUserRating());
