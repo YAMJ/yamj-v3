@@ -37,7 +37,7 @@ public class Certification extends AbstractIdentifiable implements Serializable 
     private static final long serialVersionUID = 5949467240717893584L;
 
     @NaturalId
-    @Column(name = "country_code", length = 3, nullable = false)
+    @Column(name = "country_code", length = 4, nullable = false)
     private String countryCode;
 
     @NaturalId
