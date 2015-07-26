@@ -52,6 +52,13 @@ public class TheMovieDbScannerTest extends AbstractJUnit4SpringContextTests {
         assertEquals("Changed scanner name", SCANNER_ID, result);
     }
 
+    @Test
+    public void testScanMovie() {
+        LOG.info("testScanMovie");
+        VideoData videoData = new VideoData();
+        videoData.setSourceDbId(SCANNER_ID, "19995");
+        tmdbScanner.scan(videoData);
+    }
 
     @Test
     public void testScanFilmography() {

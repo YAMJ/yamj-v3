@@ -141,6 +141,8 @@ public class LocaleService  {
                 return entry.getValue();
             }
         }
+        
+        LOG.trace("No language code found for language '{}'", language);
         return null;
     }
 
@@ -158,6 +160,8 @@ public class LocaleService  {
                 return entry.getValue();
             }
         }
+
+        LOG.trace("No country code found for country '{}'", country);
         return null;
     }
     
@@ -193,7 +197,7 @@ public class LocaleService  {
     }
 
     public Set<Locale> getCertificationLocales(Locale defaultLocale) {
-        Set<Locale> result = new HashSet<>();   
+        Set<Locale> result = new HashSet<>();
         List<String> countries = this.configService.getPropertyAsList("yamj3.certification.countries", defaultLocale.getCountry());
         for (String country : countries) {
             String countryCode = this.findCountryCode(country);

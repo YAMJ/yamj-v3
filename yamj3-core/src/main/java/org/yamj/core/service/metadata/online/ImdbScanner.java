@@ -178,6 +178,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             return ScanResult.TYPE_CHANGE;
         }
 
+        // locale for IMDb
+        Locale imdbLocale = localeService.getLocaleForConfig("imdb");
+
         // get header tag
         String headerXml = HTMLTools.extractTag(xml, "<h1 class=\"header\">", "</h1>");
 
@@ -248,7 +251,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
         
         // CERTIFICATIONS
-        videoData.setCertificationInfos(parseCertifications(imdbId));
+        videoData.setCertificationInfos(parseCertifications(imdbId, imdbLocale));
 
         // RELEASE DATE
         parseReleaseData(videoData, imdbId);
@@ -304,6 +307,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             throw new OnlineScannerException("IMDb request failed: " + response.getStatusCode());
         }
         
+        // locale for IMDb
+        Locale imdbLocale = localeService.getLocaleForConfig("imdb");
+
         // get content
         final String xml = response.getContent();
         
@@ -355,7 +361,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
 
         // CERTIFICATIONS
-        series.setCertificationInfos(parseCertifications(imdbId));
+        series.setCertificationInfos(parseCertifications(imdbId, imdbLocale));
 
         // RELEASE DATE
         parseReleaseData(series, imdbId);
@@ -887,9 +893,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return studios;
     }
 
-    private Map<Locale, String> parseCertifications(String imdbId) {
+    private Map<Locale, String> parseCertifications(String imdbId, Locale imdbLocale) {
         Map<Locale, String> certificationInfos = new HashMap<>();
-        Locale imdbLocale = localeService.getLocaleForConfig("imdb");
         
         try {
             DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "parentalguide#certification"), charset);
