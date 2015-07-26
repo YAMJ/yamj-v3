@@ -25,7 +25,6 @@ package org.yamj.core.api.model.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.*;
-import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.model.type.ArtworkType;
 
@@ -42,7 +41,7 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
     private List<ApiTargetDTO> genres = new ArrayList<>(0);
     private List<Studio> studios = new ArrayList<>(0);
     private List<ApiTargetDTO> countries = new ArrayList<>(0);
-    private List<Certification> certifications = new ArrayList<>(0);
+    private List<ApiCertificationDTO> certifications = new ArrayList<>(0);
     private List<ApiAwardDTO> awards = new ArrayList<>(0);
     private List<ApiRatingDTO> ratings = new ArrayList<>(0);
     private List<ApiSeasonInfoDTO> seasonList = new ArrayList<>(0);
@@ -145,11 +144,11 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
         return countries.size();
     }
 
-    public List<Certification> getCertifications() {
+    public List<ApiCertificationDTO> getCertifications() {
         return certifications;
     }
 
-    public void setCertifications(List<Certification> certifications) {
+    public void setCertifications(List<ApiCertificationDTO> certifications) {
         this.certifications = certifications;
     }
 

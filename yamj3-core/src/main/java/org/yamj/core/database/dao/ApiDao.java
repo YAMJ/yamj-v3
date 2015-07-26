@@ -39,7 +39,6 @@ import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
-import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.model.type.*;
 import org.yamj.core.hibernate.HibernateDao;
@@ -1863,9 +1862,9 @@ public class ApiDao extends HibernateDao {
             }
             if (options.hasDataItem(DataItem.CERTIFICATION)) {
                 // use series certifications
-                Map<Long, List<Certification>> map = new HashMap<>();
+                Map<Long, List<ApiCertificationDTO>> map = new HashMap<>();
                 for (ApiEpisodeDTO episode : results) {
-                    List<Certification> certifications = map.get(episode.getSeriesId());
+                    List<ApiCertificationDTO> certifications = map.get(episode.getSeriesId());
                     if (certifications == null) {
                         certifications = getCertificationsForId(MetaDataType.SERIES, episode.getSeriesId());
                         map.put(episode.getSeriesId(), certifications);
@@ -2335,9 +2334,9 @@ public class ApiDao extends HibernateDao {
      * @param id
      * @return
      */
-    private List<Certification> getCertificationsForId(MetaDataType type, Long id) {
+    private List<ApiCertificationDTO> getCertificationsForId(MetaDataType type, Long id) {
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT DISTINCT c.id, c.country, c.certificate ");
+        sqlScalars.addToSql("SELECT DISTINCT c.id, c.country_code as countryCode, c.certificate ");
         sqlScalars.addToSql("FROM certification c ");
         if (type == MetaDataType.SERIES) {
             sqlScalars.addToSql("JOIN series_certifications sc ON c.id=sc.cert_id and sc.series_id=:id ");
@@ -2348,14 +2347,14 @@ public class ApiDao extends HibernateDao {
             // defaults to movie
             sqlScalars.addToSql("JOIN videodata_certifications vc ON c.id=vc.cert_id and vc.data_id=:id ");
         }
-        sqlScalars.addToSql("ORDER BY country");
+        sqlScalars.addToSql("ORDER BY country_code, certificate");
 
         sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar("country", StringType.INSTANCE);
+        sqlScalars.addScalar("countryCode", StringType.INSTANCE);
         sqlScalars.addScalar("certificate", StringType.INSTANCE);
         sqlScalars.addParameter(ID, id);
 
-        return executeQueryWithTransform(Certification.class, sqlScalars, null);
+        return executeQueryWithTransform(ApiCertificationDTO.class, sqlScalars, null);
     }
 
     /**

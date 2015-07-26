@@ -28,7 +28,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.yamj.core.database.model.Certification;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.model.type.JobType;
 
@@ -54,7 +53,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     private List<ApiTargetDTO> genres = new ArrayList<>(0);
     private List<Studio> studios = new ArrayList<>(0);
     private List<ApiTargetDTO> countries = new ArrayList<>(0);
-    private List<Certification> certifications = new ArrayList<>(0);
+    private List<ApiCertificationDTO> certifications = new ArrayList<>(0);
     private List<ApiRatingDTO> ratings = new ArrayList<>(0);
     private List<ApiAwardDTO> awards = new ArrayList<>(0);
     private List<ApiFileDTO> files = new ArrayList<>(0);
@@ -127,7 +126,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
         this.countries = countries;
     }
 
-    public void setCertifications(List<Certification> certifications) {
+    public void setCertifications(List<ApiCertificationDTO> certifications) {
         this.certifications = certifications;
     }
     
@@ -206,7 +205,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
         return countries;
     }
     
-    public List<Certification> getCertifications() {
+    public List<ApiCertificationDTO> getCertifications() {
         return certifications;
     }
     

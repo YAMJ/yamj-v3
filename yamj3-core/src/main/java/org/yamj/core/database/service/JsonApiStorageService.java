@@ -25,6 +25,7 @@ package org.yamj.core.database.service;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -76,6 +77,14 @@ public class JsonApiStorageService {
     //<editor-fold defaultstate="collapsed" desc="Index Methods">
     public void getVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
         apiDao.getVideoList(wrapper);
+        
+        // localization
+        if (CollectionUtils.isNotEmpty(wrapper.getResults())) {
+            final Locale inLocale = localeService.getLanguageLocale(wrapper.getOptions().getLanguage());
+            for (ApiVideoDTO video : wrapper.getResults()) {
+                localize(video.getCertifications(), inLocale);
+            }
+        }
     }
 
     public CountTimestamp getCountTimestamp(MetaDataType type) {
@@ -167,13 +176,29 @@ public class JsonApiStorageService {
 
     //<editor-fold defaultstate="collapsed" desc="Certification Methods">
     public List<ApiCertificationDTO> getCertifications(ApiWrapperList<ApiCertificationDTO> wrapper) {
-        Locale inLocale = localeService.getLanguageLocale(wrapper.getOptions().getLanguage());
         List<ApiCertificationDTO> result = commonDao.getCertifications(wrapper);
-        for (ApiCertificationDTO cert : result) {
-            Locale country = new Locale(Locale.US.getLanguage(), cert.getCountryCode());
-            cert.setCountry(country.getDisplayCountry(inLocale));
-        }
+        
+        // localization
+        final Locale inLocale = localeService.getLanguageLocale(wrapper.getOptions().getLanguage());
+        localize(result, inLocale);
+        
         return  result;
+    }
+    
+    private static void localize(List<ApiCertificationDTO> certifications, Locale inLocale) {
+        if (CollectionUtils.isEmpty(certifications)) return;
+        
+        for (ApiCertificationDTO cert : certifications) {
+            String country;
+            try {
+                final Locale countryLocale = new Locale(Locale.US.getLanguage(), cert.getCountryCode());
+                country = countryLocale.getDisplayCountry(inLocale);
+                if (country == null) country = cert.getCountryCode();
+            } catch (Exception e) {
+                country = cert.getCountryCode();
+            }
+            cert.setCountry(country);
+        }
     }
     //</editor-fold>
 
@@ -322,10 +347,24 @@ public class JsonApiStorageService {
 
     public void getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
         apiDao.getEpisodeList(wrapper);
+        
+        // localization
+        if (CollectionUtils.isNotEmpty(wrapper.getResults())) {
+            final Locale inLocale = localeService.getLanguageLocale(wrapper.getOptions().getLanguage());
+            for (ApiEpisodeDTO episode : wrapper.getResults()) {
+                localize(episode.getCertifications(), inLocale);
+            }
+        }
     }
 
     public void getSingleVideo(ApiWrapperSingle<ApiVideoDTO> wrapper) {
         apiDao.getSingleVideo(wrapper);
+        
+        if (wrapper.getResult() != null && CollectionUtils.isNotEmpty(wrapper.getResult().getCertifications())) {
+            // localization
+            final Locale inLocale = localeService.getLanguageLocale(wrapper.getOptions().getLanguage());
+            localize(wrapper.getResult().getCertifications(), inLocale);
+        }
     }
 
     public List<CountGeneric> getJobCount(List<String> requiredJobs) {
@@ -334,6 +373,14 @@ public class JsonApiStorageService {
 
     public void getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper) {
         apiDao.getSeriesInfo(wrapper);
+        
+        // localization
+        if (CollectionUtils.isNotEmpty(wrapper.getResults())) {
+            final Locale inLocale = localeService.getLanguageLocale(wrapper.getOptions().getLanguage());
+            for (ApiSeriesInfoDTO series : wrapper.getResults()) {
+                localize(series.getCertifications(), inLocale);
+            }
+        }
     }
 
     public List<Long> getSeasonVideoIds(Long id) {
