@@ -68,7 +68,15 @@ public class UpgradeDatabaseService {
         try {
             upgradeDatabaseDao.patchCertifications();
         } catch (Exception ex) {
-            LOG.warn("Failed upgrade 'patchLocales'", ex);
+            LOG.warn("Failed upgrade 'patchCertifications'", ex);
+        }
+
+        // Issues: #234
+        // Date:   26.07.2015
+        try {
+            upgradeDatabaseDao.patchCountries();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchCountries'", ex);
         }
     }
 }

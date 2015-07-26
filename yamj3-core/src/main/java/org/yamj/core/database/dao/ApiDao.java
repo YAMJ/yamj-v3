@@ -1826,9 +1826,9 @@ public class ApiDao extends HibernateDao {
             }
             if (options.hasDataItem(DataItem.GENRE)) {
                 // use series genres
-                Map<Long, List<ApiTargetDTO>> map = new HashMap<>();
+                Map<Long, List<ApiGenreDTO>> map = new HashMap<>();
                 for (ApiEpisodeDTO episode : results) {
-                    List<ApiTargetDTO> genres = map.get(episode.getSeriesId());
+                    List<ApiGenreDTO> genres = map.get(episode.getSeriesId());
                     if (genres == null) {
                         genres = getGenresForId(MetaDataType.SERIES, episode.getSeriesId());
                         map.put(episode.getSeriesId(), genres);
@@ -1838,9 +1838,9 @@ public class ApiDao extends HibernateDao {
             }
             if (options.hasDataItem(DataItem.COUNTRY)) {
                 // use series countries
-                Map<Long, List<ApiTargetDTO>> map = new HashMap<>();
+                Map<Long, List<ApiCountryDTO>> map = new HashMap<>();
                 for (ApiEpisodeDTO episode : results) {
-                    List<ApiTargetDTO> countries = map.get(episode.getSeriesId());
+                    List<ApiCountryDTO> countries = map.get(episode.getSeriesId());
                     if (countries == null) {
                         countries = getCountriesForId(MetaDataType.SERIES, episode.getSeriesId());
                         map.put(episode.getSeriesId(), countries);
@@ -2229,7 +2229,7 @@ public class ApiDao extends HibernateDao {
      * @param id
      * @return
      */
-    private List<ApiTargetDTO> getGenresForId(MetaDataType type, Long id) {
+    private List<ApiGenreDTO> getGenresForId(MetaDataType type, Long id) {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT DISTINCT ");
         sqlScalars.addToSql("CASE ");
@@ -2257,7 +2257,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("name", StringType.INSTANCE);
         sqlScalars.addParameter(ID, id);
 
-        return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, null);
+        return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, null);
     }
 
     /**
@@ -2296,14 +2296,9 @@ public class ApiDao extends HibernateDao {
      * @param id
      * @return
      */
-    private List<ApiTargetDTO> getCountriesForId(MetaDataType type, Long id) {
+    private List<ApiCountryDTO> getCountriesForId(MetaDataType type, Long id) {
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT DISTINCT ");
-        sqlScalars.addToSql("CASE ");
-        sqlScalars.addToSql(" WHEN target_api is not null THEN target_api ");
-        sqlScalars.addToSql(" WHEN target_xml is not null THEN target_xml ");
-        sqlScalars.addToSql(" ELSE name ");
-        sqlScalars.addToSql("END as name ");
+        sqlScalars.addToSql("SELECT c.id, c.country_code as countryCode ");
         if (type == MetaDataType.SERIES) {
             sqlScalars.addToSql("FROM series_countries sc, country c ");
             sqlScalars.addToSql("WHERE sc.series_id=:id ");
@@ -2319,12 +2314,12 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("WHERE vc.data_id=:id ");
             sqlScalars.addToSql("AND vc.country_id=c.id ");
         }
-        sqlScalars.addToSql("ORDER BY name");
 
-        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar(ID, LongType.INSTANCE);
+        sqlScalars.addScalar("countryCode", StringType.INSTANCE);
         sqlScalars.addParameter(ID, id);
 
-        return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, null);
+        return executeQueryWithTransform(ApiCountryDTO.class, sqlScalars, null);
     }
 
     /**

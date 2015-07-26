@@ -24,7 +24,6 @@ package org.yamj.core.database.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Locale;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,9 +79,9 @@ public class JsonApiStorageService {
         
         // localization
         if (CollectionUtils.isNotEmpty(wrapper.getResults())) {
-            final Locale inLocale = localeService.getLanguageLocale(wrapper.getOptions().getLanguage());
             for (ApiVideoDTO video : wrapper.getResults()) {
-                localize(video.getCertifications(), inLocale);
+                localizeCertifications(video.getCertifications(), wrapper.getOptions().getLanguage());
+                localizeCountries(video.getCountries(), wrapper.getOptions().getLanguage());
             }
         }
     }
@@ -127,11 +126,11 @@ public class JsonApiStorageService {
         return commonDao.getGenre(name);
     }
 
-    public List<ApiTargetDTO> getGenres(ApiWrapperList<ApiTargetDTO> wrapper) {
+    public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper) {
         return commonDao.getGenres(wrapper);
     }
 
-    public List<ApiTargetDTO> getGenreFilename(ApiWrapperList<ApiTargetDTO> wrapper, String filename) {
+    public List<ApiGenreDTO> getGenreFilename(ApiWrapperList<ApiGenreDTO> wrapper, String filename) {
         return commonDao.getGenreFilename(wrapper, filename);
     }
     //</editor-fold>
@@ -151,20 +150,56 @@ public class JsonApiStorageService {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Country Methods">
-    public Country getCountry(Serializable id) {
-        return commonDao.getById(Country.class, id);
+    public ApiCountryDTO getCountry(Serializable id, String language) {
+        Country country = commonDao.getById(Country.class, id);
+        if (country == null) return null;
+
+        ApiCountryDTO dto = new ApiCountryDTO();
+        dto.setId(country.getId());
+        dto.setCountryCode(country.getCountryCode());
+        localize(dto, language);
+        return dto;
     }
 
-    public Country getCountry(String name) {
-        return commonDao.getCountry(name);
+    public ApiCountryDTO getCountry(String countryCode, String language) {
+        Country country =  commonDao.getCountry(countryCode);
+        if (country == null) return null;
+        
+        ApiCountryDTO dto = new ApiCountryDTO();
+        dto.setId(country.getId());
+        dto.setCountryCode(country.getCountryCode());
+        localize(dto, language);
+        return dto;
     }
 
-    public List<ApiTargetDTO> getCountries(ApiWrapperList<ApiTargetDTO> wrapper) {
-        return commonDao.getCountries(wrapper);
+    public List<ApiCountryDTO> getCountries(ApiWrapperList<ApiCountryDTO> wrapper) {
+        List<ApiCountryDTO> result = commonDao.getCountries(wrapper);
+        localizeCountries(result, wrapper.getOptions().getLanguage());
+        return result;
     }
 
-    public List<ApiTargetDTO> getCountryFilename(ApiWrapperList<ApiTargetDTO> wrapper, String filename) {
-        return commonDao.getCountryFilename(wrapper, filename);
+    public List<ApiCountryDTO> getCountryFilename(ApiWrapperList<ApiCountryDTO> wrapper, String filename) {
+        List<ApiCountryDTO> result = commonDao.getCountryFilename(wrapper, filename);
+        localizeCountries(result, wrapper.getOptions().getLanguage());
+        return result;
+    }
+
+    private void localizeCountries(List<ApiCountryDTO> countries, String language) {
+        if (CollectionUtils.isEmpty(countries)) return;
+        for (ApiCountryDTO dto : countries) {
+            localize(dto, language);
+        }
+    }
+
+    private void localize(ApiCountryDTO dto, String language) {
+        String country;
+        try {
+            country = localeService.getDisplayCountry(language, dto.getCountryCode());
+        } catch (Exception e) {
+            // just to be sure
+            country = dto.getCountryCode();
+        }
+        dto.setCountry(country);
     }
     //</editor-fold>
 
@@ -177,27 +212,14 @@ public class JsonApiStorageService {
     //<editor-fold defaultstate="collapsed" desc="Certification Methods">
     public List<ApiCertificationDTO> getCertifications(ApiWrapperList<ApiCertificationDTO> wrapper) {
         List<ApiCertificationDTO> result = commonDao.getCertifications(wrapper);
-        
-        // localization
-        final Locale inLocale = localeService.getLanguageLocale(wrapper.getOptions().getLanguage());
-        localize(result, inLocale);
-        
+        localizeCertifications(result, wrapper.getOptions().getLanguage());
         return  result;
     }
     
-    private static void localize(List<ApiCertificationDTO> certifications, Locale inLocale) {
+    private void localizeCertifications(List<ApiCertificationDTO> certifications, String language) {
         if (CollectionUtils.isEmpty(certifications)) return;
-        
         for (ApiCertificationDTO cert : certifications) {
-            String country;
-            try {
-                final Locale countryLocale = new Locale(Locale.US.getLanguage(), cert.getCountryCode());
-                country = countryLocale.getDisplayCountry(inLocale);
-                if (country == null) country = cert.getCountryCode();
-            } catch (Exception e) {
-                country = cert.getCountryCode();
-            }
-            cert.setCountry(country);
+            localize(cert, language);
         }
     }
     //</editor-fold>
@@ -309,50 +331,14 @@ public class JsonApiStorageService {
     }
     //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Country methods">
-    @Transactional
-    public boolean addCountry(String name, String targetApi) {
-        Country country = commonDao.getCountry(name);
-        if (country != null) {
-            return false;
-        }
-        country = new Country(name);
-        country.setTargetApi(targetApi);
-        this.commonDao.saveEntity(country);
-        return true;
-    }
-
-    @Transactional
-    public boolean updateCountry(long id, String targetApi) {
-        Country country = commonDao.getById(Country.class, id);
-        if (country == null) {
-            return false;
-        }
-        country.setTargetApi(StringUtils.trimToNull(targetApi));
-        this.commonDao.updateEntity(country);
-        return true;
-    }
-
-    @Transactional
-    public boolean updateCountry(String name, String targetApi) {
-        Country country = commonDao.getCountry(name);
-        if (country == null) {
-            return false;
-        }
-        country.setTargetApi(StringUtils.trimToNull(targetApi));
-        this.commonDao.updateEntity(country);
-        return true;
-    }
-    //</editor-fold>
-
     public void getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
         apiDao.getEpisodeList(wrapper);
         
         // localization
         if (CollectionUtils.isNotEmpty(wrapper.getResults())) {
-            final Locale inLocale = localeService.getLanguageLocale(wrapper.getOptions().getLanguage());
             for (ApiEpisodeDTO episode : wrapper.getResults()) {
-                localize(episode.getCertifications(), inLocale);
+                localizeCertifications(episode.getCertifications(), wrapper.getOptions().getLanguage());
+                localizeCountries(episode.getCountries(), wrapper.getOptions().getLanguage());
             }
         }
     }
@@ -360,10 +346,10 @@ public class JsonApiStorageService {
     public void getSingleVideo(ApiWrapperSingle<ApiVideoDTO> wrapper) {
         apiDao.getSingleVideo(wrapper);
         
-        if (wrapper.getResult() != null && CollectionUtils.isNotEmpty(wrapper.getResult().getCertifications())) {
+        if (wrapper.getResult() != null) {
             // localization
-            final Locale inLocale = localeService.getLanguageLocale(wrapper.getOptions().getLanguage());
-            localize(wrapper.getResult().getCertifications(), inLocale);
+            localizeCertifications(wrapper.getResult().getCertifications(), wrapper.getOptions().getLanguage());
+            localizeCountries(wrapper.getResult().getCountries(), wrapper.getOptions().getLanguage());
         }
     }
 
@@ -376,9 +362,9 @@ public class JsonApiStorageService {
         
         // localization
         if (CollectionUtils.isNotEmpty(wrapper.getResults())) {
-            final Locale inLocale = localeService.getLanguageLocale(wrapper.getOptions().getLanguage());
             for (ApiSeriesInfoDTO series : wrapper.getResults()) {
-                localize(series.getCertifications(), inLocale);
+                localizeCertifications(series.getCertifications(), wrapper.getOptions().getLanguage());
+                localizeCountries(series.getCountries(), wrapper.getOptions().getLanguage());
             }
         }
     }

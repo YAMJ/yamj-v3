@@ -532,31 +532,6 @@ public class CommonStorageService {
     }
 
     @Transactional
-    public void updateCountriesXml(Map<String, String> subCountries) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("UPDATE Country ");
-        sb.append("SET targetXml = null ");
-        sb.append("WHERE targetXml is not null ");
-        sb.append("AND lower(name) not in (:subCountries) ");
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("subCountries", subCountries.keySet());
-        this.stagingDao.executeUpdate(sb, params);
-
-        for (Entry<String, String> entry : subCountries.entrySet()) {
-            sb.setLength(0);
-            sb.append("UPDATE Country ");
-            sb.append("SET targetXml=:targetXml ");
-            sb.append("WHERE lower(name)=:subCountry ");
-
-            params.clear();
-            params.put("subCountry", entry.getKey());
-            params.put("targetXml", entry.getValue());
-            this.stagingDao.executeUpdate(sb, params);
-        }
-    }
-
-    @Transactional
     public int deleteOrphanGenres() {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM genre ");

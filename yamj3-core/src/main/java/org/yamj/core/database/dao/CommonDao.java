@@ -62,7 +62,7 @@ public class CommonDao extends HibernateDao {
         }
     }
 
-    public List<ApiTargetDTO> getGenres(ApiWrapperList<ApiTargetDTO> wrapper) {
+    public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper) {
         OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
 
         SqlScalars sqlScalars = new SqlScalars();
@@ -105,10 +105,10 @@ public class CommonDao extends HibernateDao {
         sqlScalars.addToSql(options.getSearchString(addWhere));
         sqlScalars.addToSql(options.getSortString());
 
-        return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, wrapper);
+        return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
     }
 
-    public List<ApiTargetDTO> getGenreFilename(ApiWrapperList<ApiTargetDTO> wrapper, String filename) {
+    public List<ApiGenreDTO> getGenreFilename(ApiWrapperList<ApiGenreDTO> wrapper, String filename) {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT g.id, g.name, ");
         sqlScalars.addToSql("CASE ");
@@ -129,7 +129,7 @@ public class CommonDao extends HibernateDao {
 
         sqlScalars.addParameter("filename", filename.toLowerCase());
 
-        return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, wrapper);
+        return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
     }
 
     public Studio getStudio(String name) {
@@ -176,110 +176,79 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(Studio.class, sqlScalars, wrapper);
     }
 
-    public Country getCountry(String name) {
-        return getByNaturalIdCaseInsensitive(Country.class, "name", name);
+    public Country getCountry(String countryCode) {
+        return getByNaturalId(Country.class, "countryCode", countryCode);
     }
 
-    public synchronized void storeNewCountry(String name, String targetXml) {
-        Country country = this.getCountry(name);
+    public synchronized void storeNewCountry(String countryCode) {
+        Country country = this.getCountry(countryCode);
         if (country == null) {
             // create new country
             country = new Country();
-            country.setName(name);
-            country.setTargetXml(targetXml);
+            country.setCountryCode(countryCode);
             this.saveEntity(country);
         }
     }
 
-    public List<ApiTargetDTO> getCountries(ApiWrapperList<ApiTargetDTO> wrapper) {
+    public List<ApiCountryDTO> getCountries(ApiWrapperList<ApiCountryDTO> wrapper) {
         OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
 
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addScalar("name", StringType.INSTANCE);
-
-        sqlScalars.addToSql("SELECT DISTINCT ");
-        if (options.getFull()) {
-            sqlScalars.addToSql("c.id as id, c.name as name, ");
-            sqlScalars.addToSql("CASE ");
-            sqlScalars.addToSql(" WHEN c.target_api is not null THEN c.target_api ");
-            sqlScalars.addToSql(" WHEN c.target_xml is not null THEN c.target_xml ");
-            sqlScalars.addToSql(" ELSE c.name ");
-            sqlScalars.addToSql("END as target ");
-
-            sqlScalars.addScalar("id", LongType.INSTANCE);
-            sqlScalars.addScalar("target", StringType.INSTANCE);
-        } else {
-            sqlScalars.addToSql("CASE ");
-            sqlScalars.addToSql(" WHEN c.target_api is not null THEN c.target_api ");
-            sqlScalars.addToSql(" WHEN c.target_xml is not null THEN c.target_xml ");
-            sqlScalars.addToSql(" ELSE c.name ");
-            sqlScalars.addToSql("END as name ");
-        }
+        sqlScalars.addToSql("SELECT c.id, c.country_code as countryCode ");
         sqlScalars.addToSql("FROM country c ");
 
-        boolean addWhere = true;
-        if (options.getType() != null) {
-            if (MetaDataType.MOVIE == options.getType()) {
-                sqlScalars.addToSql("JOIN videodata_countries vc ON c.id=vc.country_id ");
-            } else {
-                sqlScalars.addToSql("JOIN series_countries sc ON c.id=sc.country_id ");
-            }
+        if (MetaDataType.MOVIE == options.getType()) {
+            sqlScalars.addToSql("JOIN videodata_countries vc ON c.id=vc.country_id ");
+        } else if (MetaDataType.SERIES == options.getType()) {
+            sqlScalars.addToSql("JOIN series_countries sc ON c.id=sc.country_id ");
         }
-        if (options.getUsed() != null && options.getUsed()) {
-            sqlScalars.addToSql("WHERE (exists (select 1 from videodata_countries vc where vc.country_id=c.id) ");
-            sqlScalars.addToSql(" or exists (select 1 from series_countries sc where sc.country_id=c.id)) ");
-            addWhere = false;
-        }
+        
+        sqlScalars.addToSql("WHERE (exists (select 1 from videodata_countries vc where vc.country_id=c.id) ");
+        sqlScalars.addToSql(" or exists (select 1 from series_countries sc where sc.country_id=c.id)) ");
 
-        sqlScalars.addToSql(options.getSearchString(addWhere));
+        sqlScalars.addScalar("id", LongType.INSTANCE);
+        sqlScalars.addScalar("countryCode", StringType.INSTANCE);
         sqlScalars.addToSql(options.getSortString());
 
-        return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, wrapper);
+        return executeQueryWithTransform(ApiCountryDTO.class, sqlScalars, wrapper);
     }
 
-    public List<ApiTargetDTO> getCountryFilename(ApiWrapperList<ApiTargetDTO> wrapper, String filename) {
+    public List<ApiCountryDTO> getCountryFilename(ApiWrapperList<ApiCountryDTO> wrapper, String filename) {
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT c.id, c.name, ");
-        sqlScalars.addToSql("CASE ");
-        sqlScalars.addToSql(" WHEN target_api is not null THEN target_api ");
-        sqlScalars.addToSql(" WHEN target_xml is not null THEN target_xml ");
-        sqlScalars.addToSql(" ELSE name ");
-        sqlScalars.addToSql("END as target ");
+        sqlScalars.addToSql("SELECT c.id, c.country_code ad countryCode ");
         sqlScalars.addToSql("FROM mediafile m, mediafile_videodata mv, videodata v, videodata_countries vc, country c ");
         sqlScalars.addToSql("WHERE m.id=mv.mediafile_id");
         sqlScalars.addToSql("AND mv.videodata_id=v.id");
-        sqlScalars.addToSql("AND v.id = vc.data_id");
+        sqlScalars.addToSql("AND v.id=vc.data_id");
         sqlScalars.addToSql("AND vc.country_id=c.id");
         sqlScalars.addToSql("AND lower(m.file_name)=:filename");
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
-        sqlScalars.addScalar("name", StringType.INSTANCE);
-        sqlScalars.addScalar("target", StringType.INSTANCE);
-
+        sqlScalars.addScalar("countryCode", StringType.INSTANCE);
         sqlScalars.addParameter("filename", filename.toLowerCase());
 
-        return executeQueryWithTransform(ApiTargetDTO.class, sqlScalars, wrapper);
+        return executeQueryWithTransform(ApiCountryDTO.class, sqlScalars, wrapper);
     }
 
-    public Certification getCertification(Locale locale, String certificate) {
+    public Certification getCertification(String countryCode, String certificate) {
         StringBuilder sb = new StringBuilder();
         sb.append("from Certification ");
         sb.append("where lower(country_code) = :countryCode ");
         sb.append("and lower(certificate) = :certificate ");
 
         Map<String, Object> params = new HashMap<>();
-        params.put("countryCode", locale.getCountry().toLowerCase());
+        params.put("countryCode", countryCode.toLowerCase());
         params.put("certificate", certificate.toLowerCase());
 
         return (Certification) this.findUniqueByNamedParameters(sb, params);
     }
 
-    public synchronized void storeNewCertification(Locale locale, String certificate) {
-        Certification certification = this.getCertification(locale, certificate);
+    public synchronized void storeNewCertification(String countryCode, String certificate) {
+        Certification certification = this.getCertification(countryCode, certificate);
         if (certification == null) {
             // create new certification
             certification = new Certification();
-            certification.setCountryCode(locale.getCountry());
+            certification.setCountryCode(countryCode);
             certification.setCertificate(certificate);
             this.saveEntity(certification);
         }

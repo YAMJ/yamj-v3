@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.core.config.ConfigServiceWrapper;
+import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
@@ -66,7 +67,9 @@ public class OfdbScanner implements IMovieScanner {
     private ImdbSearchEngine imdbSearchEngine;
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
-
+    @Autowired
+    private LocaleService localeService;
+    
     @Override
     public String getScannerName() {
         return SCANNER_ID;
@@ -342,11 +345,12 @@ public class OfdbScanner implements IMovieScanner {
             }
 
             if (OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID) && tag.contains("Herstellungsland")) {
-                Set<String> countryNames = new LinkedHashSet<>();
+                Set<String> countryCodes = new HashSet<>();
                 for (String country : HTMLTools.extractHtmlTags(tag, "class=\"Daten\"", "</td>", "<a", "</a>")) {
-                    countryNames.add(HTMLTools.removeHtmlTags(country).trim());
+                    final String countryCode = localeService.findCountryCode(HTMLTools.removeHtmlTags(country).trim());
+                    if (countryCode != null) countryCodes.add(countryCode);
                 }
-                videoData.setCountryNames(countryNames, SCANNER_ID);
+                videoData.setCountryCodes(countryCodes, SCANNER_ID);
             }
         }
 

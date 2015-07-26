@@ -38,9 +38,9 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
     private String outline;
     private Integer year;
     private Boolean watched;
-    private List<ApiTargetDTO> genres = new ArrayList<>(0);
+    private List<ApiGenreDTO> genres = new ArrayList<>(0);
     private List<Studio> studios = new ArrayList<>(0);
-    private List<ApiTargetDTO> countries = new ArrayList<>(0);
+    private List<ApiCountryDTO> countries = new ArrayList<>(0);
     private List<ApiCertificationDTO> certifications = new ArrayList<>(0);
     private List<ApiAwardDTO> awards = new ArrayList<>(0);
     private List<ApiRatingDTO> ratings = new ArrayList<>(0);
@@ -108,11 +108,11 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
         this.watched = watched;
     }
 
-    public List<ApiTargetDTO> getGenres() {
+    public List<ApiGenreDTO> getGenres() {
         return genres;
     }
 
-    public void setGenres(List<ApiTargetDTO> genres) {
+    public void setGenres(List<ApiGenreDTO> genres) {
         this.genres = genres;
     }
 
@@ -132,11 +132,11 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
         return studios.size();
     }
 
-    public List<ApiTargetDTO> getCountries() {
+    public List<ApiCountryDTO> getCountries() {
         return countries;
     }
   
-    public void setCountries(List<ApiTargetDTO> countries) {
+    public void setCountries(List<ApiCountryDTO> countries) {
         this.countries = countries;
     }
 

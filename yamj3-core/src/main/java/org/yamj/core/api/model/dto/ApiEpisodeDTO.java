@@ -50,9 +50,9 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
     private String cacheFilename;
     private String cacheDir;
     private String videoimage;
-    private List<ApiTargetDTO> genres = new ArrayList<>(0);
+    private List<ApiGenreDTO> genres = new ArrayList<>(0);
     private List<Studio> studios = new ArrayList<>(0);
-    private List<ApiTargetDTO> countries = new ArrayList<>(0);
+    private List<ApiCountryDTO> countries = new ArrayList<>(0);
     private List<ApiCertificationDTO> certifications = new ArrayList<>(0);
     private List<ApiRatingDTO> ratings = new ArrayList<>(0);
     private List<ApiAwardDTO> awards = new ArrayList<>(0);
@@ -114,7 +114,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
         this.cacheDir = cacheDir;
     }
 
-    public void setGenres(List<ApiTargetDTO> genres) {
+    public void setGenres(List<ApiGenreDTO> genres) {
         this.genres = genres;
     }
 
@@ -122,7 +122,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
         this.studios = studios;
     }
 
-    public void setCountries(List<ApiTargetDTO> countries) {
+    public void setCountries(List<ApiCountryDTO> countries) {
         this.countries = countries;
     }
 
@@ -193,7 +193,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
         return videoimage;
     }
 
-    public List<ApiTargetDTO> getGenres() {
+    public List<ApiGenreDTO> getGenres() {
         return genres;
     }
 
@@ -201,7 +201,7 @@ public class ApiEpisodeDTO extends AbstractApiIdentifiableDTO {
         return studios;
     }
     
-    public List<ApiTargetDTO> getCountries() {
+    public List<ApiCountryDTO> getCountries() {
         return countries;
     }
     

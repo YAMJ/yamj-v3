@@ -111,4 +111,10 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
         return factoryBean;
     }
 
+    @Bean
+    public FactoryBean<Properties> countryProperties() {
+        PropertiesFactoryBean factoryBean = new PropertiesFactoryBean();
+        factoryBean.setLocation(new ClassPathResource("/countries.properties"));
+        return factoryBean;
+    }
 }

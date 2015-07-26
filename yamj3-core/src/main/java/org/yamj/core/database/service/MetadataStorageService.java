@@ -46,7 +46,6 @@ import org.yamj.core.database.model.dto.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.artwork.ArtworkTools;
-import org.yamj.core.tools.CountryXmlTools;
 import org.yamj.core.tools.GenreXmlTools;
 import org.yamj.core.tools.MetadataTools;
 
@@ -173,14 +172,13 @@ public class MetadataStorageService {
             }
         }
 
-        if (CollectionUtils.isNotEmpty(videoData.getCountryNames())) {
+        if (CollectionUtils.isNotEmpty(videoData.getCountryCodes())) {
             // store new countries
-            for (String countryName : videoData.getCountryNames()) {
+            for (String countryCode: videoData.getCountryCodes()) {
                 try {
-                    String targetXml = CountryXmlTools.getMasterCountry(countryName);
-                    this.commonDao.storeNewCountry(countryName, targetXml);
+                    this.commonDao.storeNewCountry(countryCode);
                 } catch (Exception ex) {
-                    LOG.error("Failed to store country '{}', error: {}", countryName, ex.getMessage());
+                    LOG.error("Failed to store country '{}', error: {}", countryCode, ex.getMessage());
                     LOG.trace("Storage error", ex);
                 }
             }
@@ -188,7 +186,7 @@ public class MetadataStorageService {
 
         if (MapUtils.isNotEmpty(videoData.getCertificationInfos())) {
             // store new certifications
-            for (Entry<Locale,String> entry : videoData.getCertificationInfos().entrySet()) {
+            for (Entry<String,String> entry : videoData.getCertificationInfos().entrySet()) {
                 try {
                     this.commonDao.storeNewCertification(entry.getKey(), entry.getValue());
                 } catch (Exception ex) {
@@ -267,14 +265,13 @@ public class MetadataStorageService {
             }
         }
 
-        if (CollectionUtils.isNotEmpty(series.getCountryNames())) {
+        if (CollectionUtils.isNotEmpty(series.getCountryCodes())) {
             // store new countries
-            for (String countryName : series.getCountryNames()) {
+            for (String countryCode : series.getCountryCodes()) {
                 try {
-                    String targetXml = CountryXmlTools.getMasterCountry(countryName);
-                    this.commonDao.storeNewCountry(countryName, targetXml);
+                    this.commonDao.storeNewCountry(countryCode);
                 } catch (Exception ex) {
-                    LOG.error("Failed to store country '{}', error: {}", countryName, ex.getMessage());
+                    LOG.error("Failed to store country '{}', error: {}", countryCode, ex.getMessage());
                     LOG.trace("Storage error", ex);
                 }
             }
@@ -282,7 +279,7 @@ public class MetadataStorageService {
 
         if (MapUtils.isNotEmpty(series.getCertificationInfos())) {
             // store new certifications
-            for (Entry<Locale,String> entry : series.getCertificationInfos().entrySet()) {
+            for (Entry<String,String> entry : series.getCertificationInfos().entrySet()) {
                 try {
                     this.commonDao.storeNewCertification(entry.getKey(), entry.getValue());
                 } catch (Exception ex) {
@@ -544,13 +541,13 @@ public class MetadataStorageService {
      * @param series
      */
     private void updateCountries(VideoData videoData) {
-        if (CollectionUtils.isEmpty(videoData.getCountryNames())) {
+        if (CollectionUtils.isEmpty(videoData.getCountryCodes())) {
             return;
         }
 
         Set<Country> countries = new LinkedHashSet<>();
-        for (String countryName : videoData.getCountryNames()) {
-            Country country = commonDao.getCountry(countryName);
+        for (String countryCode : videoData.getCountryCodes()) {
+            Country country = commonDao.getCountry(countryCode);
             if (country != null) {
                 countries.add(country);
             }
@@ -564,13 +561,13 @@ public class MetadataStorageService {
      * @param series
      */
     private void updateCountries(Series series) {
-        if (CollectionUtils.isEmpty(series.getCountryNames())) {
+        if (CollectionUtils.isEmpty(series.getCountryCodes())) {
             return;
         }
 
         Set<Country> countries = new LinkedHashSet<>();
-        for (String countryName : series.getCountryNames()) {
-            Country country = commonDao.getCountry(countryName);
+        for (String countryCode : series.getCountryCodes()) {
+            Country country = commonDao.getCountry(countryCode);
             if (country != null) {
                 countries.add(country);
             }
@@ -589,7 +586,7 @@ public class MetadataStorageService {
         }
 
         Set<Certification> certifications = new LinkedHashSet<>();
-        for (Entry<Locale,String> entry : videoData.getCertificationInfos().entrySet()) {
+        for (Entry<String,String> entry : videoData.getCertificationInfos().entrySet()) {
             Certification certification = commonDao.getCertification(entry.getKey(), entry.getValue());
             if (certification != null) {
                 certifications.add(certification);
@@ -609,7 +606,7 @@ public class MetadataStorageService {
         }
 
         Set<Certification> certifications = new LinkedHashSet<>();
-        for (Entry<Locale,String> entry : series.getCertificationInfos().entrySet()) {
+        for (Entry<String,String> entry : series.getCertificationInfos().entrySet()) {
             Certification certification = commonDao.getCertification(entry.getKey(), entry.getValue());
             if (certification != null) {
                 certifications.add(certification);

@@ -211,7 +211,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             for (Locale locale : locales) {
                 for (ReleaseInfo releaseInfo : movieInfo.getReleases()) {
                     if (locale.getCountry().equalsIgnoreCase(releaseInfo.getCountry())) {
-                        videoData.addCertificationInfo(locale, releaseInfo.getCertification());
+                        videoData.addCertificationInfo(locale.getCountry(), releaseInfo.getCertification());
                         break;
                     }
                 }
@@ -220,11 +220,11 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         
         // COUNTRIES
         if (CollectionUtils.isNotEmpty(movieInfo.getProductionCountries()) && OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
-            final Set<String> countryNames = new HashSet<>(movieInfo.getProductionCountries().size());
+            final Set<String> countryCodes = new HashSet<>(movieInfo.getProductionCountries().size());
             for (ProductionCountry country : movieInfo.getProductionCountries()) {
-                countryNames.add(country.getName());
+                countryCodes.add(country.getCountry());
             }
-            videoData.setCountryNames(countryNames, SCANNER_ID);
+            videoData.setCountryCodes(countryCodes, SCANNER_ID);
         }
 
         // GENRES
@@ -358,8 +358,12 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
 
         if (CollectionUtils.isNotEmpty(tvInfo.getOriginCountry()) && OverrideTools.checkOverwriteCountries(series, SCANNER_ID)) {
-            final Set<String> countryNames = new HashSet<>(tvInfo.getOriginCountry());
-            series.setCountryNames(countryNames, SCANNER_ID);
+            Set<String> countryCodes = new HashSet<>();
+            for (String country : tvInfo.getOriginCountry()) {
+                final String countryCode = localeService.findCountryCode(country);
+                if (countryCode != null) countryCodes.add(country);
+            }
+            series.setCountryCodes(countryCodes, SCANNER_ID);
         }
 
         if (CollectionUtils.isNotEmpty(tvInfo.getGenres()) && OverrideTools.checkOverwriteGenres(series, SCANNER_ID)) {

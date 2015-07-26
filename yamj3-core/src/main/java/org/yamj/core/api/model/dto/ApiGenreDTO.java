@@ -24,24 +24,21 @@ package org.yamj.core.api.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import org.yamj.core.database.model.Country;
 import org.yamj.core.database.model.Genre;
 
 /**
  * @author Stuart
  */
 @JsonInclude(Include.NON_DEFAULT)
-public class ApiTargetDTO {
+public class ApiGenreDTO extends AbstractApiIdentifiableDTO {
 
-    private Long id;
     private String name;
     private String target;
 
-    public ApiTargetDTO() {
-    }
+    public ApiGenreDTO() {}
 
-    public ApiTargetDTO(Genre genre) {
-        this.id = genre.getId();
+    public ApiGenreDTO(Genre genre) {
+        this.setId(genre.getId());
         this.name = genre.getName();
         if (genre.getTargetApi() != null) {
             this.target = genre.getTargetApi();
@@ -50,26 +47,6 @@ public class ApiTargetDTO {
         } else {
             this.target = genre.getName();
         }
-    }
-
-    public ApiTargetDTO(Country country) {
-        this.id = country.getId();
-        this.name = country.getName();
-        if (country.getTargetApi() != null) {
-            this.target = country.getTargetApi();
-        } else if (country.getTargetXml() != null) {
-            this.target = country.getTargetXml();
-        } else {
-            this.target = country.getName();
-        }
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getName() {

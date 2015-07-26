@@ -73,7 +73,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     private static final Pattern PATTERN_PERSON_DOB = Pattern.compile("(\\d{1,2})-(\\d{1,2})");
 
     private Charset charset;
-    private Locale mpaaLocale;
 
     @Autowired
     private PoolingHttpClient httpClient;
@@ -96,7 +95,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         LOG.info("Initialize IMDb scanner");
 
         charset = Charset.forName("UTF-8");
-        mpaaLocale =  new Locale(Locale.ENGLISH.getLanguage(), "MPAA");
         
         // register this scanner
         onlineScannerService.registerMetadataScanner(this);
@@ -247,7 +245,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         // COUNTRIES
         if (OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
-            videoData.setCountryNames(parseCountries(xml), SCANNER_ID);
+            videoData.setCountryCodes(parseCountryCodes(xml), SCANNER_ID);
         }
         
         // CERTIFICATIONS
@@ -357,7 +355,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         // COUNTRIES
         if (OverrideTools.checkOverwriteCountries(series, SCANNER_ID)) {
-            series.setCountryNames(parseCountries(xml), SCANNER_ID);
+            series.setCountryCodes(parseCountryCodes(xml), SCANNER_ID);
         }
 
         // CERTIFICATIONS
@@ -864,15 +862,13 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
     }
 
-    private static Set<String> parseCountries(String xml) {
-        Set<String> countryNames = new LinkedHashSet<>();
+    private Set<String> parseCountryCodes(String xml) {
+        Set<String> countryCodes = new HashSet<>();
         for (String country : HTMLTools.extractTags(xml, "Country" + HTML_H4_END, HTML_DIV_END, "<a href=\"", HTML_A_END)) {
-            String countryName = HTMLTools.removeHtmlTags(country);
-            if (StringUtils.isNotBlank(countryName)) {
-                countryNames.add(countryName.trim());
-            }
+            final String countryCode = localeService.findCountryCode(HTMLTools.removeHtmlTags(country));
+            if (countryCode != null) countryCodes.add(countryCode);
         }
-        return countryNames;
+        return countryCodes;
     }
 
     private Set<String> parseStudios(String imdbId) {
@@ -893,8 +889,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return studios;
     }
 
-    private Map<Locale, String> parseCertifications(String imdbId, Locale imdbLocale) {
-        Map<Locale, String> certificationInfos = new HashMap<>();
+    private Map<String, String> parseCertifications(String imdbId, Locale imdbLocale) {
+        Map<String, String> certificationInfos = new HashMap<>();
         
         try {
             DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "parentalguide#certification"), charset);
@@ -913,7 +909,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                                 pos = mpaa.indexOf(" for ", start);
                             }
                             if (pos != -1) {
-                                certificationInfos.put(mpaaLocale, mpaa.substring(start, pos));
+                                certificationInfos.put("MPAA", mpaa.substring(start, pos));
                             }
                         }
                     }
@@ -927,7 +923,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                         for (String country : localeService.getCountryNames(locale)) {
                             String certificate = getPreferredValue(tags, true, country);
                             if (StringUtils.isNotBlank(certificate)) {
-                                certificationInfos.put(locale, certificate);
+                                certificationInfos.put(locale.getCountry(), certificate);
                             }
                         }
                     }

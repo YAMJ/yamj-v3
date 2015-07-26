@@ -30,59 +30,37 @@ import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "country",
-        uniqueConstraints = @UniqueConstraint(name = "UIX_COUNTRY_NATURALID", columnNames = {"name"})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_COUNTRY_NATURALID", columnNames = {"country_code"})
 )
 public class Country extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 474957956935900650L;
 
     @NaturalId(mutable = true)
-    @Column(name = "name", nullable = false, length = 50)
-    private String name;
-
-    @Column(name = "target_api", length = 100)
-    private String targetApi;
-
-    @Column(name = "target_xml", length = 100)
-    private String targetXml;
+    @Column(name = "country_code", nullable = false, length = 4)
+    private String countryCode;
 
     public Country() {
     }
 
-    public Country(String name) {
-        this.name = name;
+    public Country(String countryCode) {
+        this.countryCode = countryCode;
     }
 
     // GETTER and SETTER
-    public String getName() {
-        return name;
+    public String getCountryCode() {
+        return countryCode;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getTargetApi() {
-        return targetApi;
-    }
-
-    public void setTargetApi(String targetApi) {
-        this.targetApi = targetApi;
-    }
-
-    public String getTargetXml() {
-        return targetXml;
-    }
-
-    public void setTargetXml(String targetXml) {
-        this.targetXml = targetXml;
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
     }
 
     // EQUALITY CHECKS
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-                .append(getName())
+                .append(getCountryCode())
                 .toHashCode();
     }
 
@@ -104,7 +82,7 @@ public class Country extends AbstractIdentifiable implements Serializable {
         }
         // check other values        
         return new EqualsBuilder()
-                .append(getName(), other.getName())
+                .append(getCountryCode(), other.getCountryCode())
                 .isEquals();
     }
 
@@ -113,16 +91,8 @@ public class Country extends AbstractIdentifiable implements Serializable {
         StringBuilder sb = new StringBuilder();
         sb.append("Country [ID=");
         sb.append(getId());
-        sb.append(", name=");
-        sb.append(getName());
-        if (getTargetApi() != null) {
-            sb.append(", targetApi=");
-            sb.append(getTargetApi());
-        }
-        if (getTargetXml() != null) {
-            sb.append(", targetXml=");
-            sb.append(getTargetXml());
-        }
+        sb.append(", countryCode=");
+        sb.append(getCountryCode());
         sb.append("]");
         return sb.toString();
     }

@@ -143,10 +143,10 @@ public class Series extends AbstractMetadata {
     private Set<String> studioNames;
 
     @Transient
-    private Set<String> countryNames;
+    private Set<String> countryCodes;
 
     @Transient
-    private final Map<Locale, String> certificationInfos = new HashMap<>(0);
+    private final Map<String, String> certificationInfos = new HashMap<>(0);
 
     @Transient
     private final Set<BoxedSetDTO> boxedSetDTOS = new HashSet<>(0);
@@ -423,39 +423,39 @@ public class Series extends AbstractMetadata {
         }
     }
 
-    public Set<String> getCountryNames() {
-        return countryNames;
+    public Set<String> getCountryCodes() {
+        return countryCodes;
     }
 
-    public void setCountryNames(Set<String> countryNames, String source) {
-        if (CollectionUtils.isNotEmpty(countryNames)) {
-            this.countryNames = countryNames;
+    public void setCountryCodes(Set<String> countryCodes, String source) {
+        if (CollectionUtils.isNotEmpty(countryCodes)) {
+            this.countryCodes = countryCodes;
             setOverrideFlag(OverrideFlag.COUNTRIES, source);
         }
     }
 
-    public Map<Locale, String> getCertificationInfos() {
+    public Map<String, String> getCertificationInfos() {
         return certificationInfos;
     }
 
-    public void setCertificationInfos(Map<Locale, String> certificationInfos) {
+    public void setCertificationInfos(Map<String, String> certificationInfos) {
         if (MapUtils.isNotEmpty(certificationInfos)) {
-            for (Entry<Locale, String> entry : certificationInfos.entrySet()) {
+            for (Entry<String, String> entry : certificationInfos.entrySet()) {
                 this.addCertificationInfo(entry.getKey(), entry.getValue());
             }
         }
     }
 
-    public void addCertificationInfo(Locale country, String certificate) {
-        if (country != null && StringUtils.isNotBlank(certificate)) {
+    public void addCertificationInfo(String countryCode, String certificate) {
+        if (StringUtils.isNotBlank(countryCode) && StringUtils.isNotBlank(certificate)) {
             // check if country already present
-            for (Locale stored : this.certificationInfos.keySet()) {
-                if (country.getCountry().equals(stored.getCountry())) {
+            for (String storedCode : this.certificationInfos.keySet()) {
+                if (countryCode.equals(storedCode)) {
                     // certificate for country already present
                     return;
                 }
             }
-            this.certificationInfos.put(country, certificate);
+            this.certificationInfos.put(countryCode, certificate);
         }
     }
 

@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigServiceWrapper;
+import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
@@ -65,6 +66,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     private ConfigServiceWrapper configServiceWrapper; 
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
+    @Autowired
+    private LocaleService localeService;
     
     @Override
     public String getScannerName() {
@@ -193,12 +196,17 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             }
         }
         
-        if (OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
-            videoData.setCountryNames(movieInfos.getNationalities(), SCANNER_ID);
+        if (CollectionUtils.isNotEmpty(movieInfos.getNationalities()) && OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
+            Set<String> countryCodes = new HashSet<>();
+            for (String country : movieInfos.getNationalities()) {
+                String countryCode = localeService.findCountryCode(country);
+                if (countryCode != null) countryCodes.add(countryCode);
+            }
+            videoData.setCountryCodes(countryCodes, SCANNER_ID);
         }
       
         // certification
-        videoData.addCertificationInfo(Locale.FRANCE, movieInfos.getCertification());
+        videoData.addCertificationInfo(Locale.FRANCE.getCountry(), movieInfos.getCertification());
 
         // allocine rating
         videoData.addRating(SCANNER_ID, movieInfos.getUserRating());
@@ -391,15 +399,18 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             series.setGenreNames(tvSeriesInfos.getGenres(), SCANNER_ID);
         }
 
-        if (OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
-            if (tvSeriesInfos.getOriginalChannel() != null) {
-                Set<String> studioNames = Collections.singleton(tvSeriesInfos.getOriginalChannel());
-                series.setStudioNames(studioNames, SCANNER_ID);
-            }
+        if (tvSeriesInfos.getOriginalChannel() != null && OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
+            Set<String> studioNames = Collections.singleton(tvSeriesInfos.getOriginalChannel());
+            series.setStudioNames(studioNames, SCANNER_ID);
         }
 
-        if (OverrideTools.checkOverwriteCountries(series, SCANNER_ID)) {
-            series.setCountryNames(tvSeriesInfos.getNationalities(), SCANNER_ID);
+        if (CollectionUtils.isNotEmpty(tvSeriesInfos.getNationalities()) && OverrideTools.checkOverwriteCountries(series, SCANNER_ID)) {
+            Set<String> countryCodes = new HashSet<>();
+            for (String country : tvSeriesInfos.getNationalities()) {
+                String countryCode = localeService.findCountryCode(country);
+                if (countryCode != null) countryCodes.add(countryCode);
+            }
+            series.setCountryCodes(countryCodes, SCANNER_ID);
         }
 
         // allocine rating

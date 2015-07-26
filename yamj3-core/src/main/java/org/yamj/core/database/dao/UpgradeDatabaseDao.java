@@ -184,7 +184,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
         
         // retrieve certification
         Map<Long, CertEntry> certifications = new HashMap<>();
-        List<Object[]> objects = currentSession().createSQLQuery("select id, country,certificate from certification").list();
+        List<Object[]> objects = currentSession().createSQLQuery("select id,country,certificate from certification").list();
         for (Object[] object : objects) {
             Long id = Long.valueOf(object[0].toString());
             String country = object[1].toString();
@@ -270,12 +270,148 @@ public class UpgradeDatabaseDao extends HibernateDao {
 
         // create new index
         currentSession()
-            .createSQLQuery("CREATE UNIQUE INDEX UIX_CERTIFICATION_NATURALID on certification(country_code,certificate)")
-            .executeUpdate();
+        .createSQLQuery("CREATE UNIQUE INDEX UIX_CERTIFICATION_NATURALID on certification(country_code,certificate)")
+        .executeUpdate();
 
         // drop old column
         currentSession()
         .createSQLQuery("ALTER TABLE certification DROP country")
+        .executeUpdate();
+    }
+
+    class CountryEntry {
+        public String name;
+        public String targetXml;
+        public String targetApi;
+        
+        public CountryEntry(String name, String targetXml, String targetApi)  {
+            this.name = name;
+            this.targetXml = targetXml;
+            this.targetApi = targetApi;
+        }
+    }
+
+    /**
+     * Issues: #234
+     * Date:   25.07.2015
+     */
+    public void patchCountries() {
+        if (!existsColumn("country", "name")) return;
+        
+        // drop unique index
+        if (existsUniqueIndex("country", "UIX_COUNTRY_NATURALID")) {
+            currentSession()
+                .createSQLQuery("ALTER TABLE country DROP index UIX_COUNTRY_NATURALID")
+                .executeUpdate();
+        }
+        
+        // retrieve countries
+        Map<Long, CountryEntry> countries = new HashMap<>();
+        List<Object[]> objects = currentSession().createSQLQuery("select id,name,target_xml,target_api from country").list();
+        for (Object[] object : objects) {
+            Long id = Long.valueOf(object[0].toString());
+            String country = object[1].toString();
+            String targetXml = (object[2] == null ? null : object[2].toString());
+            String targetApi = (object[3] == null ? null : object[3].toString());
+            countries.put(id, new CountryEntry(country, targetXml, targetApi));
+        }
+        
+        // modify certifications
+        Set<Long> ids = new HashSet<>(countries.keySet());
+        Set<Long> deletions = new HashSet<>();
+        Map<Long,Long> moves = new HashMap<>();
+        for (Long id : ids) {
+            CountryEntry ce = countries.get(id);
+            
+            String code = localeService.findCountryCode(ce.targetApi);
+            if (code == null) {
+                code = localeService.findCountryCode(ce.targetXml);
+            }
+            if (code == null) {
+                code = localeService.findCountryCode(ce.name);
+            }
+            
+            if (StringUtils.isBlank(code)) {
+                deletions.add(id);
+                countries.remove(id);
+            } else {
+                // check if same combination exists
+                ce.name = code;
+                countries.put(id, ce);
+                
+                Map<Long,CountryEntry> others = new HashMap<>(countries);
+                for (Entry<Long,CountryEntry> other : others.entrySet()) {
+                    if (!id.equals(other.getKey()) &&
+                        StringUtils.equalsIgnoreCase(ce.name, other.getValue().name))
+                    {
+                        moves.put(other.getKey(), id);
+                        countries.remove(other.getKey());
+                    }
+                }
+            }
+        }
+        
+        // move to left countries
+        for (Entry<Long,Long> move : moves.entrySet()) {
+            currentSession()
+            .createSQLQuery("UPDATE videodata_countries set country_id=:newId where country_id=:oldId")
+            .setLong("oldId", move.getKey())
+            .setLong("newId", move.getValue())
+            .executeUpdate();
+            
+            currentSession()
+            .createSQLQuery("UPDATE series_countries set country_id=:newId where country_id=:oldId")
+            .setLong("oldId", move.getKey())
+            .setLong("newId", move.getValue())
+            .executeUpdate();
+            
+            currentSession()
+            .createSQLQuery("DELETE FROM country where id=:oldId")
+            .setLong("oldId", move.getKey())
+            .executeUpdate();
+        }
+
+        // delete countries in database
+        if (CollectionUtils.isNotEmpty(deletions)) {
+            currentSession()
+            .createSQLQuery("DELETE FROM videodata_countries where country_id in :ids")
+            .setParameterList("ids", deletions)
+            .executeUpdate();
+
+            currentSession()
+            .createSQLQuery("DELETE FROM series_countries where country_id in :ids")
+            .setParameterList("ids", deletions)
+            .executeUpdate();
+
+            currentSession()
+            .createSQLQuery("DELETE FROM country where id in :ids")
+            .setParameterList("ids", deletions)
+            .executeUpdate();
+        }
+        
+        // update country codes
+        for (Entry<Long,CountryEntry> update : countries.entrySet()) {
+            currentSession()
+            .createSQLQuery("UPDATE country set country_code=:code where id=:id")
+            .setLong("id", update.getKey())
+            .setString("code", update.getValue().name)
+            .executeUpdate();
+        }
+
+        // create new index
+        currentSession()
+        .createSQLQuery("CREATE UNIQUE INDEX UIX_COUNTRY_NATURALID on country(country_code)")
+        .executeUpdate();
+
+        // drop old columns
+        currentSession()
+        .createSQLQuery("ALTER TABLE country DROP name")
+        .executeUpdate();
+        currentSession()
+        .createSQLQuery("ALTER TABLE country DROP target_xml")
+        .executeUpdate();
+        currentSession()
+        .createSQLQuery("ALTER TABLE country DROP target_api")
         .executeUpdate();
     }
 }

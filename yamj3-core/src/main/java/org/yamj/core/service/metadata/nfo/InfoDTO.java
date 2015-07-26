@@ -35,7 +35,7 @@ public final class InfoDTO {
     private Set<String> skippedScans = new HashSet<>(0);
     private Map<String, String> ids = new HashMap<>(2);
     private Map<String, Integer> setInfos = new HashMap<>(2);
-    private Map<Locale, String> certificationInfos = new HashMap<>(1);
+    private Map<String, String> certificationInfos = new HashMap<>(1);
     private Set<CreditDTO> credits = new LinkedHashSet<>(10);
     private Set<String> genres = new LinkedHashSet<>(5);
     private Set<InfoEpisodeDTO> episodes = new HashSet<>();
@@ -200,13 +200,13 @@ public final class InfoDTO {
         }
     }
 
-    public Map<Locale,String> getCertificationInfos() {
+    public Map<String,String> getCertificationInfos() {
         return certificationInfos;
     }
 
-    public void addCertificatioInfo(Locale country, String certification) {
-        if (country != null && StringUtils.isNotBlank(certification)) {
-            this.certificationInfos.put(country, certification.trim());
+    public void addCertificatioInfo(String countryCode, String certification) {
+        if (StringUtils.isNotBlank(certification) && StringUtils.isNotBlank(certification)) {
+            this.certificationInfos.put(countryCode, certification.trim());
             this.changed = true;
         }
     }

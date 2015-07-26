@@ -52,8 +52,6 @@ public final class InfoReader {
     private static final String XML_START = "<";
     private static final String XML_END = "</";
     private static final String SPLIT_GENRE = "(?<!-)/|,|\\|";  // caters for the case where "-/" is not wanted as part of the split
-
-    private Locale mpaaLocale = new Locale(Locale.ENGLISH.getLanguage(), "MPAA");
     
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
@@ -455,7 +453,7 @@ public final class InfoReader {
             tempCert = DOMHelper.getValueFromElement(eCommon, "mpaa");
             if (StringUtils.isNotBlank(tempCert)) {
                 String mpaa = MetadataTools.processMpaaCertification(tempCert);
-                dto.addCertificatioInfo(mpaaLocale, StringUtils.trimToNull(mpaa));
+                dto.addCertificatioInfo("MPAA", StringUtils.trimToNull(mpaa));
             }
         }
 
@@ -479,14 +477,14 @@ public final class InfoReader {
                                 certification = certification.substring(pos + 1);
                             }
                         }
-                        dto.addCertificatioInfo(locale, StringUtils.trimToNull(certification));
+                        dto.addCertificatioInfo(locale.getCountry(), StringUtils.trimToNull(certification));
                     }
                 }
                 
                 if (certificationMPAA && StringUtils.containsIgnoreCase(tempCert, "Rated")) {
                     // extract the MPAA rating from the certification
                     String mpaa = MetadataTools.processMpaaCertification(tempCert);
-                    dto.addCertificatioInfo(mpaaLocale, StringUtils.trimToNull(mpaa));
+                    dto.addCertificatioInfo("MPAA", StringUtils.trimToNull(mpaa));
                 }
             }
         }

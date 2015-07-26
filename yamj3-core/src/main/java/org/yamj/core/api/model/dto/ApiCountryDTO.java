@@ -25,16 +25,28 @@ package org.yamj.core.api.model.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+/**
+ * @author Stuart
+ */
 @JsonInclude(Include.NON_DEFAULT)
-public class ApiCertificationDTO extends ApiCountryDTO {
+public class ApiCountryDTO extends AbstractApiIdentifiableDTO {
 
-    private String certificate;
-    
-    public String getCertificate() {
-        return certificate;
+    private String countryCode;
+    private String country;
+
+    public String getCountryCode() {
+        return countryCode;
     }
 
-    public void setCertificate(String certificate) {
-        this.certificate = certificate;
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 }

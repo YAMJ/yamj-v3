@@ -27,19 +27,13 @@ import javax.persistence.*;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.core.hibernate.Auditable;
-import org.yamj.core.hibernate.Identifiable;
 
 /**
  * Abstract implementation of an identifiable and auditable object.
  */
 @MappedSuperclass
 @SuppressWarnings("unused")
-public abstract class AbstractAuditable implements Auditable, Identifiable {
-
-    @Id
-    @GeneratedValue
-    @Column(name = "id")
-    private long id;
+public abstract class AbstractAuditable extends AbstractIdentifiable implements Auditable {
 
     @Version
     @Column(name = "lock_no", nullable = false)
@@ -54,18 +48,8 @@ public abstract class AbstractAuditable implements Auditable, Identifiable {
     private Date updateTimestamp;
 
     // GETTER AND SETTER
-
-    @Override
-    public long getId() {
-        return this.id;
-    }
-
-    private void setId(long id) {
-        this.id = id;
-    }
-
     public boolean isNewlyCreated() {
-        return (this.id <= 0);
+        return (this.getId() <= 0);
     }
 
     private Date getCreateTimestamp() {

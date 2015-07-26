@@ -36,7 +36,6 @@ import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
-import org.yamj.core.database.model.Country;
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -224,19 +223,19 @@ public class CommonController {
 
     //<editor-fold defaultstate="collapsed" desc="Genre Methods">
     @RequestMapping("/genre")
-    public ApiWrapperList<ApiTargetDTO> getGenreFilename(@RequestParam(required = true, defaultValue = "") String filename) {
+    public ApiWrapperList<ApiGenreDTO> getGenreFilename(@RequestParam(required = true, defaultValue = "") String filename) {
         LOG.info("Getting genres for filename '{}'", filename);
-        ApiWrapperList<ApiTargetDTO> wrapper = new ApiWrapperList<>();
-        List<ApiTargetDTO> results = jsonApi.getGenreFilename(wrapper, filename);
+        ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<>();
+        List<ApiGenreDTO> results = jsonApi.getGenreFilename(wrapper, filename);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
         return wrapper;
     }
 
     @RequestMapping("/genre/{name}")
-    public ApiWrapperSingle<ApiTargetDTO> getGenre(@PathVariable String name) {
+    public ApiWrapperSingle<ApiGenreDTO> getGenre(@PathVariable String name) {
         Genre genre;
-        ApiWrapperSingle<ApiTargetDTO> wrapper = new ApiWrapperSingle<>();
+        ApiWrapperSingle<ApiGenreDTO> wrapper = new ApiWrapperSingle<>();
         if (StringUtils.isNumeric(name)) {
             LOG.info("Getting genre with ID '{}'", name);
             genre = jsonApi.getGenre(Long.parseLong(name));
@@ -245,19 +244,19 @@ public class CommonController {
             genre = jsonApi.getGenre(name);
         }
         if (genre != null) {
-            wrapper.setResult(new ApiTargetDTO(genre));
+            wrapper.setResult(new ApiGenreDTO(genre));
         }
         wrapper.setStatusCheck();
         return wrapper;
     }
 
     @RequestMapping("/genres/list")
-    public ApiWrapperList<ApiTargetDTO> getGenres(@ModelAttribute("options") OptionsSingleType options) {
+    public ApiWrapperList<ApiGenreDTO> getGenres(@ModelAttribute("options") OptionsSingleType options) {
         LOG.info("Getting genre list: used={}, full={}", options.getUsed(), options.getFull());
 
-        ApiWrapperList<ApiTargetDTO> wrapper = new ApiWrapperList<>();
+        ApiWrapperList<ApiGenreDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        List<ApiTargetDTO> results = jsonApi.getGenres(wrapper);
+        List<ApiGenreDTO> results = jsonApi.getGenres(wrapper);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
         return wrapper;
@@ -350,96 +349,39 @@ public class CommonController {
 
     //<editor-fold defaultstate="collapsed" desc="Country Methods">
     @RequestMapping("/country")
-    public ApiWrapperList<ApiTargetDTO> getCountryFilename(@RequestParam(required = true, defaultValue = "") String filename) {
+    public ApiWrapperList<ApiCountryDTO> getCountryFilename(@RequestParam(required = true, defaultValue = "") String filename) {
         LOG.info("Getting countries for filename '{}'", filename);
-        ApiWrapperList<ApiTargetDTO> wrapper = new ApiWrapperList<>();
-        List<ApiTargetDTO> results = jsonApi.getCountryFilename(wrapper, filename);
+        ApiWrapperList<ApiCountryDTO> wrapper = new ApiWrapperList<>();
+        List<ApiCountryDTO> results = jsonApi.getCountryFilename(wrapper, filename);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
         return wrapper;
     }
 
-    @RequestMapping("/country/{name}")
-    public ApiWrapperSingle<ApiTargetDTO> getCountry(@PathVariable String name) {
-        Country country;
-        ApiWrapperSingle<ApiTargetDTO> wrapper = new ApiWrapperSingle<>();
-        if (StringUtils.isNumeric(name)) {
-            LOG.info("Getting country with ID '{}'", name);
-            country = jsonApi.getCountry(Long.parseLong(name));
+    @RequestMapping("/country/{countryCode}")
+    public ApiWrapperSingle<ApiCountryDTO> getCountry(@PathVariable String countryCode) {
+        ApiCountryDTO country;
+        ApiWrapperSingle<ApiCountryDTO> wrapper = new ApiWrapperSingle<>();
+        if (StringUtils.isNumeric(countryCode)) {
+            LOG.info("Getting country with ID '{}'", countryCode);
+            country = jsonApi.getCountry(Long.parseLong(countryCode), wrapper.getOptions().getLanguage());
         } else {
-            LOG.info("Getting country with name '{}'", name);
-            country = jsonApi.getCountry(name);
+            LOG.info("Getting country with country code {}", countryCode);
+            country = jsonApi.getCountry(countryCode, wrapper.getOptions().getLanguage());
         }
-        if (country != null) {
-            wrapper.setResult(new ApiTargetDTO(country));
-        }
+        wrapper.setResult(country);
         wrapper.setStatusCheck();
         return wrapper;
     }
 
     @RequestMapping("/countries/list")
-    public ApiWrapperList<ApiTargetDTO> getCountries(@ModelAttribute("options") OptionsSingleType options) {
-        LOG.info("Getting contries list: used={}, full={}", options.getUsed(), options.getFull());
-
-        ApiWrapperList<ApiTargetDTO> wrapper = new ApiWrapperList<>();
+    public ApiWrapperList<ApiCountryDTO> getCountries(@ModelAttribute("options") OptionsSingleType options) {
+        ApiWrapperList<ApiCountryDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        List<ApiTargetDTO> results = jsonApi.getCountries(wrapper);
+        List<ApiCountryDTO> results = jsonApi.getCountries(wrapper);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
         return wrapper;
-    }
-
-    @RequestMapping("/countries/add")
-    public ApiStatus countryAdd(
-            @RequestParam(required = true, defaultValue = "") String name,
-            @RequestParam(required = true, defaultValue = "") String target) {
-
-        ApiStatus status = new ApiStatus();
-        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(target)) {
-            LOG.info("Adding country '{}' with target '{}'", name, target);
-            boolean result = this.jsonApi.addCountry(name, target);
-            if (result) {
-                status.setStatus(200);
-                status.setMessage("Successfully added country '" + name + "' with target '" + target + "'");
-            } else {
-                status.setStatus(400);
-                status.setMessage("Country '" + name + "' already exists");
-            }
-        } else {
-            status.setStatus(400);
-            status.setMessage("Invalid name/target specified, country not added");
-        }
-        return status;
-    }
-
-    @RequestMapping("/countries/update")
-    public ApiStatus countryUpdate(
-            @RequestParam(required = true, defaultValue = "") String name,
-            @RequestParam(required = false, defaultValue = "") String target) {
-
-        ApiStatus status = new ApiStatus();
-        if (StringUtils.isNotBlank(name)) {
-            LOG.info("Updating country '{}' with target '{}'", name, target);
-
-            boolean result;
-            if (StringUtils.isNumeric(name)) {
-                result = this.jsonApi.updateCountry(Long.valueOf(name), target);
-            } else {
-                result = this.jsonApi.updateCountry(name, target);
-            }
-
-            if (result) {
-                status.setStatus(200);
-                status.setMessage("Successfully updated country '" + name + "' with target '" + target + "'");
-            } else {
-                status.setStatus(400);
-                status.setMessage("Country '" + name + "' does not exist");
-            }
-        } else {
-            status.setStatus(400);
-            status.setMessage("Invalid name specified, country not updated");
-        }
-        return status;
     }
     //</editor-fold>
 

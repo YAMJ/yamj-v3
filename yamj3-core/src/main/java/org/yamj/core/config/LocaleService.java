@@ -41,9 +41,12 @@ public class LocaleService  {
     private Locale yamjLocale = Locale.getDefault();
     private Map<String,String> languageLookupMap = new HashMap<>();
     private Map<String,String> countryLookupMap = new HashMap<>();
-
+    private Map<String,String> displayCountryLookupMap = new HashMap<>();
+    
     @Autowired
     private ConfigService configService;
+    @Autowired
+    private Properties countryProperties;
     
     @PostConstruct
     public void init() {
@@ -86,16 +89,20 @@ public class LocaleService  {
                     key = locale.getDisplayCountry(alternate);
                     if (StringUtils.isNotEmpty(key)) {
                         countryLookupMap.put(key, locale.getCountry());
+                        
+                        final String lang = alternate.getLanguage();
+                        final String country = locale.getCountry();
+                        displayCountryLookupMap.put(new String(lang+"_"+country).toLowerCase(), key);
                     }
                 }
             }
         }
         
-        // additional countries
-        countryLookupMap.put("UK", "GB");
-        countryLookupMap.put("United Kingdom", "GB");
-        countryLookupMap.put("Grossbritannien", "GB");
-        countryLookupMap.put("MPAA", "MPAA");
+        // additional countries from properties file
+        for (Entry<Object,Object> prop : countryProperties.entrySet()) {
+            String key = StringUtils.replace(prop.getKey().toString(), "_", " ");
+            countryLookupMap.put(key, prop.getValue().toString());
+        }
         
         // build default locale
         String language = PropertyTools.getProperty("yamj3.language");
@@ -118,13 +125,11 @@ public class LocaleService  {
         }
         
         yamjLocale = new Locale(language, country);
-        LOG.info("YAMY locale: language={}, country={}", language, country);
-    }
-
-    public Locale getLanguageLocale(String language) {
-        String code = findLanguageCode(language);
-        if (code == null) return yamjLocale;
-        return new Locale(code);
+        
+        LOG.info("YAMY default: language={}, country={}", language, country);
+        LOG.info("YAMY localized languages: {}", languageLookupMap.size());
+        LOG.info("YAMY localized countries: {}", countryLookupMap.size());
+        LOG.info("YAMY displayed countries: {}", displayCountryLookupMap.size());
     }
     
     public String findLanguageCode(String language) {
@@ -142,7 +147,7 @@ public class LocaleService  {
             }
         }
         
-        LOG.trace("No language code found for language '{}'", language);
+        LOG.warn("No language code found for language '{}'", language);
         return null;
     }
 
@@ -161,7 +166,7 @@ public class LocaleService  {
             }
         }
 
-        LOG.trace("No country code found for country '{}'", country);
+        LOG.warn("No country code found for country '{}'", country);
         return null;
     }
     
@@ -192,6 +197,24 @@ public class LocaleService  {
         return new Locale(language, country);            
     }
 
+    public String getDisplayCountry(final String language, final String countryCode) {
+        String langCode = (language == null ? yamjLocale.getLanguage() : language);
+        
+        // fast way
+        String key = new String(langCode + "_" + countryCode).toLowerCase();
+        String display = this.displayCountryLookupMap.get(key);
+        if (display != null) return display;
+            
+        // slower way
+        langCode = findLanguageCode(language);
+        if (langCode == null) langCode = yamjLocale.getLanguage();
+        key = new String(langCode + "_" + countryCode).toLowerCase();
+        display = this.displayCountryLookupMap.get(key);
+        
+        if (display == null) return countryCode;
+        return display;
+    }
+    
     public Set<Locale> getCertificationLocales() {
         return this.getCertificationLocales(yamjLocale);
     }
