@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class ApiCertificationDTO {
 
     private long id;
-    private String code;
+    private String countryCode;
     private String country;
     private String certificate;
     
@@ -41,12 +41,12 @@ public class ApiCertificationDTO {
         this.id = id;
     }
 
-    public String getCode() {
-        return code;
+    public String getCountryCode() {
+        return countryCode;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
     }
 
     public String getCountry() {

@@ -170,7 +170,7 @@ public class JsonApiStorageService {
         Locale inLocale = localeService.getLanguageLocale(wrapper.getOptions().getLanguage());
         List<ApiCertificationDTO> result = commonDao.getCertifications(wrapper);
         for (ApiCertificationDTO cert : result) {
-            Locale country = new Locale(Locale.US.getLanguage(), cert.getCode());
+            Locale country = new Locale(Locale.US.getLanguage(), cert.getCountryCode());
             cert.setCountry(country.getDisplayCountry(inLocale));
         }
         return  result;

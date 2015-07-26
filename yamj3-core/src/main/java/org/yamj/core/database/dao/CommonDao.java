@@ -314,7 +314,7 @@ public class CommonDao extends HibernateDao {
         OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
 
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT DISTINCT cert.id, cert.country_code as code, cert.certificate ");
+        sqlScalars.addToSql("SELECT DISTINCT cert.id, cert.country_code as countryCode, cert.certificate ");
 
         String sortBy = options.getSortby();
         if ("certificate".equalsIgnoreCase(sortBy)) {
@@ -335,7 +335,7 @@ public class CommonDao extends HibernateDao {
         sqlScalars.addToSql(options.getSortString(sortBy));
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
-        sqlScalars.addScalar("code", StringType.INSTANCE);
+        sqlScalars.addScalar("countryCode", StringType.INSTANCE);
         sqlScalars.addScalar("certificate", StringType.INSTANCE);
 
         return executeQueryWithTransform(ApiCertificationDTO.class, sqlScalars, wrapper);
