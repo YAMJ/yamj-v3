@@ -32,9 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.builder.SqlScalars;
-import org.yamj.core.api.model.dto.ApiAwardDTO;
-import org.yamj.core.api.model.dto.ApiRatingDTO;
-import org.yamj.core.api.model.dto.ApiTargetDTO;
+import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.OptionsRating;
 import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
@@ -312,11 +310,11 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiAwardDTO.class, sqlScalars, wrapper);
     }
 
-    public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
+    public List<ApiCertificationDTO> getCertifications(ApiWrapperList<ApiCertificationDTO> wrapper) {
         OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
 
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT DISTINCT cert.id, cert.country, cert.certificate ");
+        sqlScalars.addToSql("SELECT DISTINCT cert.id, cert.country_code as code, cert.certificate ");
 
         String sortBy = options.getSortby();
         if ("certificate".equalsIgnoreCase(sortBy)) {
@@ -337,10 +335,10 @@ public class CommonDao extends HibernateDao {
         sqlScalars.addToSql(options.getSortString(sortBy));
 
         sqlScalars.addScalar("id", LongType.INSTANCE);
-        sqlScalars.addScalar("country", StringType.INSTANCE);
+        sqlScalars.addScalar("code", StringType.INSTANCE);
         sqlScalars.addScalar("certificate", StringType.INSTANCE);
 
-        return executeQueryWithTransform(Certification.class, sqlScalars, wrapper);
+        return executeQueryWithTransform(ApiCertificationDTO.class, sqlScalars, wrapper);
     }
 
     public BoxedSet getBoxedSet(String name) {

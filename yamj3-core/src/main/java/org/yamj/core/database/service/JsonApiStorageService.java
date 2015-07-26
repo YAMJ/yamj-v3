@@ -24,6 +24,7 @@ package org.yamj.core.database.service;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.config.ConfigService;
+import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.dao.*;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;
@@ -61,10 +63,12 @@ public class JsonApiStorageService {
     @Autowired
     private ConfigService configService;
     @Autowired
+    private LocaleService localeService;
+    @Autowired
     private MetadataStorageService metadataStorageService;
     @Autowired
     private OnlineScannerService onlineScannerService;
-
+    
     public List<Configuration> getConfiguration(String property) {
         return configService.getConfiguration(property);
     }
@@ -162,8 +166,14 @@ public class JsonApiStorageService {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Certification Methods">
-    public List<Certification> getCertifications(ApiWrapperList<Certification> wrapper) {
-        return commonDao.getCertifications(wrapper);
+    public List<ApiCertificationDTO> getCertifications(ApiWrapperList<ApiCertificationDTO> wrapper) {
+        Locale inLocale = localeService.getLanguageLocale(wrapper.getOptions().getLanguage());
+        List<ApiCertificationDTO> result = commonDao.getCertifications(wrapper);
+        for (ApiCertificationDTO cert : result) {
+            Locale country = new Locale(Locale.US.getLanguage(), cert.getCode());
+            cert.setCountry(country.getDisplayCountry(inLocale));
+        }
+        return  result;
     }
     //</editor-fold>
 

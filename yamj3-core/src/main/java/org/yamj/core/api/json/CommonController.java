@@ -36,7 +36,9 @@ import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Country;
+import org.yamj.core.database.model.Genre;
+import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.service.ScanningScheduler;
 import org.yamj.core.service.TrailerProcessScheduler;
@@ -456,10 +458,10 @@ public class CommonController {
 
     //<editor-fold defaultstate="collapsed" desc="Certification Methods">
     @RequestMapping("/certifications/list")
-    public ApiWrapperList<Certification> getCertifications(@ModelAttribute("options") OptionsSingleType options) {
+    public ApiWrapperList<ApiCertificationDTO> getCertifications(@ModelAttribute("options") OptionsSingleType options) {
         LOG.info("Getting certifications list with {}", options.toString());
 
-        ApiWrapperList<Certification> wrapper = new ApiWrapperList<>();
+        ApiWrapperList<ApiCertificationDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
         wrapper.setResults(jsonApi.getCertifications(wrapper));
         wrapper.setStatusCheck();

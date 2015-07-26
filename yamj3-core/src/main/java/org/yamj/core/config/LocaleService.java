@@ -120,6 +120,12 @@ public class LocaleService  {
         yamjLocale = new Locale(language, country);
         LOG.info("YAMY locale: language={}, country={}", language, country);
     }
+
+    public Locale getLanguageLocale(String language) {
+        String code = findLanguageCode(language);
+        if (code == null) return yamjLocale;
+        return new Locale(code);
+    }
     
     public String findLanguageCode(String language) {
         if (StringUtils.isBlank(language)) {
