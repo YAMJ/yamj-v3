@@ -28,7 +28,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -915,16 +914,13 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                     }
                 }
 
-                Set<Locale> locales = localeService.getCertificationLocales(imdbLocale);
-                if (CollectionUtils.isNotEmpty(locales)) {
-                    List<String> tags = HTMLTools.extractTags(response.getContent(), HTML_H5_START + "Certification" + HTML_H5_END, HTML_DIV_END,
-                            "<a href=\"/search/title?certificates=", HTML_A_END);
-                    for (Locale locale : locales) {
-                        for (String country : localeService.getCountryNames(locale)) {
-                            String certificate = getPreferredValue(tags, true, country);
-                            if (StringUtils.isNotBlank(certificate)) {
-                                certificationInfos.put(locale.getCountry(), certificate);
-                            }
+                List<String> tags = HTMLTools.extractTags(response.getContent(), HTML_H5_START + "Certification" + HTML_H5_END, HTML_DIV_END,
+                                "<a href=\"/search/title?certificates=", HTML_A_END);
+                for (String countryCode : localeService.getCertificationCountryCodes(imdbLocale)) {
+                    for (String country : localeService.getCountryNames(countryCode)) {
+                        String certificate = getPreferredValue(tags, true, country);
+                        if (StringUtils.isNotBlank(certificate)) {
+                            certificationInfos.put(countryCode, certificate);
                         }
                     }
                 }

@@ -23,7 +23,9 @@
 package org.yamj.core.service.metadata.nfo;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -460,9 +462,9 @@ public final class InfoReader {
         tempCert = DOMHelper.getValueFromElement(eCommon, "certification");
         if (StringUtils.isNotBlank(tempCert)) {
             // scan for given countries
-            for (Locale locale : this.localeService.getCertificationLocales()) {
-                for (String country : this.localeService.getCountryNames(locale)) {
-                    int countryPos = StringUtils.lastIndexOfIgnoreCase(tempCert, country);
+            for (String countryCode : this.localeService.getCertificationCountryCodes()) {
+                for (String countryName : this.localeService.getCountryNames(countryCode)) {
+                    int countryPos = StringUtils.lastIndexOfIgnoreCase(tempCert, countryName);
                     if (countryPos >= 0) {
                         // We've found the country, so extract just that tag
                         String certification = tempCert.substring(countryPos);
@@ -477,7 +479,7 @@ public final class InfoReader {
                                 certification = certification.substring(pos + 1);
                             }
                         }
-                        dto.addCertificatioInfo(locale.getCountry(), StringUtils.trimToNull(certification));
+                        dto.addCertificatioInfo(countryCode, StringUtils.trimToNull(certification));
                     }
                 }
                 

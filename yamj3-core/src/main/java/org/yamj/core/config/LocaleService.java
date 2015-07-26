@@ -184,7 +184,7 @@ public class LocaleService  {
                 language = yamjLocale.getLanguage();
             }
         }
-        String country = PropertyTools.getProperty("yamj3.country");
+        String country = PropertyTools.getProperty(config+".country");
         if (StringUtils.isBlank(country)) {
             country = yamjLocale.getCountry();
         } else {
@@ -215,26 +215,26 @@ public class LocaleService  {
         return display;
     }
     
-    public Set<Locale> getCertificationLocales() {
-        return this.getCertificationLocales(yamjLocale);
+    public Set<String> getCertificationCountryCodes() {
+        return this.getCertificationCountryCodes(yamjLocale);
     }
 
-    public Set<Locale> getCertificationLocales(Locale defaultLocale) {
-        Set<Locale> result = new HashSet<>();
+    public Set<String> getCertificationCountryCodes(Locale defaultLocale) {
+        Set<String> result = new HashSet<>();
         List<String> countries = this.configService.getPropertyAsList("yamj3.certification.countries", defaultLocale.getCountry());
         for (String country : countries) {
             String countryCode = this.findCountryCode(country);
             if (countryCode != null) {
-                result.add(new Locale(defaultLocale.getLanguage(), countryCode));
+                result.add(countryCode);
             }
         }
         return result;
     }
     
-    public Set<String> getCountryNames(Locale locale) {
+    public Set<String> getCountryNames(String countryCode) {
         Set<String> result = new HashSet<>();
         for (Entry<String,String> entry : countryLookupMap.entrySet()) {
-            if (entry.getValue().equals(locale.getCountry())) {
+            if (entry.getValue().equals(countryCode)) {
                 result.add(entry.getKey());
             }
         }
