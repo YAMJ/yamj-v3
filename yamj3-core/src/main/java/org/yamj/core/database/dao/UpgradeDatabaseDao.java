@@ -22,13 +22,22 @@
  */
 package org.yamj.core.database.dao;
 
+import java.util.*;
+import java.util.Map.Entry;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.yamj.core.config.LocaleService;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Transactional
 @Repository("fixDatabaseDao")
 public class UpgradeDatabaseDao extends HibernateDao {
+
+    @Autowired
+    private LocaleService localeService;
 
     private boolean existsColumn(String table, String column) {
         StringBuilder sb = new StringBuilder();
@@ -52,7 +61,6 @@ public class UpgradeDatabaseDao extends HibernateDao {
         return (object != null);
     }
 
-    @SuppressWarnings("unused")
     private boolean existsUniqueIndex(String table, String indexName) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM information_schema.TABLE_CONSTRAINTS ");
@@ -132,7 +140,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
      * Issues: #234
      * Date:   24.07.2015
      */
-    public void patchLocales() {
+    public void patchLocaleConfig() {
         currentSession()
             .createSQLQuery("DELETE FROM configuration where config_key='imdb.id.search.country'")
             .executeUpdate();
@@ -148,5 +156,126 @@ public class UpgradeDatabaseDao extends HibernateDao {
         currentSession()
             .createSQLQuery("UPDATE configuration set config_value='DE,FR,GB,US' where config_key='yamj3.certification.countries'")
             .executeUpdate();
+    }
+
+    class CertEntry {
+        public String country;
+        public String cert;
+        
+        public CertEntry(String country, String cert)  {
+            this.country = country;
+            this.cert = cert;
+        }
+    }
+
+    /**
+     * Issues: #234
+     * Date:   25.07.2015
+     */
+    public void patchCertifications() {
+        if (!existsColumn("certification", "country")) return;
+        
+        // drop unique index
+        if (existsUniqueIndex("certification", "UIX_CERTIFICATION_NATURALID")) {
+            currentSession()
+                .createSQLQuery("ALTER TABLE certification DROP index UIX_CERTIFICATION_NATURALID")
+                .executeUpdate();
+        }
+        
+        // retrieve certification
+        Map<Long, CertEntry> certifications = new HashMap<>();
+        List<Object[]> objects = currentSession().createSQLQuery("select id, country,certificate from certification").list();
+        for (Object[] object : objects) {
+            Long id = Long.valueOf(object[0].toString());
+            String country = object[1].toString();
+            String cert = object[2].toString();
+            certifications.put(id, new CertEntry(country, cert));
+        }
+        
+        // modify certifications
+        Set<Long> ids = new HashSet<>(certifications.keySet());
+        Set<Long> deletions = new HashSet<>();
+        Map<Long,Long> moves = new HashMap<>();
+        for (Long id : ids) {
+            CertEntry ce = certifications.get(id);
+            
+            String code = localeService.findCountryCode(ce.country);
+            if (StringUtils.isBlank(code)) {
+                deletions.add(id);
+                certifications.remove(id);
+            } else {
+                // check if same combination exists
+                ce.country = code;
+                certifications.put(id, ce);
+                
+                Map<Long,CertEntry> others = new HashMap<>(certifications);
+                for (Entry<Long,CertEntry> other : others.entrySet()) {
+                    if (!id.equals(other.getKey()) &&
+                        StringUtils.equalsIgnoreCase(ce.country, other.getValue().country) &&
+                        StringUtils.equalsIgnoreCase(ce.cert, other.getValue().cert))
+                    {
+                        moves.put(other.getKey(), id);
+                        certifications.remove(other.getKey());
+                    }
+                }
+            }
+        }
+        
+        // move to left certifications
+        for (Entry<Long,Long> move : moves.entrySet()) {
+            currentSession()
+            .createSQLQuery("UPDATE videodata_certifications set cert_id=:newId where cert_id=:oldId")
+            .setLong("oldId", move.getKey())
+            .setLong("newId", move.getValue())
+            .executeUpdate();
+            
+            currentSession()
+            .createSQLQuery("UPDATE series_certifications set cert_id=:newId where cert_id=:oldId")
+            .setLong("oldId", move.getKey())
+            .setLong("newId", move.getValue())
+            .executeUpdate();
+            
+            currentSession()
+            .createSQLQuery("DELETE FROM certification where id=:oldId")
+            .setLong("oldId", move.getKey())
+            .executeUpdate();
+        }
+
+        // delete certifications in database
+        if (CollectionUtils.isNotEmpty(deletions)) {
+            currentSession()
+            .createSQLQuery("DELETE FROM videodata_certifications where cert_id in :ids")
+            .setParameterList("ids", deletions)
+            .executeUpdate();
+
+            currentSession()
+            .createSQLQuery("DELETE FROM series_certifications where cert_id in :ids")
+            .setParameterList("ids", deletions)
+            .executeUpdate();
+
+            currentSession()
+            .createSQLQuery("DELETE FROM certification where id in :ids")
+            .setParameterList("ids", deletions)
+            .executeUpdate();
+        }
+
+        // update certification codes
+        for (Entry<Long,CertEntry> update : certifications.entrySet()) {
+            currentSession()
+            .createSQLQuery("UPDATE certification set country_code=:code where id=:id")
+            .setLong("id", update.getKey())
+            .setString("code", update.getValue().country)
+            .executeUpdate();
+        }
+
+        // create new index
+        currentSession()
+            .createSQLQuery("CREATE UNIQUE INDEX UIX_CERTIFICATION_NATURALID on certification(country_code,certificate)")
+            .executeUpdate();
+
+        // drop old column
+        currentSession()
+        .createSQLQuery("ALTER TABLE certification DROP country")
+        .executeUpdate();
     }
 }

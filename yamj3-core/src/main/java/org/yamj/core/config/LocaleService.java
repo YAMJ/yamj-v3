@@ -121,7 +121,7 @@ public class LocaleService  {
         LOG.info("YAMY locale: language={}, country={}", language, country);
     }
     
-    private String findLanguageCode(String language) {
+    public String findLanguageCode(String language) {
         if (StringUtils.isBlank(language)) {
             return null;
         }
@@ -138,7 +138,7 @@ public class LocaleService  {
         return null;
     }
 
-    private String findCountryCode(String country) {
+    public String findCountryCode(String country) {
         if (StringUtils.isBlank(country)) {
             return null;
         }

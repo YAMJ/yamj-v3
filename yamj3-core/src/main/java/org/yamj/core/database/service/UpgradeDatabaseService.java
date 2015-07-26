@@ -36,7 +36,7 @@ public class UpgradeDatabaseService {
 
     @Autowired
     private UpgradeDatabaseDao upgradeDatabaseDao;
-
+    
     @PostConstruct
     public void init() {
         // Issues: #222
@@ -58,7 +58,15 @@ public class UpgradeDatabaseService {
         // Issues: #234
         // Date:   24.07.2015
         try {
-            upgradeDatabaseDao.patchLocales();
+            upgradeDatabaseDao.patchLocaleConfig();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchLocales'", ex);
+        }
+
+        // Issues: #234
+        // Date:   25.07.2015
+        try {
+            upgradeDatabaseDao.patchCertifications();
         } catch (Exception ex) {
             LOG.warn("Failed upgrade 'patchLocales'", ex);
         }
