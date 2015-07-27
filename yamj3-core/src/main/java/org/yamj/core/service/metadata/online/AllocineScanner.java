@@ -180,8 +180,9 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
 
         if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
+            String releaseCountryCode = localeService.findCountryCode(movieInfos.getReleaseState());
             Date releaseDate = MetadataTools.parseToDate(movieInfos.getReleaseDate());
-            videoData.setReleaseDate(releaseDate, SCANNER_ID);
+            videoData.setRelease(releaseCountryCode, releaseDate, SCANNER_ID);
         }
                 
         if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
@@ -540,7 +541,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                 
                 if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
                     Date releaseDate = MetadataTools.parseToDate(episodeInfos.getOriginalBroadcastDate());
-                    videoData.setReleaseDate(releaseDate, SCANNER_ID);
+                    videoData.setRelease(releaseDate, SCANNER_ID);
                 }
                 
                 //  parse credits
@@ -733,7 +734,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             filmo.setTitleOriginal(StringUtils.trimToNull(participance.getOriginalTitle()));
             filmo.setDescription(StringUtils.trimToNull(participance.getSynopsisShort()));
             filmo.setReleaseDate(MetadataTools.parseToDate(participance.getReleaseDate()));
-            filmo.setReleaseState(StringUtils.trimToNull(participance.getReleaseState()));
+            String releaseCountryCode = localeService.findCountryCode(StringUtils.trimToNull(participance.getReleaseState()));
+            filmo.setReleaseCountryCode(releaseCountryCode);
             newFilmography.add(filmo);
         }
         

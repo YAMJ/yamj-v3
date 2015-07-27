@@ -110,6 +110,13 @@ public class JsonApiStorageService {
 
     public void getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
         apiDao.getPerson(wrapper);
+        
+        if (wrapper.getResult() != null && CollectionUtils.isNotEmpty(wrapper.getResult().getFilmography())) {
+            for (ApiFilmographyDTO filmo : wrapper.getResult().getFilmography()) {
+                String releaseCountry = localeService.getDisplayCountry(wrapper.getOptions().getLanguage(), filmo.getReleaseCountryCode());
+                filmo.setReleaseCountry(releaseCountry);
+            }
+        }
     }
 
     public void getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {
@@ -192,13 +199,7 @@ public class JsonApiStorageService {
     }
 
     private void localize(ApiCountryDTO dto, String language) {
-        String country;
-        try {
-            country = localeService.getDisplayCountry(language, dto.getCountryCode());
-        } catch (Exception e) {
-            // just to be sure
-            country = dto.getCountryCode();
-        }
+        String country = localeService.getDisplayCountry(language, dto.getCountryCode());
         dto.setCountry(country);
     }
     //</editor-fold>

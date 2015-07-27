@@ -84,12 +84,12 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     @Column(name = "year_end", nullable = false)
     private int yearEnd = -1;
 
+    @Column(name = "release_country_code", length = 4)
+    private String releaseCountryCode;
+
     @Temporal(value = TemporalType.DATE)
     @Column(name = "release_date")
     private Date releaseDate;
-
-    @Column(name = "release_state", length = 255)
-    private String releaseState;
 
     // GETTER and SETTER
     public String getSourceDb() {
@@ -181,20 +181,20 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
         this.yearEnd = yearEnd;
     }
 
+    public String getReleaseCountryCode() {
+        return releaseCountryCode;
+    }
+
+    public void setReleaseCountryCode(String releaseCountryCode) {
+        this.releaseCountryCode = releaseCountryCode;
+    }
+
     public Date getReleaseDate() {
         return releaseDate;
     }
 
     public void setReleaseDate(Date releaseDate) {
         this.releaseDate = releaseDate;
-    }
-
-    public String getReleaseState() {
-        return releaseState;
-    }
-
-    public void setReleaseState(String releaseState) {
-        this.releaseState = releaseState;
     }
 
     // TRANSIENT METHODS
@@ -207,7 +207,7 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
         this.setTitleOriginal(newFilmo.getTitleOriginal());
         this.setDescription(newFilmo.getDescription());
         this.setReleaseDate(newFilmo.getReleaseDate());
-        this.setReleaseState(newFilmo.getReleaseState());
+        this.setReleaseCountryCode(newFilmo.getReleaseCountryCode());
     }
 
     // EQUALITY CHECKS

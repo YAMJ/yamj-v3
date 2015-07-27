@@ -113,7 +113,7 @@ public class NfoScannerService {
             }
             
             if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-                videoData.setReleaseDate(infoDTO.getReleaseDate(), SCANNER_ID);
+                videoData.setRelease(infoDTO.getReleaseDate(), SCANNER_ID);
             }
             
             if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
@@ -322,7 +322,7 @@ public class NfoScannerService {
                             videoData.setOutline(episode.getPlot(), SCANNER_ID);
                         }
                         if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-                            videoData.setReleaseDate(episode.getFirstAired(), SCANNER_ID);
+                            videoData.setRelease(episode.getFirstAired(), SCANNER_ID);
                         }
                         
                         // set cast and crew from NFO to all episodes

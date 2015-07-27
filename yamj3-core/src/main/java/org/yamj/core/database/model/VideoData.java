@@ -63,6 +63,9 @@ public class VideoData extends AbstractMetadata {
     @Column(name = "publication_year", nullable = false)
     private int publicationYear = -1;
 
+    @Column(name = "release_country_code", length = 4)
+    private String releaseCountryCode;
+
     @Temporal(value = TemporalType.DATE)
     @Column(name = "release_date")
     private Date releaseDate;
@@ -272,6 +275,14 @@ public class VideoData extends AbstractMetadata {
         this.episode = episode;
     }
 
+    public String getReleaseCountryCode() {
+        return releaseCountryCode;
+    }
+
+    private void setReleaseCountryCode(String releaseCountryCode) {
+        this.releaseCountryCode = releaseCountryCode;
+    }
+
     public Date getReleaseDate() {
         return releaseDate;
     }
@@ -280,15 +291,21 @@ public class VideoData extends AbstractMetadata {
         this.releaseDate = releaseDate;
     }
 
-    public void setReleaseDate(Date releaseDate, String source) {
+    public void setRelease(Date releaseDate, String source) {
+        setRelease(null, releaseDate, source);
+    }
+
+    public void setRelease(String releaseCountryCode, Date releaseDate, String source) {
         if (releaseDate != null) {
+            this.releaseCountryCode = releaseCountryCode;
             this.releaseDate = releaseDate;
             setOverrideFlag(OverrideFlag.RELEASEDATE, source);
         }
     }
 
-    public void removeReleaseDate(String source) {
+    public void removeRelease(String source) {
         if (hasOverrideSource(OverrideFlag.RELEASEDATE, source)) {
+            this.releaseCountryCode = null;
             this.releaseDate = null;
             removeOverrideFlag(OverrideFlag.RELEASEDATE);
         }

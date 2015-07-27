@@ -1390,7 +1390,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(ParticipationType.MOVIE.name());
         sbSQL.append("' as typeString, c1.job as job, c1.role as role,");
         sbSQL.append("v1.title as title, v1.title_original as originalTitle, v1.publication_year as year, null as yearEnd,");
-        sbSQL.append("v1.release_date as releaseDate, null as releaseState,");
+        sbSQL.append("v1.release_date as releaseDate, v1.release_country_code as releaseCountryCode,");
         sbSQL.append("v1.id as videoDataId, null as seriesId ");
 
         if (options.hasDataItem(DataItem.PLOT)) {
@@ -1406,7 +1406,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(ParticipationType.SERIES.name());
         sbSQL.append("' as typeString, c2.job as job, c2.role as role,");
         sbSQL.append("ser.title as title, ser.title_original as originalTitle, ser.start_year as year, ser.end_year as yearEnd,");
-        sbSQL.append("null as releaseDate, null as releaseState,");
+        sbSQL.append("null as releaseDate, null as releaseCountryCode,");
         sbSQL.append("null as videoDataId, ser.id as seriesId ");
 
         if (options.hasDataItem(DataItem.PLOT)) {
@@ -1451,7 +1451,7 @@ public class ApiDao extends HibernateDao {
         StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("SELECT DISTINCT p.participation_type as typeString, p.job as job, p.role as role,");
         sbSQL.append("p.title as title, p.title_original as originalTitle, p.year as year,p.year_end as yearEnd,");
-        sbSQL.append("p.release_date as releaseDate, p.release_state as releaseState,");
+        sbSQL.append("p.release_date as releaseDate, p.release_country_code as releaseCountryCode,");
         sbSQL.append("movie.id as videoDataId, serids.series_id as seriesId ");
 
         if (options.hasDataItem(DataItem.PLOT)) {
@@ -1510,7 +1510,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(YEAR, IntegerType.INSTANCE);
         sqlScalars.addScalar("yearEnd", IntegerType.INSTANCE);
         sqlScalars.addScalar("releaseDate", DateType.INSTANCE);
-        sqlScalars.addScalar("releaseState", StringType.INSTANCE);
+        sqlScalars.addScalar("releaseCountryCode", StringType.INSTANCE);
         sqlScalars.addScalar("description", StringType.INSTANCE);
         sqlScalars.addScalar("videoDataId", LongType.INSTANCE);
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);

@@ -176,11 +176,15 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
         // RELEASE DATE
         Date releaseDate = null;
+        String releaseCountryCode = null;
         if (CollectionUtils.isNotEmpty(movieInfo.getReleases())) {
             for (ReleaseInfo releaseInfo : movieInfo.getReleases()) {
                 if (tmdbLocale.getCountry().equalsIgnoreCase(releaseInfo.getCountry())) {
                     releaseDate = parseTMDbDate(releaseInfo.getReleaseDate());
-                    if (releaseDate != null) break;
+                    if (releaseDate != null) {
+                        releaseCountryCode = releaseInfo.getCountry();
+                        break;
+                    }
                 }
             }
             if (releaseDate == null) {
@@ -188,6 +192,9 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                 for (ReleaseInfo releaseInfo : movieInfo.getReleases()) {
                     if (releaseInfo.isPrimary()) {
                         releaseDate = parseTMDbDate(releaseInfo.getReleaseDate());
+                        if (releaseDate != null) {
+                            releaseCountryCode = releaseInfo.getCountry();
+                        }
                         break;
                     }
                 }
@@ -198,7 +205,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
         if (releaseDate != null) {
             if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-                videoData.setReleaseDate(releaseDate, SCANNER_ID);
+                videoData.setRelease(releaseCountryCode, releaseDate, SCANNER_ID);
             }
             if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID)) {
                 videoData.setPublicationYear(MetadataTools.extractYearAsInt(releaseDate), SCANNER_ID);
@@ -490,7 +497,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                 
                 if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
                     Date releaseDate = parseTMDbDate(episode.getAirDate());
-                    videoData.setReleaseDate(releaseDate, SCANNER_ID);
+                    videoData.setRelease(releaseDate, SCANNER_ID);
                 }
 
                 // CAST

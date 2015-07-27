@@ -293,7 +293,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
 
     /**
      * Issues: #234
-     * Date:   25.07.2015
+     * Date:   26.07.2015
      */
     public void patchCountries() {
         if (!existsColumn("country", "name")) return;
@@ -316,7 +316,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
             countries.put(id, new CountryEntry(country, targetXml, targetApi));
         }
         
-        // modify certifications
+        // modify countries
         Set<Long> ids = new HashSet<>(countries.keySet());
         Set<Long> deletions = new HashSet<>();
         Map<Long,Long> moves = new HashMap<>();
@@ -412,6 +412,48 @@ public class UpgradeDatabaseDao extends HibernateDao {
         .executeUpdate();
         currentSession()
         .createSQLQuery("ALTER TABLE country DROP target_api")
+        .executeUpdate();
+    }
+
+    /**
+     * Issues: #234
+     * Date:   27.07.2015
+     */
+    public void patchReleaseCountryFilmo() {
+        if (!existsColumn("release_state", "participation")) return;
+        
+        // retrieve countries
+        Map<Long, String> filmo = new HashMap<>();
+        List<Object[]> objects = currentSession().createSQLQuery("select id,release_state from participation where release_state is not null").list();
+        for (Object[] object : objects) {
+            Long id = Long.valueOf(object[0].toString());
+            String country = object[1].toString();
+            filmo.put(id, country);
+        }
+        
+        // modify country codes
+        Set<Long> ids = new HashSet<>(filmo.keySet());
+        for (Long id : ids) {
+            String code = localeService.findCountryCode(filmo.get(id));
+            if (code == null) {
+                filmo.remove(id);
+            } else {
+                filmo.put(id, code);
+            }
+        }
+        
+        // update country codes
+        for (Entry<Long,String> update : filmo.entrySet()) {
+            currentSession()
+            .createSQLQuery("UPDATE participation set release_country_code=:code where id=:id")
+            .setLong("id", update.getKey())
+            .setString("code", update.getValue())
+            .executeUpdate();
+        }
+
+        // drop old columns
+        currentSession()
+        .createSQLQuery("ALTER TABLE participation DROP release_state")
         .executeUpdate();
     }
 }

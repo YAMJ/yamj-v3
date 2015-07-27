@@ -1007,7 +1007,7 @@ public class MetadataStorageService {
                 videoData.removeTitle(source);
                 videoData.removeTitleOriginal(source);
                 videoData.removePublicationYear(source);
-                videoData.removeReleaseDate(source);
+                videoData.removeRelease(source);
                 videoData.removePlot(source);
                 videoData.removeOutline(source);
                 videoData.removeTagline(source);

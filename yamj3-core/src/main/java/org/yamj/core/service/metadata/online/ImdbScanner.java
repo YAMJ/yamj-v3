@@ -441,7 +441,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 videoData.setTitle(dto.getTitle(), SCANNER_ID);
             }
             if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-                videoData.setReleaseDate(dto.getAirDate(), SCANNER_ID);
+                videoData.setRelease(dto.getAirDate(), SCANNER_ID);
             }
             if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
                 videoData.setPlot(dto.getOutline(), SCANNER_ID);
@@ -488,7 +488,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 if (releaseDate == null) {
                     releaseDate = dto.getAirDate();
                 }
-                videoData.setReleaseDate(releaseDate, SCANNER_ID);
+                videoData.setRelease(releaseDate, SCANNER_ID);
             }
 
             // PLOT
@@ -620,7 +620,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                     if (mRelease.find()) {
                         String strReleaseDate = mRelease.group(1) + " " + mRelease.group(2);
                         Date releaseDate = MetadataTools.parseToDate(strReleaseDate);
-                        videoData.setReleaseDate(releaseDate, SCANNER_ID);
+                        videoData.setRelease(releaseDate, SCANNER_ID);
                     }
                 }
             }

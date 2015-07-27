@@ -39,7 +39,8 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
     private Integer year;
     private Integer yearEnd;
     private String releaseDate;
-    private String releaseState;
+    private String releaseCountryCode;
+    private String releaseCountry;
     private String description;
     private Long videoDataId;
     private Long seriesId;
@@ -112,12 +113,20 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
         this.releaseDate = MetadataTools.formatDateShort(releaseDate);
     }
 
-    public String getReleaseState() {
-        return releaseState;
+    public String getReleaseCountryCode() {
+        return releaseCountryCode;
     }
 
-    public void setReleaseState(String releaseState) {
-        this.releaseState = releaseState;
+    public void setReleaseCountryCode(String releaseCountryCode) {
+        this.releaseCountryCode = releaseCountryCode;
+    }
+
+    public String getReleaseCountry() {
+        return releaseCountry;
+    }
+
+    public void setReleaseCountry(String releaseCountry) {
+        this.releaseCountry = releaseCountry;
     }
 
     public String getDescription() {

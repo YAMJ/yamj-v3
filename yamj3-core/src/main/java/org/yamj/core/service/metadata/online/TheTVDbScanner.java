@@ -264,7 +264,7 @@ public class TheTVDbScanner implements ISeriesScanner {
 
                 if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
                     Date releaseDate = MetadataTools.parseToDate(episode.getFirstAired());
-                    videoData.setReleaseDate(releaseDate, SCANNER_ID);
+                    videoData.setRelease(releaseDate, SCANNER_ID);
                 }
 
                 // directors
