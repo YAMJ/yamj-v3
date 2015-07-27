@@ -46,80 +46,104 @@ public class LocaleService  {
     @Autowired
     private ConfigService configService;
     @Autowired
-    private Properties countryProperties;
-    
+    private Properties countryCodeProperties;
+    @Autowired
+    private Properties countryDisplayProperties;
+
     @PostConstruct
     public void init() {
-        for (String countryCode : Locale.getISOCountries()) {
-            for (Locale locale : LocaleUtils.languagesByCountry(countryCode)) {
-                languageLookupMap.put(locale.getLanguage(), locale.getLanguage());
+        for (Locale locale : LocaleUtils.availableLocaleList()) {
+            if (StringUtils.isBlank(locale.getLanguage())) {
+                continue;
+            }
+            
+            languageLookupMap.put(locale.getLanguage(), locale.getLanguage());
 
-                String key = locale.getDisplayLanguage();
+            String key = locale.getDisplayLanguage();
+            if (StringUtils.isNotEmpty(key)) {
+                languageLookupMap.put(key, locale.getLanguage());
+            }
+            
+            try {
+                key = locale.getISO3Language();
                 if (StringUtils.isNotEmpty(key)) {
                     languageLookupMap.put(key, locale.getLanguage());
                 }
-                
-                try {
-                    key = locale.getISO3Language();
-                    if (StringUtils.isNotEmpty(key)) {
-                        languageLookupMap.put(key, locale.getLanguage());
-                    }
-                } catch (Exception e) {/*ignore*/}
-                
-                countryLookupMap.put(locale.getCountry(), locale.getCountry());
+            } catch (Exception e) {/*ignore*/}
 
-                key = locale.getDisplayCountry();
+            key = locale.getCountry();
+            if (StringUtils.isEmpty(key)) {
+                countryLookupMap.put(key, locale.getCountry());
+            }
+            
+            key = locale.getDisplayCountry();
+            if (StringUtils.isNotEmpty(key)) {
+                countryLookupMap.put(key, locale.getCountry());
+            }
+
+            try {
+                key = locale.getISO3Country();
                 if (StringUtils.isNotEmpty(key)) {
                     countryLookupMap.put(key, locale.getCountry());
                 }
+            } catch (Exception e) {/*ignore*/}
+            
+            for (Locale alternate : LocaleUtils.availableLocaleList()) {
+                if (StringUtils.isBlank(alternate.getLanguage())) {
+                    continue;
+                }
 
-                try {
-                    key = locale.getISO3Country();
-                    if (StringUtils.isNotEmpty(key)) {
-                        countryLookupMap.put(key, locale.getCountry());
-                    }
-                } catch (Exception e) {/*ignore*/}
-                
-                for (Locale alternate : LocaleUtils.availableLocaleList()) {
-                    key = locale.getDisplayLanguage(alternate);
-                    if (StringUtils.isNotEmpty(key)) {
-                        languageLookupMap.put(key, locale.getLanguage());
-                    }
+                key = locale.getDisplayLanguage(alternate);
+                if (StringUtils.isNotEmpty(key)) {
+                    languageLookupMap.put(key, locale.getLanguage());
+                }
 
-                    key = locale.getDisplayCountry(alternate);
-                    if (StringUtils.isNotEmpty(key)) {
-                        countryLookupMap.put(key, locale.getCountry());
-                        
-                        final String lang = alternate.getLanguage();
-                        final String country = locale.getCountry();
-                        displayCountryLookupMap.put(new String(lang+"_"+country).toLowerCase(), key);
-                    }
+                key = locale.getDisplayCountry(alternate);
+                if (StringUtils.isNotEmpty(key)) {
+                    countryLookupMap.put(key, locale.getCountry());
+
+                    String lang = alternate.getLanguage();
+                    String country = locale.getCountry();
+                    displayCountryLookupMap.put(new String(lang+"_"+country).toLowerCase(), key);
+                    
+                    // try ISO 3
+                    try {
+                        lang = alternate.getISO3Language();
+                        if (StringUtils.isNotBlank(lang)) {
+                            displayCountryLookupMap.put(new String(lang+"_"+country).toLowerCase(), key);
+                        }
+                    } catch (Exception ignore) {/*ignore*/}
                 }
             }
         }
         
         // additional countries from properties file
-        for (Entry<Object,Object> prop : countryProperties.entrySet()) {
+        for (Entry<Object,Object> prop : countryCodeProperties.entrySet()) {
             String key = StringUtils.replace(prop.getKey().toString(), "_", " ");
             countryLookupMap.put(key, prop.getValue().toString());
         }
-        
+
+        // additional country display from properties file
+        for (Entry<Object,Object> prop : countryDisplayProperties.entrySet()) {
+            displayCountryLookupMap.put(prop.getKey().toString().toLowerCase(), prop.getValue().toString());
+        }
+
         // build default locale
         String language = PropertyTools.getProperty("yamj3.language");
-        if (StringUtils.isBlank(language)) {
+        if (StringUtils.isEmpty(language)) {
             language = Locale.getDefault().getLanguage();
         } else {
             language = findLanguageCode(language);
-            if (StringUtils.isBlank(language)) {
+            if (StringUtils.isEmpty(language)) {
                 language = Locale.getDefault().getLanguage();
             }
         }
         String country = PropertyTools.getProperty("yamj3.country");
-        if (StringUtils.isBlank(country)) {
+        if (StringUtils.isEmpty(country)) {
             country = Locale.getDefault().getCountry();
         } else {
             country = findCountryCode(country);
-            if (StringUtils.isBlank(country)) {
+            if (StringUtils.isEmpty(country)) {
                 country = Locale.getDefault().getCountry();
             }
         }
