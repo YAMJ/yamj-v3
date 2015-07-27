@@ -268,18 +268,36 @@ public class LocaleService  {
         return new Locale(language, country);            
     }
 
-    public String getDisplayCountry(final String inLanguage, final String countryCode) {
-        String langCode = (inLanguage == null ? yamjLocale.getLanguage() : inLanguage);
+    public String getDisplayLanguage(final String inLanguage, final String languageCode) {
+        String inLangCode = (inLanguage == null ? yamjLocale.getLanguage() : inLanguage);
         
         // fast way
-        String key = new String(langCode + "_" + countryCode).toLowerCase();
+        String key = new String(inLangCode + "_" + languageCode).toLowerCase();
+        String display = this.displayLanguageLookupMap.get(key);
+        if (display != null) return display;
+            
+        // slower way
+        inLangCode = findLanguageCode(inLanguage);
+        if (inLangCode == null) inLangCode = yamjLocale.getLanguage();
+        key = new String(inLangCode + "_" + languageCode).toLowerCase();
+        display = this.displayLanguageLookupMap.get(key);
+        
+        if (display == null) return languageCode;
+        return display;
+    }
+
+    public String getDisplayCountry(final String inLanguage, final String countryCode) {
+        String inLangCode = (inLanguage == null ? yamjLocale.getLanguage() : inLanguage);
+        
+        // fast way
+        String key = new String(inLangCode + "_" + countryCode).toLowerCase();
         String display = this.displayCountryLookupMap.get(key);
         if (display != null) return display;
             
         // slower way
-        langCode = findLanguageCode(inLanguage);
-        if (langCode == null) langCode = yamjLocale.getLanguage();
-        key = new String(langCode + "_" + countryCode).toLowerCase();
+        inLangCode = findLanguageCode(inLanguage);
+        if (inLangCode == null) inLangCode = yamjLocale.getLanguage();
+        key = new String(inLangCode + "_" + countryCode).toLowerCase();
         display = this.displayCountryLookupMap.get(key);
         
         if (display == null) return countryCode;

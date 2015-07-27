@@ -82,6 +82,7 @@ public class JsonApiStorageService {
             for (ApiVideoDTO video : wrapper.getResults()) {
                 localizeCertifications(video.getCertifications(), wrapper.getOptions().getLanguage());
                 localizeCountries(video.getCountries(), wrapper.getOptions().getLanguage());
+                localizeFiles(video.getFiles(), wrapper.getOptions().getLanguage());
             }
         }
     }
@@ -191,10 +192,10 @@ public class JsonApiStorageService {
         return result;
     }
 
-    private void localizeCountries(List<ApiCountryDTO> countries, String language) {
+    private void localizeCountries(List<ApiCountryDTO> countries, String inLanguage) {
         if (CollectionUtils.isEmpty(countries)) return;
         for (ApiCountryDTO dto : countries) {
-            localize(dto, language);
+            localize(dto, inLanguage);
         }
     }
 
@@ -217,10 +218,10 @@ public class JsonApiStorageService {
         return  result;
     }
     
-    private void localizeCertifications(List<ApiCertificationDTO> certifications, String language) {
+    private void localizeCertifications(List<ApiCertificationDTO> certifications, String inLanguage) {
         if (CollectionUtils.isEmpty(certifications)) return;
         for (ApiCertificationDTO cert : certifications) {
-            localize(cert, language);
+            localize(cert, inLanguage);
         }
     }
     //</editor-fold>
@@ -340,6 +341,7 @@ public class JsonApiStorageService {
             for (ApiEpisodeDTO episode : wrapper.getResults()) {
                 localizeCertifications(episode.getCertifications(), wrapper.getOptions().getLanguage());
                 localizeCountries(episode.getCountries(), wrapper.getOptions().getLanguage());
+                localizeFiles(episode.getFiles(), wrapper.getOptions().getLanguage());
             }
         }
     }
@@ -351,9 +353,24 @@ public class JsonApiStorageService {
             // localization
             localizeCertifications(wrapper.getResult().getCertifications(), wrapper.getOptions().getLanguage());
             localizeCountries(wrapper.getResult().getCountries(), wrapper.getOptions().getLanguage());
+            localizeFiles(wrapper.getResult().getFiles(), wrapper.getOptions().getLanguage());
         }
     }
 
+    private void localizeFiles(List<ApiFileDTO> files, String inLanguage) {
+        if (CollectionUtils.isEmpty(files)) return;
+        for (ApiFileDTO file : files) {
+            for (ApiAudioCodecDTO codec : file.getAudioCodecs()) {
+                final String language = localeService.getDisplayLanguage(inLanguage, codec.getLanguageCode());
+                codec.setLanguage(language);
+            }
+            for (ApiSubtitleDTO subtitle : file.getSubtitles()) {
+                final String language = localeService.getDisplayLanguage(inLanguage, subtitle.getLanguageCode());
+                subtitle.setLanguage(language);
+            }
+        }
+    }
+    
     public List<CountGeneric> getJobCount(List<String> requiredJobs) {
         return apiDao.getJobCount(requiredJobs);
     }

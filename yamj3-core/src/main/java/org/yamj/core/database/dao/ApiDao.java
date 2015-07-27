@@ -2186,7 +2186,7 @@ public class ApiDao extends HibernateDao {
 
     private List<ApiAudioCodecDTO> getAudioCodecs(long mediaFileId) {
         StringBuilder sbSQL = new StringBuilder();
-        sbSQL.append("SELECT ac.codec, ac.codec_format as codecFormat, ac.bitrate, ac.channels, ac.language ");
+        sbSQL.append("SELECT ac.codec, ac.codec_format as codecFormat, ac.bitrate, ac.channels, ac.language_code as languageCode ");
         sbSQL.append("FROM audio_codec ac ");
         sbSQL.append("WHERE ac.mediafile_id=:id ");
         sbSQL.append("ORDER BY ac.counter ASC");
@@ -2196,7 +2196,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("codecFormat", StringType.INSTANCE);
         sqlScalars.addScalar("bitrate", IntegerType.INSTANCE);
         sqlScalars.addScalar("channels", IntegerType.INSTANCE);
-        sqlScalars.addScalar("language", StringType.INSTANCE);
+        sqlScalars.addScalar("languageCode", StringType.INSTANCE);
         sqlScalars.addParameter(ID, mediaFileId);
 
         return executeQueryWithTransform(ApiAudioCodecDTO.class, sqlScalars, null);
@@ -2204,7 +2204,7 @@ public class ApiDao extends HibernateDao {
 
     private List<ApiSubtitleDTO> getSubtitles(long mediaFileId) {
         StringBuilder sbSQL = new StringBuilder();
-        sbSQL.append("SELECT st.counter, st.format, st.language, st.default_flag AS defaultFlag,");
+        sbSQL.append("SELECT st.counter, st.format, st.language_code as languageCode, st.default_flag AS defaultFlag,");
         sbSQL.append("st.forced_flag AS forcedFlag, sf.full_path as filePath ");
         sbSQL.append("FROM subtitle st ");
         sbSQL.append("LEFT OUTER JOIN stage_file sf ON sf.id=st.stagefile_id ");
@@ -2213,7 +2213,7 @@ public class ApiDao extends HibernateDao {
 
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
         sqlScalars.addScalar("format", StringType.INSTANCE);
-        sqlScalars.addScalar("language", StringType.INSTANCE);
+        sqlScalars.addScalar("languageCode", StringType.INSTANCE);
         sqlScalars.addScalar("defaultFlag", BooleanType.INSTANCE);
         sqlScalars.addScalar("forcedFlag", BooleanType.INSTANCE);
         sqlScalars.addScalar("filePath", StringType.INSTANCE);

@@ -23,11 +23,8 @@
 package org.yamj.core.tools;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -112,36 +109,6 @@ public class LanguageTools {
                 }
             }
         }
-    }
-
-    /**
-     * Decode the language tag passed in, into standard YAMJ language code
-     *
-     * @param language
-     * @return
-     */
-    public static String determineLanguage(String language) {
-        for (Map.Entry<String, Pattern> e : STRICT_LANGUAGE_MAP.entrySet()) {
-            Matcher matcher = e.getValue().matcher(language);
-            if (matcher.find()) {
-                return e.getKey();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Get the list of loose languages associated with a language
-     *
-     * @param language
-     * @return
-     */
-    public static String getLanguageList(String language) {
-        if (LOOSE_LANGUAGE_MAP.containsKey(language)) {
-            Pattern langPatt = LOOSE_LANGUAGE_MAP.get(language);
-            return langPatt.toString().toLowerCase();
-        }
-        return StringUtils.EMPTY;
     }
 
     public static TokensPatternMap getStrictLanguageMap() {

@@ -59,8 +59,8 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
     @Column(name = "format", nullable = false, length = 50)
     private String format;
 
-    @Column(name = "language", nullable = false, length = 50)
-    private String language;
+    @Column(name = "language_code", nullable = false, length = 4)
+    private String languageCode;
 
     @Column(name = "default_flag", nullable = false)
     private boolean defaultFlag = false;
@@ -116,12 +116,12 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
         this.forcedFlag = forcedFlag;
     }
 
-    public String getLanguage() {
-        return language;
+    public String getLanguageCode() {
+        return languageCode;
     }
 
-    public void setLanguage(String language) {
-        this.language = language;
+    public void setLanguageCode(String languageCode) {
+        this.languageCode = languageCode;
     }
 
     // EQUALITY CHECKS
@@ -176,8 +176,8 @@ public class Subtitle extends AbstractIdentifiable implements Serializable {
         sb.append(getCounter());
         sb.append(", format=");
         sb.append(getFormat());
-        sb.append(", language=");
-        sb.append(getLanguage());
+        sb.append(", languageCode=");
+        sb.append(getLanguageCode());
         sb.append("]");
         return sb.toString();
     }

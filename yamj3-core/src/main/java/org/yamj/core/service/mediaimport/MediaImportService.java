@@ -36,10 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigServiceWrapper;
-import org.yamj.core.database.dao.ArtworkDao;
-import org.yamj.core.database.dao.MediaDao;
-import org.yamj.core.database.dao.MetadataDao;
-import org.yamj.core.database.dao.StagingDao;
+import org.yamj.core.config.LocaleService;
+import org.yamj.core.database.dao.*;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
@@ -48,7 +46,6 @@ import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.Constants;
-import org.yamj.core.tools.LanguageTools;
 import org.yamj.core.tools.MetadataTools;
 
 /**
@@ -85,7 +82,9 @@ public class MediaImportService {
     private CommonStorageService commonStorageService;
     @Autowired
     private StagingService stagingService;
-
+    @Autowired
+    private LocaleService localeService;
+    
     @Transactional(readOnly = true)
     public Long getNextStageFileId(final FileType fileType, final StatusType... statusTypes) {
         return this.stagingDao.getNextStageFileId(fileType, statusTypes);
@@ -559,7 +558,7 @@ public class MediaImportService {
             subtitle.setMediaFile(mediaFile);
             subtitle.setFormat(MetadataTools.getExternalSubtitleFormat(subtitleFile.getExtension()));
             // TODO search stage files with language
-            subtitle.setLanguage(Constants.UNDEFINED);
+            subtitle.setLanguageCode(Constants.LANGUAGE_UNTERTERMINED);
             subtitle.setDefaultFlag(true);
             this.mediaDao.saveEntity(subtitle);
 
@@ -986,7 +985,8 @@ public class MediaImportService {
         LOG.info("Process subtitle {}-'{}'", subtitleFile.getId(), subtitleFile.getFileName());
 
         // determine language which may only be the "extension" of the base name
-        String language = LanguageTools.determineLanguage(FilenameUtils.getExtension(subtitleFile.getBaseName()));
+        final String language = FilenameUtils.getExtension(subtitleFile.getBaseName());
+        final String languageCode = localeService.findLanguageCode(language);
 
         for (StageFile videoFile : this.stagingService.findSubtitleVideoFiles(subtitleFile, language)) {
             if (videoFile.getMediaFile() != null) {
@@ -998,11 +998,11 @@ public class MediaImportService {
                 if (!subtitleFile.getSubtitles().contains(subtitle)) {
                     subtitle.setFormat(MetadataTools.getExternalSubtitleFormat(subtitleFile.getExtension()));
 
-                    if (StringUtils.isBlank(language)) {
-                        subtitle.setLanguage(Constants.UNDEFINED);
+                    if (StringUtils.isBlank(languageCode)) {
+                        subtitle.setLanguageCode(Constants.LANGUAGE_UNTERTERMINED);
                         subtitle.setDefaultFlag(true);
                     } else {
-                        subtitle.setLanguage(language);
+                        subtitle.setLanguageCode(languageCode);
                     }
 
                     subtitleFile.getSubtitles().add(subtitle);

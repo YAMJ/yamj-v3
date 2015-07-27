@@ -36,6 +36,7 @@ public class ApiSubtitleDTO extends AbstractApiDTO {
 
     private String type;
     private String format;
+    private String languageCode;
     private String language;
     private Boolean defaultFlag;
     private Boolean forcedFlag;
@@ -51,6 +52,14 @@ public class ApiSubtitleDTO extends AbstractApiDTO {
 
     public void setFormat(String format) {
         this.format = format;
+    }
+
+    public String getLanguageCode() {
+        return languageCode;
+    }
+
+    public void setLanguageCode(String languageCode) {
+        this.languageCode = languageCode;
     }
 
     public String getLanguage() {

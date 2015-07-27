@@ -31,6 +31,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.hibernate.HibernateDao;
+import org.yamj.core.tools.Constants;
 
 @Transactional
 @Repository("fixDatabaseDao")
@@ -420,7 +421,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
      * Date:   27.07.2015
      */
     public void patchReleaseCountryFilmo() {
-        if (!existsColumn("release_state", "participation")) return;
+        if (!existsColumn("participation", "release_state")) return;
         
         // retrieve countries
         Map<Long, String> filmo = new HashMap<>();
@@ -454,6 +455,94 @@ public class UpgradeDatabaseDao extends HibernateDao {
         // drop old columns
         currentSession()
         .createSQLQuery("ALTER TABLE participation DROP release_state")
+        .executeUpdate();
+    }
+
+    /**
+     * Issues: #234
+     * Date:   28.07.2015
+     */
+    public void patchLanguageAudioCodes() {
+        if (!existsColumn("audio_codec", "language")) return;
+
+        // retrieve codecs
+        Map<Long, String> codecs = new HashMap<>();
+        List<Object[]> objects = currentSession().createSQLQuery("select id,language from audio_codec").list();
+        for (Object[] object : objects) {
+            Long id = Long.valueOf(object[0].toString());
+            String lang = object[1].toString();
+            codecs.put(id, lang);
+        }
+        
+        // modify country codes
+        Set<Long> ids = new HashSet<>(codecs.keySet());
+        for (Long id : ids) {
+            String lang = codecs.get(id);
+            if (Constants.UNDEFINED.equalsIgnoreCase(lang)) {
+                codecs.put(id, Constants.LANGUAGE_UNTERTERMINED);
+            } else {
+                String code = localeService.findLanguageCode(lang);
+                if (code == null) code = Constants.LANGUAGE_UNTERTERMINED;
+                codecs.put(id, code);
+            }
+        }
+        
+        // update language codes
+        for (Entry<Long,String> update : codecs.entrySet()) {
+            currentSession()
+            .createSQLQuery("UPDATE audio_codec set language_code=:code where id=:id")
+            .setLong("id", update.getKey())
+            .setString("code", update.getValue())
+            .executeUpdate();
+        }
+
+        // drop old columns
+        currentSession()
+        .createSQLQuery("ALTER TABLE audio_codec DROP language")
+        .executeUpdate();
+    }
+
+    /**
+     * Issues: #234
+     * Date:   28.07.2015
+     */
+    public void patchLanguageSubtitles() {
+        if (!existsColumn("subtitle", "language")) return;
+
+        // retrieve subtitles
+        Map<Long, String> subtitles = new HashMap<>();
+        List<Object[]> objects = currentSession().createSQLQuery("select id,language from subtitle").list();
+        for (Object[] object : objects) {
+            Long id = Long.valueOf(object[0].toString());
+            String lang = object[1].toString();
+            subtitles.put(id, lang);
+        }
+        
+        // modify subtitles
+        Set<Long> ids = new HashSet<>(subtitles.keySet());
+        for (Long id : ids) {
+            String lang = subtitles.get(id);
+            if (Constants.UNDEFINED.equalsIgnoreCase(lang)) {
+                subtitles.put(id, Constants.LANGUAGE_UNTERTERMINED);
+            } else {
+                String code = localeService.findLanguageCode(lang);
+                if (code == null) code = Constants.LANGUAGE_UNTERTERMINED;
+                subtitles.put(id, code);
+            }
+        }
+        
+        // update language codes
+        for (Entry<Long,String> update : subtitles.entrySet()) {
+            currentSession()
+            .createSQLQuery("UPDATE subtitle set language_code=:code where id=:id")
+            .setLong("id", update.getKey())
+            .setString("code", update.getValue())
+            .executeUpdate();
+        }
+
+        // drop old columns
+        currentSession()
+        .createSQLQuery("ALTER TABLE subtitle DROP language")
         .executeUpdate();
     }
 }

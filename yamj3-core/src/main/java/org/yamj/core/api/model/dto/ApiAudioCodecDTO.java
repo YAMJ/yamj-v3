@@ -37,6 +37,7 @@ public class ApiAudioCodecDTO extends AbstractApiDTO {
     private String codecFormat;
     private Integer bitrate = -1;
     private Integer channels = -1;
+    private String languageCode;
     private String language;
 
     public String getCodec() {
@@ -69,6 +70,14 @@ public class ApiAudioCodecDTO extends AbstractApiDTO {
 
     public void setChannels(Integer channels) {
         this.channels = channels;
+    }
+
+    public String getLanguageCode() {
+        return languageCode;
+    }
+
+    public void setLanguageCode(String languageCode) {
+        this.languageCode = languageCode;
     }
 
     public String getLanguage() {

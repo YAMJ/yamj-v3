@@ -37,13 +37,14 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.tools.DateTimeTools;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.MediaStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.tools.AspectRatioTools;
 import org.yamj.core.tools.Constants;
-import org.yamj.core.tools.LanguageTools;
+//import org.yamj.core.tools.LanguageTools;
 
 @Service("mediaInfoService")
 public class MediaInfoService {
@@ -67,7 +68,9 @@ public class MediaInfoService {
     private MediaStorageService mediaStorageService;
     @Autowired
     private AspectRatioTools aspectRatioTools;
-
+    @Autowired
+    private LocaleService localeService;
+    
     @PostConstruct
     public void init() {
         LOG.info("Initialize MediaInfo service");
@@ -310,11 +313,11 @@ public class MediaInfoService {
             if (subtitle == null) {
                 subtitle = new Subtitle();
                 subtitle.setCounter(numText + 1);
-                subtitle.setMediaFile(mediaFile);
             }
 
             boolean processed = parseSubtitle(subtitle, infosCurrentText);
             if (processed) {
+                subtitle.setMediaFile(mediaFile);
                 mediaFile.getSubtitles().add(subtitle);
                 processedSubtitles.add(subtitle);
             }
@@ -330,7 +333,7 @@ public class MediaInfoService {
         }
     }
 
-    private static void parseAudioCodec(AudioCodec audioCodec, Map<String, String> infosAudio) {
+    private void parseAudioCodec(AudioCodec audioCodec, Map<String, String> infosAudio) {
         // codec
         String infoValue = infosAudio.get("Codec ID");
         if (StringUtils.isBlank(infoValue)) {
@@ -368,23 +371,21 @@ public class MediaInfoService {
         }
 
         // language
-        audioCodec.setLanguage(Constants.UNDEFINED);
+        audioCodec.setLanguageCode(Constants.LANGUAGE_UNTERTERMINED);
         infoValue = infosAudio.get("Language");
         if (StringUtils.isNotBlank(infoValue)) {
             if (infoValue.contains("/")) {
                 infoValue = infoValue.substring(0, infoValue.indexOf('/')).trim(); // In this case, language are "doubled", just take the first one.
             }
             // determine language
-            if (StringUtils.isNotBlank(infoValue)) {
-                String language = LanguageTools.determineLanguage(infoValue);
-                if (StringUtils.isNotBlank(language)) {
-                    audioCodec.setLanguage(language);
-                }
+            String langCode = localeService.findLanguageCode(infoValue);
+            if (StringUtils.isNotBlank(langCode)) {
+                audioCodec.setLanguageCode(langCode);
             }
         }
     }
 
-    private static boolean parseSubtitle(Subtitle subtitle, Map<String, String> infosText) {
+    private boolean parseSubtitle(Subtitle subtitle, Map<String, String> infosText) {
         // format
         String infoFormat = infosText.get("Format");
         if (StringUtils.isBlank(infoFormat)) {
@@ -398,8 +399,6 @@ public class MediaInfoService {
             if (infoLanguage.contains("/")) {
                 infoLanguage = infoLanguage.substring(0, infoLanguage.indexOf('/')).trim(); // In this case, language are "doubled", just take the first one.
             }
-            // determine language
-            infoLanguage = LanguageTools.determineLanguage(infoLanguage);
         }
 
         // just use defined formats
@@ -411,10 +410,12 @@ public class MediaInfoService {
                 || "VobSub".equalsIgnoreCase(infoFormat))
         {
             subtitle.setFormat(infoFormat);
+            
+            String langCode = localeService.findLanguageCode(infoLanguage);
             if (StringUtils.isBlank(infoLanguage)) {
-                subtitle.setLanguage(Constants.UNDEFINED);
+                subtitle.setLanguageCode(Constants.LANGUAGE_UNTERTERMINED);
             } else {
-                subtitle.setLanguage(infoLanguage);
+                subtitle.setLanguageCode(langCode);
             }
 
             subtitle.setDefaultFlag("yes".equalsIgnoreCase(infosText.get("Default")));

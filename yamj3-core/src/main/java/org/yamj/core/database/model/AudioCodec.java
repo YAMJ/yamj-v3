@@ -61,8 +61,8 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
     @Column(name = "channels", nullable = false)
     private int channels = -1;
 
-    @Column(name = "language", nullable = false, length = 50)
-    private String language;
+    @Column(name = "language_code", nullable = false, length = 4)
+    private String languageCode;
 
     // GETTER AND SETTER
     public MediaFile getMediaFile() {
@@ -113,12 +113,12 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
         this.channels = channels;
     }
 
-    public String getLanguage() {
-        return language;
+    public String getLanguageCode() {
+        return languageCode;
     }
 
-    public void setLanguage(String language) {
-        this.language = language;
+    public void setLanguageCode(String languageCode) {
+        this.languageCode = languageCode;
     }
 
     // EQUALITY CHECKS
@@ -173,8 +173,8 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
         sb.append(getBitRate());
         sb.append(", channels=");
         sb.append(getChannels());
-        sb.append(", language=");
-        sb.append(getLanguage());
+        sb.append(", languageCode=");
+        sb.append(getLanguageCode());
         sb.append("]");
         return sb.toString();
     }

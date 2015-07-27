@@ -30,4 +30,5 @@ public final class Constants {
     
     public static final String SPACE_SLASH_SPACE = " / ";
     public static final String UNDEFINED = "Undefined";
+    public static final String LANGUAGE_UNTERTERMINED = "und";
 }

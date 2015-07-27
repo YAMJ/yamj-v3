@@ -86,5 +86,21 @@ public class UpgradeDatabaseService {
         } catch (Exception ex) {
             LOG.warn("Failed upgrade 'patchReleaseCountryFilmo'", ex);
         }
+
+        // Issues: #234
+        // Date:   28.07.2015
+        try {
+            upgradeDatabaseDao.patchLanguageAudioCodes();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchLanguageAudioCodes'", ex);
+        }
+
+        // Issues: #234
+        // Date:   28.07.2015
+        try {
+            upgradeDatabaseDao.patchLanguageSubtitles();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchLanguageSubtitles'", ex);
+        }
     }
 }
