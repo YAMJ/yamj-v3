@@ -110,18 +110,4 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
             new ClassPathResource("/yamj3-core-dynamic."+defLang+".properties"));
         return factoryBean;
     }
-
-    @Bean
-    public FactoryBean<Properties> countryCodeProperties() {
-        PropertiesFactoryBean factoryBean = new PropertiesFactoryBean();
-        factoryBean.setLocation(new ClassPathResource("/countries.code.properties"));
-        return factoryBean;
-    }
-
-    @Bean
-    public FactoryBean<Properties> countryDisplayProperties() {
-        PropertiesFactoryBean factoryBean = new PropertiesFactoryBean();
-        factoryBean.setLocation(new ClassPathResource("/countries.display.properties"));
-        return factoryBean;
-    }
 }
