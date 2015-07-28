@@ -23,10 +23,7 @@
 package org.yamj.core;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
@@ -43,13 +40,10 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.hibernate.HibernateAwareObjectMapper;
 
-
 @Configuration
 @EnableScheduling
 @ComponentScan(basePackages = {"org.yamj.core"})
 public class YamjConfiguration extends WebMvcConfigurationSupport {
-
-    private static final Logger LOG = LoggerFactory.getLogger(YamjConfiguration.class);
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
