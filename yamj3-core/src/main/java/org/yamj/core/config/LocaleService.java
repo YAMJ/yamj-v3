@@ -170,6 +170,20 @@ public class LocaleService  {
             LOG.error("Failed to load country display properties: {}", e.getMessage());
         }
 
+        // the ISO 639 catalog
+        try (InputStream inStream = getClass().getResourceAsStream("/iso639.properties")) {
+            Properties props = new Properties();
+            props.load(inStream);
+            for (Entry<Object,Object> prop : props.entrySet()) {
+                // map from name to code
+                languageLookupMap.put(prop.getValue().toString(), prop.getKey().toString());
+                // map from code to name
+                languageDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
+            }
+        } catch (Exception e) {
+            LOG.error("Failed to load ISO 3166 properties: {}", e.getMessage());
+        }
+
         // the ISO 3166 catalog
         try (InputStream inStream = getClass().getResourceAsStream("/iso3166.properties")) {
             Properties props = new Properties();
@@ -192,7 +206,7 @@ public class LocaleService  {
                 for (Entry<Object,Object> prop : props.entrySet()) {
                     // map from name to code
                     countryLookupMap.put(prop.getValue().toString(), prop.getKey().toString());
-                    // map from code to name
+                    // map from language plus code to name
                     countryDisplayMap.put(lang + "_" + prop.getKey().toString(), prop.getValue().toString());
                 }
             } catch (Exception e) {
@@ -224,10 +238,10 @@ public class LocaleService  {
         yamjLocale = new Locale(language, country);
         
         LOG.info("YAMY default: language={}, country={}", language, country);
-        LOG.info("YAMY localized languages: {}", languageLookupMap.size());
-        LOG.info("YAMY displayed languages: {}", languageDisplayMap.size());
-        LOG.info("YAMY localized countries: {}", countryLookupMap.size());
-        LOG.info("YAMY displayed countries: {}", countryDisplayMap.size());
+        LOG.info("YAMY lookup languages:  {}", languageLookupMap.size());
+        LOG.info("YAMY display languages: {}", languageDisplayMap.size());
+        LOG.info("YAMY lookup countries:  {}", countryLookupMap.size());
+        LOG.info("YAMY display countries: {}", countryDisplayMap.size());
     }
     
     public String findLanguageCode(String language) {
