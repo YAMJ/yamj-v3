@@ -251,7 +251,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         videoData.setCertificationInfos(parseCertifications(imdbId, imdbLocale));
 
         // RELEASE DATE
-        parseReleaseData(videoData, imdbId);
+        parseReleaseData(videoData, imdbId, imdbLocale);
 
         // CAST and CREW
         parseCastCrew(videoData, imdbId);
@@ -361,7 +361,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         series.setCertificationInfos(parseCertifications(imdbId, imdbLocale));
 
         // RELEASE DATE
-        parseReleaseData(series, imdbId);
+        parseReleaseData(series, imdbId, imdbLocale);
 
         // AWARDS
         if (configServiceWrapper.getBooleanProperty("imdb.tvshow.awards", Boolean.FALSE)) {
@@ -602,7 +602,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return url;
     }
 
-    private void parseReleaseData(AbstractMetadata metadata, String imdbId) {
+    private void parseReleaseData(AbstractMetadata metadata, String imdbId, Locale locale) {
 
         String releaseInfoXML = null;
 
@@ -613,14 +613,10 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 // load the release page from IMDb
                 releaseInfoXML = getReleasInfoXML(releaseInfoXML, imdbId);
                 if (releaseInfoXML != null) {
-                    String preferredCountry = this.configServiceWrapper.getProperty("imdb.aka.preferred.country", "USA");
-                    Pattern pRelease = Pattern.compile("(?:.*?)\\Q" + preferredCountry + "\\E(?:.*?)\\Qrelease_date\">\\E(.*?)(?:<.*?>)(.*?)(?:</a>.*)");
-                    Matcher mRelease = pRelease.matcher(releaseInfoXML);
-
-                    if (mRelease.find()) {
-                        String strReleaseDate = mRelease.group(1) + " " + mRelease.group(2);
-                        Date releaseDate = MetadataTools.parseToDate(strReleaseDate);
-                        videoData.setRelease(releaseDate, SCANNER_ID);
+                    boolean found = findReleaseDate(videoData, releaseInfoXML, locale.getCountry());
+                    if (!found && !Locale.US.getCountry().equals(locale.getCountry())) {
+                        // try with US country code
+                        findReleaseDate(videoData, releaseInfoXML, Locale.US.getCountry());
                     }
                 }
             }
@@ -653,14 +649,12 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         boolean akaScrapeTitle = configServiceWrapper.getBooleanProperty("imdb.aka.scrape.title", Boolean.FALSE);
         if (akaScrapeTitle && OverrideTools.checkOverwriteTitle(metadata, SCANNER_ID)) {
             List<String> akaIgnoreVersions = configServiceWrapper.getPropertyAsList("imdb.aka.ignore.versions", "");
-            String preferredCountry = this.configServiceWrapper.getProperty("imdb.aka.preferred.country", "USA");
-            String fallbacks = configServiceWrapper.getProperty("imdb.aka.fallback.countries", "");
 
-            List<String> akaMatchingCountries;
-            if (StringUtils.isBlank(fallbacks)) {
-                akaMatchingCountries = Collections.singletonList(preferredCountry);
-            } else {
-                akaMatchingCountries = Arrays.asList((preferredCountry + "," + fallbacks).split(","));
+            // build countries to search for within AKA list
+            Set<String> akaMatchingCountries = new TreeSet<>(localeService.getCountryNames(locale.getCountry()));
+            for (String fallback : configServiceWrapper.getPropertyAsList("imdb.aka.fallback.countries", "")) {
+                String countryCode = localeService.findCountryCode(fallback);
+                akaMatchingCountries.addAll(localeService.getCountryNames(countryCode));
             }
 
             // load the release page from IMDb
@@ -672,12 +666,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 String foundValue = null;
                 // NOTE: First matching country is the preferred country
                 for (String matchCountry : akaMatchingCountries) {
-
-                    if (StringUtils.isBlank(matchCountry)) {
-                        // must be a valid country setting
-                        continue;
-                    }
-
                     for (Map.Entry<String, String> aka : akas.entrySet()) {
                         int startIndex = aka.getKey().indexOf(matchCountry);
                         if (startIndex > -1) {
@@ -713,6 +701,23 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
     }
 
+    private boolean findReleaseDate(VideoData videoData, String releaseInfoXML, String countryCode) {
+        for (String country : localeService.getCountryNames(countryCode)) {
+            Pattern pRelease = Pattern.compile("(?:.*?)\\Q" + country + "\\E(?:.*?)\\Qrelease_date\">\\E(.*?)(?:<.*?>)(.*?)(?:</a>.*)");
+            Matcher mRelease = pRelease.matcher(releaseInfoXML);
+        
+            if (mRelease.find()) {
+                String strReleaseDate = mRelease.group(1) + " " + mRelease.group(2);
+                Date releaseDate = MetadataTools.parseToDate(strReleaseDate);
+                if (releaseDate != null) {
+                    videoData.setRelease(countryCode, releaseDate, SCANNER_ID);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
     private String getReleasInfoXML(final String releaseInfoXML, final String imdbId) {
         if (releaseInfoXML != null) {
             return releaseInfoXML;

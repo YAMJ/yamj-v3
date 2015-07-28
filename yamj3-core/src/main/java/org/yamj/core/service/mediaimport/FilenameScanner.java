@@ -28,6 +28,7 @@ import static org.springframework.util.StringUtils.tokenizeToStringArray;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.PostConstruct;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -40,7 +41,6 @@ import org.yamj.common.util.KeywordMap;
 import org.yamj.common.util.PatternUtils;
 import org.yamj.common.util.TokensPatternMap;
 import org.yamj.core.database.model.type.FileType;
-import org.yamj.core.tools.LanguageTools;
 
 @Service("filenameScanner")
 public class FilenameScanner {
@@ -65,6 +65,64 @@ public class FilenameScanner {
     private static final Pattern TITLE_CLEANUP_CUT_PATTERN = PatternUtils.patt("-$|\\($");
     // All symbols between '-' and '/' but not after '/TVSHOW/' or '/PART/'
     private static final Pattern SECOND_TITLE_PATTERN = PatternUtils.patt("(?<!/TVSHOW/|/PART/)-([^/]+)");
+    
+    /**
+     * Mapping exact tokens to language.
+     *
+     * Strict mapping is case sensitive and must be obvious, it must avoid confusing movie name words and language markers.
+     *
+     * For example the English word "it" and Italian language marker "it", or "French" as part of the title and "french" as language
+     * marker.
+     *
+     * However, described above is important only by file naming with token delimiters (see tokens description constants
+     * TOKEN_DELIMITERS*). Language detection in non-token separated titles will be skipped automatically.
+     *
+     * Language markers, found with this pattern are counted as token delimiters (they will cut movie title)
+     */
+    private final static TokensPatternMap STRICT_LANGUAGE_MAP = new TokensPatternMap() {
+        private static final long serialVersionUID = 3630995345545037071L;
+
+        @Override
+        protected void put(String key, Collection<String> tokens) {
+            StringBuilder tokenBuilder = new StringBuilder();
+            for (String s : tokens) {
+                if (tokenBuilder.length() > 0) {
+                    tokenBuilder.append('|');
+                }
+                tokenBuilder.append(Pattern.quote(s));
+            }
+            put(key, PatternUtils.tpatt(tokenBuilder.toString()));
+        }
+    };
+
+    /**
+     * Mapping loose language markers.
+     *
+     * The second pass of language detection is being started after movie title detection. Language markers will be scanned with
+     * loose pattern in order to find out more languages without chance to confuse with movie title.
+     *
+     * Markers in this map are case insensitive.
+     */
+    private final  static TokensPatternMap LOOSE_LANGUAGE_MAP = new TokensPatternMap() {
+        private static final long serialVersionUID = 1383819843117148442L;
+
+        @Override
+        protected void put(String key, Collection<String> tokens) {
+            StringBuilder tokenBuilder = new StringBuilder();
+            for (String token : tokens) {
+                // Only add the token if it's not there already
+                String quotedToken = Pattern.quote(token.toUpperCase());
+                if (tokenBuilder.indexOf(quotedToken) < 0) {
+                    if (tokenBuilder.length() > 0) {
+                        tokenBuilder.append('|');
+                    }
+                    tokenBuilder.append(quotedToken);
+                }
+            }
+            put(key, PatternUtils.iwpatt(tokenBuilder.toString()));
+        }
+    };
+    
     /**
      * Parts/disks markers.
      *
@@ -149,15 +207,16 @@ public class FilenameScanner {
     private Collection<String> videoExtensions = new HashSet<>();
     private Collection<String> subtitleExtensions = new HashSet<>();
     private Collection<String> imageExtensions = new HashSet<>();
-    private final Collection<Pattern> skipPatterns = new ArrayList<>();
-    private final Collection<Pattern> movieVersionPatterns = new ArrayList<>();
-    private final Collection<Pattern> extraPatterns = new ArrayList<>();
-    private final boolean languageDetection;
-    private final boolean skipEpisodeTitle;
+    private Collection<Pattern> skipPatterns = new ArrayList<>();
+    private Collection<Pattern> movieVersionPatterns = new ArrayList<>();
+    private Collection<Pattern> extraPatterns = new ArrayList<>();
+    private boolean languageDetection;
+    private boolean skipEpisodeTitle;
     private boolean useParentRegex;
     private Pattern useParentPattern;
 
-    public FilenameScanner() {
+    @PostConstruct
+    public void init() {    
         // resolve extensions
         videoExtensions = StringTools.tokenize(PropertyTools.getProperty("filename.scanner.video.extensions", "avi,divx,xvid,mkv,wmv,m2ts,ts,rm,qt,iso,vob,mpg,mov,mp4,m1v,m2v,m4v,m2p,top,trp,m2t,mts,asf,rmp4,img,mk3d,rar,001"), ",;|");
         subtitleExtensions = StringTools.tokenize(PropertyTools.getProperty("filename.scanner.subtitle.extensions", "srt,sub,ssa,smi,pgs"), ",;|");
@@ -207,6 +266,19 @@ public class FilenameScanner {
         // set source keywords
         KeywordMap sourceKeywords = PropertyTools.getKeywordMap("filename.scanner.source.keywords", "HDTV,PDTV,DVDRip,DVDSCR,DSRip,CAM,R5,LINE,HD2DVD,DVD,DVD5,DVD9,HRHDTV,MVCD,VCD,TS,VHSRip,BluRay,BDRip,HDDVD,D-THEATER,SDTV");
         videoSourceMap.putAll(sourceKeywords.getKeywords(), sourceKeywords);
+        
+        KeywordMap languages = PropertyTools.getKeywordMap("language.detection.keywords", null);
+        if (!languages.isEmpty()) {
+            for (String lang : languages.getKeywords()) {
+                String values = languages.get(lang);
+                if (values != null) {
+                    STRICT_LANGUAGE_MAP.put(lang, values);
+                    LOOSE_LANGUAGE_MAP.put(lang, values);
+                } else {
+                    LOG.info("No values found for language code '{}'", lang);
+                }
+            }
+        }
     }
 
     public FileType determineFileType(final String extension) {
@@ -416,10 +488,10 @@ public class FilenameScanner {
             return;
         }
 
-        String language = seekPatternAndUpdateRest(LanguageTools.getStrictLanguageMap(), null, dto);
+        String language = seekPatternAndUpdateRest(STRICT_LANGUAGE_MAP, null, dto);
         while (StringUtils.isNotBlank(language)) {
             dto.getLanguages().add(StringUtils.trim(language));
-            language = seekPatternAndUpdateRest(LanguageTools.getStrictLanguageMap(), null, dto);
+            language = seekPatternAndUpdateRest(STRICT_LANGUAGE_MAP, null, dto);
         }
     }
 
@@ -475,7 +547,7 @@ public class FilenameScanner {
 
             // Loose language search
             if (token.length() >= 2 && token.indexOf('-') < 0) {
-                for (Map.Entry<String, Pattern> e : LanguageTools.getLooseLanguageMap().entrySet()) {
+                for (Map.Entry<String, Pattern> e : LOOSE_LANGUAGE_MAP.entrySet()) {
                     Matcher matcher = e.getValue().matcher(token);
                     if (matcher.find()) {
                         dto.getLanguages().add(e.getKey());

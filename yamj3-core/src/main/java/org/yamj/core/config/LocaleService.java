@@ -322,9 +322,11 @@ public class LocaleService  {
     
     public Set<String> getCountryNames(String countryCode) {
         Set<String> result = new HashSet<>();
-        for (Entry<String,String> entry : countryLookupMap.entrySet()) {
-            if (entry.getValue().equals(countryCode)) {
-                result.add(entry.getKey());
+        if (StringUtils.isNotBlank(countryCode)) {
+            for (Entry<String,String> entry : countryLookupMap.entrySet()) {
+                if (entry.getValue().equals(countryCode)) {
+                    result.add(entry.getKey());
+                }
             }
         }
         return result;

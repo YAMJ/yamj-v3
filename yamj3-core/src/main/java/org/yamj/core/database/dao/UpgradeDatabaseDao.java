@@ -146,6 +146,9 @@ public class UpgradeDatabaseDao extends HibernateDao {
             .createSQLQuery("DELETE FROM configuration where config_key='imdb.id.search.country'")
             .executeUpdate();
         currentSession()
+            .createSQLQuery("DELETE FROM configuration where config_key='imdb.aka.preferred.country'")
+            .executeUpdate();
+        currentSession()
             .createSQLQuery("UPDATE configuration set config_value='' where config_key='themoviedb.language'")
             .executeUpdate();
         currentSession()

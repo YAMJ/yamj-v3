@@ -99,15 +99,8 @@ public class YamjConfiguration extends WebMvcConfigurationSupport {
 
     @Bean
     public FactoryBean<Properties> dynamicProperties() {
-        
-        final String defLang = Locale.getDefault().getLanguage();
-        LOG.trace("Using default language: {}", defLang);
-        
         PropertiesFactoryBean factoryBean = new PropertiesFactoryBean();
-        factoryBean.setIgnoreResourceNotFound(true);
-        factoryBean.setLocations(
-            new ClassPathResource("/yamj3-core-dynamic.properties"),
-            new ClassPathResource("/yamj3-core-dynamic."+defLang+".properties"));
+        factoryBean.setLocation(new ClassPathResource("/yamj3-core-dynamic.properties"));
         return factoryBean;
     }
 }
