@@ -41,116 +41,114 @@ public class LocaleService  {
 
     private Locale yamjLocale = Locale.getDefault();
     private Map<String,String> languageLookupMap = new HashMap<>();
+    private Map<String,String> languageDisplayMap = new HashMap<>();
     private Map<String,String> countryLookupMap = new HashMap<>();
-    private Map<String,String> displayLanguageLookupMap = new HashMap<>();
-    private Map<String,String> displayCountryLookupMap = new HashMap<>();
+    private Map<String,String> countryDisplayMap = new HashMap<>();
     
     @Autowired
     private ConfigService configService;
 
     @PostConstruct
     public void init() {
-        for (Locale locale : LocaleUtils.availableLocaleList()) {
-            if (StringUtils.isBlank(locale.getLanguage())) {
-                continue;
-            }
-            
-            languageLookupMap.put(locale.getLanguage(), locale.getLanguage());
-
-            String key = locale.getDisplayLanguage();
-            if (StringUtils.isNotEmpty(key)) {
-                languageLookupMap.put(key, locale.getLanguage());
-            }
-            
+        String langCode;
+        String countryCode;
+        String langISO3;
+        String countryISO3;
+        String displayLanguage;
+        String displayCountry;
+        String altCode;
+        String altDisplay;
+        
+        for (Locale locale : LocaleUtils.availableLocaleSet()) {
+            langCode = StringUtils.trimToNull(locale.getLanguage());
+            countryCode = StringUtils.trimToNull(locale.getCountry());
             try {
-                key = locale.getISO3Language();
-                if (StringUtils.isNotEmpty(key)) {
-                    languageLookupMap.put(key, locale.getLanguage());
-                }
-            } catch (Exception e) {/*ignore*/}
-
-            key = locale.getCountry();
-            if (StringUtils.isEmpty(key)) {
-                countryLookupMap.put(key, locale.getCountry());
+                langISO3 = StringUtils.trimToNull(locale.getISO3Language());
+            } catch (Exception e) {
+               langISO3 = null; 
             }
-            
-            key = locale.getDisplayCountry();
-            if (StringUtils.isNotEmpty(key)) {
-                countryLookupMap.put(key, locale.getCountry());
-            }
-
             try {
-                key = locale.getISO3Country();
-                if (StringUtils.isNotEmpty(key)) {
-                    countryLookupMap.put(key, locale.getCountry());
+                countryISO3 = StringUtils.trimToNull(locale.getISO3Country());
+            } catch (Exception e) {
+                countryISO3 = null; 
+            }
+            displayLanguage = StringUtils.trimToNull(locale.getDisplayLanguage());
+            displayCountry = StringUtils.trimToNull(locale.getDisplayCountry());
+
+            if (langCode != null) {
+                languageLookupMap.put(langCode, langCode);
+                if (langISO3 != null) {
+                    languageLookupMap.put(langISO3, langCode);
                 }
-            } catch (Exception e) {/*ignore*/}
-            
+                if (displayLanguage != null) {
+                    languageLookupMap.put(displayLanguage, langCode);
+                    languageDisplayMap.put(langCode+"_"+langCode, displayLanguage);
+                }
+            }
+
+            if (countryCode != null) {
+                countryLookupMap.put(countryCode, countryCode);
+                if (countryISO3 != null) {
+                    countryLookupMap.put(countryISO3, countryCode);
+                }
+                if (displayCountry != null) {
+                    countryLookupMap.put(displayCountry, countryCode);
+                    if (langCode != null) {
+                        countryDisplayMap.put(langCode+"_"+countryCode, displayCountry);
+                    }
+                }
+            }
+
             for (Locale alternate : LocaleUtils.availableLocaleList()) {
-                if (StringUtils.isBlank(alternate.getLanguage())) {
-                    continue;
+                altCode = StringUtils.trimToNull(alternate.getLanguage());
+
+                if (langCode != null) {
+                    altDisplay = StringUtils.trimToNull(locale.getDisplayLanguage(alternate));
+                    if (altDisplay != null) {
+                        languageLookupMap.put(altDisplay, langCode);
+                        if (altCode != null) {
+                            languageDisplayMap.put(altCode+"_"+langCode, altDisplay);
+                        }
+                    }
                 }
 
-                key = locale.getDisplayLanguage(alternate);
-                if (StringUtils.isNotEmpty(key)) {
-                    languageLookupMap.put(key, locale.getLanguage());
-
-                    String altLang = alternate.getLanguage();
-                    String lang = locale.getLanguage();
-                    displayLanguageLookupMap.put(new String(altLang+"_"+lang).toLowerCase(), key);
-                    
-                    // try ISO 3
-                    try {
-                        altLang = alternate.getISO3Language();
-                        if (StringUtils.isNotBlank(altLang)) {
-                            displayLanguageLookupMap.put(new String(altLang+"_"+lang).toLowerCase(), key);
+                if (countryCode != null) {
+                    altDisplay = StringUtils.trimToNull(locale.getDisplayCountry(alternate));
+                    if (altDisplay != null) {
+                        countryLookupMap.put(altDisplay, countryCode);
+                        if (altCode != null) {
+                            countryDisplayMap.put(altCode+"_"+countryCode, altDisplay);
                         }
-                    } catch (Exception ignore) {/*ignore*/}
-                }
-
-                key = locale.getDisplayCountry(alternate);
-                if (StringUtils.isNotEmpty(key)) {
-                    countryLookupMap.put(key, locale.getCountry());
-
-                    String altLang = alternate.getLanguage();
-                    String country = locale.getCountry();
-                    displayCountryLookupMap.put(new String(altLang+"_"+country).toLowerCase(), key);
-                    
-                    // try ISO 3
-                    try {
-                        altLang = alternate.getISO3Language();
-                        if (StringUtils.isNotBlank(altLang)) {
-                            displayCountryLookupMap.put(new String(altLang+"_"+country).toLowerCase(), key);
-                        }
-                    } catch (Exception ignore) {/*ignore*/}
+                    }
                 }
             }
         }
 
         // additional languages from properties file
-        try (InputStream inStream = getClass().getResourceAsStream("/languages.code.properties")) {
+        try (InputStream inStream = getClass().getResourceAsStream("/iso639.code.properties")) {
             Properties props = new Properties();
             props.load(inStream);
             for (Entry<Object,Object> prop : props.entrySet()) {
-                languageLookupMap.put(prop.getKey().toString().toLowerCase(), prop.getValue().toString());
+                String key = StringUtils.replace(prop.getKey().toString(), "_", " ");
+                languageLookupMap.put(key, prop.getValue().toString());
             }
         } catch (Exception e) {
             LOG.error("Failed to load language code properties: {}", e.getMessage());
         }
 
         // additional language display from properties file
-        try (InputStream inStream = getClass().getResourceAsStream("/languages.display.properties")) {
+        try (InputStream inStream = getClass().getResourceAsStream("/iso639.display.properties")) {
             Properties props = new Properties();
             props.load(inStream);
             for (Entry<Object,Object> prop : props.entrySet()) {
-                displayLanguageLookupMap.put(prop.getKey().toString().toLowerCase(), prop.getValue().toString());
+                languageDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
             }
         } catch (Exception e) {
             LOG.error("Failed to load language display properties: {}", e.getMessage());
         }
 
         // additional countries from properties file
-        try (InputStream inStream = getClass().getResourceAsStream("/countries.code.properties")) {
+        try (InputStream inStream = getClass().getResourceAsStream("/iso3166.code.properties")) {
             Properties props = new Properties();
             props.load(inStream);
             for (Entry<Object,Object> prop : props.entrySet()) {
@@ -161,18 +159,47 @@ public class LocaleService  {
             LOG.error("Failed to load country code properties: {}", e.getMessage());
         }
         
-
         // additional country display from properties file
-        try (InputStream inStream = getClass().getResourceAsStream("/countries.display.properties")) {
+        try (InputStream inStream = getClass().getResourceAsStream("/iso3166.display.properties")) {
             Properties props = new Properties();
             props.load(inStream);
             for (Entry<Object,Object> prop : props.entrySet()) {
-                displayCountryLookupMap.put(prop.getKey().toString().toLowerCase(), prop.getValue().toString());
+                countryDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
             }
         } catch (Exception e) {
             LOG.error("Failed to load country display properties: {}", e.getMessage());
         }
 
+        // the ISO 3166 catalog
+        try (InputStream inStream = getClass().getResourceAsStream("/iso3166.properties")) {
+            Properties props = new Properties();
+            props.load(inStream);
+            for (Entry<Object,Object> prop : props.entrySet()) {
+                // map from name to code
+                countryLookupMap.put(prop.getValue().toString(), prop.getKey().toString());
+                // map from code to name
+                countryDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
+            }
+        } catch (Exception e) {
+            LOG.error("Failed to load ISO 3166 properties: {}", e.getMessage());
+        }
+
+        // the ISO 3166 catalog for special languages
+        for (String lang : new String[]{"fr"}) {
+            try (InputStream inStream = getClass().getResourceAsStream("/iso3166."+lang+".properties")) {
+                Properties props = new Properties();
+                props.load(inStream);
+                for (Entry<Object,Object> prop : props.entrySet()) {
+                    // map from name to code
+                    countryLookupMap.put(prop.getValue().toString(), prop.getKey().toString());
+                    // map from code to name
+                    countryDisplayMap.put(lang + "_" + prop.getKey().toString(), prop.getValue().toString());
+                }
+            } catch (Exception e) {
+                LOG.error("Failed to load {} ISO 3166 properties: {}", lang, e.getMessage());
+            }
+        }
+        
         // build default locale
         String language = PropertyTools.getProperty("yamj3.language");
         if (StringUtils.isEmpty(language)) {
@@ -198,9 +225,9 @@ public class LocaleService  {
         
         LOG.info("YAMY default: language={}, country={}", language, country);
         LOG.info("YAMY localized languages: {}", languageLookupMap.size());
-        LOG.info("YAMY displayed languages: {}", displayLanguageLookupMap.size());
+        LOG.info("YAMY displayed languages: {}", languageDisplayMap.size());
         LOG.info("YAMY localized countries: {}", countryLookupMap.size());
-        LOG.info("YAMY displayed countries: {}", displayCountryLookupMap.size());
+        LOG.info("YAMY displayed countries: {}", countryDisplayMap.size());
     }
     
     public String findLanguageCode(String language) {
@@ -269,53 +296,61 @@ public class LocaleService  {
     }
 
     public String getDisplayLanguage(final String inLanguage, final String languageCode) {
-        String inLangCode = (inLanguage == null ? yamjLocale.getLanguage() : inLanguage);
+        if (languageCode == null) return null;
+        final String langCode = languageCode.toLowerCase();
+        String inLangCode = (inLanguage == null ? yamjLocale.getLanguage() : inLanguage.toLowerCase());
         
         // fast way
-        String key = new String(inLangCode + "_" + languageCode).toLowerCase();
-        String display = this.displayLanguageLookupMap.get(key);
+        String display = this.languageDisplayMap.get(inLangCode + "_" + langCode);
         if (display != null) return display;
-            
+        
         // slower way
         inLangCode = findLanguageCode(inLanguage);
         if (inLangCode == null) inLangCode = yamjLocale.getLanguage();
-        key = new String(inLangCode + "_" + languageCode).toLowerCase();
-        display = this.displayLanguageLookupMap.get(key);
-        
-        if (display == null) return languageCode;
-        return display;
+        display = this.languageDisplayMap.get(inLangCode + "_" + langCode);
+        if (display != null) return display;
+
+        // search for language code only
+        display = this.languageDisplayMap.get(langCode);
+        if (display != null) return display;
+
+        // just return language code
+        return languageCode;
     }
 
     public String getDisplayCountry(final String inLanguage, final String countryCode) {
-        String inLangCode = (inLanguage == null ? yamjLocale.getLanguage() : inLanguage);
+        if (countryCode == null) return null;
+        final String cCode = countryCode.toUpperCase();
+        String inLangCode = (inLanguage == null ? yamjLocale.getLanguage() : inLanguage.toLowerCase());
         
         // fast way
-        String key = new String(inLangCode + "_" + countryCode).toLowerCase();
-        String display = this.displayCountryLookupMap.get(key);
+        String display = this.countryDisplayMap.get(inLangCode + "_" + cCode);
         if (display != null) return display;
             
         // slower way
         inLangCode = findLanguageCode(inLanguage);
         if (inLangCode == null) inLangCode = yamjLocale.getLanguage();
-        key = new String(inLangCode + "_" + countryCode).toLowerCase();
-        display = this.displayCountryLookupMap.get(key);
-        
-        if (display == null) return countryCode;
-        return display;
+        display = this.countryDisplayMap.get(inLangCode + "_" + cCode);
+        if (display != null) return display;
+
+        // search for country code only
+        display = this.countryDisplayMap.get(cCode);
+        if (display != null) return display;
+
+        // just return country code
+        return cCode;
     }
     
     public Set<String> getCertificationCountryCodes() {
         return this.getCertificationCountryCodes(yamjLocale);
     }
 
-    public Set<String> getCertificationCountryCodes(Locale defaultLocale) {
+    public Set<String> getCertificationCountryCodes(Locale locale) {
         Set<String> result = new HashSet<>();
-        List<String> countries = this.configService.getPropertyAsList("yamj3.certification.countries", defaultLocale.getCountry());
+        List<String> countries = this.configService.getPropertyAsList("yamj3.certification.countries", locale.getCountry());
         for (String country : countries) {
             String countryCode = this.findCountryCode(country);
-            if (countryCode != null) {
-                result.add(countryCode);
-            }
+            if (countryCode != null) result.add(countryCode);
         }
         return result;
     }
