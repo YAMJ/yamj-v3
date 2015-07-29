@@ -184,6 +184,22 @@ public class LocaleService  {
             LOG.error("Failed to load ISO 3166 properties: {}", e.getMessage());
         }
 
+        // the ISO 639 catalog for special languages
+        for (String lang : new String[]{"de"}) {
+            try (InputStream inStream = getClass().getResourceAsStream("/iso639."+lang+".properties")) {
+                Properties props = new Properties();
+                props.load(inStream);
+                for (Entry<Object,Object> prop : props.entrySet()) {
+                    // map from name to code
+                    languageLookupMap.put(prop.getValue().toString(), prop.getKey().toString());
+                    // map from language plus code to name
+                    languageDisplayMap.put(lang + "_" + prop.getKey().toString(), prop.getValue().toString());
+                }
+            } catch (Exception e) {
+                LOG.error("Failed to load {} ISO 3166 properties: {}", lang, e.getMessage());
+            }
+        }
+
         // the ISO 3166 catalog
         try (InputStream inStream = getClass().getResourceAsStream("/iso3166.properties")) {
             Properties props = new Properties();
