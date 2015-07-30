@@ -68,6 +68,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     private static final String HTML_SPAN_END = "</span>";
     private static final String HTML_TABLE_END = "</table>";
     private static final String HTML_TD_END = "</td>";
+    private static final String HTML_TR_END = "</tr>";
     private static final String HTML_GT = ">";
     private static final Pattern PATTERN_PERSON_DOB = Pattern.compile("(\\d{1,2})-(\\d{1,2})");
 
@@ -613,10 +614,11 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 // load the release page from IMDb
                 releaseInfoXML = getReleasInfoXML(releaseInfoXML, imdbId);
                 if (releaseInfoXML != null) {
-                    boolean found = findReleaseDate(videoData, releaseInfoXML, locale.getCountry());
+                    List<String> releaseTags = HTMLTools.extractTags(releaseInfoXML, "<table id=\"release_dates\"", HTML_TABLE_END, "<tr", HTML_TR_END);
+                    boolean found = findReleaseDate(videoData, releaseTags, locale.getCountry());
                     if (!found && !Locale.US.getCountry().equals(locale.getCountry())) {
                         // try with US country code
-                        findReleaseDate(videoData, releaseInfoXML, Locale.US.getCountry());
+                        findReleaseDate(videoData, releaseTags, Locale.US.getCountry());
                     }
                 }
             }
@@ -701,17 +703,16 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
     }
 
-    private boolean findReleaseDate(VideoData videoData, String releaseInfoXML, String countryCode) {
-        for (String country : localeService.getCountryNames(countryCode)) {
-            Pattern pRelease = Pattern.compile("(?:.*?)\\Q" + country + "\\E(?:.*?)\\Qrelease_date\">\\E(.*?)(?:<.*?>)(.*?)(?:</a>.*)");
-            Matcher mRelease = pRelease.matcher(releaseInfoXML);
-        
-            if (mRelease.find()) {
-                String strReleaseDate = mRelease.group(1) + " " + mRelease.group(2);
-                Date releaseDate = MetadataTools.parseToDate(strReleaseDate);
-                if (releaseDate != null) {
-                    videoData.setRelease(countryCode, releaseDate, SCANNER_ID);
-                    return true;
+    private boolean findReleaseDate(VideoData videoData, List<String> releaseTags, String countryCode) {
+        for (String tag : releaseTags) {
+            for (String country : localeService.getCountryNames(countryCode)) {
+                if (tag.indexOf(HTML_GT + country) > -1) {
+                    String dateToParse = HTMLTools.removeHtmlTags(HTMLTools.extractTag(tag, "<td class=\"release_date\">", HTML_TD_END));
+                    Date releaseDate = MetadataTools.parseToDate(dateToParse);
+                    if (releaseDate != null) {
+                        videoData.setRelease(countryCode, releaseDate, SCANNER_ID);
+                        return true;
+                    }
                 }
             }
         }
@@ -926,6 +927,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                         String certificate = getPreferredValue(tags, true, country);
                         if (StringUtils.isNotBlank(certificate)) {
                             certificationInfos.put(countryCode, certificate);
+                            break;
                         }
                     }
                 }
