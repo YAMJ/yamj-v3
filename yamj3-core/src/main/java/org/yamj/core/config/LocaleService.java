@@ -147,29 +147,6 @@ public class LocaleService  {
             LOG.error("Failed to load language display properties: {}", e.getMessage());
         }
 
-        // additional countries from properties file
-        try (InputStream inStream = getClass().getResourceAsStream("/iso3166.code.properties")) {
-            Properties props = new Properties();
-            props.load(inStream);
-            for (Entry<Object,Object> prop : props.entrySet()) {
-                String key = StringUtils.replace(prop.getKey().toString(), "_", " ");
-                countryLookupMap.put(key, prop.getValue().toString());
-            }
-        } catch (Exception e) {
-            LOG.error("Failed to load country code properties: {}", e.getMessage());
-        }
-        
-        // additional country display from properties file
-        try (InputStream inStream = getClass().getResourceAsStream("/iso3166.display.properties")) {
-            Properties props = new Properties();
-            props.load(inStream);
-            for (Entry<Object,Object> prop : props.entrySet()) {
-                countryDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
-            }
-        } catch (Exception e) {
-            LOG.error("Failed to load country display properties: {}", e.getMessage());
-        }
-
         // the ISO 639 catalog
         try (InputStream inStream = getClass().getResourceAsStream("/iso639.properties")) {
             Properties props = new Properties();
@@ -181,7 +158,7 @@ public class LocaleService  {
                 languageDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
             }
         } catch (Exception e) {
-            LOG.error("Failed to load ISO 3166 properties: {}", e.getMessage());
+            LOG.error("Failed to load default ISO 639 properties: {}", e.getMessage());
         }
 
         // the ISO 639 catalog for special languages
@@ -200,6 +177,30 @@ public class LocaleService  {
             }
         }
 
+        // additional countries from properties file
+        try (InputStream inStream = getClass().getResourceAsStream("/iso3166.code.properties")) {
+            Properties props = new Properties();
+            props.load(inStream);
+            for (Entry<Object,Object> prop : props.entrySet()) {
+                String key = StringUtils.replace(prop.getKey().toString(), "_", " ");
+                countryLookupMap.put(key, prop.getValue().toString());
+            }
+        } catch (Exception e) {
+            LOG.error("Failed to load country code properties: {}", e.getMessage());
+        }
+
+        
+        // additional country display from properties file
+        try (InputStream inStream = getClass().getResourceAsStream("/iso3166.display.properties")) {
+            Properties props = new Properties();
+            props.load(inStream);
+            for (Entry<Object,Object> prop : props.entrySet()) {
+                countryDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
+            }
+        } catch (Exception e) {
+            LOG.error("Failed to load country display properties: {}", e.getMessage());
+        }
+
         // the ISO 3166 catalog
         try (InputStream inStream = getClass().getResourceAsStream("/iso3166.properties")) {
             Properties props = new Properties();
@@ -211,11 +212,11 @@ public class LocaleService  {
                 countryDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
             }
         } catch (Exception e) {
-            LOG.error("Failed to load ISO 3166 properties: {}", e.getMessage());
+            LOG.error("Failed to load default ISO 3166 properties: {}", e.getMessage());
         }
 
         // the ISO 3166 catalog for special languages
-        for (String lang : new String[]{"fr"}) {
+        for (String lang : new String[]{"de","fr"}) {
             try (InputStream inStream = getClass().getResourceAsStream("/iso3166."+lang+".properties")) {
                 Properties props = new Properties();
                 props.load(inStream);
