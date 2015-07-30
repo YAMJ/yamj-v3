@@ -251,8 +251,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         // CERTIFICATIONS
         videoData.setCertificationInfos(parseCertifications(imdbId, imdbLocale));
 
-        // RELEASE DATE
-        parseReleaseData(videoData, imdbId, imdbLocale);
+        // RELEASE INFO
+        parseReleaseInfo(videoData, imdbId, imdbLocale);
 
         // CAST and CREW
         parseCastCrew(videoData, imdbId);
@@ -361,8 +361,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         // CERTIFICATIONS
         series.setCertificationInfos(parseCertifications(imdbId, imdbLocale));
 
-        // RELEASE DATE
-        parseReleaseData(series, imdbId, imdbLocale);
+        // RELEASE INFO
+        parseReleaseInfo(series, imdbId, imdbLocale);
 
         // AWARDS
         if (configServiceWrapper.getBooleanProperty("imdb.tvshow.awards", Boolean.FALSE)) {
@@ -603,7 +603,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return url;
     }
 
-    private void parseReleaseData(AbstractMetadata metadata, String imdbId, Locale locale) {
+    private void parseReleaseInfo(AbstractMetadata metadata, String imdbId, Locale locale) {
 
         String releaseInfoXML = null;
 
