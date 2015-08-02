@@ -22,9 +22,12 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,18 +42,23 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.SourceType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 
+
 @Service("onlineScannerService")
 public class OnlineScannerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(OnlineScannerService.class);
     public static final String MOVIE_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie", "tmdb");
     public static final String MOVIE_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie.alternate", "");
+    public static final String MOVIE_SCANNER_PRIO = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie.priority", "");
     public static final String SERIES_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.series", "tvdb");
     public static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.alternate", "");
+    public static final String SERIES_SCANNER_PRIO = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.priority", "");
     public static final String PERSON_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.person", "tmdb");
     public static final String PERSON_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.person.alternate", "");
+    public static final String PERSON_SCANNER_PRIO = PropertyTools.getProperty("yamj3.sourcedb.scanner.person.priority", "");
     public static final String FILMOGRAPHY_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.filmography", "tmdb");
     public static final String FILMOGRAPHY_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.filmography.alternate", "");
+    public static final String FILMOGRAPHY_SCANNER_PRIO = PropertyTools.getProperty("yamj3.sourcedb.filmography.person.priority", "");
     
     private final HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<>();
     private final HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<>();
@@ -90,53 +98,36 @@ public class OnlineScannerService {
      * @param videoData
      */
     public void scanMovie(VideoData videoData) {
-        ScanResult scanResult;
+        List<String> scanners = Arrays.asList(MOVIE_SCANNER_PRIO.split(","));
+    	ScanResult scanResult = null;
 
-        IMovieScanner movieScanner = registeredMovieScanner.get(MOVIE_SCANNER);
-        if (movieScanner == null) {
-            LOG.error("Movie scanner '{}' not registered", MOVIE_SCANNER);
-            scanResult = ScanResult.ERROR;
-        } else {
-
-            // scan video data
-            try {
-                if (videoData.isSkippedScan(movieScanner.getScannerName())) {
-                    LOG.info("Movie scan skipped for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
-                    scanResult = ScanResult.SKIPPED;
-                } else {
-                    LOG.info("Scanning movie data for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
-                    scanResult = movieScanner.scan(videoData);
-                }
-            } catch (Exception error) {
+    	for (String scanner : scanners) {
+    		IMovieScanner movieScanner = registeredMovieScanner.get(scanner);
+            if (movieScanner == null) {
+                LOG.error("Movie scanner '{}' not registered", scanner);
                 scanResult = ScanResult.ERROR;
-                LOG.error("Failed scanning movie with {} scanner", movieScanner.getScannerName());
-                LOG.warn("Scanning error", error);
-            }
-        }
-        
-        // alternate scanning if main scanner failed or not registered; alternate scanning can be forced
-        boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.movie.alternate.always", Boolean.FALSE);
-        if (!ScanResult.OK.equals(scanResult) || useAlternate) {
-            movieScanner = registeredMovieScanner.get(MOVIE_SCANNER_ALT);
-
-            if (movieScanner != null && !videoData.isSkippedScan(movieScanner.getScannerName())) {
-                LOG.info("Alternate scanning movie data for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
-
+            } else {
+                // scan video data
                 try {
-                    ScanResult alternateScanResult = movieScanner.scan(videoData);
-                    
-                    // set alternate scan result if main scanner skipped
-                    if (ScanResult.SKIPPED.equals(scanResult)) scanResult = alternateScanResult;
+                    if (videoData.isSkippedScan(movieScanner.getScannerName())) {
+                        LOG.info("Movie scan skipped for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
+                        scanResult = ScanResult.SKIPPED;
+                    } else {
+                        LOG.info("Scanning movie data for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
+                        scanResult = movieScanner.scan(videoData);
+                    }
                 } catch (Exception error) {
-                    // set to ERROR if previous scanner has been skipped
-                    if (ScanResult.SKIPPED.equals(scanResult)) scanResult = ScanResult.ERROR;
-                    
-                    LOG.error("Failed scanning movie with {} alternate scanner", movieScanner.getScannerName());
-                    LOG.warn("Alternate scanning error", error);
+                    scanResult = ScanResult.ERROR;
+                    LOG.error("Failed scanning movie with {} scanner", movieScanner.getScannerName());
+                    LOG.warn("Scanning error", error);
                 }
             }
-        }
+            if (ScanResult.OK.equals(scanResult)) {
+            	break;
+            }
+		}       
 
+        
         // evaluate scan result
         if (ScanResult.OK.equals(scanResult)) {
             LOG.debug("Movie {}-'{}', scanned OK", videoData.getId(), videoData.getTitle());
@@ -166,52 +157,37 @@ public class OnlineScannerService {
      * @param series
      */
     public void scanSeries(Series series) {
-        ScanResult scanResult;
+    	List<String> scanners = Arrays.asList(SERIES_SCANNER_PRIO.split(","));
+		ScanResult scanResult = null;
 
-        ISeriesScanner seriesScanner = registeredSeriesScanner.get(SERIES_SCANNER);
-        if (seriesScanner == null) {
-            LOG.error("Series scanner '{}' not registered", SERIES_SCANNER);
-            scanResult = ScanResult.ERROR;
-        } else {
-
-            // scan series
-            try {
-                if (series.isSkippedScan(seriesScanner.getScannerName())) {
-                    LOG.warn("Series scan skipped for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
-                    scanResult = ScanResult.SKIPPED;
-                } else {
-                    LOG.info("Scanning series data for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
-                    scanResult = seriesScanner.scan(series);
-                }
-            } catch (Exception error) {
+    	for (String scanner : scanners) {
+    		ISeriesScanner seriesScanner = registeredSeriesScanner.get(scanner);
+            if (seriesScanner == null) {
+                LOG.error("Series scanner '{}' not registered", scanner);
                 scanResult = ScanResult.ERROR;
-                LOG.error("Failed scanning series data with {} scanner", seriesScanner.getScannerName());
-                LOG.warn("Scanning error", error);
-            }
-        }
-        
-        // alternate scanning if main scanner failed or not registered; alternate scanning can be forced
-        boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.series.alternate.always", Boolean.FALSE);
-        if (!ScanResult.OK.equals(scanResult) || useAlternate) {
-            seriesScanner = registeredSeriesScanner.get(SERIES_SCANNER_ALT);
+            } else {
 
-            if (seriesScanner != null && !series.isSkippedScan(seriesScanner.getScannerName())) {
-                LOG.info("Alternate scanning series data for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
-
+                // scan series
                 try {
-                    ScanResult alternateScanResult = seriesScanner.scan(series);
-                    
-                    // set alternate scan result if main scanner skipped
-                    if (ScanResult.SKIPPED.equals(scanResult)) scanResult = alternateScanResult;
+                    if (series.isSkippedScan(seriesScanner.getScannerName())) {
+                        LOG.warn("Series scan skipped for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
+                        scanResult = ScanResult.SKIPPED;
+                    } else {
+                        LOG.info("Scanning series data for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
+                        scanResult = seriesScanner.scan(series);
+                    }
                 } catch (Exception error) {
-                    // set to ERROR if previous scanner has been skipped
-                    if (ScanResult.SKIPPED.equals(scanResult)) scanResult = ScanResult.ERROR;
-                        
-                    LOG.error("Failed scanning series data with {} alternate scanner", seriesScanner.getScannerName());
-                    LOG.warn("Alternate scanning error", error);
+                    scanResult = ScanResult.ERROR;
+                    LOG.error("Failed scanning series data with {} scanner", seriesScanner.getScannerName());
+                    LOG.warn("Scanning error", error);
                 }
             }
-        }
+            
+            if (ScanResult.OK.equals(scanResult)) {
+            	break;
+            }
+    	}
+
 
         // evaluate scan result
         if (ScanResult.OK.equals(scanResult)) {
@@ -242,54 +218,38 @@ public class OnlineScannerService {
      * @param person
      */
     public void scanPerson(Person person) {
-        ScanResult scanResult;
+    	List<String> scanners = Arrays.asList(PERSON_SCANNER_PRIO.split(","));
+    	ScanResult scanResult = null;
         
-        IPersonScanner personScanner = registeredPersonScanner.get(PERSON_SCANNER);
-        if (personScanner == null) {
-            LOG.error("Person scanner '{}' not registered", PERSON_SCANNER);
-            scanResult = ScanResult.ERROR;
-        } else {
-            LOG.info("Scanning for information on person '{}' using {}", person.getName(), personScanner.getScannerName());
-    
-            // scan person data
-            try {
-                if (person.isSkippedScan(personScanner.getScannerName())) {
-                    LOG.info("Person scan skipped for '{}' using {}", person.getName(), personScanner.getScannerName());
-                    scanResult = ScanResult.SKIPPED;
-                } else {
-                    LOG.info("Scanning person data for '{}' using {}", person.getName(), personScanner.getScannerName());
-                    scanResult = personScanner.scan(person);
-                }
-            } catch (Exception error) {
+    	for (String scanner : scanners) {
+    		IPersonScanner personScanner = registeredPersonScanner.get(scanner);
+            if (personScanner == null) {
+                LOG.error("Person scanner '{}' not registered", scanner);
                 scanResult = ScanResult.ERROR;
-                LOG.error("Failed scanning person (ID '{}') data with scanner {} ", person.getId(), personScanner.getScannerName());
-                LOG.warn("Scanning error", error);
-            }
-        }
+            } else {
+                LOG.info("Scanning for information on person '{}' using {}", person.getName(), personScanner.getScannerName());
         
-        // alternate scanning if main scanner failed or not registered; alternate scanning can be forced
-        boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.person.alternate.always", Boolean.FALSE);
-        if (!ScanResult.OK.equals(scanResult) || useAlternate) {
-            personScanner = registeredPersonScanner.get(PERSON_SCANNER_ALT);
-
-            if (personScanner != null && !person.isSkippedScan(personScanner.getScannerName())) {
-                LOG.info("Alternate scanning for information on person '{}' using {}", person.getName(), personScanner.getScannerName());
-
+                // scan person data
                 try {
-                    ScanResult alternateScanResult = personScanner.scan(person);
-                    
-                    // set alternate scan result if main scanner skipped
-                    if (ScanResult.SKIPPED.equals(scanResult)) scanResult = alternateScanResult;
+                    if (person.isSkippedScan(personScanner.getScannerName())) {
+                        LOG.info("Person scan skipped for '{}' using {}", person.getName(), personScanner.getScannerName());
+                        scanResult = ScanResult.SKIPPED;
+                    } else {
+                        LOG.info("Scanning person data for '{}' using {}", person.getName(), personScanner.getScannerName());
+                        scanResult = personScanner.scan(person);
+                    }
                 } catch (Exception error) {
-                    // set to ERROR if previous scanner has been skipped
-                    if (ScanResult.SKIPPED.equals(scanResult)) scanResult = ScanResult.ERROR;
-                    
-                    LOG.error("Failed scanning person (ID '{}') data with alternate scanner {}", person.getId(), personScanner.getScannerName());
-                    LOG.warn("Alternate scanning error", error);
+                    scanResult = ScanResult.ERROR;
+                    LOG.error("Failed scanning person (ID '{}') data with scanner {} ", person.getId(), personScanner.getScannerName());
+                    LOG.warn("Scanning error", error);
                 }
             }
-        }
-
+            
+            if (ScanResult.OK.equals(scanResult)){
+            	break;
+            }
+		}
+        
         // evaluate status
         if (ScanResult.OK.equals(scanResult)) {
             LOG.debug("Person {}-'{}', scanned OK", person.getId(), person.getName());
@@ -321,53 +281,38 @@ public class OnlineScannerService {
      * @param person
      */
     public void scanFilmography(Person person) {
-        ScanResult scanResult;
+    	List<String> scanners = Arrays.asList(FILMOGRAPHY_SCANNER_PRIO.split(","));
+        ScanResult scanResult = null;
 
-    	IFilmographyScanner filmographyScanner = registeredFilmographyScanner.get(FILMOGRAPHY_SCANNER);
-        if (filmographyScanner == null) {
-            LOG.error("Filmography scanner '{}' not registered", FILMOGRAPHY_SCANNER);
-            scanResult = ScanResult.ERROR;
-        } else {
-        	LOG.info("Scanning for filmography of person '{}' using {}", person.getName(), filmographyScanner.getScannerName());
-
-            // scan filmography
-            try {
-                if (person.isSkippedScan(filmographyScanner.getScannerName())) {
-                    LOG.info("Filmography scan skipped for '{}' using {}", person.getName(), filmographyScanner.getScannerName());
-                    scanResult = ScanResult.SKIPPED;
-                } else {
-                    LOG.info("Scanning filmography data for '{}' using {}", person.getName(), filmographyScanner.getScannerName());
-                    scanResult = filmographyScanner.scanFilmography(person);
-                }
-            } catch (Exception error) {
+        for (String scanner : scanners) {
+        	IFilmographyScanner filmographyScanner = registeredFilmographyScanner.get(scanner);
+            if (filmographyScanner == null) {
+                LOG.error("Filmography scanner '{}' not registered", scanner);
                 scanResult = ScanResult.ERROR;
-                LOG.error("Failed scanning person filmography (ID '{}') data with scanner {} ", person.getId(), filmographyScanner.getScannerName());
-                LOG.warn("Scanning error", error);
-            }
-        }
-        
-        // alternate scanning if main scanner failed or not registered
-        // NOTE: no alternate scanning can be forced cause that would reset the filmography from main scanner
-        if (!ScanResult.OK.equals(scanResult)) {
-        	filmographyScanner = registeredFilmographyScanner.get(FILMOGRAPHY_SCANNER_ALT);
+            } else {
+            	LOG.info("Scanning for filmography of person '{}' using {}", person.getName(), filmographyScanner.getScannerName());
 
-            if (filmographyScanner != null && !person.isSkippedScan(filmographyScanner.getScannerName())) {
-            	LOG.info("Alternate scanning for filmography of person '{}' using {}", person.getName(), filmographyScanner.getScannerName());
-
+                // scan filmography
                 try {
-                    ScanResult alternateScanResult = filmographyScanner.scanFilmography(person);
-                    
-                    // set alternate scan result if main scanner skipped
-                    if (ScanResult.SKIPPED.equals(scanResult)) scanResult = alternateScanResult;
+                    if (person.isSkippedScan(filmographyScanner.getScannerName())) {
+                        LOG.info("Filmography scan skipped for '{}' using {}", person.getName(), filmographyScanner.getScannerName());
+                        scanResult = ScanResult.SKIPPED;
+                    } else {
+                        LOG.info("Scanning filmography data for '{}' using {}", person.getName(), filmographyScanner.getScannerName());
+                        scanResult = filmographyScanner.scanFilmography(person);
+                    }
                 } catch (Exception error) {
-                    // set to ERROR if previous scanner has been skipped
-                    if (ScanResult.SKIPPED.equals(scanResult)) scanResult = ScanResult.ERROR;
-                            
-                    LOG.error("Failed scanning person filmography (ID '{}') data with alternate scanner {} ", person.getId(), filmographyScanner.getScannerName());
-                    LOG.warn("Alternate scanning error", error);
+                    scanResult = ScanResult.ERROR;
+                    LOG.error("Failed scanning person filmography (ID '{}') data with scanner {} ", person.getId(), filmographyScanner.getScannerName());
+                    LOG.warn("Scanning error", error);
                 }
             }
-        }
+            
+            if (ScanResult.OK.equals(scanResult)) {
+            	break;
+            }
+		}
+    	
 
         // evaluate scan result
         if (ScanResult.OK.equals(scanResult)) {
