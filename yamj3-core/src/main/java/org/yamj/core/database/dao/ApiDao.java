@@ -290,6 +290,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", vd.season_id AS seasonId");
         sbSQL.append(", null AS season");
         sbSQL.append(", vd.episode AS episode");
+        sbSQL.append(", vd.status AS status");
         sbSQL.append(", (vd.watched_nfo or vd.watched_file or vd.watched_api) as watched");
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "vd"));
 
@@ -634,6 +635,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", null AS seasonId");
         sbSQL.append(", null AS season");
         sbSQL.append(", null AS episode");
+        sbSQL.append(", ser.status AS status");
         sbSQL.append(", (SELECT min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched ");
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "ser"));
 
@@ -932,6 +934,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", sea.id AS seasonId");
         sbSQL.append(", sea.season AS season");
         sbSQL.append(", null AS episode");
+        sbSQL.append(", sea.status AS status");
         sbSQL.append(", (SELECT min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid where vid.season_id=sea.id) as watched ");
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "sea"));
 
@@ -2000,6 +2003,8 @@ public class ApiDao extends HibernateDao {
                 LOG.trace("Adding boxed sets for ID {}", options.getId());
                 video.setBoxedSets(getBoxedSetsForId(type, options.getId()));
             }
+            
+     
             
             if (params.hasDataItem(DataItem.ARTWORK)) {
                 LOG.trace("Adding artwork for ID {}", options.getId());
