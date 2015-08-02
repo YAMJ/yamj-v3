@@ -54,7 +54,7 @@ public class FilenameScanner {
     private static final Pattern SET_PATTERN = PatternUtils.ipatt("\\[SET(?:\\s|-)([^\\[\\]]*)\\]");
     // Number at the end of string preceded with '-'
     private static final Pattern SET_INDEX_PATTERN = PatternUtils.patt("-\\s*(\\d+)\\s*$");
-    private static final Pattern TV_PATTERN = PatternUtils.ipatt("(?<![0-9])((s[0-9]{1,4})|[0-9]{1,2})?(?:(\\s|\\.|x))??((?:(e|x)\\s??[0-9]+)+)");
+    private static final Pattern TV_PATTERN = PatternUtils.ipatt("(?<![0-9])((s[0-9]{1,4})|[0-9]{1,2})(?:(\\s|\\.|x))??((?:(e|x)\\s??[0-9]+)+)|\\s+((?:e[0-9]+)+)");
     private static final Pattern SEASON_PATTERN = PatternUtils.ipatt("s{0,1}([0-9]+)(\\s|\\.)??[ex-]");
     private static final Pattern EPISODE_PATTERN = PatternUtils.ipatt("[ex]\\s??([0-9]+)");
 	private static final Pattern SITE_INFO_PATTERN = PatternUtils.ipatt("\\[[^\\]]*\\]\\s");
