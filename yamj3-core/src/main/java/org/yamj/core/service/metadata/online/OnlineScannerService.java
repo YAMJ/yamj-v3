@@ -110,13 +110,10 @@ public class OnlineScannerService {
             }
 
             if (ScanResult.OK.equals(innerResult)) {
-                // scan OK
+                // scanned OK
                 scanResult = ScanResult.OK;
-                break;
-            } else if (!useAlternate) {
-                // if no alternate then set scan result to inner result
-                scanResult = innerResult;
-                break;
+                // no alternate scanning then break the loop
+                if (!useAlternate) break;
             } else if (ScanResult.SKIPPED.equals(innerResult)) {
                 // change nothing if scan skipped and force next scan
             } else {
@@ -181,13 +178,10 @@ public class OnlineScannerService {
             }
             
             if (ScanResult.OK.equals(innerResult)) {
-                // scan OK
+                // scanned OK
                 scanResult = ScanResult.OK;
-                break;
-            } else if (!useAlternate) {
-                // if no alternate then set scan result to inner result
-                scanResult = innerResult;
-                break;
+                // no alternate scanning then break the loop
+                if (!useAlternate) break;
             } else if (ScanResult.SKIPPED.equals(innerResult)) {
                 // change nothing if scan skipped and force next scan
             } else {
@@ -253,13 +247,10 @@ public class OnlineScannerService {
             }
             
             if (ScanResult.OK.equals(innerResult)) {
-                // scan OK
+                // scanned OK
                 scanResult = ScanResult.OK;
-                break;
-            } else if (!useAlternate) {
-                // if no alternate then set scan result to inner result
-                scanResult = innerResult;
-                break;
+                // no alternate scanning then break the loop
+                if (!useAlternate) break;
             } else if (ScanResult.SKIPPED.equals(innerResult)) {
                 // change nothing if scan skipped and force next scan
             } else {
@@ -299,7 +290,6 @@ public class OnlineScannerService {
      * @param person
      */
     public void scanFilmography(Person person) {
-        boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.filmography.alternate.always", Boolean.FALSE);
         ScanResult scanResult = null;
 
         for (String scanner : FILMOGRAPHY_SCANNER) {
@@ -328,10 +318,6 @@ public class OnlineScannerService {
             if (ScanResult.OK.equals(innerResult)) {
                 // scan OK
                 scanResult = ScanResult.OK;
-                break;
-            } else if (!useAlternate) {
-                // if no alternate then set scan result to inner result
-                scanResult = innerResult;
                 break;
             } else if (ScanResult.SKIPPED.equals(innerResult)) {
                 // change nothing if scan skipped and force next scan
