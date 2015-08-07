@@ -47,14 +47,6 @@ public class UpgradeDatabaseService {
             LOG.warn("Failed upgrade 'patchTrailers'", ex);
         }
 
-        // Issues: enhancement
-        // Date:   21.07.2015
-        try {
-            upgradeDatabaseDao.patchArtworkConfig();
-        } catch (Exception ex) {
-            LOG.warn("Failed upgrade 'patchArtworkConfig'", ex);
-        }
-
         // Issues: #234
         // Date:   24.07.2015
         try {
@@ -101,6 +93,14 @@ public class UpgradeDatabaseService {
             upgradeDatabaseDao.patchLanguageSubtitles();
         } catch (Exception ex) {
             LOG.warn("Failed upgrade 'patchLanguageSubtitles'", ex);
+        }
+
+        // Issues: #237
+        // Date:   07.08.2015
+        try {
+            upgradeDatabaseDao.patchArtworkConfig();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchArtworkConfig'", ex);
         }
     }
 }

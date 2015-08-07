@@ -101,43 +101,6 @@ public class UpgradeDatabaseDao extends HibernateDao {
     }
     
     /**
-     * Issues: enhancement
-     * Date:   21.07.2015
-     */
-    public void patchArtworkConfig() {
-        currentSession()
-            .createSQLQuery("UPDATE configuration set config_value='plugin_movie,alternate_movie,tmdb,fanarttv,yahoo' where config_key='yamj3.artwork.scanner.poster.movie.priorities'")
-            .executeUpdate();
-        currentSession()
-            .createSQLQuery("UPDATE configuration set config_value='plugin_series,alternate_series,tvdb' where config_key='yamj3.artwork.scanner.poster.tvshow.priorities'")
-            .executeUpdate();
-        currentSession()
-            .createSQLQuery("UPDATE configuration set config_value='plugin_movie,alternate_movie,tmdb' where config_key='yamj3.artwork.scanner.poster.boxset.priorities'")
-            .executeUpdate();
-        currentSession()
-            .createSQLQuery("UPDATE configuration set config_value='plugin_movie,alternate_movie,tmdb,fanarttv' where config_key='yamj3.artwork.scanner.fanart.movie.priorities'")
-            .executeUpdate();
-        currentSession()
-            .createSQLQuery("UPDATE configuration set config_value='plugin_series,alternate_series,tvdb' where config_key='yamj3.artwork.scanner.fanart.tvshow.priorities'")
-            .executeUpdate();
-        currentSession()
-            .createSQLQuery("UPDATE configuration set config_value='plugin_movie,alternate_movie,tmdb' where config_key='yamj3.artwork.scanner.fanart.boxset.priorities'")
-            .executeUpdate();
-        currentSession()
-            .createSQLQuery("UPDATE configuration set config_value='plugin_series,alternate_series,tvdb' where config_key='yamj3.artwork.scanner.banner.tvshow.priorities'")
-            .executeUpdate();
-        currentSession()
-            .createSQLQuery("UPDATE configuration set config_value='plugin_movie,alternate_movie,tmdb' where config_key='yamj3.artwork.scanner.banner.boxset.priorities'")
-            .executeUpdate();
-        currentSession()
-            .createSQLQuery("UPDATE configuration set config_value='plugin_series,alternate_series,tvdb' where config_key='yamj3.artwork.scanner.videoimage.priorities'")
-            .executeUpdate();
-        currentSession()
-            .createSQLQuery("UPDATE configuration set config_value='plugin_person,alternate_person,tmdb' where config_key='yamj3.artwork.scanner.photo.priorities'")
-            .executeUpdate();
-    }
-    
-    /**
      * Issues: #234
      * Date:   24.07.2015
      */
@@ -547,5 +510,42 @@ public class UpgradeDatabaseDao extends HibernateDao {
         currentSession()
         .createSQLQuery("ALTER TABLE subtitle DROP language")
         .executeUpdate();
+    }
+
+    /**
+     * Issues: #237
+     * Date:   07.08.2015
+     */
+    public void patchArtworkConfig() {
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='movie_scanner,tmdb,fanarttv,yahoo' where config_key='yamj3.artwork.scanner.poster.movie.priorities'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='series_scanner,tvdb' where config_key='yamj3.artwork.scanner.poster.tvshow.priorities'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='movie_scanner,tmdb' where config_key='yamj3.artwork.scanner.poster.boxset.priorities'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='movie_scanner,tmdb,fanarttv' where config_key='yamj3.artwork.scanner.fanart.movie.priorities'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='series_scanner,tvdb' where config_key='yamj3.artwork.scanner.fanart.tvshow.priorities'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='movie_scanner,tmdb' where config_key='yamj3.artwork.scanner.fanart.boxset.priorities'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='series_scanner,tvdb' where config_key='yamj3.artwork.scanner.banner.tvshow.priorities'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='movie_scanner,tmdb' where config_key='yamj3.artwork.scanner.banner.boxset.priorities'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='series_scanner,tvdb' where config_key='yamj3.artwork.scanner.videoimage.priorities'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='person_scanner,tmdb' where config_key='yamj3.artwork.scanner.photo.priorities'")
+            .executeUpdate();
     }
 }

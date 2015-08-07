@@ -24,10 +24,8 @@ package org.yamj.common.tools;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -70,6 +68,17 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
 
     public static String getProperty(String key, String defaultValue) {
         return StringUtils.trimToEmpty(PROPERTIES.getProperty(key, defaultValue));
+    }
+
+    public static Set<String> getPropertyAsOrderedSet(String key, String defaultValue) {
+        final String prop = StringUtils.trimToEmpty(PROPERTIES.getProperty(key, defaultValue));
+        final LinkedHashSet<String> result = new LinkedHashSet<>();
+        for (String val : prop.toLowerCase().split(",")) {
+            if (StringUtils.isNotBlank(val)) {
+                result.add(val);
+            }
+        }
+        return result;
     }
 
     /**

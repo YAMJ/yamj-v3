@@ -22,12 +22,7 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,26 +34,16 @@ import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.database.model.type.SourceType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
-
 
 @Service("onlineScannerService")
 public class OnlineScannerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(OnlineScannerService.class);
-    public static final String MOVIE_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie", "tmdb");
-    public static final String MOVIE_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie.alternate", "");
-    public static final String MOVIE_SCANNER_PRIO = PropertyTools.getProperty("yamj3.sourcedb.scanner.movie.priority", "");
-    public static final String SERIES_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.series", "tvdb");
-    public static final String SERIES_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.alternate", "");
-    public static final String SERIES_SCANNER_PRIO = PropertyTools.getProperty("yamj3.sourcedb.scanner.series.priority", "");
-    public static final String PERSON_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.person", "tmdb");
-    public static final String PERSON_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.person.alternate", "");
-    public static final String PERSON_SCANNER_PRIO = PropertyTools.getProperty("yamj3.sourcedb.scanner.person.priority", "");
-    public static final String FILMOGRAPHY_SCANNER = PropertyTools.getProperty("yamj3.sourcedb.scanner.filmography", "tmdb");
-    public static final String FILMOGRAPHY_SCANNER_ALT = PropertyTools.getProperty("yamj3.sourcedb.scanner.filmography.alternate", "");
-    public static final String FILMOGRAPHY_SCANNER_PRIO = PropertyTools.getProperty("yamj3.sourcedb.filmography.person.priority", "");
+    public static final Set<String> MOVIE_SCANNER = PropertyTools.getPropertyAsOrderedSet("yamj3.sourcedb.scanner.movie", "tmdb,imdb");
+    public static final Set<String> SERIES_SCANNER = PropertyTools.getPropertyAsOrderedSet("yamj3.sourcedb.scanner.series", "tvdb,tmdb");
+    public static final Set<String> PERSON_SCANNER = PropertyTools.getPropertyAsOrderedSet("yamj3.sourcedb.scanner.person", "tmdb,imdb");
+    public static final Set<String> FILMOGRAPHY_SCANNER = PropertyTools.getPropertyAsOrderedSet("yamj3.sourcedb.scanner.filmography", "tmdb");
     
     private final HashMap<String, IMovieScanner> registeredMovieScanner = new HashMap<>();
     private final HashMap<String, ISeriesScanner> registeredSeriesScanner = new HashMap<>();
@@ -98,35 +83,48 @@ public class OnlineScannerService {
      * @param videoData
      */
     public void scanMovie(VideoData videoData) {
-        List<String> scanners = Arrays.asList(MOVIE_SCANNER_PRIO.split(","));
-    	ScanResult scanResult = null;
-
-    	for (String scanner : scanners) {
+        boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.movie.alternate.always", Boolean.FALSE);
+        ScanResult scanResult = null;
+        System.err.println(MOVIE_SCANNER);
+        
+    	for (String scanner : MOVIE_SCANNER) {
+    	    // holds the inner scan result
+    	    ScanResult innerResult = ScanResult.ERROR;
+    	    
     		IMovieScanner movieScanner = registeredMovieScanner.get(scanner);
             if (movieScanner == null) {
                 LOG.error("Movie scanner '{}' not registered", scanner);
-                scanResult = ScanResult.ERROR;
             } else {
                 // scan video data
                 try {
                     if (videoData.isSkippedScan(movieScanner.getScannerName())) {
                         LOG.info("Movie scan skipped for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
-                        scanResult = ScanResult.SKIPPED;
+                        innerResult = ScanResult.SKIPPED;
                     } else {
                         LOG.info("Scanning movie data for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
-                        scanResult = movieScanner.scan(videoData);
+                        innerResult = movieScanner.scan(videoData);
                     }
                 } catch (Exception error) {
-                    scanResult = ScanResult.ERROR;
                     LOG.error("Failed scanning movie with {} scanner", movieScanner.getScannerName());
                     LOG.warn("Scanning error", error);
                 }
             }
-            if (ScanResult.OK.equals(scanResult)) {
-            	break;
+
+            if (ScanResult.OK.equals(innerResult)) {
+                // scan OK
+                scanResult = ScanResult.OK;
+                break;
+            } else if (!useAlternate) {
+                // if no alternate then set scan result to inner result
+                scanResult = innerResult;
+                break;
+            } else if (ScanResult.SKIPPED.equals(innerResult)) {
+                // change nothing if scan skipped and force next scan
+            } else {
+                // just set scan result to inner result if no scan result before
+                scanResult = (scanResult == null ? innerResult : scanResult);
             }
 		}       
-
         
         // evaluate scan result
         if (ScanResult.OK.equals(scanResult)) {
@@ -157,34 +155,45 @@ public class OnlineScannerService {
      * @param series
      */
     public void scanSeries(Series series) {
-    	List<String> scanners = Arrays.asList(SERIES_SCANNER_PRIO.split(","));
+        boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.series.alternate.always", Boolean.FALSE);
 		ScanResult scanResult = null;
 
-    	for (String scanner : scanners) {
+    	for (String scanner : SERIES_SCANNER) {
+            // holds the inner scan result
+            ScanResult innerResult = ScanResult.ERROR;
+            
     		ISeriesScanner seriesScanner = registeredSeriesScanner.get(scanner);
             if (seriesScanner == null) {
                 LOG.error("Series scanner '{}' not registered", scanner);
-                scanResult = ScanResult.ERROR;
             } else {
-
                 // scan series
                 try {
                     if (series.isSkippedScan(seriesScanner.getScannerName())) {
                         LOG.warn("Series scan skipped for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
-                        scanResult = ScanResult.SKIPPED;
+                        innerResult = ScanResult.SKIPPED;
                     } else {
                         LOG.info("Scanning series data for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
-                        scanResult = seriesScanner.scan(series);
+                        innerResult = seriesScanner.scan(series);
                     }
                 } catch (Exception error) {
-                    scanResult = ScanResult.ERROR;
                     LOG.error("Failed scanning series data with {} scanner", seriesScanner.getScannerName());
                     LOG.warn("Scanning error", error);
                 }
             }
             
-            if (ScanResult.OK.equals(scanResult)) {
-            	break;
+            if (ScanResult.OK.equals(innerResult)) {
+                // scan OK
+                scanResult = ScanResult.OK;
+                break;
+            } else if (!useAlternate) {
+                // if no alternate then set scan result to inner result
+                scanResult = innerResult;
+                break;
+            } else if (ScanResult.SKIPPED.equals(innerResult)) {
+                // change nothing if scan skipped and force next scan
+            } else {
+                // just set scan result to inner result if no scan result before
+                scanResult = (scanResult == null ? innerResult : scanResult);
             }
     	}
 
@@ -218,35 +227,45 @@ public class OnlineScannerService {
      * @param person
      */
     public void scanPerson(Person person) {
-    	List<String> scanners = Arrays.asList(PERSON_SCANNER_PRIO.split(","));
+        boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.person.alternate.always", Boolean.FALSE);
     	ScanResult scanResult = null;
         
-    	for (String scanner : scanners) {
+    	for (String scanner : PERSON_SCANNER) {
+            // holds the inner scan result
+            ScanResult innerResult = ScanResult.ERROR;
+            
     		IPersonScanner personScanner = registeredPersonScanner.get(scanner);
             if (personScanner == null) {
                 LOG.error("Person scanner '{}' not registered", scanner);
-                scanResult = ScanResult.ERROR;
             } else {
-                LOG.info("Scanning for information on person '{}' using {}", person.getName(), personScanner.getScannerName());
-        
                 // scan person data
                 try {
                     if (person.isSkippedScan(personScanner.getScannerName())) {
                         LOG.info("Person scan skipped for '{}' using {}", person.getName(), personScanner.getScannerName());
-                        scanResult = ScanResult.SKIPPED;
+                        innerResult = ScanResult.SKIPPED;
                     } else {
                         LOG.info("Scanning person data for '{}' using {}", person.getName(), personScanner.getScannerName());
-                        scanResult = personScanner.scan(person);
+                        innerResult = personScanner.scan(person);
                     }
                 } catch (Exception error) {
-                    scanResult = ScanResult.ERROR;
                     LOG.error("Failed scanning person (ID '{}') data with scanner {} ", person.getId(), personScanner.getScannerName());
                     LOG.warn("Scanning error", error);
                 }
             }
             
-            if (ScanResult.OK.equals(scanResult)){
-            	break;
+            if (ScanResult.OK.equals(innerResult)) {
+                // scan OK
+                scanResult = ScanResult.OK;
+                break;
+            } else if (!useAlternate) {
+                // if no alternate then set scan result to inner result
+                scanResult = innerResult;
+                break;
+            } else if (ScanResult.SKIPPED.equals(innerResult)) {
+                // change nothing if scan skipped and force next scan
+            } else {
+                // just set scan result to inner result if no scan result before
+                scanResult = (scanResult == null ? innerResult : scanResult);
             }
 		}
         
@@ -281,39 +300,48 @@ public class OnlineScannerService {
      * @param person
      */
     public void scanFilmography(Person person) {
-    	List<String> scanners = Arrays.asList(FILMOGRAPHY_SCANNER_PRIO.split(","));
+        boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.filmography.alternate.always", Boolean.FALSE);
         ScanResult scanResult = null;
 
-        for (String scanner : scanners) {
-        	IFilmographyScanner filmographyScanner = registeredFilmographyScanner.get(scanner);
+        for (String scanner : FILMOGRAPHY_SCANNER) {
+            // holds the inner scan result
+            ScanResult innerResult = ScanResult.ERROR;
+            
+            IFilmographyScanner filmographyScanner = registeredFilmographyScanner.get(scanner);
             if (filmographyScanner == null) {
                 LOG.error("Filmography scanner '{}' not registered", scanner);
-                scanResult = ScanResult.ERROR;
             } else {
-            	LOG.info("Scanning for filmography of person '{}' using {}", person.getName(), filmographyScanner.getScannerName());
-
                 // scan filmography
                 try {
                     if (person.isSkippedScan(filmographyScanner.getScannerName())) {
                         LOG.info("Filmography scan skipped for '{}' using {}", person.getName(), filmographyScanner.getScannerName());
-                        scanResult = ScanResult.SKIPPED;
+                        innerResult = ScanResult.SKIPPED;
                     } else {
                         LOG.info("Scanning filmography data for '{}' using {}", person.getName(), filmographyScanner.getScannerName());
-                        scanResult = filmographyScanner.scanFilmography(person);
+                        innerResult = filmographyScanner.scanFilmography(person);
                     }
                 } catch (Exception error) {
-                    scanResult = ScanResult.ERROR;
                     LOG.error("Failed scanning person filmography (ID '{}') data with scanner {} ", person.getId(), filmographyScanner.getScannerName());
                     LOG.warn("Scanning error", error);
                 }
             }
             
-            if (ScanResult.OK.equals(scanResult)) {
-            	break;
+            if (ScanResult.OK.equals(innerResult)) {
+                // scan OK
+                scanResult = ScanResult.OK;
+                break;
+            } else if (!useAlternate) {
+                // if no alternate then set scan result to inner result
+                scanResult = innerResult;
+                break;
+            } else if (ScanResult.SKIPPED.equals(innerResult)) {
+                // change nothing if scan skipped and force next scan
+            } else {
+                // just set scan result to inner result if no scan result before
+                scanResult = (scanResult == null ? innerResult : scanResult);
             }
 		}
     	
-
         // evaluate scan result
         if (ScanResult.OK.equals(scanResult)) {
             LOG.debug("Person filmography {}-'{}', scanned OK", person.getId(), person.getName());
@@ -342,11 +370,13 @@ public class OnlineScannerService {
     }
 
     public boolean scanNFO(String nfoContent, InfoDTO dto) {
-        INfoScanner nfoScanner;
+        INfoScanner nfoScanner = null;
         if (dto.isTvShow()) {
-            nfoScanner = this.registeredSeriesScanner.get(SERIES_SCANNER);
+            Iterator<String> iter = SERIES_SCANNER.iterator();
+            if (iter.hasNext()) nfoScanner = this.registeredSeriesScanner.get(iter.next());
         } else {
-            nfoScanner = this.registeredMovieScanner.get(MOVIE_SCANNER);
+            Iterator<String> iter = MOVIE_SCANNER.iterator();
+            if (iter.hasNext()) nfoScanner = this.registeredMovieScanner.get(iter.next());
         }
 
         boolean autodetect = this.configService.getBooleanProperty("nfo.autodetect.scanner", Boolean.FALSE);
@@ -378,48 +408,27 @@ public class OnlineScannerService {
         return foundInfo;
     }
     
-    public SourceType determineSourceType(MetaDataType type, String source) {
+    public boolean isKnownScanner(MetaDataType type, String source) {
         switch(type) {
             case SERIES:
             case SEASON:
             case EPISODE:
-                if (!registeredSeriesScanner.containsKey(source)) {
-                    return SourceType.UNKNOWN;
+                if (registeredSeriesScanner.containsKey(source)) {
+                    return true;
                 }
-                if (SERIES_SCANNER.equals(source)) {
-                    return SourceType.MAIN;
-                }
-                if (SERIES_SCANNER_ALT.equals(source)) {
-                    return SourceType.ALTERNATE;
-                }
-                return SourceType.KNOWN;
-                                
+                return false;
             case MOVIE:
-                if (!registeredMovieScanner.containsKey(source)) {
-                    return SourceType.UNKNOWN;
+                if (registeredMovieScanner.containsKey(source)) {
+                    return true;
                 }
-                if (MOVIE_SCANNER.equals(source)) {
-                    return SourceType.MAIN;
-                }
-                if (MOVIE_SCANNER_ALT.equals(source)) {
-                    return SourceType.ALTERNATE;
-                }
-                return SourceType.KNOWN;
-                
+                return false;
             case PERSON:
-                if (!registeredPersonScanner.containsKey(source)) {
-                    return SourceType.UNKNOWN;
+                if (registeredPersonScanner.containsKey(source)) {
+                    return true;
                 }
-                if (PERSON_SCANNER.equals(source)) {
-                    return SourceType.MAIN;
-                }
-                if (PERSON_SCANNER_ALT.equals(source)) {
-                    return SourceType.ALTERNATE;
-                }
-                return SourceType.KNOWN;
-                
+                return false;
             default:
-                return SourceType.UNKNOWN;
+                return false;
         }
     }
 }

@@ -43,7 +43,6 @@ import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.dao.*;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;
-import org.yamj.core.database.model.type.SourceType;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 
 @Service("jsonApiStorageService")
@@ -689,9 +688,8 @@ public class JsonApiStorageService {
     
     @Transactional
     public ApiStatus updateOnlineScan(MetaDataType type, Long id, String sourceDb, boolean disable) {
-
-        // first check if source is valid
-        if (SourceType.UNKNOWN.equals(onlineScannerService.determineSourceType(type, sourceDb))) {
+        // first check if source is known
+        if (!onlineScannerService.isKnownScanner(type, sourceDb)) {
             StringBuilder sb = new StringBuilder();
             sb.append("The sourceDb ");
             sb.append(sourceDb);
@@ -747,11 +745,8 @@ public class JsonApiStorageService {
 
     @Transactional
     public ApiStatus updateExternalId(MetaDataType type, Long id, String sourceDb, String sourceDbId) {
-        // determine source type
-        SourceType sourceType = onlineScannerService.determineSourceType(type, sourceDb);
-
-        // check if source is valid
-        if (SourceType.UNKNOWN.equals(sourceType)) {
+        // first check if source is known
+        if (!onlineScannerService.isKnownScanner(type, sourceDb)) {
             StringBuilder sb = new StringBuilder();
             sb.append("The sourceDb ");
             sb.append(sourceDb);

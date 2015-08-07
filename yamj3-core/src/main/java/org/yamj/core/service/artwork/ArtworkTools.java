@@ -30,18 +30,9 @@ import org.yamj.core.service.metadata.online.OnlineScannerService;
 
 public class ArtworkTools {
 
-    private static final String TYPE_PLUGIN_MOVIE = "plugin_movie";
-    private static final String TYPE_PLUGIN_SERIES = "plugin_series";
-    private static final String TYPE_PLUGIN_PERSON = "plugin_person";
-    private static final String TYPE_ALTERNATE_MOVIE = "alternate_movie";
-    private static final String TYPE_ALTERNATE_SERIES = "alternate_series";
-    private static final String TYPE_ALTERNATE_PERSON = "alternate_person";
-    private static final String PLUGIN_MOVIE = OnlineScannerService.MOVIE_SCANNER;
-    private static final String PLUGIN_MOVIE_ALT = OnlineScannerService.MOVIE_SCANNER_ALT;
-    private static final String PLUGIN_SERIES = OnlineScannerService.SERIES_SCANNER;
-    private static final String PLUGIN_SERIES_ALT = OnlineScannerService.SERIES_SCANNER_ALT;
-    private static final String PLUGIN_PERSON = OnlineScannerService.PERSON_SCANNER;
-    private static final String PLUGIN_PERSON_ALT = OnlineScannerService.PERSON_SCANNER_ALT;
+    private static final String TYPE_MOVIE_SCANNER = "movie_scanner";
+    private static final String TYPE_SERIES_SCANNER = "series_scanner";
+    private static final String TYPE_PERSON_SCANNER = "person_scanner";
     
     public enum HashCodeType {
         SIMPLE,
@@ -107,23 +98,28 @@ public class ArtworkTools {
     }
     
     public static Set<String> determinePriorities(final String configValue, Set<String> allowedForScan) {
-        // replace settings
-        String pattern = configValue.toLowerCase();
-        pattern = StringUtils.replace(pattern, TYPE_PLUGIN_MOVIE, PLUGIN_MOVIE);
-        pattern = StringUtils.replace(pattern, TYPE_ALTERNATE_MOVIE, PLUGIN_MOVIE_ALT);
-        pattern = StringUtils.replace(pattern, TYPE_PLUGIN_SERIES, PLUGIN_SERIES);
-        pattern = StringUtils.replace(pattern, TYPE_ALTERNATE_SERIES, PLUGIN_SERIES_ALT);
-        pattern = StringUtils.replace(pattern, TYPE_PLUGIN_PERSON, PLUGIN_PERSON);
-        pattern = StringUtils.replace(pattern, TYPE_ALTERNATE_PERSON, PLUGIN_PERSON_ALT);
-        
-        String[] splitted = StringUtils.split(pattern, ',');
-        if (splitted == null || splitted.length == 0) {
-            return Collections.emptySet();
-        }
-        Set<String> result = new LinkedHashSet<>();
-        for (String split : splitted) {
-            if (allowedForScan.contains(split)) {
-                result.add(split);
+        final Set<String> result;
+        if (StringUtils.isBlank(configValue)) {
+            result = Collections.emptySet();
+        } else {
+            result = new LinkedHashSet<>();
+            for (String config : configValue.toLowerCase().split(",")) {
+                final Set<String> checkPrios;
+                if (config.equalsIgnoreCase(TYPE_MOVIE_SCANNER)) {
+                    checkPrios = OnlineScannerService.MOVIE_SCANNER;
+                } else if (config.equalsIgnoreCase(TYPE_SERIES_SCANNER)) {
+                    checkPrios = OnlineScannerService.SERIES_SCANNER;
+                } else if (config.equalsIgnoreCase(TYPE_PERSON_SCANNER)) {
+                    checkPrios = OnlineScannerService.PERSON_SCANNER;
+                } else {
+                    checkPrios = Collections.singleton(config);
+                }
+                
+                for (String check : checkPrios) {
+                    if (allowedForScan.contains(check)) {
+                        result.add(check);
+                    }
+                }
             }
         }
         return result;
