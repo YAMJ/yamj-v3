@@ -54,6 +54,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private Long episode;
     private Boolean watched;
     private Date newest;
+    private String status;
     private List<ApiGenreDTO> genres = new ArrayList<>(0);
     private List<Studio> studios = new ArrayList<>(0);
     private List<ApiCountryDTO> countries = new ArrayList<>(0);
@@ -352,6 +353,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     }
     //</editor-fold>
 
+    
     public void addArtwork(ApiArtworkDTO newArtwork) {
         // Add a blank list if it doesn't already exist
         if (!artwork.containsKey(newArtwork.getArtworkType())) {
@@ -360,7 +362,15 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
         this.artwork.get(newArtwork.getArtworkType()).add(newArtwork);
     }
 
-    public void addCast(ApiPersonDTO newCast) {
+    public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public void addCast(ApiPersonDTO newCast) {
         // Add a blank list if it doesn't already exist
         if (!cast.containsKey(newCast.getJobType())) {
             cast.put(newCast.getJobType(), new ArrayList<ApiPersonDTO>(1));

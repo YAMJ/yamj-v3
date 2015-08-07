@@ -54,9 +54,11 @@ public class FilenameScanner {
     private static final Pattern SET_PATTERN = PatternUtils.ipatt("\\[SET(?:\\s|-)([^\\[\\]]*)\\]");
     // Number at the end of string preceded with '-'
     private static final Pattern SET_INDEX_PATTERN = PatternUtils.patt("-\\s*(\\d+)\\s*$");
-    private static final Pattern TV_PATTERN = PatternUtils.ipatt("(?<![0-9])((s[0-9]{1,4})|[0-9]{1,2})(?:(\\s|\\.|x))??((?:(e|x)\\s??[0-9]+)+)");
+    private static final Pattern TV_PATTERN = PatternUtils.ipatt("(?<![0-9])((s[0-9]{1,4})|[0-9]{1,2})(?:(\\s|\\.|x))??((?:(e|x)\\s??[0-9]+)+)|\\s+((?:e[0-9]+)+)");
     private static final Pattern SEASON_PATTERN = PatternUtils.ipatt("s{0,1}([0-9]+)(\\s|\\.)??[ex-]");
     private static final Pattern EPISODE_PATTERN = PatternUtils.ipatt("[ex]\\s??([0-9]+)");
+	private static final Pattern SITE_INFO_PATTERN = PatternUtils.ipatt("\\[[^\\]]*\\]\\s");
+	
     // Last 4 digits or last 4 digits in parenthesis
     private static final Pattern MOVIE_YEAR_PATTERN = PatternUtils.patt("\\({0,1}(\\d{4})(?:/|\\\\|\\||-){0,1}(I*)\\){0,1}$");
     // One or more '.[]_ '
@@ -177,8 +179,9 @@ public class FilenameScanner {
         private static final long serialVersionUID = 7370884465939448891L;
 
         {
-            put("XviD", PatternUtils.iwpatt("XVID"));
-            put("DivX", PatternUtils.iwpatt("DIVX|DIVX6"));
+            put("XviD", PatternUtils.iwpatt("XVID(?:-[^"+Pattern.quote(PatternUtils.WORD_DELIMITERS_STRING)+"]*)?"));
+            // add DIVX-lpdm support
+            put("DivX", PatternUtils.iwpatt("(?:DIVX|DIVX6)(?:-[^"+Pattern.quote(PatternUtils.WORD_DELIMITERS_STRING)+"]*)?"));
             put("H.264", PatternUtils.iwpatt("H264|H\\.264|X264"));
         }
     };
@@ -376,6 +379,7 @@ public class FilenameScanner {
         dto.setVideoSource(seekPatternAndUpdateRest(videoSourceMap, dto.getVideoSource(), dto, PART_PATTERNS));
 
         // SEASON + EPISODES
+        processSiteInfo(dto);
         processSeasonEpisode(dto);
         processPart(dto);
         processSets(dto);
@@ -385,6 +389,17 @@ public class FilenameScanner {
     }
 
     /**
+     * process the site show like [www.cpabien.com] video
+     * @param dto
+     */
+    private void processSiteInfo(FilenameDTO dto) {
+    	Matcher matcher = SITE_INFO_PATTERN.matcher(dto.getRest());
+        if (matcher.find()) {
+            dto.setRest(cutMatch(dto.getRest(), matcher));
+        }
+	}
+
+	/**
      * Process the Season and Episodes
      *
      * @param dto
@@ -395,8 +410,13 @@ public class FilenameScanner {
             dto.setRest(cutMatch(dto.getRest(), matcher, "./TVSHOW/."));
 
             final Matcher smatcher = SEASON_PATTERN.matcher(matcher.group(0));
-            smatcher.find();
-            int season = Integer.parseInt(smatcher.group(1));
+            // Default season for tv show like "my tv E05 - title"
+            String sseason = "01";
+            if (smatcher.find()) {
+            	sseason = smatcher.group(1);
+            }
+       
+            int season = Integer.parseInt(sseason);
             dto.setSeason(season);
 
             final Matcher ematcher = EPISODE_PATTERN.matcher(matcher.group(0));

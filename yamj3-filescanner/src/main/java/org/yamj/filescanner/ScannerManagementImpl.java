@@ -349,7 +349,8 @@ public class ScannerManagementImpl implements ScannerManagement {
 
             library.getStatistics().increment(StatType.DIRECTORY);
 
-            List<File> currentFileList = Arrays.asList(directory.listFiles());
+            File[] files = directory.listFiles();
+            List<File> currentFileList = files != null ? Arrays.asList(files) : new ArrayList<File>();
             FileTypeComparator comp = new FileTypeComparator(Boolean.FALSE);
             Collections.sort(currentFileList, comp);
 
