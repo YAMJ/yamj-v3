@@ -85,7 +85,6 @@ public class OnlineScannerService {
     public void scanMovie(VideoData videoData) {
         boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.movie.alternate.always", Boolean.FALSE);
         ScanResult scanResult = null;
-        System.err.println(MOVIE_SCANNER);
         
     	for (String scanner : MOVIE_SCANNER) {
     	    // holds the inner scan result
