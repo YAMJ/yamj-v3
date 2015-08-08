@@ -82,7 +82,7 @@ public class ImportScheduler {
                     LOG.trace("Process video stage file: {}", id);
                     mediaImportService.processVideo(id);
                     LOG.info("Processed video stage file: {}", id);
-                    
+                } else {
                     // trigger scan of media files and meta data
                     scanningScheduler.triggerScanMediaFiles();
                     scanningScheduler.triggerScanMetaData();
@@ -109,11 +109,11 @@ public class ImportScheduler {
                 id = mediaImportService.getNextStageFileId(FileType.NFO, StatusType.NEW, StatusType.UPDATED);
                 if (id != null) {
                     LOG.trace("Process nfo stage file: {}", id);
-                    boolean done = mediaImportService.processNfo(id);
+                    mediaImportService.processNfo(id);
                     LOG.info("Processed nfo stage file: {}", id);
-
+                } else {
                     // trigger scan of meta data
-                    if (done) scanningScheduler.triggerScanMetaData();
+                    scanningScheduler.triggerScanMetaData();
                 }
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
@@ -137,11 +137,11 @@ public class ImportScheduler {
                 id = mediaImportService.getNextStageFileId(FileType.IMAGE, StatusType.NEW, StatusType.UPDATED);
                 if (id != null) {
                     LOG.trace("Process image stage file: {}", id);
-                    boolean done = mediaImportService.processImage(id);
+                    mediaImportService.processImage(id);
                     LOG.info("Processed image stage file: {}", id);
-
+                } else {
                     // trigger scan of artwork
-                    if (done) scanningScheduler.triggerScanArtwork();
+                    scanningScheduler.triggerScanArtwork();
                 }
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {

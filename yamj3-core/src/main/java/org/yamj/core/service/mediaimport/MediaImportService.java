@@ -584,7 +584,7 @@ public class MediaImportService {
     }
 
     @Transactional
-    public boolean processNfo(long id) {
+    public void processNfo(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
         LOG.info("Process nfo {}-'{}'", stageFile.getId(), stageFile.getFileName());
 
@@ -594,7 +594,7 @@ public class MediaImportService {
             stageFile.setStatus(StatusType.INVALID);
             stagingDao.updateEntity(stageFile);
             // nothing to do anymore
-            return false;
+            return;
         }
 
         // process new NFO
@@ -628,9 +628,6 @@ public class MediaImportService {
                 LOG.debug("Marked series {}-'{}' as updated", series.getId(), series.getTitle());
             }
         }
-        
-        // return true if NFO file has relations to videos
-        return CollectionUtils.isNotEmpty(stageFile.getNfoRelations());
     }
 
     private boolean processNfoFile(StageFile stageFile) {
@@ -760,7 +757,7 @@ public class MediaImportService {
     }
 
     @Transactional
-    public boolean processImage(long id) {
+    public void processImage(long id) {
         StageFile stageFile = stagingDao.getStageFile(id);
         LOG.info("Process image {}-'{}'", stageFile.getId(), stageFile.getFileName());
 
@@ -783,8 +780,6 @@ public class MediaImportService {
             stageFile.setStatus(StatusType.NOTFOUND);
         }
         stagingDao.updateEntity(stageFile);
-        
-        return (found || updated);
     }
 
     private boolean processImageFile(StageFile stageFile) {

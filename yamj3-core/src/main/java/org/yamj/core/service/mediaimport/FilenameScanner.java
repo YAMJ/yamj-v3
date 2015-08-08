@@ -392,7 +392,7 @@ public class FilenameScanner {
      * process the site show like [www.cpabien.com] video
      * @param dto
      */
-    private void processSiteInfo(FilenameDTO dto) {
+    private static void processSiteInfo(FilenameDTO dto) {
     	Matcher matcher = SITE_INFO_PATTERN.matcher(dto.getRest());
         if (matcher.find()) {
             dto.setRest(cutMatch(dto.getRest(), matcher));
