@@ -120,7 +120,7 @@ public class LibrarySendScheduler {
                 }
 
                 // Don't stop sending until the scanning is completed and there are no running tasks
-                if (library.isScanningComplete() && runningCount.get() > 0) {
+                if (library.isScanningComplete() && runningCount.get() <= 0) {
                     // When we reach this point we should have completed the library sending
                     LOG.info("Sending complete for {}", library.getImportDTO().getBaseDirectory());
                     library.setSendingComplete(Boolean.TRUE);
@@ -139,8 +139,10 @@ public class LibrarySendScheduler {
     private boolean checkStatus(Library library, Future<StatusType> statusType, String directory) throws InterruptedException, ExecutionException {
         boolean sendStatus;
 
+        
         if (statusType.isDone()) {
             StatusType processingStatus = statusType.get();
+            
             if (processingStatus == StatusType.NEW) {
                 LOG.info("    Sending '{}' to core for processing.", directory);
                 sendStatus = sendToCore(library, directory);
@@ -184,7 +186,7 @@ public class LibrarySendScheduler {
             return Boolean.TRUE;
         }
 
-        LOG.debug("Sending #{}: {}", runningCount.incrementAndGet(), sendDir);
+        LOG.info("Sending #{}: {}", runningCount.incrementAndGet(), sendDir);
 
         ApplicationContext appContext = ApplicationContextProvider.getApplicationContext();
         SendToCore stc = (SendToCore) appContext.getBean("sendToCore");

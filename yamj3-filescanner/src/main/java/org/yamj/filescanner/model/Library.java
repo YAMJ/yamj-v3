@@ -25,6 +25,7 @@ package org.yamj.filescanner.model;
 import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -59,7 +60,7 @@ public class Library implements Serializable {
         this.description = "";
         this.statistics = new Statistics();
         this.directories = new HashMap<>(1);
-        this.directoryStatus = new HashMap<>(1);
+        this.directoryStatus = new LinkedHashMap<>(1);
         importDTO = new ImportDTO();
         this.scanningComplete = new AtomicBoolean(Boolean.FALSE);
         this.sendingComplete = new AtomicBoolean(Boolean.FALSE);
