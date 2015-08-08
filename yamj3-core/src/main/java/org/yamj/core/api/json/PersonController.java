@@ -140,7 +140,9 @@ public class PersonController {
         }
         
         LOG.info("Enable {} online scan for person with ID '{}'", sourcedb, id);
-        return jsonApiStorageService.updateOnlineScan(MetaDataType.PERSON, id, sourcedb, false);
+        ApiStatus apiStatus = jsonApiStorageService.updateOnlineScan(MetaDataType.PERSON, id, sourcedb, false);
+        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanPeopleData();
+        return apiStatus;
     }
 
     /**
@@ -156,6 +158,8 @@ public class PersonController {
         }
         
         LOG.info("Disable {} online scan for person with ID '{}'", sourcedb, id);
-        return jsonApiStorageService.updateOnlineScan(MetaDataType.PERSON, id, sourcedb, true);
+        ApiStatus apiStatus =  jsonApiStorageService.updateOnlineScan(MetaDataType.PERSON, id, sourcedb, true);
+        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanPeopleData();
+        return apiStatus;
     }
 }

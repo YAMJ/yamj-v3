@@ -703,34 +703,63 @@ public class JsonApiStorageService {
             if (person == null) {
                 return new ApiStatus(404, "Person for ID " + id + " not found");
             }
+            
+            final boolean changed;
             if (disable) {
-                person.disableApiScan(sourceDb);
+                changed = person.disableApiScan(sourceDb);
             } else {
-                person.enableApiScan(sourceDb);
+                changed = person.enableApiScan(sourceDb);
             }
-            commonDao.updateEntity(person);
+
+            // if skip value has changed then reset status
+            if (changed) {
+                person.setStatus(StatusType.UPDATED);
+                commonDao.updateEntity(person);
+            }
         } else if (MetaDataType.SERIES == type) {
             Series series = commonDao.getById(Series.class, id);
             if (series == null) {
                 return new ApiStatus(404, "Series for ID " + id + " not found");
             }
+        
+            final boolean changed;
             if (disable) {
-                series.disableApiScan(sourceDb);
+                changed = series.disableApiScan(sourceDb);
             } else {
-                series.enableApiScan(sourceDb);
+                changed = series.enableApiScan(sourceDb);
             }
-            commonDao.updateEntity(series);
+        
+            // if something changed then reset status
+            if (changed) {
+                series.setStatus(StatusType.UPDATED);
+                commonDao.updateEntity(series);
+                for (Season season: series.getSeasons()) {
+                    season.setStatus(StatusType.UPDATED);
+                    commonDao.updateEntity(season);
+                    for (VideoData videoDaa : season.getVideoDatas()) {
+                        videoDaa.setStatus(StatusType.UPDATED);
+                        commonDao.updateEntity(videoDaa);
+                    }
+                }
+            }
         } else {
             VideoData videoData = commonDao.getById(VideoData.class, id);
             if (videoData == null) {
                 return new ApiStatus(404, "VideoData for ID " + id + " not found");
             }
+
+            final boolean changed;
             if (disable) {
-                videoData.disableApiScan(sourceDb);
+                changed = videoData.disableApiScan(sourceDb);
             } else {
-                videoData.enableApiScan(sourceDb);
+                changed = videoData.enableApiScan(sourceDb);
             }
-            commonDao.updateEntity(videoData);
+            
+            // if something changed then reset status
+            if (changed) {
+                videoData.setStatus(StatusType.UPDATED);
+                commonDao.updateEntity(videoData);
+            }
         }
         
         StringBuilder sb = new StringBuilder();

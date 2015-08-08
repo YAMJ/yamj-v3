@@ -172,10 +172,13 @@ public abstract class AbstractScannable extends AbstractAuditable
 
     abstract void setSkipScanApi(String skipScanApi);
     
-    public final void enableApiScan(String sourceDb) {
-        if (sourceDb == null) return;
-        if (getSkipScanApi() == null) return;
-        
+    public final boolean enableApiScan(String sourceDb) {
+        if (sourceDb == null) return false;
+        if (getSkipScanApi() == null) return false;
+
+        // store the actual setting
+        String oldSkipApi = getSkipScanApi();
+
         if ("all".equalsIgnoreCase(sourceDb)) {
             setSkipScanApi(null);
         } else {
@@ -192,10 +195,16 @@ public abstract class AbstractScannable extends AbstractAuditable
                 setSkipScanApi(StringUtils.join(skipScans, ';'));
             }
         }
+
+        // return true if something has changed 
+        return !StringUtils.equalsIgnoreCase(oldSkipApi, getSkipScanApi());
     }
 
-    public final void disableApiScan(String sourceDb) {
-        if (sourceDb == null) return;
+    public final boolean disableApiScan(String sourceDb) {
+        if (sourceDb == null) return false;
+        
+        // store the actual setting
+        String oldSkipApi = getSkipScanApi();
         
         if ("all".equalsIgnoreCase(sourceDb)) {
             setSkipScanApi("all");
@@ -208,6 +217,9 @@ public abstract class AbstractScannable extends AbstractAuditable
             skipScans.add(sourceDb);
             setSkipScanApi(StringUtils.join(skipScans, ';'));
         }
+
+        // return true if something has changed 
+        return !StringUtils.equalsIgnoreCase(oldSkipApi, getSkipScanApi());
     }
 
     // OVERRIDE METHODS

@@ -84,7 +84,9 @@ public class VideoController {
         }
         
         LOG.info("Enable {} online scan for movie with ID '{}'", sourcedb, id);
-        return jsonApi.updateOnlineScan(MetaDataType.MOVIE, id, sourcedb, false);
+        ApiStatus apiStatus = jsonApi.updateOnlineScan(MetaDataType.MOVIE, id, sourcedb, false);
+        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
+        return apiStatus;
     }
 
     /**
@@ -100,7 +102,9 @@ public class VideoController {
         }
         
         LOG.info("Disable {} online scan for movie with ID '{}'", sourcedb, id);
-        return jsonApi.updateOnlineScan(MetaDataType.MOVIE, id, sourcedb, true);
+        ApiStatus apiStatus = jsonApi.updateOnlineScan(MetaDataType.MOVIE, id, sourcedb, true);
+        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
+        return apiStatus;
     }
 
     /**
@@ -116,7 +120,6 @@ public class VideoController {
         ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.MOVIE, id, sourcedb, externalid);
         if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
         return apiStatus;
-        
     }
 
     /**
@@ -169,7 +172,9 @@ public class VideoController {
         }
         
         LOG.info("Enable {} online scan for series with ID '{}'", sourcedb, id);
-        return jsonApi.updateOnlineScan(MetaDataType.SERIES, id, sourcedb, false);
+        ApiStatus apiStatus = jsonApi.updateOnlineScan(MetaDataType.SERIES, id, sourcedb, false);
+        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
+        return apiStatus;
     }
 
     /**
@@ -185,7 +190,9 @@ public class VideoController {
         }
         
         LOG.info("Disable {} online scan for series with ID '{}'", sourcedb, id);
-        return jsonApi.updateOnlineScan(MetaDataType.SERIES, id, sourcedb, true);
+        ApiStatus apiStatus = jsonApi.updateOnlineScan(MetaDataType.SERIES, id, sourcedb, true);
+        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
+        return apiStatus;
     } 
     
     /**
