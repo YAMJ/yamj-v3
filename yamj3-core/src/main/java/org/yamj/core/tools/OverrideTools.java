@@ -47,7 +47,7 @@ public final class OverrideTools {
     private static final Map<OverrideFlag, List<String>> SEASON_PRIORITIES = new EnumMap<>(OverrideFlag.class);
     private static final Map<OverrideFlag, List<String>> SERIES_PRIORITIES = new EnumMap<>(OverrideFlag.class);
     private static final Map<OverrideFlag, List<String>> PERSON_PRIORITIES = new EnumMap<>(OverrideFlag.class);
-    private static final String DEFAULT_PLUGIN_MOVIE_SERIES = "api,nfo,"+TYPE_MOVIE_SCANNER+","+TYPE_SERIES_SCANNER;
+    private static final String DEFAULT_PLUGIN_SERIES_MOVIE = "api,nfo,"+TYPE_SERIES_SCANNER+","+TYPE_MOVIE_SCANNER;
     private static final String DEFAULT_PLUGIN_SERIES = "api,nfo,"+TYPE_SERIES_SCANNER;
     private static final String DEFAULT_PLUGIN_PERSON = "api,nfo,"+TYPE_PERSON_SCANNER;
     private static final String APPEND_FILENAME = ",filename";
@@ -56,59 +56,59 @@ public final class OverrideTools {
         String sources;
 
         // countries
-        sources = PropertyTools.getProperty("priority.videodata.countries", DEFAULT_PLUGIN_MOVIE_SERIES);
+        sources = PropertyTools.getProperty("priority.videodata.countries", DEFAULT_PLUGIN_SERIES_MOVIE);
         putVideodataPriorities(OverrideFlag.COUNTRIES, sources);
         sources = PropertyTools.getProperty("priority.series.countries", DEFAULT_PLUGIN_SERIES);
         putSeriesPriorities(OverrideFlag.COUNTRIES, sources);
         // genres
-        sources = PropertyTools.getProperty("priority.videodata.genres", DEFAULT_PLUGIN_MOVIE_SERIES);
+        sources = PropertyTools.getProperty("priority.videodata.genres", DEFAULT_PLUGIN_SERIES_MOVIE);
         putVideodataPriorities(OverrideFlag.GENRES, sources);
         sources = PropertyTools.getProperty("priority.series.genres", DEFAULT_PLUGIN_SERIES);
         putSeriesPriorities(OverrideFlag.GENRES, sources);
         // studios
-        sources = PropertyTools.getProperty("priority.videodata.studios", DEFAULT_PLUGIN_MOVIE_SERIES);
+        sources = PropertyTools.getProperty("priority.videodata.studios", DEFAULT_PLUGIN_SERIES_MOVIE);
         putVideodataPriorities(OverrideFlag.STUDIOS, sources);
         sources = PropertyTools.getProperty("priority.series.studios", DEFAULT_PLUGIN_SERIES);
         putSeriesPriorities(OverrideFlag.STUDIOS, sources);
         // original title
-        sources = PropertyTools.getProperty("priority.videodata.originaltitle", DEFAULT_PLUGIN_MOVIE_SERIES);
+        sources = PropertyTools.getProperty("priority.videodata.originaltitle", DEFAULT_PLUGIN_SERIES_MOVIE);
         putVideodataPriorities(OverrideFlag.ORIGINALTITLE, sources);
         sources = PropertyTools.getProperty("priority.series.originaltitle", DEFAULT_PLUGIN_SERIES);
         putSeriesPriorities(OverrideFlag.ORIGINALTITLE, sources);
         sources = PropertyTools.getProperty("priority.season.originaltitle", DEFAULT_PLUGIN_SERIES);
         putSeasonPriorities(OverrideFlag.ORIGINALTITLE, sources);
         // outline
-        sources = PropertyTools.getProperty("priority.videodata.outline", DEFAULT_PLUGIN_MOVIE_SERIES);
+        sources = PropertyTools.getProperty("priority.videodata.outline", DEFAULT_PLUGIN_SERIES_MOVIE);
         putVideodataPriorities(OverrideFlag.OUTLINE, sources);
         sources = PropertyTools.getProperty("priority.series.outline", DEFAULT_PLUGIN_SERIES);
         putSeriesPriorities(OverrideFlag.OUTLINE, sources);
         sources = PropertyTools.getProperty("priority.season.outline", DEFAULT_PLUGIN_SERIES);
         putSeasonPriorities(OverrideFlag.OUTLINE, sources);
         // plot
-        sources = PropertyTools.getProperty("priority.videodata.plot", DEFAULT_PLUGIN_MOVIE_SERIES);
+        sources = PropertyTools.getProperty("priority.videodata.plot", DEFAULT_PLUGIN_SERIES_MOVIE);
         putVideodataPriorities(OverrideFlag.PLOT, sources);
         sources = PropertyTools.getProperty("priority.series.plot", DEFAULT_PLUGIN_SERIES);
         putSeriesPriorities(OverrideFlag.PLOT, sources);
         sources = PropertyTools.getProperty("priority.season.plot", DEFAULT_PLUGIN_SERIES);
         putSeasonPriorities(OverrideFlag.PLOT, sources);
         // quote
-        sources = PropertyTools.getProperty("priority.videodata.quote", DEFAULT_PLUGIN_MOVIE_SERIES);
+        sources = PropertyTools.getProperty("priority.videodata.quote", DEFAULT_PLUGIN_SERIES_MOVIE);
         putVideodataPriorities(OverrideFlag.QUOTE, sources);
         // releasedate
-        sources = PropertyTools.getProperty("priority.videodata.releasedate", DEFAULT_PLUGIN_MOVIE_SERIES);
+        sources = PropertyTools.getProperty("priority.videodata.releasedate", DEFAULT_PLUGIN_SERIES_MOVIE);
         putVideodataPriorities(OverrideFlag.RELEASEDATE, sources);
         // tagline
-        sources = PropertyTools.getProperty("priority.videodata.tagline", DEFAULT_PLUGIN_MOVIE_SERIES);
+        sources = PropertyTools.getProperty("priority.videodata.tagline", DEFAULT_PLUGIN_SERIES_MOVIE);
         putVideodataPriorities(OverrideFlag.TAGLINE, sources);
         // title
-        sources = PropertyTools.getProperty("priority.videodata.title", DEFAULT_PLUGIN_MOVIE_SERIES + APPEND_FILENAME);
+        sources = PropertyTools.getProperty("priority.videodata.title", DEFAULT_PLUGIN_SERIES_MOVIE + APPEND_FILENAME);
         putVideodataPriorities(OverrideFlag.TITLE, sources);
         sources = PropertyTools.getProperty("priority.series.title", DEFAULT_PLUGIN_SERIES + APPEND_FILENAME);
         putSeriesPriorities(OverrideFlag.TITLE, sources);
         sources = PropertyTools.getProperty("priority.season.title", DEFAULT_PLUGIN_SERIES + APPEND_FILENAME);
         putSeasonPriorities(OverrideFlag.TITLE, sources);
         // year
-        sources = PropertyTools.getProperty("priority.videodata.year", DEFAULT_PLUGIN_MOVIE_SERIES + APPEND_FILENAME);
+        sources = PropertyTools.getProperty("priority.videodata.year", DEFAULT_PLUGIN_SERIES_MOVIE + APPEND_FILENAME);
         putVideodataPriorities(OverrideFlag.YEAR, sources);
         sources = PropertyTools.getProperty("priority.series.year", DEFAULT_PLUGIN_SERIES + APPEND_FILENAME);
         putSeriesPriorities(OverrideFlag.YEAR, sources);
