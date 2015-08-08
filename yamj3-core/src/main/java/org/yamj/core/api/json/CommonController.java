@@ -199,6 +199,13 @@ public class CommonController {
         if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanArtwork();
         return apiStatus;
     }
+
+    @RequestMapping("/rescan/all")
+    public ApiStatus rescanAll() {
+        ApiStatus apiStatus = jsonApi.rescanAll();
+        if (apiStatus.isSuccessful()) this.scanningScheduler.triggerAllScans();
+        return apiStatus;
+    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Trailer Methods">

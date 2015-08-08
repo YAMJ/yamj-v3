@@ -3261,4 +3261,12 @@ public class ApiDao extends HibernateDao {
 
         return executeQueryWithTransform(ApiYearDecadeDTO.class, sqlScalars, wrapper);
     }
+    
+    public void rescanAll() {
+        this.executeSqlUpdate("UPDATE person SET status='"+StatusType.UPDATED.name()+"'");
+        this.executeSqlUpdate("UPDATE videodata SET status='"+StatusType.UPDATED.name()+"'");
+        this.executeSqlUpdate("UPDATE season SET status='"+StatusType.UPDATED.name()+"'");
+        this.executeSqlUpdate("UPDATE series SET status='"+StatusType.UPDATED.name()+"'");
+        this.executeSqlUpdate("UPDATE artwork SET status='"+StatusType.UPDATED.name()+"'");
+    }
 }

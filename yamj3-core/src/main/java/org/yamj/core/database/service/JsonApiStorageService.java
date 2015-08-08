@@ -684,6 +684,13 @@ public class JsonApiStorageService {
 
         return new ApiStatus(410, "No valid " + type.name().toLowerCase() + " ID provided");
     }
+    
+    @Transactional
+    public ApiStatus rescanAll() {
+        this.apiDao.rescanAll();
+        return new ApiStatus(200, "Rescan forced for all meta data objects");
+    }
+    
     //</editor-fold>
     
     @Transactional
