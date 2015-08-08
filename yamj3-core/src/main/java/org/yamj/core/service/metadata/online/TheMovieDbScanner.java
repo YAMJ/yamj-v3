@@ -655,21 +655,14 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             return null;
         }
 
-        newBio = newBio.replaceAll("\\s+", " ");
-
+        newBio = newBio.replaceAll("\\u00A0", " ").replaceAll("\\s+", " ");
+        
         int pos = StringUtils.indexOfIgnoreCase(newBio, FROM_WIKIPEDIA);
-        if (pos >= 0) {
-            // We've found the text, so remove it
-            LOG.trace("Removing start wikipedia text from bio");
-            newBio = newBio.substring(pos + FROM_WIKIPEDIA.length() + 1);
-        }
+        if (pos >= 0) newBio = newBio.substring(pos + FROM_WIKIPEDIA.length() + 1);
 
         pos = StringUtils.indexOfIgnoreCase(newBio, WIKIPEDIA_DESCRIPTION_ABOVE);
-        if (pos >= 0) {
-            LOG.trace("Removing end wikipedia text from bio");
-            newBio = newBio.substring(0, pos);
-        }
-
+        if (pos >= 0) newBio = newBio.substring(0, pos);
+        
         return newBio.trim();
     }
 
