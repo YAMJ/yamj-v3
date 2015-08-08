@@ -663,7 +663,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         pos = StringUtils.indexOfIgnoreCase(newBio, WIKIPEDIA_DESCRIPTION_ABOVE);
         if (pos >= 0) newBio = newBio.substring(0, pos);
         
-        return newBio.trim();
+        return newBio;
     }
 
     @Override
