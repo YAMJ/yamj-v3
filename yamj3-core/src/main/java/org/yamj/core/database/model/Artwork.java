@@ -157,23 +157,6 @@ public class Artwork extends AbstractAuditable implements Serializable {
         this.status = status;
     }
 
-    // TRANSIENT METHODS
-    public IMetadata getMetadata() {
-        if (getVideoData() != null) {
-            return getVideoData();
-        }
-
-        if (getSeason() != null) {
-            return getSeason();
-        }
-
-        if (getSeries() != null) {
-            return getSeries();
-        }
-
-        return null;
-    }
-
     // EQUALITY CHECKS
     @Override
     public int hashCode() {

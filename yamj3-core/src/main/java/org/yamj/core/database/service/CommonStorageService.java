@@ -146,7 +146,13 @@ public class CommonStorageService {
                     }
                 }
             }
+        }
 
+        // delete attached artwork
+        for (ArtworkLocated located : stageFile.getArtworkLocated()) {
+            Artwork artwork = located.getArtwork();
+            artwork.getArtworkLocated().remove(located);
+            this.delete(artwork, located, filesToDelete);
         }
 
         // delete the stage file

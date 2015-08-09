@@ -37,6 +37,7 @@ import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.service.file.FileTools;
+import org.yamj.core.service.staging.StagingService;
 
 /**
  * Scans and extracts attachments within a file i.e. matroska files.
@@ -69,6 +70,8 @@ public class AttachmentScannerService {
 
     @Autowired
     private Cache attachmentCache;
+    @Autowired
+    private StagingService stagingService;
     
     @PostConstruct
     public void init() {
@@ -160,8 +163,17 @@ public class AttachmentScannerService {
             return null;
         }
 
-        // TODO find scanable stage files
-        List<StageFile> stageFiles = Collections.emptyList();
+        if (artwork.getPerson() != null || artwork.getBoxedSet() != null) {
+            // no attachments for persons or boxed sets
+            return null;
+        }
+        
+        // find video stage files
+        List<StageFile> stageFiles = stagingService.findVideoStageFiles(artwork);
+        if (CollectionUtils.isEmpty(stageFiles)) {
+            // nothing to do anymore cause no video stage files found
+            return null;
+        }
         
         // create attachments
         List<Attachment> artworkAttachments = new ArrayList<>();

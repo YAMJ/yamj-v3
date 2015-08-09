@@ -298,4 +298,10 @@ public class StagingService {
 
         return videoFiles;
     }
+    
+    @Transactional(readOnly = true)
+    public List<StageFile> findVideoStageFiles(Artwork artwork) {
+        // TODO find video stage files
+        return null;
+    }
 }
