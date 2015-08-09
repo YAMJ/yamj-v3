@@ -44,7 +44,6 @@ import org.yamj.core.database.service.MediaStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.tools.AspectRatioTools;
 import org.yamj.core.tools.Constants;
-//import org.yamj.core.tools.LanguageTools;
 
 @Service("mediaInfoService")
 public class MediaInfoService {
