@@ -65,6 +65,14 @@ public class ConfigServiceWrapper {
         return this.configService.getBooleanProperty(sb.toString(), Boolean.TRUE);
     }
 
+    public boolean isAttachedArtworkScanEnabled(Artwork artwork) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("yamj3.artwork.scan.attached.");
+        addScanArtworkType(artwork, sb);
+
+        return this.configService.getBooleanProperty(sb.toString(), Boolean.FALSE);
+    }
+
     public boolean isOnlineArtworkScanEnabled(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
         StringBuilder sb = new StringBuilder();
         sb.append("yamj3.artwork.scan.online.");

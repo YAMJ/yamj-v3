@@ -48,6 +48,7 @@ public class CachingConfiguration implements CachingConfigurer {
     private static final String ALLOCINE_INFO = "allocineInfoCache";
     private static final String TVDB = "tvdbCache";
     private static final String TMDB_ARTWORK = "tmdbArtworkCache";
+    private static final String ATTACHMENTS = "attachments";
     
     @Bean(destroyMethod="shutdown")
     public net.sf.ehcache.CacheManager ehCacheManager() {
@@ -57,7 +58,8 @@ public class CachingConfiguration implements CachingConfigurer {
                 .cache(cacheConfig(ALLOCINE_SEARCH, 100, 300,  MemoryStoreEvictionPolicy.LFU))
                 .cache(cacheConfig(ALLOCINE_INFO, 400, 1800,  MemoryStoreEvictionPolicy.LRU))
                 .cache(cacheConfig(TVDB, 500, 1800,  MemoryStoreEvictionPolicy.LRU))
-                .cache(cacheConfig(TMDB_ARTWORK, 100, 1800,  MemoryStoreEvictionPolicy.LFU)));
+                .cache(cacheConfig(TMDB_ARTWORK, 100, 1800,  MemoryStoreEvictionPolicy.LFU))
+                .cache(cacheConfig(ATTACHMENTS, 300, 3600,  MemoryStoreEvictionPolicy.LFU)));
     }
 
     @Scope
@@ -114,5 +116,10 @@ public class CachingConfiguration implements CachingConfigurer {
     @Bean
     public Cache tmdbArtworkCache() {
         return cacheManager().getCache(TVDB);
+    }
+
+    @Bean
+    public Cache attachmentCache() {
+        return cacheManager().getCache(ATTACHMENTS);
     }
 }

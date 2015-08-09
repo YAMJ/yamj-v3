@@ -91,7 +91,19 @@ public class ArtworkProcessorService {
             boolean stored;
             try {
                 if (located.getStageFile() != null) {
-                    stored = fileStorageService.store(storageType, cacheFilename, located.getStageFile());
+                    if (StringUtils.startsWith(located.getSource(), "attachment")) {
+                        // file contains attached artwork
+                        int attachmentId = -1;
+                        try {
+                            attachmentId = Integer.parseInt(located.getSource().split("#")[1]);
+                        } catch (Exception e) {
+                           LOG.warn("Failed to determine attachment id from source {}", located.getSource());
+                        }
+                        stored = fileStorageService.store(storageType, cacheFilename, located.getStageFile(), attachmentId);
+                    } else {
+                        // file is an artwork
+                        stored = fileStorageService.store(storageType, cacheFilename, located.getStageFile());
+                    }
                 } else {
                     stored = fileStorageService.store(storageType, cacheFilename, new URL(located.getUrl()));
                 }
@@ -101,7 +113,7 @@ public class ArtworkProcessorService {
             }
 
             if (!stored) {
-                LOG.error("Failed to store artwork store artwork in file cache: {}", cacheFilename);
+                LOG.error("Failed to store artwork in file cache: {}", cacheFilename);
                 // mark located artwork with error
                 located.setStatus(StatusType.ERROR);
                 artworkStorageService.updateArtworkLocated(located);

@@ -30,6 +30,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
 import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.Artwork;
@@ -65,6 +67,9 @@ public class AttachmentScannerService {
     private Set<String> validMimeTypesText;
     private Map<String, String> validMimeTypesImage;
 
+    @Autowired
+    private Cache attachmentCache;
+    
     @PostConstruct
     public void init() {
         LOG.info("Initialize attachment scanner service");
@@ -150,30 +155,30 @@ public class AttachmentScannerService {
      *
      * @param movie
      */
-    public void scan(Artwork artwork) {
+    public List<Attachment> scan(Artwork artwork) {
         if (!isActivated) {
-            return;
+            return null;
         }
 
         // TODO find scanable stage files
         List<StageFile> stageFiles = Collections.emptyList();
         
         // create attachments
-        List<Attachment> allAttachments = new ArrayList<>();
+        List<Attachment> artworkAttachments = new ArrayList<>();
         for (StageFile stageFile : stageFiles) {
             List<Attachment> attachments = scanAttachments(stageFile);
             if (CollectionUtils.isNotEmpty(attachments)) {
-                allAttachments.addAll(attachments);
+                artworkAttachments.addAll(attachments);
             }
         }
         
-        if (CollectionUtils.isEmpty(allAttachments)) {
+        if (CollectionUtils.isEmpty(artworkAttachments)) {
             // nothing to do anymore cause no attachments found
-            return;
+            return null;
         }
         
         // filter attachments
-        Iterator<Attachment> iter = allAttachments.iterator();
+        Iterator<Attachment> iter = artworkAttachments.iterator();
         while (iter.hasNext()) {
             Attachment attachment = iter.next();
             if (!artwork.getArtworkType().name().equals(attachment.getType().name())) {
@@ -182,12 +187,8 @@ public class AttachmentScannerService {
             }
         }
 
-        if (CollectionUtils.isEmpty(allAttachments)) {
-            // nothing to do anymore cause no attachments for artwork present
-            return;
-        }
-
-        // TODO extract attachments and store them in artwork cache
+        // return attachments for artwork
+        return artworkAttachments;
     }
 
     /**
@@ -198,8 +199,15 @@ public class AttachmentScannerService {
     private List<Attachment> scanAttachments(StageFile stageFile) {
         if (!isFileScanable(stageFile)) return null;
         
-        // holds the attachments
-        List<Attachment> attachments = new ArrayList<>();
+        final String cacheKey = String.valueOf(stageFile.getId());
+        List<Attachment> attachments = attachmentCache.get(cacheKey, List.class);
+        if (attachments != null) {
+            // attachments stored so just return them
+            return attachments;
+        }
+        
+        // create new attachments
+        attachments = new ArrayList<>();
 
         LOG.debug("Scanning file {}",  stageFile.getFileName());
         int attachmentId = 0;
@@ -240,6 +248,9 @@ public class AttachmentScannerService {
         } catch (IOException | InterruptedException ex) {
             LOG.error("Attachment scanner error", ex);
         }
+        
+        // put into cache
+        this.attachmentCache.putIfAbsent(cacheKey, attachments);
         return attachments;
     }
 
@@ -364,5 +375,43 @@ public class AttachmentScannerService {
 
         // no content type determined
         return null;
+    }
+
+    public boolean extractArtwort(File dst, StageFile stageFile, int attachmentId) {
+        if (!FileTools.isFileReadable(stageFile)) return false;
+
+        LOG.trace("Extract attachement {} from stage file {}",  attachmentId, stageFile.getFullPath());
+        
+        boolean stored = true;
+        try {
+            // Create the command line
+            List<String> commandMedia = new ArrayList<>(MT_EXTRACT_EXE);
+            commandMedia.add("attachments");
+            commandMedia.add(stageFile.getFullPath());
+            commandMedia.add(attachmentId + ":" + dst.getAbsolutePath());
+
+            ProcessBuilder pb = new ProcessBuilder(commandMedia);
+            pb.directory(MT_PATH);
+            Process p = pb.start();
+
+            if (p.waitFor() != 0) {
+                LOG.error("Error during extraction - ErrorCode={}",  p.exitValue());
+                stored = false;
+            }
+        } catch (IOException | InterruptedException ex) {
+            LOG.error("Attachment extraction error", ex);
+            stored = false;
+        }
+
+        if (!stored) {
+            // delete destination file in error case
+            try {
+                dst.delete();
+            } catch (Exception e) {
+                // ignore any error;
+            }
+        }
+        
+        return stored;
     }
 }

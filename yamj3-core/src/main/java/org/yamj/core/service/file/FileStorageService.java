@@ -26,15 +26,9 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import javax.annotation.PostConstruct;
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
+import javax.imageio.*;
 import javax.imageio.stream.FileImageOutputStream;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -51,6 +45,7 @@ import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.api.model.Skin;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.type.ImageFormat;
+import org.yamj.core.service.attachment.AttachmentScannerService;
 import org.yamj.core.web.PoolingHttpClient;
 
 @Service("fileStorageService")
@@ -68,6 +63,8 @@ public class FileStorageService {
     
     @Autowired
     private PoolingHttpClient httpClient;
+    @Autowired
+    private AttachmentScannerService attachmentScannerService;
 
     @PostConstruct
     public void init() throws Exception {
@@ -144,6 +141,16 @@ public class FileStorageService {
         File src = new File(stageFile.getFullPath());
         File dst = getFile(type, filename);
         return FileTools.copyFile(src, dst);
+    }
+
+    public boolean store(StorageType type, String filename, StageFile stageFile, int attachmentId) {
+        if (attachmentId <= 0) return false;
+        
+        LOG.debug("Store file {}; attachment {} in source file: {}", filename, attachmentId, stageFile.getFullPath());
+
+        // get destination file
+        File dst = getFile(type, filename);
+        return attachmentScannerService.extractArtwort(dst, stageFile, attachmentId);
     }
 
     public boolean store(StorageType type, String filename, File sourceFile) {
