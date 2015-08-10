@@ -22,7 +22,6 @@
  */
 package org.yamj.core.database.model.player;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,17 +32,12 @@ import org.yamj.core.database.model.AbstractIdentifiable;
 @Table(name = "player_path")
 public class PlayerPath extends AbstractIdentifiable implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
+    private static final long serialVersionUID = -2933321283219977791L;
+    
     @Column(name = "source_path", nullable = false, length = 200)
-    @JsonProperty("source_path")
     private String sourcePath;
     @Column(name = "target_path", nullable = false, length = 200)
-    @JsonProperty("target_path")
     private String targetPath;
-
-    public PlayerPath() {
-    }
 
     public String getSourcePath() {
         return sourcePath;
@@ -60,5 +54,4 @@ public class PlayerPath extends AbstractIdentifiable implements Serializable {
     public void setTargetPath(String targetPath) {
         this.targetPath = targetPath;
     }
-
 }

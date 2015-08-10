@@ -24,6 +24,7 @@ package org.yamj.core.database.service;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.ListIterator;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.dao.*;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;
+import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 
 @Service("jsonApiStorageService")
@@ -265,11 +267,11 @@ public class JsonApiStorageService {
 
     //<editor-fold defaultstate="collapsed" desc="Player methods">
     public PlayerInfo getPlayerInfo(String playerName) {
-        return playerDao.getPlayerInfo(playerName);
+        return playerDao.getByNaturalIdCaseInsensitive(PlayerInfo.class, "name", playerName);
     }
 
     public PlayerInfo getPlayerInfo(Long playerId) {
-        return playerDao.getPlayerInfo(playerId);
+        return playerDao.getById(PlayerInfo.class, playerId);
     }
 
     public List<PlayerInfo> getPlayerList() {
@@ -282,17 +284,48 @@ public class JsonApiStorageService {
 
     @Transactional
     public void deletePlayer(Long playerId) {
-        playerDao.deletePlayer(playerId);
-    }
-
-    @Transactional
-    public void deletePlayerPath(Long playerId, Long pathId) {
-        playerDao.deletePlayerPath(playerId, pathId);
+        PlayerInfo playerInfo = this.getPlayerInfo(playerId);
+        if (playerInfo == null) return;
+        playerDao.deleteEntity(playerInfo);
     }
 
     @Transactional
     public void storePlayer(PlayerInfo player) {
-        playerDao.storePlayer(player);
+        PlayerInfo playerInfo = this.getPlayerInfo(player.getName());
+        if (playerInfo == null) {
+            playerDao.saveEntity(player);
+        } else {
+            playerInfo.setDeviceType(player.getDeviceType());
+            playerInfo.setIpAddress(player.getIpAddress());
+            playerDao.updateEntity(playerInfo);
+        }
+    }
+
+    @Transactional
+    public boolean storePlayerPath(Long playerId, PlayerPath playerPath) {
+        PlayerInfo playerInfo = this.getPlayerInfo(playerId);
+        if (playerInfo == null) return false;
+        
+        playerInfo.addPath(playerPath);
+        playerDao.updateEntity(playerInfo);
+        return true;
+    }
+    
+    @Transactional
+    public boolean deletePlayerPath(Long playerId, Long pathId) {
+        PlayerInfo playerInfo = this.getPlayerInfo(playerId);
+        if (playerInfo == null) return false;
+
+        ListIterator<PlayerPath> iter = playerInfo.getPaths().listIterator();
+        while (iter.hasNext()) {
+            PlayerPath path = iter.next();
+            if (path.getId() == pathId) {
+                iter.remove();
+                playerDao.updateEntity(playerInfo);
+                return true;
+            }
+        }
+        return false;
     }
     //</editor-fold>
 

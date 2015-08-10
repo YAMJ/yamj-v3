@@ -22,7 +22,6 @@
  */
 package org.yamj.core.database.model.player;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +30,9 @@ import org.hibernate.annotations.NaturalId;
 import org.yamj.core.database.model.AbstractIdentifiable;
 
 @Entity
-@Table(name = "player_info")
+@Table(name = "player_info",
+    uniqueConstraints = @UniqueConstraint(name = "UIX_PLAYER_INFO_NATURALID", columnNames = {"name"})
+)
 public class PlayerInfo extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 2906323039735788880L;
@@ -41,7 +42,6 @@ public class PlayerInfo extends AbstractIdentifiable implements Serializable {
     private String name;
 
     @Column(name = "device_type", nullable = false, length = 200)
-    @JsonProperty("device_type")
     private String deviceType;
 
     @Column(name = "ip_address", nullable = false, length = 15)
@@ -49,10 +49,8 @@ public class PlayerInfo extends AbstractIdentifiable implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinTable(name = "playerinfo_playerpath",
-            joinColumns = {
-                @JoinColumn(name = "player_info_id", foreignKey = @ForeignKey(name = "FK_PLAYERPATH_INFO"))},
-            inverseJoinColumns = {
-                @JoinColumn(name = "player_path_id", foreignKey = @ForeignKey(name = "FK_PLAYERPATH_PATH"))})
+            joinColumns = {@JoinColumn(name = "player_info_id", foreignKey = @ForeignKey(name = "FK_PLAYERPATH_INFO"))},
+            inverseJoinColumns = {@JoinColumn(name = "player_path_id", foreignKey = @ForeignKey(name = "FK_PLAYERPATH_PATH"))})
     private List<PlayerPath> paths = new ArrayList<>();
 
     public String getName() {
@@ -88,11 +86,17 @@ public class PlayerInfo extends AbstractIdentifiable implements Serializable {
     }
 
     public void addPath(PlayerPath path) {
+        if (this.paths.size() > 0) {
+            for (PlayerPath stored : this.paths) {
+                if (stored.getSourcePath().equalsIgnoreCase(path.getSourcePath())) {
+                    // just update target path
+                    stored.setTargetPath(path.getTargetPath());
+                    return;
+                }
+            }
+        }
+        
+        // just add path
         this.paths.add(path);
     }
-
-    public void clearPaths() {
-        this.paths.clear();
-    }
-
 }

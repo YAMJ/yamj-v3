@@ -118,5 +118,13 @@ public class UpgradeDatabaseService {
         } catch (Exception ex) {
             LOG.warn("Failed upgrade 'patchBoxedSetIdentifier'", ex);
         }
-}
+
+        // Issues: database schema
+        // Date:   10.08.2015
+        try {
+            upgradeDatabaseDao.patchStudio();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchStudio'", ex);
+        }
+    }
 }

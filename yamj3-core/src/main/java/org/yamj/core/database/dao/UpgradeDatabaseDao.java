@@ -560,7 +560,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
         .executeUpdate();
 
         if (!existsColumn("artwork_located", "language")) return;
-        
+
         currentSession()
         .createSQLQuery("UPDATE artwork_located set language_code=language where language is not null")
         .executeUpdate();
@@ -611,5 +611,17 @@ public class UpgradeDatabaseDao extends HibernateDao {
         currentSession()
         .createSQLQuery("CREATE UNIQUE INDEX UIX_BOXEDSET_NATURALID on boxed_set(identifier)")
         .executeUpdate();
+    }
+    
+    /**
+     * Issues: database schema
+     * Date:   10.08.2015
+     */
+    public void patchStudio() {
+        if (existsUniqueIndex("studio", "UK_STUDIO_NATURALID")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE studio DROP index UK_STUDIO_NATURALID")
+            .executeUpdate();
+        }
     }
 }

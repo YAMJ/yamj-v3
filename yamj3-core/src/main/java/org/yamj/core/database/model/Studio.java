@@ -30,7 +30,7 @@ import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "studio",
-        uniqueConstraints = @UniqueConstraint(name = "UK_STUDIO_NATURALID", columnNames = {"name"})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_STUDIO_NATURALID", columnNames = {"name"})
 )
 public class Studio extends AbstractIdentifiable implements Serializable {
 

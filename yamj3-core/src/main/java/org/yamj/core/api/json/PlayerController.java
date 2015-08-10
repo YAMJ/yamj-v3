@@ -22,8 +22,6 @@
  */
 package org.yamj.core.api.json;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,15 +66,15 @@ public class PlayerController {
     }
 
     /**
-     * Add a new player
+     * Store a new player
      *
      * @param name
      * @param deviceType
      * @param ipAddress
      * @return
      */
-    @RequestMapping("/add")
-    public ApiStatus playerAdd(
+    @RequestMapping("/store")
+    public ApiStatus playerStore(
             @RequestParam(required = true, defaultValue = "") String name,
             @RequestParam(required = true, defaultValue = "") String deviceType,
             @RequestParam(required = true, defaultValue = "") String ipAddress) {
@@ -90,10 +88,10 @@ public class PlayerController {
             player.setIpAddress(ipAddress);
             jsonApi.storePlayer(player);
             status.setStatus(200);
-            status.setMessage("Successfully added '" + name + "'");
+            status.setMessage("Successfully stored '" + name + "'");
         } else {
             status.setStatus(400);
-            status.setMessage("Invalid player information specified, player not added");
+            status.setMessage("Invalid player information specified; player not stored");
         }
         return status;
     }
@@ -115,70 +113,79 @@ public class PlayerController {
             status.setMessage("Successfully deleted '" + playerId + "'");
         } else {
             status.setStatus(400);
-            status.setMessage("Invalid player ID specified, player not deleted");
+            status.setMessage("Invalid player ID specified; player not deleted");
         }
         return status;
     }
 
     /**
-     * Update a player
+     * Store a player path.
      *
-     * @param name
-     * @param deviceType
-     * @param ipAddress
-     * @return
+     * @param playerId
+     * @param sourcePath
+     * @param targetPath
+     * @return the api status
      */
-    @RequestMapping("/update")
-    public ApiStatus playerUpdate(
-            @RequestParam(required = true, defaultValue = "") String name,
-            @RequestParam(required = true, defaultValue = "") String deviceType,
-            @RequestParam(required = true, defaultValue = "") String ipAddress) {
+    @RequestMapping("/path/store")
+    public ApiStatus playerPathStore(
+        @RequestParam(required = true, defaultValue = "") Long playerId,
+        @RequestParam(required = true, defaultValue = "") String sourcePath,
+        @RequestParam(required = true, defaultValue = "") String targetPath)
+    {
         ApiStatus status = new ApiStatus();
-        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(ipAddress) && StringUtils.isNotBlank(deviceType)) {
-            LOG.info("Updating player '{}'", name);
-            PlayerInfo player = new PlayerInfo();
-            player.setName(name);
-            player.setDeviceType(deviceType);
-            player.setIpAddress(ipAddress);
-            jsonApi.storePlayer(player);
-            status.setStatus(200);
-            status.setMessage("Successfully updated '" + name + "'");
-        } else {
+        if (playerId == null || playerId <= 0) {
             status.setStatus(400);
-            status.setMessage("Invalid player information specified, player not updated");
+            status.setMessage("Invalid player ID specified; player path not added");
+        } else if (StringUtils.isBlank(sourcePath)) {
+            status.setStatus(400);
+            status.setMessage("Invalid source path; player path not added");
+        } else if (StringUtils.isBlank(targetPath)) {
+            status.setStatus(400);
+            status.setMessage("Invalid target path; player path not added");
+        } else {
+            PlayerPath playerPath = new PlayerPath();
+            playerPath.setSourcePath(sourcePath);
+            playerPath.setTargetPath(targetPath);
+            boolean stored = jsonApi.storePlayerPath(playerId, playerPath);
+            if (stored) {
+                status.setStatus(200);
+                status.setMessage("Successfully added player path to '" + playerId + "'");
+            } else {
+                status.setStatus(400);
+                status.setMessage("Player '"+ playerId + "' does not exist; player path not added");
+            }
         }
         return status;
     }
 
-    @RequestMapping("/scan")
-    public void playerScan() {
-        List<PlayerInfo> players = getDummyPlayers(2, 3);
-
-        for (PlayerInfo player : players) {
-            LOG.info("Storing player: {}", player);
-            jsonApi.storePlayer(player);
-        }
-        LOG.info("Player storage completed");
-    }
-
-    private static List<PlayerInfo> getDummyPlayers(int playerCount, int pathCount) {
-        List<PlayerInfo> players = new ArrayList<>();
-
-        for (int loopPlayer = 1; loopPlayer <= playerCount; loopPlayer++) {
-            PlayerInfo p = new PlayerInfo();
-            p.setIpAddress("192.168.0." + loopPlayer);
-            p.setName("PCH-C200-" + loopPlayer);
-            p.setDeviceType("network");
-
-            for (int loopPath = 1; loopPath <= pathCount; loopPath++) {
-                PlayerPath pp = new PlayerPath();
-                pp.setSourcePath("http://some.path/" + loopPlayer + "-" + loopPath + "/");
-                pp.setTargetPath("http://some.path/" + loopPlayer + "-" + loopPath + "/");
-                p.addPath(pp);
+    /**
+     * Remove a player path.
+     *
+     * @param playerId
+     * @param pathId
+     */
+    @RequestMapping("/path/delete")
+    public ApiStatus playerPathDelete(
+        @RequestParam(required = true, defaultValue = "") Long playerId,
+        @RequestParam(required = true, defaultValue = "") Long pathId)
+    {
+        ApiStatus status = new ApiStatus();
+        if (playerId == null || playerId <= 0) {
+            status.setStatus(400);
+            status.setMessage("Invalid player ID specified, player path not removed");
+        } else if (pathId == null || pathId <= 0) {
+            status.setStatus(400);
+            status.setMessage("Invalid path ID specified, player path not removed");
+        } else {
+            boolean deleted = jsonApi.deletePlayerPath(playerId, pathId);
+            if (deleted) {
+                status.setStatus(200);
+                status.setMessage("Successfully removed player path '" + pathId + "' from player '" + playerId + "'");
+            } else {
+                status.setStatus(400);
+                status.setMessage("Given player id or path id does not exist; player path not deleted");
             }
-            players.add(p);
         }
-
-        return players;
+        return status;
     }
 }

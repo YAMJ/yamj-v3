@@ -22,6 +22,8 @@
  */
 package org.yamj.core.tools.player;
 
+import org.yamj.core.database.model.player.PlayerInfo;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import java.io.*;
@@ -40,7 +42,6 @@ import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.DigestedResponseReader;
 import org.yamj.api.common.http.SimpleHttpClientBuilder;
-import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.tools.player.davidbox.DavidBoxPlayerPath;
 import org.yamj.core.tools.player.davidbox.DavidBoxWrapper;
@@ -122,15 +123,6 @@ public final class PlayerTools {
         this.port = port;
     }
     //</editor-fold>
-
-    /**
-     * Get the results of the search once the scan has been completed
-     *
-     * @return
-     */
-    public List<PlayerInfo> getPlayers() {
-        return players;
-    }
 
     public void scan() {
         LOG.info("Scanning for players in '{}*' address range");
