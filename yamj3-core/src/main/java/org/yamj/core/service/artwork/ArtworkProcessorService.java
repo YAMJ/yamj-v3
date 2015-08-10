@@ -95,10 +95,11 @@ public class ArtworkProcessorService {
                         int attachmentId = -1;
                         try {
                             attachmentId = Integer.parseInt(located.getSource().split("#")[1]);
+                            stored = fileStorageService.store(storageType, cacheFilename, located.getStageFile(), attachmentId);
                         } catch (Exception e) {
                            LOG.warn("Failed to determine attachment id from source {}", located.getSource());
+                           stored = false;
                         }
-                        stored = fileStorageService.store(storageType, cacheFilename, located.getStageFile(), attachmentId);
                     } else {
                         // file is an artwork
                         stored = fileStorageService.store(storageType, cacheFilename, located.getStageFile());
