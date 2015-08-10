@@ -44,7 +44,7 @@ public class ArtworkDetailDTO {
     }
 
     public ArtworkDetailDTO(String source, String url, HashCodeType hashCodeType) {
-        this(source, url, HashCodeType.SIMPLE, ImageType.fromString(FilenameUtils.getExtension(url)));
+        this(source, url, hashCodeType, ImageType.fromString(FilenameUtils.getExtension(url)));
     }
 
     public ArtworkDetailDTO(String source, String url, HashCodeType hashCodeType, ImageType imageType) {

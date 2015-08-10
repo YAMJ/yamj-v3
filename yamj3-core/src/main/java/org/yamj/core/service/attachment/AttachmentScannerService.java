@@ -194,13 +194,14 @@ public class AttachmentScannerService {
         Iterator<Attachment> iter = artworkAttachments.iterator();
         while (iter.hasNext()) {
             Attachment attachment = iter.next();
-            if (!artwork.getArtworkType().name().equals(attachment.getType().name())) {
+            if (!artwork.getArtworkType().name().equals(attachment.getContentType().name())) {
                 // remove non matching types
                 iter.remove();
             }
         }
 
         // return attachments for artwork
+        LOG.info("Found {} attachments for artwork: {}", artworkAttachments.size(), artwork);
         return artworkAttachments;
     }
 
@@ -222,7 +223,7 @@ public class AttachmentScannerService {
         // create new attachments
         attachments = new ArrayList<>();
 
-        LOG.debug("Scanning file {}",  stageFile.getFileName());
+        LOG.debug("Scanning file for attachments {}",  stageFile.getFileName());
         int attachmentId = 0;
         try {
             // create the command line
@@ -310,7 +311,7 @@ public class AttachmentScannerService {
             attachment.setContentType(content.getContentType());
             attachment.setImageType(content.getImageType());
             attachment.setPart(content.getPart());
-            LOG.debug("Found attachment {}",  attachment);
+            LOG.trace("Found attachment {}",  attachment);
         }
         return attachment;
     }

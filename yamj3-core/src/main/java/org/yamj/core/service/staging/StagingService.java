@@ -45,6 +45,7 @@ import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.mediaimport.FilenameScanner;
 
+@Transactional(readOnly = true)
 @Service("stagingService")
 public class StagingService {
 
@@ -185,19 +186,16 @@ public class StagingService {
         return cal.getTime();
     }
 
-    @Transactional
     public List<StageFile> getValidNFOFiles(VideoData videoData) {
         // read NFO files for movies
         return this.stagingDao.getValidNFOFilesForVideo(videoData.getId());
     }
 
-    @Transactional
     public List<StageFile> getValidNFOFiles(Series series) {
         // read NFO files for series
         return this.stagingDao.getValidNFOFilesForSeries(series.getId());
     }
 
-    @Transactional
     public void updateStageFile(StageFile stageFile) {
         this.stagingDao.updateEntity(stageFile);
     }
@@ -296,9 +294,7 @@ public class StagingService {
         return videoFiles;
     }
     
-    @Transactional(readOnly = true)
     public List<StageFile> findVideoStageFiles(Artwork artwork) {
-        // TODO find video stage files
-        return null;
+        return this.stagingDao.findVideoStageFiles(artwork);
     }
 }

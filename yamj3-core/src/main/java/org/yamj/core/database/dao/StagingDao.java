@@ -523,4 +523,45 @@ public class StagingDao extends HibernateDao {
 
         return (Date) query.uniqueResult();
     }
+
+    public List<StageFile> findVideoStageFiles(Artwork artwork) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT distinct sf ");
+        
+        long id;
+        if (artwork.getSeries() != null) {
+            id = artwork.getSeries().getId();
+            sb.append("FROM Series ser ");
+            sb.append("JOIN ser.seasons sea ");
+            sb.append("JOIN sea.videoDatas vd ");
+            sb.append("JOIN vd.mediaFiles mf ");
+            sb.append("JOIN mf.stageFiles sf ");
+            sb.append("WHERE sea.id=:id ");
+        } else if (artwork.getSeason() != null) {
+            id = artwork.getSeason().getId();
+            sb.append("FROM Season sea ");
+            sb.append("JOIN sea.videoDatas vd ");
+            sb.append("JOIN vd.mediaFiles mf ");
+            sb.append("JOIN mf.stageFiles sf ");
+            sb.append("WHERE sea.id=:id ");
+        } else {
+            id = artwork.getVideoData().getId();
+            sb.append("FROM VideoData vd ");
+            sb.append("JOIN vd.mediaFiles mf ");
+            sb.append("JOIN mf.stageFiles sf ");
+            sb.append("WHERE vd.id=:id ");
+        }
+        sb.append("AND mf.extra=:extra ");
+        sb.append("AND sf.fileType=:fileType ");
+        sb.append("AND sf.status != :deleted ");
+        
+        Query query = currentSession().createQuery(sb.toString());
+        query.setLong("id", id);
+        query.setParameter("fileType", FileType.VIDEO);
+        query.setBoolean("extra", Boolean.FALSE);
+        query.setParameter("deleted", StatusType.DELETED);
+        query.setCacheable(true);
+        query.setCacheMode(CacheMode.NORMAL);
+        return query.list();
+    }
 }
