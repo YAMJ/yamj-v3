@@ -23,6 +23,7 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
@@ -100,11 +101,14 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     @Column(name = "episode_count", nullable = false)
     private int episodeCount = 0;
 
-    @Column(name = "watched_file", nullable = false)
-    private boolean watchedFile = false;
+    @Column(name = "watched_file_date")
+    private Date watchedFileDate;
 
     @Column(name = "watched_api", nullable = false)
     private boolean watchedApi = false;
+
+    @Column(name = "watched_api_date")
+    private Date watchedApiDate;
 
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
@@ -276,15 +280,15 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     }
 
     public boolean isWatchedFile() {
-        return watchedFile;
+        return (this.watchedFileDate != null);
     }
 
-    public void setWatchedFile(boolean watchedFile) {
-        this.watchedFile = watchedFile;
+    public Date getWatchedFileDate() {
+        return watchedFileDate;
     }
 
-    public void setWatchedDate(boolean watchedFile) {
-        this.watchedFile = watchedFile;
+    public void setWatchedFileDate(Date watchedFileDate) {
+        this.watchedFileDate = watchedFileDate;
     }
 
     public boolean isWatchedApi() {
@@ -293,6 +297,14 @@ public class MediaFile extends AbstractAuditable implements Serializable {
 
     public void setWatchedApi(boolean watchedApi) {
         this.watchedApi = watchedApi;
+    }
+    
+    public Date getWatchedApiDate() {
+        return watchedApiDate;
+    }
+
+    public void setWatchedApiDate(Date watchedApiDate) {
+        this.watchedApiDate = watchedApiDate;
     }
 
     public StatusType getStatus() {

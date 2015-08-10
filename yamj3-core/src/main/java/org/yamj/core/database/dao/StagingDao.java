@@ -551,7 +551,6 @@ public class StagingDao extends HibernateDao {
             sb.append("JOIN mf.stageFiles sf ");
             sb.append("WHERE vd.id=:id ");
         }
-        sb.append("AND mf.extra=:extra ");
         sb.append("AND sf.fileType=:fileType ");
         sb.append("AND sf.status != :deleted ");
         

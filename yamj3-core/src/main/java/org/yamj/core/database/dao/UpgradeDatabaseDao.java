@@ -22,6 +22,7 @@
  */
 package org.yamj.core.database.dao;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
@@ -623,5 +624,44 @@ public class UpgradeDatabaseDao extends HibernateDao {
             .createSQLQuery("ALTER TABLE studio DROP index UK_STUDIO_NATURALID")
             .executeUpdate();
         }
+    }
+
+    /**
+     * Issues: #193
+     * Date:   10.08.2015
+     */
+    public void patchMediaFileWatched() {
+        if (!existsColumn("mediafile", "watched_file")) return;
+        
+        // retrieve media file with watched file
+        List<BigInteger> ids = currentSession()
+            .createSQLQuery("select id from mediafile where watched_file=:watched")
+            .setBoolean("watched", Boolean.TRUE)
+            .list();
+
+        for (BigInteger id : ids) {
+            Date watchedFileDate = (Date)currentSession()
+                .createSQLQuery("SELECT max(sf.file_date) FROM stage_file sf WHERE sf.mediafile_id =:id and sf.status != 'DELETED'")
+                .setLong("id", id.longValue())
+                .uniqueResult();
+            
+            if (watchedFileDate != null) {
+                currentSession()
+                .createSQLQuery("UPDATE mediafile set watched_file_date=:watchedFileDate where id=:id")
+                .setLong("id", id.longValue())
+                .setTimestamp("watchedFileDate", watchedFileDate)
+                .executeUpdate();
+            }
+        }
+        
+        // update watched api date
+        currentSession()
+        .createSQLQuery("UPDATE mediafile set watched_api_date=update_timestamp where watched_api=:watched")
+        .setBoolean("watched", Boolean.TRUE)
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE mediafile DROP watched_file")
+        .executeUpdate();
     }
 }
