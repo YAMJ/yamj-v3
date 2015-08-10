@@ -355,8 +355,7 @@ public final class InfoDTO {
 
     public void addActor(String actor, String role, String photoURL) {
         if (StringUtils.isNotBlank(actor)) {
-            String fixedRole = MetadataTools.fixActorRole(role);
-            CreditDTO credit = new CreditDTO(NfoScannerService.SCANNER_ID, JobType.ACTOR, actor, fixedRole);
+            CreditDTO credit = new CreditDTO(NfoScannerService.SCANNER_ID, JobType.ACTOR, actor, role);
             credit.addPhotoURL(photoURL);
             this.credits.add(credit);
             this.changed = true;

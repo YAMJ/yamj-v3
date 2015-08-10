@@ -36,7 +36,6 @@ import org.pojava.datetime.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.PropertyTools;
-import org.yamj.common.tools.StringTools;
 import org.yamj.core.database.model.AbstractMetadata;
 import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.database.model.VideoData;
@@ -464,34 +463,6 @@ public final class MetadataTools {
         }
 
         return !onlyExtras;
-    }
-
-    /**
-     * Remove alternate name from role
-     *
-     * @param role
-     * @return
-     */
-    public static String fixActorRole(final String role) {
-        if (role == null) {
-            return null;
-        }
-        String fixed = role;
-
-        // (as = alternate name)
-        int idx = StringUtils.indexOfIgnoreCase(fixed, "(as ");
-        if (idx > 0) {
-            fixed = fixed.substring(0, idx);
-        }
-
-        // double characters
-        idx = StringUtils.indexOf(fixed, "/");
-        if (idx > 0) {
-            List<String> characters = StringTools.splitList(fixed, "/");
-            fixed = StringUtils.join(characters.toArray(), " / ");
-        }
-
-        return fixScannedValue(fixed);
     }
 
     /**

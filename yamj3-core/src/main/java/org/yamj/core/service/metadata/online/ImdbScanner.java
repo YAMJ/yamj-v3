@@ -1106,7 +1106,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                     if (StringUtils.isNotBlank(name)) {
                         int nmPosition = actorBlock.indexOf("/nm");
                         String personId = actorBlock.substring(nmPosition + 1, actorBlock.indexOf("/", nmPosition + 1));
-                        character = MetadataTools.fixActorRole(character);
                         videoData.addCreditDTO(new CreditDTO(SCANNER_ID, personId, JobType.ACTOR, name, character));
                     }
                 }
