@@ -257,7 +257,14 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
         // CAST
         if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+            boolean skipUncredited = configServiceWrapper.getBooleanProperty("yamj3.castcrew.skip.uncredited", Boolean.TRUE);
+            
             for (MediaCreditCast person : movieInfo.getCast()) {
+                // skip person without credit
+                if (skipUncredited && StringUtils.indexOf(person.getCharacter(), "uncredited") > 0) {
+                    continue;
+                }
+                
                 CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), JobType.ACTOR, person.getName(), person.getCharacter());
                 videoData.addCreditDTO(credit);
             }

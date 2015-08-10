@@ -102,31 +102,6 @@ public class UpgradeDatabaseDao extends HibernateDao {
         }
     }
     
-    /**
-     * Issues: #234
-     * Date:   24.07.2015
-     */
-    public void patchLocaleConfig() {
-        currentSession()
-            .createSQLQuery("DELETE FROM configuration where config_key='imdb.id.search.country'")
-            .executeUpdate();
-        currentSession()
-            .createSQLQuery("DELETE FROM configuration where config_key='imdb.aka.preferred.country'")
-            .executeUpdate();
-        currentSession()
-            .createSQLQuery("UPDATE configuration set config_value='' where config_key='themoviedb.language'")
-            .executeUpdate();
-        currentSession()
-            .createSQLQuery("UPDATE configuration set config_value='' where config_key='themoviedb.country'")
-            .executeUpdate();
-        currentSession()
-            .createSQLQuery("UPDATE configuration set config_value='' where config_key='thetvdb.language'")
-            .executeUpdate();
-        currentSession()
-            .createSQLQuery("UPDATE configuration set config_value='DE,FR,GB,US' where config_key='yamj3.certification.countries'")
-            .executeUpdate();
-    }
-
     class CertEntry {
         public String country;
         public String cert;
@@ -515,10 +490,36 @@ public class UpgradeDatabaseDao extends HibernateDao {
     }
 
     /**
-     * Issues: #237
+     * Issues: #234, #237, enhancements
      * Date:   07.08.2015
      */
-    public void patchArtworkConfig() {
+    public void patchConfiguration() {
+        // enhancements
+        currentSession()
+            .createSQLQuery("DELETE FROM configuration where config_key='imdb.skip.faceless'")
+            .executeUpdate();
+        
+        // #234
+        currentSession()
+            .createSQLQuery("DELETE FROM configuration where config_key='imdb.id.search.country'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("DELETE FROM configuration where config_key='imdb.aka.preferred.country'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='' where config_key='themoviedb.language'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='' where config_key='themoviedb.country'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='' where config_key='thetvdb.language'")
+            .executeUpdate();
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_value='DE,FR,GB,US' where config_key='yamj3.certification.countries'")
+            .executeUpdate();
+
+        // #237
         currentSession()
             .createSQLQuery("UPDATE configuration set config_value='movie_scanner,tmdb,fanarttv,yahoo' where config_key='yamj3.artwork.scanner.poster.movie.priorities'")
             .executeUpdate();

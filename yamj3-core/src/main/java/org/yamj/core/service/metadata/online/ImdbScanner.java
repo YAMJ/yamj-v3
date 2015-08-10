@@ -1087,19 +1087,25 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
             // ACTORS
             if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
-                boolean skipFaceless = configServiceWrapper.getBooleanProperty("imdb.skip.faceless", Boolean.FALSE);
+                boolean skipFaceless = configServiceWrapper.getBooleanProperty("yamj3.castcrew.skip.faceless", Boolean.FALSE);
+                boolean skipUncredited = configServiceWrapper.getBooleanProperty("yamj3.castcrew.skip.uncredited", Boolean.TRUE);
+                
                 for (String actorBlock : HTMLTools.extractTags(xml, "<table class=\"cast_list\">", HTML_TABLE_END, "<td class=\"primary_photo\"", "</tr>")) {
                     // skip faceless persons ('loadlate' is present for actors with photos)
                     if (skipFaceless && !actorBlock.contains("loadlate")) {
                         continue;
                     }
 
-                    int nmPosition = actorBlock.indexOf("/nm");
-                    String personId = actorBlock.substring(nmPosition + 1, actorBlock.indexOf("/", nmPosition + 1));
-                    String name = HTMLTools.stripTags(HTMLTools.extractTag(actorBlock, "itemprop=\"name\">", HTML_SPAN_END));
+                    // skip person without credit
                     String character = HTMLTools.stripTags(HTMLTools.extractTag(actorBlock, "<td class=\"character\">", HTML_TD_END));
+                    if (skipUncredited && StringUtils.indexOf(character, "uncredited") > 0) {
+                        continue;
+                    }
 
-                    if (StringUtils.isNotBlank(name) && StringUtils.indexOf(character, "uncredited") == -1) {
+                    String name = HTMLTools.stripTags(HTMLTools.extractTag(actorBlock, "itemprop=\"name\">", HTML_SPAN_END));
+                    if (StringUtils.isNotBlank(name)) {
+                        int nmPosition = actorBlock.indexOf("/nm");
+                        String personId = actorBlock.substring(nmPosition + 1, actorBlock.indexOf("/", nmPosition + 1));
                         character = MetadataTools.fixActorRole(character);
                         videoData.addCreditDTO(new CreditDTO(SCANNER_ID, personId, JobType.ACTOR, name, character));
                     }

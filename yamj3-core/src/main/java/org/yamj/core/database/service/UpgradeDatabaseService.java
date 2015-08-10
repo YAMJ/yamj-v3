@@ -39,20 +39,20 @@ public class UpgradeDatabaseService {
     
     @PostConstruct
     public void init() {
+        // Issues: #234, #237, enhancements
+        // Date:   10.08.2015
+        try {
+            upgradeDatabaseDao.patchConfiguration();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchConfiguration'", ex);
+        }
+
         // Issues: #222
         // Date:   18.07.2015
         try {
             upgradeDatabaseDao.patchTrailers();
         } catch (Exception ex) {
             LOG.warn("Failed upgrade 'patchTrailers'", ex);
-        }
-
-        // Issues: #234
-        // Date:   24.07.2015
-        try {
-            upgradeDatabaseDao.patchLocaleConfig();
-        } catch (Exception ex) {
-            LOG.warn("Failed upgrade 'patchLocales'", ex);
         }
 
         // Issues: #234
@@ -93,14 +93,6 @@ public class UpgradeDatabaseService {
             upgradeDatabaseDao.patchLanguageSubtitles();
         } catch (Exception ex) {
             LOG.warn("Failed upgrade 'patchLanguageSubtitles'", ex);
-        }
-
-        // Issues: #237
-        // Date:   07.08.2015
-        try {
-            upgradeDatabaseDao.patchArtworkConfig();
-        } catch (Exception ex) {
-            LOG.warn("Failed upgrade 'patchArtworkConfig'", ex);
         }
 
         // Issues: enhancement
