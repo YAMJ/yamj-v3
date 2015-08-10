@@ -322,7 +322,7 @@ public class MetadataStorageService {
         }
     }
 
-    @Transactional
+    @Transactional(timeout=120)
     public void updateScannedPerson(Person person) {
         // update entity
         person.fixScannedValues();
@@ -344,7 +344,7 @@ public class MetadataStorageService {
         this.updateLocatedArtwork(person);
     }
 
-    @Transactional
+    @Transactional(timeout=300)
     public void updateScannedPersonFilmography(Person person) {
         // update entity
         metadataDao.updateEntity(person);
@@ -422,7 +422,7 @@ public class MetadataStorageService {
         updateLocatedArtwork(videoData);
     }
 
-    @Transactional(timeout=120)
+    @Transactional(timeout=300)
     public void updateScannedMetaData(Series series) {
         // update entity
         series.setLastScanned(new Date(System.currentTimeMillis()));
