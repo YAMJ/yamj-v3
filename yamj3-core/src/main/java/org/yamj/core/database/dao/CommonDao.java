@@ -310,15 +310,15 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiCertificationDTO.class, sqlScalars, wrapper);
     }
 
-    public BoxedSet getBoxedSet(String name) {
-        return getByNaturalIdCaseInsensitive(BoxedSet.class, "name", name);
+    public BoxedSet getBoxedSet(String identifier) {
+        return getByNaturalIdCaseInsensitive(BoxedSet.class, "identifier", identifier);
     }
 
     public synchronized void storeNewBoxedSet(BoxedSetDTO boxedSetDTO) {
-        BoxedSet boxedSet = this.getBoxedSet(boxedSetDTO.getName());
+        BoxedSet boxedSet = this.getBoxedSet(boxedSetDTO.getIdentifier());
         if (boxedSet == null) {
             // create new boxed set
-            boxedSet = new BoxedSet();
+            boxedSet = new BoxedSet(boxedSetDTO.getIdentifier());
             boxedSet.setName(boxedSetDTO.getName());
             if (boxedSetDTO.getSourceId() != null) {
                 boxedSet.setSourceDbId(boxedSetDTO.getSource(), boxedSetDTO.getSourceId());

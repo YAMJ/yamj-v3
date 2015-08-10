@@ -265,10 +265,10 @@ public class ArtworkProcessorService {
             sb.append(located.getArtwork().getSeries().getIdentifier());
             sb.append(".series.");
         } else if (located.getArtwork().getPerson() != null) {
-        	sb.append(FileTools.makeSafeFilename(located.getArtwork().getPerson().getIdentifier()));
+        	sb.append(located.getArtwork().getPerson().getIdentifier());
             sb.append(".person.");
         } else if (located.getArtwork().getBoxedSet() != null) {
-            sb.append(FileTools.makeSafeFilename(located.getArtwork().getBoxedSet().getName()));
+            sb.append(located.getArtwork().getBoxedSet().getIdentifier());
             sb.append(".boxset.");
         } else {
             // should never happen

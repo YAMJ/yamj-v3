@@ -26,10 +26,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.yamj.core.tools.MetadataTools;
 
 public class BoxedSetDTO {
 
     private final String source;
+    private final String identifier;
     private final String name;
     private final Integer ordering;
     private final String sourceId;
@@ -45,6 +47,7 @@ public class BoxedSetDTO {
     public BoxedSetDTO(String source, String name, Integer ordering, String sourceId) {
         this.source = source;
         this.name = StringUtils.trimToNull(name);
+        this.identifier = MetadataTools.cleanIdentifier(name);
         this.ordering = ordering;
         this.sourceId = StringUtils.trimToNull(sourceId);
     }
@@ -59,6 +62,10 @@ public class BoxedSetDTO {
 
     public String getName() {
         return name;
+    }
+
+    public String getIdentifier() {
+        return identifier;
     }
 
     public Integer getOrdering() {

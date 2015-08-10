@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.hibernate.HibernateDao;
 import org.yamj.core.tools.Constants;
+import org.yamj.core.tools.MetadataTools;
 
 @Transactional
 @Repository("fixDatabaseDao")
@@ -566,6 +567,49 @@ public class UpgradeDatabaseDao extends HibernateDao {
         
         currentSession()
         .createSQLQuery("ALTER TABLE artwork_located DROP language")
+        .executeUpdate();
+    }
+
+    /**
+     * Issues: enhancement
+     * Date:   10.08.2015
+     */
+    public void patchBoxedSetIdentifier() {
+        // retrieve boxed sets
+        Map<Long, String> boxedSets = new HashMap<>();
+        List<Object[]> objects = currentSession().createSQLQuery("select id,name from boxed_set where identifier=''").list();
+        for (Object[] object : objects) {
+            Long id = Long.valueOf(object[0].toString());
+            String name = object[1].toString();
+            boxedSets.put(id, name);
+        }
+
+        if (boxedSets.isEmpty()) {
+            // nothing to do anymore
+            return;
+        }
+        
+        // drop unique index
+        if (existsUniqueIndex("boxed_set", "UIX_BOXEDSET_NATURALID")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE boxed_set DROP index UIX_BOXEDSET_NATURALID")
+            .executeUpdate();
+        }
+
+        // update language codes
+        for (Entry<Long,String> update : boxedSets.entrySet()) {
+            String identifier = MetadataTools.cleanIdentifier(update.getValue());
+            
+            currentSession()
+            .createSQLQuery("UPDATE boxed_set set identifier=:identifier where id=:id")
+            .setLong("id", update.getKey())
+            .setString("identifier", identifier)
+            .executeUpdate();
+        }
+
+        // create new index
+        currentSession()
+        .createSQLQuery("CREATE UNIQUE INDEX UIX_BOXEDSET_NATURALID on boxed_set(identifier)")
         .executeUpdate();
     }
 }

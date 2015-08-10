@@ -699,7 +699,7 @@ public class MetadataStorageService {
 
             BoxedSetOrder boxedSetOrder = null;
             for (BoxedSetOrder stored : videoData.getBoxedSets()) {
-                if (StringUtils.equalsIgnoreCase(stored.getBoxedSet().getName(), boxedSetDTO.getName())) {
+                if (StringUtils.equalsIgnoreCase(stored.getBoxedSet().getIdentifier(), boxedSetDTO.getIdentifier())) {
                     boxedSetOrder = stored;
                     break;
                 }
@@ -707,7 +707,7 @@ public class MetadataStorageService {
 
             if (boxedSetOrder == null) {
                 // create new videoSet
-                BoxedSet boxedSet = commonDao.getBoxedSet(boxedSetDTO.getName());
+                BoxedSet boxedSet = commonDao.getBoxedSet(boxedSetDTO.getIdentifier());
                 if (boxedSet != null) {
                     boxedSetOrder = new BoxedSetOrder();
                     boxedSetOrder.setVideoData(videoData);
@@ -744,7 +744,7 @@ public class MetadataStorageService {
 
             BoxedSetOrder boxedSetOrder = null;
             for (BoxedSetOrder stored : series.getBoxedSets()) {
-                if (StringUtils.equalsIgnoreCase(stored.getBoxedSet().getName(), boxedSetDTO.getName())) {
+                if (StringUtils.equalsIgnoreCase(stored.getBoxedSet().getIdentifier(), boxedSetDTO.getIdentifier())) {
                     boxedSetOrder = stored;
                     break;
                 }
@@ -752,7 +752,7 @@ public class MetadataStorageService {
 
             if (boxedSetOrder == null) {
                 // create new videoSet
-                BoxedSet boxedSet = commonDao.getBoxedSet(boxedSetDTO.getName());
+                BoxedSet boxedSet = commonDao.getBoxedSet(boxedSetDTO.getIdentifier());
                 if (boxedSet != null) {
                     boxedSetOrder = new BoxedSetOrder();
                     boxedSetOrder.setSeries(series);

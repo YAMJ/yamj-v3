@@ -23,7 +23,6 @@
 package org.yamj.core.service.staging;
 
 import java.io.File;
-import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -231,14 +230,12 @@ public class StagingService {
         return true;
     }
 
-    public boolean isWatchedVideoFile(StageFile videoFile) {
+    public Date maxWatchedFileDate(StageFile videoFile) {
         // get the name used for WATCHED directories
         String watchedFolderName = PropertyTools.getProperty("yamj3.folder.name.watched");
 
         boolean checkLibrary = this.configService.getBooleanProperty("yamj3.librarycheck.folder.watched", Boolean.TRUE);
-
-        BigInteger count = this.stagingDao.countWatchedFiles(videoFile, watchedFolderName, checkLibrary);
-        return (count != null && count.intValue()>0);
+        return this.stagingDao.maxWatchedFileDate(videoFile, watchedFolderName, checkLibrary);
     }
 
     public List<StageFile> findWatchedVideoFiles(StageFile watchedFile) {

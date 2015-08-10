@@ -43,6 +43,7 @@ public final class InfoDTO {
     private Set<String> fanartURLs = new HashSet<>(0);
     private Set<String> trailerURLs= new HashSet<>(0);
     private boolean watched = false;
+    private Date watchedDate; 
     private String title;
     private String titleOriginal;
     private String titleSort;
@@ -117,8 +118,17 @@ public final class InfoDTO {
         return watched;
     }
 
-    public void setWatched(boolean watched) {
+    public Date getWatchedDate() {
+        return this.watchedDate;
+    }
+    
+    public void setWatched(Boolean watched, Date watchedDate) {
         this.watched = watched;
+        if (this.watchedDate == null) {
+            this.watchedDate = watchedDate;
+        } else if (watchedDate != null && watchedDate.after(this.watchedDate)) {
+            this.watchedDate = watchedDate;
+        }
         this.changed = true;
     }
     

@@ -22,7 +22,6 @@
  */
 package org.yamj.core.database.dao;
 
-import java.math.BigInteger;
 import java.util.*;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -491,9 +490,9 @@ public class StagingDao extends HibernateDao {
         return this.findByNamedParameters(sb, params);
     }
 
-    public BigInteger countWatchedFiles(StageFile videoFile, String folderName, boolean checkLibrary) {
+    public Date maxWatchedFileDate(StageFile videoFile, String folderName, boolean checkLibrary) {
         StringBuilder sb = new StringBuilder();
-        sb.append("SELECT count(*) ");
+        sb.append("SELECT max(sf.file_date) ");
         sb.append("FROM stage_file sf ");
         sb.append("JOIN stage_directory sd ON sf.directory_id=sd.id and ");
         if (StringUtils.isBlank(folderName)) {
@@ -522,6 +521,6 @@ public class StagingDao extends HibernateDao {
             query.setString("dirName", StringEscapeUtils.escapeSql(folderName.toLowerCase()));
         }
 
-        return (BigInteger) query.uniqueResult();
+        return (Date) query.uniqueResult();
     }
 }

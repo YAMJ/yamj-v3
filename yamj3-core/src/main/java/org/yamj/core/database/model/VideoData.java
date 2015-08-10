@@ -378,7 +378,7 @@ public class VideoData extends AbstractMetadata {
         this.sourceDbIdMap = sourceDbIdMap;
     }
 
-    public boolean isWatchedNfo() {
+    private boolean isWatchedNfo() {
         return watchedNfo;
     }
 

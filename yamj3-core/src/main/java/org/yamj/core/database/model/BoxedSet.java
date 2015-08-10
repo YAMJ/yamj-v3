@@ -32,15 +32,21 @@ import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "boxed_set",
-        uniqueConstraints = @UniqueConstraint(name = "UIX_BOXEDSET_NATURALID", columnNames = {"name"})
+        uniqueConstraints = @UniqueConstraint(name = "UIX_BOXEDSET_NATURALID", columnNames = {"identifier"})
 )
 @SuppressWarnings("unused")
 public class BoxedSet extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 3074855702659953694L;
 
-    @NaturalId(mutable = true)
-    @Column(name = "name", nullable = false, length = 100)
+    /**
+     * This will be generated from a scanned file name.
+     */
+    @NaturalId
+    @Column(name = "identifier", length = 100, nullable = false)
+    private String identifier;
+    
+    @Column(name = "name", length = 100, nullable = false)
     private String name;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "boxedSet")
@@ -53,7 +59,24 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);
 
+    // CONSTRUCTORS
+    
+    public BoxedSet() {}
+
+    public BoxedSet(String identifier) {
+        setIdentifier(identifier);
+    }
+    
     // GETTER and SETTER
+    
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    private void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+    
     public String getName() {
         return name;
     }
@@ -97,11 +120,12 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
     }
     
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         final int prime = 7;
         int result = 1;
-        result = prime * result + (getName() == null ? 0 : getName().toLowerCase().hashCode());
+        result = prime * result + (getIdentifier() == null ? 0 : getIdentifier().toLowerCase().hashCode());
         return result;
     }
 
@@ -122,7 +146,7 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
             return getId() == other.getId();
         }
         // check the name
-        return StringUtils.equalsIgnoreCase(getName(), other.getName());
+        return StringUtils.equalsIgnoreCase(getIdentifier(), other.getIdentifier());
     }
 
     @Override
@@ -130,6 +154,8 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
         StringBuilder sb = new StringBuilder();
         sb.append("BoxedSet [ID=");
         sb.append(getId());
+        sb.append(", identifier=");
+        sb.append(getIdentifier());
         sb.append(", name=");
         sb.append(getName());
         sb.append("]");

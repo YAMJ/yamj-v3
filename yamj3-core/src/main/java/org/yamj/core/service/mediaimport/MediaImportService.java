@@ -151,7 +151,7 @@ public class MediaImportService {
         }
 
         // determine if watched file exists for the video file
-        boolean watchedFile = this.stagingService.isWatchedVideoFile(stageFile);
+        Date watchedDate = this.stagingService.maxWatchedFileDate(stageFile);
 
         // new media file
         mediaFile = new MediaFile();
@@ -166,7 +166,7 @@ public class MediaImportService {
         mediaFile.setVideoSource(dto.getVideoSource());
         mediaFile.setEpisodeCount(dto.getEpisodes().size());
         mediaFile.setStatus(StatusType.NEW);
-        mediaFile.setWatchedFile(watchedFile);
+        mediaFile.setWatchedFile(watchedDate!=null);
         mediaFile.addStageFile(stageFile);
         stageFile.setMediaFile(mediaFile);
 
@@ -225,7 +225,7 @@ public class MediaImportService {
                 videoData.addMediaFile(mediaFile);
 
                 // set watched file if all media files are watched by file
-                watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
+                boolean watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
                 videoData.setWatchedFile(watchedFile);
 
                 // set watched API if all media files are watched by API

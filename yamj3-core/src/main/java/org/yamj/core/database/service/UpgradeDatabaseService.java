@@ -110,5 +110,13 @@ public class UpgradeDatabaseService {
         } catch (Exception ex) {
             LOG.warn("Failed upgrade 'patchArtworkLocated'", ex);
         }
-    }
+
+        // Issues: enhancement
+        // Date:   10.08.2015
+        try {
+            upgradeDatabaseDao.patchBoxedSetIdentifier();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchBoxedSetIdentifier'", ex);
+        }
+}
 }

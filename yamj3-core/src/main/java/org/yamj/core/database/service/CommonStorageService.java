@@ -123,13 +123,13 @@ public class CommonStorageService {
                         this.stagingDao.updateEntity(check);
 
                         // reset watched file
-                        boolean watchedFile = this.stagingService.isWatchedVideoFile(check);
-                        mediaFile.setWatchedFile(watchedFile);
+                        Date watchedDate = this.stagingService.maxWatchedFileDate(check);
+                        mediaFile.setWatchedFile(watchedDate!=null);
                         mediaFile.setStatus(StatusType.UPDATED);
                         this.stagingDao.updateEntity(mediaFile);
 
                         for (VideoData videoData : mediaFile.getVideoDatas()) {
-                            watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
+                            boolean watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
                             if (videoData.isWatchedFile() != watchedFile) {
                                 videoData.setWatchedFile(watchedFile);
                                 this.stagingDao.updateEntity(videoData);

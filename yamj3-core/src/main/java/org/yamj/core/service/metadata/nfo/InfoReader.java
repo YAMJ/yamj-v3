@@ -112,7 +112,7 @@ public final class InfoReader {
 
         // If the file has XML tags in it, try reading it as a pure XML file
         if (hasXml) {
-            parsedNfo = this.readXmlNfo(nfoFile, nfoContent, nfoFilename, dto);
+            parsedNfo = this.readXmlNfo(nfoFile, nfoContent, nfoFilename, stageFile.getFileDate(), dto);
         }
 
         // If it has XML in it, but didn't parse correctly, try splitting it out
@@ -132,7 +132,7 @@ public final class InfoReader {
 
                 // Send text to be read
                 String nfoTrimmed = StringUtils.substring(nfoContent, start, end);
-                parsedNfo = readXmlNfo(null, nfoTrimmed, nfoFilename, dto);
+                parsedNfo = readXmlNfo(null, nfoTrimmed, nfoFilename, stageFile.getFileDate(), dto);
 
                 nfoTrimmed = StringUtils.remove(nfoContent, nfoTrimmed);
                 if (parsedNfo && StringUtils.isNotBlank(nfoTrimmed)) {
@@ -183,7 +183,7 @@ public final class InfoReader {
      * @param dto
      * @return
      */
-    private boolean readXmlNfo(final File nfoFile, final String nfoContent, final String nfoFilename, InfoDTO dto) {
+    private boolean readXmlNfo(final File nfoFile, final String nfoContent, final String nfoFilename, final Date nfoFileDate, InfoDTO dto) {
         Document xmlDoc;
 
         try {
@@ -198,7 +198,7 @@ public final class InfoReader {
             return Boolean.FALSE;
         }
 
-        parseXML(xmlDoc, dto, nfoFilename);
+        parseXML(xmlDoc, dto, nfoFilename, nfoFileDate);
         return Boolean.TRUE;
     }
 
@@ -210,7 +210,7 @@ public final class InfoReader {
      * @param nfoFilename
      * @return
      */
-    private void parseXML(final Document xmlDoc, InfoDTO dto, final String nfoFilename) {
+    private void parseXML(final Document xmlDoc, InfoDTO dto, final String nfoFilename, final Date nfoFileDate) {
         NodeList nlMovies;
 
         // determine if the NFO file is for a TV Show or Movie so the default ID can be set
@@ -248,7 +248,7 @@ public final class InfoReader {
 
         // parsed watched
         value = DOMHelper.getValueFromElement(eCommon, "watched");
-        boolean watched = Boolean.parseBoolean(value);
+        final boolean watched = Boolean.parseBoolean(value);
         
         if (dto.isTvShow()) {
             // TV show specific
@@ -262,7 +262,7 @@ public final class InfoReader {
             // movie specific
         
             // movie watched status
-            dto.setWatched(watched);
+            dto.setWatched(watched, nfoFileDate);
         }
         
         // parse sets
