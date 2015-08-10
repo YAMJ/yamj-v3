@@ -41,6 +41,7 @@ import org.yamj.core.database.dao.*;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.MetadataStorageService;
 import org.yamj.core.service.file.FileTools;
@@ -930,12 +931,13 @@ public class MediaImportService {
             ArtworkLocated located = new ArtworkLocated();
             located.setArtwork(artwork);
             located.setSource("file");
-            located.setPriority(priority);
             located.setStageFile(stageFile);
 
             if (!artwork.getArtworkLocated().contains(located)) {
+                located.setPriority(priority);
                 located.setHashCode(stageFile.getHashCode());
-
+                located.setImageType(ImageType.fromString(stageFile.getExtension()));
+                
                 if (FileTools.isFileReadable(stageFile)) {
                     located.setStatus(StatusType.NEW);
                 } else {

@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.*;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.artwork.ArtworkTools;
 import org.yamj.core.tools.GenreXmlTools;
@@ -875,6 +877,7 @@ public class MetadataStorageService {
             located.setUrl(entry.getKey());
             located.setHashCode(ArtworkTools.getUrlHashCode(entry.getKey()));
             located.setPriority(5);
+            located.setImageType(ImageType.fromString(FilenameUtils.getExtension(entry.getKey())));
             located.setStatus(StatusType.NEW);
             
             artworkDao.saveArtworkLocated(artwork, located);

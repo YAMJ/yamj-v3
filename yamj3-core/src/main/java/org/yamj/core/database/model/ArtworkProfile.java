@@ -27,7 +27,7 @@ import javax.persistence.*;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.database.model.type.ImageFormat;
+import org.yamj.core.database.model.type.ImageType;
 
 @Entity
 @Table(name = "artwork_profile",
@@ -208,8 +208,8 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     }
 
     // TODO
-    public ImageFormat getImageFormat() {
-        return ImageFormat.JPEG;
+    public ImageType getImageType() {
+        return ImageType.JPG;
     }
 
     // TODO

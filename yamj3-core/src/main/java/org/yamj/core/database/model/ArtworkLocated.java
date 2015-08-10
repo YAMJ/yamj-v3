@@ -34,6 +34,7 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.type.ImageType;
 
 @Entity
 @Table(name = "artwork_located",
@@ -85,11 +86,15 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @Column(name = "height", nullable = false)
     private int height = -1;
 
-    @Column(name = "language", length = 30)
-    private String language;
+    @Column(name = "language_code", length = 4)
+    private String languageCode;
 
     @Column(name = "rating", nullable = false)
     private int rating = -1;
+
+    @Type(type = "imageType")
+    @Column(name = "image_type", nullable = false, length = 4)
+    private ImageType imageType;
 
     @Column(name = "cache_filename", length = 255)
     private String cacheFilename;
@@ -195,12 +200,12 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
         this.height = height;
     }
 
-    public String getLanguage() {
-        return language;
+    public String getLanguageCode() {
+        return languageCode;
     }
 
-    public void setLanguage(String language) {
-        this.language = language;
+    public void setLanguageCode(String languageCode) {
+        this.languageCode = languageCode;
     }
 
     public int getRating() {
@@ -209,6 +214,14 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     public void setRating(int rating) {
         this.rating = rating;
+    }
+    
+    public ImageType getImageType() {
+        return imageType;
+    }
+
+    public void setImageType(ImageType imageType) {
+        this.imageType = imageType;
     }
 
     public String getCacheFilename() {

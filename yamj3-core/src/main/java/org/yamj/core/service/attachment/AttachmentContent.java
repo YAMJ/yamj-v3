@@ -22,25 +22,33 @@
  */
 package org.yamj.core.service.attachment;
 
+import org.yamj.core.database.model.type.ImageType;
+
 /**
  * A volatile container for content information of an attachment.
  */
 public class AttachmentContent {
 
     private final ContentType contentType;
+    private final ImageType imageType;
     private final int part;
 
-    public AttachmentContent(ContentType contentType) {
-        this(contentType, -1);
+    public AttachmentContent(ContentType contentType, ImageType imageType) {
+        this(contentType, imageType, -1);
     }
 
-    public AttachmentContent(ContentType contentType, int part) {
+    public AttachmentContent(ContentType contentType, ImageType imageType, int part) {
         this.contentType = contentType;
+        this.imageType = imageType;
         this.part = part;
     }
 
     public ContentType getContentType() {
         return contentType;
+    }
+
+    public ImageType getImageType() {
+        return imageType;
     }
 
     public int getPart() {

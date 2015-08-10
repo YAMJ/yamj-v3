@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.staging.StagingService;
 
@@ -66,7 +67,7 @@ public class AttachmentScannerService {
     private boolean isActivated = Boolean.FALSE;
     // valid MIME types
     private Set<String> validMimeTypesText;
-    private Map<String, String> validMimeTypesImage;
+    private Map<String, ImageType> validMimeTypesImage;
 
     @Autowired
     private Cache attachmentCache;
@@ -132,10 +133,10 @@ public class AttachmentScannerService {
 
             // add valid mime types (image)
             validMimeTypesImage = new HashMap<>(4);
-            validMimeTypesImage.put("image/jpeg", ".jpg");
-            validMimeTypesImage.put("image/png", ".png");
-            validMimeTypesImage.put("image/gif", ".gif");
-            validMimeTypesImage.put("image/x-ms-bmp", ".bmp");
+            validMimeTypesImage.put("image/jpeg", ImageType.JPG);
+            validMimeTypesImage.put("image/png", ImageType.PNG);
+            validMimeTypesImage.put("image/gif", ImageType.GIF);
+            validMimeTypesImage.put("image/x-ms-bmp", ImageType.BMP);
         }
     }
 
@@ -204,7 +205,7 @@ public class AttachmentScannerService {
     }
 
     /**
-     * Scans a matroska movie file for attachments.
+     * Scans a MATROSKA movie file for attachments.
      *
      * @param movieFile the movie file to scan
      */
@@ -301,13 +302,13 @@ public class AttachmentScannerService {
 
         Attachment attachment = null;
         if (content == null) {
-            LOG.debug("Failed to dertermine attachment type for '{}' ({})",fixedFileName,  fixedMimeType );
+            LOG.debug("Failed to dertermine attachment type for '{}' ({})", fixedFileName,  fixedMimeType );
         } else {
             attachment = new Attachment();
             attachment.setType(AttachmentType.MATROSKA); // one and only type at the moment
             attachment.setAttachmentId(id);
             attachment.setContentType(content.getContentType());
-            attachment.setMimeType(fixedMimeType == null ? null : fixedMimeType.toLowerCase());
+            attachment.setImageType(content.getImageType());
             attachment.setPart(content.getPart());
             LOG.debug("Found attachment {}",  attachment);
         }
@@ -334,9 +335,11 @@ public class AttachmentScannerService {
         if (validMimeTypesText.contains(mimeType)) {
             // NFO
             if ("nfo".equalsIgnoreCase(FilenameUtils.getExtension(fileName))) {
-                return new AttachmentContent(ContentType.NFO);
+                return new AttachmentContent(ContentType.NFO, null);
             }
         } else if (validMimeTypesImage.containsKey(mimeType)) {
+            final ImageType imageType = validMimeTypesImage.get(mimeType);
+            
             String check = FilenameUtils.removeExtension(fileName);
             // check for SET image
             boolean isSetImage = Boolean.FALSE;
@@ -350,36 +353,36 @@ public class AttachmentScannerService {
                 if (check.endsWith("."+posterToken) || check.equals(posterToken)) {
                     if (isSetImage) {
                         // fileName = <any>.<posterToken>.set.<extension>
-                        return new AttachmentContent(ContentType.SET_POSTER);
+                        return new AttachmentContent(ContentType.SET_POSTER, imageType);
                     }
                     // fileName = <any>.<posterToken>.<extension>
-                    return new AttachmentContent(ContentType.POSTER);
+                    return new AttachmentContent(ContentType.POSTER, imageType);
                 }
             }
             for (String fanartToken : FANART_TOKEN) {
                 if (check.endsWith("."+fanartToken) || check.equals(fanartToken)) {
                     if (isSetImage) {
                         // fileName = <any>.<fanartToken>.set.<extension>
-                        return new AttachmentContent(ContentType.SET_FANART);
+                        return new AttachmentContent(ContentType.SET_FANART, imageType);
                     }
                     // fileName = <any>.<fanartToken>.<extension>
-                    return new AttachmentContent(ContentType.FANART);
+                    return new AttachmentContent(ContentType.FANART, imageType);
                 }
             }
             for (String bannerToken : BANNER_TOKEN) {
                 if (check.endsWith("."+bannerToken) || check.equals(bannerToken)) {
                     if (isSetImage) {
                         // fileName = <any>.<bannerToken>.set.<extension>
-                        return new AttachmentContent(ContentType.SET_BANNER);
+                        return new AttachmentContent(ContentType.SET_BANNER, imageType);
                     }
                     // fileName = <any>.<bannerToken>.<extension>
-                    return new AttachmentContent(ContentType.BANNER);
+                    return new AttachmentContent(ContentType.BANNER, imageType);
                 }
             }
             for (String videoimageToken : VIDEOIMAGE_TOKEN) {
                 if (check.endsWith("."+videoimageToken) || check.equals(videoimageToken)) {
                     // fileName = <any>.<videoimageToken>.<extension>
-                    return new AttachmentContent(ContentType.VIDEOIMAGE);
+                    return new AttachmentContent(ContentType.VIDEOIMAGE, imageType);
                 }
                 // TODO determination of episode/part
             }

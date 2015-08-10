@@ -107,7 +107,8 @@ public class TrailerScannerService {
         }
 
         LOG.trace("Scan local for trailer of movie {}-'{}'", videoData.getId(), videoData.getTitle());
-        // TODO
+
+        // TODO local scan for movie trailer
     }
 
     private void scanTrailerOnline(VideoData videoData, List<Trailer> trailers) {
@@ -167,7 +168,8 @@ public class TrailerScannerService {
         }
 
         LOG.trace("Scan local for trailer of series {}-'{}'", series.getId(), series.getTitle());
-        // TODO
+
+        // TODO local scan for series trailer
     }
 
     private void scanTrailerOnline(Series series, List<Trailer> trailers) {

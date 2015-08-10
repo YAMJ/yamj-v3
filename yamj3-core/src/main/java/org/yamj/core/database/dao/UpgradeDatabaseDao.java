@@ -548,4 +548,24 @@ public class UpgradeDatabaseDao extends HibernateDao {
             .createSQLQuery("UPDATE configuration set config_value='person_scanner,tmdb' where config_key='yamj3.artwork.scanner.photo.priorities'")
             .executeUpdate();
     }
+
+    /**
+     * Issues: enhancement
+     * Date:   10.08.2015
+     */
+    public void patchArtworkLocated() {
+        currentSession()
+        .createSQLQuery("UPDATE artwork_located set image_type='JPG' where image_type=''")
+        .executeUpdate();
+
+        if (!existsColumn("artwork_located", "language")) return;
+        
+        currentSession()
+        .createSQLQuery("UPDATE artwork_located set language_code=language where language is not null")
+        .executeUpdate();
+        
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_located DROP language")
+        .executeUpdate();
+    }
 }

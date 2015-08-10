@@ -44,7 +44,7 @@ import org.springframework.util.CollectionUtils;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.api.model.Skin;
 import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.type.ImageFormat;
+import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.service.attachment.AttachmentScannerService;
 import org.yamj.core.web.PoolingHttpClient;
 
@@ -163,14 +163,14 @@ public class FileStorageService {
         return FileTools.copyFile(sourceFile, dst, deleteSource);
     }
 
-    public void storeImage(String filename, StorageType type, BufferedImage bi, ImageFormat imageFormat, int quality) throws Exception {
-        LOG.debug("Store {} {} image: {}", type, imageFormat, filename);
+    public void storeImage(String filename, StorageType type, BufferedImage bi, ImageType imageType, int quality) throws Exception {
+        LOG.debug("Store {} {} image: {}", type, imageType, filename);
         String storageFileName = getStorageName(type, filename);
         File outputFile = new File(storageFileName);
 
         ImageWriter writer = null;
         try {
-            if (ImageFormat.PNG == imageFormat) {
+            if (ImageType.PNG == imageType) {
                 ImageIO.write(bi, "png", outputFile);
             } else {
                 float jpegQuality = (float) quality / 100;

@@ -100,7 +100,7 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
 
             for (FTArtwork artwork : ftm.getArtwork(artworkType)) {
                 ArtworkDetailDTO aDto = new ArtworkDetailDTO(SCANNER_ID, artwork.getUrl());
-                aDto.setLanguage(artwork.getLanguage());
+                aDto.setLanguageCode(artwork.getLanguage());
                 artworkList.add(aDto);
             }
         } catch (FanartTvException ex) {

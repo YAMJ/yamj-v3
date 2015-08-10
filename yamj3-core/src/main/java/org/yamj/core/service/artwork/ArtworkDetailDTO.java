@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.artwork;
 
+import org.apache.commons.io.FilenameUtils;
+import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.service.artwork.ArtworkTools.HashCodeType;
 
 public class ArtworkDetailDTO {
@@ -29,17 +31,27 @@ public class ArtworkDetailDTO {
     private final String source;
     private final String url;
     private final String hashCode;
-    private String language = null;
+    private final ImageType imageType;
+    private String languageCode = null;
     private int rating = -1;
 
     public ArtworkDetailDTO(String source, String url) {
-        this(source, url, HashCodeType.SIMPLE);
+        this(source, url, HashCodeType.SIMPLE, ImageType.fromString(FilenameUtils.getExtension(url)));
+    }
+
+    public ArtworkDetailDTO(String source, String url, ImageType imageType) {
+        this(source, url, HashCodeType.SIMPLE, imageType);
     }
 
     public ArtworkDetailDTO(String source, String url, HashCodeType hashCodeType) {
+        this(source, url, HashCodeType.SIMPLE, ImageType.fromString(FilenameUtils.getExtension(url)));
+    }
+
+    public ArtworkDetailDTO(String source, String url, HashCodeType hashCodeType, ImageType imageType) {
         this.source = source;
         this.url = url;
         this.hashCode = ArtworkTools.getUrlHashCode(url, hashCodeType);
+        this.imageType = imageType;
     }
     
     public String getSource() {
@@ -54,12 +66,16 @@ public class ArtworkDetailDTO {
         return hashCode;
     }
 
-    public String getLanguage() {
-        return language;
+    public ImageType getImageType() {
+        return imageType;
+    }
+    
+    public String getLanguageCode() {
+        return languageCode;
     }
 
-    public void setLanguage(String language) {
-        this.language = language;
+    public void setLanguageCode(String languageCode) {
+        this.languageCode = languageCode;
     }
 
     public int getRating() {
@@ -79,8 +95,10 @@ public class ArtworkDetailDTO {
         sb.append(getUrl());
         sb.append(", hashCode=");
         sb.append(getHashCode());
-        sb.append(", language=");
-        sb.append(getLanguage());
+        sb.append(", imageType=");
+        sb.append(getImageType());
+        sb.append(", languageCode=");
+        sb.append(getLanguageCode());
         sb.append(", rating=");
         sb.append(getRating());
         sb.append("]");

@@ -471,7 +471,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
 
         // set language
         if (StringUtils.isNotBlank(banner.getLanguage())) {
-            dto.setLanguage(banner.getLanguage());
+            dto.setLanguageCode(banner.getLanguage());
         }
 
         // set rating

@@ -40,7 +40,6 @@ import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.database.model.type.ImageFormat;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.FileTools;
@@ -195,7 +194,7 @@ public class ArtworkProcessorService {
 
         // store image on stage system
         String cacheFilename = buildCacheFilename(located, profile);
-        fileStorageService.storeImage(cacheFilename, storageType, image, profile.getImageFormat(), profile.getQuality());
+        fileStorageService.storeImage(cacheFilename, storageType, image, profile.getImageType(), profile.getQuality());
 
         try {
             ArtworkGenerated generated = new ArtworkGenerated();
@@ -292,17 +291,13 @@ public class ArtworkProcessorService {
         // 4. profile and suffix
         if (artworkProfile == null) {
             // it's the original image
-            sb.append("original");
-            // TODO determine suffix from URL or stage file name
-            sb.append(".jpg");
+            sb.append("original.");
+            sb.append(located.getImageType().name().toLowerCase());
         } else {
             // it's a generated image
             sb.append(artworkProfile.getProfileName().toLowerCase());
-            if (ImageFormat.PNG == artworkProfile.getImageFormat()) {
-                sb.append(".png");
-            } else {
-                sb.append(".jpg");
-            }
+            sb.append(".");
+            sb.append(artworkProfile.getImageType().name().toLowerCase());
         }
         
         return sb.toString();

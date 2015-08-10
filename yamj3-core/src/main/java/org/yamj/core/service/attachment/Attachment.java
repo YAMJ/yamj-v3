@@ -22,10 +22,10 @@
  */
 package org.yamj.core.service.attachment;
 
-import javax.xml.bind.annotation.XmlElement;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.type.ImageType;
 
 /**
  * File attachment.
@@ -35,7 +35,7 @@ public class Attachment {
     private AttachmentType type;
     private int attachmentId;
     private ContentType contentType;
-    private String mimeType;
+    private ImageType imageType;
     private int part; // only relevant for video images
     private StageFile stageFile;
 
@@ -55,7 +55,6 @@ public class Attachment {
         this.attachmentId = attachmentId;
     }
 
-    @XmlElement
     public ContentType getContentType() {
         return contentType;
     }
@@ -64,12 +63,12 @@ public class Attachment {
         this.contentType = contentType;
     }
 
-    public String getMimeType() {
-        return mimeType;
+    public ImageType getImageType() {
+        return imageType;
     }
 
-    public void setMimeType(String mimeType) {
-        this.mimeType = mimeType;
+    public void setImageType(ImageType imageType) {
+        this.imageType = imageType;
     }
 
     public int getPart() {
@@ -93,8 +92,8 @@ public class Attachment {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append(attachmentId)
                 .append(contentType)
+                .append(imageType)
                 .append(part)
-                .append(mimeType)
                 .toString();
     }
 }
