@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
@@ -47,6 +48,12 @@ import org.yamj.core.hibernate.HibernateDao;
 @Repository("commonDao")
 public class CommonDao extends HibernateDao {
 
+    @Cacheable("genre")
+    public Genre getGenre(Long id) {
+        return getById(Genre.class, id);
+    }
+
+    @Cacheable("genre")
     public Genre getGenre(String name) {
         return getByNaturalIdCaseInsensitive(Genre.class, "name", name);
     }
@@ -132,6 +139,12 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
     }
 
+    @Cacheable("studio")
+    public Studio getStudio(Long id) {
+        return getById(Studio.class, id);
+    }
+
+    @Cacheable("studio")
     public Studio getStudio(String name) {
         return getByNaturalIdCaseInsensitive(Studio.class, "name", name);
     }
@@ -176,6 +189,12 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(Studio.class, sqlScalars, wrapper);
     }
 
+    @Cacheable("country")
+    public Country getCountry(Long id) {
+        return getById(Country.class, id);
+    }
+
+    @Cacheable("country")
     public Country getCountry(String countryCode) {
         return getByNaturalId(Country.class, "countryCode", countryCode);
     }
@@ -230,6 +249,7 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiCountryDTO.class, sqlScalars, wrapper);
     }
 
+    @Cacheable("certification")
     public Certification getCertification(String countryCode, String certificate) {
         StringBuilder sb = new StringBuilder();
         sb.append("from Certification ");
@@ -310,6 +330,12 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiCertificationDTO.class, sqlScalars, wrapper);
     }
 
+    @Cacheable("boxset")
+    public BoxedSet getBoxedSet(Long id) {
+        return getById(BoxedSet.class, id);
+    }
+
+    @Cacheable("boxset")
     public BoxedSet getBoxedSet(String identifier) {
         return getByNaturalIdCaseInsensitive(BoxedSet.class, "identifier", identifier);
     }
@@ -447,17 +473,18 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiRatingDTO.class, sqlScalars, wrapper);
     }
 
-    public Award getAward(AwardDTO awardDTO) {
+    @Cacheable("award")
+    public Award getAward(String event, String category, String source) {
         return (Award) currentSession()
                 .byNaturalId(Award.class)
-                .using("event", awardDTO.getEvent())
-                .using("category", awardDTO.getCategory())
-                .using("sourceDb", awardDTO.getSource())
+                .using("event", event)
+                .using("category", category)
+                .using("sourceDb", source)
                 .load();
     }
 
     public synchronized void storeNewAward(AwardDTO awardDTO) {
-        Award award = this.getAward(awardDTO);
+        Award award = this.getAward(awardDTO.getEvent(), awardDTO.getCategory(), awardDTO.getSource());
         if (award == null) {
             // create new award event
             award = new Award(awardDTO.getEvent(), awardDTO.getCategory(), awardDTO.getSource());

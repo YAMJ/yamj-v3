@@ -22,7 +22,6 @@
  */
 package org.yamj.core.database.service;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.ListIterator;
 import org.apache.commons.collections.CollectionUtils;
@@ -127,8 +126,8 @@ public class JsonApiStorageService {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Genre Methods">
-    public Genre getGenre(Serializable id) {
-        return commonDao.getById(Genre.class, id);
+    public Genre getGenre(Long id) {
+        return commonDao.getGenre(id);
     }
 
     public Genre getGenre(String name) {
@@ -145,8 +144,8 @@ public class JsonApiStorageService {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Studio Methods">
-    public Studio getStudio(Serializable id) {
-        return commonDao.getById(Studio.class, id);
+    public Studio getStudio(Long id) {
+        return commonDao.getStudio(id);
     }
 
     public Studio getStudio(String name) {
@@ -159,8 +158,8 @@ public class JsonApiStorageService {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Country Methods">
-    public ApiCountryDTO getCountry(Serializable id, String language) {
-        Country country = commonDao.getById(Country.class, id);
+    public ApiCountryDTO getCountry(Long id, String language) {
+        Country country = commonDao.getCountry(id);
         if (country == null) return null;
 
         ApiCountryDTO dto = new ApiCountryDTO();
@@ -631,7 +630,7 @@ public class JsonApiStorageService {
                     }
                     break;
                 case BOXSET:
-                    BoxedSet boxedSet = commonDao.getById(BoxedSet.class, id);
+                    BoxedSet boxedSet = commonDao.getBoxedSet(id);
                     if (boxedSet != null) {
                         this.commonDao.markAsUpdated(boxedSet.getArtworks());
                         rescan = true;

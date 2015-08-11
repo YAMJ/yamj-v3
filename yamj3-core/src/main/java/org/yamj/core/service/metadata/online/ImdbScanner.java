@@ -267,7 +267,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         // AWARDS
         if (configServiceWrapper.getBooleanProperty("imdb.movie.awards", Boolean.FALSE)) {
-            videoData.addAwards(parseAwards(imdbId), SCANNER_ID);
+            videoData.addAwards(parseAwards(imdbId));
         }
         
         return ScanResult.OK;
@@ -374,7 +374,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         // AWARDS
         if (configServiceWrapper.getBooleanProperty("imdb.tvshow.awards", Boolean.FALSE)) {
-            series.addAwards(parseAwards(imdbId), SCANNER_ID);
+            series.addAwards(parseAwards(imdbId));
         }
 
         // scan seasons
@@ -978,7 +978,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                             category = StringUtils.trimToEmpty(HTMLTools.extractTag(outcomeBlock, "<span class=\"award_category\">", "</span>"));
                         }
                         
-                        awards.add(new AwardDTO(event, category, year).setWon(awardWon).setNominated(!awardWon));
+                        awards.add(new AwardDTO(event, category, SCANNER_ID, year).setWon(awardWon).setNominated(!awardWon));
                     }
                 }
             }

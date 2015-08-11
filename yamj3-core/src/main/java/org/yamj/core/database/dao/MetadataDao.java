@@ -25,6 +25,7 @@ package org.yamj.core.database.dao;
 import java.util.*;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
@@ -82,6 +83,7 @@ public class MetadataDao extends HibernateDao {
         return getByNaturalIdCaseInsensitive(Series.class, IDENTIFIER, identifier);
     }
 
+    @Cacheable("person")
     public Person getPerson(String identifier) {
         return getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, identifier);
     }

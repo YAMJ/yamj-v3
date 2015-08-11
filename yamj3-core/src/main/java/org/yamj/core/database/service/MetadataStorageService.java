@@ -630,7 +630,7 @@ public class MetadataStorageService {
         List<MovieAward> deleteAwards = new ArrayList<>(videoData.getMovieAwards());
 
         for (AwardDTO dto : videoData.getAwardDTOS()) {
-            Award award = this.commonDao.getAward(dto);
+            Award award = this.commonDao.getAward(dto.getEvent(), dto.getCategory(), dto.getSource());
             if (award != null) {
                 MovieAward movieAward = new MovieAward(videoData, award, dto.getYear());
                 movieAward.setWon(dto.isWon());
@@ -664,7 +664,7 @@ public class MetadataStorageService {
         List<SeriesAward> deleteAwards = new ArrayList<>(series.getSeriesAwards());
 
         for (AwardDTO dto : series.getAwardDTOS()) {
-            Award award = this.commonDao.getAward(dto);
+            Award award = this.commonDao.getAward(dto.getEvent(), dto.getCategory(), dto.getSource());
             if (award != null) {
                 SeriesAward seriesAward = new SeriesAward(series, award, dto.getYear());
                 seriesAward.setWon(dto.isWon());
@@ -790,7 +790,7 @@ public class MetadataStorageService {
         for (CreditDTO dto : videoData.getCreditDTOS()) {
             String identifier = MetadataTools.cleanIdentifier(dto.getName());
             CastCrew castCrew = this.metadataDao.getCastCrew(videoData, dto.getJobType(), identifier);
-
+            
             if (castCrew == null) {
                 // retrieve person
                 Person person = metadataDao.getPerson(identifier);

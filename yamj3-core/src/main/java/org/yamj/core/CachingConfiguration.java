@@ -43,7 +43,6 @@ public class CachingConfiguration implements CachingConfigurer {
 
     private static final Logger LOG = LoggerFactory.getLogger(CachingConfiguration.class);
 
-    private static final String DEFAULT = "default";
     private static final String ALLOCINE_SEARCH = "allocineSearchCache";
     private static final String ALLOCINE_INFO = "allocineInfoCache";
     private static final String TVDB = "tvdbCache";
@@ -54,12 +53,25 @@ public class CachingConfiguration implements CachingConfigurer {
     public net.sf.ehcache.CacheManager ehCacheManager() {
         return net.sf.ehcache.CacheManager.create(
             new net.sf.ehcache.config.Configuration()
-                .defaultCache(cacheConfig(DEFAULT, 1000, 600, MemoryStoreEvictionPolicy.LRU))
+                // default cache
+                .defaultCache(cacheConfig("default", 1000, 600, MemoryStoreEvictionPolicy.LRU))
+                
+                // API caches
                 .cache(cacheConfig(ALLOCINE_SEARCH, 100, 300,  MemoryStoreEvictionPolicy.LFU))
                 .cache(cacheConfig(ALLOCINE_INFO, 400, 1800,  MemoryStoreEvictionPolicy.LRU))
                 .cache(cacheConfig(TVDB, 500, 1800,  MemoryStoreEvictionPolicy.LRU))
                 .cache(cacheConfig(TMDB_ARTWORK, 100, 1800,  MemoryStoreEvictionPolicy.LFU))
-                .cache(cacheConfig(ATTACHMENTS, 300, 3600,  MemoryStoreEvictionPolicy.LFU)));
+                .cache(cacheConfig(ATTACHMENTS, 300, 3600,  MemoryStoreEvictionPolicy.LFU))
+                
+                // caches for database objects
+                .cache(cacheConfigDatabase("person", 500, 300))
+                .cache(cacheConfigDatabase("genre", 500, 300))
+                .cache(cacheConfigDatabase("studio", 500, 300))
+                .cache(cacheConfigDatabase("country", 500, 300))
+                .cache(cacheConfigDatabase("certification", 500, 300))
+                .cache(cacheConfigDatabase("boxset", 500, 300))
+                .cache(cacheConfigDatabase("award", 500, 300))
+            );
     }
 
     @Scope
@@ -95,6 +107,18 @@ public class CachingConfiguration implements CachingConfigurer {
             .timeToLiveSeconds(timeToLiveSeconds)
             .persistence(new PersistenceConfiguration().strategy(PersistenceConfiguration.Strategy.NONE))
             .memoryStoreEvictionPolicy(memoryStoreEvictionPolicy)
+            .statistics(false);
+    }
+
+    private static CacheConfiguration cacheConfigDatabase(String name, int maxEntries, long timeToLiveSeconds) {
+        return new CacheConfiguration()
+            .name(name)
+            .eternal(false)
+            .maxEntriesLocalHeap(maxEntries)
+            .timeToIdleSeconds(0)
+            .timeToLiveSeconds(timeToLiveSeconds)
+            .persistence(new PersistenceConfiguration().strategy(PersistenceConfiguration.Strategy.NONE))
+            .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
             .statistics(false);
     }
 

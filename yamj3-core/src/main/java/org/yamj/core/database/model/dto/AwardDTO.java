@@ -28,20 +28,16 @@ public class AwardDTO {
 
     private final String event;
     private final String category;
+    private final String source;
     private final int year;
-    private String source;
     private boolean won = false;
     private boolean nominated = false;
 
-    public AwardDTO(String event, String category, int year) {
-      this.event = event;
-      this.category = category;
-      this.year = year;
-  }
-
-    public AwardDTO(String event, String category, int year, String source) {
-        this(event, category, year);
+    public AwardDTO(String event, String category, String source, int year) {
+        this.event = event;
+        this.category = category;
         this.source = source;
+        this.year = year;
     }
 
     public String getEvent() {
@@ -52,16 +48,12 @@ public class AwardDTO {
         return category;
     }
 
-    public int getYear() {
-        return year;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
     public String getSource() {
         return source;
+    }
+
+    public int getYear() {
+        return year;
     }
     
     public boolean isWon() {
