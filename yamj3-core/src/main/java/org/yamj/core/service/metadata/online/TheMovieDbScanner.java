@@ -246,7 +246,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
         // COMPANIES
         if (CollectionUtils.isNotEmpty(movieInfo.getProductionCompanies()) && OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
-            final Set<String> studioNames = new HashSet<>(movieInfo.getProductionCompanies().size());
+            final Set<String> studioNames = new HashSet<>();
             for (ProductionCompany company : movieInfo.getProductionCompanies()) {
                 if (StringUtils.isNotBlank(company.getName())) {
                     studioNames.add(StringUtils.trim(company.getName()));

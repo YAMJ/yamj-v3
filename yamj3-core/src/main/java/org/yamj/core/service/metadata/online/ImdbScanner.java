@@ -22,12 +22,18 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import com.omertron.imdbapi.ImdbApi;
+import com.omertron.imdbapi.model.ImdbCast;
+import com.omertron.imdbapi.model.ImdbCredit;
+import com.omertron.imdbapi.model.ImdbPerson;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -60,7 +66,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     private static final String HTML_DIV_END = "</div>";
     private static final String HTML_A_END = "</a>";
     private static final String HTML_A_START = "<a ";
-    private static final String HTML_SLASH_PIPE = "\\|";
     private static final String HTML_NAME = "name/";
     private static final String HTML_H4_END = ":</h4>";
     private static final String HTML_SITE_FULL = "http://www.imdb.com/";
@@ -71,9 +76,10 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     private static final String HTML_TR_END = "</tr>";
     private static final String HTML_GT = ">";
     private static final Pattern PATTERN_PERSON_DOB = Pattern.compile("(\\d{1,2})-(\\d{1,2})");
-
+    private static final ReentrantLock IMDB_API_LOCK = new ReentrantLock();
+    
     private Charset charset;
-
+    
     @Autowired
     private PoolingHttpClient httpClient;
     @Autowired
@@ -84,6 +90,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     private ConfigServiceWrapper configServiceWrapper;
     @Autowired
     private LocaleService localeService;
+    @Autowired
+    private ImdbApi imdbApi;
 
     @Override
     public String getScannerName() {
@@ -255,7 +263,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         parseReleaseInfo(videoData, imdbId, imdbLocale);
 
         // CAST and CREW
-        parseCastCrew(videoData, imdbId);
+        parseCastCrew(videoData, imdbId, imdbLocale);
 
         // AWARDS
         if (configServiceWrapper.getBooleanProperty("imdb.movie.awards", Boolean.FALSE)) {
@@ -370,12 +378,12 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
 
         // scan seasons
-        this.scanSeasons(series, imdbId, title, titleOriginal, plot, outline);
+        this.scanSeasons(series, imdbId, title, titleOriginal, plot, outline, imdbLocale);
 
         return ScanResult.OK;
     }
 
-    private void scanSeasons(Series series, String imdbId, String title, String titleOriginal, String plot, String outline) {
+    private void scanSeasons(Series series, String imdbId, String title, String titleOriginal, String plot, String outline, Locale imdbLocale) {
         for (Season season : series.getSeasons()) {
 
             // use values from series
@@ -426,13 +434,13 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                     }
 
                     // scan episode
-                    this.scanEpisode(videoData, episodes.get(videoData.getEpisode()));
+                    this.scanEpisode(videoData, episodes.get(videoData.getEpisode()), imdbLocale);
                 }
             }
         }
     }
 
-    private void scanEpisode(VideoData videoData, ImdbEpisodeDTO dto) {
+    private void scanEpisode(VideoData videoData, ImdbEpisodeDTO dto, Locale imdbLocale) {
         if (dto == null) {
             videoData.setTvEpisodeNotFound();
             return;
@@ -521,7 +529,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             }
 
             // CAST and CREW
-            parseCastCrew(videoData, dto.getImdbId());
+            parseCastCrew(videoData, dto.getImdbId(), imdbLocale);
 
         } catch (Exception ex) {
             LOG.error("Failed to scan episode: " + dto.getImdbId(), ex);
@@ -1062,114 +1070,156 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return map;
     }
 
-    private void parseCastCrew(VideoData videoData, String imdbId) {
+    private void parseCastCrew(VideoData videoData, String imdbId, Locale imdbLocale) {
+        
+        List<ImdbCredit> fullCast;
+        IMDB_API_LOCK.lock();
         try {
-            DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "fullcredits"), charset);
-            if (ResponseTools.isNotOK(response)) {
-                LOG.warn("Requesting full credits failed with status {}: {}", response.getStatusCode(), imdbId);
-                return;
-            }
-            final String xml = response.getContent();
-            
-            // DIRECTORS
-            if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
-                for (String creditsMatch : "Directed by|Director".split(HTML_SLASH_PIPE)) {
-                    parseCredits(videoData, JobType.DIRECTOR, xml, creditsMatch + "&nbsp;</h4>");
-                }
-            }
-
-            // WRITERS
-            if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
-                for (String creditsMatch : "Writing Credits|Writer".split(HTML_SLASH_PIPE)) {
-                    parseCredits(videoData, JobType.WRITER, xml, creditsMatch);
-                }
-            }
-
-            // ACTORS
-            if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
-                boolean skipFaceless = configServiceWrapper.getBooleanProperty("yamj3.castcrew.skip.faceless", Boolean.FALSE);
-                boolean skipUncredited = configServiceWrapper.getBooleanProperty("yamj3.castcrew.skip.uncredited", Boolean.TRUE);
-                
-                for (String actorBlock : HTMLTools.extractTags(xml, "<table class=\"cast_list\">", HTML_TABLE_END, "<td class=\"primary_photo\"", "</tr>")) {
-                    // skip faceless persons ('loadlate' is present for actors with photos)
-                    if (skipFaceless && !actorBlock.contains("loadlate")) {
-                        continue;
-                    }
-
-                    // skip person without credit
-                    String character = HTMLTools.stripTags(HTMLTools.extractTag(actorBlock, "<td class=\"character\">", HTML_TD_END));
-                    if (skipUncredited && StringUtils.indexOf(character, "uncredited") > 0) {
-                        continue;
-                    }
-
-                    String name = HTMLTools.stripTags(HTMLTools.extractTag(actorBlock, "itemprop=\"name\">", HTML_SPAN_END));
-                    if (StringUtils.isNotBlank(name)) {
-                        int nmPosition = actorBlock.indexOf("/nm");
-                        String personId = actorBlock.substring(nmPosition + 1, actorBlock.indexOf("/", nmPosition + 1));
-                        videoData.addCreditDTO(new CreditDTO(SCANNER_ID, personId, JobType.ACTOR, name, character));
-                    }
-                }
-            }
-
-            // CAMERA
-            if (this.configServiceWrapper.isCastScanEnabled(JobType.CAMERA)) {
-                for (String creditsMatch : "Cinematography by".split(HTML_SLASH_PIPE)) {
-                    parseCredits(videoData, JobType.CAMERA, xml, creditsMatch);
-                }
-            }
-
-            // PRODUCERS
-            if (this.configServiceWrapper.isCastScanEnabled(JobType.PRODUCER)) {
-                for (String creditsMatch : "Produced by|Casting By|Casting by".split(HTML_SLASH_PIPE)) {
-                    parseCredits(videoData, JobType.PRODUCER, xml, creditsMatch);
-                }
-            }
-
-            // SOUND
-            if (this.configServiceWrapper.isCastScanEnabled(JobType.SOUND)) {
-                for (String creditsMatch : "Music by".split(HTML_SLASH_PIPE)) {
-                    parseCredits(videoData, JobType.SOUND, xml, creditsMatch);
-                }
-            }
-
-            // ART
-            if (this.configServiceWrapper.isCastScanEnabled(JobType.ART)) {
-                for (String creditsMatch : "Production Design by|Art Direction by|Set Decoration by".split(HTML_SLASH_PIPE)) {
-                    parseCredits(videoData, JobType.ART, xml, creditsMatch);
-                }
-            }
-
-            // EDITING
-            if (this.configServiceWrapper.isCastScanEnabled(JobType.EDITING)) {
-                for (String creditsMatch : "Film Editing by".split(HTML_SLASH_PIPE)) {
-                    parseCredits(videoData, JobType.EDITING, xml, creditsMatch);
-                }
-            }
-
-            // COSTUME_MAKEUP
-            if (this.configServiceWrapper.isCastScanEnabled(JobType.COSTUME_MAKEUP)) {
-                for (String creditsMatch : "Costume Design by".split(HTML_SLASH_PIPE)) {
-                    parseCredits(videoData, JobType.COSTUME_MAKEUP, xml, creditsMatch);
-                }
-            }
-
-        } catch (Exception ex) {
-            LOG.error("Failed to scan cast crew: " + imdbId, ex);
+            // use US locale to check for uncredited cast
+            imdbApi.setLocale(Locale.US);
+            fullCast = imdbApi.getFullCast(imdbId);
+            imdbApi.setLocale(imdbLocale);
+        } finally {
+            IMDB_API_LOCK.unlock();
         }
+        
+        if (CollectionUtils.isEmpty(fullCast)) {
+            LOG.info("No cast for imdb ID: {}", imdbId);
+            return;
+        }
+
+        // build jobs map
+        EnumMap<JobType,List<ImdbCast>> jobs = getJobs(fullCast);
+        // get config parameters
+        boolean skipFaceless = configServiceWrapper.getBooleanProperty("yamj3.castcrew.skip.faceless", Boolean.FALSE);
+        boolean skipUncredited = configServiceWrapper.getBooleanProperty("yamj3.castcrew.skip.uncredited", Boolean.TRUE);
+        
+        // add credits
+        addCredits(videoData, JobType.DIRECTOR, jobs, skipUncredited, skipFaceless);
+        addCredits(videoData, JobType.WRITER, jobs, skipUncredited, skipFaceless);
+        addCredits(videoData, JobType.ACTOR, jobs, skipUncredited, skipFaceless);
+        addCredits(videoData, JobType.PRODUCER, jobs, skipUncredited, skipFaceless);
+        addCredits(videoData, JobType.CAMERA, jobs, skipUncredited, skipFaceless);
+        addCredits(videoData, JobType.EDITING, jobs, skipUncredited, skipFaceless);
+        addCredits(videoData, JobType.ART, jobs, skipUncredited, skipFaceless);
+        addCredits(videoData, JobType.SOUND, jobs, skipUncredited, skipFaceless);
+        addCredits(videoData, JobType.EFFECTS, jobs, skipUncredited, skipFaceless);
+        addCredits(videoData, JobType.LIGHTING, jobs, skipUncredited, skipFaceless);
+        addCredits(videoData, JobType.COSTUME_MAKEUP, jobs, skipUncredited, skipFaceless);
+        addCredits(videoData, JobType.CREW, jobs, skipUncredited, skipFaceless);
+        addCredits(videoData, JobType.UNKNOWN, jobs, skipUncredited, skipFaceless);
     }
 
-    private static void parseCredits(VideoData videoData, JobType jobType, String xml, String creditsMatch) {
-        if (StringUtils.indexOf(xml, HTML_GT + creditsMatch) > 0) {
-            for (String member : HTMLTools.extractTags(xml, HTML_GT + creditsMatch, HTML_TABLE_END, HTML_A_START, HTML_A_END, Boolean.FALSE)) {
-                int beginIndex = member.indexOf("href=\"/name/");
-                if (beginIndex > -1) {
-                    String personId = member.substring(beginIndex + 12, member.indexOf("/", beginIndex + 12));
-                    String name = StringUtils.trimToEmpty(member.substring(member.indexOf(HTML_GT, beginIndex) + 1));
-                    if (!name.contains("more credit") && StringUtils.containsNone(name, "<>:/")) {
-                        videoData.addCreditDTO(new CreditDTO(SCANNER_ID, personId, jobType, name));
-                    }
-                }
+    private static EnumMap<JobType,List<ImdbCast>>  getJobs(List<ImdbCredit> credits) {
+        EnumMap<JobType,List<ImdbCast>> result = new EnumMap<>(JobType.class);
+        
+        for (ImdbCredit credit : credits) {
+            if (CollectionUtils.isEmpty(credit.getCredits())) {
+                continue;
             }
+            
+            switch (credit.getToken()) {
+                case "cast":
+                    result.put(JobType.ACTOR, credit.getCredits());
+                    break;
+                case "writers":
+                    result.put(JobType.WRITER, credit.getCredits());
+                    break;
+                case "directors":
+                    result.put(JobType.DIRECTOR, credit.getCredits());
+                    break;
+                case "cinematographers":
+                    result.put(JobType.CAMERA, credit.getCredits());
+                    break;
+                case "editors":
+                    result.put(JobType.EDITING, credit.getCredits());
+                    break;
+                case "producers":
+                case "casting_directors":
+                    if (result.containsKey(JobType.PRODUCER)) {
+                        result.get(JobType.PRODUCER).addAll(credit.getCredits());
+                    } else {
+                        result.put(JobType.PRODUCER, credit.getCredits());
+                    }
+                    break;
+                case "music_original":
+                    result.put(JobType.SOUND, credit.getCredits());
+                    break;
+                case "production_designers":
+                case "art_directors":
+                case "set_decorators":
+                    if (result.containsKey(JobType.ART)) {
+                        result.get(JobType.ART).addAll(credit.getCredits());
+                    } else {
+                        result.put(JobType.ART, credit.getCredits());
+                    }
+                    break;
+                case "costume_designers":
+                    if (result.containsKey(JobType.COSTUME_MAKEUP)) {
+                        result.get(JobType.COSTUME_MAKEUP).addAll(credit.getCredits());
+                    } else {
+                        result.put(JobType.COSTUME_MAKEUP, credit.getCredits());
+                    }
+                    break;
+                case "assistant_directors":
+                case "production_managers":
+                case "art_department":
+                case "sound_department":
+                case "special_effects_department":
+                case "visual_effects_department":
+                case "stunts":
+                case "camera_department":
+                case "animation_department":
+                case "casting_department":
+                case "costume_department":
+                case "editorial_department":
+                case "music_department":
+                case "transportation_department":
+                case "make_up_department":
+                case "miscellaneous":
+                    if (result.containsKey(JobType.CREW)) {
+                        result.get(JobType.CREW).addAll(credit.getCredits());
+                    } else {
+                        result.put(JobType.CREW, credit.getCredits());
+                    }
+                    break;
+                default:
+                    if (result.containsKey(JobType.UNKNOWN)) {
+                        result.get(JobType.UNKNOWN).addAll(credit.getCredits());
+                    } else {
+                        result.put(JobType.UNKNOWN, credit.getCredits());
+                    }
+                    break;
+            }
+        }
+        
+        return result;
+    }
+    
+    private void addCredits(VideoData videoData, JobType jobType, EnumMap<JobType,List<ImdbCast>> jobs, boolean skipUncredited, boolean skipFaceless) {
+        if (CollectionUtils.isEmpty(jobs.get(jobType))) return;
+        if (!this.configServiceWrapper.isCastScanEnabled(jobType)) return;
+            
+        for (ImdbCast cast : jobs.get(jobType)) {
+            final ImdbPerson person = cast.getPerson();
+            if (person == null || StringUtils.isBlank(person.getName())) {
+                continue;
+            }
+            
+            if (skipUncredited && StringUtils.contains(cast.getAttr(), "uncredited")) {
+                continue;
+            }
+            
+            final String photoURL = (person.getImage() == null ? null : person.getImage().getUrl());
+            if (skipFaceless && JobType.ACTOR.equals(jobType) && StringUtils.isEmpty(photoURL)) {
+                // skip faceless actors only
+                continue;
+            }
+            
+            CreditDTO creditDTO = new CreditDTO(SCANNER_ID, person.getActorId(), jobType, person.getName());
+            creditDTO.setRole(cast.getCharacter());
+            creditDTO.addPhotoURL(photoURL);
+            videoData.addCreditDTO(creditDTO);
         }
     }
 

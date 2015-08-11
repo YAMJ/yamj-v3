@@ -31,6 +31,7 @@
         <thetvdbapi.version>1.8-SNAPSHOT</thetvdbapi.version>
         <fanarttvapi.version>3.2-SNAPSHOT</fanarttvapi.version>
         <allocineapi.version>1.5-SNAPSHOT</allocineapi.version>
+        <imdbapi.version>1.4-SNAPSHOT</imdbapi.version>
         <httpclient.version>4.5</httpclient.version>
     </properties>
 
@@ -190,6 +191,12 @@
             <artifactId>allocine-api</artifactId>
             <version>${allocineapi.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.moviejukebox</groupId>
+            <artifactId>api-imdb</artifactId>
+            <version>${imdbapi.version}</version>
+        </dependency>
+        
         <!--JACKSON JSON-->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>

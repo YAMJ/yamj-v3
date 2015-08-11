@@ -24,8 +24,10 @@ package org.yamj.core.web;
 
 import com.moviejukebox.allocine.AllocineApi;
 import com.omertron.fanarttvapi.FanartTvApi;
+import com.omertron.imdbapi.ImdbApi;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.thetvdbapi.TheTVDBApi;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
@@ -205,6 +207,14 @@ public class WebConfiguration  {
     public AllocineApi allocineApi() throws Exception {
         LOG.trace("Initialize AllocineApi");
         return new AllocineApi(allocineApiPartnerKey, allocineApiSecretKey, poolingHttpClient());
+    }
+
+    @Bean
+    public ImdbApi imdbApi() {
+        LOG.trace("Initialize ImdbApi");
+        ImdbApi imdbApi = new ImdbApi(poolingHttpClient());
+        imdbApi.setLocale(Locale.US);
+        return imdbApi;
     }
 }
 

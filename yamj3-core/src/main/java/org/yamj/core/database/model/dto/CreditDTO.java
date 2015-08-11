@@ -113,6 +113,11 @@ public class CreditDTO {
         if (idx > 0) {
             fixed = fixed.substring(0, idx);
         }
+        // (uncredited)
+        idx = StringUtils.indexOfIgnoreCase(fixed, "(uncredit");
+        if (idx > 0) {
+            fixed = fixed.substring(0, idx);
+        }
 
         // double characters
         idx = StringUtils.indexOf(fixed, "/");
