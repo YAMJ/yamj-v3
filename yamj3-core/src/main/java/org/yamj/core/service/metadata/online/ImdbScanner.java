@@ -34,11 +34,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.core.config.ConfigServiceWrapper;
@@ -92,7 +94,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     private LocaleService localeService;
     @Autowired
     private ImdbApi imdbApi;
-
+    @Autowired
+    private Cache imdbWebpageCache;
+    
     @Override
     public String getScannerName() {
         return SCANNER_ID;
@@ -613,14 +617,12 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
     private void parseReleaseInfo(AbstractMetadata metadata, String imdbId, Locale locale) {
 
-        String releaseInfoXML = null;
-
         // RELEASE DATE
         if (metadata instanceof VideoData) {
             VideoData videoData = (VideoData) metadata;
             if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
                 // load the release page from IMDb
-                releaseInfoXML = getReleasInfoXML(releaseInfoXML, imdbId);
+                String releaseInfoXML = getReleasInfoXML(imdbId);
                 if (releaseInfoXML != null) {
                     List<String> releaseTags = HTMLTools.extractTags(releaseInfoXML, "<table id=\"release_dates\"", HTML_TABLE_END, "<tr", HTML_TR_END);
                     boolean found = findReleaseDate(videoData, releaseTags, locale.getCountry());
@@ -632,46 +634,34 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             }
         }
 
-        // ORIGINAL TITLE / AKAS
-        // Store the AKA list
-        Map<String, String> akas = null;
-
+        // ORIGINAL TITLE
         if (OverrideTools.checkOverwriteOriginalTitle(metadata, SCANNER_ID)) {
-            // load the release page from IMDb
-            releaseInfoXML = getReleasInfoXML(releaseInfoXML, imdbId);
-            if (releaseInfoXML != null) {
-                // get the AKAs from release info XML
-                akas = getAkaMap(akas, releaseInfoXML);
-
-                String foundValue = null;
+            // get the AKAs from release info XML
+            Map<String, String> akas = getAkaMap(imdbId);
+            if (MapUtils.isNotEmpty(akas)) {
                 for (Map.Entry<String, String> aka : akas.entrySet()) {
                     if (StringUtils.indexOfIgnoreCase(aka.getKey(), "original title") > 0) {
-                        foundValue = aka.getValue().trim();
+                        metadata.setTitleOriginal(aka.getValue().trim(), SCANNER_ID);
                         break;
                     }
                 }
-
-                metadata.setTitleOriginal(foundValue, SCANNER_ID);
             }
         }
 
         // TITLE for preferred country from AKAS
         boolean akaScrapeTitle = configServiceWrapper.getBooleanProperty("imdb.aka.scrape.title", Boolean.FALSE);
         if (akaScrapeTitle && OverrideTools.checkOverwriteTitle(metadata, SCANNER_ID)) {
-            List<String> akaIgnoreVersions = configServiceWrapper.getPropertyAsList("imdb.aka.ignore.versions", "");
+            Map<String, String> akas = getAkaMap(imdbId);
+            
+            if (MapUtils.isNotEmpty(akas)) {
+                List<String> akaIgnoreVersions = configServiceWrapper.getPropertyAsList("imdb.aka.ignore.versions", "");
 
-            // build countries to search for within AKA list
-            Set<String> akaMatchingCountries = new TreeSet<>(localeService.getCountryNames(locale.getCountry()));
-            for (String fallback : configServiceWrapper.getPropertyAsList("imdb.aka.fallback.countries", "")) {
-                String countryCode = localeService.findCountryCode(fallback);
-                akaMatchingCountries.addAll(localeService.getCountryNames(countryCode));
-            }
-
-            // load the release page from IMDb
-            releaseInfoXML = getReleasInfoXML(releaseInfoXML, imdbId);
-            if (releaseInfoXML != null) {
-                // get the AKAs from release info XML
-                akas = getAkaMap(akas, releaseInfoXML);
+                // build countries to search for within AKA list
+                Set<String> akaMatchingCountries = new TreeSet<>(localeService.getCountryNames(locale.getCountry()));
+                for (String fallback : configServiceWrapper.getPropertyAsList("imdb.aka.fallback.countries", "")) {
+                    String countryCode = localeService.findCountryCode(fallback);
+                    akaMatchingCountries.addAll(localeService.getCountryNames(countryCode));
+                }
 
                 String foundValue = null;
                 // NOTE: First matching country is the preferred country
@@ -727,27 +717,29 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return false;
     }
     
-    private String getReleasInfoXML(final String releaseInfoXML, final String imdbId) {
-        if (releaseInfoXML != null) {
-            return releaseInfoXML;
-        }
-
-        try {
-            final DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "releaseinfo"), charset);
-            if (ResponseTools.isOK(response)) {
-                return response.getContent();
+    private String getReleasInfoXML(final String imdbId) {
+        final String cacheKey = (imdbId+"###releaseinfo");
+        String webpage = imdbWebpageCache.get(cacheKey, String.class);
+        
+        if (webpage ==null) {
+            try {
+                final DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "releaseinfo"), charset);
+                if (ResponseTools.isOK(response)) {
+                    webpage = response.getContent();
+                    imdbWebpageCache.put(cacheKey, webpage);
+                } else {
+                    LOG.warn("Requesting release infos failed with status {}: {}", response.getStatusCode(), imdbId);
+                }
+            } catch (Exception ex) {
+                LOG.error("Requesting release infos failed: " + imdbId, ex);
             }
-            LOG.warn("Requesting release infos failed with status {}: {}", response.getStatusCode(), imdbId);
-        } catch (Exception ex) {
-            LOG.error("Requesting release infos failed: " + imdbId, ex);
         }
-        return null;                
+        return webpage;
     }
 
-    private static Map<String, String> getAkaMap(Map<String, String> akas, String releaseInfoXML) {
-        // The AKAs are stored in the format "title", "country"
-        // therefore we need to look for the preferredCountry and then work backwards
-        if (akas == null) {
+    private Map<String, String> getAkaMap(String imdbId) {
+        String releaseInfoXML = getReleasInfoXML(imdbId);
+        if (releaseInfoXML != null) {
             // Just extract the AKA section from the page
             List<String> akaList = HTMLTools.extractTags(releaseInfoXML, "<a id=\"akas\" name=\"akas\">", HTML_TABLE_END, "<td>", HTML_TD_END, Boolean.FALSE);
             return buildAkaMap(akaList);

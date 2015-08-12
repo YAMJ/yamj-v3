@@ -47,7 +47,8 @@ public class CachingConfiguration implements CachingConfigurer {
     private static final String ALLOCINE_INFO = "allocineInfoCache";
     private static final String TVDB = "tvdbCache";
     private static final String TMDB_ARTWORK = "tmdbArtworkCache";
-    private static final String ATTACHMENTS = "attachments";
+    private static final String ATTACHMENTS = "attachmentCache";
+    private static final String IMDB_WEBPAGE = "imdbWebpageCache";
     
     @Bean(destroyMethod="shutdown")
     public net.sf.ehcache.CacheManager ehCacheManager() {
@@ -57,20 +58,21 @@ public class CachingConfiguration implements CachingConfigurer {
                 .defaultCache(cacheConfig("default", 1000, 600, MemoryStoreEvictionPolicy.LRU))
                 
                 // API caches
-                .cache(cacheConfig(ALLOCINE_SEARCH, 100, 300,  MemoryStoreEvictionPolicy.LFU))
-                .cache(cacheConfig(ALLOCINE_INFO, 400, 1800,  MemoryStoreEvictionPolicy.LRU))
-                .cache(cacheConfig(TVDB, 500, 1800,  MemoryStoreEvictionPolicy.LRU))
-                .cache(cacheConfig(TMDB_ARTWORK, 100, 1800,  MemoryStoreEvictionPolicy.LFU))
-                .cache(cacheConfig(ATTACHMENTS, 300, 3600,  MemoryStoreEvictionPolicy.LFU))
+                .cache(cacheConfig(ALLOCINE_SEARCH, 100, 300, MemoryStoreEvictionPolicy.LFU))
+                .cache(cacheConfig(ALLOCINE_INFO, 400, 1800, MemoryStoreEvictionPolicy.LRU))
+                .cache(cacheConfig(TVDB, 500, 1800, MemoryStoreEvictionPolicy.LRU))
+                .cache(cacheConfig(TMDB_ARTWORK, 100, 1800, MemoryStoreEvictionPolicy.LFU))
+                .cache(cacheConfig(ATTACHMENTS, 300, 3600, MemoryStoreEvictionPolicy.LFU))
+                .cache(cacheConfig(IMDB_WEBPAGE, 50, 86400, MemoryStoreEvictionPolicy.LFU))
                 
                 // caches for database objects
-                .cache(cacheConfigDatabase(DatabaseCache.GENRE, 100, 300))
-                .cache(cacheConfigDatabase(DatabaseCache.STUDIO, 100, 86400))
-                .cache(cacheConfigDatabase(DatabaseCache.COUNTRY, 100, 86400))
-                .cache(cacheConfigDatabase(DatabaseCache.CERTIFICATION, 200, 86400))
-                .cache(cacheConfigDatabase(DatabaseCache.PERSON, 500, 300))
-                .cache(cacheConfigDatabase(DatabaseCache.BOXEDSET, 500, 300))
-                .cache(cacheConfigDatabase(DatabaseCache.AWARD, 500, 300))
+                .cache(cacheConfigDatabase(DatabaseCache.GENRE, 50, 86400))
+                .cache(cacheConfigDatabase(DatabaseCache.STUDIO, 50, 86400))
+                .cache(cacheConfigDatabase(DatabaseCache.COUNTRY, 50, 86400))
+                .cache(cacheConfigDatabase(DatabaseCache.CERTIFICATION, 100, 86400))
+                .cache(cacheConfigDatabase(DatabaseCache.PERSON, 500, 86400))
+                .cache(cacheConfigDatabase(DatabaseCache.BOXEDSET, 50, 86400))
+                .cache(cacheConfigDatabase(DatabaseCache.AWARD, 50, 86400))
             );
     }
 
@@ -145,5 +147,10 @@ public class CachingConfiguration implements CachingConfigurer {
     @Bean
     public Cache attachmentCache() {
         return cacheManager().getCache(ATTACHMENTS);
+    }
+
+    @Bean
+    public Cache imdbWebpageCache() {
+        return cacheManager().getCache(IMDB_WEBPAGE);
     }
 }
