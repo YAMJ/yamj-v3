@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.DatabaseCache;
+import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.DeletionDTO;
@@ -50,6 +51,8 @@ public class CommonStorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommonStorageService.class);
 
+    @Autowired
+    private MetadataDao metadataDao;
     @Autowired
     private StagingDao stagingDao;
     @Autowired
@@ -389,6 +392,7 @@ public class CommonStorageService {
     }
 
     @Transactional
+    @CacheEvict(value=DatabaseCache.PERSON, key="#id")
     public Set<String> deletePerson(Long id) {
         Set<String> filesToDelete = new HashSet<>();
         Person person = this.stagingDao.getById(Person.class, id);

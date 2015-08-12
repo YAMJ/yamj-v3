@@ -33,11 +33,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.DatabaseCache;
 import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.MetadataDao;
@@ -140,6 +142,7 @@ public class MetadataStorageService {
     }
 
     @Transactional(readOnly = true)
+    @CachePut(value=DatabaseCache.PERSON, key="#id")
     public Person getRequiredPerson(Long id) {
         final StringBuilder sb = new StringBuilder();
         sb.append("from Person p ");
@@ -922,7 +925,7 @@ public class MetadataStorageService {
     }
 
     @Transactional
-    @CacheEvict(value="person", key="#id")
+    @CacheEvict(value=DatabaseCache.PERSON, key="#id")
     public void errorPerson(Long id) {
         Person person = metadataDao.getById(Person.class, id);
         if (person != null) {
@@ -932,7 +935,7 @@ public class MetadataStorageService {
     }
 
     @Transactional
-    @CacheEvict(value="person", key="#id")
+    @CacheEvict(value=DatabaseCache.PERSON, key="#id")
     public void errorFilmography(Long id) {
         Person person = metadataDao.getById(Person.class, id);
         if (person != null) {
