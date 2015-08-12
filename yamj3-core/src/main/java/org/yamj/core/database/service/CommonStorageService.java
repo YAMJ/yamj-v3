@@ -30,9 +30,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.DatabaseCache;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.DeletionDTO;
@@ -511,6 +513,7 @@ public class CommonStorageService {
     }
 
     @Transactional
+    @CacheEvict(value=DatabaseCache.GENRE, allEntries=true)
     public void updateGenresXml(Map<String, String> subGenres) {
         StringBuilder sb = new StringBuilder();
         sb.append("UPDATE Genre ");
@@ -536,6 +539,7 @@ public class CommonStorageService {
     }
 
     @Transactional
+    @CacheEvict(value=DatabaseCache.GENRE, allEntries=true)
     public int deleteOrphanGenres() {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM genre ");
@@ -545,6 +549,7 @@ public class CommonStorageService {
     }
 
     @Transactional
+    @CacheEvict(value=DatabaseCache.STUDIO, allEntries=true)
     public int deleteOrphanStudios() {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM studio ");
@@ -554,6 +559,7 @@ public class CommonStorageService {
     }
 
     @Transactional
+    @CacheEvict(value=DatabaseCache.COUNTRY, allEntries=true)
     public int deleteOrphanCountries() {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM country ");
@@ -563,6 +569,7 @@ public class CommonStorageService {
     }
 
     @Transactional
+    @CacheEvict(value=DatabaseCache.CERTIFICATION, allEntries=true)
     public int deleteOrphanCertifications() {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM certification ");

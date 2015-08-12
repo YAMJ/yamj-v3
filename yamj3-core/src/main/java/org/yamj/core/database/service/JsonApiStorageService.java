@@ -53,6 +53,8 @@ public class JsonApiStorageService {
     @Autowired
     private CommonDao commonDao;
     @Autowired
+    private MetadataDao metadataDao;
+    @Autowired
     private MediaDao mediaDao;
     @Autowired
     private ArtworkDao artworkDao;
@@ -738,7 +740,7 @@ public class JsonApiStorageService {
         }
 
         if (MetaDataType.PERSON == type) {
-            Person person = commonDao.getById(Person.class, id);
+            Person person = metadataDao.getPerson(id);
             if (person == null) {
                 return new ApiStatus(404, "Person for ID " + id + " not found");
             }

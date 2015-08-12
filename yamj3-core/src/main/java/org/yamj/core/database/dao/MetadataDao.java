@@ -28,6 +28,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.DatabaseCache;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
@@ -81,15 +82,15 @@ public class MetadataDao extends HibernateDao {
         return getByNaturalIdCaseInsensitive(Series.class, IDENTIFIER, identifier);
     }
 
-    @Cacheable(value="person", unless="#result==null")
-    public Person getPerson(String identifier) {
-        return getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, identifier);
+    @Cacheable(value=DatabaseCache.PERSON, key="#id", unless="#result==null")
+    public Person getPerson(Long id) {
+        return getById(Person.class, id);
     }
 
     public synchronized void storePerson(CreditDTO dto) {
         String identifier = MetadataTools.cleanIdentifier(dto.getName());
-
-        Person person = this.getPerson(identifier);
+        Person person = getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, identifier);
+        
         if (person == null) {
             // create new person
             person = new Person(identifier);
@@ -125,6 +126,9 @@ public class MetadataDao extends HibernateDao {
             // update person in database
             this.updateEntity(person);
         }
+        
+        // set person id for later user
+        dto.setPersonId(person.getId());
     }
 
     public List<Artwork> findPersonArtworks(String identifier) {

@@ -64,13 +64,13 @@ public class CachingConfiguration implements CachingConfigurer {
                 .cache(cacheConfig(ATTACHMENTS, 300, 3600,  MemoryStoreEvictionPolicy.LFU))
                 
                 // caches for database objects
-                .cache(cacheConfigDatabase("person", 500, 300))
-                .cache(cacheConfigDatabase("genre", 500, 300))
-                .cache(cacheConfigDatabase("studio", 500, 300))
-                .cache(cacheConfigDatabase("country", 500, 300))
-                .cache(cacheConfigDatabase("certification", 500, 300))
-                .cache(cacheConfigDatabase("boxset", 500, 300))
-                .cache(cacheConfigDatabase("award", 500, 300))
+                .cache(cacheConfigDatabase(DatabaseCache.GENRE, 100, 300))
+                .cache(cacheConfigDatabase(DatabaseCache.STUDIO, 100, 86400))
+                .cache(cacheConfigDatabase(DatabaseCache.COUNTRY, 100, 86400))
+                .cache(cacheConfigDatabase(DatabaseCache.CERTIFICATION, 200, 86400))
+                .cache(cacheConfigDatabase(DatabaseCache.PERSON, 500, 300))
+                .cache(cacheConfigDatabase(DatabaseCache.BOXEDSET, 500, 300))
+                .cache(cacheConfigDatabase(DatabaseCache.AWARD, 500, 300))
             );
     }
 

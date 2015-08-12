@@ -44,8 +44,9 @@ public class CreditDTO {
     private String lastName;
     private String realName;
     private String role;
+    private Long personId;
     private final Set<String> photoURLS = new HashSet<>();
-
+    
     public CreditDTO(String source, JobType jobType, String name) {
         this(source, null, jobType, name, null);
     }
@@ -101,6 +102,14 @@ public class CreditDTO {
         this.lastName = StringUtils.trimToNull(lastName);
     }
 
+    public String getRealName() {
+        return realName;
+    }
+
+    public void setRealName(String realName) {
+        this.realName = StringUtils.trimToNull(realName);
+    }
+
     public String getRole() {
         return role;
     }
@@ -140,12 +149,12 @@ public class CreditDTO {
         }
     }
 
-    public String getRealName() {
-        return realName;
+    public Long getPersonId() {
+        return personId;
     }
 
-    public void setRealName(String realName) {
-        this.realName = StringUtils.trimToNull(realName);
+    public void setPersonId(Long personId) {
+        this.personId = personId;
     }
 
     public Set<String> getPhotoURLS() {
