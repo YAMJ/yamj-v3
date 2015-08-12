@@ -59,7 +59,7 @@ public class AllocineApiWrapper {
             searchMoviesLock.lock();
             try {
                 search = allocineApi.searchMovies(title);
-                allocineSearchCache.putIfAbsent(cacheKey, search);
+                allocineSearchCache.put(cacheKey, search);
             } catch (AllocineException ex) {
                 if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                     throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
@@ -111,7 +111,7 @@ public class AllocineApiWrapper {
             searchSeriesLock.lock();
             try {
                 search = allocineApi.searchTvSeries(title);
-                allocineSearchCache.putIfAbsent(cacheKey, search);
+                allocineSearchCache.put(cacheKey, search);
             } catch (AllocineException ex) {
                 if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                     throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
@@ -167,7 +167,7 @@ public class AllocineApiWrapper {
             searchPersonLock.lock();
             try {
                 search = allocineApi.searchPersons(name);
-                allocineSearchCache.putIfAbsent(cacheKey, search);
+                allocineSearchCache.put(cacheKey, search);
             } catch (AllocineException ex) {
                 if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                     throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
@@ -215,7 +215,7 @@ public class AllocineApiWrapper {
                 movieInfos = allocineApi.getMovieInfos(allocineId);
                 if (movieInfos != null && movieInfos.isValid()) {
                     // add to the cache
-                    allocineInfoCache.putIfAbsent(allocineId, movieInfos);
+                    allocineInfoCache.put(allocineId, movieInfos);
                 }
             } catch (AllocineException ex) {
                 if (throwTempError && ResponseTools.isTemporaryError(ex)) {
@@ -236,7 +236,7 @@ public class AllocineApiWrapper {
                 tvSeriesInfos = allocineApi.getTvSeriesInfos(allocineId);
                 if (tvSeriesInfos != null && tvSeriesInfos.isValid()) {
                     // add to the cache
-                    allocineInfoCache.putIfAbsent(allocineId, tvSeriesInfos);
+                    allocineInfoCache.put(allocineId, tvSeriesInfos);
                 }
             } catch (AllocineException ex) {
                 if (throwTempError && ResponseTools.isTemporaryError(ex)) {

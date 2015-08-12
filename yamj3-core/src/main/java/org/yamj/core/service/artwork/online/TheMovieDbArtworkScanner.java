@@ -329,7 +329,7 @@ public class TheMovieDbArtworkScanner implements
             if (results == null || results.isEmpty()) {
                 results = tmdbApi.getPersonImages(tmdbId);
             }
-            tmdbArtworkCache.putIfAbsent(cacheKey, results);
+            tmdbArtworkCache.put(cacheKey, results);
         } else if (MetaDataType.BOXSET == metaDataType) {
             String cacheKey = "boxset###"+tmdbId;
             results = tmdbArtworkCache.get(cacheKey, ResultList.class);
@@ -337,7 +337,7 @@ public class TheMovieDbArtworkScanner implements
                 // use an empty language to get all artwork and then filter it
                 results = tmdbApi.getCollectionImages(tmdbId, NO_LANGUAGE);
             }
-            tmdbArtworkCache.putIfAbsent(cacheKey, results);
+            tmdbArtworkCache.put(cacheKey, results);
         } else if (MetaDataType.SERIES == metaDataType) {
             String cacheKey = "series###"+tmdbId;
             results = tmdbArtworkCache.get(cacheKey, ResultList.class);
@@ -345,7 +345,7 @@ public class TheMovieDbArtworkScanner implements
                 // use an empty language to get all artwork and then filter it
                 results = tmdbApi.getTVImages(tmdbId, NO_LANGUAGE);
             }
-            tmdbArtworkCache.putIfAbsent(cacheKey, results);
+            tmdbArtworkCache.put(cacheKey, results);
         } else if (MetaDataType.SEASON == metaDataType) {
             String cacheKey = "season###"+season+"###"+tmdbId;
             results = tmdbArtworkCache.get(cacheKey, ResultList.class);
@@ -353,7 +353,7 @@ public class TheMovieDbArtworkScanner implements
                 // use an empty language to get all artwork and then filter it
                 results = tmdbApi.getSeasonImages(tmdbId, season, NO_LANGUAGE);
             }
-            tmdbArtworkCache.putIfAbsent(cacheKey, results);
+            tmdbArtworkCache.put(cacheKey, results);
         } else if (MetaDataType.EPISODE == metaDataType) {
             String cacheKey = "episode###"+season+"###"+episode+"###"+tmdbId;
             results = tmdbArtworkCache.get(cacheKey, ResultList.class);
@@ -361,7 +361,7 @@ public class TheMovieDbArtworkScanner implements
                 // use an empty language to get all artwork and then filter it
                 results = tmdbApi.getEpisodeImages(tmdbId, season, episode);
             }
-            tmdbArtworkCache.putIfAbsent(cacheKey, results);
+            tmdbArtworkCache.put(cacheKey, results);
         } else {
             String cacheKey = "movie###"+tmdbId;
             results = tmdbArtworkCache.get(cacheKey, ResultList.class);
@@ -369,7 +369,7 @@ public class TheMovieDbArtworkScanner implements
                 // use an empty language to get all artwork and then filter it
                 results = tmdbApi.getMovieImages(tmdbId, NO_LANGUAGE);
             }
-            tmdbArtworkCache.putIfAbsent(cacheKey, results);
+            tmdbArtworkCache.put(cacheKey, results);
         }
         return results;
     }

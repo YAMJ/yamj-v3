@@ -264,7 +264,7 @@ public class AttachmentScannerService {
         }
         
         // put into cache
-        this.attachmentCache.putIfAbsent(cacheKey, attachments);
+        this.attachmentCache.put(cacheKey, attachments);
         return attachments;
     }
 

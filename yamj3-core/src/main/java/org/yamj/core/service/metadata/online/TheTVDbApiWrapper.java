@@ -67,7 +67,7 @@ public class TheTVDbApiWrapper {
             try {
                 // retrieve banners from TheTVDb
                 banners = tvdbApi.getBanners(id);
-                tvdbCache.putIfAbsent(cacheKey, banners);
+                tvdbCache.put(cacheKey, banners);
             } catch (TvDbException ex) {
                 LOG.error("Failed to get banners using TVDb ID {}: {}", id, ex.getMessage());
                 LOG.trace("TheTVDb error" , ex);
@@ -115,7 +115,7 @@ public class TheTVDbApiWrapper {
                     series = new Series();
                 }
 
-                tvdbCache.putIfAbsent(cacheKey, series);
+                tvdbCache.put(cacheKey, series);
             } catch (TvDbException ex) {
                 if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                     throw new TemporaryUnavailableException("TheTVDb service temporary not available: " + ex.getResponseCode(), ex);
