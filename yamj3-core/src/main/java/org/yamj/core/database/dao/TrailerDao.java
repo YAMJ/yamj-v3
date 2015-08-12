@@ -31,7 +31,6 @@ import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.Trailer;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.dto.QueueDTOComparator;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Repository("trailerDao")
@@ -79,7 +78,7 @@ public class TrailerDao extends HibernateDao {
             queueElements.add(queueElement);
         }
 
-        Collections.sort(queueElements, new QueueDTOComparator());
+        Collections.sort(queueElements);
         return queueElements;
     }
 
@@ -108,7 +107,7 @@ public class TrailerDao extends HibernateDao {
             queueElements.add(queueElement);
         }
 
-        Collections.sort(queueElements, new QueueDTOComparator());
+        Collections.sort(queueElements);
         return queueElements;
     }
 

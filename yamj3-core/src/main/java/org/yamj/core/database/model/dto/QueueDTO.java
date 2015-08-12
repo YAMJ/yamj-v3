@@ -28,7 +28,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
 
-public class QueueDTO {
+public class QueueDTO implements Comparable<QueueDTO> {
 
     private Long id;
     private Date date;
@@ -88,5 +88,19 @@ public class QueueDTO {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SIMPLE_STYLE);
+    }
+
+    @Override
+    public int compareTo(QueueDTO obj) {
+        if (getDate() == null && obj.getDate() == null) {
+            return 0;
+        }
+        if (getDate() != null && obj.getDate() == null) {
+            return 1;
+        }
+        if (getDate() == null && obj.getDate() != null) {
+            return -11;
+        }
+        return getDate().compareTo(obj.getDate());
     }
 }

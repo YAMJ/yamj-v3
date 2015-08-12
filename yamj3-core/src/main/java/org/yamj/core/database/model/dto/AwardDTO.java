@@ -77,11 +77,11 @@ public class AwardDTO {
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-                .append(getEvent())
-                .append(getCategory())
-                .append(getYear())
-                .append(getSource())
-                .toHashCode();
+            .append(event)
+            .append(category)
+            .append(year)
+            .append(source)
+            .toHashCode();
     }
 
     @Override
@@ -89,11 +89,11 @@ public class AwardDTO {
         if (obj instanceof AwardDTO) {
             final AwardDTO other = (AwardDTO) obj;
             return new EqualsBuilder()
-                    .append(getEvent(), other.getEvent())
-                    .append(getCategory(), other.getCategory())
-                    .append(getYear(), other.getYear())
-                    .append(getSource(), other.getSource())
-                    .isEquals();
+                .append(event, other.event)
+                .append(category, other.category)
+                .append(year, other.year)
+                .append(source, other.source)
+                .isEquals();
         }
         return false;
     }

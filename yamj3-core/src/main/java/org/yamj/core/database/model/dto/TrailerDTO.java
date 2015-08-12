@@ -70,9 +70,9 @@ public class TrailerDTO {
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-                .append(getSource())
-                .append(getUrl())
-                .toHashCode();
+            .append(source)
+            .append(url)
+            .toHashCode();
     }
 
     @Override
@@ -80,9 +80,9 @@ public class TrailerDTO {
         if (obj instanceof TrailerDTO) {
             final TrailerDTO other = (TrailerDTO) obj;
             return new EqualsBuilder()
-                    .append(getSource(), other.getSource())
-                    .append(getUrl(), other.getUrl())
-                    .isEquals();
+                .append(source, other.source)
+                .append(url, other.url)
+                .isEquals();
         }
         return false;
     }

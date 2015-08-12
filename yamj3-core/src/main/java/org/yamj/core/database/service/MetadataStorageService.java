@@ -53,7 +53,6 @@ import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.service.artwork.ArtworkTools;
 import org.yamj.core.tools.GenreXmlTools;
-import org.yamj.core.tools.MetadataTools;
 
 @Service("metadataStorageService")
 public class MetadataStorageService {
@@ -158,12 +157,12 @@ public class MetadataStorageService {
      * @param videoData
      */
     public void storeAssociatedEntities(VideoData videoData) {
-
         this.storeCountries(videoData.getCountryCodes());
         this.storeStudios(videoData.getStudioNames());
         this.storeCertifications(videoData.getCertificationInfos());
         this.storeAwards(videoData.getAwardDTOS());
-
+        this.storeBoxedSets(videoData.getBoxedSetDTOS());
+        
         if (CollectionUtils.isNotEmpty(videoData.getGenreNames())) {
             // store new genres
             for (String genreName : videoData.getGenreNames()) {
@@ -188,18 +187,6 @@ public class MetadataStorageService {
                 }
             }
         }
-
-        if (CollectionUtils.isNotEmpty(videoData.getBoxedSetDTOS())) {
-            // store boxed sets
-            for (BoxedSetDTO boxedSetDTO : videoData.getBoxedSetDTOS()) {
-                try {
-                    this.commonDao.storeNewBoxedSet(boxedSetDTO);
-                } catch (Exception ex) {
-                    LOG.error("Failed to store boxed set '{}', error: {}", boxedSetDTO.getName(), ex.getMessage());
-                    LOG.trace("Storage error", ex);
-                }
-            }
-        }
     }
 
     /**
@@ -208,11 +195,11 @@ public class MetadataStorageService {
      * @param series
      */
     public void storeAssociatedEntities(Series series) {
-
         this.storeCountries(series.getCountryCodes());
         this.storeStudios(series.getStudioNames());
         this.storeCertifications(series.getCertificationInfos());
         this.storeAwards(series.getAwardDTOS());
+        this.storeBoxedSets(series.getBoxedSetDTOS());
 
         if (CollectionUtils.isNotEmpty(series.getGenreNames())) {
             // store new genres
@@ -330,6 +317,20 @@ public class MetadataStorageService {
                 } finally {
                     AWARD_STORAGE_LOCK.unlock();
                 }
+            }
+        }
+    }
+
+    private void storeBoxedSets(Collection<BoxedSetDTO> boxedSets) {
+        if (CollectionUtils.isEmpty(boxedSets)) return;
+        
+        // store boxed sets
+        for (BoxedSetDTO boxedSet : boxedSets) {
+            try {
+                this.commonDao.storeNewBoxedSet(boxedSet);
+            } catch (Exception ex) {
+                LOG.error("Failed to store boxed set '{}', error: {}", boxedSet.getName(), ex.getMessage());
+                LOG.trace("Storage error", ex);
             }
         }
     }
@@ -719,7 +720,7 @@ public class MetadataStorageService {
 
             if (boxedSetOrder == null) {
                 // create new videoSet
-                BoxedSet boxedSet = commonDao.getBoxedSet(boxedSetDTO.getIdentifier());
+                BoxedSet boxedSet = commonDao.getBoxedSet(boxedSetDTO.getBoxedSetId());
                 if (boxedSet != null) {
                     boxedSetOrder = new BoxedSetOrder();
                     boxedSetOrder.setVideoData(videoData);
@@ -764,7 +765,7 @@ public class MetadataStorageService {
 
             if (boxedSetOrder == null) {
                 // create new videoSet
-                BoxedSet boxedSet = commonDao.getBoxedSet(boxedSetDTO.getIdentifier());
+                BoxedSet boxedSet = commonDao.getBoxedSet(boxedSetDTO.getBoxedSetId());
                 if (boxedSet != null) {
                     boxedSetOrder = new BoxedSetOrder();
                     boxedSetOrder.setSeries(series);
@@ -772,6 +773,7 @@ public class MetadataStorageService {
                     if (boxedSetDTO.getOrdering() != null) {
                         boxedSetOrder.setOrdering(boxedSetDTO.getOrdering());
                     }
+                    
                     series.addBoxedSet(boxedSetOrder);
                     this.commonDao.saveEntity(boxedSetOrder);
                 }
@@ -800,13 +802,12 @@ public class MetadataStorageService {
         int ordering = 0; // ordering counter
 
         for (CreditDTO dto : videoData.getCreditDTOS()) {
-            String identifier = MetadataTools.cleanIdentifier(dto.getName());
             
             // find matching cast/crew
             CastCrew castCrew = null;
             for (CastCrew credit : videoData.getCredits()) {
                 if (credit.getCastCrewPK().getJobType() == dto.getJobType() &&
-                    credit.getCastCrewPK().getPerson().getIdentifier().equalsIgnoreCase(identifier))
+                    credit.getCastCrewPK().getPerson().getIdentifier().equalsIgnoreCase(dto.getIdentifier()))
                 {
                     castCrew = credit;
                     break;
@@ -822,7 +823,7 @@ public class MetadataStorageService {
                     // continue with next cast entry
                     continue;
                 }
-                LOG.trace("Found person '{}' for identifier '{}'", person.getName(), identifier);
+                LOG.trace("Found person '{}' for identifier '{}'", person.getName(), dto.getIdentifier());
 
                 // create new association between person and video
                 castCrew = new CastCrew(person, videoData, dto.getJobType());

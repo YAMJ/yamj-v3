@@ -40,6 +40,7 @@ public class CreditDTO {
     private final String sourceId;
     private final JobType jobType;
     private final String name;
+    private final String identifier;
     private String firstName;
     private String lastName;
     private String realName;
@@ -65,6 +66,7 @@ public class CreditDTO {
         this.jobType = jobType;
         PersonNameDTO dto = MetadataTools.splitFullName(name.trim());
         this.name = dto.getName();
+        this.identifier = MetadataTools.cleanIdentifier(name);
         setFirstName(dto.getFirstName());
         setLastName(dto.getLastName());
         setRole(role);
@@ -84,6 +86,10 @@ public class CreditDTO {
 
     public String getName() {
         return name;
+    }
+    
+    public String getIdentifier() {
+        return identifier;
     }
 
     public String getFirstName() {
@@ -170,34 +176,27 @@ public class CreditDTO {
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-                .append(name)
-                .append(source)
-                .append(jobType)
-                .toHashCode();
+            .append(jobType)
+            .append(source)
+            .append(identifier)
+            .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (other == null) {
+        if (obj == null) {
             return false;
         }
-        if (!(other instanceof CreditDTO)) {
+        if (!(obj instanceof CreditDTO)) {
             return false;
         }
-        CreditDTO castOther = (CreditDTO) other;
-        // check job
-        if (this.jobType != castOther.jobType) {
-            return false;
-        }
-        // check source
-        if (!StringUtils.equals(this.source, castOther.source)) {
-            return false;
-        }
-        // check name
-        return StringUtils.equalsIgnoreCase(this.name, castOther.name);
+        CreditDTO other = (CreditDTO) obj;
+        if (this.jobType != other.jobType) return false;
+        if (!StringUtils.equals(this.source, other.source)) return false;
+        return StringUtils.equalsIgnoreCase(this.identifier, other.identifier);
     }
 
     @Override

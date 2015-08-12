@@ -32,10 +32,8 @@ import org.yamj.core.DatabaseCache;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.dto.QueueDTOComparator;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
-import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 
 @Transactional
@@ -66,7 +64,7 @@ public class MetadataDao extends HibernateDao {
             queueElements.add(queueElement);
         }
 
-        Collections.sort(queueElements, new QueueDTOComparator());
+        Collections.sort(queueElements);
         return queueElements;
     }
 
@@ -88,12 +86,11 @@ public class MetadataDao extends HibernateDao {
     }
 
     public synchronized void storePerson(CreditDTO dto) {
-        String identifier = MetadataTools.cleanIdentifier(dto.getName());
-        Person person = getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, identifier);
+        Person person = getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, dto.getIdentifier());
         
         if (person == null) {
             // create new person
-            person = new Person(identifier);
+            person = new Person(dto.getIdentifier());
             person.setSourceDbId(dto.getSource(), dto.getSourceId());
             person.setName(dto.getName(), dto.getSource());
             person.setFirstName(dto.getFirstName(), dto.getSource());
@@ -127,7 +124,7 @@ public class MetadataDao extends HibernateDao {
             this.updateEntity(person);
         }
         
-        // set person id for later user
+        // set person id for later use
         dto.setPersonId(person.getId());
     }
 

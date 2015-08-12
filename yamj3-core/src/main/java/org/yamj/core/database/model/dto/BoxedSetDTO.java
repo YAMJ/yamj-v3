@@ -35,7 +35,8 @@ public class BoxedSetDTO {
     private final String name;
     private final Integer ordering;
     private final String sourceId;
-
+    private Long boxedSetId;
+    
     public BoxedSetDTO(String source, String name) {
         this(source, name, null, null);
     }
@@ -71,29 +72,37 @@ public class BoxedSetDTO {
     public Integer getOrdering() {
         return ordering;
     }
+    
+    public Long getBoxedSetId() {
+        return boxedSetId;
+    }
+
+    public void setBoxedSetId(Long boxedSetId) {
+        this.boxedSetId = boxedSetId;
+    }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
             .append(source)
-            .append(name)
+            .append(identifier)
             .toHashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (other == null) {
+        if (obj == null) {
             return false;
         }
-        if (!(other instanceof BoxedSetDTO)) {
+        if (!(obj instanceof BoxedSetDTO)) {
             return false;
         }
-        BoxedSetDTO castOther = (BoxedSetDTO) other;
-        if (!StringUtils.equalsIgnoreCase(this.source, castOther.source)) return false;
-        return StringUtils.equalsIgnoreCase(this.name, castOther.name);
+        BoxedSetDTO other = (BoxedSetDTO) obj;
+        if (!StringUtils.equalsIgnoreCase(this.source, other.source)) return false;
+        return StringUtils.equalsIgnoreCase(this.identifier, other.identifier);
     }
 
     @Override

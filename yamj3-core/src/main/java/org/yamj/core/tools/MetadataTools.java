@@ -509,7 +509,7 @@ public final class MetadataTools {
         // just leave characters and digits
         result = CLEAN_STRING_PATTERN.matcher(result).replaceAll(" ").trim();
         // remove double whitespaces
-        result = result.replaceAll("^ +| +$|( ){2,}", "$1");
+        result = result.replaceAll("( )+", " ").trim();
         
         return result;
     }

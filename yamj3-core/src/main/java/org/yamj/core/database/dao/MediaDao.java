@@ -35,7 +35,6 @@ import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.dto.QueueDTOComparator;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Repository("mediaDao")
@@ -70,7 +69,7 @@ public class MediaDao extends HibernateDao {
             queueElements.add(queueElement);
         }
 
-        Collections.sort(queueElements, new QueueDTOComparator());
+        Collections.sort(queueElements);
         return queueElements;
     }
     

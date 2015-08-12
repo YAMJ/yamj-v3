@@ -416,6 +416,7 @@ public class CommonStorageService {
     }
 
     @Transactional
+    @CacheEvict(value=DatabaseCache.BOXEDSET, key="#id")
     public Set<String> deleteBoxedSet(Long id) {
         Set<String> filesToDelete = new HashSet<>();
         BoxedSet boxedSet = this.stagingDao.getById(BoxedSet.class, id);

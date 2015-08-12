@@ -330,19 +330,15 @@ public class CommonDao extends HibernateDao {
         return getById(BoxedSet.class, id);
     }
 
-    @Cacheable(value=DatabaseCache.BOXEDSET, key="#identifier.toLowerCase()", unless="#result==null")
-    public BoxedSet getBoxedSet(String identifier) {
-        return getByNaturalIdCaseInsensitive(BoxedSet.class, "identifier", identifier);
-    }
-
-    public synchronized void storeNewBoxedSet(BoxedSetDTO boxedSetDTO) {
-        BoxedSet boxedSet = this.getBoxedSet(boxedSetDTO.getIdentifier());
+    public synchronized void storeNewBoxedSet(BoxedSetDTO dto) {
+        BoxedSet boxedSet = getByNaturalIdCaseInsensitive(BoxedSet.class, "identifier", dto.getIdentifier());
+        
         if (boxedSet == null) {
             // create new boxed set
-            boxedSet = new BoxedSet(boxedSetDTO.getIdentifier());
-            boxedSet.setName(boxedSetDTO.getName());
-            if (boxedSetDTO.getSourceId() != null) {
-                boxedSet.setSourceDbId(boxedSetDTO.getSource(), boxedSetDTO.getSourceId());
+            boxedSet = new BoxedSet(dto.getIdentifier());
+            boxedSet.setName(dto.getName());
+            if (dto.getSourceId() != null) {
+                boxedSet.setSourceDbId(dto.getSource(), dto.getSourceId());
             }
             this.saveEntity(boxedSet);
 
@@ -366,10 +362,13 @@ public class CommonDao extends HibernateDao {
             banner.setStatus(StatusType.NEW);
             banner.setBoxedSet(boxedSet);
             this.saveEntity(banner);
-        } else if (boxedSetDTO.getSourceId() != null) {
-            boxedSet.setSourceDbId(boxedSetDTO.getSource(), boxedSetDTO.getSourceId());
+        } else if (dto.getSourceId() != null) {
+            boxedSet.setSourceDbId(dto.getSource(), dto.getSourceId());
             this.updateEntity(boxedSet);
         }
+        
+        // set boxed set id for later use
+        dto.setBoxedSetId(boxedSet.getId());
     }
 
     public List<ApiRatingDTO> getRatings(ApiWrapperList<ApiRatingDTO> wrapper) {
