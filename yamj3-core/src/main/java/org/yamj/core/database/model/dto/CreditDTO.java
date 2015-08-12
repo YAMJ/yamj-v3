@@ -108,13 +108,18 @@ public class CreditDTO {
     public final void setRole(final String role) {
         String fixed = StringUtils.trimToEmpty(role);
         
-        // (as = alternate name)
+        // (as ... = alternate name
         int idx = StringUtils.indexOfIgnoreCase(fixed, "(as ");
         if (idx > 0) {
             fixed = fixed.substring(0, idx);
         }
-        // (uncredited)
+        // uncredited cast member
         idx = StringUtils.indexOfIgnoreCase(fixed, "(uncredit");
+        if (idx > 0) {
+            fixed = fixed.substring(0, idx);
+        }
+        // season marker
+        idx = StringUtils.indexOfIgnoreCase(fixed, "(Season");
         if (idx > 0) {
             fixed = fixed.substring(0, idx);
         }

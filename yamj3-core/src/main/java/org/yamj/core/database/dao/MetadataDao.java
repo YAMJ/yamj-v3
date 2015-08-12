@@ -23,7 +23,6 @@
 package org.yamj.core.database.dao;
 
 import java.util.*;
-import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
@@ -34,7 +33,6 @@ import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.QueueDTOComparator;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.hibernate.HibernateDao;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
@@ -127,22 +125,6 @@ public class MetadataDao extends HibernateDao {
             // update person in database
             this.updateEntity(person);
         }
-    }
-
-    public CastCrew getCastCrew(VideoData videoData, JobType jobType, String identifier) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("select distinct c ");
-        sb.append("from CastCrew c ");
-        sb.append("join c.castCrewPK.person p ");
-        sb.append("where c.castCrewPK.videoData=:videoData ");
-        sb.append("and c.castCrewPK.jobType=:jobType ");
-        sb.append("and lower(p.identifier)=:identifier ");
-
-        Query query = currentSession().createQuery(sb.toString());
-        query.setParameter("videoData", videoData);
-        query.setParameter("jobType", jobType);
-        query.setString(IDENTIFIER, identifier.toLowerCase());
-        return (CastCrew) query.uniqueResult();
     }
 
     public List<Artwork> findPersonArtworks(String identifier) {

@@ -789,7 +789,17 @@ public class MetadataStorageService {
 
         for (CreditDTO dto : videoData.getCreditDTOS()) {
             String identifier = MetadataTools.cleanIdentifier(dto.getName());
-            CastCrew castCrew = this.metadataDao.getCastCrew(videoData, dto.getJobType(), identifier);
+            
+            // find matching cast/crew
+            CastCrew castCrew = null;
+            for (CastCrew credit : videoData.getCredits()) {
+                if (credit.getCastCrewPK().getJobType() == dto.getJobType() &&
+                    credit.getCastCrewPK().getPerson().getIdentifier().equalsIgnoreCase(identifier))
+                {
+                    castCrew = credit;
+                    break;
+                }
+            }
             
             if (castCrew == null) {
                 // retrieve person
