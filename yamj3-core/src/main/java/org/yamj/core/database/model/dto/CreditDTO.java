@@ -106,7 +106,8 @@ public class CreditDTO {
     }
 
     public final void setRole(final String role) {
-        String fixed = StringUtils.trimToEmpty(role);
+        String fixed = StringUtils.trimToNull(role);
+        if (fixed == null) return;
         
         // (as ... = alternate name
         int idx = StringUtils.indexOfIgnoreCase(fixed, "(as ");
