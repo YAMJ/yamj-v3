@@ -48,12 +48,12 @@ import org.yamj.core.hibernate.HibernateDao;
 @Repository("commonDao")
 public class CommonDao extends HibernateDao {
 
-    @Cacheable("genre")
+    @Cacheable(value="genre", unless="#result==null")
     public Genre getGenre(Long id) {
         return getById(Genre.class, id);
     }
 
-    @Cacheable("genre")
+    @Cacheable(value="genre", unless="#result==null")
     public Genre getGenre(String name) {
         return getByNaturalIdCaseInsensitive(Genre.class, "name", name);
     }
@@ -139,12 +139,12 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
     }
 
-    @Cacheable("studio")
+    @Cacheable(value="studio", unless="#result==null")
     public Studio getStudio(Long id) {
         return getById(Studio.class, id);
     }
 
-    @Cacheable("studio")
+    @Cacheable(value="studio", unless="#result==null")
     public Studio getStudio(String name) {
         return getByNaturalIdCaseInsensitive(Studio.class, "name", name);
     }
@@ -189,12 +189,12 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(Studio.class, sqlScalars, wrapper);
     }
 
-    @Cacheable("country")
+    @Cacheable(value="country", unless="#result==null")
     public Country getCountry(Long id) {
         return getById(Country.class, id);
     }
 
-    @Cacheable("country")
+    @Cacheable(value="country", unless="#result==null")
     public Country getCountry(String countryCode) {
         return getByNaturalId(Country.class, "countryCode", countryCode);
     }
@@ -249,7 +249,7 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiCountryDTO.class, sqlScalars, wrapper);
     }
 
-    @Cacheable("certification")
+    @Cacheable(value="certification", unless="#result==null")
     public Certification getCertification(String countryCode, String certificate) {
         StringBuilder sb = new StringBuilder();
         sb.append("from Certification ");
@@ -330,12 +330,12 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiCertificationDTO.class, sqlScalars, wrapper);
     }
 
-    @Cacheable("boxset")
+    @Cacheable(value="boxset", unless="#result==null")
     public BoxedSet getBoxedSet(Long id) {
         return getById(BoxedSet.class, id);
     }
 
-    @Cacheable("boxset")
+    @Cacheable(value="boxset", unless="#result==null")
     public BoxedSet getBoxedSet(String identifier) {
         return getByNaturalIdCaseInsensitive(BoxedSet.class, "identifier", identifier);
     }
@@ -473,7 +473,7 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiRatingDTO.class, sqlScalars, wrapper);
     }
 
-    @Cacheable("award")
+    @Cacheable(value="award", unless="#result==null")
     public Award getAward(String event, String category, String source) {
         return (Award) currentSession()
                 .byNaturalId(Award.class)

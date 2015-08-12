@@ -81,7 +81,7 @@ public class MetadataDao extends HibernateDao {
         return getByNaturalIdCaseInsensitive(Series.class, IDENTIFIER, identifier);
     }
 
-    @Cacheable("person")
+    @Cacheable(value="person", unless="#result==null")
     public Person getPerson(String identifier) {
         return getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, identifier);
     }
