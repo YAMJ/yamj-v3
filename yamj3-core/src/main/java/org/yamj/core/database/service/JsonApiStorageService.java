@@ -333,7 +333,7 @@ public class JsonApiStorageService {
     //<editor-fold defaultstate="collapsed" desc="Genre methods">
     @Transactional
     public boolean addGenre(String name, String targetApi) {
-        Genre genre = commonDao.getGenre(name);
+        Genre genre = this.commonDao.getGenre(name);
         if (genre != null) {
             return false;
         }
@@ -345,7 +345,7 @@ public class JsonApiStorageService {
 
     @Transactional
     public boolean updateGenre(long id, String targetApi) {
-        Genre genre = commonDao.getById(Genre.class, id);
+        Genre genre = commonDao.getGenre(id);
         if (genre == null) {
             return false;
         }

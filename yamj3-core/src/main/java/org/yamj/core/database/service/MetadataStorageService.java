@@ -62,6 +62,7 @@ public class MetadataStorageService {
     private static final ReentrantLock STUDIO_STORAGE_LOCK = new ReentrantLock();
     private static final ReentrantLock CERTIFICATION_STORAGE_LOCK = new ReentrantLock();
     private static final ReentrantLock AWARD_STORAGE_LOCK = new ReentrantLock();
+    private static final ReentrantLock GENRE_STORAGE_LOCK = new ReentrantLock();
   
     @Autowired
     private CommonDao commonDao;
@@ -162,19 +163,7 @@ public class MetadataStorageService {
         this.storeCertifications(videoData.getCertificationInfos());
         this.storeAwards(videoData.getAwardDTOS());
         this.storeBoxedSets(videoData.getBoxedSetDTOS());
-        
-        if (CollectionUtils.isNotEmpty(videoData.getGenreNames())) {
-            // store new genres
-            for (String genreName : videoData.getGenreNames()) {
-                try {
-                    String targetXml = GenreXmlTools.getMasterGenre(genreName);
-                    this.commonDao.storeNewGenre(genreName, targetXml);
-                } catch (Exception ex) {
-                    LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
-                    LOG.trace("Storage error", ex);
-                }
-            }
-        }
+        this.storeGenres(videoData.getGenreNames());
         
         if (CollectionUtils.isNotEmpty(videoData.getCreditDTOS())) {
             // store persons
@@ -200,31 +189,7 @@ public class MetadataStorageService {
         this.storeCertifications(series.getCertificationInfos());
         this.storeAwards(series.getAwardDTOS());
         this.storeBoxedSets(series.getBoxedSetDTOS());
-
-        if (CollectionUtils.isNotEmpty(series.getGenreNames())) {
-            // store new genres
-            for (String genreName : series.getGenreNames()) {
-                try {
-                    String targetXml = GenreXmlTools.getMasterGenre(genreName);
-                    this.commonDao.storeNewGenre(genreName, targetXml);
-                } catch (Exception ex) {
-                    LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
-                    LOG.trace("Storage error", ex);
-                }
-            }
-        }
-        
-        if (CollectionUtils.isNotEmpty(series.getBoxedSetDTOS())) {
-            // store boxed sets
-            for (BoxedSetDTO boxedSetDTO : series.getBoxedSetDTOS()) {
-                try {
-                    this.commonDao.storeNewBoxedSet(boxedSetDTO);
-                } catch (Exception ex) {
-                    LOG.error("Failed to store boxed set '{}', error: {}", boxedSetDTO.getName(), ex.getMessage());
-                    LOG.trace("Storage error", ex);
-                }
-            }
-        }
+        this.storeGenres(series.getGenreNames());
 
         for (Season season : series.getSeasons()) {
             for (VideoData videoData : season.getVideoDatas()) {
@@ -331,6 +296,29 @@ public class MetadataStorageService {
             } catch (Exception ex) {
                 LOG.error("Failed to store boxed set '{}', error: {}", boxedSet.getName(), ex.getMessage());
                 LOG.trace("Storage error", ex);
+            }
+        }
+    }
+
+    private void storeGenres(Collection<String> genreNames) {
+        if (CollectionUtils.isEmpty(genreNames)) return;
+
+        // store new genres
+        for (String genreName : genreNames) {
+            if (this.commonDao.getGenre(genreName) == null) {
+                // double check with lock
+                GENRE_STORAGE_LOCK.lock();
+                try {
+                    if (this.commonDao.getGenre(genreName) == null) {
+                        final String targetXml = GenreXmlTools.getMasterGenre(genreName);
+                        this.commonDao.saveGenre(genreName, targetXml);
+                    }
+                } catch (Exception ex) {
+                    LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
+                    LOG.trace("Storage error", ex);
+                } finally {
+                    GENRE_STORAGE_LOCK.unlock();
+                }
             }
         }
     }

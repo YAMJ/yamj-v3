@@ -59,15 +59,13 @@ public class CommonDao extends HibernateDao {
         return getByNaturalIdCaseInsensitive(Genre.class, "name", name);
     }
 
-    public synchronized void storeNewGenre(String name, String targetXml) {
-        Genre genre = this.getGenre(name);
-        if (genre == null) {
-            // create new genre
-            genre = new Genre();
-            genre.setName(name);
-            genre.setTargetXml(targetXml);
-            this.saveEntity(genre);
-        }
+    @CachePut(value=DatabaseCache.GENRE, key="#name.toLowerCase()")
+    public Genre saveGenre(String name, String targetXml) {
+        Genre genre = new Genre();
+        genre.setName(name);
+        genre.setTargetXml(targetXml);
+        this.saveEntity(genre);
+        return genre;
     }
 
     public List<ApiGenreDTO> getGenres(ApiWrapperList<ApiGenreDTO> wrapper) {
