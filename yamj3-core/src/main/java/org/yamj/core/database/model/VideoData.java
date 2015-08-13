@@ -711,12 +711,8 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void addPosterDTO(String source, String url) {
-        this.addPosterDTO(source, url, null);
-    }
-
-    public void addPosterDTO(String source, String url, String hashCode) {
-        if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(url)) {
-            this.posterDTOS.add(new ArtworkDetailDTO(source, url, hashCode));
+         if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(url)) {
+            this.posterDTOS.add(new ArtworkDetailDTO(source, url));
         }
     }
 
@@ -725,12 +721,8 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void addFanartDTO(String source, String url) {
-        this.addFanartDTO(source, url, null);
-    }
-
-    public void addFanartDTO(String source, String url, String hashCode) {
         if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(url)) {
-            this.fanartDTOS.add(new ArtworkDetailDTO(source, url, hashCode));
+            this.fanartDTOS.add(new ArtworkDetailDTO(source, url));
         }
     }
 

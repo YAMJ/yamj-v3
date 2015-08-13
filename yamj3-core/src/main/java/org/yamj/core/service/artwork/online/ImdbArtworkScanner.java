@@ -22,7 +22,10 @@
  */
 package org.yamj.core.service.artwork.online;
 
+import com.omertron.imdbapi.ImdbApi;
+import com.omertron.imdbapi.model.ImdbPerson;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
@@ -40,7 +44,7 @@ import org.yamj.core.web.PoolingHttpClient;
 import org.yamj.core.web.ResponseTools;
 
 @Service("imdbArtworkScanner")
-public class ImdbArtworkScanner implements IMoviePosterScanner {
+public class ImdbArtworkScanner implements IMoviePosterScanner, IPhotoScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImdbArtworkScanner.class);
 
@@ -48,6 +52,8 @@ public class ImdbArtworkScanner implements IMoviePosterScanner {
     private ArtworkScannerService artworkScannerService;
     @Autowired
     private ImdbScanner imdbScanner;
+    @Autowired
+    private ImdbApi imdbApi;
     @Autowired
     private PoolingHttpClient httpClient;
 
@@ -93,5 +99,21 @@ public class ImdbArtworkScanner implements IMoviePosterScanner {
             LOG.trace("IMDb service error", ex);
         }
         return dtos;
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getPhotos(Person person) {
+        String imdbId = imdbScanner.getPersonId(person);
+        if (StringUtils.isBlank(imdbId)) {
+            return null;
+        }
+        
+        ImdbPerson imdbPerson = imdbApi.getActorDetails(imdbId);
+        if (imdbPerson == null || imdbPerson.getImage() == null) {
+            return null;
+        }
+        
+        ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), imdbPerson.getImage().getUrl(), imdbId);
+        return Collections.singletonList(dto);
     }
 }

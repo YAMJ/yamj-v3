@@ -248,13 +248,6 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                 videoData.addCreditDTO(createCredit(person, JobType.PRODUCER));
             }
         }
-        
-        // add poster URLs
-        if (CollectionUtils.isNotEmpty(movieInfos.getPosterUrls()))  {
-            for (String posterURL : movieInfos.getPosterUrls()) {
-                videoData.addPosterDTO(SCANNER_ID, posterURL);
-            }
-        }
 
         // add awards
         if (configServiceWrapper.getBooleanProperty("allocine.movie.awards", Boolean.FALSE)) {
@@ -416,13 +409,6 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
 
         // allocine rating
         series.addRating(SCANNER_ID, tvSeriesInfos.getUserRating());
-
-        // add poster URLs
-        if (CollectionUtils.isNotEmpty(tvSeriesInfos.getPosterUrls()))  {
-            for (String posterURL : tvSeriesInfos.getPosterUrls()) {
-                series.addPosterDTO(SCANNER_ID, posterURL);
-            }
-        }
 
         // add awards
         if (configServiceWrapper.getBooleanProperty("allocine.tvshow.awards", Boolean.FALSE)) {
@@ -663,9 +649,6 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         if (OverrideTools.checkOverwriteBiography(person, SCANNER_ID)) {
             person.setBiography(personInfos.getBiography(), SCANNER_ID);
         }
-        
-        // add poster URL
-        person.addPhotoDTO(SCANNER_ID, personInfos.getPhotoURL(), String.valueOf(personInfos.getCode()));
 
         return ScanResult.OK;
     }

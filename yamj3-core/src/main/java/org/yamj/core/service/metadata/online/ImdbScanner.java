@@ -1341,18 +1341,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             }
         }
 
-        if (xml.contains("id=\"img_primary\"")) {
-            LOG.trace("Looking for image on webpage for {}", person.getName());
-            String photoURL = HTMLTools.extractTag(xml, "id=\"img_primary\"", HTML_TD_END);
-            if (photoURL.contains("http://ia.media-imdb.com/images")) {
-                photoURL = "http://ia.media-imdb.com/images" + HTMLTools.extractTag(photoURL, "src=\"http://ia.media-imdb.com/images", "\"");
-                // TODO: build hash code from photo URL
-                person.addPhotoDTO(SCANNER_ID, photoURL);
-            }
-        } else {
-            LOG.trace("No image found on webpage for {}", person.getName());
-        }
-
         response = httpClient.requestContent(HTML_SITE_FULL + HTML_NAME + imdbId + "/bio", charset);
         if (throwTempError && ResponseTools.isTemporaryError(response)) {
             throw new TemporaryUnavailableException("IMDb service is temporary not available: " + response.getStatusCode());

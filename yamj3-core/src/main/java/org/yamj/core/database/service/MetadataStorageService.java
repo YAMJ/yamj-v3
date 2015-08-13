@@ -866,25 +866,11 @@ public class MetadataStorageService {
                 }
             }
         }
-        
-        if (CollectionUtils.isNotEmpty(series.getPosterDTOS())) {
-            Artwork artwork = series.getArtwork(ArtworkType.POSTER);
-            updateLocatedArtwork(artwork, series.getPosterDTOS());
-        }
-        if (CollectionUtils.isNotEmpty(series.getFanartDTOS())) {
-            Artwork artwork = series.getArtwork(ArtworkType.FANART);
-            updateLocatedArtwork(artwork, series.getFanartDTOS());
-        }
     }
 
     private void updateLocatedArtwork(Person person) {
         if (person.hasModifiedSource()) {
             this.commonDao.markAsDeleted(person.getPhoto(), person.getModifiedSources());
-        }
-        
-        if (CollectionUtils.isNotEmpty(person.getPhotoDTOS())) {
-            Artwork artwork = person.getPhoto();
-            updateLocatedArtwork(artwork, person.getPhotoDTOS());
         }
     }
 

@@ -255,19 +255,22 @@ public class AllocineApiWrapper {
             return null;
         }
         
-        TvSeasonInfos tvSeasonInfos = null;
         int seasonCode = tvSeriesInfos.getSeasonCode(season);
+        if (seasonCode <= 0) return null;
+        return getTvSeasonInfos(String.valueOf(seasonCode), throwTempError); 
+    }
 
+    public TvSeasonInfos getTvSeasonInfos(String allocineId, boolean throwTempError) {
+        TvSeasonInfos tvSeasonInfos = null;
         try {
-            tvSeasonInfos = allocineApi.getTvSeasonInfos(seasonCode);
+            tvSeasonInfos = allocineApi.getTvSeasonInfos(allocineId);
         } catch (AllocineException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
             }
-            LOG.error("Failed retrieving Allocine infos for season id {}: {}", seasonCode, ex.getMessage());
+            LOG.error("Failed retrieving Allocine infos for season id {}: {}", allocineId, ex.getMessage());
             LOG.trace("Allocine error" , ex);
         }
-        
         return tvSeasonInfos;
     }
 

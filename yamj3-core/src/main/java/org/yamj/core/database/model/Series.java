@@ -42,7 +42,6 @@ import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
 @Entity
 @Table(name = "series",
@@ -151,12 +150,6 @@ public class Series extends AbstractMetadata {
 
     @Transient
     private final Set<BoxedSetDTO> boxedSetDTOS = new HashSet<>(0);
-
-    @Transient
-    private final Set<ArtworkDetailDTO> posterDTOS = new HashSet<>(0);
-
-    @Transient
-    private final Set<ArtworkDetailDTO> fanartDTOS = new HashSet<>(0);
 
     @Transient
     private final Set<AwardDTO> awardDTOS = new HashSet<>(0);
@@ -475,34 +468,6 @@ public class Series extends AbstractMetadata {
     public void addBoxedSetDTO(String source, String name, Integer ordering, String sourceId) {
         if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(name)) {
             this.boxedSetDTOS.add(new BoxedSetDTO(source, name, ordering, sourceId));
-        }
-    }
-    
-    public Set<ArtworkDetailDTO> getPosterDTOS() {
-        return posterDTOS;
-    }
-
-    public void addPosterDTO(String source, String url) {
-        this.addPosterDTO(source, url, null);
-    }
-
-    public void addPosterDTO(String source, String url, String hashCode) {
-        if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(url)) {
-            this.posterDTOS.add(new ArtworkDetailDTO(source, url, hashCode));
-        }
-    }
-
-    public Set<ArtworkDetailDTO> getFanartDTOS() {
-        return this.fanartDTOS;
-    }
-
-    public void addFanartDTO(String source, String url) {
-        this.addFanartDTO(source, url, null);
-    }
-
-    public void addFanartDTO(String source, String url, String hashCode) {
-        if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(url)) {
-            this.fanartDTOS.add(new ArtworkDetailDTO(source, url, hashCode));
         }
     }
     
