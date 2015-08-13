@@ -35,6 +35,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
+import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.PersonNameDTO;
 
@@ -110,7 +111,7 @@ public class Person extends AbstractScannable {
     private Artwork photo;
 
     @Transient
-    private Map<String, String> photoURLS = new HashMap<>(0);
+    private Set<ArtworkDetailDTO> photoDTOS = new HashSet<>(0);
 
     @Transient
     private Set<FilmParticipation> newFilmography = new HashSet<>(0);
@@ -384,13 +385,17 @@ public class Person extends AbstractScannable {
 
     // TRANSIENT METHODS
     
-    public Map<String, String> getPhotoURLS() {
-        return photoURLS;
+    public Set<ArtworkDetailDTO> getPhotoDTOS() {
+        return photoDTOS;
     }
 
-    public void addPhotoURL(String photoURL, String source) {
-        if (StringUtils.isNotBlank(photoURL) && StringUtils.isNotBlank(source)) {
-            this.photoURLS.put(photoURL, source);
+    public void addPhotoDTO(String source, String photoURL) {
+        this.addPhotoDTO(source, photoURL, null);
+    }
+
+    public void addPhotoDTO(String source, String photoURL, String hashCode) {
+        if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(photoURL)) {
+            this.photoDTOS.add(new ArtworkDetailDTO(source, photoURL, hashCode));
         }
     }
 

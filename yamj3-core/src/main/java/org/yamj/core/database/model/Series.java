@@ -42,6 +42,7 @@ import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
+import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
 @Entity
 @Table(name = "series",
@@ -152,10 +153,10 @@ public class Series extends AbstractMetadata {
     private final Set<BoxedSetDTO> boxedSetDTOS = new HashSet<>(0);
 
     @Transient
-    private final Map<String, String> posterURLS = new HashMap<>(0);
+    private final Set<ArtworkDetailDTO> posterDTOS = new HashSet<>(0);
 
     @Transient
-    private final Map<String, String> fanartURLS = new HashMap<>(0);
+    private final Set<ArtworkDetailDTO> fanartDTOS = new HashSet<>(0);
 
     @Transient
     private final Set<AwardDTO> awardDTOS = new HashSet<>(0);
@@ -477,44 +478,52 @@ public class Series extends AbstractMetadata {
         }
     }
     
-    public Map<String, String> getPosterURLS() {
-        return posterURLS;
+    public Set<ArtworkDetailDTO> getPosterDTOS() {
+        return posterDTOS;
     }
 
-    public void addPosterURL(String posterURL, String source) {
-        if (StringUtils.isNotBlank(posterURL) && StringUtils.isNotBlank(source)) {
-            this.posterURLS.put(posterURL, source);
+    public void addPosterDTO(String source, String url) {
+        this.addPosterDTO(source, url, null);
+    }
+
+    public void addPosterDTO(String source, String url, String hashCode) {
+        if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(url)) {
+            this.posterDTOS.add(new ArtworkDetailDTO(source, url, hashCode));
         }
     }
 
-    public Map<String, String> getFanartURLS() {
-        return fanartURLS;
+    public Set<ArtworkDetailDTO> getFanartDTOS() {
+        return this.fanartDTOS;
     }
 
-    public void addFanartURL(String fanartURL, String source) {
-        if (StringUtils.isNotBlank(fanartURL) && StringUtils.isNotBlank(source)) {
-            this.fanartURLS.put(fanartURL, source);
+    public void addFanartDTO(String source, String url) {
+        this.addFanartDTO(source, url, null);
+    }
+
+    public void addFanartDTO(String source, String url, String hashCode) {
+        if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(url)) {
+            this.fanartDTOS.add(new ArtworkDetailDTO(source, url, hashCode));
         }
     }
-
+    
     public Set<AwardDTO> getAwardDTOS() {
         return awardDTOS;
     }
 
-    public void addAwards(Collection<AwardDTO> awards) {
-        if (CollectionUtils.isEmpty(awards)) {
+    public void addAwardDTOS(Collection<AwardDTO> awardDTOS) {
+        if (CollectionUtils.isEmpty(awardDTOS)) {
             return;
         }
 
-        for (AwardDTO award : awards) {
-            if (StringUtils.isBlank(award.getEvent()) || StringUtils.isBlank(award.getCategory()) || StringUtils.isBlank(award.getSource()) || award.getYear() <= 0) {
+        for (AwardDTO awardDTO : awardDTOS) {
+            if (StringUtils.isBlank(awardDTO.getEvent()) || StringUtils.isBlank(awardDTO.getCategory()) || StringUtils.isBlank(awardDTO.getSource()) || awardDTO.getYear() <= 0) {
                 continue;
             }
-            this.awardDTOS.add(award);
+            this.awardDTOS.add(awardDTO);
         }
     }
 
-    public void addAward(String event, String category, String source, int year) {
+    public void addAwardDTO(String event, String category, String source, int year) {
         if (StringUtils.isNotBlank(event) && StringUtils.isNotBlank(category) && StringUtils.isNotBlank(source) && year > 0) {
             this.awardDTOS.add(new AwardDTO(event, category, source, year).setWon(true));
         }

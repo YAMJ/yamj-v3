@@ -271,7 +271,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         // AWARDS
         if (configServiceWrapper.getBooleanProperty("imdb.movie.awards", Boolean.FALSE)) {
-            videoData.addAwards(parseAwards(imdbId));
+            videoData.addAwardDTOS(parseAwards(imdbId));
         }
         
         return ScanResult.OK;
@@ -378,7 +378,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         // AWARDS
         if (configServiceWrapper.getBooleanProperty("imdb.tvshow.awards", Boolean.FALSE)) {
-            series.addAwards(parseAwards(imdbId));
+            series.addAwardDTOS(parseAwards(imdbId));
         }
 
         // scan seasons
@@ -1346,9 +1346,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             String photoURL = HTMLTools.extractTag(xml, "id=\"img_primary\"", HTML_TD_END);
             if (photoURL.contains("http://ia.media-imdb.com/images")) {
                 photoURL = "http://ia.media-imdb.com/images" + HTMLTools.extractTag(photoURL, "src=\"http://ia.media-imdb.com/images", "\"");
-                if (StringUtils.isNotBlank(photoURL)) {
-                    person.addPhotoURL(photoURL, SCANNER_ID);
-                }
+                // TODO: build hash code from photo URL
+                person.addPhotoDTO(SCANNER_ID, photoURL);
             }
         } else {
             LOG.trace("No image found on webpage for {}", person.getName());

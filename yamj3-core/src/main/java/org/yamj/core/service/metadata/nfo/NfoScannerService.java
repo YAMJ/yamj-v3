@@ -157,14 +157,14 @@ public class NfoScannerService {
             // add poster URLs
             if (CollectionUtils.isNotEmpty(infoDTO.getPosterURLs())) {
                 for (String posterURL : infoDTO.getPosterURLs()) {
-                    videoData.addPosterURL(posterURL, SCANNER_ID);
+                    videoData.addPosterDTO(SCANNER_ID, posterURL);
                 }
             }
 
             // add fanart URLs
             if (CollectionUtils.isNotEmpty(infoDTO.getFanartURLs())) {
                 for (String fanartURL : infoDTO.getFanartURLs()) {
-                    videoData.addFanartURL(fanartURL, SCANNER_ID);
+                    videoData.addFanartDTO(SCANNER_ID, fanartURL);
                 }
             }
         }

@@ -50,7 +50,7 @@ import org.yamj.core.web.PoolingHttpClient;
 @Service("allocineScanner")
 public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, IFilmographyScanner {
 
-    public static final String SCANNER_ID = "allocine";
+    private static final String SCANNER_ID = "allocine";
     private static final Logger LOG = LoggerFactory.getLogger(AllocineScanner.class);
 
     private final Lock searchEngingeLock = new ReentrantLock(true);
@@ -252,7 +252,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         // add poster URLs
         if (CollectionUtils.isNotEmpty(movieInfos.getPosterUrls()))  {
             for (String posterURL : movieInfos.getPosterUrls()) {
-                videoData.addPosterURL(posterURL, SCANNER_ID);
+                videoData.addPosterDTO(SCANNER_ID, posterURL);
             }
         }
 
@@ -260,7 +260,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         if (configServiceWrapper.getBooleanProperty("allocine.movie.awards", Boolean.FALSE)) {
             if (CollectionUtils.isNotEmpty(movieInfos.getFestivalAwards())) {
                 for (FestivalAward festivalAward : movieInfos.getFestivalAwards()) {
-                    videoData.addAward(festivalAward.getFestival(), festivalAward.getName(), SCANNER_ID, festivalAward.getYear());
+                    videoData.addAwardDTO(festivalAward.getFestival(), festivalAward.getName(), SCANNER_ID, festivalAward.getYear());
                 }
             }
         }
@@ -420,7 +420,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         // add poster URLs
         if (CollectionUtils.isNotEmpty(tvSeriesInfos.getPosterUrls()))  {
             for (String posterURL : tvSeriesInfos.getPosterUrls()) {
-                series.addPosterURL(posterURL, SCANNER_ID);
+                series.addPosterDTO(SCANNER_ID, posterURL);
             }
         }
 
@@ -428,7 +428,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         if (configServiceWrapper.getBooleanProperty("allocine.tvshow.awards", Boolean.FALSE)) {
             if (CollectionUtils.isNotEmpty(tvSeriesInfos.getFestivalAwards())) {
                 for (FestivalAward festivalAward : tvSeriesInfos.getFestivalAwards()) {
-                    series.addAward(festivalAward.getFestival(), festivalAward.getName(), SCANNER_ID, festivalAward.getYear());
+                    series.addAwardDTO(festivalAward.getFestival(), festivalAward.getName(), SCANNER_ID, festivalAward.getYear());
                 }
             }
         }
@@ -665,7 +665,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
         
         // add poster URL
-        person.addPhotoURL(personInfos.getPhotoURL(), SCANNER_ID);
+        person.addPhotoDTO(SCANNER_ID, personInfos.getPhotoURL(), String.valueOf(personInfos.getCode()));
 
         return ScanResult.OK;
     }

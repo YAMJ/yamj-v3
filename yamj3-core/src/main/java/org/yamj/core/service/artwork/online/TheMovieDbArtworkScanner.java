@@ -44,7 +44,7 @@ import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
-import org.yamj.core.service.artwork.ArtworkTools.HashCodeType;
+import org.yamj.core.service.artwork.ArtworkTools;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 import org.yamj.core.tools.MetadataTools;
 
@@ -317,7 +317,7 @@ public class TheMovieDbArtworkScanner implements
             LOG.warn("{} URL is invalid and will not be used: {}", artworkType, artworkURL);
         } else {
             String url = artworkURL.toString();
-            dtos.add(new ArtworkDetailDTO(getScannerName(), url, HashCodeType.PART));
+            dtos.add(new ArtworkDetailDTO(getScannerName(), url, ArtworkTools.getPartialHashCode(url)));
         }
     }
 

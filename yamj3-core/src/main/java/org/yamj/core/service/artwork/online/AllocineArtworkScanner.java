@@ -51,7 +51,7 @@ public class AllocineArtworkScanner implements IPhotoScanner {
 
     @Override
     public String getScannerName() {
-        return AllocineScanner.SCANNER_ID;
+        return allocineScanner.getScannerName();
     }
 
     @PostConstruct
@@ -78,7 +78,7 @@ public class AllocineArtworkScanner implements IPhotoScanner {
             return null;
         }
 
-        ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), personInfos.getPhotoURL());
+        ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), allocineId, personInfos.getPhotoURL());
         return Collections.singletonList(dto);
     }
 }

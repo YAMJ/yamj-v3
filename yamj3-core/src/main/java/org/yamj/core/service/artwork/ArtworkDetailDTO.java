@@ -23,8 +23,8 @@
 package org.yamj.core.service.artwork;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.type.ImageType;
-import org.yamj.core.service.artwork.ArtworkTools.HashCodeType;
 
 public class ArtworkDetailDTO {
 
@@ -36,21 +36,25 @@ public class ArtworkDetailDTO {
     private int rating = -1;
 
     public ArtworkDetailDTO(String source, String url) {
-        this(source, url, HashCodeType.SIMPLE, ImageType.fromString(FilenameUtils.getExtension(url)));
+        this(source, url, null, ImageType.fromString(FilenameUtils.getExtension(url)));
     }
 
     public ArtworkDetailDTO(String source, String url, ImageType imageType) {
-        this(source, url, HashCodeType.SIMPLE, imageType);
+        this(source, url, null, imageType);
     }
 
-    public ArtworkDetailDTO(String source, String url, HashCodeType hashCodeType) {
-        this(source, url, hashCodeType, ImageType.fromString(FilenameUtils.getExtension(url)));
+    public ArtworkDetailDTO(String source, String url, String hashCode) {
+        this(source, url, hashCode, ImageType.fromString(FilenameUtils.getExtension(url)));
     }
 
-    public ArtworkDetailDTO(String source, String url, HashCodeType hashCodeType, ImageType imageType) {
+    public ArtworkDetailDTO(String source, String url, String hashCode, ImageType imageType) {
         this.source = source;
         this.url = url;
-        this.hashCode = ArtworkTools.getUrlHashCode(url, hashCodeType);
+        if (StringUtils.isBlank(hashCode)) {
+            this.hashCode = ArtworkTools.getUrlHashCode(url);
+        } else {
+            this.hashCode = hashCode;
+        }
         this.imageType = imageType;
     }
     

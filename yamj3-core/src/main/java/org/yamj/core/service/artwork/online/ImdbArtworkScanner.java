@@ -34,21 +34,20 @@ import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
-import org.yamj.core.service.artwork.ArtworkTools.HashCodeType;
+import org.yamj.core.service.artwork.ArtworkTools;
 import org.yamj.core.service.metadata.online.ImdbScanner;
-import org.yamj.core.service.metadata.online.ImdbSearchEngine;
 import org.yamj.core.web.PoolingHttpClient;
 import org.yamj.core.web.ResponseTools;
 
-@Service("imdbPosterScanner")
-public class ImdbPosterScanner implements IMoviePosterScanner {
+@Service("imdbArtworkScanner")
+public class ImdbArtworkScanner implements IMoviePosterScanner {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ImdbPosterScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImdbArtworkScanner.class);
 
     @Autowired
     private ArtworkScannerService artworkScannerService;
     @Autowired
-    private ImdbSearchEngine imdbSearchEngine;
+    private ImdbScanner imdbScanner;
     @Autowired
     private PoolingHttpClient httpClient;
 
@@ -59,7 +58,7 @@ public class ImdbPosterScanner implements IMoviePosterScanner {
 
     @PostConstruct
     public void init() {
-        LOG.info("Initialize IMDb poster scanner");
+        LOG.info("Initialize IMDb artwork scanner");
 
         // register this scanner
         artworkScannerService.registerArtworkScanner(this);
@@ -67,16 +66,12 @@ public class ImdbPosterScanner implements IMoviePosterScanner {
 
     @Override
     public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
-        List<ArtworkDetailDTO> dtos = new ArrayList<>();
-      
-        String imdbId = videoData.getSourceDbId(getScannerName());
+        String imdbId = imdbScanner.getMovieId(videoData);
         if (StringUtils.isBlank(imdbId)) {
-            imdbId = imdbSearchEngine.getImdbId(videoData.getTitle(), videoData.getPublicationYear(), false, false);
-            if (StringUtils.isBlank(imdbId)) {
-                return dtos;
-            }
+            return null;
         }
-
+        
+        List<ArtworkDetailDTO> dtos = new ArrayList<>();
         try {
             DigestedResponse response = this.httpClient.requestContent("http://www.imdb.com/title/" + imdbId);
             if (ResponseTools.isOK(response)) {
@@ -87,7 +82,7 @@ public class ImdbPosterScanner implements IMoviePosterScanner {
                     int endIndex =  response.getContent().indexOf("\"", beginIndex);
                     if (endIndex > 0) {
                         String url = response.getContent().substring(beginIndex, endIndex);
-                        dtos.add(new ArtworkDetailDTO(getScannerName(), url, HashCodeType.PART));
+                        dtos.add(new ArtworkDetailDTO(getScannerName(), url, ArtworkTools.getPartialHashCode(url)));
                     }
                 }
             } else {
@@ -97,7 +92,6 @@ public class ImdbPosterScanner implements IMoviePosterScanner {
             LOG.error("Failed retrieving poster URL from IMDb images for id {}: {}", imdbId, ex.getMessage());
             LOG.trace("IMDb service error", ex);
         }
-
         return dtos;
     }
 }

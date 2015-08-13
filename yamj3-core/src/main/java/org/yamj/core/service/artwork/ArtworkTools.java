@@ -33,45 +33,17 @@ public class ArtworkTools {
     private static final String TYPE_MOVIE_SCANNER = "movie_scanner";
     private static final String TYPE_SERIES_SCANNER = "series_scanner";
     private static final String TYPE_PERSON_SCANNER = "person_scanner";
-    
-    public enum HashCodeType {
-        SIMPLE,
-        PART;
-    }
 
     /**
      * Get the hash code of an URL.
      * 
      * @param url
-     * @param hashCodeType
      * @return the hash code
      */
     public static String getUrlHashCode(String url) {
-        return getUrlHashCode(url, HashCodeType.SIMPLE);
-    }
-
-    /**
-     * Get the hash code of an URL.
-     * 
-     * @param url
-     * @param hashCodeType
-     * @return the hash code
-     */
-    public static String getUrlHashCode(String url, HashCodeType hashCodeType) {
-        if (hashCodeType == null || hashCodeType.equals(HashCodeType.SIMPLE)) {
-            // hash code of URL
-            int hash = url.hashCode();
-            return String.valueOf((hash < 0 ? 0 - hash : hash));
-        }
-        
-        // hash code is part of the URL
-        String hc = ArtworkTools.getPartialHashCode(url);
-        if (StringUtils.isEmpty(hc)) {
-            // may not be empty, so use simple hash code
-            int hash = url.hashCode();
-            return String.valueOf((hash < 0 ? 0 - hash : hash));
-        }
-        return hc;
+        // hash code of URL
+        int hash = url.hashCode();
+        return String.valueOf((hash < 0 ? 0 - hash : hash));
     }
     
     /**
@@ -80,7 +52,7 @@ public class ArtworkTools {
      * @param url
      * @return the hash code
      */
-    private static String getPartialHashCode(String url) {
+    public static String getPartialHashCode(String url) {
         String hashCode = null;
         try {
             int index = StringUtils.lastIndexOf(url, "/");
@@ -94,6 +66,11 @@ public class ArtworkTools {
         } catch (Exception ignore) {
             // ignore any exception
         }
+        
+        if (StringUtils.isEmpty(hashCode)) {
+            hashCode = getUrlHashCode(url);
+        }
+        
         return hashCode;
     }
     
