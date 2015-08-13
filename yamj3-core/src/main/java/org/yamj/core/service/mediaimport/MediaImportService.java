@@ -577,7 +577,7 @@ public class MediaImportService {
             return;
         }
 
-        StageFile stageFile = stagingDao.getStageFile(id);
+        StageFile stageFile = stagingDao.getById(StageFile.class, id);
         if (stageFile != null) {
             stageFile.setStatus(StatusType.ERROR);
             stagingDao.updateEntity(stageFile);

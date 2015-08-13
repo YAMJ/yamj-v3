@@ -77,9 +77,10 @@ public class CommonStorageService {
      * @return list of cached file names which must be deleted also
      */
     @Transactional
+    @CacheEvict(value=DatabaseCache.STAGEFILE, key="#id")
     public Set<String> deleteStageFile(Long id) {
         // get the stage file
-        StageFile stageFile = this.stagingDao.getStageFile(id);
+        StageFile stageFile = this.stagingDao.getById(StageFile.class, id);
 
         // check stage file
         if (stageFile == null) {

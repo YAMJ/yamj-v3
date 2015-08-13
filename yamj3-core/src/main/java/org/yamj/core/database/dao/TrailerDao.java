@@ -36,10 +36,6 @@ import org.yamj.core.hibernate.HibernateDao;
 @Repository("trailerDao")
 public class TrailerDao extends HibernateDao {
 
-    public Trailer getTrailer(Long id) {
-        return getById(Trailer.class, id);
-    }
-
     public List<QueueDTO> getTrailerQueueForScanning(final int maxResults) {
         final StringBuilder sql = new StringBuilder();
         sql.append("select vd.id,'");

@@ -186,7 +186,7 @@ public class ArtworkStorageService {
 
     @Transactional
     public void errorArtwork(Long id) {
-        Artwork artwork = artworkDao.getArtwork(id);
+        Artwork artwork = artworkDao.getById(Artwork.class, id);
         if (artwork != null) {
             artwork.setStatus(StatusType.ERROR);
             artworkDao.updateEntity(artwork);
@@ -217,7 +217,7 @@ public class ArtworkStorageService {
 
     @Transactional
     public boolean errorArtworkLocated(Long id) {
-        ArtworkLocated located = artworkDao.getArtworkLocated(id);
+        ArtworkLocated located = artworkDao.getById(ArtworkLocated.class, id);
         if (located != null) {
             located.setStatus(StatusType.ERROR);
             artworkDao.updateEntity(located);

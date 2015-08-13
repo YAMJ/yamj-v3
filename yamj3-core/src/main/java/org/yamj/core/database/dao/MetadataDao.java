@@ -85,7 +85,7 @@ public class MetadataDao extends HibernateDao {
         return getById(Person.class, id);
     }
 
-    public synchronized void storePerson(CreditDTO dto) {
+    public void storePerson(CreditDTO dto) {
         Person person = getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, dto.getIdentifier());
         
         if (person == null) {

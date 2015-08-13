@@ -30,10 +30,12 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.DatabaseCache;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
@@ -58,6 +60,7 @@ public class StagingDao extends HibernateDao {
                 .load();
     }
 
+    @Cacheable(value=DatabaseCache.STAGEFILE, key="#id", unless="#result==null")
     public StageFile getStageFile(long id) {
         return getById(StageFile.class, id);
     }

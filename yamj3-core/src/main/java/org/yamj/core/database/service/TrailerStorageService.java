@@ -89,7 +89,7 @@ public class TrailerStorageService {
 
     @Transactional
     public boolean errorTrailer(Long id) {
-        Trailer trailer = trailerDao.getTrailer(id);
+        Trailer trailer = trailerDao.getById(Trailer.class, id);
         if (trailer != null) {
             trailer.setStatus(StatusType.ERROR);
             trailerDao.updateEntity(trailer);

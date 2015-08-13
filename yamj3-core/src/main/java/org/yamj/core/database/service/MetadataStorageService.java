@@ -63,6 +63,7 @@ public class MetadataStorageService {
     private static final ReentrantLock CERTIFICATION_STORAGE_LOCK = new ReentrantLock();
     private static final ReentrantLock AWARD_STORAGE_LOCK = new ReentrantLock();
     private static final ReentrantLock GENRE_STORAGE_LOCK = new ReentrantLock();
+    private static final ReentrantLock PERSON_STORAGE_LOCK = new ReentrantLock();
   
     @Autowired
     private CommonDao commonDao;
@@ -168,11 +169,14 @@ public class MetadataStorageService {
         if (CollectionUtils.isNotEmpty(videoData.getCreditDTOS())) {
             // store persons
             for (CreditDTO creditDTO : videoData.getCreditDTOS()) {
+                PERSON_STORAGE_LOCK.lock();
                 try {
                     this.metadataDao.storePerson(creditDTO);
                 } catch (Exception ex) {
                     LOG.error("Failed to store person '{}', error: {}", creditDTO.getName(), ex.getMessage());
                     LOG.trace("Storage error", ex);
+                } finally {
+                    PERSON_STORAGE_LOCK.unlock();
                 }
             }
         }

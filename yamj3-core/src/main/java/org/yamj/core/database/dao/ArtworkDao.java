@@ -68,10 +68,6 @@ public class ArtworkDao extends HibernateDao {
         return criteria.list();
     }
 
-    public Artwork getArtwork(Long id) {
-        return getById(Artwork.class, id);
-    }
-
     public List<QueueDTO> getArtworkQueue(final CharSequence sql, final int maxResults) {
         SQLQuery query = currentSession().createSQLQuery(sql.toString());
         query.setReadOnly(true);
@@ -96,10 +92,6 @@ public class ArtworkDao extends HibernateDao {
 
         Collections.sort(queueElements);
         return queueElements;
-    }
-
-    public ArtworkLocated getArtworkLocated(Long id) {
-        return getById(ArtworkLocated.class, id);
     }
 
     public ArtworkLocated getStoredArtworkLocated(ArtworkLocated located) {

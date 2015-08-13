@@ -73,6 +73,7 @@ public class CachingConfiguration implements CachingConfigurer {
                 .cache(cacheConfigDatabase(DatabaseCache.PERSON, 500, 86400))
                 .cache(cacheConfigDatabase(DatabaseCache.BOXEDSET, 50, 86400))
                 .cache(cacheConfigDatabase(DatabaseCache.AWARD, 50, 86400))
+                .cache(cacheConfigDatabase(DatabaseCache.STAGEFILE, 100, 180))
             );
     }
 

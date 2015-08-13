@@ -29,6 +29,7 @@ public class DatabaseCache {
     public static final String COUNTRY = "country";
     public static final String CERTIFICATION = "certification";
     public static final String PERSON = "person";
-    public static final String BOXEDSET = "boxedset";
+    public static final String BOXEDSET = "boxedSet";
     public static final String AWARD = "award";
+    public static final String STAGEFILE = "stageFile";
 }
