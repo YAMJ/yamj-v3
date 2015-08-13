@@ -1198,10 +1198,10 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 continue;
             }
             
-            if (skipUncredited && StringUtils.contains(cast.getAttr(), "uncredited")) {
+            if (skipUncredited && StringUtils.contains(cast.getAttr(), "(uncredited")) {
                 continue;
             }
-            
+
             final String photoURL = (person.getImage() == null ? null : person.getImage().getUrl());
             if (skipFaceless && JobType.ACTOR.equals(jobType) && StringUtils.isEmpty(photoURL)) {
                 // skip faceless actors only
@@ -1210,6 +1210,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             
             CreditDTO creditDTO = new CreditDTO(SCANNER_ID, person.getActorId(), jobType, person.getName());
             creditDTO.setRole(cast.getCharacter());
+            creditDTO.setVoice(StringUtils.contains(cast.getAttr(), "(voice"));
             creditDTO.addPhotoURL(photoURL);
             videoData.addCreditDTO(creditDTO);
         }

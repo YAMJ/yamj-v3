@@ -24,7 +24,7 @@ package org.yamj.core.database.model.dto;
 
 import org.apache.commons.lang3.builder.*;
 
-public class TrailerDTO {
+public final class TrailerDTO {
 
     private final String source;
     private final String url;

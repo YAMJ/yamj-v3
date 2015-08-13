@@ -34,7 +34,7 @@ import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.PersonNameDTO;
 
-public class CreditDTO {
+public final class CreditDTO {
 
     private final String source;
     private final String sourceId;
@@ -45,6 +45,7 @@ public class CreditDTO {
     private String lastName;
     private String realName;
     private String role;
+    private boolean voice = false;
     private Long personId;
     private final Set<String> photoURLS = new HashSet<>();
     
@@ -120,12 +121,19 @@ public class CreditDTO {
         return role;
     }
 
-    public final void setRole(final String role) {
+    public void setRole(final String role) {
         String fixed = StringUtils.trimToNull(role);
         if (fixed == null) return;
         
+        boolean voice= false;
+        // (voice)
+        int idx = StringUtils.indexOfIgnoreCase(fixed, "(voice");
+        if (idx > 0) {
+            voice = true;
+            fixed = fixed.substring(0, idx);
+        }
         // (as ... = alternate name
-        int idx = StringUtils.indexOfIgnoreCase(fixed, "(as ");
+         idx = StringUtils.indexOfIgnoreCase(fixed, "(as ");
         if (idx > 0) {
             fixed = fixed.substring(0, idx);
         }
@@ -152,7 +160,16 @@ public class CreditDTO {
         
         if (StringUtils.isNotEmpty(fixed)) {
             this.role = fixed;
+            this.voice = voice;
         }
+    }
+    
+    public boolean isVoice() {
+        return voice;
+    }
+
+    public void setVoice(boolean voice) {
+        this.voice = voice;
     }
 
     public Long getPersonId() {

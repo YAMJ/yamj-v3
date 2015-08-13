@@ -28,7 +28,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
 
-public class QueueDTO implements Comparable<QueueDTO> {
+public final class QueueDTO implements Comparable<QueueDTO> {
 
     private Long id;
     private Date date;

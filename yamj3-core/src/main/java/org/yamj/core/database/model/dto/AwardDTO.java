@@ -24,7 +24,7 @@ package org.yamj.core.database.model.dto;
 
 import org.apache.commons.lang3.builder.*;
 
-public class AwardDTO {
+public final class AwardDTO {
 
     private final String event;
     private final String category;

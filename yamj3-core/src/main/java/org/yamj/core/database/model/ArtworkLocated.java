@@ -257,9 +257,13 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     }
 
     public boolean isCached() {
-        return StringUtils.isNotBlank(cacheFilename);
+        return StringUtils.isNotBlank(cacheFilename) && StringUtils.isNotBlank(cacheDirectory);
     }
-    
+
+    public boolean isNotCached() {
+        return StringUtils.isBlank(cacheFilename) || StringUtils.isBlank(cacheDirectory);
+    }
+
     // EQUALITY CHECKS
     @Override
     public int hashCode() {

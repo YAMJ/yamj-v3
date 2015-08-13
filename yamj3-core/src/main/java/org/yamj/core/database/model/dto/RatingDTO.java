@@ -25,7 +25,7 @@ package org.yamj.core.database.model.dto;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class RatingDTO {
+public final class RatingDTO {
 
     private String sourcedb;
     private String rating;

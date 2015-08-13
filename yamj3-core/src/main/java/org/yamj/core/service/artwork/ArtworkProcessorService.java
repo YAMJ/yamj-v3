@@ -70,7 +70,7 @@ public class ArtworkProcessorService {
         }
         LOG.debug("Process located artwork: {}", located);
 
-        if (StringUtils.isBlank(located.getCacheDirectory()) || StringUtils.isBlank(located.getCacheFilename())) {
+        if (located.isNotCached()) {
             // just processed if cache file name not stored before
             // which means that no original image has been created
             

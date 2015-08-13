@@ -335,7 +335,7 @@ public class CommonStorageService {
         }
 
         // delete located file
-        if (StringUtils.isNotBlank(located.getCacheFilename())) {
+        if (located.isCached()) {
             String filename = FilenameUtils.concat(located.getCacheDirectory(), located.getCacheFilename());
             filesToDelete.add(this.fileStorageService.getStorageDir(storageType, filename));
         }

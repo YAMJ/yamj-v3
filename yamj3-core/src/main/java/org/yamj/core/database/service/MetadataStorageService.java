@@ -816,17 +816,23 @@ public class MetadataStorageService {
                 // create new association between person and video
                 castCrew = new CastCrew(person, videoData, dto.getJobType());
                 castCrew.setRole(StringUtils.abbreviate(dto.getRole(), 255));
+                castCrew.setVoiceRole(dto.isVoice());
                 castCrew.setOrdering(ordering++);
                 videoData.getCredits().add(castCrew);
             } else if (deleteCredits.contains(castCrew)) {
                 // updated cast entry if not processed before
                 castCrew.setRole(StringUtils.abbreviate(dto.getRole(), 255));
+                castCrew.setVoiceRole(dto.isVoice());
                 castCrew.setOrdering(ordering++);
                 // remove from credits to delete
                 deleteCredits.remove(castCrew);
             } else if (dto.getRole() != null && StringUtils.isBlank(castCrew.getRole())) {
                 // just update the role when cast member already processed
                 castCrew.setRole(StringUtils.abbreviate(dto.getRole(), 255));
+                castCrew.setVoiceRole(dto.isVoice());
+            } else if (dto.isVoice()) {
+                // set to true if voice role is determined in at least one source for cast member
+                castCrew.setVoiceRole(true);
             }
         }
         // delete orphans

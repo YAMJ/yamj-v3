@@ -26,7 +26,7 @@ import java.util.Set;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class DeletionDTO {
+public final class DeletionDTO {
 
     private final Set<String> filesToDelete;
     private boolean updateTrigger = false;

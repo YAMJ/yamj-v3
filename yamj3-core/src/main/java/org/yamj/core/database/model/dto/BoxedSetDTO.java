@@ -28,7 +28,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.core.tools.MetadataTools;
 
-public class BoxedSetDTO {
+public final class BoxedSetDTO {
 
     private final String source;
     private final String identifier;

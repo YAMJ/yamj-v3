@@ -40,6 +40,9 @@ public class CastCrew implements Serializable {
     @Column(name = "role", length = 255)
     private String role;
 
+    @Column(name = "voiceRole", nullable = false)
+    private boolean voiceRole = false;
+    
     @Column(name = "ordering", nullable = false)
     private int ordering;
 
@@ -65,6 +68,14 @@ public class CastCrew implements Serializable {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public boolean isVoiceRole() {
+        return voiceRole;
+    }
+
+    public void setVoiceRole(boolean voiceRole) {
+        this.voiceRole = voiceRole;
     }
 
     public int getOrdering() {
