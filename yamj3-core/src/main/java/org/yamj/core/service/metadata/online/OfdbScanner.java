@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.core.web.apis.ImdbSearchEngine;
+
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;

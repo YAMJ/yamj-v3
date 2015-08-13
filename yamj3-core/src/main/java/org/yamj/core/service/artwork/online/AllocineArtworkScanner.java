@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.artwork.online;
 
+import org.yamj.core.web.apis.AllocineApiWrapper;
+
 import com.moviejukebox.allocine.model.*;
 import java.util.*;
 import java.util.Map.Entry;
@@ -37,7 +39,6 @@ import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
-import org.yamj.core.service.metadata.online.AllocineApiWrapper;
 import org.yamj.core.service.metadata.online.AllocineScanner;
 
 @Service("allocineArtworkScanner")
@@ -125,7 +126,7 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
         }
         
         PersonInfos personInfos = allocineApiWrapper.getPersonInfos(allocineId, false);
-        if (personInfos == null || personInfos.isNotValid() || StringUtils.isBlank(personInfos.getPhotoURL())) {
+        if (personInfos.isNotValid() || StringUtils.isBlank(personInfos.getPhotoURL())) {
             return null;
         }
 

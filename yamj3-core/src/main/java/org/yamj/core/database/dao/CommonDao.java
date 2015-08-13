@@ -33,7 +33,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.DatabaseCache;
+import org.yamj.core.CachingNames;
 import org.yamj.core.api.model.builder.SqlScalars;
 import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.OptionsRating;
@@ -49,17 +49,17 @@ import org.yamj.core.hibernate.HibernateDao;
 @Repository("commonDao")
 public class CommonDao extends HibernateDao {
 
-    @Cacheable(value=DatabaseCache.GENRE, key="#id", unless="#result==null")
+    @Cacheable(value=CachingNames.DB_GENRE, key="#id", unless="#result==null")
     public Genre getGenre(Long id) {
         return getById(Genre.class, id);
     }
 
-    @Cacheable(value=DatabaseCache.GENRE, key="#name.toLowerCase()", unless="#result==null")
+    @Cacheable(value=CachingNames.DB_GENRE, key="#name.toLowerCase()", unless="#result==null")
     public Genre getGenre(String name) {
         return getByNaturalIdCaseInsensitive(Genre.class, "name", name);
     }
 
-    @CachePut(value=DatabaseCache.GENRE, key="#name.toLowerCase()")
+    @CachePut(value=CachingNames.DB_GENRE, key="#name.toLowerCase()")
     public Genre saveGenre(String name, String targetXml) {
         Genre genre = new Genre();
         genre.setName(name);
@@ -138,17 +138,17 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, wrapper);
     }
 
-    @Cacheable(value=DatabaseCache.STUDIO, key="#id", unless="#result==null")
+    @Cacheable(value=CachingNames.DB_STUDIO, key="#id", unless="#result==null")
     public Studio getStudio(Long id) {
         return getById(Studio.class, id);
     }
 
-    @Cacheable(value=DatabaseCache.STUDIO, key="#name.toLowerCase()", unless="#result==null")
+    @Cacheable(value=CachingNames.DB_STUDIO, key="#name.toLowerCase()", unless="#result==null")
     public Studio getStudio(String name) {
         return getByNaturalIdCaseInsensitive(Studio.class, "name", name);
     }
 
-    @CachePut(value=DatabaseCache.STUDIO, key="#name.toLowerCase()")
+    @CachePut(value=CachingNames.DB_STUDIO, key="#name.toLowerCase()")
     public Studio saveStudio(String name) {
         Studio studio = new Studio();
         studio.setName(name);
@@ -186,17 +186,17 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(Studio.class, sqlScalars, wrapper);
     }
 
-    @Cacheable(value=DatabaseCache.COUNTRY, key="#id", unless="#result==null")
+    @Cacheable(value=CachingNames.DB_COUNTRY, key="#id", unless="#result==null")
     public Country getCountry(Long id) {
         return getById(Country.class, id);
     }
 
-    @Cacheable(value=DatabaseCache.COUNTRY, key="#countryCode", unless="#result==null")
+    @Cacheable(value=CachingNames.DB_COUNTRY, key="#countryCode", unless="#result==null")
     public Country getCountry(String countryCode) {
         return getByNaturalId(Country.class, "countryCode", countryCode);
     }
 
-    @CachePut(value=DatabaseCache.COUNTRY, key="#countryCode")
+    @CachePut(value=CachingNames.DB_COUNTRY, key="#countryCode")
     public Country saveCountry(String countryCode) {
         Country country = new Country();
         country.setCountryCode(countryCode);
@@ -244,7 +244,7 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiCountryDTO.class, sqlScalars, wrapper);
     }
 
-    @Cacheable(value=DatabaseCache.CERTIFICATION, key="#countryCode.toLowerCase() + '_' + #certificate.toLowerCase()", unless="#result==null")
+    @Cacheable(value=CachingNames.DB_CERTIFICATION, key="#countryCode.toLowerCase() + '_' + #certificate.toLowerCase()", unless="#result==null")
     public Certification getCertification(String countryCode, String certificate) {
         StringBuilder sb = new StringBuilder();
         sb.append("from Certification ");
@@ -258,7 +258,7 @@ public class CommonDao extends HibernateDao {
         return (Certification) this.findUniqueByNamedParameters(sb, params);
     }
 
-    @CachePut(value=DatabaseCache.CERTIFICATION, key="#countryCode.toLowerCase()+'_'+#certificate.toLowerCase()")
+    @CachePut(value=CachingNames.DB_CERTIFICATION, key="#countryCode.toLowerCase()+'_'+#certificate.toLowerCase()")
     public Certification saveCertification(String countryCode, String certificate) {
         Certification certification = new Certification();
         certification.setCountryCode(countryCode);
@@ -323,7 +323,7 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiCertificationDTO.class, sqlScalars, wrapper);
     }
 
-    @Cacheable(value=DatabaseCache.BOXEDSET, key="#id", unless="#result==null")
+    @Cacheable(value=CachingNames.DB_BOXEDSET, key="#id", unless="#result==null")
     public BoxedSet getBoxedSet(Long id) {
         return getById(BoxedSet.class, id);
     }
@@ -465,7 +465,7 @@ public class CommonDao extends HibernateDao {
         return executeQueryWithTransform(ApiRatingDTO.class, sqlScalars, wrapper);
     }
 
-    @Cacheable(value=DatabaseCache.AWARD, unless="#result==null")
+    @Cacheable(value=CachingNames.DB_AWARD, unless="#result==null")
     public Award getAward(String event, String category, String source) {
         return (Award) currentSession()
                 .byNaturalId(Award.class)
@@ -475,7 +475,7 @@ public class CommonDao extends HibernateDao {
                 .load();
     }
 
-    @CachePut(value=DatabaseCache.AWARD)
+    @CachePut(value=CachingNames.DB_AWARD)
     public Award saveAward(String event, String category, String source) {
         Award award = new Award(event, category, source);
         this.saveEntity(award);

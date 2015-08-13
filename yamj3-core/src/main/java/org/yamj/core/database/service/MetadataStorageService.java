@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.DatabaseCache;
+import org.yamj.core.CachingNames;
 import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.MetadataDao;
@@ -56,12 +56,12 @@ import org.yamj.core.tools.GenreXmlTools;
 public class MetadataStorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MetadataStorageService.class);
-    private static final ReentrantLock COUNTRY_STORAGE_LOCK = new ReentrantLock();
-    private static final ReentrantLock STUDIO_STORAGE_LOCK = new ReentrantLock();
-    private static final ReentrantLock CERTIFICATION_STORAGE_LOCK = new ReentrantLock();
-    private static final ReentrantLock AWARD_STORAGE_LOCK = new ReentrantLock();
-    private static final ReentrantLock GENRE_STORAGE_LOCK = new ReentrantLock();
-    private static final ReentrantLock PERSON_STORAGE_LOCK = new ReentrantLock();
+    private static final ReentrantLock COUNTRY_STORAGE_LOCK = new ReentrantLock(true);
+    private static final ReentrantLock STUDIO_STORAGE_LOCK = new ReentrantLock(true);
+    private static final ReentrantLock CERTIFICATION_STORAGE_LOCK = new ReentrantLock(true);
+    private static final ReentrantLock AWARD_STORAGE_LOCK = new ReentrantLock(true);
+    private static final ReentrantLock GENRE_STORAGE_LOCK = new ReentrantLock(true);
+    private static final ReentrantLock PERSON_STORAGE_LOCK = new ReentrantLock(true);
   
     @Autowired
     private CommonDao commonDao;
@@ -141,7 +141,7 @@ public class MetadataStorageService {
     }
 
     @Transactional(readOnly = true)
-    @CachePut(value=DatabaseCache.PERSON, key="#id")
+    @CachePut(value=CachingNames.DB_PERSON, key="#id")
     public Person getRequiredPerson(Long id) {
         final StringBuilder sb = new StringBuilder();
         sb.append("from Person p ");
@@ -908,7 +908,7 @@ public class MetadataStorageService {
     }
 
     @Transactional
-    @CacheEvict(value=DatabaseCache.PERSON, key="#id")
+    @CacheEvict(value=CachingNames.DB_PERSON, key="#id")
     public void errorPerson(Long id) {
         Person person = metadataDao.getById(Person.class, id);
         if (person != null) {
@@ -918,7 +918,7 @@ public class MetadataStorageService {
     }
 
     @Transactional
-    @CacheEvict(value=DatabaseCache.PERSON, key="#id")
+    @CacheEvict(value=CachingNames.DB_PERSON, key="#id")
     public void errorFilmography(Long id) {
         Person person = metadataDao.getById(Person.class, id);
         if (person != null) {

@@ -28,7 +28,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.DatabaseCache;
+import org.yamj.core.CachingNames;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
@@ -80,7 +80,7 @@ public class MetadataDao extends HibernateDao {
         return getByNaturalIdCaseInsensitive(Series.class, IDENTIFIER, identifier);
     }
 
-    @Cacheable(value=DatabaseCache.PERSON, key="#id", unless="#result==null")
+    @Cacheable(value=CachingNames.DB_PERSON, key="#id", unless="#result==null")
     public Person getPerson(Long id) {
         return getById(Person.class, id);
     }

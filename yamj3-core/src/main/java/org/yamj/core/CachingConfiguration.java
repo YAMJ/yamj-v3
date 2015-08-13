@@ -43,39 +43,35 @@ public class CachingConfiguration implements CachingConfigurer {
 
     private static final Logger LOG = LoggerFactory.getLogger(CachingConfiguration.class);
 
-    private static final String ALLOCINE_SEARCH = "allocineSearchCache";
-    private static final String ALLOCINE_INFO = "allocineInfoCache";
-    private static final String TVDB = "tvdbCache";
     private static final String TMDB_ARTWORK = "tmdbArtworkCache";
     private static final String ATTACHMENTS = "attachmentCache";
     private static final String IMDB_WEBPAGE = "imdbWebpageCache";
-    private static final String IMDB_ARTWORK = "imdbArtworkCache";
     
     @Bean(destroyMethod="shutdown")
     public net.sf.ehcache.CacheManager ehCacheManager() {
         return net.sf.ehcache.CacheManager.create(
             new net.sf.ehcache.config.Configuration()
                 // default cache
-                .defaultCache(cacheConfig("default", 1000, 600, MemoryStoreEvictionPolicy.LRU))
+                .defaultCache(cacheConfig("default", 100, 600))
                 
                 // API caches
-                .cache(cacheConfig(ALLOCINE_SEARCH, 100, 300, MemoryStoreEvictionPolicy.LFU))
-                .cache(cacheConfig(ALLOCINE_INFO, 400, 1800, MemoryStoreEvictionPolicy.LRU))
-                .cache(cacheConfig(TVDB, 500, 1800, MemoryStoreEvictionPolicy.LRU))
-                .cache(cacheConfig(TMDB_ARTWORK, 100, 1800, MemoryStoreEvictionPolicy.LFU))
-                .cache(cacheConfig(ATTACHMENTS, 300, 3600, MemoryStoreEvictionPolicy.LRU))
-                .cache(cacheConfig(IMDB_WEBPAGE, 50, 86400, MemoryStoreEvictionPolicy.LFU))
-                .cache(cacheConfig(IMDB_ARTWORK, 100, 1800, MemoryStoreEvictionPolicy.LFU))
+                .cache(cacheConfig(CachingNames.API_TMDB, 500, 1800))
+                .cache(cacheConfig(CachingNames.API_TVDB, 500, 1800))
+                .cache(cacheConfig(CachingNames.API_ALLOCINE, 500, 600))
+                .cache(cacheConfig(CachingNames.API_IMDB, 500, 1800))
+                .cache(cacheConfig(TMDB_ARTWORK, 100, 1800))
+                .cache(cacheConfig(ATTACHMENTS, 300, 600))
+                .cache(cacheConfig(IMDB_WEBPAGE, 50, 86400))
                 
                 // caches for database objects
-                .cache(cacheConfigDatabase(DatabaseCache.GENRE, 50, 86400))
-                .cache(cacheConfigDatabase(DatabaseCache.STUDIO, 50, 86400))
-                .cache(cacheConfigDatabase(DatabaseCache.COUNTRY, 50, 86400))
-                .cache(cacheConfigDatabase(DatabaseCache.CERTIFICATION, 100, 86400))
-                .cache(cacheConfigDatabase(DatabaseCache.PERSON, 500, 86400))
-                .cache(cacheConfigDatabase(DatabaseCache.BOXEDSET, 50, 86400))
-                .cache(cacheConfigDatabase(DatabaseCache.AWARD, 50, 86400))
-                .cache(cacheConfigDatabase(DatabaseCache.STAGEFILE, 100, 180))
+                .cache(cacheConfigDatabase(CachingNames.DB_GENRE, 50, 86400))
+                .cache(cacheConfigDatabase(CachingNames.DB_STUDIO, 50, 86400))
+                .cache(cacheConfigDatabase(CachingNames.DB_COUNTRY, 50, 86400))
+                .cache(cacheConfigDatabase(CachingNames.DB_CERTIFICATION, 100, 86400))
+                .cache(cacheConfigDatabase(CachingNames.DB_PERSON, 500, 86400))
+                .cache(cacheConfigDatabase(CachingNames.DB_BOXEDSET, 50, 86400))
+                .cache(cacheConfigDatabase(CachingNames.DB_AWARD, 50, 86400))
+                .cache(cacheConfigDatabase(CachingNames.DB_STAGEFILE, 100, 180))
             );
     }
 
@@ -103,7 +99,7 @@ public class CachingConfiguration implements CachingConfigurer {
         return new SimpleCacheErrorHandler();
     }
     
-    private static CacheConfiguration cacheConfig(String name, int maxEntries, long timeToLiveSeconds, MemoryStoreEvictionPolicy memoryStoreEvictionPolicy) {
+    private static CacheConfiguration cacheConfig(String name, int maxEntries, long timeToLiveSeconds) {
         return new CacheConfiguration()
             .name(name)
             .eternal(false)
@@ -111,7 +107,7 @@ public class CachingConfiguration implements CachingConfigurer {
             .timeToIdleSeconds(0)
             .timeToLiveSeconds(timeToLiveSeconds)
             .persistence(new PersistenceConfiguration().strategy(PersistenceConfiguration.Strategy.NONE))
-            .memoryStoreEvictionPolicy(memoryStoreEvictionPolicy)
+            .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LRU)
             .statistics(false);
     }
 
@@ -128,23 +124,8 @@ public class CachingConfiguration implements CachingConfigurer {
     }
 
     @Bean
-    public Cache allocineSearchCache() {
-        return cacheManager().getCache(ALLOCINE_SEARCH);
-    }
-
-    @Bean
-    public Cache allocineInfoCache() {
-        return cacheManager().getCache(ALLOCINE_INFO);
-    }
-
-    @Bean
-    public Cache tvdbCache() {
-        return cacheManager().getCache(TVDB);
-    }
-
-    @Bean
     public Cache tmdbArtworkCache() {
-        return cacheManager().getCache(TVDB);
+        return cacheManager().getCache(TMDB_ARTWORK);
     }
 
     @Bean
@@ -155,10 +136,5 @@ public class CachingConfiguration implements CachingConfigurer {
     @Bean
     public Cache imdbWebpageCache() {
         return cacheManager().getCache(IMDB_WEBPAGE);
-    }
-
-    @Bean
-    public Cache imdbArtworkCache() {
-        return cacheManager().getCache(IMDB_ARTWORK);
     }
 }

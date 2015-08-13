@@ -22,11 +22,17 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 
 public interface ISeriesScanner extends INfoScanner {
 
     String getSeriesId(Series series);
+
+    String getSeasonId(Season season);
+
+    String getEpisodeId(VideoData videoData);
 
     ScanResult scan(Series series);
 }

@@ -34,7 +34,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.DatabaseCache;
+import org.yamj.core.CachingNames;
 import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.dao.StagingDao;
 import org.yamj.core.database.model.*;
@@ -77,7 +77,7 @@ public class CommonStorageService {
      * @return list of cached file names which must be deleted also
      */
     @Transactional
-    @CacheEvict(value=DatabaseCache.STAGEFILE, key="#id")
+    @CacheEvict(value=CachingNames.DB_STAGEFILE, key="#id")
     public Set<String> deleteStageFile(Long id) {
         // get the stage file
         StageFile stageFile = this.stagingDao.getById(StageFile.class, id);
@@ -393,7 +393,7 @@ public class CommonStorageService {
     }
 
     @Transactional
-    @CacheEvict(value=DatabaseCache.PERSON, key="#id")
+    @CacheEvict(value=CachingNames.DB_PERSON, key="#id")
     public Set<String> deletePerson(Long id) {
         Set<String> filesToDelete = new HashSet<>();
         Person person = this.stagingDao.getById(Person.class, id);
@@ -417,7 +417,7 @@ public class CommonStorageService {
     }
 
     @Transactional
-    @CacheEvict(value=DatabaseCache.BOXEDSET, key="#id")
+    @CacheEvict(value=CachingNames.DB_BOXEDSET, key="#id")
     public Set<String> deleteBoxedSet(Long id) {
         Set<String> filesToDelete = new HashSet<>();
         BoxedSet boxedSet = this.stagingDao.getById(BoxedSet.class, id);
@@ -519,7 +519,7 @@ public class CommonStorageService {
     }
 
     @Transactional
-    @CacheEvict(value=DatabaseCache.GENRE, allEntries=true)
+    @CacheEvict(value=CachingNames.DB_GENRE, allEntries=true)
     public void updateGenresXml(Map<String, String> subGenres) {
         StringBuilder sb = new StringBuilder();
         sb.append("UPDATE Genre ");
@@ -545,7 +545,7 @@ public class CommonStorageService {
     }
 
     @Transactional
-    @CacheEvict(value=DatabaseCache.GENRE, allEntries=true)
+    @CacheEvict(value=CachingNames.DB_GENRE, allEntries=true)
     public int deleteOrphanGenres() {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM genre ");
@@ -555,7 +555,7 @@ public class CommonStorageService {
     }
 
     @Transactional
-    @CacheEvict(value=DatabaseCache.STUDIO, allEntries=true)
+    @CacheEvict(value=CachingNames.DB_STUDIO, allEntries=true)
     public int deleteOrphanStudios() {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM studio ");
@@ -565,7 +565,7 @@ public class CommonStorageService {
     }
 
     @Transactional
-    @CacheEvict(value=DatabaseCache.COUNTRY, allEntries=true)
+    @CacheEvict(value=CachingNames.DB_COUNTRY, allEntries=true)
     public int deleteOrphanCountries() {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM country ");
@@ -575,7 +575,7 @@ public class CommonStorageService {
     }
 
     @Transactional
-    @CacheEvict(value=DatabaseCache.CERTIFICATION, allEntries=true)
+    @CacheEvict(value=CachingNames.DB_CERTIFICATION, allEntries=true)
     public int deleteOrphanCertifications() {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM certification ");

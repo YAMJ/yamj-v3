@@ -22,19 +22,14 @@
  */
 package org.yamj.core.service.artwork.online;
 
-import com.omertron.imdbapi.ImdbApi;
 import com.omertron.imdbapi.model.ImdbImage;
 import com.omertron.imdbapi.model.ImdbPerson;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import javax.annotation.PostConstruct;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.Cache;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.VideoData;
@@ -42,7 +37,7 @@ import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.ImdbScanner;
-import org.yamj.core.web.PoolingHttpClient;
+import org.yamj.core.web.apis.ImdbApiWrapper;
 
 @Service("imdbArtworkScanner")
 public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScanner, IPhotoScanner {
@@ -54,11 +49,7 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
     @Autowired
     private ImdbScanner imdbScanner;
     @Autowired
-    private ImdbApi imdbApi;
-    @Autowired
-    private Cache imdbArtworkCache;
-    @Autowired
-    private PoolingHttpClient httpClient;
+    private ImdbApiWrapper imdbApiWrapper;
 
     @Override
     public String getScannerName() {
@@ -92,10 +83,8 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
             return null;
         }
         
-        ImdbPerson imdbPerson = imdbApi.getActorDetails(imdbId);
-        if (imdbPerson == null || imdbPerson.getImage() == null) {
-            return null;
-        }
+        ImdbPerson imdbPerson = imdbApiWrapper.getActorDetails(imdbId, Locale.US);
+        if (imdbPerson.getImage() == null) return null;
         
         ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), imdbPerson.getImage().getUrl(), imdbId);
         return Collections.singletonList(dto);
@@ -105,39 +94,25 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
         if (StringUtils.isBlank(imdbId)) {
             return null;
         }
-        
-        List<ImdbArtwork> artworks = this.getImdbArtwork(imdbId);
-        if (CollectionUtils.isEmpty(artworks)) {
-            return null;
-        }
 
         List<ArtworkDetailDTO> dtos = new ArrayList<>();
-        for (ImdbArtwork artwork : artworks) {
-            if (artworkType == artwork.getArtworkType()) {
-                dtos.add(new ArtworkDetailDTO(getScannerName(), artwork.getUrl(), artwork.getHashCode()));
-            }
+        for (ImdbArtwork artwork : this.getImdbArtwork(imdbId, artworkType)) {
+            dtos.add(new ArtworkDetailDTO(getScannerName(), artwork.getUrl(), artwork.getHashCode()));
         }
         return dtos;
     }
     
-    private List<ImdbArtwork> getImdbArtwork(String imdbId) {
-        List<ImdbArtwork> artwork = imdbArtworkCache.get(imdbId, List.class);
-        if (artwork == null) {
-            List<ImdbImage> titlePhotos = imdbApi.getTitlePhotos(imdbId);
-            if (CollectionUtils.isNotEmpty(titlePhotos)) {
-                artwork = new ArrayList<>();
-                for (ImdbImage image : titlePhotos) {
-                    ImdbArtwork ia = buildImdbArtwork(image);
-                    if (ia != null) artwork.add(ia);
-                }
-                Collections.sort(artwork);
-                imdbArtworkCache.put(imdbId, artwork);
-            }
+    private Set<ImdbArtwork> getImdbArtwork(String imdbId, ArtworkType artworkType) {
+        // use TreeSet just for ordering according to size
+        TreeSet<ImdbArtwork> result = new TreeSet<>();
+        for (ImdbImage image : imdbApiWrapper.getTitlePhotos(imdbId)) {
+            ImdbArtwork ia = buildImdbArtwork(image, artworkType);
+            if (ia != null) result.add(ia);
         }
-        return artwork;
+        return result;
     }
 
-    private static ImdbArtwork buildImdbArtwork(ImdbImage image) {
+    private static ImdbArtwork buildImdbArtwork(ImdbImage image, ArtworkType artworkType) {
         if (image.getImage() == null) return null;
         if (!"presskit".equalsIgnoreCase(image.getSource())) return null;
         if (StringUtils.isBlank(image.getImage().getUrl())) return null;
@@ -145,15 +120,19 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
         final int width = image.getImage().getWidth();
         final int height = image.getImage().getHeight();
         
-        ArtworkType artworkType;
+        ArtworkType imdbArtworkType;
         if (width > height) {
-            artworkType = ArtworkType.FANART;
-            if (width > (2*height)) artworkType = ArtworkType.BANNER;
+            imdbArtworkType = ArtworkType.FANART;
+            if (width > (2*height)) imdbArtworkType = ArtworkType.BANNER;
         } else if (height == width) {
             return null;
         } else  {
-            artworkType = ArtworkType.POSTER;
+            imdbArtworkType = ArtworkType.POSTER;
             if (height > (2*width)) return null;
+        }
+        
+        if (imdbArtworkType != artworkType) {
+            return null;
         }
         
         // build hash code from caption
@@ -167,24 +146,18 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
         }
         
         final int size = (image.getImage().getWidth() * image.getImage().getHeight());
-        return new ImdbArtwork(artworkType, image.getImage().getUrl(), hashCode, size);
+        return new ImdbArtwork(image.getImage().getUrl(), hashCode, size);
     }
     
     private static class ImdbArtwork implements Comparable<ImdbArtwork>{
-        private final ArtworkType artworkType;
         private final String url;
         private final String hashCode;
         private final int size;
         
-        public ImdbArtwork(ArtworkType artworkType, String url, String hashCode, int size) {
-            this.artworkType = artworkType;
+        public ImdbArtwork(String url, String hashCode, int size) {
             this.url = url;
             this.hashCode = hashCode;
             this.size = size;
-        }
-
-        public ArtworkType getArtworkType() {
-            return artworkType;
         }
 
         public String getUrl() {

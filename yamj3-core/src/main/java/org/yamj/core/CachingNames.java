@@ -22,14 +22,19 @@
  */
 package org.yamj.core;
 
-public class DatabaseCache {
+public class CachingNames {
 
-    public static final String GENRE = "genre";
-    public static final String STUDIO = "studio";
-    public static final String COUNTRY = "country";
-    public static final String CERTIFICATION = "certification";
-    public static final String PERSON = "person";
-    public static final String BOXEDSET = "boxedSet";
-    public static final String AWARD = "award";
-    public static final String STAGEFILE = "stageFile";
+    public static final String API_TMDB = "api_tmdb";
+    public static final String API_TVDB = "api_tvdb";
+    public static final String API_ALLOCINE = "api_allocine";
+    public static final String API_IMDB = "api_imdb";
+    
+    public static final String DB_GENRE = "db_genre";
+    public static final String DB_STUDIO = "db_studio";
+    public static final String DB_COUNTRY = "db_country";
+    public static final String DB_CERTIFICATION = "db_certification";
+    public static final String DB_PERSON = "db_person";
+    public static final String DB_BOXEDSET = "db_boxedSet";
+    public static final String DB_AWARD = "db_award";
+    public static final String DB_STAGEFILE = "db_stageFile";
 }

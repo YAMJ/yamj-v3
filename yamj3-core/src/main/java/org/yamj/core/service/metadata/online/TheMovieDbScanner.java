@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.core.web.apis.TheMovieDbApiWrapper;
+
 import com.omertron.themoviedbapi.model.credits.*;
 import com.omertron.themoviedbapi.model.media.MediaCreditList;
 import com.omertron.themoviedbapi.model.movie.*;
@@ -318,6 +320,39 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             return tmdbId;
         }
 
+        return null;
+    }
+
+    @Override
+    public String getSeasonId(Season season) {
+        // locale for TMDb
+        final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
+
+        return getSeasonId(season, tmdbLocale, false);
+    }
+
+    private String getSeasonId(Season season, Locale tmdbLocale, boolean throwTempError) {
+        String tmdbId = season.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNumeric(tmdbId)) {
+            return tmdbId;
+        }
+
+        // first get series id and then season id
+        String seriesId = this.getSeriesId(season.getSeries(), tmdbLocale, throwTempError);
+        if (StringUtils.isNumeric(seriesId)) {
+            TVSeasonInfo seasonInfo = tmdbApiWrapper.getSeasonInfo(Integer.parseInt(seriesId), season.getSeason(), tmdbLocale, throwTempError);
+            if (seasonInfo != null) {
+                tmdbId = String.valueOf(seasonInfo.getId());
+                season.setSourceDbId(SCANNER_ID, tmdbId);
+            }
+        }
+        
+        return tmdbId;
+    }
+        
+    @Override
+    public String getEpisodeId(VideoData videoData) {
+        // TODO Auto-generated method stub
         return null;
     }
 

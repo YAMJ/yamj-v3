@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.artwork.online;
 
+import org.yamj.core.web.apis.TheTVDbApiWrapper;
+
 import com.omertron.thetvdbapi.model.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,7 +43,6 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.artwork.ArtworkTools;
-import org.yamj.core.service.metadata.online.TheTVDbApiWrapper;
 import org.yamj.core.service.metadata.online.TheTVDbScanner;
 
 @Service("tvdbArtworkScanner")

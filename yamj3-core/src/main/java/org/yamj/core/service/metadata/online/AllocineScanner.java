@@ -46,6 +46,8 @@ import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.HTMLTools;
 import org.yamj.core.web.PoolingHttpClient;
+import org.yamj.core.web.apis.AllocineApiWrapper;
+import org.yamj.core.web.apis.ImdbSearchEngine;
 
 @Service("allocineScanner")
 public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, IFilmographyScanner {
@@ -309,6 +311,18 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     }
 
     @Override
+    public String getSeasonId(Season season) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getEpisodeId(VideoData videoData) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public String getPersonId(Person person) {
         return getPersonId(person, false);
     }
@@ -429,7 +443,13 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
 
         for (Season season : series.getSeasons()) {
 
-            TvSeasonInfos tvSeasonInfos = allocineApiWrapper.getTvSeasonInfos(tvSeriesInfos, season.getSeason(), false);
+            TvSeasonInfos tvSeasonInfos = null;
+            if (season.getSeason() <= tvSeriesInfos.getSeasonCount()) {
+                int seasonCode = tvSeriesInfos.getSeasonCode(season.getSeason());
+                if (seasonCode > 0) {
+                    tvSeasonInfos = allocineApiWrapper.getTvSeasonInfos(String.valueOf(seasonCode), false);
+                }
+            }
 
             // use values from series
             if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
@@ -493,7 +513,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
 
                 List<CastMember> castMembers = null;
                 EpisodeInfos episodeInfos = allocineApiWrapper.getEpisodeInfos(allocineId, false);
-                if (episodeInfos == null || episodeInfos.isNotValid()) {
+                if (episodeInfos.isNotValid()) {
                     // fix episode from season info
                     episode.setSynopsis(HTMLTools.replaceHtmlTags(episode.getSynopsis(), " "));
 
@@ -605,7 +625,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                 return ScanResult.RETRY;
             }
         }
-        if (personInfos == null || personInfos.isNotValid()) {
+        
+        if (personInfos.isNotValid()) {
             LOG.error("Can't find informations for person '{}'", person.getName());
             return ScanResult.ERROR;
         }
@@ -673,7 +694,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                 return ScanResult.RETRY;
             }
         }
-        if (filmographyInfos == null || filmographyInfos.isNotValid()) {
+        if (filmographyInfos.isNotValid()) {
             LOG.error("Can't find filmography for person '{}'", person.getName());
             return ScanResult.ERROR;
         } else if (CollectionUtils.isEmpty(filmographyInfos.getParticipances())) {

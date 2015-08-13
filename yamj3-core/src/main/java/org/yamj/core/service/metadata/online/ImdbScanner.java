@@ -22,14 +22,12 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.omertron.imdbapi.ImdbApi;
 import com.omertron.imdbapi.model.ImdbCast;
 import com.omertron.imdbapi.model.ImdbCredit;
 import com.omertron.imdbapi.model.ImdbPerson;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
@@ -56,6 +54,8 @@ import org.yamj.core.tools.PersonNameDTO;
 import org.yamj.core.web.HTMLTools;
 import org.yamj.core.web.PoolingHttpClient;
 import org.yamj.core.web.ResponseTools;
+import org.yamj.core.web.apis.ImdbApiWrapper;
+import org.yamj.core.web.apis.ImdbSearchEngine;
 
 @Service("imdbScanner")
 public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner {
@@ -78,7 +78,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     private static final String HTML_TR_END = "</tr>";
     private static final String HTML_GT = ">";
     private static final Pattern PATTERN_PERSON_DOB = Pattern.compile("(\\d{1,2})-(\\d{1,2})");
-    private static final ReentrantLock IMDB_API_LOCK = new ReentrantLock();
     
     private Charset charset;
     
@@ -93,9 +92,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     @Autowired
     private LocaleService localeService;
     @Autowired
-    private ImdbApi imdbApi;
-    @Autowired
     private Cache imdbWebpageCache;
+    @Autowired
+    private ImdbApiWrapper imdbApiWrapper;
     
     @Override
     public String getScannerName() {
@@ -138,6 +137,23 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             series.setSourceDbId(SCANNER_ID, imdbId);
         }
         return imdbId;
+    }
+
+    @Override
+    public String getSeasonId(Season season) {
+        String imdbId = season.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isBlank(imdbId)) {
+            // same as series id
+            imdbId = this.getSeriesId(season.getSeries());
+            season.setSourceDbId(SCANNER_ID, imdbId);
+        }
+        return  imdbId;
+    }
+
+    @Override
+    public String getEpisodeId(VideoData videoData) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
@@ -267,7 +283,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         parseReleaseInfo(videoData, imdbId, imdbLocale);
 
         // CAST and CREW
-        parseCastCrew(videoData, imdbId, imdbLocale);
+        parseCastCrew(videoData, imdbId);
 
         // AWARDS
         if (configServiceWrapper.getBooleanProperty("imdb.movie.awards", Boolean.FALSE)) {
@@ -382,12 +398,12 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
 
         // scan seasons
-        this.scanSeasons(series, imdbId, title, titleOriginal, plot, outline, imdbLocale);
+        this.scanSeasons(series, imdbId, title, titleOriginal, plot, outline);
 
         return ScanResult.OK;
     }
 
-    private void scanSeasons(Series series, String imdbId, String title, String titleOriginal, String plot, String outline, Locale imdbLocale) {
+    private void scanSeasons(Series series, String imdbId, String title, String titleOriginal, String plot, String outline) {
         for (Season season : series.getSeasons()) {
 
             // use values from series
@@ -438,13 +454,13 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                     }
 
                     // scan episode
-                    this.scanEpisode(videoData, episodes.get(videoData.getEpisode()), imdbLocale);
+                    this.scanEpisode(videoData, episodes.get(videoData.getEpisode()));
                 }
             }
         }
     }
 
-    private void scanEpisode(VideoData videoData, ImdbEpisodeDTO dto, Locale imdbLocale) {
+    private void scanEpisode(VideoData videoData, ImdbEpisodeDTO dto) {
         if (dto == null) {
             videoData.setTvEpisodeNotFound();
             return;
@@ -533,7 +549,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             }
 
             // CAST and CREW
-            parseCastCrew(videoData, dto.getImdbId(), imdbLocale);
+            parseCastCrew(videoData, dto.getImdbId());
 
         } catch (Exception ex) {
             LOG.error("Failed to scan episode: " + dto.getImdbId(), ex);
@@ -1062,18 +1078,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return map;
     }
 
-    private void parseCastCrew(VideoData videoData, String imdbId, Locale imdbLocale) {
-        
-        List<ImdbCredit> fullCast;
-        IMDB_API_LOCK.lock();
-        try {
-            // use US locale to check for uncredited cast
-            imdbApi.setLocale(Locale.US);
-            fullCast = imdbApi.getFullCast(imdbId);
-            imdbApi.setLocale(imdbLocale);
-        } finally {
-            IMDB_API_LOCK.unlock();
-        }
+    private void parseCastCrew(VideoData videoData, String imdbId) {
+        List<ImdbCredit> fullCast = imdbApiWrapper.getFullCast(imdbId);
         
         if (CollectionUtils.isEmpty(fullCast)) {
             LOG.info("No cast for imdb ID: {}", imdbId);

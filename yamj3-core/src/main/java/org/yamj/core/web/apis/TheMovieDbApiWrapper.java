@@ -20,7 +20,9 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online;
+package org.yamj.core.web.apis;
+
+import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 
 import com.omertron.themoviedbapi.Compare;
 import com.omertron.themoviedbapi.MovieDbException;
@@ -42,7 +44,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.yamj.core.CachingNames;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.web.ResponseTools;
 
@@ -56,12 +60,12 @@ public class TheMovieDbApiWrapper {
     @Autowired
     private TheMovieDbApi tmdbApi;
     
+    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #title, #year}")
     public String getMovieId(String title, int year, Locale locale, boolean throwTempError) {
         boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
         int searchMatch = configService.getIntProperty("themoviedb.searchMatch", 3);
         
         MovieInfo movie = null;
-
         try {
             // Search using movie name
             ResultList<MovieInfo> movieList = tmdbApi.searchMovie(title, 0, locale.getLanguage(), includeAdult, year, 0, null);
@@ -92,9 +96,10 @@ public class TheMovieDbApiWrapper {
             LOG.info("TMDB ID found {} for '{}'", movie.getId(), title);
             return String.valueOf(movie.getId());
         }
-        return null;
+        return StringUtils.EMPTY;
     }
 
+    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #title, #year}")
     public String getSeriesId(String title, int year, Locale locale, boolean throwTempError) {
         String id = null;
         TVBasic closestTV = null;
@@ -138,9 +143,11 @@ public class TheMovieDbApiWrapper {
             LOG.error("Failed retrieving TMDb id for series '{}': {}", title, ex.getMessage());
             LOG.trace("TheMovieDb error", ex);
         }
-        return id;
+        
+        return (id == null ? StringUtils.EMPTY : id);
     }
     
+    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #name}")
     public String getPersonId(String name, boolean throwTempError) {
         boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
 
@@ -183,9 +190,11 @@ public class TheMovieDbApiWrapper {
             LOG.error("Failed retrieving TMDb id for person '{}': {}", name, ex.getMessage());
             LOG.trace("TheMovieDb error", ex);
         }
-        return id;
+        
+        return (id == null ? StringUtils.EMPTY : id);
     }
 
+    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #tmdbId}", unless="#result==null")
     public PersonInfo getPersonInfo(int tmdbId, boolean throwTempError) {
         PersonInfo person = null;
         try {
@@ -197,9 +206,11 @@ public class TheMovieDbApiWrapper {
             LOG.error("Failed to get person info using TMDb ID {}: {}", tmdbId, ex.getMessage());
             LOG.trace("TheMovieDb error", ex);
         }
+        
         return person;
     }
 
+    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #tmdbId}", unless="#result==null")
     public MovieInfo getMovieInfoByTMDB(int tmdbId, Locale locale, boolean throwTempError) {
         MovieInfo movieDb = null;
         try {
@@ -214,6 +225,7 @@ public class TheMovieDbApiWrapper {
         return movieDb;
     }
 
+    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #tmdbId}", unless="#result==null")
     public TVInfo getSeriesInfo(int tmdbId, Locale locale, boolean throwTempError) {
         TVInfo tvInfo = null;
         try {
@@ -228,6 +240,7 @@ public class TheMovieDbApiWrapper {
         return tvInfo;
     }
 
+    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #tmdbId, #season}", unless="#result==null")
     public TVSeasonInfo getSeasonInfo(int tmdbId, int season, Locale locale, boolean throwTempError) {
         TVSeasonInfo tvSeasonInfo = null;
         try {
@@ -242,6 +255,7 @@ public class TheMovieDbApiWrapper {
         return tvSeasonInfo;
     }
 
+    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #tmdbId, #season}", unless="#result==null")
     public MediaCreditList getSeasonCredits(int tmdbId, int season, boolean throwTempError) {
         MediaCreditList mediaCreditList = null;
         try {
@@ -256,6 +270,7 @@ public class TheMovieDbApiWrapper {
         return mediaCreditList;
     }
 
+    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #imdbId}", unless="#result==null")
     public MovieInfo getMovieInfoByIMDB(String imdbId, Locale locale, boolean throwTempError) {
         MovieInfo movieDb = null;
         try {
@@ -270,6 +285,7 @@ public class TheMovieDbApiWrapper {
         return movieDb;
     }
 
+    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #tmdbId}", unless="#result==null")
     public PersonCreditList<CreditBasic> getPersonCredits(int tmdbId, Locale locale, boolean throwTempError) {
         try {
             return tmdbApi.getPersonCombinedCredits(tmdbId, locale.getLanguage());

@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import org.yamj.core.web.apis.TheTVDbApiWrapper;
+
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
 import java.util.*;
@@ -73,13 +75,30 @@ public class TheTVDbScanner implements ISeriesScanner {
         return getSeriesId(series, false);
     }
 
-    private String getSeriesId(Series series, boolean throwTempError) {
-        String id = series.getSourceDbId(SCANNER_ID);
-        if (StringUtils.isBlank(id)) {
-            id = tvdbApiWrapper.getSeriesId(series.getTitle(), series.getStartYear(), throwTempError);
-            series.setSourceDbId(SCANNER_ID, id);
+    @Override
+    public String getSeasonId(Season season) {
+        String tvdbId = season.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isBlank(tvdbId)) {
+            // same as series id
+            tvdbId = this.getSeriesId(season.getSeries());
+            season.setSourceDbId(SCANNER_ID, tvdbId);
         }
-        return id;
+        return  tvdbId;
+    }
+
+    @Override
+    public String getEpisodeId(VideoData videoData) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private String getSeriesId(Series series, boolean throwTempError) {
+        String tvdbId = series.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isBlank(tvdbId)) {
+            tvdbId = tvdbApiWrapper.getSeriesId(series.getTitle(), series.getStartYear(), throwTempError);
+            series.setSourceDbId(SCANNER_ID, tvdbId);
+        }
+        return tvdbId;
     }
 
     @Override
@@ -105,7 +124,7 @@ public class TheTVDbScanner implements ISeriesScanner {
             }
         }
         
-        if (tvdbSeries == null || StringUtils.isBlank(tvdbSeries.getId()) || tvdbActors == null) {
+        if (StringUtils.isBlank(tvdbSeries.getId()) || CollectionUtils.isEmpty(tvdbActors)) {
             LOG.error("Can't find informations for series '{}'", series.getTitle());
             return ScanResult.ERROR;
         }
