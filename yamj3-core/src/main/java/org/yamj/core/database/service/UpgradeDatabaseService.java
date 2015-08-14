@@ -126,5 +126,15 @@ public class UpgradeDatabaseService {
         } catch (Exception ex) {
             LOG.warn("Failed upgrade 'patchMediaFileWatched'", ex);
         }
+
+        // Issues: enhancement
+        // Date:   15.08.2015
+        try {
+            upgradeDatabaseDao.patchDatabaseLongVarchars();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchDatabaseLongVarchars'", ex);
+        }
+
+        
     }
 }

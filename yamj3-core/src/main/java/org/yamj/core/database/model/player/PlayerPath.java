@@ -34,9 +34,9 @@ public class PlayerPath extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -2933321283219977791L;
     
-    @Column(name = "source_path", nullable = false, length = 200)
+    @Column(name = "source_path", nullable = false, length = 1000)
     private String sourcePath;
-    @Column(name = "target_path", nullable = false, length = 200)
+    @Column(name = "target_path", nullable = false, length = 1000)
     private String targetPath;
 
     public String getSourcePath() {

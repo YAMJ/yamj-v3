@@ -74,12 +74,10 @@ public class VideoData extends AbstractMetadata {
     @Column(name = "top_rank", nullable = false)
     private int topRank = -1;
 
-    @Lob
-    @Column(name = "tagline", length = 25000)
+    @Column(name = "tagline", length = 2000)
     private String tagline;
 
-    @Lob
-    @Column(name = "quote", length = 25000)
+    @Column(name = "quote", length = 2000)
     private String quote;
 
     @Column(name = "watched_nfo", nullable = false)
@@ -336,7 +334,7 @@ public class VideoData extends AbstractMetadata {
 
     public void setTagline(String tagline, String source) {
         if (StringUtils.isNotBlank(tagline)) {
-            this.tagline = tagline.trim();
+            this.tagline = StringUtils.abbreviate(tagline.trim(), 2000);
             setOverrideFlag(OverrideFlag.TAGLINE, source);
         }
     }
@@ -358,7 +356,7 @@ public class VideoData extends AbstractMetadata {
 
     public void setQuote(String quote, String source) {
         if (StringUtils.isNotBlank(quote)) {
-            this.quote = quote.trim();
+            this.quote = StringUtils.abbreviate(quote.trim(), 2000);
             setOverrideFlag(OverrideFlag.QUOTE, source);
         }
     }

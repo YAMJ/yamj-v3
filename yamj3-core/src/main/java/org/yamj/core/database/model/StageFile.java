@@ -73,7 +73,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
     @Column(name = "file_type", nullable = false, length = 30)
     private FileType fileType;
 
-    @Column(name = "full_path", nullable = false, length = 255)
+    @Column(name = "full_path", nullable = false, length = 1000)
     private String fullPath;
 
     @Type(type = "statusType")

@@ -62,7 +62,7 @@ public class Trailer extends AbstractAuditable implements Serializable {
     private StageFile stageFile;
 
     @NaturalId(mutable = true)
-    @Column(name = "url", length = 255)
+    @Column(name = "url", length = 1000)
     private String url;
 
     @Column(name = "source", nullable = false, length = 50)

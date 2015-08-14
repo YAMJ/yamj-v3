@@ -100,8 +100,12 @@ public class UpgradeDatabaseDao extends HibernateDao {
                 .createSQLQuery("ALTER TABLE trailer DROP source_hash")
                 .executeUpdate();
         }
+        
+        currentSession()
+            .createSQLQuery("ALTER TABLE trailer MODIFY COLUMN url VARCHAR(1000)")
+            .executeUpdate();
     }
-    
+
     class CertEntry {
         public String country;
         public String cert;
@@ -663,6 +667,52 @@ public class UpgradeDatabaseDao extends HibernateDao {
 
         currentSession()
         .createSQLQuery("ALTER TABLE mediafile DROP watched_file")
+        .executeUpdate();
+    }
+
+    /**
+     * Issues: enhancement
+     * Date:   15.08.2015
+     */
+    public void patchDatabaseLongVarchars() {
+        currentSession()
+        .createSQLQuery("ALTER TABLE trailer MODIFY COLUMN url VARCHAR(2000)")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE videodata MODIFY COLUMN tagline VARCHAR(2000)")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE videodata MODIFY COLUMN quote VARCHAR(2000)")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE stage_file MODIFY COLUMN full_path VARCHAR(1000)")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE player_path MODIFY COLUMN source_path VARCHAR(1000)")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE player_path MODIFY COLUMN target_path VARCHAR(1000)")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_located MODIFY COLUMN url VARCHAR(2000)")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_generated MODIFY COLUMN cache_filename VARCHAR(500)")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE library MODIFY COLUMN player_path VARCHAR(1000)")
+        .executeUpdate();
+        
+        currentSession()
+        .createSQLQuery("ALTER TABLE library MODIFY COLUMN base_directory VARCHAR(1000)")
         .executeUpdate();
     }
 }

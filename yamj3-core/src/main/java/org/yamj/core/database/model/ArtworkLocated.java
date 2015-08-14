@@ -63,7 +63,7 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @Column(name = "source", length = 50)
     private String source;
 
-    @Column(name = "url", length = 255)
+    @Column(name = "url", length = 2000)
     private String url;
 
     @Type(type = "statusType")
