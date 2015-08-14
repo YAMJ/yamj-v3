@@ -22,8 +22,6 @@
  */
 package org.yamj.core.web.apis;
 
-import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
-
 import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.thetvdbapi.TvDbException;
 import com.omertron.thetvdbapi.model.*;
@@ -42,6 +40,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.CachingNames;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
+import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 import org.yamj.core.web.ResponseTools;
 
 @Service
@@ -83,27 +82,27 @@ public class TheTVDbApiWrapper {
      * @param id
      * @return
      */
-    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id}")
-    public Series getSeries(String id) {
-        return getSeries(id, false);
+    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id, #language}")
+    public Series getSeries(String id, String language) {
+        return getSeries(id, language, false);
     }
-        
+    
     /**
      * Get series information using the ID
      *
      * @param throwTempError
      * @return
      */
-    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id}")
-    public Series getSeries(String id, boolean throwTempError) {
+    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id, #language}")
+    public Series getSeries(String id, String language, boolean throwTempError) {
         Series series = null;
 
         try {
-            String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
             String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
+            if (altLanguage.equalsIgnoreCase(language)) altLanguage = null;
 
             // retrieve series from TheTVDb
-            series = tvdbApi.getSeries(id, defaultLanguage);
+            series = tvdbApi.getSeries(id, language);
             if (series == null && StringUtils.isNotBlank(altLanguage)) {
                 series = tvdbApi.getSeries(id, altLanguage);
             }
@@ -132,7 +131,8 @@ public class TheTVDbApiWrapper {
         try {
             String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
             String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
-
+            if (altLanguage.equalsIgnoreCase(defaultLanguage)) altLanguage = null;
+            
             List<Series> seriesList = tvdbApi.searchSeries(title, defaultLanguage);
             if (CollectionUtils.isEmpty(seriesList) && StringUtils.isNotBlank(altLanguage)) {
                 seriesList = tvdbApi.searchSeries(title, altLanguage);

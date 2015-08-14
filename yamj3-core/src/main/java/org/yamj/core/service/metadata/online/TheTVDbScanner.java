@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.web.apis.TheTVDbApiWrapper;
-
 import com.omertron.thetvdbapi.model.Actor;
 import com.omertron.thetvdbapi.model.Episode;
 import java.util.*;
@@ -35,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigServiceWrapper;
+import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
@@ -43,6 +42,7 @@ import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
+import org.yamj.core.web.apis.TheTVDbApiWrapper;
 
 @Service("tvdbScanner")
 public class TheTVDbScanner implements ISeriesScanner {
@@ -56,6 +56,8 @@ public class TheTVDbScanner implements ISeriesScanner {
     private TheTVDbApiWrapper tvdbApiWrapper;
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
+    @Autowired
+    private LocaleService localeService;
     
     @Override
     public String getScannerName() {
@@ -75,12 +77,21 @@ public class TheTVDbScanner implements ISeriesScanner {
         return getSeriesId(series, false);
     }
 
+    private String getSeriesId(Series series, boolean throwTempError) {
+        String tvdbId = series.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isBlank(tvdbId)) {
+            tvdbId = tvdbApiWrapper.getSeriesId(series.getTitle(), series.getStartYear(), throwTempError);
+            series.setSourceDbId(SCANNER_ID, tvdbId);
+        }
+        return tvdbId;
+    }
+
     @Override
     public String getSeasonId(Season season) {
         String tvdbId = season.getSourceDbId(SCANNER_ID);
         if (StringUtils.isBlank(tvdbId)) {
             // same as series id
-            tvdbId = this.getSeriesId(season.getSeries());
+            tvdbId = season.getSeries().getSourceDbId(SCANNER_ID);
             season.setSourceDbId(SCANNER_ID, tvdbId);
         }
         return  tvdbId;
@@ -90,15 +101,6 @@ public class TheTVDbScanner implements ISeriesScanner {
     public String getEpisodeId(VideoData videoData) {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    private String getSeriesId(Series series, boolean throwTempError) {
-        String tvdbId = series.getSourceDbId(SCANNER_ID);
-        if (StringUtils.isBlank(tvdbId)) {
-            tvdbId = tvdbApiWrapper.getSeriesId(series.getTitle(), series.getStartYear(), throwTempError);
-            series.setSourceDbId(SCANNER_ID, tvdbId);
-        }
-        return tvdbId;
     }
 
     @Override
@@ -114,7 +116,8 @@ public class TheTVDbScanner implements ISeriesScanner {
                 return ScanResult.MISSING_ID;
             }
 
-            tvdbSeries = tvdbApiWrapper.getSeries(tvdbId, throwTempError);
+            String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
+            tvdbSeries = tvdbApiWrapper.getSeries(tvdbId, defaultLanguage, throwTempError);
             tvdbActors = tvdbApiWrapper.getActors(tvdbSeries.getId(), throwTempError);
         } catch (TemporaryUnavailableException ex) {
             // check retry

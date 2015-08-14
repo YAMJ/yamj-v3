@@ -45,7 +45,6 @@ public class CachingConfiguration implements CachingConfigurer {
 
     private static final String TMDB_ARTWORK = "tmdbArtworkCache";
     private static final String ATTACHMENTS = "attachmentCache";
-    private static final String IMDB_WEBPAGE = "imdbWebpageCache";
     
     @Bean(destroyMethod="shutdown")
     public net.sf.ehcache.CacheManager ehCacheManager() {
@@ -61,7 +60,6 @@ public class CachingConfiguration implements CachingConfigurer {
                 .cache(cacheConfig(CachingNames.API_IMDB, 500, 1800))
                 .cache(cacheConfig(TMDB_ARTWORK, 100, 1800))
                 .cache(cacheConfig(ATTACHMENTS, 300, 600))
-                .cache(cacheConfig(IMDB_WEBPAGE, 50, 86400))
                 
                 // caches for database objects
                 .cache(cacheConfigDatabase(CachingNames.DB_GENRE, 50, 86400))
@@ -131,10 +129,5 @@ public class CachingConfiguration implements CachingConfigurer {
     @Bean
     public Cache attachmentCache() {
         return cacheManager().getCache(ATTACHMENTS);
-    }
-
-    @Bean
-    public Cache imdbWebpageCache() {
-        return cacheManager().getCache(IMDB_WEBPAGE);
     }
 }

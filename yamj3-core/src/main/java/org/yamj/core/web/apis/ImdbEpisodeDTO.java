@@ -1,4 +1,4 @@
-package org.yamj.core.service.metadata.online;
+package org.yamj.core.web.apis;
 
 import java.util.Date;
 
@@ -26,11 +26,12 @@ import java.util.Date;
  */
 public class ImdbEpisodeDTO {
 
-    public int episode;
-    public String imdbId;
-    public String title;
-    public String outline;
-    public Date airDate;
+    private int episode;
+    private String imdbId;
+    private String title;
+    private int year;
+    private String releaseCountry;
+    private Date releaseDate;
 
     public int getEpisode() {
         return episode;
@@ -56,19 +57,27 @@ public class ImdbEpisodeDTO {
         this.title = title;
     }
 
-    public String getOutline() {
-        return outline;
+    public int getYear() {
+        return year;
     }
 
-    public void setOutline(String outline) {
-        this.outline = outline;
+    public void setYear(int year) {
+        this.year = year;
     }
 
-    public Date getAirDate() {
-        return airDate;
+    public String getReleaseCountry() {
+        return releaseCountry;
     }
 
-    public void setAirDate(Date airDate) {
-        this.airDate = airDate;
+    public void setReleaseCountry(String releaseCountry) {
+        this.releaseCountry = releaseCountry;
+    }
+
+    public Date getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(Date releaseDate) {
+        this.releaseDate = releaseDate;
     }
 }

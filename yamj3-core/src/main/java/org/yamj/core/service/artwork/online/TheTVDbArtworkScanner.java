@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.artwork.online;
 
-import org.yamj.core.web.apis.TheTVDbApiWrapper;
-
 import com.omertron.thetvdbapi.model.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +42,7 @@ import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.artwork.ArtworkTools;
 import org.yamj.core.service.metadata.online.TheTVDbScanner;
+import org.yamj.core.web.apis.TheTVDbApiWrapper;
 
 @Service("tvdbArtworkScanner")
 public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
@@ -128,7 +127,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
             Banner banner = bannerList.getPosterList().get(0);
             returnDTOs.add(createArtworDetail(banner));
         } else {
-            String url = tvdbApiWrapper.getSeries(id).getPoster();
+            String url = tvdbApiWrapper.getSeries(id, defaultLanguage).getPoster();
             if (StringUtils.isNotBlank(url)) {
                 LOG.info("Season {}-{}: Using default series poster", id, season);
                 ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), url, ArtworkTools.getPartialHashCode(url));
@@ -187,7 +186,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
             LOG.info("Series {}: No poster found for language '{}', using posters with no language", id, defaultLanguage);
             returnDTOs = noLangDTOs;
         } else {
-            String url = tvdbApiWrapper.getSeries(id).getPoster();
+            String url = tvdbApiWrapper.getSeries(id, defaultLanguage).getPoster();
             if (StringUtils.isNotBlank(url)) {
                 LOG.info("Series {}: Using default series poster", id);
                 ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), url, ArtworkTools.getPartialHashCode(url));
@@ -238,7 +237,8 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
             LOG.debug("Season {}-{}: No HD fanart found; using SD fanart", id, season);
             returnDTOs = sdDTOs;
         } else {
-            String url = tvdbApiWrapper.getSeries(id).getFanart();
+            final String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
+            String url = tvdbApiWrapper.getSeries(id, defaultLanguage).getFanart();
             if (StringUtils.isNotBlank(url)) {
                 LOG.debug("Season {}-{}: Using default series fanart", id, season);
                 ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), url, ArtworkTools.getPartialHashCode(url));
@@ -286,7 +286,8 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
             LOG.info("Series {}: No HD fanart found; using SD fanart", id);
             returnDTOs = sdDTOs;
         } else {
-            String url = tvdbApiWrapper.getSeries(id).getFanart();
+            final String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
+            String url = tvdbApiWrapper.getSeries(id, defaultLanguage).getFanart();
             if (StringUtils.isNotBlank(url)) {
                 LOG.info("Series {}: Using default series fanart", id);
                 ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), url, ArtworkTools.getPartialHashCode(url));
@@ -389,7 +390,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
             LOG.info("Season {}-{}: No banner found for language '{}', using blank banners", id, season, defaultLanguage);
             returnDTOs = blankDTOs;
         } else {
-            String url = tvdbApiWrapper.getSeries(id).getBanner();
+            String url = tvdbApiWrapper.getSeries(id, defaultLanguage).getBanner();
             if (StringUtils.isNotBlank(url)) {
                 LOG.info("Season {}-{}: Using default series banner", id, season);
                 ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), url, ArtworkTools.getPartialHashCode(url));
@@ -455,7 +456,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
             LOG.info("Series {}: No banner found for language '{}', using blank banners", id, defaultLanguage);
             returnDTOs = blankDTOs;
         } else {
-            String url = tvdbApiWrapper.getSeries(id).getBanner();
+            String url = tvdbApiWrapper.getSeries(id, defaultLanguage).getBanner();
             if (StringUtils.isNotBlank(url)) {
                 LOG.info("Series {}: Using default series banner", id);
                 ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), url, ArtworkTools.getPartialHashCode(url));

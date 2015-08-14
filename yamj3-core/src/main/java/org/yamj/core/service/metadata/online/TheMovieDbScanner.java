@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.web.apis.TheMovieDbApiWrapper;
-
 import com.omertron.themoviedbapi.model.credits.*;
 import com.omertron.themoviedbapi.model.media.MediaCreditList;
 import com.omertron.themoviedbapi.model.movie.*;
@@ -50,6 +48,7 @@ import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.PersonNameDTO;
+import org.yamj.core.web.apis.TheMovieDbApiWrapper;
 
 @Service("tmdbScanner")
 public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, IFilmographyScanner {
@@ -337,9 +336,9 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             return tmdbId;
         }
 
-        // first get series id and then season id
-        String seriesId = this.getSeriesId(season.getSeries(), tmdbLocale, throwTempError);
+        String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
         if (StringUtils.isNumeric(seriesId)) {
+            // get season id from series
             TVSeasonInfo seasonInfo = tmdbApiWrapper.getSeasonInfo(Integer.parseInt(seriesId), season.getSeason(), tmdbLocale, throwTempError);
             if (seasonInfo != null) {
                 tmdbId = String.valueOf(seasonInfo.getId());

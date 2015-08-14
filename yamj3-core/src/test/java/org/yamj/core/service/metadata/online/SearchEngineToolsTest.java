@@ -25,6 +25,8 @@ package org.yamj.core.service.metadata.online;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.yamj.core.web.apis.SearchEngineTools;
+
 import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;

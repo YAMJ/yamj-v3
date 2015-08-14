@@ -20,7 +20,9 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.online;
+package org.yamj.core.web.apis;
+
+import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 
 import java.io.IOException;
 import java.net.URLEncoder;

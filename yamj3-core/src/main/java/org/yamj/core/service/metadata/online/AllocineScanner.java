@@ -48,6 +48,7 @@ import org.yamj.core.web.HTMLTools;
 import org.yamj.core.web.PoolingHttpClient;
 import org.yamj.core.web.apis.AllocineApiWrapper;
 import org.yamj.core.web.apis.ImdbSearchEngine;
+import org.yamj.core.web.apis.SearchEngineTools;
 
 @Service("allocineScanner")
 public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, IFilmographyScanner {
@@ -56,8 +57,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     private static final Logger LOG = LoggerFactory.getLogger(AllocineScanner.class);
 
     private final Lock searchEngingeLock = new ReentrantLock(true);
-    
     private SearchEngineTools searchEngineTools;
+    
     @Autowired
     private PoolingHttpClient httpClient;
     @Autowired
@@ -154,7 +155,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             }
         }
         
-        if (movieInfos == null || movieInfos.isNotValid()) {
+        if (movieInfos.isNotValid()) {
             LOG.error("Can't find informations for movie '{}'", videoData.getTitle());
             return ScanResult.ERROR;
         }
@@ -375,7 +376,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             }
         }
         
-        if (tvSeriesInfos == null || tvSeriesInfos.isNotValid()) {
+        if (tvSeriesInfos.isNotValid()) {
             LOG.error("Can't find informations for series '{}'", series.getTitle());
             return ScanResult.ERROR;
         }

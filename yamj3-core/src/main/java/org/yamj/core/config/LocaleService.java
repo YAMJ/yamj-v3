@@ -313,7 +313,7 @@ public class LocaleService  {
                 language = yamjLocale.getLanguage();
             }
         }
-        String country = PropertyTools.getProperty(config+".country");
+        String country = configService.getProperty(config+".country");
         if (StringUtils.isBlank(country)) {
             country = yamjLocale.getCountry();
         } else {
