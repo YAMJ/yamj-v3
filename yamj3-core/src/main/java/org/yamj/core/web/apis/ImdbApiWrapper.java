@@ -84,12 +84,11 @@ public class ImdbApiWrapper {
         return url;
     }
 
-    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId}")
-    public ImdbMovieDetails gerMovieDetails(String imdbId, Locale locale) {
+    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId, #locale}")
+    public ImdbMovieDetails getMovieDetails(String imdbId, Locale locale) {
         ImdbMovieDetails imdbMovieDetails;
         imdbApiLock.lock();
         try {
-            // use US locale to check for uncredited cast
             imdbApi.setLocale(locale);
             imdbMovieDetails = imdbApi.getFullDetails(imdbId);
         } finally {
@@ -201,22 +200,6 @@ public class ImdbApiWrapper {
         return webpage;
     }
 
-    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId}", unless="#result==null")
-    public String getParentalGuideXML(final String imdbId) {
-        String webpage = null;
-        try {
-            final DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "releaseinfo"), CHARSET);
-            if (ResponseTools.isOK(response)) {
-                webpage = response.getContent();
-            } else {
-                LOG.warn("Requesting release infos failed with status {}: {}", response.getStatusCode(), imdbId);
-            }
-        } catch (Exception ex) {
-            LOG.error("Requesting release infos failed: " + imdbId, ex);
-        }
-        return webpage;
-    }
-
     public String getPersonBioXML(final String imdbId, boolean throwTempError) throws IOException {
         DigestedResponse response;
         try {
@@ -257,7 +240,7 @@ public class ImdbApiWrapper {
         Map<String, String> certifications = new HashMap<>();
         
         try {
-            DigestedResponse response = httpClient.requestContent(ImdbApiWrapper.getImdbUrl(imdbId, "parentalguide#certification"), CHARSET);
+            DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "parentalguide#certification"), CHARSET);
             if (ResponseTools.isNotOK(response)) {
                 LOG.warn("Requesting certifications failed with status {}: {}", response.getStatusCode(), imdbId);
             } else {
@@ -281,12 +264,13 @@ public class ImdbApiWrapper {
 
                 List<String> tags = HTMLTools.extractTags(response.getContent(), HTML_H5_START + "Certification" + HTML_H5_END, HTML_DIV_END,
                                 "<a href=\"/search/title?certificates=", HTML_A_END);
+                Collections.reverse(tags);
                 for (String countryCode : localeService.getCertificationCountryCodes(imdbLocale)) {
-                    for (String country : localeService.getCountryNames(countryCode)) {
-                        String certificate = getPreferredValue(tags, true, country);
+                    loop: for (String country : localeService.getCountryNames(countryCode)) {
+                        String certificate = getPreferredValue(tags, country);
                         if (StringUtils.isNotBlank(certificate)) {
                             certifications.put(countryCode, certificate);
-                            break;
+                            break loop;
                         }
                     }
                 }
@@ -298,14 +282,10 @@ public class ImdbApiWrapper {
     }
 
 
-    private static String getPreferredValue(List<String> values, boolean useLast, String preferredCountry) {
+    private static String getPreferredValue(List<String> tags, String preferredCountry) {
         String value = null;
 
-        if (useLast) {
-            Collections.reverse(values);
-        }
-
-        for (String text : values) {
+        for (String text : tags) {
             String country = null;
 
             int pos = text.indexOf(':');
@@ -333,7 +313,7 @@ public class ImdbApiWrapper {
 
     public Set<AwardDTO> getAwards(String imdbId) {
         HashSet<AwardDTO> awards = new HashSet<>();
-  
+        
         try {
             DigestedResponse response = httpClient.requestContent(ImdbApiWrapper.getImdbUrl(imdbId, "awards"), CHARSET);
             if (ResponseTools.isNotOK(response)) {

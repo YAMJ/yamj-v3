@@ -874,7 +874,7 @@ public class MetadataStorageService {
         }
     }
 
-    private void updateLocatedArtwork(Artwork artwork, Set<ArtworkDetailDTO> dtos) {
+    private void updateLocatedArtwork(Artwork artwork, Collection<ArtworkDetailDTO> dtos) {
         for (ArtworkDetailDTO dto : dtos) {
             ArtworkLocated located = new ArtworkLocated();
             located.setArtwork(artwork);

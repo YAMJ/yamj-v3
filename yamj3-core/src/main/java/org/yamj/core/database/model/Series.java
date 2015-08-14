@@ -137,22 +137,22 @@ public class Series extends AbstractMetadata {
     private List<Trailer> trailers = new ArrayList<>(0);
 
     @Transient
-    private Set<String> genreNames;
+    private Collection<String> genreNames;
 
     @Transient
-    private Set<String> studioNames;
+    private Collection<String> studioNames;
 
     @Transient
-    private Set<String> countryCodes;
+    private Collection<String> countryCodes;
 
     @Transient
     private final Map<String, String> certificationInfos = new HashMap<>(0);
 
     @Transient
-    private final Set<BoxedSetDTO> boxedSetDTOS = new HashSet<>(0);
+    private final Collection<BoxedSetDTO> boxedSetDTOS = new HashSet<>(0);
 
     @Transient
-    private final Set<AwardDTO> awardDTOS = new HashSet<>(0);
+    private final Collection<AwardDTO> awardDTOS = new HashSet<>(0);
 
     // CONSTRUCTORS
     
@@ -395,33 +395,33 @@ public class Series extends AbstractMetadata {
 
     // TRANSIENT METHODS
     
-    public Set<String> getGenreNames() {
+    public Collection<String> getGenreNames() {
         return genreNames;
     }
 
-    public void setGenreNames(Set<String> genreNames, String source) {
+    public void setGenreNames(Collection<String> genreNames, String source) {
         if (CollectionUtils.isNotEmpty(genreNames)) {
             this.genreNames = genreNames;
             setOverrideFlag(OverrideFlag.GENRES, source);
         }
     }
 
-    public Set<String> getStudioNames() {
+    public Collection<String> getStudioNames() {
         return studioNames;
     }
 
-    public void setStudioNames(Set<String> studioNames, String source) {
+    public void setStudioNames(Collection<String> studioNames, String source) {
         if (CollectionUtils.isNotEmpty(studioNames)) {
             this.studioNames = studioNames;
             setOverrideFlag(OverrideFlag.STUDIOS, source);
         }
     }
 
-    public Set<String> getCountryCodes() {
+    public Collection<String> getCountryCodes() {
         return countryCodes;
     }
 
-    public void setCountryCodes(Set<String> countryCodes, String source) {
+    public void setCountryCodes(Collection<String> countryCodes, String source) {
         if (CollectionUtils.isNotEmpty(countryCodes)) {
             this.countryCodes = countryCodes;
             setOverrideFlag(OverrideFlag.COUNTRIES, source);
@@ -453,7 +453,7 @@ public class Series extends AbstractMetadata {
         }
     }
 
-    public Set<BoxedSetDTO> getBoxedSetDTOS() {
+    public Collection<BoxedSetDTO> getBoxedSetDTOS() {
         return boxedSetDTOS;
     }
 
@@ -471,7 +471,7 @@ public class Series extends AbstractMetadata {
         }
     }
     
-    public Set<AwardDTO> getAwardDTOS() {
+    public Collection<AwardDTO> getAwardDTOS() {
         return awardDTOS;
     }
 

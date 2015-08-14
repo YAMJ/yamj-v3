@@ -120,13 +120,13 @@ public class TrailerScannerService {
         LOG.trace("Scan online for trailer of movie {}-'{}'", videoData.getId(), videoData.getTitle());
 
         List<TrailerDTO> trailerDTOs = null;
-        for (String prio : this.configService.getPropertyAsList("yamj3.trailer.scanner.movie.priorities", YouTubeTrailerScanner.SCANNER_ID)) {
+        loop: for (String prio : this.configService.getPropertyAsList("yamj3.trailer.scanner.movie.priorities", YouTubeTrailerScanner.SCANNER_ID)) {
             IMovieTrailerScanner scanner = registeredMovieTrailerScanner.get(prio);
             if (scanner != null) {
                 LOG.debug("Scanning movie trailers for '{}' using {}", videoData.getTitle(), scanner.getScannerName());
                 trailerDTOs = scanner.getTrailers(videoData);
                 if (CollectionUtils.isNotEmpty(trailerDTOs)) {
-                    break;
+                    break loop;
                 }
             } else {
                 LOG.warn("Desired movie trailer scanner {} not registerd", prio);

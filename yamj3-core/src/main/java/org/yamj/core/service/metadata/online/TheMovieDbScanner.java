@@ -214,10 +214,10 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         // CERTIFICATIONS
         if (CollectionUtils.isNotEmpty(movieInfo.getReleases())) {
             for (String countryCode : localeService.getCertificationCountryCodes(tmdbLocale)) {
-                for (ReleaseInfo releaseInfo : movieInfo.getReleases()) {
+                loop: for (ReleaseInfo releaseInfo : movieInfo.getReleases()) {
                     if (countryCode.equalsIgnoreCase(releaseInfo.getCountry())) {
                         videoData.addCertificationInfo(countryCode, releaseInfo.getCertification());
-                        break;
+                        break loop;
                     }
                 }
             }

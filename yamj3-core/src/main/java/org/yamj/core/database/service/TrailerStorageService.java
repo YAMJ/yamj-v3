@@ -178,10 +178,10 @@ public class TrailerStorageService {
                     trailerDao.saveEntity(trailer);
                 } else {
                     // find matching stored trailer and reset deleted status
-                    for (Trailer stored : series.getTrailers()) {
+                    loop: for (Trailer stored : series.getTrailers()) {
                         if (stored.equals(trailer)) {
                             trailerDao.resetDeletionStatus(stored);
-                            break;
+                            break loop;
                         }
                     }
                 }
