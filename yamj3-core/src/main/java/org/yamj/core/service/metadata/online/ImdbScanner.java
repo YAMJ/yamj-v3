@@ -1017,21 +1017,17 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
 
     private ScanResult updatePerson(Person person, String imdbId, boolean throwTempError) throws IOException {
-        String xml = imdbApiWrapper.getPersonXML(imdbId, throwTempError);
+        Locale imdbLocale = localeService.getLocaleForConfig("imdb");
+        ImdbPerson imdbPerson = imdbApiWrapper.getPerson(imdbId, imdbLocale);
+        if (StringUtils.isBlank(imdbPerson.getActorId())) {
+            return ScanResult.NO_RESULT;
+        }
+        // TODO remove BIO XML if IMDb person contains the needed values
+        final String bio = imdbApiWrapper.getPersonBioXML(imdbId, throwTempError);
         
         if (OverrideTools.checkOverwritePersonNames(person, SCANNER_ID)) {
-            // We can work out if this is the new site by looking for " - IMDb" at the end of the title
-            String title = HTMLTools.extractTag(xml, "<title>");
-            // Check for the new version and correct the title if found.
-            if (title.toLowerCase().endsWith(" - imdb")) {
-                title = title.substring(0, title.length() - 7);
-            }
-            if (title.toLowerCase().startsWith("imdb - ")) {
-                title = title.substring(7);
-            }
-
             // split person names
-            PersonNameDTO nameDTO = MetadataTools.splitFullName(title);
+            PersonNameDTO nameDTO = MetadataTools.splitFullName(imdbPerson.getName());
             if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
                 person.setName(nameDTO.getName(), SCANNER_ID);
             }
@@ -1043,9 +1039,12 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             }
         }
 
+        if (OverrideTools.checkOverwriteBiography(person, SCANNER_ID)) {
+            person.setBiography(MetadataTools.cleanBiography(imdbPerson.getBiography()), SCANNER_ID);
+        }
+
         int endIndex;
         int beginIndex;
-        final String bio = imdbApiWrapper.getPersonBioXML(imdbId, throwTempError);
         
         if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {
             beginIndex = bio.indexOf(">Date of Birth</td>");
@@ -1119,16 +1118,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 beginIndex += 20;
                 String name = bio.substring(beginIndex, bio.indexOf(HTML_TD_END, beginIndex));
                 person.setBirthName(HTMLTools.decodeHtml(name), SCANNER_ID);
-            }
-        }
-
-        if (OverrideTools.checkOverwriteBiography(person, SCANNER_ID)) {
-            if (bio.contains(">Mini Bio (1)</h4>")) {
-                String biography = HTMLTools.extractTag(bio, ">Mini Bio (1)</h4>", "<em>- IMDb Mini Biography");
-                if (StringUtils.isBlank(biography) && bio.contains("<a name=\"trivia\">")) {
-                    biography = HTMLTools.extractTag(bio, ">Mini Bio (1)</h4>", "<a name=\"trivia\">");
-                }
-                person.setBiography(HTMLTools.removeHtmlTags(biography), SCANNER_ID);
             }
         }
 

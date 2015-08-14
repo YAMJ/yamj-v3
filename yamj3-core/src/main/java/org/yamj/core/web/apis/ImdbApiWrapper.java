@@ -132,7 +132,7 @@ public class ImdbApiWrapper {
     }
 
     @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId, #locale}")
-    public ImdbPerson getActorDetails(String imdbId, Locale locale) {
+    public ImdbPerson getPerson(String imdbId, Locale locale) {
         ImdbPerson imdbPerson;
         imdbApiLock.lock();
         try {
@@ -216,25 +216,6 @@ public class ImdbApiWrapper {
             LOG.error("Requesting release infos failed: " + imdbId, ex);
         }
         return webpage;
-    }
-
-    // no caching
-    public String getPersonXML(final String imdbId, boolean throwTempError) throws IOException {
-        DigestedResponse response;
-        try {
-            response = httpClient.requestContent(HTML_SITE_FULL + "name/" + imdbId + "/", CHARSET);
-        } catch (IOException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            throw new OnlineScannerException("IMDb request failed", ex);
-        }
-
-        if (throwTempError && ResponseTools.isTemporaryError(response)) {
-            throw new TemporaryUnavailableException("IMDb service is temporary not available: " + response.getStatusCode());
-        } else if (ResponseTools.isNotOK(response)) {
-            throw new OnlineScannerException("IMDb request failed: " + response.getStatusCode());
-        }
-        return response.getContent();
     }
 
     // no caching

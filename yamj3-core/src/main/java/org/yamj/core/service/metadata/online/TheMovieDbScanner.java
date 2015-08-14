@@ -55,8 +55,6 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
     public static final String SCANNER_ID = "tmdb";
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbScanner.class);
-    private static final String FROM_WIKIPEDIA = "From Wikipedia, the free encyclopedia";
-    private static final String WIKIPEDIA_DESCRIPTION_ABOVE = "Description above from the Wikipedia";
 
     @Autowired
     private OnlineScannerService onlineScannerService;
@@ -678,33 +676,10 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
 
         if (OverrideTools.checkOverwriteBiography(person, SCANNER_ID)) {
-            person.setBiography(cleanBiography(tmdbPerson.getBiography()), SCANNER_ID);
+            person.setBiography(MetadataTools.cleanBiography(tmdbPerson.getBiography()), SCANNER_ID);
         }
 
         return ScanResult.OK;
-    }
-
-    /**
-     * Remove unneeded text from the biography
-     *
-     * @param bio
-     * @return
-     */
-    private static String cleanBiography(final String bio) {
-        String newBio = StringUtils.trimToNull(bio);
-        if (newBio == null) {
-            return null;
-        }
-
-        newBio = newBio.replaceAll("\\u00A0", " ").replaceAll("\\s+", " ");
-        
-        int pos = StringUtils.indexOfIgnoreCase(newBio, FROM_WIKIPEDIA);
-        if (pos >= 0) newBio = newBio.substring(pos + FROM_WIKIPEDIA.length() + 1);
-
-        pos = StringUtils.indexOfIgnoreCase(newBio, WIKIPEDIA_DESCRIPTION_ABOVE);
-        if (pos >= 0) newBio = newBio.substring(0, pos);
-        
-        return newBio;
     }
 
     @Override

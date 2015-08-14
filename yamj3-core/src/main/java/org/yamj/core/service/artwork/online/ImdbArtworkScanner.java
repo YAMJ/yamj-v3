@@ -83,7 +83,7 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
             return null;
         }
         
-        ImdbPerson imdbPerson = imdbApiWrapper.getActorDetails(imdbId, Locale.US);
+        ImdbPerson imdbPerson = imdbApiWrapper.getPerson(imdbId, Locale.US);
         if (imdbPerson.getImage() == null) return null;
         
         ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), imdbPerson.getImage().getUrl(), imdbId);

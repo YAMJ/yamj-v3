@@ -49,6 +49,8 @@ public final class MetadataTools {
     private static final Pattern DATE_COUNTRY = Pattern.compile("(.*)(\\s*?\\(\\w*\\))");
     private static final Pattern YEAR_PATTERN = Pattern.compile("(?:.*?)(\\d{4})(?:.*?)");
     private static final Pattern LASTNAME_PATTERN = Pattern.compile("((?:(?:d[aeiu]|de la|mac|zu|v[ao]n(?: de[nr])?) *)?[^ ]+) *(.*)");
+    private static final String FROM_WIKIPEDIA = "From Wikipedia, the free encyclopedia";
+    private static final String WIKIPEDIA_DESCRIPTION_ABOVE = "Description above from the Wikipedia";
 
     private static final String MPPA_RATED = "Rated";
     private static final long KB = 1024;
@@ -614,5 +616,28 @@ public final class MetadataTools {
     
     public static String fixScannedValue(String value) {
         return StringUtils.replace(value, "\"", "'");
+    }
+
+    /**
+     * Remove unneeded text from the biography
+     *
+     * @param bio
+     * @return
+     */
+    public static String cleanBiography(final String bio) {
+        String newBio = StringUtils.trimToNull(bio);
+        if (newBio == null) {
+            return null;
+        }
+
+        newBio = newBio.replaceAll("\\u00A0", " ").replaceAll("\\s+", " ");
+        
+        int pos = StringUtils.indexOfIgnoreCase(newBio, FROM_WIKIPEDIA);
+        if (pos >= 0) newBio = newBio.substring(pos + FROM_WIKIPEDIA.length() + 1);
+
+        pos = StringUtils.indexOfIgnoreCase(newBio, WIKIPEDIA_DESCRIPTION_ABOVE);
+        if (pos >= 0) newBio = newBio.substring(0, pos);
+        
+        return fixScannedValue(newBio);
     }
 }
