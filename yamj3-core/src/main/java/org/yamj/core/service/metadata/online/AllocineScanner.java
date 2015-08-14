@@ -157,7 +157,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         
         if (movieInfos.isNotValid()) {
             LOG.error("Can't find informations for movie '{}'", videoData.getTitle());
-            return ScanResult.ERROR;
+            return ScanResult.NO_RESULT;
         }
 
         // fill in data
@@ -313,14 +313,50 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
 
     @Override
     public String getSeasonId(Season season) {
-        // TODO Auto-generated method stub
-        return null;
+        return getSeasonId(season, false);
+    }
+
+    private String getSeasonId(Season season, boolean throwTempError) {
+        String allocineId = season.getSourceDbId(SCANNER_ID);
+        
+        if (StringUtils.isBlank(allocineId)) {
+            String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
+            if (StringUtils.isNotBlank(seriesId)) {
+                TvSeriesInfos tvSeriesInfos = allocineApiWrapper.getTvSeriesInfos(allocineId, throwTempError);
+                if (tvSeriesInfos.isValid() && season.getSeason() <= tvSeriesInfos.getSeasonCount()) {
+                    int seasonCode = tvSeriesInfos.getSeasonCode(season.getSeason());
+                    if (seasonCode > 0) allocineId = String.valueOf(seasonCode);
+                }
+            }
+          
+            season.setSourceDbId(SCANNER_ID, allocineId);
+        }
+
+        return allocineId;
     }
 
     @Override
     public String getEpisodeId(VideoData videoData) {
-        // TODO Auto-generated method stub
-        return null;
+        return getEpisodeId(videoData, false);
+    }
+
+    private String getEpisodeId(VideoData videoData, boolean throwTempError) {
+        String allocineId = videoData.getSourceDbId(SCANNER_ID);
+        
+        if (StringUtils.isBlank(allocineId)) {
+            String seasonId = videoData.getSeason().getSourceDbId(SCANNER_ID);
+            if (StringUtils.isNotBlank(seasonId)) {
+                TvSeasonInfos tvSeasonInfos = allocineApiWrapper.getTvSeasonInfos(seasonId, throwTempError);
+                if (tvSeasonInfos.isValid()) {
+                    Episode episode = tvSeasonInfos.getEpisode(videoData.getEpisode());
+                    if (episode.getCode() > 0) allocineId = String.valueOf(episode.getCode());
+                }
+            }
+          
+            videoData.setSourceDbId(SCANNER_ID, allocineId);
+        }
+
+        return allocineId;
     }
 
     @Override
@@ -378,7 +414,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         
         if (tvSeriesInfos.isNotValid()) {
             LOG.error("Can't find informations for series '{}'", series.getTitle());
-            return ScanResult.ERROR;
+            return ScanResult.NO_RESULT;
         }
         
         // fill in data
@@ -629,7 +665,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         
         if (personInfos.isNotValid()) {
             LOG.error("Can't find informations for person '{}'", person.getName());
-            return ScanResult.ERROR;
+            return ScanResult.NO_RESULT;
         }
         
         // fill in data

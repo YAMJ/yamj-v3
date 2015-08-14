@@ -131,8 +131,25 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
     @Override
     public String getEpisodeId(VideoData videoData) {
-        // TODO Auto-generated method stub
-        return null;
+        String imdbId = videoData.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isBlank(imdbId)) {
+            // NOTE: seriesId = seasonId
+            String seasonId = videoData.getSeason().getSourceDbId(SCANNER_ID);
+            if (StringUtils.isNotBlank(seasonId)) {
+                Locale imdbLocale = localeService.getLocaleForConfig("imdb");
+                List<ImdbEpisodeDTO> episodes = imdbApiWrapper.getTitleEpisodes(seasonId, imdbLocale).get(Integer.valueOf(Integer.valueOf(videoData.getSeason().getSeason())));
+                if (CollectionUtils.isNotEmpty(episodes)) {
+                    for (ImdbEpisodeDTO episode : episodes) {
+                        if (episode.getEpisode() == videoData.getEpisode()) {
+                            imdbId = episode.getImdbId();
+                            videoData.setSourceDbId(SCANNER_ID, imdbId);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return imdbId;
     }
 
     @Override

@@ -89,18 +89,19 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
 
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);
-        final String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
-        final String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
+        String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
+        String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
+        if (altLanguage.equalsIgnoreCase(defaultLanguage)) altLanguage = null;
 
         // find posters
         for (Banner banner : bannerList.getSeasonList()) {
             if ((banner.getSeason() == season.getSeason()) && (banner.getBannerType2() == BannerType.SEASON)) {
                 if (banner.getLanguage().equalsIgnoreCase(defaultLanguage)) {
                     langDTOs.add(createArtworDetail(banner));
-                } else if (StringUtils.isNotBlank(altLanguage) && banner.getLanguage().equalsIgnoreCase(altLanguage)) {
-                    altLangDTOs.add(createArtworDetail(banner));
                 } else if (StringUtils.isBlank(banner.getLanguage())) {
                     noLangDTOs.add(createArtworDetail(banner));
+                } else if (StringUtils.equalsIgnoreCase(altLanguage, banner.getLanguage())) {
+                    altLangDTOs.add(createArtworDetail(banner));
                 }
             }
         }
@@ -154,17 +155,18 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);
         String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
-        final String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
+        String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
+        if (altLanguage.equalsIgnoreCase(defaultLanguage)) altLanguage = null;
 
         // find posters
         for (Banner banner : bannerList.getPosterList()) {
             if (banner.getBannerType2() == BannerType.POSTER) {
                 if (banner.getLanguage().equalsIgnoreCase(defaultLanguage)) {
                     langDTOs.add(createArtworDetail(banner));
-                } else if (StringUtils.isNotBlank(altLanguage) && altLanguage.equalsIgnoreCase(banner.getLanguage())) {
-                    altLangDTOs.add(createArtworDetail(banner));
                 } else if (StringUtils.isBlank(banner.getLanguage())) {
                     noLangDTOs.add(createArtworDetail(banner));
+                } else if (StringUtils.equalsIgnoreCase(altLanguage, banner.getLanguage())) {
+                    altLangDTOs.add(createArtworDetail(banner));
                 }
             }
         }
@@ -317,8 +319,10 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
 
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);
-        final String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
-        final String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
+        String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
+        String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
+        if (altLanguage.equalsIgnoreCase(defaultLanguage)) altLanguage = null;
+        
         final boolean seasonBannerOnlySeries = configService.getBooleanProperty("thetvdb.season.banner.onlySeries", Boolean.FALSE);
 
         // series banners
@@ -328,10 +332,10 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
                 if (banner.getBannerType2() == BannerType.SEASONWIDE) {
                     if (banner.getLanguage().equalsIgnoreCase(defaultLanguage)) {
                         seasonLangDTOs.add(createArtworDetail(banner));
-                    } else if (StringUtils.isNotBlank(altLanguage) && altLanguage.equalsIgnoreCase(banner.getLanguage())) {
-                        seasonAltLangDTOs.add(createArtworDetail(banner));
                     } else if (StringUtils.isBlank(banner.getLanguage())) {
                         seasonNoLangDTOs.add(createArtworDetail(banner));
+                    } else if (StringUtils.equalsIgnoreCase(altLanguage, banner.getLanguage())) {
+                        seasonAltLangDTOs.add(createArtworDetail(banner));
                     }
                 }
             }
@@ -340,10 +344,10 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
             if (banner.getBannerType2() == BannerType.GRAPHICAL) {
                 if (banner.getLanguage().equalsIgnoreCase(defaultLanguage)) {
                     seriesLangDTOs.add(createArtworDetail(banner));
-                } else if (StringUtils.isNotBlank(altLanguage) && altLanguage.equalsIgnoreCase(banner.getLanguage())) {
-                    seriesAltLangDTOs.add(createArtworDetail(banner));
                 } else if (StringUtils.isBlank(banner.getLanguage())) {
                     seriesNoLangDTOs.add(createArtworDetail(banner));
+                } else if (StringUtils.equalsIgnoreCase(altLanguage, banner.getLanguage())) {
+                    seriesAltLangDTOs.add(createArtworDetail(banner));
                 }
             } else if (banner.getBannerType2() == BannerType.BLANK) {
                 blankDTOs.add(createArtworDetail(banner));
@@ -417,18 +421,19 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
 
         // get series artwork
         final Banners bannerList = tvdbApiWrapper.getBanners(id);
-        final String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
-        final String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
+        String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
+        String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
+        if (altLanguage.equalsIgnoreCase(defaultLanguage)) altLanguage = null;
 
         // find banners
         for (Banner banner : bannerList.getSeriesList()) {
             if (banner.getBannerType2() == BannerType.GRAPHICAL) {
                 if (banner.getLanguage().equalsIgnoreCase(defaultLanguage)) {
                     langDTOs.add(createArtworDetail(banner));
-                } else if (StringUtils.isNotBlank(altLanguage) && altLanguage.equalsIgnoreCase(banner.getLanguage())) {
-                    altLangDTOs.add(createArtworDetail(banner));
                 } else if (StringUtils.isBlank(banner.getLanguage())) {
                     noLangDTOs.add(createArtworDetail(banner));
+                } else if (StringUtils.equalsIgnoreCase(altLanguage, banner.getLanguage())) {
+                    altLangDTOs.add(createArtworDetail(banner));
                 }
             } else if (banner.getBannerType2() == BannerType.BLANK) {
                 blankDTOs.add(createArtworDetail(banner));
@@ -500,7 +505,8 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
             return null;
         }
         
-        List<Episode> episodeList = tvdbApiWrapper.getSeasonEpisodes(id, videoData.getSeason().getSeason());
+        final String language = localeService.getLocaleForConfig("thetvdb").getLanguage();
+        List<Episode> episodeList = tvdbApiWrapper.getSeasonEpisodes(id, videoData.getSeason().getSeason(), language, false);
         if (CollectionUtils.isEmpty(episodeList)) {
             return null;
         }

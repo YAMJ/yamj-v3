@@ -80,7 +80,8 @@ public class TheTVDbScanner implements ISeriesScanner {
     private String getSeriesId(Series series, boolean throwTempError) {
         String tvdbId = series.getSourceDbId(SCANNER_ID);
         if (StringUtils.isBlank(tvdbId)) {
-            tvdbId = tvdbApiWrapper.getSeriesId(series.getTitle(), series.getStartYear(), throwTempError);
+            Locale tvdbLocale = localeService.getLocaleForConfig("thetvdb");
+            tvdbId = tvdbApiWrapper.getSeriesId(series.getTitle(), series.getStartYear(), tvdbLocale.getLanguage(), throwTempError);
             series.setSourceDbId(SCANNER_ID, tvdbId);
         }
         return tvdbId;
@@ -99,12 +100,35 @@ public class TheTVDbScanner implements ISeriesScanner {
 
     @Override
     public String getEpisodeId(VideoData videoData) {
-        // TODO Auto-generated method stub
-        return null;
+        Locale locale = localeService.getLocaleForConfig("thetvdb");
+        return getEpisodeId(videoData, locale, false);
     }
 
+    private String getEpisodeId(VideoData videoData, Locale tvdbLocale, boolean throwTempError) {
+        String allocineId = videoData.getSourceDbId(SCANNER_ID);
+        
+        if (StringUtils.isBlank(allocineId)) {
+            String seasonId = videoData.getSeason().getSourceDbId(SCANNER_ID);
+            if (StringUtils.isNotBlank(seasonId)) {
+                // NOTE: seriesId = seasonId
+                List<Episode> episodeList = tvdbApiWrapper.getSeasonEpisodes(seasonId, videoData.getSeason().getSeason(), tvdbLocale.getLanguage(), throwTempError);
+                for (Episode episode : episodeList) {
+                    if (episode.getEpisodeNumber() == videoData.getEpisode()) {
+                        allocineId = episode.getId();
+                    }
+                }
+            }
+          
+            videoData.setSourceDbId(SCANNER_ID, allocineId);
+        }
+
+        return allocineId;
+    }
+    
     @Override
     public ScanResult scan(Series series) {
+        Locale tvdbLocale = localeService.getLocaleForConfig("thetvdb");
+
         com.omertron.thetvdbapi.model.Series tvdbSeries = null;
         List<Actor> tvdbActors = null;
         try {
@@ -116,8 +140,7 @@ public class TheTVDbScanner implements ISeriesScanner {
                 return ScanResult.MISSING_ID;
             }
 
-            String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
-            tvdbSeries = tvdbApiWrapper.getSeries(tvdbId, defaultLanguage, throwTempError);
+            tvdbSeries = tvdbApiWrapper.getSeries(tvdbId, tvdbLocale.getLanguage(), throwTempError);
             tvdbActors = tvdbApiWrapper.getActors(tvdbSeries.getId(), throwTempError);
         } catch (TemporaryUnavailableException ex) {
             // check retry
@@ -127,7 +150,7 @@ public class TheTVDbScanner implements ISeriesScanner {
             }
         }
         
-        if (StringUtils.isBlank(tvdbSeries.getId()) || CollectionUtils.isEmpty(tvdbActors)) {
+        if (StringUtils.isBlank(tvdbSeries.getId())) {
             LOG.error("Can't find informations for series '{}'", series.getTitle());
             return ScanResult.ERROR;
         }
@@ -187,12 +210,12 @@ public class TheTVDbScanner implements ISeriesScanner {
         }
         
         // SCAN SEASONS
-        this.scanSeasons(series, tvdbSeries, actors);
+        this.scanSeasons(series, tvdbSeries, actors, tvdbLocale);
 
         return ScanResult.OK;
     }
 
-    private void scanSeasons(Series series, com.omertron.thetvdbapi.model.Series tvdbSeries, Set<CreditDTO> actors) {
+    private void scanSeasons(Series series, com.omertron.thetvdbapi.model.Series tvdbSeries, Set<CreditDTO> actors, Locale tvdbLocale) {
 
         for (Season season : series.getSeasons()) {
 
@@ -210,7 +233,7 @@ public class TheTVDbScanner implements ISeriesScanner {
             if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
                 // get season year from minimal first aired of episodes
                 String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
-                Date year = this.getSeasonYear(seriesId, season.getSeason());
+                Date year = this.getSeasonYear(seriesId, season.getSeason(), tvdbLocale);
                 if (year == null) {
                     // try first aired from series as fall-back
                     if (StringUtils.isNotBlank(tvdbSeries.getFirstAired())) {
@@ -224,12 +247,12 @@ public class TheTVDbScanner implements ISeriesScanner {
             season.setTvSeasonDone();
             
             // scan episodes
-            this.scanEpisodes(season, actors);
+            this.scanEpisodes(season, actors, tvdbLocale);
         }
     }
 
-    private Date getSeasonYear(String seriesId, int season) {
-        List<Episode> episodeList = tvdbApiWrapper.getSeasonEpisodes(seriesId, season);
+    private Date getSeasonYear(String seriesId, int season, Locale tvdbLocale) {
+        List<Episode> episodeList = tvdbApiWrapper.getSeasonEpisodes(seriesId, season, tvdbLocale.getLanguage(), false);
         if (CollectionUtils.isEmpty(episodeList)) {
             return null;
         }
@@ -250,14 +273,14 @@ public class TheTVDbScanner implements ISeriesScanner {
         return yearDate;
     }
     
-    private void scanEpisodes(Season season, Set<CreditDTO> actors) {
+    private void scanEpisodes(Season season, Set<CreditDTO> actors, Locale tvdbLocale) {
         if (season.isTvEpisodesScanned(SCANNER_ID)) {
             // nothing to do anymore
             return;
         }
 
         String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
-        List<Episode> episodeList = tvdbApiWrapper.getSeasonEpisodes(seriesId, season.getSeason());
+        List<Episode> episodeList = tvdbApiWrapper.getSeasonEpisodes(seriesId, season.getSeason(), tvdbLocale.getLanguage(), false);
 
         for (VideoData videoData : season.getVideoDatas()) {
             if (videoData.isTvEpisodeDone(SCANNER_ID)) {

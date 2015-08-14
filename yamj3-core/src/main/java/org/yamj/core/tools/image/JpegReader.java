@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JpegReader {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GraphicTools.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JpegReader.class);
 
     public static final int COLOR_TYPE_RGB = 1;
     public static final int COLOR_TYPE_CMYK = 2;
@@ -70,7 +70,7 @@ public class JpegReader {
         hasAdobeMarker = Boolean.FALSE;
 
         if (!file.exists()) {
-            LOG.debug("Error reading file, does not exist: " + file.getName());
+            LOG.debug("Error reading file, does not exist: {}", file.getName());
             return null;
         }
 
@@ -124,13 +124,13 @@ public class JpegReader {
 
             image = convertCmykToRgb(raster, profile);
         } catch (IOException ex) {
-            LOG.warn("Failed to transform image: '{}', error:", file.getName(), ex.getMessage());
+            LOG.warn("Failed to transform image: '{}', error: {}", file.getName(), ex.getMessage());
             image = null;
         } catch (ImageReadException ex) {
-            LOG.warn("Failed to transform image: '{}', error:", file.getName(), ex.getMessage());
+            LOG.warn("Failed to transform image: '{}', error: {}", file.getName(), ex.getMessage());
             image = null;
         } catch (CMMException ex) {
-            LOG.warn("Failed to transform image: '{}', error:", file.getName(), ex.getMessage());
+            LOG.warn("Failed to transform image: '{}', error: {}", file.getName(), ex.getMessage());
             image = null;
         }
         return image;

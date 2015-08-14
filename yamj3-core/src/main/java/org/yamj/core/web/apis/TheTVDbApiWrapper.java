@@ -39,7 +39,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.yamj.core.CachingNames;
 import org.yamj.core.config.ConfigService;
-import org.yamj.core.config.LocaleService;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 import org.yamj.core.web.ResponseTools;
 
@@ -53,8 +52,6 @@ public class TheTVDbApiWrapper {
 
     @Autowired
     private ConfigService configService;
-    @Autowired
-    private LocaleService localeService;
     @Autowired
     private TheTVDBApi tvdbApi;
     
@@ -124,16 +121,14 @@ public class TheTVDbApiWrapper {
      * @param year
      * @return
      */
-    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #title, #year}")
-    public String getSeriesId(String title, int year, boolean throwTempError) {
+    public String getSeriesId(String title, int year, String language, boolean throwTempError) {
         String tvdbId = null;
 
         try {
-            String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
             String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
-            if (altLanguage.equalsIgnoreCase(defaultLanguage)) altLanguage = null;
+            if (altLanguage.equalsIgnoreCase(language)) altLanguage = null;
             
-            List<Series> seriesList = tvdbApi.searchSeries(title, defaultLanguage);
+            List<Series> seriesList = tvdbApi.searchSeries(title, language);
             if (CollectionUtils.isEmpty(seriesList) && StringUtils.isNotBlank(altLanguage)) {
                 seriesList = tvdbApi.searchSeries(title, altLanguage);
             }
@@ -186,19 +181,22 @@ public class TheTVDbApiWrapper {
         return (actorList == null ? new ArrayList<Actor>() : actorList);
     }
 
-    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id, #season}")
-    public List<Episode> getSeasonEpisodes(String id, int season) {
+    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id, #season, #language}")
+    public List<Episode> getSeasonEpisodes(String id, int season, String language, boolean throwTempError) {
         List<Episode> episodeList = null;
 
         try {
-            String defaultLanguage = localeService.getLocaleForConfig("thetvdb").getLanguage();
             String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
+            if (altLanguage.equalsIgnoreCase(language)) altLanguage = null;
 
-            episodeList = tvdbApi.getSeasonEpisodes(id, season, defaultLanguage);
+            episodeList = tvdbApi.getSeasonEpisodes(id, season, language);
             if (CollectionUtils.isEmpty(episodeList) && StringUtils.isNotBlank(altLanguage)) {
                 episodeList = tvdbApi.getSeasonEpisodes(id, season, altLanguage);
             }
         } catch (TvDbException ex) {
+            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+                throw new TemporaryUnavailableException("TheTVDb service temporary not available: " + ex.getResponseCode(), ex);
+            }
             LOG.error("Failed to get episodes for TVDb ID {} and season {}: {}", id, season, ex.getMessage());
             LOG.trace("TheTVDb error" , ex);
         }

@@ -32,9 +32,7 @@ import com.omertron.themoviedbapi.model.movie.MovieInfo;
 import com.omertron.themoviedbapi.model.person.PersonCreditList;
 import com.omertron.themoviedbapi.model.person.PersonFind;
 import com.omertron.themoviedbapi.model.person.PersonInfo;
-import com.omertron.themoviedbapi.model.tv.TVBasic;
-import com.omertron.themoviedbapi.model.tv.TVInfo;
-import com.omertron.themoviedbapi.model.tv.TVSeasonInfo;
+import com.omertron.themoviedbapi.model.tv.*;
 import com.omertron.themoviedbapi.results.ResultList;
 import com.omertron.themoviedbapi.tools.MethodSub;
 import java.util.Locale;
@@ -267,6 +265,21 @@ public class TheMovieDbApiWrapper {
             LOG.trace("TheMovieDb error", ex);
         }
         return mediaCreditList;
+    }
+
+    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #tmdbId, #season, #episode, #locale}", unless="#result==null")
+    public TVEpisodeInfo getEpisodeInfo(int tmdbId, int season, int episode, Locale locale, boolean throwTempError) {
+        TVEpisodeInfo tvEpisodeInfo = null;
+        try {
+            tvEpisodeInfo = tmdbApi.getEpisodeInfo(tmdbId, season, episode, locale.getLanguage());
+        } catch (MovieDbException ex) {
+            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+                throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
+            }
+            LOG.error("Failed to get episodes using TMDb ID {} and season {}: {}", tmdbId, season, ex.getMessage());
+            LOG.trace("TheMovieDb error", ex);
+        }
+        return tvEpisodeInfo;
     }
 
     @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #imdbId, #locale}", unless="#result==null")

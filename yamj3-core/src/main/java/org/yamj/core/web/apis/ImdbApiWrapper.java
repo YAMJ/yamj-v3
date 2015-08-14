@@ -98,7 +98,6 @@ public class ImdbApiWrapper {
         return (imdbMovieDetails == null ? new ImdbMovieDetails() : imdbMovieDetails);
     }
         
-    // no caching
     public String getMovieDetailsXML(final String imdbId, boolean throwTempError) throws IOException {
         DigestedResponse response;
         try {
@@ -218,7 +217,6 @@ public class ImdbApiWrapper {
         return webpage;
     }
 
-    // no caching
     public String getPersonBioXML(final String imdbId, boolean throwTempError) throws IOException {
         DigestedResponse response;
         try {
@@ -237,7 +235,6 @@ public class ImdbApiWrapper {
         return response.getContent();
     }
 
-    // no caching
     public Set<String> getProductionStudios(String imdbId) {
         Set<String> studios = new LinkedHashSet<>();
         try {
@@ -256,26 +253,6 @@ public class ImdbApiWrapper {
         return studios;
     }
 
-    // no caching
-    public Set<String> getCertifications(String imdbId) {
-        Set<String> studios = new LinkedHashSet<>();
-        try {
-            DigestedResponse response = httpClient.requestContent(ImdbApiWrapper.getImdbUrl(imdbId, "companycredits"), CHARSET);
-            if (ResponseTools.isNotOK(response)) {
-                LOG.warn("Requesting studios failed with status {}: {}", response.getStatusCode(), imdbId);
-            } else {
-                List<String> tags = HTMLTools.extractTags(response.getContent(), "Production Companies</h4>", "</ul>", HTML_A_START, HTML_A_END);
-                for (String tag : tags) {
-                    studios.add(HTMLTools.removeHtmlTags(tag));
-                }
-            }
-        } catch (Exception ex) {
-            LOG.error("Failed to retrieve studios: " + imdbId, ex);
-        }
-        return studios;
-    }
-
-    // no caching
     public Map<String, String> getCertifications(String imdbId, Locale imdbLocale) {
         Map<String, String> certifications = new HashMap<>();
         
@@ -354,7 +331,6 @@ public class ImdbApiWrapper {
         return HTMLTools.stripTags(value);
     }
 
-    // no caching
     public Set<AwardDTO> getAwards(String imdbId) {
         HashSet<AwardDTO> awards = new HashSet<>();
   

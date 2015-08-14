@@ -322,13 +322,6 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
     @Override
     public String getSeasonId(Season season) {
-        // locale for TMDb
-        final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
-
-        return getSeasonId(season, tmdbLocale, false);
-    }
-
-    private String getSeasonId(Season season, Locale tmdbLocale, boolean throwTempError) {
         String tmdbId = season.getSourceDbId(SCANNER_ID);
         if (StringUtils.isNumeric(tmdbId)) {
             return tmdbId;
@@ -337,7 +330,8 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
         if (StringUtils.isNumeric(seriesId)) {
             // get season id from series
-            TVSeasonInfo seasonInfo = tmdbApiWrapper.getSeasonInfo(Integer.parseInt(seriesId), season.getSeason(), tmdbLocale, throwTempError);
+            final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
+            TVSeasonInfo seasonInfo = tmdbApiWrapper.getSeasonInfo(Integer.parseInt(seriesId), season.getSeason(), tmdbLocale, false);
             if (seasonInfo != null) {
                 tmdbId = String.valueOf(seasonInfo.getId());
                 season.setSourceDbId(SCANNER_ID, tmdbId);
@@ -349,10 +343,25 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         
     @Override
     public String getEpisodeId(VideoData videoData) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+        String tmdbId = videoData.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNumeric(tmdbId)) {
+            return tmdbId;
+        }
 
+        String seriesId = videoData.getSeason().getSeries().getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNumeric(seriesId)) {
+            // get episode id from series and season
+            final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
+            TVEpisodeInfo episodeInfo = tmdbApiWrapper.getEpisodeInfo(Integer.parseInt(seriesId), videoData.getSeason().getSeason(), videoData.getEpisode(), tmdbLocale, false);
+            if (episodeInfo != null) {
+                tmdbId = String.valueOf(episodeInfo.getId());
+                videoData.setSourceDbId(SCANNER_ID, tmdbId);
+            }
+        }
+        
+        return tmdbId;
+    }
+    
     @Override
     public ScanResult scan(Series series) {
         // locale for TMDb
@@ -379,7 +388,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
         if (tvInfo == null) {
             LOG.error("Can't find informations for series '{}'", series.getTitle());
-            return ScanResult.ERROR;
+            return ScanResult.NO_RESULT;
         }
 
         if (OverrideTools.checkOverwriteTitle(series, SCANNER_ID)) {
