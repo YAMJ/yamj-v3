@@ -40,7 +40,7 @@ public class CastCrew implements Serializable {
     @Column(name = "role", length = 255)
     private String role;
 
-    @Column(name = "voiceRole", nullable = false)
+    @Column(name = "voice_role", nullable = false)
     private boolean voiceRole = false;
     
     @Column(name = "ordering", nullable = false)
