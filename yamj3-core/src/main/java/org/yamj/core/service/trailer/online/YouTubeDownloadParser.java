@@ -35,8 +35,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.core.database.model.type.ContainerType;
 import org.yamj.core.service.trailer.TrailerDownloadDTO;
-import org.yamj.core.service.trailer.TrailerDownloadDTO.Container;
 import org.yamj.core.web.PoolingHttpClient;
 
 @Service("youTubeDownloadParser")
@@ -57,10 +57,10 @@ public class YouTubeDownloadParser  {
     }
 
     static final class StreamInfo {
-        public final Container container;
+        public final ContainerType container;
         public final Quality quality;
 
-        public StreamInfo(Container container, Quality quality) {
+        public StreamInfo(ContainerType container, Quality quality) {
             this.container = container;
             this.quality = quality;
         }
@@ -87,29 +87,29 @@ public class YouTubeDownloadParser  {
     static final Map<Integer, StreamInfo> ITAG_MAP = new HashMap<Integer, StreamInfo>() {
         private static final long serialVersionUID = 6207047619035836958L;
         {
-            put(120, new StreamInfo(Container.FLV, Quality.p720));
-            put(102, new StreamInfo(Container.WEBM, Quality.p720));
-            put(101, new StreamInfo(Container.WEBM, Quality.p360));
-            put(100, new StreamInfo(Container.WEBM, Quality.p360));
-            put(85, new StreamInfo(Container.MP4, Quality.p1080));
-            put(84, new StreamInfo(Container.MP4,Quality.p720));
-            put(83, new StreamInfo(Container.MP4, Quality.p240));
-            put(82, new StreamInfo(Container.MP4, Quality.p360));
-            put(46, new StreamInfo(Container.WEBM, Quality.p1080));
-            put(45, new StreamInfo(Container.WEBM, Quality.p720));
-            put(44, new StreamInfo(Container.WEBM, Quality.p480));
-            put(43, new StreamInfo(Container.WEBM, Quality.p360));
-            put(38, new StreamInfo(Container.MP4, Quality.p3072));
-            put(37, new StreamInfo(Container.MP4, Quality.p1080));
-            put(36, new StreamInfo(Container.GP3, Quality.p240));
-            put(35, new StreamInfo(Container.FLV, Quality.p480));
-            put(34, new StreamInfo(Container.FLV, Quality.p360));
-            put(22, new StreamInfo(Container.MP4, Quality.p720));
-            put(18, new StreamInfo(Container.MP4, Quality.p360));
-            put(17, new StreamInfo(Container.GP3, Quality.p144));
-            put(13, new StreamInfo(Container.GP3, Quality.p144));
-            put(6, new StreamInfo(Container.FLV, Quality.p270));
-            put(5, new StreamInfo(Container.FLV, Quality.p240));
+            put(120, new StreamInfo(ContainerType.FLV, Quality.p720));
+            put(102, new StreamInfo(ContainerType.WEBM, Quality.p720));
+            put(101, new StreamInfo(ContainerType.WEBM, Quality.p360));
+            put(100, new StreamInfo(ContainerType.WEBM, Quality.p360));
+            put(85, new StreamInfo(ContainerType.MP4, Quality.p1080));
+            put(84, new StreamInfo(ContainerType.MP4,Quality.p720));
+            put(83, new StreamInfo(ContainerType.MP4, Quality.p240));
+            put(82, new StreamInfo(ContainerType.MP4, Quality.p360));
+            put(46, new StreamInfo(ContainerType.WEBM, Quality.p1080));
+            put(45, new StreamInfo(ContainerType.WEBM, Quality.p720));
+            put(44, new StreamInfo(ContainerType.WEBM, Quality.p480));
+            put(43, new StreamInfo(ContainerType.WEBM, Quality.p360));
+            put(38, new StreamInfo(ContainerType.MP4, Quality.p3072));
+            put(37, new StreamInfo(ContainerType.MP4, Quality.p1080));
+            put(36, new StreamInfo(ContainerType.GP3, Quality.p240));
+            put(35, new StreamInfo(ContainerType.FLV, Quality.p480));
+            put(34, new StreamInfo(ContainerType.FLV, Quality.p360));
+            put(22, new StreamInfo(ContainerType.MP4, Quality.p720));
+            put(18, new StreamInfo(ContainerType.MP4, Quality.p360));
+            put(17, new StreamInfo(ContainerType.GP3, Quality.p144));
+            put(13, new StreamInfo(ContainerType.GP3, Quality.p144));
+            put(6, new StreamInfo(ContainerType.FLV, Quality.p270));
+            put(5, new StreamInfo(ContainerType.FLV, Quality.p240));
         }
     };
 

@@ -33,6 +33,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.type.ContainerType;
 
 @Entity
 @Table(name = "trailer",
@@ -67,6 +68,10 @@ public class Trailer extends AbstractAuditable implements Serializable {
 
     @Column(name = "source", nullable = false, length = 50)
     private String source;
+
+    @Type(type = "containerType")
+    @Column(name = "container", nullable = false, length = 10)
+    private ContainerType container;
 
     @Column(name = "hash_code", nullable = false, length = 100)
     private String hashCode;
@@ -127,6 +132,14 @@ public class Trailer extends AbstractAuditable implements Serializable {
 
     public void setSource(String source) {
         this.source = source;
+    }
+
+    public ContainerType getContainer() {
+        return container;
+    }
+
+    public void setContainer(ContainerType container) {
+        this.container = container;
     }
 
     public String getHashCode() {

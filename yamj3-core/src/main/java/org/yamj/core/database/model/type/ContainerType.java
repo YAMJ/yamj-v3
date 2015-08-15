@@ -20,33 +20,20 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.trailer;
+package org.yamj.core.database.model.type;
 
-import java.net.URL;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.yamj.core.database.model.type.ContainerType;
-
-public class TrailerDownloadDTO {
-
-    private final ContainerType container;
-    private final URL url;
-
-    public TrailerDownloadDTO(ContainerType container, URL url) {
-        this.container = container;
-        this.url = url;
-    }
+public enum ContainerType {
     
-    public ContainerType getContainer() {
-        return container;
-    }
+    MP4,
+    FLV,
+    GP3,
+    WEBM;
     
-    public URL getUrl() {
-        return url;
-    }
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    public static ContainerType fromString(String containerType) {
+        try {
+            return ContainerType.valueOf(containerType.trim().toUpperCase());
+        } catch (NullPointerException | IllegalArgumentException ex) {
+            return MP4;
+        }
     }
 }

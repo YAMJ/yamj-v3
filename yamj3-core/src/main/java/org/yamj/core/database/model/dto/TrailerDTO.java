@@ -23,20 +23,23 @@
 package org.yamj.core.database.model.dto;
 
 import org.apache.commons.lang3.builder.*;
+import org.yamj.core.database.model.type.ContainerType;
 
 public final class TrailerDTO {
 
+    private final ContainerType container;
     private final String source;
     private final String url;
     private final String title;
     private final String hashCode;
     
-    public TrailerDTO(String source, String url) {
-        this(source, url, null);
+    public TrailerDTO(String source, ContainerType container, String url) {
+        this(source, container, url, null);
     }
 
-    public TrailerDTO(String source, String url, String title) {
+    public TrailerDTO(String source, ContainerType container, String url, String title) {
         this.source = source;
+        this.container = container;
         this.url = url;
         this.title = title;
         
@@ -44,8 +47,9 @@ public final class TrailerDTO {
         this.hashCode = String.valueOf(iHashCode < 0 ? 0-iHashCode : iHashCode);
     }
 
-    public TrailerDTO(String source, String url, String title, String hashCode) {
+    public TrailerDTO(String source, ContainerType container, String url, String title, String hashCode) {
         this.source = source;
+        this.container = container;
         this.url = url;
         this.title = title;
         this.hashCode = hashCode;
@@ -53,6 +57,10 @@ public final class TrailerDTO {
 
     public String getSource() {
         return source;
+    }
+
+    public ContainerType getContainer() {
+        return container;
     }
 
     public String getUrl() {

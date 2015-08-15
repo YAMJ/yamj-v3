@@ -32,11 +32,11 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.Trailer;
 import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.type.ContainerType;
 import org.yamj.core.database.service.TrailerStorageService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.file.StorageType;
-import org.yamj.core.service.trailer.TrailerDownloadDTO.Container;
 import org.yamj.core.service.trailer.online.YouTubeDownloadParser;
 
 @Service("trailerProcessorService")
@@ -82,7 +82,7 @@ public class TrailerProcessorService {
         } else {
             try {
                 // defaults to MP4 and URL
-                dto = new TrailerDownloadDTO(TrailerDownloadDTO.Container.MP4, new URL(trailer.getUrl()));
+                dto = new TrailerDownloadDTO(trailer.getContainer(), new URL(trailer.getUrl()));
             } catch (Exception e) {
                 LOG.warn("Malformed URL: {}", trailer.getUrl());
             }
@@ -123,7 +123,7 @@ public class TrailerProcessorService {
         trailerStorageService.updateTrailer(trailer);
     }
 
-    private static String buildCacheFilename(Trailer trailer, Container container) {
+    private static String buildCacheFilename(Trailer trailer, ContainerType container) {
         StringBuilder sb = new StringBuilder();
         
         // 1. video name
@@ -149,7 +149,7 @@ public class TrailerProcessorService {
         // 3. extension
         switch (container) {
         case FLV:
-            sb.append("mp4");
+            sb.append("flv");
             break;
         case WEBM:
             sb.append("webm");

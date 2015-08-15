@@ -36,7 +36,9 @@
     @TypeDef(name = "intervalType", typeClass = EnumStringUserType.class,
         parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.IntervalType")}),
     @TypeDef(name = "imageType", typeClass = EnumStringUserType.class,
-        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ImageType")})
+        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ImageType")}),
+    @TypeDef(name = "containerType", typeClass = EnumStringUserType.class,
+        parameters = {@Parameter(name = "enumClassName", value = "org.yamj.core.database.model.type.ContainerType")})
 })
 package org.yamj.core.database.model;
 

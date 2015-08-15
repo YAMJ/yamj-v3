@@ -44,6 +44,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.TrailerDTO;
+import org.yamj.core.database.model.type.ContainerType;
 import org.yamj.core.service.trailer.TrailerScannerService;
 
 @Service("youTubeTrailerScanner")
@@ -137,7 +138,7 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
                 for (SearchResult item : searchResponse.getItems()) {
                     ResourceId resourceId = item.getId();
                     if (resourceId.getKind().equals("youtube#video")) {
-                        trailers.add(new TrailerDTO(SCANNER_ID,
+                        trailers.add(new TrailerDTO(SCANNER_ID, ContainerType.MP4,
                                         YouTubeDownloadParser.TRAILER_BASE_URL + resourceId.getVideoId(),
                                         item.getSnippet().getTitle(),
                                         resourceId.getVideoId()));

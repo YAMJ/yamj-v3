@@ -151,6 +151,7 @@ public class TrailerScannerService {
         for (TrailerDTO dto : trailerDTOs) {
             Trailer trailer = new Trailer();
             trailer.setVideoData(videoData);
+            trailer.setContainer(dto.getContainer());
             trailer.setSource(dto.getSource());
             trailer.setUrl(dto.getUrl());
             trailer.setTitle(dto.getTitle());
@@ -181,13 +182,13 @@ public class TrailerScannerService {
         LOG.trace("Scan online for trailer of series {}-'{}'", series.getId(), series.getTitle());
 
         List<TrailerDTO> trailerDTOs = null;
-        for (String prio : this.configService.getPropertyAsList("yamj3.trailer.scanner.series.priorities", YouTubeTrailerScanner.SCANNER_ID)) {
+        loop: for (String prio : this.configService.getPropertyAsList("yamj3.trailer.scanner.series.priorities", YouTubeTrailerScanner.SCANNER_ID)) {
             ISeriesTrailerScanner scanner = registeredSeriesTrailerScanner.get(prio);
             if (scanner != null) {
                 LOG.debug("Scanning series trailers for '{}' using {}", series.getTitle(), scanner.getScannerName());
                 trailerDTOs = scanner.getTrailers(series);
                 if (CollectionUtils.isNotEmpty(trailerDTOs)) {
-                    break;
+                    break loop;
                 }
             } else {
                 LOG.warn("Desired series trailer scanner {} not registerd", prio);
@@ -212,6 +213,7 @@ public class TrailerScannerService {
         for (TrailerDTO dto : trailerDTOs) {
             Trailer trailer = new Trailer();
             trailer.setSeries(series);
+            trailer.setContainer(dto.getContainer());
             trailer.setSource(dto.getSource());
             trailer.setUrl(dto.getUrl());
             trailer.setHashCode(dto.getHashCode());
