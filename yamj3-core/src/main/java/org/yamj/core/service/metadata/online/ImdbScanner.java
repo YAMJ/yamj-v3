@@ -772,7 +772,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             CreditDTO creditDTO = new CreditDTO(SCANNER_ID, person.getActorId(), jobType, person.getName());
             creditDTO.setRole(cast.getCharacter());
             creditDTO.setVoice(StringUtils.contains(cast.getAttr(), "(voice"));
-            creditDTO.addPhotoURL(photoURL);
             videoData.addCreditDTO(creditDTO);
         }
     }

@@ -195,7 +195,7 @@ public class VideoData extends AbstractMetadata {
     private final Collection<BoxedSetDTO> boxedSetDTOS = new HashSet<>(0);
 
     @Transient
-    private final Collection<CreditDTO> creditDTOS = new LinkedHashSet<>(0);
+    private final Collection<CreditDTO> creditDTOS = new LinkedHashSet<>();
 
     @Transient
     private final Collection<ArtworkDetailDTO> posterDTOS = new HashSet<>(0);

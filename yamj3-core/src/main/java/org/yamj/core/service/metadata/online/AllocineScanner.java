@@ -134,135 +134,6 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         return allocineId;
     }
 
-    @Override
-    public ScanResult scan(VideoData videoData) {
-        MovieInfos movieInfos = null;
-        try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
-            String allocineId = getMovieId(videoData, throwTempError);
-
-            if (StringUtils.isBlank(allocineId)) {
-                LOG.debug("Allocine id not available '{}'", videoData.getTitle());
-                return ScanResult.MISSING_ID;
-            }
-
-            movieInfos = allocineApiWrapper.getMovieInfos(allocineId, throwTempError);
-        } catch (TemporaryUnavailableException ex) {
-            // check retry
-            int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.movie", 0);
-            if (videoData.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
-            }
-        }
-        
-        if (movieInfos.isNotValid()) {
-            LOG.error("Can't find informations for movie '{}'", videoData.getTitle());
-            return ScanResult.NO_RESULT;
-        }
-
-        // fill in data
-        
-        if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
-            videoData.setTitle(movieInfos.getTitle(), SCANNER_ID);
-        }
-        if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID)) {
-            videoData.setTitleOriginal(movieInfos.getOriginalTitle(), SCANNER_ID);
-        }
-
-        if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID)) {
-            int year = movieInfos.getProductionYear();
-            videoData.setPublicationYear(year, SCANNER_ID);
-        }
-            
-        if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-            videoData.setPlot(movieInfos.getSynopsis(), SCANNER_ID);
-        }
-
-        if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-            videoData.setOutline(movieInfos.getSynopsisShort(), SCANNER_ID);
-        }
-
-        if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-            String releaseCountryCode = localeService.findCountryCode(movieInfos.getReleaseState());
-            Date releaseDate = MetadataTools.parseToDate(movieInfos.getReleaseDate());
-            videoData.setRelease(releaseCountryCode, releaseDate, SCANNER_ID);
-        }
-                
-        if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
-            videoData.setGenreNames(movieInfos.getGenres(), SCANNER_ID);
-        }
-
-        if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
-            String studioName = movieInfos.getDistributor();
-            if (StringUtils.isNotBlank(studioName)) {
-                Set<String> studioNames = Collections.singleton(studioName);
-                videoData.setStudioNames(studioNames, SCANNER_ID);
-            }
-        }
-        
-        if (CollectionUtils.isNotEmpty(movieInfos.getNationalities()) && OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
-            Set<String> countryCodes = new HashSet<>();
-            for (String country : movieInfos.getNationalities()) {
-                String countryCode = localeService.findCountryCode(country);
-                if (countryCode != null) countryCodes.add(countryCode);
-            }
-            videoData.setCountryCodes(countryCodes, SCANNER_ID);
-        }
-      
-        // certification
-        videoData.addCertificationInfo(Locale.FRANCE.getCountry(), movieInfos.getCertification());
-
-        // allocine rating
-        videoData.addRating(SCANNER_ID, movieInfos.getUserRating());
-
-        // DIRECTORS
-        if (configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
-            for (MoviePerson person : movieInfos.getDirectors()) {
-                videoData.addCreditDTO(createCredit(person, JobType.DIRECTOR));
-            }
-        }
-        
-        // WRITERS
-        if (configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
-            for (MoviePerson person : movieInfos.getWriters()) {
-                videoData.addCreditDTO(createCredit(person, JobType.WRITER));
-            }
-        }
-        
-        // ACTORS
-        if (configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
-            for (MoviePerson person : movieInfos.getActors()) {
-                CreditDTO credit = createCredit(person, JobType.ACTOR);
-                credit.setRole(person.getRole());
-                videoData.addCreditDTO(credit);
-            }
-        }
-        
-        // CAMERA    
-        if (configServiceWrapper.isCastScanEnabled(JobType.CAMERA)) {
-            for (MoviePerson person : movieInfos.getCamera()) {
-                videoData.addCreditDTO(createCredit(person, JobType.CAMERA));
-            }
-        }
-        
-        // PRODUCERS        
-        if (configServiceWrapper.isCastScanEnabled(JobType.PRODUCER)) {
-            for (MoviePerson person : movieInfos.getProducers()) {
-                videoData.addCreditDTO(createCredit(person, JobType.PRODUCER));
-            }
-        }
-
-        // add awards
-        if (configServiceWrapper.getBooleanProperty("allocine.movie.awards", Boolean.FALSE)) {
-            if (CollectionUtils.isNotEmpty(movieInfos.getFestivalAwards())) {
-                for (FestivalAward festivalAward : movieInfos.getFestivalAwards()) {
-                    videoData.addAwardDTO(festivalAward.getFestival(), festivalAward.getName(), SCANNER_ID, festivalAward.getYear());
-                }
-            }
-        }
-        
-        return ScanResult.OK;
-    }
 
     @Override
     public String getSeriesId(Series series) {
@@ -392,6 +263,136 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     }
 
     @Override
+    public ScanResult scan(VideoData videoData) {
+        MovieInfos movieInfos = null;
+        try {
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
+            String allocineId = getMovieId(videoData, throwTempError);
+
+            if (StringUtils.isBlank(allocineId)) {
+                LOG.debug("Allocine id not available '{}'", videoData.getIdentifier());
+                return ScanResult.MISSING_ID;
+            }
+
+            movieInfos = allocineApiWrapper.getMovieInfos(allocineId, throwTempError);
+        } catch (TemporaryUnavailableException ex) {
+            // check retry
+            int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.movie", 0);
+            if (videoData.getRetries() < maxRetries) {
+                return ScanResult.RETRY;
+            }
+        }
+        
+        if (movieInfos.isNotValid()) {
+            LOG.error("Can't find informations for movie '{}'", videoData.getIdentifier());
+            return ScanResult.NO_RESULT;
+        }
+
+        // fill in data
+        
+        if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
+            videoData.setTitle(movieInfos.getTitle(), SCANNER_ID);
+        }
+        if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID)) {
+            videoData.setTitleOriginal(movieInfos.getOriginalTitle(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteYear(videoData, SCANNER_ID)) {
+            int year = movieInfos.getProductionYear();
+            videoData.setPublicationYear(year, SCANNER_ID);
+        }
+            
+        if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
+            videoData.setPlot(movieInfos.getSynopsis(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
+            videoData.setOutline(movieInfos.getSynopsisShort(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
+            String releaseCountryCode = localeService.findCountryCode(movieInfos.getReleaseState());
+            Date releaseDate = MetadataTools.parseToDate(movieInfos.getReleaseDate());
+            videoData.setRelease(releaseCountryCode, releaseDate, SCANNER_ID);
+        }
+                
+        if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
+            videoData.setGenreNames(movieInfos.getGenres(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
+            String studioName = movieInfos.getDistributor();
+            if (StringUtils.isNotBlank(studioName)) {
+                Set<String> studioNames = Collections.singleton(studioName);
+                videoData.setStudioNames(studioNames, SCANNER_ID);
+            }
+        }
+        
+        if (CollectionUtils.isNotEmpty(movieInfos.getNationalities()) && OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
+            Set<String> countryCodes = new HashSet<>();
+            for (String country : movieInfos.getNationalities()) {
+                String countryCode = localeService.findCountryCode(country);
+                if (countryCode != null) countryCodes.add(countryCode);
+            }
+            videoData.setCountryCodes(countryCodes, SCANNER_ID);
+        }
+      
+        // certification
+        videoData.addCertificationInfo(Locale.FRANCE.getCountry(), movieInfos.getCertification());
+
+        // allocine rating
+        videoData.addRating(SCANNER_ID, movieInfos.getUserRating());
+
+        // DIRECTORS
+        if (configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
+            for (MoviePerson person : movieInfos.getDirectors()) {
+                videoData.addCreditDTO(createCredit(person, JobType.DIRECTOR));
+            }
+        }
+        
+        // WRITERS
+        if (configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
+            for (MoviePerson person : movieInfos.getWriters()) {
+                videoData.addCreditDTO(createCredit(person, JobType.WRITER));
+            }
+        }
+        
+        // ACTORS
+        if (configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+            for (MoviePerson person : movieInfos.getActors()) {
+                CreditDTO credit = createCredit(person, JobType.ACTOR);
+                credit.setRole(person.getRole());
+                videoData.addCreditDTO(credit);
+            }
+        }
+        
+        // CAMERA    
+        if (configServiceWrapper.isCastScanEnabled(JobType.CAMERA)) {
+            for (MoviePerson person : movieInfos.getCamera()) {
+                videoData.addCreditDTO(createCredit(person, JobType.CAMERA));
+            }
+        }
+        
+        // PRODUCERS        
+        if (configServiceWrapper.isCastScanEnabled(JobType.PRODUCER)) {
+            for (MoviePerson person : movieInfos.getProducers()) {
+                videoData.addCreditDTO(createCredit(person, JobType.PRODUCER));
+            }
+        }
+
+        // add awards
+        if (configServiceWrapper.getBooleanProperty("allocine.movie.awards", Boolean.FALSE)) {
+            if (CollectionUtils.isNotEmpty(movieInfos.getFestivalAwards())) {
+                for (FestivalAward festivalAward : movieInfos.getFestivalAwards()) {
+                    videoData.addAwardDTO(festivalAward.getFestival(), festivalAward.getName(), SCANNER_ID, festivalAward.getYear());
+                }
+            }
+        }
+        
+        return ScanResult.OK;
+    }
+
+    @Override
     public ScanResult scan(Series series) {
         TvSeriesInfos tvSeriesInfos = null;
         try {
@@ -399,7 +400,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             String allocineId = getSeriesId(series, throwTempError);
 
             if (StringUtils.isBlank(allocineId)) {
-                LOG.debug("Allocine id not available '{}'", series.getTitle());
+                LOG.debug("Allocine id not available '{}'", series.getIdentifier());
                 return ScanResult.MISSING_ID;
             }
 
@@ -413,7 +414,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
         
         if (tvSeriesInfos.isNotValid()) {
-            LOG.error("Can't find informations for series '{}'", series.getTitle());
+            LOG.error("Can't find informations for series '{}'", series.getIdentifier());
             return ScanResult.NO_RESULT;
         }
         
@@ -476,6 +477,104 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         return ScanResult.OK;
     }
 
+    //@Override
+    public ScanResult scan(Season season) {
+        TvSeasonInfos tvSeasonInfos = null;
+        TvSeriesInfos tvSeriesInfos = null;
+        try {
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
+            String allocineId = getSeasonId(season, throwTempError);
+
+            if (StringUtils.isBlank(allocineId)) {
+                LOG.debug("Allocine id not available '{}'", season.getIdentifier());
+                return ScanResult.MISSING_ID;
+            }
+
+            tvSeasonInfos = allocineApiWrapper.getTvSeasonInfos(allocineId, throwTempError);
+            
+            String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
+            tvSeriesInfos = allocineApiWrapper.getTvSeriesInfos(seriesId, throwTempError);
+        } catch (TemporaryUnavailableException ex) {
+            // check retry
+            int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.tvshow", 0);
+            if (season.getRetries() < maxRetries) {
+                return ScanResult.RETRY;
+            }
+        }
+        
+        if (tvSeasonInfos.isNotValid()) {
+            LOG.error("Can't find informations for series '{}'", season.getIdentifier());
+            return ScanResult.NO_RESULT;
+        }
+        
+        // use values from series
+        if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
+            season.setTitle(tvSeriesInfos.getTitle(), SCANNER_ID);
+        }
+        if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
+            season.setTitle(tvSeriesInfos.getOriginalTitle(), SCANNER_ID);
+        }
+        if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
+            season.setPlot(tvSeriesInfos.getSynopsis(), SCANNER_ID);
+        }
+        if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
+            season.setOutline(tvSeriesInfos.getSynopsisShort(), SCANNER_ID);
+        }
+        if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
+            season.setPublicationYear(tvSeasonInfos.getYearStart(), SCANNER_ID);
+        }
+        
+        return ScanResult.OK;
+    }
+    
+    public ScanResult scanEpisode(VideoData videoData) {
+        EpisodeInfos episodeInfos = null;
+        try {
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
+            String allocineId = getEpisodeId(videoData, throwTempError);
+
+            if (StringUtils.isBlank(allocineId)) {
+                LOG.debug("Allocine id not available '{}'", videoData.getIdentifier());
+                return ScanResult.MISSING_ID;
+            }
+
+            episodeInfos = allocineApiWrapper.getEpisodeInfos(allocineId, throwTempError);
+        } catch (TemporaryUnavailableException ex) {
+            // check retry
+            int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.tvshow", 0);
+            if (videoData.getRetries() < maxRetries) {
+                return ScanResult.RETRY;
+            }
+        }
+
+        if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
+            videoData.setTitle(episodeInfos.getTitle(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID)) {
+            videoData.setTitleOriginal(episodeInfos.getOriginalTitle(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
+            videoData.setPlot(episodeInfos.getSynopsis(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
+            videoData.setOutline(episodeInfos.getSynopsisShort(), SCANNER_ID);
+        }
+        
+        if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
+            Date releaseDate = MetadataTools.parseToDate(episodeInfos.getOriginalBroadcastDate());
+            videoData.setRelease(releaseDate, SCANNER_ID);
+        }
+        
+        //  parse credits
+        parseCredits(videoData, episodeInfos.getEpisode().getCastMember());
+        
+        return ScanResult.OK;
+    }
+    
+    @Deprecated
     private void scanSeasons(Series series, TvSeriesInfos tvSeriesInfos) {
 
         for (Season season : series.getSeasons()) {
@@ -519,6 +618,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
     }
 
+    @Deprecated
     private void scanEpisodes(Season season, TvSeasonInfos tvSeasonInfos) {
         if (season.isTvEpisodesScanned(SCANNER_ID)) {
             // nothing to do anymore
@@ -628,18 +728,12 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     
     private static CreditDTO createCredit(CastMember member, JobType jobType) {
         String sourceId = (member.getShortPerson().getCode() > 0 ?  String.valueOf(member.getShortPerson().getCode()) : null);
-        CreditDTO credit = new CreditDTO(SCANNER_ID, sourceId, jobType, member.getShortPerson().getName());
-        if (member.getPicture() != null) {
-            credit.addPhotoURL(member.getPicture().getHref());
-        }
-        return credit;
+        return new CreditDTO(SCANNER_ID, sourceId, jobType, member.getShortPerson().getName());
     }
 
     private static CreditDTO createCredit(MoviePerson person, JobType jobType) {
         String sourceId = (person.getCode() > 0 ?  String.valueOf(person.getCode()) : null);
-        CreditDTO credit = new CreditDTO(SCANNER_ID, sourceId, jobType, person.getName());
-        credit.addPhotoURL(person.getPhotoURL());
-        return credit;
+        return new CreditDTO(SCANNER_ID, sourceId, jobType, person.getName());
     }
 
     @Override

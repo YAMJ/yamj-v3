@@ -31,6 +31,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.common.tools.StringTools;
 import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.PersonNameDTO;
 
@@ -47,7 +48,7 @@ public final class CreditDTO {
     private String role;
     private boolean voice = false;
     private Long personId;
-    private final Set<String> photoURLS = new HashSet<>();
+    private Set<ArtworkDetailDTO> photoDTOS;
     
     public CreditDTO(String source, JobType jobType, String name) {
         this(source, null, jobType, name, null);
@@ -180,13 +181,14 @@ public final class CreditDTO {
         this.personId = personId;
     }
 
-    public Set<String> getPhotoURLS() {
-        return photoURLS;
+    public Set<ArtworkDetailDTO> getPhotoDTOS() {
+        return photoDTOS;
     }
 
-    public void addPhotoURL(String photoURL) {
-        if (StringUtils.isNotBlank(photoURL)) {
-            this.photoURLS.add(photoURL.trim());
+    public void addPhoto(String source, String url) {
+        if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(url)) {
+            if (photoDTOS == null) photoDTOS = new HashSet<>(1);
+            this.photoDTOS.add(new ArtworkDetailDTO(source, url));
         }
     }
 

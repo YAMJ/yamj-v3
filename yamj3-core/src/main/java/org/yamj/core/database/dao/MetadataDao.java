@@ -23,7 +23,9 @@
 package org.yamj.core.database.dao;
 
 import java.util.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.SQLQuery;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,12 +36,16 @@ import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
+import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.tools.OverrideTools;
 
 @Transactional
 @Repository("metadataDao")
 public class MetadataDao extends HibernateDao {
 
+    @Autowired
+    private ArtworkDao artworkDao;
+    
     private static final String IDENTIFIER = "identifier";
 
     public List<QueueDTO> getMetadataQueue(final CharSequence sql, final int maxResults) {
@@ -85,7 +91,7 @@ public class MetadataDao extends HibernateDao {
         return getById(Person.class, id);
     }
 
-    public void storePerson(CreditDTO dto) {
+    public void storeMovieCredit(CreditDTO dto) {
         Person person = getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, dto.getIdentifier());
         
         if (person == null) {
@@ -99,6 +105,14 @@ public class MetadataDao extends HibernateDao {
             person.setStatus(StatusType.NEW);
             person.setFilmographyStatus(StatusType.NEW);
             this.saveEntity(person);
+
+            // store artwork
+            Artwork photo = new Artwork();
+            photo.setArtworkType(ArtworkType.PHOTO);
+            photo.setPerson(person);
+            photo.setStatus(StatusType.NEW);
+            person.setPhoto(photo);
+            this.saveEntity(photo);
         } else {
             // these values are not regarded for updating status
             if (OverrideTools.checkOverwriteFirstName(person, dto.getSource())) {
@@ -114,8 +128,7 @@ public class MetadataDao extends HibernateDao {
             if (person.setSourceDbId(dto.getSource(), dto.getSourceId())) {
                 // if IDs have changed then person update is needed
                 person.setStatus(StatusType.UPDATED);
-            }
-            if (StatusType.DELETED.equals(person.getStatus())) {
+            } else if (StatusType.DELETED.equals(person.getStatus())) {
                 // if previously deleted then set as updated now
                 person.setStatus(StatusType.UPDATED);
             }
@@ -124,8 +137,27 @@ public class MetadataDao extends HibernateDao {
             this.updateEntity(person);
         }
         
+        if (CollectionUtils.isEmpty(dto.getPhotoDTOS())) {
+            this.updateLocatedArtwork(person.getPhoto(), dto.getPhotoDTOS());
+        }
+
         // set person id for later use
         dto.setPersonId(person.getId());
+    }
+
+    public void updateLocatedArtwork(Artwork artwork, Collection<ArtworkDetailDTO> dtos) {
+        for (ArtworkDetailDTO dto : dtos) {
+            ArtworkLocated located = new ArtworkLocated();
+            located.setArtwork(artwork);
+            located.setSource(dto.getSource());
+            located.setUrl(dto.getUrl());
+            located.setHashCode(dto.getHashCode());
+            located.setPriority(5);
+            located.setImageType(dto.getImageType());
+            located.setStatus(StatusType.NEW);
+            
+            artworkDao.saveArtworkLocated(artwork, located);
+        }
     }
 
     public List<Artwork> findPersonArtworks(String identifier) {

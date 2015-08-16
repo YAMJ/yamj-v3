@@ -115,14 +115,14 @@ public abstract class AbstractScannable extends AbstractAuditable
     
     public final void addModifiedSource(String source) {
         if (!"all".equalsIgnoreCase(source)) {
-            if (modifiedSources == null) modifiedSources = new HashSet<>(0);
+            if (modifiedSources == null) modifiedSources = new HashSet<>(1);
             modifiedSources.add(source);
         }
     }
 
     public final void addModifiedSources(Set<String> sources) {
         if (CollectionUtils.isNotEmpty(sources)) {
-            if (modifiedSources == null) modifiedSources = new HashSet<>();
+            if (modifiedSources == null) modifiedSources = new HashSet<>(sources.size());
             modifiedSources.addAll(sources);
         }
     }

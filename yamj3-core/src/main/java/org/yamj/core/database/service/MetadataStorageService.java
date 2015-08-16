@@ -39,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.CachingNames;
-import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.MetadataDao;
 import org.yamj.core.database.model.*;
@@ -49,7 +48,6 @@ import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
-import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.tools.GenreXmlTools;
 
 @Service("metadataStorageService")
@@ -67,8 +65,6 @@ public class MetadataStorageService {
     private CommonDao commonDao;
     @Autowired
     private MetadataDao metadataDao;
-    @Autowired
-    private ArtworkDao artworkDao;
 
     @Transactional(readOnly = true)
     public List<QueueDTO> getMetaDataQueueForScanning(final int maxResults) {
@@ -169,7 +165,7 @@ public class MetadataStorageService {
             for (CreditDTO creditDTO : videoData.getCreditDTOS()) {
                 PERSON_STORAGE_LOCK.lock();
                 try {
-                    this.metadataDao.storePerson(creditDTO);
+                    this.metadataDao.storeMovieCredit(creditDTO);
                 } catch (Exception ex) {
                     LOG.error("Failed to store person '{}', error: {}", creditDTO.getName(), ex.getMessage());
                     LOG.trace("Storage error", ex);
@@ -179,7 +175,7 @@ public class MetadataStorageService {
             }
         }
     }
-
+    
     /**
      * Store associated entities, like genres or cast.
      *
@@ -331,17 +327,6 @@ public class MetadataStorageService {
         person.fixScannedValues();
         person.setLastScanned(new Date(System.currentTimeMillis()));
         metadataDao.updateEntity(person);
-
-        // store artwork
-        Artwork photo = person.getPhoto();
-        if (photo == null) {
-            photo = new Artwork();
-            photo.setArtworkType(ArtworkType.PHOTO);
-            photo.setPerson(person);
-            photo.setStatus(StatusType.NEW);
-            person.setPhoto(photo);
-            this.artworkDao.saveEntity(photo);
-        }
 
         // update artwork
         this.updateLocatedArtwork(person);
@@ -848,11 +833,11 @@ public class MetadataStorageService {
         
         if (CollectionUtils.isNotEmpty(videoData.getPosterDTOS())) {
             Artwork artwork = videoData.getArtwork(ArtworkType.POSTER);
-            updateLocatedArtwork(artwork, videoData.getPosterDTOS());
+            this.metadataDao.updateLocatedArtwork(artwork, videoData.getPosterDTOS());
         }
         if (CollectionUtils.isNotEmpty(videoData.getFanartDTOS())) {
             Artwork artwork = videoData.getArtwork(ArtworkType.FANART);
-            updateLocatedArtwork(artwork, videoData.getFanartDTOS());
+            this.metadataDao.updateLocatedArtwork(artwork, videoData.getFanartDTOS());
         }
     }
 
@@ -874,27 +859,12 @@ public class MetadataStorageService {
         }
     }
 
-    private void updateLocatedArtwork(Artwork artwork, Collection<ArtworkDetailDTO> dtos) {
-        for (ArtworkDetailDTO dto : dtos) {
-            ArtworkLocated located = new ArtworkLocated();
-            located.setArtwork(artwork);
-            located.setSource(dto.getSource());
-            located.setUrl(dto.getUrl());
-            located.setHashCode(dto.getHashCode());
-            located.setPriority(5);
-            located.setImageType(dto.getImageType());
-            located.setStatus(StatusType.NEW);
-            
-            artworkDao.saveArtworkLocated(artwork, located);
-        }
-    }
-
     @Transactional
     public void errorVideoData(Long id) {
         VideoData videoData = metadataDao.getById(VideoData.class, id);
         if (videoData != null) {
             videoData.setStatus(StatusType.ERROR);
-            metadataDao.updateEntity(videoData);
+            this.metadataDao.updateEntity(videoData);
         }
     }
 
@@ -903,7 +873,7 @@ public class MetadataStorageService {
         Series series = metadataDao.getById(Series.class, id);
         if (series != null) {
             series.setStatus(StatusType.ERROR);
-            metadataDao.updateEntity(series);
+            this.metadataDao.updateEntity(series);
         }
     }
 
@@ -913,7 +883,7 @@ public class MetadataStorageService {
         Person person = metadataDao.getById(Person.class, id);
         if (person != null) {
             person.setStatus(StatusType.ERROR);
-            metadataDao.updateEntity(person);
+            this.metadataDao.updateEntity(person);
         }
     }
 
@@ -923,7 +893,7 @@ public class MetadataStorageService {
         Person person = metadataDao.getById(Person.class, id);
         if (person != null) {
             person.setFilmographyStatus(StatusType.ERROR);
-            metadataDao.updateEntity(person);
+            this.metadataDao.updateEntity(person);
         }
     }
 
