@@ -121,6 +121,7 @@ public class TheTVDbApiWrapper {
      * @param year
      * @return
      */
+    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #title, #year, #language}")
     public String getSeriesId(String title, int year, String language, boolean throwTempError) {
         String tvdbId = null;
 
@@ -135,17 +136,17 @@ public class TheTVDbApiWrapper {
 
             if (CollectionUtils.isNotEmpty(seriesList)) {
                 Series series = null;
-                for (Series s : seriesList) {
+                loop: for (Series s : seriesList) {
                     if (s.getFirstAired() != null && !s.getFirstAired().isEmpty() && (year > YEAR_MIN && year < YEAR_MAX)) {
                         DateTime firstAired = DateTime.parse(s.getFirstAired());
                         firstAired.getYear();
                         if (firstAired.getYear() == year) {
                             series = s;
-                            break;
+                            break loop;
                         }
                     } else {
                         series = s;
-                        break;
+                        break loop;
                     }
                 }
 

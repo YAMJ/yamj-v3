@@ -314,7 +314,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             String imdbId = getSeriesId(series, throwTempError);
             
             if (StringUtils.isBlank(imdbId)) {
-                LOG.debug("IMDb id not available: {}", series.getTitle());
+                LOG.debug("IMDb id not available: {}", series.getIdentifier());
                 return ScanResult.MISSING_ID;
             }
 
@@ -325,14 +325,14 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             // check retry
             int maxRetries = this.configServiceWrapper.getIntProperty("imdb.maxRetries.tvshow", 0);
             if (series.getRetries() < maxRetries) {
-                LOG.info("IMDb service temporary not available; trigger retry: '{}'", series.getTitle());
+                LOG.info("IMDb service temporary not available; trigger retry: '{}'", series.getIdentifier());
                 return ScanResult.RETRY;
             }
-            LOG.warn("IMDb service temporary not available; no retry: '{}'", series.getTitle());
+            LOG.warn("IMDb service temporary not available; no retry: '{}'", series.getIdentifier());
             return ScanResult.ERROR;
             
         } catch (IOException ioe) {
-            LOG.error("IMDb service error: '" + series.getTitle() + "'", ioe);
+            LOG.error("IMDb service error: '" + series.getIdentifier() + "'", ioe);
             return ScanResult.ERROR;
         }
     }
@@ -423,14 +423,105 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
     @Override
     public ScanResult scanSeason(Season season) {
-        // TODO scan season
-        return ScanResult.NO_RESULT;
+        try {
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("imdb.throwError.tempUnavailable", Boolean.TRUE);
+
+            String imdbId = getSeasonId(season);
+            return updateSeason(season, imdbId, throwTempError);
+            
+        } catch (TemporaryUnavailableException tue) {
+            // check retry
+            int maxRetries = this.configServiceWrapper.getIntProperty("imdb.maxRetries.tvshow", 0);
+            if (season.getRetries() < maxRetries) {
+                LOG.info("IMDb service temporary not available; trigger retry: '{}'", season.getIdentifier());
+                return ScanResult.RETRY;
+            }
+            LOG.warn("IMDb service temporary not available; no retry: '{}'", season.getIdentifier());
+            return ScanResult.ERROR;
+            
+        } catch (IOException ioe) {
+            LOG.error("IMDb service error: '" + season.getIdentifier() + "'", ioe);
+            return ScanResult.ERROR;
+        }
+    }
+
+    private ScanResult updateSeason(Season season, String imdbId, boolean throwTempError) throws IOException {
+        Locale imdbLocale = localeService.getLocaleForConfig("imdb");
+        ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId, imdbLocale);
+        if (StringUtils.isBlank(movieDetails.getImdbId())) {
+            return ScanResult.NO_RESULT;
+        }
+        
+        // check type change
+        if (!"tv_series".equals(movieDetails.getType())) {
+            return ScanResult.TYPE_CHANGE;
+        }
+
+        // ORIGINAL TITLE
+        if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
+            // movie details XML is still needed for original title
+            final String xml = imdbApiWrapper.getMovieDetailsXML(imdbId, throwTempError);
+            final String headerXml = HTMLTools.extractTag(xml, "<h1 class=\"header\">", "</h1>");
+            final String titleOriginal = parseOriginalTitle(headerXml);
+            season.setTitleOriginal(titleOriginal, SCANNER_ID);
+        }
+
+        // TITLE
+        if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
+            season.setTitle(movieDetails.getTitle(), SCANNER_ID);
+        }
+
+        // PLOT
+        if (movieDetails.getBestPlot() != null && OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
+            season.setPlot(movieDetails.getBestPlot().getSummary(), SCANNER_ID);
+        }
+
+        // OUTLINE
+        if (movieDetails.getPlot() != null && OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
+            season.setOutline(movieDetails.getPlot().getOutline(), SCANNER_ID);
+        }
+
+        // YEAR
+        if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
+            Map<Integer, ImdbEpisodeDTO> episodes = getEpisodes(imdbId, season.getSeason(), imdbLocale);
+
+            Date publicationYear = null;
+            for (ImdbEpisodeDTO episode : episodes.values()) {
+                if (publicationYear == null) {
+                    publicationYear = episode.getReleaseDate();
+                } else if (episode.getReleaseDate() != null && publicationYear.after(episode.getReleaseDate())) {
+                    // previous episode
+                    publicationYear = episode.getReleaseDate();
+                }
+            }
+            season.setPublicationYear(MetadataTools.extractYearAsInt(publicationYear), SCANNER_ID);
+        }
+
+        return ScanResult.OK;
     }
 
     @Override
     public ScanResult scanEpisode(VideoData videoData) {
-        // TODO scan episode
-        return ScanResult.NO_RESULT;
+        String imdbId = getEpisodeId(videoData);
+        if (StringUtils.isBlank(imdbId)) {
+            return ScanResult.MISSING_ID;
+        }
+        
+        Locale imdbLocale = localeService.getLocaleForConfig("imdb");
+        ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId, imdbLocale);
+        if (StringUtils.isBlank(movieDetails.getImdbId())) {
+            return ScanResult.NO_RESULT;
+        }
+
+        // check type change
+        if (!"tv_episode".equals(movieDetails.getType())) {
+            return ScanResult.TYPE_CHANGE;
+        }
+
+        // update common values for movie and episodes
+        updateCommonMovieEpisode(videoData, movieDetails, imdbId, imdbLocale);
+
+        return ScanResult.OK;
     }
 
     @Deprecated

@@ -97,6 +97,7 @@ public class ImdbApiWrapper {
         return (imdbMovieDetails == null ? new ImdbMovieDetails() : imdbMovieDetails);
     }
         
+    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId}")
     public String getMovieDetailsXML(final String imdbId, boolean throwTempError) throws IOException {
         DigestedResponse response;
         try {
