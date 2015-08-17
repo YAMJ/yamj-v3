@@ -105,22 +105,23 @@ public class TheTVDbScanner implements ISeriesScanner {
     }
 
     private String getEpisodeId(VideoData videoData, Locale tvdbLocale, boolean throwTempError) {
-        String allocineId = videoData.getSourceDbId(SCANNER_ID);
+        String tvdbId = videoData.getSourceDbId(SCANNER_ID);
         
-        if (StringUtils.isBlank(allocineId)) {
+        if (StringUtils.isBlank(tvdbId)) {
             // NOTE: seriesId = seasonId
             String seasonId = videoData.getSeason().getSourceDbId(SCANNER_ID);
             if (StringUtils.isNotBlank(seasonId)) {
                 final int seasonNumber = videoData.getSeason().getSeason();
                 final int episodeNumber = videoData.getEpisode();
                 Episode tvdbEpisode = tvdbApiWrapper.getEpisode(seasonId, seasonNumber, episodeNumber, tvdbLocale.getLanguage(), throwTempError);
-                allocineId = tvdbEpisode.getId();
-                videoData.setSourceDbId(SCANNER_ID, allocineId);
+                if (tvdbEpisode != null) {
+                    tvdbId = tvdbEpisode.getId();
+                    videoData.setSourceDbId(SCANNER_ID, tvdbId);
+                }
             }
-          
         }
 
-        return allocineId;
+        return tvdbId;
     }
     
     @Override
@@ -239,7 +240,7 @@ public class TheTVDbScanner implements ISeriesScanner {
 
         if (StringUtils.isBlank(tvdbSeries.getId())) {
             LOG.error("Can't find informations for season '{}'", season.getIdentifier());
-            return ScanResult.ERROR;
+            return ScanResult.NO_RESULT;
         }
 
         // use values from series
@@ -295,7 +296,7 @@ public class TheTVDbScanner implements ISeriesScanner {
             }
         }
 
-        if (tvdbEpisode == null || StringUtils.isBlank(tvdbEpisode.getId())) {
+        if (StringUtils.isBlank(tvdbEpisode.getId())) {
             LOG.error("Can't find informations for episode '{}'", videoData.getIdentifier());
             return ScanResult.NO_RESULT;
         }

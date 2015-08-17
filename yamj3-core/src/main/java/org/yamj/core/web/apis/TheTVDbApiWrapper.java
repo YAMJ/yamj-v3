@@ -205,7 +205,6 @@ public class TheTVDbApiWrapper {
         return (episodeList == null ? new ArrayList<Episode>() : episodeList);
     }
 
-    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id, #season, #episode, #language}")
     public Episode getEpisode(String id, int season, int episode, String language, boolean throwTempError) {
         Episode tvdbEpisode = null;
         try {
@@ -224,7 +223,7 @@ public class TheTVDbApiWrapper {
             LOG.trace("TheTVDb error" , ex);
         }
         
-        return (tvdbEpisode == null ? new Episode() : tvdbEpisode);
+        return tvdbEpisode;
     }
 
     public Episode getEpisode(String id, String language, boolean throwTempError) {
@@ -245,6 +244,6 @@ public class TheTVDbApiWrapper {
             LOG.trace("TheTVDb error" , ex);
         }
         
-        return tvdbEpisode;
+        return (tvdbEpisode == null ? new Episode() : tvdbEpisode);
     }
 }

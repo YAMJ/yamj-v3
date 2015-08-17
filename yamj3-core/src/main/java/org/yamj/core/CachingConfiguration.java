@@ -56,7 +56,7 @@ public class CachingConfiguration implements CachingConfigurer {
                 // API caches
                 .cache(cacheConfig(CachingNames.API_TMDB, 500, 1800))
                 .cache(cacheConfig(CachingNames.API_TVDB, 500, 1800))
-                .cache(cacheConfig(CachingNames.API_ALLOCINE, 500, 600))
+                .cache(cacheConfig(CachingNames.API_ALLOCINE, 500, 1800))
                 .cache(cacheConfig(CachingNames.API_IMDB, 500, 1800))
                 .cache(cacheConfig(TMDB_ARTWORK, 100, 1800))
                 .cache(cacheConfig(ATTACHMENTS, 300, 600))

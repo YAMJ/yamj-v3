@@ -45,12 +45,9 @@ public class AllocineApiWrapper {
     @Autowired
     private AllocineApiSearch allocineApiSearch;
 
-    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #title, #year}")
     public String getAllocineMovieId(String title, int year, boolean throwTempError) {
         Search search = allocineApiSearch.searchMovies(title, throwTempError);
-        if (!search.isValid()) {
-            return StringUtils.EMPTY;
-        }
+        if (!search.isValid()) return null;
         
         // if we have a valid year try to find the first movie that match
         if (search.getTotalResults() > 1 && year > 0) {
@@ -76,15 +73,12 @@ public class AllocineApiWrapper {
         }
         
         // no id found
-        return StringUtils.EMPTY;
+        return null;
     }
 
-    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #title, #year}")
     public String getAllocineSeriesId(String title, int year, boolean throwTempError) {
         Search search = allocineApiSearch.searchTvSeries(title, throwTempError);
-        if (!search.isValid()) {
-            return StringUtils.EMPTY;
-        }
+        if (!search.isValid()) return null;
 
         // if we have a valid year try to find the first series that match
         if (search.getTotalResults() > 1 && year > 0) {
@@ -114,15 +108,12 @@ public class AllocineApiWrapper {
         }
         
         // no id found
-        return StringUtils.EMPTY;
+        return null;
     }
 
-    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #name}")
     public String getAllocinePersonId(String name, boolean throwTempError) {
         Search search = allocineApiSearch.searchPersons(name, throwTempError);
-        if (!search.isValid()) {
-            return StringUtils.EMPTY;
-        }
+        if (!search.isValid()) return null;
         
         // find for matching person
         if (search.getTotalResults() > 1) {
@@ -145,7 +136,7 @@ public class AllocineApiWrapper {
         }
         
         // no id found
-        return StringUtils.EMPTY;
+        return null;
     }
 
     @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #allocineId}")
@@ -208,7 +199,6 @@ public class AllocineApiWrapper {
         return (personInfos == null ? new PersonInfos() : personInfos);
     }
 
-    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #allocineId}")
     public FilmographyInfos getFilmographyInfos(String allocineId, boolean throwTempError) {
         FilmographyInfos filmographyInfos = null;
         try {
@@ -223,7 +213,6 @@ public class AllocineApiWrapper {
         return (filmographyInfos == null ? new FilmographyInfos() : filmographyInfos);
     }
 
-    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #allocineId}")
     public EpisodeInfos getEpisodeInfos(String allocineId, boolean throwTempError) {
         EpisodeInfos episodeInfos = null;
         try {

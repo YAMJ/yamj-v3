@@ -148,7 +148,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
 
             if (StringUtils.isBlank(allocineId) && StringUtils.isNotBlank(series.getTitleOriginal())) {
                 // try with original title
-                allocineId = allocineApiWrapper.getAllocineMovieId(series.getTitleOriginal(), series.getYear(), throwTempError);
+                allocineId = allocineApiWrapper.getAllocineSeriesId(series.getTitleOriginal(), series.getYear(), throwTempError);
             }
 
             if (StringUtils.isBlank(allocineId)) {

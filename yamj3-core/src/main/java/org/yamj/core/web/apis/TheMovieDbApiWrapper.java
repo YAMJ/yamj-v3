@@ -40,9 +40,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.yamj.core.CachingNames;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 import org.yamj.core.web.ResponseTools;
@@ -57,7 +55,6 @@ public class TheMovieDbApiWrapper {
     @Autowired
     private TheMovieDbApi tmdbApi;
     
-    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #title, #year}")
     public String getMovieId(String title, int year, Locale locale, boolean throwTempError) {
         boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
         int searchMatch = configService.getIntProperty("themoviedb.searchMatch", 3);
@@ -93,10 +90,9 @@ public class TheMovieDbApiWrapper {
             LOG.info("TMDB ID found {} for '{}'", movie.getId(), title);
             return String.valueOf(movie.getId());
         }
-        return StringUtils.EMPTY;
+        return null;
     }
 
-    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #title, #year}")
     public String getSeriesId(String title, int year, Locale locale, boolean throwTempError) {
         String id = null;
         TVBasic closestTV = null;
@@ -141,10 +137,9 @@ public class TheMovieDbApiWrapper {
             LOG.trace("TheMovieDb error", ex);
         }
         
-        return (id == null ? StringUtils.EMPTY : id);
+        return id;
     }
     
-    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #name}")
     public String getPersonId(String name, boolean throwTempError) {
         boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
 
@@ -188,14 +183,14 @@ public class TheMovieDbApiWrapper {
             LOG.trace("TheMovieDb error", ex);
         }
         
-        return (id == null ? StringUtils.EMPTY : id);
+        return id;
     }
 
-    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #tmdbId}", unless="#result==null")
     public PersonInfo getPersonInfo(int tmdbId, boolean throwTempError) {
-        PersonInfo person = null;
+        PersonInfo personInfo = null;
         try {
-            person = tmdbApi.getPersonInfo(tmdbId, "combined_credits");
+            personInfo = tmdbApi.getPersonInfo(tmdbId, MethodSub.COMBINED_CREDITS.getValue());
+            if (personInfo != null && personInfo.getId() <= 0) personInfo = null; 
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
@@ -204,14 +199,14 @@ public class TheMovieDbApiWrapper {
             LOG.trace("TheMovieDb error", ex);
         }
         
-        return person;
+        return personInfo;
     }
 
-    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #tmdbId, #locale}", unless="#result==null")
     public MovieInfo getMovieInfoByTMDB(int tmdbId, Locale locale, boolean throwTempError) {
-        MovieInfo movieDb = null;
+        MovieInfo movieInfo = null;
         try {
-            movieDb = tmdbApi.getMovieInfo(tmdbId, locale.getLanguage(), MethodSub.RELEASES.getValue(), MethodSub.CREDITS.getValue());
+            movieInfo = tmdbApi.getMovieInfo(tmdbId, locale.getLanguage(), MethodSub.RELEASES.getValue(), MethodSub.CREDITS.getValue());
+            if (movieInfo != null && movieInfo.getId() <= 0) movieInfo = null; 
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
@@ -219,14 +214,14 @@ public class TheMovieDbApiWrapper {
             LOG.error("Failed to get movie info using TMDb ID {}: {}", tmdbId, ex.getMessage());
             LOG.trace("TheMovieDb error", ex);
         }
-        return movieDb;
+        return movieInfo;
     }
 
-    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #tmdbId, #locale}", unless="#result==null")
     public TVInfo getSeriesInfo(int tmdbId, Locale locale, boolean throwTempError) {
         TVInfo tvInfo = null;
         try {
             tvInfo = tmdbApi.getTVInfo(tmdbId, locale.getLanguage());
+            if (tvInfo != null && tvInfo.getId() <= 0) tvInfo = null; 
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
@@ -237,11 +232,11 @@ public class TheMovieDbApiWrapper {
         return tvInfo;
     }
 
-    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #tmdbId, #season, #locale}", unless="#result==null")
     public TVSeasonInfo getSeasonInfo(int tmdbId, int season, Locale locale, boolean throwTempError) {
         TVSeasonInfo tvSeasonInfo = null;
         try {
             tvSeasonInfo = tmdbApi.getSeasonInfo(tmdbId, season, locale.getLanguage());
+            if (tvSeasonInfo != null && tvSeasonInfo.getId() <= 0) tvSeasonInfo = null; 
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
@@ -252,7 +247,7 @@ public class TheMovieDbApiWrapper {
         return tvSeasonInfo;
     }
 
-    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #tmdbId, #season}", unless="#result==null")
+    @Deprecated
     public MediaCreditList getSeasonCredits(int tmdbId, int season, boolean throwTempError) {
         MediaCreditList mediaCreditList = null;
         try {
@@ -267,11 +262,11 @@ public class TheMovieDbApiWrapper {
         return mediaCreditList;
     }
 
-    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #tmdbId, #season, #episode, #locale}", unless="#result==null")
     public TVEpisodeInfo getEpisodeInfo(int tmdbId, int season, int episode, Locale locale, boolean throwTempError) {
         TVEpisodeInfo tvEpisodeInfo = null;
         try {
-            tvEpisodeInfo = tmdbApi.getEpisodeInfo(tmdbId, season, episode, locale.getLanguage());
+            tvEpisodeInfo = tmdbApi.getEpisodeInfo(tmdbId, season, episode, locale.getLanguage(), MethodSub.CREDITS.getValue(), MethodSub.EXTERNAL_IDS.getValue());
+            if (tvEpisodeInfo != null && tvEpisodeInfo.getId() <= 0) tvEpisodeInfo = null; 
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
@@ -282,11 +277,11 @@ public class TheMovieDbApiWrapper {
         return tvEpisodeInfo;
     }
 
-    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #imdbId, #locale}", unless="#result==null")
     public MovieInfo getMovieInfoByIMDB(String imdbId, Locale locale, boolean throwTempError) {
         MovieInfo movieInfo = null;
         try {
             movieInfo = tmdbApi.getMovieInfoImdb(imdbId, locale.getLanguage(), MethodSub.RELEASES.getValue(), MethodSub.CREDITS.getValue());
+            if (movieInfo != null && movieInfo.getId() <= 0) movieInfo = null; 
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
@@ -297,7 +292,6 @@ public class TheMovieDbApiWrapper {
         return movieInfo;
     }
 
-    @Cacheable(value=CachingNames.API_TMDB, key="{#root.methodName, #tmdbId, #locale}", unless="#result==null")
     public PersonCreditList<CreditBasic> getPersonCredits(int tmdbId, Locale locale, boolean throwTempError) {
         try {
             return tmdbApi.getPersonCombinedCredits(tmdbId, locale.getLanguage());

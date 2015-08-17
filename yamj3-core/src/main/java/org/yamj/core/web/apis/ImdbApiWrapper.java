@@ -115,7 +115,6 @@ public class ImdbApiWrapper {
         return response.getContent();
     }
     
-    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId}")
     public List<ImdbCredit> getFullCast(String imdbId) {
         List<ImdbCredit> fullCast;
         imdbApiLock.lock();
