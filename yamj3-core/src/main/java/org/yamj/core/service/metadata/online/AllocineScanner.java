@@ -263,7 +263,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     }
 
     @Override
-    public ScanResult scan(VideoData videoData) {
+    public ScanResult scanMovie(VideoData videoData) {
         MovieInfos movieInfos = null;
         try {
             boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
@@ -393,7 +393,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     }
 
     @Override
-    public ScanResult scan(Series series) {
+    public ScanResult scanSeries(Series series) {
         TvSeriesInfos tvSeriesInfos = null;
         try {
             boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
@@ -477,8 +477,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         return ScanResult.OK;
     }
 
-    //@Override
-    public ScanResult scan(Season season) {
+    @Override
+    public ScanResult scanSeason(Season season) {
         TvSeasonInfos tvSeasonInfos = null;
         TvSeriesInfos tvSeriesInfos = null;
         try {
@@ -503,7 +503,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
         
         if (tvSeasonInfos.isNotValid()) {
-            LOG.error("Can't find informations for series '{}'", season.getIdentifier());
+            LOG.error("Can't find informations for season '{}'", season.getIdentifier());
             return ScanResult.NO_RESULT;
         }
         
@@ -527,6 +527,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         return ScanResult.OK;
     }
     
+    @Override
     public ScanResult scanEpisode(VideoData videoData) {
         EpisodeInfos episodeInfos = null;
         try {
@@ -545,6 +546,11 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             if (videoData.getRetries() < maxRetries) {
                 return ScanResult.RETRY;
             }
+        }
+
+        if (episodeInfos.isNotValid()) {
+            LOG.error("Can't find informations for episode '{}'", videoData.getIdentifier());
+            return ScanResult.NO_RESULT;
         }
 
         if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
@@ -737,14 +743,14 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     }
 
     @Override
-    public ScanResult scan(Person person) {
+    public ScanResult scanPerson(Person person) {
         PersonInfos  personInfos = null;
         try {
             boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
             String allocineId = getPersonId(person, throwTempError);
 
             if (StringUtils.isBlank(allocineId)) {
-                LOG.debug("Allocine id not available '{}'", person.getName());
+                LOG.debug("Allocine id not available '{}'", person.getIdentifier());
                 return ScanResult.MISSING_ID;
             }
 
@@ -758,7 +764,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
         
         if (personInfos.isNotValid()) {
-            LOG.error("Can't find informations for person '{}'", person.getName());
+            LOG.error("Can't find informations for person '{}'", person.getIdentifier());
             return ScanResult.NO_RESULT;
         }
         
@@ -813,7 +819,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             String allocineId = getPersonId(person, throwTempError);
 
             if (StringUtils.isBlank(allocineId)) {
-                LOG.debug("Allocine id not available '{}'", person.getName());
+                LOG.debug("Allocine id not available '{}'", person.getIdentifier());
                 return ScanResult.MISSING_ID;
             }
 
@@ -825,11 +831,9 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                 return ScanResult.RETRY;
             }
         }
-        if (filmographyInfos.isNotValid()) {
-            LOG.error("Can't find filmography for person '{}'", person.getName());
-            return ScanResult.ERROR;
-        } else if (CollectionUtils.isEmpty(filmographyInfos.getParticipances())) {
-            LOG.trace("No filmography present for person '{}'", person.getName());
+        
+        if (filmographyInfos.isNotValid() || CollectionUtils.isEmpty(filmographyInfos.getParticipances())) {
+            LOG.trace("No filmography present for person '{}'", person.getIdentifier());
             return ScanResult.NO_RESULT;
         }
         

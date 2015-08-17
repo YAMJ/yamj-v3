@@ -50,10 +50,10 @@ public class OfdbScannerTest extends AbstractJUnit4SpringContextTests {
     }
 
     @Test
-    public void testScan() {
+    public void testScanMovie() {
         VideoData videoData = new VideoData();
         videoData.setSourceDbId(ofdbScanner.getScannerName(), "http://www.ofdb.de/film/188514,Avatar---Aufbruch-nach-Pandora");
-        ofdbScanner.scan(videoData);
+        ofdbScanner.scanMovie(videoData);
 
         assertEquals("Avatar - Aufbruch nach Pandora", videoData.getTitle());
         assertEquals("Avatar", videoData.getTitleOriginal());

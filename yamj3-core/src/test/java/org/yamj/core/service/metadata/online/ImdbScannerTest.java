@@ -30,10 +30,7 @@ import javax.annotation.Resource;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.AwardDTO;
 import org.yamj.core.database.model.dto.CreditDTO;
 
@@ -48,7 +45,7 @@ public class ImdbScannerTest extends AbstractJUnit4SpringContextTests {
     public void testMovie() {
         VideoData videoData = new VideoData();
         videoData.setSourceDbId(imdbScanner.getScannerName(), "tt0499549");
-        imdbScanner.scan(videoData);
+        imdbScanner.scanMovie(videoData);
 
         assertEquals("Avatar - Aufbruch nach Pandora", videoData.getTitle());
         assertEquals("Avatar", videoData.getTitleOriginal());
@@ -91,7 +88,7 @@ public class ImdbScannerTest extends AbstractJUnit4SpringContextTests {
         episode2.setSeason(season);
         season.getVideoDatas().add(episode2);
         
-        imdbScanner.scan(series);
+        imdbScanner.scanSeries(series);
 
         assertEquals("Game of Thrones - Das Lied von Eis und Feuer", series.getTitle());
         assertEquals("Game of Thrones", series.getTitleOriginal());
@@ -114,7 +111,7 @@ public class ImdbScannerTest extends AbstractJUnit4SpringContextTests {
     public void testPerson() {
         Person person = new Person();
         person.setSourceDbId(imdbScanner.getScannerName(), "nm0001352");
-        imdbScanner.scan(person);
+        imdbScanner.scanPerson(person);
 
         assertEquals("Terence Hill", person.getName());
         assertEquals("Mario Girotti", person.getBirthName());

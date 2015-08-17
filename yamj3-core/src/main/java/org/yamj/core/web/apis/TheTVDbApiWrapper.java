@@ -181,6 +181,7 @@ public class TheTVDbApiWrapper {
         return (actorList == null ? new ArrayList<Actor>() : actorList);
     }
 
+    @Deprecated
     @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id, #season, #language}")
     public List<Episode> getSeasonEpisodes(String id, int season, String language, boolean throwTempError) {
         List<Episode> episodeList = null;
@@ -202,5 +203,48 @@ public class TheTVDbApiWrapper {
         }
         
         return (episodeList == null ? new ArrayList<Episode>() : episodeList);
+    }
+
+    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id, #season, #episode, #language}")
+    public Episode getEpisode(String id, int season, int episode, String language, boolean throwTempError) {
+        Episode tvdbEpisode = null;
+        try {
+            String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
+            if (altLanguage.equalsIgnoreCase(language)) altLanguage = null;
+
+            tvdbEpisode = tvdbApi.getEpisode(id, season, episode, language);
+            if (tvdbEpisode == null && StringUtils.isNotBlank(altLanguage)) {
+                tvdbEpisode = tvdbApi.getEpisode(id, season, episode, altLanguage);
+            }
+        } catch (TvDbException ex) {
+            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+                throw new TemporaryUnavailableException("TheTVDb service temporary not available: " + ex.getResponseCode(), ex);
+            }
+            LOG.error("Failed to get episode {} for TVDb ID {} and season {} : {}", episode, id, season, ex.getMessage());
+            LOG.trace("TheTVDb error" , ex);
+        }
+        
+        return (tvdbEpisode == null ? new Episode() : tvdbEpisode);
+    }
+
+    public Episode getEpisode(String id, String language, boolean throwTempError) {
+        Episode tvdbEpisode = null;
+        try {
+            String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
+            if (altLanguage.equalsIgnoreCase(language)) altLanguage = null;
+
+            tvdbEpisode = tvdbApi.getEpisodeById(id, language);
+            if (tvdbEpisode == null && StringUtils.isNotBlank(altLanguage)) {
+                tvdbEpisode = tvdbApi.getEpisodeById(id, altLanguage);
+            }
+        } catch (TvDbException ex) {
+            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+                throw new TemporaryUnavailableException("TheTVDb service temporary not available: " + ex.getResponseCode(), ex);
+            }
+            LOG.error("Failed to get episode for TVDb ID {}: {}", id, ex.getMessage());
+            LOG.trace("TheTVDb error" , ex);
+        }
+        
+        return tvdbEpisode;
     }
 }

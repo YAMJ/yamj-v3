@@ -28,5 +28,5 @@ public interface IPersonScanner extends IMetadataScanner {
 
     String getPersonId(Person person);
 
-    ScanResult scan(Person person);
+    ScanResult scanPerson(Person person);
 }

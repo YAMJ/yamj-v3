@@ -168,7 +168,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
     
     @Override
-    public ScanResult scan(VideoData videoData) {
+    public ScanResult scanMovie(VideoData videoData) {
         try {
             boolean throwTempError = configServiceWrapper.getBooleanProperty("imdb.throwError.tempUnavailable", Boolean.TRUE);
 
@@ -180,7 +180,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             }
 
             LOG.debug("IMDb id available ({}), updating movie", imdbId);
-            return updateVideoData(videoData, imdbId, throwTempError);
+            return updateMovie(videoData, imdbId, throwTempError);
             
         } catch (TemporaryUnavailableException tue) {
             // check retry
@@ -198,7 +198,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
     }
 
-    private ScanResult updateVideoData(VideoData videoData, String imdbId, boolean throwTempError) throws IOException {
+    private ScanResult updateMovie(VideoData videoData, String imdbId, boolean throwTempError) throws IOException {
         Locale imdbLocale = localeService.getLocaleForConfig("imdb");
         ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId, imdbLocale);
         if (StringUtils.isBlank(movieDetails.getImdbId())) {
@@ -213,8 +213,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         // movie details XML is still needed for some parts
         final String xml = imdbApiWrapper.getMovieDetailsXML(imdbId, throwTempError);
         
-        // update common values with episode
-        updateMovieOrEpisode(videoData, movieDetails, imdbId, imdbLocale);
+        // update common values for movie and episodes
+        updateCommonMovieEpisode(videoData, movieDetails, imdbId, imdbLocale);
         
         // ORIGINAL TITLE
         if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID)) {
@@ -265,7 +265,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
 
 
-    private void updateMovieOrEpisode(VideoData videoData, ImdbMovieDetails movieDetails, String imdbId, Locale imdbLocale) {
+    private void updateCommonMovieEpisode(VideoData videoData, ImdbMovieDetails movieDetails, String imdbId, Locale imdbLocale) {
         // TITLE
         if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
             videoData.setTitle(movieDetails.getTitle(), SCANNER_ID);
@@ -307,7 +307,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
     
     @Override
-    public ScanResult scan(Series series) {
+    public ScanResult scanSeries(Series series) {
         try {
             boolean throwTempError = configServiceWrapper.getBooleanProperty("imdb.throwError.tempUnavailable", Boolean.TRUE);
 
@@ -421,6 +421,19 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         return ScanResult.OK;
     }
 
+    @Override
+    public ScanResult scanSeason(Season season) {
+        // TODO scan season
+        return ScanResult.NO_RESULT;
+    }
+
+    @Override
+    public ScanResult scanEpisode(VideoData videoData) {
+        // TODO scan episode
+        return ScanResult.NO_RESULT;
+    }
+
+    @Deprecated
     private void scanSeasons(Series series, String imdbId, String title, String titleOriginal, String plot, String outline, Locale imdbLocale) {
         for (Season season : series.getSeasons()) {
 
@@ -478,6 +491,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
     }
 
+    @Deprecated
     private void scanEpisode(VideoData videoData, ImdbEpisodeDTO dto, Locale imdbLocale) {
         if (dto == null) {
             videoData.setTvEpisodeNotFound();
@@ -500,8 +514,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             return;
         }
         
-        // update common values with movie
-        updateMovieOrEpisode(videoData, movieDetails, dto.getImdbId(), imdbLocale);
+        // update common values for movie and episodes
+        updateCommonMovieEpisode(videoData, movieDetails, dto.getImdbId(), imdbLocale);
         
         // ORIGINAL TITLE
         if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID)) {
@@ -820,7 +834,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
 
     @Override
-    public ScanResult scan(Person person) {
+    public ScanResult scanPerson(Person person) {
         try {
             boolean throwTempError = configServiceWrapper.getBooleanProperty("imdb.throwError.tempUnavailable", Boolean.TRUE);
 

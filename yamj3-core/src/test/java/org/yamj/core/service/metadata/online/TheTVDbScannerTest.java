@@ -91,12 +91,12 @@ public class TheTVDbScannerTest extends AbstractJUnit4SpringContextTests {
         Series series = new Series();
 
         // Test that we get an error when scanning without an ID
-        ScanResult result = tvdbScanner.scan(series);
+        ScanResult result = tvdbScanner.scanSeries(series);
         assertEquals("Wrong ScanResult returned", ScanResult.MISSING_ID, result);
 
         series = new Series();
         series.setSourceDbId(PLUGIN_ID, "70726");
-        result = tvdbScanner.scan(series);
+        result = tvdbScanner.scanSeries(series);
 
         LOG.info("***** SERIES {} *****", ToStringBuilder.reflectionToString(series, ToStringStyle.MULTI_LINE_STYLE));
         assertEquals("Wrong ScanResult returned", ScanResult.OK, result);

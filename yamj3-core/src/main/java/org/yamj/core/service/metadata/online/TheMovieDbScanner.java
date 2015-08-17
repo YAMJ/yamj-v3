@@ -122,7 +122,98 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     }
 
     @Override
-    public ScanResult scan(VideoData videoData) {
+    public String getSeriesId(Series series) {
+        // locale for TMDb
+        final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
+
+        return getSeriesId(series, tmdbLocale, false);
+    }
+
+    private String getSeriesId(Series series, Locale tmdbLocale, boolean throwTempError) {
+        String tmdbId = series.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNumeric(tmdbId)) {
+            return tmdbId;
+        }
+
+        LOG.debug("No TMDb id found for '{}', searching title with year {}", series.getTitle(), series.getStartYear());
+        tmdbId = tmdbApiWrapper.getSeriesId(series.getTitle(), series.getStartYear(), tmdbLocale, throwTempError);
+
+        if (!StringUtils.isNumeric(tmdbId) && StringUtils.isNotBlank(series.getTitleOriginal())) {
+            LOG.debug("No TMDb id found for '{}', searching original title with year {}", series.getTitleOriginal(), series.getStartYear());
+            tmdbId = tmdbApiWrapper.getMovieId(series.getTitleOriginal(), series.getStartYear(), tmdbLocale, throwTempError);
+        }
+
+        if (StringUtils.isNumeric(tmdbId)) {
+            series.setSourceDbId(SCANNER_ID, tmdbId);
+            return tmdbId;
+        }
+
+        return null;
+    }
+
+    @Override
+    public String getSeasonId(Season season) {
+        String tmdbId = season.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNumeric(tmdbId)) {
+            return tmdbId;
+        }
+
+        String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNumeric(seriesId)) {
+            // get season id from series
+            final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
+            TVSeasonInfo seasonInfo = tmdbApiWrapper.getSeasonInfo(Integer.parseInt(seriesId), season.getSeason(), tmdbLocale, false);
+            if (seasonInfo != null) {
+                tmdbId = String.valueOf(seasonInfo.getId());
+                season.setSourceDbId(SCANNER_ID, tmdbId);
+            }
+        }
+        
+        return tmdbId;
+    }
+        
+    @Override
+    public String getEpisodeId(VideoData videoData) {
+        String tmdbId = videoData.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNumeric(tmdbId)) {
+            return tmdbId;
+        }
+
+        String seriesId = videoData.getSeason().getSeries().getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNumeric(seriesId)) {
+            // get episode id from series and season
+            final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
+            TVEpisodeInfo episodeInfo = tmdbApiWrapper.getEpisodeInfo(Integer.parseInt(seriesId), videoData.getSeason().getSeason(), videoData.getEpisode(), tmdbLocale, false);
+            if (episodeInfo != null) {
+                tmdbId = String.valueOf(episodeInfo.getId());
+                videoData.setSourceDbId(SCANNER_ID, tmdbId);
+            }
+        }
+        
+        return tmdbId;
+    }
+
+    @Override
+    public String getPersonId(Person person) {
+        return getPersonId(person, false);
+    }
+
+    private String getPersonId(Person person, boolean throwTempError) {
+        String tmdbId = person.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNumeric(tmdbId)) {
+            return tmdbId;
+        }
+
+        if (StringUtils.isNotBlank(person.getName())) {
+            tmdbId = tmdbApiWrapper.getPersonId(person.getName(), throwTempError);
+            person.setSourceDbId(SCANNER_ID, tmdbId);
+        }
+
+        return tmdbId;
+    }
+
+    @Override
+    public ScanResult scanMovie(VideoData videoData) {
         // locale for TMDb
         final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
 
@@ -132,7 +223,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             String tmdbId = getMovieId(videoData, tmdbLocale, throwTempError);
 
             if (!StringUtils.isNumeric(tmdbId)) {
-                LOG.debug("TMDb id not available '{}'", videoData.getTitle());
+                LOG.debug("TMDb id not available '{}'", videoData.getIdentifier());
                 return ScanResult.MISSING_ID;
             }
 
@@ -146,8 +237,8 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
 
         if (movieInfo == null) {
-            LOG.error("Can't find informations for movie '{}'", videoData.getTitle());
-            return ScanResult.ERROR;
+            LOG.error("Can't find informations for movie '{}'", videoData.getIdentifier());
+            return ScanResult.NO_RESULT;
         }
                         
         // fill in data
@@ -289,81 +380,9 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         
         return ScanResult.OK;
     }
-
-    @Override
-    public String getSeriesId(Series series) {
-        // locale for TMDb
-        final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
-
-        return getSeriesId(series, tmdbLocale, false);
-    }
-
-    private String getSeriesId(Series series, Locale tmdbLocale, boolean throwTempError) {
-        String tmdbId = series.getSourceDbId(SCANNER_ID);
-        if (StringUtils.isNumeric(tmdbId)) {
-            return tmdbId;
-        }
-
-        LOG.debug("No TMDb id found for '{}', searching title with year {}", series.getTitle(), series.getStartYear());
-        tmdbId = tmdbApiWrapper.getSeriesId(series.getTitle(), series.getStartYear(), tmdbLocale, throwTempError);
-
-        if (!StringUtils.isNumeric(tmdbId) && StringUtils.isNotBlank(series.getTitleOriginal())) {
-            LOG.debug("No TMDb id found for '{}', searching original title with year {}", series.getTitleOriginal(), series.getStartYear());
-            tmdbId = tmdbApiWrapper.getMovieId(series.getTitleOriginal(), series.getStartYear(), tmdbLocale, throwTempError);
-        }
-
-        if (StringUtils.isNumeric(tmdbId)) {
-            series.setSourceDbId(SCANNER_ID, tmdbId);
-            return tmdbId;
-        }
-
-        return null;
-    }
-
-    @Override
-    public String getSeasonId(Season season) {
-        String tmdbId = season.getSourceDbId(SCANNER_ID);
-        if (StringUtils.isNumeric(tmdbId)) {
-            return tmdbId;
-        }
-
-        String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
-        if (StringUtils.isNumeric(seriesId)) {
-            // get season id from series
-            final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
-            TVSeasonInfo seasonInfo = tmdbApiWrapper.getSeasonInfo(Integer.parseInt(seriesId), season.getSeason(), tmdbLocale, false);
-            if (seasonInfo != null) {
-                tmdbId = String.valueOf(seasonInfo.getId());
-                season.setSourceDbId(SCANNER_ID, tmdbId);
-            }
-        }
-        
-        return tmdbId;
-    }
-        
-    @Override
-    public String getEpisodeId(VideoData videoData) {
-        String tmdbId = videoData.getSourceDbId(SCANNER_ID);
-        if (StringUtils.isNumeric(tmdbId)) {
-            return tmdbId;
-        }
-
-        String seriesId = videoData.getSeason().getSeries().getSourceDbId(SCANNER_ID);
-        if (StringUtils.isNumeric(seriesId)) {
-            // get episode id from series and season
-            final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
-            TVEpisodeInfo episodeInfo = tmdbApiWrapper.getEpisodeInfo(Integer.parseInt(seriesId), videoData.getSeason().getSeason(), videoData.getEpisode(), tmdbLocale, false);
-            if (episodeInfo != null) {
-                tmdbId = String.valueOf(episodeInfo.getId());
-                videoData.setSourceDbId(SCANNER_ID, tmdbId);
-            }
-        }
-        
-        return tmdbId;
-    }
     
     @Override
-    public ScanResult scan(Series series) {
+    public ScanResult scanSeries(Series series) {
         // locale for TMDb
         final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
         
@@ -373,7 +392,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             String tmdbId = getSeriesId(series, tmdbLocale, throwTempError);
 
             if (!StringUtils.isNumeric(tmdbId)) {
-                LOG.debug("TMDb id not available '{}'", series.getTitle());
+                LOG.debug("TMDb id not available '{}'", series.getIdentifier());
                 return ScanResult.MISSING_ID;
             }
 
@@ -387,7 +406,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
 
         if (tvInfo == null) {
-            LOG.error("Can't find informations for series '{}'", series.getTitle());
+            LOG.error("Can't find informations for series '{}'", series.getIdentifier());
             return ScanResult.NO_RESULT;
         }
 
@@ -451,6 +470,19 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         return ScanResult.OK;
     }
     
+    @Override
+    public ScanResult scanSeason(Season season) {
+        // TODO scan season
+        return ScanResult.NO_RESULT;
+    }
+
+    @Override
+    public ScanResult scanEpisode(VideoData videoData) {
+        // TODO scan episode
+        return ScanResult.NO_RESULT;
+    }
+
+    @Deprecated
     private void scanSeasons(Series series, TVInfo tvInfo, Locale tmdbLocale) {
         
         for (Season season : series.getSeasons()) {
@@ -502,6 +534,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
     }
     
+    @Deprecated
     private void scanEpisodes(Season season, TVSeasonInfo seasonInfo, MediaCreditList mediaCreditList) {
         if (season.isTvEpisodesScanned(SCANNER_ID)) {
             // nothing to do anymore
@@ -602,33 +635,14 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     }
     
     @Override
-    public String getPersonId(Person person) {
-        return getPersonId(person, false);
-    }
-
-    private String getPersonId(Person person, boolean throwTempError) {
-        String tmdbId = person.getSourceDbId(SCANNER_ID);
-        if (StringUtils.isNumeric(tmdbId)) {
-            return tmdbId;
-        }
-
-        if (StringUtils.isNotBlank(person.getName())) {
-            tmdbId = tmdbApiWrapper.getPersonId(person.getName(), throwTempError);
-            person.setSourceDbId(SCANNER_ID, tmdbId);
-        }
-
-        return tmdbId;
-    }
-
-    @Override
-    public ScanResult scan(Person person) {
+    public ScanResult scanPerson(Person person) {
         PersonInfo tmdbPerson = null;
         try {
             boolean throwTempError = configServiceWrapper.getBooleanProperty("themoviedb.throwError.tempUnavailable", Boolean.TRUE);
             String tmdbId = getPersonId(person, throwTempError);
 
             if (!StringUtils.isNumeric(tmdbId)) {
-                LOG.debug("TMDb id not available '{}'", person.getName());
+                LOG.debug("TMDb id not available '{}'", person.getIdentifier());
                 return ScanResult.MISSING_ID;
             }
 
@@ -642,7 +656,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
 
         if (tmdbPerson == null) {
-            LOG.error("Can't find information for person '{}'", person.getName());
+            LOG.error("Can't find information for person '{}'", person.getIdentifier());
             return ScanResult.ERROR;
         }
 

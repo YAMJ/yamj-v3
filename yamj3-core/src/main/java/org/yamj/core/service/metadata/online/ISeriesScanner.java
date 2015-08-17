@@ -34,5 +34,9 @@ public interface ISeriesScanner extends INfoScanner {
 
     String getEpisodeId(VideoData videoData);
 
-    ScanResult scan(Series series);
+    ScanResult scanSeries(Series series);
+
+    ScanResult scanSeason(Season season);
+
+    ScanResult scanEpisode(VideoData videoData);
 }

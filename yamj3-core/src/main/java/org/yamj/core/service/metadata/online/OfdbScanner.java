@@ -22,9 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import org.yamj.core.web.apis.SearchEngineTools;
-
-import org.yamj.core.web.apis.ImdbSearchEngine;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -48,6 +45,8 @@ import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.HTMLTools;
 import org.yamj.core.web.PoolingHttpClient;
 import org.yamj.core.web.ResponseTools;
+import org.yamj.core.web.apis.ImdbSearchEngine;
+import org.yamj.core.web.apis.SearchEngineTools;
 
 @Service("ofdbScanner")
 public class OfdbScanner implements IMovieScanner {
@@ -220,37 +219,37 @@ public class OfdbScanner implements IMovieScanner {
     }
 
     @Override
-    public ScanResult scan(VideoData videoData) {
+    public ScanResult scanMovie(VideoData videoData) {
         try {
             boolean throwTempError = configServiceWrapper.getBooleanProperty("ofdb.throwError.tempUnavailable", Boolean.TRUE);
 
             String ofdbUrl = getMovieId(videoData, throwTempError);
     
             if (StringUtils.isBlank(ofdbUrl)) {
-                LOG.debug("OFDb url not available: {}", videoData.getTitle());
+                LOG.debug("OFDb url not available: {}", videoData.getIdentifier());
                 return ScanResult.MISSING_ID;
             }
     
             LOG.debug("OFDb url available ({}), updating video data", ofdbUrl);
-            return updateVideoData(videoData, ofdbUrl, throwTempError);
+            return updateMovie(videoData, ofdbUrl, throwTempError);
             
         } catch (TemporaryUnavailableException tue) {
             int maxRetries = this.configServiceWrapper.getIntProperty("ofdb.maxRetries.movie", 0);
             if (videoData.getRetries() < maxRetries) {
-                LOG.info("OFDb service temporary not available; trigger retry: '{}'", videoData.getTitle());
+                LOG.info("OFDb service temporary not available; trigger retry: '{}'", videoData.getIdentifier());
                 return ScanResult.RETRY;
             }
             
-            LOG.warn("OFDb service temporary not available; no retry: '{}'", videoData.getTitle());
+            LOG.warn("OFDb service temporary not available; no retry: '{}'", videoData.getIdentifier());
             return ScanResult.ERROR;
             
         } catch (IOException ioe) {
-            LOG.error("OFDb service error: '" + videoData.getTitle() + "'", ioe);
+            LOG.error("OFDb service error: '{}': {}", videoData.getIdentifier(), ioe.getMessage());
             return ScanResult.ERROR;
         }
     }
 
-    private ScanResult updateVideoData(VideoData videoData, String ofdbUrl, boolean throwTempError) throws IOException {
+    private ScanResult updateMovie(VideoData videoData, String ofdbUrl, boolean throwTempError) throws IOException {
         DigestedResponse response = httpClient.requestContent(ofdbUrl, charset);
         if (throwTempError && ResponseTools.isTemporaryError(response)) {
             throw new TemporaryUnavailableException("OFDb service is temporary not available: " + response.getStatusCode());
@@ -262,7 +261,7 @@ public class OfdbScanner implements IMovieScanner {
         String title = HTMLTools.extractTag(xml, "<title>OFDb -", "</title>");
         // check for movie type change
         if (title.contains("[TV-Serie]")) {
-            LOG.warn("{} is a TV Show, skipping", videoData.getTitle());
+            LOG.warn("{} is a TV Show, skipping", videoData.getIdentifier());
             return ScanResult.TYPE_CHANGE;
         }
         

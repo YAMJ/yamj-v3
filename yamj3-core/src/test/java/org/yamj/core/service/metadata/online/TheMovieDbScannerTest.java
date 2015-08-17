@@ -57,7 +57,7 @@ public class TheMovieDbScannerTest extends AbstractJUnit4SpringContextTests {
         LOG.info("testScanMovie");
         VideoData videoData = new VideoData();
         videoData.setSourceDbId(SCANNER_ID, "19995");
-        tmdbScanner.scan(videoData);
+        tmdbScanner.scanMovie(videoData);
     }
 
     @Test
@@ -97,7 +97,7 @@ public class TheMovieDbScannerTest extends AbstractJUnit4SpringContextTests {
         episode.setEpisode(5);
         episode.setSeason(season);
         season.getVideoDatas().add(episode);
-        tmdbScanner.scan(series);
+        tmdbScanner.scanSeries(series);
         
         System.err.println(episode.getTitle());
         for (CreditDTO credit : episode.getCreditDTOS()) {

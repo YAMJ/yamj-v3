@@ -86,7 +86,7 @@ public class OnlineScannerService {
         boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.movie.alternate.always", Boolean.FALSE);
         ScanResult scanResult = null;
         
-    	for (String scanner : MOVIE_SCANNER) {
+    	loop: for (String scanner : MOVIE_SCANNER) {
     	    // holds the inner scan result
     	    ScanResult innerResult = ScanResult.ERROR;
     	    
@@ -101,7 +101,7 @@ public class OnlineScannerService {
                         innerResult = ScanResult.SKIPPED;
                     } else {
                         LOG.info("Scanning movie data for '{}' using {}", videoData.getTitle(), movieScanner.getScannerName());
-                        innerResult = movieScanner.scan(videoData);
+                        innerResult = movieScanner.scanMovie(videoData);
                     }
                 } catch (Exception error) {
                     LOG.error("Failed scanning movie with {} scanner", movieScanner.getScannerName());
@@ -113,7 +113,7 @@ public class OnlineScannerService {
                 // scanned OK
                 scanResult = ScanResult.OK;
                 // no alternate scanning then break the loop
-                if (!useAlternate) break;
+                if (!useAlternate) break loop;
             } else if (ScanResult.SKIPPED.equals(innerResult)) {
                 // change nothing if scan skipped and force next scan
             } else {
@@ -154,7 +154,7 @@ public class OnlineScannerService {
         boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.series.alternate.always", Boolean.FALSE);
 		ScanResult scanResult = null;
 
-    	for (String scanner : SERIES_SCANNER) {
+    	loop: for (String scanner : SERIES_SCANNER) {
             // holds the inner scan result
             ScanResult innerResult = ScanResult.ERROR;
             
@@ -169,7 +169,7 @@ public class OnlineScannerService {
                         innerResult = ScanResult.SKIPPED;
                     } else {
                         LOG.info("Scanning series data for '{}' using {}", series.getTitle(), seriesScanner.getScannerName());
-                        innerResult = seriesScanner.scan(series);
+                        innerResult = seriesScanner.scanSeries(series);
                     }
                 } catch (Exception error) {
                     LOG.error("Failed scanning series data with {} scanner", seriesScanner.getScannerName());
@@ -181,7 +181,7 @@ public class OnlineScannerService {
                 // scanned OK
                 scanResult = ScanResult.OK;
                 // no alternate scanning then break the loop
-                if (!useAlternate) break;
+                if (!useAlternate) break loop;
             } else if (ScanResult.SKIPPED.equals(innerResult)) {
                 // change nothing if scan skipped and force next scan
             } else {
@@ -223,7 +223,7 @@ public class OnlineScannerService {
         boolean useAlternate = this.configService.getBooleanProperty("yamj3.sourcedb.scanner.person.alternate.always", Boolean.FALSE);
     	ScanResult scanResult = null;
         
-    	for (String scanner : PERSON_SCANNER) {
+    	loop: for (String scanner : PERSON_SCANNER) {
             // holds the inner scan result
             ScanResult innerResult = ScanResult.ERROR;
             
@@ -238,7 +238,7 @@ public class OnlineScannerService {
                         innerResult = ScanResult.SKIPPED;
                     } else {
                         LOG.info("Scanning person data for '{}' using {}", person.getName(), personScanner.getScannerName());
-                        innerResult = personScanner.scan(person);
+                        innerResult = personScanner.scanPerson(person);
                     }
                 } catch (Exception error) {
                     LOG.error("Failed scanning person (ID '{}') data with scanner {} ", person.getId(), personScanner.getScannerName());
@@ -250,7 +250,7 @@ public class OnlineScannerService {
                 // scanned OK
                 scanResult = ScanResult.OK;
                 // no alternate scanning then break the loop
-                if (!useAlternate) break;
+                if (!useAlternate) break loop;
             } else if (ScanResult.SKIPPED.equals(innerResult)) {
                 // change nothing if scan skipped and force next scan
             } else {
