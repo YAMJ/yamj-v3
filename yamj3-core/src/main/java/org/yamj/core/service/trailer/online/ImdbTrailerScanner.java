@@ -23,7 +23,6 @@
 package org.yamj.core.service.trailer.online;
 
 import com.omertron.imdbapi.model.ImdbEncodingFormat;
-import com.omertron.imdbapi.model.ImdbMovieDetails;
 import com.omertron.imdbapi.model.ImdbTrailer;
 import java.util.Collections;
 import java.util.List;
@@ -93,8 +92,7 @@ public class ImdbTrailerScanner implements IMovieTrailerScanner, ISeriesTrailerS
         }
         
         Locale imdbLocale = localeService.getLocaleForConfig("imdb");
-        ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId, imdbLocale);
-        final ImdbTrailer imdbTrailer = movieDetails.getTrailer();
+        ImdbTrailer imdbTrailer = imdbApiWrapper.getMovieDetails(imdbId, imdbLocale).getTrailer();
         if (imdbTrailer == null || MapUtils.isEmpty(imdbTrailer.getEncodings())) {
             return null;
         }

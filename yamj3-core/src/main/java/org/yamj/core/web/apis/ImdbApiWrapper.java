@@ -84,7 +84,6 @@ public class ImdbApiWrapper {
         return url;
     }
 
-    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId, #locale}")
     public ImdbMovieDetails getMovieDetails(String imdbId, Locale locale) {
         ImdbMovieDetails imdbMovieDetails;
         imdbApiLock.lock();
@@ -166,9 +165,6 @@ public class ImdbApiWrapper {
                 List<ImdbEpisodeDTO> episodes = new ArrayList<>();
                 int episodeCounter = 0;
                 for (ImdbMovie movie : season.getEpisodes()) {
-                    if (!"tv_episode".equals(movie.getType())) {
-                        continue;
-                    }
                     ImdbEpisodeDTO episode = new ImdbEpisodeDTO();
                     episode.setEpisode(++episodeCounter);
                     episode.setImdbId(movie.getImdbId());

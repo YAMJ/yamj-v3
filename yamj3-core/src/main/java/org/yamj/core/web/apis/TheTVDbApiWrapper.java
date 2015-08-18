@@ -121,7 +121,7 @@ public class TheTVDbApiWrapper {
      * @param year
      * @return
      */
-    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #title, #year, #language}")
+    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #title.toLowerCase(), #year, #language}")
     public String getSeriesId(String title, int year, String language, boolean throwTempError) {
         String tvdbId = null;
 
@@ -165,7 +165,6 @@ public class TheTVDbApiWrapper {
         return (tvdbId == null ? StringUtils.EMPTY : tvdbId);
     }
 
-    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id}")
     public List<Actor> getActors(String id, boolean throwTempError) {
         List<Actor> actorList = null;
         
@@ -200,7 +199,7 @@ public class TheTVDbApiWrapper {
         return year;
     }
         
-    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id, #season, #episode, #language}")
+    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id, #season, #episode, #language}", unless="#result==null")
     public Episode getEpisode(String id, int season, int episode, String language) {
         Episode tvdbEpisode = null;
         try {

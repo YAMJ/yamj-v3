@@ -448,7 +448,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             videoData.setTvEpisodeNotFound();
             return;
         }
-        
+
         videoData.setSourceDbId(SCANNER_ID, dto.getImdbId());
 
         // set other values

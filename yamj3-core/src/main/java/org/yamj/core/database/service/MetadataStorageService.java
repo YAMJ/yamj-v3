@@ -376,11 +376,6 @@ public class MetadataStorageService {
 
     @Transactional(timeout=120)
     public void updateScannedMetaData(VideoData videoData) {
-        // replace temporary done
-        if (StatusType.TEMP_DONE.equals(videoData.getStatus())) {
-            videoData.setStatus(StatusType.DONE);
-        }
-
         // update entity
         videoData.setLastScanned(new Date(System.currentTimeMillis()));
         metadataDao.updateEntity(videoData);
@@ -446,7 +441,13 @@ public class MetadataStorageService {
             metadataDao.updateEntity(season);
 
             for (VideoData videoData : season.getVideoDatas()) {
-                updateScannedMetaData(videoData);
+                if (!StatusType.DONE.equals(videoData.getStatus())) {
+                    // replace temporary done
+                    if (StatusType.TEMP_DONE.equals(videoData.getStatus())) {
+                        videoData.setStatus(StatusType.DONE);
+                    }
+                    updateScannedMetaData(videoData);
+                }
             }
         }
     }
