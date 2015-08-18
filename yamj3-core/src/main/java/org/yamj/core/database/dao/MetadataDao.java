@@ -46,8 +46,6 @@ public class MetadataDao extends HibernateDao {
     @Autowired
     private ArtworkDao artworkDao;
     
-    private static final String IDENTIFIER = "identifier";
-
     public List<QueueDTO> getMetadataQueue(final CharSequence sql, final int maxResults) {
         SQLQuery query = currentSession().createSQLQuery(sql.toString());
         query.setReadOnly(true);
@@ -137,7 +135,7 @@ public class MetadataDao extends HibernateDao {
             this.updateEntity(person);
         }
         
-        if (CollectionUtils.isEmpty(dto.getPhotoDTOS())) {
+        if (CollectionUtils.isNotEmpty(dto.getPhotoDTOS())) {
             this.updateLocatedArtwork(person.getPhoto(), dto.getPhotoDTOS());
         }
 

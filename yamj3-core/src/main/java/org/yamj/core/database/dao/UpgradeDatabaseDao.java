@@ -64,6 +64,16 @@ public class UpgradeDatabaseDao extends HibernateDao {
         return (object != null);
     }
 
+    private boolean existsIndex(String table, String indexName) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT * FROM information_schema.STATISTICS ");
+        sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
+        sb.append("AND TABLE_NAME = '").append(table).append("' ");
+        sb.append("AND INDEX_NAME = '").append(indexName).append("'");
+        Object object = currentSession().createSQLQuery(sb.toString()).uniqueResult();
+        return (object != null);
+    }
+
     private boolean existsUniqueIndex(String table, String indexName) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM information_schema.TABLE_CONSTRAINTS ");
@@ -561,6 +571,46 @@ public class UpgradeDatabaseDao extends HibernateDao {
      * Date:   10.08.2015
      */
     public void patchArtworkLocated() {
+        if (existsIndex("artwork_located", "IX_ARTWORKLOCATED_DOWNLOAD")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_located DROP INDEX IX_ARTWORKLOCATED_DOWNLOAD")
+            .executeUpdate();
+        }
+
+        if (existsUniqueIndex("artwork_located", "UIX_ARTWORKLOCATED_NATURALID")) {
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_located DROP FOREIGN KEY FK_ARTWORKLOCATED_ARTWORK")
+            .executeUpdate();
+
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_located DROP INDEX UIX_ARTWORKLOCATED_NATURALID")
+            .executeUpdate();
+
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_located ADD CONSTRAINT FK_ARTWORKLOCATED_ARTWORK FOREIGN KEY (artwork_id) REFERENCES artwork (id)")
+            .executeUpdate();
+        }
+
+        currentSession()
+        .createSQLQuery("UPDATE artwork_located SET source='file' WHERE source is null and stagefile_id is not null")
+        .executeUpdate();
+        
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_located MODIFY COLUMN source VARCHAR(50) NOT NULL")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_located MODIFY COLUMN hash_code VARCHAR(100) NOT NULL")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_located ADD UNIQUE INDEX UIX_ARTWORKLOCATED_NATURALID(artwork_id,stagefile_id,source,hash_code)")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_located MODIFY COLUMN url VARCHAR(1000)")
+        .executeUpdate();
+        
         currentSession()
         .createSQLQuery("UPDATE artwork_located set image_type='JPG' where image_type=''")
         .executeUpdate();
@@ -609,7 +659,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
             currentSession()
             .createSQLQuery("UPDATE boxed_set set identifier=:identifier where id=:id")
             .setLong("id", update.getKey())
-            .setString("identifier", identifier)
+            .setString(IDENTIFIER, identifier)
             .executeUpdate();
         }
 
@@ -697,10 +747,6 @@ public class UpgradeDatabaseDao extends HibernateDao {
 
         currentSession()
         .createSQLQuery("ALTER TABLE player_path MODIFY COLUMN target_path VARCHAR(1000)")
-        .executeUpdate();
-
-        currentSession()
-        .createSQLQuery("ALTER TABLE artwork_located MODIFY COLUMN url VARCHAR(2000)")
         .executeUpdate();
 
         currentSession()

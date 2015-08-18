@@ -329,15 +329,13 @@ public class CommonDao extends HibernateDao {
     }
 
     public synchronized void storeNewBoxedSet(BoxedSetDTO dto) {
-        BoxedSet boxedSet = getByNaturalIdCaseInsensitive(BoxedSet.class, "identifier", dto.getIdentifier());
+        BoxedSet boxedSet = getByNaturalIdCaseInsensitive(BoxedSet.class, IDENTIFIER, dto.getIdentifier());
         
         if (boxedSet == null) {
             // create new boxed set
             boxedSet = new BoxedSet(dto.getIdentifier());
             boxedSet.setName(dto.getName());
-            if (dto.getSourceId() != null) {
-                boxedSet.setSourceDbId(dto.getSource(), dto.getSourceId());
-            }
+            boxedSet.setSourceDbId(dto.getSource(), dto.getSourceId());
             this.saveEntity(boxedSet);
 
             // create new poster artwork entry

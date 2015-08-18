@@ -106,7 +106,7 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
     }
     
     public final boolean setSourceDbId(String sourceDb, String id) {
-        if (StringUtils.isBlank(sourceDb) || StringUtils.isBlank(id)) {
+        if (StringUtils.isBlank(id) || StringUtils.isBlank(sourceDb)) {
             return false;
         }
         String newId = id.trim();

@@ -40,6 +40,8 @@ import org.yamj.core.api.wrapper.IApiWrapper;
  */
 public abstract class HibernateDao {
 
+    public static final String IDENTIFIER = "identifier";
+
     @Autowired
     private SessionFactory sessionFactory;
 

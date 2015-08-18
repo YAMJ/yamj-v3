@@ -22,6 +22,8 @@
  */
 package org.yamj.core.database.service;
 
+import static org.yamj.core.hibernate.HibernateDao.IDENTIFIER;
+
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.locks.ReentrantLock;
@@ -168,7 +170,7 @@ public class MetadataStorageService {
                     this.metadataDao.storeMovieCredit(creditDTO);
                 } catch (Exception ex) {
                     LOG.error("Failed to store person '{}', error: {}", creditDTO.getName(), ex.getMessage());
-                    LOG.trace("Storage error", ex);
+                    LOG.warn("Storage error", ex);
                 } finally {
                     PERSON_STORAGE_LOCK.unlock();
                 }
@@ -693,16 +695,26 @@ public class MetadataStorageService {
         for (BoxedSetDTO boxedSetDTO : videoData.getBoxedSetDTOS()) {
 
             BoxedSetOrder boxedSetOrder = null;
-            for (BoxedSetOrder stored : videoData.getBoxedSets()) {
-                if (StringUtils.equalsIgnoreCase(stored.getBoxedSet().getIdentifier(), boxedSetDTO.getIdentifier())) {
+            loop: for (BoxedSetOrder stored : videoData.getBoxedSets()) {
+                if (boxedSetDTO.getBoxedSetId() != null) {
+                    if (boxedSetDTO.getBoxedSetId().longValue() == stored.getId()) {
+                        boxedSetOrder = stored;
+                        break loop;
+                    }
+                } else if (StringUtils.equalsIgnoreCase(stored.getBoxedSet().getIdentifier(), boxedSetDTO.getIdentifier())) {
                     boxedSetOrder = stored;
-                    break;
+                    break loop;
                 }
             }
 
             if (boxedSetOrder == null) {
-                // create new videoSet
-                BoxedSet boxedSet = commonDao.getBoxedSet(boxedSetDTO.getBoxedSetId());
+                BoxedSet boxedSet;
+                if (boxedSetDTO.getBoxedSetId() == null) {
+                    boxedSet = commonDao.getByNaturalIdCaseInsensitive(BoxedSet.class, IDENTIFIER, boxedSetDTO.getIdentifier());
+                } else {
+                    boxedSet = commonDao.getBoxedSet(boxedSetDTO.getBoxedSetId());
+                }
+                
                 if (boxedSet != null) {
                     boxedSetOrder = new BoxedSetOrder();
                     boxedSetOrder.setVideoData(videoData);
@@ -738,16 +750,26 @@ public class MetadataStorageService {
         for (BoxedSetDTO boxedSetDTO : series.getBoxedSetDTOS()) {
 
             BoxedSetOrder boxedSetOrder = null;
-            for (BoxedSetOrder stored : series.getBoxedSets()) {
-                if (StringUtils.equalsIgnoreCase(stored.getBoxedSet().getIdentifier(), boxedSetDTO.getIdentifier())) {
+            loop: for (BoxedSetOrder stored : series.getBoxedSets()) {
+                if (boxedSetDTO.getBoxedSetId() != null) {
+                    if (boxedSetDTO.getBoxedSetId().longValue() == stored.getId()) {
+                        boxedSetOrder = stored;
+                        break loop;
+                    }
+                } else if (StringUtils.equalsIgnoreCase(stored.getBoxedSet().getIdentifier(), boxedSetDTO.getIdentifier())) {
                     boxedSetOrder = stored;
-                    break;
+                    break loop;
                 }
             }
 
             if (boxedSetOrder == null) {
-                // create new videoSet
-                BoxedSet boxedSet = commonDao.getBoxedSet(boxedSetDTO.getBoxedSetId());
+                BoxedSet boxedSet;
+                if (boxedSetDTO.getBoxedSetId() == null) {
+                    boxedSet = commonDao.getByNaturalIdCaseInsensitive(BoxedSet.class, IDENTIFIER, boxedSetDTO.getIdentifier());
+                } else {
+                    boxedSet = commonDao.getBoxedSet(boxedSetDTO.getBoxedSetId());
+                }
+                
                 if (boxedSet != null) {
                     boxedSetOrder = new BoxedSetOrder();
                     boxedSetOrder.setSeries(series);
@@ -787,18 +809,28 @@ public class MetadataStorageService {
             
             // find matching cast/crew
             CastCrew castCrew = null;
-            for (CastCrew credit : videoData.getCredits()) {
-                if (credit.getCastCrewPK().getJobType() == dto.getJobType() &&
-                    credit.getCastCrewPK().getPerson().getIdentifier().equalsIgnoreCase(dto.getIdentifier()))
-                {
-                    castCrew = credit;
-                    break;
+            loop: for (CastCrew credit : videoData.getCredits()) {
+                if (credit.getCastCrewPK().getJobType() == dto.getJobType()) {
+                    if (dto.getPersonId() != null) {
+                        if (credit.getCastCrewPK().getPerson().getId() == dto.getPersonId().longValue()) {
+                            castCrew = credit;
+                            break loop;
+                        }
+                    } else if (credit.getCastCrewPK().getPerson().getIdentifier().equalsIgnoreCase(dto.getIdentifier())) {
+                        castCrew = credit;
+                        break loop;
+                    }
                 }
             }
             
             if (castCrew == null) {
                 // retrieve person
-                Person person = metadataDao.getPerson(dto.getPersonId());
+                Person person;
+                if (dto.getPersonId() == null) {
+                    person = metadataDao.getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, dto.getIdentifier());
+                } else {
+                    person = metadataDao.getPerson(dto.getPersonId());
+                }
 
                 if (person == null) {
                     LOG.warn("Person '{}' not found, skipping", dto.getName());

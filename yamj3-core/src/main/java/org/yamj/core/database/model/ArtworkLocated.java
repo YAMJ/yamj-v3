@@ -38,9 +38,8 @@ import org.yamj.core.database.model.type.ImageType;
 
 @Entity
 @Table(name = "artwork_located",
-       uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORKLOCATED_NATURALID", columnNames = {"artwork_id", "stagefile_id", "source", "url"}),
-       indexes = {@Index(name = "IX_ARTWORKLOCATED_DOWNLOAD", columnList = "source,url"),
-                  @Index(name = "IX_ARTWORKLOCATED_STATUS", columnList = "status")}
+       uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORKLOCATED_NATURALID", columnNames = {"artwork_id", "stagefile_id", "source", "hash_code"}),
+       indexes = @Index(name = "IX_ARTWORKLOCATED_STATUS", columnList = "status")
 )
 public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
@@ -60,10 +59,10 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @Column(name = "stagefile_id", insertable = false, updatable = false)
     private Long stageFileId;
 
-    @Column(name = "source", length = 50)
+    @Column(name = "source", nullable=false, length = 50)
     private String source;
 
-    @Column(name = "url", length = 2000)
+    @Column(name = "url", length = 1000)
     private String url;
 
     @Type(type = "statusType")
@@ -74,7 +73,7 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @Column(name = "previous_status", length = 30)
     private StatusType previousStatus;
 
-    @Column(name = "hash_code", length = 100)
+    @Column(name = "hash_code", nullable=false, length = 100)
     private String hashCode;
 
     @Column(name = "priority", nullable = false)
