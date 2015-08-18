@@ -429,9 +429,14 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             if (!season.isTvSeasonDone(SCANNER_ID)) {
                 final String seriesId = series.getSourceDbId(SCANNER_ID);
                 TVSeasonInfo seasonInfo = tmdbApiWrapper.getSeasonInfo(seriesId, season.getSeason(), tmdbLocale);
+                
                 if (seasonInfo == null) {
+                    // mark season as not found
+                    season.removeOverrideSource(SCANNER_ID);
+                    season.removeSourceDbId(SCANNER_ID);
                     season.setTvSeasonNotFound();
                 } else {
+                    // set source id
                     season.setSourceDbId(SCANNER_ID, String.valueOf(seasonInfo.getId()));
                     
                     if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
@@ -475,10 +480,13 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             TVEpisodeInfo episodeInfo = tmdbApiWrapper.getEpisodeInfo(seriesId, season.getSeason(), videoData.getEpisode(), tmdbLocale);
             if (episodeInfo == null) {
                 // mark episode as not found
+                videoData.removeOverrideSource(SCANNER_ID);
+                videoData.removeSourceDbId(SCANNER_ID);
                 videoData.setTvEpisodeNotFound();
                 continue;
             }
             
+            // set source id
             videoData.setSourceDbId(SCANNER_ID, String.valueOf(episodeInfo.getId()));
 
             if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
@@ -622,7 +630,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             // locale for TMDb
             final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
 
-            credits = tmdbApiWrapper.getPersonCredits(tmdbId, tmdbLocale, throwTempError);
+            credits = tmdbApiWrapper.getPersonCredits(Integer.parseInt(tmdbId), tmdbLocale, throwTempError);
         } catch (TemporaryUnavailableException ex) {
             // check retry
             int maxRetries = configServiceWrapper.getIntProperty("themoviedb.maxRetries.filmography", 0);

@@ -763,13 +763,12 @@ public class VideoData extends AbstractMetadata {
 
     public void setTvEpisodeNotFound() {
         if (StatusType.DONE.equals(this.getStatus())) {
-            // do not reset done
-            return;
-        } else if (StatusType.TEMP_DONE.equals(this.getStatus())) {
+            // reset to temporary done state
+            this.setStatus(StatusType.TEMP_DONE);
+        } else if (!StatusType.TEMP_DONE.equals(this.getStatus())) {
             // do not reset temporary done
-            return;
+            this.setStatus(StatusType.NOTFOUND);
         }
-        this.setStatus(StatusType.NOTFOUND);
     }
 
     @Override

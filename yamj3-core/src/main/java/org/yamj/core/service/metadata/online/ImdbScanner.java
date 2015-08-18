@@ -390,47 +390,43 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     private void scanSeasons(Series series, String imdbId, String title, String titleOriginal, String plot, String outline, Locale imdbLocale) {
         for (Season season : series.getSeasons()) {
 
-            // use values from series
-            if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
-                season.setTitle(title, SCANNER_ID);
-            }
-            if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
-                season.setTitle(titleOriginal, SCANNER_ID);
-            }
-            if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
-                season.setPlot(plot, SCANNER_ID);
-            }
-            if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
-                season.setOutline(outline, SCANNER_ID);
-            }
+            // get the episodes
+            Map<Integer, ImdbEpisodeDTO> episodes = getEpisodes(imdbId, season.getSeason(), imdbLocale);
 
-            Map<Integer, ImdbEpisodeDTO> episodes = null;
-            if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
-                episodes = getEpisodes(imdbId, season.getSeason(), imdbLocale);
+            if (!season.isTvSeasonDone(SCANNER_ID)) {
 
-                Date publicationYear = null;
-                for (ImdbEpisodeDTO episode : episodes.values()) {
-                    if (publicationYear == null) {
-                        publicationYear = episode.getReleaseDate();
-                    } else if (episode.getReleaseDate() != null) {
-                        if (publicationYear.after(episode.getReleaseDate())) {
-                            // previous episode
+                // use values from series
+                if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
+                    season.setTitle(title, SCANNER_ID);
+                }
+                if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
+                    season.setTitle(titleOriginal, SCANNER_ID);
+                }
+                if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
+                    season.setPlot(plot, SCANNER_ID);
+                }
+                if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
+                    season.setOutline(outline, SCANNER_ID);
+                }
+
+                if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
+                    Date publicationYear = null;
+                    for (ImdbEpisodeDTO episode : episodes.values()) {
+                        if (publicationYear == null) {
                             publicationYear = episode.getReleaseDate();
+                        } else if (episode.getReleaseDate() != null) {
+                            if (publicationYear.after(episode.getReleaseDate())) {
+                                // previous episode
+                                publicationYear = episode.getReleaseDate();
+                            }
                         }
                     }
-                }
-                season.setPublicationYear(MetadataTools.extractYearAsInt(publicationYear), SCANNER_ID);
-            }
-
-            // mark season as done
-            season.setTvSeasonDone();
-
-            // only scan episodes if not done before
-            if (!season.isTvEpisodesScanned(SCANNER_ID)) {
-                if (episodes == null) {
-                    episodes = getEpisodes(imdbId, season.getSeason(), imdbLocale);
+                    season.setPublicationYear(MetadataTools.extractYearAsInt(publicationYear), SCANNER_ID);
                 }
 
+                // mark season as done
+                season.setTvSeasonDone();
+            
                 for (VideoData videoData : season.getVideoDatas()) {
                     if (videoData.isTvEpisodeDone(SCANNER_ID)) {
                         // nothing to do if already done
@@ -445,10 +441,14 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
 
     private void scanEpisode(VideoData videoData, ImdbEpisodeDTO dto, Locale imdbLocale) {
+        
         if (dto == null) {
+            videoData.removeOverrideSource(SCANNER_ID);
+            videoData.removeSourceDbId(SCANNER_ID);
             videoData.setTvEpisodeNotFound();
             return;
         }
+        
         videoData.setSourceDbId(SCANNER_ID, dto.getImdbId());
 
         // set other values

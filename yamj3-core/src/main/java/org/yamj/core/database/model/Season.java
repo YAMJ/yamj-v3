@@ -33,7 +33,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
-import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
@@ -210,19 +209,6 @@ public class Season extends AbstractMetadata {
     
     // TV CHECKS
 
-    public boolean isTvEpisodesScanned(String sourceDb) {
-        if (CollectionUtils.isEmpty(this.getVideoDatas())) {
-            return true;
-        }
-
-        for (VideoData videoData : this.getVideoDatas()) {
-            if (!videoData.isTvEpisodeDone(sourceDb)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public boolean isTvSeasonDone(String sourceDb) {
         if (StringUtils.isBlank(this.getSourceDbId(sourceDb))) {
             // not done if episode ID not set
@@ -237,13 +223,12 @@ public class Season extends AbstractMetadata {
 
     public void setTvSeasonNotFound() {
         if (StatusType.DONE.equals(this.getStatus())) {
-            // do not reset done
-            return;
-        } else if (StatusType.TEMP_DONE.equals(this.getStatus())) {
+            // reset to temporary done state
+            this.setStatus(StatusType.TEMP_DONE);
+        } else if (!StatusType.TEMP_DONE.equals(this.getStatus())) {
             // do not reset temporary done
-            return;
+            this.setStatus(StatusType.NOTFOUND);
         }
-        this.setStatus(StatusType.NOTFOUND);
     }
 
     // EQUALITY CHECKS

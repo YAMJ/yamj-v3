@@ -436,7 +436,13 @@ public class MetadataStorageService {
 
         // update underlying seasons and episodes
         for (Season season : series.getSeasons()) {
-            season.setLastScanned(series.getLastScanned());
+            // replace temporary done
+            if (StatusType.TEMP_DONE.equals(season.getStatus())) {
+                season.setLastScanned(series.getLastScanned());
+                season.setStatus(StatusType.DONE);
+            } else if (!StatusType.DONE.equals(season.getStatus())) {
+                season.setLastScanned(series.getLastScanned());
+            }
             metadataDao.updateEntity(season);
 
             for (VideoData videoData : season.getVideoDatas()) {

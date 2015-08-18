@@ -225,11 +225,13 @@ public class TheTVDbScanner implements ISeriesScanner {
             Episode tvdbEpisode = tvdbApiWrapper.getEpisode(seriesId, season.getSeason(), videoData.getEpisode(), tvdbLocale.getLanguage());
             if (tvdbEpisode == null || StringUtils.isBlank(tvdbEpisode.getId())) {
                 // mark episode as not found
+                videoData.removeOverrideSource(SCANNER_ID);
+                videoData.removeSourceDbId(SCANNER_ID);
                 videoData.setTvEpisodeNotFound();
                 continue;
             }
             
-            // set source id
+            // set source id's
             videoData.setSourceDbId(SCANNER_ID, tvdbEpisode.getId());
             videoData.setSourceDbId(ImdbScanner.SCANNER_ID, tvdbEpisode.getImdbId());
 

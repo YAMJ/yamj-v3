@@ -22,8 +22,6 @@
  */
 package org.yamj.core.service.artwork.online;
 
-import org.yamj.core.web.apis.AllocineApiWrapper;
-
 import com.moviejukebox.allocine.model.*;
 import java.util.*;
 import java.util.Map.Entry;
@@ -40,6 +38,7 @@ import org.yamj.core.database.model.Season;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.AllocineScanner;
+import org.yamj.core.web.apis.AllocineApiWrapper;
 
 @Service("allocineArtworkScanner")
 public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPosterScanner, IPhotoScanner {
@@ -101,8 +100,8 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
             return null;
         }
 
-        TvSeasonInfos tvSeasonInfos = allocineApiWrapper.getTvSeasonInfos(allocineId, false);
-        if (tvSeasonInfos == null || tvSeasonInfos.isNotValid() || MapUtils.isEmpty(tvSeasonInfos.getPosters())) {
+        TvSeasonInfos tvSeasonInfos = allocineApiWrapper.getTvSeasonInfos(allocineId);
+        if (tvSeasonInfos.isNotValid() || MapUtils.isEmpty(tvSeasonInfos.getPosters())) {
             return null;
         }
         return buildArtworkDetails(tvSeasonInfos.getPosters());

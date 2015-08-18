@@ -239,8 +239,6 @@ public class NfoScannerService {
             // reset skipped scans
             series.setSkippendScansNfo(infoDTO.getSkippedScans());
             
-            // set last scan date
-            series.setLastScanned(new Date(System.currentTimeMillis()));
             // set sort title
             series.setTitleSort(infoDTO.getTitleSort());
             

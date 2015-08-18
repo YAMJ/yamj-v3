@@ -437,115 +437,104 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             if (season.getSeason() <= tvSeriesInfos.getSeasonCount()) {
                 int seasonCode = tvSeriesInfos.getSeasonCode(season.getSeason());
                 if (seasonCode > 0) {
-                    tvSeasonInfos = allocineApiWrapper.getTvSeasonInfos(String.valueOf(seasonCode), false);
+                    tvSeasonInfos = allocineApiWrapper.getTvSeasonInfos(String.valueOf(seasonCode));
                 }
             }
 
-            // use values from series
-            if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
-                season.setTitle(tvSeriesInfos.getTitle(), SCANNER_ID);
-            }
-            if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
-                season.setTitle(tvSeriesInfos.getOriginalTitle(), SCANNER_ID);
-            }
-            if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
-                season.setPlot(tvSeriesInfos.getSynopsis(), SCANNER_ID);
-            }
-            if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
-                season.setOutline(tvSeriesInfos.getSynopsisShort(), SCANNER_ID);
-            }
+            if (!season.isTvSeasonDone(SCANNER_ID)) {
 
-            if (tvSeasonInfos != null && tvSeasonInfos.isValid()) {
-                
-                if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
-                    season.setPublicationYear(tvSeasonInfos.getYearStart(), SCANNER_ID);
+                if (tvSeasonInfos == null || tvSeasonInfos.isNotValid()) {
+                    // mark season as not found
+                    season.removeOverrideSource(SCANNER_ID);
+                    season.removeSourceDbId(SCANNER_ID);
+                    season.setTvSeasonNotFound();
+                } else {
+                    season.setSourceDbId(SCANNER_ID, String.valueOf(tvSeasonInfos.getCode()));
+
+                    if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
+                        season.setTitle(tvSeriesInfos.getTitle(), SCANNER_ID);
+                    }
+                    
+                    if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
+                        season.setTitle(tvSeriesInfos.getOriginalTitle(), SCANNER_ID);
+                    }
+                    
+                    if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
+                        season.setPlot(tvSeriesInfos.getSynopsis(), SCANNER_ID);
+                    }
+                    
+                    if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
+                        season.setOutline(tvSeriesInfos.getSynopsisShort(), SCANNER_ID);
+                    }
+
+                    if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
+                        season.setPublicationYear(tvSeasonInfos.getSeason().getYearStart(), SCANNER_ID);
+                    }
+                       
+                    // mark season as done
+                    season.setTvSeasonDone();
                 }
-                
-                season.setSourceDbId(SCANNER_ID, String.valueOf(tvSeasonInfos.getCode()));
             }
-
-            // mark season as done
-            season.setTvSeasonDone();
-
+            
             // scan episodes
             scanEpisodes(season, tvSeasonInfos);
         }
     }
 
     private void scanEpisodes(Season season, TvSeasonInfos tvSeasonInfos) {
-        if (season.isTvEpisodesScanned(SCANNER_ID)) {
-            // nothing to do anymore
-            return;
-        }
-
         for (VideoData videoData : season.getVideoDatas()) {
-            if (videoData.isTvEpisodeDone(SCANNER_ID)) {
+            
+            if (season.isTvSeasonDone(SCANNER_ID)) {
                 // nothing to do if already done
                 continue;
             }
 
             // get the episode
-            Episode episode = null;
-            if (tvSeasonInfos != null && tvSeasonInfos.isValid()) {
-                episode = tvSeasonInfos.getEpisode(videoData.getEpisode());
-            }
-            
-            if (episode == null) {
-                // mark episode as not found
-                videoData.setTvEpisodeNotFound();
-            } else {
-
-                String allocineId = videoData.getSourceDbId(SCANNER_ID);
-                if (episode.getCode() > 0) {
+            String allocineId = videoData.getSourceDbId(SCANNER_ID);
+            if (StringUtils.isBlank(allocineId) && tvSeasonInfos != null && tvSeasonInfos.isValid()) {
+                Episode episode = tvSeasonInfos.getEpisode(videoData.getEpisode());
+                if (episode != null && episode.getCode() > 0) {
                     allocineId = String.valueOf(episode.getCode());
                 }
-                videoData.setSourceDbId(SCANNER_ID, allocineId);
-
-                List<CastMember> castMembers = null;
-                EpisodeInfos episodeInfos = allocineApiWrapper.getEpisodeInfos(allocineId, false);
-                if (episodeInfos.isNotValid()) {
-                    // fix episode from season info
-                    episode.setSynopsis(HTMLTools.replaceHtmlTags(episode.getSynopsis(), " "));
-
-                    episodeInfos = new EpisodeInfos();
-                    episodeInfos.setEpisode(episode);
-                    
-                    // use members from season
-                    if (tvSeasonInfos.getSeason() != null) {
-                        castMembers = tvSeasonInfos.getSeason().getCastMember();
-                    }
-                } else {
-                    // use members from episode
-                    castMembers = episodeInfos.getEpisode().getCastMember();
-                }
-
-                if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
-                    videoData.setTitle(episodeInfos.getTitle(), SCANNER_ID);
-                }
-
-                if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID)) {
-                    videoData.setTitleOriginal(episodeInfos.getOriginalTitle(), SCANNER_ID);
-                }
-
-                if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-                    videoData.setPlot(episodeInfos.getSynopsis(), SCANNER_ID);
-                }
-
-                if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-                    videoData.setOutline(episodeInfos.getSynopsisShort(), SCANNER_ID);
-                }
-                
-                if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-                    Date releaseDate = MetadataTools.parseToDate(episodeInfos.getOriginalBroadcastDate());
-                    videoData.setRelease(releaseDate, SCANNER_ID);
-                }
-                
-                //  parse credits
-                parseCredits(videoData, castMembers);
-
-                // mark episode as done
-                videoData.setTvEpisodeDone();
             }
+
+            EpisodeInfos episodeInfos = allocineApiWrapper.getEpisodeInfos(allocineId);
+            if (episodeInfos == null || episodeInfos.isNotValid()) {
+                // mark episode as not found
+                videoData.removeOverrideSource(SCANNER_ID);
+                videoData.removeSourceDbId(SCANNER_ID);
+                videoData.setTvEpisodeNotFound();
+                continue;
+            }
+            
+            videoData.setSourceDbId(SCANNER_ID, String.valueOf(episodeInfos.getCode()));
+
+            if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
+                videoData.setTitle(episodeInfos.getTitle(), SCANNER_ID);
+            }
+
+            if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID)) {
+                videoData.setTitleOriginal(episodeInfos.getOriginalTitle(), SCANNER_ID);
+            }
+
+            if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
+                videoData.setPlot(episodeInfos.getSynopsis(), SCANNER_ID);
+            }
+
+            if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
+                videoData.setOutline(episodeInfos.getSynopsisShort(), SCANNER_ID);
+            }
+            
+            if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
+                Date releaseDate = MetadataTools.parseToDate(episodeInfos.getOriginalBroadcastDate());
+                videoData.setRelease(releaseDate, SCANNER_ID);
+            }
+            
+            //  parse credits
+            parseCredits(videoData, episodeInfos.getEpisode().getCastMember());
+
+            // mark episode as done
+            videoData.setTvEpisodeDone();
         }
     }
 
@@ -679,7 +668,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             }
         }
         
-        if (filmographyInfos.isNotValid() || CollectionUtils.isEmpty(filmographyInfos.getParticipances())) {
+        if (filmographyInfos == null || filmographyInfos.isNotValid() || CollectionUtils.isEmpty(filmographyInfos.getParticipances())) {
             LOG.trace("No filmography present for person '{}'", person.getIdentifier());
             return ScanResult.NO_RESULT;
         }
