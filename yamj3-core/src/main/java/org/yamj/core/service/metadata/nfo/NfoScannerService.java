@@ -175,7 +175,7 @@ public class NfoScannerService {
     public void scanSeries(Series series) {
         // remove override source for NFO
         series.removeOverrideSource(SCANNER_ID);
-
+        
         // get the stage files
         List<StageFile> stageFiles = this.stagingService.getValidNFOFiles(series);
         if (CollectionUtils.isEmpty(stageFiles)) {
@@ -185,8 +185,12 @@ public class NfoScannerService {
                 if (season.removeOverrideSource(SCANNER_ID)) {
                     season.setStatus(StatusType.UPDATED);
                 }
+                
                 for (VideoData videoData : season.getVideoDatas()) {
-                    videoData.setWatchedNfo(false);
+                    if (videoData.isWatchedNfo()) {
+                        videoData.setWatchedNfo(false);
+                        videoData.setStatus(StatusType.UPDATED);
+                    }
                     if (videoData.removeOverrideSource(SCANNER_ID)) {
                         videoData.setStatus(StatusType.UPDATED);
                     }
@@ -223,8 +227,10 @@ public class NfoScannerService {
                         series.addModifiedSource(skippedSourceDb);
                         for (Season season : series.getSeasons()) {
                             season.addModifiedSource(skippedSourceDb);
+                            season.setStatus(StatusType.UPDATED);
                             for (VideoData videoData : season.getVideoDatas()) {
                                 videoData.addModifiedSource(skippedSourceDb);
+                                videoData.setStatus(StatusType.UPDATED);
                             }
                         }
                     }
@@ -302,10 +308,11 @@ public class NfoScannerService {
                             videoData.setStatus(StatusType.UPDATED);
                         }
                         
-                        // mark episode as NFO unwatched
-                        videoData.setWatchedNfo(false);
-                        // mark episode as not found
-                        videoData.setTvEpisodeNotFound();
+                        // reset status if NFO watched flag changes
+                        if (videoData.isWatchedNfo()) {
+                            videoData.setWatchedNfo(false);
+                            videoData.setStatus(StatusType.UPDATED);
+                        }
                     } else {
                         // remove override source for NFO
                         videoData.removeOverrideSource(SCANNER_ID);

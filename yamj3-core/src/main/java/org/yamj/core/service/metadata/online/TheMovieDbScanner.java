@@ -150,48 +150,6 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
     }
 
     @Override
-    public String getSeasonId(Season season) {
-        String tmdbId = season.getSourceDbId(SCANNER_ID);
-        if (StringUtils.isNumeric(tmdbId)) {
-            return tmdbId;
-        }
-
-        String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
-        if (StringUtils.isNumeric(seriesId)) {
-            // get season id from series
-            final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
-            TVSeasonInfo seasonInfo = tmdbApiWrapper.getSeasonInfo(Integer.parseInt(seriesId), season.getSeason(), tmdbLocale, false);
-            if (seasonInfo != null) {
-                tmdbId = String.valueOf(seasonInfo.getId());
-                season.setSourceDbId(SCANNER_ID, tmdbId);
-            }
-        }
-        
-        return tmdbId;
-    }
-        
-    @Override
-    public String getEpisodeId(VideoData videoData) {
-        String tmdbId = videoData.getSourceDbId(SCANNER_ID);
-        if (StringUtils.isNumeric(tmdbId)) {
-            return tmdbId;
-        }
-
-        String seriesId = videoData.getSeason().getSeries().getSourceDbId(SCANNER_ID);
-        if (StringUtils.isNumeric(seriesId)) {
-            // get episode id from series and season
-            final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
-            TVEpisodeInfo episodeInfo = tmdbApiWrapper.getEpisodeInfo(Integer.parseInt(seriesId), videoData.getSeason().getSeason(), videoData.getEpisode(), tmdbLocale, false);
-            if (episodeInfo != null) {
-                tmdbId = String.valueOf(episodeInfo.getId());
-                videoData.setSourceDbId(SCANNER_ID, tmdbId);
-            }
-        }
-        
-        return tmdbId;
-    }
-
-    @Override
     public String getPersonId(Person person) {
         return getPersonId(person, false);
     }
@@ -464,257 +422,105 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         return ScanResult.OK;
     }
     
-    @Override
-    public ScanResult scanSeason(Season season) {
-        final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
-        TVSeasonInfo tvSeasonInfo = null;
-        try {
-            String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
-            if (!StringUtils.isNumeric(seriesId)) {
-                LOG.debug("TMDb id not available '{}'", season.getIdentifier());
-                return ScanResult.MISSING_ID;
-            }
-            
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("themoviedb.throwError.tempUnavailable", Boolean.TRUE);
-            tvSeasonInfo = tmdbApiWrapper.getSeasonInfo(Integer.parseInt(seriesId), season.getSeason(), tmdbLocale, throwTempError);
-        } catch (TemporaryUnavailableException ex) {
-            // check retry
-            int maxRetries = configServiceWrapper.getIntProperty("themoviedb.maxRetries.tvshow", 0);
-            if (season.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
-            }
-        }
-
-        if (tvSeasonInfo == null) {
-            LOG.error("Can't find informations for season '{}'", season.getIdentifier());
-            return ScanResult.NO_RESULT;
-        }
-        season.setSourceDbId(SCANNER_ID, String.valueOf(tvSeasonInfo.getId()));
-        
-        if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
-            season.setTitle(tvSeasonInfo.getName(), SCANNER_ID);
-        }
-        if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
-            season.setPlot(tvSeasonInfo.getOverview(), SCANNER_ID);
-        }
-        if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
-            season.setOutline(tvSeasonInfo.getOverview(), SCANNER_ID);
-        }
-        if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
-            final Date date = parseTMDbDate(tvSeasonInfo.getAirDate());
-            season.setPublicationYear(MetadataTools.extractYearAsInt(date), SCANNER_ID);
-        }
-
-        return ScanResult.OK;
-    }
-
-    @Override
-    public ScanResult scanEpisode(VideoData videoData) {
-        TVEpisodeInfo tvEpisodeInfo = null;
-        try {
-            String seriesId = videoData.getSeason().getSeries().getSourceDbId(SCANNER_ID);
-            if (!StringUtils.isNumeric(seriesId)) {
-                LOG.debug("TMDb id not available '{}'", videoData.getIdentifier());
-                return ScanResult.MISSING_ID;
-            }
-            
-            final boolean throwTempError = configServiceWrapper.getBooleanProperty("themoviedb.throwError.tempUnavailable", Boolean.TRUE);
-            final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
-            final int seasonNumber = videoData.getSeason().getSeason();
-            final int episodeNumber = videoData.getEpisode();
-            tvEpisodeInfo = tmdbApiWrapper.getEpisodeInfo(Integer.parseInt(seriesId), seasonNumber, episodeNumber, tmdbLocale, throwTempError);
-        } catch (TemporaryUnavailableException ex) {
-            // check retry
-            int maxRetries = configServiceWrapper.getIntProperty("themoviedb.maxRetries.tvshow", 0);
-            if (videoData.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
-            }
-        }
-        
-        if (tvEpisodeInfo == null) {
-            LOG.error("Can't find informations for episode '{}'", videoData.getIdentifier());
-            return ScanResult.NO_RESULT;
-        }
-        videoData.setSourceDbId(SCANNER_ID, String.valueOf(tvEpisodeInfo.getId()));
-
-        if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
-            videoData.setTitle(tvEpisodeInfo.getName(), SCANNER_ID);
-        }
-
-        if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-            videoData.setPlot(tvEpisodeInfo.getOverview(), SCANNER_ID);
-        }
-
-        if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-            videoData.setOutline(tvEpisodeInfo.getOverview(), SCANNER_ID);
-        }
-        
-        if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-            Date releaseDate = parseTMDbDate(tvEpisodeInfo.getAirDate());
-            videoData.setRelease(releaseDate, SCANNER_ID);
-        }
-
-        MediaCreditList credits = tvEpisodeInfo.getCredits();
-        if (credits != null) {
-            // CAST
-            if (CollectionUtils.isNotEmpty(credits.getCast()) && this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
-                for (MediaCreditCast cast : credits.getCast()) {
-                    CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(cast.getId()), JobType.ACTOR, cast.getName(), cast.getCharacter());
-                    videoData.addCreditDTO(credit);
-                }
-            }
-        
-            // GUEST STARS
-            if (CollectionUtils.isNotEmpty(credits.getGuestStars()) && this.configServiceWrapper.isCastScanEnabled(JobType.GUEST_STAR)) {
-                for (MediaCreditCast cast : credits.getGuestStars()) {
-                    CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(cast.getId()), JobType.GUEST_STAR, cast.getName(), cast.getCharacter());
-                    videoData.addCreditDTO(credit);
-                }
-            }
-        
-            if (CollectionUtils.isNotEmpty(credits.getCrew())) {
-                for (MediaCreditCrew crew : credits.getCrew()) {
-                    JobType jobType = retrieveJobType(crew.getName(), crew.getDepartment());
-                    if (!this.configServiceWrapper.isCastScanEnabled(jobType)) {
-                        // scan not enabled for that job
-                        continue;
-                    }
-                    CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(crew.getId()), jobType, crew.getName(), crew.getJob());
-                    videoData.addCreditDTO(credit);
-                }
-            }
-        }
-        
-        return ScanResult.OK;
-    }
-
-    @Deprecated
     private void scanSeasons(Series series, TVInfo tvInfo, Locale tmdbLocale) {
         
         for (Season season : series.getSeasons()) {
-
-            TVSeasonInfo seasonInfo = tmdbApiWrapper.getSeasonInfo(tvInfo.getId(), season.getSeason(), tmdbLocale, false);
-            MediaCreditList mediaCreditList = tmdbApiWrapper.getSeasonCredits(tvInfo.getId(), season.getSeason(), false);
-
-            // use values from series
-            if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
+            
+            if (!season.isTvSeasonDone(SCANNER_ID)) {
+                final String seriesId = series.getSourceDbId(SCANNER_ID);
+                TVSeasonInfo seasonInfo = tmdbApiWrapper.getSeasonInfo(seriesId, season.getSeason(), tmdbLocale);
                 if (seasonInfo == null) {
-                    season.setTitle(tvInfo.getName(), SCANNER_ID);
+                    season.setTvSeasonNotFound();
                 } else {
-                    season.setTitle(seasonInfo.getName(), SCANNER_ID);
+                    season.setSourceDbId(SCANNER_ID, String.valueOf(seasonInfo.getId()));
+                    
+                    if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
+                        season.setTitle(seasonInfo.getName(), SCANNER_ID);
+                    }
+                    if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
+                        season.setTitle(tvInfo.getOriginalName(), SCANNER_ID);
+                    }
+                    if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
+                        season.setPlot(seasonInfo.getOverview(), SCANNER_ID);
+                    }
+                    if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
+                        season.setOutline(seasonInfo.getOverview(), SCANNER_ID);
+                    }
+        
+                    if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
+                        final Date date = parseTMDbDate(seasonInfo.getAirDate());
+                        season.setPublicationYear(MetadataTools.extractYearAsInt(date), SCANNER_ID);
+                    }
+        
+                    // mark season as done
+                    season.setTvSeasonDone();
                 }
             }
-            if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
-                season.setTitle(tvInfo.getOriginalName(), SCANNER_ID);
-            }
-            if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
-                if (seasonInfo == null) {
-                    season.setPlot(tvInfo.getOverview(), SCANNER_ID);
-                } else {
-                    season.setPlot(seasonInfo.getOverview(), SCANNER_ID);
-                }
-            }
-            if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
-                if (seasonInfo == null) {
-                    season.setOutline(tvInfo.getOverview(), SCANNER_ID);
-                } else {
-                    season.setOutline(seasonInfo.getOverview(), SCANNER_ID);
-                }
-            }
-
-            if (seasonInfo != null) {
-                
-                if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
-                    final Date date = parseTMDbDate(seasonInfo.getAirDate());
-                    season.setPublicationYear(MetadataTools.extractYearAsInt(date), SCANNER_ID);
-                }
-                
-                season.setSourceDbId(SCANNER_ID, String.valueOf(seasonInfo.getId()));
-            }
-
-            // mark season as done
-            season.setTvSeasonDone();
-
+            
             // scan episodes
-            scanEpisodes(season, seasonInfo, mediaCreditList);
+            scanEpisodes(season, tmdbLocale);
         }
     }
     
-    @Deprecated
-    private void scanEpisodes(Season season, TVSeasonInfo seasonInfo, MediaCreditList mediaCreditList) {
-        if (season.isTvEpisodesScanned(SCANNER_ID)) {
-            // nothing to do anymore
-            return;
-        }
-
+    private void scanEpisodes(Season season, Locale tmdbLocale) {
         for (VideoData videoData : season.getVideoDatas()) {
+            
             if (videoData.isTvEpisodeDone(SCANNER_ID)) {
                 // nothing to do if already done
                 continue;
             }
 
             // get the episode
-            TVEpisodeInfo episode = null;
-            if (seasonInfo != null) {
-                for (TVEpisodeInfo check : seasonInfo.getEpisodes()) {
-                    if (check.getSeasonNumber() == season.getSeason() && check.getEpisodeNumber() == videoData.getEpisode()) {
-                        episode = check;
-                        break;
-                    }
-                }
-            }
-            
-            if (episode == null) {
+            String seriesId = videoData.getSeason().getSeries().getSourceDbId(SCANNER_ID);
+            TVEpisodeInfo episodeInfo = tmdbApiWrapper.getEpisodeInfo(seriesId, season.getSeason(), videoData.getEpisode(), tmdbLocale);
+            if (episodeInfo == null) {
                 // mark episode as not found
                 videoData.setTvEpisodeNotFound();
-            } else {
-                videoData.setSourceDbId(SCANNER_ID, String.valueOf(episode.getId()));
+                continue;
+            }
+            
+            videoData.setSourceDbId(SCANNER_ID, String.valueOf(episodeInfo.getId()));
 
-                if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
-                    videoData.setTitle(episode.getName(), SCANNER_ID);
-                }
+            if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
+                videoData.setTitle(episodeInfo.getName(), SCANNER_ID);
+            }
 
-                if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-                    videoData.setPlot(episode.getOverview(), SCANNER_ID);
-                }
+            if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
+                videoData.setPlot(episodeInfo.getOverview(), SCANNER_ID);
+            }
 
-                if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-                    videoData.setOutline(episode.getOverview(), SCANNER_ID);
-                }
-                
-                if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-                    Date releaseDate = parseTMDbDate(episode.getAirDate());
-                    videoData.setRelease(releaseDate, SCANNER_ID);
-                }
+            if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
+                videoData.setOutline(episodeInfo.getOverview(), SCANNER_ID);
+            }
+            
+            if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
+                Date releaseDate = parseTMDbDate(episodeInfo.getAirDate());
+                videoData.setRelease(releaseDate, SCANNER_ID);
+            }
 
-                // CAST
-                if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
-                    if (mediaCreditList != null && CollectionUtils.isNotEmpty(mediaCreditList.getCast())) {
-                        for (MediaCreditCast person : mediaCreditList.getCast()) {
-                            CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), JobType.ACTOR, person.getName(), person.getCharacter());
-                            videoData.addCreditDTO(credit);
-                        }
+            // CAST & CREW
+            MediaCreditList credits = episodeInfo.getCredits();
+            if (credits != null) {
+
+                if (CollectionUtils.isNotEmpty(credits.getCast()) && this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+                    for (MediaCreditCast person : credits.getCast()) {
+                        CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), JobType.ACTOR, person.getName(), person.getCharacter());
+                        videoData.addCreditDTO(credit);
                     }
                 }
-                
+            
                 // GUEST STARS
-                if (this.configServiceWrapper.isCastScanEnabled(JobType.GUEST_STAR)) {
-                    if (mediaCreditList != null && CollectionUtils.isNotEmpty(mediaCreditList.getGuestStars())) {
-                        for (MediaCreditCast person : mediaCreditList.getGuestStars()) {
-                            CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), JobType.GUEST_STAR, person.getName(), person.getCharacter());
-                            videoData.addCreditDTO(credit);
-                        }
-                    }
-                    for (MediaCreditCast person : episode.getGuestStars()) {
+                if (CollectionUtils.isNotEmpty(credits.getGuestStars()) && this.configServiceWrapper.isCastScanEnabled(JobType.GUEST_STAR)) {
+                    for (MediaCreditCast person : credits.getGuestStars()) {
                         CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), JobType.GUEST_STAR, person.getName(), person.getCharacter());
                         videoData.addCreditDTO(credit);
                     }
                 }
-                
+            
                 // CREW
-                if (mediaCreditList != null && CollectionUtils.isNotEmpty(mediaCreditList.getCrew())) {
-                    for (MediaCreditCrew person : mediaCreditList.getCrew()) {
-                        JobType jobType = retrieveJobType(person.getName(), person.getDepartment());
+                if (CollectionUtils.isNotEmpty(credits.getCrew())) {
+                    for (MediaCreditCrew person : credits.getCrew()) {
+                        final JobType jobType = retrieveJobType(person.getName(), person.getDepartment());
                         if (!this.configServiceWrapper.isCastScanEnabled(jobType)) {
                             // scan not enabled for that job
                             continue;
@@ -723,20 +529,10 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                         videoData.addCreditDTO(credit);
                     }
                 }
-                
-                for (MediaCreditCrew person : episode.getCrew()) {
-                    JobType jobType = retrieveJobType(person.getName(), person.getDepartment());
-                    if (!this.configServiceWrapper.isCastScanEnabled(jobType)) {
-                        // scan not enabled for that job
-                        continue;
-                    }
-                    CreditDTO credit = new CreditDTO(SCANNER_ID, String.valueOf(person.getId()), jobType, person.getName(), person.getJob());
-                    videoData.addCreditDTO(credit);
-                }
-
-                // mark episode as done
-                videoData.setTvEpisodeDone();
             }
+
+            // mark episode as done
+            videoData.setTvEpisodeDone();
         }
     }
     
@@ -826,7 +622,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             // locale for TMDb
             final Locale tmdbLocale = localeService.getLocaleForConfig("themoviedb");
 
-            credits = tmdbApiWrapper.getPersonCredits(Integer.parseInt(tmdbId), tmdbLocale, throwTempError);
+            credits = tmdbApiWrapper.getPersonCredits(tmdbId, tmdbLocale, throwTempError);
         } catch (TemporaryUnavailableException ex) {
             // check retry
             int maxRetries = configServiceWrapper.getIntProperty("themoviedb.maxRetries.filmography", 0);

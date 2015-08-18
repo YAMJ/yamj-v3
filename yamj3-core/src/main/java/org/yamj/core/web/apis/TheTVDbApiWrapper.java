@@ -182,31 +182,26 @@ public class TheTVDbApiWrapper {
         return (actorList == null ? new ArrayList<Actor>() : actorList);
     }
 
-    @Deprecated
-    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id, #season, #language}")
-    public List<Episode> getSeasonEpisodes(String id, int season, String language, boolean throwTempError) {
-        List<Episode> episodeList = null;
-
+    public String getSeasonYear(String id, int season, String language) {
+        String year = null;
         try {
             String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
             if (altLanguage.equalsIgnoreCase(language)) altLanguage = null;
 
-            episodeList = tvdbApi.getSeasonEpisodes(id, season, language);
-            if (CollectionUtils.isEmpty(episodeList) && StringUtils.isNotBlank(altLanguage)) {
-                episodeList = tvdbApi.getSeasonEpisodes(id, season, altLanguage);
+            year = tvdbApi.getSeasonYear(id, season, language);
+            if (StringUtils.isBlank(year) && StringUtils.isNotBlank(altLanguage)) {
+                year = tvdbApi.getSeasonYear(id, season, altLanguage);
             }
         } catch (TvDbException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("TheTVDb service temporary not available: " + ex.getResponseCode(), ex);
-            }
-            LOG.error("Failed to get episodes for TVDb ID {} and season {}: {}", id, season, ex.getMessage());
+            LOG.error("Failed to season year for TVDb ID {} and season {}: {}", id, season, ex.getMessage());
             LOG.trace("TheTVDb error" , ex);
         }
         
-        return (episodeList == null ? new ArrayList<Episode>() : episodeList);
+        return year;
     }
-
-    public Episode getEpisode(String id, int season, int episode, String language, boolean throwTempError) {
+        
+    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id, #season, #episode, #language}")
+    public Episode getEpisode(String id, int season, int episode, String language) {
         Episode tvdbEpisode = null;
         try {
             String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
@@ -217,34 +212,10 @@ public class TheTVDbApiWrapper {
                 tvdbEpisode = tvdbApi.getEpisode(id, season, episode, altLanguage);
             }
         } catch (TvDbException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("TheTVDb service temporary not available: " + ex.getResponseCode(), ex);
-            }
-            LOG.error("Failed to get episode {} for TVDb ID {} and season {} : {}", episode, id, season, ex.getMessage());
+            LOG.error("Failed to get episode {} for TVDb ID {} and season {}: {}", episode, id, season, ex.getMessage());
             LOG.trace("TheTVDb error" , ex);
         }
         
         return tvdbEpisode;
-    }
-
-    public Episode getEpisode(String id, String language, boolean throwTempError) {
-        Episode tvdbEpisode = null;
-        try {
-            String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
-            if (altLanguage.equalsIgnoreCase(language)) altLanguage = null;
-
-            tvdbEpisode = tvdbApi.getEpisodeById(id, language);
-            if (tvdbEpisode == null && StringUtils.isNotBlank(altLanguage)) {
-                tvdbEpisode = tvdbApi.getEpisodeById(id, altLanguage);
-            }
-        } catch (TvDbException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("TheTVDb service temporary not available: " + ex.getResponseCode(), ex);
-            }
-            LOG.error("Failed to get episode for TVDb ID {}: {}", id, ex.getMessage());
-            LOG.trace("TheTVDb error" , ex);
-        }
-        
-        return (tvdbEpisode == null ? new Episode() : tvdbEpisode);
     }
 }

@@ -223,9 +223,27 @@ public class Season extends AbstractMetadata {
         return true;
     }
 
+    public boolean isTvSeasonDone(String sourceDb) {
+        if (StringUtils.isBlank(this.getSourceDbId(sourceDb))) {
+            // not done if episode ID not set
+            return false;
+        }
+        return (StatusType.DONE.equals(this.getStatus()));
+    }
+    
     public void setTvSeasonDone() {
-        super.setLastScanned(new Date(System.currentTimeMillis()));
-        this.setStatus(StatusType.DONE);
+        this.setStatus(StatusType.TEMP_DONE);
+    }
+
+    public void setTvSeasonNotFound() {
+        if (StatusType.DONE.equals(this.getStatus())) {
+            // do not reset done
+            return;
+        } else if (StatusType.TEMP_DONE.equals(this.getStatus())) {
+            // do not reset temporary done
+            return;
+        }
+        this.setStatus(StatusType.NOTFOUND);
     }
 
     // EQUALITY CHECKS

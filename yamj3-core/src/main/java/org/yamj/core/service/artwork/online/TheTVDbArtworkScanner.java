@@ -506,21 +506,10 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
         }
         
         final String language = localeService.getLocaleForConfig("thetvdb").getLanguage();
-        List<Episode> episodeList = tvdbApiWrapper.getSeasonEpisodes(id, videoData.getSeason().getSeason(), language, false);
-        if (CollectionUtils.isEmpty(episodeList)) {
-            return null;
-        }
-
-        // NOTE: just one video image per episode
-        for (Episode episode : episodeList) {
-            if (episode.getEpisodeNumber() == videoData.getEpisode()) {
-                if (StringUtils.isNotBlank(episode.getFilename())) {
-                    ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), episode.getFilename(), ArtworkTools.getPartialHashCode(episode.getFilename()));
-                    return Collections.singletonList(detailDTO);
-                }
-                // episode found but no image
-                break;
-            }
+        Episode episode = tvdbApiWrapper.getEpisode(id, videoData.getSeason().getSeason(), videoData.getEpisode(), language);
+        if (episode != null && StringUtils.isNotBlank(episode.getFilename())) {
+            ArtworkDetailDTO detailDTO = new ArtworkDetailDTO(getScannerName(), episode.getFilename(), ArtworkTools.getPartialHashCode(episode.getFilename()));
+            return Collections.singletonList(detailDTO);
         }
         
         return null;

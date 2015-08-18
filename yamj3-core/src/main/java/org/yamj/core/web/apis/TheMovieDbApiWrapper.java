@@ -27,7 +27,6 @@ import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.themoviedbapi.enumeration.SearchType;
 import com.omertron.themoviedbapi.model.credits.CreditBasic;
-import com.omertron.themoviedbapi.model.media.MediaCreditList;
 import com.omertron.themoviedbapi.model.movie.MovieInfo;
 import com.omertron.themoviedbapi.model.person.PersonCreditList;
 import com.omertron.themoviedbapi.model.person.PersonFind;
@@ -232,45 +231,32 @@ public class TheMovieDbApiWrapper {
         return tvInfo;
     }
 
-    public TVSeasonInfo getSeasonInfo(int tmdbId, int season, Locale locale, boolean throwTempError) {
+    public TVSeasonInfo getSeasonInfo(String tmdbId, int season, Locale locale) {
+        if (!StringUtils.isNumeric(tmdbId)) {
+            return null;
+        }
+        
         TVSeasonInfo tvSeasonInfo = null;
         try {
-            tvSeasonInfo = tmdbApi.getSeasonInfo(tmdbId, season, locale.getLanguage());
+            tvSeasonInfo = tmdbApi.getSeasonInfo(Integer.parseInt(tmdbId), season, locale.getLanguage());
             if (tvSeasonInfo != null && tvSeasonInfo.getId() <= 0) tvSeasonInfo = null; 
         } catch (MovieDbException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
-            }
             LOG.error("Failed to get episodes using TMDb ID {} and season {}: {}", tmdbId, season, ex.getMessage());
             LOG.trace("TheMovieDb error", ex);
         }
         return tvSeasonInfo;
     }
 
-    @Deprecated
-    public MediaCreditList getSeasonCredits(int tmdbId, int season, boolean throwTempError) {
-        MediaCreditList mediaCreditList = null;
-        try {
-            mediaCreditList = tmdbApi.getSeasonCredits(tmdbId, season);
-        } catch (MovieDbException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
-            }
-            LOG.error("Failed to get credits using TMDb ID {} and season {}: {}", tmdbId, season, ex.getMessage());
-            LOG.trace("TheMovieDb error", ex);
+    public TVEpisodeInfo getEpisodeInfo(String tmdbId, int season, int episode, Locale locale) {
+        if (!StringUtils.isNumeric(tmdbId)) {
+            return null;
         }
-        return mediaCreditList;
-    }
 
-    public TVEpisodeInfo getEpisodeInfo(int tmdbId, int season, int episode, Locale locale, boolean throwTempError) {
         TVEpisodeInfo tvEpisodeInfo = null;
         try {
-            tvEpisodeInfo = tmdbApi.getEpisodeInfo(tmdbId, season, episode, locale.getLanguage(), MethodSub.CREDITS.getValue(), MethodSub.EXTERNAL_IDS.getValue());
+            tvEpisodeInfo = tmdbApi.getEpisodeInfo(Integer.parseInt(tmdbId), season, episode, locale.getLanguage(), MethodSub.CREDITS.getValue(), MethodSub.EXTERNAL_IDS.getValue());
             if (tvEpisodeInfo != null && tvEpisodeInfo.getId() <= 0) tvEpisodeInfo = null; 
         } catch (MovieDbException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
-            }
             LOG.error("Failed to get episodes using TMDb ID {} and season {}: {}", tmdbId, season, ex.getMessage());
             LOG.trace("TheMovieDb error", ex);
         }
@@ -292,9 +278,13 @@ public class TheMovieDbApiWrapper {
         return movieInfo;
     }
 
-    public PersonCreditList<CreditBasic> getPersonCredits(int tmdbId, Locale locale, boolean throwTempError) {
+    public PersonCreditList<CreditBasic> getPersonCredits(String tmdbId, Locale locale, boolean throwTempError) {
+        if (!StringUtils.isNumeric(tmdbId)) {
+            return null;
+        }
+
         try {
-            return tmdbApi.getPersonCombinedCredits(tmdbId, locale.getLanguage());
+            return tmdbApi.getPersonCombinedCredits(Integer.parseInt(tmdbId), locale.getLanguage());
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);

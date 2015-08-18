@@ -183,54 +183,6 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     }
 
     @Override
-    public String getSeasonId(Season season) {
-        return getSeasonId(season, false);
-    }
-
-    private String getSeasonId(Season season, boolean throwTempError) {
-        String allocineId = season.getSourceDbId(SCANNER_ID);
-        
-        if (StringUtils.isBlank(allocineId)) {
-            String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
-            if (StringUtils.isNotBlank(seriesId)) {
-                TvSeriesInfos tvSeriesInfos = allocineApiWrapper.getTvSeriesInfos(allocineId, throwTempError);
-                if (tvSeriesInfos.isValid() && season.getSeason() <= tvSeriesInfos.getSeasonCount()) {
-                    int seasonCode = tvSeriesInfos.getSeasonCode(season.getSeason());
-                    if (seasonCode > 0) allocineId = String.valueOf(seasonCode);
-                }
-            }
-          
-            season.setSourceDbId(SCANNER_ID, allocineId);
-        }
-
-        return allocineId;
-    }
-
-    @Override
-    public String getEpisodeId(VideoData videoData) {
-        return getEpisodeId(videoData, false);
-    }
-
-    private String getEpisodeId(VideoData videoData, boolean throwTempError) {
-        String allocineId = videoData.getSourceDbId(SCANNER_ID);
-        
-        if (StringUtils.isBlank(allocineId)) {
-            String seasonId = videoData.getSeason().getSourceDbId(SCANNER_ID);
-            if (StringUtils.isNotBlank(seasonId)) {
-                TvSeasonInfos tvSeasonInfos = allocineApiWrapper.getTvSeasonInfos(seasonId, throwTempError);
-                if (tvSeasonInfos.isValid()) {
-                    Episode episode = tvSeasonInfos.getEpisode(videoData.getEpisode());
-                    if (episode.getCode() > 0) allocineId = String.valueOf(episode.getCode());
-                }
-            }
-          
-            videoData.setSourceDbId(SCANNER_ID, allocineId);
-        }
-
-        return allocineId;
-    }
-
-    @Override
     public String getPersonId(Person person) {
         return getPersonId(person, false);
     }
@@ -476,111 +428,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
 
         return ScanResult.OK;
     }
-
-    @Override
-    public ScanResult scanSeason(Season season) {
-        TvSeasonInfos tvSeasonInfos = null;
-        TvSeriesInfos tvSeriesInfos = null;
-        try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
-            String allocineId = getSeasonId(season, throwTempError);
-
-            if (StringUtils.isBlank(allocineId)) {
-                LOG.debug("Allocine id not available '{}'", season.getIdentifier());
-                return ScanResult.MISSING_ID;
-            }
-
-            tvSeasonInfos = allocineApiWrapper.getTvSeasonInfos(allocineId, throwTempError);
-            
-            String seriesId = season.getSeries().getSourceDbId(SCANNER_ID);
-            tvSeriesInfos = allocineApiWrapper.getTvSeriesInfos(seriesId, throwTempError);
-        } catch (TemporaryUnavailableException ex) {
-            // check retry
-            int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.tvshow", 0);
-            if (season.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
-            }
-        }
-        
-        if (tvSeasonInfos.isNotValid()) {
-            LOG.error("Can't find informations for season '{}'", season.getIdentifier());
-            return ScanResult.NO_RESULT;
-        }
-        
-        // use values from series
-        if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
-            season.setTitle(tvSeriesInfos.getTitle(), SCANNER_ID);
-        }
-        if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
-            season.setTitle(tvSeriesInfos.getOriginalTitle(), SCANNER_ID);
-        }
-        if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
-            season.setPlot(tvSeriesInfos.getSynopsis(), SCANNER_ID);
-        }
-        if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
-            season.setOutline(tvSeriesInfos.getSynopsisShort(), SCANNER_ID);
-        }
-        if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
-            season.setPublicationYear(tvSeasonInfos.getYearStart(), SCANNER_ID);
-        }
-        
-        return ScanResult.OK;
-    }
-    
-    @Override
-    public ScanResult scanEpisode(VideoData videoData) {
-        EpisodeInfos episodeInfos = null;
-        try {
-            boolean throwTempError = configServiceWrapper.getBooleanProperty("allocine.throwError.tempUnavailable", Boolean.TRUE);
-            String allocineId = getEpisodeId(videoData, throwTempError);
-
-            if (StringUtils.isBlank(allocineId)) {
-                LOG.debug("Allocine id not available '{}'", videoData.getIdentifier());
-                return ScanResult.MISSING_ID;
-            }
-
-            episodeInfos = allocineApiWrapper.getEpisodeInfos(allocineId, throwTempError);
-        } catch (TemporaryUnavailableException ex) {
-            // check retry
-            int maxRetries = configServiceWrapper.getIntProperty("allocine.maxRetries.tvshow", 0);
-            if (videoData.getRetries() < maxRetries) {
-                return ScanResult.RETRY;
-            }
-        }
-
-        if (episodeInfos.isNotValid()) {
-            LOG.error("Can't find informations for episode '{}'", videoData.getIdentifier());
-            return ScanResult.NO_RESULT;
-        }
-
-        if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
-            videoData.setTitle(episodeInfos.getTitle(), SCANNER_ID);
-        }
-
-        if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID)) {
-            videoData.setTitleOriginal(episodeInfos.getOriginalTitle(), SCANNER_ID);
-        }
-
-        if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-            videoData.setPlot(episodeInfos.getSynopsis(), SCANNER_ID);
-        }
-
-        if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-            videoData.setOutline(episodeInfos.getSynopsisShort(), SCANNER_ID);
-        }
-        
-        if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-            Date releaseDate = MetadataTools.parseToDate(episodeInfos.getOriginalBroadcastDate());
-            videoData.setRelease(releaseDate, SCANNER_ID);
-        }
-        
-        //  parse credits
-        parseCredits(videoData, episodeInfos.getEpisode().getCastMember());
-        
-        return ScanResult.OK;
-    }
-    
-    @Deprecated
+     
     private void scanSeasons(Series series, TvSeriesInfos tvSeriesInfos) {
 
         for (Season season : series.getSeasons()) {
@@ -624,7 +472,6 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
     }
 
-    @Deprecated
     private void scanEpisodes(Season season, TvSeasonInfos tvSeasonInfos) {
         if (season.isTvEpisodesScanned(SCANNER_ID)) {
             // nothing to do anymore

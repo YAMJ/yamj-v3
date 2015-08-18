@@ -190,7 +190,6 @@ public class OnlineScannerService {
             }
     	}
 
-
         // evaluate scan result
         if (ScanResult.OK.equals(scanResult)) {
             LOG.debug("Series {}-'{}', scanned OK", series.getId(), series.getTitle());

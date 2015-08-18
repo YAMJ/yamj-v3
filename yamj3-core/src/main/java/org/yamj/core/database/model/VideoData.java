@@ -195,7 +195,7 @@ public class VideoData extends AbstractMetadata {
     private final Collection<BoxedSetDTO> boxedSetDTOS = new HashSet<>(0);
 
     @Transient
-    private final Collection<CreditDTO> creditDTOS = new LinkedHashSet<>();
+    private final Collection<CreditDTO> creditDTOS = new LinkedHashSet<>(0);
 
     @Transient
     private final Collection<ArtworkDetailDTO> posterDTOS = new HashSet<>(0);
@@ -377,7 +377,7 @@ public class VideoData extends AbstractMetadata {
         this.sourceDbIdMap = sourceDbIdMap;
     }
 
-    private boolean isWatchedNfo() {
+    public boolean isWatchedNfo() {
         return watchedNfo;
     }
 
@@ -758,12 +758,10 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void setTvEpisodeDone() {
-        setLastScanned(new Date(System.currentTimeMillis()));
         this.setStatus(StatusType.TEMP_DONE);
     }
 
     public void setTvEpisodeNotFound() {
-        setLastScanned(new Date(System.currentTimeMillis()));
         if (StatusType.DONE.equals(this.getStatus())) {
             // do not reset done
             return;
