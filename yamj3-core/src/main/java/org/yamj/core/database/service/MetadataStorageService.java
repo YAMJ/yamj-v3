@@ -203,19 +203,16 @@ public class MetadataStorageService {
 
         // store countries
         for (String countryCode: countryCodes) {
-            if (this.commonDao.getCountry(countryCode) == null) {
-                // double check with lock
-                COUNTRY_STORAGE_LOCK.lock();
-                try {
-                    if (this.commonDao.getCountry(countryCode) == null) {
-                        this.commonDao.saveCountry(countryCode);
-                    }
-                } catch (Exception ex) {
-                    LOG.error("Failed to store country '{}', error: {}", countryCode, ex.getMessage());
-                    LOG.trace("Storage error", ex);
-                } finally {
-                    COUNTRY_STORAGE_LOCK.unlock();
+            COUNTRY_STORAGE_LOCK.lock();
+            try {
+                if (this.commonDao.getCountry(countryCode) == null) {
+                    this.commonDao.saveCountry(countryCode);
                 }
+            } catch (Exception ex) {
+                LOG.error("Failed to store country '{}', error: {}", countryCode, ex.getMessage());
+                LOG.trace("Storage error", ex);
+            } finally {
+                COUNTRY_STORAGE_LOCK.unlock();
             }
         }
     }
@@ -225,19 +222,17 @@ public class MetadataStorageService {
         
         // store studios
         for (String studioName : studioNames) {
-            if (commonDao.getStudio(studioName) == null) {
-                // double check with lock
-                STUDIO_STORAGE_LOCK.lock();
-                try {
-                    if (this.commonDao.getStudio(studioName) == null) {
-                        this.commonDao.saveStudio(studioName);
-                    }
-                } catch (Exception ex) {
-                    LOG.error("Failed to store studio '{}', error: {}", studioName, ex.getMessage());
-                    LOG.trace("Storage error", ex);
-                } finally {
-                    STUDIO_STORAGE_LOCK.unlock();
+            // double check with lock
+            STUDIO_STORAGE_LOCK.lock();
+            try {
+                if (this.commonDao.getStudio(studioName) == null) {
+                    this.commonDao.saveStudio(studioName);
                 }
+            } catch (Exception ex) {
+                LOG.error("Failed to store studio '{}', error: {}", studioName, ex.getMessage());
+                LOG.trace("Storage error", ex);
+            } finally {
+                STUDIO_STORAGE_LOCK.unlock();
             }
         }
     }
@@ -247,19 +242,16 @@ public class MetadataStorageService {
         
         // store certifications
         for (Entry<String,String> entry : certificationInfos.entrySet()) {
-            if (this.commonDao.getCertification(entry.getKey(), entry.getValue()) == null) {
-                // double check with lock
-                CERTIFICATION_STORAGE_LOCK.lock();
-                try {
-                    if (this.commonDao.getCertification(entry.getKey(), entry.getValue()) == null) {
-                        this.commonDao.saveCertification(entry.getKey(), entry.getValue());
-                    }
-                } catch (Exception ex) {
-                    LOG.error("Failed to store certification '{}'-'{}', error: {}", entry.getKey(), entry.getValue(), ex.getMessage());
-                    LOG.trace("Storage error", ex);
-                } finally {
-                    CERTIFICATION_STORAGE_LOCK.unlock();
+            CERTIFICATION_STORAGE_LOCK.lock();
+            try {
+                if (this.commonDao.getCertification(entry.getKey(), entry.getValue()) == null) {
+                    this.commonDao.saveCertification(entry.getKey(), entry.getValue());
                 }
+            } catch (Exception ex) {
+                LOG.error("Failed to store certification '{}'-'{}', error: {}", entry.getKey(), entry.getValue(), ex.getMessage());
+                LOG.trace("Storage error", ex);
+            } finally {
+                CERTIFICATION_STORAGE_LOCK.unlock();
             }
         }
     }
@@ -305,20 +297,17 @@ public class MetadataStorageService {
 
         // store new genres
         for (String genreName : genreNames) {
-            if (this.commonDao.getGenre(genreName) == null) {
-                // double check with lock
-                GENRE_STORAGE_LOCK.lock();
-                try {
-                    if (this.commonDao.getGenre(genreName) == null) {
-                        final String targetXml = GenreXmlTools.getMasterGenre(genreName);
-                        this.commonDao.saveGenre(genreName, targetXml);
-                    }
-                } catch (Exception ex) {
-                    LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
-                    LOG.trace("Storage error", ex);
-                } finally {
-                    GENRE_STORAGE_LOCK.unlock();
+            GENRE_STORAGE_LOCK.lock();
+            try {
+                if (this.commonDao.getGenre(genreName) == null) {
+                    final String targetXml = GenreXmlTools.getMasterGenre(genreName);
+                    this.commonDao.saveGenre(genreName, targetXml);
                 }
+            } catch (Exception ex) {
+                LOG.error("Failed to store genre '{}', error: {}", genreName, ex.getMessage());
+                LOG.trace("Storage error", ex);
+            } finally {
+                GENRE_STORAGE_LOCK.unlock();
             }
         }
     }

@@ -516,9 +516,8 @@ public class UpgradeDatabaseDao extends HibernateDao {
         currentSession()
             .createSQLQuery("DELETE FROM configuration where config_key='imdb.skip.faceless'")
             .executeUpdate();
-
         currentSession()
-            .createSQLQuery("UPDATE configuration set config_key='themoviedb.include.adult' where config_key='themoviedb.includeAdult'")
+            .createSQLQuery("DELETE FROM configuration where config_key='themoviedb.includeAdult'")
             .executeUpdate();
 
         // #234

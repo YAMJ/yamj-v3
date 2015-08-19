@@ -115,7 +115,7 @@ public class FileStorageService {
         }
         this.storagePathTrailer = FilenameUtils.normalizeNoEndSeparator(FilenameUtils.concat(this.storageResourceDir, value), true);
         this.storagePathTrailer += "/";
-        LOG.info("Trailer storage path set to '{}'", this.storagePathSkin);
+        LOG.info("Trailer storage path set to '{}'", this.storagePathTrailer);
 }
 
     public boolean store(StorageType type, String filename, URL url) throws IOException {

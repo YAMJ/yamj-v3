@@ -147,33 +147,31 @@ public class LocaleService  {
             LOG.error("Failed to load language display properties: {}", e.getMessage());
         }
 
-        // the ISO 639 catalog
-        try (InputStream inStream = getClass().getResourceAsStream("/iso639.properties")) {
-            Properties props = new Properties();
-            props.load(inStream);
-            for (Entry<Object,Object> prop : props.entrySet()) {
-                // map from name to code
-                languageLookupMap.put(prop.getValue().toString(), prop.getKey().toString());
-                // map from code to name
-                languageDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
+        // the ISO 639 catalogs
+        for (String lang : new String[]{"", "de"}) {
+            StringBuilder stream = new StringBuilder();
+            stream.append("/iso639.");
+            if (StringUtils.isNotBlank(lang)) {
+                stream.append(lang).append(".");
             }
-        } catch (Exception e) {
-            LOG.error("Failed to load default ISO 639 properties: {}", e.getMessage());
-        }
-
-        // the ISO 639 catalog for special languages
-        for (String lang : new String[]{"de"}) {
-            try (InputStream inStream = getClass().getResourceAsStream("/iso639."+lang+".properties")) {
+            stream.append("properties");
+            
+            try (InputStream inStream = getClass().getResourceAsStream(stream.toString())) {
                 Properties props = new Properties();
                 props.load(inStream);
                 for (Entry<Object,Object> prop : props.entrySet()) {
                     // map from name to code
                     languageLookupMap.put(prop.getValue().toString(), prop.getKey().toString());
-                    // map from language plus code to name
-                    languageDisplayMap.put(lang + "_" + prop.getKey().toString(), prop.getValue().toString());
+                    if (StringUtils.isBlank(lang)) {
+                        // map from code to name
+                        languageDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
+                    } else {
+                        // map from language plus code to name
+                        languageDisplayMap.put(lang + "_" + prop.getKey().toString(), prop.getValue().toString());
+                    }
                 }
             } catch (Exception e) {
-                LOG.error("Failed to load {} ISO 3166 properties: {}", lang, e.getMessage());
+                LOG.error("Failed to load {}: {}", stream, e.getMessage());
             }
         }
 
@@ -201,33 +199,31 @@ public class LocaleService  {
             LOG.error("Failed to load country display properties: {}", e.getMessage());
         }
 
-        // the ISO 3166 catalog
-        try (InputStream inStream = getClass().getResourceAsStream("/iso3166.properties")) {
-            Properties props = new Properties();
-            props.load(inStream);
-            for (Entry<Object,Object> prop : props.entrySet()) {
-                // map from name to code
-                countryLookupMap.put(prop.getValue().toString(), prop.getKey().toString());
-                // map from code to name
-                countryDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
+        // the ISO 3166 catalogs
+        for (String lang : new String[]{"","de","fr"}) {
+            StringBuilder stream = new StringBuilder();
+            stream.append("/iso3166.");
+            if (StringUtils.isNotBlank(lang)) {
+                stream.append(lang).append(".");
             }
-        } catch (Exception e) {
-            LOG.error("Failed to load default ISO 3166 properties: {}", e.getMessage());
-        }
-
-        // the ISO 3166 catalog for special languages
-        for (String lang : new String[]{"de","fr"}) {
-            try (InputStream inStream = getClass().getResourceAsStream("/iso3166."+lang+".properties")) {
+            stream.append("properties");
+            
+            try (InputStream inStream = getClass().getResourceAsStream(stream.toString())) {
                 Properties props = new Properties();
                 props.load(inStream);
                 for (Entry<Object,Object> prop : props.entrySet()) {
                     // map from name to code
                     countryLookupMap.put(prop.getValue().toString(), prop.getKey().toString());
-                    // map from language plus code to name
-                    countryDisplayMap.put(lang + "_" + prop.getKey().toString(), prop.getValue().toString());
+                    if (StringUtils.isBlank(lang)) {
+                        // map from code to name
+                        countryDisplayMap.put(prop.getKey().toString(), prop.getValue().toString());
+                    } else {
+                        // map from language plus code to name
+                        countryDisplayMap.put(lang + "_" + prop.getKey().toString(), prop.getValue().toString());
+                    }
                 }
             } catch (Exception e) {
-                LOG.error("Failed to load {} ISO 3166 properties: {}", lang, e.getMessage());
+                LOG.error("Failed to load {}: {}", stream, e.getMessage());
             }
         }
         
