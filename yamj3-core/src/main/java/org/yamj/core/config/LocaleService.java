@@ -125,7 +125,7 @@ public class LocaleService  {
         }
 
         // additional languages from properties file
-        try (InputStream inStream = getClass().getResourceAsStream("/iso639.code.properties")) {
+        try (InputStream inStream = getClass().getResourceAsStream("/iso639.xcode.properties")) {
             Properties props = new Properties();
             props.load(inStream);
             for (Entry<Object,Object> prop : props.entrySet()) {
@@ -137,7 +137,7 @@ public class LocaleService  {
         }
 
         // additional language display from properties file
-        try (InputStream inStream = getClass().getResourceAsStream("/iso639.display.properties")) {
+        try (InputStream inStream = getClass().getResourceAsStream("/iso639.xdisplay.properties")) {
             Properties props = new Properties();
             props.load(inStream);
             for (Entry<Object,Object> prop : props.entrySet()) {
@@ -178,7 +178,7 @@ public class LocaleService  {
         }
 
         // additional countries from properties file
-        try (InputStream inStream = getClass().getResourceAsStream("/iso3166.code.properties")) {
+        try (InputStream inStream = getClass().getResourceAsStream("/iso3166.xcode.properties")) {
             Properties props = new Properties();
             props.load(inStream);
             for (Entry<Object,Object> prop : props.entrySet()) {
@@ -191,7 +191,7 @@ public class LocaleService  {
 
         
         // additional country display from properties file
-        try (InputStream inStream = getClass().getResourceAsStream("/iso3166.display.properties")) {
+        try (InputStream inStream = getClass().getResourceAsStream("/iso3166.xdisplay.properties")) {
             Properties props = new Properties();
             props.load(inStream);
             for (Entry<Object,Object> prop : props.entrySet()) {

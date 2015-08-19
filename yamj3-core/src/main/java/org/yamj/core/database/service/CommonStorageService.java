@@ -143,7 +143,7 @@ public class CommonStorageService {
 
                             boolean watchedApi = MetadataTools.allMediaFilesWatched(videoData, true);
                             if (videoData.isWatchedApi() != watchedApi) {
-                                videoData.setWatchedApi(watchedFile);
+                                videoData.setWatchedApi(watchedApi);
                                 this.stagingDao.updateEntity(videoData);
                             }
                         }
