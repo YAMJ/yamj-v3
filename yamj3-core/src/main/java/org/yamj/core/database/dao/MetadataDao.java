@@ -91,7 +91,6 @@ public class MetadataDao extends HibernateDao {
 
     public void storeMovieCredit(CreditDTO dto) {
         Person person = getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, dto.getIdentifier());
-        
         if (person == null) {
             // create new person
             person = new Person(dto.getIdentifier());

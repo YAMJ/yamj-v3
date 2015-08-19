@@ -55,7 +55,7 @@ public class TheMovieDbApiWrapper {
     private TheMovieDbApi tmdbApi;
     
     public String getMovieId(String title, int year, Locale locale, boolean throwTempError) {
-        boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
+        boolean includeAdult = configService.getBooleanProperty("themoviedb.include.adult", Boolean.FALSE);
         int searchMatch = configService.getIntProperty("themoviedb.searchMatch", 3);
         
         MovieInfo movie = null;

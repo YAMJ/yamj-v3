@@ -326,7 +326,6 @@ public class MetadataStorageService {
     @Transactional(timeout=120)
     public void updateScannedPerson(Person person) {
         // update entity
-        person.fixScannedValues();
         person.setLastScanned(new Date(System.currentTimeMillis()));
         metadataDao.updateEntity(person);
 

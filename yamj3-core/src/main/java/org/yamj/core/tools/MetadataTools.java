@@ -638,6 +638,6 @@ public final class MetadataTools {
         pos = StringUtils.indexOfIgnoreCase(newBio, WIKIPEDIA_DESCRIPTION_ABOVE);
         if (pos >= 0) newBio = newBio.substring(0, pos);
         
-        return fixScannedValue(newBio);
+        return newBio;
     }
 }

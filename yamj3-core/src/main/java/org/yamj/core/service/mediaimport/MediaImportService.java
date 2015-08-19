@@ -60,7 +60,7 @@ import org.yamj.core.tools.MetadataTools;
 public class MediaImportService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MediaImportService.class);
-    private static final String MEDIA_SOURCE = "filename";
+    private static final String SCANNER_ID = "filename";
     private static final String TVSHOW_NFO_NAME = "tvshow";
     private static final String BDMV_FOLDER = "BDMV";
     private static final String DVD_FOLDER = "VIDEO_TS";
@@ -187,9 +187,9 @@ public class MediaImportService {
                 // NEW video data
                 videoData = new VideoData(identifier);
                 videoData.setSourceDbIdMap(dto.getIdMap());
-                videoData.setTitle(dto.getTitle(), MEDIA_SOURCE);
-                videoData.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
-                videoData.setPublicationYear(dto.getYear(), MEDIA_SOURCE);
+                videoData.setTitle(dto.getTitle(), SCANNER_ID);
+                videoData.setTitleOriginal(dto.getTitle(), SCANNER_ID);
+                videoData.setPublicationYear(dto.getYear(), SCANNER_ID);
                 videoData.setStatus(StatusType.NEW);
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);
@@ -239,7 +239,7 @@ public class MediaImportService {
             if (MapUtils.isNotEmpty(dto.getSetMap())) {
                 for (Entry<String, Integer> entry : dto.getSetMap().entrySet()) {
                     // add boxed set to video data
-                    videoData.addBoxedSetDTO(MEDIA_SOURCE, entry.getKey(), entry.getValue());
+                    videoData.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue());
                 }
 
                 // store associated entities (only sets right now)
@@ -268,8 +268,8 @@ public class MediaImportService {
                         Series series = metadataDao.getSeries(seriesIdentifier);
                         if (series == null) {
                             series = new Series(seriesIdentifier);
-                            series.setTitle(dto.getTitle(), MEDIA_SOURCE);
-                            series.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
+                            series.setTitle(dto.getTitle(), SCANNER_ID);
+                            series.setTitleOriginal(dto.getTitle(), SCANNER_ID);
                             series.setSourceDbIdMap(dto.getIdMap());
                             series.setStatus(StatusType.NEW);
                             series.setTrailerStatus(StatusType.NEW);
@@ -306,7 +306,7 @@ public class MediaImportService {
                         if (MapUtils.isNotEmpty(dto.getSetMap())) {
                             for (Entry<String, Integer> entry : dto.getSetMap().entrySet()) {
                                 // add boxed set to video data
-                                series.addBoxedSetDTO(MEDIA_SOURCE, entry.getKey(), entry.getValue());
+                                series.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue());
                             }
 
                             // store associated entities (only sets right now)
@@ -317,8 +317,8 @@ public class MediaImportService {
 
                         season = new Season(seasonIdentifier);
                         season.setSeason(dto.getSeason());
-                        season.setTitle(dto.getTitle(), MEDIA_SOURCE);
-                        season.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
+                        season.setTitle(dto.getTitle(), SCANNER_ID);
+                        season.setTitleOriginal(dto.getTitle(), SCANNER_ID);
                         season.setSeries(series);
                         season.setStatus(StatusType.NEW);
 
@@ -352,11 +352,11 @@ public class MediaImportService {
 
                     videoData = new VideoData(identifier);
                     if (StringUtils.isNotBlank(dto.getEpisodeTitle())) {
-                        videoData.setTitle(dto.getEpisodeTitle(), MEDIA_SOURCE);
-                        videoData.setTitleOriginal(dto.getEpisodeTitle(), MEDIA_SOURCE);
+                        videoData.setTitle(dto.getEpisodeTitle(), SCANNER_ID);
+                        videoData.setTitleOriginal(dto.getEpisodeTitle(), SCANNER_ID);
                     } else {
-                        videoData.setTitle(dto.getTitle(), MEDIA_SOURCE);
-                        videoData.setTitleOriginal(dto.getTitle(), MEDIA_SOURCE);
+                        videoData.setTitle(dto.getTitle(), SCANNER_ID);
+                        videoData.setTitleOriginal(dto.getTitle(), SCANNER_ID);
                     }
                     videoData.setStatus(StatusType.NEW);
                     videoData.setSeason(season);

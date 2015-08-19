@@ -134,7 +134,7 @@ public class Person extends AbstractScannable {
 
     public void setName(String name, String source) {
         if (StringUtils.isNotBlank(name)) {
-            this.name = name.trim();
+            this.name = MetadataTools.fixScannedValue(name.trim());
             setOverrideFlag(OverrideFlag.NAME, source);
         }
     }
@@ -155,7 +155,11 @@ public class Person extends AbstractScannable {
     }
 
     public void setFirstName(String firstName, String source) {
-        this.firstName = StringUtils.trimToNull(firstName);
+        if (firstName == null) {
+            this.firstName = firstName;
+        } else {
+            this.firstName = StringUtils.trimToNull(MetadataTools.fixScannedValue(firstName));
+        }
         setOverrideFlag(OverrideFlag.FIRSTNAME, source);
     }
 
@@ -176,7 +180,11 @@ public class Person extends AbstractScannable {
     }
 
     public void setLastName(String lastName, String source) {
-        this.lastName = StringUtils.trimToNull(lastName);
+        if (lastName == null) {
+            this.lastName = lastName;
+        } else {
+            this.lastName = StringUtils.trimToNull(MetadataTools.fixScannedValue(lastName));
+        }
         setOverrideFlag(OverrideFlag.LASTNAME, source);
     }
 
@@ -220,7 +228,7 @@ public class Person extends AbstractScannable {
 
     public void setBirthPlace(String birthPlace, String source) {
         if (StringUtils.isNotBlank(birthPlace)) {
-            this.birthPlace = birthPlace.trim();
+            this.birthPlace =  MetadataTools.fixScannedValue(birthPlace.trim());
             setOverrideFlag(OverrideFlag.BIRTHPLACE, source);
         }
     }
@@ -242,7 +250,7 @@ public class Person extends AbstractScannable {
 
     public void setBirthName(String birthName, String source) {
         if (StringUtils.isNotBlank(birthName)) {
-            this.birthName = birthName.trim();
+            this.birthName =  MetadataTools.fixScannedValue(birthName.trim());
             setOverrideFlag(OverrideFlag.BIRTHNAME, source);
         }
     }
@@ -286,7 +294,7 @@ public class Person extends AbstractScannable {
 
     public void setDeathPlace(String deathPlace, String source) {
         if (StringUtils.isNotBlank(deathPlace)) {
-            this.deathPlace = deathPlace.trim();
+            this.deathPlace =  MetadataTools.fixScannedValue(deathPlace.trim());
             setOverrideFlag(OverrideFlag.DEATHPLACE, source);
         }
     }
@@ -308,7 +316,7 @@ public class Person extends AbstractScannable {
 
     public void setBiography(String biography, String source) {
         if (StringUtils.isNotBlank(biography)) {
-            this.biography = biography.trim();
+            this.biography = MetadataTools.fixScannedValue(biography.trim());
             setOverrideFlag(OverrideFlag.BIOGRAPHY, source);
         }
     }
@@ -387,16 +395,6 @@ public class Person extends AbstractScannable {
 
     public void setNewFilmography(Set<FilmParticipation> newFilmography) {
         this.newFilmography = newFilmography;
-    }
-
-    public void fixScannedValues() {
-        this.name = MetadataTools.fixScannedValue(this.name);
-        this.firstName = MetadataTools.fixScannedValue(this.firstName);
-        this.lastName = MetadataTools.fixScannedValue(this.lastName);
-        this.birthName = MetadataTools.fixScannedValue(this.birthName);
-        this.birthPlace = MetadataTools.fixScannedValue(this.birthPlace);
-        this.deathPlace = MetadataTools.fixScannedValue(this.deathPlace);
-        this.biography = MetadataTools.fixScannedValue(this.biography);
     }
 
     // EQUALITY CHECKS

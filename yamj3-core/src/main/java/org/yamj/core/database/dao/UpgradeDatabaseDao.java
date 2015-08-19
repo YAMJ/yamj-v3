@@ -110,7 +110,11 @@ public class UpgradeDatabaseDao extends HibernateDao {
                 .createSQLQuery("ALTER TABLE trailer DROP source_hash")
                 .executeUpdate();
         }
-        
+
+        currentSession()
+            .createSQLQuery("UPDATE trailer SET container='MP4' where container=''")
+            .executeUpdate();
+
         currentSession()
             .createSQLQuery("ALTER TABLE trailer MODIFY COLUMN url VARCHAR(1000)")
             .executeUpdate();
@@ -512,7 +516,11 @@ public class UpgradeDatabaseDao extends HibernateDao {
         currentSession()
             .createSQLQuery("DELETE FROM configuration where config_key='imdb.skip.faceless'")
             .executeUpdate();
-        
+
+        currentSession()
+            .createSQLQuery("UPDATE configuration set config_key='themoviedb.include.adult' where config_key='themoviedb.includeAdult'")
+            .executeUpdate();
+
         // #234
         currentSession()
             .createSQLQuery("DELETE FROM configuration where config_key='imdb.id.search.country'")

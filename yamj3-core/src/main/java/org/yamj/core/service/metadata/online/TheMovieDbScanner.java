@@ -327,9 +327,11 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
 
         // store collection as boxed set
-        com.omertron.themoviedbapi.model.collection.Collection collection = movieInfo.getBelongsToCollection();
-        if (collection != null) {
-            videoData.addBoxedSetDTO(SCANNER_ID, collection.getName(), -1, String.valueOf(collection.getId()));
+        if (this.configServiceWrapper.getBooleanProperty("themoviedb.include.collection", Boolean.FALSE)) {
+            com.omertron.themoviedbapi.model.collection.Collection collection = movieInfo.getBelongsToCollection();
+            if (collection != null && collection.getName() != null) {
+                videoData.addBoxedSetDTO(SCANNER_ID, collection.getName(), -1, String.valueOf(collection.getId()));
+            }
         }
         
         return ScanResult.OK;

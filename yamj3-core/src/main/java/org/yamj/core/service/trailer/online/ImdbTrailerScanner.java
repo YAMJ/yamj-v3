@@ -48,7 +48,6 @@ import org.yamj.core.web.apis.ImdbApiWrapper;
 public class ImdbTrailerScanner implements IMovieTrailerScanner, ISeriesTrailerScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImdbTrailerScanner.class);
-    public static final String SCANNER_ID = "youtube";
 
     @Autowired
     private TrailerScannerService trailerScannerService;
@@ -63,7 +62,7 @@ public class ImdbTrailerScanner implements IMovieTrailerScanner, ISeriesTrailerS
     
     @Override
     public String getScannerName() {
-        return SCANNER_ID;
+        return imdbScanner.getScannerName();
     }
     
     @PostConstruct
@@ -97,28 +96,32 @@ public class ImdbTrailerScanner implements IMovieTrailerScanner, ISeriesTrailerS
             return null;
         }
         
-        String bestFormat = null;
         String url = null;
-        loop: for (ImdbEncodingFormat format : imdbTrailer.getEncodings().values()) {
+        int prio = 1000;
+        
+        for (ImdbEncodingFormat format : imdbTrailer.getEncodings().values()) {
             switch(format.getFormat()) {
                 case "HD 720":
-                   url = format.getUrl();
-                   // best match found;
-                   break loop;
+                   if (prio > 10) {
+                       prio = 10;
+                       url = format.getUrl();
+                   }
+                   break;
                 case "HD 480p":
-                    url = format.getUrl();
-                    // just store the format
-                    bestFormat = "HD 480p";
+                    if (prio > 20) {
+                        prio = 20;
+                        url = format.getUrl();
+                    }
                     break;
                 case "H.264 Fire 600":
-                    if (!"HD 480p".equals(bestFormat)) {
+                    if (prio > 30) {
+                        prio = 30;
                         url = format.getUrl();
-                        bestFormat = "H.264 Fire 600";
                     }
                     break;
                 default:
-                    if (StringUtils.isBlank(bestFormat)) {
-                        bestFormat = format.getFormat();
+                    if (prio > 100) {
+                        prio = 100;
                         url = format.getUrl();
                     }
                     break;
