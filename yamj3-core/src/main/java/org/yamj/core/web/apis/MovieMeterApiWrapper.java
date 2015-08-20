@@ -51,7 +51,7 @@ public class MovieMeterApiWrapper {
                 throw new TemporaryUnavailableException("MovieMeter service temporary not available: " + ex.getResponseCode(), ex);
             }
             LOG.error("Failed to get film info using IMDb ID {}: {}", imdbId, ex.getMessage());
-            LOG.trace("TheTVDb error" , ex);
+            LOG.trace("MovieMeter error" , ex);
         }
         return moviemeterId;
     }
