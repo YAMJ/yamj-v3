@@ -25,6 +25,7 @@ package org.yamj.core.web;
 import com.moviejukebox.allocine.AllocineApi;
 import com.omertron.fanarttvapi.FanartTvApi;
 import com.omertron.imdbapi.ImdbApi;
+import com.omertron.moviemeter.MovieMeterApi;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.thetvdbapi.TheTVDBApi;
 import java.util.Locale;
@@ -107,6 +108,9 @@ public class WebConfiguration  {
     @Value("${APIKEY.allocine.secretKey}")
     private String allocineApiSecretKey;
 
+    @Value("${APIKEY.moviemeter}")
+    private String movieMeterApiKey;
+
     @Scope
     @Bean(destroyMethod="close")
     @SuppressWarnings("resource")
@@ -186,7 +190,7 @@ public class WebConfiguration  {
     }
 
     @Bean
-    public TheMovieDbApi theMovieDbApi() throws Exception  {
+    public TheMovieDbApi theMovieDbApi() throws Exception {
         LOG.trace("Initialize TheMovieDbApi");
         return new TheMovieDbApi(theMovieDbApiKey, poolingHttpClient());
     }
@@ -198,7 +202,7 @@ public class WebConfiguration  {
     }
 
     @Bean
-    public FanartTvApi fanartTvApi() throws Exception  {
+    public FanartTvApi fanartTvApi() throws Exception {
         LOG.trace("Initialize FanartTvApi");
         return new FanartTvApi(fanartTvApiKey, fanartTvApiClientKey, poolingHttpClient());
     }
@@ -215,6 +219,12 @@ public class WebConfiguration  {
         ImdbApi imdbApi = new ImdbApi(poolingHttpClient());
         imdbApi.setLocale(Locale.US);
         return imdbApi;
+    }
+
+    @Bean
+    public MovieMeterApi movieMeterApi() throws Exception {
+        LOG.trace("Initialize MovieMeterApi");
+        return new MovieMeterApi(movieMeterApiKey, poolingHttpClient());
     }
 }
 

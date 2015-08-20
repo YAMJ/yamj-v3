@@ -122,8 +122,8 @@ public final class InfoDTO {
         return this.watchedDate;
     }
     
-    public void setWatched(Boolean watched, Date watchedDate) {
-        this.watched = watched;
+    public void setWatched(boolean watched, Date watchedDate) {
+        this.watched = this.watched || watched;
         if (this.watchedDate == null) {
             this.watchedDate = watchedDate;
         } else if (watchedDate != null && watchedDate.after(this.watchedDate)) {

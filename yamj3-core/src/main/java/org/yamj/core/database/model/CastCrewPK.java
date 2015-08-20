@@ -52,8 +52,7 @@ public class CastCrewPK implements Serializable {
     @Column(name = "job", nullable = false, length = 30, insertable = false, updatable = false)
     private JobType jobType;
 
-    public CastCrewPK() {
-    }
+    public CastCrewPK() {}
 
     public CastCrewPK(Person person, VideoData videoData, JobType jobType) {
         this.person = person;

@@ -92,7 +92,6 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             return tmdbId;
         }
 
-        
         String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
         if (StringUtils.isNotBlank(imdbId)) {
             // Search based on IMDb ID

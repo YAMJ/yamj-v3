@@ -258,6 +258,8 @@ public final class InfoReader {
             if (StringUtils.isNotBlank(value)) {
                 dto.addId(TheTVDbScanner.SCANNER_ID, value);
             }
+            
+            // TODO series watched status
         } else {
             // movie specific
         
