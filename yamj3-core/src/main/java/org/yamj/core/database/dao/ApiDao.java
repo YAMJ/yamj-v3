@@ -2978,7 +2978,7 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("SELECT vd.id");
             sqlScalars.addToSql(SQL_COMMA_SPACE_QUOTE + MetaDataType.MOVIE + SQL_AS_VIDEO_TYPE_STRING);
             sqlScalars.addToSql(", bo1.ordering, vd.title, vd.title_original AS originalTitle, vd.publication_year AS year,vd.release_date AS releaseDate,");
-            sqlScalars.addToSql("min(vd.watched_nfo or vd.watched_file or vd.watched_api) as watched");
+            sqlScalars.addToSql("(vd.watched_nfo or vd.watched_file or vd.watched_api) as watched");
             sqlScalars.addToSql(DataItemTools.addSqlDataItems(options.splitDataItems(), "vd").toString());
             sqlScalars.addToSql("FROM boxed_set_order bo1");
             sqlScalars.addToSql("JOIN videodata vd ON bo1.videodata_id=vd.id");
@@ -3028,8 +3028,8 @@ public class ApiDao extends HibernateDao {
     private static SqlScalars generateSqlForBoxedSet(OptionsBoxedSet options) {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT s.id, s.name, count(s.member) as memberCount, min(s.watched_set) as watched FROM (");
-        sqlScalars.addToSql("SELECT bs1.id, bs1.name, bo1.id as member,");
-        sqlScalars.addToSql("min(vd1.watched_nfo or vd1.watched_file or vd1.watched_api) as watched_set");
+        sqlScalars.addToSql("SELECT bs1.id, bs1.name, vd1.id as member,");
+        sqlScalars.addToSql("(vd1.watched_nfo or vd1.watched_file or vd1.watched_api) as watched_set");
         sqlScalars.addToSql("FROM boxed_set bs1");
         sqlScalars.addToSql("LEFT OUTER JOIN boxed_set_order bo1 ON bs1.id=bo1.boxedset_id");
         sqlScalars.addToSql("LEFT OUTER JOIN videodata vd1 ON bo1.videodata_id=vd1.id");
@@ -3037,7 +3037,7 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("WHERE bs1.id=" + options.getId());
         }
         sqlScalars.addToSql(SQL_UNION);
-        sqlScalars.addToSql("SELECT bs2.id, bs2.name, bo2.id as member,");
+        sqlScalars.addToSql("SELECT bs2.id, bs2.name, ser.id as member,");
         sqlScalars.addToSql("(SELECT min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched_set");
         sqlScalars.addToSql("FROM boxed_set bs2");
         sqlScalars.addToSql("LEFT OUTER JOIN boxed_set_order bo2 ON bs2.id=bo2.boxedset_id");
