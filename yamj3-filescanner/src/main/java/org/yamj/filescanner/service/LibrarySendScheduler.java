@@ -120,7 +120,7 @@ public class LibrarySendScheduler {
                 }
 
                 // Don't stop sending until the scanning is completed and there are no running tasks
-                if (library.isScanningComplete() && runningCount.get() > 0) {
+                if (library.isScanningComplete() && runningCount.get() <= 0) {
                     // When we reach this point we should have completed the library sending
                     LOG.info("Sending complete for {}", library.getImportDTO().getBaseDirectory());
                     library.setSendingComplete(Boolean.TRUE);
