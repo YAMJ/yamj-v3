@@ -26,6 +26,8 @@ import com.omertron.tvrageapi.TVRageApi;
 import com.omertron.tvrageapi.TVRageException;
 import com.omertron.tvrageapi.model.EpisodeList;
 import com.omertron.tvrageapi.model.ShowInfo;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -46,7 +48,7 @@ public class TVRageApiWrapper {
 
     public ShowInfo getShowInfoByTitle(String title, boolean throwTempError) {
         try {
-            List<ShowInfo> showList = tvRageApi.searchShow(title);
+            List<ShowInfo> showList = tvRageApi.searchShow(URLEncoder.encode(title, "UTF-8"));
 
             if (CollectionUtils.isEmpty(showList)) {
                 // failed retrieving any results
@@ -58,6 +60,9 @@ public class TVRageApiWrapper {
                     return si;
                 }
             }
+        } catch (UnsupportedEncodingException ex) {
+            LOG.error("Failed to get TVRage ID by title '{}': {}", title, ex.getMessage());
+            LOG.trace("TVRage error" , ex);
         } catch (TVRageException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TVRage service temporary not available: " + ex.getResponseCode(), ex);

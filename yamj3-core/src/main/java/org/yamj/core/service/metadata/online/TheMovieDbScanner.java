@@ -512,6 +512,9 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                 if (StringUtils.isBlank(videoData.getSourceDbId(TheTVDbScanner.SCANNER_ID))) {
                     videoData.setSourceDbId(TheTVDbScanner.SCANNER_ID, episodeInfo.getExternalIDs().getTvdbId());
                 }
+                if (StringUtils.isBlank(videoData.getSourceDbId(TVRageScanner.SCANNER_ID))) {
+                    videoData.setSourceDbId(TVRageScanner.SCANNER_ID, episodeInfo.getExternalIDs().getTvrageId());
+                }
             }
 
             if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {

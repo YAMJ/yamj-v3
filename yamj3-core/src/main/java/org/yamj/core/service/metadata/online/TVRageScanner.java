@@ -22,8 +22,7 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.omertron.tvrageapi.model.EpisodeList;
-import com.omertron.tvrageapi.model.ShowInfo;
+import com.omertron.tvrageapi.model.*;
 import java.util.*;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
+import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
@@ -108,6 +108,7 @@ public class TVRageScanner implements ISeriesScanner {
 
     @Override
     public ScanResult scanSeries(Series series) {
+        final Locale tvRageLocale = localeService.getLocaleForConfig("tvrage");
         ShowInfo showInfo = null;
         EpisodeList episodeList = null;
         try {
@@ -134,6 +135,25 @@ public class TVRageScanner implements ISeriesScanner {
             return ScanResult.NO_RESULT;
         }
 
+        String title = showInfo.getShowName();
+        if (showInfo.getAkas() != null) {
+            // try AKAs for title in another country
+            loop: for (CountryDetail cd : showInfo.getAkas()) {
+                if (tvRageLocale.getCountry().equals(cd.getCountry())) {
+                    title = cd.getDetail();
+                    break loop;
+                }
+            }
+        }
+        
+        if (OverrideTools.checkOverwriteTitle(series, SCANNER_ID)) {
+            series.setTitle(title, SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteOriginalTitle(series, SCANNER_ID)) {
+            series.setTitleOriginal(showInfo.getShowName(), SCANNER_ID);
+        }
+        
         if (OverrideTools.checkOverwritePlot(series, SCANNER_ID)) {
             series.setPlot(showInfo.getSummary(), SCANNER_ID);
         }
@@ -147,30 +167,73 @@ public class TVRageScanner implements ISeriesScanner {
         }
 
         if (OverrideTools.checkOverwriteYear(series, SCANNER_ID)) {
-            Date date = showInfo.getStartDate();
-            if (date != null) series.setStartYear(MetadataTools.extractYearAsInt(date), SCANNER_ID);
-            // TODO ended date?
+            series.setStartYear(MetadataTools.extractYearAsInt(showInfo.getStartDate()), SCANNER_ID);
+            series.setEndYear(MetadataTools.extractYearAsInt(showInfo.getEnded()), SCANNER_ID);
         }
 
-        if (OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
-            // TODO studios
-            // CountryDetail cd = showInfo.getNetwork().get(0);
-            //movie.setCompany(cd.getDetail(), SCANNER_ID);
+        if (showInfo.getNetwork() != null && OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
+            Set<String> studioNames = new HashSet<>();
+            for (CountryDetail cd : showInfo.getNetwork()) {
+                if (StringUtils.isNotBlank(cd.getDetail())) {
+                    studioNames.add(cd.getDetail());
+                }
+            }
+            series.setStudioNames(studioNames, SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteCountries(series, SCANNER_ID)) {
-            String countryCode = localeService.findCountryCode(showInfo.getCountry());
+            String countryCode = localeService.findCountryCode(showInfo.getOriginCountry());
             if (countryCode != null) {
                 Set<String> countryCodes = Collections.singleton(countryCode);
                 series.setCountryCodes(countryCodes, SCANNER_ID);
             }
         }
         
-        // TODO scan seasons and episodes
+        scanSeasons(series, showInfo, title, episodeList);
         
         return ScanResult.OK;
     }
     
+    private void scanSeasons(Series series, ShowInfo showInfo, String title, EpisodeList episodeList) {
+        
+        for (Season season : series.getSeasons()) {
+            
+            if (!season.isTvSeasonDone(SCANNER_ID)) {
+                // same as series id
+                final String tvRageId = Integer.toString(showInfo.getShowID());
+                season.setSourceDbId(SCANNER_ID, tvRageId);
+                
+                // use values from series
+                if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
+                    season.setTitle(title, SCANNER_ID);
+                }
+                if (OverrideTools.checkOverwriteOriginalTitle(series, SCANNER_ID)) {
+                    series.setTitleOriginal(showInfo.getShowName(), SCANNER_ID);
+                }
+                if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
+                    season.setPlot(showInfo.getSummary(), SCANNER_ID);
+                }
+                if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
+                    season.setOutline(showInfo.getSummary(), SCANNER_ID);
+                }
+    
+                if (OverrideTools.checkOverwriteYear(season, SCANNER_ID)) {
+                    // get season year from minimal first aired of episodes
+                    Episode episode = episodeList.getEpisode(season.getSeason(), 1);
+                    if (episode != null && episode.getAirDate() != null) {
+                        season.setPublicationYear(MetadataTools.extractYearAsInt(episode.getAirDate()), SCANNER_ID);
+                    }
+                }
+    
+                // mark season as done
+                season.setTvSeasonDone();
+            }
+            
+            // scan episodes
+            //scanEpisodes(season, episodeList);
+        }
+    }
+
     @Override
     public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
         // if we already have the ID, skip the scanning of the NFO file
