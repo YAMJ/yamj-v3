@@ -28,6 +28,7 @@ import com.omertron.imdbapi.ImdbApi;
 import com.omertron.moviemeter.MovieMeterApi;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.thetvdbapi.TheTVDBApi;
+import com.omertron.tvrageapi.TVRageApi;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -110,6 +111,9 @@ public class WebConfiguration  {
 
     @Value("${APIKEY.moviemeter}")
     private String movieMeterApiKey;
+    
+    @Value("${APIKEY.tvrage}")
+    private String tvRageApiKey;
 
     @Scope
     @Bean(destroyMethod="close")
@@ -225,6 +229,12 @@ public class WebConfiguration  {
     public MovieMeterApi movieMeterApi() throws Exception {
         LOG.trace("Initialize MovieMeterApi");
         return new MovieMeterApi(movieMeterApiKey, poolingHttpClient());
+    }
+
+    @Bean
+    public TVRageApi tvRageApi() {
+        LOG.trace("Initialize TVRageApi");
+        return new TVRageApi(tvRageApiKey, poolingHttpClient());
     }
 }
 
