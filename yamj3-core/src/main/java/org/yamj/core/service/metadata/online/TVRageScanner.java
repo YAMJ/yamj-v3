@@ -1,0 +1,216 @@
+/*
+ *      Copyright (c) 2004-2015 YAMJ Members
+ *      https://github.com/organizations/YAMJ/teams
+ *
+ *      This file is part of the Yet Another Media Jukebox (YAMJ).
+ *
+ *      YAMJ is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation, either version 3 of the License, or
+ *      any later version.
+ *
+ *      YAMJ is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with YAMJ.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Web: https://github.com/YAMJ/yamj-v3
+ *
+ */
+package org.yamj.core.service.metadata.online;
+
+import com.omertron.tvrageapi.model.EpisodeList;
+import com.omertron.tvrageapi.model.ShowInfo;
+import java.util.*;
+import javax.annotation.PostConstruct;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.yamj.core.config.ConfigServiceWrapper;
+import org.yamj.core.config.LocaleService;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.service.metadata.nfo.InfoDTO;
+import org.yamj.core.tools.MetadataTools;
+import org.yamj.core.tools.OverrideTools;
+import org.yamj.core.web.apis.TVRageApiWrapper;
+
+@Service("tvRageScanner")
+public class TVRageScanner implements ISeriesScanner {
+
+    public static final String SCANNER_ID = "tvrage";
+    private static final Logger LOG = LoggerFactory.getLogger(TVRageScanner.class);
+
+    @Autowired
+    private OnlineScannerService onlineScannerService;
+    @Autowired
+    private ConfigServiceWrapper configServiceWrapper;
+    @Autowired
+    private LocaleService localeService;
+    @Autowired
+    private TVRageApiWrapper tvRageApiWrapper;
+    
+    @Override
+    public String getScannerName() {
+        return SCANNER_ID;
+    }
+
+    @PostConstruct
+    public void init() {
+        LOG.info("Initialize TVRage scanner");
+
+        // register this scanner
+        onlineScannerService.registerMetadataScanner(this);
+    }
+
+    @Override
+    public String getSeriesId(Series series) {
+        return getSeriesId(series, false);
+    }
+
+    private String getSeriesId(Series series, boolean throwTempError) {
+        String tvRageId = series.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNumeric(tvRageId)) {
+            return tvRageId;
+        }
+
+        ShowInfo showInfo = null;
+        if (StringUtils.isNotBlank(tvRageId)) {
+            // try by vanity URL
+            showInfo = tvRageApiWrapper.getShowInfoByVanityURL(tvRageId, throwTempError);
+        }
+        
+        // try by title
+        if (showInfo == null || !showInfo.isValid()) {
+            showInfo = tvRageApiWrapper.getShowInfoByTitle(series.getTitle(), throwTempError);
+        }
+
+        // try by original title
+        if ((showInfo == null || !showInfo.isValid())
+            && StringUtils.isNotBlank(series.getTitleOriginal())
+            && !series.getTitle().equalsIgnoreCase(series.getTitleOriginal()))
+        {
+            showInfo = tvRageApiWrapper.getShowInfoByTitle(series.getTitleOriginal(), throwTempError);
+        }
+
+        if (showInfo != null && showInfo.isValid() && showInfo.getShowID()>0) {
+            tvRageId = Integer.toString(showInfo.getShowID());
+            series.setSourceDbId(SCANNER_ID, tvRageId);
+            return tvRageId;
+        }
+        
+        return null;
+    }
+
+    @Override
+    public ScanResult scanSeries(Series series) {
+        ShowInfo showInfo = null;
+        EpisodeList episodeList = null;
+        try {
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("tvrage.throwError.tempUnavailable", Boolean.TRUE);
+            String tvRageId = getSeriesId(series, throwTempError); 
+
+            if (!StringUtils.isNumeric(tvRageId)) {
+                LOG.debug("TVRage id not available '{}'", series.getIdentifier());
+                return ScanResult.MISSING_ID;
+            }
+
+            showInfo = tvRageApiWrapper.getShowInfo(tvRageId, throwTempError);
+            episodeList = tvRageApiWrapper.getEpisodeList(tvRageId, throwTempError);
+        } catch (TemporaryUnavailableException ex) {
+            // check retry
+            int maxRetries = this.configServiceWrapper.getIntProperty("tvrage.maxRetries.tvshow", 0);
+            if (series.getRetries() < maxRetries) {
+                return ScanResult.RETRY;
+            }
+        }
+
+        if (showInfo == null || !showInfo.isValid()) {
+            LOG.error("Can't find informations for series '{}'", series.getIdentifier());
+            return ScanResult.NO_RESULT;
+        }
+
+        if (OverrideTools.checkOverwritePlot(series, SCANNER_ID)) {
+            series.setPlot(showInfo.getSummary(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteOutline(series, SCANNER_ID)) {
+            series.setOutline(showInfo.getSummary(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteGenres(series, SCANNER_ID)) {
+            series.setGenreNames(showInfo.getGenres(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteYear(series, SCANNER_ID)) {
+            Date date = showInfo.getStartDate();
+            if (date != null) series.setStartYear(MetadataTools.extractYearAsInt(date), SCANNER_ID);
+            // TODO ended date?
+        }
+
+        if (OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
+            // TODO studios
+            // CountryDetail cd = showInfo.getNetwork().get(0);
+            //movie.setCompany(cd.getDetail(), SCANNER_ID);
+        }
+
+        if (OverrideTools.checkOverwriteCountries(series, SCANNER_ID)) {
+            String countryCode = localeService.findCountryCode(showInfo.getCountry());
+            if (countryCode != null) {
+                Set<String> countryCodes = Collections.singleton(countryCode);
+                series.setCountryCodes(countryCodes, SCANNER_ID);
+            }
+        }
+        
+        // TODO scan seasons and episodes
+        
+        return ScanResult.OK;
+    }
+    
+    @Override
+    public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
+        // if we already have the ID, skip the scanning of the NFO file
+        if (!ignorePresentId && StringUtils.isNumeric(dto.getId(SCANNER_ID))) {
+            return Boolean.TRUE;
+        }
+
+        // There are two formats for the URL. The first is a vanity URL with the show name in it,
+        // http://www.tvrage.com/House
+        // the second is an id based URL
+        // http://www.tvrage.com/shows/id-22771
+
+        LOG.trace("Scanning NFO for TVRage ID");
+        
+        try {
+            String text = "/shows/";
+            int beginIndex = nfoContent.indexOf(text);
+            if (beginIndex > -1) {
+                StringTokenizer st = new StringTokenizer(nfoContent.substring(beginIndex + text.length()), "/ \n,:!&é\"'(è_çà)=$");
+                // Remove the "id-" from the front of the ID
+                String id = st.nextToken().substring("id-".length());
+                LOG.debug("TVRage ID found in NFO: {}", id);
+                dto.addId(SCANNER_ID, id);
+                return Boolean.TRUE;
+            }
+
+            text = "tvrage.com/";
+            beginIndex = nfoContent.indexOf(text);
+            if (beginIndex > -1) {
+                StringTokenizer st = new StringTokenizer(nfoContent.substring(beginIndex + text.length()), "/ \n,:!&\"'=$");
+                String id = st.nextToken();
+                LOG.debug("TVRage vanity ID found in NFO: {}", id);
+                dto.addId(SCANNER_ID, id);
+                return Boolean.TRUE;
+            }
+        } catch (Exception ex) {
+            LOG.trace("NFO scanning error", ex);
+        }
+
+        LOG.debug("No TVRage ID found in NFO");
+        return Boolean.FALSE;
+    }
+}

@@ -24,6 +24,7 @@ package org.yamj.core.web.apis;
 
 import com.omertron.tvrageapi.TVRageApi;
 import com.omertron.tvrageapi.TVRageException;
+import com.omertron.tvrageapi.model.EpisodeList;
 import com.omertron.tvrageapi.model.ShowInfo;
 import java.util.List;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -93,5 +94,19 @@ public class TVRageApiWrapper {
             LOG.trace("TVRage error" , ex);
         }
         return showInfo;
+    }
+
+    public EpisodeList getEpisodeList(String tvRageId, boolean throwTempError) {
+        EpisodeList episodeList = null;
+        try {
+            episodeList = tvRageApi.getEpisodeList(tvRageId);
+        } catch (TVRageException ex) {
+            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+                throw new TemporaryUnavailableException("TVRage service temporary not available: " + ex.getResponseCode(), ex);
+            }
+            LOG.error("Failed to get episodes using TVRage ID {}: {}", tvRageId, ex.getMessage());
+            LOG.trace("TVRage error" , ex);
+        }
+        return episodeList;
     }
 }
