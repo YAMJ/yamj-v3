@@ -167,7 +167,7 @@ public class TVRageScanner implements ISeriesScanner {
         }
 
         if (OverrideTools.checkOverwriteYear(series, SCANNER_ID)) {
-            series.setStartYear(MetadataTools.extractYearAsInt(showInfo.getStartDate()), SCANNER_ID);
+            series.setStartYear(showInfo.getStarted(), SCANNER_ID);
             series.setEndYear(MetadataTools.extractYearAsInt(showInfo.getEnded()), SCANNER_ID);
         }
 
