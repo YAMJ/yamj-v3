@@ -115,8 +115,11 @@ public class TheTVDbScanner implements ISeriesScanner {
             return ScanResult.NO_RESULT;
         }
         
-        series.setSourceDbId(SCANNER_ID, tvdbSeries.getId());
-        series.setSourceDbId(ImdbScanner.SCANNER_ID, tvdbSeries.getImdbId());
+        // set IMDb id if not set before
+        String imdbId = series.getSourceDbId(ImdbScanner.SCANNER_ID);
+        if (StringUtils.isBlank(imdbId)) {
+            series.setSourceDbId(ImdbScanner.SCANNER_ID, tvdbSeries.getImdbId());
+        }
 
         if (OverrideTools.checkOverwriteTitle(series, SCANNER_ID)) {
             series.setTitle(tvdbSeries.getSeriesName(), SCANNER_ID);
@@ -231,9 +234,13 @@ public class TheTVDbScanner implements ISeriesScanner {
                 continue;
             }
             
-            // set source id's
+            // set episode ID
             videoData.setSourceDbId(SCANNER_ID, tvdbEpisode.getId());
-            videoData.setSourceDbId(ImdbScanner.SCANNER_ID, tvdbEpisode.getImdbId());
+            // set IMDb id if not set before
+            String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
+            if (StringUtils.isBlank(imdbId)) {
+                videoData.setSourceDbId(ImdbScanner.SCANNER_ID, tvdbEpisode.getImdbId());
+            }
 
             if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
                 videoData.setTitle(tvdbEpisode.getEpisodeName(), SCANNER_ID);

@@ -265,7 +265,7 @@ public class OfdbScanner implements IMovieScanner {
             return ScanResult.TYPE_CHANGE;
         }
         
-        // retrieve IMDb id if not set
+        // set IMDb id if not set before
         String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
         if (StringUtils.isBlank(imdbId)) {
             imdbId = HTMLTools.extractTag(xml, "href=\"http://www.imdb.com/Title?", "\"");

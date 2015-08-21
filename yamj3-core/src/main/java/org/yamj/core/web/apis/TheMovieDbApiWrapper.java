@@ -219,7 +219,7 @@ public class TheMovieDbApiWrapper {
     public TVInfo getSeriesInfo(int tmdbId, Locale locale, boolean throwTempError) {
         TVInfo tvInfo = null;
         try {
-            tvInfo = tmdbApi.getTVInfo(tmdbId, locale.getLanguage());
+            tvInfo = tmdbApi.getTVInfo(tmdbId, locale.getLanguage(), MethodSub.EXTERNAL_IDS.getValue());
             if (tvInfo != null && tvInfo.getId() <= 0) tvInfo = null; 
         } catch (MovieDbException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {

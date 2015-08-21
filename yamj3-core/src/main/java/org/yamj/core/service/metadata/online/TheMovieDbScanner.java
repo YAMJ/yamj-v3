@@ -194,8 +194,12 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             return ScanResult.NO_RESULT;
         }
                         
-        // fill in data
-        videoData.setSourceDbId(ImdbScanner.SCANNER_ID, StringUtils.trim(movieInfo.getImdbID()));
+        // set IMDb id if not set before
+        String imdbId = videoData.getSourceDbId(ImdbScanner.SCANNER_ID);
+        if (StringUtils.isBlank(imdbId)) {
+            imdbId = StringUtils.trim(movieInfo.getImdbID());
+            videoData.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
+        }
 
         if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
             videoData.setTitle(movieInfo.getTitle(), SCANNER_ID);
@@ -363,6 +367,16 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             return ScanResult.NO_RESULT;
         }
 
+        // set external IDS if not set before
+        if (tvInfo.getExternalIDs() != null) {
+            if (StringUtils.isBlank(series.getSourceDbId(ImdbScanner.SCANNER_ID))) {
+                series.setSourceDbId(ImdbScanner.SCANNER_ID, tvInfo.getExternalIDs().getImdbId());
+            }
+            if (StringUtils.isBlank(series.getSourceDbId(TheTVDbScanner.SCANNER_ID))) {
+                series.setSourceDbId(TheTVDbScanner.SCANNER_ID, tvInfo.getExternalIDs().getTvdbId());
+            }
+        }
+        
         if (OverrideTools.checkOverwriteTitle(series, SCANNER_ID)) {
             series.setTitleOriginal(tvInfo.getName(), SCANNER_ID);
         }
@@ -489,6 +503,16 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             
             // set source id
             videoData.setSourceDbId(SCANNER_ID, String.valueOf(episodeInfo.getId()));
+
+            // set external IDS if not set before
+            if (episodeInfo.getExternalIDs() != null) {
+                if (StringUtils.isBlank(videoData.getSourceDbId(ImdbScanner.SCANNER_ID))) {
+                    videoData.setSourceDbId(ImdbScanner.SCANNER_ID, episodeInfo.getExternalIDs().getImdbId());
+                }
+                if (StringUtils.isBlank(videoData.getSourceDbId(TheTVDbScanner.SCANNER_ID))) {
+                    videoData.setSourceDbId(TheTVDbScanner.SCANNER_ID, episodeInfo.getExternalIDs().getTvdbId());
+                }
+            }
 
             if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
                 videoData.setTitle(episodeInfo.getName(), SCANNER_ID);

@@ -25,11 +25,15 @@ package org.yamj.core.web.apis;
 import com.omertron.moviemeter.MovieMeterApi;
 import com.omertron.moviemeter.MovieMeterException;
 import com.omertron.moviemeter.model.FilmInfo;
+import com.omertron.moviemeter.model.SearchResult;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 import org.yamj.core.web.ResponseTools;
 
@@ -42,10 +46,9 @@ public class MovieMeterApiWrapper {
     private MovieMeterApi movieMeterApi;
 
     public String getMovieIdByIMDbId(String imdbId, boolean throwTempError) {
-        String moviemeterId = null;
         try {
             FilmInfo filmInfo = movieMeterApi.getFilm(imdbId);
-            moviemeterId = String.valueOf(filmInfo.getId());
+            return String.valueOf(filmInfo.getId());
         } catch (MovieMeterException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("MovieMeter service temporary not available: " + ex.getResponseCode(), ex);
@@ -53,18 +56,62 @@ public class MovieMeterApiWrapper {
             LOG.error("Failed to get film info using IMDb ID {}: {}", imdbId, ex.getMessage());
             LOG.trace("MovieMeter error" , ex);
         }
-        return moviemeterId;
+        return null;
     }
 
-    public FilmInfo getFilmInfo(String moviemeterId, boolean throwTempError) {
-        FilmInfo filmInfo = null;
+    public String getMovieIdByTitleAndYear(String title, int year, boolean throwTempError) {
+        LOG.trace("Looking for MovieMeter ID for '{}' ({})", title, year);
+        
+        List<SearchResult> searchResults = null;
         try {
-            filmInfo = movieMeterApi.getFilm(NumberUtils.toInt(moviemeterId));
+            searchResults = movieMeterApi.search(title);
         } catch (MovieMeterException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("MovieMeter service temporary not available: " + ex.getResponseCode(), ex);
             }
-            LOG.error("Failed to get film info using MovieMeter ID {}: {}", moviemeterId, ex.getMessage());
+            LOG.error("Failed to get MovieMeter ID by title '{}': {}", title, ex.getMessage());
+            LOG.trace("MovieMeter error" , ex);
+        }
+
+        if (CollectionUtils.isEmpty(searchResults)) {
+            // failed retrieving any results
+            return null;
+        }
+
+        double maxMatch = 0.0;
+        Integer id = null;
+        for (SearchResult searchResult : searchResults) {
+            // if we have a year, check that first
+            if (year > 0 && searchResult.getYear() != year) {
+                continue;
+            }
+
+            // check for best text similarity
+            double result = StringUtils.getJaroWinklerDistance(title, searchResult.getTitle());
+            if (result > maxMatch) {
+                LOG.trace("Better match found for {} ({}) = {} ({}) [{}]", title, year, searchResult.getTitle(), searchResult.getYear(), maxMatch);
+                maxMatch = result;
+                id = searchResult.getId();
+            }
+        }
+
+        if (id != null) {
+            LOG.debug("MovieMeter ID {} found for '{}' ({}): match confidence = {}", id, title, year, maxMatch);
+            return id.toString();
+        }
+
+        return null;
+    }
+
+    public FilmInfo getFilmInfo(String movieMeterId, boolean throwTempError) {
+        FilmInfo filmInfo = null;
+        try {
+            filmInfo = movieMeterApi.getFilm(NumberUtils.toInt(movieMeterId));
+        } catch (MovieMeterException ex) {
+            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+                throw new TemporaryUnavailableException("MovieMeter service temporary not available: " + ex.getResponseCode(), ex);
+            }
+            LOG.error("Failed to get film info using MovieMeter ID {}: {}", movieMeterId, ex.getMessage());
             LOG.trace("MovieMeter error" , ex);
         }
         return filmInfo;

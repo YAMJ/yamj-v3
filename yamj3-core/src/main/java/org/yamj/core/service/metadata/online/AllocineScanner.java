@@ -240,11 +240,10 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             return ScanResult.NO_RESULT;
         }
 
-        // fill in data
-        
         if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
             videoData.setTitle(movieInfos.getTitle(), SCANNER_ID);
         }
+        
         if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID)) {
             videoData.setTitleOriginal(movieInfos.getOriginalTitle(), SCANNER_ID);
         }
@@ -369,8 +368,6 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             LOG.error("Can't find informations for series '{}'", series.getIdentifier());
             return ScanResult.NO_RESULT;
         }
-        
-        // fill in data
         
         if (OverrideTools.checkOverwriteTitle(series, SCANNER_ID)) {
             series.setTitle(tvSeriesInfos.getTitle(), SCANNER_ID);
