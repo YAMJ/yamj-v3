@@ -253,6 +253,14 @@ public class TVRageScanner implements ISeriesScanner {
                 continue;
             }
             
+            try {
+                int lastIdx = StringUtils.lastIndexOf(episode.getLink(), "/");
+                if (lastIdx > 0) {
+                    String tvRageId = episode.getLink().substring(lastIdx+1);
+                    videoData.setSourceDbId(SCANNER_ID, tvRageId);
+                }   
+            } catch (Exception ignore) {}
+            
             if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
                 videoData.setTitle(episode.getTitle(), SCANNER_ID);
             }
@@ -264,7 +272,9 @@ public class TVRageScanner implements ISeriesScanner {
             if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
                 videoData.setRelease(episode.getAirDate(), SCANNER_ID);
             }
-
+            
+            videoData.addRating(SCANNER_ID, Float.valueOf(episode.getRating()*10f).intValue());
+            
             // mark episode as done
             videoData.setTvEpisodeDone();
         }

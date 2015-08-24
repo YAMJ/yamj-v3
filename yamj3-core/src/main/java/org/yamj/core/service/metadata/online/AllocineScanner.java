@@ -481,8 +481,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
     private void scanEpisodes(Season season, TvSeasonInfos tvSeasonInfos) {
         for (VideoData videoData : season.getVideoDatas()) {
             
-            if (season.isTvSeasonDone(SCANNER_ID)) {
-                // nothing to do if already done
+            if (videoData.isTvEpisodeDone(SCANNER_ID)) {
+                // nothing to do if episode already done
                 continue;
             }
 
@@ -526,7 +526,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                 Date releaseDate = MetadataTools.parseToDate(episodeInfos.getOriginalBroadcastDate());
                 videoData.setRelease(releaseDate, SCANNER_ID);
             }
-            
+
             //  parse credits
             parseCredits(videoData, episodeInfos.getEpisode().getCastMember());
 

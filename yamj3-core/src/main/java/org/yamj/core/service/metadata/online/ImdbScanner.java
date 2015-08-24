@@ -22,7 +22,6 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.ibm.icu.math.BigDecimal;
 import com.omertron.imdbapi.model.*;
 import java.io.IOException;
 import java.util.*;
@@ -194,10 +193,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             videoData.setPublicationYear(movieDetails.getYear(), SCANNER_ID);
         }
 
-        // RATING
-        int rating = new BigDecimal(movieDetails.getRating()).multiply(BigDecimal.TEN).intValue();
-        videoData.addRating(SCANNER_ID, rating);
-
         // TOP250
         String strTop = HTMLTools.extractTag(xml, "Top 250 #");
         if (StringUtils.isNumeric(strTop)) {
@@ -265,6 +260,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             }
         }
         
+        // RATING
+        videoData.addRating(SCANNER_ID, Float.valueOf(movieDetails.getRating() * 10f).intValue());
+
         // CERTIFICATIONS
         videoData.setCertificationInfos(imdbApiWrapper.getCertifications(imdbId, imdbLocale));
 

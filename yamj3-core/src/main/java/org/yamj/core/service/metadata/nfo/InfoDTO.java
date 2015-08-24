@@ -126,7 +126,7 @@ public final class InfoDTO {
         this.watched = this.watched || watched;
         if (this.watchedDate == null) {
             this.watchedDate = watchedDate;
-        } else if (watchedDate != null && watchedDate.after(this.watchedDate)) {
+        } else if (watchedDate != null && this.watchedDate.before(watchedDate)) {
             this.watchedDate = watchedDate;
         }
         this.changed = true;

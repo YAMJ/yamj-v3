@@ -52,7 +52,7 @@ public abstract class AbstractAuditable extends AbstractIdentifiable implements 
         return (this.getId() <= 0);
     }
 
-    private Date getCreateTimestamp() {
+    public Date getCreateTimestamp() {
         return this.createTimestamp;
     }
 
@@ -60,7 +60,7 @@ public abstract class AbstractAuditable extends AbstractIdentifiable implements 
         this.createTimestamp = createTimestamp;
     }
 
-    private Date getUpdateTimestamp() {
+    public Date getUpdateTimestamp() {
         return this.updateTimestamp;
     }
 

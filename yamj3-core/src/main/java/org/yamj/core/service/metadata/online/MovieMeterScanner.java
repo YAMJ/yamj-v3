@@ -135,8 +135,8 @@ public class MovieMeterScanner implements IMovieScanner {
             videoData.setSourceDbId(ImdbScanner.SCANNER_ID, filmInfo.getImdbId());
         }
 
-        // NOTE: MovieMeter has a rating from 0 to 5; but YAMJ use rating up to 10 internally
-        videoData.addRating(SCANNER_ID, (int) (filmInfo.getAverage() * 20f));
+        // NOTE: MovieMeter has a rating from 0 to 5; but YAMJ use rating up to 100 internally
+        videoData.addRating(SCANNER_ID, Float.valueOf(filmInfo.getAverage() * 20f).intValue());
 
         if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
             videoData.setTitle(filmInfo.getDisplayTitle(), SCANNER_ID);
