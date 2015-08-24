@@ -69,7 +69,7 @@
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd-HHmm</maven.build.timestamp.format>
         <!-- Group version numbers -->
-        <hibernate.version>4.3.10.Final</hibernate.version>
+        <hibernate.version>4.3.11.Final</hibernate.version>
         <spring.version>4.1.7.RELEASE</spring.version>
         <org.slf4j.version>1.7.12</org.slf4j.version>
         <jackson.version>2.5.3</jackson.version>

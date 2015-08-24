@@ -130,9 +130,12 @@ public class CommonStorageService {
 
                         // reset watched file date
                         Date watchedFileDate = this.stagingService.maxWatchedFileDate(check);
-                        mediaFile.setWatchedFileDate(watchedFileDate);
-                        mediaFile.setStatus(StatusType.UPDATED);
-                        this.stagingDao.updateEntity(mediaFile);
+                        if (watchedFileDate != null) {
+                            // just update if watched file date has been found
+                            mediaFile.setWatchedFileDate(watchedFileDate);
+                            mediaFile.setStatus(StatusType.UPDATED);
+                            this.stagingDao.updateEntity(mediaFile);
+                        }
 
                         for (VideoData videoData : mediaFile.getVideoDatas()) {
                             boolean watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
@@ -489,7 +492,11 @@ public class CommonStorageService {
             mediaFile.setWatchedApi(watched);
             mediaFile.setWatchedApiDate(new Date(System.currentTimeMillis()));
         } else {
-            mediaFile.setWatchedFileDate(this.stagingService.maxWatchedFileDate(videoFile));
+            Date watchedFileDate = this.stagingService.maxWatchedFileDate(videoFile);
+            if (watchedFileDate != null) {
+                // just update if watched file date has been found
+                mediaFile.setWatchedFileDate(watchedFileDate);
+            }
         }
         
         LOG.debug("Mark media file as {} {}: {}", (apiCall ? "api" : "file"), (watched ? "watched" : "unwatched"), mediaFile);
