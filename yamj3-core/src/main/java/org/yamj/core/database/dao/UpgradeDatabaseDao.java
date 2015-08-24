@@ -713,7 +713,14 @@ public class UpgradeDatabaseDao extends HibernateDao {
                 .executeUpdate();
             }
         }
-        
+
+        // update watched file
+        currentSession()
+        .createSQLQuery("UPDATE mediafile set watched_file=:watched where watched_file=:notwatched and watched_file_date is not null")
+        .setBoolean("watched", Boolean.TRUE)
+        .setBoolean("notwatched", Boolean.FALSE)
+        .executeUpdate();
+
         // update watched api date
         currentSession()
         .createSQLQuery("UPDATE mediafile set watched_api_date=update_timestamp where watched_api=:watched and watched_api_date is null")
