@@ -166,6 +166,7 @@ public class MediaImportService {
         mediaFile.setVideoSource(dto.getVideoSource());
         mediaFile.setEpisodeCount(dto.getEpisodes().size());
         mediaFile.setStatus(StatusType.NEW);
+        mediaFile.setWatchedFile(maxWatchedFileDate != null);
         mediaFile.setWatchedFileLastDate(maxWatchedFileDate);
         mediaFile.addStageFile(stageFile);
         stageFile.setMediaFile(mediaFile);

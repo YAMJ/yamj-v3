@@ -135,7 +135,7 @@ public class CommonStorageService {
                             mediaFile.setWatchedFileLastDate(maxWatchedFileDate);
                             mediaFile.setWatchedFile(true);
                         } else if (mediaFile.isWatchedFile()) {
-                            // set first detection date of NO watched file anymore
+                            // set watched date to actual date if watch-change detected
                             mediaFile.setWatchedFileLastDate(new Date(System.currentTimeMillis()));
                             mediaFile.setWatchedFile(false);
                         }
@@ -506,7 +506,9 @@ public class CommonStorageService {
                 // just update last date if max watched file date has been found
                 mediaFile.setWatchedFileLastDate(maxWatchedFileDate);
                 mediaFile.setWatchedFile(true);
-            } else {
+            } else if (mediaFile.isWatchedFile()) {
+                // set watched date to actual date if watch-change detected
+                mediaFile.setWatchedFileLastDate(new Date(System.currentTimeMillis()));
                 mediaFile.setWatchedFile(false);
             }
             marked = mediaFile.isWatchedFile();
