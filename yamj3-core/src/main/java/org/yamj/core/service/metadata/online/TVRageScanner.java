@@ -34,6 +34,7 @@ import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
@@ -230,10 +231,45 @@ public class TVRageScanner implements ISeriesScanner {
             }
             
             // scan episodes
-            //scanEpisodes(season, episodeList);
+            scanEpisodes(season, episodeList);
         }
     }
 
+    private void scanEpisodes(Season season, EpisodeList episodeList) {
+        for (VideoData videoData : season.getVideoDatas()) {
+            
+            if (videoData.isTvEpisodeDone(SCANNER_ID)) {
+                // nothing to do if already done
+                continue;
+            }
+
+            // get the episode
+            Episode episode = episodeList.getEpisode(season.getSeason(), videoData.getEpisode());
+            if (episode == null || !episode.isValid()) {
+                // mark episode as not found
+                videoData.removeOverrideSource(SCANNER_ID);
+                videoData.removeSourceDbId(SCANNER_ID);
+                videoData.setTvEpisodeNotFound();
+                continue;
+            }
+            
+            if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
+                videoData.setTitle(episode.getTitle(), SCANNER_ID);
+            }
+
+            if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
+                videoData.setPlot(episode.getSummary(), SCANNER_ID);
+            }
+
+            if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
+                videoData.setRelease(episode.getAirDate(), SCANNER_ID);
+            }
+
+            // mark episode as done
+            videoData.setTvEpisodeDone();
+        }
+    }
+    
     @Override
     public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
         // if we already have the ID, skip the scanning of the NFO file

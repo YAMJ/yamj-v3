@@ -101,6 +101,9 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     @Column(name = "episode_count", nullable = false)
     private int episodeCount = 0;
 
+    @Column(name = "watched_file", nullable = false)
+    private boolean watchedFile = false;
+
     @Column(name = "watched_file_date")
     private Date watchedFileDate;
 
@@ -280,7 +283,11 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     }
 
     public boolean isWatchedFile() {
-        return (this.watchedFileDate != null);
+        return watchedFile;
+    }
+
+    private void setWatchedFile(boolean watchedFile) {
+        this.watchedFile = watchedFile;
     }
 
     public Date getWatchedFileDate() {
@@ -288,7 +295,12 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     }
 
     public void setWatchedFileDate(Date watchedFileDate) {
-        this.watchedFileDate = watchedFileDate;
+        if (watchedFileDate == null) {
+           if (this.watchedFile) this.watchedFile = false;
+        } else {
+            if (!this.watchedFile) this.watchedFile = true;
+            this.watchedFileDate = watchedFileDate;
+        }
     }
 
     public boolean isWatchedApi() {
