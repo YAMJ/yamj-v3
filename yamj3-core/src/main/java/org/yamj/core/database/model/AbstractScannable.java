@@ -53,7 +53,7 @@ public abstract class AbstractScannable extends AbstractAuditable
     @Column(name = "status", nullable = false, length = 30)
     private StatusType status;
     
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_scanned")
     private Date lastScanned;
 

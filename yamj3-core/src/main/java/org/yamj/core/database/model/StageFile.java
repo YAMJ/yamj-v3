@@ -62,7 +62,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
     @Column(name = "extension", nullable = false, length = 30)
     private String extension;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "file_date", nullable = false)
     private Date fileDate;
 

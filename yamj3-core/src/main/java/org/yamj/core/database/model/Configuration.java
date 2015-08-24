@@ -43,11 +43,11 @@ public class Configuration implements Auditable, Serializable {
     @Column(name = "config_value", length = 255)
     private String value;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "create_timestamp", nullable = false, updatable = false)
     private Date createTimestamp;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "update_timestamp")
     private Date updateTimestamp;
 

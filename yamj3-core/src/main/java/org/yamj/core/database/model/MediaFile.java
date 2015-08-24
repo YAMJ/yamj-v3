@@ -104,14 +104,16 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     @Column(name = "watched_file", nullable = false)
     private boolean watchedFile = false;
 
-    @Column(name = "watched_file_date")
-    private Date watchedFileDate;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "watched_file_last_date")
+    private Date watchedFileLastDate;
 
     @Column(name = "watched_api", nullable = false)
     private boolean watchedApi = false;
 
-    @Column(name = "watched_api_date")
-    private Date watchedApiDate;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "watched_api_last_date")
+    private Date watchedApiLastDate;
 
     @Type(type = "statusType")
     @Column(name = "status", nullable = false, length = 30)
@@ -290,14 +292,14 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         this.watchedFile = watchedFile;
     }
 
-    public Date getWatchedFileDate() {
-        return watchedFileDate;
+    public Date getWatchedFileLastDate() {
+        return watchedFileLastDate;
     }
 
-    public void setWatchedFileDate(Date watchedFileDate) {
-        this.watchedFileDate = watchedFileDate;
+    public void setWatchedFileLastDate(Date watchedFileLastDate) {
+        this.watchedFileLastDate = watchedFileLastDate;
     }
-
+    
     public boolean isWatchedApi() {
         return watchedApi;
     }
@@ -306,12 +308,12 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         this.watchedApi = watchedApi;
     }
     
-    public Date getWatchedApiDate() {
-        return watchedApiDate;
+    public Date getWatchedApiLastDate() {
+        return watchedApiLastDate;
     }
 
-    public void setWatchedApiDate(Date watchedApiDate) {
-        this.watchedApiDate = watchedApiDate;
+    public void setWatchedApiLastDate(Date watchedApiLastDate) {
+        this.watchedApiLastDate = watchedApiLastDate;
     }
 
     public StatusType getStatus() {

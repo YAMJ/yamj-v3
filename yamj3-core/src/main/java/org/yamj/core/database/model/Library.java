@@ -48,7 +48,7 @@ public class Library extends AbstractIdentifiable implements Serializable {
     @Column(name = "base_directory", nullable = false, length = 1000)
     private String baseDirectory;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_scanned", nullable = false)
     private Date lastScanned;
 

@@ -43,7 +43,7 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
     @Column(name = "directory_path", nullable = false, length = 255)
     private String directoryPath;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "directory_date", nullable = false)
     private Date directoryDate;
 

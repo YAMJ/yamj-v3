@@ -39,11 +39,11 @@ public abstract class AbstractAuditable extends AbstractIdentifiable implements 
     @Column(name = "lock_no", nullable = false)
     private int lockNo = 0;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "create_timestamp", nullable = false, updatable = false)
     private Date createTimestamp;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "update_timestamp")
     private Date updateTimestamp;
 

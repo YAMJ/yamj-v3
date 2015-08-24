@@ -53,11 +53,11 @@ public class ExecutionTask implements Serializable {
     @Column(name = "delay", nullable = false)
     private int delay = -1;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "next_execution", nullable = false)
     private Date nextExecution;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_execution")
     private Date lastExecution;
 

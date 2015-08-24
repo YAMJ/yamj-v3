@@ -151,7 +151,7 @@ public class MediaImportService {
         }
 
         // determine if watched file exists for the video file
-        Date watchedFileDate = this.stagingService.maxWatchedFileDate(stageFile);
+        Date maxWatchedFileDate = this.stagingService.maxWatchedFileDate(stageFile);
 
         // new media file
         mediaFile = new MediaFile();
@@ -166,7 +166,7 @@ public class MediaImportService {
         mediaFile.setVideoSource(dto.getVideoSource());
         mediaFile.setEpisodeCount(dto.getEpisodes().size());
         mediaFile.setStatus(StatusType.NEW);
-        mediaFile.setWatchedFileDate(watchedFileDate);
+        mediaFile.setWatchedFileLastDate(maxWatchedFileDate);
         mediaFile.addStageFile(stageFile);
         stageFile.setMediaFile(mediaFile);
 

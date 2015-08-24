@@ -129,13 +129,18 @@ public class CommonStorageService {
                         this.stagingDao.updateEntity(check);
 
                         // reset watched file date
-                        Date watchedFileDate = this.stagingService.maxWatchedFileDate(check);
-                        if (watchedFileDate != null) {
-                            // just update if watched file date has been found
-                            mediaFile.setWatchedFileDate(watchedFileDate);
-                            mediaFile.setStatus(StatusType.UPDATED);
-                            this.stagingDao.updateEntity(mediaFile);
+                        Date maxWatchedFileDate = this.stagingService.maxWatchedFileDate(check);
+                        if (maxWatchedFileDate != null) {
+                            // just update last date if max watched file date has been found
+                            mediaFile.setWatchedFileLastDate(maxWatchedFileDate);
+                            mediaFile.setWatchedFile(true);
+                        } else if (mediaFile.isWatchedFile()) {
+                            mediaFile.setWatchedFile(false);
                         }
+                        
+                        // media file needs an update
+                        mediaFile.setStatus(StatusType.UPDATED);
+                        this.stagingDao.updateEntity(mediaFile);
 
                         for (VideoData videoData : mediaFile.getVideoDatas()) {
                             boolean watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
@@ -471,7 +476,7 @@ public class CommonStorageService {
     }
 
     @Transactional
-    public boolean toogleWatchedStatus(StageFile videoFile, boolean watched, boolean apiCall) {
+    public boolean toogleWatchedStatus(final StageFile videoFile, final boolean watched, final boolean apiCall) {
         if (videoFile == null) {
             return false;
         }
@@ -488,18 +493,24 @@ public class CommonStorageService {
         }
         
         // update media file
+        boolean marked;
         if (apiCall) {
             mediaFile.setWatchedApi(watched);
-            mediaFile.setWatchedApiDate(new Date(System.currentTimeMillis()));
+            mediaFile.setWatchedApiLastDate(new Date(System.currentTimeMillis()));
+            marked = mediaFile.isWatchedApi();
         } else {
-            Date watchedFileDate = this.stagingService.maxWatchedFileDate(videoFile);
-            if (watchedFileDate != null) {
-                // just update if watched file date has been found
-                mediaFile.setWatchedFileDate(watchedFileDate);
+            Date maxWatchedFileDate = this.stagingService.maxWatchedFileDate(videoFile);
+            if (maxWatchedFileDate != null) {
+                // just update last date if max watched file date has been found
+                mediaFile.setWatchedFileLastDate(maxWatchedFileDate);
+                mediaFile.setWatchedFile(true);
+            } else {
+                mediaFile.setWatchedFile(false);
             }
+            marked = mediaFile.isWatchedFile();
         }
         
-        LOG.debug("Mark media file as {} {}: {}", (apiCall ? "api" : "file"), (watched ? "watched" : "unwatched"), mediaFile);
+        LOG.debug("Mark media file as {} {}: {}", (apiCall ? "api" : "file"), (marked ? "watched" : "unwatched"), mediaFile);
         this.stagingDao.updateEntity(mediaFile);
 
         if (mediaFile.isExtra()) {

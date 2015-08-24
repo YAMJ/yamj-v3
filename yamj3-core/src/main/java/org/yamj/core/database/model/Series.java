@@ -71,7 +71,7 @@ public class Series extends AbstractMetadata {
     @Column(name = "trailer_status", nullable = false, length = 30)
     private StatusType trailerStatus;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "trailer_last_scanned")
     private Date trailerLastScanned;
 

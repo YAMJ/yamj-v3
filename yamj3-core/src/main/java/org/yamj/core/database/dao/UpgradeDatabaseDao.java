@@ -693,39 +693,57 @@ public class UpgradeDatabaseDao extends HibernateDao {
      * Date:   10.08.2015
      */
     public void patchMediaFileWatched() {
-        // retrieve media file with watched file
-        List<BigInteger> ids = currentSession()
-            .createSQLQuery("select id from mediafile where watched_file=:watched and watched_file_date is null")
-            .setBoolean("watched", Boolean.TRUE)
-            .list();
+        if (existsColumn("mediafile", "watched_file_date")) {
+            currentSession()
+            .createSQLQuery("UPDATE mediafile set watched_file_last_date=watched_file_date where watched_file_date is not null")
+            .executeUpdate();
 
-        for (BigInteger id : ids) {
-            Date watchedFileDate = (Date)currentSession()
-                .createSQLQuery("SELECT max(sf.file_date) FROM stage_file sf WHERE sf.mediafile_id =:id and sf.status != 'DELETED'")
-                .setLong("id", id.longValue())
-                .uniqueResult();
-            
-            if (watchedFileDate != null) {
-                currentSession()
-                .createSQLQuery("UPDATE mediafile set watched_file_date=:watchedFileDate where id=:id")
-                .setLong("id", id.longValue())
-                .setTimestamp("watchedFileDate", watchedFileDate)
-                .executeUpdate();
+            currentSession()
+            .createSQLQuery("UPDATE mediafile set watched_api_last_date=watched_api_date where watched_api_date is not null")
+            .executeUpdate();
+
+            currentSession()
+            .createSQLQuery("ALTER TABLE mediafile DROP column watched_file_date")
+            .executeUpdate();
+
+            currentSession()
+            .createSQLQuery("ALTER TABLE mediafile DROP column watched_api_date")
+            .executeUpdate();
+        } else {
+            // retrieve media file with watched file
+            List<BigInteger> ids = currentSession()
+                .createSQLQuery("select id from mediafile where watched_file=:watched and watched_file_last_date is null")
+                .setBoolean("watched", Boolean.TRUE)
+                .list();
+    
+            for (BigInteger id : ids) {
+                Date watchedFileDate = (Date)currentSession()
+                    .createSQLQuery("SELECT max(sf.file_date) FROM stage_file sf WHERE sf.mediafile_id =:id and sf.status != 'DELETED' and sf.status !='DUPLICATE'")
+                    .setLong("id", id.longValue())
+                    .uniqueResult();
+                
+                if (watchedFileDate != null) {
+                    currentSession()
+                    .createSQLQuery("UPDATE mediafile set watched_file_last_date=:watchedFileDate where id=:id")
+                    .setLong("id", id.longValue())
+                    .setTimestamp("watchedFileDate", watchedFileDate)
+                    .executeUpdate();
+                }
             }
+
+            // update watched file
+            currentSession()
+            .createSQLQuery("UPDATE mediafile set watched_file=:watched where watched_file=:notwatched and watched_file_last_date is not null")
+            .setBoolean("watched", Boolean.TRUE)
+            .setBoolean("notwatched", Boolean.FALSE)
+            .executeUpdate();
+
+            // update watched api date
+            currentSession()
+            .createSQLQuery("UPDATE mediafile set watched_api_last_date=update_timestamp where watched_api=:watched and watched_api_last_date is null")
+            .setBoolean("watched", Boolean.TRUE)
+            .executeUpdate();
         }
-
-        // update watched file
-        currentSession()
-        .createSQLQuery("UPDATE mediafile set watched_file=:watched where watched_file=:notwatched and watched_file_date is not null")
-        .setBoolean("watched", Boolean.TRUE)
-        .setBoolean("notwatched", Boolean.FALSE)
-        .executeUpdate();
-
-        // update watched api date
-        currentSession()
-        .createSQLQuery("UPDATE mediafile set watched_api_date=update_timestamp where watched_api=:watched and watched_api_date is null")
-        .setBoolean("watched", Boolean.TRUE)
-        .executeUpdate();
     }
 
     /**
