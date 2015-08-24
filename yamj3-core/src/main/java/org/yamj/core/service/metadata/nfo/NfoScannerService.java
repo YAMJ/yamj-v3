@@ -99,7 +99,6 @@ public class NfoScannerService {
             // set watched by NFO
             if (infoDTO.isWatched() != videoData.isWatchedNfo()) {
                 videoData.setWatchedNfo(infoDTO.isWatched());
-                videoData.setWatchedNfoDate(infoDTO.getWatchedDate());
             }
             
             // set sort title
@@ -323,7 +322,6 @@ public class NfoScannerService {
                         if (episode.isWatched() != videoData.isWatched()) {
                             // set NFO watched flag
                             videoData.setWatchedNfo(episode.isWatched());
-                            videoData.setWatchedNfoDate(infoDTO.getWatchedDate());
                         }
                         
                         if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {

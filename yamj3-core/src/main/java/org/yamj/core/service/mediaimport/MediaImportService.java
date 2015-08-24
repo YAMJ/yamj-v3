@@ -198,7 +198,6 @@ public class MediaImportService {
                 // set watched if media file is NO extra
                 if (!mediaFile.isExtra()) {
                     videoData.setWatchedFile(mediaFile.isWatchedFile());
-                    videoData.setWatchedFileDate(mediaFile.getWatchedFileDate());
                 }
 
                 // set sort title
@@ -227,11 +226,9 @@ public class MediaImportService {
 
                 // set watched file if all media files are watched by file
                 videoData.setWatchedFile(MetadataTools.allMediaFilesWatched(videoData, false));
-                videoData.setWatchedFileDate(MetadataTools.maxWatchedDate(videoData, false));
                 
                 // set watched API if all media files are watched by API
                 videoData.setWatchedApi(MetadataTools.allMediaFilesWatched(videoData, true));
-                videoData.setWatchedApiDate(MetadataTools.maxWatchedDate(videoData, true));
                 
                 // update video data
                 metadataDao.updateEntity(videoData);

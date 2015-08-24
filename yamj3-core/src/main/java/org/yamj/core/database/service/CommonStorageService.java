@@ -138,14 +138,12 @@ public class CommonStorageService {
                             boolean watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
                             if (videoData.isWatchedFile() != watchedFile) {
                                 videoData.setWatchedFile(watchedFile);
-                                videoData.setWatchedFileDate(MetadataTools.maxWatchedDate(videoData, false));
                                 this.stagingDao.updateEntity(videoData);
                             }
 
                             boolean watchedApi = MetadataTools.allMediaFilesWatched(videoData, true);
                             if (videoData.isWatchedApi() != watchedApi) {
                                 videoData.setWatchedApi(watchedApi);
-                                videoData.setWatchedApiDate(MetadataTools.maxWatchedDate(videoData, true));
                                 this.stagingDao.updateEntity(videoData);
                             }
                         }
@@ -508,13 +506,11 @@ public class CommonStorageService {
             if (apiCall) {
                 if (videoData.isWatchedApi() != watchedAll) {
                     videoData.setWatchedApi(watchedAll);
-                    videoData.setWatchedApiDate(MetadataTools.maxWatchedDate(videoData, apiCall));
                     LOG.debug("Mark video as api {}: {}", (watchedAll ? "watched" : "unwatched"), videoData);
                     this.stagingDao.updateEntity(videoData);
                 }
             } else if (videoData.isWatchedFile() != watchedAll) {
                 videoData.setWatchedFile(watchedAll);
-                videoData.setWatchedFileDate(MetadataTools.maxWatchedDate(videoData, apiCall));
                 LOG.debug("Mark video as file {}: {}", (watchedAll ? "watched" : "unwatched"), videoData);
                 this.stagingDao.updateEntity(videoData);
             }
