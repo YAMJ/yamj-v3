@@ -95,8 +95,13 @@ public class NfoScannerService {
             videoData.setTopRank(infoDTO.getTop250());
             // set rating
             videoData.addRating(SCANNER_ID, infoDTO.getRating());
+            
             // set watched by NFO
-            videoData.setWatchedNfo(infoDTO.isWatched());
+            if (infoDTO.isWatched() != videoData.isWatchedNfo()) {
+                videoData.setWatchedNfo(infoDTO.isWatched());
+                videoData.setWatchedNfoDate(infoDTO.getWatchedDate());
+            }
+            
             // set sort title
             videoData.setTitleSort(infoDTO.getTitleSort());
             
@@ -314,8 +319,12 @@ public class NfoScannerService {
                     } else {
                         // remove override source for NFO
                         videoData.removeOverrideSource(SCANNER_ID);
-                        // set NFO watched flag
-                        videoData.setWatchedNfo(episode.isWatched());
+                        
+                        if (episode.isWatched() != videoData.isWatched()) {
+                            // set NFO watched flag
+                            videoData.setWatchedNfo(episode.isWatched());
+                            videoData.setWatchedNfoDate(infoDTO.getWatchedDate());
+                        }
                         
                         if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
                             videoData.setTitle(episode.getTitle(), SCANNER_ID);

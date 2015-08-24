@@ -83,11 +83,20 @@ public class VideoData extends AbstractMetadata {
     @Column(name = "watched_nfo", nullable = false)
     private boolean watchedNfo = false;
 
+    @Column(name = "watched_nfo_date")
+    private Date watchedNfoDate;
+
     @Column(name = "watched_file", nullable = false)
     private boolean watchedFile = false;
 
+    @Column(name = "watched_file_date")
+    private Date watchedFileDate;
+
     @Column(name = "watched_api", nullable = false)
     private boolean watchedApi = false;
+
+    @Column(name = "watched_api_date")
+    private Date watchedApiDate;
 
     @Column(name = "skip_scan_nfo", length = 255)
     private String skipScanNfo;
@@ -385,6 +394,14 @@ public class VideoData extends AbstractMetadata {
         this.watchedNfo = watchedNfo;
     }
 
+    public Date getWatchedNfoDate() {
+        return watchedNfoDate;
+    }
+
+    public void setWatchedNfoDate(Date watchedNfoDate) {
+        this.watchedNfoDate = watchedNfoDate;
+    }
+
     public boolean isWatchedFile() {
         return watchedFile;
     }
@@ -393,12 +410,28 @@ public class VideoData extends AbstractMetadata {
         this.watchedFile = watchedFile;
     }
 
+    public Date getWatchedFileDate() {
+        return watchedFileDate;
+    }
+
+    public void setWatchedFileDate(Date watchedFileDate) {
+        this.watchedFileDate = watchedFileDate;
+    }
+
     public boolean isWatchedApi() {
         return watchedApi;
     }
 
     public void setWatchedApi(boolean watchedApi) {
         this.watchedApi = watchedApi;
+    }
+
+    public Date getWatchedApiDate() {
+        return watchedApiDate;
+    }
+
+    public void setWatchedApiDate(Date watchedApiDate) {
+        this.watchedApiDate = watchedApiDate;
     }
 
     private String getSkipScanNfo() {

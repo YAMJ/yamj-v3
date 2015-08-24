@@ -468,6 +468,36 @@ public final class MetadataTools {
     }
 
     /**
+     * Checks if all media files have been watched.
+     *
+     * @param videoData
+     * @param apiCall
+     * @return
+     */
+    public static Date maxWatchedDate(VideoData videoData, boolean apiCall) {
+        Date maxWatchedDate = null;
+        for (MediaFile stored : videoData.getMediaFiles()) {
+            if (stored.isExtra()) {
+                continue;
+            }
+            Date checkDate = null;
+            if (apiCall) {
+                checkDate = stored.getWatchedApiDate();
+            } else {
+                checkDate = stored.getWatchedFileDate();
+            }
+            
+            if (maxWatchedDate == null) {
+                maxWatchedDate = checkDate;
+            } else if (checkDate != null && checkDate.after(maxWatchedDate)) {
+                maxWatchedDate = checkDate;
+            }
+        }
+
+        return maxWatchedDate;
+    }
+
+    /**
      * Get the certification from the MPAA string
      *
      * @param mpaaCertification
