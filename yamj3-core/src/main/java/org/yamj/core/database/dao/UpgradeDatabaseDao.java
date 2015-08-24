@@ -693,11 +693,9 @@ public class UpgradeDatabaseDao extends HibernateDao {
      * Date:   10.08.2015
      */
     public void patchMediaFileWatched() {
-        if (!existsColumn("mediafile", "watched_file")) return;
-        
         // retrieve media file with watched file
         List<BigInteger> ids = currentSession()
-            .createSQLQuery("select id from mediafile where watched_file=:watched")
+            .createSQLQuery("select id from mediafile where watched_file=:watched and watched_file_date is null")
             .setBoolean("watched", Boolean.TRUE)
             .list();
 
@@ -718,12 +716,8 @@ public class UpgradeDatabaseDao extends HibernateDao {
         
         // update watched api date
         currentSession()
-        .createSQLQuery("UPDATE mediafile set watched_api_date=update_timestamp where watched_api=:watched")
+        .createSQLQuery("UPDATE mediafile set watched_api_date=update_timestamp where watched_api=:watched and watched_api_date is null")
         .setBoolean("watched", Boolean.TRUE)
-        .executeUpdate();
-
-        currentSession()
-        .createSQLQuery("ALTER TABLE mediafile DROP watched_file")
         .executeUpdate();
     }
 
