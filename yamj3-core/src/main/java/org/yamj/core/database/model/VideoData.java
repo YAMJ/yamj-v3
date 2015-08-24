@@ -83,6 +83,10 @@ public class VideoData extends AbstractMetadata {
     @Column(name = "watched_nfo", nullable = false)
     private boolean watchedNfo = false;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "watched_nfo_last_date")
+    private Date watchedNfoLastDate;
+
     @Column(name = "watched_file", nullable = false)
     private boolean watchedFile = false;
 
@@ -383,6 +387,14 @@ public class VideoData extends AbstractMetadata {
 
     public void setWatchedNfo(boolean watchedNfo) {
         this.watchedNfo = watchedNfo;
+    }
+
+    public Date getWatchedNfoLastDate() {
+        return watchedNfoLastDate;
+    }
+
+    public void setWatchedNfoLastDate(Date watchedNfoLastDate) {
+        this.watchedNfoLastDate = watchedNfoLastDate;
     }
 
     public boolean isWatchedFile() {

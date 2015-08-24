@@ -135,6 +135,8 @@ public class CommonStorageService {
                             mediaFile.setWatchedFileLastDate(maxWatchedFileDate);
                             mediaFile.setWatchedFile(true);
                         } else if (mediaFile.isWatchedFile()) {
+                            // set first detection date of NO watched file anymore
+                            mediaFile.setWatchedFileLastDate(new Date(System.currentTimeMillis()));
                             mediaFile.setWatchedFile(false);
                         }
                         
