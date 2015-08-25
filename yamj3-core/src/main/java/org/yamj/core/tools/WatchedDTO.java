@@ -29,46 +29,50 @@ public final class WatchedDTO {
     private Boolean watched = null;
     private Date watchedDate = null;
     
-    private boolean watchedNfo = true;
-    private Date watchedNfoDate;
-    private boolean watchedFile = true;
-    private Date watchedFileDate;
-    private boolean watchedApi = true;
-    private Date watchedApiDate;
+    private boolean watchedVideo = false;
+    private Date watchedVideoDate;
+    private boolean watchedMediaFile = true;
+    private Date watchedMediaFileDate;
+    private boolean watchedMediaApi = true;
+    private Date watchedMediaApiDate;
   
-    public void setWatchedNfo(boolean watched, Date watchedDate) {
+    public void watchedVideo(boolean watched, Date watchedDate) {
         if (watchedDate == null) return;
 
-        if (this.watchedNfoDate == null) {
-            this.watchedNfo = watched;
-            this.watchedNfoDate = watchedDate;
-        } else if (watchedDate.after(this.watchedNfoDate)) {
-            this.watchedNfoDate = watchedDate;
-            this.watchedNfo = this.watchedNfo && watched;
+        if (this.watchedVideoDate == null) {
+            this.watchedVideo = watched;
+            this.watchedVideoDate = watchedDate;
+        } else if (watchedDate.after(this.watchedVideoDate)) {
+            this.watchedVideo = watched;
+            this.watchedVideoDate = watchedDate;
         }
     }
 
-    public void setWatchedFile(boolean watched, Date watchedDate) {
+    public void watchedMediaFile(boolean watched, Date watchedDate) {
         if (watchedDate == null) return;
 
-        if (this.watchedFileDate == null) {
-            this.watchedFile = watched;
-            this.watchedFileDate = watchedDate;
-        } else if (watchedDate.after(this.watchedFileDate)) {
-            this.watchedFile = this.watchedFile && watched;
-            this.watchedFileDate = watchedDate;
+        if (this.watchedMediaFileDate == null) {
+            this.watchedMediaFile = watched;
+            this.watchedMediaFileDate = watchedDate;
+        } else {
+            this.watchedMediaFile = this.watchedMediaFile && watched;
+            if (watchedDate.after(this.watchedMediaFileDate)) {            
+                this.watchedMediaFileDate = watchedDate;
+            }
         }
     }
 
-    public void setWatchedApi(boolean watched, Date watchedDate) {
+    public void watchedMediaApi(boolean watched, Date watchedDate) {
         if (watchedDate == null) return;
 
-        if (this.watchedApiDate == null) {
-            this.watchedApi = watched;
-            this.watchedApiDate = watchedDate;
-        } else if (watchedDate.after(this.watchedApiDate)) {
-            this.watchedApi = this.watchedApi && watched;
-            this.watchedApiDate = watchedDate;
+        if (this.watchedMediaApiDate == null) {
+            this.watchedMediaApi = watched;
+            this.watchedMediaApiDate = watchedDate;
+        } else {
+            this.watchedMediaApi = this.watchedMediaApi && watched;
+            if (watchedDate.after(this.watchedMediaApiDate)) {            
+                this.watchedMediaApiDate = watchedDate;
+            }
         }
     }
 
@@ -88,28 +92,28 @@ public final class WatchedDTO {
         boolean watched = false;
         Date watchedDate = null;
         
-        if (this.watchedNfoDate != null) {
-            watched = this.watchedNfo;
-            watchedDate =  this.watchedNfoDate;
+        if (this.watchedVideoDate != null) {
+            watched = this.watchedVideo;
+            watchedDate =  this.watchedVideoDate;
         }
         
-        if (this.watchedFileDate != null) {
+        if (this.watchedMediaFileDate != null) {
             if (watchedDate == null) {
-                watched = this.watchedFile;
-                watchedDate = this.watchedFileDate;
-            } else if (watchedDate.before(this.watchedFileDate)) {
-                watched = this.watchedFile;
-                watchedDate = this.watchedFileDate;
+                watched = this.watchedMediaFile;
+                watchedDate = this.watchedMediaFileDate;
+            } else if (watchedDate.before(this.watchedMediaFileDate)) {
+                watched = this.watchedMediaFile;
+                watchedDate = this.watchedMediaFileDate;
             }
         }
 
-        if (this.watchedApiDate != null) {
+        if (this.watchedMediaApiDate != null) {
             if (watchedDate == null) {
-                watched = this.watchedApi;
-                watchedDate = this.watchedApiDate;
-            } else if (watchedDate.before(this.watchedApiDate)) {
-                watched = this.watchedApi;
-                watchedDate = this.watchedApiDate;
+                watched = this.watchedMediaApi;
+                watchedDate = this.watchedMediaApiDate;
+            } else if (watchedDate.before(this.watchedMediaApiDate)) {
+                watched = this.watchedMediaApi;
+                watchedDate = this.watchedMediaApiDate;
             }
         }
 

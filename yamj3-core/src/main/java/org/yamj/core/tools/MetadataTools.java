@@ -443,14 +443,15 @@ public final class MetadataTools {
 
     public static WatchedDTO getWatchedDTO(VideoData videoData) {
         WatchedDTO watched = new WatchedDTO();
-        watched.setWatchedNfo(videoData.isWatchedNfo(), videoData.getWatchedNfoLastDate());
+        watched.watchedVideo(videoData.isWatchedNfo(), videoData.getWatchedNfoLastDate());
+        watched.watchedVideo(videoData.isWatchedApi(), videoData.getWatchedApiLastDate());
         
         for (MediaFile mediaFile : videoData.getMediaFiles()) {
             if (mediaFile.isExtra()) {
                 continue;
             }
-            watched.setWatchedFile(mediaFile.isWatchedFile(), mediaFile.getWatchedFileLastDate());
-            watched.setWatchedApi(mediaFile.isWatchedApi(), mediaFile.getWatchedApiLastDate());
+            watched.watchedMediaFile(mediaFile.isWatchedFile(), mediaFile.getWatchedFileLastDate());
+            watched.watchedMediaApi(mediaFile.isWatchedApi(), mediaFile.getWatchedApiLastDate());
         }
 
         return watched;

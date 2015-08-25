@@ -748,11 +748,6 @@ public class UpgradeDatabaseDao extends HibernateDao {
         if (existsColumn("videodata", "watched_file")) {
             
             currentSession()
-            .createSQLQuery("UPDATE videodata set watched_nfo_last_date=create_timestamp where watched_nfo=:watched" )
-            .setBoolean("watched", Boolean.TRUE)
-            .executeUpdate();
-            
-            currentSession()
             .createSQLQuery("UPDATE videodata set watched = (watched_nfo or watched_api or watched_file)" )
             .executeUpdate();
 
@@ -764,11 +759,17 @@ public class UpgradeDatabaseDao extends HibernateDao {
             currentSession()
             .createSQLQuery("ALTER TABLE videodata DROP column watched_file")
             .executeUpdate();
-
-            currentSession()
-            .createSQLQuery("ALTER TABLE videodata DROP column watched_api")
-            .executeUpdate();
         }
+
+        currentSession()
+        .createSQLQuery("UPDATE videodata set watched_nfo_last_date=create_timestamp where watched_nfo=:watched and watched_nfo_last_date is null" )
+        .setBoolean("watched", Boolean.TRUE)
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("UPDATE videodata set watched_api_last_date=create_timestamp where watched_api=:watched and watched_api_last_date is null" )
+        .setBoolean("watched", Boolean.TRUE)
+        .executeUpdate();
     }
 
     /**

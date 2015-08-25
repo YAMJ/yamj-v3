@@ -44,8 +44,6 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
-import org.yamj.core.tools.MetadataTools;
-import org.yamj.core.tools.WatchedDTO;
 
 @Service("jsonApiStorageService")
 @Transactional(readOnly = true)
@@ -497,19 +495,8 @@ public class JsonApiStorageService {
         
         final Date watchedApiDate = new Date(System.currentTimeMillis());
         for (VideoData videoData : videoDatas) {
-            for (MediaFile mediaFile : videoData.getMediaFiles()) {
-                if (mediaFile.isExtra()) {
-                    continue;
-                }
-                mediaFile.setWatchedApi(watched, watchedApiDate);
-                commonDao.updateEntity(mediaFile);
-                
-                for (VideoData stored : mediaFile.getVideoDatas()) {
-                    WatchedDTO watchedDTO = MetadataTools.getWatchedDTO(stored);
-                    stored.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
-                    this.commonDao.updateEntity(stored);
-                }
-            }
+            // this will also set watched status to watched flag due the actual date
+            videoData.setWatchedApi(watched, watchedApiDate);
         }
     }
     //</editor-fold>
