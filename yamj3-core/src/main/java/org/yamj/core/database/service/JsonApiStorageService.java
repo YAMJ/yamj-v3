@@ -22,8 +22,7 @@
  */
 package org.yamj.core.database.service;
 
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +44,8 @@ import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
+import org.yamj.core.tools.MetadataTools;
+import org.yamj.core.tools.WatchedDTO;
 
 @Service("jsonApiStorageService")
 @Transactional(readOnly = true)
@@ -440,24 +441,8 @@ public class JsonApiStorageService {
     @Transactional
     public ApiStatus updateWatchedSingle(MetaDataType type, Long id, boolean watched) {
         if (id != null && id > 0L) {
-            VideoData video = commonDao.getById(VideoData.class, id);
-
-            StringBuilder sb = new StringBuilder("Watched status for ");
-            sb.append(type).append(" ID: ").append(video.getId());
-            sb.append("-").append(video.getTitle());
-
-            // Check to see if the status is the same
-            if (video.isWatchedApi() == watched) {
-                sb.append(" is already '").append(watched(watched)).append("' unchanged");
-                return new ApiStatus(200, sb.toString());
-            }
-
-            // Set the watched status and update the video
-            video.setWatchedApi(watched);
-            commonDao.storeEntity(video);
-
-            sb.append(" changed to ").append(watched(video.isWatchedApi()));
-            return new ApiStatus(200, sb.toString());
+            updatedWatched(type, id, watched);
+            return new ApiStatus(200, "Set " + type + " " + id + " to " + watched);
         }
         
         return new ApiStatus(400, "No " + type + " ID provided");
@@ -474,37 +459,58 @@ public class JsonApiStorageService {
      */
     @Transactional
     public ApiStatus updateWatchedList(MetaDataType type, List<Long> ids, boolean watched, Long sourceId) {
-        int watchedCount = 0;
-        int unwatchedCount = 0;
-
+        if (CollectionUtils.isEmpty(ids)) {
+            return new ApiStatus(400, "No " + type + " IDs provided");
+        }
+        
         for (Long id : ids) {
+            updatedWatched(type, id, watched);
+        }
+        
+        return new ApiStatus(200, "Set " + type + " " + ids + " to " + watched);
+    }
+    
+    private void updatedWatched(MetaDataType type, long id, boolean watched) {
+        Collection<VideoData> videoDatas = null;
+        if (MetaDataType.SERIES.equals(type)) {
+            Series series = commonDao.getById(Series.class, id);
+            if (series != null) {
+                videoDatas = new HashSet<>();
+                for (Season season : series.getSeasons()) {
+                    videoDatas.addAll(season.getVideoDatas());
+                }
+            }
+        } else if (MetaDataType.SEASON.equals(type)) {
+            Season season = commonDao.getById(Season.class, id);
+            if (season != null) {
+                videoDatas = season.getVideoDatas();
+            }
+        } else {
             VideoData videoData = commonDao.getById(VideoData.class, id);
             if (videoData != null) {
-                if (videoData.isWatched()) {
-                    watchedCount++;
-                } else {
-                    unwatchedCount++;
-                }
-    
-                if (videoData.isWatchedApi() != watched) {
-                    // Set the watched status and update the video
-                    videoData.setWatchedApi(watched);
-                    commonDao.updateEntity(videoData);
-                }
+                videoDatas = Collections.singleton(videoData);
             }
         }
 
-        StringBuilder sb = new StringBuilder("Watched status for ");
-        sb.append(type).append(" ID: ").append(sourceId);
-        sb.append(" set to '").append(watched(watched)).append("'. ");
-        sb.append(watchedCount).append(" were set to ").append(watched(watched)).append(", ");
-        sb.append(unwatchedCount).append(" were already ").append(watched(watched));
-
-        return new ApiStatus(200, sb.toString());
-    }
-
-    private static String watched(boolean watched) {
-        return watched ? "watched" : "unwatched";
+        // nothing to do
+        if (videoDatas == null) return;
+        
+        final Date watchedApiDate = new Date(System.currentTimeMillis());
+        for (VideoData videoData : videoDatas) {
+            for (MediaFile mediaFile : videoData.getMediaFiles()) {
+                if (mediaFile.isExtra()) {
+                    continue;
+                }
+                mediaFile.setWatchedApi(watched, watchedApiDate);
+                commonDao.updateEntity(mediaFile);
+                
+                for (VideoData stored : mediaFile.getVideoDatas()) {
+                    WatchedDTO watchedDTO = MetadataTools.getWatchedDTO(stored);
+                    stored.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
+                    this.commonDao.updateEntity(stored);
+                }
+            }
+        }
     }
     //</editor-fold>
 

@@ -690,9 +690,9 @@ public class UpgradeDatabaseDao extends HibernateDao {
 
     /**
      * Issues: #193
-     * Date:   10.08.2015
+     * Date:   25.08.2015
      */
-    public void patchMediaFileWatched() {
+    public void patchWatched() {
         if (existsColumn("mediafile", "watched_file_date")) {
             currentSession()
             .createSQLQuery("UPDATE mediafile set watched_file_last_date=watched_file_date where watched_file_date is not null")
@@ -742,6 +742,31 @@ public class UpgradeDatabaseDao extends HibernateDao {
             currentSession()
             .createSQLQuery("UPDATE mediafile set watched_api_last_date=update_timestamp where watched_api=:watched and watched_api_last_date is null")
             .setBoolean("watched", Boolean.TRUE)
+            .executeUpdate();
+        }
+
+        if (existsColumn("videodata", "watched_file")) {
+            
+            currentSession()
+            .createSQLQuery("UPDATE videodata set watched_nfo_last_date=create_timestamp where watched_nfo=:watched" )
+            .setBoolean("watched", Boolean.TRUE)
+            .executeUpdate();
+            
+            currentSession()
+            .createSQLQuery("UPDATE videodata set watched = (watched_nfo or watched_api or watched_file)" )
+            .executeUpdate();
+
+            currentSession()
+            .createSQLQuery("UPDATE videodata set watched_date=create_timestamp where watched=:watched" )
+            .setBoolean("watched", Boolean.TRUE)
+            .executeUpdate();
+            
+            currentSession()
+            .createSQLQuery("ALTER TABLE videodata DROP column watched_file")
+            .executeUpdate();
+
+            currentSession()
+            .createSQLQuery("ALTER TABLE videodata DROP column watched_api")
             .executeUpdate();
         }
     }

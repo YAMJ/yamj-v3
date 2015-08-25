@@ -289,8 +289,8 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", null AS seriesId");
         sbSQL.append(", vd.season_id AS seasonId");
         sbSQL.append(", null AS season");
-        sbSQL.append(", vd.episode AS episode");
-        sbSQL.append(", (vd.watched_nfo or vd.watched_file or vd.watched_api) as watched");
+        sbSQL.append(", vd.episode AS episode ");
+        sbSQL.append(", vd.watched AS watched ");
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "vd"));
 
         if (params.includeNewest() || params.excludeNewest()) {
@@ -339,11 +339,8 @@ public class ApiDao extends HibernateDao {
         }
 
         if (params.getWatched() != null) {
-            if (params.getWatched()) {
-                sbSQL.append(" AND (vd.watched_nfo=1 or vd.watched_file=1 or vd.watched_api=1)");
-            } else {
-                sbSQL.append(" AND vd.watched_nfo=0 AND vd.watched_file=0 AND vd.watched_api=0");
-            }
+            sbSQL.append(" AND vd.watched=");
+            sbSQL.append(params.getWatched() ? "1" : "0");
         }
 
         // check genre
@@ -634,7 +631,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", null AS seasonId");
         sbSQL.append(", null AS season");
         sbSQL.append(", null AS episode");
-        sbSQL.append(", (SELECT min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched ");
+        sbSQL.append(", (SELECT min(vid.watched) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched ");
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "ser"));
 
         if (params.includeNewest() || params.excludeNewest()) {
@@ -681,13 +678,10 @@ public class ApiDao extends HibernateDao {
         }
 
         if (params.getWatched() != null) {
-            if (params.getWatched()) {
-                sbSQL.append(" AND not exists");
-            } else {
-                sbSQL.append(" AND exists");
-            }
+            sbSQL.append(" AND exists");
             sbSQL.append(" (SELECT 1 FROM videodata v,season sea");
-            sbSQL.append(" WHERE v.watched_nfo=0 AND v.watched_file=0 AND v.watched_api=0");
+            sbSQL.append(" WHERE v.watched=" );
+            sbSQL.append(params.getWatched() ? "1" : "0");
             sbSQL.append(" AND v.season_id=sea.id and sea.series_id=ser.id)");
         }
 
@@ -932,7 +926,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", sea.id AS seasonId");
         sbSQL.append(", sea.season AS season");
         sbSQL.append(", null AS episode");
-        sbSQL.append(", (SELECT min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid where vid.season_id=sea.id) as watched ");
+        sbSQL.append(", (SELECT min(vid.watched) from videodata vid where vid.season_id=sea.id) as watched ");
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "sea"));
 
         if (params.includeNewest() || params.excludeNewest()) {

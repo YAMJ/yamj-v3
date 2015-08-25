@@ -45,6 +45,7 @@ import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.StorageType;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.MetadataTools;
+import org.yamj.core.tools.WatchedDTO;
 
 @Service("commonStorageService")
 public class CommonStorageService {
@@ -132,12 +133,10 @@ public class CommonStorageService {
                         Date maxWatchedFileDate = this.stagingService.maxWatchedFileDate(check);
                         if (maxWatchedFileDate != null) {
                             // just update last date if max watched file date has been found
-                            mediaFile.setWatchedFileLastDate(maxWatchedFileDate);
-                            mediaFile.setWatchedFile(true);
+                            mediaFile.setWatchedFile(true, maxWatchedFileDate);
                         } else if (mediaFile.isWatchedFile()) {
                             // set watched date to actual date if watch-change detected
-                            mediaFile.setWatchedFileLastDate(new Date(System.currentTimeMillis()));
-                            mediaFile.setWatchedFile(false);
+                            mediaFile.setWatchedFile(false, new Date(System.currentTimeMillis()));
                         }
                         
                         // media file needs an update
@@ -145,18 +144,11 @@ public class CommonStorageService {
                         this.stagingDao.updateEntity(mediaFile);
 
                         for (VideoData videoData : mediaFile.getVideoDatas()) {
-                            boolean watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
-                            if (videoData.isWatchedFile() != watchedFile) {
-                                videoData.setWatchedFile(watchedFile);
-                                this.stagingDao.updateEntity(videoData);
-                            }
-
-                            boolean watchedApi = MetadataTools.allMediaFilesWatched(videoData, true);
-                            if (videoData.isWatchedApi() != watchedApi) {
-                                videoData.setWatchedApi(watchedApi);
-                                this.stagingDao.updateEntity(videoData);
-                            }
+                            WatchedDTO watchedDTO = MetadataTools.getWatchedDTO(videoData);
+                            videoData.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
+                            this.stagingDao.updateEntity(videoData);
                         }
+                        
                         // break the loop; so that just one duplicate is processed
                         break;
                     }
@@ -253,18 +245,10 @@ public class CommonStorageService {
             } else if (videoData.getMediaFiles().size() > 1) {
                 // reset watched flag on video data
                 videoData.getMediaFiles().remove(mediaFile);
-
-                boolean watchedFile = MetadataTools.allMediaFilesWatched(videoData, false);
-                if (videoData.isWatchedFile() != watchedFile) {
-                    videoData.setWatchedFile(watchedFile);
-                    this.stagingDao.updateEntity(videoData);
-                }
-
-                boolean watchedApi = MetadataTools.allMediaFilesWatched(videoData, true);
-                if (videoData.isWatchedApi() != watchedApi) {
-                    videoData.setWatchedApi(watchedFile);
-                    this.stagingDao.updateEntity(videoData);
-                }
+                
+                WatchedDTO watchedDTO = MetadataTools.getWatchedDTO(videoData);
+                videoData.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
+                this.stagingDao.updateEntity(videoData);
             }
         }
 
@@ -497,19 +481,16 @@ public class CommonStorageService {
         // update media file
         boolean marked;
         if (apiCall) {
-            mediaFile.setWatchedApi(watched);
-            mediaFile.setWatchedApiLastDate(new Date(System.currentTimeMillis()));
+            mediaFile.setWatchedApi(watched, new Date(System.currentTimeMillis()));
             marked = mediaFile.isWatchedApi();
         } else {
             Date maxWatchedFileDate = this.stagingService.maxWatchedFileDate(videoFile);
             if (maxWatchedFileDate != null) {
                 // just update last date if max watched file date has been found
-                mediaFile.setWatchedFileLastDate(maxWatchedFileDate);
-                mediaFile.setWatchedFile(true);
+                mediaFile.setWatchedFile(true, maxWatchedFileDate);
             } else if (mediaFile.isWatchedFile()) {
                 // set watched date to actual date if watch-change detected
-                mediaFile.setWatchedFileLastDate(new Date(System.currentTimeMillis()));
-                mediaFile.setWatchedFile(false);
+                mediaFile.setWatchedFile(false, new Date(System.currentTimeMillis()));
             }
             marked = mediaFile.isWatchedFile();
         }
@@ -522,20 +503,11 @@ public class CommonStorageService {
             return true;
         }
 
-        // determine watch status for each video data which is not an extra
+        // determine watch status for each video data
         for (VideoData videoData : mediaFile.getVideoDatas()) {
-            boolean watchedAll = MetadataTools.allMediaFilesWatched(videoData, apiCall);
-            if (apiCall) {
-                if (videoData.isWatchedApi() != watchedAll) {
-                    videoData.setWatchedApi(watchedAll);
-                    LOG.debug("Mark video as api {}: {}", (watchedAll ? "watched" : "unwatched"), videoData);
-                    this.stagingDao.updateEntity(videoData);
-                }
-            } else if (videoData.isWatchedFile() != watchedAll) {
-                videoData.setWatchedFile(watchedAll);
-                LOG.debug("Mark video as file {}: {}", (watchedAll ? "watched" : "unwatched"), videoData);
-                this.stagingDao.updateEntity(videoData);
-            }
+            WatchedDTO watchedDTO = MetadataTools.getWatchedDTO(videoData);
+            videoData.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
+            this.stagingDao.updateEntity(videoData);
         }
         return true;
     }

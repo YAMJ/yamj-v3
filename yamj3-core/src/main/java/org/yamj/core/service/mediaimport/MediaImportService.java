@@ -48,6 +48,7 @@ import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.staging.StagingService;
 import org.yamj.core.tools.Constants;
 import org.yamj.core.tools.MetadataTools;
+import org.yamj.core.tools.WatchedDTO;
 
 /**
  * The media import service is a spring-managed service. This will be used by
@@ -166,8 +167,7 @@ public class MediaImportService {
         mediaFile.setVideoSource(dto.getVideoSource());
         mediaFile.setEpisodeCount(dto.getEpisodes().size());
         mediaFile.setStatus(StatusType.NEW);
-        mediaFile.setWatchedFile(maxWatchedFileDate != null);
-        mediaFile.setWatchedFileLastDate(maxWatchedFileDate);
+        mediaFile.setWatchedFile(maxWatchedFileDate != null, maxWatchedFileDate);
         mediaFile.addStageFile(stageFile);
         stageFile.setMediaFile(mediaFile);
 
@@ -198,7 +198,7 @@ public class MediaImportService {
                 
                 // set watched if media file is NO extra
                 if (!mediaFile.isExtra()) {
-                    videoData.setWatchedFile(mediaFile.isWatchedFile());
+                    videoData.setWatched(mediaFile.isWatchedFile(), mediaFile.getWatchedFileLastDate());
                 }
 
                 // set sort title
@@ -225,11 +225,9 @@ public class MediaImportService {
                 mediaFile.addVideoData(videoData);
                 videoData.addMediaFile(mediaFile);
 
-                // set watched file if all media files are watched by file
-                videoData.setWatchedFile(MetadataTools.allMediaFilesWatched(videoData, false));
-                
-                // set watched API if all media files are watched by API
-                videoData.setWatchedApi(MetadataTools.allMediaFilesWatched(videoData, true));
+                // set watched status
+                WatchedDTO watchedDTO = MetadataTools.getWatchedDTO(videoData);
+                videoData.setWatched(watchedDTO.isWatched(), watchedDTO.getWatchedDate());
                 
                 // update video data
                 metadataDao.updateEntity(videoData);

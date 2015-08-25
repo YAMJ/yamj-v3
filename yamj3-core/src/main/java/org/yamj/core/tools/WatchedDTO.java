@@ -26,6 +26,9 @@ import java.util.Date;
 
 public final class WatchedDTO {
 
+    private Boolean watched = null;
+    private Date watchedDate = null;
+    
     private boolean watchedNfo = true;
     private Date watchedNfoDate;
     private boolean watchedFile = true;
@@ -39,11 +42,9 @@ public final class WatchedDTO {
         if (this.watchedNfoDate == null) {
             this.watchedNfo = watched;
             this.watchedNfoDate = watchedDate;
-        } else {
+        } else if (watchedDate.after(this.watchedNfoDate)) {
+            this.watchedNfoDate = watchedDate;
             this.watchedNfo = this.watchedNfo && watched;
-            if (watchedDate.after(this.watchedNfoDate)) {
-                this.watchedNfoDate = watchedDate;
-            }
         }
     }
 
@@ -53,11 +54,9 @@ public final class WatchedDTO {
         if (this.watchedFileDate == null) {
             this.watchedFile = watched;
             this.watchedFileDate = watchedDate;
-        } else {
+        } else if (watchedDate.after(this.watchedFileDate)) {
             this.watchedFile = this.watchedFile && watched;
-            if (watchedDate.after(this.watchedFileDate)) {
-                this.watchedFileDate = watchedDate;
-            }
+            this.watchedFileDate = watchedDate;
         }
     }
 
@@ -67,64 +66,54 @@ public final class WatchedDTO {
         if (this.watchedApiDate == null) {
             this.watchedApi = watched;
             this.watchedApiDate = watchedDate;
-        } else {
+        } else if (watchedDate.after(this.watchedApiDate)) {
             this.watchedApi = this.watchedApi && watched;
-            if (watchedDate.after(this.watchedApiDate)) {
-                this.watchedApiDate = watchedDate;
-            }
+            this.watchedApiDate = watchedDate;
         }
     }
-    
-    public boolean isWatched() {
-        boolean result = false;
-        Date watchedDate = null;
-        if (this.watchedNfoDate != null) {
-            watchedDate =  this.watchedNfoDate;
-            result = this.watchedNfo;
-        }
-        
-        if (this.watchedFileDate != null) {
-            if (watchedDate == null) {
-                watchedDate = this.watchedFileDate;
-                result = this.watchedFile;
-            } else if (watchedDate.before(watchedFileDate)) {
-                watchedDate = this.watchedFileDate;
-                result = this.watchedFile;
-            }
-        }
 
-        if (this.watchedApiDate != null) {
-            if (watchedDate == null) {
-                watchedDate = this.watchedApiDate;
-                result = this.watchedApi;
-            } else if (watchedDate.before(watchedApiDate)) {
-                watchedDate = this.watchedApiDate;
-                result = this.watchedApi;
-            }
-        }
-        
-        return result;
+    public boolean isWatched() {
+        this.evaluateWatched();
+        return this.watched.booleanValue();
     }
 
     public Date getWatchedDate() {
-        Date watchedDate = this.watchedNfoDate;
+        this.evaluateWatched();
+        return this.watchedDate;
+    }
 
+    private void evaluateWatched() {
+        if (this.watched != null) return;
+        
+        boolean watched = false;
+        Date watchedDate = null;
+        
+        if (this.watchedNfoDate != null) {
+            watched = this.watchedNfo;
+            watchedDate =  this.watchedNfoDate;
+        }
+        
         if (this.watchedFileDate != null) {
             if (watchedDate == null) {
+                watched = this.watchedFile;
                 watchedDate = this.watchedFileDate;
-            } else if (watchedDate.before(watchedFileDate)) {
+            } else if (watchedDate.before(this.watchedFileDate)) {
+                watched = this.watchedFile;
                 watchedDate = this.watchedFileDate;
             }
         }
 
         if (this.watchedApiDate != null) {
             if (watchedDate == null) {
+                watched = this.watchedApi;
                 watchedDate = this.watchedApiDate;
-            } else if (watchedDate.before(watchedApiDate)) {
+            } else if (watchedDate.before(this.watchedApiDate)) {
+                watched = this.watchedApi;
                 watchedDate = this.watchedApiDate;
             }
         }
-        
-        return watchedDate;
+
+        this.watched = Boolean.valueOf(watched); 
+        this.watchedDate = watchedDate;
     }
 }

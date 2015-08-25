@@ -217,7 +217,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
             videoData.setTagline(movieInfo.getTagline(), SCANNER_ID);
         }
         
-        videoData.addRating(SCANNER_ID, Float.valueOf(movieInfo.getVoteAverage() * 10f).intValue());
+        videoData.addRating(SCANNER_ID, MetadataTools.parseRating(movieInfo.getVoteAverage()));
 
         // RELEASE DATE
         Date releaseDate = null;
@@ -392,7 +392,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
 
         if (tvInfo.getVoteAverage() > 0) {
-            series.addRating(SCANNER_ID, Float.valueOf(tvInfo.getVoteAverage() * 10).intValue());
+            series.addRating(SCANNER_ID, MetadataTools.parseRating(tvInfo.getVoteAverage()));
         }
 
         if (CollectionUtils.isNotEmpty(tvInfo.getOriginCountry()) && OverrideTools.checkOverwriteCountries(series, SCANNER_ID)) {
@@ -532,7 +532,7 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
                 videoData.setRelease(releaseDate, SCANNER_ID);
             }
 
-            videoData.addRating(SCANNER_ID, Float.valueOf(episodeInfo.getVoteAverage()*10f).intValue());
+            videoData.addRating(SCANNER_ID, MetadataTools.parseRating(episodeInfo.getVoteAverage()));
             
             // CAST & CREW
             MediaCreditList credits = episodeInfo.getCredits();

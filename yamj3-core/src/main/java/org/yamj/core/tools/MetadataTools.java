@@ -441,32 +441,21 @@ public final class MetadataTools {
         return -1;
     }
 
-    /**
-     * Checks if all media files have been watched.
-     *
-     * @param videoData
-     * @param apiCall
-     * @return
-     */
-    public static boolean allMediaFilesWatched(VideoData videoData, boolean apiCall) {
-        boolean onlyExtras = true;
-        for (MediaFile stored : videoData.getMediaFiles()) {
-            if (stored.isExtra()) {
+    public static WatchedDTO getWatchedDTO(VideoData videoData) {
+        WatchedDTO watched = new WatchedDTO();
+        watched.setWatchedNfo(videoData.isWatchedNfo(), videoData.getWatchedNfoLastDate());
+        
+        for (MediaFile mediaFile : videoData.getMediaFiles()) {
+            if (mediaFile.isExtra()) {
                 continue;
             }
-            onlyExtras = false;
-            if (apiCall) {
-                if (!stored.isWatchedApi()) {
-                    return false;
-                }
-            } else if (!stored.isWatchedFile()) {
-                return false;
-            }
+            watched.setWatchedFile(mediaFile.isWatchedFile(), mediaFile.getWatchedFileLastDate());
+            watched.setWatchedApi(mediaFile.isWatchedApi(), mediaFile.getWatchedApiLastDate());
         }
 
-        return !onlyExtras;
+        return watched;
     }
-
+    
     /**
      * Get the certification from the MPAA string
      *

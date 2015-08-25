@@ -119,14 +119,6 @@ public class UpgradeDatabaseService {
             LOG.warn("Failed upgrade 'patchStudio'", ex);
         }
 
-        // Issues:  #193
-        // Date:   10.08.2015
-        try {
-            upgradeDatabaseDao.patchMediaFileWatched();
-        } catch (Exception ex) {
-            LOG.warn("Failed upgrade 'patchMediaFileWatched'", ex);
-        }
-
         // Issues: enhancement
         // Date:   15.08.2015
         try {
@@ -135,6 +127,13 @@ public class UpgradeDatabaseService {
             LOG.warn("Failed upgrade 'patchDatabaseLongVarchars'", ex);
         }
 
+        // Issues:  #193
+        // Date:   25.08.2015
+        try {
+            upgradeDatabaseDao.patchWatched();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchWatched'", ex);
+        }
         
     }
 }

@@ -261,7 +261,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
         
         // RATING
-        videoData.addRating(SCANNER_ID, Float.valueOf(movieDetails.getRating() * 10f).intValue());
+        videoData.addRating(SCANNER_ID, MetadataTools.parseRating(movieDetails.getRating()));
 
         // CERTIFICATIONS
         videoData.setCertificationInfos(imdbApiWrapper.getCertifications(imdbId, imdbLocale));

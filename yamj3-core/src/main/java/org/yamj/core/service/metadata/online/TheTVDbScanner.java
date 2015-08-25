@@ -133,13 +133,7 @@ public class TheTVDbScanner implements ISeriesScanner {
             series.setOutline(tvdbSeries.getOverview(), SCANNER_ID);
         }
 
-        if (StringUtils.isNumeric(tvdbSeries.getRating())) {
-            try {
-                series.addRating(SCANNER_ID, (int) (Float.parseFloat(tvdbSeries.getRating()) * 10));
-            } catch (NumberFormatException nfe) {
-                LOG.warn("Failed to convert TVDB rating '{}' to an integer: {}", tvdbSeries.getRating(), nfe.getMessage());
-            }
-        }
+        series.addRating(SCANNER_ID, MetadataTools.parseRating(tvdbSeries.getRating()));
 
         if (OverrideTools.checkOverwriteYear(series, SCANNER_ID)) {
             String faDate = tvdbSeries.getFirstAired();

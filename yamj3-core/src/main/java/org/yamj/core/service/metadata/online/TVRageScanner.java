@@ -273,7 +273,7 @@ public class TVRageScanner implements ISeriesScanner {
                 videoData.setRelease(episode.getAirDate(), SCANNER_ID);
             }
             
-            videoData.addRating(SCANNER_ID, Float.valueOf(episode.getRating()*10f).intValue());
+            videoData.addRating(SCANNER_ID, MetadataTools.parseRating(episode.getRating()));
             
             // mark episode as done
             videoData.setTvEpisodeDone();

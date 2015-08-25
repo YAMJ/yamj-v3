@@ -87,11 +87,11 @@ public class VideoData extends AbstractMetadata {
     @Column(name = "watched_nfo_last_date")
     private Date watchedNfoLastDate;
 
-    @Column(name = "watched_file", nullable = false)
-    private boolean watchedFile = false;
+    @Column(name = "watched", nullable = false)
+    private boolean watched = false;
 
-    @Column(name = "watched_api", nullable = false)
-    private boolean watchedApi = false;
+    @Column(name = "watched_date")
+    private Date watchedDate;
 
     @Column(name = "skip_scan_nfo", length = 255)
     private String skipScanNfo;
@@ -385,7 +385,7 @@ public class VideoData extends AbstractMetadata {
         return watchedNfo;
     }
 
-    public void setWatchedNfo(boolean watchedNfo) {
+    private void setWatchedNfo(boolean watchedNfo) {
         this.watchedNfo = watchedNfo;
     }
 
@@ -393,26 +393,45 @@ public class VideoData extends AbstractMetadata {
         return watchedNfoLastDate;
     }
 
-    public void setWatchedNfoLastDate(Date watchedNfoLastDate) {
+    private void setWatchedNfoLastDate(Date watchedNfoLastDate) {
         this.watchedNfoLastDate = watchedNfoLastDate;
     }
 
-    public boolean isWatchedFile() {
-        return watchedFile;
+    public void setWatchedNfo(boolean watchedNfo, Date watchedNfoLastDate) {
+        if (watchedNfoLastDate == null) return;
+        
+        setWatchedNfo(watchedNfo);
+        setWatchedNfoLastDate(watchedNfoLastDate);
+
+        if (getWatchedDate() == null || getWatchedDate().before(watchedNfoLastDate)) {
+            setWatched(watchedNfo);
+            setWatchedDate(watchedNfoLastDate);
+        }
+    }
+    
+    public boolean isWatched() {
+        return watched;
     }
 
-    public void setWatchedFile(boolean watchedFile) {
-        this.watchedFile = watchedFile;
+    private void setWatched(boolean watched) {
+        this.watched = watched;
     }
 
-    public boolean isWatchedApi() {
-        return watchedApi;
+    public Date getWatchedDate() {
+        return watchedDate;
     }
 
-    public void setWatchedApi(boolean watchedApi) {
-        this.watchedApi = watchedApi;
+    private void setWatchedDate(Date watchedDate) {
+        this.watchedDate = watchedDate;
     }
 
+    public void setWatched(boolean watched, Date watchedDate) {
+        if (watchedDate == null) return;
+
+        setWatched(watched);
+        setWatchedDate(watchedDate);
+    }
+    
     private String getSkipScanNfo() {
         return skipScanNfo;
     }
@@ -624,10 +643,6 @@ public class VideoData extends AbstractMetadata {
     
     // TRANSIENT METHODS
    
-    public boolean isWatched() {
-        return (this.watchedNfo || this.watchedFile || this.watchedApi);
-    }
-
     public Collection<CreditDTO> getCreditDTOS() {
         return creditDTOS;
     }

@@ -288,7 +288,7 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         return watchedFile;
     }
 
-    public void setWatchedFile(boolean watchedFile) {
+    private void setWatchedFile(boolean watchedFile) {
         this.watchedFile = watchedFile;
     }
 
@@ -296,15 +296,21 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         return watchedFileLastDate;
     }
 
-    public void setWatchedFileLastDate(Date watchedFileLastDate) {
+    private void setWatchedFileLastDate(Date watchedFileLastDate) {
         this.watchedFileLastDate = watchedFileLastDate;
+    }
+    
+    public void setWatchedFile(boolean watchedFile, Date watchedFileLastDate) {
+        if (watchedFileLastDate == null) return;
+        setWatchedFile(watchedFile);
+        setWatchedFileLastDate(watchedFileLastDate);
     }
     
     public boolean isWatchedApi() {
         return watchedApi;
     }
 
-    public void setWatchedApi(boolean watchedApi) {
+    private void setWatchedApi(boolean watchedApi) {
         this.watchedApi = watchedApi;
     }
     
@@ -312,8 +318,14 @@ public class MediaFile extends AbstractAuditable implements Serializable {
         return watchedApiLastDate;
     }
 
-    public void setWatchedApiLastDate(Date watchedApiLastDate) {
+    private void setWatchedApiLastDate(Date watchedApiLastDate) {
         this.watchedApiLastDate = watchedApiLastDate;
+    }
+
+    public void setWatchedApi(boolean watchedApi, Date watchedApiLastDate) {
+        if (watchedApiLastDate == null) return;
+        setWatchedApi(watchedApi);
+        setWatchedApiLastDate(watchedApiLastDate);
     }
 
     public StatusType getStatus() {
