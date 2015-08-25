@@ -340,7 +340,7 @@ public class ApiDao extends HibernateDao {
 
         if (params.getWatched() != null) {
             sbSQL.append(" AND vd.watched=");
-            sbSQL.append(params.getWatched() ? "1" : "0");
+            sbSQL.append(params.getWatched().booleanValue() ? "1" : "0");
         }
 
         // check genre
@@ -681,7 +681,7 @@ public class ApiDao extends HibernateDao {
             sbSQL.append(" AND exists");
             sbSQL.append(" (SELECT 1 FROM videodata v,season sea");
             sbSQL.append(" WHERE v.watched=" );
-            sbSQL.append(params.getWatched() ? "1" : "0");
+            sbSQL.append(params.getWatched().booleanValue() ? "1" : "0");
             sbSQL.append(" AND v.season_id=sea.id and sea.series_id=ser.id)");
         }
 
@@ -972,13 +972,9 @@ public class ApiDao extends HibernateDao {
         
         // check watched
         if (params.getWatched() != null) {
-            if (params.getWatched()) {
-                sbSQL.append(" AND not exists");
-            } else {
-                sbSQL.append(" AND exists");
-            }
             sbSQL.append(" (SELECT 1 FROM videodata v");
-            sbSQL.append(" WHERE v.watched_nfo=0 AND v.watched_file=0 AND v.watched_api=0");
+            sbSQL.append(" WHERE v.watched=");
+            sbSQL.append(params.getWatched().booleanValue() ? "1" : "0");
             sbSQL.append(" AND v.season_id=sea.id)");
         }
 
@@ -1759,7 +1755,7 @@ public class ApiDao extends HibernateDao {
 
         sqlScalars.addToSql("SELECT ser.id AS seriesId, sea.id AS seasonId, sea.season, vid.episode, ");
         sqlScalars.addToSql("vid.id, vid.title, vid.title_original as originalTitle, vid.release_date as firstAired, ");
-        sqlScalars.addToSql("(vid.watched_nfo or vid.watched_file or vid.watched_api) as watched, ");
+        sqlScalars.addToSql("vid.watched as watched, ");
         if (options.hasDataItem(DataItem.PLOT)) {
             sqlScalars.addToSql("vid.plot, ");
             sqlScalars.addScalar("plot", StringType.INSTANCE);
@@ -1790,10 +1786,9 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addParameter("seasonid", options.getSeasonid());
         }
 
-        if (options.getWatched() != null && options.getWatched()) {
-            sqlScalars.addToSql(" AND (vid.watched_nfo=1 or vid.watched_file=1 or vid.watched_api=1)");
-        } else if (options.getWatched() != null && !options.getWatched()) {
-            sqlScalars.addToSql(" AND vid.watched_nfo=0 AND vid.watched_file=0 AND vid.watched_api=0");
+        if (options.getWatched() != null) {
+            sqlScalars.addToSql(" AND vid.watched=:watched");
+            sqlScalars.addParameter("watched", options.getWatched().booleanValue());
         }
 
         sqlScalars.addToSql(" ORDER BY seriesId, season, episode");
@@ -2592,7 +2587,7 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("s.outline, ");
             sqlScalars.addScalar("outline", StringType.INSTANCE);
         }
-        sqlScalars.addToSql("(SELECT min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=s.id) as watched ");
+        sqlScalars.addToSql("(SELECT min(vid.watched) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=s.id) as watched ");
         sqlScalars.addToSql("FROM series s");
         sqlScalars.addToSql("WHERE id=:id");
         sqlScalars.addToSql("ORDER BY id");
@@ -2661,7 +2656,7 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("s.outline, ");
             sqlScalars.addScalar("outline", StringType.INSTANCE);
         }
-        sqlScalars.addToSql("(SELECT min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid where vid.season_id=s.id) as watched ");
+        sqlScalars.addToSql("(SELECT min(vid.watched) from videodata vid where vid.season_id=s.id) as watched ");
         sqlScalars.addToSql("FROM season s");
         sqlScalars.addToSql("WHERE series_id=:id");
         sqlScalars.addToSql("ORDER BY series_id, season");
@@ -2971,8 +2966,7 @@ public class ApiDao extends HibernateDao {
             sqlScalars = new SqlScalars();
             sqlScalars.addToSql("SELECT vd.id");
             sqlScalars.addToSql(SQL_COMMA_SPACE_QUOTE + MetaDataType.MOVIE + SQL_AS_VIDEO_TYPE_STRING);
-            sqlScalars.addToSql(", bo1.ordering, vd.title, vd.title_original AS originalTitle, vd.publication_year AS year,vd.release_date AS releaseDate,");
-            sqlScalars.addToSql("(vd.watched_nfo or vd.watched_file or vd.watched_api) as watched");
+            sqlScalars.addToSql(", bo1.ordering, vd.title, vd.title_original AS originalTitle, vd.publication_year AS year,vd.release_date AS releaseDate,vd.watched");
             sqlScalars.addToSql(DataItemTools.addSqlDataItems(options.splitDataItems(), "vd").toString());
             sqlScalars.addToSql("FROM boxed_set_order bo1");
             sqlScalars.addToSql("JOIN videodata vd ON bo1.videodata_id=vd.id");
@@ -2981,7 +2975,7 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("SELECT ser.id");
             sqlScalars.addToSql(SQL_COMMA_SPACE_QUOTE + MetaDataType.SERIES + SQL_AS_VIDEO_TYPE_STRING);
             sqlScalars.addToSql(", bo2.ordering, ser.title, ser.title_original AS originalTitle, ser.start_year AS year,null as releaseDate,");
-            sqlScalars.addToSql("(SELECT min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched");
+            sqlScalars.addToSql("(SELECT min(vid.watched) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched");
             sqlScalars.addToSql(DataItemTools.addSqlDataItems(options.splitDataItems(), "ser").toString());
             sqlScalars.addToSql("FROM boxed_set_order bo2");
             sqlScalars.addToSql("JOIN series ser ON bo2.series_id=ser.id");
@@ -3022,8 +3016,7 @@ public class ApiDao extends HibernateDao {
     private static SqlScalars generateSqlForBoxedSet(OptionsBoxedSet options) {
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT s.id, s.name, count(s.member) as memberCount, min(s.watched_set) as watched FROM (");
-        sqlScalars.addToSql("SELECT bs1.id, bs1.name, vd1.id as member,");
-        sqlScalars.addToSql("(vd1.watched_nfo or vd1.watched_file or vd1.watched_api) as watched_set");
+        sqlScalars.addToSql("SELECT bs1.id, bs1.name, vd1.id as member, vd1.watched as watched_set");
         sqlScalars.addToSql("FROM boxed_set bs1");
         sqlScalars.addToSql("LEFT OUTER JOIN boxed_set_order bo1 ON bs1.id=bo1.boxedset_id");
         sqlScalars.addToSql("LEFT OUTER JOIN videodata vd1 ON bo1.videodata_id=vd1.id");
@@ -3032,7 +3025,7 @@ public class ApiDao extends HibernateDao {
         }
         sqlScalars.addToSql(SQL_UNION);
         sqlScalars.addToSql("SELECT bs2.id, bs2.name, ser.id as member,");
-        sqlScalars.addToSql("(SELECT min(vid.watched_nfo or vid.watched_file or vid.watched_api) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched_set");
+        sqlScalars.addToSql("(SELECT min(vid.watched) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched_set");
         sqlScalars.addToSql("FROM boxed_set bs2");
         sqlScalars.addToSql("LEFT OUTER JOIN boxed_set_order bo2 ON bs2.id=bo2.boxedset_id");
         sqlScalars.addToSql("LEFT OUTER JOIN series ser ON bo2.series_id=ser.id");
