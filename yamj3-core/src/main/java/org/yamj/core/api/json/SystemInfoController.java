@@ -26,7 +26,6 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.yamj.common.model.YamjInfo;
 import org.yamj.common.model.YamjInfoBuild;
@@ -34,8 +33,7 @@ import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.database.service.JsonApiStorageService;
 
-@Controller
-@ResponseBody
+@RestController
 @RequestMapping(value = "/system/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class SystemInfoController {
 

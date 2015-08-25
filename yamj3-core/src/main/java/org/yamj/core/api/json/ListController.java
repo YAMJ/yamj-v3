@@ -23,16 +23,14 @@
 package org.yamj.core.api.json;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.yamj.core.api.model.dto.ApiListDTO;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.service.JsonApiStorageService;
 
-@Controller
-@ResponseBody
+@RestController
 @RequestMapping(value = "/api/list/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class ListController {
 
