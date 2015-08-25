@@ -599,7 +599,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
         }
 
         currentSession()
-        .createSQLQuery("UPDATE artwork_located SET source='file' WHERE source is null and stagefile_id is not null")
+        .createSQLQuery("UPDATE artwork_located SET source='file' WHERE (source ='' or source is null) and stagefile_id is not null")
         .executeUpdate();
         
         currentSession()
@@ -740,7 +740,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
 
             // update watched api date
             currentSession()
-            .createSQLQuery("UPDATE mediafile set watched_api_last_date=update_timestamp where watched_api=:watched and watched_api_last_date is null")
+            .createSQLQuery("UPDATE mediafile set watched_api_last_date=create_timestamp where watched_api=:watched and watched_api_last_date is null")
             .setBoolean("watched", Boolean.TRUE)
             .executeUpdate();
         }
