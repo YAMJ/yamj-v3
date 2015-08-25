@@ -44,12 +44,14 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     private String baseArtworkUrl = "";
     private String baseMediainfoUrl = "";
     private String basePhotoUrl = "";
+    private String baseTrailerUrl = "";
 
     public ApiWrapperAbstract() {
         YamjInfo yi = new YamjInfo(YamjInfoBuild.CORE);
         baseArtworkUrl = yi.getBaseArtworkUrl();
         baseMediainfoUrl = yi.getBaseMediainfoUrl();
         basePhotoUrl = yi.getBasePhotoUrl();
+        baseTrailerUrl = yi.getBaseTrailerUrl();
     }
 
     @Override
@@ -98,6 +100,11 @@ public abstract class ApiWrapperAbstract implements IApiWrapper {
     @Override
     public String getBasePhotoUrl() {
         return basePhotoUrl;
+    }
+
+    @Override
+    public String getBaseTrailerUrl() {
+        return baseTrailerUrl;
     }
 
     @Override

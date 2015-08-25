@@ -3256,4 +3256,44 @@ public class ApiDao extends HibernateDao {
         this.executeSqlUpdate("UPDATE series SET status='"+StatusType.UPDATED.name()+"'");
         this.executeSqlUpdate("UPDATE artwork SET status='"+StatusType.UPDATED.name()+"'");
     }
+    
+    public List<ApiListDTO> getMovieList(ApiWrapperList<ApiListDTO> wrapper) {
+        StringBuilder sbSQL = new StringBuilder();
+        sbSQL.append("select vd.id, vd.title, vd.publication_year as year,");
+        sbSQL.append("(select i1.sourcedb_id from videodata_ids i1 where i1.videodata_id=vd.id and i1.sourcedb='imdb') as imdb,");
+        sbSQL.append("(select i2.sourcedb_id from videodata_ids i2 where i2.videodata_id=vd.id and i2.sourcedb='tmdb') as tmdb,");
+        sbSQL.append("vd.watched ");
+        sbSQL.append("from videodata vd where vd.episode<0 ");
+        sbSQL.append("order by vd.title asc, vd.publication_year asc");
+
+        SqlScalars sqlScalars = new SqlScalars(sbSQL);
+        sqlScalars.addScalar(ID, LongType.INSTANCE);
+        sqlScalars.addScalar(TITLE, StringType.INSTANCE);
+        sqlScalars.addScalar(YEAR, IntegerType.INSTANCE);
+        sqlScalars.addScalar("imdb", StringType.INSTANCE);
+        sqlScalars.addScalar("tmdb", StringType.INSTANCE);
+        sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
+
+        return executeQueryWithTransform(ApiListDTO.class, sqlScalars, wrapper);
+    }
+
+    public List<ApiListDTO> getSeriesList(ApiWrapperList<ApiListDTO> wrapper) {
+        StringBuilder sbSQL = new StringBuilder();
+        sbSQL.append("select ser.id, ser.title, ser.start_year as year,");
+        sbSQL.append("(select i1.sourcedb_id from series_ids i1 where i1.series_id=ser.id and i1.sourcedb='imdb') as imdb,");
+        sbSQL.append("(select i2.sourcedb_id from series_ids i2 where i2.series_id=ser.id and i2.sourcedb='tmdb') as tmdb,");
+        sbSQL.append("(select min(vid.watched) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched ");
+        sbSQL.append("from series ser ");
+        sbSQL.append("order by ser.title asc, ser.start_year asc");
+
+        SqlScalars sqlScalars = new SqlScalars(sbSQL);
+        sqlScalars.addScalar(ID, LongType.INSTANCE);
+        sqlScalars.addScalar(TITLE, StringType.INSTANCE);
+        sqlScalars.addScalar(YEAR, IntegerType.INSTANCE);
+        sqlScalars.addScalar("imdb", StringType.INSTANCE);
+        sqlScalars.addScalar("tmdb", StringType.INSTANCE);
+        sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
+
+        return executeQueryWithTransform(ApiListDTO.class, sqlScalars, wrapper);
+    }
 }

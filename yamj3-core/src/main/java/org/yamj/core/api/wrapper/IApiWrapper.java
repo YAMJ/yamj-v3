@@ -50,6 +50,8 @@ public interface IApiWrapper {
 
     String getBasePhotoUrl();
 
+    String getBaseTrailerUrl();
+
     void setQueryTime(DateTime queryTime);
 
     void setQueryEnd();

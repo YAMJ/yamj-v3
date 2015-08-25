@@ -76,6 +76,7 @@ public class YamjInfo {
     private String baseArtworkUrl;
     private String baseMediainfoUrl;
     private String basePhotoUrl;
+    private String baseTrailerUrl;
     private String skinDir;
 
     @SuppressWarnings("unused")
@@ -116,6 +117,7 @@ public class YamjInfo {
         this.baseArtworkUrl = buildBaseUrl(PropertyTools.getProperty("yamj3.file.storage.artwork", ""));
         this.baseMediainfoUrl = buildBaseUrl(PropertyTools.getProperty("yamj3.file.storage.mediainfo", ""));
         this.basePhotoUrl = buildBaseUrl(PropertyTools.getProperty("yamj3.file.storage.photo", ""));
+        this.baseTrailerUrl = buildBaseUrl(PropertyTools.getProperty("yamj3.file.storage.trailer", ""));
         this.skinDir = buildBaseUrl(PropertyTools.getProperty("yamj3.file.storage.skins", "./skins/"));
     }
 
@@ -243,6 +245,10 @@ public class YamjInfo {
 
     public String getBasePhotoUrl() {
         return basePhotoUrl;
+    }
+    
+    public String getBaseTrailerUrl() {
+        return baseTrailerUrl;
     }
 
     public String getSkinDir() {
