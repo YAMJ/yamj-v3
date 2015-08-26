@@ -37,7 +37,7 @@ import org.yamj.core.database.model.type.ContainerType;
 
 @Entity
 @Table(name = "trailer",
-       uniqueConstraints = @UniqueConstraint(name = "UIX_TRAILER_NATURALID", columnNames = {"videodata_id", "series_id", "stagefile_id", "url"}),
+       uniqueConstraints = @UniqueConstraint(name = "UIX_TRAILER_NATURALID", columnNames = {"videodata_id", "series_id", "source", "hash_code"}),
        indexes = {@Index(name = "IX_TRAILER_STATUS", columnList = "status")}
 )
 public class Trailer extends AbstractAuditable implements Serializable {
@@ -56,25 +56,25 @@ public class Trailer extends AbstractAuditable implements Serializable {
     @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_TRAILER_SERIES"))
     private Series series;
 
-    @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @Fetch(FetchMode.JOIN)
     @JoinColumn(name = "stagefile_id", foreignKey = @ForeignKey(name = "FK_TRAILER_STAGEFILE"))
     private StageFile stageFile;
 
     @NaturalId(mutable = true)
-    @Column(name = "url", length = 1000)
-    private String url;
-
     @Column(name = "source", nullable = false, length = 50)
     private String source;
+
+    @NaturalId(mutable = true)
+    @Column(name = "hash_code", nullable = false, length = 100)
+    private String hashCode;
+
+    @Column(name = "url", length = 1000)
+    private String url;
 
     @Type(type = "containerType")
     @Column(name = "container", nullable = false, length = 10)
     private ContainerType container;
-
-    @Column(name = "hash_code", nullable = false, length = 100)
-    private String hashCode;
 
     @Column(name = "cache_filename", length = 255)
     private String cacheFilename;
@@ -118,14 +118,6 @@ public class Trailer extends AbstractAuditable implements Serializable {
         this.stageFile = stageFile;
     }
 
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
     public String getSource() {
         return source;
     }
@@ -134,20 +126,28 @@ public class Trailer extends AbstractAuditable implements Serializable {
         this.source = source;
     }
 
-    public ContainerType getContainer() {
-        return container;
-    }
-
-    public void setContainer(ContainerType container) {
-        this.container = container;
-    }
-
     public String getHashCode() {
         return hashCode;
     }
 
     public void setHashCode(String hashCode) {
         this.hashCode = hashCode;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public ContainerType getContainer() {
+        return container;
+    }
+
+    public void setContainer(ContainerType container) {
+        this.container = container;
     }
 
     public String getCacheFilename() {

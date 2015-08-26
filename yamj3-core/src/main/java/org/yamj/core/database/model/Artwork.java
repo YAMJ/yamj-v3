@@ -49,8 +49,7 @@ public class Artwork extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -981494909436217076L;
 
-    @NaturalId(mutable = true)
-    
+    @NaturalId(mutable = true)    
     @Type(type = "artworkType")
     @Column(name = "artwork_type", nullable = false)
     private ArtworkType artworkType;

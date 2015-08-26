@@ -26,25 +26,29 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.ImageType;
 
 @Entity
 @Table(name = "artwork_located",
-       uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORKLOCATED_NATURALID", columnNames = {"artwork_id", "stagefile_id", "source", "hash_code"}),
+       uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORKLOCATED_NATURALID", columnNames = {"artwork_id", "source", "hash_code"}),
        indexes = @Index(name = "IX_ARTWORKLOCATED_STATUS", columnList = "status")
 )
 public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     private static final long serialVersionUID = -981494909436217076L;
 
+    @NaturalId(mutable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "artwork_id", nullable = false, foreignKey = @ForeignKey(name = "FK_ARTWORKLOCATED_ARTWORK"))
@@ -55,12 +59,13 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @JoinColumn(name = "stagefile_id", foreignKey = @ForeignKey(name = "FK_ARTWORKLOCATED_STAGEFILE"))
     private StageFile stageFile;
 
-    // only used for equality checks
-    @Column(name = "stagefile_id", insertable = false, updatable = false)
-    private Long stageFileId;
-
+    @NaturalId(mutable = true)
     @Column(name = "source", nullable=false, length = 50)
     private String source;
+
+    @NaturalId(mutable = true)
+    @Column(name = "hash_code", nullable=false, length = 100)
+    private String hashCode;
 
     @Column(name = "url", length = 1000)
     private String url;
@@ -72,9 +77,6 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     @Type(type = "statusType")
     @Column(name = "previous_status", length = 30)
     private StatusType previousStatus;
-
-    @Column(name = "hash_code", nullable=false, length = 100)
-    private String hashCode;
 
     @Column(name = "priority", nullable = false)
     private int priority = -1;
@@ -119,15 +121,6 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     public void setStageFile(StageFile stageFile) {
         this.stageFile = stageFile;
-        setStageFileId(stageFile == null ? null : stageFile.getId());
-    }
-
-    private Long getStageFileId() {
-        return stageFileId;
-    }
-
-    private void setStageFileId(Long stageFileId) {
-        this.stageFileId = stageFileId;
     }
 
     public String getSource() {
@@ -138,6 +131,14 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
         this.source = source;
     }
 
+    public String getHashCode() {
+        return hashCode;
+    }
+
+    public void setHashCode(String hashCode) {
+        this.hashCode = hashCode;
+    }
+    
     public String getUrl() {
         return url;
     }
@@ -165,14 +166,6 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     private void setPreviousStatus(StatusType previousStatus) {
         this.previousStatus = previousStatus;
-    }
-
-    public String getHashCode() {
-        return hashCode;
-    }
-
-    public void setHashCode(String hashCode) {
-        this.hashCode = hashCode;
     }
 
     public int getPriority() {
@@ -268,9 +261,8 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     public int hashCode() {
         return new HashCodeBuilder()
                 .append(getArtwork())
-                .append(getStageFileId())
                 .append(getSource())
-                .append(getUrl())
+                .append(getHashCode())
                 .toHashCode();
     }
 
@@ -292,10 +284,9 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
         }
         // check other values
         return new EqualsBuilder()
-                .append(getSource(), other.getSource())
-                .append(getUrl(), other.getUrl())
                 .append(getArtwork(), other.getArtwork())
-                .append(getStageFileId(), other.getStageFileId())
+                .append(getSource(), other.getSource())
+                .append(getHashCode(), other.getHashCode())
                 .isEquals();
     }
 
@@ -308,19 +299,17 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
             sb.append(", type=");
             sb.append(getArtwork().getArtworkType());
         }
+        sb.append(", source=");
+        sb.append(getSource());
+        sb.append(", hashCode=");
+        sb.append(getHashCode());
         if (StringUtils.isNotBlank(getUrl())) {
-            sb.append(", source=");
-            sb.append(getSource());
             sb.append(", url=");
             sb.append(getUrl());
-        } else if (getStageFile() != null) {
-            if (Hibernate.isInitialized(getStageFile())) {
-                sb.append(", stageFile=");
-                sb.append(getStageFile().getFileName());
-            } else {
-                sb.append(", stageFileId=");
-                sb.append(getStageFileId());
-            }
+        }
+        if (Hibernate.isInitialized(getStageFile())) {
+            sb.append(", stageFile=");
+            sb.append(getStageFile().getFileName());
         }
         sb.append("]");
         return sb.toString();

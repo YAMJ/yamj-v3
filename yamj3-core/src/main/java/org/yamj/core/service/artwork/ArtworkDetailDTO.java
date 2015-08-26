@@ -25,6 +25,7 @@ package org.yamj.core.service.artwork;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.type.ImageType;
+import org.yamj.core.tools.CommonTools;
 
 public class ArtworkDetailDTO {
 
@@ -51,7 +52,7 @@ public class ArtworkDetailDTO {
         this.source = source;
         this.url = url;
         if (StringUtils.isBlank(hashCode)) {
-            this.hashCode = ArtworkTools.getUrlHashCode(url);
+            this.hashCode = CommonTools.getSimpleHashCode(url);
         } else {
             this.hashCode = hashCode;
         }

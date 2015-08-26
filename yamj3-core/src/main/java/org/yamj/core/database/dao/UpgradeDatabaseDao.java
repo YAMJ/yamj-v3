@@ -36,13 +36,13 @@ import org.yamj.core.tools.Constants;
 import org.yamj.core.tools.MetadataTools;
 
 @Transactional
-@Repository("fixDatabaseDao")
+@Repository("upgradeDatabaseDao")
 public class UpgradeDatabaseDao extends HibernateDao {
 
     @Autowired
     private LocaleService localeService;
 
-    private boolean existsColumn(String table, String column) {
+    protected boolean existsColumn(String table, String column) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM information_schema.COLUMNS ");
         sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
@@ -52,8 +52,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
         return (object != null);
     }
 
-    @SuppressWarnings("unused")
-    private boolean existsForeignKey(String table, String foreignKey) {
+    protected boolean existsForeignKey(String table, String foreignKey) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM information_schema.TABLE_CONSTRAINTS ");
         sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
@@ -64,7 +63,26 @@ public class UpgradeDatabaseDao extends HibernateDao {
         return (object != null);
     }
 
-    private boolean existsIndex(String table, String indexName) {
+    protected void dropForeignKey(String table, String foreignKey) {
+        if (existsForeignKey(table, foreignKey)) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("ALTER TABLE ").append(table);
+            sb.append(" DROP FOREIGN KEY ").append(foreignKey);
+            currentSession().createSQLQuery(sb.toString()).executeUpdate();
+        }
+    }
+    
+    @SuppressWarnings("cast")
+    protected List<String> listForeignKeys(String table) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS ");
+        sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
+        sb.append("AND TABLE_NAME = '").append(table).append("' ");
+        sb.append("AND CONSTRAINT_TYPE = 'FOREIGN KEY' ");
+        return (List<String>) currentSession().createSQLQuery(sb.toString()).list();
+    }
+
+    protected boolean existsIndex(String table, String indexName) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM information_schema.STATISTICS ");
         sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
@@ -74,7 +92,16 @@ public class UpgradeDatabaseDao extends HibernateDao {
         return (object != null);
     }
 
-    private boolean existsUniqueIndex(String table, String indexName) {
+    protected void dropIndex(String table, String indexName) {
+        if (existsIndex(table, indexName)) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("ALTER TABLE ").append(table);
+            sb.append(" DROP INDEX ").append(indexName);
+            currentSession().createSQLQuery(sb.toString()).executeUpdate();
+        }
+    }
+
+    protected boolean existsUniqueIndex(String table, String indexName) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM information_schema.TABLE_CONSTRAINTS ");
         sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
@@ -85,39 +112,75 @@ public class UpgradeDatabaseDao extends HibernateDao {
         return (object != null);
     }
 
+    protected void dropUniqueIndex(String table, String indexName) {
+        if (existsUniqueIndex(table, indexName)) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("ALTER TABLE ").append(table);
+            sb.append(" DROP INDEX ").append(indexName);
+            currentSession().createSQLQuery(sb.toString()).executeUpdate();
+        }
+    }
+
     /**
      * Issues: #222
      * Date:   18.07.2015
      */
     public void patchTrailers() {
+        
         if (existsColumn("videodata", "trailer_status")) {
             currentSession()
-                .createSQLQuery("UPDATE videodata set trailer_status = 'NEW' where trailer_status=''")
-                .executeUpdate();
+            .createSQLQuery("UPDATE videodata set trailer_status = 'NEW' where trailer_status=''")
+            .executeUpdate();
         }
 
         if (existsColumn("series", "trailer_status")) {
             currentSession()
-                .createSQLQuery("UPDATE series set trailer_status = 'NEW' where trailer_status=''")
-                .executeUpdate();
+            .createSQLQuery("UPDATE series set trailer_status = 'NEW' where trailer_status=''")
+            .executeUpdate();
         }
 
         if (existsColumn("trailer", "source_hash")) {
             currentSession()
-                .createSQLQuery("UPDATE trailer set hash_code=source_hash")
-                .executeUpdate();
+            .createSQLQuery("UPDATE trailer set hash_code=source_hash")
+            .executeUpdate();
+            
             currentSession()
-                .createSQLQuery("ALTER TABLE trailer DROP source_hash")
-                .executeUpdate();
+            .createSQLQuery("ALTER TABLE trailer DROP source_hash")
+            .executeUpdate();
         }
+       
+        currentSession()
+        .createSQLQuery("UPDATE trailer SET container='MP4' where container=''")
+        .executeUpdate();
 
         currentSession()
-            .createSQLQuery("UPDATE trailer SET container='MP4' where container=''")
-            .executeUpdate();
+        .createSQLQuery("UPDATE trailer SET source='file' WHERE (source ='' or source is null) and stagefile_id is not null")
+        .executeUpdate();
+        
+        dropForeignKey("trailer", "FK_TRAILER_VIDEODATA");
+        dropForeignKey("trailer", "FK_TRAILER_SERIES");
+        dropForeignKey("trailer", "FK_TRAILER_STAGEFILE");
+        dropUniqueIndex("trailer", "UIX_TRAILER_NATURALID");
 
         currentSession()
-            .createSQLQuery("ALTER TABLE trailer MODIFY COLUMN url VARCHAR(1000)")
-            .executeUpdate();
+        .createSQLQuery("ALTER TABLE trailer ADD CONSTRAINT FK_TRAILER_VIDEODATA FOREIGN KEY (videodata_id) REFERENCES videodata (id)")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE trailer ADD CONSTRAINT FK_TRAILER_SERIES FOREIGN KEY (series_id) REFERENCES series (id)")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE trailer ADD CONSTRAINT FK_TRAILER_STAGEFILE FOREIGN KEY (stagefile_id) REFERENCES stage_file (id)")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE trailer ADD UNIQUE INDEX UIX_TRAILER_NATURALID(videodata_id,series_id,source,hash_code)")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE trailer MODIFY COLUMN url VARCHAR(1000)")
+        .executeUpdate();
     }
 
     class CertEntry {
@@ -138,11 +201,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
         if (!existsColumn("certification", "country")) return;
         
         // drop unique index
-        if (existsUniqueIndex("certification", "UIX_CERTIFICATION_NATURALID")) {
-            currentSession()
-                .createSQLQuery("ALTER TABLE certification DROP index UIX_CERTIFICATION_NATURALID")
-                .executeUpdate();
-        }
+        dropUniqueIndex("certification", "UIX_CERTIFICATION_NATURALID");
         
         // retrieve certification
         Map<Long, CertEntry> certifications = new HashMap<>();
@@ -261,11 +320,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
         if (!existsColumn("country", "name")) return;
         
         // drop unique index
-        if (existsUniqueIndex("country", "UIX_COUNTRY_NATURALID")) {
-            currentSession()
-                .createSQLQuery("ALTER TABLE country DROP index UIX_COUNTRY_NATURALID")
-                .executeUpdate();
-        }
+        dropUniqueIndex("country", "UIX_COUNTRY_NATURALID");
         
         // retrieve countries
         Map<Long, CountryEntry> countries = new HashMap<>();
@@ -578,25 +633,10 @@ public class UpgradeDatabaseDao extends HibernateDao {
      * Date:   10.08.2015
      */
     public void patchArtworkLocated() {
-        if (existsIndex("artwork_located", "IX_ARTWORKLOCATED_DOWNLOAD")) {
-            currentSession()
-            .createSQLQuery("ALTER TABLE artwork_located DROP INDEX IX_ARTWORKLOCATED_DOWNLOAD")
-            .executeUpdate();
-        }
-
-        if (existsUniqueIndex("artwork_located", "UIX_ARTWORKLOCATED_NATURALID")) {
-            currentSession()
-            .createSQLQuery("ALTER TABLE artwork_located DROP FOREIGN KEY FK_ARTWORKLOCATED_ARTWORK")
-            .executeUpdate();
-
-            currentSession()
-            .createSQLQuery("ALTER TABLE artwork_located DROP INDEX UIX_ARTWORKLOCATED_NATURALID")
-            .executeUpdate();
-
-            currentSession()
-            .createSQLQuery("ALTER TABLE artwork_located ADD CONSTRAINT FK_ARTWORKLOCATED_ARTWORK FOREIGN KEY (artwork_id) REFERENCES artwork (id)")
-            .executeUpdate();
-        }
+        dropForeignKey("artwork_located", "FK_ARTWORKLOCATED_ARTWORK");
+        dropForeignKey("artwork_located", "FK_ARTWORKLOCATED_STAGEFILE");
+        dropIndex("artwork_located", "IX_ARTWORKLOCATED_DOWNLOAD"); 
+        dropUniqueIndex("artwork_located", "UIX_ARTWORKLOCATED_NATURALID");
 
         currentSession()
         .createSQLQuery("UPDATE artwork_located SET source='file' WHERE (source ='' or source is null) and stagefile_id is not null")
@@ -611,7 +651,15 @@ public class UpgradeDatabaseDao extends HibernateDao {
         .executeUpdate();
 
         currentSession()
-        .createSQLQuery("ALTER TABLE artwork_located ADD UNIQUE INDEX UIX_ARTWORKLOCATED_NATURALID(artwork_id,stagefile_id,source,hash_code)")
+        .createSQLQuery("ALTER TABLE artwork_located ADD CONSTRAINT FK_ARTWORKLOCATED_ARTWORK FOREIGN KEY (artwork_id) REFERENCES artwork (id)")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_located ADD CONSTRAINT FK_ARTWORKLOCATED_STAGEFILE FOREIGN KEY (stagefile_id) REFERENCES stage_file (id)")
+        .executeUpdate();
+
+        currentSession()
+        .createSQLQuery("ALTER TABLE artwork_located ADD UNIQUE INDEX UIX_ARTWORKLOCATED_NATURALID(artwork_id,source,hash_code)")
         .executeUpdate();
 
         currentSession()
@@ -622,15 +670,15 @@ public class UpgradeDatabaseDao extends HibernateDao {
         .createSQLQuery("UPDATE artwork_located set image_type='JPG' where image_type=''")
         .executeUpdate();
 
-        if (!existsColumn("artwork_located", "language")) return;
-
-        currentSession()
-        .createSQLQuery("UPDATE artwork_located set language_code=language where language is not null")
-        .executeUpdate();
-        
-        currentSession()
-        .createSQLQuery("ALTER TABLE artwork_located DROP language")
-        .executeUpdate();
+        if (existsColumn("artwork_located", "language")) {
+            currentSession()
+            .createSQLQuery("UPDATE artwork_located set language_code=language where language is not null")
+            .executeUpdate();
+            
+            currentSession()
+            .createSQLQuery("ALTER TABLE artwork_located DROP language")
+            .executeUpdate();
+        }
     }
 
     /**
@@ -653,11 +701,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
         }
         
         // drop unique index
-        if (existsUniqueIndex("boxed_set", "UIX_BOXEDSET_NATURALID")) {
-            currentSession()
-            .createSQLQuery("ALTER TABLE boxed_set DROP index UIX_BOXEDSET_NATURALID")
-            .executeUpdate();
-        }
+        dropUniqueIndex("boxed_set", "UIX_BOXEDSET_NATURALID");
 
         // update language codes
         for (Entry<Long,String> update : boxedSets.entrySet()) {
@@ -681,11 +725,7 @@ public class UpgradeDatabaseDao extends HibernateDao {
      * Date:   10.08.2015
      */
     public void patchStudio() {
-        if (existsUniqueIndex("studio", "UK_STUDIO_NATURALID")) {
-            currentSession()
-            .createSQLQuery("ALTER TABLE studio DROP index UK_STUDIO_NATURALID")
-            .executeUpdate();
-        }
+        dropUniqueIndex("studio", "UK_STUDIO_NATURALID");
     }
 
     /**
@@ -777,10 +817,6 @@ public class UpgradeDatabaseDao extends HibernateDao {
      * Date:   15.08.2015
      */
     public void patchDatabaseLongVarchars() {
-        currentSession()
-        .createSQLQuery("ALTER TABLE trailer MODIFY COLUMN url VARCHAR(2000)")
-        .executeUpdate();
-
         currentSession()
         .createSQLQuery("ALTER TABLE videodata MODIFY COLUMN tagline VARCHAR(2000)")
         .executeUpdate();

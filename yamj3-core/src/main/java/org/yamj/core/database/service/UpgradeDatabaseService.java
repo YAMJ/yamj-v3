@@ -134,6 +134,5 @@ public class UpgradeDatabaseService {
         } catch (Exception ex) {
             LOG.warn("Failed upgrade 'patchWatched'", ex);
         }
-        
     }
 }

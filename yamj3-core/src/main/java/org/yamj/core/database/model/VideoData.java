@@ -124,7 +124,7 @@ public class VideoData extends AbstractMetadata {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "videodata_ratings",
-            joinColumns = @JoinColumn(name = "videodata_id"), foreignKey = @ForeignKey(name = "FK_VIDEODATA_RATINGS"))
+            joinColumns = @JoinColumn(name = "videodata_id", foreignKey = @ForeignKey(name = "FK_VIDEODATA_RATINGS")))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)

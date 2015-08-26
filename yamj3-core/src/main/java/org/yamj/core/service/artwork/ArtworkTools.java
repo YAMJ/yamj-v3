@@ -34,46 +34,6 @@ public class ArtworkTools {
     private static final String TYPE_SERIES_SCANNER = "series_scanner";
     private static final String TYPE_PERSON_SCANNER = "person_scanner";
 
-    /**
-     * Get the hash code of an URL.
-     * 
-     * @param url
-     * @return the hash code
-     */
-    public static String getUrlHashCode(String url) {
-        // hash code of URL
-        int hash = url.hashCode();
-        return String.valueOf((hash < 0 ? 0 - hash : hash));
-    }
-    
-    /**
-     * Get a part of the URL as hash code.
-     * 
-     * @param url
-     * @return the hash code
-     */
-    public static String getPartialHashCode(String url) {
-        String hashCode = null;
-        try {
-            int index = StringUtils.lastIndexOf(url, "/");
-            if (index > -1) {
-                String tmp = url.substring(index+1);
-                index = tmp.indexOf(".");
-                if (index > -1) {
-                    hashCode = tmp.substring(0, index);
-                }
-            }
-        } catch (Exception ignore) {
-            // ignore any exception
-        }
-        
-        if (StringUtils.isEmpty(hashCode)) {
-            hashCode = getUrlHashCode(url);
-        }
-        
-        return hashCode;
-    }
-    
     public static Set<String> determinePriorities(final String configValue, Set<String> allowedForScan) {
         final Set<String> result;
         if (StringUtils.isBlank(configValue)) {
