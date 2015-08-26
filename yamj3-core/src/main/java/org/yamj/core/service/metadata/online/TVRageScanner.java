@@ -195,7 +195,7 @@ public class TVRageScanner implements ISeriesScanner {
         return ScanResult.OK;
     }
     
-    private void scanSeasons(Series series, ShowInfo showInfo, String title, EpisodeList episodeList) {
+    private static void scanSeasons(Series series, ShowInfo showInfo, String title, EpisodeList episodeList) {
         
         for (Season season : series.getSeasons()) {
             
@@ -235,7 +235,7 @@ public class TVRageScanner implements ISeriesScanner {
         }
     }
 
-    private void scanEpisodes(Season season, EpisodeList episodeList) {
+    private static void scanEpisodes(Season season, EpisodeList episodeList) {
         for (VideoData videoData : season.getVideoDatas()) {
             
             if (videoData.isTvEpisodeDone(SCANNER_ID)) {
@@ -259,7 +259,7 @@ public class TVRageScanner implements ISeriesScanner {
                     String tvRageId = episode.getLink().substring(lastIdx+1);
                     videoData.setSourceDbId(SCANNER_ID, tvRageId);
                 }   
-            } catch (Exception ignore) {}
+            } catch (Exception ex) {/*ignore*/}
             
             if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
                 videoData.setTitle(episode.getTitle(), SCANNER_ID);

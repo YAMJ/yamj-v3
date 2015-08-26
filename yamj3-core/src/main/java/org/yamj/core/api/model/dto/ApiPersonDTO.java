@@ -172,7 +172,7 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
         return jobType;
     }
 
-    public void setJobTypeAsString(String job) {
+    public void setJobType(String job) {
         this.jobType = JobType.fromString(job);
     }
 }

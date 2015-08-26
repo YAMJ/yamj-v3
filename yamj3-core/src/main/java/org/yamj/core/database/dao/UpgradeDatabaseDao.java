@@ -849,4 +849,65 @@ public class UpgradeDatabaseDao extends HibernateDao {
         .createSQLQuery("ALTER TABLE library MODIFY COLUMN base_directory VARCHAR(1000)")
         .executeUpdate();
     }
+
+    private void dropOldForeignKeys(String table) {
+        for (String foreignKey : listForeignKeys(table)) {
+            if (StringUtils.startsWithIgnoreCase(foreignKey, "FK_VIDEODATA")) {
+                continue;
+            }
+            if (StringUtils.startsWithIgnoreCase(foreignKey, "FK_SEASON")) {
+                continue;
+            }
+            if (StringUtils.startsWithIgnoreCase(foreignKey, "FK_SERIES")) {
+                continue;
+            }
+            if (StringUtils.startsWithIgnoreCase(foreignKey, "FK_DATA")) {
+                continue;
+            }
+            if (StringUtils.startsWithIgnoreCase(foreignKey, "FK_BOXED")) {
+                continue;
+            }
+            if (StringUtils.startsWithIgnoreCase(foreignKey, "FK_PLAYER")) {
+                continue;
+            }
+            if (StringUtils.startsWithIgnoreCase(foreignKey, "FK_REL")) {
+                continue;
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.append("ALTER TABLE ").append(table);
+            sb.append(" DROP FOREIGN KEY ").append(foreignKey);
+            currentSession().createSQLQuery(sb.toString()).executeUpdate();
+        }
+    }
+    
+    /**
+     * Issues: enhancement
+     * Date:   26.08.2015
+     */
+    public void patchInvalidForeinKeys() {
+        dropOldForeignKeys("boxed_set_ids");
+        dropOldForeignKeys("playerinfo_playerpath");
+        dropOldForeignKeys("mediafile_videodata");
+        
+        dropOldForeignKeys("season_ids");
+        dropOldForeignKeys("season_override");
+        dropOldForeignKeys("season_ratings");
+
+        dropOldForeignKeys("series_certifications");
+        dropOldForeignKeys("series_countries");
+        dropOldForeignKeys("series_genres");
+        dropOldForeignKeys("series_ids");
+        dropOldForeignKeys("series_override");
+        dropOldForeignKeys("series_ratings");
+        dropOldForeignKeys("series_studios");
+
+        dropOldForeignKeys("videodata_certifications");
+        dropOldForeignKeys("videodata_countries");
+        dropOldForeignKeys("videodata_genres");
+        dropOldForeignKeys("videodata_ids");
+        dropOldForeignKeys("videodata_override");
+        dropOldForeignKeys("videodata_ratings");
+        dropOldForeignKeys("videodata_studios");
+    }
+    
 }

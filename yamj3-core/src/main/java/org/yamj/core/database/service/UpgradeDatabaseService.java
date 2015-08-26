@@ -134,5 +134,13 @@ public class UpgradeDatabaseService {
         } catch (Exception ex) {
             LOG.warn("Failed upgrade 'patchWatched'", ex);
         }
-    }
+
+        // Issues: enhancement
+        // Date:   26.08.2015
+        try {
+            upgradeDatabaseDao.patchInvalidForeinKeys();
+        } catch (Exception ex) {
+            LOG.warn("Failed upgrade 'patchInvalidForeinKeys'", ex);
+        }
+}
 }

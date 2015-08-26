@@ -37,6 +37,7 @@ import org.yamj.core.hibernate.HibernateDao;
 @Repository("playerDao")
 public class PlayerDao extends HibernateDao {
 
+    @SuppressWarnings("resource")
     public List<PlayerInfo> getPlayerList() {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(PlayerInfo.class);

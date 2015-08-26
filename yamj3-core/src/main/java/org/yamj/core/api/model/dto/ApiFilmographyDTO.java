@@ -49,12 +49,8 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
         return type;
     }
 
-    public void setType(ParticipationType type) {
-        this.type = type;
-    }
-
-    public void setTypeString(String type) {
-        setType(ParticipationType.fromString(type));
+    public void setType(String type) {
+        this.type = ParticipationType.fromString(type);
     }
 
     public String getJob() {

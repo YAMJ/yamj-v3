@@ -53,7 +53,9 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
     private List<Artwork> artworks = new ArrayList<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "boxed_set_ids", joinColumns = @JoinColumn(name = "boxedset_id", foreignKey = @ForeignKey(name = "FK_BOXEDSET_SOURCEIDS")))
+    @CollectionTable(name = "boxed_set_ids",
+            joinColumns = @JoinColumn(name = "boxedset_id"), 
+            foreignKey = @ForeignKey(name = "FK_BOXEDSET_SOURCEIDS"))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)

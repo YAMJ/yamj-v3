@@ -76,21 +76,25 @@ public class Series extends AbstractMetadata {
     private Date trailerLastScanned;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "series_ids", joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIES_SOURCEIDS")))
+    @CollectionTable(name = "series_ids",
+            joinColumns = @JoinColumn(name = "series_id"), foreignKey = @ForeignKey(name = "FK_SERIES_SOURCEIDS"))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "series_ratings", joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIES_RATINGS")))
+    @CollectionTable(name = "series_ratings",
+            joinColumns = @JoinColumn(name = "series_id"), foreignKey = @ForeignKey(name = "FK_SERIES_RATINGS"))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "series_override", joinColumns = @JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIES_OVERRIDE")))
+    @CollectionTable(name = "series_override",
+            joinColumns = @JoinColumn(name = "series_id"), 
+            foreignKey = @ForeignKey(name = "FK_SERIES_OVERRIDE"))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
@@ -99,26 +103,34 @@ public class Series extends AbstractMetadata {
 
     @ManyToMany
     @JoinTable(name = "series_genres",
-            joinColumns = {@JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESGENRES_SERIES"))},
-            inverseJoinColumns = {@JoinColumn(name = "genre_id", foreignKey = @ForeignKey(name = "FK_SERIESGENRES_GENRE"))})
+            joinColumns = @JoinColumn(name = "series_id"),
+            foreignKey = @ForeignKey(name = "FK_SERIESGENRES_SERIES"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id"),
+            inverseForeignKey = @ForeignKey(name = "FK_SERIESGENRES_GENRE"))
     private Set<Genre> genres = new HashSet<>(0);
 
     @ManyToMany
     @JoinTable(name = "series_studios",
-            joinColumns = {@JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESSTUDIOS_SERIES"))},
-            inverseJoinColumns = {@JoinColumn(name = "studio_id", foreignKey = @ForeignKey(name = "FK_SERIESSTUDIOS_STUDIO"))})
+            joinColumns = @JoinColumn(name = "series_id"),
+            foreignKey = @ForeignKey(name = "FK_SERIESSTUDIOS_SERIES"),
+            inverseJoinColumns = @JoinColumn(name = "studio_id"),
+            inverseForeignKey = @ForeignKey(name = "FK_SERIESSTUDIOS_STUDIO"))
     private Set<Studio> studios = new HashSet<>(0);
 
     @ManyToMany
     @JoinTable(name = "series_countries",
-            joinColumns = {@JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESCOUNTRIES_SERIES"))},
-            inverseJoinColumns = {@JoinColumn(name = "country_id", foreignKey = @ForeignKey(name = "FK_SERIESCOUNTRIES_COUNTRY"))})
+            joinColumns = @JoinColumn(name = "series_id"),
+            foreignKey = @ForeignKey(name = "FK_SERIESCOUNTRIES_SERIES"),
+            inverseJoinColumns = @JoinColumn(name = "country_id"),
+            inverseForeignKey = @ForeignKey(name = "FK_SERIESCOUNTRIES_COUNTRY"))
     private Set<Country> countries = new HashSet<>(0);
 
     @ManyToMany
     @JoinTable(name = "series_certifications",
-            joinColumns = {@JoinColumn(name = "series_id", foreignKey = @ForeignKey(name = "FK_SERIESCERTS_SERIES"))},
-            inverseJoinColumns = {@JoinColumn(name = "cert_id", foreignKey = @ForeignKey(name = "FK_SERIESCERTS_CERTIFICATION"))})
+            joinColumns = @JoinColumn(name = "series_id"), 
+            foreignKey = @ForeignKey(name = "FK_SERIESCERTS_SERIES"),
+            inverseJoinColumns = @JoinColumn(name = "cert_id"),
+            inverseForeignKey = @ForeignKey(name = "FK_SERIESCERTS_CERTIFICATION"))
     private Set<Certification> certifications = new HashSet<>(0);
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "series")

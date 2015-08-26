@@ -41,12 +41,13 @@ import org.yamj.core.hibernate.HibernateDao;
 public class ArtworkDao extends HibernateDao {
 
     public ArtworkProfile getArtworkProfile(String profileName, ArtworkType artworkType) {
-        return (ArtworkProfile) currentSession().byNaturalId(ArtworkProfile.class)
+        return currentSession().byNaturalId(ArtworkProfile.class)
                 .using("profileName", profileName)
                 .using("artworkType", artworkType)
                 .load();
     }
 
+    @SuppressWarnings("resource")
     public List<ArtworkProfile> getPreProcessArtworkProfiles(ArtworkType artworkType, MetaDataType metaDataType) {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(ArtworkProfile.class);

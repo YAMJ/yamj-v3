@@ -58,14 +58,18 @@ public class ApiDao extends HibernateDao {
     private static final String SERIES_YEAR = "seriesYear";
     private static final String VIDEO_YEAR = "videoYear";
     private static final String ORIGINAL_TITLE = "originalTitle";
+    private static final String SORT_TITLE = "sortTitle";
     private static final String CACHE_FILENAME = "cacheFilename";
     private static final String CACHE_DIR = "cacheDir";
     private static final String WATCHED = "watched";
-    private static final String TYPE_STRING = "typeString";
+    private static final String VIDEO_TYPE = "videoType";               
+    private static final String NAME = "name";
+    private static final String TYPE = "type";
+    
     // SQL
     private static final String SQL_UNION = " UNION ";
     private static final String SQL_UNION_ALL = " UNION ALL ";
-    private static final String SQL_AS_VIDEO_TYPE_STRING = "' AS videoTypeString";
+    private static final String SQL_AS_VIDEO_TYPE = "' AS videoType";
     private static final String SQL_WHERE_1_EQ_1 = " WHERE 1=1";
     private static final String SQL_COMMA_SPACE_QUOTE = ", '";
     private static final String SQL_ARTWORK_TYPE_IN_ARTWORKLIST = " AND a.artwork_type IN (:artworklist) ";
@@ -84,13 +88,15 @@ public class ApiDao extends HibernateDao {
 
         SqlScalars sqlScalars = new SqlScalars(generateSqlForVideoList(params));
         sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar("videoTypeString", StringType.INSTANCE);
+        sqlScalars.addScalar(VIDEO_TYPE, StringType.INSTANCE);                      
         sqlScalars.addScalar(TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(ORIGINAL_TITLE, StringType.INSTANCE);
+        sqlScalars.addScalar(SORT_TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(VIDEO_YEAR, IntegerType.INSTANCE);
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON, LongType.INSTANCE);
+        sqlScalars.addScalar(EPISODE, LongType.INSTANCE);
         sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
 
         if (params.includeNewest() || params.excludeNewest()) {
@@ -278,9 +284,9 @@ public class ApiDao extends HibernateDao {
 
         sbSQL.append("SELECT vd.id");
         if (isMovie) {
-            sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.MOVIE).append(SQL_AS_VIDEO_TYPE_STRING);
+            sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.MOVIE).append(SQL_AS_VIDEO_TYPE);
         } else {
-            sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.EPISODE).append(SQL_AS_VIDEO_TYPE_STRING);
+            sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.EPISODE).append(SQL_AS_VIDEO_TYPE);
         }
         sbSQL.append(", vd.title");
         sbSQL.append(", vd.title_original AS originalTitle");
@@ -622,7 +628,7 @@ public class ApiDao extends HibernateDao {
         StringBuilder sbSQL = new StringBuilder();
 
         sbSQL.append("SELECT ser.id");
-        sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.SERIES).append(SQL_AS_VIDEO_TYPE_STRING);
+        sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.SERIES).append(SQL_AS_VIDEO_TYPE);
         sbSQL.append(", ser.title");
         sbSQL.append(", ser.title_original AS originalTitle");
         sbSQL.append(", ser.title_sort AS sortTitle");
@@ -917,7 +923,7 @@ public class ApiDao extends HibernateDao {
         StringBuilder sbSQL = new StringBuilder();
 
         sbSQL.append("SELECT sea.id");
-        sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.SEASON).append(SQL_AS_VIDEO_TYPE_STRING);
+        sbSQL.append(SQL_COMMA_SPACE_QUOTE).append(MetaDataType.SEASON).append(SQL_AS_VIDEO_TYPE);
         sbSQL.append(", sea.title");
         sbSQL.append(", sea.title_original AS originalTitle");
         sbSQL.append(", sea.title_sort AS sortTitle");
@@ -1215,7 +1221,7 @@ public class ApiDao extends HibernateDao {
             boolean hasEpisode = CollectionUtils.isNotEmpty(ids.get(MetaDataType.EPISODE));
 
             if (hasMovie) {
-                sqlScalars.addToSql("SELECT 'MOVIE' as sourceString, v.id as sourceId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
+                sqlScalars.addToSql("SELECT 'MOVIE' as source, v.id, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkType, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
                 sqlScalars.addToSql(" FROM videodata v, artwork a");
                 sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
                 sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
@@ -1230,7 +1236,7 @@ public class ApiDao extends HibernateDao {
             }
 
             if (hasSeries) {
-                sqlScalars.addToSql(" SELECT 'SERIES' as sourceString, s.id as sourceId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
+                sqlScalars.addToSql(" SELECT 'SERIES' as source, s.id, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkType, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
                 sqlScalars.addToSql(" FROM series s, artwork a");
                 sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
                 sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
@@ -1244,7 +1250,7 @@ public class ApiDao extends HibernateDao {
             }
 
             if (hasSeason) {
-                sqlScalars.addToSql(" SELECT 'SEASON' as sourceString, s.id as sourceId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
+                sqlScalars.addToSql(" SELECT 'SEASON' as source, s.id as sourceId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkType, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
                 sqlScalars.addToSql(" FROM season s, artwork a");
                 sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
                 sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
@@ -1258,7 +1264,7 @@ public class ApiDao extends HibernateDao {
             }
 
             if (hasEpisode) {
-                sqlScalars.addToSql("SELECT 'EPISODE' as sourceString, v.id as sourceId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkTypeString, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
+                sqlScalars.addToSql("SELECT 'EPISODE' as source, v.id as sourceId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkType, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
                 sqlScalars.addToSql(" FROM videodata v, artwork a");
                 sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
                 sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
@@ -1268,12 +1274,12 @@ public class ApiDao extends HibernateDao {
                 sqlScalars.addToSql(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
             }
 
-            sqlScalars.addScalar("sourceString", StringType.INSTANCE);
-            sqlScalars.addScalar("sourceId", LongType.INSTANCE);
+            sqlScalars.addScalar(ID, LongType.INSTANCE);
+            sqlScalars.addScalar("source", StringType.INSTANCE);
             sqlScalars.addScalar("artworkId", LongType.INSTANCE);
             sqlScalars.addScalar("locatedId", LongType.INSTANCE);
             sqlScalars.addScalar("generatedId", LongType.INSTANCE);
-            sqlScalars.addScalar("artworkTypeString", StringType.INSTANCE);
+            sqlScalars.addScalar("artworkType", StringType.INSTANCE);
             sqlScalars.addScalar(CACHE_DIR, StringType.INSTANCE);
             sqlScalars.addScalar(CACHE_FILENAME, StringType.INSTANCE);
 
@@ -1378,7 +1384,7 @@ public class ApiDao extends HibernateDao {
         StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("SELECT DISTINCT '");
         sbSQL.append(ParticipationType.MOVIE.name());
-        sbSQL.append("' as typeString, c1.job as job, c1.role as role,");
+        sbSQL.append("' as type, c1.job as job, c1.role as role,");
         sbSQL.append("v1.title as title, v1.title_original as originalTitle, v1.publication_year as year, null as yearEnd,");
         sbSQL.append("v1.release_date as releaseDate, v1.release_country_code as releaseCountryCode,");
         sbSQL.append("v1.id as videoDataId, null as seriesId ");
@@ -1394,7 +1400,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append("UNION ");
         sbSQL.append("SELECT DISTINCT '");
         sbSQL.append(ParticipationType.SERIES.name());
-        sbSQL.append("' as typeString, c2.job as job, c2.role as role,");
+        sbSQL.append("' as type, c2.job as job, c2.role as role,");
         sbSQL.append("ser.title as title, ser.title_original as originalTitle, ser.start_year as year, ser.end_year as yearEnd,");
         sbSQL.append("null as releaseDate, null as releaseCountryCode,");
         sbSQL.append("null as videoDataId, ser.id as seriesId ");
@@ -1417,8 +1423,8 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("title ");
             sbSQL.append(sortDir);
             sbSQL.append(", ");
-        } else if ("type".equalsIgnoreCase(options.getSortby())) {
-            sbSQL.append("typeString ");
+        } else if (TYPE.equalsIgnoreCase(options.getSortby())) {
+            sbSQL.append("type ");
             sbSQL.append(sortDir);
             sbSQL.append(", ");
         } else if ("job".equalsIgnoreCase(options.getSortby())) {
@@ -1439,7 +1445,7 @@ public class ApiDao extends HibernateDao {
 
     private List<ApiFilmographyDTO> getPersonFilmographyScanned(long id, OptionsId options) {
         StringBuilder sbSQL = new StringBuilder();
-        sbSQL.append("SELECT DISTINCT p.participation_type as typeString, p.job as job, p.role as role,");
+        sbSQL.append("SELECT DISTINCT p.participation_type as type, p.job as job, p.role as role,");
         sbSQL.append("p.title as title, p.title_original as originalTitle, p.year as year,p.year_end as yearEnd,");
         sbSQL.append("p.release_date as releaseDate, p.release_country_code as releaseCountryCode,");
         sbSQL.append("movie.id as videoDataId, serids.series_id as seriesId ");
@@ -1471,7 +1477,7 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("p.title ");
             sbSQL.append(sortDir);
             sbSQL.append(", ");
-        } else if ("type".equalsIgnoreCase(options.getSortby())) {
+        } else if (TYPE.equalsIgnoreCase(options.getSortby())) {
             sbSQL.append("p.participation_type ");
             sbSQL.append(sortDir);
             sbSQL.append(", ");
@@ -1492,7 +1498,7 @@ public class ApiDao extends HibernateDao {
     }
 
     public List<ApiFilmographyDTO> retrieveFilmography(long id, SqlScalars sqlScalars) {
-        sqlScalars.addScalar(TYPE_STRING, StringType.INSTANCE);
+        sqlScalars.addScalar(TYPE, StringType.INSTANCE);
         sqlScalars.addScalar("job", StringType.INSTANCE);
         sqlScalars.addScalar("role", StringType.INSTANCE);
         sqlScalars.addScalar(TITLE, StringType.INSTANCE);
@@ -1590,7 +1596,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addParameter(ID, options.getId());
 
         sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar(NAME, StringType.INSTANCE);
         sqlScalars.addScalar("firstName", StringType.INSTANCE);
         sqlScalars.addScalar("lastName", StringType.INSTANCE);
         sqlScalars.addScalar("birthDay", DateType.INSTANCE);
@@ -1651,7 +1657,7 @@ public class ApiDao extends HibernateDao {
         }
 
         sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar(NAME, StringType.INSTANCE);
         sqlScalars.addScalar("firstName", StringType.INSTANCE);
         sqlScalars.addScalar("lastName", StringType.INSTANCE);
         sqlScalars.addScalar("birthDay", DateType.INSTANCE);
@@ -1689,7 +1695,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql(" a.season_id AS seasonId,");
         sqlScalars.addToSql(" a.series_id AS seriesId,");
         sqlScalars.addToSql(" a.videodata_id AS videodataId,");
-        sqlScalars.addToSql(" a.artwork_type AS artworkTypeString,");
+        sqlScalars.addToSql(" a.artwork_type AS artworkType,");
         sqlScalars.addToSql(" ag.cache_filename AS cacheFilename,");
         sqlScalars.addToSql(" ag.cache_dir AS cacheDir");
         sqlScalars.addToSql(" FROM artwork a");
@@ -1741,7 +1747,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(SEASON_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar("videodataId", LongType.INSTANCE);
-        sqlScalars.addScalar("artworkTypeString", StringType.INSTANCE);
+        sqlScalars.addScalar("artworkType", StringType.INSTANCE);
         sqlScalars.addScalar(CACHE_DIR, StringType.INSTANCE);
         sqlScalars.addScalar(CACHE_FILENAME, StringType.INSTANCE);
 
@@ -1930,16 +1936,18 @@ public class ApiDao extends HibernateDao {
         LOG.trace("SQL for {}-{}: {}", type, params.getId(), sql);
 
         SqlScalars sqlScalars = new SqlScalars(sql);
-
         sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar("videoTypeString", StringType.INSTANCE);
+        sqlScalars.addScalar(VIDEO_TYPE, StringType.INSTANCE);
         sqlScalars.addScalar(TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(ORIGINAL_TITLE, StringType.INSTANCE);
+        sqlScalars.addScalar(SORT_TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(VIDEO_YEAR, IntegerType.INSTANCE);
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON_ID, LongType.INSTANCE);
         sqlScalars.addScalar(SEASON, LongType.INSTANCE);
+        sqlScalars.addScalar(EPISODE, LongType.INSTANCE);
         sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
+
         // add Scalars for additional data item columns
         DataItemTools.addDataItemScalars(sqlScalars, params.getDataItems());
         // add additional parameters
@@ -2244,7 +2252,7 @@ public class ApiDao extends HibernateDao {
         }
         sqlScalars.addToSql("ORDER BY name");
 
-        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar(NAME, StringType.INSTANCE);
         sqlScalars.addParameter(ID, id);
 
         return executeQueryWithTransform(ApiGenreDTO.class, sqlScalars, null);
@@ -2273,7 +2281,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("ORDER BY name");
 
         sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar(NAME, StringType.INSTANCE);
         sqlScalars.addParameter(ID, id);
 
         return executeQueryWithTransform(Studio.class, sqlScalars, null);
@@ -2453,7 +2461,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("p.death_day AS deathDay,");
         sqlScalars.addToSql("p.death_place AS deathPlace,");
         sqlScalars.addToSql("c.role as role,");
-        sqlScalars.addToSql("c.job as jobTypeAsString ");
+        sqlScalars.addToSql("c.job as jobType ");
         sqlScalars.addToSql("FROM person p ");
 
         if (type == MetaDataType.SERIES) {
@@ -2475,7 +2483,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("ORDER BY c.ordering");
 
         sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar(NAME, StringType.INSTANCE);
         sqlScalars.addScalar("firstName", StringType.INSTANCE);
         sqlScalars.addScalar("lastName", StringType.INSTANCE);
         sqlScalars.addScalar("birthDay", DateType.INSTANCE);
@@ -2484,7 +2492,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("deathDay", DateType.INSTANCE);
         sqlScalars.addScalar("deathPlace", StringType.INSTANCE);
         sqlScalars.addScalar("role", StringType.INSTANCE);
-        sqlScalars.addScalar("jobTypeAsString", StringType.INSTANCE);
+        sqlScalars.addScalar("jobType", StringType.INSTANCE);
         sqlScalars.addParameter(ID, id);
 
         return executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, null);
@@ -2520,9 +2528,9 @@ public class ApiDao extends HibernateDao {
         LOG.trace("Artwork required for {} ID {} is {}", type, id, artworkRequired);
 
         StringBuilder sbSQL = new StringBuilder();
-        sbSQL.append("SELECT '").append(type.toString()).append("' AS sourceString,");
-        sbSQL.append(" v.id AS sourceId, a.id AS artworkId, al.id AS locatedId, ag.id AS generatedId,");
-        sbSQL.append(" a.artwork_type AS artworkTypeString, ag.cache_dir AS cacheDir, ag.cache_filename AS cacheFilename ");
+        sbSQL.append("SELECT '").append(type.toString()).append("' AS source,");
+        sbSQL.append(" v.id AS id, a.id AS artworkId, al.id AS locatedId, ag.id AS generatedId,");
+        sbSQL.append(" a.artwork_type AS artworkType, ag.cache_dir AS cacheDir, ag.cache_filename AS cacheFilename ");
         if (type == MetaDataType.MOVIE) {
             sbSQL.append("FROM videodata v ");
         } else if (type == MetaDataType.SERIES) {
@@ -2556,12 +2564,12 @@ public class ApiDao extends HibernateDao {
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
         LOG.info("Artwork SQL: {}", sqlScalars.getSql());
 
-        sqlScalars.addScalar("sourceString", StringType.INSTANCE);
-        sqlScalars.addScalar("sourceId", LongType.INSTANCE);
+        sqlScalars.addScalar(ID, LongType.INSTANCE);
+        sqlScalars.addScalar("source", StringType.INSTANCE);
         sqlScalars.addScalar("artworkId", LongType.INSTANCE);
         sqlScalars.addScalar("locatedId", LongType.INSTANCE);
         sqlScalars.addScalar("generatedId", LongType.INSTANCE);
-        sqlScalars.addScalar("artworkTypeString", StringType.INSTANCE);
+        sqlScalars.addScalar("artworkType", StringType.INSTANCE);
         sqlScalars.addScalar(CACHE_DIR, StringType.INSTANCE);
         sqlScalars.addScalar(CACHE_FILENAME, StringType.INSTANCE);
 
@@ -2713,7 +2721,7 @@ public class ApiDao extends HibernateDao {
             return null;
         }
 
-        StringBuilder sql = new StringBuilder("SELECT '").append(type).append("' as typeString, ");
+        StringBuilder sql = new StringBuilder("SELECT '").append(type).append("' as type, ");
         sql.append("count(*) as count, ");
         sql.append("MAX(create_timestamp) as createTimestamp, ");
         sql.append("MAX(update_timestamp) as updateTimestamp, ");
@@ -2725,7 +2733,7 @@ public class ApiDao extends HibernateDao {
 
         SqlScalars sqlScalars = new SqlScalars(sql);
 
-        sqlScalars.addScalar("typeString", StringType.INSTANCE);
+        sqlScalars.addScalar(TYPE, StringType.INSTANCE);
         sqlScalars.addScalar("count", LongType.INSTANCE);
         sqlScalars.addScalar("createTimestamp", TimestampType.INSTANCE);
         sqlScalars.addScalar("updateTimestamp", TimestampType.INSTANCE);
@@ -2919,7 +2927,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addParameter(ID, id);
         
         sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar(NAME, StringType.INSTANCE);
         sqlScalars.addScalar("memberCount", IntegerType.INSTANCE);
 
         return executeQueryWithTransform(ApiBoxedSetDTO.class, sqlScalars, null);
@@ -2965,7 +2973,7 @@ public class ApiDao extends HibernateDao {
             // get members
             sqlScalars = new SqlScalars();
             sqlScalars.addToSql("SELECT vd.id");
-            sqlScalars.addToSql(SQL_COMMA_SPACE_QUOTE + MetaDataType.MOVIE + SQL_AS_VIDEO_TYPE_STRING);
+            sqlScalars.addToSql(SQL_COMMA_SPACE_QUOTE + MetaDataType.MOVIE + SQL_AS_VIDEO_TYPE);
             sqlScalars.addToSql(", bo1.ordering, vd.title, vd.title_original AS originalTitle, vd.publication_year AS year,vd.release_date AS releaseDate,vd.watched");
             sqlScalars.addToSql(DataItemTools.addSqlDataItems(options.splitDataItems(), "vd").toString());
             sqlScalars.addToSql("FROM boxed_set_order bo1");
@@ -2973,7 +2981,7 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("WHERE bo1.boxedset_id=" + options.getId());
             sqlScalars.addToSql(SQL_UNION);
             sqlScalars.addToSql("SELECT ser.id");
-            sqlScalars.addToSql(SQL_COMMA_SPACE_QUOTE + MetaDataType.SERIES + SQL_AS_VIDEO_TYPE_STRING);
+            sqlScalars.addToSql(SQL_COMMA_SPACE_QUOTE + MetaDataType.SERIES + SQL_AS_VIDEO_TYPE);
             sqlScalars.addToSql(", bo2.ordering, ser.title, ser.title_original AS originalTitle, ser.start_year AS year,null as releaseDate,");
             sqlScalars.addToSql("(SELECT min(vid.watched) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched");
             sqlScalars.addToSql(DataItemTools.addSqlDataItems(options.splitDataItems(), "ser").toString());
@@ -2983,7 +2991,7 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql(options.getSortString());
 
             sqlScalars.addScalar(ID, LongType.INSTANCE);
-            sqlScalars.addScalar("videoTypeString", StringType.INSTANCE);
+            sqlScalars.addScalar(VIDEO_TYPE, StringType.INSTANCE);
             sqlScalars.addScalar("ordering", IntegerType.INSTANCE);
             sqlScalars.addScalar(TITLE, StringType.INSTANCE);
             sqlScalars.addScalar(ORIGINAL_TITLE, StringType.INSTANCE);
@@ -3046,7 +3054,7 @@ public class ApiDao extends HibernateDao {
         }
 
         sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar(NAME, StringType.INSTANCE);
         sqlScalars.addScalar("memberCount", IntegerType.INSTANCE);
         sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
 
@@ -3117,10 +3125,10 @@ public class ApiDao extends HibernateDao {
             return Collections.emptyList();
         }
 
-        sbSQL.append(options.getSortString("name"));
+        sbSQL.append(options.getSortString(NAME));
 
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
-        sqlScalars.addScalar("name", StringType.INSTANCE);
+        sqlScalars.addScalar(NAME, StringType.INSTANCE);
 
         return executeQueryWithTransform(ApiNameDTO.class, sqlScalars, wrapper);
     }

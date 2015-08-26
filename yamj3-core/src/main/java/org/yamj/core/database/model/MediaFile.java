@@ -121,9 +121,11 @@ public class MediaFile extends AbstractAuditable implements Serializable {
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "mediafile_videodata",
-            joinColumns = {@JoinColumn(name = "mediafile_id", foreignKey = @ForeignKey(name = "FK_REL_MEDIAFILE_VIDEODATA"))},
-            inverseJoinColumns = {@JoinColumn(name = "videodata_id", foreignKey = @ForeignKey(name = "FK_REL_VIDEODATA_MEDIAFILE"))},
-            uniqueConstraints = {@UniqueConstraint(name = "UIX_REL_MEDIAFILE", columnNames = {"mediafile_id", "videodata_id"})})
+            joinColumns = @JoinColumn(name = "mediafile_id"),
+            foreignKey = @ForeignKey(name = "FK_REL_MEDIAFILE_VIDEODATA"),
+            inverseJoinColumns = @JoinColumn(name = "videodata_id"),
+            inverseForeignKey = @ForeignKey(name = "FK_REL_VIDEODATA_MEDIAFILE"),
+            uniqueConstraints = @UniqueConstraint(name = "UIX_REL_MEDIAFILE", columnNames = {"mediafile_id", "videodata_id"}))
             
     private Set<VideoData> videoDatas = new HashSet<>(0);
 

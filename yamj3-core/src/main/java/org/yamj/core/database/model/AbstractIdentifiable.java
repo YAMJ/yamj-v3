@@ -34,7 +34,7 @@ import org.yamj.core.hibernate.Identifiable;
 public abstract class AbstractIdentifiable implements Identifiable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
 

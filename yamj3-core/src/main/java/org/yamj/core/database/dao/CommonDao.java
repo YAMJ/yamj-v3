@@ -465,7 +465,7 @@ public class CommonDao extends HibernateDao {
 
     @Cacheable(value=CachingNames.DB_AWARD, unless="#result==null")
     public Award getAward(String event, String category, String source) {
-        return (Award) currentSession()
+        return currentSession()
                 .byNaturalId(Award.class)
                 .using("event", event)
                 .using("category", category)

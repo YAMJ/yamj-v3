@@ -42,6 +42,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private MetaDataType videoType;
     private String title;
     private String originalTitle;
+    private String sortTitle;
     private Integer videoYear;
     private String outline;
     private String plot;
@@ -51,7 +52,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private Long seriesId;
     private Long seasonId;
     private Long season;
-    private Long episode;
+    private Long episode = -1L;
     private Boolean watched;
     private Date newest;
     private String status;
@@ -79,6 +80,10 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public String getOriginalTitle() {
         return originalTitle;
+    }
+
+    public String getSortTitle() {
+        return sortTitle;
     }
 
     public Integer getVideoYear() {
@@ -219,11 +224,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Setter Methods">
-    public void setVideoType(MetaDataType videoType) {
-        this.videoType = videoType;
-    }
-
-    public void setVideoTypeString(String videoType) {
+    public void setVideoType(String videoType) {
         this.videoType = MetaDataType.fromString(videoType);
     }
 
@@ -233,6 +234,10 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
     public void setOriginalTitle(String originalTitle) {
         this.originalTitle = originalTitle;
+    }
+
+    public void setSortTitle(String sortTitle) {
+        this.sortTitle = sortTitle;
     }
 
     public void setVideoYear(Integer videoYear) {

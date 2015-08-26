@@ -57,9 +57,8 @@ public abstract class HibernateDao {
      * Flush and clear the session.
      */
     public void flushAndClear() {
-        Session session = currentSession();
-        session.flush();
-        session.clear();
+        currentSession().flush();
+        currentSession().clear();
     }
 
     /**
@@ -88,9 +87,8 @@ public abstract class HibernateDao {
     @SuppressWarnings("rawtypes")
     public void storeAll(final Collection entities) {
         if (entities != null && !entities.isEmpty()) {
-            Session session = currentSession();
             for (Object entity : entities) {
-                session.saveOrUpdate(entity);
+                currentSession().saveOrUpdate(entity);
             }
         }
     }
@@ -103,9 +101,8 @@ public abstract class HibernateDao {
     @SuppressWarnings("rawtypes")
     public void deleteAll(final Collection entities) {
         if (entities != null && !entities.isEmpty()) {
-            Session session = currentSession();
             for (Object entity : entities) {
-                session.delete(entity);
+                currentSession().delete(entity);
             }
         }
     }
@@ -145,9 +142,8 @@ public abstract class HibernateDao {
      * @param id
      * @return
      */
-    @SuppressWarnings("unchecked")
     public <T> T getById(Class<T> entityClass, Serializable id) {
-        return (T) currentSession().get(entityClass, id);
+        return currentSession().get(entityClass, id);
     }
 
     /**
@@ -159,9 +155,8 @@ public abstract class HibernateDao {
      * @param name
      * @return
      */
-    @SuppressWarnings("unchecked")
     public <T> T getByNaturalId(Class<? extends T> entityClass, String field, String name) {
-        return (T) currentSession().byNaturalId(entityClass).using(field, name).load();
+        return currentSession().byNaturalId(entityClass).using(field, name).load();
     }
 
     /**

@@ -98,20 +98,8 @@ public class ApiArtworkDTO extends AbstractApiIdentifiableDTO {
         return filename;
     }
 
-    public void setSource(MetaDataType source) {
-        this.source = source;
-    }
-
-    public void setSourceString(String source) {
+    public void setSource(String source) {
         this.source = MetaDataType.fromString(source);
-    }
-
-    public void setSourceId(Long sourceId) {
-        if (sourceId == null) {
-            setId(-1L);
-        } else {
-            setId(sourceId);
-        }
     }
 
     public void setArtworkId(Long artworkId) {
@@ -126,15 +114,11 @@ public class ApiArtworkDTO extends AbstractApiIdentifiableDTO {
         this.generatedId = generatedId;
     }
 
-    public void setArtworkType(ArtworkType artworkType) {
-        this.artworkType = artworkType;
-        if (artworkType == ArtworkType.VIDEOIMAGE) {
-            setSource(MetaDataType.EPISODE);
+    public void setArtworkType(String artworkType) {
+        this.artworkType = ArtworkType.fromString(artworkType);
+        if (this.artworkType == ArtworkType.VIDEOIMAGE) {
+            this.source = MetaDataType.EPISODE;
         }
-    }
-
-    public void setArtworkTypeString(String artworkType) {
-        setArtworkType(ArtworkType.fromString(artworkType));
     }
 
     public void setCacheDir(String cacheDir) {

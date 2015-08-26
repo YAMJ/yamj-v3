@@ -23,7 +23,7 @@
 package org.yamj.core.hibernate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
+import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 
 /**
@@ -39,9 +39,9 @@ public class HibernateAwareObjectMapper extends ObjectMapper {
 
     public HibernateAwareObjectMapper() {
         // https://github.com/FasterXML/jackson-module-hibernate
-        Hibernate4Module hm = new Hibernate4Module();
+        Hibernate5Module hm = new Hibernate5Module();
         registerModule(hm);
-        hm.configure(Hibernate4Module.Feature.FORCE_LAZY_LOADING, true);
+        hm.configure(Hibernate5Module.Feature.FORCE_LAZY_LOADING, true);
 
         // https://github.com/FasterXML/jackson-datatype-joda
         registerModule(new JodaModule());

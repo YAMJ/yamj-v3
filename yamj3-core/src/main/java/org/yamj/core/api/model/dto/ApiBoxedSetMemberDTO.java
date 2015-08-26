@@ -49,11 +49,7 @@ public class ApiBoxedSetMemberDTO extends AbstractApiIdentifiableDTO {
         return videoType;
     }
 
-    public void setVideoType(MetaDataType videoType) {
-        this.videoType = videoType;
-    }
-
-    public void setVideoTypeString(String videoType) {
+    public void setVideoType(String videoType) {
         this.videoType = MetaDataType.fromString(videoType);
     }
 

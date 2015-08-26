@@ -47,14 +47,14 @@ import org.yamj.core.service.file.FileTools;
 public class StagingDao extends HibernateDao {
 
     public Library getLibrary(String client, String playerPath) {
-        return (Library) currentSession().byNaturalId(Library.class)
+        return currentSession().byNaturalId(Library.class)
                 .using("client", client)
                 .using("playerPath", playerPath)
                 .load();
     }
 
     public StageDirectory getStageDirectory(String directoryPath, Library library) {
-        return (StageDirectory) currentSession().byNaturalId(StageDirectory.class)
+        return currentSession().byNaturalId(StageDirectory.class)
                 .using("directoryPath", directoryPath)
                 .using("library", library)
                 .load();
@@ -66,7 +66,7 @@ public class StagingDao extends HibernateDao {
     }
 
     public StageFile getStageFile(String baseName, String extension, StageDirectory stageDirectory) {
-        return (StageFile) currentSession().byNaturalId(StageFile.class)
+        return currentSession().byNaturalId(StageFile.class)
                 .using("baseName", baseName)
                 .using("extension", extension)
                 .using("stageDirectory", stageDirectory)

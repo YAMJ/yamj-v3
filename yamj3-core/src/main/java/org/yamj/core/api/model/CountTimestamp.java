@@ -58,10 +58,6 @@ public class CountTimestamp {
         this.type = MetaDataType.fromString(type);
     }
 
-    public void setType(MetaDataType type) {
-        this.type = type;
-    }
-
     public Long getCount() {
         return count;
     }

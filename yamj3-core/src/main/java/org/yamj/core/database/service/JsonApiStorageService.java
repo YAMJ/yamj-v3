@@ -316,7 +316,7 @@ public class JsonApiStorageService {
         PlayerInfo playerInfo = this.getPlayerInfo(playerId);
         if (playerInfo == null) return false;
 
-        ListIterator<PlayerPath> iter = playerInfo.getPaths().listIterator();
+        Iterator<PlayerPath> iter = playerInfo.getPaths().iterator();
         while (iter.hasNext()) {
             PlayerPath path = iter.next();
             if (path.getId() == pathId) {

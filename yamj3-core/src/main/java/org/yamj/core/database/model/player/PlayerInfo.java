@@ -23,8 +23,8 @@
 package org.yamj.core.database.model.player;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.*;
 import org.hibernate.annotations.NaturalId;
 import org.yamj.core.database.model.AbstractIdentifiable;
@@ -47,11 +47,13 @@ public class PlayerInfo extends AbstractIdentifiable implements Serializable {
     @Column(name = "ip_address", nullable = false, length = 15)
     private String ipAddress;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "playerinfo_playerpath",
-            joinColumns = {@JoinColumn(name = "player_info_id", foreignKey = @ForeignKey(name = "FK_PLAYERPATH_INFO"))},
-            inverseJoinColumns = {@JoinColumn(name = "player_path_id", foreignKey = @ForeignKey(name = "FK_PLAYERPATH_PATH"))})
-    private List<PlayerPath> paths = new ArrayList<>();
+            joinColumns = @JoinColumn(name = "player_info_id"),
+            foreignKey = @ForeignKey(name = "FK_PLAYERPATH_INFO"),
+            inverseJoinColumns = @JoinColumn(name = "player_path_id"), 
+            inverseForeignKey = @ForeignKey(name = "FK_PLAYERPATH_PATH"))
+    private Set<PlayerPath> paths = new HashSet<>(0);
 
     public String getName() {
         return name;
@@ -77,11 +79,11 @@ public class PlayerInfo extends AbstractIdentifiable implements Serializable {
         this.ipAddress = ipAddress;
     }
 
-    public List<PlayerPath> getPaths() {
+    public Set<PlayerPath> getPaths() {
         return paths;
     }
 
-    public void setPaths(List<PlayerPath> paths) {
+    public void setPaths(Set<PlayerPath> paths) {
         this.paths = paths;
     }
 

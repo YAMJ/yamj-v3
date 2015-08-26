@@ -64,9 +64,10 @@ public class ConfigDao extends HibernateDao {
         }
     }
 
+    @SuppressWarnings("resource")
     public void storeConfig(String key, String value, boolean updateAllowed) {
         Session session = currentSession();
-        Configuration config = (Configuration) session.byId(Configuration.class).load(key);
+        Configuration config = session.byId(Configuration.class).load(key);
         if (config == null) {
             LOG.debug("Store new configuration: key='{}', value='{}'", key, value);
             config = new Configuration();
