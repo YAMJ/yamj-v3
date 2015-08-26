@@ -873,6 +873,9 @@ public class UpgradeDatabaseDao extends HibernateDao {
             if (StringUtils.startsWithIgnoreCase(foreignKey, "FK_REL")) {
                 continue;
             }
+            if (StringUtils.startsWithIgnoreCase(foreignKey, "FK_PERSON")) {
+                continue;
+            }
             StringBuilder sb = new StringBuilder();
             sb.append("ALTER TABLE ").append(table);
             sb.append(" DROP FOREIGN KEY ").append(foreignKey);
@@ -886,9 +889,12 @@ public class UpgradeDatabaseDao extends HibernateDao {
      */
     public void patchInvalidForeinKeys() {
         dropOldForeignKeys("boxed_set_ids");
-        dropOldForeignKeys("playerinfo_playerpath");
         dropOldForeignKeys("mediafile_videodata");
-        
+        dropOldForeignKeys("playerinfo_playerpath");
+
+        dropOldForeignKeys("person_ids");
+        dropOldForeignKeys("person_override");
+
         dropOldForeignKeys("season_ids");
         dropOldForeignKeys("season_override");
         dropOldForeignKeys("season_ratings");

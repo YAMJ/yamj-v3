@@ -85,14 +85,16 @@ public class Person extends AbstractScannable {
     private String skipScanApi;
     
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "person_ids", joinColumns = @JoinColumn(name = "person_id", foreignKey = @ForeignKey(name = "FK_PERSON_SOURCEIDS")))
+    @CollectionTable(name = "person_ids", 
+            joinColumns = @JoinColumn(name = "person_id"), foreignKey = @ForeignKey(name = "FK_PERSON_SOURCEIDS"))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 40)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "person_override", joinColumns = @JoinColumn(name = "person_id", foreignKey = @ForeignKey(name = "FK_PERSON_OVERRIDE")))
+    @CollectionTable(name = "person_override",
+            joinColumns = @JoinColumn(name = "person_id"), foreignKey = @ForeignKey(name = "FK_PERSON_OVERRIDE"))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
