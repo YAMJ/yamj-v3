@@ -115,24 +115,24 @@ public class VideoData extends AbstractMetadata {
     private Date trailerLastScanned;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "videodata_ids",
-            joinColumns = @JoinColumn(name = "videodata_id", foreignKey = @ForeignKey(name = "FK_VIDEODATA_SOURCEIDS")))
+    @CollectionTable(name = "videodata_ids",
+            joinColumns = @JoinColumn(name = "videodata_id"), foreignKey = @ForeignKey(name = "FK_VIDEODATA_SOURCEIDS"))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "sourcedb_id", length = 200, nullable = false)
     private Map<String, String> sourceDbIdMap = new HashMap<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "videodata_ratings",
-            joinColumns = @JoinColumn(name = "videodata_id", foreignKey = @ForeignKey(name = "FK_VIDEODATA_RATINGS")))
+    @CollectionTable(name = "videodata_ratings",
+            joinColumns = @JoinColumn(name = "videodata_id"), foreignKey = @ForeignKey(name = "FK_VIDEODATA_RATINGS"))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "sourcedb", length = 40)
     @Column(name = "rating", nullable = false)
     private Map<String, Integer> ratings = new HashMap<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @JoinTable(name = "videodata_override",
-            joinColumns = @JoinColumn(name = "videodata_id", foreignKey = @ForeignKey(name = "FK_VIDEODATA_OVERRIDE")))
+    @CollectionTable(name = "videodata_override",
+            joinColumns = @JoinColumn(name = "videodata_id"), foreignKey = @ForeignKey(name = "FK_VIDEODATA_OVERRIDE"))
     @Fetch(FetchMode.SELECT)
     @MapKeyColumn(name = "flag", length = 30)
     @MapKeyType(value = @Type(type = "overrideFlag"))
@@ -141,27 +141,34 @@ public class VideoData extends AbstractMetadata {
 
     @ManyToMany
     @JoinTable(name = "videodata_genres",
-            joinColumns = {@JoinColumn(name = "data_id", foreignKey = @ForeignKey(name = "FK_DATAGENRES_VIDEODATA"))},
-            inverseJoinColumns = {@JoinColumn(name = "genre_id", foreignKey = @ForeignKey(name = "FK_DATAGENRES_GENRE"))})
+            joinColumns = @JoinColumn(name = "data_id"),
+            foreignKey = @ForeignKey(name = "FK_DATAGENRES_VIDEODATA"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id"),
+            inverseForeignKey = @ForeignKey(name = "FK_DATAGENRES_GENRE"))
     private Set<Genre> genres = new HashSet<>(0);
 
     @ManyToMany
     @JoinTable(name = "videodata_studios",
-            joinColumns = {@JoinColumn(name = "data_id", foreignKey = @ForeignKey(name = "FK_DATASTUDIOS_VIDEODATA"))},
-            inverseJoinColumns = {@JoinColumn(name = "studio_id", foreignKey = @ForeignKey(name = "FK_DATASTUDIOS_STUDIO"))})
+            joinColumns = @JoinColumn(name = "data_id"),
+            foreignKey = @ForeignKey(name = "FK_DATASTUDIOS_VIDEODATA"),
+            inverseJoinColumns = @JoinColumn(name = "studio_id"),
+            inverseForeignKey = @ForeignKey(name = "FK_DATASTUDIOS_STUDIO"))
     private Set<Studio> studios = new HashSet<>(0);
 
     @ManyToMany
     @JoinTable(name = "videodata_countries",
-            joinColumns = {@JoinColumn(name = "data_id", foreignKey = @ForeignKey(name = "FK_DATACOUNTRIES_VIDEODATA"))},
-            inverseJoinColumns = {@JoinColumn(name = "country_id", foreignKey = @ForeignKey(name = "FK_DATACOUNTRIES_COUNTRY"))})
+            joinColumns = @JoinColumn(name = "data_id"),
+            foreignKey = @ForeignKey(name = "FK_DATACOUNTRIES_VIDEODATA"),
+            inverseJoinColumns = @JoinColumn(name = "country_id"),
+            inverseForeignKey = @ForeignKey(name = "FK_DATACOUNTRIES_COUNTRY"))
     private Set<Country> countries = new HashSet<>(0);
 
     @ManyToMany
     @JoinTable(name = "videodata_certifications",
-            joinColumns = {@JoinColumn(name = "data_id", foreignKey = @ForeignKey(name = "FK_DATACERTS_VIDEODATA"))},
-            inverseJoinColumns = {@JoinColumn(name = "cert_id", foreignKey = @ForeignKey(name = "FK_DATACERTS_CERTIFICATION"))})
-   
+            joinColumns = @JoinColumn(name = "data_id"),
+            foreignKey = @ForeignKey(name = "FK_DATACERTS_VIDEODATA"),
+            inverseJoinColumns = @JoinColumn(name = "cert_id"),
+            inverseForeignKey = @ForeignKey(name = "FK_DATACERTS_CERTIFICATION"))
     private Set<Certification> certifications = new HashSet<>(0);
 
     @ManyToOne(fetch = FetchType.LAZY)
