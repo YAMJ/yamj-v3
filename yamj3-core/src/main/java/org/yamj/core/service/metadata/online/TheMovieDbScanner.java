@@ -22,6 +22,7 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import com.omertron.themoviedbapi.model.collection.CollectionInfo;
 import com.omertron.themoviedbapi.model.credits.*;
 import com.omertron.themoviedbapi.model.media.MediaCreditList;
 import com.omertron.themoviedbapi.model.movie.*;
@@ -329,9 +330,9 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
 
         // store collection as boxed set
         if (this.configServiceWrapper.getBooleanProperty("themoviedb.include.collection", Boolean.FALSE)) {
-            com.omertron.themoviedbapi.model.collection.Collection collection = movieInfo.getBelongsToCollection();
-            if (collection != null && collection.getName() != null) {
-                videoData.addBoxedSetDTO(SCANNER_ID, collection.getName(), -1, String.valueOf(collection.getId()));
+            CollectionInfo collectionInfo = movieInfo.getBelongsToCollection();
+            if (collectionInfo != null && collectionInfo.getName() != null) {
+                videoData.addBoxedSetDTO(SCANNER_ID, collectionInfo.getName(), -1, Integer.toString(collectionInfo.getId()));
             }
         }
         
