@@ -238,10 +238,10 @@ public abstract class HibernateDao {
             return null;
         } else if (rowElement instanceof Date) {
             return (Date) rowElement;
-        } else {
-            // TODO invalid date
-            return null;
+        } else if (rowElement instanceof Timestamp) {
+            return (Date) rowElement;
         }
+        return null;
     }
 
     /**
@@ -255,10 +255,10 @@ public abstract class HibernateDao {
             return null;
         } else if (rowElement instanceof Timestamp) {
             return (Timestamp) rowElement;
-        } else {
-            // TODO invalid timestamp
-            return null;
+        } else if (rowElement instanceof Date) {
+            return new Timestamp(((Date)rowElement).getTime());
         }
+        return null;
     }
 
     /**
