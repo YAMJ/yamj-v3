@@ -64,6 +64,9 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     @Column(name = "role", length = 255)
     private String role;
 
+    @Column(name = "voice_role", nullable = false)
+    private boolean voiceRole = false;
+
     @Type(type = "participationType")
     @Column(name = "participation_type", nullable = false, length = 15)
     private ParticipationType participationType;
@@ -133,6 +136,14 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
         this.role = (role == null ? role : role.substring(0, Math.min(role.length(), 254)));
     }
 
+    public boolean isVoiceRole() {
+        return voiceRole;
+    }
+
+    public void setVoiceRole(boolean voiceRole) {
+        this.voiceRole = voiceRole;
+    }
+
     public ParticipationType getParticipationType() {
         return participationType;
     }
@@ -200,6 +211,7 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     // TRANSIENT METHODS
     public void merge(FilmParticipation newFilmo) {
         this.setRole(newFilmo.getRole());
+        this.setVoiceRole(newFilmo.isVoiceRole());
         this.setParticipationType(newFilmo.getParticipationType());
         this.setYear(newFilmo.getYear());
         this.setYearEnd(newFilmo.getYearEnd());

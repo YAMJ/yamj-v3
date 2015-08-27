@@ -377,9 +377,9 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
 
 	public void addCast(ApiPersonDTO newCast) {
         // Add a blank list if it doesn't already exist
-        if (!cast.containsKey(newCast.getJobType())) {
-            cast.put(newCast.getJobType(), new ArrayList<ApiPersonDTO>(1));
+        if (!cast.containsKey(newCast.getJob())) {
+            cast.put(newCast.getJob(), new ArrayList<ApiPersonDTO>(1));
         }
-        this.cast.get(newCast.getJobType()).add(newCast);
+        this.cast.get(newCast.getJob()).add(newCast);
     }
 }

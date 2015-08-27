@@ -36,6 +36,7 @@ import org.pojava.datetime.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.PropertyTools;
+import org.yamj.common.tools.StringTools;
 import org.yamj.core.database.model.AbstractMetadata;
 import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.database.model.VideoData;
@@ -629,5 +630,62 @@ public final class MetadataTools {
         if (pos >= 0) newBio = newBio.substring(0, pos);
         
         return newBio;
+    }
+
+    /**
+     * Determine from role if it is a voice role
+     *
+     * @param role
+     * @return
+     */
+    public static boolean isVoiceRole(final String role) {
+        int idx = StringUtils.indexOfIgnoreCase(role, "(voice");
+        return (idx != -1);
+    }
+
+    /**
+     * Remove unneeded text from the role
+     *
+     * @param role
+     * @return
+     */
+    public static String cleanRole(final String role) {
+        String newRole = StringUtils.trimToNull(role);
+        if (newRole == null) {
+            return null;
+        }
+    
+        // (voice)
+        int idx = StringUtils.indexOfIgnoreCase(newRole, "(voice");
+        if (idx > 0) {
+            newRole = newRole.substring(0, idx);
+        }
+        // (as ... = alternate name
+         idx = StringUtils.indexOfIgnoreCase(newRole, "(as ");
+        if (idx > 0) {
+            newRole = newRole.substring(0, idx);
+        }
+        // uncredited cast member
+        idx = StringUtils.indexOfIgnoreCase(newRole, "(uncredit");
+        if (idx > 0) {
+            newRole = newRole.substring(0, idx);
+        }
+        // season marker
+        idx = StringUtils.indexOfIgnoreCase(newRole, "(Season");
+        if (idx > 0) {
+            newRole = newRole.substring(0, idx);
+        }
+    
+        // double characters
+        idx = StringUtils.indexOf(newRole, "/");
+        if (idx > 0) {
+            List<String> characters = StringTools.splitList(newRole, "/");
+            newRole = StringUtils.join(characters.toArray(), " / ");
+        }
+        
+        newRole = fixScannedValue(newRole);
+        newRole = newRole.replaceAll("( )+", " ").trim();
+        
+        return newRole;
     }
 }

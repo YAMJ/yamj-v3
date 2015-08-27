@@ -22,7 +22,6 @@
  */
 package org.yamj.core.api.model.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.ArrayList;
@@ -46,14 +45,12 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     private String birthName;
     private String deathDay;
     private String deathPlace;
-    private String job;
     private String role;
+    private Boolean voiceRole;
+    private JobType job;
     private List<ApiArtworkDTO> artwork = new ArrayList<>(0);
     private List<ApiFilmographyDTO> filmography = new ArrayList<>(0);
     private List<ApiExternalIdDTO> externalIds = new ArrayList<>(0);
-    
-    @JsonIgnore
-    private JobType jobType;
 
     public String getBiography() {
         return biography;
@@ -127,12 +124,15 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
         this.deathPlace = deathPlace;
     }
     
-    public String getJob() {
+    public JobType getJob() {
         return job;
     }
 
     public void setJob(String job) {
-        this.job = job;
+        this.job = JobType.fromString(job);
+        if (JobType.ACTOR != this.job) {
+            this.voiceRole = null;
+        }
     }
 
     public String getRole() {
@@ -141,6 +141,16 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public Boolean getVoiceRole() {
+        return voiceRole;
+    }
+
+    public void setVoiceRole(Boolean voiceRole) {
+        if (this.job == null || this.job == JobType.ACTOR) {
+            this.voiceRole = voiceRole;
+        }
     }
 
     public List<ApiArtworkDTO> getArtwork() {
@@ -166,13 +176,5 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
 
     public void setExternalIds(List<ApiExternalIdDTO> externalIds) {
         this.externalIds = externalIds;
-    }
-
-    public JobType getJobType() {
-        return jobType;
-    }
-
-    public void setJobType(String job) {
-        this.jobType = JobType.fromString(job);
     }
 }

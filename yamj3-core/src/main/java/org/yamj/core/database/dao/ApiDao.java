@@ -65,6 +65,7 @@ public class ApiDao extends HibernateDao {
     private static final String VIDEO_TYPE = "videoType";               
     private static final String NAME = "name";
     private static final String TYPE = "type";
+    private static final String JOB = "job";
     
     // SQL
     private static final String SQL_UNION = " UNION ";
@@ -1384,8 +1385,8 @@ public class ApiDao extends HibernateDao {
         StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("SELECT DISTINCT '");
         sbSQL.append(ParticipationType.MOVIE.name());
-        sbSQL.append("' as type, c1.job as job, c1.role as role,");
-        sbSQL.append("v1.title as title, v1.title_original as originalTitle, v1.publication_year as year, null as yearEnd,");
+        sbSQL.append("' as type, c1.job as job, c1.role as role, c1.voice_role as voiceRole, ");
+        sbSQL.append("v1.title as title, v1.title_original as originalTitle, v1.publication_year as year, -1 as yearEnd,");
         sbSQL.append("v1.release_date as releaseDate, v1.release_country_code as releaseCountryCode,");
         sbSQL.append("v1.id as videoDataId, null as seriesId ");
 
@@ -1400,7 +1401,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append("UNION ");
         sbSQL.append("SELECT DISTINCT '");
         sbSQL.append(ParticipationType.SERIES.name());
-        sbSQL.append("' as type, c2.job as job, c2.role as role,");
+        sbSQL.append("' as type, c2.job as job, c2.role as role, c2.voice_role as voiceRole, ");
         sbSQL.append("ser.title as title, ser.title_original as originalTitle, ser.start_year as year, ser.end_year as yearEnd,");
         sbSQL.append("null as releaseDate, null as releaseCountryCode,");
         sbSQL.append("null as videoDataId, ser.id as seriesId ");
@@ -1419,7 +1420,7 @@ public class ApiDao extends HibernateDao {
         final String sortDir = ("DESC".equalsIgnoreCase(options.getSortdir()) ? "DESC" : "ASC");
 
         sbSQL.append("ORDER BY ");
-        if ("title".equalsIgnoreCase(options.getSortby())) {
+        if (TITLE.equalsIgnoreCase(options.getSortby())) {
             sbSQL.append("title ");
             sbSQL.append(sortDir);
             sbSQL.append(", ");
@@ -1427,7 +1428,7 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("type ");
             sbSQL.append(sortDir);
             sbSQL.append(", ");
-        } else if ("job".equalsIgnoreCase(options.getSortby())) {
+        } else if (JOB.equalsIgnoreCase(options.getSortby())) {
             sbSQL.append("job ");
             sbSQL.append(sortDir);
             sbSQL.append(", ");
@@ -1445,7 +1446,7 @@ public class ApiDao extends HibernateDao {
 
     private List<ApiFilmographyDTO> getPersonFilmographyScanned(long id, OptionsId options) {
         StringBuilder sbSQL = new StringBuilder();
-        sbSQL.append("SELECT DISTINCT p.participation_type as type, p.job as job, p.role as role,");
+        sbSQL.append("SELECT DISTINCT p.participation_type as type, p.job as job, p.role as role, p.voice_role as voiceRole, ");
         sbSQL.append("p.title as title, p.title_original as originalTitle, p.year as year,p.year_end as yearEnd,");
         sbSQL.append("p.release_date as releaseDate, p.release_country_code as releaseCountryCode,");
         sbSQL.append("movie.id as videoDataId, serids.series_id as seriesId ");
@@ -1473,7 +1474,7 @@ public class ApiDao extends HibernateDao {
         final String sortDir = ("DESC".equalsIgnoreCase(options.getSortdir()) ? "DESC" : "ASC");
 
         sbSQL.append("ORDER BY ");
-        if ("title".equalsIgnoreCase(options.getSortby())) {
+        if (TITLE.equalsIgnoreCase(options.getSortby())) {
             sbSQL.append("p.title ");
             sbSQL.append(sortDir);
             sbSQL.append(", ");
@@ -1481,7 +1482,7 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("p.participation_type ");
             sbSQL.append(sortDir);
             sbSQL.append(", ");
-        } else if ("job".equalsIgnoreCase(options.getSortby())) {
+        } else if (JOB.equalsIgnoreCase(options.getSortby())) {
             sbSQL.append("p.job ");
             sbSQL.append(sortDir);
             sbSQL.append(", ");
@@ -1499,8 +1500,9 @@ public class ApiDao extends HibernateDao {
 
     public List<ApiFilmographyDTO> retrieveFilmography(long id, SqlScalars sqlScalars) {
         sqlScalars.addScalar(TYPE, StringType.INSTANCE);
-        sqlScalars.addScalar("job", StringType.INSTANCE);
+        sqlScalars.addScalar(JOB, StringType.INSTANCE);
         sqlScalars.addScalar("role", StringType.INSTANCE);
+        sqlScalars.addScalar("voiceRole", BooleanType.INSTANCE);
         sqlScalars.addScalar(TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(ORIGINAL_TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(YEAR, IntegerType.INSTANCE);
@@ -1564,8 +1566,9 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("p.birth_name AS birthName,");
         sqlScalars.addToSql("p.death_day AS deathDay,");
         sqlScalars.addToSql("p.death_place AS deathPlace,");
-        sqlScalars.addToSql("c.job as job,");
-        sqlScalars.addToSql("c.role as role ");
+        sqlScalars.addToSql("c.job as jobType,");
+        sqlScalars.addToSql("c.role as role,");
+        sqlScalars.addToSql("c.voice_role as voiceRole ");
         sqlScalars.addToSql("FROM person p ");
 
         if (metaDataType == MetaDataType.SERIES) {
@@ -1604,8 +1607,9 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("birthName", StringType.INSTANCE);
         sqlScalars.addScalar("deathDay", DateType.INSTANCE);
         sqlScalars.addScalar("deathPlace", StringType.INSTANCE);
-        sqlScalars.addScalar("job", StringType.INSTANCE);
+        sqlScalars.addScalar(JOB, StringType.INSTANCE);
         sqlScalars.addScalar("role", StringType.INSTANCE);
+        sqlScalars.addScalar("voiceRole", BooleanType.INSTANCE);
 
         LOG.debug("SQL ForVideoPerson: {}", sqlScalars.getSql());
         return sqlScalars;
@@ -1895,13 +1899,13 @@ public class ApiDao extends HibernateDao {
                     // just add given amount for jobs to cast
                     Map<JobType, Integer> jobMap = new HashMap<>(options.splitJobs());
                     for (ApiPersonDTO entry : cast) {
-                        Integer amount = jobMap.get(entry.getJobType());
+                        Integer amount = jobMap.get(entry.getJob());
                         if (amount == null) {
                             episode.addCast(entry);
                         } else if (amount > 0) {
                             episode.addCast(entry);
                             amount--;
-                            jobMap.put(entry.getJobType(), amount);
+                            jobMap.put(entry.getJob(), amount);
                         }
                     }
                 }
@@ -2032,13 +2036,13 @@ public class ApiDao extends HibernateDao {
                 // just add given amount for jobs to cast
                 Map<JobType, Integer> jobMap = new HashMap<>(options.splitJobs());
                 for (ApiPersonDTO entry : cast) {
-                    Integer amount = jobMap.get(entry.getJobType());
+                    Integer amount = jobMap.get(entry.getJob());
                     if (amount == null) {
                         video.addCast(entry);
                     } else if (amount > 0) {
                         video.addCast(entry);
                         amount--;
-                        jobMap.put(entry.getJobType(), amount);
+                        jobMap.put(entry.getJob(), amount);
                     }
                 }
             } else if (options.isAllJobTypes()) {
@@ -2461,7 +2465,8 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("p.death_day AS deathDay,");
         sqlScalars.addToSql("p.death_place AS deathPlace,");
         sqlScalars.addToSql("c.role as role,");
-        sqlScalars.addToSql("c.job as jobType ");
+        sqlScalars.addToSql("c.voice_role as voiceRole, ");
+        sqlScalars.addToSql("c.job as job ");
         sqlScalars.addToSql("FROM person p ");
 
         if (type == MetaDataType.SERIES) {
@@ -2492,7 +2497,8 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("deathDay", DateType.INSTANCE);
         sqlScalars.addScalar("deathPlace", StringType.INSTANCE);
         sqlScalars.addScalar("role", StringType.INSTANCE);
-        sqlScalars.addScalar("jobType", StringType.INSTANCE);
+        sqlScalars.addScalar("voiceRole", BooleanType.INSTANCE);
+        sqlScalars.addScalar(JOB, StringType.INSTANCE);
         sqlScalars.addParameter(ID, id);
 
         return executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, null);

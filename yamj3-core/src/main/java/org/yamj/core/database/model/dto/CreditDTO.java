@@ -23,13 +23,11 @@
 package org.yamj.core.database.model.dto;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.yamj.common.tools.StringTools;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.tools.MetadataTools;
@@ -71,7 +69,8 @@ public final class CreditDTO {
         this.identifier = MetadataTools.cleanIdentifier(name);
         setFirstName(dto.getFirstName());
         setLastName(dto.getLastName());
-        setRole(role);
+        setRole(MetadataTools.cleanRole(role));
+        setVoice(MetadataTools.isVoiceRole(role));
     }
 
     public String getSource() {
@@ -122,47 +121,8 @@ public final class CreditDTO {
         return role;
     }
 
-    public void setRole(final String role) {
-        String fixed = StringUtils.trimToNull(role);
-        if (fixed == null) return;
-        
-        boolean voice= false;
-        // (voice)
-        int idx = StringUtils.indexOfIgnoreCase(fixed, "(voice");
-        if (idx > 0) {
-            voice = true;
-            fixed = fixed.substring(0, idx);
-        }
-        // (as ... = alternate name
-         idx = StringUtils.indexOfIgnoreCase(fixed, "(as ");
-        if (idx > 0) {
-            fixed = fixed.substring(0, idx);
-        }
-        // uncredited cast member
-        idx = StringUtils.indexOfIgnoreCase(fixed, "(uncredit");
-        if (idx > 0) {
-            fixed = fixed.substring(0, idx);
-        }
-        // season marker
-        idx = StringUtils.indexOfIgnoreCase(fixed, "(Season");
-        if (idx > 0) {
-            fixed = fixed.substring(0, idx);
-        }
-
-        // double characters
-        idx = StringUtils.indexOf(fixed, "/");
-        if (idx > 0) {
-            List<String> characters = StringTools.splitList(fixed, "/");
-            fixed = StringUtils.join(characters.toArray(), " / ");
-        }
-        
-        fixed = MetadataTools.fixScannedValue(fixed);
-        fixed = fixed.replaceAll("( )+", " ").trim();
-        
-        if (StringUtils.isNotEmpty(fixed)) {
-            this.role = fixed;
-            this.voice = voice;
-        }
+    public void setRole(String role) {
+        this.role = role;
     }
     
     public boolean isVoice() {

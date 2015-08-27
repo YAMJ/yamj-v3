@@ -700,9 +700,8 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         }
 
         // Fill in CREW data
-        for (CreditBasic credit : credits.getCast()) {
-            JobType jobType = retrieveJobType(person.getName(), credit.getDepartment());
-
+        for (CreditBasic credit : credits.getCrew()) {
+            final JobType jobType = retrieveJobType(person.getName(), credit.getDepartment());
             FilmParticipation filmo = null;
             switch (credit.getMediaType()) {
                 case MOVIE:
@@ -742,7 +741,8 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         filmo.setPerson(person);
         filmo.setJobType(jobType);
         if (JobType.ACTOR == jobType) {
-            filmo.setRole(credit.getCharacter());
+            filmo.setRole(MetadataTools.cleanRole(credit.getCharacter()));
+            filmo.setVoiceRole(MetadataTools.isVoiceRole(credit.getCharacter()));
         }
         filmo.setTitle(credit.getTitle());
         filmo.setTitleOriginal(StringUtils.trimToNull(credit.getOriginalTitle()));

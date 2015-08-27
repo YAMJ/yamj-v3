@@ -25,6 +25,8 @@ package org.yamj.core.api.model.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
+import org.apache.commons.lang3.StringUtils;
+import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.ParticipationType;
 import org.yamj.core.tools.MetadataTools;
 
@@ -34,10 +36,11 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
     private ParticipationType type;
     private String job;
     private String role;
+    private Boolean voiceRole = null;
     private String title;
     private String originalTitle;
     private Integer year;
-    private Integer yearEnd;
+    private Integer yearEnd = -1;
     private String releaseDate;
     private String releaseCountryCode;
     private String releaseCountry;
@@ -59,6 +62,9 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
 
     public void setJob(String job) {
         this.job = job;
+        if (!StringUtils.equalsIgnoreCase(this.job, JobType.ACTOR.name())) {
+            this.voiceRole = null;
+        }
     }
 
     public String getRole() {
@@ -67,6 +73,16 @@ public class ApiFilmographyDTO extends AbstractApiDTO {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public Boolean getVoiceRole() {
+        return voiceRole;
+    }
+
+    public void setVoiceRole(Boolean voiceRole) {
+        if (this.job == null || this.job.equalsIgnoreCase(JobType.ACTOR.name())) {
+            this.voiceRole = voiceRole;
+        }
     }
 
     public String getTitle() {

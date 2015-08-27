@@ -84,7 +84,7 @@ public class AllocineApiSearch {
         return (search == null ? new Search() : search);
     }
 
-    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #name")
+    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #name}")
     public Search searchPersons(String name, boolean throwTempError) {
         Search search = null;
         searchPersonLock.lock();
