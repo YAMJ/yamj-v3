@@ -24,7 +24,6 @@ package org.yamj.jetty;
 
 import org.apache.log4j.BasicConfigurator;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.util.resource.ResourceCollection;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 public class JettyCore {
@@ -41,7 +40,7 @@ public class JettyCore {
     private static WebAppContext createWebAppContext() {
         final WebAppContext context = new WebAppContext();
         context.setContextPath("/yamj3");
-        context.setBaseResource(new ResourceCollection(new String[]{"./../yamj3-core/src/main/webapp/"}));
+        context.setResourceBase("./../yamj3-core/src/main/webapp");
         return context;
     }
 }
