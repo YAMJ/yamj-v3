@@ -54,7 +54,7 @@ public class CountTimestamp {
         return type;
     }
 
-    public void setTypeString(String type) {
+    public void setType(String type) {
         this.type = MetaDataType.fromString(type);
     }
 
