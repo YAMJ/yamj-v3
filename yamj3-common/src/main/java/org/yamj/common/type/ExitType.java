@@ -22,7 +22,7 @@
  */
 package org.yamj.common.type;
 
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Enum for the exit codes for the services
