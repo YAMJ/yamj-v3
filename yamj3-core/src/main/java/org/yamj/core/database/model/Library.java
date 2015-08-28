@@ -27,21 +27,16 @@ import java.util.Date;
 import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.NaturalId;
 
 @Entity
-@Table(name = "library",
-        uniqueConstraints = @UniqueConstraint(name = "UIX_LIBRARY_NATURALID", columnNames = {"client", "player_path"})
-)
+@Table(name = "library")
 public class Library extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -3086992329257871600L;
 
-    @NaturalId
     @Column(name = "client", nullable = false, length = 100)
     private String client;
 
-    @NaturalId
     @Column(name = "player_path", nullable = false, length = 1000)
     private String playerPath;
 

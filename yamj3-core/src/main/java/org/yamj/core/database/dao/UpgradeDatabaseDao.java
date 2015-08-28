@@ -48,8 +48,8 @@ public class UpgradeDatabaseDao extends HibernateDao {
         sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
         sb.append("AND TABLE_NAME = '").append(table).append("' ");
         sb.append("AND COLUMN_NAME = '").append(column).append("'");
-        Object object = currentSession().createSQLQuery(sb.toString()).uniqueResult();
-        return (object != null);
+        List<Object> objects = currentSession().createSQLQuery(sb.toString()).list();
+        return CollectionUtils.isNotEmpty(objects);
     }
 
     protected boolean existsForeignKey(String table, String foreignKey) {
@@ -59,8 +59,8 @@ public class UpgradeDatabaseDao extends HibernateDao {
         sb.append("AND TABLE_NAME = '").append(table).append("' ");
         sb.append("AND CONSTRAINT_TYPE = 'FOREIGN KEY' ");
         sb.append("AND CONSTRAINT_NAME = '").append(foreignKey).append("'");
-        Object object = currentSession().createSQLQuery(sb.toString()).uniqueResult();
-        return (object != null);
+        List<Object> objects = currentSession().createSQLQuery(sb.toString()).list();
+        return CollectionUtils.isNotEmpty(objects);
     }
 
     protected void dropForeignKey(String table, String foreignKey) {
@@ -88,8 +88,8 @@ public class UpgradeDatabaseDao extends HibernateDao {
         sb.append("WHERE TABLE_SCHEMA = 'yamj3' ");
         sb.append("AND TABLE_NAME = '").append(table).append("' ");
         sb.append("AND INDEX_NAME = '").append(indexName).append("'");
-        Object object = currentSession().createSQLQuery(sb.toString()).uniqueResult();
-        return (object != null);
+        List<Object> objects = currentSession().createSQLQuery(sb.toString()).list();
+        return CollectionUtils.isNotEmpty(objects);
     }
 
     protected void dropIndex(String table, String indexName) {
@@ -108,8 +108,8 @@ public class UpgradeDatabaseDao extends HibernateDao {
         sb.append("AND TABLE_NAME = '").append(table).append("' ");
         sb.append("AND CONSTRAINT_TYPE = 'UNIQUE' ");
         sb.append("AND CONSTRAINT_NAME = '").append(indexName).append("'");
-        Object object = currentSession().createSQLQuery(sb.toString()).uniqueResult();
-        return (object != null);
+        List<Object> objects = currentSession().createSQLQuery(sb.toString()).list();
+        return CollectionUtils.isNotEmpty(objects);
     }
 
     protected void dropUniqueIndex(String table, String indexName) {
@@ -841,6 +841,8 @@ public class UpgradeDatabaseDao extends HibernateDao {
         .createSQLQuery("ALTER TABLE artwork_generated MODIFY COLUMN cache_filename VARCHAR(500)")
         .executeUpdate();
 
+        dropUniqueIndex("library", "UIX_LIBRARY_NATURALID");
+        
         currentSession()
         .createSQLQuery("ALTER TABLE library MODIFY COLUMN player_path VARCHAR(1000)")
         .executeUpdate();

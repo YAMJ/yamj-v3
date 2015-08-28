@@ -262,8 +262,8 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
 
         if (OverrideTools.checkOverwriteReleaseDate(videoData, SCANNER_ID)) {
-            String releaseCountryCode = localeService.findCountryCode(movieInfos.getReleaseState());
-            Date releaseDate = MetadataTools.parseToDate(movieInfos.getReleaseDate());
+            final String releaseCountryCode = localeService.findCountryCode(movieInfos.getReleaseCountry());
+            final Date releaseDate = MetadataTools.parseToDate(movieInfos.getReleaseDate());
             videoData.setRelease(releaseCountryCode, releaseDate, SCANNER_ID);
         }
                 
@@ -272,7 +272,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
 
         if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
-            String studioName = movieInfos.getDistributor();
+            final String studioName = movieInfos.getDistributor();
             if (StringUtils.isNotBlank(studioName)) {
                 Set<String> studioNames = Collections.singleton(studioName);
                 videoData.setStudioNames(studioNames, SCANNER_ID);
@@ -280,7 +280,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         }
         
         if (CollectionUtils.isNotEmpty(movieInfos.getNationalities()) && OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
-            Set<String> countryCodes = new HashSet<>();
+            final Set<String> countryCodes = new HashSet<>();
             for (String country : movieInfos.getNationalities()) {
                 String countryCode = localeService.findCountryCode(country);
                 if (countryCode != null) countryCodes.add(countryCode);
@@ -707,7 +707,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             filmo.setTitleOriginal(StringUtils.trimToNull(participance.getOriginalTitle()));
             filmo.setDescription(StringUtils.trimToNull(participance.getSynopsisShort()));
             filmo.setReleaseDate(MetadataTools.parseToDate(participance.getReleaseDate()));
-            String releaseCountryCode = localeService.findCountryCode(StringUtils.trimToNull(participance.getReleaseState()));
+            String releaseCountryCode = localeService.findCountryCode(participance.getReleaseCountry());
             filmo.setReleaseCountryCode(releaseCountryCode);
             newFilmography.add(filmo);
         }
