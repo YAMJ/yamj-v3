@@ -1625,17 +1625,14 @@ public class ApiDao extends HibernateDao {
         SqlScalars sqlScalars = new SqlScalars();
         // Make sure to set the alias for the files for the Transformation into the class
         sqlScalars.addToSql("SELECT DISTINCT p.id,p.name,");
-        if (options.hasDataItem(DataItem.BIOGRAPHY)) {
-            sqlScalars.addToSql(" p.biography, ");
-            sqlScalars.addScalar("biography", StringType.INSTANCE);
-        }
-        sqlScalars.addToSql("p.first_name AS firstName, ");
-        sqlScalars.addToSql("p.last_name AS lastName, ");
-        sqlScalars.addToSql("p.birth_day AS birthDay, ");
-        sqlScalars.addToSql("p.birth_place AS birthPlace, ");
-        sqlScalars.addToSql("p.birth_name AS birthName, ");
-        sqlScalars.addToSql("p.death_day AS deathDay, ");
-        sqlScalars.addToSql("p.death_place AS deathPlace ");
+        sqlScalars.addToSql("p.first_name AS firstName,");
+        sqlScalars.addToSql("p.last_name AS lastName,");
+        sqlScalars.addToSql("p.birth_day AS birthDay,");
+        sqlScalars.addToSql("p.birth_place AS birthPlace,");
+        sqlScalars.addToSql("p.birth_name AS birthName,");
+        sqlScalars.addToSql("p.death_day AS deathDay,");
+        sqlScalars.addToSql("p.death_place AS deathPlace");
+        sqlScalars.addToSql(DataItemTools.addSqlDataItems(options.splitDataItems(), "p").toString());
         sqlScalars.addToSql("FROM person p");
 
         if (options.getId() > 0L) {
@@ -1669,6 +1666,9 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar("birthName", StringType.INSTANCE);
         sqlScalars.addScalar("deathDay", DateType.INSTANCE);
         sqlScalars.addScalar("deathPlace", StringType.INSTANCE);
+
+        // add Scalars for additional data item columns
+        DataItemTools.addDataItemScalars(sqlScalars, options.splitDataItems());
 
         return sqlScalars;
     }
