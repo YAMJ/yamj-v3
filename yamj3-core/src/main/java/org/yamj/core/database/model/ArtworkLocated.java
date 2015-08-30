@@ -307,7 +307,7 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
             sb.append(", url=");
             sb.append(getUrl());
         }
-        if (Hibernate.isInitialized(getStageFile())) {
+        if (getStageFile() != null && Hibernate.isInitialized(getStageFile())) {
             sb.append(", stageFile=");
             sb.append(getStageFile().getFileName());
         }
