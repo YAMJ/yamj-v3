@@ -37,7 +37,6 @@ import org.yamj.core.api.model.dto.*;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
-import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.dao.*;
 import org.yamj.core.database.model.*;
@@ -62,18 +61,13 @@ public class JsonApiStorageService {
     @Autowired
     private PlayerDao playerDao;
     @Autowired
-    private ConfigService configService;
-    @Autowired
     private LocaleService localeService;
     @Autowired
     private MetadataStorageService metadataStorageService;
     @Autowired
     private OnlineScannerService onlineScannerService;
-    
-    public List<Configuration> getConfiguration(String property) {
-        return configService.getConfiguration(property);
-    }
 
+    
     //<editor-fold defaultstate="collapsed" desc="Index Methods">
     public void getVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
         apiDao.getVideoList(wrapper);

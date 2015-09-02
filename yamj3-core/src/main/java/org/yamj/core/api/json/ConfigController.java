@@ -55,7 +55,7 @@ public class ConfigController {
             options.setMode("EXACT");
         }
         wrapper.setOptions(options);
-        wrapper.setResults(configService.getConfiguration(options));
+        wrapper.setResults(configService.getConfigurations(options));
         wrapper.setStatusCheck();
 
         return wrapper;

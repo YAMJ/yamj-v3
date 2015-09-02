@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.yamj.core.api.options.OptionsConfig;
 import org.yamj.core.database.dao.ConfigDao;
 import org.yamj.core.database.model.Configuration;
@@ -165,6 +166,7 @@ public class ConfigService {
         setProperty(key, Float.toString(value));
     }
 
+    @Transactional
     public void deleteProperty(String key) {
         // Delete the config from the database
         configDao.deleteConfig(key);
@@ -173,13 +175,14 @@ public class ConfigService {
     }
 
     /**
-     * Get a list of the configuration entries for "key"
+     * Get a list of the configuration for "key"
      *
-     * @param key Can be blank/null or specific key
+     * @param key the configuration key
      * @return
      */
-    public List<Configuration> getConfiguration(String key) {
-        return configDao.getConfigurationEntries(key);
+    @Transactional(readOnly = true)
+    public Configuration getConfiguration(String key) {
+        return configDao.getById(Configuration.class, key);
     }
 
     /**
@@ -188,7 +191,8 @@ public class ConfigService {
      * @param options
      * @return
      */
-    public List<Configuration> getConfiguration(OptionsConfig options) {
-        return configDao.getConfigurationEntries(options);
+    @Transactional(readOnly = true)
+    public List<Configuration> getConfigurations(OptionsConfig options) {
+        return configDao.getConfigurations(options);
     }
 }

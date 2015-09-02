@@ -41,5 +41,4 @@ public class OptionsConfig extends OptionsAbstractSortSearch {
         setSearch(config);
         setField("config_key");
     }
-
 }

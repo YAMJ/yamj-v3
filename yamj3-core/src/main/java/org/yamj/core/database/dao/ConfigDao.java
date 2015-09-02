@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SQLQuery;
-import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -36,12 +35,12 @@ import org.yamj.core.api.options.OptionsConfig;
 import org.yamj.core.database.model.Configuration;
 import org.yamj.core.hibernate.HibernateDao;
 
-@Transactional
 @Repository("configDao")
 public class ConfigDao extends HibernateDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigDao.class);
 
+    @Transactional(readOnly = true)
     public Map<String, String> readConfig() {
         SQLQuery query = currentSession().createSQLQuery("select config_key, config_value from configuration");
         query.setReadOnly(true);
@@ -58,29 +57,29 @@ public class ConfigDao extends HibernateDao {
         return config;
     }
 
+    @Transactional
     public void storeConfig(Map<String, String> config) {
         for (Map.Entry<String, String> entry : config.entrySet()) {
             storeConfig(entry.getKey(), entry.getValue(), false);
         }
     }
 
-    @SuppressWarnings("resource")
+    @Transactional
     public void storeConfig(String key, String value, boolean updateAllowed) {
-        Session session = currentSession();
-        Configuration config = session.byId(Configuration.class).load(key);
+        Configuration config = currentSession().byId(Configuration.class).load(key);
         if (config == null) {
             LOG.debug("Store new configuration: key='{}', value='{}'", key, value);
             config = new Configuration();
             config.setKey(key);
             config.setValue(value);
-            session.save(config);
+            currentSession().save(config);
         } else if (updateAllowed) {
             config.setValue(value);
-            session.update(config);
+            currentSession().update(config);
         }
     }
 
-    public List<Configuration> getConfigurationEntries(OptionsConfig options) {
+    public List<Configuration> getConfigurations(OptionsConfig options) {
         StringBuilder sbSQL = new StringBuilder("from Configuration");
 
         if (StringUtils.isBlank(options.getConfig())) {
@@ -95,27 +94,13 @@ public class ConfigDao extends HibernateDao {
         return currentSession().createQuery(sbSQL.toString()).list();
     }
 
-    public List<Configuration> getConfigurationEntries(String key) {
-        OptionsConfig options = new OptionsConfig();
-        options.setConfig(key);
-        // Make the search exact
-        options.setMode("EXACT");
-        return getConfigurationEntries(options);
-    }
-
-    /**
-     * Delete keys from the database
-     *
-     * @param key
-     */
     public void deleteConfig(String key) {
         if (StringUtils.isNotBlank(key)) {
-            List<Configuration> configList = getConfigurationEntries(key);
-            for (Configuration config : configList) {
-                LOG.trace("Deleting key '{}'", key);
+            Configuration config = getById(Configuration.class, key);
+            if (config != null) {
+                LOG.trace("Deleting configuration: {}", key);
                 currentSession().delete(config);
             }
-            LOG.debug("Successfully deleted all keys for '{}'", key);
         }
     }
 }

@@ -23,6 +23,7 @@
 package org.yamj.core.pages;
 
 import java.util.*;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import org.yamj.core.api.json.IndexController;
 import org.yamj.core.api.json.SystemInfoController;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.Skin;
+import org.yamj.core.api.options.OptionsConfig;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.Configuration;
 import org.yamj.core.database.model.player.PlayerInfo;
@@ -134,7 +136,7 @@ public class PagesController {
     public ModelAndView configList() {
         ModelAndView view = new ModelAndView("config-list");
 
-        List<Configuration> configList = configService.getConfiguration("");
+        List<Configuration> configList = configService.getConfigurations(new OptionsConfig());
         Collections.sort(configList, new Comparator<Configuration>() {
             @Override
             public int compare(Configuration o1, Configuration o2) {
@@ -151,9 +153,9 @@ public class PagesController {
     @RequestMapping(value = "/config/edit/{key}", method = RequestMethod.GET)
     public ModelAndView configEditPage(@PathVariable String key) {
         ModelAndView view = new ModelAndView("config-edit");
-        List<Configuration> configList = configService.getConfiguration(key);
-        if (!configList.isEmpty()) {
-            view.addObject("config", configList.get(0));
+        if (StringUtils.isNotBlank(key)) {
+            Configuration config = configService.getConfiguration(key);
+            if (config != null) view.addObject("config", config);
         }
         YamjInfo yi = sic.getYamjInfo("true");
         view.addObject("yi", yi);
