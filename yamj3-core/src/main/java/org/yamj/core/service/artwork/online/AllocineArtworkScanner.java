@@ -38,6 +38,7 @@ import org.yamj.core.database.model.Season;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.AllocineScanner;
+import org.yamj.core.tools.CommonTools;
 import org.yamj.core.web.apis.AllocineApiWrapper;
 
 @Service("allocineArtworkScanner")
@@ -110,7 +111,12 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
     private List<ArtworkDetailDTO> buildArtworkDetails(Map<String,Long> artworks) {
         List<ArtworkDetailDTO> dtos = new ArrayList<>(artworks.size());
         for (Entry<String,Long> entry : artworks.entrySet()) {
-            final String hashCode = (entry.getValue() == null ? null : entry.getValue().toString());
+            final String hashCode;
+            if (entry.getValue() == null || entry.getValue().longValue() == 0) {
+                hashCode = CommonTools.getSimpleHashCode(entry.getKey());
+            } else {
+                hashCode = entry.getValue().toString();
+            }
             ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), entry.getKey(), hashCode);
             dtos.add(dto);
         }
@@ -129,7 +135,7 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
             return null;
         }
 
-        ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), allocineId, personInfos.getPhotoURL());
+        ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), personInfos.getPhotoURL(), allocineId);
         return Collections.singletonList(dto);
     }
 }
