@@ -42,7 +42,6 @@ public class PlayerDao extends HibernateDao {
     public List<PlayerInfo> getPlayerList() {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(PlayerInfo.class);
-        criteria.setFetchMode("paths", FetchMode.JOIN);
         // http://stackoverflow.com/a/4645549/443283
         criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         return criteria.list();
@@ -50,7 +49,6 @@ public class PlayerDao extends HibernateDao {
 
     public List<PlayerInfo> getPlayerList(OptionsPlayer options) {
         Criteria criteria = currentSession().createCriteria(PlayerInfo.class);
-        criteria.setFetchMode("paths", FetchMode.JOIN);
 
         if (StringUtils.isNotBlank(options.getPlayer())) { 
             MatchMode mode;

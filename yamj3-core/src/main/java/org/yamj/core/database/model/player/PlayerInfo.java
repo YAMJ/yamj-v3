@@ -26,6 +26,8 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.NaturalId;
 import org.yamj.core.database.model.AbstractIdentifiable;
 
@@ -47,6 +49,7 @@ public class PlayerInfo extends AbstractIdentifiable implements Serializable {
     @Column(name = "ip_address", nullable = false, length = 15)
     private String ipAddress;
 
+    @Fetch(FetchMode.JOIN)
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "playerinfo_playerpath",
             joinColumns = @JoinColumn(name = "player_info_id"),
