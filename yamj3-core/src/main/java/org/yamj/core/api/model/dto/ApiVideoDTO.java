@@ -43,7 +43,7 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private String title;
     private String originalTitle;
     private String sortTitle;
-    private Integer videoYear;
+    private Integer videoYear = -1;
     private String outline;
     private String plot;
     private String quote;

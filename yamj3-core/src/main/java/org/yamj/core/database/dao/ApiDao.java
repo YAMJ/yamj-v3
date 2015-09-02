@@ -637,7 +637,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", ser.id AS seriesId");
         sbSQL.append(", null AS seasonId");
         sbSQL.append(", null AS season");
-        sbSQL.append(", null AS episode");
+        sbSQL.append(", -1 AS episode");
         sbSQL.append(", (SELECT min(vid.watched) from videodata vid,season sea where vid.season_id=sea.id and sea.series_id=ser.id) as watched ");
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "ser"));
 
@@ -932,7 +932,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(", sea.series_id AS seriesId");
         sbSQL.append(", sea.id AS seasonId");
         sbSQL.append(", sea.season AS season");
-        sbSQL.append(", null AS episode");
+        sbSQL.append(", -1 AS episode");
         sbSQL.append(", (SELECT min(vid.watched) from videodata vid where vid.season_id=sea.id) as watched ");
         sbSQL.append(DataItemTools.addSqlDataItems(params.getDataItems(), "sea"));
 
@@ -1251,7 +1251,7 @@ public class ApiDao extends HibernateDao {
             }
 
             if (hasSeason) {
-                sqlScalars.addToSql(" SELECT 'SEASON' as source, s.id as sourceId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkType, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
+                sqlScalars.addToSql(" SELECT 'SEASON' as source, s.id, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkType, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
                 sqlScalars.addToSql(" FROM season s, artwork a");
                 sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
                 sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
@@ -1265,7 +1265,7 @@ public class ApiDao extends HibernateDao {
             }
 
             if (hasEpisode) {
-                sqlScalars.addToSql("SELECT 'EPISODE' as source, v.id as sourceId, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkType, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
+                sqlScalars.addToSql("SELECT 'EPISODE' as source, v.id, a.id as artworkId, al.id as locatedId, ag.id as generatedId, a.artwork_type as artworkType, ag.cache_dir as cacheDir, ag.cache_filename as cacheFilename");
                 sqlScalars.addToSql(" FROM videodata v, artwork a");
                 sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_LOCATED);
                 sqlScalars.addToSql(SQL_LEFT_JOIN_ARTWORK_GENERATED);
