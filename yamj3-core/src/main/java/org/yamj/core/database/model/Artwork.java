@@ -238,7 +238,7 @@ public class Artwork extends AbstractAuditable implements Serializable {
         } else if (getPerson() != null) {
             if (Hibernate.isInitialized(getPerson())) {
                 sb.append(", person-id='");
-                sb.append(getPerson().getId());
+                sb.append(getPerson().getIdentifier());
                 sb.append("'");
             } else {
                 sb.append(", target=Person");
@@ -246,7 +246,7 @@ public class Artwork extends AbstractAuditable implements Serializable {
         } else if (getBoxedSet() != null) {
             if (Hibernate.isInitialized(getBoxedSet())) {
                 sb.append(", boxedset-id='");
-                sb.append(getBoxedSet().getId());
+                sb.append(getBoxedSet().getIdentifier());
                 sb.append("'");
             } else {
                 sb.append(", target=BoxedSet");
