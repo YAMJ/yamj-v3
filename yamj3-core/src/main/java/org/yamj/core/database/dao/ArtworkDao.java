@@ -174,7 +174,7 @@ public class ArtworkDao extends HibernateDao {
                         case INVALID:
                         case NOTFOUND:
                         case IGNORE:
-                            LOG.info("Leave status {} for located artwork {}", stored.getStatus(), stored);
+                            LOG.debug("Leave status {} for located artwork {}", stored.getStatus(), stored);
                             break;
                         default:
                             break;
