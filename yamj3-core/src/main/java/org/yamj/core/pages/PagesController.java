@@ -300,13 +300,11 @@ public class PagesController {
     @RequestMapping(value = "/player/add-path/process/{id}", method = RequestMethod.POST)
     public ModelAndView playerAddPath(@PathVariable Long id, @ModelAttribute PlayerPath playerPath) {
         ModelAndView view = new ModelAndView("redirect:/player/details/" + id);
-
+        
         LOG.info("Updating player '{}' with new path: {}", id, playerPath.toString());
-        PlayerInfo player = jsonApi.getPlayerInfo(id);
-        player.addPath(playerPath);
-        jsonApi.storePlayer(player);
+        jsonApi.storePlayerPath(id, playerPath);
         LOG.info("Player was successfully updated.");
-
+        
         return view;
     }
 
@@ -339,24 +337,11 @@ public class PagesController {
     }
 
     @RequestMapping(value = "/player/edit-path/{playerId}/{pathId}", method = RequestMethod.POST)
-    public ModelAndView playerEditPath(@PathVariable Long playerId, @PathVariable Long pathId, @ModelAttribute("path") PlayerPath path) {
+    public ModelAndView playerEditPath(@PathVariable Long playerId, @PathVariable Long pathId, @ModelAttribute("path") PlayerPath playerPath) {
         ModelAndView view = new ModelAndView("redirect:/player/details/" + playerId);
 
-        PlayerInfo player = jsonApi.getPlayerInfo(playerId);
-        LOG.info("Updating player: {}-{}", player.getId(), player.getName());
-
-        Iterator<PlayerPath> iter = player.getPaths().iterator();
-        while (iter.hasNext()) {
-            PlayerPath currentPath = iter.next();
-            if (currentPath.getId() == pathId) {
-                LOG.info("Updating path {} to {}", currentPath, path);
-                currentPath.setSourcePath(path.getSourcePath());
-                currentPath.setTargetPath(path.getTargetPath());
-                break;
-            }
-        }
-
-        jsonApi.storePlayer(player);
+        LOG.info("Updating player path: {}-{}", playerId, pathId);
+        this.jsonApi.storePlayerPath(playerId, pathId, playerPath);
         LOG.info("Path was successfully updated.");
         return view;
     }

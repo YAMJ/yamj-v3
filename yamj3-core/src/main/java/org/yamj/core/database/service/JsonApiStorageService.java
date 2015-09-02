@@ -260,10 +260,6 @@ public class JsonApiStorageService {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Player methods">
-    public PlayerInfo getPlayerInfo(String playerName) {
-        return playerDao.getByNaturalIdCaseInsensitive(PlayerInfo.class, "name", playerName);
-    }
-
     public PlayerInfo getPlayerInfo(Long playerId) {
         return playerDao.getById(PlayerInfo.class, playerId);
     }
@@ -285,7 +281,7 @@ public class JsonApiStorageService {
 
     @Transactional
     public void storePlayer(PlayerInfo player) {
-        PlayerInfo playerInfo = this.getPlayerInfo(player.getName());
+        PlayerInfo playerInfo = playerDao.getByNaturalIdCaseInsensitive(PlayerInfo.class, "name", player.getName());
         if (playerInfo == null) {
             playerDao.saveEntity(player);
         } else {
@@ -300,11 +296,37 @@ public class JsonApiStorageService {
         PlayerInfo playerInfo = this.getPlayerInfo(playerId);
         if (playerInfo == null) return false;
         
-        playerInfo.addPath(playerPath);
+        for (PlayerPath stored : playerInfo.getPaths()) {
+            if (stored.getSourcePath().equals(playerPath.getSourcePath())) {
+                stored.setTargetPath(playerPath.getTargetPath());
+                playerDao.updateEntity(stored);
+                return true;
+            }
+        }
+        
+        playerPath.setPlayerInfo(playerInfo);
+        playerInfo.getPaths().add(playerPath);
         playerDao.updateEntity(playerInfo);
         return true;
     }
-    
+
+    @Transactional
+    public boolean storePlayerPath(Long playerId, Long pathId, PlayerPath playerPath) {
+        PlayerInfo playerInfo = this.getPlayerInfo(playerId);
+        if (playerInfo == null) return false;
+        
+        for (PlayerPath stored : playerInfo.getPaths()) {
+            if (stored.getId() == pathId) {
+                stored.setSourcePath(playerPath.getSourcePath());
+                stored.setTargetPath(playerPath.getTargetPath());
+                playerDao.updateEntity(stored);
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
     @Transactional
     public boolean deletePlayerPath(Long playerId, Long pathId) {
         PlayerInfo playerInfo = this.getPlayerInfo(playerId);

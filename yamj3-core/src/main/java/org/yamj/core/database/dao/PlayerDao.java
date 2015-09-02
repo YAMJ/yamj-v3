@@ -25,7 +25,6 @@ package org.yamj.core.database.dao;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
@@ -37,10 +36,8 @@ import org.yamj.core.hibernate.HibernateDao;
 @Repository("playerDao")
 public class PlayerDao extends HibernateDao {
 
-    @SuppressWarnings("resource")
     public List<PlayerInfo> getPlayerList() {
-        Session session = currentSession();
-        Criteria criteria = session.createCriteria(PlayerInfo.class);
+        Criteria criteria = currentSession().createCriteria(PlayerInfo.class);
         // http://stackoverflow.com/a/4645549/443283
         criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         return criteria.list();
@@ -48,7 +45,8 @@ public class PlayerDao extends HibernateDao {
 
     public List<PlayerInfo> getPlayerList(OptionsPlayer options) {
         Criteria criteria = currentSession().createCriteria(PlayerInfo.class);
-
+        criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
+        
         if (StringUtils.isNotBlank(options.getPlayer())) { 
             MatchMode mode;
             if (StringUtils.equalsIgnoreCase("START", options.getMode())) {

@@ -133,13 +133,13 @@ public class PlayerController {
         ApiStatus status = new ApiStatus();
         if (playerId == null || playerId <= 0) {
             status.setStatus(400);
-            status.setMessage("Invalid player ID specified; player path not added");
+            status.setMessage("Invalid player ID specified; player path not stored");
         } else if (StringUtils.isBlank(sourcePath)) {
             status.setStatus(400);
-            status.setMessage("Invalid source path; player path not added");
+            status.setMessage("Invalid source path; player path not stored");
         } else if (StringUtils.isBlank(targetPath)) {
             status.setStatus(400);
-            status.setMessage("Invalid target path; player path not added");
+            status.setMessage("Invalid target path; player path not stored");
         } else {
             PlayerPath playerPath = new PlayerPath();
             playerPath.setSourcePath(sourcePath);
@@ -147,10 +147,10 @@ public class PlayerController {
             boolean stored = jsonApi.storePlayerPath(playerId, playerPath);
             if (stored) {
                 status.setStatus(200);
-                status.setMessage("Successfully added player path to '" + playerId + "'");
+                status.setMessage("Successfully stored player path for player " + playerId);
             } else {
                 status.setStatus(400);
-                status.setMessage("Player '"+ playerId + "' does not exist; player path not added");
+                status.setMessage("Player "+ playerId + " does not exist; player path not stored");
             }
         }
         return status;

@@ -22,8 +22,6 @@
  */
 package org.yamj.core.tools.player;
 
-import org.yamj.core.database.model.player.PlayerInfo;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import java.io.*;
@@ -42,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.DigestedResponseReader;
 import org.yamj.api.common.http.SimpleHttpClientBuilder;
+import org.yamj.core.database.model.player.PlayerInfo;
 import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.tools.player.davidbox.DavidBoxPlayerPath;
 import org.yamj.core.tools.player.davidbox.DavidBoxWrapper;
@@ -231,7 +230,8 @@ public final class PlayerTools {
                         PlayerPath path = new PlayerPath();
                         path.setSourcePath(db.getPath());
                         path.setTargetPath(db.getPath());
-                        player.addPath(path);
+                        path.setPlayerInfo(player);
+                        player.getPaths().add(path);
                         LOG.debug("Found path for '{}': {}", addr, path.toString());
                     }
                 }
