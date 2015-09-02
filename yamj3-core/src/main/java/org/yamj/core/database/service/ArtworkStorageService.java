@@ -126,7 +126,7 @@ public class ArtworkStorageService {
         }
         
         // set status of artwork
-        if (CollectionUtils.isEmpty(locatedArtworks) && CollectionUtils.isEmpty(artwork.getArtworkLocated())) {
+        if (CollectionUtils.isEmpty(artwork.getArtworkLocated())) {
             artwork.setStatus(StatusType.NOTFOUND);
         } else {
             artwork.setStatus(StatusType.DONE);
