@@ -250,7 +250,7 @@ public class LocaleService  {
         // default locale for YAMJ
         yamjLocale = new Locale(language, country);
         
-        LOG.info("YAMY default: language={}, country={}", language, country);
+        LOG.info("YAMY locale: language={}, country={}", language, country);
         LOG.info("YAMY lookup languages:  {}", languageLookupMap.size());
         LOG.info("YAMY display languages: {}", languageDisplayMap.size());
         LOG.info("YAMY lookup countries:  {}", countryLookupMap.size());

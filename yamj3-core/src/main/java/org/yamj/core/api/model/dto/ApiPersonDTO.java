@@ -48,6 +48,8 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     private String role;
     private Boolean voiceRole;
     private JobType job;
+    private String status;
+    private String filmography_status;
     private List<ApiArtworkDTO> artwork = new ArrayList<>(0);
     private List<ApiFilmographyDTO> filmography = new ArrayList<>(0);
     private List<ApiExternalIdDTO> externalIds = new ArrayList<>(0);
@@ -151,6 +153,22 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
         if (this.job == null || this.job == JobType.ACTOR) {
             this.voiceRole = voiceRole;
         }
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getFilmography_status() {
+        return filmography_status;
+    }
+
+    public void setFilmography_status(String filmography_status) {
+        this.filmography_status = filmography_status;
     }
 
     public List<ApiArtworkDTO> getArtwork() {
