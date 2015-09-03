@@ -47,7 +47,7 @@ public class PlayerDao extends HibernateDao {
         Criteria criteria = currentSession().createCriteria(PlayerInfo.class);
         criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         
-        if (StringUtils.isNotBlank(options.getPlayer())) { 
+        if (StringUtils.isNotBlank(options.getPlayerName())) { 
             MatchMode mode;
             if (StringUtils.equalsIgnoreCase("START", options.getMode())) {
                 mode = MatchMode.START;

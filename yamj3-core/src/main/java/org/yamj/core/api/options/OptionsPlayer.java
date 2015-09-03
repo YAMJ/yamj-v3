@@ -33,11 +33,11 @@ public class OptionsPlayer extends OptionsAbstractSortSearch {
 
     // Don't display this field in the JSON output
     @JsonIgnore
-    public String getPlayer() {
+    public String getPlayerName() {
         return getSearch();
     }
 
-    public void setPlayer(String playerName) {
+    public void setPlayerName(String playerName) {
         setSearch(playerName);
         setField("name");
     }
