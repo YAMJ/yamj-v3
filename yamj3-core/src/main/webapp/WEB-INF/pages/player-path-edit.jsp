@@ -10,7 +10,7 @@
             <c:param name="sectionName" value="HEAD" />
         </c:import>
     </head>
-    <body background="${pageContext.request.contextPath}/images/yamj-configbg.jpg">
+    <body>
         <!--Import the navigation header-->
         <c:import url="template.jsp">
             <c:param name="sectionName" value="NAV" />
