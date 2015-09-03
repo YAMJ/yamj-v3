@@ -171,7 +171,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
 
         // check type change
-        if (!"feauture".equals(movieDetails.getType())) {
+        if (!"feature".equals(movieDetails.getType())) {
             return ScanResult.TYPE_CHANGE;
         }
         
