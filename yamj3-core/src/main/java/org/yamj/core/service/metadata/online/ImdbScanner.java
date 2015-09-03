@@ -240,12 +240,12 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         // PLOT
         if (movieDetails.getBestPlot() != null && OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-            videoData.setPlot(movieDetails.getBestPlot().getSummary(), SCANNER_ID);
+            videoData.setPlot(MetadataTools.cleanPlot(movieDetails.getBestPlot().getSummary()), SCANNER_ID);
         }
 
         // OUTLINE
         if (movieDetails.getPlot() != null && OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-            videoData.setOutline(movieDetails.getPlot().getOutline(), SCANNER_ID);
+            videoData.setOutline(MetadataTools.cleanPlot(movieDetails.getPlot().getOutline()), SCANNER_ID);
         }
 
         // TAGLINE
@@ -256,7 +256,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         // QUOTE
         if (OverrideTools.checkOverwriteQuote(videoData, SCANNER_ID)) {
             if (movieDetails.getQuote() != null && CollectionUtils.isNotEmpty(movieDetails.getQuote().getLines())) {
-                videoData.setQuote(movieDetails.getQuote().getLines().get(0).getQuote(), SCANNER_ID);
+                videoData.setQuote(MetadataTools.cleanPlot(movieDetails.getQuote().getLines().get(0).getQuote()), SCANNER_ID);
             }
         }
         
@@ -333,13 +333,13 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
 
         // PLOT
-        final String plot = (movieDetails.getBestPlot() == null ? null : movieDetails.getBestPlot().getSummary());
+        final String plot = (movieDetails.getBestPlot() == null ? null : MetadataTools.cleanPlot(movieDetails.getBestPlot().getSummary()));
         if (plot != null && OverrideTools.checkOverwritePlot(series, SCANNER_ID)) {
-            series.setPlot(movieDetails.getBestPlot().getSummary(), SCANNER_ID);
+            series.setPlot(plot, SCANNER_ID);
         }
 
         // OUTLINE
-        final String outline = (movieDetails.getPlot() == null ? null : movieDetails.getPlot().getOutline());
+        final String outline = (movieDetails.getPlot() == null ? null : MetadataTools.cleanPlot(movieDetails.getPlot().getOutline()));
         if (outline != null && OverrideTools.checkOverwriteOutline(series, SCANNER_ID)) {
             series.setOutline(outline, SCANNER_ID);
         }

@@ -605,10 +605,25 @@ public final class MetadataTools {
         return dto;
     }
     
-    public static String fixScannedValue(String value) {
+    public static String fixScannedValue(final String value) {
         return StringUtils.replace(value, "\"", "'");
     }
 
+    /**
+     * Remove unneeded text from the plot
+     *
+     * @param bio
+     * @return
+     */
+    public static String cleanPlot(final String plot) {
+        String newPlot = StringUtils.trimToNull(plot);
+        if (newPlot == null) {
+            return null;
+        }
+
+        return newPlot = newPlot.replaceAll("\\u00A0", " ").replaceAll("\\s+", " ").replaceAll("\"", "'");
+    }
+    
     /**
      * Remove unneeded text from the biography
      *
@@ -621,7 +636,7 @@ public final class MetadataTools {
             return null;
         }
 
-        newBio = newBio.replaceAll("\\u00A0", " ").replaceAll("\\s+", " ");
+        newBio = newBio.replaceAll("\\u00A0", " ").replaceAll("\\s+", " ").replaceAll("\"", "'");
         
         int pos = StringUtils.indexOfIgnoreCase(newBio, FROM_WIKIPEDIA);
         if (pos >= 0) newBio = newBio.substring(pos + FROM_WIKIPEDIA.length() + 1);
