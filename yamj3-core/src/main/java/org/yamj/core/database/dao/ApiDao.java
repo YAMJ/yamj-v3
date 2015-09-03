@@ -416,7 +416,7 @@ public class ApiDao extends HibernateDao {
 
         // check country
         if (params.includeCountry() || params.excludeCountry()) {
-            String country = params.getCountryName();
+            String countryCode = params.getCountryCode();
 
             if (params.includeCountry()) {
                 sbSQL.append(" AND exists(");
@@ -432,12 +432,10 @@ public class ApiDao extends HibernateDao {
                 sbSQL.append("SELECT 1 FROM series_countries sc, country c, season sea ");
                 sbSQL.append("WHERE vd.season_id=sea.id ");
                 sbSQL.append("AND sc.series_id=sea.series_id ");
-                sbSQL.append("AND sc.countryid=c.id ");
+                sbSQL.append("AND sc.country_id=c.id ");
 
             }
-            sbSQL.append("AND (lower(c.name)='").append(country).append("'");
-            sbSQL.append(" or (c.target_api is not null and lower(c.target_api)='").append(country).append("')");
-            sbSQL.append(" or (c.target_xml is not null and lower(c.target_xml)='").append(country).append("')))");
+            sbSQL.append("AND lower(c.country_code)='").append(countryCode).append("')");
         }
 
         // check studio
@@ -736,7 +734,7 @@ public class ApiDao extends HibernateDao {
 
         // check country
         if (params.includeCountry() || params.excludeCountry()) {
-            String country = params.getCountryName();
+            String countryCode = params.getCountryCode();
 
             if (params.includeCountry()) {
                 sbSQL.append(" AND exists(");
@@ -747,9 +745,7 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("SELECT 1 FROM series_countries sc, country c ");
             sbSQL.append("WHERE ser.id=sc.series_id ");
             sbSQL.append("AND sc.country_id=c.id ");
-            sbSQL.append("AND (lower(c.name)='").append(country).append("'");
-            sbSQL.append(" or (c.target_api is not null and lower(c.target_api)='").append(country).append("')");
-            sbSQL.append(" or (c.target_xml is not null and lower(c.target_xml)='").append(country).append("')))");
+            sbSQL.append("AND lower(c.country_code)='").append(countryCode).append("')");
         }
 
         // check award
@@ -1029,7 +1025,7 @@ public class ApiDao extends HibernateDao {
 
         // check country
         if (params.includeCountry() || params.excludeCountry()) {
-            String country = params.getCountryName();
+            String countryCode = params.getCountryCode();
 
             if (params.includeCountry()) {
                 sbSQL.append(" AND exists(");
@@ -1040,9 +1036,7 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("SELECT 1 FROM series_countries sc, country c ");
             sbSQL.append("WHERE sea.series_id=sc.series_id ");
             sbSQL.append("AND sc.country_id=c.id ");
-            sbSQL.append("AND (lower(c.name)='").append(country).append("'");
-            sbSQL.append(" or (c.target_api is not null and lower(c.target_api)='").append(country).append("')");
-            sbSQL.append(" or (c.target_xml is not null and lower(c.target_xml)='").append(country).append("')))");
+            sbSQL.append("AND lower(c.country_code)='").append(countryCode).append("')");
         }
 
         // check award

@@ -159,7 +159,7 @@ public class IndexParams {
         return excludes.containsKey(COUNTRY);
     }
 
-    public String getCountryName() {
+    public String getCountryCode() {
         if (includeCountry()) {
             return includes.get(COUNTRY);
         }

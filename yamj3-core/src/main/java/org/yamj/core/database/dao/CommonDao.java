@@ -208,7 +208,7 @@ public class CommonDao extends HibernateDao {
         OptionsSingleType options = (OptionsSingleType) wrapper.getOptions();
 
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT c.id, c.country_code as countryCode ");
+        sqlScalars.addToSql("SELECT DISTINCT c.id, c.country_code as countryCode ");
         sqlScalars.addToSql("FROM country c ");
 
         if (MetaDataType.MOVIE == options.getType()) {
