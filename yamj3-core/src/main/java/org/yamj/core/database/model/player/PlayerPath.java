@@ -22,10 +22,9 @@
  */
 package org.yamj.core.database.model.player;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import org.yamj.core.database.model.AbstractIdentifiable;
 
 @Entity
@@ -33,11 +32,25 @@ import org.yamj.core.database.model.AbstractIdentifiable;
 public class PlayerPath extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = -2933321283219977791L;
-    
+ 
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "player_id", nullable = false, foreignKey = @ForeignKey(name = "FK_PLAYERPATH_INFO"))
+    private PlayerInfo playerInfo;
+
     @Column(name = "source_path", nullable = false, length = 1000)
     private String sourcePath;
+    
     @Column(name = "target_path", nullable = false, length = 1000)
     private String targetPath;
+
+    public PlayerInfo getPlayerInfo() {
+        return playerInfo;
+    }
+
+    public void setPlayerInfo(PlayerInfo playerInfo) {
+        this.playerInfo = playerInfo;
+    }
 
     public String getSourcePath() {
         return sourcePath;

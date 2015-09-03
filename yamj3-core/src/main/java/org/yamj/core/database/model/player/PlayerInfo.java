@@ -26,8 +26,6 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.NaturalId;
 import org.yamj.core.database.model.AbstractIdentifiable;
 
@@ -49,13 +47,7 @@ public class PlayerInfo extends AbstractIdentifiable implements Serializable {
     @Column(name = "ip_address", nullable = false, length = 15)
     private String ipAddress;
 
-    @Fetch(FetchMode.JOIN)
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "playerinfo_playerpath",
-            joinColumns = @JoinColumn(name = "player_info_id"),
-            foreignKey = @ForeignKey(name = "FK_PLAYERPATH_INFO"),
-            inverseJoinColumns = @JoinColumn(name = "player_path_id"), 
-            inverseForeignKey = @ForeignKey(name = "FK_PLAYERPATH_PATH"))
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "playerInfo")
     private Set<PlayerPath> paths = new HashSet<>(0);
 
     public String getName() {
@@ -89,19 +81,5 @@ public class PlayerInfo extends AbstractIdentifiable implements Serializable {
     public void setPaths(Set<PlayerPath> paths) {
         this.paths = paths;
     }
-
-    public void addPath(PlayerPath path) {
-        if (this.paths.size() > 0) {
-            for (PlayerPath stored : this.paths) {
-                if (stored.getSourcePath().equalsIgnoreCase(path.getSourcePath())) {
-                    // just update target path
-                    stored.setTargetPath(path.getTargetPath());
-                    return;
-                }
-            }
-        }
-        
-        // just add path
-        this.paths.add(path);
-    }
 }
+

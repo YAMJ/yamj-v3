@@ -29,9 +29,10 @@ import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -39,6 +40,8 @@ import org.yamj.core.hibernate.HibernateDao;
 
 @Repository("artworkDao")
 public class ArtworkDao extends HibernateDao {
+
+    private static final Logger LOG = LoggerFactory.getLogger(HibernateDao.class);
 
     public ArtworkProfile getArtworkProfile(String profileName, ArtworkType artworkType) {
         return currentSession().byNaturalId(ArtworkProfile.class)
@@ -162,11 +165,20 @@ public class ArtworkDao extends HibernateDao {
             // find matching stored located artwork and reset deletion status
             for (ArtworkLocated stored : artwork.getArtworkLocated()) {
                 if (stored.equals(scannedLocated)) {
-                    if (StatusType.DELETED.equals(stored.getStatus())) {
-                        stored.setStatus(stored.getPreviousStatus());
-                        this.updateEntity(stored);
+                    switch (stored.getStatus()) {
+                        case DELETED:
+                            stored.setStatus(stored.getPreviousStatus());
+                            this.updateEntity(stored);
+                            break;
+                        case ERROR:
+                        case INVALID:
+                        case NOTFOUND:
+                        case IGNORE:
+                            LOG.debug("Leave status {} for located artwork {}", stored.getStatus(), stored);
+                            break;
+                        default:
+                            break;
                     }
-                    break;
                 }
             }
         }

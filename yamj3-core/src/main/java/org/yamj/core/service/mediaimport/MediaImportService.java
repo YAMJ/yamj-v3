@@ -930,12 +930,12 @@ public class MediaImportService {
             located.setArtwork(artwork);
             located.setSource("file");
             located.setStageFile(stageFile);
+            located.setPriority(priority);
+            located.setHashCode(stageFile.getHashCode());
+            located.setImageType(ImageType.fromString(stageFile.getExtension()));
 
             if (!artwork.getArtworkLocated().contains(located)) {
-                located.setPriority(priority);
-                located.setHashCode(stageFile.getHashCode());
-                located.setImageType(ImageType.fromString(stageFile.getExtension()));
-                
+
                 if (FileTools.isFileReadable(stageFile)) {
                     located.setStatus(StatusType.NEW);
                 } else {
