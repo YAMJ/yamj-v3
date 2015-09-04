@@ -44,7 +44,7 @@ public class VideoController {
     private static final Logger LOG = LoggerFactory.getLogger(VideoController.class);
     
     @Autowired
-    private JsonApiStorageService jsonApi;
+    private JsonApiStorageService jsonApiStorageService;
     @Autowired
     private ScanningScheduler scanningScheduler;
 
@@ -63,7 +63,7 @@ public class VideoController {
 
         if (options.getId() > 0L) {
             LOG.info("Getting video with ID '{}'", options.getId());
-            jsonApi.getSingleVideo(wrapper);
+            jsonApiStorageService.getSingleVideo(wrapper);
         }
         wrapper.setStatusCheck();
         return wrapper;
@@ -82,7 +82,7 @@ public class VideoController {
         }
         
         LOG.info("Enable {} online scan for movie with ID '{}'", sourcedb, id);
-        ApiStatus apiStatus = jsonApi.updateOnlineScan(MetaDataType.MOVIE, id, sourcedb, false);
+        ApiStatus apiStatus = jsonApiStorageService.updateOnlineScan(MetaDataType.MOVIE, id, sourcedb, false);
         if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
         return apiStatus;
     }
@@ -100,7 +100,7 @@ public class VideoController {
         }
         
         LOG.info("Disable {} online scan for movie with ID '{}'", sourcedb, id);
-        ApiStatus apiStatus = jsonApi.updateOnlineScan(MetaDataType.MOVIE, id, sourcedb, true);
+        ApiStatus apiStatus = jsonApiStorageService.updateOnlineScan(MetaDataType.MOVIE, id, sourcedb, true);
         if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
         return apiStatus;
     }
@@ -115,7 +115,7 @@ public class VideoController {
             @RequestParam(required = true) String externalid
     ) {
         LOG.info("Set {} external ID '{}' for movie ID {}", sourcedb, externalid, id);
-        ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.MOVIE, id, sourcedb, externalid);
+        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.MOVIE, id, sourcedb, externalid);
         if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
         return apiStatus;
     }
@@ -129,7 +129,7 @@ public class VideoController {
             @RequestParam(required = true) String sourcedb
     ) {
         LOG.info("Remove {} external ID from movie ID {}", sourcedb, id);
-        ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.MOVIE, id, sourcedb, null);
+        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.MOVIE, id, sourcedb, null);
         if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
         return apiStatus;
     }
@@ -151,7 +151,7 @@ public class VideoController {
 
         if (options.getId() > 0L) {
             LOG.info("Getting series with ID '{}'", options.getId());
-            jsonApi.getSingleVideo(wrapper);
+            jsonApiStorageService.getSingleVideo(wrapper);
         }
         wrapper.setStatusCheck();
         return wrapper;
@@ -170,7 +170,7 @@ public class VideoController {
         }
         
         LOG.info("Enable {} online scan for series with ID '{}'", sourcedb, id);
-        ApiStatus apiStatus = jsonApi.updateOnlineScan(MetaDataType.SERIES, id, sourcedb, false);
+        ApiStatus apiStatus = jsonApiStorageService.updateOnlineScan(MetaDataType.SERIES, id, sourcedb, false);
         if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
         return apiStatus;
     }
@@ -188,7 +188,7 @@ public class VideoController {
         }
         
         LOG.info("Disable {} online scan for series with ID '{}'", sourcedb, id);
-        ApiStatus apiStatus = jsonApi.updateOnlineScan(MetaDataType.SERIES, id, sourcedb, true);
+        ApiStatus apiStatus = jsonApiStorageService.updateOnlineScan(MetaDataType.SERIES, id, sourcedb, true);
         if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
         return apiStatus;
     } 
@@ -203,7 +203,7 @@ public class VideoController {
             @RequestParam(required = true) String externalid
     ) {
         LOG.info("Set {} external ID '{}' for series ID {}", sourcedb, externalid, id);
-        ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.SERIES, id, sourcedb, externalid);
+        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.SERIES, id, sourcedb, externalid);
         if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
         return apiStatus;
         
@@ -218,7 +218,7 @@ public class VideoController {
             @RequestParam(required = true) String sourcedb
     ) {
         LOG.info("Remove {} external ID from series ID {}", sourcedb, id);
-        ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.SERIES, id, sourcedb, null);
+        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.SERIES, id, sourcedb, null);
         if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
         return apiStatus;
     }
@@ -233,7 +233,7 @@ public class VideoController {
             @RequestParam(required = true) String externalid
     ) {
         LOG.info("Set {} external ID '{}' for season ID {}", sourcedb, externalid, id);
-        ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.SEASON, id, sourcedb, externalid);
+        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.SEASON, id, sourcedb, externalid);
         if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
         return apiStatus;
         
@@ -248,7 +248,7 @@ public class VideoController {
             @RequestParam(required = true) String sourcedb
     ) {
         LOG.info("Remove {} external ID from season ID {}", sourcedb, id);
-        ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.SEASON, id, sourcedb, null);
+        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.SEASON, id, sourcedb, null);
         if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
         return apiStatus;
     }
@@ -263,7 +263,7 @@ public class VideoController {
             @RequestParam(required = true) String externalid
     ) {
         LOG.info("Set {} external ID '{}' for episode ID {}", sourcedb, externalid, id);
-        ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.EPISODE, id, sourcedb, externalid);
+        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.EPISODE, id, sourcedb, externalid);
         if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
         return apiStatus;
         
@@ -278,7 +278,7 @@ public class VideoController {
             @RequestParam(required = true) String sourcedb
     ) {
         LOG.info("Remove {} external ID from episode ID {}", sourcedb, id);
-        ApiStatus apiStatus = this.jsonApi.updateExternalId(MetaDataType.EPISODE, id, sourcedb, null);
+        ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.EPISODE, id, sourcedb, null);
         if (apiStatus.isSuccessful()) scanningScheduler.triggerScanMetaData();
         return apiStatus;
     }
@@ -300,7 +300,7 @@ public class VideoController {
 
         if (options.getId() > 0L) {
             LOG.info("Getting season with ID '{}'", options.getId());
-            jsonApi.getSingleVideo(wrapper);
+            jsonApiStorageService.getSingleVideo(wrapper);
         }
         wrapper.setStatusCheck();
         return wrapper;
@@ -322,7 +322,7 @@ public class VideoController {
             if (options.hasDataItem(DataItem.ARTWORK) && StringUtils.isBlank(options.getArtwork())) {
                 options.setArtwork("all");
             }
-            jsonApi.getSeriesInfo(wrapper);
+            jsonApiStorageService.getSeriesInfo(wrapper);
             wrapper.setStatusCheck();
         } else {
             wrapper.setStatusInvalidId();
@@ -345,7 +345,7 @@ public class VideoController {
 
         ApiWrapperList<ApiEpisodeDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        jsonApi.getEpisodeList(wrapper);
+        jsonApiStorageService.getEpisodeList(wrapper);
         wrapper.setStatusCheck();
         return wrapper;
     }
@@ -362,7 +362,7 @@ public class VideoController {
 
         ApiWrapperList<ApiYearDecadeDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        wrapper.setResults(jsonApi.getYears(wrapper));
+        wrapper.setResults(jsonApiStorageService.getYears(wrapper));
         wrapper.setStatusCheck();
         return wrapper;
         
@@ -380,7 +380,7 @@ public class VideoController {
 
         ApiWrapperList<ApiYearDecadeDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        wrapper.setResults(jsonApi.getDecades(wrapper));
+        wrapper.setResults(jsonApiStorageService.getDecades(wrapper));
         wrapper.setStatusCheck();
         return wrapper;
         

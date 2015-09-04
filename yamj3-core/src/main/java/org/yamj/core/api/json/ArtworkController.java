@@ -43,7 +43,7 @@ public class ArtworkController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkController.class);
     @Autowired
-    private JsonApiStorageService api;
+    private JsonApiStorageService jsonApiStorageService;
     @Autowired
     private CommonStorageService commonStorageService;
     @Autowired
@@ -54,7 +54,7 @@ public class ArtworkController {
         ApiWrapperSingle<ApiArtworkDTO> wrapper = new ApiWrapperSingle<>();
 
         LOG.info("Attempting to retrieve artwork with id '{}'", id);
-        ApiArtworkDTO artwork = api.getArtworkById(id);
+        ApiArtworkDTO artwork = jsonApiStorageService.getArtworkById(id);
         LOG.info("Artwork: {}", artwork);
 
         // Add the result to the wrapper
@@ -69,7 +69,7 @@ public class ArtworkController {
         LOG.info("INDEX: Artwork list - Options: {}", options.toString());
         ApiWrapperList<ApiArtworkDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
-        wrapper.setResults(api.getArtworkList(wrapper));
+        wrapper.setResults(jsonApiStorageService.getArtworkList(wrapper));
         wrapper.setStatusCheck();
 
         return wrapper;

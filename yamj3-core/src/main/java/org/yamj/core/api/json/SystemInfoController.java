@@ -39,8 +39,9 @@ public class SystemInfoController {
 
     private static final Logger LOG = LoggerFactory.getLogger(SystemInfoController.class);
     private static final YamjInfo YAMJ_INFO = new YamjInfo(YamjInfoBuild.CORE);
+    
     @Autowired
-    private JsonApiStorageService jsonApi;
+    private JsonApiStorageService jsonApiStorageService;
 
     @RequestMapping("")
     public String getSystemUp() {
@@ -57,7 +58,7 @@ public class SystemInfoController {
         if (BooleanUtils.toBoolean(addcounts)) {
             for (MetaDataType singleType : MetaDataType.values()) {
                 if (singleType.isRealMetaData()) {
-                    CountTimestamp result = jsonApi.getCountTimestamp(singleType);
+                    CountTimestamp result = jsonApiStorageService.getCountTimestamp(singleType);
                     if (result == null) {
                         LOG.warn("There was an error getting the count for {}", singleType.toString());
                     } else {

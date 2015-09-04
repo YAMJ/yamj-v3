@@ -39,8 +39,9 @@ import org.yamj.core.database.service.JsonApiStorageService;
 public class PlayerController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlayerController.class);
+    
     @Autowired
-    private JsonApiStorageService jsonApi;
+    private JsonApiStorageService jsonApiStorageService;
 
     /**
      * Get a list of the players
@@ -57,7 +58,7 @@ public class PlayerController {
             options.setMode("EXACT");
         }
         wrapper.setOptions(options);
-        wrapper.setResults(jsonApi.getPlayerList(options));
+        wrapper.setResults(jsonApiStorageService.getPlayerList(options));
         wrapper.setStatusCheck();
 
         return wrapper;
@@ -84,7 +85,7 @@ public class PlayerController {
             player.setName(name);
             player.setDeviceType(deviceType);
             player.setIpAddress(ipAddress);
-            jsonApi.storePlayer(player);
+            jsonApiStorageService.storePlayer(player);
             status.setStatus(200);
             status.setMessage("Successfully stored '" + name + "'");
         } else {
@@ -106,7 +107,7 @@ public class PlayerController {
         ApiStatus status = new ApiStatus();
         if (playerId != null && playerId > 0) {
             LOG.info("Deleting player '{}'", playerId);
-            jsonApi.deletePlayer(playerId);
+            jsonApiStorageService.deletePlayer(playerId);
             status.setStatus(200);
             status.setMessage("Successfully deleted '" + playerId + "'");
         } else {
@@ -144,7 +145,7 @@ public class PlayerController {
             PlayerPath playerPath = new PlayerPath();
             playerPath.setSourcePath(sourcePath);
             playerPath.setTargetPath(targetPath);
-            boolean stored = jsonApi.storePlayerPath(playerId, playerPath);
+            boolean stored = jsonApiStorageService.storePlayerPath(playerId, playerPath);
             if (stored) {
                 status.setStatus(200);
                 status.setMessage("Successfully stored player path for player " + playerId);
@@ -175,7 +176,7 @@ public class PlayerController {
             status.setStatus(400);
             status.setMessage("Invalid path ID specified, player path not removed");
         } else {
-            boolean deleted = jsonApi.deletePlayerPath(playerId, pathId);
+            boolean deleted = jsonApiStorageService.deletePlayerPath(playerId, pathId);
             if (deleted) {
                 status.setStatus(200);
                 status.setMessage("Successfully removed player path '" + pathId + "' from player '" + playerId + "'");

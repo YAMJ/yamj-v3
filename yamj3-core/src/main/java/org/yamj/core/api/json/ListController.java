@@ -35,12 +35,12 @@ import org.yamj.core.database.service.JsonApiStorageService;
 public class ListController {
 
     @Autowired
-    private JsonApiStorageService jsonApi;
+    private JsonApiStorageService jsonApiStorageService;
 
     @RequestMapping("/movies")
     public ApiWrapperList<ApiListDTO> getMovieList() {
         ApiWrapperList<ApiListDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setResults(jsonApi.getMovieList(wrapper));
+        wrapper.setResults(jsonApiStorageService.getMovieList(wrapper));
         wrapper.setStatusCheck();
         return wrapper;
     }
@@ -48,7 +48,7 @@ public class ListController {
     @RequestMapping("/series")
     public ApiWrapperList<ApiListDTO> getSeriesList() {
         ApiWrapperList<ApiListDTO> wrapper = new ApiWrapperList<>();
-        wrapper.setResults(jsonApi.getSeriesList(wrapper));
+        wrapper.setResults(jsonApiStorageService.getSeriesList(wrapper));
         wrapper.setStatusCheck();
         return wrapper;
     }
