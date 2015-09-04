@@ -28,12 +28,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>yamj3-common</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework</groupId>
-                    <artifactId>spring-beans</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- JETTY -->
         <dependency>
