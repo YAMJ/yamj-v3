@@ -36,6 +36,14 @@
                 <td class="left" style="width: 20%"><a href="${yi.baseArtworkUrl}">${yi.baseArtworkUrl}</a></td>
             </tr>
             <tr>
+                <th class="left" style="width: 20%">Photo Location URL</th>
+                <td class="left" style="width: 20%"><a href="${yi.basePhotoUrl}">${yi.basePhotoUrl}</a></td>
+            </tr>
+            <tr>
+                <th class="left" style="width: 20%">Trailer Location URL</th>
+                <td class="left" style="width: 20%"><a href="${yi.baseTrailerUrl}">${yi.baseTrailerUrl}</a></td>
+            </tr>
+            <tr>
                 <th class="left" style="width: 20%">MediaInfo Location URL</th>
                 <td class="left" style="width: 20%"><a href="${yi.baseMediainfoUrl}">${yi.baseMediainfoUrl}</a></td>
             </tr>
