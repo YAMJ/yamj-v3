@@ -24,6 +24,7 @@ package org.yamj.core.service.trailer;
 
 import java.io.File;
 import java.net.URL;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +47,6 @@ public class TrailerProcessorService {
     
     @Autowired
     private TrailerStorageService trailerStorageService;
-    @Autowired
-    private TrailerScannerService trailerScannerService;
     @Autowired
     private FileStorageService fileStorageService;
     @Autowired

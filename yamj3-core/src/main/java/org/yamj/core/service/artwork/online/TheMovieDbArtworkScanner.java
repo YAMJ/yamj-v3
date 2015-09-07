@@ -22,17 +22,13 @@
  */
 package org.yamj.core.service.artwork.online;
 
-import com.omertron.themoviedbapi.MovieDbException;
-import com.omertron.themoviedbapi.TheMovieDbApi;
-import com.omertron.themoviedbapi.enumeration.ArtworkType;
-import com.omertron.themoviedbapi.model.artwork.Artwork;
-import com.omertron.themoviedbapi.model.movie.MovieBasic;
-import com.omertron.themoviedbapi.results.ResultList;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,14 +36,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.BoxedSet;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 import org.yamj.core.tools.CommonTools;
 import org.yamj.core.tools.MetadataTools;
+
+import com.omertron.themoviedbapi.MovieDbException;
+import com.omertron.themoviedbapi.TheMovieDbApi;
+import com.omertron.themoviedbapi.enumeration.ArtworkType;
+import com.omertron.themoviedbapi.model.artwork.Artwork;
+import com.omertron.themoviedbapi.model.movie.MovieBasic;
+import com.omertron.themoviedbapi.results.ResultList;
 
 @Service("tmdbArtworkScanner")
 public class TheMovieDbArtworkScanner implements
@@ -60,8 +66,6 @@ public class TheMovieDbArtworkScanner implements
     private static final String NO_LANGUAGE = StringUtils.EMPTY;
     private static final String LANGUAGE_EN = "en";
     
-    @Autowired
-    private ConfigService configService;
     @Autowired
     private LocaleService localeService;
     @Autowired
