@@ -22,8 +22,13 @@
  */
 package org.yamj.jetty;
 
+import static org.yamj.common.type.ExitType.CMDLINE_ERROR;
+import static org.yamj.common.type.ExitType.STARTUP_FAILURE;
+import static org.yamj.common.type.ExitType.SUCCESS;
+
 import java.io.File;
 import java.io.IOException;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,9 +49,6 @@ import org.yamj.common.model.YamjInfo;
 import org.yamj.common.model.YamjInfoBuild;
 import org.yamj.common.tools.ClassTools;
 import org.yamj.common.type.ExitType;
-import static org.yamj.common.type.ExitType.CMDLINE_ERROR;
-import static org.yamj.common.type.ExitType.STARTUP_FAILURE;
-import static org.yamj.common.type.ExitType.SUCCESS;
 
 public class Start {
 
@@ -106,6 +108,7 @@ public class Start {
             } catch (IOException ex) {
                 ClassTools.checkSystemProperty("yamj3.home", yamjHome);
             }
+            
             LOG.info("YAMJ Home: '{}'", yamjHome);
             LOG.info("YAMJ Port: {}", yamjPort);
             LOG.info("YAMJ Shudown Timeout: {}ms", yamjShutdownTimeout);
