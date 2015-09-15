@@ -22,12 +22,23 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.omertron.imdbapi.model.*;
 import java.io.IOException;
-import java.util.*;
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +49,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.AbstractMetadata;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
@@ -49,6 +64,11 @@ import org.yamj.core.web.HTMLTools;
 import org.yamj.core.web.apis.ImdbApiWrapper;
 import org.yamj.core.web.apis.ImdbEpisodeDTO;
 import org.yamj.core.web.apis.ImdbSearchEngine;
+
+import com.omertron.imdbapi.model.ImdbCast;
+import com.omertron.imdbapi.model.ImdbCredit;
+import com.omertron.imdbapi.model.ImdbMovieDetails;
+import com.omertron.imdbapi.model.ImdbPerson;
 
 @Service("imdbScanner")
 public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner {
@@ -819,7 +839,8 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         if (StringUtils.isBlank(imdbPerson.getActorId())) {
             return ScanResult.NO_RESULT;
         }
-        // BIO xml is still needed for birtd and death informations
+        
+        // BIO xml is still needed for some values
         final String bio = imdbApiWrapper.getPersonBioXML(imdbId, throwTempError);
         
         if (OverrideTools.checkOverwritePersonNames(person, SCANNER_ID)) {
@@ -837,7 +858,16 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
 
         if (OverrideTools.checkOverwriteBiography(person, SCANNER_ID)) {
-            person.setBiography(MetadataTools.cleanBiography(imdbPerson.getBiography()), SCANNER_ID);
+            final String apiBio = MetadataTools.cleanBiography(imdbPerson.getBiography());
+            if (StringUtils.isNotBlank(apiBio)) {
+                person.setBiography(apiBio, SCANNER_ID);
+            } else if (bio.contains(">Mini Bio (1)</h4>")) {
+                String biography = HTMLTools.extractTag(bio, ">Mini Bio (1)</h4>", "<em>- IMDb Mini Biography");
+                if (StringUtils.isBlank(biography) && bio.contains("<a name=\"trivia\">")) {
+                    biography = HTMLTools.extractTag(bio, ">Mini Bio (1)</h4>", "<a name=\"trivia\">");
+                }
+                person.setBiography(HTMLTools.removeHtmlTags(biography), SCANNER_ID);
+            }
         }
 
         int endIndex;
