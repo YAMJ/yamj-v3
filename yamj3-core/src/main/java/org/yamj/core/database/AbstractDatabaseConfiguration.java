@@ -22,21 +22,17 @@
  */
 package org.yamj.core.database;
 
-import javax.sql.DataSource;
-
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
-public interface DatabaseConfiguration  {
-
+public abstract class AbstractDatabaseConfiguration  implements DatabaseConfiguration {
+    
     @Bean
-    DataSource dataSource();
-
-    @Bean
-    FactoryBean<SessionFactory> sessionFactory();
-
-    @Bean
-    PlatformTransactionManager transactionManager() throws Exception;
+    public PlatformTransactionManager transactionManager() throws Exception {
+        HibernateTransactionManager transactionManager = new HibernateTransactionManager(sessionFactory().getObject());
+        transactionManager.setDefaultTimeout(30);
+        return transactionManager;
+    }
 }
+

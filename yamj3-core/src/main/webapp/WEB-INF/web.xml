@@ -18,7 +18,11 @@
         <param-name>log4jConfigLocation</param-name>
         <param-value>/WEB-INF/log4j.properties</param-value>
     </context-param>
-    
+    <context-param>
+		<param-name>spring.profiles.default</param-name>
+   		<param-value>default</param-value>
+	</context-param>
+
     <filter>
         <filter-name>encoding-filter</filter-name>
         <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
