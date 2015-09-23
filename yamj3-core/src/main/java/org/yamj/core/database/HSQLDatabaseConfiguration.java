@@ -31,14 +31,15 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.SessionFactory;
 import org.hsqldb.server.Server;
+import org.hsqldb.server.ServerConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
@@ -52,65 +53,24 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(HSQLDatabaseConfiguration.class);
 
-    @Value("${yamj3.database.showSql:false}")
-    private boolean showSql;
-
-    @Value("${yamj3.database.statistics:false}")
-    private boolean generateStatistics;
-
-    @Value("${yamj3.database.poolPreparedStatements:true}")
-    private boolean poolPreparedStatements;
-
-    @Value("${yamj3.database.connections.initialSize:5}")
-    private int initialSize;
-
-    @Value("${yamj3.database.connections.maxActive:5}")
-    private int maxActive;
-
-    @Value("${yamj3.database.connections.minIdle:2}")
-    private int minIdle;
-
-    @Value("${yamj3.database.connections.maxIdle:10}")
-    private int maxIdle;
-
-    @Value("${yamj3.database.connections.maxWait:500}")
-    private long maxWait;
-
-    @Value("${yamj3.database.connections.minEvictableIdleTimeMillis:1800000}")
-    private long minEvictableIdleTimeMillis;
-
-    @Value("${yamj3.database.connections.timeBetweenEvictionRunsMillis:1800000}")
-    private long timeBetweenEvictionRunsMillis;
-
-    @Value("${yamj3.database.connections.numTestsPerEvictionRun:3}")
-    private int numTestsPerEvictionRun;
-
-    @Value("${yamj3.database.connections.testOnBorrow:true}")
-    private boolean testOnBorrow;
-
-    @Value("${yamj3.database.connections.testWhileIdle:true}")
-    private boolean testWhileIdle;
-
-    @Value("${yamj3.database.connections.testOnReturn:true}")
-    private boolean testOnReturn;
-
-    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+    @Lazy(false)
     @Bean(destroyMethod="shutdown")
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public Server hsqlServer() {
         LOG.debug("Starting HSQL server");
         
         Server hsqlServer = new Server();
-        //hsqlServer.setLogWriter(new PrintWriter(System.err));
         hsqlServer.setLogWriter(null);
+        //hsqlServer.setLogWriter(new PrintWriter(System.err));
         hsqlServer.setSilent(true);
+        hsqlServer.setNoSystemExit(true);
 
         StringBuffer path = new StringBuffer().append("file:");
         path.append(System.getProperty("yamj3.home", ".")).append("/database/yamj3");
-
         hsqlServer.setDatabaseName(0, "yamj3");
         hsqlServer.setDatabasePath(0, path.toString());
-
-        hsqlServer.setPort(9001); // default port
+        
+        hsqlServer.setPort(ServerConstants.SC_DEFAULT_HSQL_SERVER_PORT);
         hsqlServer.setDaemon(true);
         hsqlServer.start();
         
@@ -125,7 +85,7 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
         LOG.trace("Create new data source");
         
         BasicDataSource basicDataSource = new BasicDataSource();
-        basicDataSource.setDriverClassName("org.hsqldb.jdbcDriver");
+        basicDataSource.setDriverClassName("org.hsqldb.jdbc.JDBCDriver");
         basicDataSource.setUrl("jdbc:hsqldb:hsql://localhost:9001/yamj3");
         basicDataSource.setUsername("sa");
         basicDataSource.setPassword("");

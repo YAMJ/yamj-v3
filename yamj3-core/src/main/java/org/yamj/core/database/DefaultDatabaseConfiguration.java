@@ -63,56 +63,14 @@ public class DefaultDatabaseConfiguration extends AbstractDatabaseConfiguration 
     @Value("${yamj3.database.password}")
     private String password;
 
-    @Value("${yamj3.database.showSql:false}")
-    private boolean showSql;
-
-    @Value("${yamj3.database.statistics:false}")
-    private boolean generateStatistics;
-
     @Value("${yamj3.database.auto:update}")
     private String hbm2ddlAuto;
 
     @Value("${yamj3.database.useSqlComments:false}")
     private boolean useSqlComments;
-
-    @Value("${yamj3.database.poolPreparedStatements:true}")
-    private boolean poolPreparedStatements;
     
     @Value("${yamj3.database.validationQuery:null}")
     private String validationQuery;
-
-    @Value("${yamj3.database.connections.initialSize:5}")
-    private int initialSize;
-
-    @Value("${yamj3.database.connections.maxActive:5}")
-    private int maxActive;
-
-    @Value("${yamj3.database.connections.minIdle:2}")
-    private int minIdle;
-
-    @Value("${yamj3.database.connections.maxIdle:10}")
-    private int maxIdle;
-
-    @Value("${yamj3.database.connections.maxWait:500}")
-    private long maxWait;
-
-    @Value("${yamj3.database.connections.minEvictableIdleTimeMillis:1800000}")
-    private long minEvictableIdleTimeMillis;
-
-    @Value("${yamj3.database.connections.timeBetweenEvictionRunsMillis:1800000}")
-    private long timeBetweenEvictionRunsMillis;
-
-    @Value("${yamj3.database.connections.numTestsPerEvictionRun:3}")
-    private int numTestsPerEvictionRun;
-
-    @Value("${yamj3.database.connections.testOnBorrow:true}")
-    private boolean testOnBorrow;
-
-    @Value("${yamj3.database.connections.testWhileIdle:true}")
-    private boolean testWhileIdle;
-
-    @Value("${yamj3.database.connections.testOnReturn:true}")
-    private boolean testOnReturn;
 
     @Override
     @Bean(destroyMethod="close")

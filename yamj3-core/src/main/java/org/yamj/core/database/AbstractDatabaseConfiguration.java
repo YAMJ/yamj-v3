@@ -22,12 +22,55 @@
  */
 package org.yamj.core.database;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
 public abstract class AbstractDatabaseConfiguration  implements DatabaseConfiguration {
     
+    @Value("${yamj3.database.showSql:false}")
+    protected boolean showSql;
+
+    @Value("${yamj3.database.statistics:false}")
+    protected boolean generateStatistics;
+
+    @Value("${yamj3.database.poolPreparedStatements:true}")
+    protected boolean poolPreparedStatements;
+
+    @Value("${yamj3.database.connections.initialSize:5}")
+    protected int initialSize;
+
+    @Value("${yamj3.database.connections.maxActive:5}")
+    protected int maxActive;
+
+    @Value("${yamj3.database.connections.minIdle:2}")
+    protected int minIdle;
+
+    @Value("${yamj3.database.connections.maxIdle:10}")
+    protected int maxIdle;
+
+    @Value("${yamj3.database.connections.maxWait:500}")
+    protected long maxWait;
+
+    @Value("${yamj3.database.connections.minEvictableIdleTimeMillis:1800000}")
+    protected long minEvictableIdleTimeMillis;
+
+    @Value("${yamj3.database.connections.timeBetweenEvictionRunsMillis:1800000}")
+    protected long timeBetweenEvictionRunsMillis;
+
+    @Value("${yamj3.database.connections.numTestsPerEvictionRun:3}")
+    protected int numTestsPerEvictionRun;
+
+    @Value("${yamj3.database.connections.testOnBorrow:true}")
+    protected boolean testOnBorrow;
+
+    @Value("${yamj3.database.connections.testWhileIdle:true}")
+    protected boolean testWhileIdle;
+
+    @Value("${yamj3.database.connections.testOnReturn:true}")
+    protected boolean testOnReturn;
+
     @Bean
     public PlatformTransactionManager transactionManager() throws Exception {
         HibernateTransactionManager transactionManager = new HibernateTransactionManager(sessionFactory().getObject());
