@@ -24,18 +24,25 @@ package org.yamj.core.database;
 
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 
+import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcDataSource;
+import org.h2.tools.Server;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Scope;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.yamj.core.hibernate.AuditInterceptor;
@@ -47,11 +54,31 @@ public class H2DatabaseConfiguration extends AbstractDatabaseConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(H2DatabaseConfiguration.class);
 
+    @Value("${yamj3.database.port:9092}")
+    protected int port;
+
+    @Lazy(false)
+    @Bean(destroyMethod="shutdown")
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+    @DependsOn("dataSource")
+    public Server h2Server() throws SQLException {
+        LOG.debug("Starting H2 tcp server");
+        
+        Server h2Server = Server.createTcpServer(
+            "-tcpPort", Integer.toString(port),
+            "-tcpAllowOthers",
+            "-tcpDaemon");
+        h2Server.start();
+        
+        LOG.info("Started H2 tcp server on port {}", h2Server.getPort());
+        return h2Server;
+    }
+    
     @Override
     @Bean
     public DataSource dataSource() {
         LOG.trace("Create new data source");
-
+        
         JdbcDataSource dataSource = new JdbcDataSource();
         StringBuffer url = new StringBuffer().append("jdbc:h2:");
         url.append(System.getProperty("yamj3.home", ".")).append("/database/yamj3;AUTO_SERVER=TRUE");

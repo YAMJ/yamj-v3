@@ -31,10 +31,10 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.SessionFactory;
 import org.hsqldb.server.Server;
-import org.hsqldb.server.ServerConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,6 +53,9 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(HSQLDatabaseConfiguration.class);
 
+    @Value("${yamj3.database.port:9001}")
+    protected int port;
+    
     @Lazy(false)
     @Bean(destroyMethod="shutdown")
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -70,7 +73,7 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
         hsqlServer.setDatabaseName(0, "yamj3");
         hsqlServer.setDatabasePath(0, path.toString());
         
-        hsqlServer.setPort(ServerConstants.SC_DEFAULT_HSQL_SERVER_PORT);
+        hsqlServer.setPort(port);
         hsqlServer.setDaemon(true);
         hsqlServer.start();
         
