@@ -65,7 +65,6 @@ public class ClassTools {
      * @return
      */
     public static String checkSystemProperty(String property, String defaultValue) {
-        // Check to see if the yamj3.home property is set
         String systemProperty = System.getProperty(property, "");
         if (StringUtils.isBlank(systemProperty)) {
             LOG.debug("System property '{}' not found. Setting to '{}'", property, defaultValue);

@@ -63,10 +63,7 @@ public class GenreXmlTools {
         File xmlFile;
         if (StringUtils.isBlank(FilenameUtils.getPrefix(genreFileName))) {
             // relative path given
-            String path = System.getProperty("yamj3.home");
-            if (StringUtils.isEmpty(path)) {
-                path = ".";
-            }
+            String path = System.getProperty("yamj3.home", ".");
             xmlFile = new File(FilenameUtils.concat(path, genreFileName));
         } else  {
             // absolute path given

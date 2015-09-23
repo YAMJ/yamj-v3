@@ -30,38 +30,27 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.SessionFactory;
+import org.hsqldb.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Scope;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.yamj.core.hibernate.AuditInterceptor;
 
 @Configuration
 @EnableTransactionManagement
-@Profile("default")
-public class DefaultDatabaseConfiguration extends AbstractDatabaseConfiguration {
+@Profile("hsql")
+public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultDatabaseConfiguration.class);
-
-    @Value("${yamj3.database.driver}")
-    private String driverClassName;
-
-    @Value("${yamj3.database.dialect}")
-    private String dialect;
-
-    @Value("${yamj3.database.url}")
-    private String url;
-
-    @Value("${yamj3.database.username}")
-    private String username;
-
-    @Value("${yamj3.database.password}")
-    private String password;
+    private static final Logger LOG = LoggerFactory.getLogger(HSQLDatabaseConfiguration.class);
 
     @Value("${yamj3.database.showSql:false}")
     private boolean showSql;
@@ -69,17 +58,8 @@ public class DefaultDatabaseConfiguration extends AbstractDatabaseConfiguration 
     @Value("${yamj3.database.statistics:false}")
     private boolean generateStatistics;
 
-    @Value("${yamj3.database.auto:update}")
-    private String hbm2ddlAuto;
-
-    @Value("${yamj3.database.useSqlComments:false}")
-    private boolean useSqlComments;
-
     @Value("${yamj3.database.poolPreparedStatements:true}")
     private boolean poolPreparedStatements;
-    
-    @Value("${yamj3.database.validationQuery:null}")
-    private String validationQuery;
 
     @Value("${yamj3.database.connections.initialSize:5}")
     private int initialSize;
@@ -114,17 +94,42 @@ public class DefaultDatabaseConfiguration extends AbstractDatabaseConfiguration 
     @Value("${yamj3.database.connections.testOnReturn:true}")
     private boolean testOnReturn;
 
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+    @Bean(destroyMethod="shutdown")
+    public Server hsqlServer() {
+        LOG.debug("Starting HSQL server");
+        
+        Server hsqlServer = new Server();
+        //hsqlServer.setLogWriter(new PrintWriter(System.err));
+        hsqlServer.setLogWriter(null);
+        hsqlServer.setSilent(true);
+
+        StringBuffer path = new StringBuffer().append("file:");
+        path.append(System.getProperty("yamj3.home", ".")).append("/database/yamj3");
+
+        hsqlServer.setDatabaseName(0, "yamj3");
+        hsqlServer.setDatabasePath(0, path.toString());
+
+        hsqlServer.setPort(9001); // default port
+        hsqlServer.setDaemon(true);
+        hsqlServer.start();
+        
+        LOG.info("Started HSQL server on port {}", hsqlServer.getPort());
+        return hsqlServer;
+    }
+    
     @Override
     @Bean(destroyMethod="close")
+    @DependsOn("hsqlServer")
     public DataSource dataSource() {
         LOG.trace("Create new data source");
         
         BasicDataSource basicDataSource = new BasicDataSource();
-        basicDataSource.setDriverClassName(driverClassName);
-        basicDataSource.setUrl(url);
-        basicDataSource.setUsername(username);
-        basicDataSource.setPassword(password);
-        basicDataSource.setValidationQuery(validationQuery);
+        basicDataSource.setDriverClassName("org.hsqldb.jdbcDriver");
+        basicDataSource.setUrl("jdbc:hsqldb:hsql://localhost:9001/yamj3");
+        basicDataSource.setUsername("sa");
+        basicDataSource.setPassword("");
+        basicDataSource.setValidationQuery("SELECT 1 FROM INFORMATION_SCHEMA.SYSTEM_USERS");
         basicDataSource.setPoolPreparedStatements(poolPreparedStatements);
         
         basicDataSource.setInitialSize(initialSize);
@@ -155,12 +160,12 @@ public class DefaultDatabaseConfiguration extends AbstractDatabaseConfiguration 
         sessionFactoryBean.setPackagesToScan("org.yamj.core.database.model");
         
         Properties props = new Properties();
-        props.put("hibernate.dialect", dialect);
+        props.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
         props.put("hibernate.show_sql", showSql);
         props.put("hibernate.generate_statistics", generateStatistics);
-        props.put("hibernate.hbm2ddl.auto", hbm2ddlAuto);
+        props.put("hibernate.hbm2ddl.auto", "update");
         props.put("hibernate.connection.isolation", TRANSACTION_READ_COMMITTED);
-        props.put("hibernate.use_sql_comments", useSqlComments);
+        props.put("hibernate.use_sql_comments", false);
         props.put("hibernate.cache.use_query_cache", false);
         props.put("hibernate.cache.use_second_level_cache", false);
         props.put("hibernate.connection.CharSet", "utf8");
