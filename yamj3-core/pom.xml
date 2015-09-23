@@ -21,8 +21,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!--  database versions -->
         <mysql.version>5.1.36</mysql.version>
-        <derby.version>10.11.1.1</derby.version>
         <hsqldb.version>2.3.3</hsqldb.version>
+        <h2.version>1.4.189</h2.version>
         <!-- other stuff -->
         <ehcache.version>2.6.11</ehcache.version>
         <datetime.version>3.0.2</datetime.version>
@@ -151,14 +151,12 @@
             <version>${hsqldb.version}</version>
             <scope>runtime</scope>
         </dependency>
-        <!--
         <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
-            <version>${derby.version}</version>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
             <scope>runtime</scope>
         </dependency>
-         -->        
         <!-- TEST -->
         <dependency>
             <groupId>junit</groupId>
