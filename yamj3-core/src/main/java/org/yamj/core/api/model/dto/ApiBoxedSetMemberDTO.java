@@ -22,11 +22,19 @@
  */
 package org.yamj.core.api.model.dto;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.yamj.common.type.MetaDataType;
+import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.tools.MetadataTools;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.Date;
-import org.yamj.common.type.MetaDataType;
-import org.yamj.core.tools.MetadataTools;
 
 /**
  * @author modmax
@@ -43,7 +51,7 @@ public class ApiBoxedSetMemberDTO extends AbstractApiIdentifiableDTO {
     private String plot;
     private String outline;
     private Boolean watched;
-
+    private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<>(ArtworkType.class);
 
     public MetaDataType getVideoType() {
         return videoType;
@@ -115,5 +123,24 @@ public class ApiBoxedSetMemberDTO extends AbstractApiIdentifiableDTO {
 
     public void setWatched(Boolean watched) {
         this.watched = watched;
+    }
+
+    public Map<ArtworkType, List<ApiArtworkDTO>> getArtwork() {
+        return artwork;
+    }
+
+    public void setArtwork(List<ApiArtworkDTO> artworkList) {
+        if (CollectionUtils.isEmpty(artworkList)) return;
+        for (ApiArtworkDTO aadto : artworkList) {
+            addArtwork(aadto);
+        }
+    }
+    
+    public void addArtwork(ApiArtworkDTO newArtwork) {
+        // Add a blank list if it doesn't already exist
+        if (!artwork.containsKey(newArtwork.getArtworkType())) {
+            artwork.put(newArtwork.getArtworkType(), new ArrayList<ApiArtworkDTO>(1));
+        }
+        this.artwork.get(newArtwork.getArtworkType()).add(newArtwork);
     }
 }

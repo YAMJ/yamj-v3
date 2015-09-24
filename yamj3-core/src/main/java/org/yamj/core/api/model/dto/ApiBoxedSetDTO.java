@@ -22,10 +22,16 @@
  */
 package org.yamj.core.api.model.dto;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.yamj.core.database.model.type.ArtworkType;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.*;
-import org.yamj.core.database.model.type.ArtworkType;
 
 /**
  * @author modmax
@@ -76,6 +82,7 @@ public class ApiBoxedSetDTO extends AbstractApiIdentifiableDTO {
     }
 
     public void setArtwork(List<ApiArtworkDTO> artworkList) {
+        if (CollectionUtils.isEmpty(artworkList)) return;
         for (ApiArtworkDTO aadto : artworkList) {
             addArtwork(aadto);
         }
