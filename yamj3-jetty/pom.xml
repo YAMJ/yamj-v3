@@ -10,7 +10,7 @@
 
     <!-- Project Information -->
     <name>YAMJ3 Jetty</name>
-    <description>Core of YAMJ project</description>
+    <description>Jetty server for YAMJ project</description>
     <artifactId>yamj3-jetty</artifactId>
     <packaging>jar</packaging>
 
