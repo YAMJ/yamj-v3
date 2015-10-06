@@ -22,7 +22,15 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.CacheMode;
@@ -36,7 +44,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.CachingNames;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.Library;
+import org.yamj.core.database.model.StageDirectory;
+import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.hibernate.HibernateDao;
@@ -220,12 +232,12 @@ public class StagingDao extends HibernateDao {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT distinct sf ");
         sb.append("FROM StageFile sf ");
-        sb.append("JOIN sf.nfoRelations nfrel ");
+        sb.append("JOIN FETCH sf.nfoRelations nfrel ");
         sb.append("JOIN nfrel.nfoRelationPK.videoData vd ");
         sb.append("WHERE vd.id=:videoDataId ");
         sb.append("AND sf.fileType=:fileType ");
         sb.append("AND sf.status in (:statusSet) ");
-        sb.append("ORDER by nfrel.priority DESC");
+        sb.append("ORDER BY nfrel.priority DESC");
 
         Set<StatusType> statusSet = new HashSet<>();
         statusSet.add(StatusType.NEW);
