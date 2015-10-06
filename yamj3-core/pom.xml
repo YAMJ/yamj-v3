@@ -34,7 +34,7 @@
         <imdbapi.version>1.4-SNAPSHOT</imdbapi.version>
         <moviemeterapi.version>1.1-SNAPSHOT</moviemeterapi.version>
         <tvrageapi.version>1.6-SNAPSHOT</tvrageapi.version>
-        <httpclient.version>4.5</httpclient.version>
+        <httpclient.version>4.5.1</httpclient.version>
     </properties>
 
     <dependencies>
