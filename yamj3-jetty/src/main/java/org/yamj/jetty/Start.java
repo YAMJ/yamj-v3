@@ -54,7 +54,8 @@ public class Start {
 
     private static final Logger LOG = LoggerFactory.getLogger(Start.class);
     private static final String WAR_DIR = "lib/";
-    private static final String WAR_FILE = "yamj3-core-3.0-SNAPSHOT.war";
+    private static final String WAR_FILE_RELEASE = "yamj3-core-3.0.war";
+    private static final String WAR_FILE_SNAPSHOT = "yamj3-core-3.0-SNAPSHOT.war";
     private static String yamjHome = ".";
     private static int yamjPort = 8888;
     private static int yamjShutdownTimeout = 5000;
@@ -98,8 +99,13 @@ public class Start {
         yamjShutdownTimeout = convertToInt(parser.getParsedOptionValue("t"), yamjShutdownTimeout);
         yamjStopAtShutdown = convertToBoolean(parser.getParsedOptionValue("s"), yamjStopAtShutdown);
 
-        String warFilename = FilenameUtils.concat(yamjHome, WAR_DIR + WAR_FILE);
+        // first release WAR, then snapshot WAR
+        String warFilename = FilenameUtils.concat(yamjHome, WAR_DIR + WAR_FILE_RELEASE);
         File warFile = new File(warFilename);
+        if (!warFile.exists()) {
+            warFilename = FilenameUtils.concat(yamjHome, WAR_DIR + WAR_FILE_SNAPSHOT);
+            warFile = new File(warFilename);
+        }        
 
         if (warFile.exists()) {
             try {
