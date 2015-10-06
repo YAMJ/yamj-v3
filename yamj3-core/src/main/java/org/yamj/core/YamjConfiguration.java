@@ -24,6 +24,7 @@ package org.yamj.core;
 
 import java.util.List;
 import java.util.Properties;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
@@ -35,14 +36,17 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.servlet.config.annotation.*;
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.hibernate.HibernateAwareObjectMapper;
 
 @Configuration
 @EnableScheduling
-@ComponentScan(basePackages = {"org.yamj.core"})
+@ComponentScan("org.yamj.core")
 public class YamjConfiguration extends WebMvcConfigurationSupport {
 
     @Override
