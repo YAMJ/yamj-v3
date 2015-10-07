@@ -174,8 +174,6 @@ public class TheMovieDbArtworkScanner implements
     }
 
     public MovieBasic findCollection(BoxedSet boxedSet, String language) {
-        if (StringUtils.isBlank(boxedSet.getName())) return null;
-        
         try {
             ResultList<MovieBasic> resultList = tmdbApi.searchCollection(boxedSet.getName(), 0, language);
             if (resultList.isEmpty() && !StringUtils.equalsIgnoreCase(language, "en")) {
@@ -183,6 +181,10 @@ public class TheMovieDbArtworkScanner implements
             }
 
             for (MovieBasic movieBasic : resultList.getResults()) {
+                if (StringUtils.isBlank(movieBasic.getTitle())) {
+                    continue;
+                }
+
                 // 1. check name
                 String boxedSetName = MetadataTools.cleanIdentifier(boxedSet.getName());
                 String collectionName = MetadataTools.cleanIdentifier(movieBasic.getTitle());
