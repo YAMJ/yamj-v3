@@ -257,14 +257,14 @@ public class StagingDao extends HibernateDao {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT distinct sf ");
         sb.append("FROM StageFile sf ");
-        sb.append("JOIN sf.nfoRelations nfrel ");
+        sb.append("JOIN FETCH sf.nfoRelations nfrel ");
         sb.append("JOIN nfrel.nfoRelationPK.videoData vd ");
         sb.append("JOIN vd.season sea ");
         sb.append("JOIN sea.series ser ");
         sb.append("WHERE ser.id=:seriesId ");
         sb.append("AND sf.fileType=:fileType ");
         sb.append("AND sf.status in (:statusSet) ");
-        sb.append("ORDER by nfrel.priority DESC");
+        sb.append("ORDER BY nfrel.priority DESC");
 
         Set<StatusType> statusSet = new HashSet<>();
         statusSet.add(StatusType.NEW);
