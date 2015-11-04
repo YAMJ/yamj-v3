@@ -22,17 +22,13 @@
  */
 package org.yamj.core.service.artwork.online;
 
-import com.omertron.themoviedbapi.MovieDbException;
-import com.omertron.themoviedbapi.TheMovieDbApi;
-import com.omertron.themoviedbapi.enumeration.ArtworkType;
-import com.omertron.themoviedbapi.model.artwork.Artwork;
-import com.omertron.themoviedbapi.model.movie.MovieBasic;
-import com.omertron.themoviedbapi.results.ResultList;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,12 +37,23 @@ import org.springframework.cache.Cache;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.config.LocaleService;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.BoxedSet;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.TheMovieDbScanner;
 import org.yamj.core.tools.CommonTools;
 import org.yamj.core.tools.MetadataTools;
+
+import com.omertron.themoviedbapi.MovieDbException;
+import com.omertron.themoviedbapi.TheMovieDbApi;
+import com.omertron.themoviedbapi.enumeration.ArtworkType;
+import com.omertron.themoviedbapi.model.artwork.Artwork;
+import com.omertron.themoviedbapi.model.collection.Collection;
+import com.omertron.themoviedbapi.results.ResultList;
 
 @Service("tmdbArtworkScanner")
 public class TheMovieDbArtworkScanner implements
@@ -144,11 +151,11 @@ public class TheMovieDbArtworkScanner implements
             return getFilteredArtwork(tmdbId, defaultLanguage, MetaDataType.BOXSET, ArtworkType.POSTER, DEFAULT_SIZE);
         }
         
-        MovieBasic movieBasic = findCollection(boxedSet, defaultLanguage);
-        if (movieBasic != null) {
-            boxedSet.setSourceDbId(getScannerName(), Integer.toString(movieBasic.getId()));
+        Collection collection = findCollection(boxedSet, defaultLanguage);
+        if (collection != null) {
+            boxedSet.setSourceDbId(getScannerName(), Integer.toString(collection.getId()));
             // TODO rename collection?
-            return this.getFilteredArtwork(movieBasic.getId(), defaultLanguage, MetaDataType.BOXSET, ArtworkType.POSTER, DEFAULT_SIZE);
+            return this.getFilteredArtwork(collection.getId(), defaultLanguage, MetaDataType.BOXSET, ArtworkType.POSTER, DEFAULT_SIZE);
         }
         
         return Collections.emptyList();
@@ -163,34 +170,34 @@ public class TheMovieDbArtworkScanner implements
             return getFilteredArtwork(tmdbId, defaultLanguage, MetaDataType.BOXSET, ArtworkType.BACKDROP, DEFAULT_SIZE);
         }
         
-        MovieBasic movieBasic = findCollection(boxedSet, defaultLanguage);
-        if (movieBasic != null) {
-            boxedSet.setSourceDbId(getScannerName(), Integer.toString(movieBasic.getId()));
+        Collection collection = findCollection(boxedSet, defaultLanguage);
+        if (collection != null) {
+            boxedSet.setSourceDbId(getScannerName(), Integer.toString(collection.getId()));
             // TODO rename collection?
-            return this.getFilteredArtwork(movieBasic.getId(), defaultLanguage, MetaDataType.BOXSET, ArtworkType.BACKDROP, DEFAULT_SIZE);
+            return this.getFilteredArtwork(collection.getId(), defaultLanguage, MetaDataType.BOXSET, ArtworkType.BACKDROP, DEFAULT_SIZE);
         }
         
         return Collections.emptyList();
     }
 
-    public MovieBasic findCollection(BoxedSet boxedSet, String language) {
+    public Collection findCollection(BoxedSet boxedSet, String language) {
         try {
-            ResultList<MovieBasic> resultList = tmdbApi.searchCollection(boxedSet.getName(), 0, language);
+            ResultList<Collection> resultList = tmdbApi.searchCollection(boxedSet.getName(), 0, language);
             if (resultList.isEmpty() && !StringUtils.equalsIgnoreCase(language, "en")) {
                 resultList = tmdbApi.searchCollection(boxedSet.getName(), 0, "en");
             }
 
-            for (MovieBasic movieBasic : resultList.getResults()) {
-                if (StringUtils.isBlank(movieBasic.getTitle())) {
+            for (Collection collection : resultList.getResults()) {
+                if (StringUtils.isBlank(collection.getTitle())) {
                     continue;
                 }
 
                 // 1. check name
                 String boxedSetName = MetadataTools.cleanIdentifier(boxedSet.getName());
-                String collectionName = MetadataTools.cleanIdentifier(movieBasic.getTitle());
+                String collectionName = MetadataTools.cleanIdentifier(collection.getTitle());
                 if (StringUtils.equalsIgnoreCase(boxedSetName, collectionName)) {
                     // found matching collection
-                    return movieBasic;
+                    return collection;
                 }
 
                 
