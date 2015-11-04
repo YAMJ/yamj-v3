@@ -24,11 +24,13 @@ package org.yamj.core.web.apis;
 
 import com.omertron.imdbapi.ImdbApi;
 import com.omertron.imdbapi.model.*;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -37,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.core.CachingNames;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
@@ -45,7 +48,6 @@ import org.yamj.core.service.metadata.online.OnlineScannerException;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.web.HTMLTools;
-import org.yamj.core.web.PoolingHttpClient;
 import org.yamj.core.web.ResponseTools;
 
 @Service

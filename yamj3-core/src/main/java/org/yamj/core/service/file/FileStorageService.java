@@ -27,12 +27,15 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+
 import javax.annotation.PostConstruct;
 import javax.imageio.*;
 import javax.imageio.stream.FileImageOutputStream;
+
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.FileHeader;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -41,12 +44,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.api.model.Skin;
 import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.service.attachment.AttachmentScannerService;
-import org.yamj.core.web.PoolingHttpClient;
 
 @Service("fileStorageService")
 public class FileStorageService {

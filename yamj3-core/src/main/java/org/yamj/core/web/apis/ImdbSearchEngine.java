@@ -23,6 +23,7 @@
 package org.yamj.core.web.apis;
 
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -30,17 +31,19 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.web.HTMLTools;
-import org.yamj.core.web.PoolingHttpClient;
 import org.yamj.core.web.ResponseTools;
 
 @Service("imdbSearchEngine")

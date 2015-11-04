@@ -26,6 +26,7 @@ import java.net.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpResponseException;
@@ -35,9 +36,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.core.database.model.type.ContainerType;
 import org.yamj.core.service.trailer.TrailerDownloadDTO;
-import org.yamj.core.web.PoolingHttpClient;
 
 @Service("youTubeDownloadParser")
 public class YouTubeDownloadParser  {

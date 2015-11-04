@@ -26,16 +26,18 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
-import org.yamj.core.web.PoolingHttpClient;
 import org.yamj.core.web.ResponseTools;
 
 @Service("yahooPosterScanner")

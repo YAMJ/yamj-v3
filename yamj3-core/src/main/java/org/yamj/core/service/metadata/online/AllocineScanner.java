@@ -23,16 +23,20 @@
 package org.yamj.core.service.metadata.online;
 
 import com.moviejukebox.allocine.model.*;
+
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
@@ -45,7 +49,6 @@ import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.HTMLTools;
-import org.yamj.core.web.PoolingHttpClient;
 import org.yamj.core.web.apis.AllocineApiWrapper;
 import org.yamj.core.web.apis.ImdbSearchEngine;
 import org.yamj.core.web.apis.SearchEngineTools;

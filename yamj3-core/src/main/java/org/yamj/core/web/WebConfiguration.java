@@ -29,9 +29,11 @@ import com.omertron.moviemeter.MovieMeterApi;
 import com.omertron.themoviedbapi.TheMovieDbApi;
 import com.omertron.thetvdbapi.TheTVDBApi;
 import com.omertron.tvrageapi.TVRageApi;
+
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -52,6 +54,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.api.common.http.WebBrowserUserAgentSelector;
 
 @Configuration

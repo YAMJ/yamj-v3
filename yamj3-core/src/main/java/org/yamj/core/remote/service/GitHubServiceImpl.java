@@ -25,6 +25,7 @@ package org.yamj.core.remote.service;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.protocol.HTTP;
@@ -34,10 +35,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.common.remote.service.GitHubService;
 import org.yamj.common.tools.ClassTools;
 import org.yamj.common.tools.DateTimeTools;
-import org.yamj.core.web.PoolingHttpClient;
 import org.yamj.core.web.ResponseTools;
 
 /**
