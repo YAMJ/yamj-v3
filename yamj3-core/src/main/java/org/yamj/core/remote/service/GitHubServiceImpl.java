@@ -36,10 +36,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.PoolingHttpClient;
+import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.common.remote.service.GitHubService;
 import org.yamj.common.tools.ClassTools;
 import org.yamj.common.tools.DateTimeTools;
-import org.yamj.core.web.ResponseTools;
 
 /**
  * Calls GitHub to determine the last code update

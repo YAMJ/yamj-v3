@@ -22,12 +22,17 @@
  */
 package org.yamj.core.web.apis;
 
-import com.omertron.imdbapi.ImdbApi;
-import com.omertron.imdbapi.model.*;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -40,6 +45,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.PoolingHttpClient;
+import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.CachingNames;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
@@ -48,7 +54,14 @@ import org.yamj.core.service.metadata.online.OnlineScannerException;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.web.HTMLTools;
-import org.yamj.core.web.ResponseTools;
+
+import com.omertron.imdbapi.ImdbApi;
+import com.omertron.imdbapi.model.ImdbCredit;
+import com.omertron.imdbapi.model.ImdbImage;
+import com.omertron.imdbapi.model.ImdbMovie;
+import com.omertron.imdbapi.model.ImdbMovieDetails;
+import com.omertron.imdbapi.model.ImdbPerson;
+import com.omertron.imdbapi.model.ImdbSeason;
 
 @Service
 public class ImdbApiWrapper {

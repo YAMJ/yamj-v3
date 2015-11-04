@@ -25,7 +25,11 @@ package org.yamj.core.service.metadata.online;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.annotation.PostConstruct;
 
@@ -36,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.PoolingHttpClient;
+import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.VideoData;
@@ -46,7 +51,6 @@ import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.HTMLTools;
-import org.yamj.core.web.ResponseTools;
 import org.yamj.core.web.apis.ImdbSearchEngine;
 import org.yamj.core.web.apis.SearchEngineTools;
 

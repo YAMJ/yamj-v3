@@ -22,19 +22,21 @@
  */
 package org.yamj.core.web.apis;
 
-import com.moviejukebox.allocine.AllocineApi;
-import com.moviejukebox.allocine.AllocineException;
-import com.moviejukebox.allocine.model.Search;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.CachingNames;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
-import org.yamj.core.web.ResponseTools;
+
+import com.moviejukebox.allocine.AllocineApi;
+import com.moviejukebox.allocine.AllocineException;
+import com.moviejukebox.allocine.model.Search;
 
 @Service
 public class AllocineApiSearch {

@@ -22,8 +22,6 @@
  */
 package org.yamj.core.web.apis;
 
-import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -41,10 +39,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.PoolingHttpClient;
+import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.config.LocaleService;
+import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 import org.yamj.core.web.HTMLTools;
-import org.yamj.core.web.ResponseTools;
 
 @Service("imdbSearchEngine")
 public class ImdbSearchEngine {

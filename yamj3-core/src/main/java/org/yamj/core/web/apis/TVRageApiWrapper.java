@@ -22,21 +22,23 @@
  */
 package org.yamj.core.web.apis;
 
-import com.omertron.tvrageapi.TVRageApi;
-import com.omertron.tvrageapi.TVRageException;
-import com.omertron.tvrageapi.model.EpisodeList;
-import com.omertron.tvrageapi.model.ShowInfo;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
+
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
-import org.yamj.core.web.ResponseTools;
+
+import com.omertron.tvrageapi.TVRageApi;
+import com.omertron.tvrageapi.TVRageException;
+import com.omertron.tvrageapi.model.EpisodeList;
+import com.omertron.tvrageapi.model.ShowInfo;
 
 @Service
 public class TVRageApiWrapper {

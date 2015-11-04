@@ -36,10 +36,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.CommonHttpClient;
 import org.yamj.api.common.http.DigestedResponse;
+import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 import org.yamj.core.web.HTMLTools;
-import org.yamj.core.web.ResponseTools;
 
 public class SearchEngineTools {
 
