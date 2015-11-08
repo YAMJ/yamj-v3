@@ -22,18 +22,13 @@
  */
 package org.yamj.core.tools;
 
+import com.ibm.icu.text.Transliterator;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.text.WordUtils;
@@ -45,8 +40,6 @@ import org.yamj.common.tools.StringTools;
 import org.yamj.core.database.model.AbstractMetadata;
 import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.database.model.VideoData;
-
-import com.ibm.icu.text.Transliterator;
 
 public final class MetadataTools {
 
@@ -357,7 +350,7 @@ public final class MetadataTools {
 
         return parsedDate;
     }
-
+    
     /**
      * Get the year as string from given date.
      *
@@ -709,9 +702,5 @@ public final class MetadataTools {
         newRole = newRole.replaceAll("( )+", " ").trim();
         
         return newRole;
-    }
-    
-    public static void main(String[] args) {
-        System.err.println(cleanIdentifier("Aaaren D. Spears"));
     }
 }
