@@ -28,7 +28,6 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Locale;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.protocol.HTTP;
@@ -198,7 +197,8 @@ public class SearchEngineTools {
             }
             sb.append("&as_sitesearch=");
             sb.append(site);
-
+            LOG.trace("Google search: {}", sb);
+            
             DigestedResponse response = this.requestContent(sb);
             if (ResponseTools.isNotOK(response)) {
                 if (throwTempError && ResponseTools.isTemporaryError(response)) {
@@ -243,6 +243,7 @@ public class SearchEngineTools {
                 sb.append("+");
                 sb.append(URLEncoder.encode(additional, UTF8));
             }
+            LOG.trace("Yahoo search: {}", sb);
 
             DigestedResponse response = this.requestContent(sb);
             if (ResponseTools.isNotOK(response)) {
@@ -295,6 +296,7 @@ public class SearchEngineTools {
                 sb.append(country);
                 sb.append("&filt=rf");
             }
+            LOG.trace("Bing search: {}", sb);
 
             DigestedResponse response = this.requestContent(sb);
             if (ResponseTools.isNotOK(response)) {
@@ -335,6 +337,7 @@ public class SearchEngineTools {
                 sb.append("+");
                 sb.append(URLEncoder.encode(additional, UTF8));
             }
+            LOG.trace("Blekko search: {}", sb);
 
             DigestedResponse response = this.requestContent(sb);
             if (ResponseTools.isNotOK(response)) {
