@@ -33,6 +33,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.pojava.datetime.DateTime;
+import org.pojava.datetime.DateTimeConfig;
+import org.pojava.datetime.DateTimeConfigBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.PropertyTools;
@@ -65,8 +67,21 @@ public final class MetadataTools {
     private static final boolean IDENT_TRANSLITERATE;
     private static final Transliterator TRANSLITERATOR;
 
-    private static final String dateFormat = PropertyTools.getProperty("yamj3.date.format", "yyyy-MM-dd");
-
+    private static final String DATE_FORMAT = PropertyTools.getProperty("yamj3.date.format", "yyyy-MM-dd");
+    private static final DateTimeConfig DATETIME_CONFIG_DEFAULT;
+    private static final DateTimeConfig DATETIME_CONFIG_FALLBACK;
+    
+    static {
+        // create new configuration builder
+        DateTimeConfigBuilder builder = DateTimeConfigBuilder.newInstance();
+        // default configuration (also global)
+        builder.setDmyOrder(Boolean.FALSE);
+        DATETIME_CONFIG_DEFAULT = DateTimeConfig.fromBuilder(builder);
+        DateTimeConfig.setGlobalDefault(DATETIME_CONFIG_DEFAULT);
+        // fall-back configuration
+        builder.setDmyOrder(Boolean.TRUE);
+        DATETIME_CONFIG_FALLBACK = DateTimeConfig.fromBuilder(builder);
+    }
     private MetadataTools() {
         throw new UnsupportedOperationException("Class cannot be instantiated");
     }
@@ -150,7 +165,7 @@ public final class MetadataTools {
             return null;
         }
 
-        SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
         return sdf.format(date);
     }
 
@@ -165,7 +180,7 @@ public final class MetadataTools {
             return null;
         }
 
-        SimpleDateFormat sdf = new SimpleDateFormat(dateFormat + " HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT + " HH:mm:ss");
         return sdf.format(date);
     }
 
@@ -323,31 +338,51 @@ public final class MetadataTools {
      * @param dateToParse
      * @return
      */
-    public static Date parseToDate(String dateToParse) {
+    public static Date parseToDate(final String dateToParse) {
         Date parsedDate = null;
 
         String parseDate = StringUtils.normalizeSpace(dateToParse);
         if (StringUtils.isNotBlank(parseDate)) {
             try {
-                DateTime dateTime;
                 if (parseDate.length() == 4 && StringUtils.isNumeric(parseDate)) {
                     // assume just the year an append "-01-01" to the end
-                    dateTime = new DateTime(parseDate + "-01-01");
+                    parseDate = parseDate + "-01-01";
                 } else {
                     // look for the date as "dd MMMM yyyy (Country)" and remove the country
-                    Matcher m = DATE_COUNTRY.matcher(dateToParse);
+                    Matcher m = DATE_COUNTRY.matcher(parseDate);
                     if (m.find()) {
                         parseDate = m.group(1);
                     }
-                    dateTime = new DateTime(parseDate);
                 }
-                parsedDate = dateTime.toDate();
+                parsedDate = parseToDate(parseDate, DATETIME_CONFIG_DEFAULT);
+                if (parsedDate == null) {
+                    // try with fall-back configuration
+                    parsedDate = parseToDate(parseDate, DATETIME_CONFIG_FALLBACK);
+                }
             } catch (Exception ex) {
                 LOG.debug("Failed to parse date '{}', error: {}", dateToParse, ex.getMessage());
                 LOG.trace("Error", ex);
             }
         }
 
+        return parsedDate;
+    }
+    
+    /**
+     * Convert the string date using DateTools parsing
+     *
+     * @param dateToParse
+     * @param config
+     * @return
+     */
+    private static Date parseToDate(String dateToParse, DateTimeConfig config) {
+        Date parsedDate = null;
+        try {
+            parsedDate = DateTime.parse(dateToParse, config).toDate();
+            LOG.trace("Converted date '{}' using {} order", dateToParse, (config.isDmyOrder() ? "DMY" : "MDY"));
+        } catch (IllegalArgumentException ex) {
+            LOG.trace("Failed to convert date '{}' using {} order", dateToParse, (config.isDmyOrder() ? "DMY" : "MDY"));
+        }
         return parsedDate;
     }
     
