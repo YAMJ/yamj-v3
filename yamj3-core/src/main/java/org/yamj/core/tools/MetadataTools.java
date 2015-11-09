@@ -22,19 +22,25 @@
  */
 package org.yamj.core.tools;
 
-import com.ibm.icu.text.Transliterator;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.pojava.datetime.DateTime;
 import org.pojava.datetime.DateTimeConfig;
 import org.pojava.datetime.DateTimeConfigBuilder;
+import org.pojava.datetime.IDateTimeConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.PropertyTools;
@@ -42,6 +48,8 @@ import org.yamj.common.tools.StringTools;
 import org.yamj.core.database.model.AbstractMetadata;
 import org.yamj.core.database.model.MediaFile;
 import org.yamj.core.database.model.VideoData;
+
+import com.ibm.icu.text.Transliterator;
 
 public final class MetadataTools {
 
@@ -68,18 +76,15 @@ public final class MetadataTools {
     private static final Transliterator TRANSLITERATOR;
 
     private static final String DATE_FORMAT = PropertyTools.getProperty("yamj3.date.format", "yyyy-MM-dd");
-    private static final DateTimeConfig DATETIME_CONFIG_DEFAULT;
-    private static final DateTimeConfig DATETIME_CONFIG_FALLBACK;
+    private static final IDateTimeConfig DATETIME_CONFIG_DEFAULT;
+    private static final IDateTimeConfig DATETIME_CONFIG_FALLBACK;
     
     static {
-        // create new configuration builder
-        DateTimeConfigBuilder builder = DateTimeConfigBuilder.newInstance();
-        // default configuration (also global)
-        builder.setDmyOrder(Boolean.FALSE);
-        DATETIME_CONFIG_DEFAULT = DateTimeConfig.fromBuilder(builder);
-        DateTimeConfig.setGlobalDefault(DATETIME_CONFIG_DEFAULT);
+        // default configuration
+        DATETIME_CONFIG_DEFAULT = DateTimeConfig.getGlobalDefault();
         // fall-back configuration
-        builder.setDmyOrder(Boolean.TRUE);
+        DateTimeConfigBuilder builder = DateTimeConfigBuilder.newInstance();
+        builder.setDmyOrder(!DATETIME_CONFIG_DEFAULT.isDmyOrder());
         DATETIME_CONFIG_FALLBACK = DateTimeConfig.fromBuilder(builder);
     }
     private MetadataTools() {
@@ -375,13 +380,13 @@ public final class MetadataTools {
      * @param config
      * @return
      */
-    private static Date parseToDate(String dateToParse, DateTimeConfig config) {
+    private static Date parseToDate(String dateToParse, IDateTimeConfig config) {
         Date parsedDate = null;
         try {
             parsedDate = DateTime.parse(dateToParse, config).toDate();
             LOG.trace("Converted date '{}' using {} order", dateToParse, (config.isDmyOrder() ? "DMY" : "MDY"));
         } catch (IllegalArgumentException ex) {
-            LOG.trace("Failed to convert date '{}' using {} order", dateToParse, (config.isDmyOrder() ? "DMY" : "MDY"));
+            LOG.debug("Failed to convert date '{}' using {} order", dateToParse, (config.isDmyOrder() ? "DMY" : "MDY"));
         }
         return parsedDate;
     }
