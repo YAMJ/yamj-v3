@@ -79,14 +79,6 @@ public final class MetadataTools {
     private static final IDateTimeConfig DATETIME_CONFIG_DEFAULT;
     private static final IDateTimeConfig DATETIME_CONFIG_FALLBACK;
     
-    static {
-        // default configuration
-        DATETIME_CONFIG_DEFAULT = DateTimeConfig.getGlobalDefault();
-        // fall-back configuration
-        DateTimeConfigBuilder builder = DateTimeConfigBuilder.newInstance();
-        builder.setDmyOrder(!DATETIME_CONFIG_DEFAULT.isDmyOrder());
-        DATETIME_CONFIG_FALLBACK = DateTimeConfig.fromBuilder(builder);
-    }
     private MetadataTools() {
         throw new UnsupportedOperationException("Class cannot be instantiated");
     }
@@ -115,6 +107,13 @@ public final class MetadataTools {
         FILESIZE_FORMAT_0 = new DecimalFormat("0", symbols);
         FILESIZE_FORMAT_1 = new DecimalFormat("0.#", symbols);
         FILESIZE_FORMAT_2 = new DecimalFormat("0.##", symbols);
+
+        // default date and time configuration
+        DATETIME_CONFIG_DEFAULT = DateTimeConfig.getGlobalDefault();
+        // fall-back configuration
+        DateTimeConfigBuilder builder = DateTimeConfigBuilder.newInstance();
+        builder.setDmyOrder(!DATETIME_CONFIG_DEFAULT.isDmyOrder());
+        DATETIME_CONFIG_FALLBACK = DateTimeConfig.fromBuilder(builder);
 
         // create a new transliterator
         TRANSLITERATOR = Transliterator.getInstance("NFD; Any-Latin; NFC");
