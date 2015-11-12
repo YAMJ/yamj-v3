@@ -817,9 +817,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             return ScanResult.NO_RESULT;
         }
         
-        // BIO xml is still needed for some values
-        final String bio = imdbApiWrapper.getPersonBioXML(imdbId, throwTempError);
-        
         // split person names
         PersonNameDTO nameDTO = MetadataTools.splitFullName(imdbPerson.getName());
         if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
@@ -839,12 +836,16 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             final String apiBio = MetadataTools.cleanBiography(imdbPerson.getBiography());
             if (StringUtils.isNotBlank(apiBio)) {
                 person.setBiography(apiBio, SCANNER_ID);
-            } else if (bio.contains(">Mini Bio (1)</h4>")) {
-                String biography = HTMLTools.extractTag(bio, ">Mini Bio (1)</h4>", "<em>- IMDb Mini Biography");
-                if (StringUtils.isBlank(biography) && bio.contains("<a name=\"trivia\">")) {
-                    biography = HTMLTools.extractTag(bio, ">Mini Bio (1)</h4>", "<a name=\"trivia\">");
+            } else {
+                // try biography from web site
+                final String bio = imdbApiWrapper.getPersonBioXML(imdbId, throwTempError);
+                if (bio.contains(">Mini Bio (1)</h4>")) {
+                    String biography = HTMLTools.extractTag(bio, ">Mini Bio (1)</h4>", "<em>- IMDb Mini Biography");
+                    if (StringUtils.isBlank(biography) && bio.contains("<a name=\"trivia\">")) {
+                        biography = HTMLTools.extractTag(bio, ">Mini Bio (1)</h4>", "<a name=\"trivia\">");
+                    }
+                    person.setBiography(HTMLTools.removeHtmlTags(biography), SCANNER_ID);
                 }
-                person.setBiography(HTMLTools.removeHtmlTags(biography), SCANNER_ID);
             }
         }
         
