@@ -391,14 +391,6 @@ public final class OverrideTools {
         if (metadata.getYear() <= 0) return Boolean.TRUE;
         return checkOverwrite(metadata, OverrideFlag.YEAR, source);
     }
-
-    // PERSON OVERRIDE
-    public static boolean checkOverwritePersonNames(Person person, String source) {
-        if (checkOverwriteName(person, source)) return true;
-        if (checkOverwriteFirstName(person, source)) return true;
-        if (checkOverwriteLastName(person, source)) return true;
-        return false;
-    }
     
     public static boolean checkOverwriteName(Person person, String source) {
         if (skipCheck(person, OverrideFlag.NAME, source)) return Boolean.FALSE;

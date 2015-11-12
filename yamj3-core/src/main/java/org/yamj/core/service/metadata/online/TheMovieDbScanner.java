@@ -22,14 +22,17 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
-import java.util.StringTokenizer;
-
+import com.omertron.themoviedbapi.model.collection.Collection;
+import com.omertron.themoviedbapi.model.credits.*;
+import com.omertron.themoviedbapi.model.media.MediaCreditList;
+import com.omertron.themoviedbapi.model.movie.*;
+import com.omertron.themoviedbapi.model.person.PersonCreditList;
+import com.omertron.themoviedbapi.model.person.PersonInfo;
+import com.omertron.themoviedbapi.model.tv.TVEpisodeInfo;
+import com.omertron.themoviedbapi.model.tv.TVInfo;
+import com.omertron.themoviedbapi.model.tv.TVSeasonInfo;
+import java.util.*;
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -38,11 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
-import org.yamj.core.database.model.FilmParticipation;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.ParticipationType;
@@ -51,22 +50,6 @@ import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.tools.PersonNameDTO;
 import org.yamj.core.web.apis.TheMovieDbApiWrapper;
-
-import com.omertron.themoviedbapi.model.collection.Collection;
-import com.omertron.themoviedbapi.model.credits.CreditBasic;
-import com.omertron.themoviedbapi.model.credits.CreditMovieBasic;
-import com.omertron.themoviedbapi.model.credits.MediaCreditCast;
-import com.omertron.themoviedbapi.model.credits.MediaCreditCrew;
-import com.omertron.themoviedbapi.model.media.MediaCreditList;
-import com.omertron.themoviedbapi.model.movie.MovieInfo;
-import com.omertron.themoviedbapi.model.movie.ProductionCompany;
-import com.omertron.themoviedbapi.model.movie.ProductionCountry;
-import com.omertron.themoviedbapi.model.movie.ReleaseInfo;
-import com.omertron.themoviedbapi.model.person.PersonCreditList;
-import com.omertron.themoviedbapi.model.person.PersonInfo;
-import com.omertron.themoviedbapi.model.tv.TVEpisodeInfo;
-import com.omertron.themoviedbapi.model.tv.TVInfo;
-import com.omertron.themoviedbapi.model.tv.TVSeasonInfo;
 
 @Service("tmdbScanner")
 public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, IFilmographyScanner {
@@ -619,18 +602,16 @@ public class TheMovieDbScanner implements IMovieScanner, ISeriesScanner, IPerson
         // fill in data
         person.setSourceDbId(ImdbScanner.SCANNER_ID, StringUtils.trim(tmdbPerson.getImdbId()));
 
-        if (OverrideTools.checkOverwritePersonNames(person, SCANNER_ID)) {
-            // split person names
-            PersonNameDTO nameDTO = MetadataTools.splitFullName(tmdbPerson.getName());
-            if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
-                person.setName(nameDTO.getName(), SCANNER_ID);
-            }
-            if (OverrideTools.checkOverwriteFirstName(person, SCANNER_ID)) {
-                person.setFirstName(nameDTO.getFirstName(), SCANNER_ID);
-            }
-            if (OverrideTools.checkOverwriteLastName(person, SCANNER_ID)) {
-                person.setLastName(nameDTO.getLastName(), SCANNER_ID);
-            }
+        // split person names
+        PersonNameDTO nameDTO = MetadataTools.splitFullName(tmdbPerson.getName());
+        if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
+            person.setName(nameDTO.getName(), SCANNER_ID);
+        }
+        if (OverrideTools.checkOverwriteFirstName(person, SCANNER_ID)) {
+            person.setFirstName(nameDTO.getFirstName(), SCANNER_ID);
+        }
+        if (OverrideTools.checkOverwriteLastName(person, SCANNER_ID)) {
+            person.setLastName(nameDTO.getLastName(), SCANNER_ID);
         }
 
         if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {

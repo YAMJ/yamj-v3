@@ -25,8 +25,6 @@ package org.yamj.core.service.metadata.online;
 import com.omertron.imdbapi.model.*;
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -61,7 +59,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     private static final String HTML_H4_END = ":</h4>";
     private static final String HTML_TABLE_END = "</table>";
     private static final String HTML_TD_END = "</td>";
-    private static final Pattern PATTERN_PERSON_DOB = Pattern.compile("(\\d{1,2})-(\\d{1,2})");
     
     @Autowired
     private ImdbSearchEngine imdbSearchEngine;
@@ -823,20 +820,21 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         // BIO xml is still needed for some values
         final String bio = imdbApiWrapper.getPersonBioXML(imdbId, throwTempError);
         
-        if (OverrideTools.checkOverwritePersonNames(person, SCANNER_ID)) {
-            // split person names
-            PersonNameDTO nameDTO = MetadataTools.splitFullName(imdbPerson.getName());
-            if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
-                person.setName(nameDTO.getName(), SCANNER_ID);
-            }
-            if (OverrideTools.checkOverwriteFirstName(person, SCANNER_ID)) {
-                person.setFirstName(nameDTO.getFirstName(), SCANNER_ID);
-            }
-            if (OverrideTools.checkOverwriteLastName(person, SCANNER_ID)) {
-                person.setLastName(nameDTO.getLastName(), SCANNER_ID);
-            }
+        // split person names
+        PersonNameDTO nameDTO = MetadataTools.splitFullName(imdbPerson.getName());
+        if (OverrideTools.checkOverwriteName(person, SCANNER_ID)) {
+            person.setName(nameDTO.getName(), SCANNER_ID);
         }
-
+        if (OverrideTools.checkOverwriteFirstName(person, SCANNER_ID)) {
+            person.setFirstName(nameDTO.getFirstName(), SCANNER_ID);
+        }
+        if (OverrideTools.checkOverwriteLastName(person, SCANNER_ID)) {
+            person.setLastName(nameDTO.getLastName(), SCANNER_ID);
+        }
+        if (OverrideTools.checkOverwriteBirthName(person, SCANNER_ID)) {
+            person.setBirthName(imdbPerson.getRealName(), SCANNER_ID);
+        }
+        
         if (OverrideTools.checkOverwriteBiography(person, SCANNER_ID)) {
             final String apiBio = MetadataTools.cleanBiography(imdbPerson.getBiography());
             if (StringUtils.isNotBlank(apiBio)) {
@@ -849,82 +847,26 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
                 person.setBiography(HTMLTools.removeHtmlTags(biography), SCANNER_ID);
             }
         }
-
-        int endIndex;
-        int beginIndex;
         
-        if (OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {
-            beginIndex = bio.indexOf(">Date of Birth</td>");
-            if (beginIndex > -1) {
-                StringBuilder date = new StringBuilder();
-                endIndex = bio.indexOf(">Date of Death</td>");
-                beginIndex = bio.indexOf("birth_monthday=", beginIndex);
-                if (beginIndex > -1 && (endIndex == -1 || beginIndex < endIndex)) {
-                    Matcher m = PATTERN_PERSON_DOB.matcher(bio.substring(beginIndex + 15, beginIndex + 20));
-                    if (m.find()) {
-                        date.append(m.group(2)).append("-").append(m.group(1));
-                    }
-                }
+        if (imdbPerson.getBirth() != null) {
+            if (imdbPerson.getBirth().getDate() != null && OverrideTools.checkOverwriteBirthDay(person, SCANNER_ID)) {
+                final String birthDay = imdbPerson.getBirth().getDate().get("normal");
+                person.setBirthDay(MetadataTools.parseToDate(birthDay), SCANNER_ID);
+            }
 
-                beginIndex = bio.indexOf("birth_year=", beginIndex);
-                if (beginIndex > -1 && (endIndex == -1 || beginIndex < endIndex)) {
-                    if (date.length() > 0) {
-                        date.append("-");
-                    }
-                    date.append(bio.substring(beginIndex + 11, beginIndex + 15));
-                }
-
-                person.setBirthDay(MetadataTools.parseToDate(date.toString()), SCANNER_ID);
+            if (OverrideTools.checkOverwriteBirthPlace(person, SCANNER_ID)) {
+                person.setBirthPlace(imdbPerson.getBirth().getPlace(), SCANNER_ID);
             }
         }
 
-        if (OverrideTools.checkOverwriteBirthPlace(person, SCANNER_ID)) {
-            beginIndex = bio.indexOf(">Date of Birth</td>");
-            if (beginIndex > -1) {
-                beginIndex = bio.indexOf("birth_place=", beginIndex);
-                String place;
-                if (beginIndex > -1) {
-                    place = HTMLTools.extractTag(bio, "birth_place=", HTML_A_END);
-                    int start = place.indexOf('>');
-                    if (start > -1 && start < place.length()) {
-                        place = place.substring(start + 1);
-                    }
-                    person.setBirthPlace(place, SCANNER_ID);
-                }
+        if (imdbPerson.getDeath() != null) {
+            if (imdbPerson.getDeath().getDate() != null && OverrideTools.checkOverwriteDeathDay(person, SCANNER_ID)) {
+                final String deathDay = imdbPerson.getDeath().getDate().get("normal");
+                person.setDeathDay(MetadataTools.parseToDate(deathDay), SCANNER_ID);
             }
-        }
 
-        if (OverrideTools.checkOverwriteDeathDay(person, SCANNER_ID)) {
-            beginIndex = bio.indexOf(">Date of Death</td>");
-            if (beginIndex > -1) {
-                StringBuilder date = new StringBuilder();
-                endIndex = bio.indexOf(">Mini Bio (1)</h4>", beginIndex);
-                beginIndex = bio.indexOf("death_monthday=", beginIndex);
-                if (beginIndex > -1 && (endIndex == -1 || beginIndex < endIndex)) {
-                    Matcher m = PATTERN_PERSON_DOB.matcher(bio.substring(beginIndex + 15, beginIndex + 20));
-                    if (m.find()) {
-                        date.append(m.group(2));
-                        date.append("-");
-                        date.append(m.group(1));
-                    }
-                }
-                beginIndex = bio.indexOf("death_date=", beginIndex);
-                if (beginIndex > -1 && (endIndex == -1 || beginIndex < endIndex)) {
-                    if (date.length() > 0) {
-                        date.append("-");
-                    }
-                    date.append(bio.substring(beginIndex + 11, beginIndex + 15));
-                }
-                person.setDeathDay(MetadataTools.parseToDate(date.toString()), SCANNER_ID);
-            }
-        }
-
-        if (OverrideTools.checkOverwriteBirthName(person, SCANNER_ID)) {
-            beginIndex = bio.indexOf(">Birth Name</td>");
-            if (beginIndex > -1) {
-                beginIndex += 20;
-                String name = bio.substring(beginIndex, bio.indexOf(HTML_TD_END, beginIndex));
-                person.setBirthName(HTMLTools.decodeHtml(name), SCANNER_ID);
+            if (OverrideTools.checkOverwriteDeathPlace(person, SCANNER_ID)) {
+                person.setDeathPlace(imdbPerson.getDeath().getPlace(), SCANNER_ID);
             }
         }
 
