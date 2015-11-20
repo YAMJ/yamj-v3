@@ -152,6 +152,21 @@ public class JsonApiStorageService {
     public void getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {
         apiDao.getPersonListByVideoType(metaDataType, wrapper);
     }
+    
+    @Transactional
+    public ApiStatus duplicatePerson(Long id, Long doubletId) {
+        Person person = metadataDao.getPerson(id);
+        if (person == null || person.getStatus() == StatusType.DELETED) {
+            return new ApiStatus(410, "ID " + id + " does not determine a valid person entry");
+        }
+        Person doubletPerson = metadataDao.getPerson(doubletId);
+        if (doubletPerson == null || doubletPerson.getStatus() == StatusType.DELETED) {
+            return new ApiStatus(410, "ID " + doubletId + " does not determine a valid person entry");
+        }
+        
+        this.metadataDao.duplicate(person, doubletPerson);
+        return new ApiStatus(200, "Marked "+doubletId+" as duplicate of "+id);
+    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Genre Methods">

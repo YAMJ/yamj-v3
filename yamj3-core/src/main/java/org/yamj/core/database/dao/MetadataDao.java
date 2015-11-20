@@ -22,16 +22,32 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.CacheMode;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.CachingNames;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.ArtworkLocated;
+import org.yamj.core.database.model.CastCrew;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -89,8 +105,60 @@ public class MetadataDao extends HibernateDao {
         return getById(Person.class, id);
     }
 
+    @CacheEvict(value=CachingNames.DB_PERSON, key="#doubletPerson.id")
+    public void duplicate(Person person, Person doubletPerson) {
+        // find movies which contains the doublet
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT distinct vd ");
+        sb.append("FROM VideoData vd ");
+        sb.append("JOIN vd.credits credit ");
+        sb.append("WHERE credit.castCrewPK.person.id=:id");
+        
+        Query query = currentSession().createQuery(sb.toString());
+        query.setParameter("id", doubletPerson.getId());
+        query.setCacheable(true);
+        query.setCacheMode(CacheMode.NORMAL);
+        List<VideoData> videoDatas = query.list();
+        
+        for (VideoData videoData : videoDatas) {
+            // find doublet entries (for different jobs)
+            List<CastCrew> doubletCredits = new ArrayList<>();
+            for (CastCrew credit : videoData.getCredits()) {
+                if (credit.getCastCrewPK().getPerson().equals(doubletPerson)) {
+                    doubletCredits.add(credit);
+                }
+            }
+            
+            for (CastCrew doubletCredit : doubletCredits) {
+                CastCrew newCredit = new CastCrew(person, videoData, doubletCredit.getCastCrewPK().getJobType());
+                if (videoData.getCredits().contains(newCredit)) {
+                    // just remove doublet person
+                    videoData.getCredits().remove(doubletCredit);
+                } else {
+                    newCredit.setOrdering(doubletCredit.getOrdering());
+                    newCredit.setRole(doubletCredit.getRole());
+                    newCredit.setVoiceRole(doubletCredit.isVoiceRole());
+                    videoData.getCredits().remove(doubletCredit);
+                    videoData.getCredits().add(newCredit);
+                } 
+            }
+            
+            // update video data
+            this.updateEntity(videoData);
+        }
+        
+        // update doublet person
+        doubletPerson.setStatus(StatusType.DELETED);
+        this.updateEntity(doubletPerson);
+    }
+    
     public void storeMovieCredit(CreditDTO dto) {
         Person person = getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, dto.getIdentifier());
+        if (person == null && StringUtils.isNotBlank(dto.getSource()) && StringUtils.isNotBlank(dto.getSourceId())) {
+            // try to fetch person by source ID; note that a list may be returned due duplicates
+            // TODO
+        }
+        
         if (person == null) {
             // create new person
             person = new Person(dto.getIdentifier());

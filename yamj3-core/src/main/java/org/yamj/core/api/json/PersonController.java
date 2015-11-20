@@ -25,7 +25,11 @@ package org.yamj.core.api.json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
@@ -159,5 +163,21 @@ public class PersonController {
         ApiStatus apiStatus =  jsonApiStorageService.updateOnlineScan(MetaDataType.PERSON, id, sourcedb, true);
         if (apiStatus.isSuccessful()) scanningScheduler.triggerScanPeopleData();
         return apiStatus;
+    }
+
+    /**
+     * Handle duplicate of a person.
+     */
+    @RequestMapping("/duplicate")
+    public ApiStatus duplicate(
+            @RequestParam(required = true) Long id,
+            @RequestParam(required = true) Long doublet) 
+    {
+        if (id <= 0L || doublet <= 0L) {
+            return new ApiStatus(410, "Not a valid ID");            
+        }
+        
+        LOG.info("Handle {} as doublet of {}", doublet, id);
+        return jsonApiStorageService.duplicatePerson(id, doublet);
     }
 }
