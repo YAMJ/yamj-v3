@@ -25,7 +25,9 @@ package org.yamj.core.service.tasks;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,8 +84,7 @@ public class DeleteTask implements ITask {
                     try {
                         filesToDelete.addAll(this.commonStorageService.deleteStageFile(id));
                     } catch (Exception ex) {
-                        LOG.warn("Failed to delete stage file ID: {}", id);
-                        LOG.error("Deletion error", ex);
+                        LOG.error("Failed to delete stage file ID: "+id, ex);
                     }
                 }
             }
@@ -107,8 +108,7 @@ public class DeleteTask implements ITask {
                         }
                         updateTrigger = (updateTrigger || dto.isUpdateTrigger());
                     } catch (Exception ex) {
-                        LOG.warn("Failed to delete located artwork ID: {}", id);
-                        LOG.error("Deletion error", ex);
+                        LOG.error("Failed to delete located artwork ID: "+id, ex);
                     }
                 }
                 
@@ -124,9 +124,7 @@ public class DeleteTask implements ITask {
             if (CollectionUtils.isEmpty(ids)) {
                 LOG.trace("No trailers found to delete");
             } else {
-                boolean updateTrigger = false;
-                
-                // delete stage files
+                // delete trailers
                 for (Long id : ids) {
                     try {
                         String fileToDelete  = this.commonStorageService.deleteTrailer(id);
@@ -134,13 +132,9 @@ public class DeleteTask implements ITask {
                            filesToDelete.add(fileToDelete);
                         }
                     } catch (Exception ex) {
-                        LOG.warn("Failed to delete trailer ID: {}", id);
-                        LOG.error("Deletion error", ex);
+                        LOG.error("Failed to delete trailer ID: "+id, ex);
                     }
                 }
-                
-                // trigger artwork scan
-                if (updateTrigger) scanningScheduler.triggerScanArtwork();
             }
         } catch (Exception ex) {
             LOG.warn("Failed to retrieve trailers to delete", ex);
@@ -154,8 +148,7 @@ public class DeleteTask implements ITask {
                     try {
                         filesToDelete.addAll(this.commonStorageService.deletePerson(id));
                     } catch (Exception ex) {
-                        LOG.warn("Failed to delete person ID: {}", id);
-                        LOG.error("Deletion error", ex);
+                        LOG.error("Failed to delete person ID: "+id, ex);
                     }
                 }
             } catch (Exception ex) {
@@ -207,7 +200,7 @@ public class DeleteTask implements ITask {
                     try {
                         filesToDelete.addAll(this.commonStorageService.deleteBoxedSet(id));
                     } catch (Exception ex) {
-                        LOG.warn("Failed to delete boxed set ID: " + id, ex);
+                        LOG.error("Failed to delete boxed set ID: "+id, ex);
                     }
                 }
             } catch (Exception ex) {
