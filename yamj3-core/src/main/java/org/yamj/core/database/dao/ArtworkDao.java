@@ -25,15 +25,21 @@ package org.yamj.core.database.dao;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.yamj.common.type.MetaDataType;
-import org.yamj.core.database.model.*;
+import org.yamj.common.type.StatusType;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.ArtworkGenerated;
+import org.yamj.core.database.model.ArtworkLocated;
+import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
@@ -182,5 +188,15 @@ public class ArtworkDao extends HibernateDao {
                 }
             }
         }
+    }
+    
+    public List<ArtworkLocated> getArtworkLocatedWithCacheFilename(long lastId) {
+        Criteria criteria = currentSession().createCriteria(ArtworkLocated.class);
+        criteria.add(Restrictions.isNotNull("cacheFilename"));
+        criteria.add(Restrictions.ne("status", StatusType.DELETED));
+        criteria.add(Restrictions.gt("id", lastId));
+        criteria.addOrder(Order.asc("id"));
+        criteria.setMaxResults(100);
+        return criteria.list();
     }
 }

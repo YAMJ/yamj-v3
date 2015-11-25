@@ -23,6 +23,7 @@
 package org.yamj.core.database.service;
 
 import java.util.List;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
@@ -34,7 +35,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.ArtworkDao;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.ArtworkGenerated;
+import org.yamj.core.database.model.ArtworkLocated;
+import org.yamj.core.database.model.ArtworkProfile;
+import org.yamj.core.database.model.StageFile;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 
@@ -241,5 +246,9 @@ public class ArtworkStorageService {
             stored.setCacheFilename(generated.getCacheFilename());
             this.artworkDao.updateEntity(stored);
         }
+    }
+    
+    public List<ArtworkLocated> getArtworkLocatedWithCacheFilename(long lastId) {
+        return this.artworkDao.getArtworkLocatedWithCacheFilename(lastId);
     }
 }

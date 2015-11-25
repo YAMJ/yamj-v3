@@ -28,12 +28,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sanselan.ImageReadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.ArtworkGenerated;
 import org.yamj.core.database.model.ArtworkLocated;
@@ -343,5 +346,49 @@ public class ArtworkProcessorService {
         }
 
         return Boolean.TRUE;
+    }
+    
+    
+    @Transactional
+    public long checkArtworkSanity(long lastId) {
+        long newLastId = -1;
+        
+        for (ArtworkLocated located : this.artworkStorageService.getArtworkLocatedWithCacheFilename(lastId)) {
+            if (newLastId < located.getId()) newLastId = located.getId();
+
+            StorageType storageType;
+            if (located.getArtwork().getArtworkType() == ArtworkType.PHOTO) {
+                storageType = StorageType.PHOTO;
+            } else {
+                storageType = StorageType.ARTWORK;
+            }
+            
+            // if original file does not exists, then also all generated artwork can be deleted
+            String filename = FilenameUtils.concat(located.getCacheDirectory(), located.getCacheFilename());
+            if (!fileStorageService.existsFile(storageType, filename)) {
+                LOG.trace("Mark located artwork {} for UPDATE due missing original image", located.getId());
+                
+                // reset status and cache file name
+                located.setStatus(StatusType.UPDATED);
+                located.setCacheDirectory(null);
+                located.setCacheFilename(null);
+                this.artworkStorageService.updateArtworkLocated(located);
+            } else {
+                // check if one of the generated images is missing
+                loopGenerated: for (ArtworkGenerated generated : located.getGeneratedArtworks()) {
+                    filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
+                    if (!fileStorageService.existsFile(storageType, filename)) {
+                        LOG.trace("Mark located artwork {} for UPDATE due missing generated image", located.getId());
+
+                        // just set status of located to UPDATED
+                        located.setStatus(StatusType.UPDATED);
+                        this.artworkStorageService.updateArtworkLocated(located);
+                        break loopGenerated;
+                    }
+                }
+            }
+        }
+        
+        return newLastId;
     }
 }

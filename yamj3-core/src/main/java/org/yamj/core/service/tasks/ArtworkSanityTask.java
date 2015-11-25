@@ -28,18 +28,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.yamj.core.service.ArtworkProcessScheduler;
+import org.yamj.core.service.artwork.ArtworkProcessorService;
 
 /**
- * Task for checking if video, series or person is older than x days and marks
- * those data entries as updated in order to force a rescan.
+ * Task for checking artwork sanity.
  */
 @Component
 public class ArtworkSanityTask implements ITask {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RecheckTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ArtworkSanityTask.class);
 
     @Autowired
     private ExecutionTaskService executionTaskService;
+    @Autowired
+    private ArtworkProcessorService artworkProcessorService;
+    @Autowired
+    private ArtworkProcessScheduler artworkProcessScheduler;
     
     @Override
     public String getTaskName() {
@@ -53,6 +58,14 @@ public class ArtworkSanityTask implements ITask {
 
     @Override
     public void execute(String options) throws Exception {
-        // TODO
+        LOG.debug("Execute artwork sanity task");
+        
+        long lastId = -1;
+        do {
+            lastId = this.artworkProcessorService.checkArtworkSanity(lastId);
+        } while (lastId > 0);
+
+        // trigger artwork processing in any case
+        this.artworkProcessScheduler.triggerProcess();
     }
 }

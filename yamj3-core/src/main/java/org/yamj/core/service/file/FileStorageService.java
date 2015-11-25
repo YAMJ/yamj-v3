@@ -23,13 +23,23 @@
 package org.yamj.core.service.file;
 
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
-import javax.imageio.*;
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
 
 import net.lingala.zip4j.core.ZipFile;
@@ -333,6 +343,16 @@ public class FileStorageService {
         return hashFilename;
     }
 
+    public boolean existsFile(StorageType type, String path) {
+        try {
+            File file = new File(this.getStorageDir(type, path));
+            return file.exists();
+        } catch (Exception e) {
+            // assume not existent on any error
+            return false;
+        }
+    }
+    
     public void deleteStorageFiles(Set<String> filesToDelete) {
         if (CollectionUtils.isEmpty(filesToDelete)) {
             LOG.trace("No files to delete in storage");
