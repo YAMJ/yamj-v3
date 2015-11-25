@@ -23,9 +23,13 @@
 package org.yamj.core.service;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +42,7 @@ import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.TrailerStorageService;
 import org.yamj.core.service.trailer.TrailerProcessRunner;
 import org.yamj.core.service.trailer.TrailerProcessorService;
+import org.yamj.core.tools.ThreadTools;
 
 @Component
 public class TrailerProcessScheduler {
@@ -87,7 +92,11 @@ public class TrailerProcessScheduler {
             watchProcess.set(false);
             return;
         }
-        messageDisabled = Boolean.FALSE;
+        
+        if (messageDisabled) {
+            LOG.info("Trailer processing is enabled");
+            messageDisabled = Boolean.FALSE;
+        }
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.trailerprocess.maxResults", 50);
         List<QueueDTO> queueElements = trailerStorageService.getTrailerQueueForProcessing(maxResults);
@@ -102,19 +111,9 @@ public class TrailerProcessScheduler {
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {
-            TrailerProcessRunner worker = new TrailerProcessRunner(queue, trailerProcessorService);
-            executor.execute(worker);
+            executor.execute(new TrailerProcessRunner(queue, trailerProcessorService));
         }
-        executor.shutdown();
-
-        // run until all workers have finished
-        while (!executor.isTerminated()) {
-            try {
-                TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ignore) {
-                // interrupt in sleep can be ignored
-            }
-        }
+        ThreadTools.waitForTermination(executor);
         
         LOG.debug("Finished trailer processing");
     }

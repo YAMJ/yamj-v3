@@ -23,9 +23,13 @@
 package org.yamj.core.service;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +38,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.service.*;
+import org.yamj.core.database.service.ArtworkStorageService;
+import org.yamj.core.database.service.MediaStorageService;
+import org.yamj.core.database.service.MetadataStorageService;
+import org.yamj.core.database.service.TrailerStorageService;
 import org.yamj.core.service.artwork.ArtworkScannerRunner;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.mediainfo.MediaInfoRunner;
@@ -43,6 +50,7 @@ import org.yamj.core.service.metadata.MetadataScannerRunner;
 import org.yamj.core.service.metadata.MetadataScannerService;
 import org.yamj.core.service.trailer.TrailerScannerRunner;
 import org.yamj.core.service.trailer.TrailerScannerService;
+import org.yamj.core.tools.ThreadTools;
 
 @Component
 public class ScanningScheduler {
@@ -158,10 +166,11 @@ public class ScanningScheduler {
             watchScanMediaFiles.set(false);
             return;
         }
+        
         if (messageDisabledMediaFiles) {
             LOG.info("Media file scanning is enabled");
+            messageDisabledMediaFiles = Boolean.FALSE;
         }
-        messageDisabledMediaFiles = Boolean.FALSE;
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.mediafilescan.maxResults", 20);
         List<QueueDTO> queueElements = mediaStorageService.getMediaFileQueueForScanning(maxResults);
@@ -176,19 +185,9 @@ public class ScanningScheduler {
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {
-            MediaInfoRunner worker = new MediaInfoRunner(queue, mediaInfoService);
-            executor.execute(worker);
+            executor.execute(new MediaInfoRunner(queue, mediaInfoService));
         }
-        executor.shutdown();
-
-        // run until all workers have finished
-        while (!executor.isTerminated()) {
-            try {
-                TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ignore) {
-                // ignore error which is expected
-            }
-        }
+        ThreadTools.waitForTermination(executor);
 
         LOG.debug("Finished media file scanning");
     }
@@ -205,10 +204,11 @@ public class ScanningScheduler {
             watchScanTrailer.set(true);
             return;
         }
+        
         if (messageDisabledMetaData) {
             LOG.info("Metadata scanning is enabled");
+            messageDisabledMetaData = Boolean.FALSE;
         }
-        messageDisabledMetaData = Boolean.FALSE;
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.metadatascan.maxResults", 20);
         List<QueueDTO> queueElements = metadataStorageService.getMetaDataQueueForScanning(maxResults);
@@ -225,19 +225,9 @@ public class ScanningScheduler {
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {
-            MetadataScannerRunner worker = new MetadataScannerRunner(queue, metadataScannerService);
-            executor.execute(worker);
+            executor.execute(new MetadataScannerRunner(queue, metadataScannerService));
         }
-        executor.shutdown();
-
-        // run until all workers have finished
-        while (!executor.isTerminated()) {
-            try {
-                TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ignore) {
-                // ignore error which is expected
-            }
-        }
+        ThreadTools.waitForTermination(executor);
 
         // trigger scan for people data and trailer
         watchScanPeopleData.set(true);
@@ -257,10 +247,11 @@ public class ScanningScheduler {
             watchScanFilmography.set(true);
             return;
         }
+        
         if (messageDisabledPeople) {
             LOG.info("People scanning is enabled");
+            messageDisabledPeople = Boolean.FALSE;
         }
-        messageDisabledPeople = Boolean.FALSE;
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.peoplescan.maxResults", 50);
         List<QueueDTO> queueElements = metadataStorageService.getPersonQueueForScanning(maxResults);
@@ -276,19 +267,9 @@ public class ScanningScheduler {
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {
-            MetadataScannerRunner worker = new MetadataScannerRunner(queue, metadataScannerService);
-            executor.execute(worker);
+            executor.execute(new MetadataScannerRunner(queue, metadataScannerService));
         }
-        executor.shutdown();
-
-        // run until all workers have finished
-        while (!executor.isTerminated()) {
-            try {
-                TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ignore) {
-                // ignore error which is expected
-            }
-        }
+        ThreadTools.waitForTermination(executor);
 
         // trigger scan for filmography
         watchScanFilmography.set(true);
@@ -307,10 +288,11 @@ public class ScanningScheduler {
             watchScanArtwork.set(true);
             return;
         }
+        
         if (messageDisabledFilmography) {
             LOG.info("Filmography scanning is enabled");
+            messageDisabledFilmography = Boolean.FALSE;
         }
-        messageDisabledFilmography = Boolean.FALSE;
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.filmographyscan.maxResults", 50);
         List<QueueDTO> queueElements = metadataStorageService.getFilmographyQueueForScanning(maxResults);
@@ -326,19 +308,9 @@ public class ScanningScheduler {
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {
-            MetadataScannerRunner worker = new MetadataScannerRunner(queue, metadataScannerService);
-            executor.execute(worker);
+            executor.execute(new MetadataScannerRunner(queue, metadataScannerService));
         }
-        executor.shutdown();
-
-        // run until all workers have finished
-        while (!executor.isTerminated()) {
-            try {
-                TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ignore) {
-                // ignore error which is expected
-            }
-        }
+        ThreadTools.waitForTermination(executor);
 
         // trigger scan for artwork
         watchScanArtwork.set(true);
@@ -356,10 +328,11 @@ public class ScanningScheduler {
             watchScanArtwork.set(false);
             return;
         }
+        
         if (messageDisabledArtwork) {
             LOG.info("Artwork scanning is enabled");
+            messageDisabledArtwork = Boolean.FALSE;
         }
-        messageDisabledArtwork = Boolean.FALSE;
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.artworkscan.maxResults", 30);
         List<QueueDTO> queueElements = artworkStorageService.getArtworkQueueForScanning(maxResults);
@@ -374,19 +347,9 @@ public class ScanningScheduler {
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {
-            ArtworkScannerRunner worker = new ArtworkScannerRunner(queue, artworkScannerService);
-            executor.execute(worker);
+            executor.execute(new ArtworkScannerRunner(queue, artworkScannerService));
         }
-        executor.shutdown();
-
-        // run until all workers have finished
-        while (!executor.isTerminated()) {
-            try {
-                TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ignore) {
-                // ignore error which is expected
-            }
-        }
+        ThreadTools.waitForTermination(executor);
 
         // trigger artwork processing
         this.artworkProcessScheduler.triggerProcess();
@@ -404,10 +367,11 @@ public class ScanningScheduler {
             watchScanTrailer.set(false);
             return;
         }
+        
         if (messageDisabledTrailer) {
             LOG.info("Trailer scanning is enabled");
+            messageDisabledTrailer = Boolean.FALSE;
         }
-        messageDisabledTrailer = Boolean.FALSE;
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.trailerscan.maxResults", 30);
         List<QueueDTO> queueElements = trailerStorageService.getTrailerQueueForScanning(maxResults);
@@ -422,19 +386,9 @@ public class ScanningScheduler {
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {
-            TrailerScannerRunner worker = new TrailerScannerRunner(queue, trailerScannerService);
-            executor.execute(worker);
+            executor.execute(new TrailerScannerRunner(queue, trailerScannerService));
         }
-        executor.shutdown();
-
-        // run until all workers have finished
-        while (!executor.isTerminated()) {
-            try {
-                TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ignore) {
-                // ignore error which is expected
-            }
-        }
+        ThreadTools.waitForTermination(executor);
 
         // trigger trailer processing
         this.trailerProcessScheduler.triggerProcess();

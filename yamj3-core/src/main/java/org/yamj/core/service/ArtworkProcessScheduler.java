@@ -23,9 +23,13 @@
 package org.yamj.core.service;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +42,7 @@ import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.service.artwork.ArtworkProcessRunner;
 import org.yamj.core.service.artwork.ArtworkProcessorService;
+import org.yamj.core.tools.ThreadTools;
 
 @Component
 public class ArtworkProcessScheduler {
@@ -87,7 +92,11 @@ public class ArtworkProcessScheduler {
             watchProcess.set(false);
             return;
         }
-        messageDisabled = Boolean.FALSE;
+        
+        if (messageDisabled) {
+            LOG.info("Artwork processing is enabled");
+            messageDisabled = Boolean.FALSE;
+        }
 
         int maxResults = configService.getIntProperty("yamj3.scheduler.artworkprocess.maxResults", 20);
         List<QueueDTO> queueElements = artworkStorageService.getArtworLocatedQueue(maxResults);
@@ -102,19 +111,9 @@ public class ArtworkProcessScheduler {
 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
         for (int i = 0; i < maxThreads; i++) {
-            ArtworkProcessRunner worker = new ArtworkProcessRunner(queue, artworkProcessorService);
-            executor.execute(worker);
+            executor.execute(new ArtworkProcessRunner(queue, artworkProcessorService));
         }
-        executor.shutdown();
-
-        // run until all workers have finished
-        while (!executor.isTerminated()) {
-            try {
-                TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ignore) {
-                // interrupt in sleep can be ignored
-            }
-        }
+        ThreadTools.waitForTermination(executor);
 
         LOG.debug("Finished artwork processing");
     }
