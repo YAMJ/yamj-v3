@@ -59,6 +59,8 @@ import org.yamj.core.tools.image.GraphicTools;
 public class ArtworkProcessorService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkProcessorService.class);
+    private static final String SOURCE_UPLOAD = "upload";
+    
     @Autowired
     private ArtworkStorageService artworkStorageService;
     @Autowired
@@ -89,6 +91,13 @@ public class ArtworkProcessorService {
                 return;
             }
     
+            if (SOURCE_UPLOAD.equals(located.getSource())) {
+                LOG.debug("Located artwork {} needs an upload", located);
+                located.setStatus(StatusType.INVALID);
+                artworkStorageService.updateArtworkLocated(located);
+                return;
+            }
+
             // store original in file cache
             String cacheFilename = buildCacheFilename(located);
             LOG.trace("Cache artwork with file name: {}", cacheFilename);
@@ -404,12 +413,12 @@ public class ArtworkProcessorService {
         // get or create located artwork
         final int hash = filename.hashCode();
         final String hashCode = String.valueOf(hash < 0 ? 0 - hash : hash);
-        ArtworkLocated located = this.artworkStorageService.getArtworkLocated(artwork, "upload", hashCode);
+        ArtworkLocated located = this.artworkStorageService.getArtworkLocated(artwork, SOURCE_UPLOAD, hashCode);
         
         if (located == null) {
             located = new ArtworkLocated();
             located.setArtwork(artwork);
-            located.setSource("upload");
+            located.setSource(SOURCE_UPLOAD);
             located.setHashCode(hashCode);
             located.setPriority(5);
             located.setImageType(ImageType.fromString(extension));
