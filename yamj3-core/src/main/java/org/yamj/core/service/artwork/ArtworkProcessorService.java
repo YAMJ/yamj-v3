@@ -447,6 +447,6 @@ public class ArtworkProcessorService {
         located.setCacheDirectory(StringUtils.removeEnd(cacheDirectory, File.separator + cacheFilename));
         this.artworkStorageService.storeArtworkLocated(located);
         
-        return new ApiStatus(200, "Bild als '" + cacheFilename + "' gespeichert");
+        return new ApiStatus(200, "Cached image as '" + cacheFilename + "'");
     }
 }
