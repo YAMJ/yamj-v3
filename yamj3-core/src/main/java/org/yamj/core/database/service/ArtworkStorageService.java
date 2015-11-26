@@ -22,7 +22,9 @@
  */
 package org.yamj.core.database.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Hibernate;
@@ -260,5 +262,39 @@ public class ArtworkStorageService {
 
     public List<ArtworkLocated> getArtworkLocatedWithCacheFilename(long lastId) {
         return this.artworkDao.getArtworkLocatedWithCacheFilename(lastId);
+    }
+    
+    @Transactional(readOnly=true)
+    public Long getArtworkId(ArtworkType artworkType, MetaDataType metaDataType, long id) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT a FROM Artwork a ");
+        switch (metaDataType) {
+            case MOVIE: 
+                sb.append("JOIN a.videoData vd WHERE vd.id=:id AND vd.episode<0 ");
+                break;
+            case EPISODE:
+                sb.append("JOIN a.videoData vd WHERE vd.id=:id AND vd.episode>=0 ");
+                break;
+            case SERIES:
+                sb.append("JOIN a.series ser WHERE ser.id=:id ");
+                break;
+            case SEASON:
+                sb.append("JOIN a.season sea WHERE sea.id=:id ");
+                break;
+            case BOXSET:
+                sb.append("JOIN a.boxedSet bs WHERE bs.id=:id ");
+                break;
+            default:
+                sb.append("JOIN a.person p WHERE p.id=:id ");
+                break;
+        }
+        sb.append("AND a.artworkType=:artworkType ");
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        params.put("artworkType", artworkType);
+        Artwork artwork = this.artworkDao.findUniqueByNamedParameters(Artwork.class, sb, params);
+        
+        return (artwork==null ? null : Long.valueOf(artwork.getId()));
     }
 }

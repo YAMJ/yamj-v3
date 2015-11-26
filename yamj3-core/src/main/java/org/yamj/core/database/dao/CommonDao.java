@@ -22,7 +22,11 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.LongType;
@@ -35,11 +39,26 @@ import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.CachingNames;
 import org.yamj.core.api.model.builder.SqlScalars;
-import org.yamj.core.api.model.dto.*;
+import org.yamj.core.api.model.dto.ApiAwardDTO;
+import org.yamj.core.api.model.dto.ApiCertificationDTO;
+import org.yamj.core.api.model.dto.ApiCountryDTO;
+import org.yamj.core.api.model.dto.ApiGenreDTO;
+import org.yamj.core.api.model.dto.ApiRatingDTO;
 import org.yamj.core.api.options.OptionsRating;
 import org.yamj.core.api.options.OptionsSingleType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.ArtworkLocated;
+import org.yamj.core.database.model.BoxedSet;
+import org.yamj.core.database.model.Certification;
+import org.yamj.core.database.model.Country;
+import org.yamj.core.database.model.Genre;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.Trailer;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.award.Award;
 import org.yamj.core.database.model.dto.BoxedSetDTO;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -255,7 +274,7 @@ public class CommonDao extends HibernateDao {
         params.put("countryCode", countryCode.toLowerCase());
         params.put("certificate", certificate.toLowerCase());
 
-        return (Certification) this.findUniqueByNamedParameters(sb, params);
+        return this.findUniqueByNamedParameters(Certification.class, sb, params);
     }
 
     @CachePut(value=CachingNames.DB_CERTIFICATION, key="#countryCode.toLowerCase()+'_'+#certificate.toLowerCase()")

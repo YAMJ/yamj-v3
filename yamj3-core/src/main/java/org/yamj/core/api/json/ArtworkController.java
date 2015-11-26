@@ -34,12 +34,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
 import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.options.OptionsIndexArtwork;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
+import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.service.ArtworkProcessScheduler;
@@ -57,6 +60,8 @@ public class ArtworkController {
     private CommonStorageService commonStorageService;
     @Autowired
     private FileStorageService fileStorageService;
+    @Autowired
+    private ArtworkStorageService artworkStorageService;
     @Autowired
     private ArtworkProcessorService artworkProcessorService;
     @Autowired
@@ -116,9 +121,29 @@ public class ArtworkController {
         return status;
     }
 
-    @RequestMapping(value = "/upload/{id}", method=RequestMethod.POST)
-    public ApiStatus uploadImage(@PathVariable("id") long id, @RequestParam MultipartFile image) {
-        ApiStatus apiStatus = this.artworkProcessorService.uploadImage(id, image);
+    @RequestMapping(value = "/add/{artwork}/{type}/{id}", method=RequestMethod.POST)
+    public ApiStatus addImage(@PathVariable("artwork") String artwork, @PathVariable("type") String type, @PathVariable("id") Long id, @RequestParam MultipartFile image) {
+        final ArtworkType artworkType = ArtworkType.fromString(artwork);
+        if (ArtworkType.UNKNOWN == artworkType) {
+            return new ApiStatus(415, "Invalid artwork type '" + artwork + "'");
+        }
+        
+        final MetaDataType metaDataType = MetaDataType.fromString(type);
+        if (!(metaDataType.isRealMetaData() || MetaDataType.BOXSET == metaDataType)) {
+            return new ApiStatus(415, "Invalid meta data type '" + type + "'");
+        }
+        
+        if (id == null || id.longValue() <= 0) {
+            return new ApiStatus(415, "Invalid id '" + id + "'");
+        }
+        
+        // find matching artwork id
+        Long artworkId = this.artworkStorageService.getArtworkId(artworkType, metaDataType, id);
+        if (artworkId == null) {
+            return new ApiStatus(400, "No matching artwork found");
+        }
+        
+        ApiStatus apiStatus = this.artworkProcessorService.uploadImage(artworkId, image);
         if (apiStatus.isSuccessful()) this.artworkProcessScheduler.triggerProcess();
         return apiStatus;
     }

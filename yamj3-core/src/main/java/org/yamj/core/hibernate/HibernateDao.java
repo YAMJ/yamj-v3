@@ -25,10 +25,19 @@ package org.yamj.core.hibernate;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.*;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.transform.Transformers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.yamj.core.api.model.builder.SqlScalars;
@@ -162,13 +171,11 @@ public abstract class HibernateDao {
     /**
      * Get a single object by the passed field using the name case insensitive.
      *
-     * @param <T>
      * @param entityClass
      * @param field
      * @param name
      * @return
      */
-    @SuppressWarnings("unchecked")
     public <T> T getByNaturalIdCaseInsensitive(Class<? extends T> entityClass, String field, String name) {
         StringBuilder sb = new StringBuilder();
         sb.append("from ");
@@ -176,7 +183,7 @@ public abstract class HibernateDao {
         sb.append(" where lower(").append(field).append(") = :name) { ");
 
         Map<String, Object> params = Collections.singletonMap("name", (Object) name.toLowerCase());
-        return (T) this.findUniqueByNamedParameters(sb, params);
+        return this.findUniqueByNamedParameters(entityClass, sb, params);
     }
 
     /**
@@ -338,17 +345,19 @@ public abstract class HibernateDao {
     /**
      * Find unique entity by named parameters.
      *
+     * @param entityClass the entity class
      * @param queryCharSequence the query string
      * @param params the named parameters
      * @return list of entities
      */
-    public Object findUniqueByNamedParameters(CharSequence queryCharSequence, Map<String, Object> params) {
+    @SuppressWarnings("unchecked")
+    public <T> T  findUniqueByNamedParameters(Class<? extends T> entityClass, CharSequence queryCharSequence, Map<String, Object> params) {
         Query query = currentSession().createQuery(queryCharSequence.toString());
         query.setCacheable(true);
         for (Entry<String, Object> param : params.entrySet()) {
             applyNamedParameterToQuery(query, param.getKey(), param.getValue());
         }
-        return query.uniqueResult();
+        return (T)query.uniqueResult();
     }
 
     /**

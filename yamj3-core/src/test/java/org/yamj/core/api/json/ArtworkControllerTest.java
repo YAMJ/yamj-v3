@@ -8,19 +8,19 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.junit.Ignore;
+import org.junit.Test;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.DigestedResponseReader;
 import org.yamj.api.common.http.SimpleHttpClientBuilder;
 
 public class ArtworkControllerTest {
 
-    @Ignore
+    @Test
     public void uploadImage() throws Exception {
-        final long artworkId = 1;
+        final long id=1;
         
         HttpClient httpClient = new SimpleHttpClientBuilder().build();
-        HttpPost httpPost = new HttpPost("http://localhost:8888/yamj3/api/artwork/upload/" + artworkId);
+        HttpPost httpPost = new HttpPost("http://localhost:8888/yamj3/api/artwork/add/fanart/movie/" + id);
 
         File file = new File("c:/test.png");
         HttpEntity reqEntity = MultipartEntityBuilder.create().addBinaryBody("image", file, ContentType.MULTIPART_FORM_DATA, file.getName()).build();

@@ -394,12 +394,12 @@ public class ArtworkProcessorService {
         return newLastId;
     }
     
-    public ApiStatus uploadImage(long id, MultipartFile image) {
+    public ApiStatus uploadImage(long artworkId, MultipartFile image) {
         Artwork artwork;
         try {
-            artwork = this.artworkStorageService.getRequiredArtwork(id);
+            artwork = this.artworkStorageService.getRequiredArtwork(artworkId);
         } catch (IncorrectResultSizeDataAccessException e) {
-            return new ApiStatus(400, "Artwork not found '" + id + "'");
+            return new ApiStatus(400, "Artwork not found '" + artworkId + "'");
         }
         
         String filename = image.getOriginalFilename();
