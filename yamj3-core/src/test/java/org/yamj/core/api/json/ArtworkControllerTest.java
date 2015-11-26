@@ -8,14 +8,14 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.junit.Test;
+import org.junit.Ignore;
 import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.DigestedResponseReader;
 import org.yamj.api.common.http.SimpleHttpClientBuilder;
 
 public class ArtworkControllerTest {
 
-    @Test
+    @Ignore
     public void uploadImage() throws Exception {
         final long id=1;
         
