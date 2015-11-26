@@ -42,7 +42,6 @@ import org.yamj.core.api.options.OptionsIndexArtwork;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.service.ArtworkProcessScheduler;
@@ -60,8 +59,6 @@ public class ArtworkController {
     private CommonStorageService commonStorageService;
     @Autowired
     private FileStorageService fileStorageService;
-    @Autowired
-    private ArtworkStorageService artworkStorageService;
     @Autowired
     private ArtworkProcessorService artworkProcessorService;
     @Autowired
@@ -137,13 +134,7 @@ public class ArtworkController {
             return new ApiStatus(415, "Invalid id '" + id + "'");
         }
         
-        // find matching artwork id
-        Long artworkId = this.artworkStorageService.getArtworkId(artworkType, metaDataType, id);
-        if (artworkId == null) {
-            return new ApiStatus(400, "No matching artwork found");
-        }
-        
-        ApiStatus apiStatus = this.artworkProcessorService.uploadImage(artworkId, image);
+        ApiStatus apiStatus = this.artworkProcessorService.addArtwork(artworkType, metaDataType, id, image);
         if (apiStatus.isSuccessful()) this.artworkProcessScheduler.triggerProcess();
         return apiStatus;
     }

@@ -265,27 +265,27 @@ public class ArtworkStorageService {
     }
     
     @Transactional(readOnly=true)
-    public Long getArtworkId(ArtworkType artworkType, MetaDataType metaDataType, long id) {
+    public Artwork getArtwork(ArtworkType artworkType, MetaDataType metaDataType, long id) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT a FROM Artwork a ");
         switch (metaDataType) {
             case MOVIE: 
-                sb.append("JOIN a.videoData vd WHERE vd.id=:id AND vd.episode<0 ");
+                sb.append("JOIN FETCH a.videoData vd WHERE vd.id=:id AND vd.episode<0 ");
                 break;
             case EPISODE:
-                sb.append("JOIN a.videoData vd WHERE vd.id=:id AND vd.episode>=0 ");
+                sb.append("JOIN FETCH a.videoData vd WHERE vd.id=:id AND vd.episode>=0 ");
                 break;
             case SERIES:
-                sb.append("JOIN a.series ser WHERE ser.id=:id ");
+                sb.append("JOIN FETCH a.series ser WHERE ser.id=:id ");
                 break;
             case SEASON:
-                sb.append("JOIN a.season sea WHERE sea.id=:id ");
+                sb.append("JOIN FETCH a.season sea WHERE sea.id=:id ");
                 break;
             case BOXSET:
-                sb.append("JOIN a.boxedSet bs WHERE bs.id=:id ");
+                sb.append("JOIN FETCH a.boxedSet bs WHERE bs.id=:id ");
                 break;
             default:
-                sb.append("JOIN a.person p WHERE p.id=:id ");
+                sb.append("JOIN FETCH a.person p WHERE p.id=:id ");
                 break;
         }
         sb.append("AND a.artworkType=:artworkType ");
@@ -293,8 +293,6 @@ public class ArtworkStorageService {
         Map<String, Object> params = new HashMap<>();
         params.put("id", id);
         params.put("artworkType", artworkType);
-        Artwork artwork = this.artworkDao.findUniqueByNamedParameters(Artwork.class, sb, params);
-        
-        return (artwork==null ? null : Long.valueOf(artwork.getId()));
+        return this.artworkDao.findUniqueByNamedParameters(Artwork.class, sb, params);
     }
 }

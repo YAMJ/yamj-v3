@@ -35,10 +35,10 @@ import org.apache.sanselan.ImageReadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.database.model.Artwork;
@@ -46,6 +46,7 @@ import org.yamj.core.database.model.ArtworkGenerated;
 import org.yamj.core.database.model.ArtworkLocated;
 import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.database.service.ArtworkStorageService;
@@ -394,20 +395,19 @@ public class ArtworkProcessorService {
         return newLastId;
     }
     
-    public ApiStatus uploadImage(long artworkId, MultipartFile image) {
-        Artwork artwork;
-        try {
-            artwork = this.artworkStorageService.getRequiredArtwork(artworkId);
-        } catch (IncorrectResultSizeDataAccessException e) {
-            return new ApiStatus(400, "Artwork not found '" + artworkId + "'");
-        }
-        
+    public ApiStatus addArtwork(ArtworkType artworkType, MetaDataType metaDataType, long id, MultipartFile image) {
         String filename = image.getOriginalFilename();
         if (StringUtils.isBlank(filename)) filename = image.getName();
         
         final String extension = FilenameUtils.getExtension(filename);
         if (filenameScanner.determineFileType(extension) != FileType.IMAGE) {
             return new ApiStatus(415, "Uploaded file '" + filename + "' is no valid image");
+        }
+        
+        // find matching artwork
+        Artwork artwork = this.artworkStorageService.getArtwork(artworkType, metaDataType, id);
+        if (artwork == null) {
+            return new ApiStatus(400, "No matching artwork found");
         }
         
         // get or create located artwork
