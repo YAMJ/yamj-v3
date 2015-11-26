@@ -23,10 +23,17 @@
 package org.yamj.core.api.json;
 
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
 import org.yamj.core.api.options.OptionsId;
@@ -35,10 +42,12 @@ import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.JsonApiStorageService;
+import org.yamj.core.service.ArtworkProcessScheduler;
+import org.yamj.core.service.artwork.ArtworkProcessorService;
 import org.yamj.core.service.file.FileStorageService;
 
 @RestController
-@RequestMapping(value = "/api/artwork/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api/artwork/**", produces = "application/json; charset=utf-8")
 public class ArtworkController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkController.class);
@@ -48,8 +57,12 @@ public class ArtworkController {
     private CommonStorageService commonStorageService;
     @Autowired
     private FileStorageService fileStorageService;
+    @Autowired
+    private ArtworkProcessorService artworkProcessorService;
+    @Autowired
+    private ArtworkProcessScheduler artworkProcessScheduler; 
     
-    @RequestMapping("/{id}")
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ApiWrapperSingle<ApiArtworkDTO> getArtwork(@PathVariable Long id) {
         ApiWrapperSingle<ApiArtworkDTO> wrapper = new ApiWrapperSingle<>();
 
@@ -64,7 +77,7 @@ public class ArtworkController {
         return wrapper;
     }
 
-    @RequestMapping("/list")
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
     public ApiWrapperList<ApiArtworkDTO> getArtworkList(@ModelAttribute("options") OptionsIndexArtwork options) {
         LOG.info("INDEX: Artwork list - Options: {}", options.toString());
         ApiWrapperList<ApiArtworkDTO> wrapper = new ApiWrapperList<>();
@@ -81,7 +94,7 @@ public class ArtworkController {
      * @param options
      * @return
      */
-    @RequestMapping("/located/ignore/{id}")
+    @RequestMapping(value = "/located/ignore/{id}", method = RequestMethod.GET)
     public ApiStatus ignoreLocatedArtwork(@ModelAttribute("options") OptionsId options) {
         ApiStatus status = new ApiStatus();
         Long id = options.getId();
@@ -101,5 +114,12 @@ public class ArtworkController {
             status.setMessage("Invalid located artwork id specified");
         }
         return status;
+    }
+
+    @RequestMapping(value = "/upload/{id}", method=RequestMethod.POST)
+    public ApiStatus uploadImage(@PathVariable("id") long id, @RequestParam MultipartFile image) {
+        ApiStatus apiStatus = this.artworkProcessorService.uploadImage(id, image);
+        if (apiStatus.isSuccessful()) this.artworkProcessScheduler.triggerProcess();
+        return apiStatus;
     }
 }

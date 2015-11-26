@@ -23,10 +23,12 @@
 package org.yamj.core.service.file;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -46,6 +48,7 @@ import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.FileHeader;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -143,6 +146,17 @@ public class FileStorageService {
 
         try (OutputStream outputStream = new FileOutputStream(storageFileName)) {
             entity.writeTo(outputStream);
+        }
+
+        return Boolean.TRUE;
+    }
+
+    public boolean store(StorageType type, String filename, byte[] bytes) throws IOException {
+        LOG.debug("Store file {}; uploaded image", filename);
+        String storageFileName = getStorageName(type, filename);
+        
+        try (InputStream is = new ByteArrayInputStream(bytes)) {
+            FileUtils.copyInputStreamToFile(is, new File(storageFileName));
         }
 
         return Boolean.TRUE;

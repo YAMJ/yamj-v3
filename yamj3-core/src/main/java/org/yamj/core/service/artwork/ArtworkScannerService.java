@@ -22,7 +22,11 @@
  */
 package org.yamj.core.service.artwork;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,13 +34,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.config.ConfigServiceWrapper;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.ArtworkLocated;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.database.service.ArtworkLocatorService;
 import org.yamj.core.database.service.ArtworkStorageService;
-import org.yamj.core.service.artwork.online.*;
+import org.yamj.core.service.artwork.online.IArtworkScanner;
+import org.yamj.core.service.artwork.online.IBoxedSetBannerScanner;
+import org.yamj.core.service.artwork.online.IBoxedSetFanartScanner;
+import org.yamj.core.service.artwork.online.IBoxedSetPosterScanner;
+import org.yamj.core.service.artwork.online.IMovieFanartScanner;
+import org.yamj.core.service.artwork.online.IMoviePosterScanner;
+import org.yamj.core.service.artwork.online.IPhotoScanner;
+import org.yamj.core.service.artwork.online.ITvShowBannerScanner;
+import org.yamj.core.service.artwork.online.ITvShowFanartScanner;
+import org.yamj.core.service.artwork.online.ITvShowPosterScanner;
+import org.yamj.core.service.artwork.online.ITvShowVideoImageScanner;
 import org.yamj.core.service.attachment.Attachment;
 import org.yamj.core.service.attachment.AttachmentScannerService;
 import org.yamj.core.service.file.FileTools;
@@ -66,7 +84,7 @@ public class ArtworkScannerService {
     private ConfigServiceWrapper configServiceWrapper;
     @Autowired
     private AttachmentScannerService attachmentScannerService;
-
+    
     public void registerArtworkScanner(IArtworkScanner artworkScanner) {
         if (artworkScanner instanceof IMoviePosterScanner) {
             LOG.trace("Registered movie poster scanner: {}", artworkScanner.getScannerName().toLowerCase());
@@ -657,7 +675,7 @@ public class ArtworkScannerService {
             ArtworkLocated located = new ArtworkLocated();
             located.setArtwork(artwork);
             located.setSource("attachment#"+attachment.getAttachmentId());
-            located.setPriority(1);
+            located.setPriority(8);
             located.setStageFile(attachment.getStageFile());
             located.setHashCode(attachment.getStageFile().getHashCode(attachment.getAttachmentId()));
             located.setImageType(attachment.getImageType());

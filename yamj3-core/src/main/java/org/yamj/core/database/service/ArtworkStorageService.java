@@ -232,6 +232,11 @@ public class ArtworkStorageService {
     }
 
     @Transactional
+    public void storeArtworkLocated(ArtworkLocated located) {
+        this.artworkDao.storeEntity(located);
+    }
+
+    @Transactional
     public void updateArtworkLocated(ArtworkLocated located) {
         this.artworkDao.updateEntity(located);
     }
@@ -247,7 +252,12 @@ public class ArtworkStorageService {
             this.artworkDao.updateEntity(stored);
         }
     }
-    
+
+    @Transactional(readOnly=true)
+    public ArtworkLocated getArtworkLocated(Artwork artwork, String source, String hashCode) {
+        return this.artworkDao.getArtworkLocated(artwork, source, hashCode);
+    }
+
     public List<ArtworkLocated> getArtworkLocatedWithCacheFilename(long lastId) {
         return this.artworkDao.getArtworkLocatedWithCacheFilename(lastId);
     }

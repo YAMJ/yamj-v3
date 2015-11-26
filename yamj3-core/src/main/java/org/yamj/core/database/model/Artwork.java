@@ -25,18 +25,30 @@ package org.yamj.core.database.model;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.*;
+
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Type;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.service.file.StorageType;
 
 @Entity
 @Table(name = "artwork",
@@ -156,7 +168,18 @@ public class Artwork extends AbstractAuditable implements Serializable {
         this.status = status;
     }
 
+    // TRANSIENT METHODS
+    
+    @Transient
+    public StorageType getStorageType() {
+        if (this.artworkType == ArtworkType.PHOTO) {
+            return StorageType.PHOTO;
+        }
+        return StorageType.ARTWORK;
+    }
+    
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()

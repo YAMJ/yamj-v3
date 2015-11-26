@@ -199,4 +199,13 @@ public class ArtworkDao extends HibernateDao {
         criteria.setMaxResults(100);
         return criteria.list();
     }
+    
+    public ArtworkLocated getArtworkLocated(Artwork artwork, String source, String hashCode) {
+        return currentSession().byNaturalId(ArtworkLocated.class)
+                        .using("artwork", artwork)
+                        .using("source", source)
+                        .using("hashCode", hashCode)
+                        .load();        
+        
+    }
 }
