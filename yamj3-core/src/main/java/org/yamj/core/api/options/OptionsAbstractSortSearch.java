@@ -336,9 +336,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
         } else {
             for (String param : StringUtils.split(type, ",")) {
                 MetaDataType mdt = MetaDataType.fromString(param);
-                if (mdt != MetaDataType.UNKNOWN) {
-                    types.add(mdt);
-                }
+                if (mdt.isRealMetaData()) types.add(mdt);
             }
         }
 
@@ -364,9 +362,7 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
                 for (String param : StringUtils.split(type, ",")) {
                     // validate that the string passed is a correct type
                     MetaDataType mdt = MetaDataType.fromString(param);
-                    if (mdt != MetaDataType.UNKNOWN) {
-                        metaDataTypes.add(mdt);
-                    }
+                    if (mdt.isRealMetaData()) metaDataTypes.add(mdt);
                 }
             }
         }

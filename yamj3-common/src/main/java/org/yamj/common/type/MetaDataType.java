@@ -32,40 +32,42 @@ public enum MetaDataType {
     /**
      * This is a movie
      */
-    MOVIE(true),
+    MOVIE(true, true),
     /**
      * This is a TV Series
      */
-    SERIES(true),
+    SERIES(true, true),
     /**
      * This is a season of a TV series
      */
-    SEASON(true),
+    SEASON(true, true),
     /**
      * This is an episode of a TV season
      */
-    EPISODE(true),
+    EPISODE(true, true),
     /**
      * This is a person, an actor or crew member
      */
-    PERSON(true),
+    PERSON(true, true),
     /**
      * This is a person filmography
      */
-    FILMOGRAPHY(false),
+    FILMOGRAPHY(false, false),
     /**
      * This is a boxed set
      */
-    BOXSET(false),
+    BOXSET(false, true),
     /**
      * The type is unknown
      */
-    UNKNOWN(false);
+    UNKNOWN(false, false);
 
     private final boolean realMetaData;
-
-    private MetaDataType(boolean realMetaData) {
+    private final boolean withArtwork;
+    
+    private MetaDataType(boolean realMetaData, boolean withArtwork) {
         this.realMetaData = realMetaData;
+        this.withArtwork = withArtwork;
     }
 
     public static MetaDataType fromString(String type) {
@@ -78,5 +80,9 @@ public enum MetaDataType {
 
     public boolean isRealMetaData() {
         return realMetaData;
+    }
+    
+    public boolean isWithArtwork() {
+        return withArtwork;
     }
 }
