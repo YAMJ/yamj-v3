@@ -90,6 +90,7 @@ import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.ParticipationType;
+import org.yamj.core.database.model.type.ResolutionType;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Repository("apiDao")
@@ -569,6 +570,26 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("AND lower(mf.video_source)=:videoSource)");
         }
 
+        // check resolution
+        if (params.includeResolution() || params.excludeResolution()) {
+            ResolutionType resType = params.getResolution();
+            params.addParameter("extra", Boolean.FALSE);
+            params.addParameter("minWidth", resType.getMinWidth());
+            params.addParameter("maxWidth", resType.getMaxWidth());
+
+            if (params.includeResolution()) {
+                sbSQL.append(" AND exists(");
+            } else {
+                sbSQL.append(" AND not exists (");
+            }
+
+            sbSQL.append("SELECT 1 FROM mediafile mf ");
+            sbSQL.append("JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
+            sbSQL.append("WHERE mv.videodata_id=vd.id ");
+            sbSQL.append("AND mf.extra=:extra ");
+            sbSQL.append("AND mf.width>=:minWidth AND mf.width<=:maxWidth)");
+        }
+        
         // check rating
         if (params.includeRating() || params.excludeRating()) {
             String source = params.getRatingSource();
@@ -860,6 +881,28 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("AND lower(mf.video_source)=:videoSource)");
         }
 
+        // check resolution
+        if (params.includeResolution() || params.excludeResolution()) {
+            ResolutionType resType = params.getResolution();
+            params.addParameter("extra", Boolean.FALSE);
+            params.addParameter("minWidth", resType.getMinWidth());
+            params.addParameter("maxWidth", resType.getMaxWidth());
+
+            if (params.includeResolution()) {
+                sbSQL.append(" AND exists(");
+            } else {
+                sbSQL.append(" AND not exists (");
+            }
+
+            sbSQL.append("SELECT 1 FROM mediafile mf ");
+            sbSQL.append("JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
+            sbSQL.append("JOIN videodata vd ON mv.videodata_id=vd.id ");
+            sbSQL.append("JOIN season sea ON sea.id=vd.season_id ");
+            sbSQL.append("WHERE sea.series_id=ser.id ");
+            sbSQL.append("AND mf.extra=:extra ");
+            sbSQL.append("AND mf.width>=:minWidth  AND mf.width<=:maxWidth)");
+        }
+        
         // check rating
         if (params.includeRating() || params.excludeRating()) {
             String source = params.getRatingSource();
@@ -1150,6 +1193,27 @@ public class ApiDao extends HibernateDao {
             sbSQL.append("AND lower(mf.video_source)=:videoSource)");
         }
 
+        // check resolution
+        if (params.includeResolution() || params.excludeResolution()) {
+            ResolutionType resType = params.getResolution();
+            params.addParameter("extra", Boolean.FALSE);
+            params.addParameter("minWidth", resType.getMinWidth());
+            params.addParameter("maxWidth", resType.getMaxWidth());
+
+            if (params.includeResolution()) {
+                sbSQL.append(" AND exists(");
+            } else {
+                sbSQL.append(" AND not exists (");
+            }
+
+            sbSQL.append("SELECT 1 FROM mediafile mf ");
+            sbSQL.append("JOIN mediafile_videodata mv ON mv.mediafile_id=mf.id ");
+            sbSQL.append("JOIN videodata vd ON mv.videodata_id=vd.id ");
+            sbSQL.append("WHERE vd.season_id=sea.id ");
+            sbSQL.append("AND mf.extra=:extra ");
+            sbSQL.append("AND mf.width>=:minWidth AND mf.width<=:maxWidth)");
+        }
+        
         // check rating
         if (params.includeRating() || params.excludeRating()) {
             String source = params.getRatingSource();

@@ -22,12 +22,19 @@
  */
 package org.yamj.core.api.model.builder;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.options.OptionsIndexVideo;
+import org.yamj.core.database.model.type.ResolutionType;
 
 /**
  * @author modmax
@@ -41,6 +48,7 @@ public class IndexParams {
     private static final String AWARD = "award";
     private static final String CERTIFICATION = "certification";
     private static final String VIDEOSOURCE = "videosource";
+    private static final String RESOLUTION = "resolution";
     private static final String RATING = "rating";
     private static final String NEWEST = "newest";
     private static final String BOXSET = "boxset";
@@ -214,7 +222,26 @@ public class IndexParams {
         return excludes.get(VIDEOSOURCE);
     }
 
-    // video source check
+    // resolution check
+    public boolean includeResolution() {
+        return includes.containsKey(RESOLUTION);
+    }
+
+    public boolean excludeResolution() {
+        return excludes.containsKey(RESOLUTION);
+    }
+
+    public ResolutionType getResolution() {
+        String synonym;
+        if (includeResolution()) {
+            synonym = includes.get(RESOLUTION);
+        } else {
+            synonym = excludes.get(RESOLUTION);
+        }
+        return ResolutionType.fromString(synonym);
+    }
+
+    // boxed set check
     public boolean includeBoxedSet() {
         return includes.containsKey(BOXSET);
     }
