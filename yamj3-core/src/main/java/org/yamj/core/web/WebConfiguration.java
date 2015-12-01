@@ -22,14 +22,6 @@
  */
 package org.yamj.core.web;
 
-import com.moviejukebox.allocine.AllocineApi;
-import com.omertron.fanarttvapi.FanartTvApi;
-import com.omertron.imdbapi.ImdbApi;
-import com.omertron.moviemeter.MovieMeterApi;
-import com.omertron.themoviedbapi.TheMovieDbApi;
-import com.omertron.thetvdbapi.TheTVDBApi;
-import com.omertron.tvrageapi.TVRageApi;
-
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,6 +48,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.api.common.http.WebBrowserUserAgentSelector;
+
+import com.moviejukebox.allocine.AllocineApi;
+import com.omertron.fanarttvapi.FanartTvApi;
+import com.omertron.imdbapi.ImdbApi;
+import com.omertron.moviemeter.MovieMeterApi;
+import com.omertron.rottentomatoesapi.RottenTomatoesApi;
+import com.omertron.themoviedbapi.TheMovieDbApi;
+import com.omertron.thetvdbapi.TheTVDBApi;
+import com.omertron.tvrageapi.TVRageApi;
 
 @Configuration
 public class WebConfiguration  {
@@ -118,6 +119,9 @@ public class WebConfiguration  {
     
     @Value("${APIKEY.tvrage}")
     private String tvRageApiKey;
+
+    @Value("${APIKEY.rottentomatoes}")
+    private String rottenTomatoesApiKey;
 
     @Scope
     @Bean(destroyMethod="close")
@@ -240,6 +244,12 @@ public class WebConfiguration  {
     public TVRageApi tvRageApi() {
         LOG.trace("Initialize TVRageApi");
         return new TVRageApi(tvRageApiKey, poolingHttpClient());
+    }
+
+    @Bean
+    public RottenTomatoesApi rottenTomatoesApi() throws Exception {
+        LOG.trace("Initialize RottenTomatoesApi");
+        return new RottenTomatoesApi(rottenTomatoesApiKey, poolingHttpClient());
     }
 }
 

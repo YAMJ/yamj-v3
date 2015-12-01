@@ -23,15 +23,20 @@
 package org.yamj.core.service.metadata;
 
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.config.ConfigServiceWrapper;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.MetadataStorageService;
+import org.yamj.core.service.metadata.extra.ExtraScannerService;
 import org.yamj.core.service.metadata.nfo.NfoScannerService;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.tools.ExceptionTools;
@@ -48,6 +53,8 @@ public class MetadataScannerService {
     private NfoScannerService nfoScannerService;
     @Autowired
     private OnlineScannerService onlineScannerService;
+    @Autowired
+    private ExtraScannerService extraScannerService;
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
 
@@ -67,6 +74,9 @@ public class MetadataScannerService {
 
         // online scanning
         this.onlineScannerService.scanMovie(videoData);
+
+        // extra scanning
+        this.extraScannerService.scanMovie(videoData);
 
         // reset sort title
         MetadataTools.setSortTitle(videoData, configServiceWrapper.getSortStripPrefixes());
@@ -113,6 +123,8 @@ public class MetadataScannerService {
         // online scanning
         this.onlineScannerService.scanSeries(series);
 
+        // extra scanning
+        this.extraScannerService.scanSeries(series);
 
         // reset sort title
         List<String> prefixes = this.configServiceWrapper.getSortStripPrefixes();
