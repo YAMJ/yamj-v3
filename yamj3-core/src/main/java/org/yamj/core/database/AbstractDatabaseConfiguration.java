@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
-public abstract class AbstractDatabaseConfiguration  implements DatabaseConfiguration {
+public abstract class AbstractDatabaseConfiguration implements DatabaseConfiguration {
     
     @Value("${yamj3.database.showSql:false}")
     protected boolean showSql;
@@ -72,6 +72,7 @@ public abstract class AbstractDatabaseConfiguration  implements DatabaseConfigur
     protected boolean testOnReturn;
 
     @Bean
+    @Override
     public PlatformTransactionManager transactionManager() throws Exception {
         HibernateTransactionManager transactionManager = new HibernateTransactionManager(sessionFactory().getObject());
         transactionManager.setDefaultTimeout(30);

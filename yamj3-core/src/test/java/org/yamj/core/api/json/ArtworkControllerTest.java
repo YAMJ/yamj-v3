@@ -2,9 +2,7 @@ package org.yamj.core.api.json;
 
 import java.io.File;
 import java.nio.charset.Charset;
-
 import org.apache.http.HttpEntity;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -19,7 +17,6 @@ public class ArtworkControllerTest {
     public void uploadImage() throws Exception {
         final long id=1;
         
-        HttpClient httpClient = new SimpleHttpClientBuilder().build();
         HttpPost httpPost = new HttpPost("http://localhost:8888/yamj3/api/artwork/add/fanart/movie/" + id);
 
         File file = new File("c:/test.png");
@@ -27,7 +24,7 @@ public class ArtworkControllerTest {
         httpPost.setEntity(reqEntity);
 
         System.out.println("Executing request " + httpPost.getRequestLine());
-        DigestedResponse response = DigestedResponseReader.postContent(httpClient, httpPost, Charset.forName("UTF-8"));
+        DigestedResponse response = DigestedResponseReader.postContent(new SimpleHttpClientBuilder().build(), httpPost, Charset.forName("UTF-8"));
         System.out.println("----------------------------------------");
         System.out.println(response.getStatusCode());
         System.out.println(response.getContent());

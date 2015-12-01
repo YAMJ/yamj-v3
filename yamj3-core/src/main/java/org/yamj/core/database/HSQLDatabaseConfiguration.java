@@ -25,9 +25,7 @@ package org.yamj.core.database;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 
 import java.util.Properties;
-
 import javax.sql.DataSource;
-
 import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.SessionFactory;
 import org.hsqldb.server.Server;
@@ -36,12 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.*;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.yamj.core.hibernate.AuditInterceptor;
@@ -89,7 +82,7 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
         
         BasicDataSource basicDataSource = new BasicDataSource();
         basicDataSource.setDriverClassName("org.hsqldb.jdbc.JDBCDriver");
-        basicDataSource.setUrl("jdbc:hsqldb:hsql://localhost:9001/yamj3");
+        basicDataSource.setUrl("jdbc:hsqldb:hsql://localhost:"+port+"/yamj3");
         basicDataSource.setUsername("sa");
         basicDataSource.setPassword("");
         basicDataSource.setValidationQuery("SELECT 1 FROM INFORMATION_SCHEMA.SYSTEM_USERS");
