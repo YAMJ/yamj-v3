@@ -30,21 +30,20 @@ import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.service.metadata.online.ImdbScanner;
 
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
-public class RottenTomatoesScannerTest extends AbstractJUnit4SpringContextTests {
+public class RottenTomatoesRatingScannerTest extends AbstractJUnit4SpringContextTests {
 
-    @Resource(name = "rottenTomatoesScanner")
-    private RottenTomatoesScanner rottenTomatoesScanner;
+    @Resource(name = "rottenTomatoesRatingScanner")
+    private RottenTomatoesRatingScanner rottenTomatoesRatingScanner;
 
     @Test
     public void testScanMovie() {
         VideoData videoData = new VideoData();
-        videoData.setTitle("Avatar", ImdbScanner.SCANNER_ID);
-        videoData.setPublicationYear(2009, ImdbScanner.SCANNER_ID);
-        rottenTomatoesScanner.scanMovie(videoData);
+        videoData.setTitle("Avatar", rottenTomatoesRatingScanner.getScannerName());
+        videoData.setPublicationYear(2009, rottenTomatoesRatingScanner.getScannerName());
+        rottenTomatoesRatingScanner.scanMovie(videoData);
         
-        assertEquals(83, videoData.getRating(rottenTomatoesScanner.getScannerName()));
+        assertEquals(83, videoData.getRating(rottenTomatoesRatingScanner.getScannerName()));
     }
 }

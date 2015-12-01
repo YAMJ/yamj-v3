@@ -1,8 +1,8 @@
 /*
  *      Copyright (c) 2004-2015 YAMJ Members
- *      https://github.com/orgs/YAMJ/people
+ *      https://github.com/organizations/YAMJ/teams
  *
- *      This file is part of the Yet Another Movie Jukebox (YAMJ) project.
+ *      This file is part of the Yet Another Media Jukebox (YAMJ).
  *
  *      YAMJ is free software: you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by
@@ -17,13 +17,12 @@
  *      You should have received a copy of the GNU General Public License
  *      along with YAMJ.  If not, see <http://www.gnu.org/licenses/>.
  *
- *      Web: https://github.com/YAMJ/yamj-v2
+ *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
 package org.yamj.core.service.metadata.extra;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -39,11 +38,11 @@ import com.omertron.rottentomatoesapi.RottenTomatoesApi;
 import com.omertron.rottentomatoesapi.RottenTomatoesException;
 import com.omertron.rottentomatoesapi.model.RTMovie;
 
-@Service("rottenTomatoesScanner")
-public class RottenTomatoesScanner implements IExtraMovieScanner {
+@Service("rottenTomatoesRatingScanner")
+public class RottenTomatoesRatingScanner implements IExtraMovieScanner {
 
     private static final String SCANNER_ID = "rottentomatoes";
-    private static final Logger LOG = LoggerFactory.getLogger(RottenTomatoesScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RottenTomatoesRatingScanner.class);
 
     @Autowired
     private RottenTomatoesApi rottenTomatoesApi;
@@ -67,7 +66,7 @@ public class RottenTomatoesScanner implements IExtraMovieScanner {
 
     @Override
     public boolean isEnabled() {
-        return configService.getBooleanProperty("rottentomatoes.enabled", false);
+        return configService.getBooleanProperty("rottentomatoes.rating.enabled", false);
     }
 
     @Override
@@ -99,10 +98,8 @@ public class RottenTomatoesScanner implements IExtraMovieScanner {
         }
 
         if (rtMovie != null) {
-            Map<String, String> ratings = rtMovie.getRatings();
-
-            for (String type : configService.getPropertyAsList("rottentomatoes.priority", "critics_score,audience_score,critics_rating,audience_rating")) {
-                int rating = NumberUtils.toInt(ratings.get(type), 0);
+            for (String type : configService.getPropertyAsList("rottentomatoes.rating.priority", "critics_score,audience_score,critics_rating,audience_rating")) {
+                int rating = NumberUtils.toInt(rtMovie.getRatings().get(type), 0);
                 if (rating > 0) {
                     LOG.debug("{} - {} found: {}", videoData.getTitle(), type, rating);
                     videoData.addRating(SCANNER_ID, rating);
