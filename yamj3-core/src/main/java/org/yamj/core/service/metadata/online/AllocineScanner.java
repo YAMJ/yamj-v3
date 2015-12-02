@@ -22,9 +22,12 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.moviejukebox.allocine.model.*;
-
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -39,9 +42,11 @@ import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.FilmParticipation;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.ParticipationType;
@@ -52,6 +57,18 @@ import org.yamj.core.web.HTMLTools;
 import org.yamj.core.web.apis.AllocineApiWrapper;
 import org.yamj.core.web.apis.ImdbSearchEngine;
 import org.yamj.core.web.apis.SearchEngineTools;
+
+import com.moviejukebox.allocine.model.CastMember;
+import com.moviejukebox.allocine.model.Episode;
+import com.moviejukebox.allocine.model.EpisodeInfos;
+import com.moviejukebox.allocine.model.FestivalAward;
+import com.moviejukebox.allocine.model.FilmographyInfos;
+import com.moviejukebox.allocine.model.MovieInfos;
+import com.moviejukebox.allocine.model.MoviePerson;
+import com.moviejukebox.allocine.model.Participance;
+import com.moviejukebox.allocine.model.PersonInfos;
+import com.moviejukebox.allocine.model.TvSeasonInfos;
+import com.moviejukebox.allocine.model.TvSeriesInfos;
 
 @Service("allocineScanner")
 public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, IFilmographyScanner {
@@ -99,11 +116,11 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         String allocineId = videoData.getSourceDbId(SCANNER_ID);
         
         if (StringUtils.isBlank(allocineId)) {
-            allocineId = allocineApiWrapper.getAllocineMovieId(videoData.getTitle(), videoData.getYear(), throwTempError);
+            allocineId = allocineApiWrapper.getAllocineMovieId(videoData.getTitle(), videoData.getPublicationYear(), throwTempError);
 
-            if (StringUtils.isBlank(allocineId) && StringUtils.isNotBlank(videoData.getTitleOriginal())) {
+            if (StringUtils.isBlank(allocineId) && videoData.isTitleOriginalScannable()) {
                 // try with original title
-                allocineId = allocineApiWrapper.getAllocineMovieId(videoData.getTitleOriginal(), videoData.getYear(), throwTempError);
+                allocineId = allocineApiWrapper.getAllocineMovieId(videoData.getTitleOriginal(), videoData.getPublicationYear(), throwTempError);
             }
             
             if (StringUtils.isBlank(allocineId)) {
@@ -111,7 +128,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                 searchEngingeLock.lock();
                 try {
                     searchEngineTools.setSearchSuffix("/fichefilm_gen_cfilm");
-                    String url = searchEngineTools.searchURL(videoData.getTitle(), videoData.getYear(), "www.allocine.fr/film", throwTempError);
+                    String url = searchEngineTools.searchURL(videoData.getTitle(), videoData.getPublicationYear(), "www.allocine.fr/film", throwTempError);
                     allocineId = HTMLTools.extractTag(url, "fichefilm_gen_cfilm=", ".html");
                 } finally {
                     searchEngingeLock.unlock();
@@ -126,7 +143,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         if (StringUtils.isBlank(imdbId) && StringUtils.isNotBlank(videoData.getTitleOriginal())) {
             boolean searchImdb = configServiceWrapper.getBooleanProperty("allocine.search.imdb", false);
             if (searchImdb) {
-                imdbId = imdbSearchEngine.getImdbId(videoData.getTitleOriginal(), videoData.getYear(), false, false);
+                imdbId = imdbSearchEngine.getImdbId(videoData.getTitleOriginal(), videoData.getPublicationYear(), false, false);
                 if (StringUtils.isNotBlank(imdbId)) {
                     LOG.debug("Found IMDb id {} for movie '{}'", imdbId, videoData.getTitleOriginal());
                     videoData.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);
@@ -147,11 +164,11 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         String allocineId = series.getSourceDbId(SCANNER_ID);
         
         if (StringUtils.isBlank(allocineId)) {
-            allocineId = allocineApiWrapper.getAllocineSeriesId(series.getTitle(), series.getYear(), throwTempError);
+            allocineId = allocineApiWrapper.getAllocineSeriesId(series.getTitle(), series.getStartYear(), throwTempError);
 
             if (StringUtils.isBlank(allocineId) && StringUtils.isNotBlank(series.getTitleOriginal())) {
                 // try with original title
-                allocineId = allocineApiWrapper.getAllocineSeriesId(series.getTitleOriginal(), series.getYear(), throwTempError);
+                allocineId = allocineApiWrapper.getAllocineSeriesId(series.getTitleOriginal(), series.getStartYear(), throwTempError);
             }
 
             if (StringUtils.isBlank(allocineId)) {
@@ -159,7 +176,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
                 searchEngingeLock.lock();
                 try {
                     searchEngineTools.setSearchSuffix("/ficheserie_gen_cserie");
-                    String url = searchEngineTools.searchURL(series.getTitle(), series.getYear(), "www.allocine.fr/series", throwTempError);
+                    String url = searchEngineTools.searchURL(series.getTitle(), series.getStartYear(), "www.allocine.fr/series", throwTempError);
                     allocineId = HTMLTools.extractTag(url, "ficheserie_gen_cserie=", ".html");
                 } finally {
                     searchEngingeLock.unlock();
@@ -174,7 +191,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
         if (StringUtils.isBlank(imdbId) && StringUtils.isNotBlank(series.getTitleOriginal())) {
             boolean searchImdb = configServiceWrapper.getBooleanProperty("allocine.search.imdb", false);
             if (searchImdb) {
-                imdbId = imdbSearchEngine.getImdbId(series.getTitleOriginal(), series.getYear(), true, false);
+                imdbId = imdbSearchEngine.getImdbId(series.getTitleOriginal(), series.getStartYear(), true, false);
                 if (StringUtils.isNotBlank(imdbId)) {
                     LOG.debug("Found IMDb id {} for series '{}'", imdbId, series.getTitleOriginal());
                     series.setSourceDbId(ImdbScanner.SCANNER_ID, imdbId);

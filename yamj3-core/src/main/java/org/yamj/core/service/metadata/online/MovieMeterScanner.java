@@ -22,12 +22,12 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.omertron.moviemeter.model.Actor;
-import com.omertron.moviemeter.model.FilmInfo;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +41,9 @@ import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.MovieMeterApiWrapper;
+
+import com.omertron.moviemeter.model.Actor;
+import com.omertron.moviemeter.model.FilmInfo;
 
 @Service("movieMeterScanner")
 public class MovieMeterScanner implements IMovieScanner {
@@ -89,17 +92,15 @@ public class MovieMeterScanner implements IMovieScanner {
 
         // try to get the MovieMeter ID using title and year
         if (!StringUtils.isNumeric(movieMeterId)) {
-            movieMeterId = movieMeterApiWrapper.getMovieIdByTitleAndYear(videoData.getTitle(), videoData.getYear(), throwTempError);
+            movieMeterId = movieMeterApiWrapper.getMovieIdByTitleAndYear(videoData.getTitle(), videoData.getPublicationYear(), throwTempError);
         }
 
-        // try to get the MovieMeter ID using originak title and year
-        if (!StringUtils.isNumeric(movieMeterId) 
-            && StringUtils.isNotBlank(videoData.getTitleOriginal())
-            && !videoData.getTitle().equalsIgnoreCase(videoData.getTitleOriginal())) 
-        {
-            movieMeterId = movieMeterApiWrapper.getMovieIdByTitleAndYear(videoData.getTitleOriginal(), videoData.getYear(), throwTempError);
+        // try to get the MovieMeter ID using original title and year
+        if (!StringUtils.isNumeric(movieMeterId) && videoData.isTitleOriginalScannable()) {
+            movieMeterId = movieMeterApiWrapper.getMovieIdByTitleAndYear(videoData.getTitleOriginal(), videoData.getPublicationYear(), throwTempError);
         }
         
+        videoData.setSourceDbId(SCANNER_ID, movieMeterId);
         return movieMeterId;
     }
     

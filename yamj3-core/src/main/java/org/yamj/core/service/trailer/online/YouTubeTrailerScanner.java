@@ -22,18 +22,12 @@
  */
 package org.yamj.core.service.trailer.online;
 
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.ResourceId;
-import com.google.api.services.youtube.model.SearchListResponse;
-import com.google.api.services.youtube.model.SearchResult;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -46,6 +40,15 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.TrailerDTO;
 import org.yamj.core.database.model.type.ContainerType;
 import org.yamj.core.service.trailer.TrailerScannerService;
+
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.model.ResourceId;
+import com.google.api.services.youtube.model.SearchListResponse;
+import com.google.api.services.youtube.model.SearchResult;
 
 @Service("youTubeTrailerScanner")
 public class YouTubeTrailerScanner implements IMovieTrailerScanner {
@@ -97,8 +100,8 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
         try {
             StringBuilder query = new StringBuilder();
             query.append(videoData.getTitle());
-            if (videoData.getYear() > 0) {
-                query.append(" ").append(videoData.getYear());
+            if (videoData.getPublicationYear() > 0) {
+                query.append(" ").append(videoData.getPublicationYear());
             }
             query.append(" trailer");
 

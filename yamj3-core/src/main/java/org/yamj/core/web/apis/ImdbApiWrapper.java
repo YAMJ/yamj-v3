@@ -99,6 +99,11 @@ public class ImdbApiWrapper {
         return url;
     }
 
+    public ImdbMovieDetails getMovieDetails(String imdbId) {
+        Locale imdbLocale = localeService.getLocaleForConfig("imdb");
+        return this.getMovieDetails(imdbId, imdbLocale);
+    }
+    
     public ImdbMovieDetails getMovieDetails(String imdbId, Locale locale) {
         ImdbMovieDetails imdbMovieDetails;
         imdbApiLock.lock();

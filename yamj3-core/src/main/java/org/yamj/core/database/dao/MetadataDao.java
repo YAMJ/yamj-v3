@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.CacheMode;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
@@ -154,11 +153,6 @@ public class MetadataDao extends HibernateDao {
     
     public void storeMovieCredit(CreditDTO dto) {
         Person person = getByNaturalIdCaseInsensitive(Person.class, IDENTIFIER, dto.getIdentifier());
-        if (person == null && StringUtils.isNotBlank(dto.getSource()) && StringUtils.isNotBlank(dto.getSourceId())) {
-            // try to fetch person by source ID; note that a list may be returned due duplicates
-            // TODO
-        }
-        
         if (person == null) {
             // create new person
             person = new Person(dto.getIdentifier());

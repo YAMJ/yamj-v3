@@ -25,6 +25,7 @@ package org.yamj.core.database.model;
 import javax.persistence.Column;
 import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
+
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.type.OverrideFlag;
 
@@ -115,6 +116,11 @@ public abstract class AbstractMetadata extends AbstractScannable
         }
     }
 
+    public boolean isTitleOriginalScannable() {
+        if (StringUtils.isBlank(this.titleOriginal)) return false;
+        return !StringUtils.equalsIgnoreCase(this.title, this.titleOriginal);
+    }
+    
     @Override
     public String getTitleSort() {
         return titleSort;

@@ -131,7 +131,7 @@ public class OfdbScanner implements IMovieScanner {
             ofdbUrl = getOfdbIdByTitleAndYear(videoData.getTitle(), videoData.getPublicationYear(), throwTempError);
         }
 
-        if (StringUtils.isBlank(ofdbUrl) && StringUtils.isNotBlank(videoData.getTitleOriginal())) {
+        if (StringUtils.isBlank(ofdbUrl) && videoData.isTitleOriginalScannable()) {
             // try by original title and year
             ofdbUrl = getOfdbIdByTitleAndYear(videoData.getTitleOriginal(), videoData.getPublicationYear(), throwTempError);
         }

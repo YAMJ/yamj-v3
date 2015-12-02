@@ -22,9 +22,14 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import com.omertron.tvrageapi.model.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+import java.util.StringTokenizer;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +44,11 @@ import org.yamj.core.service.metadata.nfo.InfoDTO;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.tools.OverrideTools;
 import org.yamj.core.web.apis.TVRageApiWrapper;
+
+import com.omertron.tvrageapi.model.CountryDetail;
+import com.omertron.tvrageapi.model.Episode;
+import com.omertron.tvrageapi.model.EpisodeList;
+import com.omertron.tvrageapi.model.ShowInfo;
 
 @Service("tvRageScanner")
 public class TVRageScanner implements ISeriesScanner {
@@ -91,10 +101,7 @@ public class TVRageScanner implements ISeriesScanner {
         }
 
         // try by original title
-        if ((showInfo == null || !showInfo.isValid())
-            && StringUtils.isNotBlank(series.getTitleOriginal())
-            && !series.getTitle().equalsIgnoreCase(series.getTitleOriginal()))
-        {
+        if ((showInfo == null || !showInfo.isValid()) && series.isTitleOriginalScannable()) {
             showInfo = tvRageApiWrapper.getShowInfoByTitle(series.getTitleOriginal(), throwTempError);
         }
 

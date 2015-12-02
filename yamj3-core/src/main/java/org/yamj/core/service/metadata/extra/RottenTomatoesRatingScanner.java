@@ -79,7 +79,7 @@ public class RottenTomatoesRatingScanner implements IExtraMovieScanner {
             try {
                 rtMovies = rottenTomatoesApi.getMoviesSearch(videoData.getTitle());
                 for (RTMovie tmpMovie : rtMovies) {
-                    if (videoData.getTitle().equalsIgnoreCase(tmpMovie.getTitle()) && (videoData.getYear() == tmpMovie.getYear())) {
+                    if (videoData.getTitle().equalsIgnoreCase(tmpMovie.getTitle()) && (videoData.getPublicationYear() == tmpMovie.getYear())) {
                         rtId = tmpMovie.getId();
                         rtMovie = tmpMovie;
                         videoData.setSourceDbId(SCANNER_ID, String.valueOf(rtId));
