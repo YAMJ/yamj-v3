@@ -17,7 +17,7 @@
  *      You should have received a copy of the GNU General Public License
  *      along with YAMJ.  If not, see <http://www.gnu.org/licenses/>.
  *
- *      Web: https://github.com/YAMJ/yamj-v2
+ *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
 package org.yamj.core.service.trailer.online;
