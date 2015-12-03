@@ -215,8 +215,8 @@ public class TVRageScanner implements ISeriesScanner {
                 if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
                     season.setTitle(title, SCANNER_ID);
                 }
-                if (OverrideTools.checkOverwriteOriginalTitle(series, SCANNER_ID)) {
-                    series.setTitleOriginal(showInfo.getShowName(), SCANNER_ID);
+                if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
+                    season.setTitleOriginal(showInfo.getShowName(), SCANNER_ID);
                 }
                 if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
                     season.setPlot(showInfo.getSummary(), SCANNER_ID);

@@ -575,7 +575,7 @@ public class JsonApiStorageService {
      * @return
      */
     @Transactional
-    public ApiStatus rescanSingle(MetaDataType type, Long id) {
+    public ApiStatus rescanMetaData(MetaDataType type, Long id) {
         boolean rescan = false;
         
         if (id != null && id > 0L) {

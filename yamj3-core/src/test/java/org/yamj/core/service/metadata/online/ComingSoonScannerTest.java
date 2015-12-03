@@ -31,7 +31,10 @@ import javax.annotation.Resource;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.dto.CreditDTO;
 
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
 public class ComingSoonScannerTest extends AbstractJUnit4SpringContextTests {
@@ -64,4 +67,51 @@ public class ComingSoonScannerTest extends AbstractJUnit4SpringContextTests {
         assertTrue(videoData.getGenreNames().contains("Azione"));
         assertTrue(videoData.getGenreNames().contains("Thriller"));
     }
+
+    @Test
+    public void testGetSeriesId() {
+        Series series = new Series();
+        series.setTitle("Two and a half men", comingSoonScanner.getScannerName());
+        series.setStartYear(2003, comingSoonScanner.getScannerName());
+        String id = comingSoonScanner.getSeriesId(series);
+        assertEquals("28", id);
+    }
+
+    @Test
+    public void testScanSeries() {
+        Series series = new Series();
+        series.setSourceDbId(comingSoonScanner.getScannerName(), "28");
+        
+        Season season = new Season();
+        season.setSeason(1);
+        season.setSeries(series);
+        series.getSeasons().add(season);
+        
+        VideoData episode1 = new VideoData("TwoAndAHalfMen_1");
+        episode1.setEpisode(1);
+        episode1.setSeason(season);
+        season.getVideoDatas().add(episode1);
+
+        VideoData episode2 = new VideoData("TwoAndAHalfMen_2");
+        episode2.setEpisode(2);
+        episode2.setSeason(season);
+        season.getVideoDatas().add(episode2);
+
+        comingSoonScanner.scanSeries(series);
+
+        assertEquals("Due Uomini E Mezzo", series.getTitle());
+        assertEquals("Two and a Half Men", series.getTitleOriginal());
+        assertNotNull(series.getPlot());
+        
+        for (VideoData videoData : season.getVideoDatas()) {
+            assertNotNull(videoData.getTitle());
+            assertNotNull(videoData.getTitleOriginal());
+            
+            for (CreditDTO credit : videoData.getCreditDTOS()) {
+                String role = credit.getRole() == null ? "" : " (" + credit.getRole() + ")";
+                System.err.println(credit.getJobType() +": " + credit.getName() + role);
+            }
+        }
+    }
+
 }

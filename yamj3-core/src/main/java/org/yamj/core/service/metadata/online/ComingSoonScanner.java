@@ -29,8 +29,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.annotation.PostConstruct;
@@ -48,6 +51,8 @@ import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
@@ -59,21 +64,24 @@ import org.yamj.core.web.HTMLTools;
 import org.yamj.core.web.apis.SearchEngineTools;
 
 @Service("comingSoonScanner")
-public class ComingSoonScanner implements IMovieScanner {
+public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(ComingSoonScanner.class);
     private static final String SCANNER_ID = "comingsoon";
     private static final String COMINGSOON_BASE_URL = "http://www.comingsoon.it/";
-    private static final String COMINGSOON_SEARCH_URL = "film/?";
-    private static final String COMINGSOON_FILM_URL = "Film/Scheda/?";
-    private static final String COMINGSOON_PERSONAGGI = "personaggi/";
-    private static final String COMINGSOON_SEARCH_PARAMS = "&genere=&nat=&regia=&attore=&orderby=&orderdir=asc&page=";
+    private static final String COMINGSOON_SEARCH_MOVIE = "film/?";
+    private static final String COMINGSOON_SEARCH_MOVIE_PARAMS = "&genere=&nat=&regia=&attore=&orderby=&orderdir=asc&page=";
+    private static final String COMINGSOON_SEARCH_SERIES = "serietv/ricerca/?";
+    private static final String COMINGSOON_SEARCH_SERIES_PARAMS = "&genere=&attore=&orderby=&orderdir=asc&page=";
     private static final String COMONGSOON_TITLE_PARAM = "titolo=";
     private static final String COMINGSOON_YEAR_PARAM = "anno=";
     private static final String COMINGSOON_KEY_PARAM = "key=";
+    private static final String COMINGSOON_MOVIE_URL = "film/scheda/?";
+    private static final String COMINGSOON_SERIES_URL = "serietv/scheda/?";
+    private static final String COMINGSOON_PERSONAGGI = "personaggi/";
     private static final int COMINGSOON_MAX_DIFF = 1000;
     private static final int COMINGSOON_MAX_SEARCH_PAGES = 5;
-    
+        
     private Charset charset;
     private SearchEngineTools searchEngineTools;
 
@@ -115,20 +123,30 @@ public class ComingSoonScanner implements IMovieScanner {
         }
         
         // search coming soon site by title
-        comingSoonId = getComingSoonId(videoData.getTitle(), videoData.getPublicationYear(), throwTempError);
-        if (isNoValidComingSoonId(comingSoonId)) {
-            videoData.setSourceDbId(SCANNER_ID, comingSoonId);
-            return comingSoonId;
-        }
+        comingSoonId = getComingSoonId(videoData.getTitle(), videoData.getPublicationYear(), false, throwTempError);
 
+        // search coming soon site by original title
         if (isNoValidComingSoonId(comingSoonId) && videoData.isTitleOriginalScannable()) {
-            comingSoonId = getComingSoonId(videoData.getTitleOriginal(), videoData.getPublicationYear(), throwTempError);
+            comingSoonId = getComingSoonId(videoData.getTitleOriginal(), videoData.getPublicationYear(), false, throwTempError);
         }
 
+        // search coming soon with search engine tools
         if (isNoValidComingSoonId(comingSoonId)) {
             comingSoonId = this.searchEngineTools.searchURL(videoData.getTitle(), videoData.getPublicationYear(), "www.comingsoon.it/film", throwTempError);
-        
+            int beginIndex = comingSoonId.indexOf("film/");
+            if (beginIndex < 0) {
+                comingSoonId = null;
+            } else {
+                beginIndex = comingSoonId.indexOf("/", beginIndex+6);
+                int endIndex = comingSoonId.indexOf("/", beginIndex+1);
+                if (beginIndex < endIndex) {
+                    comingSoonId = comingSoonId.substring(beginIndex+1, endIndex);
+                } else {
+                    comingSoonId = null;
+                }
+            }
         }
+        
         if (isNoValidComingSoonId(comingSoonId)) {
             return null;
         }
@@ -136,192 +154,6 @@ public class ComingSoonScanner implements IMovieScanner {
         videoData.setSourceDbId(SCANNER_ID, comingSoonId);
         return comingSoonId;
     }
-
-    private static boolean isNoValidComingSoonId(String comingSoonId) {
-        if (StringUtils.isBlank(comingSoonId)) return true;
-        return StringUtils.equalsIgnoreCase(comingSoonId, "na");
-    }
-        
-    private String getComingSoonId(String title, int year, boolean throwTempError) {
-        return getComingSoonId(title, year, COMINGSOON_MAX_DIFF, throwTempError);
-    }
-
-    private String getComingSoonId(String title, int year, int scoreToBeat, boolean throwTempError) {
-        if (scoreToBeat == 0) return null;
-        int currentScore = scoreToBeat;
-
-        try {
-            StringBuilder urlBase = new StringBuilder(COMINGSOON_BASE_URL);
-            urlBase.append(COMINGSOON_SEARCH_URL);
-            urlBase.append(COMONGSOON_TITLE_PARAM);
-            urlBase.append(URLEncoder.encode(title.toLowerCase(), "UTF-8"));
-
-            urlBase.append("&").append(COMINGSOON_YEAR_PARAM);
-            if (year > 0 ) {
-                urlBase.append(year);
-            }
-            urlBase.append(COMINGSOON_SEARCH_PARAMS);
-
-            int searchPage = 0;
-            String comingSoonId = null;
-            
-            loop: while (searchPage++ < COMINGSOON_MAX_SEARCH_PAGES) {
-
-                StringBuilder urlPage = new StringBuilder(urlBase);
-                if (searchPage > 1) {
-                    urlPage.append("&p=").append(searchPage);
-                }
-
-                LOG.debug("Fetching ComingSoon search page {}/{} - URL: {}", searchPage, COMINGSOON_MAX_SEARCH_PAGES, urlPage.toString());
-                DigestedResponse response = httpClient.requestContent(urlPage.toString(), charset);
-                if (throwTempError && ResponseTools.isTemporaryError(response)) {
-                    throw new TemporaryUnavailableException("ComingSoon service is temporary not available: " + response.getStatusCode());
-                } else if (ResponseTools.isNotOK(response)) {
-                    LOG.error("Can't find ComingSoon ID due response status {}", response.getStatusCode());
-                    return null;
-                }
-
-                List<String[]> movieList = parseComingSoonSearchResults(response.getContent());
-                if (movieList.isEmpty()) {
-                    break loop;
-                }
-                
-                for (int i = 0; i < movieList.size() && currentScore > 0; i++) {
-                    String lId = movieList.get(i)[0];
-                    String lTitle = movieList.get(i)[1];
-                    String lOrig = movieList.get(i)[2];
-                    //String lYear = (String) movieList.get(i)[3];
-                    int difference = compareTitles(title, lTitle);
-                    int differenceOrig = compareTitles(title, lOrig);
-                    difference = (differenceOrig < difference ? differenceOrig : difference);
-                    if (difference < currentScore) {
-                        if (difference == 0) {
-                            LOG.debug("Found perfect match for: {}, {}", lTitle, lOrig);
-                            searchPage = COMINGSOON_MAX_SEARCH_PAGES; //ends loop
-                        } else {
-                            LOG.debug("Found a match for: {}, {}, difference {}", lTitle, lOrig, difference);
-                        }
-                        comingSoonId = lId;
-                        currentScore = difference;
-                    }
-                }
-            }
-
-            if (year>0 && currentScore>0) {
-                LOG.debug("Perfect match not found, trying removing by year ...");
-                String newComingSoonId = getComingSoonId(title, -1, currentScore, throwTempError);
-                comingSoonId = (isNoValidComingSoonId(newComingSoonId) ? comingSoonId : newComingSoonId);
-            }
-
-            if (StringUtils.isNotBlank(comingSoonId)) {
-                LOG.debug("Found valid ComingSoon ID: {}", comingSoonId);
-            }
-
-            return comingSoonId;
-
-        } catch (IOException ex) {
-            LOG.error("Failed retrieving ComingSoon id for title '{}': {}", title, ex.getMessage());
-            LOG.trace("ComingSoon service error", ex);
-            return null;
-        }
-    }
-
-    /**
-     * Parse the search results
-     *
-     * Search results end with "Trovati NNN Film" (found NNN movies).
-     *
-     * After this string, more movie URL are found, so we have to set a boundary
-     *
-     * @param xml
-     * @return
-     */
-    private static List<String[]> parseComingSoonSearchResults(String xml) {
-        final List<String[]> result = new ArrayList<>();
-        
-        int beginIndex = StringUtils.indexOfIgnoreCase(xml, "Trovate");
-        int moviesFound = -1;
-        if (beginIndex > 0) {
-            int end = xml.indexOf(" film", beginIndex + 7);
-            if (end > 0) {
-                String tmp = HTMLTools.stripTags(xml.substring(beginIndex + 8, xml.indexOf(" film", beginIndex)));
-                moviesFound = NumberUtils.toInt(tmp, -1);
-            }
-        }
-
-        if (moviesFound < 0) {
-            LOG.error("Couldn't find 'Trovate NNN film in archivio' string. Search page layout probably changed");
-            return result;
-        }
- 
-        List<String> films = HTMLTools.extractTags(xml, "box-lista-cinema", "BOX FILM RICERCA", "<a h", "</a>", false);
-        if (CollectionUtils.isEmpty(films)) {
-            return result;
-        }
-        
-        LOG.debug("Search found {} movies", films.size());
-
-        for (String film : films) {
-            String comingSoonId = null;
-            beginIndex = film.indexOf("ref=\"/film/");
-            if (beginIndex >= 0) {
-                comingSoonId = getComingSoonIdFromURL(film);
-            }
-            if (StringUtils.isBlank(comingSoonId)) continue;
-
-            String title = HTMLTools.extractTag(film, "<div class=\"h5 titolo cat-hover-color anim25\">", "</div>");
-            if (StringUtils.isBlank(title)) continue;
-            
-            String originalTitle = HTMLTools.extractTag(film, "<div class=\"h6 sottotitolo\">", "</div>");
-            originalTitle = StringUtils.trimToEmpty(originalTitle);
-            if (originalTitle.startsWith("(")) originalTitle = originalTitle.substring(1, originalTitle.length() - 1).trim();
-            
-            String year = null;
-            beginIndex = film.indexOf("ANNO</span>:");
-            if (beginIndex > 0) {
-                int endIndex = film.indexOf("</li>", beginIndex);
-                if (endIndex > 0) {
-                    year = film.substring(beginIndex + 12, endIndex).trim();
-                }
-            }
-            
-            result.add(new String[]{comingSoonId, title, originalTitle, year});
-        }
-
-        return result;
-    }
-
-    private static String getComingSoonIdFromURL(String url) {
-        int index = url.indexOf("/scheda");
-        if (index > -1) {
-            String stripped = url.substring(0, index);
-            index = StringUtils.lastIndexOf(stripped, '/');
-            if (index > -1) {
-                return stripped.substring(index + 1);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Returns difference between two titles.
-     *
-     * Since ComingSoon returns strange results on some researches, difference
-     * is defined as follows: abs(word count difference) - (searchedTitle wordcount - matched words)
-     *
-     * @param searchedTitle
-     * @param returnedTitle
-     * @return
-     */
-    private static int compareTitles(String searchedTitle, String returnedTitle) {
-        if (StringUtils.isBlank(returnedTitle)) return COMINGSOON_MAX_DIFF;
-        LOG.trace("Comparing {} and {}", searchedTitle, returnedTitle);
-
-        String title1 = searchedTitle.toLowerCase().replaceAll("[,.\\!\\?\"']", "");
-        String title2 = returnedTitle.toLowerCase().replaceAll("[,.\\!\\?\"']", "");
-        return StringUtils.getLevenshteinDistance(title1, title2);
-    }
-
 
     @Override
     public ScanResult scanMovie(VideoData videoData) {
@@ -355,14 +187,13 @@ public class ComingSoonScanner implements IMovieScanner {
     }
         
     private ScanResult updateMovie(VideoData videoData, String comingSoonId, boolean throwTempError) throws IOException {
-        final String url = COMINGSOON_BASE_URL + COMINGSOON_FILM_URL + COMINGSOON_KEY_PARAM + comingSoonId;
+        final String url = COMINGSOON_BASE_URL + COMINGSOON_MOVIE_URL + COMINGSOON_KEY_PARAM + comingSoonId;
         DigestedResponse response = httpClient.requestContent(url, charset);
         if (throwTempError && ResponseTools.isTemporaryError(response)) {
             throw new TemporaryUnavailableException("ComingSoon service is temporary not available: " + response.getStatusCode());
         } else if (ResponseTools.isNotOK(response)) {
             throw new OnlineScannerException("ComingSoon request failed: " + response.getStatusCode());
         }
-        
         String xml = response.getContent();
 
         // TITLE
@@ -380,44 +211,24 @@ public class ComingSoonScanner implements IMovieScanner {
             videoData.setTitle(WordUtils.capitalizeFully(title), SCANNER_ID);
         }
 
+        // ORIGINAL TITLE
+        if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID)) {
+            videoData.setTitleOriginal(parseTitleOriginal(xml), SCANNER_ID);
+        }
+
         // PLOT AND OUTLINE
         if (OverrideTools.checkOneOverwrite(videoData, SCANNER_ID, OverrideFlag.PLOT, OverrideFlag.OUTLINE)) {
-            int beginIndex = xml.indexOf("<div class=\"contenuto-scheda-destra");
-            if (beginIndex < 0) {
-                LOG.error("No plot found at ComingSoon page. HTML layout has changed?");
-                return ScanResult.NO_RESULT;
-            }
-
-            int endIndex = xml.indexOf("<div class=\"box-descrizione\"", beginIndex);
-            if (endIndex < 0) {
-                LOG.error("No plot found at ComingSoon page. HTML layout has changed?");
-                return ScanResult.NO_RESULT;
-            }
-
-            final String xmlPlot = HTMLTools.stripTags(HTMLTools.extractTag(xml.substring(beginIndex, endIndex), "<p>", "</p>"));
+            final String plot = parsePlot(xml);
             if (OverrideTools.checkOverwritePlot(videoData, SCANNER_ID)) {
-                videoData.setPlot(xmlPlot, SCANNER_ID);
+                videoData.setPlot(plot, SCANNER_ID);
             }
             if (OverrideTools.checkOverwriteOutline(videoData, SCANNER_ID)) {
-                videoData.setOutline(xmlPlot, SCANNER_ID);
+                videoData.setOutline(plot, SCANNER_ID);
             }
         }
         
-        // ORIGINAL TITLE
-        if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID)) {
-            String titleOriginal = HTMLTools.extractTag(xml, "Titolo originale:", "</p>").trim();
-            if (titleOriginal.startsWith("(")) {
-                titleOriginal = titleOriginal.substring(1, titleOriginal.length() - 1).trim();
-            }
-            videoData.setTitleOriginal(titleOriginal, SCANNER_ID);
-        }
-
         // RATING
-        String rating = HTMLTools.extractTag(xml, "<span itemprop=\"ratingValue\">", "</span>");
-        if (StringUtils.isNotBlank(rating)) {
-            int ratingInt = (int) (NumberUtils.toFloat(rating.replace(',', '.'), 0) * 20); // Rating is 0 to 5, we normalize to 100
-            videoData.addRating(SCANNER_ID, ratingInt);
-        }
+        videoData.addRating(SCANNER_ID, parseRating(xml));
 
         // RELEASE DATE
         String dateToParse = HTMLTools.stripTags(HTMLTools.extractTag(xml, "<time itemprop=\"datePublished\">", "</time>"));
@@ -439,102 +250,623 @@ public class ComingSoonScanner implements IMovieScanner {
         
         // COUNTRY
         if (OverrideTools.checkOverwriteCountries(videoData, SCANNER_ID)) {
-            final String country = HTMLTools.stripTags(HTMLTools.extractTag(xml, ">PAESE</span>:", "</li>")).trim();
-            final String countryCode = localeService.findCountryCode(country);
-            if (countryCode != null) {
-                videoData.setCountryCodes(Collections.singleton(countryCode), SCANNER_ID);
-            }
+            videoData.setCountryCodes(parseCountries(xml), SCANNER_ID);
         }
         
-        // COMPANY
+        // STUDIOS
         if (OverrideTools.checkOverwriteStudios(videoData, SCANNER_ID)) {
-            final String studioList = HTMLTools.stripTags(HTMLTools.extractTag(xml, ">PRODUZIONE</span>: ","</li>"));
-            if (StringUtils.isNotBlank(studioList)) {
-                Collection<String> studioNames = new ArrayList<>();
-                StringTokenizer st = new StringTokenizer(studioList, ",");
-                while (st.hasMoreTokens()) {
-                    studioNames.add(st.nextToken().trim());
-                }
-                videoData.setStudioNames(studioNames, SCANNER_ID);
-            }
+            videoData.setStudioNames(parseStudios(xml), SCANNER_ID);
         }
 
         // GENRES
         if (OverrideTools.checkOverwriteGenres(videoData, SCANNER_ID)) {
-            final String genreList = HTMLTools.stripTags(HTMLTools.extractTag(xml, ">GENERE</span>: ", "</li>"));
-            if (StringUtils.isNotBlank(genreList)) {
-                Collection<String> genreNames = new ArrayList<>();
-                StringTokenizer st = new StringTokenizer(genreList, ",");
-                while (st.hasMoreTokens()) {
-                    genreNames.add(st.nextToken().trim());
-                }
-                videoData.setGenreNames(genreNames, SCANNER_ID);
-            }
+            videoData.setGenreNames(parseGenres(xml), SCANNER_ID);
         }
 
         // DIRECTORS
         if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
-            List<String> tags = HTMLTools.extractTags(xml, ">REGIA</span>:", "</li>", "<a", "</a>", false);
-            addCrew(videoData, JobType.DIRECTOR, tags);
+            videoData.addCreditDTOS(parseCredits(xml, ">REGIA</span>:", JobType.DIRECTOR));
         }
 
         // WRITERS
         if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
-            List<String> tags = HTMLTools.extractTags(xml, ">SCENEGGIATURA</span>:", "</li>", "<a", "</a>", false);
-            addCrew(videoData, JobType.WRITER, tags);
+            videoData.addCreditDTOS(parseCredits(xml, ">SCENEGGIATURA</span>:", JobType.WRITER));
         }
 
         // SOUND
         if (this.configServiceWrapper.isCastScanEnabled(JobType.SOUND)) {
-            List<String> tags = HTMLTools.extractTags(xml, ">MUSICHE</span>:", "</li>", "<a", "</a>", false);
-            addCrew(videoData, JobType.SOUND, tags);
+            videoData.addCreditDTOS(parseCredits(xml, ">MUSICHE</span>:", JobType.SOUND));
         }
 
         // CAMERA
         if (this.configServiceWrapper.isCastScanEnabled(JobType.CAMERA)) {
-            List<String> tags = HTMLTools.extractTags(xml, ">FOTOGRAFIA</span>:", "</li>", "<a", "</a>", false);
-            addCrew(videoData, JobType.CAMERA, tags);
+            videoData.addCreditDTOS(parseCredits(xml, ">FOTOGRAFIA</span>:", JobType.CAMERA));
         }
 
         // EDITING
         if (this.configServiceWrapper.isCastScanEnabled(JobType.EDITING)) {
-            List<String> tags = HTMLTools.extractTags(xml, ">MONTAGGIO</span>:", "</li>", "<a", "</a>", false);
-            addCrew(videoData, JobType.EDITING, tags);
+            videoData.addCreditDTOS(parseCredits(xml, ">MONTAGGIO</span>:", JobType.EDITING));
         }
         
         // CAST
         if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
-            List<String> tags = HTMLTools.extractTags(xml, "Il Cast</div>", "<!-- /IL CAST -->", "<a href=\"/personaggi/", "</a>", false);
-            for (String tag : tags) {
-                String name = HTMLTools.extractTag(tag, "<div class=\"h6 titolo\">", "</div>");
-                String role = HTMLTools.extractTag(tag, "<div class=\"h6 descrizione\">", "</div>");
-                
-                String sourceId = null;
-                int beginIndex = tag.indexOf('/');
-                if (beginIndex >-1) {
-                    int endIndex = tag.indexOf('/', beginIndex+1);
-                    if (endIndex > beginIndex) {
-                        sourceId = tag.substring(beginIndex+1, endIndex);
-                    }
-                }
-                
-                CreditDTO credit = new CreditDTO(SCANNER_ID, sourceId, JobType.ACTOR, name, role);
-                
-                String posterURL = HTMLTools.extractTag(tag, "<img src=\"", "\"");
-                if (posterURL.contains("http")) {
-                    posterURL = posterURL.replace("_ico.jpg", ".jpg");
-                    credit.addPhoto(SCANNER_ID, posterURL);
-                }
-                
-                videoData.addCreditDTO(credit);
-            }
+            videoData.addCreditDTOS(parseActors(xml));
         }
 
         return ScanResult.OK;
     }
 
-    private static void addCrew(VideoData videoData, JobType jobType, List<String> tags) {
+    @Override
+    public String getSeriesId(Series series) {
+        return getSeriesId(series, false);
+    }
+
+    private String getSeriesId(Series series, boolean throwTempError) {
+        String comingSoonId = series.getSourceDbId(SCANNER_ID);
+        if (StringUtils.isNotBlank(comingSoonId)) {
+            return comingSoonId;
+        }
+        
+        // search coming soon site by title
+        comingSoonId = getComingSoonId(series.getTitle(), series.getStartYear(), true, throwTempError);
+
+        // search coming soon site by original title
+        if (isNoValidComingSoonId(comingSoonId) && series.isTitleOriginalScannable()) {
+            comingSoonId = getComingSoonId(series.getTitleOriginal(), series.getStartYear(), true, throwTempError);
+        }
+
+        // search coming soon with search engine tools
+        if (isNoValidComingSoonId(comingSoonId)) {
+            comingSoonId = this.searchEngineTools.searchURL(series.getTitle(), series.getStartYear(), "www.comingsoon.it/serietv", throwTempError);
+            int beginIndex = comingSoonId.indexOf("serietv/");
+            if (beginIndex < 0) {
+                comingSoonId = null;
+            } else {
+                beginIndex = comingSoonId.indexOf("/", beginIndex+9);
+                int endIndex = comingSoonId.indexOf("/", beginIndex+1);
+                if (beginIndex < endIndex) {
+                    comingSoonId = comingSoonId.substring(beginIndex+1, endIndex);
+                } else {
+                    comingSoonId = null;
+                }
+            }
+        }
+        
+        if (isNoValidComingSoonId(comingSoonId)) {
+            return null;
+        }
+        
+        series.setSourceDbId(SCANNER_ID, comingSoonId);
+        return comingSoonId;
+    }
+
+    @Override
+    public ScanResult scanSeries(Series series) {
+        try {
+            boolean throwTempError = configServiceWrapper.getBooleanProperty("comingsoon.throwError.tempUnavailable", Boolean.TRUE);
+
+            String comingSoonId = getSeriesId(series, throwTempError);
+    
+            if (isNoValidComingSoonId(comingSoonId)) {
+                LOG.debug("ComingSoon ID not available: {}", series.getIdentifier());
+                return ScanResult.MISSING_ID;
+            }
+    
+            LOG.debug("ComingSoon ID available ({}), updating series", comingSoonId);
+            return updateSeries(series, comingSoonId, throwTempError);
+            
+        } catch (TemporaryUnavailableException tue) {
+            int maxRetries = this.configServiceWrapper.getIntProperty("comingsoon.maxRetries.movie", 0);
+            if (series.getRetries() < maxRetries) {
+                LOG.info("ComingSoon service temporary not available; trigger retry: '{}'", series.getIdentifier());
+                return ScanResult.RETRY;
+            }
+            
+            LOG.warn("ComingSoon service temporary not available; no retry: '{}'", series.getIdentifier());
+            return ScanResult.ERROR;
+            
+        } catch (IOException ioe) {
+            LOG.error("ComingSoon service error: '{}': {}", series.getIdentifier(), ioe.getMessage());
+            return ScanResult.ERROR;
+        }
+    }
+        
+    private ScanResult updateSeries(Series series, String comingSoonId, boolean throwTempError) throws IOException {
+        final String url = COMINGSOON_BASE_URL + COMINGSOON_SERIES_URL + COMINGSOON_KEY_PARAM + comingSoonId;
+        DigestedResponse response = httpClient.requestContent(url, charset);
+        if (throwTempError && ResponseTools.isTemporaryError(response)) {
+            throw new TemporaryUnavailableException("ComingSoon service is temporary not available: " + response.getStatusCode());
+        } else if (ResponseTools.isNotOK(response)) {
+            throw new OnlineScannerException("ComingSoon request failed: " + response.getStatusCode());
+        }
+        String xml = response.getContent();
+        
+        // TITLE
+        String title = null;
+        if (OverrideTools.checkOverwriteTitle(series, SCANNER_ID)) {
+            int beginIndex = xml.indexOf("<h1 itemprop=\"name\"");
+            if (beginIndex < 0 ) {
+                LOG.error("No title found at ComingSoon page. HTML layout has changed?");
+                return ScanResult.NO_RESULT;
+            }
+            
+            String tag = xml.substring(beginIndex, xml.indexOf(">", beginIndex)+1);
+            title = HTMLTools.extractTag(xml, tag, "</h1>").trim();
+            if (StringUtils.isBlank(title)) return ScanResult.NO_RESULT;
+
+            title = WordUtils.capitalizeFully(title);
+            series.setTitle(title, SCANNER_ID);
+        }
+
+        // ORIGINAL TITLE
+        String titleOriginal = parseTitleOriginal(xml);
+        if (OverrideTools.checkOverwriteOriginalTitle(series, SCANNER_ID)) {
+            series.setTitleOriginal(titleOriginal, SCANNER_ID);
+        }
+
+        // PLOT AND OUTLINE
+        String plot = parsePlot(xml);
+        if (OverrideTools.checkOverwritePlot(series, SCANNER_ID)) {
+            series.setPlot(plot, SCANNER_ID);
+        }
+        if (OverrideTools.checkOverwriteOutline(series, SCANNER_ID)) {
+            series.setOutline(plot, SCANNER_ID);
+        }
+
+        // RATING
+        series.addRating(SCANNER_ID, parseRating(xml));
+        
+        // YEAR
+        if (OverrideTools.checkOverwriteYear(series, SCANNER_ID)) {
+            String year = HTMLTools.stripTags(HTMLTools.extractTag(xml, ">ANNO</span>:", "</li>")).trim();
+            int intYear = NumberUtils.toInt(year, 0); 
+            if (intYear > 1900) series.setStartYear(intYear, SCANNER_ID);
+        } 
+        
+        // COUNTRY
+        if (OverrideTools.checkOverwriteCountries(series, SCANNER_ID)) {
+            series.setCountryCodes(parseCountries(xml), SCANNER_ID);
+        }
+        
+        // STUDIOS
+        if (OverrideTools.checkOverwriteStudios(series, SCANNER_ID)) {
+            series.setStudioNames(parseStudios(xml), SCANNER_ID);
+        }
+
+        // GENRES
+        if (OverrideTools.checkOverwriteGenres(series, SCANNER_ID)) {
+            series.setGenreNames(parseGenres(xml), SCANNER_ID);
+        }
+
+        // ACTORS
+        Collection<CreditDTO> actors;
+        if (this.configServiceWrapper.isCastScanEnabled(JobType.ACTOR)) {
+            actors = parseActors(xml);
+        } else {
+            actors = Collections.emptyList();
+        }
+        
+        // scan seasons and episodes
+        scanSeasons(series, comingSoonId, title, titleOriginal, plot, actors);
+        
+        return ScanResult.OK;
+    }
+
+    private void scanSeasons(Series series, String comingSoonId, String title, String titleOriginal, String plot, Collection<CreditDTO> actors) {
+        
+        for (Season season : series.getSeasons()) {
+        
+            String seasonXML = getSeasonXml(comingSoonId, season.getSeason());
+
+            if (!season.isTvSeasonDone(SCANNER_ID)) {
+                // same as series ID
+                season.setSourceDbId(SCANNER_ID, comingSoonId);
+                
+                // use values from series
+                if (OverrideTools.checkOverwriteTitle(season, SCANNER_ID)) {
+                    season.setTitle(title, SCANNER_ID);
+                }
+                if (OverrideTools.checkOverwriteOriginalTitle(season, SCANNER_ID)) {
+                    season.setTitleOriginal(titleOriginal, SCANNER_ID);
+                }
+                if (OverrideTools.checkOverwritePlot(season, SCANNER_ID)) {
+                    season.setPlot(plot, SCANNER_ID);
+                }
+                if (OverrideTools.checkOverwriteOutline(season, SCANNER_ID)) {
+                    season.setOutline(plot, SCANNER_ID);
+                }
+    
+                // TODO start year from season XML for Italia
+                
+                // mark season as done
+                season.setTvSeasonDone();
+            }
+            
+            // scan episodes
+            scanEpisodes(season, comingSoonId, seasonXML, actors);
+        }
+    }
+
+    private void scanEpisodes(Season season, String comingSoonId, String seasonXML, Collection<CreditDTO> actors) {
+        
+        // parse episodes from season XML
+        Map<Integer,EpisodeDTO> episodes = this.parseEpisodes(seasonXML);
+
+        for (VideoData videoData : season.getVideoDatas()) {
+            
+            if (videoData.isTvEpisodeDone(SCANNER_ID)) {
+                // nothing to do if already done
+                continue;
+            }
+
+            EpisodeDTO episode = episodes.get(videoData.getEpisode());
+            if (episode == null) {
+                // TV episode not found
+                videoData.setTvEpisodeNotFound();
+                continue;
+            }
+            
+            // set coming soon id for episode
+            videoData.setSourceDbId(SCANNER_ID, comingSoonId);
+            
+            if (OverrideTools.checkOverwriteTitle(videoData, SCANNER_ID)) {
+                videoData.setTitle(episode.getTitle(), SCANNER_ID);
+            }
+
+            if (OverrideTools.checkOverwriteOriginalTitle(videoData, SCANNER_ID)) {
+                videoData.setTitleOriginal(episode.getTitleOriginal(), SCANNER_ID);
+            }
+
+            // add actors
+            videoData.addCreditDTOS(actors);
+            // add directors and writers
+            videoData.addCreditDTOS(episode.getCredits());
+            
+            // mark episode as done
+            videoData.setTvEpisodeDone();
+        }
+    }
+    
+    private String getSeasonXml(String comingSoonId, int season) {
+        final String url = COMINGSOON_BASE_URL + "/serietv/scheda/" + comingSoonId + "/episodi/stagione-" + season + "/";
+
+        String xml = null; 
+        try {
+            DigestedResponse response = httpClient.requestContent(url, charset);
+            if (ResponseTools.isNotOK(response)) {
+                LOG.error("ComingSoon request failed for episodes of season {}-{}: {}", comingSoonId, season, response.getStatusCode());
+            } else {
+                xml = response.getContent();
+            }
+        } catch (Exception ex) {
+            LOG.error("ComingSoon episodes request failed", ex);
+        }
+        return xml;
+    }
+    
+    private Map<Integer,EpisodeDTO> parseEpisodes(String seasonXML) {
+        Map<Integer,EpisodeDTO> episodes = new HashMap<>();
+        if (StringUtils.isBlank(seasonXML)) return episodes;
+        
+        List<String> tags = HTMLTools.extractTags(seasonXML, "BOX LISTA EPISODI SERIE TV", "BOX LISTA EPISODI SERIE TV", "<div class=\"box-contenitore", "<!-");
         for (String tag : tags) {
+            System.err.println(tag);
+            int episode = NumberUtils.toInt(HTMLTools.extractTag(tag, "episode=\"", "\""), -1);
+            if (episode > -1) {
+                EpisodeDTO dto = new EpisodeDTO();
+                dto.setEpisode(episode);
+                dto.setTitle(HTMLTools.extractTag(tag, "img title=\"", "\""));
+                dto.setTitleOriginal(HTMLTools.extractTag(tag, " descrizione\">", "</div>"));
+                
+                if (this.configServiceWrapper.isCastScanEnabled(JobType.DIRECTOR)) {
+                    for (CreditDTO credit : parseEpisodeCredits(tag, ">REGIA</strong>:", JobType.DIRECTOR)) {
+                        dto.addCredit(credit);
+                    }
+                }
+
+                if (this.configServiceWrapper.isCastScanEnabled(JobType.WRITER)) {
+                    for (CreditDTO credit : parseEpisodeCredits(tag, ">SCENEGGIATURA</strong>:", JobType.WRITER)) {
+                        dto.addCredit(credit);
+                    }
+                }
+
+                episodes.put(dto.getEpisode(), dto);
+            }
+        }
+        
+        return episodes;
+    }
+    
+    private static class EpisodeDTO {
+        
+        private int episode;
+        private String title;
+        private String titleOriginal;
+        private Collection<CreditDTO> credits = new HashSet<>();
+        
+        public int getEpisode() {
+            return episode;
+        }
+        public void setEpisode(int episode) {
+            this.episode = episode;
+        }
+        public String getTitle() {
+            return title;
+        }
+        public void setTitle(String title) {
+            this.title = title;
+        }
+        public String getTitleOriginal() {
+            return titleOriginal;
+        }
+        public void setTitleOriginal(String titleOriginal) {
+            this.titleOriginal = titleOriginal;
+        }
+        public Collection<CreditDTO> getCredits() {
+            return credits;
+        }
+        public void addCredit(CreditDTO credit) {
+            this.credits.add(credit);
+        }
+    }
+    
+    private static String parseTitleOriginal(String xml) {
+        String titleOriginal = HTMLTools.extractTag(xml, "Titolo originale:", "</p>").trim();
+        if (titleOriginal.startsWith("(")) {
+            titleOriginal = titleOriginal.substring(1, titleOriginal.length() - 1).trim();
+        }
+        return titleOriginal;
+    }
+    
+    private static String parsePlot(String xml) {
+        int beginIndex = xml.indexOf("<div class=\"contenuto-scheda-destra");
+        if (beginIndex < 0) return null;
+        
+        int endIndex = xml.indexOf("<div class=\"box-descrizione\"", beginIndex);
+        if (endIndex < 0) return null;
+
+        return  HTMLTools.stripTags(HTMLTools.extractTag(xml.substring(beginIndex, endIndex), "<p>", "</p>"));
+    }
+    
+    private static int parseRating(String xml) {
+        String rating = HTMLTools.extractTag(xml, "<span itemprop=\"ratingValue\">", "</span>");
+        if (StringUtils.isNotBlank(rating)) {
+            // Rating is 0 to 5, we normalize to 100
+            return (int) (NumberUtils.toFloat(rating.replace(',', '.'), -1.0f) * 20);
+        }
+        return -1;
+    }
+
+    private Collection<String> parseCountries(String xml) {
+        final String country = HTMLTools.stripTags(HTMLTools.extractTag(xml, ">PAESE</span>:", "</li>")).trim();
+        final String countryCode = localeService.findCountryCode(country);
+        if (countryCode != null) return Collections.singleton(countryCode);
+        return null;
+    }
+    
+    private static Collection<String> parseStudios(String xml) {
+        final String studioList = HTMLTools.stripTags(HTMLTools.extractTag(xml, ">PRODUZIONE</span>: ","</li>"));
+        if (StringUtils.isBlank(studioList)) return null;
+        
+        Collection<String> studioNames = new ArrayList<>();
+        StringTokenizer st = new StringTokenizer(studioList, ",");
+        while (st.hasMoreTokens()) {
+            studioNames.add(st.nextToken().trim());
+        }
+        return studioNames;
+    }
+    
+    private static Collection<String> parseGenres(String xml) {
+        final String genreList = HTMLTools.stripTags(HTMLTools.extractTag(xml, ">GENERE</span>: ", "</li>"));
+        if (StringUtils.isBlank(genreList)) return null;
+        
+        Collection<String> genreNames = new ArrayList<>();
+        StringTokenizer st = new StringTokenizer(genreList, ",");
+        while (st.hasMoreTokens()) {
+            genreNames.add(st.nextToken().trim());
+        }
+        return genreNames;
+    }
+    
+    private static boolean isNoValidComingSoonId(String comingSoonId) {
+        if (StringUtils.isBlank(comingSoonId)) return true;
+        return StringUtils.equalsIgnoreCase(comingSoonId, "na");
+    }
+        
+    private String getComingSoonId(String title, int year, boolean tvShow, boolean throwTempError) {
+        return getComingSoonId(title, year, COMINGSOON_MAX_DIFF, tvShow, throwTempError);
+    }
+
+    private String getComingSoonId(String title, int year, int scoreToBeat, boolean tvShow, boolean throwTempError) {
+        if (scoreToBeat == 0) return null;
+        int currentScore = scoreToBeat;
+
+        try {
+            StringBuilder urlBase = new StringBuilder(COMINGSOON_BASE_URL);
+            if (tvShow) {
+                urlBase.append(COMINGSOON_SEARCH_SERIES);
+            } else {
+                urlBase.append(COMINGSOON_SEARCH_MOVIE);
+            }
+            urlBase.append(COMONGSOON_TITLE_PARAM);
+            urlBase.append(URLEncoder.encode(title.toLowerCase(), "UTF-8"));
+
+            urlBase.append("&").append(COMINGSOON_YEAR_PARAM);
+            if (year > 0 ) {
+                urlBase.append(year);
+            }
+            if (tvShow) {
+                urlBase.append(COMINGSOON_SEARCH_SERIES_PARAMS);
+            } else {
+                urlBase.append(COMINGSOON_SEARCH_MOVIE_PARAMS);
+            }
+            int searchPage = 0;
+            String comingSoonId = null;
+            
+            loop: while (searchPage++ < COMINGSOON_MAX_SEARCH_PAGES) {
+
+                StringBuilder urlPage = new StringBuilder(urlBase);
+                if (searchPage > 1) {
+                    urlPage.append("&p=").append(searchPage);
+                }
+
+                LOG.debug("Fetching ComingSoon search page {}/{} - URL: {}", searchPage, COMINGSOON_MAX_SEARCH_PAGES, urlPage.toString());
+                DigestedResponse response = httpClient.requestContent(urlPage.toString(), charset);
+                if (throwTempError && ResponseTools.isTemporaryError(response)) {
+                    throw new TemporaryUnavailableException("ComingSoon service is temporary not available: " + response.getStatusCode());
+                } else if (ResponseTools.isNotOK(response)) {
+                    LOG.error("Can't find ComingSoon ID due response status {}", response.getStatusCode());
+                    return null;
+                }
+
+                List<String[]> resultList = parseComingSoonSearchResults(response.getContent(), tvShow);
+                if (resultList.isEmpty()) {
+                    break loop;
+                }
+                
+                for (int i = 0; i < resultList.size() && currentScore > 0; i++) {
+                    String lId = resultList.get(i)[0];
+                    String lTitle = resultList.get(i)[1];
+                    String lOrig = resultList.get(i)[2];
+                    //String lYear = (String) movieList.get(i)[3];
+                    int difference = compareTitles(title, lTitle);
+                    int differenceOrig = compareTitles(title, lOrig);
+                    difference = (differenceOrig < difference ? differenceOrig : difference);
+                    if (difference < currentScore) {
+                        if (difference == 0) {
+                            LOG.debug("Found perfect match for: {}, {}", lTitle, lOrig);
+                            searchPage = COMINGSOON_MAX_SEARCH_PAGES; //ends loop
+                        } else {
+                            LOG.debug("Found a match for: {}, {}, difference {}", lTitle, lOrig, difference);
+                        }
+                        comingSoonId = lId;
+                        currentScore = difference;
+                    }
+                }
+            }
+
+            if (year>0 && currentScore>0) {
+                LOG.debug("Perfect match not found, trying removing by year ...");
+                String newComingSoonId = getComingSoonId(title, -1, currentScore, tvShow, throwTempError);
+                comingSoonId = (isNoValidComingSoonId(newComingSoonId) ? comingSoonId : newComingSoonId);
+            }
+
+            if (StringUtils.isNotBlank(comingSoonId)) {
+                LOG.debug("Found valid ComingSoon ID: {}", comingSoonId);
+            }
+
+            return comingSoonId;
+
+        } catch (IOException ex) {
+            LOG.error("Failed retrieving ComingSoon id for title '{}': {}", title, ex.getMessage());
+            LOG.trace("ComingSoon service error", ex);
+            return null;
+        }
+    }
+
+    /**
+     * Parse the search results
+     *
+     * Search results end with "Trovati NNN Film" (found NNN movies).
+     *
+     * After this string, more movie URL are found, so we have to set a boundary
+     *
+     * @param xml
+     * @return
+     */
+    private static List<String[]> parseComingSoonSearchResults(String xml, boolean tvShow) {
+        final List<String[]> result = new ArrayList<>();
+        
+        int beginIndex = StringUtils.indexOfIgnoreCase(xml, "Trovate");
+        int resultsFound = -1;
+        if (beginIndex > 0) {
+            int end = xml.indexOf((tvShow?" serie tv":" film"), beginIndex + 7);
+            if (end > 0) {
+                String tmp = HTMLTools.stripTags(xml.substring(beginIndex + 8, end));
+                resultsFound = NumberUtils.toInt(tmp, -1);
+            }
+        }
+
+        if (resultsFound < 0) {
+            LOG.error("Couldn't find 'Trovate NNN "+(tvShow?"serie tv":"film")+" in archivio' string. Search page layout probably changed");
+            return result;
+        }
+ 
+        List<String> searchResults = HTMLTools.extractTags(xml, "box-lista-cinema", "BOX FILM RICERCA", "<a h", "</a>", false);
+        if (CollectionUtils.isEmpty(searchResults)) {
+            return result;
+        }
+        
+        LOG.debug("Search found {} results", searchResults.size());
+
+        for (String searchResult : searchResults) {
+            String comingSoonId = null;
+            if (tvShow) {
+                beginIndex = searchResult.indexOf("ref=\"/serietv/");
+            } else {
+                beginIndex = searchResult.indexOf("ref=\"/film/");
+            }
+            if (beginIndex >= 0) {
+                comingSoonId = getComingSoonIdFromURL(searchResult, tvShow);
+            }
+            if (StringUtils.isBlank(comingSoonId)) continue;
+
+            String title = HTMLTools.extractTag(searchResult, "<div class=\"h5 titolo cat-hover-color anim25\">", "</div>");
+            if (StringUtils.isBlank(title)) continue;
+            
+            String originalTitle = HTMLTools.extractTag(searchResult, "<div class=\"h6 sottotitolo\">", "</div>");
+            originalTitle = StringUtils.trimToEmpty(originalTitle);
+            if (originalTitle.startsWith("(")) originalTitle = originalTitle.substring(1, originalTitle.length() - 1).trim();
+            
+            String year = null;
+            beginIndex = searchResult.indexOf("ANNO</span>:");
+            if (beginIndex > 0) {
+                int endIndex = searchResult.indexOf("</li>", beginIndex);
+                if (endIndex > 0) {
+                    year = searchResult.substring(beginIndex + 12, endIndex).trim();
+                }
+            }
+            
+            result.add(new String[]{comingSoonId, title, originalTitle, year});
+        }
+
+        return result;
+    }
+
+    private static String getComingSoonIdFromURL(String url, boolean tvShow) {
+        int index = url.indexOf("/scheda");
+        if (index > -1) {
+            String stripped = url.substring(0, index);
+            index = StringUtils.lastIndexOf(stripped, '/');
+            if (index > -1) {
+                return stripped.substring(index + 1);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns difference between two titles.
+     *
+     * Since ComingSoon returns strange results on some researches, difference
+     * is defined as follows: abs(word count difference) - (searchedTitle wordcount - matched words)
+     *
+     * @param searchedTitle
+     * @param returnedTitle
+     * @return
+     */
+    private static int compareTitles(String searchedTitle, String returnedTitle) {
+        if (StringUtils.isBlank(returnedTitle)) return COMINGSOON_MAX_DIFF;
+        LOG.trace("Comparing {} and {}", searchedTitle, returnedTitle);
+
+        String title1 = searchedTitle.toLowerCase().replaceAll("[,.\\!\\?\"']", "");
+        String title2 = returnedTitle.toLowerCase().replaceAll("[,.\\!\\?\"']", "");
+        return StringUtils.getLevenshteinDistance(title1, title2);
+    }
+
+    private static Collection<CreditDTO> parseCredits(String xml, String startTag, JobType jobType) {
+        List<CreditDTO> credits = new ArrayList<>();
+        for (String tag : HTMLTools.extractTags(xml, startTag, "</li>", "<a", "</a>", false)) {
             int beginIndex = tag.indexOf(">");
             if (beginIndex > -1) {
                 String name = tag.substring(beginIndex+1);
@@ -549,11 +881,48 @@ public class ComingSoonScanner implements IMovieScanner {
                     }
                 }
                 
-                videoData.addCreditDTO(new CreditDTO(SCANNER_ID, sourceId, jobType, name));
+                credits.add(new CreditDTO(SCANNER_ID, sourceId, jobType, name));
             }
         }
+        return credits;
     }
-    
+
+    private static Collection<CreditDTO> parseActors(String xml) {
+        List<CreditDTO> credits = new ArrayList<>();
+        for (String tag : HTMLTools.extractTags(xml, "Il Cast</div>", "IL CAST -->", "<a href=\"/personaggi/", "</a>", false)) {
+            String name = HTMLTools.extractTag(tag, "<div class=\"h6 titolo\">", "</div>");
+            String role = HTMLTools.extractTag(tag, "<div class=\"h6 descrizione\">", "</div>");
+            
+            String sourceId = null;
+            int beginIndex = tag.indexOf('/');
+            if (beginIndex >-1) {
+                int endIndex = tag.indexOf('/', beginIndex+1);
+                if (endIndex > beginIndex) {
+                    sourceId = tag.substring(beginIndex+1, endIndex);
+                }
+            }
+            
+            CreditDTO credit = new CreditDTO(SCANNER_ID, sourceId, JobType.ACTOR, name, role);
+            
+            String posterURL = HTMLTools.extractTag(tag, "<img src=\"", "\"");
+            if (posterURL.contains("http")) {
+                posterURL = posterURL.replace("_ico.jpg", ".jpg");
+                credit.addPhoto(SCANNER_ID, posterURL);
+            }
+            
+            credits.add(credit);
+        }
+        return credits;
+    }
+
+    private static Collection<CreditDTO> parseEpisodeCredits(String xml, String startTag, JobType jobType) {
+        List<CreditDTO> credits = new ArrayList<>();
+        for (String name : HTMLTools.extractTag(xml, startTag, "</li>").split(",")) {
+            credits.add(new CreditDTO(SCANNER_ID, jobType, name));
+        }
+        return credits;
+    }
+
     @Override
     public boolean scanNFO(String nfoContent, InfoDTO dto, boolean ignorePresentId) {
         // if we already have the ID, skip the scanning of the NFO file

@@ -206,29 +206,14 @@ Get an index of videos.
         <td>include</td>
         <td>Comma delimited list of fields & values to include.<br/>
             Example: include=year-2010,genre-Action<br/>
-            <br/>
-            Currently supported includes:
-            <ul>
-              <li>year</li>
-              <li>genre</li>
-              <li>studio</li>
-              <li>country</li>
-              <li>award</li>
-              <li>certification</li>
-              <li>videosource</li>
-              <li>resolution</li>
-              <li>rating</li>
-              <li>newest</li>
-              <li>boxset</li>
-            </ul>
+            Valid includes are: year, genre, studio, country, award, certification, videosource, resolution, rating, newest, boxset
         </td>
     </tr>
     <tr>
         <td>exclude</td>
         <td>Comma delimited list of fields & values to exclude.<br/>
             Example: exclude=year-2012,genre-Thriller<br/>
-            <br/>
-            Currently supported excludes are the same as includes.
+            Valid excludes are: year, genre, studio, country, award, certification, videosource, resolution, rating, newest, boxset
         </td>
     </tr>
     <tr>
@@ -422,6 +407,7 @@ For specific indexes, there will be an option to get the count for that index.
         </td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/index/count?type=all`
 
 GET /api/index/count
 < 200
@@ -476,11 +462,12 @@ Get a list of jobs and their associated counts.
     <col width="80%">
     <tr>
         <td>job</td>
-        <td>A comma separated list of the jobs to get counts for.
+        <td>A comma separated list of the jobs to get counts for.<br/>
             If left blank, will default to 'all'
         </td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/index/jobs?job=actor,writer,director`
 
 GET /api/index/jobs
 < 200
@@ -559,6 +546,7 @@ Get an alphabetical list of the first characters in a type list
         </td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/alphabetical/list?type=movie`
 
 GET /api/alphabetical/list
 < 200

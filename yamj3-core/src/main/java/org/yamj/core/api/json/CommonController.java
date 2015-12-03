@@ -83,22 +83,22 @@ public class CommonController {
 
     //<editor-fold defaultstate="collapsed" desc="Watched Methods">
     @RequestMapping(value = "/watched/{type}/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
-    public ApiStatus markWatchedMovie(@PathVariable("type") String type, @PathVariable("id") Long id) {
+    public ApiStatus markWatched(@PathVariable("type") String type, @PathVariable("id") Long id) {
         
         final MetaDataType metaDataType = MetaDataType.fromString(type);
         if (!metaDataType.isWithVideos()) {
-            return new ApiStatus(415, "Invalid meta data type '" + type + "' for watched videos");
+            return new ApiStatus(415, "Invalid meta data type '" + type + "' for watching videos");
         }
 
         return jsonApiStorageService.updateWatchedSingle(metaDataType, id, true);
     }
 
     @RequestMapping(value = "/unwatched/{type}/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
-    public ApiStatus markUnwatchedMovie(@PathVariable("type") String type, @PathVariable("id") Long id) {
+    public ApiStatus markUnwatched(@PathVariable("type") String type, @PathVariable("id") Long id) {
 
         final MetaDataType metaDataType = MetaDataType.fromString(type);
         if (!metaDataType.isWithVideos()) {
-            return new ApiStatus(415, "Invalid meta data type '" + type + "' for unwatched videos");
+            return new ApiStatus(415, "Invalid meta data type '" + type + "' for unwatching videos");
         }
 
         return jsonApiStorageService.updateWatchedSingle(metaDataType, id, false);
@@ -107,14 +107,14 @@ public class CommonController {
 
     //<editor-fold defaultstate="collapsed" desc="Rescan Methods">
     @RequestMapping(value = "/rescan/{type}/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
-    public ApiStatus rescanType(@PathVariable("type") String type, @PathVariable("id") Long id) {
+    public ApiStatus rescanMetaData(@PathVariable("type") String type, @PathVariable("id") Long id) {
 
         final MetaDataType metaDataType = MetaDataType.fromString(type);
         if (!metaDataType.isRescanMetaData()) {
             return new ApiStatus(415, "Invalid meta data type '" + type + "' for rescan");
         }
 
-        ApiStatus apiStatus = jsonApiStorageService.rescanSingle(metaDataType, id);
+        ApiStatus apiStatus = jsonApiStorageService.rescanMetaData(metaDataType, id);
         if (apiStatus.isSuccessful()) this.scanningScheduler.triggerScanMetaData();
         return apiStatus;
     }
@@ -133,7 +133,7 @@ public class CommonController {
     }
 
     @RequestMapping(value = "/rescan/{type}/trailer/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
-    public ApiStatus rescanMovieTrailer(@PathVariable("type") String type, @PathVariable("id") Long id) {
+    public ApiStatus rescanTrailer(@PathVariable("type") String type, @PathVariable("id") Long id) {
 
         final MetaDataType metaDataType = MetaDataType.fromString(type);
         if (!metaDataType.isWithTrailer()) {
