@@ -22,7 +22,6 @@
  */
 package org.yamj.core.service.mediainfo;
 
-import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 
@@ -46,21 +45,17 @@ public class MediaInfoStream implements AutoCloseable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws Exception {
         if (process != null) {
             try {
                 process.waitFor();
-            } catch (Exception ignore) {
-                // error can be ignored
-            }
+            } catch (Exception ignore)  {/*ignore*/}
         }
             
         if (inputStream != null) {
             try {
                 inputStream.close();
-            } catch (Exception ignore) {
-                // error can be ignored
-            }
+            } catch (Exception ignore)  {/*ignore*/}
         }
         
         if (process != null) {
@@ -68,21 +63,16 @@ public class MediaInfoStream implements AutoCloseable {
                 if (process.getErrorStream() != null) {
                     process.getErrorStream().close();  
                 }
-            } catch (Exception ignore) {
-                // error can be ignored
-            }
+            } catch (Exception ignore)  {/*ignore*/}
             try {
                 if (process.getOutputStream() != null) {
                     process.getOutputStream().close();
                 }
-            } catch (Exception ignore) {
-                // error can be ignored
-            }
+            } catch (Exception ignore) {/*ignore*/}
+
             try {
                 process.destroy();
-            } catch (Exception ignore) {
-                // error can be ignored
-            }
+            } catch (Exception ignore)  {/*ignore*/}
         }
     }
 }
