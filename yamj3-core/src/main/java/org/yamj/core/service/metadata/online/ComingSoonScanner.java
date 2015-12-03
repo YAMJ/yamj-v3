@@ -501,7 +501,8 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
 
             EpisodeDTO episode = episodes.get(videoData.getEpisode());
             if (episode == null) {
-                // TV episode not found
+                videoData.removeOverrideSource(SCANNER_ID);
+                videoData.removeSourceDbId(SCANNER_ID);
                 videoData.setTvEpisodeNotFound();
                 continue;
             }

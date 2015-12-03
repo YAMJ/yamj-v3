@@ -43,7 +43,7 @@ import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.JsonApiStorageService;
-import org.yamj.core.service.ArtworkProcessScheduler;
+import org.yamj.core.scheduling.ArtworkProcessScheduler;
 import org.yamj.core.service.artwork.ArtworkProcessorService;
 import org.yamj.core.service.file.FileStorageService;
 

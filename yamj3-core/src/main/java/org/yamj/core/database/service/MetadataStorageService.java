@@ -24,9 +24,19 @@ package org.yamj.core.database.service;
 
 import static org.yamj.core.hibernate.HibernateDao.IDENTIFIER;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -43,11 +53,26 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.CachingNames;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.MetadataDao;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.Artwork;
+import org.yamj.core.database.model.BoxedSet;
+import org.yamj.core.database.model.BoxedSetOrder;
+import org.yamj.core.database.model.CastCrew;
+import org.yamj.core.database.model.Certification;
+import org.yamj.core.database.model.Country;
+import org.yamj.core.database.model.FilmParticipation;
+import org.yamj.core.database.model.Genre;
+import org.yamj.core.database.model.Person;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.award.Award;
 import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.award.SeriesAward;
-import org.yamj.core.database.model.dto.*;
+import org.yamj.core.database.model.dto.AwardDTO;
+import org.yamj.core.database.model.dto.BoxedSetDTO;
+import org.yamj.core.database.model.dto.CreditDTO;
+import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.tools.GenreXmlTools;
@@ -62,6 +87,7 @@ public class MetadataStorageService {
     private static final ReentrantLock AWARD_STORAGE_LOCK = new ReentrantLock(true);
     private static final ReentrantLock GENRE_STORAGE_LOCK = new ReentrantLock(true);
     private static final ReentrantLock PERSON_STORAGE_LOCK = new ReentrantLock(true);
+    private static final ReentrantLock BOXSET_STORAGE_LOCK = new ReentrantLock(true);
   
     @Autowired
     private CommonDao commonDao;
@@ -261,19 +287,16 @@ public class MetadataStorageService {
         
         // store awards
         for (AwardDTO award : awards) {
-            if (this.commonDao.getAward(award.getEvent(), award.getCategory(), award.getSource()) == null) {
-                // double check with lock
-                AWARD_STORAGE_LOCK.lock();
-                try {
-                    if (this.commonDao.getAward(award.getEvent(), award.getCategory(), award.getSource()) == null) {
-                        this.commonDao.saveAward(award.getEvent(), award.getCategory(), award.getSource());
-                    }
-                } catch (Exception ex) {
-                    LOG.error("Failed to store award '{}'-'{}', error: {}", award.getEvent(), award.getCategory(), ex.getMessage());
-                    LOG.trace("Storage error", ex);
-                } finally {
-                    AWARD_STORAGE_LOCK.unlock();
+            AWARD_STORAGE_LOCK.lock();
+            try {
+                if (this.commonDao.getAward(award.getEvent(), award.getCategory(), award.getSource()) == null) {
+                    this.commonDao.saveAward(award.getEvent(), award.getCategory(), award.getSource());
                 }
+            } catch (Exception ex) {
+                LOG.error("Failed to store award '{}'-'{}', error: {}", award.getEvent(), award.getCategory(), ex.getMessage());
+                LOG.trace("Storage error", ex);
+            } finally {
+                AWARD_STORAGE_LOCK.unlock();
             }
         }
     }
@@ -283,11 +306,14 @@ public class MetadataStorageService {
         
         // store boxed sets
         for (BoxedSetDTO boxedSet : boxedSets) {
+            BOXSET_STORAGE_LOCK.lock();
             try {
                 this.commonDao.storeNewBoxedSet(boxedSet);
             } catch (Exception ex) {
                 LOG.error("Failed to store boxed set '{}', error: {}", boxedSet.getName(), ex.getMessage());
                 LOG.trace("Storage error", ex);
+            } finally {
+                BOXSET_STORAGE_LOCK.unlock();
             }
         }
     }

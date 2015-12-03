@@ -22,9 +22,6 @@
  */
 package org.yamj.core.web.apis;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,18 +39,13 @@ import com.moviejukebox.allocine.model.Search;
 public class AllocineApiSearch {
 
     private static final Logger LOG = LoggerFactory.getLogger(AllocineApiSearch.class);
-
-    private final Lock searchMoviesLock = new ReentrantLock(true);
-    private final Lock searchSeriesLock = new ReentrantLock(true);
-    private final Lock searchPersonLock = new ReentrantLock(true);
     
     @Autowired
     private AllocineApi allocineApi;
 
-    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #name}")
+    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #name}", unless="#result==null")
     public Search searchMovies(String name, boolean throwTempError) {
         Search search = null;
-        searchMoviesLock.lock();
         try {
             search = allocineApi.searchMovies(name);
         } catch (AllocineException ex) {
@@ -62,16 +54,13 @@ public class AllocineApiSearch {
             }
             LOG.error("Failed retrieving Allocine id for movie '{}': {}", name, ex.getMessage());
             LOG.trace("Allocine error" , ex);
-        } finally {
-            searchMoviesLock.unlock();
         }
-        return (search == null ? new Search() : search);
+        return search;
     }
     
-    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #name}")
+    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #name}", unless="#result==null")
     public Search searchTvSeries(String name, boolean throwTempError) {
         Search search = null;
-        searchSeriesLock.lock();
         try {
             search = allocineApi.searchTvSeries(name);
         } catch (AllocineException ex) {
@@ -80,16 +69,13 @@ public class AllocineApiSearch {
             }
             LOG.error("Failed retrieving Allocine id for series '{}': {}", name, ex.getMessage());
             LOG.trace("Allocine error" , ex);
-        } finally {
-            searchSeriesLock.unlock();
         }
-        return (search == null ? new Search() : search);
+        return search;
     }
 
-    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #name}")
+    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #name}", unless="#result==null")
     public Search searchPersons(String name, boolean throwTempError) {
         Search search = null;
-        searchPersonLock.lock();
         try {
             search = allocineApi.searchPersons(name);
         } catch (AllocineException ex) {
@@ -98,9 +84,7 @@ public class AllocineApiSearch {
             }
             LOG.error("Failed retrieving Allocine id for person '{}': {}", name, ex.getMessage());
             LOG.trace("Allocine error" , ex);
-        } finally {
-            searchPersonLock.unlock();
         }
-        return (search == null ? new Search() : search);
+        return search;
     }
 }   

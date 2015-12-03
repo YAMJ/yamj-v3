@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service;
+package org.yamj.core.scheduling;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -69,16 +69,12 @@ public class ArtworkProcessScheduler {
     @Async
     @Scheduled(initialDelay = 6000, fixedDelay = 1000)
     public void runProcess() {
-        if (ARTWORK_PROCESS_LOCK.isLocked()) {
-            // do nothing if locked
-            return;
-        }
-
-        ARTWORK_PROCESS_LOCK.lock();
-        try {
-            if (watchProcess.get()) processArtwork();
-        } finally {
-            ARTWORK_PROCESS_LOCK.unlock();
+        if (watchProcess.get() && ARTWORK_PROCESS_LOCK.tryLock()) {
+            try {
+                processArtwork();
+            } finally {
+                ARTWORK_PROCESS_LOCK.unlock();
+            }
         }
     }
     

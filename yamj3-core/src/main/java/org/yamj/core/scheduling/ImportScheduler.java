@@ -20,10 +20,11 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service;
+package org.yamj.core.scheduling;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,16 +58,12 @@ public class ImportScheduler {
     @Async
     @Scheduled(initialDelay = 2000, fixedDelay = 1000)
     public void runProcess() {
-        if (IMPORT_LOCK.isLocked()) {
-            // do nothing if locked
-            return;
-        }
-
-        IMPORT_LOCK.lock();
-        try {
-            if (watchProcess.getAndSet(false)) processStageFiles();
-        } finally {
-            IMPORT_LOCK.unlock();
+        if (IMPORT_LOCK.tryLock()) {
+            try {
+                if (watchProcess.getAndSet(false)) processStageFiles();
+            } finally {
+                IMPORT_LOCK.unlock();
+            }
         }
     }
 

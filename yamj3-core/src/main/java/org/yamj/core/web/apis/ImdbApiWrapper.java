@@ -164,7 +164,7 @@ public class ImdbApiWrapper {
     @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId}")
     public List<ImdbImage> getTitlePhotos(String imdbId) {
         List<ImdbImage> titlePhotos = imdbApi.getTitlePhotos(imdbId);
-        return (titlePhotos == null ? new ArrayList<ImdbImage>() : titlePhotos);
+        return (titlePhotos == null ? new ArrayList<ImdbImage>(0) : titlePhotos);
     }
 
     @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId, #locale}")

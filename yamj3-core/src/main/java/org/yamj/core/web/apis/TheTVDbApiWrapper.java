@@ -24,8 +24,6 @@ package org.yamj.core.web.apis;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -53,17 +51,15 @@ public class TheTVDbApiWrapper {
     private static final Logger LOG = LoggerFactory.getLogger(TheTVDbApiWrapper.class);
     private static final int YEAR_MIN = 1900;
     private static final int YEAR_MAX = 2050;
-    private final Lock bannersLock = new ReentrantLock(true);
 
     @Autowired
     private ConfigService configService;
     @Autowired
     private TheTVDBApi tvdbApi;
     
-    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id}")
+    @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id}", unless="#result==null")
     public Banners getBanners(String id) {
         Banners banners = null;
-        bannersLock.lock();
         
         try {
             // retrieve banners from TheTVDb
@@ -71,11 +67,9 @@ public class TheTVDbApiWrapper {
         } catch (TvDbException ex) {
             LOG.error("Failed to get banners using TVDb ID {}: {}", id, ex.getMessage());
             LOG.trace("TheTVDb error" , ex);
-        } finally {
-            bannersLock.unlock();
         }
         
-        return (banners == null ? new Banners() : banners);
+        return banners;
     }
 
     /**
@@ -207,6 +201,7 @@ public class TheTVDbApiWrapper {
     @Cacheable(value=CachingNames.API_TVDB, key="{#root.methodName, #id, #season, #episode, #language}", unless="#result==null")
     public Episode getEpisode(String id, int season, int episode, String language) {
         Episode tvdbEpisode = null;
+        
         try {
             String altLanguage = configService.getProperty("thetvdb.language.alternate", StringUtils.EMPTY);
             if (altLanguage.equalsIgnoreCase(language)) altLanguage = null;

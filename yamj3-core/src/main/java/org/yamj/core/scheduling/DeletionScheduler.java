@@ -20,43 +20,36 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.tasks;
+package org.yamj.core.scheduling;
 
-import javax.annotation.PostConstruct;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.yamj.core.service.delete.DeletionService;
 
-/**
- * Task for checking if video, series or person is older than x days and marks
- * those data entries as updated in order to force a rescan.
- */
 @Component
-public class DeleteTask implements ITask {
+public class DeletionScheduler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RecheckTask.class);
-
-    @Autowired
-    private ExecutionTaskService executionTaskService;
+    private static final Logger LOG = LoggerFactory.getLogger(DeletionScheduler.class);
+    
     @Autowired
     private DeletionService deletionService;
     
-    @Override
-    public String getTaskName() {
-        return "delete";
+    private final AtomicBoolean watchProcess = new AtomicBoolean(false);
+
+    public void triggerProcess() {
+        LOG.trace("Trigger deletion process");
+        watchProcess.set(true);
     }
 
-    @PostConstruct
-    public void init() {
-        executionTaskService.registerTask(this);
-    }
-
-    @Override
-    public void execute(String options) throws Exception {
-        LOG.debug("Execute delete task");
-        this.deletionService.executeAllDeletions();
+    @Async
+    @Scheduled(initialDelay = 2000, fixedDelay = 1000)
+    public void runProcess() {
+        if (watchProcess.getAndSet(false)) deletionService.executeAllDeletions();
     }
 }

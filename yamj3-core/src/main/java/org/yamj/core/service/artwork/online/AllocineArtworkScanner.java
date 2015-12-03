@@ -22,24 +22,34 @@
  */
 package org.yamj.core.service.artwork.online;
 
-import com.moviejukebox.allocine.model.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
+import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.AllocineScanner;
 import org.yamj.core.tools.CommonTools;
 import org.yamj.core.web.apis.AllocineApiWrapper;
+
+import com.moviejukebox.allocine.model.MovieInfos;
+import com.moviejukebox.allocine.model.PersonInfos;
+import com.moviejukebox.allocine.model.TvSeasonInfos;
+import com.moviejukebox.allocine.model.TvSeriesInfos;
 
 @Service("allocineArtworkScanner")
 public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPosterScanner, IPhotoScanner {
@@ -102,7 +112,7 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
         }
 
         TvSeasonInfos tvSeasonInfos = allocineApiWrapper.getTvSeasonInfos(allocineId);
-        if (tvSeasonInfos.isNotValid() || MapUtils.isEmpty(tvSeasonInfos.getPosters())) {
+        if (tvSeasonInfos == null || tvSeasonInfos.isNotValid() || MapUtils.isEmpty(tvSeasonInfos.getPosters())) {
             return null;
         }
         return buildArtworkDetails(tvSeasonInfos.getPosters());
@@ -131,7 +141,7 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
         }
         
         PersonInfos personInfos = allocineApiWrapper.getPersonInfos(allocineId, false);
-        if (personInfos.isNotValid() || StringUtils.isBlank(personInfos.getPhotoURL())) {
+        if (personInfos == null || personInfos.isNotValid() || StringUtils.isBlank(personInfos.getPhotoURL())) {
             return null;
         }
 

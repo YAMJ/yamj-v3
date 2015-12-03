@@ -53,8 +53,8 @@ import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Genre;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.service.JsonApiStorageService;
-import org.yamj.core.service.ScanningScheduler;
-import org.yamj.core.service.TrailerProcessScheduler;
+import org.yamj.core.scheduling.ScanningScheduler;
+import org.yamj.core.scheduling.TrailerProcessScheduler;
 
 @RestController
 @RequestMapping(value = "/api/**", produces = "application/json; charset=utf-8")

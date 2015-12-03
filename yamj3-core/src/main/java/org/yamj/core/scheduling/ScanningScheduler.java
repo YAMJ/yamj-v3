@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service;
+package org.yamj.core.scheduling;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -138,21 +138,17 @@ public class ScanningScheduler {
 
     @Scheduled(initialDelay = 2000, fixedDelay = 1000)
     public void runAllScans() {
-        if (SCANNING_LOCK.isLocked()) {
-            // do nothing if locked
-            return;
-        }
-
-        SCANNING_LOCK.lock();
-        try {
-            if (watchScanMediaFiles.get()) scanMediaFiles();
-            if (watchScanMetaData.get()) scanMetaData();
-            if (watchScanPeopleData.get()) scanPeopleData();
-            if (watchScanFilmography.get()) scanFilmography();
-            if (watchScanArtwork.get()) scanArtwork();
-            if (watchScanTrailer.get()) scanTrailer();
-        } finally {
-            SCANNING_LOCK.unlock();
+        if (SCANNING_LOCK.tryLock()) {
+            try {
+                if (watchScanMediaFiles.get()) scanMediaFiles();
+                if (watchScanMetaData.get()) scanMetaData();
+                if (watchScanPeopleData.get()) scanPeopleData();
+                if (watchScanFilmography.get()) scanFilmography();
+                if (watchScanArtwork.get()) scanArtwork();
+                if (watchScanTrailer.get()) scanTrailer();
+            } finally {
+                SCANNING_LOCK.unlock();
+            }
         }
     }
     

@@ -255,7 +255,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             }
         }
         
-        if (movieInfos.isNotValid()) {
+        if (movieInfos == null || movieInfos.isNotValid()) {
             LOG.error("Can't find informations for movie '{}'", videoData.getIdentifier());
             return ScanResult.NO_RESULT;
         }
@@ -384,7 +384,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             }
         }
         
-        if (tvSeriesInfos.isNotValid()) {
+        if (tvSeriesInfos == null || tvSeriesInfos.isNotValid()) {
             LOG.error("Can't find informations for series '{}'", series.getIdentifier());
             return ScanResult.NO_RESULT;
         }
@@ -617,7 +617,7 @@ public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonSc
             }
         }
         
-        if (personInfos.isNotValid()) {
+        if (personInfos == null || personInfos.isNotValid()) {
             LOG.error("Can't find informations for person '{}'", person.getIdentifier());
             return ScanResult.NO_RESULT;
         }

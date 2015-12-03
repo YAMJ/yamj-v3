@@ -37,7 +37,7 @@ import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
-import org.yamj.core.service.ScanningScheduler;
+import org.yamj.core.scheduling.ScanningScheduler;
 
 @RestController
 @RequestMapping(value = "/api/person/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")

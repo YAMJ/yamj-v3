@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 import org.yamj.common.dto.ImportDTO;
 import org.yamj.common.remote.service.FileImportService;
 import org.yamj.core.database.model.Library;
-import org.yamj.core.service.ImportScheduler;
+import org.yamj.core.scheduling.ImportScheduler;
 import org.yamj.core.service.staging.StagingService;
 
 @Service("fileImportService")

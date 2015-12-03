@@ -458,6 +458,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     private void scanEpisode(VideoData videoData, ImdbEpisodeDTO dto, Locale imdbLocale) {
         
         if (dto == null) {
+            // mark episode as not found
             videoData.removeOverrideSource(SCANNER_ID);
             videoData.removeSourceDbId(SCANNER_ID);
             videoData.setTvEpisodeNotFound();

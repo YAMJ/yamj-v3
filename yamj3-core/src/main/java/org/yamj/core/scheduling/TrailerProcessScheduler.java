@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service;
+package org.yamj.core.scheduling;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -69,18 +69,15 @@ public class TrailerProcessScheduler {
     @Async
     @Scheduled(initialDelay = 6000, fixedDelay = 1000)
     public void runProcess() {
-        if (TRAILER_PROCESS_LOCK.isLocked()) {
-            // do nothing if locked
-            return;
-        }
-
-        TRAILER_PROCESS_LOCK.lock();
-        try {
-            if (watchProcess.get()) processTrailer();
-        } finally {
-            TRAILER_PROCESS_LOCK.unlock();
+        if (watchProcess.get() && TRAILER_PROCESS_LOCK.tryLock()) {
+            try {
+                processTrailer();
+            } finally {
+                TRAILER_PROCESS_LOCK.unlock();
+            }
         }
     }
+        
     
     private void processTrailer() {
         int maxThreads = configService.getIntProperty("yamj3.scheduler.trailerprocess.maxThreads", 0);

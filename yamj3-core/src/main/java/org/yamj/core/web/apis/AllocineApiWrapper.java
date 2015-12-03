@@ -57,7 +57,7 @@ public class AllocineApiWrapper {
 
     public String getAllocineMovieId(String title, int year, boolean throwTempError) {
         Search search = allocineApiSearch.searchMovies(title, throwTempError);
-        if (!search.isValid()) return null;
+        if (search == null || !search.isValid()) return null;
         
         // if we have a valid year try to find the first movie that match
         if (search.getTotalResults() > 1 && year > 0) {
@@ -88,7 +88,7 @@ public class AllocineApiWrapper {
 
     public String getAllocineSeriesId(String title, int year, boolean throwTempError) {
         Search search = allocineApiSearch.searchTvSeries(title, throwTempError);
-        if (!search.isValid()) return null;
+        if (search == null || !search.isValid()) return null;
 
         // if we have a valid year try to find the first series that match
         if (search.getTotalResults() > 1 && year > 0) {
@@ -123,7 +123,7 @@ public class AllocineApiWrapper {
 
     public String getAllocinePersonId(String name, boolean throwTempError) {
         Search search = allocineApiSearch.searchPersons(name, throwTempError);
-        if (!search.isValid()) return null;
+        if (search == null || !search.isValid()) return null;
         
         // find for matching person
         if (search.getTotalResults() > 1) {
@@ -149,7 +149,7 @@ public class AllocineApiWrapper {
         return null;
     }
 
-    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #allocineId}")
+    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #allocineId}", unless="#result==null")
     public MovieInfos getMovieInfos(String allocineId, boolean throwTempError) {
         MovieInfos movieInfos = null;
         try {
@@ -161,10 +161,10 @@ public class AllocineApiWrapper {
             LOG.error("Failed retrieving Allocine infos for movie id {}: {}", allocineId, ex.getMessage());
             LOG.trace("Allocine error" , ex);
         }
-        return (movieInfos == null ? new MovieInfos() : movieInfos);
+        return movieInfos;
     }
 
-    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #allocineId}")
+    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #allocineId}", unless="#result==null")
     public TvSeriesInfos getTvSeriesInfos(String allocineId, boolean throwTempError) {
         TvSeriesInfos tvSeriesInfos = null;
         try {
@@ -176,10 +176,10 @@ public class AllocineApiWrapper {
             LOG.error("Failed retrieving Allocine infos for series id {}: {}", allocineId, ex.getMessage());
             LOG.trace("Allocine error" , ex);
         }
-        return (tvSeriesInfos == null ? new TvSeriesInfos() : tvSeriesInfos);
+        return tvSeriesInfos;
     }
 
-    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #allocineId}")
+    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #allocineId}", unless="#result==null")
     public TvSeasonInfos getTvSeasonInfos(String allocineId) {
         TvSeasonInfos tvSeasonInfos = null;
         try {
@@ -188,7 +188,7 @@ public class AllocineApiWrapper {
             LOG.error("Failed retrieving Allocine infos for season id {}: {}", allocineId, ex.getMessage());
             LOG.trace("Allocine error" , ex);
         }
-        return (tvSeasonInfos == null ? new TvSeasonInfos() : tvSeasonInfos);
+        return tvSeasonInfos;
     }
 
     public EpisodeInfos getEpisodeInfos(String allocineId) {
@@ -204,7 +204,7 @@ public class AllocineApiWrapper {
         return episodeInfos;
     }
 
-    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #allocineId}")
+    @Cacheable(value=CachingNames.API_ALLOCINE, key="{#root.methodName, #allocineId}", unless="#result==null")
     public PersonInfos getPersonInfos(String allocineId, boolean throwTempError) {
         PersonInfos personInfos = null;
         try {
@@ -216,7 +216,7 @@ public class AllocineApiWrapper {
             LOG.error("Failed retrieving Allocine infos for person id {}: {}", allocineId, ex.getMessage());
             LOG.trace("Allocine error" , ex);
         }
-        return (personInfos == null ? new PersonInfos() : personInfos);
+        return personInfos;
     }
 
     public FilmographyInfos getFilmographyInfos(String allocineId, boolean throwTempError) {

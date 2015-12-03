@@ -20,10 +20,11 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service;
+package org.yamj.core.scheduling;
 
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -40,19 +41,15 @@ public class ExecutionTaskScheduler {
     
     @Scheduled(initialDelay = 5000, fixedDelay = 60000)
     public void executeTasks() {
-        if (EXECUTION_TASK_LOCK.isLocked()) {
-            // do nothing if locked
-            return;
-        }
-        
-        EXECUTION_TASK_LOCK.lock();
-        try {
-            List<ExecutionTask> tasks = this.executionTaskService.getTasksForExecution();
-            for (ExecutionTask task : tasks) {
-                executionTaskService.executeTask(task);
+        if (EXECUTION_TASK_LOCK.tryLock()) {
+            try {
+                List<ExecutionTask> tasks = this.executionTaskService.getTasksForExecution();
+                for (ExecutionTask task : tasks) {
+                    executionTaskService.executeTask(task);
+                }
+            } finally {
+                EXECUTION_TASK_LOCK.unlock();
             }
-        } finally {
-            EXECUTION_TASK_LOCK.unlock();
         }
     }
 }

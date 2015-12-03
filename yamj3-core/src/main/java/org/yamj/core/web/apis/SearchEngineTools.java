@@ -28,6 +28,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Locale;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.protocol.HTTP;
@@ -78,9 +79,8 @@ public class SearchEngineTools {
         // sites to search for URLs
         searchSites = new LinkedList<>();
         searchSites.addAll(Arrays.asList(PropertyTools.getProperty("yamj3.searchengine.sites", "google,yahoo,bing,blekko").split(",")));
-
-        // country specific presets
         
+        // country specific presets
         if (Locale.GERMANY.getCountry().equalsIgnoreCase(locale.getCountry())) {
             country = Locale.GERMAN.getCountry();
             language = Locale.GERMAN.getLanguage();

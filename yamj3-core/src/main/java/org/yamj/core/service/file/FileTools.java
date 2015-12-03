@@ -22,13 +22,19 @@
  */
 package org.yamj.core.service.file;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.StringTokenizer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +51,7 @@ public class FileTools {
     private static final Logger LOG = LoggerFactory.getLogger(FileTools.class);
     private static final int BUFF_SIZE = 16 * 1024;
     private static final Collection<ReplaceEntry> UNSAFE_CHARS = new ArrayList<>();
-    private static Lock mkdirsLock = new ReentrantLock();
+    private static final Lock MKDIRS_LOCK = new ReentrantLock();
 
     static {
         // What to do if the user specifies a blank encodeEscapeChar? Disable encoding!
@@ -285,7 +291,7 @@ public class FileTools {
         }
         LOG.debug("Creating directories for {} ", targetDirectory.getAbsolutePath());
 
-        mkdirsLock.lock();
+        MKDIRS_LOCK.lock();
         try {
             boolean status = targetDirectory.mkdirs();
             int looper = 1;
@@ -298,7 +304,7 @@ public class FileTools {
             }
             return Boolean.TRUE;
         } finally {
-            mkdirsLock.unlock();
+            MKDIRS_LOCK.unlock();
         }
     }
 
