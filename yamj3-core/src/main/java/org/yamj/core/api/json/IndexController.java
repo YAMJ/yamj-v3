@@ -25,11 +25,16 @@ package org.yamj.core.api.json;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
@@ -49,8 +54,7 @@ public class IndexController {
     private JsonApiStorageService jsonApiStorageService;
 
     @RequestMapping("/video")
-    public ApiWrapperList<ApiVideoDTO> getVideoList(
-            @ModelAttribute("options") OptionsIndexVideo options) {
+    public ApiWrapperList<ApiVideoDTO> getVideoList(@ModelAttribute("options") OptionsIndexVideo options) {
         LOG.debug("INDEX: Video list - Options: {}", options.toString());
 
         ApiWrapperList<ApiVideoDTO> wrapper = new ApiWrapperList<>();
@@ -108,6 +112,7 @@ public class IndexController {
         } else {
             results = jsonApiStorageService.getJobCount(null);
         }
+        
         return results;
     }
 }

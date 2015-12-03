@@ -23,15 +23,20 @@
 package org.yamj.core.api.json;
 
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiArtworkDTO;
-import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.options.OptionsIndexArtwork;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
@@ -59,7 +64,7 @@ public class ArtworkController {
     private ArtworkProcessScheduler artworkProcessScheduler; 
     
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public ApiWrapperSingle<ApiArtworkDTO> getArtwork(@PathVariable Long id) {
+    public ApiWrapperSingle<ApiArtworkDTO> getArtwork(@PathVariable("id") Long id) {
         ApiWrapperSingle<ApiArtworkDTO> wrapper = new ApiWrapperSingle<>();
 
         LOG.info("Attempting to retrieve artwork with id '{}'", id);
@@ -90,10 +95,9 @@ public class ArtworkController {
      * @param options
      * @return
      */
-    @RequestMapping(value = "/located/ignore/{id}", method = RequestMethod.GET)
-    public ApiStatus ignoreLocatedArtwork(@ModelAttribute("options") OptionsId options) {
+    @RequestMapping(value = "/located/ignore/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus ignoreLocatedArtwork(@PathVariable("id") Long id) {
         ApiStatus status = new ApiStatus();
-        Long id = options.getId();
         if (id != null && id > 0L) {
             LOG.info("Ignore located artwork '{}'", id);
             Set<String> filesToDelete = this.commonStorageService.ignoreArtworkLocated(id);

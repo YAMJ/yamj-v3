@@ -32,42 +32,48 @@ public enum MetaDataType {
     /**
      * This is a movie
      */
-    MOVIE(true, true),
+    MOVIE(true, true, true, true, true),
     /**
      * This is a TV Series
      */
-    SERIES(true, true),
+    SERIES(true, true, true, true, true),
     /**
      * This is a season of a TV series
      */
-    SEASON(true, true),
+    SEASON(true, true, true, true, false),
     /**
      * This is an episode of a TV season
      */
-    EPISODE(true, true),
+    EPISODE(true, true, true, true, false),
     /**
      * This is a person, an actor or crew member
      */
-    PERSON(true, true),
+    PERSON(true, true, false, true, false),
     /**
      * This is a person filmography
      */
-    FILMOGRAPHY(false, false),
+    FILMOGRAPHY(false, true, false, false, false),
     /**
      * This is a boxed set
      */
-    BOXSET(false, true),
+    BOXSET(false, false, false, true, false),
     /**
      * The type is unknown
      */
-    UNKNOWN(false, false);
+    UNKNOWN(false, false, false, false, false);
 
     private final boolean realMetaData;
+    private final boolean rescanMetaData;
+    private final boolean withVideos;
     private final boolean withArtwork;
+    private final boolean withTrailer;
     
-    private MetaDataType(boolean realMetaData, boolean withArtwork) {
+    private MetaDataType(boolean realMetaData, boolean rescanMetaData, boolean withVideos, boolean withArtwork, boolean withTrailer) {
         this.realMetaData = realMetaData;
+        this.rescanMetaData = rescanMetaData;
+        this.withVideos = withVideos;
         this.withArtwork = withArtwork;
+        this.withTrailer = withTrailer; 
     }
 
     public static MetaDataType fromString(String type) {
@@ -82,7 +88,19 @@ public enum MetaDataType {
         return realMetaData;
     }
     
+    public boolean isRescanMetaData() {
+        return rescanMetaData;
+    }
+
+    public boolean isWithVideos() {
+        return withVideos;
+    }
+
     public boolean isWithArtwork() {
         return withArtwork;
+    }
+
+    public boolean isWithTrailer() {
+        return withTrailer;
     }
 }

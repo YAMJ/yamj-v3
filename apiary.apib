@@ -179,6 +179,7 @@ Index Methods
 This section is for the index API methods
 --
 
+
 Get an index of videos.
 ***
 **Required Parameters**
@@ -189,8 +190,10 @@ Get an index of videos.
     <tr>
         <td>type</td>
         <td>The list of video types to get.<br/>
-            Can be one or more of: 'ALL', 'MOVIE', 'SERIES' or 'SEASON'.<br/>
-            Leave this option blank to return all types</td>
+            Can be a comma separated list consisting one or more of:<br>
+           'all', 'movie', 'series', 'season' or 'episode'<br>
+           If left blank, will default to 'all'.
+        </td>
     </tr>
 </table>
 
@@ -201,16 +204,31 @@ Get an index of videos.
     <col width="80%">
     <tr>
         <td>include</td>
-        <td>Comma delimited list of fields & values to include<br/>
-        Currently 'year' and 'genre' are supported using this format:<br/>
-        include=year-2010,genre-Action
+        <td>Comma delimited list of fields & values to include.<br/>
+            Example: include=year-2010,genre-Action<br/>
+            <br/>
+            Currently supported includes:
+            <ul>
+              <li>year</li>
+              <li>genre</li>
+              <li>studio</li>
+              <li>country</li>
+              <li>award</li>
+              <li>certification</li>
+              <li>videosource</li>
+              <li>resolution</li>
+              <li>rating</li>
+              <li>newest</li>
+              <li>boxset</li>
+            </ul>
         </td>
     </tr>
     <tr>
         <td>exclude</td>
-        <td>Comma delimited list of fields & values to exclude<br/>
-        Currently 'year' and 'genre' are supported using this format:<br/>
-        include=year-2010,genre-Action
+        <td>Comma delimited list of fields & values to exclude.<br/>
+            Example: exclude=year-2012,genre-Thriller<br/>
+            <br/>
+            Currently supported excludes are the same as includes.
         </td>
     </tr>
     <tr>
@@ -220,16 +238,31 @@ Get an index of videos.
             Leave this option blank to return no artwork</td>
     </tr>
     <tr>
+        <td>watched</td>
+        <td>If just watched or unwatched videos should be selected.<br/>
+            Use 'watched=true' to select just watched videos.<br/>
+            Use 'watched=false' to select just unwatched videos.
+        </td>
+    </tr>
+    <tr>
+        <td>yearStart</td>
+        <td>Get just videos from this and later years.</td>
+    </tr>
+    <tr>
+        <td>yearEnd</td>
+        <td>Get just videos from this and previous years.</td>
+    </tr>
+    <tr>
         <td>PAGING</td>
-        <td>See above for the explanation on paging parameters</td>
+        <td>See above for the explanation on paging parameters.</td>
     </tr>
     <tr>
         <td>SEARCHING</td>
-        <td>See above for the explanation on searching parameters</td>
+        <td>See above for the explanation on searching parameters.</td>
     </tr>
     <tr>
         <td>SORTING</td>
-        <td>See above for the explanation on sorting parameters</td>
+        <td>See above for the explanation on sorting parameters.</td>
     </tr>
 </table>
 
@@ -248,13 +281,8 @@ GET /api/index/video
    "parameters":{
       "start":-1,
       "max":2,
-      "type":"",
-      "include":"",
-      "exclude":"",
-      "sortby":"",
       "sortdir":"ASC",
       "artwork":"POSTER",
-      "id":-1
    },
    "baseArtworkUrl":"http://141.196.102.114:8888/artwork/",
    "baseMediainfoUrl":"http://141.196.102.114:8888/mediainfo/",
@@ -290,38 +318,6 @@ GET /api/index/video
          },
          "artworkCount":2,
          "genreCount":0
-      },
-      {
-         "id":1,
-         "videoType":"SERIES",
-         "title":"Game of Thrones",
-         "originalTitle":"Game of Thrones",
-         "videoYear":2011,
-         "genres":[],
-         "artwork":{
-            "POSTER":[
-               {
-                  "source":"SERIES",
-                  "videoId":1,
-                  "artworkId":1,
-                  "locatedId":1,
-                  "generatedId":1,
-                  "artworkType":"POSTER",
-                  "filename":"g/ga/Game of Thrones_0000.series.poster.1.default-poster.jpg"
-               },
-               {
-                  "source":"SERIES",
-                  "videoId":1,
-                  "artworkId":1,
-                  "locatedId":2,
-                  "generatedId":2,
-                  "artworkType":"POSTER",
-                  "filename":"g/ga/Game of Thrones_0000.series.poster.2.default-poster.jpg"
-               }
-            ]
-         },
-         "artworkCount":2,
-         "genreCount":0
       }
    ]
 }
@@ -337,7 +333,8 @@ Get an index of people.
     <tr>
         <td>dataitems</td>
         <td>This is a list of additional data items to append to add to the results.<br/>
-            Valid options are: artwork</td>
+            Valid options are: artwork, biography.
+        </td>
     </tr>
     <tr>
         <td>artwork</td>
@@ -347,15 +344,15 @@ Get an index of people.
     </tr>
     <tr>
         <td>SEARCHING</td>
-        <td>See above for the explanation on searching parameters</td>
+        <td>See above for the explanation on searching parameters.</td>
     </tr>
     <tr>
         <td>SORTING</td>
-        <td>See above for the explanation on sorting parameters</td>
+        <td>See above for the explanation on sorting parameters.</td>
     </tr>
     <tr>
         <td>PAGING</td>
-        <td>See above for the explanation on paging parameters</td>
+        <td>See above for the explanation on paging parameters.</td>
     </tr>
 </table>
 __Example__: `http://localhost:8888/yamj3/api/index/person?max=3`
@@ -372,7 +369,6 @@ GET /api/index/person
       "status":200,
       "message":"OK"
    },
-   "parameters":null,
    "options":{
       "start":-1,
       "max":3,
@@ -389,8 +385,6 @@ GET /api/index/person
          "biography":"Zachary Levi Pugh (born September 29, 1980), better known by his stage name Zachary Levi, ...",
          "birthDay":"1980-09-29",
          "birthPlace":"Lake Charles, Louisiana, USA",
-         "birthName":null,
-         "deathDay":null
       },
       {
          "id":2,
@@ -398,8 +392,6 @@ GET /api/index/person
          "biography":"Yvonne Strahovski (born Strzechowski on 30 July 1982) is an Australian actress. Born in Australia ...",
          "birthDay":"1982-07-30",
          "birthPlace":"Sydney, Australia",
-         "birthName":null,
-         "deathDay":null
       },
       {
          "id":3,
@@ -407,8 +399,6 @@ GET /api/index/person
          "biography":"Joshua Eli Gomez (born November 20, 1975, in Bayonne, New Jersey) is an American actor ...",
          "birthDay":"1975-11-20",
          "birthPlace":"Bayonne, New Jersey, USA",
-         "birthName":null,
-         "deathDay":null
       }
    ]
 }
@@ -426,9 +416,9 @@ For specific indexes, there will be an option to get the count for that index.
     <tr>
         <td>type</td>
         <td>The type of the count to get.<br/>
-        Can be a comma separated list consisting one or more of:<br>
-        'all', 'movie', 'series', 'season', 'episode' or 'person'<br>
-        If left blank, will default to 'all'
+            Can be a comma separated list consisting one or more of:<br>
+           'all', 'movie', 'series', 'season', 'episode' or 'person'<br>
+           If left blank, will default to 'all'.
         </td>
     </tr>
 </table>
@@ -437,95 +427,43 @@ GET /api/index/count
 < 200
 < Content-Type: application/json
 {
-    [
-   {
+  [
+    {
       "type":"MOVIE",
       "count":730,
       "createTimestamp":1372626565000,
       "updateTimestamp":1372785055000,
       "lastId":877
-   },
-   {
+    },
+    {
       "type":"SERIES",
       "count":6,
       "createTimestamp":1372626159000,
       "updateTimestamp":1372785325000,
       "lastId":6
-   },
-   {
+    },
+    {
       "type":"SEASON",
       "count":10,
       "createTimestamp":1372626160000,
       "updateTimestamp":1372785325000,
       "lastId":10
-   },
-   {
+    },
+    {
       "type":"EPISODE",
       "count":147,
       "createTimestamp":1372626160000,
       "updateTimestamp":1372785325000,
       "lastId":549
-   },
-   {
+    },
+    {
       "type":"PERSON",
       "count":9175,
       "createTimestamp":1372785318000,
       "updateTimestamp":1372795950000,
       "lastId":9175
-   }
-    ]
-}
-
-
-Get an alphabetical list of the first characters in a type list
-***
-**Optional Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>type</td>
-        <td>The type of the list to get.<br/>
-        Can be a comma separated list consisting one or more of:<br>
-        'all', 'movie', 'series', 'season', 'episode' or 'person'<br>
-        If left blank, will default to 'all'
-        </td>
-    </tr>
-</table>
-
-GET /api/alphabetical/list
-< 200
-< Content-Type: application/json
-{
-    "count": 25,
-    "totalCount": 25,
-    "queryDuration": "64ms",
-    "queryTime": "2015-05-13 11:05:34 +0100",
-    "status": {
-        "status": 200,
-        "message": "OK"
-    },
-    "options": {
-        "type": "movie"
-    },
-    "baseArtworkUrl": "http://192.168.0.20:8888/artwork/",
-    "baseMediainfoUrl": "http://192.168.0.20:8888/mediainfo/",
-    "basePhotoUrl": "http://192.168.0.20:8888/photo/",
-    "results": [
-        {
-            "name": "3"
-        },
-        {
-            "name": "A"
-        },
-        {
-            "name": "B"
-        },
-        {
-            "name": "C"
-        }
-    ]
+    }
+  ]
 }
 
 
@@ -539,16 +477,16 @@ Get a list of jobs and their associated counts.
     <tr>
         <td>job</td>
         <td>A comma separated list of the jobs to get counts for.
-        If left blank, will default to 'all'
+            If left blank, will default to 'all'
         </td>
     </tr>
 </table>
 
-GET /api/index/count
+GET /api/index/jobs
 < 200
 < Content-Type: application/json
 {
-[
+  [
    {
       "item":"ACTOR",
       "count":11693
@@ -601,7 +539,59 @@ GET /api/index/count
       "item":"WRITER",
       "count":1532
    }
-]
+  ]
+}
+
+
+Get an alphabetical list of the first characters in a type list
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The type of the list to get.<br/>
+            Can be a comma separated list consisting one or more of:<br>
+           'all', 'movie', 'series', 'season', 'episode' or 'person'<br>
+           If left blank, will default to 'all'.
+        </td>
+    </tr>
+</table>
+
+GET /api/alphabetical/list
+< 200
+< Content-Type: application/json
+{
+    "count": 25,
+    "totalCount": 25,
+    "queryDuration": "64ms",
+    "queryTime": "2015-05-13 11:05:34 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": {
+        "type": "movie"
+    },
+    "baseArtworkUrl": "http://192.168.0.20:8888/artwork/",
+    "baseMediainfoUrl": "http://192.168.0.20:8888/mediainfo/",
+    "basePhotoUrl": "http://192.168.0.20:8888/photo/",
+    "results": [
+        {
+            "name": "3"
+        },
+        {
+            "name": "A"
+        },
+        {
+            "name": "B"
+        },
+        {
+            "name": "C"
+        }
+    ]
 }
 
 
@@ -1482,27 +1472,27 @@ GET /api/video/externalids?id={}&sourcedb={}&externalid={}
 < 200
 < Content-Type: application/json
 {
-	"count": 1,
-	"totalCount": 1,
-	"queryDuration": "9ms",
-	"queryTime": "2015-05-07 14:33:11 +0100",
-	"status": {
-		"status": 200,
-		"message": "OK"
-	},
-	"options": {
-		"externalid": "tt1375666"
-	},
-	"baseArtworkUrl": "http://141.196.104.13:8888/artwork/",
-	"baseMediainfoUrl": "http://141.196.104.13:8888/mediainfo/",
-	"basePhotoUrl": "http://141.196.104.13:8888/photo/",
-	"results": [
-		{
-			"id": 8,
-			"externalid": "tt1375666",
-			"sourcedb": "imdb"
-		}
-	]
+    "count": 1,
+    "totalCount": 1,
+    "queryDuration": "9ms",
+    "queryTime": "2015-05-07 14:33:11 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": {
+        "externalid": "tt1375666"
+    },
+    "baseArtworkUrl": "http://141.196.104.13:8888/artwork/",
+    "baseMediainfoUrl": "http://141.196.104.13:8888/mediainfo/",
+    "basePhotoUrl": "http://141.196.104.13:8888/photo/",
+    "results": [
+        {
+            "id": 8,
+            "externalid": "tt1375666",
+            "sourcedb": "imdb"
+        }
+    ]
 }
 
 
