@@ -22,12 +22,11 @@
  */
 package org.yamj.core.service.mediainfo;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 
-public class MediaInfoStream implements Closeable  {
+public class MediaInfoStream implements AutoCloseable {
 
     private final Process process;
     private final InputStream inputStream;
