@@ -247,6 +247,12 @@
                 <artifactId>joda-time</artifactId>
                 <version>2.9.1</version>
             </dependency>
+            <dependency>
+                <groupId>org.joda</groupId>
+                <artifactId>joda-convert</artifactId>
+                <version>1.8.1</version>
+                <scope>provided</scope>
+            </dependency>
             <!--JACKSON JSON-->
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>

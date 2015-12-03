@@ -275,7 +275,7 @@ public class ApiDao extends HibernateDao {
      *
      * Note: In this method MetaDataType.UNKNOWN will return all types
      *
-     * @param wrapper
+     * @param params
      * @return
      */
     private static String generateSqlForVideoList(IndexParams params) {
