@@ -24,19 +24,9 @@ package org.yamj.core.database.service;
 
 import static org.yamj.core.hibernate.HibernateDao.IDENTIFIER;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -53,26 +43,11 @@ import org.yamj.common.type.StatusType;
 import org.yamj.core.CachingNames;
 import org.yamj.core.database.dao.CommonDao;
 import org.yamj.core.database.dao.MetadataDao;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.BoxedSet;
-import org.yamj.core.database.model.BoxedSetOrder;
-import org.yamj.core.database.model.CastCrew;
-import org.yamj.core.database.model.Certification;
-import org.yamj.core.database.model.Country;
-import org.yamj.core.database.model.FilmParticipation;
-import org.yamj.core.database.model.Genre;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.award.Award;
 import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.award.SeriesAward;
-import org.yamj.core.database.model.dto.AwardDTO;
-import org.yamj.core.database.model.dto.BoxedSetDTO;
-import org.yamj.core.database.model.dto.CreditDTO;
-import org.yamj.core.database.model.dto.QueueDTO;
+import org.yamj.core.database.model.dto.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.tools.GenreXmlTools;
@@ -709,14 +684,14 @@ public class MetadataStorageService {
         for (BoxedSetDTO boxedSetDTO : videoData.getBoxedSetDTOS()) {
 
             BoxedSetOrder boxedSetOrder = null;
-            loop: for (BoxedSetOrder stored : videoData.getBoxedSets()) {
+            loop: for (BoxedSetOrder storedOrder : videoData.getBoxedSets()) {
                 if (boxedSetDTO.getBoxedSetId() != null) {
-                    if (boxedSetDTO.getBoxedSetId().longValue() == stored.getId()) {
-                        boxedSetOrder = stored;
+                    if (boxedSetDTO.getBoxedSetId().longValue() == storedOrder.getBoxedSet().getId()) {
+                        boxedSetOrder = storedOrder;
                         break loop;
                     }
-                } else if (StringUtils.equalsIgnoreCase(stored.getBoxedSet().getIdentifier(), boxedSetDTO.getIdentifier())) {
-                    boxedSetOrder = stored;
+                } else if (StringUtils.equalsIgnoreCase(boxedSetDTO.getIdentifier(), storedOrder.getBoxedSet().getIdentifier())) {
+                    boxedSetOrder = storedOrder;
                     break loop;
                 }
             }
