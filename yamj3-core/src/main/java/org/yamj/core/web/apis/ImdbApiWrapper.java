@@ -58,6 +58,7 @@ import org.yamj.core.web.HTMLTools;
 import com.omertron.imdbapi.ImdbApi;
 import com.omertron.imdbapi.model.ImdbCredit;
 import com.omertron.imdbapi.model.ImdbImage;
+import com.omertron.imdbapi.model.ImdbList;
 import com.omertron.imdbapi.model.ImdbMovie;
 import com.omertron.imdbapi.model.ImdbMovieDetails;
 import com.omertron.imdbapi.model.ImdbPerson;
@@ -100,8 +101,7 @@ public class ImdbApiWrapper {
     }
 
     public ImdbMovieDetails getMovieDetails(String imdbId) {
-        Locale imdbLocale = localeService.getLocaleForConfig("imdb");
-        return this.getMovieDetails(imdbId, imdbLocale);
+        return this.getMovieDetails(imdbId, Locale.US);
     }
     
     public ImdbMovieDetails getMovieDetails(String imdbId, Locale locale) {
@@ -161,6 +161,19 @@ public class ImdbApiWrapper {
         return (imdbPerson == null ? new ImdbPerson() : imdbPerson);
     }
 
+    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName}")
+    public Map<String,Integer> getTop250() {
+        Map<String,Integer> result = new HashMap<>();
+        int rank = 0;
+        for (ImdbList imdbList : imdbApi.getTop250()) {
+            rank++;
+            if (StringUtils.isNotBlank(imdbList.getImdbId())) {
+                result.put(imdbList.getImdbId(), Integer.valueOf(rank));
+            }
+        }
+        return result;
+    }
+    
     @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId}")
     public List<ImdbImage> getTitlePhotos(String imdbId) {
         List<ImdbImage> titlePhotos = imdbApi.getTitlePhotos(imdbId);
@@ -252,8 +265,17 @@ public class ImdbApiWrapper {
         return studios;
     }
 
-    public Map<String, String> getCertifications(String imdbId, Locale imdbLocale) {
+    public Map<String, String> getCertifications(String imdbId, Locale imdbLocale, ImdbMovieDetails movieDetails) {
         Map<String, String> certifications = new HashMap<>();
+        
+        // get certificate from IMDb API movie details
+        String certificate = movieDetails.getCertificate().get("certificate");
+        if (StringUtils.isNotBlank(certificate)) {
+            String country = movieDetails.getCertificate().get("country");
+            if (StringUtils.isBlank(country)) {
+                certifications.put(imdbLocale.getCountry(), certificate);
+            }
+        }
         
         try {
             DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "parentalguide#certification"), CHARSET);
@@ -283,7 +305,7 @@ public class ImdbApiWrapper {
                 Collections.reverse(tags);
                 for (String countryCode : localeService.getCertificationCountryCodes(imdbLocale)) {
                     loop: for (String country : localeService.getCountryNames(countryCode)) {
-                        String certificate = getPreferredValue(tags, country);
+                        certificate = getPreferredValue(tags, country);
                         if (StringUtils.isNotBlank(certificate)) {
                             certifications.put(countryCode, certificate);
                             break loop;

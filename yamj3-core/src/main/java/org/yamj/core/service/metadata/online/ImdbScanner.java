@@ -39,8 +39,8 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -183,7 +183,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     private ScanResult updateMovie(VideoData videoData, String imdbId, boolean throwTempError) throws IOException {
         Locale imdbLocale = localeService.getLocaleForConfig("imdb");
         ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId, imdbLocale);
-        if (StringUtils.isBlank(movieDetails.getImdbId())) {
+        if (movieDetails == null || StringUtils.isBlank(movieDetails.getImdbId())) {
             return ScanResult.NO_RESULT;
         }
 
@@ -211,9 +211,9 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
 
         // TOP250
-        String strTop = HTMLTools.extractTag(xml, "Top Rated Movies #");
-        if (StringUtils.isNumeric(strTop)) {
-            videoData.setTopRank(NumberUtils.toInt(strTop, -1));
+        Integer rank = this.imdbApiWrapper.getTop250().get(imdbId);
+        if (rank != null) {
+            videoData.setTopRank(rank.intValue());
         }
 
         // GENRES
@@ -281,7 +281,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         videoData.addRating(SCANNER_ID, MetadataTools.parseRating(movieDetails.getRating()));
 
         // CERTIFICATIONS
-        videoData.setCertificationInfos(imdbApiWrapper.getCertifications(imdbId, imdbLocale));
+        videoData.setCertificationInfos(imdbApiWrapper.getCertifications(imdbId, imdbLocale, movieDetails));
 
         // CAST/CREW
         parseCastCrew(videoData, imdbId);
@@ -321,7 +321,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     private ScanResult updateSeries(Series series, String imdbId, boolean throwTempError) throws IOException {
         Locale imdbLocale = localeService.getLocaleForConfig("imdb");
         ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId, imdbLocale);
-        if (StringUtils.isBlank(movieDetails.getImdbId())) {
+        if (movieDetails == null || StringUtils.isBlank(movieDetails.getImdbId())) {
             return ScanResult.NO_RESULT;
         }
         
@@ -344,9 +344,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         // START YEAR and END YEAR
         if (OverrideTools.checkOverwriteYear(series, SCANNER_ID)) {
             series.setStartYear(movieDetails.getYear(), SCANNER_ID);
-            if (StringUtils.isNumeric(movieDetails.getYearEnd())) {
-               series.setEndYear(Integer.parseInt(movieDetails.getYearEnd()), SCANNER_ID);
-            }
+            series.setEndYear(NumberUtils.toInt(movieDetails.getYearEnd(), -1), SCANNER_ID);
         }
 
         // PLOT
@@ -361,9 +359,6 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
             series.setOutline(outline, SCANNER_ID);
         }
         
-        // CERTIFICATIONS
-        series.setCertificationInfos(imdbApiWrapper.getCertifications(imdbId, imdbLocale));
-
         // ORIGINAL TITLE
         final String titleOriginal = parseOriginalTitle(headerXml);
         if (OverrideTools.checkOverwriteOriginalTitle(series, SCANNER_ID)) {
@@ -386,7 +381,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
         }
 
         // CERTIFICATIONS
-        series.setCertificationInfos(imdbApiWrapper.getCertifications(imdbId, imdbLocale));
+        series.setCertificationInfos(imdbApiWrapper.getCertifications(imdbId, imdbLocale, movieDetails));
 
         // RELEASE INFO
         parseReleasedTitles(series, imdbId, imdbLocale);
@@ -477,7 +472,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
 
         // get movie details from IMDB
         ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(dto.getImdbId(), imdbLocale);
-        if (StringUtils.isBlank(movieDetails.getImdbId())) {
+        if (movieDetails == null || StringUtils.isBlank(movieDetails.getImdbId())) {
             videoData.setTvEpisodeNotFound();
             return;
         }
