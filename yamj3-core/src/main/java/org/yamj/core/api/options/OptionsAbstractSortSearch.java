@@ -320,8 +320,8 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     }
 
     @JsonIgnore
-    public Set<String> getJobTypesAsSet() {
-        HashSet<String> set = new HashSet<>();
+    public Set<String> getJobTypes() {
+        Set<String> set = new HashSet<>();
         for (JobType jobType : this.splitJobs().keySet()) {
             set.add(jobType.toString());
         }

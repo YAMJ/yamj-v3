@@ -91,7 +91,7 @@ public class JsonApiStorageService {
         } else if (type.equals(MetaDataType.EPISODE)) {
             ct = apiDao.getCountTimestamp(type, "videodata", "episode>=0");
         } else if (type.equals(MetaDataType.PERSON)) {
-            ct = apiDao.getCountTimestamp(type, "person", "");
+            ct = apiDao.getCountTimestamp(type, "person", "status != 'DELETED'");
         }
         return ct;
     }

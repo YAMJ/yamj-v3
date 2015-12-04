@@ -25,19 +25,8 @@ package org.yamj.core.service.metadata.online;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.StringTokenizer;
-
+import java.util.*;
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -808,7 +797,7 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
                 beginIndex = searchResult.indexOf("ref=\"/film/");
             }
             if (beginIndex >= 0) {
-                comingSoonId = getComingSoonIdFromURL(searchResult, tvShow);
+                comingSoonId = getComingSoonIdFromURL(searchResult);
             }
             if (StringUtils.isBlank(comingSoonId)) continue;
 
@@ -834,7 +823,7 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
         return result;
     }
 
-    private static String getComingSoonIdFromURL(String url, boolean tvShow) {
+    private static String getComingSoonIdFromURL(String url) {
         int index = url.indexOf("/scheda");
         if (index > -1) {
             String stripped = url.substring(0, index);
