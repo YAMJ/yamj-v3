@@ -258,7 +258,7 @@ public class CommonDao extends HibernateDao {
         return this.findUniqueByNamedParameters(Certification.class, sb, params);
     }
 
-    @CachePut(value=CachingNames.DB_CERTIFICATION, key="#countryCode.toLowerCase()+'_'+#certificate.toLowerCase()")
+    @CachePut(value=CachingNames.DB_CERTIFICATION, key="#countryCode.toLowerCase() + '_' + #certificate.toLowerCase()")
     public Certification saveCertification(String countryCode, String certificate) {
         Certification certification = new Certification();
         certification.setCountryCode(countryCode);
@@ -375,12 +375,13 @@ public class CommonDao extends HibernateDao {
 
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT DISTINCT ");
-        sb.append("grouped.type as type, ");
-        sb.append("grouped.sourcedb as source ");
+        sb.append("grouped.type as type,");
+        sb.append("grouped.sourcedb as source,");
+        sb.append("grouped.ordering as ordering");
         if (options.getRating() == null || options.getRating()) {
-            sb.append(", round(grouped.rating/10) as rating ");
+            sb.append(", round(grouped.rating/10) as rating");
         }
-        sb.append("FROM ( ");
+        sb.append(" FROM ( ");
 
         if (!justSeries) {
             // not just series
@@ -446,7 +447,7 @@ public class CommonDao extends HibernateDao {
         sb.append(") as grouped ");
 
         // order by
-        sb.append("order by type, grouped.ordering, source");
+        sb.append("order by type, ordering, source");
         if (options.getRating() == null || options.getRating()) {
             sb.append(", rating");
         }

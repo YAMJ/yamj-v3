@@ -23,17 +23,10 @@
 package org.yamj.core.config;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.io.InputStreamReader;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.slf4j.Logger;
@@ -236,8 +229,10 @@ public class LocaleService  {
     
     private Properties loadProperties(String resourceName) {
         Properties props = new Properties();
-        try (InputStream inStream = getClass().getResourceAsStream(resourceName)) {
-            props.load(inStream);
+        try (InputStream inStream = getClass().getResourceAsStream(resourceName);
+             InputStreamReader reader = new InputStreamReader(inStream, "UTF-8"))
+        {
+            props.load(reader);
         } catch (Exception e) {
             props.clear();
             LOG.error("Failed to load '{}' properties: {}", resourceName, e.getMessage());

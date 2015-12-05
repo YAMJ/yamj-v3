@@ -1291,7 +1291,7 @@ public class ApiDao extends HibernateDao {
             }
 
             if (hasMovie && hasSeries) {
-                sqlScalars.addToSql(" UNION");
+                sqlScalars.addToSql(SQL_UNION);
             }
 
             if (hasSeries) {
@@ -1305,7 +1305,7 @@ public class ApiDao extends HibernateDao {
             }
 
             if ((hasMovie || hasSeries) && hasSeason) {
-                sqlScalars.addToSql(" UNION");
+                sqlScalars.addToSql(SQL_UNION);
             }
 
             if (hasSeason) {
@@ -1319,7 +1319,7 @@ public class ApiDao extends HibernateDao {
             }
 
             if ((hasMovie || hasSeries || hasSeason) && hasEpisode) {
-                sqlScalars.addToSql(" UNION");
+                sqlScalars.addToSql(SQL_UNION);
             }
 
             if (hasEpisode) {
@@ -1456,7 +1456,7 @@ public class ApiDao extends HibernateDao {
 
         sbSQL.append("FROM cast_crew c1, videodata v1 ");
         sbSQL.append("WHERE c1.person_id = :id and v1.id=c1.videodata_id and v1.episode<0 ");
-        sbSQL.append("UNION ");
+        sbSQL.append(SQL_UNION);
         sbSQL.append("SELECT DISTINCT '");
         sbSQL.append(ParticipationType.SERIES.name());
         sbSQL.append("' as type, c2.job as job, c2.role as role, c2.voice_role as voiceRole, ");
@@ -2472,7 +2472,7 @@ public class ApiDao extends HibernateDao {
             sqlScalars.addToSql("FROM videodata_ratings r1 ");
             sqlScalars.addToSql("WHERE r1.videodata_id=:id ");
         }
-        sqlScalars.addToSql("UNION ");
+        sqlScalars.addToSql(SQL_UNION);
         // combined rating
         sqlScalars.addToSql("SELECT round(grouped.average) AS rating, 'combined' AS source, 1 AS sorting FROM ");
         sqlScalars.addToSql("(SELECT avg(r2.rating) as average ");
@@ -3281,10 +3281,10 @@ public class ApiDao extends HibernateDao {
 
         // add the movie entries
         if (mdt.contains(MetaDataType.MOVIE)) {
-            sbSQL.append("SELECT DISTINCT CONCAT(LEFT(vd.publication_year,3),'0') AS decade ");
+            sbSQL.append("SELECT DISTINCT CONCAT(LEFT(CAST(vd.publication_year AS CHAR(4)),3),'0') AS decade ");
             sbSQL.append("FROM videodata vd ");
             sbSQL.append("WHERE vd.episode < 0 ");
-            sbSQL.append("AND vd.publication_year > 0" );
+            sbSQL.append("AND vd.publication_year > 1000" );
             appendUnion = true;
         }
 
@@ -3293,9 +3293,9 @@ public class ApiDao extends HibernateDao {
             if (appendUnion) {
                 sbSQL.append(SQL_UNION);
             }
-            sbSQL.append("SELECT DISTINCT CONCAT(LEFT(ser.start_year,3),'0') as decade ");
+            sbSQL.append("SELECT DISTINCT CONCAT(LEFT(CAST(ser.start_year AS CHAR(4)),3),'0') as decade ");
             sbSQL.append("FROM series ser ");
-            sbSQL.append("WHERE ser.start_year > 0 ");
+            sbSQL.append("WHERE ser.start_year > 1000 ");
             appendUnion = true;
         }
 
@@ -3304,9 +3304,9 @@ public class ApiDao extends HibernateDao {
             if (appendUnion) {
                 sbSQL.append(SQL_UNION);
             }
-            sbSQL.append("SELECT DISTINCT CONCAT(LEFT(sea.publication_year,3),'0') AS decade ");
+            sbSQL.append("SELECT DISTINCT CONCAT(LEFT(CAST(sea.publication_year AS CHAR(4)),3),'0') AS decade ");
             sbSQL.append("FROM season sea ");
-            sbSQL.append("WHERE sea.publication_year > 0" );
+            sbSQL.append("WHERE sea.publication_year > 1000" );
             appendUnion = true;
         }
 
@@ -3315,10 +3315,10 @@ public class ApiDao extends HibernateDao {
             if (appendUnion) {
                 sbSQL.append(SQL_UNION);
             }
-            sbSQL.append("SELECT DISTINCT CONCAT(LEFT(vd.publication_year,3),'0') AS decade ");
+            sbSQL.append("SELECT DISTINCT CONCAT(LEFT(CAST(vd.publication_year AS CHAR(4)),3),'0') AS decade ");
             sbSQL.append("FROM videodata vd ");
             sbSQL.append("WHERE vd.episode >= 0 ");
-            sbSQL.append("AND vd.publication_year > 0" );
+            sbSQL.append("AND vd.publication_year > 1000" );
         }
 
         // If there were no types added, then return an empty list
