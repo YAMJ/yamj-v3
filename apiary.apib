@@ -1272,6 +1272,111 @@ PUT /api/video/{type}/disableonlinescan?id={}&sourcedb={}
 }
 
 
+Get a list of present years. 
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The type of the list to get.<br/>
+            Can be a comma separated list consisting one or more of:<br>
+           'all', 'movie', 'series', 'season' or 'episode'<br>
+           If left blank, will default to 'all'.
+        </td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/video/years/list?type=movie`
+
+GET /api/video/years/list
+< 200
+< Content-Type: application/json
+{
+    "count": 4,
+    "totalCount": 4,
+    "queryDuration": "267ms",
+    "queryTime": "2015-12-07 11:11:00 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": {
+        "type": "movie"
+    },
+    "baseArtworkUrl": "http:///192.168.0.20:8888:8888/artwork/",
+    "baseMediainfoUrl": "http:///192.168.0.20:8888:8888/mediainfo/",
+    "basePhotoUrl": "http:///192.168.0.20:8888:8888/photo/",
+    "baseTrailerUrl": "http:///192.168.0.20:8888:8888/trailer/",
+    "results": [
+        {
+            "year": 1999
+        },
+        {
+            "year": 2009
+        },
+        {
+            "year": 2010
+        },
+        {
+            "year": 2013
+        }
+    ]
+}
+
+
+Get a list of present decades. 
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The type of the list to get.<br/>
+            Can be a comma separated list consisting one or more of:<br>
+           'all', 'movie', 'series', 'season' or 'episode'<br>
+           If left blank, will default to 'all'.
+        </td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/video/decades/list?type=movie`
+
+GET /api/video/decades/list
+< 200
+< Content-Type: application/json
+{
+    "count": 3,
+    "totalCount": 3,
+    "queryDuration": "266ms",
+    "queryTime": "2015-12-07 11:12:40 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": {
+        "type": "movie"
+    },
+    "baseArtworkUrl": "http:///192.168.0.20:8888:8888/artwork/",
+    "baseMediainfoUrl": "http:///192.168.0.20:8888:8888/mediainfo/",
+    "basePhotoUrl": "http:///192.168.0.20:8888:8888/photo/",
+    "baseTrailerUrl": "http:///192.168.0.20:8888:8888/trailer/",
+    "results": [
+        {
+            "decade": 1990
+        },
+        {
+            "decade": 2000
+        },
+        {
+            "decade": 2010
+        }
+    ]
+}
+
+
 --
 Artwork
 --
