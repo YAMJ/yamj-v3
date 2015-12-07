@@ -25,14 +25,16 @@ package org.yamj.core.api.json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import org.yamj.core.api.model.ApiStatus;
-import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.service.staging.StagingService;
 
 @RestController
-@RequestMapping(value = "/api/file/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api/file/**", produces = "application/json; charset=utf-8")
 public class FileController {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileController.class);
@@ -47,10 +49,9 @@ public class FileController {
      * @param options
      * @return
      */
-    @RequestMapping("/delete/{id}")
-    public ApiStatus deleteFileById(@ModelAttribute("options") OptionsId options) {
+    @RequestMapping(value = "/delete/{id}", method = {RequestMethod.GET, RequestMethod.DELETE})
+    public ApiStatus deleteFileById(@PathVariable("id") Long id) {
         ApiStatus status = new ApiStatus();
-        Long id = options.getId();
         if (id != null && id > 0L) {
             LOG.info("Deleting file '{}'", id);
             boolean result = this.stagingService.deleteStageFile(id);
@@ -74,10 +75,9 @@ public class FileController {
      * @param options
      * @return
      */
-    @RequestMapping("/update/{id}")
-    public ApiStatus updateFileById(@ModelAttribute("options") OptionsId options) {
+    @RequestMapping(value = "/update/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus updateFileById(@PathVariable("id") Long id) {
         ApiStatus status = new ApiStatus();
-        Long id = options.getId();
         if (id != null && id > 0L) {
             LOG.info("Updating file '{}'", id);
             boolean result = this.stagingService.updateStageFile(id);
@@ -101,10 +101,9 @@ public class FileController {
      * @param options
      * @return
      */
-    @RequestMapping("/watched/{id}")
-    public ApiStatus watchedFileById(@ModelAttribute("options") OptionsId options) {
+    @RequestMapping(value = "/watched/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus watchedFileById(@PathVariable("id") Long id) {
         ApiStatus status = new ApiStatus();
-        Long id = options.getId();
         if (id != null && id > 0L) {
             LOG.info("Watched file '{}'", id);
             boolean result = commonStorageService.toogleWatchedStatus(id, true, true);
@@ -128,10 +127,9 @@ public class FileController {
      * @param options
      * @return
      */
-    @RequestMapping("/unwatched/{id}")
-    public ApiStatus unwatchedFileById(@ModelAttribute("options") OptionsId options) {
+    @RequestMapping(value = "/unwatched/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
+    public ApiStatus unwatchedFileById(@PathVariable("id") Long id) {
         ApiStatus status = new ApiStatus();
-        Long id = options.getId();
         if (id != null && id > 0L) {
             LOG.info("Unwatched file '{}'", id);
             boolean result = this.commonStorageService.toogleWatchedStatus(id, false, true);

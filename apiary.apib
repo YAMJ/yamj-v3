@@ -3066,6 +3066,103 @@ GET /api/boxset/list
 
 
 --
+Staging
+--
+
+
+Mark a stage file as deleted.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the stage file.</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/file/delete/1`
+
+GET /api/file/delete/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Successfully marked file '1' as deleted"
+}
+
+
+Mark a stage file as updated.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the stage file.</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/file/update/1`
+
+GET /api/file/update/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Successfully marked file '1' as updated"
+}
+
+
+Mark a stage file as watched.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the stage file.</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/file/watched/2`
+
+GET /api/file/watched/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Successfully marked file '2' as watched"
+}
+
+
+Mark a stage file as unwatched.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the stage file.</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/file/unwatched/2`
+
+GET /api/file/unwatched/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Successfully marked file '2' as unwatched"
+}
+
+
+--
 Configuration
 This API is for the retrieval and update of the configuration entries.
 --
@@ -3142,7 +3239,7 @@ GET /api/config/list
       }
    ]
 }
---
+
 
 Add a new configuration entry
 ***
@@ -3163,14 +3260,14 @@ Add a new configuration entry
 </table>
 __Example__: `http://localhost:8888/yamj3/api/config/add?key=skin.language&value=en`
 
-GET /api/config/add
+POST /api/config/add
 < 200
 < Content-Type: application/json
 {
     status: 200,
     message: "Successfully added 'skin.language' with value 'en'"
 }
---
+
 
 Update a configuration entry
 ***
@@ -3191,14 +3288,14 @@ Update a configuration entry
 
 __Example__: `http://localhost:8888/yamj3/api/config/update?key=skin.language&value=en`
 
-GET /api/config/update
+PUT /api/config/update
 < 200
 < Content-Type: application/json
 {
     status: 200,
     message: "Successfully updated 'skin.language' with value 'en'"
 }
---
+
 
 Delete a configuration entry
 ***
@@ -3215,7 +3312,7 @@ Delete a configuration entry
 
 __Example__: `http://localhost:8888/yamj3/api/config/delete?key=skin.language`
 
-GET /api/config/delete
+DELETE /api/config/delete
 < 200
 < Content-Type: application/json
 {

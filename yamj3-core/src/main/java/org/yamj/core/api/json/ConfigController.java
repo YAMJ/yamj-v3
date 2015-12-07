@@ -26,7 +26,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.options.OptionsConfig;
 import org.yamj.core.api.wrapper.ApiWrapperList;
@@ -34,14 +38,14 @@ import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.Configuration;
 
 @RestController
-@RequestMapping(value = "/api/config/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api/config/**", produces = "application/json; charset=utf-8")
 public class ConfigController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigController.class);
     @Autowired
     private ConfigService configService;
 
-    @RequestMapping("/list")
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
     public ApiWrapperList<Configuration> configList(@ModelAttribute("options") OptionsConfig options) {
         if (StringUtils.isBlank(options.getConfig())) {
             LOG.info("Getting all configuration entries");
@@ -61,7 +65,7 @@ public class ConfigController {
         return wrapper;
     }
 
-    @RequestMapping("/add")
+    @RequestMapping(value = "/add", method = {RequestMethod.GET, RequestMethod.POST})
     public ApiStatus configAdd(
             @RequestParam(required = true, defaultValue = "") String key,
             @RequestParam(required = true, defaultValue = "") String value) {
@@ -79,7 +83,7 @@ public class ConfigController {
         return status;
     }
 
-    @RequestMapping("/delete")
+    @RequestMapping(value = "/delete", method = {RequestMethod.GET, RequestMethod.DELETE})
     public ApiStatus configDelete(
             @RequestParam(required = true, defaultValue = "") String key) {
         ApiStatus status = new ApiStatus();
@@ -95,7 +99,7 @@ public class ConfigController {
         return status;
     }
 
-    @RequestMapping("/update")
+    @RequestMapping(value = "/update", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus configUpdate(
             @RequestParam(required = true, defaultValue = "") String key,
             @RequestParam(required = true, defaultValue = "") String value) {
