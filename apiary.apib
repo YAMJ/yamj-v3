@@ -1522,6 +1522,62 @@ GET /api/artwork/list
 }
 
 
+Ignore a located artwork
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>This is the ID of the located artwork.</td>
+    </tr>
+</table>
+
+PUT /api/artwork/located/ignore/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Successfully marked located artwork '15' as ignored"
+}
+
+
+Add an image to a defined artwork for a choose video type
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>artwork</td>
+        <td>The artwork type: poster, banner, fanart, videoimage</td>
+    </tr>
+    <tr>
+        <td>type</td>
+        <td>The video type: movies, series, season, episode, person, boxset</td>
+    </tr>
+    <tr>
+        <td>id</td>
+        <td>The ID of the choosen type; i.e. the movie ID.</td>
+    </tr>
+    <tr>
+        <td>image</td>
+        <td>The artwork images as multipartz file.</td>
+    </tr>
+</table>
+
+POST /add/{artwork}/{type}/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Cached image as '/a/av/Avatar.movie.13819.poster.jpg'"
+}
+
+
 --
 Person
 --
