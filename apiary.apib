@@ -583,12 +583,118 @@ GET /api/alphabetical/list
 }
 
 
+Get a list of present years. 
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The type of the list to get.<br/>
+            Can be a comma separated list consisting one or more of:<br>
+           'all', 'movie', 'series', 'season' or 'episode'<br>
+           If left blank, will default to 'all'.
+        </td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/video/years/list?type=movie`
+
+GET /api/video/years/list
+< 200
+< Content-Type: application/json
+{
+    "count": 4,
+    "totalCount": 4,
+    "queryDuration": "267ms",
+    "queryTime": "2015-12-07 11:11:00 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": {
+        "type": "movie"
+    },
+    "baseArtworkUrl": "http:///192.168.0.20:8888:8888/artwork/",
+    "baseMediainfoUrl": "http:///192.168.0.20:8888:8888/mediainfo/",
+    "basePhotoUrl": "http:///192.168.0.20:8888:8888/photo/",
+    "baseTrailerUrl": "http:///192.168.0.20:8888:8888/trailer/",
+    "results": [
+        {
+            "year": 1999
+        },
+        {
+            "year": 2009
+        },
+        {
+            "year": 2010
+        },
+        {
+            "year": 2013
+        }
+    ]
+}
+
+
+Get a list of present decades. 
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The type of the list to get.<br/>
+            Can be a comma separated list consisting one or more of:<br>
+           'all', 'movie', 'series', 'season' or 'episode'<br>
+           If left blank, will default to 'all'.
+        </td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/video/decades/list?type=movie`
+
+GET /api/video/decades/list
+< 200
+< Content-Type: application/json
+{
+
+    "count": 3,
+    "totalCount": 3,
+    "queryDuration": "266ms",
+    "queryTime": "2015-12-07 11:12:40 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": {
+        "type": "movie"
+    },
+    "baseArtworkUrl": "http:///192.168.0.20:8888:8888/artwork/",
+    "baseMediainfoUrl": "http:///192.168.0.20:8888:8888/mediainfo/",
+    "basePhotoUrl": "http:///192.168.0.20:8888:8888/photo/",
+    "baseTrailerUrl": "http:///192.168.0.20:8888:8888/trailer/",
+    "results": [
+        {
+            "decade": 1990
+        },
+        {
+            "decade": 2000
+        },
+        {
+            "decade": 2010
+        }
+    ]
+}
+
+
 --
 Video Methods
 These methods get information on the videos in the database
 --
 
-Retrieve information on the video.
+Retrieve information for a video (movie/series/season).
 ***
 **Required Parameters**
 
@@ -596,9 +702,16 @@ Retrieve information on the video.
     <col width="20%">
     <col width="80%">
     <tr>
+        <td>type</td>
+        <td>The type of the video.<br/>
+            Valid types are: movie, season, series
+        </td>
+    </tr>
+    <tr>
         <td>id</td>
         <td>The id of the movie to get.<br/>
-            Note: This is specific to the video type, so Movie ID 1 is not the same as Season ID 1</td>
+            Note: This is specific to the video type, so Movie ID 1 is not the same as Season ID 1.
+        </td>
     </tr>
 </table>
 
@@ -609,8 +722,9 @@ Retrieve information on the video.
     <col width="80%">
     <tr>
         <td>dataitems</td>
-        <td>This is a list of additional data items to append to add to the results.<br/>
-            Valid options are: artwork, files, genre, studio, country, certification, rating, award, externalid</td>
+        <td>This is a list of additional data items to append to the results.<br/>
+            Valid options are: plot, outline, quote, tagline, status, artwork, files, genre, studio, country, certification, rating, award, externalid, boxset, trailer, jobs
+        </td>
     </tr>
     <tr>
         <td>artwork</td>
@@ -619,9 +733,9 @@ Retrieve information on the video.
             Leave this option blank to return no artwork</td>
     </tr>
 </table>
-__Example__: `http://localhost:8888/yamj3/api/video/movie/2?dataitems=artwork,files,genre&artwork=all`
+__Example__: `http://localhost:8888/yamj3/api/video/movie/2?dataitems=plot,artwork,files,genre&artwork=all`
 
-GET /api/video/movie/{id}
+GET /api/video/{type}/{id}
 < 200
 < Content-Type: application/json
 {
@@ -751,7 +865,7 @@ Will get all the seasons associated with the series
     <tr>
         <td>dataitems</td>
         <td>This is a list of additional data items to append to add to the results.<br/>
-            Valid options are: artwork</td>
+            Valid options are: plot, outline, genre, studio, country, certification, rating, award, artwork</td>
     </tr>
     <tr>
         <td>artwork</td>
@@ -963,317 +1077,6 @@ GET /api/video/seriesinfo
    ]
 }
 
-Retrieve information on a series
-***
-**Required Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>id</td>
-        <td>The id of the series to get.<br/>
-            Note: This is specific to the video type, so Movie ID 1 is not the same as Season ID 1</td>
-    </tr>
-</table>
-
-**Optional Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>dataitems</td>
-        <td>This is a list of additional data items to append to add to the results.<br/>
-            Valid options are: artwork, files, genre</td>
-    </tr>
-    <tr>
-        <td>artwork</td>
-        <td>The list of artwork types to get for the video.<br/>
-            Can be one or more of: 'ALL', 'POSTER', 'FANART', 'BANNER', 'VIDEOIMAGE', etc.<br/>
-            Leave this option blank to return no artwork</td>
-    </tr>
-</table>
-__Example__: `http://localhost:8888/yamj3/api/video/series/3?dataitems=files,artwork,plot,outline&artwork=all`
-
-GET /api/video/series/{id}
-< 200
-< Content-Type: application/json
-{
-   "count":1,
-   "totalCount":1,
-   "queryDuration":"427ms",
-   "queryTime":"2014-01-14 15:47:59",
-   "status":{
-      "status":200,
-      "message":"OK"
-   },
-   "options":{
-      "start":-1,
-      "max":-1,
-      "language":null,
-      "sortby":"",
-      "sortdir":"ASC",
-      "field":"",
-      "search":"",
-      "mode":"",
-      "dataitems":[
-         "files",
-         "artwork",
-         "plot",
-         "outline"
-      ],
-      "id":3,
-      "artwork":"",
-      "type":"SERIES",
-      "include":"",
-      "exclude":""
-   },
-   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
-   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
-   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
-   "result":{
-      "id":3,
-      "videoType":"SERIES",
-      "title":"Lost",
-      "originalTitle":"Lost",
-      "videoYear":2004,
-      "genres":[],
-      "artwork":{
-         "POSTER":[
-            {
-               "id":3,
-               "source":"SERIES",
-               "artworkId":17,
-               "locatedId":84,
-               "generatedId":82,
-               "artworkType":"POSTER",
-               "filename":"l/lo/Lost_0000.series.poster.84.default-poster.jpg"
-            }
-         ],
-         "BANNER":[
-            {
-               "id":3,
-               "source":"SERIES",
-               "artworkId":19,
-               "locatedId":77,
-               "generatedId":75,
-               "artworkType":"BANNER",
-               "filename":"l/lo/Lost_0000.series.banner.77.default-banner.jpg"
-            }
-         ],
-         "FANART":[
-            {
-               "id":3,
-               "source":"SERIES",
-               "artworkId":18,
-               "locatedId":75,
-               "generatedId":79,
-               "artworkType":"FANART",
-               "filename":"l/lo/Lost_0000.series.fanart.75.default-fanart.jpg"
-            }
-         ]
-      },
-      "files":[
-         {
-            "id":4,
-            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S02E01.avi",
-            "season":2,
-            "episode":1
-         },
-         {
-            "id":8,
-            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S02E02.avi",
-            "season":2,
-            "episode":2
-         },
-         {
-            "id":9,
-            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S02E03.avi",
-            "season":2,
-            "episode":3
-         },
-         {
-            "id":5,
-            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S01E01.avi",
-            "season":1,
-            "episode":1
-         },
-         {
-            "id":6,
-            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S01E02.avi",
-            "season":1,
-            "episode":2
-         },
-         {
-            "id":7,
-            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S01E03.avi",
-            "season":1,
-            "episode":3
-         }
-      ],
-      "outline":"After their plane, Oceanic Air flight 815, tore apart whilst thousands of miles off course, the survivors find themselves on a mysterious deserted island where they soon find out they are not alone.",
-      "plot":"After their plane, Oceanic Air flight 815, tore apart whilst thousands of miles off course, the survivors find themselves on a mysterious deserted island where they soon find out they are not alone.",
-      "country":null,
-      "quote":null,
-      "tagline":null,
-      "topRank":null,
-      "seriesId":3,
-      "seasonId":-1,
-      "season":-1,
-      "episode":-1,
-      "genreCount":0,
-      "artworkCount":3
-   }
-}
-
-Retrieve information on the season
-***
-**Required Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>id</td>
-        <td>The id of the season to get.<br/>
-            Note: This is specific to the video type, so Movie ID 1 is not the same as Season ID 1</td>
-    </tr>
-</table>
-
-**Optional Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>dataitems</td>
-        <td>This is a list of additional data items to append to add to the results.<br/>
-            Valid options are: artwork, files, genre</td>
-    </tr>
-    <tr>
-        <td>artwork</td>
-        <td>The list of artwork types to get for the video.<br/>
-            Can be one or more of: 'ALL', 'POSTER', 'FANART', 'BANNER', 'VIDEOIMAGE', etc.<br/>
-            Leave this option blank to return no artwork</td>
-    </tr>
-</table>
-__Example__: `http://localhost:8888/yamj3/api/video/season/4?dataitems=files,artwork,plot,outline&artwork=all`
-
-GET /api/video/season/{id}
-< 200
-< Content-Type: application/json
-{
-   "count":1,
-   "totalCount":1,
-   "queryDuration":"421ms",
-   "queryTime":"2014-01-14 15:54:20",
-   "status":{
-      "status":200,
-      "message":"OK"
-   },
-   "options":{
-      "start":-1,
-      "max":-1,
-      "language":null,
-      "sortby":"",
-      "sortdir":"ASC",
-      "field":"",
-      "search":"",
-      "mode":"",
-      "dataitems":[
-         "files",
-         "artwork",
-         "plot",
-         "outline"
-      ],
-      "id":4,
-      "artwork":"ALL",
-      "type":"SEASON",
-      "include":"",
-      "exclude":""
-   },
-   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
-   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
-   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
-   "result":{
-      "id":4,
-      "videoType":"SEASON",
-      "title":"Lost",
-      "originalTitle":"Lost",
-      "videoYear":2004,
-      "genres":[],
-      "artwork":{
-         "POSTER":[
-            {
-               "id":4,
-               "source":"SEASON",
-               "artworkId":24,
-               "locatedId":97,
-               "generatedId":94,
-               "artworkType":"POSTER",
-               "filename":"l/lo/Lost_0000_001.season.poster.97.default-poster.jpg"
-            }
-         ],
-         "BANNER":[
-            {
-               "id":4,
-               "source":"SEASON",
-               "artworkId":26,
-               "locatedId":111,
-               "generatedId":107,
-               "artworkType":"BANNER",
-               "filename":"l/lo/Lost_0000_001.season.banner.111.default-banner.jpg"
-            }
-         ],
-         "FANART":[
-            {
-               "id":4,
-               "source":"SEASON",
-               "artworkId":25,
-               "locatedId":102,
-               "generatedId":103,
-               "artworkType":"FANART",
-               "filename":"l/lo/Lost_0000_001.season.fanart.102.default-fanart.jpg"
-            }
-         ]
-      },
-      "files":[
-         {
-            "id":5,
-            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S01E01.avi",
-            "season":1,
-            "episode":1
-         },
-         {
-            "id":6,
-            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S01E02.avi",
-            "season":1,
-            "episode":2
-         },
-         {
-            "id":7,
-            "filename":"C:\\Projects\\YAMJv3\\testdir\\Lost S01E03.avi",
-            "season":1,
-            "episode":3
-         }
-      ],
-      "outline":"After their plane, Oceanic Air flight 815, tore apart whilst thousands of miles off course, the survivors find themselves on a mysterious deserted island where they soon find out they are not alone.",
-      "plot":"After their plane, Oceanic Air flight 815, tore apart whilst thousands of miles off course, the survivors find themselves on a mysterious deserted island where they soon find out they are not alone.",
-      "country":null,
-      "quote":null,
-      "tagline":null,
-      "topRank":null,
-      "seriesId":3,
-      "seasonId":4,
-      "season":1,
-      "episode":-1,
-      "genreCount":0,
-      "artworkCount":3
-   }
-}
-
-
 Retrieve information on the TV episodes
 ***
 **Optional Parameters**
@@ -1299,7 +1102,12 @@ Retrieve information on the TV episodes
     <tr>
         <td>dataitems</td>
         <td>This is a list of additional data items to append to add to the results.<br/>
-            Valid options are: outline, plot, files</td>
+            Valid options are: plot, outline, files, genre, country, studio, certification, award, rating, jobs
+        </td>
+    </tr>
+    <tr>
+        <td>watched</td>
+        <td>If just watched or unwatched episodes should be selected.</td>
     </tr>
     <tr>
         <td>SEARCHING</td>
@@ -1310,9 +1118,9 @@ Retrieve information on the TV episodes
         <td>See above for the explanation on sorting parameters</td>
     </tr>
 </table>
-__Example__: `http://localhost:8888/yamj3/api/video/episodes?dataitems=files,artwork,outline,plot&seriesid=3&artwork=all`
+__Example__: `http://localhost:8888/yamj3/api/video/episodes?dataitems=files,plot,outline&seriesid=3`
 
-GET /api/video/episodes?series={}&season={}
+GET /api/video/episodes
 < 200
 < Content-Type: application/json
 {
@@ -1423,102 +1231,48 @@ GET /api/video/episodes?series={}&season={}
 }
 
 
-Get the external IDs for a video ID or find the video id from an external ID.
-***
-**Optional Parameters**
-
-Although these are listed as optional, one or more must be used.
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>id</td>
-        <td>The Video ID of the video to get.<br>
-        Leave blank to search by source or external ID.</td>
-    </tr>
-    <tr>
-        <td>sourcedb</td>
-        <td>The source database to get information for.<br>
-        For example: imdb, tmdb, etc.</td>
-    </tr>
-    <tr>
-        <td>externalid</td>
-        <td>The External ID to search for.<br>
-        This should be the full ID from the source site, e.g. tt123456.</td>
-    </tr>
-</table>
-__Example 1__: `http://localhost:8888/yamj3/api/video/externalids?id=8`
-
-Gets all the External IDs for Video ID 8
-
-__Example 2__: `http://localhost:8888/yamj3/api/video/externalids?sourcedb=imdb&externalid=tt123456`
-
-Search the external IDs for the video with the IMDB reference `tt123456`
-
-GET /api/video/externalids?id={}&sourcedb={}&externalid={}
-< 200
-< Content-Type: application/json
-{
-    "count": 1,
-    "totalCount": 1,
-    "queryDuration": "9ms",
-    "queryTime": "2015-05-07 14:33:11 +0100",
-    "status": {
-        "status": 200,
-        "message": "OK"
-    },
-    "options": {
-        "externalid": "tt1375666"
-    },
-    "baseArtworkUrl": "http://141.196.104.13:8888/artwork/",
-    "baseMediainfoUrl": "http://141.196.104.13:8888/mediainfo/",
-    "basePhotoUrl": "http://141.196.104.13:8888/photo/",
-    "results": [
-        {
-            "id": 8,
-            "externalid": "tt1375666",
-            "sourcedb": "imdb"
-        }
-    ]
-}
-
-
-Add or Update the external IDs for a video ID.
+Add or Update an external ID for a video ID.
 ***
 **Required Parameters**
 
 <table width="100%">
     <col width="20%">
     <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The type of the video.<br/>
+            Valid types are: movie, season, series, episode
+        </td>
+    </tr>
     <tr>
         <td>id</td>
         <td>The Video ID of the video to add/update the external ID for.</td>
     </tr>
     <tr>
         <td>sourcedb</td>
-        <td>The source database of the external ID.<br>
-        For example: imdb, tmdb, etc.</td>
+        <td>The source database of the external ID.</br>
+	        For example: imdb, tmdb, etc.
+        </td>
     </tr>
     <tr>
         <td>externalid</td>
-        <td>The External ID to add/update to.<br>
-        This should be the full ID from the source site, e.g. tt123456.</td>
+        <td>The External ID to add/update to.<br/>
+            This should be the full ID from the source site, e.g. tt123456.
+        </td>
     </tr>
 </table>
-__Example__: `http://localhost:8888/yamj3/api/video/externalids/update?id=8&sourcedb=imdb&externalid=tt123456`
+__Example__: `http://localhost:8888/yamj3/api/video/movie/updateexternalid?id=81&sourcedb=imdb&externalid=tt123456`
 
-
-GET /api/video/externalids/update?id={}&sourcedb={}&externalid={}
+PUT /api/video/{type}/updateexternalid?id={}&sourcedb={}&externalid={}
 < 200
 < Content-Type: application/json
 {
     "status": 200,
-    "message": "Successfully updated 'test' ID to '12345' for 81 - Captain America: The First Avenger"
+    "message": "Updated external ID for imdb for movie ID 81"
 }
 
 
-Get the external IDs for a video ID or find the video id from an external ID.
+Remove an external ID for a video ID.
 ***
 **Required Parameters**
 
@@ -1526,23 +1280,100 @@ Get the external IDs for a video ID or find the video id from an external ID.
     <col width="20%">
     <col width="80%">
     <tr>
+        <td>type</td>
+        <td>The type of the video.<br/>
+            Valid types are: movie, season, series, episode
+        </td>
+    </tr>
+    <tr>
         <td>id</td>
-        <td>The Video ID of the video to delete the external ID for.</td>
+        <td>The Video ID of the video to remove the external ID for.</td>
     </tr>
     <tr>
         <td>sourcedb</td>
-        <td>The source database of the external ID to delete.<br>
-        For example: imdb, tmdb, etc.</td>
+        <td>The source database of the external ID.</br>
+	        For example: imdb, tmdb, etc.
+        </td>
     </tr>
 </table>
-__Example__: `http://localhost:8888/yamj3/api/video/externalids/delete?id=81&sourcedb=test`
+__Example__: `http://localhost:8888/yamj3/api/video/movie/removeexternalid?id=81&sourcedb=imdb`
 
-GET /api/video/externalids/delete?id={}&sourcedb={}
+PUT /api/video/{type}/removeexternalid?id={}&sourcedb={}
 < 200
 < Content-Type: application/json
 {
     "status": 200,
-    "message": "Successfully deleted 'test' ID for 81 - Captain America: The First Avenger"
+    "message": "Removed external ID for imdb for movie ID 81"
+}
+
+
+Enabled online scan for a video ID.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The type of the video.<br/>
+            Valid types are: movie, series, person
+        </td>
+    </tr>
+    <tr>
+        <td>id</td>
+        <td>The Video ID of the video to enable online scan for.</td>
+    </tr>
+    <tr>
+        <td>sourcedb</td>
+        <td>The source database for online scanning.</br>
+	        For example: imdb, tmdb, etc.
+        </td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/video/movie/enableonlinescan?id=81&sourcedb=tmdb
+
+PUT /api/video/{type}/enableonlinescan?id={}&sourcedb={}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Enabled tmdb scan for movie ID: 81"
+}
+
+
+Disable online scan for a video ID.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The type of the video.<br/>
+            Valid types are: movie, series, person
+        </td>
+    </tr>
+    <tr>
+        <td>id</td>
+        <td>The Video ID of the video to disable online scan for.</td>
+    </tr>
+    <tr>
+        <td>sourcedb</td>
+        <td>The source database for online scanning.</br>
+	        For example: imdb, tmdb, etc.
+        </td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/video/movie/enableonlinescan?id=81&sourcedb=tmdb
+
+PUT /api/video/{type}/disableonlinescan?id={}&sourcedb={}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Disabled tmdb scan for movie ID: 81"
 }
 
 
