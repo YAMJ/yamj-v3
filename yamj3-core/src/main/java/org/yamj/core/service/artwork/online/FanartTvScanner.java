@@ -177,7 +177,7 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
         
         // first try for default language
         for (FTArtwork artwork : ftArtwork) {
-            if (season != null && !StringUtils.equalsIgnoreCase(season, artwork.getSeason())) {
+            if (season != null && !StringUtils.equals(season, artwork.getSeason())) {
                 continue;
             }
             
@@ -191,7 +191,7 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
         // try with English if nothing found with default language
         if (artworkList.isEmpty() && !LANGUAGE_EN.equalsIgnoreCase(defaultLanguage)) {
             for (FTArtwork artwork : ftArtwork) {
-                if (season != null && !StringUtils.equalsIgnoreCase(season, artwork.getSeason())) {
+                if (season != null && !StringUtils.equals(season, artwork.getSeason())) {
                     continue;
                 }
 
@@ -205,7 +205,7 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
 
         // add artwork without language
         for (FTArtwork artwork : ftArtwork) {
-            if (season != null && !StringUtils.equalsIgnoreCase(season, artwork.getSeason())) {
+            if (season != null && !StringUtils.equals(season, artwork.getSeason())) {
                 continue;
             }
 
