@@ -65,6 +65,7 @@ public class CachingConfiguration implements CachingConfigurer {
                 .cache(cacheConfig(CachingNames.API_TVDB, 500, TTL_30_MINUTES))
                 .cache(cacheConfig(CachingNames.API_ALLOCINE, 500, TTL_30_MINUTES))
                 .cache(cacheConfig(CachingNames.API_IMDB, 500, TTL_30_MINUTES))
+                .cache(cacheConfig(CachingNames.API_FANARTTV, 500, TTL_30_MINUTES))
                 .cache(cacheConfig(TMDB_ARTWORK, 100, TTL_30_MINUTES))
                 .cache(cacheConfig(ATTACHMENTS, 300, TTL_10_MINUTES))
                 

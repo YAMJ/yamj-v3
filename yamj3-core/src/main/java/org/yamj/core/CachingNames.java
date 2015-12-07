@@ -27,6 +27,7 @@ public class CachingNames {
     public static final String API_TVDB = "api_tvdb";
     public static final String API_ALLOCINE = "api_allocine";
     public static final String API_IMDB = "api_imdb";
+    public static final String API_FANARTTV = "api_fanarttv";
     
     public static final String DB_GENRE = "db_genre";
     public static final String DB_STUDIO = "db_studio";

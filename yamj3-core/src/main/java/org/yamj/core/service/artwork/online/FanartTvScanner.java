@@ -22,36 +22,51 @@
  */
 package org.yamj.core.service.artwork.online;
 
-import com.omertron.fanarttvapi.FanartTvApi;
-import com.omertron.fanarttvapi.FanartTvException;
-import com.omertron.fanarttvapi.enumeration.FTArtworkType;
-import com.omertron.fanarttvapi.model.FTArtwork;
-import com.omertron.fanarttvapi.model.FTMovie;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.core.config.LocaleService;
+import org.yamj.core.database.model.Season;
+import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
-import org.yamj.core.service.metadata.online.TheMovieDbScanner;
+import org.yamj.core.service.metadata.online.ImdbScanner;
+import org.yamj.core.service.metadata.online.TheTVDbScanner;
+import org.yamj.core.web.apis.FanartTvApiWrapper;
 
-@Service("fanartTvArtworkScanner")
-public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner {
+import com.omertron.fanarttvapi.enumeration.FTArtworkType;
+import com.omertron.fanarttvapi.model.FTArtwork;
+import com.omertron.fanarttvapi.model.FTMovie;
+import com.omertron.fanarttvapi.model.FTSeries;
+
+@Service("fanartTvScanner")
+public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner,
+    ITvShowFanartScanner, ITvShowPosterScanner, ITvShowBannerScanner 
+{
 
     private static final Logger LOG = LoggerFactory.getLogger(FanartTvScanner.class);
-    public static final String SCANNER_ID = "fanarttv";
+    private static final String SCANNER_ID = "fanarttv";
+    private static final String LANGUAGE_EN = "en";
+    private static final String LANGUAGE_NONE = "00";
+    
     @Autowired
     private ArtworkScannerService artworkScannerService;
     @Autowired
-    private FanartTvApi fanarttvApi;
+    private LocaleService localeService;
     @Autowired
-    private TheMovieDbScanner tmdbScanner;
+    private FanartTvApiWrapper fanartTvApiWrapper;
+    @Autowired
+    private ImdbScanner imdbScanner;
+    @Autowired
+    private TheTVDbScanner tvdbScanner;
 
     @PostConstruct
     public void init() {
@@ -68,46 +83,137 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
 
     @Override
     public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
-      String tmdbId = tmdbScanner.getMovieId(videoData);
-        if (StringUtils.isNumeric(tmdbId)) {
-            return getMovieArtworkType(tmdbId, FTArtworkType.MOVIEPOSTER);
-        }
-        return Collections.emptyList();
+        String imdbId = imdbScanner.getMovieId(videoData);
+        return getMovieArtworkType(imdbId, FTArtworkType.MOVIEPOSTER);
     }
 
     @Override
     public List<ArtworkDetailDTO> getFanarts(VideoData videoData) {
-      String tmdbId = tmdbScanner.getMovieId(videoData);
-        if (StringUtils.isNumeric(tmdbId)) {
-            return getMovieArtworkType(tmdbId, FTArtworkType.MOVIEBACKGROUND);
-        }
-        return Collections.emptyList();
+        String imdbId = imdbScanner.getMovieId(videoData);
+        return getMovieArtworkType(imdbId, FTArtworkType.MOVIEBACKGROUND);
     }
-    
+
+    @Override
+    public List<ArtworkDetailDTO> getPosters(Series series) {
+        String tvdbId = tvdbScanner.getSeriesId(series);
+        return getSeriesArtworkType(tvdbId, FTArtworkType.TVPOSTER, -1);
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getFanarts(Series series) {
+        String tvdbId = tvdbScanner.getSeriesId(series);
+        return getSeriesArtworkType(tvdbId, FTArtworkType.SHOWBACKGROUND, -1);
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getBanners(Series series) {
+        String tvdbId = tvdbScanner.getSeriesId(series);
+        return getSeriesArtworkType(tvdbId, FTArtworkType.TVBANNER, -1);
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getPosters(Season season) {
+        String tvdbId = tvdbScanner.getSeriesId(season.getSeries());
+        return getSeriesArtworkType(tvdbId, FTArtworkType.SEASONPOSTER, season.getSeason());
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getFanarts(Season season) {
+        String tvdbId = tvdbScanner.getSeriesId(season.getSeries());
+        return getSeriesArtworkType(tvdbId, FTArtworkType.SHOWBACKGROUND, -1);
+    }
+
+    @Override
+    public List<ArtworkDetailDTO> getBanners(Season season) {
+        String tvdbId = tvdbScanner.getSeriesId(season.getSeries());
+        return getSeriesArtworkType(tvdbId, FTArtworkType.SEASONBANNER, season.getSeason());
+    }
+
     /**
-     * Generic routine to get the artwork type from the FanartTV based on the
-     * passed type
+     * Generic routine to get the artwork type from the FanartTV based on the passed type.
      *
-     * @param id ID of the artwork to get
-     * @param artworkType Type of the artwork to get
-     * @return List of the appropriate artwork
+     * @param id the ID of the movie to get
+     * @param artworkType type of the artwork to get
+     * @return list of the appropriate artwork
      */
     private List<ArtworkDetailDTO> getMovieArtworkType(String id, FTArtworkType artworkType) {
+        if (StringUtils.isBlank(id)) {
+            return null;
+        }
+        
+        FTMovie ftMovie = fanartTvApiWrapper.getFanartMovie(id);
+        if (ftMovie == null) {
+            return null;
+        }
+        
+        final String defaultLanguage = localeService.getLocaleForConfig("fanarttv").getLanguage();
+        return getArtworkList(ftMovie.getArtwork(artworkType), defaultLanguage, -1);
+    }
+
+    /**
+     * Generic routine to get the artwork type from the FanartTV based on the passed type.
+     *
+     * @param id the ID of the movie to get
+     * @param artworkType type of the artwork to get
+     * @return list of the appropriate artwork
+     */
+    private List<ArtworkDetailDTO> getSeriesArtworkType(String id, FTArtworkType artworkType, int seasonNumber) {
+        if (StringUtils.isBlank(id)) {
+            return null;
+        }
+        
+        FTSeries ftSeries = fanartTvApiWrapper.getFanartSeries(id);
+        if (ftSeries == null) {
+            return null;
+        }
+        
+        final String defaultLanguage = localeService.getLocaleForConfig("fanarttv").getLanguage();
+        return getArtworkList(ftSeries.getArtwork(artworkType), defaultLanguage, seasonNumber);
+    }
+    
+    private static List<ArtworkDetailDTO> getArtworkList(List<FTArtwork> ftArtwork, String defaultLanguage, int seasonNumber) {
         List<ArtworkDetailDTO> artworkList = new ArrayList<>();
-
-        try {
-            FTMovie ftm = fanarttvApi.getMovieArtwork(id);
-
-            for (FTArtwork artwork : ftm.getArtwork(artworkType)) {
+        String season = (seasonNumber < 0 ? null : Integer.toString(seasonNumber));
+        
+        // first try for default language
+        for (FTArtwork artwork : ftArtwork) {
+            if (season != null && !StringUtils.equalsIgnoreCase(season, artwork.getSeason())) {
+                continue;
+            }
+            
+            if (defaultLanguage.equalsIgnoreCase(artwork.getLanguage())) {
                 ArtworkDetailDTO aDto = new ArtworkDetailDTO(SCANNER_ID, artwork.getUrl());
                 aDto.setLanguageCode(artwork.getLanguage());
                 artworkList.add(aDto);
             }
-        } catch (FanartTvException ex) {
-            LOG.error("Failed to get {} artwork from FanartTV for id {}: {}", artworkType, id, ex.getMessage(), ex);
-            LOG.trace("FanartTV scanner error", ex);
         }
-        
+
+        // try with English if nothing found with default language
+        if (artworkList.isEmpty() && !LANGUAGE_EN.equalsIgnoreCase(defaultLanguage)) {
+            for (FTArtwork artwork : ftArtwork) {
+                if (season != null && !StringUtils.equalsIgnoreCase(season, artwork.getSeason())) {
+                    continue;
+                }
+
+                if (LANGUAGE_EN.equalsIgnoreCase(artwork.getLanguage())) {
+                    ArtworkDetailDTO aDto = new ArtworkDetailDTO(SCANNER_ID, artwork.getUrl());
+                    aDto.setLanguageCode(artwork.getLanguage());
+                    artworkList.add(aDto);
+                }
+            }
+        }
+
+        // add artwork without language
+        for (FTArtwork artwork : ftArtwork) {
+            if (season != null && !StringUtils.equalsIgnoreCase(season, artwork.getSeason())) {
+                continue;
+            }
+
+            if (LANGUAGE_NONE.equalsIgnoreCase(artwork.getLanguage())) {
+                artworkList.add(new ArtworkDetailDTO(SCANNER_ID, artwork.getUrl()));
+            }
+        }
+
         return artworkList;
     }
 }
