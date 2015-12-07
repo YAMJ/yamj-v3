@@ -104,7 +104,7 @@ public class VideoController {
         ApiStatus apiStatus;
         if (id <= 0L) {
             apiStatus =  new ApiStatus(410, "Not a valid ID");            
-        } else if (MetaDataType.MOVIE == metaDataType || MetaDataType.SERIES == metaDataType || MetaDataType.PERSON == metaDataType) {
+        } else if (MetaDataType.MOVIE == metaDataType || MetaDataType.SERIES == metaDataType) {
             LOG.info("Enable {} online scan for {} with ID '{}'", sourcedb, metaDataType.name().toLowerCase(), id);
 
             apiStatus = jsonApiStorageService.updateOnlineScan(metaDataType, id, sourcedb, false);
@@ -129,7 +129,7 @@ public class VideoController {
         ApiStatus apiStatus;
         if (id <= 0L) {
             apiStatus =  new ApiStatus(410, "Not a valid ID");            
-        } else if (MetaDataType.MOVIE == metaDataType || MetaDataType.SERIES == metaDataType || MetaDataType.PERSON == metaDataType) {
+        } else if (MetaDataType.MOVIE == metaDataType || MetaDataType.SERIES == metaDataType) {
             LOG.info("Disable {} online scan for {} with ID '{}'", sourcedb, metaDataType.name().toLowerCase(), id);
 
             apiStatus = jsonApiStorageService.updateOnlineScan(metaDataType, id, sourcedb, true);

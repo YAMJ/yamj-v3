@@ -40,7 +40,7 @@ import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.scheduling.ScanningScheduler;
 
 @RestController
-@RequestMapping(value = "/api/person/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api/person/**", produces = "application/json; charset=utf-8")
 public class PersonController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PersonController.class);
@@ -49,7 +49,7 @@ public class PersonController {
     @Autowired
     private ScanningScheduler scanningScheduler;
 
-    @RequestMapping("/{id}")
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ApiWrapperSingle<ApiPersonDTO> getPersonById(@ModelAttribute("options") OptionsId options) {
         ApiWrapperSingle<ApiPersonDTO> wrapper = new ApiWrapperSingle<>();
         if (options.getId() > 0) {
@@ -64,22 +64,22 @@ public class PersonController {
         return wrapper;
     }
 
-    @RequestMapping("/movie")
+    @RequestMapping(value = "/movie", method = RequestMethod.GET)
     public ApiWrapperList<ApiPersonDTO> getPersonListByMovie(@ModelAttribute("options") OptionsId options) {
         return getPersonListByVideo(MetaDataType.MOVIE, options);
     }
 
-    @RequestMapping("/series")
+    @RequestMapping(value = "/series", method = RequestMethod.GET)
     public ApiWrapperList<ApiPersonDTO> getPersonListBySeries(@ModelAttribute("options") OptionsId options) {
         return getPersonListByVideo(MetaDataType.SERIES, options);
     }
 
-    @RequestMapping("/season")
+    @RequestMapping(value = "/season", method = RequestMethod.GET)
     public ApiWrapperList<ApiPersonDTO> getPersonListBySeason(@ModelAttribute("options") OptionsId options) {
         return getPersonListByVideo(MetaDataType.SEASON, options);
     }
 
-    @RequestMapping("/episode")
+    @RequestMapping(value = "/episode", method = RequestMethod.GET)
     public ApiWrapperList<ApiPersonDTO> getPersonListByEpisode(@ModelAttribute("options") OptionsId options) {
         return getPersonListByVideo(MetaDataType.EPISODE, options);
     }
@@ -102,7 +102,7 @@ public class PersonController {
     /**
      * Add or update an external id of a series.
      */
-    @RequestMapping("/updateexternalid")
+    @RequestMapping(value = "/updateexternalid", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus updateExternalId(
             @RequestParam(required = true) Long id,
             @RequestParam(required = true) String sourcedb,
@@ -118,7 +118,7 @@ public class PersonController {
     /**
      * Add or update an external id of a series.
      */
-    @RequestMapping("/removeexternalid")
+    @RequestMapping(value = "/removeexternalid", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus removeExternalId(
             @RequestParam(required = true) Long id,
             @RequestParam(required = true) String sourcedb
@@ -132,7 +132,7 @@ public class PersonController {
     /**
      * Enable online scan for one person.
      */
-    @RequestMapping("/enableonlinescan")
+    @RequestMapping(value = "/enableonlinescan", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus enableOnlineScan(
             @RequestParam(required = true) Long id,
             @RequestParam(required = true) String sourcedb) 
@@ -150,7 +150,7 @@ public class PersonController {
     /**
      * Disable online scan for one person.
      */
-    @RequestMapping("/disableonlinescan")
+    @RequestMapping(value = "/disableonlinescan", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus disableOnlineScan(
             @RequestParam(required = true) Long id,
             @RequestParam(required = true) String sourcedb) 
@@ -168,7 +168,7 @@ public class PersonController {
     /**
      * Handle duplicate of a person.
      */
-    @RequestMapping("/duplicate")
+    @RequestMapping(value = "/duplicate", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus duplicate(
             @RequestParam(required = true) Long id,
             @RequestParam(required = true) Long doublet) 

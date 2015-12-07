@@ -530,7 +530,7 @@ GET /api/index/jobs
 }
 
 
-Get an alphabetical list of the first characters in a type list
+Get an alphabetical list of the first characters in a type list.
 ***
 **Optional Parameters**
 
@@ -585,7 +585,7 @@ GET /api/alphabetical/list
 
 --
 Video Methods
-These methods get information on the videos in the database
+These methods get information on the videos in the database.
 --
 
 Retrieve information for a video (movie/series/season).
@@ -738,7 +738,7 @@ GET /api/video/{type}/{id}
 
 Retrieve information on a specific series.
 
-Will get all the seasons associated with the series
+Will get all the seasons associated with the series.
 
 ***
 **Required Parameters**
@@ -972,7 +972,7 @@ GET /api/video/seriesinfo
    ]
 }
 
-Retrieve information on the TV episodes
+Retrieve information on the TV episodes.
 ***
 **Optional Parameters**
 
@@ -1212,7 +1212,7 @@ Enabled online scan for a video ID.
     <tr>
         <td>type</td>
         <td>The type of the video.<br/>
-            Valid types are: movie, series, person
+            Valid types are: movie, series
         </td>
     </tr>
     <tr>
@@ -1247,7 +1247,7 @@ Disable online scan for a video ID.
     <tr>
         <td>type</td>
         <td>The type of the video.<br/>
-            Valid types are: movie, series, person
+            Valid types are: movie, series
         </td>
     </tr>
     <tr>
@@ -1261,7 +1261,7 @@ Disable online scan for a video ID.
         </td>
     </tr>
 </table>
-__Example__: `http://localhost:8888/yamj3/api/video/movie/enableonlinescan?id=81&sourcedb=tmdb
+__Example__: `http://localhost:8888/yamj3/api/video/movie/disableonlinescan?id=81&sourcedb=tmdb
 
 PUT /api/video/{type}/disableonlinescan?id={}&sourcedb={}
 < 200
@@ -1272,7 +1272,7 @@ PUT /api/video/{type}/disableonlinescan?id={}&sourcedb={}
 }
 
 
-Get a list of present years. 
+Get a list of present years.
 ***
 **Optional Parameters**
 
@@ -1326,7 +1326,7 @@ GET /api/video/years/list
 }
 
 
-Get a list of present decades. 
+Get a list of present decades.
 ***
 **Optional Parameters**
 
@@ -1381,7 +1381,7 @@ GET /api/video/decades/list
 Artwork
 --
 
-Get information on the artwork
+Get information on the artwork.
 ***
 **Optional Parameters**
 
@@ -1421,7 +1421,7 @@ GET /api/artwork/{id}
    }
 }
 
-Get a list of artwork
+Get a list of artwork.
 ***
 **Optional Parameters**
 
@@ -1522,7 +1522,7 @@ GET /api/artwork/list
 }
 
 
-Ignore a located artwork
+Ignore a located artwork.
 ***
 **Required Parameters**
 
@@ -1544,7 +1544,7 @@ PUT /api/artwork/located/ignore/{id}
 }
 
 
-Add an image to a defined artwork for a choose video type
+Add an image to a defined artwork for a choosen video type.
 ***
 **Required Parameters**
 
@@ -1565,7 +1565,7 @@ Add an image to a defined artwork for a choose video type
     </tr>
     <tr>
         <td>image</td>
-        <td>The artwork images as multipartz file.</td>
+        <td>The artwork image as multipart image file.</td>
     </tr>
 </table>
 
@@ -1582,8 +1582,8 @@ POST /add/{artwork}/{type}/{id}
 Person
 --
 
-Get information on the person
-
+Get information on the person.
+***
 **Required Parameters**
 
 <table width="100%">
@@ -1603,7 +1603,7 @@ Get information on the person
     <tr>
         <td>dataitems</td>
         <td>This is a list of additional data items to append to add to the results.<br>
-        Valid options are: artwork, biography</td>
+        Valid options are: artwork, biography, externalid, filmography_inside, filmography_scanned</td>
     </tr>
 </table>
 __Example__: `http://localhost:8888/yamj3/api/person/1`
@@ -1642,15 +1642,20 @@ GET /api/person
 }
 
 
-Get a list of cast and crew for a movie
+Get a list of cast and crew for a video.
+***
 
 **Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
     <tr>
+        <td>type</td>
+        <td>The video type: movies, series, season, episode</td>
+    </tr>
+    <tr>
         <td>id</td>
-        <td>This is the ID of the movie to get the list for.</td>
+        <td>The ID of the choosen type; i.e. the movie ID.</td>
     </tr>
 </table>
 
@@ -1666,7 +1671,8 @@ Get a list of cast and crew for a movie
     <tr>
         <td>dataitems</td>
         <td>Comma separated list of additional data items to add to the results.<br>
-            Valid items are: artwork, biography.</td>
+            Valid items are: artwork, biography.
+        </td>
     </tr>
     <tr>
         <td>PAGING</td>
@@ -1683,7 +1689,7 @@ Get a list of cast and crew for a movie
 </table>
 __Example__: `http://localhost:8888/yamj3/api/person/movie?id=1&job=actor&max=2`
 
-GET /api/person/movie
+GET /api/person/{type}?id={}
 < 200
 < Content-Type: application/json
 {
@@ -1741,296 +1747,152 @@ GET /api/person/movie
 }
 
 
-Get a list of cast and crew for a series
-
+Add or Update an external ID for a person
+***
 **Required Parameters**
+
 <table width="100%">
     <col width="20%">
     <col width="80%">
     <tr>
         <td>id</td>
-        <td>This is the ID of the series to get the list for.</td>
+        <td>The ID of the person to add/update the external ID for.</td>
+    </tr>
+    <tr>
+        <td>sourcedb</td>
+        <td>The source database of the external ID.</br>
+	        For example: imdb, tmdb, etc.
+        </td>
+    </tr>
+    <tr>
+        <td>externalid</td>
+        <td>The External ID to add/update to.<br/>
+            This should be the full ID from the source site, e.g. tt123456.
+        </td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/person/updateexternalid?id=12&sourcedb=imdb&externalid=nm123456`
 
-**Optional Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>job</td>
-        <td>Comma separated list of jobs to restrict the list to.</td>
-    </tr>
-    <tr>
-        <td>dataitems</td>
-        <td>Comma separated list of additional data items to add to the results.<br>
-            Valid items are: artwork, biography.</td>
-    </tr>
-    <tr>
-        <td>PAGING</td>
-        <td>See above for the explanation on paging parameters</td>
-    </tr>
-    <tr>
-        <td>SEARCHING</td>
-        <td>See above for the explanation on searching parameters</td>
-    </tr>
-    <tr>
-        <td>SORTING</td>
-        <td>See above for the explanation on sorting parameters</td>
-    </tr>
-</table>
-__Example__: `http://localhost:8888/yamj3/api/person/series?id=2&job=actor&max=2`
-
-GET /api/person/series
+PUT /api/person/updateexternalid?id={}&sourcedb={}&externalid={}
 < 200
 < Content-Type: application/json
 {
-   "count":2,
-   "totalCount":318,
-   "queryDuration":"681ms",
-   "queryTime":"2013-09-10 15:00:51",
-   "status":{
-      "status":200,
-      "message":"OK"
-   },
-   "options":{
-      "start":-1,
-      "max":2,
-      "sortby":"",
-      "sortdir":"ASC",
-      "field":"",
-      "search":"",
-      "mode":"",
-      "dataitems":[],
-      "id":2,
-      "job":[
-         "actor"
-      ]
-   },
-   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
-   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
-   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
-   "results":[
-      {
-         "id":143,
-         "name":"Natalie Dormer",
-         "biography":"Natalie Dormer (born 11 February 1982 in Reading, Berkshire, England, UK) is an English actress. She is best known for her roles in Casanova as Victoria and as the ill-fated Tudor queen, Anne Boleyn in the Showtime series The Tudors. She is also a descendant of the family of Jane Dormer.",
-         "birthDay":"1982-02-11",
-         "birthPlace":"Reading, UK",
-         "birthName":null,
-         "deathDay":null,
-         "job":"ACTOR",
-         "role":"Margaery Tyrell",
-         "artwork":[]
-      },
-      {
-         "id":144,
-         "name":"Emilia Clarke",
-         "biography":"Emilia Clarke (born 1987/1988) is an English actress. She is best known for the role of Daenerys Targaryen in the HBO cable television medieval-fantasy series Game of Thrones.",
-         "birthDay":null,
-         "birthPlace":"London, UK",
-         "birthName":null,
-         "deathDay":null,
-         "job":"ACTOR",
-         "role":"Daenerys Targaryen",
-         "artwork":[]
-      }
-   ]
+    "status": 200,
+    "message": "Updated external ID for imdb for person ID 12"
 }
 
-Get a list of cast and crew for a season
 
+Remove an external ID for a person ID.
+***
 **Required Parameters**
+
 <table width="100%">
     <col width="20%">
     <col width="80%">
     <tr>
         <td>id</td>
-        <td>This is the ID of the season to get the list for.</td>
+        <td>The ID of the person to remove the external ID for.</td>
+    </tr>
+    <tr>
+        <td>sourcedb</td>
+        <td>The source database of the external ID.</br>
+	        For example: imdb, tmdb, etc.
+        </td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/person/removeexternalid?id=12&sourcedb=imdb`
 
-**Optional Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>job</td>
-        <td>Comma separated list of jobs to restrict the list to.</td>
-    </tr>
-    <tr>
-        <td>dataitems</td>
-        <td>Comma separated list of additional data items to add to the results.<br>
-            Valid items are: artwork, biography.</td>
-    </tr>
-    <tr>
-        <td>PAGING</td>
-        <td>See above for the explanation on paging parameters</td>
-    </tr>
-    <tr>
-        <td>SEARCHING</td>
-        <td>See above for the explanation on searching parameters</td>
-    </tr>
-    <tr>
-        <td>SORTING</td>
-        <td>See above for the explanation on sorting parameters</td>
-    </tr>
-</table>
-__Example__: `http://localhost:8888/yamj3/api/person/season?id=3&job=actor&max=2&start=3`
-
-GET /api/person/season
+PUT /api/person/removeexternalid?id={}&sourcedb={}
 < 200
 < Content-Type: application/json
 {
-   "count":2,
-   "totalCount":106,
-   "queryDuration":"544ms",
-   "queryTime":"2013-09-10 15:02:28",
-   "status":{
-      "status":200,
-      "message":"OK"
-   },
-   "options":{
-      "start":3,
-      "max":2,
-      "sortby":"",
-      "sortdir":"ASC",
-      "field":"",
-      "search":"",
-      "mode":"",
-      "dataitems":[],
-      "id":3,
-      "job":[
-         "actor"
-      ]
-   },
-   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
-   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
-   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
-   "results":[
-      {
-         "id":146,
-         "name":"Lena Headey",
-         "biography":"  Lena Headey (born 3 October 1973) is an English actress known for playing Sarah Connor on Fox's Terminator: The Sarah Connor Chronicles, as well as appearing in such films as The Remains of the Day, Possession, Imagine Me and You, The Brothers Grimm, The Broken, 300 and The Red Baron.",
-         "birthDay":"1973-10-03",
-         "birthPlace":"Bermuda",
-         "birthName":null,
-         "deathDay":null,
-         "job":"ACTOR",
-         "role":"Cersei Lannister",
-         "artwork":[]
-      },
-      {
-         "id":147,
-         "name":"Sean Bean",
-         "biography":"Shaun Mark \"Sean\" Bean (born 17 April 1959) is an English film and stage actor. Bean is best known for starring roles in the films Lord of the Rings: The Fellowship of the Ring, GoldenEye, Patriot Games, Troy, National Treasure and Silent Hill, as well as the television series Sharpe. Bean has also acted in a number of television productions, most recent being HBO's Game of Thrones, as well as performing voice work for computer games and television adverts.",
-         "birthDay":"1959-04-17",
-         "birthPlace":"Sheffield, South Yorkshire, England, UK",
-         "birthName":null,
-         "deathDay":null,
-         "job":"ACTOR",
-         "role":"Eddard \"Ned\" Stark",
-         "artwork":[]
-      }
-   ]
+    "status": 200,
+    "message": "Removed external ID for imdb for person ID 12"
 }
 
-Get a list of cast and crew for an episode
 
+Enable online scan for a person ID.
+***
 **Required Parameters**
+
 <table width="100%">
     <col width="20%">
     <col width="80%">
     <tr>
         <td>id</td>
-        <td>This is the ID of the episode to get the list for.</td>
+        <td>The ID of the person to enable online scan for.</td>
+    </tr>
+    <tr>
+        <td>sourcedb</td>
+        <td>The source database for online scanning.</br>
+	        For example: imdb, tmdb, etc.
+        </td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/person/enableonlinescan?id=12&sourcedb=tmdb
 
-**Optional Parameters**
+PUT /api/person/enableonlinescan?id={}&sourcedb={}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Enabled tmdb scan for person ID: 12"
+}
+
+
+Disable online scan for a person ID.
+***
+**Required Parameters**
 
 <table width="100%">
     <col width="20%">
     <col width="80%">
     <tr>
-        <td>job</td>
-        <td>Comma separated list of jobs to restrict the list to.</td>
+        <td>id</td>
+        <td>The Video ID of the person to disable online scan for.</td>
     </tr>
     <tr>
-        <td>dataitems</td>
-        <td>Comma separated list of additional data items to add to the results.<br>
-            Valid items are: artwork, biography.</td>
-    </tr>
-    <tr>
-        <td>PAGING</td>
-        <td>See above for the explanation on paging parameters</td>
-    </tr>
-    <tr>
-        <td>SEARCHING</td>
-        <td>See above for the explanation on searching parameters</td>
-    </tr>
-    <tr>
-        <td>SORTING</td>
-        <td>See above for the explanation on sorting parameters</td>
+        <td>sourcedb</td>
+        <td>The source database for online scanning.</br>
+	        For example: imdb, tmdb, etc.
+        </td>
     </tr>
 </table>
-__Example__: `http://localhost:8888/yamj3/api/person/episode?id=1&job=actor&max=2`
+__Example__: `http://localhost:8888/yamj3/api/person/disableonlinescan?id=12&sourcedb=tmdb
 
-GET /api/person/episode
+PUT /api/person/disableonlinescan?id={}&sourcedb={}
 < 200
 < Content-Type: application/json
 {
-   "count":2,
-   "totalCount":35,
-   "queryDuration":"402ms",
-   "queryTime":"2013-09-10 15:04:04",
-   "status":{
-      "status":200,
-      "message":"OK"
-   },
-   "options":{
-      "start":-1,
-      "max":2,
-      "sortby":"",
-      "sortdir":"ASC",
-      "field":"",
-      "search":"",
-      "mode":"",
-      "dataitems":[],
-      "id":22,
-      "job":[]
-   },
-   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
-   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
-   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
-   "results":[
-      {
-         "id":233,
-         "name":"Hayden Panettiere",
-         "biography":"Hayden Leslie Panettiere (born August 21, 1989) is an American actress and singer. She came to professional prominence at the age of 10 with her portrayal of Sheryl Yoast in Disney's Remember the Titans, although for five years before that, Panettiere had held roles in two soap operas. She portrayed Sarah Roberts on One Life to Live (1994–1997), and Lizzie Spaulding on Guiding Light (1996–2000). Panettiere reached a wider audience with her starring role as cheerleader Claire Bennet on the NBC television series Heroes.",
-         "birthDay":"1989-08-21",
-         "birthPlace":"Palisades, New York, USA",
-         "birthName":null,
-         "deathDay":null,
-         "job":"ACTOR",
-         "role":"Claire Bennet",
-         "artwork":[]
-      },
-      {
-         "id":234,
-         "name":"Milo Ventimiglia",
-         "biography":"Milo Anthony Ventimiglia (born July 8, 1977) is an American television actor best known for his role of Peter Petrelli on the TV series Heroes. Ventimiglia was first noticed by fans during his three year stint on the WB series Gilmore Girls, playing Rory Gilmore's boyfriend Jess Mariano from 2001 until his final guest appearance in 2006. After his own WB series The Bedford Diaries, a recurring role as Meg Pryor's love interest on NBC's American Dreams, and playing Rocky Balboa's son in the sixth and final installment of the Rocky series, Rocky Balboa, Ventimiglia's big break came in 2006 when he received the part of nurse-turned-superhero Peter Petrelli for four seasons on NBC's Heroes.",
-         "birthDay":"1977-07-08",
-         "birthPlace":"Anaheim, California, USA",
-         "birthName":null,
-         "deathDay":null,
-         "job":"ACTOR",
-         "role":"Peter Petrelli",
-         "artwork":[]
-      }
-   ]
+    "status": 200,
+    "message": "Disabled tmdb scan for person ID: 12"
+}
+
+
+Mark a person as duplicate of another person.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the original person.</td>
+    </tr>
+    <tr>
+        <td>doublet</td>
+        <td>The ID of the duplicate person.</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/person/duplicate?id=1&doublet=2
+
+PUT /api/person/duplicate?id={}&doublet={}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Marked 2 as duplicate of 1"
 }
 
 
