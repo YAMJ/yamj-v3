@@ -1226,7 +1226,7 @@ Enabled online scan for a video ID.
         </td>
     </tr>
 </table>
-__Example__: `http://localhost:8888/yamj3/api/video/movie/enableonlinescan?id=81&sourcedb=tmdb
+__Example__: `http://localhost:8888/yamj3/api/video/movie/enableonlinescan?id=81&sourcedb=tmdb`
 
 PUT /api/video/{type}/enableonlinescan?id={}&sourcedb={}
 < 200
@@ -1261,7 +1261,7 @@ Disable online scan for a video ID.
         </td>
     </tr>
 </table>
-__Example__: `http://localhost:8888/yamj3/api/video/movie/disableonlinescan?id=81&sourcedb=tmdb
+__Example__: `http://localhost:8888/yamj3/api/video/movie/disableonlinescan?id=81&sourcedb=tmdb`
 
 PUT /api/video/{type}/disableonlinescan?id={}&sourcedb={}
 < 200
@@ -1608,7 +1608,7 @@ Get information on the person.
 </table>
 __Example__: `http://localhost:8888/yamj3/api/person/1`
 
-GET /api/person
+GET /api/person/{id}
 < 200
 < Content-Type: application/json
 {
@@ -1747,7 +1747,7 @@ GET /api/person/{type}?id={}
 }
 
 
-Add or Update an external ID for a person
+Add or update an external ID for a person ID.
 ***
 **Required Parameters**
 
@@ -1829,7 +1829,7 @@ Enable online scan for a person ID.
         </td>
     </tr>
 </table>
-__Example__: `http://localhost:8888/yamj3/api/person/enableonlinescan?id=12&sourcedb=tmdb
+__Example__: `http://localhost:8888/yamj3/api/person/enableonlinescan?id=12&sourcedb=tmdb`
 
 PUT /api/person/enableonlinescan?id={}&sourcedb={}
 < 200
@@ -1858,7 +1858,7 @@ Disable online scan for a person ID.
         </td>
     </tr>
 </table>
-__Example__: `http://localhost:8888/yamj3/api/person/disableonlinescan?id=12&sourcedb=tmdb
+__Example__: `http://localhost:8888/yamj3/api/person/disableonlinescan?id=12&sourcedb=tmdb`
 
 PUT /api/person/disableonlinescan?id={}&sourcedb={}
 < 200
@@ -1885,7 +1885,7 @@ Mark a person as duplicate of another person.
         <td>The ID of the duplicate person.</td>
     </tr>
 </table>
-__Example__: `http://localhost:8888/yamj3/api/person/duplicate?id=1&doublet=2
+__Example__: `http://localhost:8888/yamj3/api/person/duplicate?id=1&doublet=2`
 
 PUT /api/person/duplicate?id={}&doublet={}
 < 200
@@ -1900,7 +1900,8 @@ PUT /api/person/duplicate?id={}&doublet={}
 Watched
 Commands to mark videos as watched and unwatched
 --
-Mark a movie as watched.
+
+Mark a video as watched.
 ***
 **Required Parameters**
 
@@ -1908,191 +1909,158 @@ Mark a movie as watched.
     <col width="20%">
     <col width="80%">
     <tr>
+        <td>type</td>
+        <td>The video type: movies, series, season, episode<br/>
+            For a season or series all episodes will be markes as watched.
+        </td>
+    </tr>
+    <tr>
         <td>id</td>
-        <td>The ID of the movie to mark as watched</td>
+        <td>The ID of the video to mark as watched</td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/watched/movie/7`
 
-
-GET /api/watched/movie/{id}
+PUT /api/watched/{type}/{id}
 < 200
 < Content-Type: application/json
 {
     "status": 200,
-    "message": "Watched status for MOVIE ID: 7-Avengers Assemble changed to watched"
+    "message": "Set movie id 7 to watched"
 }
 
-Mark a movie as unwatched.
+Mark a video as unwatched.
 ***
 **Required Parameters**
 
 <table width="100%">
     <col width="20%">
     <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The video type: movies, series, season, episode<br/>
+            For a season or series all episodes will be markes as unwatched.
+        </td>
+    </tr>
     <tr>
         <td>id</td>
         <td>The ID of the movie to mark as unwatched</td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/unwatched/movie/7`
 
-
-GET /api/unwatched/movie/{id}
+PUT /api/unwatched/{type}/{id}
 < 200
 < Content-Type: application/json
 {
     "status": 200,
-    "message": "Watched status for MOVIE ID: 7-Avengers Assemble changed to unwatched"
+    "message": "Set movie id 7 to unwatched"
 }
-
-
-Mark a series as watched.
-
-<i>Note</i>: All episodes in the series will be marked as watched.
-***
-**Required Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>id</td>
-        <td>The ID of the series to mark as watched</td>
-    </tr>
-</table>
-
-
-GET /api/watched/series/{id}
-< 200
-< Content-Type: application/json
-{
-    "status": 200,
-    "message": "Watched status for SERIES ID: 1 set to 'watched'. 1 were set to watched, 5 were already watched"
-}
-
-Mark a series as unwatched.
-
-<i>Note</i>: All episodes in the series will be marked as unwatched.
-***
-**Required Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>id</td>
-        <td>The ID of the series to mark as unwatched</td>
-    </tr>
-</table>
-
-
-GET /api/unwatched/series/{id}
-< 200
-< Content-Type: application/json
-{
-    "status": 200,
-    "message": "Watched status for SERIES ID: 1 set to 'unwatched'. 6 were set to unwatched, 0 were already unwatched"
-}
-
-Mark a season as watched.
-
-<i>Note</i>: All episodes in the season will be marked as watched.
-***
-**Required Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>id</td>
-        <td>The ID of the season to mark as watched</td>
-    </tr>
-</table>
-
-
-GET /api/watched/season/{id}
-< 200
-< Content-Type: application/json
-{
-    "status": 200,
-    "message": "Watched status for SEASON ID: 1 set to watched. 3 were set to watched, 3 were already watched"
-}
-
-Mark a season as unwatched.
-
-<i>Note</i>: All episodes in the season will be marked as unwatched.
-***
-**Required Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>id</td>
-        <td>The ID of the season to mark as unwatched</td>
-    </tr>
-</table>
-
-
-GET /api/unwatched/season/{id}
-< 200
-< Content-Type: application/json
-{
-    "status": 200,
-    "message": "Watched status for SEASON ID: 1 set to unwatched. 6 were set to unwatched, 0 were already unwatched"
-}
-
-Mark a episode as watched.
-***
-**Required Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>id</td>
-        <td>The ID of the episode to mark as watched</td>
-    </tr>
-</table>
-
-
-GET /api/watched/episode/{id}
-< 200
-< Content-Type: application/json
-{
-    "status": 200,
-    "message": "Watched status for EPISODE ID: 1-Chuck Versus the Intersect changed to watched"
-}
-
-Mark a episode as unwatched.
-***
-**Required Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>id</td>
-        <td>The ID of the episode to mark as unwatched</td>
-    </tr>
-</table>
-
-
-GET /api/unwatched/episode/{id}
-< 200
-< Content-Type: application/json
-{
-    "status": 200,
-    "message": "Watched status for EPISODE ID: 1-Chuck Versus the Intersect changed to unwatched"
-}
-
 
 
 --
-Other
+Rescan
 --
 
+Rescan a meta dataobject.
+***
+**Required Parameters**
 
-Get information on a single genre
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The metadata type: movies, series, season, episode, person, filmography</td>
+    </tr>
+    <tr>
+        <td>id</td>
+        <td>The ID of the metadata to rescan.</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/rescan/episode/12`
+
+PUT /api/rescan/{type}/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Rescan episode for ID: 12"
+}
+
+
+Rescan artwork of a metadata object.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The metadata type: movies, series, season, episode, person, boxset</td>
+    </tr>
+    <tr>
+        <td>id</td>
+        <td>The ID of the metadata to rescan artwork for.</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/rescan/episode/artwork/12`
+
+PUT /api/rescan/{type}/artwork/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Rescan episode artwork for ID: 12"
+}
+
+
+Rescan trailer of a metadata object.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The metadata type: movies, series</td>
+    </tr>
+    <tr>
+        <td>id</td>
+        <td>The ID of the metadata to rescan trailer for.</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/rescan/series/trailer/19`
+
+PUT /api/rescan/{type}/trailer/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Rescan series trailer for ID: 19"
+}
+
+
+Rescan all metadata and artworks.
+***
+__Example__: `http://localhost:8888/yamj3/api/rescan/all`
+
+PUT /api/rescan/all
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": ""Rescan forced for all meta data objects"
+}
+
+
+--
+Trailer
+--
+
+Delete a trailer.
 ***
 **Required Parameters**
 
@@ -2101,13 +2069,82 @@ Get information on a single genre
     <col width="80%">
     <tr>
         <td>id</td>
-        <td>The ID of the genre to get</td>
-    </tr>
-    <tr>
-        <td>name</td>
-        <td>The name of the genre to get</td>
+        <td>The ID of the trailer.</td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/trailer/delete/{87}`
+
+PUT /api/trailer/delete/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Set status DELETED for trailer ID: 87"
+}
+
+Ignore a trailer.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the trailer.</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/trailer/ignore/{87}`
+
+PUT /api/trailer/ignore/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Set status IGNORED for trailer ID: 87"
+}
+
+Download a trailer.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>The ID of the trailer.</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/trailer/download/{87}`
+
+PUT /api/trailer/download/{id}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Set status UPDATED for trailer ID: 87"
+}
+
+
+--
+Genres
+--
+
+
+Get information on a single genre.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id_or_name</td>
+        <td>The ID or name of the genre to get</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/genre/1`
 
 GET /api/genre/{id_or_name}
 < 200
@@ -2129,7 +2166,7 @@ GET /api/genre/{id_or_name}
 }
 
 
-Get information on the genres associated with a filename
+Get information on the genres associated with a filename.
 ***
 **Required Parameters**
 
@@ -2141,7 +2178,6 @@ Get information on the genres associated with a filename
         <td>The filename to get the list of genres for</td>
     </tr>
 </table>
-
 __Example__: `http://localhost:8888/yamj3/api/genre?filename=Avatar%20(2009).avi`
 
 GET /api/genre
@@ -2180,13 +2216,30 @@ GET /api/genre
 }
 
 
-Get information genres
+Get information genres.
 ***
 **Optional Parameters**
-
 <table width="100%">
     <col width="20%">
     <col width="80%">
+    <tr>
+        <td>used</td>
+        <td>Set to false to get all genres instead just used genres.<br/>
+            Default value: true
+        </td>
+    </tr>
+    <tr>
+        <td>full</td>
+        <td>Set to get genre target informations also.<br/>
+            Default value: false
+        </td>
+    </tr>
+    <tr>
+        <td>type</td>
+        <td>The video type to get genres for.<br/>
+            May be just movie or series
+        </td>
+    </tr>
     <tr>
         <td>SEARCHING</td>
         <td>See above for the explanation on searching parameters</td>
@@ -2196,8 +2249,9 @@ Get information genres
         <td>See above for the explanation on sorting parameters</td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/genres/list`
 
-GET /api/genres
+GET /api/genres/list
 < 200
 < Content-Type: application/json
 {
@@ -2217,6 +2271,10 @@ GET /api/genres
    },
    "results":[
       {
+         "id":9,
+         "name":"Adventure"
+      },
+      {
          "id":2,
          "name":"Comedy"
       },
@@ -2227,74 +2285,69 @@ GET /api/genres
       {
          "id":5,
          "name":"Holiday"
-      },
-      {
-         "id":9,
-         "name":"Adventure"
       }
    ]
 }
 
 
-Get information on a single certification
-***
-**Required Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>id</td>
-        <td>The ID of the certificate to get</td>
-    </tr>
-    <tr>
-        <td>name</td>
-        <td>The name of the certificate to get</td>
-    </tr>
-</table>
-
-GET /api/certificate/{id_or_name}
-< 200
-< Content-Type: application/json
-{}
-
-
-Get information certifications
+Add a genre withe a defined genre target.
 ***
 **Optional Parameters**
-
 <table width="100%">
     <col width="20%">
     <col width="80%">
     <tr>
-        <td>search</td>
-        <td>The search term to use</td>
+        <td>name</td>
+        <td>The name of the genre.</td>
     </tr>
     <tr>
-        <td>match</td>
-        <td>The match method. Can be one of `any` (default), `start`, `end` or `exact`</td>
-    </tr>
-    <tr>
-        <td>sort</td>
-        <td>Sort the returned results. Can be one of `asc` or `desc`</td>
-    </tr>
-    <tr>
-        <td>start</td>
-        <td>Where to start the list from</td>
-    </tr>
-    <tr>
-        <td>max</td>
-        <td>The maximum number of results to return</td>
+        <td>target</td>
+        <td>The target of the genre; how it's displayed in the genres list of videos.</td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/genres/add?name=Sci-Fi&target=Science-Fiction`
 
-GET /api/certifications
+POST /api/genres/add?name={}&target={}
 < 200
 < Content-Type: application/json
-{}
+{
+    "status": 200,
+    "message": "Successfully added genre 'Sci-Fi' with target 'Science-Fiction'"
+}
 
 
-Get information on a single studio
+Update a genre withe a defined genre target.
+***
+**Optional Parameters**
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id_or_name</td>
+        <td>The ID or name of the genre.</td>
+    </tr>
+    <tr>
+        <td>target</td>
+        <td>The target of the genre.</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/genres/add?name=Sci-Fi&target=Science+Fiction`
+
+POST /api/genres/update?id_or_name={}&target={}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Successfully updated genre 'Sci-Fi' with target 'Science Fiction'"
+}
+
+
+--
+Studios
+--
+
+
+Get information on a single studio.
 ***
 **Required Parameters**
 
@@ -2302,22 +2355,37 @@ Get information on a single studio
     <col width="20%">
     <col width="80%">
     <tr>
-        <td>id</td>
-        <td>The ID of the studio to get</td>
-    </tr>
-    <tr>
-        <td>name</td>
-        <td>The name of the studio to get</td>
+        <td>id_or_name</td>
+        <td>The ID or name of the studio to get</td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/studio/163`
 
 GET /api/studio/{id_or_name}
 < 200
 < Content-Type: application/json
-{}
+{
+    "count": 1,
+    "totalCount": 1,
+    "queryDuration": "323ms",
+    "queryTime": "2015-12-07 14:24:06 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": null,
+    "baseArtworkUrl": "http://192.168.0.20:8888/artwork/",
+    "baseMediainfoUrl": "http://192.168.0.20:8888/mediainfo/",
+    "basePhotoUrl": "http://192.168.0.20:8888/photo/",
+    "baseTrailerUrl": "http://192.168.0.20:8888/trailer/",
+    "result": {
+        "id": 163,
+        "name": "Lightstorm Entertainment"
+    }
+}
 
 
-Get information studios
+Get information studios.
 ***
 **Optional Parameters**
 
@@ -2325,32 +2393,534 @@ Get information studios
     <col width="20%">
     <col width="80%">
     <tr>
-        <td>search</td>
-        <td>The search term to use</td>
+        <td>used</td>
+        <td>Set to false to get all studios instead just used studios.<br/>
+            Default value: true
+        </td>
     </tr>
     <tr>
-        <td>match</td>
-        <td>The match method. Can be one of `any` (default), `start`, `end` or `exact`</td>
+        <td>type</td>
+        <td>The video type to get genres for.<br/>
+            May be just movie or series
+        </td>
     </tr>
     <tr>
-        <td>sort</td>
-        <td>Sort the returned results. Can be one of `asc` or `desc`</td>
+        <td>SEARCHING</td>
+        <td>See above for the explanation on searching parameters</td>
     </tr>
     <tr>
-        <td>start</td>
-        <td>Where to start the list from</td>
+        <td>SORTING</td>
+        <td>See above for the explanation on sorting parameters</td>
     </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/studios/list?type=movie`
+
+GET /api/studios/list
+< 200
+< Content-Type: application/json
+{
+    "count": 11,
+    "totalCount": 11,
+    "queryDuration": "0ms",
+    "queryTime": "2015-12-07 14:27:30 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": { },
+    "baseArtworkUrl": "http://192.168.0.20:8888/artwork/",
+    "baseMediainfoUrl": "http://192.168.0.20:8888/mediainfo/",
+    "basePhotoUrl": "http://192.168.0.20:8888/photo/",
+    "baseTrailerUrl": "http://192.168.0.20:8888/trailer/",
+    "results": [
+        {
+            "id": 2,
+            "name": "20th Century Fox"
+        },
+        {
+            "id": 11,
+            "name": "Appian Way"
+        },
+        {
+            "id": 3,
+            "name": "Dune Entertainment"
+        },
+        {
+            "id": 9,
+            "name": "EMJAG Productions"
+        },
+        {
+            "id": 4,
+            "name": "Ingenious Film Partners"
+        },
+        {
+            "id": 1,
+            "name": "Lightstorm Entertainment"
+        },
+        {
+            "id": 13,
+            "name": "Lucasfilm"
+        },
+        {
+            "id": 7,
+            "name": "Paramount Pictures"
+        },
+        {
+            "id": 8,
+            "name": "Red Granite Pictures"
+        },
+        {
+            "id": 10,
+            "name": "Sikelia Productions"
+        },
+        {
+            "id": 5,
+            "name": "Universal Pictures"
+        }
+    ]
+}
+
+
+--
+Countries
+--
+
+
+Get information on a single country.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
     <tr>
-        <td>max</td>
-        <td>The maximum number of results to return</td>
+        <td>countryCode</td>
+        <td>The countryCode of the county</td>
     </tr>
 </table>
 
-GET /api/studios
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>language</td>
+        <td>the language code to use for translating the country name.</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/country/US?language=en`
+
+GET /api/country/{countryCode}
+{
+    "count": 1,
+    "totalCount": 1,
+    "queryDuration": "235ms",
+    "queryTime": "2015-12-07 14:42:25 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": null,
+    "baseArtworkUrl": "http://192.168.0.20:8888/artwork/",
+    "baseMediainfoUrl": "http://192.168.0.20:8888/mediainfo/",
+    "basePhotoUrl": "http://192.168.0.20:8888/photo/",
+    "baseTrailerUrl": "http://192.168.0.20:8888/trailer/",
+    "result": {
+        "id": 1,
+        "countryCode": "US",
+        "country": "United States"
+    }
+}
+
+
+Get information on the countries associated with a filename.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>filename</td>
+        <td>The filename to get the list of genres for</td>
+    </tr>
+</table>
+
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>language</td>
+        <td>the language code to use for translating the country name.</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/country?filename=Avatar%20(2009).avi`
+
+GET /api/country
 < 200
 < Content-Type: application/json
-{}
 
+GET /api/country/{countryCode}
+{
+    "count": 1,
+    "totalCount": 1,
+    "queryDuration": "235ms",
+    "queryTime": "2015-12-07 14:42:25 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": null,
+    "baseArtworkUrl": "http://192.168.0.20:8888/artwork/",
+    "baseMediainfoUrl": "http://192.168.0.20:8888/mediainfo/",
+    "basePhotoUrl": "http://192.168.0.20:8888/photo/",
+    "baseTrailerUrl": "http://192.168.0.20:8888/trailer/",
+    "results": [
+        {
+            "id": 1,
+            "countryCode": "US",
+            "country": "United States"
+        },
+        {
+            "id": 49,
+            "countryCode": "DE",
+            "country": "Germany"
+        },
+    ]
+}
+
+
+Get information countries.
+***
+**Optional Parameters**
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The video type to get countries for.<br/>
+            May be just movie or series
+        </td>
+    </tr>
+    <tr>
+        <td>SORTING</td>
+        <td>See above for the explanation on sorting parameters</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/countries/list?type=movie`
+
+GET /api/countries/list
+< 200
+< Content-Type: application/json
+{
+    "count": 2,
+    "totalCount": 2,
+    "queryDuration": "327ms",
+    "queryTime": "2015-12-07 14:49:15 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": {
+        "type": "MOVIE"
+    },
+    "baseArtworkUrl": "http://192.168.0.20:8888/artwork/",
+    "baseMediainfoUrl": "http://192.168.0.20:8888/mediainfo/",
+    "basePhotoUrl": "http://192.168.0.20:8888/photo/",
+    "baseTrailerUrl": "http://192.168.0.20:8888/trailer/",
+    "results": [
+        {
+            "id": 2,
+            "countryCode": "GB",
+            "country": "Vereinigtes Königreich"
+        },
+        {
+            "id": 1,
+            "countryCode": "US",
+            "country": "Vereinigte Staaten von Amerika"
+        }
+    ]
+}
+
+
+
+--
+Other
+--
+
+
+Get information certifications.
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The video type to get certifications for.<br/>
+            May be just movie or series
+        </td>
+    </tr>
+    <tr>
+        <td>SEARCHING</td>
+        <td>See above for the explanation on searching parameters</td>
+    </tr>
+    <tr>
+        <td>SORTING</td>
+        <td>See above for the explanation on sorting parameters</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/certifications/list?type=movie`
+
+GET /api/certifications/list
+< 200
+< Content-Type: application/json
+{
+    "count": 7,
+    "totalCount": 7,
+    "queryDuration": "267ms",
+    "queryTime": "2015-12-07 14:53:16 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": {
+        "type": "MOVIE"
+    },
+    "baseArtworkUrl": "http://192.168.0.20:8888/artwork/",
+    "baseMediainfoUrl": "http://192.168.0.20:8888/mediainfo/",
+    "basePhotoUrl": "http://192.168.0.20:8888/photo/",
+    "baseTrailerUrl": "http://192.168.0.20:8888/trailer/",
+    "results": [
+        {
+            "id": 5,
+            "countryCode": "DE",
+            "country": "Deutschland",
+            "certificate": "0"
+        },
+        {
+            "id": 1,
+            "countryCode": "DE",
+            "country": "Deutschland",
+            "certificate": "12"
+        },
+        {
+            "id": 8,
+            "countryCode": "DE",
+            "country": "Deutschland",
+            "certificate": "16"
+        },
+        {
+            "id": 11,
+            "countryCode": "DE",
+            "country": "Deutschland",
+            "certificate": "6"
+        },
+        {
+            "id": 6,
+            "countryCode": "US",
+            "country": "Vereinigte Staaten von Amerika",
+            "certificate": "PG"
+        },
+        {
+            "id": 3,
+            "countryCode": "US",
+            "country": "Vereinigte Staaten von Amerika",
+            "certificate": "PG-13"
+        },
+        {
+            "id": 10,
+            "countryCode": "US",
+            "country": "Vereinigte Staaten von Amerika",
+            "certificate": "R"
+        }
+    ]
+}
+
+
+Get information awards.
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The video type to get awards for.<br/>
+            May be just movie or series
+        </td>
+    </tr>
+    <tr>
+        <td>SEARCHING</td>
+        <td>See above for the explanation on searching parameters</td>
+    </tr>
+    <tr>
+        <td>SORTING</td>
+        <td>See above for the explanation on sorting parameters</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/awards/list`
+
+GET /api/awards/list
+< 200
+< Content-Type: application/json
+{
+    "count": 0,
+    "totalCount": 0,
+    "queryDuration": "266ms",
+    "queryTime": "2015-12-07 14:54:47 +0100",
+    "status": {
+        "status": 400,
+        "message": "No records found"
+    },
+    "options": { },
+    "baseArtworkUrl": "http://192.168.0.20:8888/artwork/",
+    "baseMediainfoUrl": "http://192.168.0.20:8888/mediainfo/",
+    "basePhotoUrl": "http://192.168.0.20:8888/photo/",
+    "baseTrailerUrl": "http://192.168.0.20:8888/trailer/",
+    "results": [ ]
+}
+
+
+Get information video sources.
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The video type to get video sources for.<br/>
+            May be just movie or series
+        </td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/videosources/list`
+
+GET /api/videosources/list
+< 200
+< Content-Type: application/json
+{
+    "count": 2,
+    "totalCount": 2,
+    "queryDuration": "281ms",
+    "queryTime": "2015-12-07 14:57:53 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": { },
+    "baseArtworkUrl": "http://192.168.0.20:8888/artwork/",
+    "baseMediainfoUrl": "http://192.168.0.20:8888/mediainfo/",
+    "basePhotoUrl": "http://192.168.0.20:8888/photo/",
+    "baseTrailerUrl": "http://192.168.0.20:8888/trailer/",
+    "results": [
+        {
+            "name": "BluRay"
+        },
+        {
+            "name": "SDTV"
+        }
+    ]
+}
+
+
+Get information ratings.
+***
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>type</td>
+        <td>The video type to get video sources for.<br/>
+            May be just movie or series
+        </td>
+    </tr>
+    <tr>
+        <td>SORTING</td>
+        <td>See above for the explanation on sorting parameters</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/ratings/list`
+
+GET /api/ratings/list
+< 200
+< Content-Type: application/json
+{
+    "count": 10,
+    "totalCount": 10,
+    "queryDuration": "274ms",
+    "queryTime": "2015-12-07 15:01:39 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": { },
+    "baseArtworkUrl": "http://192.168.0.20:8888/artwork/",
+    "baseMediainfoUrl": "http://192.168.0.20:8888/mediainfo/",
+    "basePhotoUrl": "http://192.168.0.20:8888/photo/",
+    "baseTrailerUrl": "http://192.168.0.20:8888/trailer/",
+    "results": [
+        {
+            "type": "MOVIE",
+            "source": "combined",
+            "rating": 6
+        },
+        {
+            "type": "MOVIE",
+            "source": "combined",
+            "rating": 7
+        },
+        {
+            "type": "MOVIE",
+            "source": "combined",
+            "rating": 8
+        },
+        {
+            "type": "MOVIE",
+            "source": "imdb",
+            "rating": 7
+        },
+        {
+            "type": "MOVIE",
+            "source": "imdb",
+            "rating": 8
+        },
+        {
+            "type": "MOVIE",
+            "source": "tmdb",
+            "rating": 6
+        },
+        {
+            "type": "MOVIE",
+            "source": "tmdb",
+            "rating": 7
+        },
+        {
+            "type": "MOVIE",
+            "source": "tmdb",
+            "rating": 8
+        },
+        {
+            "type": "SERIES",
+            "source": "combined",
+            "rating": 9
+        },
+        {
+            "type": "SERIES",
+            "source": "tvdb",
+            "rating": 9
+        }
+    ]
+}
 
 Get information on a single boxed set
 ***
@@ -2363,19 +2933,72 @@ Get information on a single boxed set
         <td>id</td>
         <td>The ID of the boxed set to get</td>
     </tr>
-    <tr>
-        <td>name</td>
-        <td>The name of the boxed set to get</td>
-    </tr>
 </table>
 
-GET /api/boxedset/{id_or_name}
+**Optional Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>dataitems</td>
+        <td>Comma separated list of additional data items to add to the results.<br>
+            Valid items are: member, artwork, plot, outline
+        </td>
+    </tr>
+    <tr>
+        <td>artwork</td>
+        <td>The artwork type: poster, banner, fanart, videoimage<br/>
+            If left empty then all artworks will be returned.
+        </td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/boxset/12?dataitems=member`
+
+GET /api/boxset/{id}
 < 200
 < Content-Type: application/json
-{}
+{
+    "count": 1,
+    "totalCount": 1,
+    "queryDuration": "297ms",
+    "queryTime": "2015-12-07 15:13:27 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": {
+        "dataitems": [
+            "member"
+        ],
+        "id": 12
+    },
+    "baseArtworkUrl": "http://192.168.0.20:8888/artwork/",
+    "baseMediainfoUrl": "http://192.168.0.20:8888/mediainfo/",
+    "basePhotoUrl": "http://192.168.0.20:8888/photo/",
+    "baseTrailerUrl": "http://192.168.0.20:8888/trailer/",
+    "result": {
+        "id": 12,
+        "name": "Star Wars",
+        "memberCount": 1,
+        "watched": false,
+        "members": [
+            {
+                "id": 6,
+                "videoType": "MOVIE",
+                "ordering": -1,
+                "title": "Star Wars: Episode I - Die dunkle Bedrohung",
+                "originalTitle": "Star Wars: Episode I - The Phantom Menace",
+                "year": 1999,
+                "releaseDate": "1999-08-19",
+                "watched": false
+            }
+        ]
+    }
+}
 
 
-Get information boxed sets
+Get information boxed sets.
 ***
 **Optional Parameters**
 
@@ -2383,31 +3006,63 @@ Get information boxed sets
     <col width="20%">
     <col width="80%">
     <tr>
-        <td>search</td>
-        <td>The search term to use</td>
+        <td>dataitems</td>
+        <td>Comma separated list of additional data items to add to the results.<br>
+            Valid items are: artwork
+        </td>
     </tr>
     <tr>
-        <td>match</td>
-        <td>The match method. Can be one of `any` (default), `start`, `end` or `exact`</td>
+        <td>artwork</td>
+        <td>The artwork type: poster, banner, fanart, videoimage<br/>
+            If left empty then all artworks will be returned.
+        </td>
     </tr>
     <tr>
-        <td>sort</td>
-        <td>Sort the returned results. Can be one of `asc` or `desc`</td>
-    </tr>
-    <tr>
-        <td>start</td>
-        <td>Where to start the list from</td>
-    </tr>
-    <tr>
-        <td>max</td>
-        <td>The maximum number of results to return</td>
+        <td>watched</td>
+        <td>If just watched or unwatched boxed sets should be selected.<br/>
+            Use 'watched=true' to select just watched  boxed sets.<br/>
+            Use 'watched=false' to select just unwatched  boxed sets.
+        </td>
     </tr>
 </table>
+__Example__: `http://localhost:8888/yamj3/api/boxset/list`
 
-GET /api/boxedsets
+GET /api/boxset/list
 < 200
 < Content-Type: application/json
-{}
+{
+    "count": 2,
+    "totalCount": 2,
+    "queryDuration": "0ms",
+    "queryTime": "2015-12-07 15:21:04 +0100",
+    "status": {
+        "status": 200,
+        "message": "OK"
+    },
+    "options": {
+        "dataitems": [
+            "artwork"
+        ]
+    },
+    "baseArtworkUrl": "http://192.168.0.20:8888/artwork/",
+    "baseMediainfoUrl": "http://192.168.0.20:8888/mediainfo/",
+    "basePhotoUrl": "http://192.168.0.20:8888/photo/",
+    "baseTrailerUrl": "http://192.168.0.20:8888/trailer/",
+    "results": [
+        {
+            "id": 1,
+            "name": "Star Wars",
+            "memberCount": 1,
+            "watched": false
+        },
+        {
+            "id": 2,
+            "name": "l'etage",
+            "memberCount": 1,
+            "watched": false
+        }
+    ]
+}
 
 
 --
@@ -2438,7 +3093,6 @@ Get information on the configuration settings
         <td>See above for the explanation on sorting parameters</td>
     </tr>
 </table>
-
 __Example__: `http://localhost:8888/yamj3/api/config/list?config=language&mode=any`
 
 GET /api/config/list
@@ -2507,7 +3161,6 @@ Add a new configuration entry
         <td>The value of the property to set.</td>
     </tr>
 </table>
-
 __Example__: `http://localhost:8888/yamj3/api/config/add?key=skin.language&value=en`
 
 GET /api/config/add

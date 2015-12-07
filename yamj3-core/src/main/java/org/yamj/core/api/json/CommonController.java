@@ -45,6 +45,7 @@ import org.yamj.core.api.model.dto.ApiGenreDTO;
 import org.yamj.core.api.model.dto.ApiNameDTO;
 import org.yamj.core.api.model.dto.ApiRatingDTO;
 import org.yamj.core.api.options.OptionsBoxedSet;
+import org.yamj.core.api.options.OptionsId;
 import org.yamj.core.api.options.OptionsMultiType;
 import org.yamj.core.api.options.OptionsRating;
 import org.yamj.core.api.options.OptionsSingleType;
@@ -301,9 +302,16 @@ public class CommonController {
 
     //<editor-fold defaultstate="collapsed" desc="Country Methods">
     @RequestMapping(value = "/country", method = RequestMethod.GET)
-    public ApiWrapperList<ApiCountryDTO> getCountryFilename(@RequestParam(required = true, defaultValue = "") String filename) {
-        LOG.info("Getting countries for filename '{}'", filename);
+    public ApiWrapperList<ApiCountryDTO> getCountryFilename(
+        @RequestParam(required = true, defaultValue = "") String filename,
+        @RequestParam(required = false) String language)
+   {
         ApiWrapperList<ApiCountryDTO> wrapper = new ApiWrapperList<>();
+        OptionsId options = new OptionsId();
+        options.setLanguage(language);
+        wrapper.setOptions(options);
+        
+        LOG.info("Getting countries for filename '{}'", filename);
         List<ApiCountryDTO> results = jsonApiStorageService.getCountryFilename(wrapper, filename);
         wrapper.setResults(results);
         wrapper.setStatusCheck();
@@ -311,15 +319,18 @@ public class CommonController {
     }
 
     @RequestMapping(value = "/country/{countryCode}", method = RequestMethod.GET)
-    public ApiWrapperSingle<ApiCountryDTO> getCountry(@PathVariable String countryCode) {
+    public ApiWrapperSingle<ApiCountryDTO> getCountry(
+        @PathVariable String countryCode,
+        @RequestParam(required = false) String language)
+    {
         ApiCountryDTO country;
         ApiWrapperSingle<ApiCountryDTO> wrapper = new ApiWrapperSingle<>();
         if (StringUtils.isNumeric(countryCode)) {
             LOG.info("Getting country with ID '{}'", countryCode);
-            country = jsonApiStorageService.getCountry(Long.parseLong(countryCode), wrapper.getOptions().getLanguage());
+            country = jsonApiStorageService.getCountry(Long.parseLong(countryCode), language);
         } else {
             LOG.info("Getting country with country code {}", countryCode);
-            country = jsonApiStorageService.getCountry(countryCode, wrapper.getOptions().getLanguage());
+            country = jsonApiStorageService.getCountry(countryCode, language);
         }
         wrapper.setResult(country);
         wrapper.setStatusCheck();
