@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sanselan.ImageReadException;
@@ -41,10 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.ApiStatus;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.ArtworkGenerated;
-import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.ArtworkProfile;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
@@ -401,13 +397,13 @@ public class ArtworkProcessorService {
         
         final String extension = FilenameUtils.getExtension(filename);
         if (filenameScanner.determineFileType(extension) != FileType.IMAGE) {
-            return new ApiStatus(415, "Uploaded file '" + filename + "' is no valid image");
+            return ApiStatus.unsupportedMediaType("Uploaded file '" + filename + "' is no valid image");
         }
         
         // find matching artwork
         Artwork artwork = this.artworkStorageService.getArtwork(artworkType, metaDataType, id);
         if (artwork == null) {
-            return new ApiStatus(400, "No matching artwork found");
+            return ApiStatus.notFound("No matching artwork found");
         }
         
         // get or create located artwork
@@ -438,7 +434,7 @@ public class ArtworkProcessorService {
             fileStorageService.store(artwork.getStorageType(), cacheFilename, image.getBytes());
         } catch (Exception e) {
             LOG.warn("Failed to store uploaded file: " + cacheFilename, e);
-            return new ApiStatus(503, "Failed to store uploaded file into cache");
+            return ApiStatus.internalError("Failed to store uploaded file into cache");
         }
         
         // store located artwork
@@ -447,6 +443,6 @@ public class ArtworkProcessorService {
         located.setCacheDirectory(StringUtils.removeEnd(cacheDirectory, File.separator + cacheFilename));
         this.artworkStorageService.storeArtworkLocated(located);
         
-        return new ApiStatus(200, "Cached image as '" + cacheFilename + "'");
+        return ApiStatus.ok("Cached image as '" + cacheFilename + "'");
     }
 }

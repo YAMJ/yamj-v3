@@ -23,31 +23,15 @@
 package org.yamj.core.api.json;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.ApiStatus;
-import org.yamj.core.api.model.dto.ApiAwardDTO;
-import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
-import org.yamj.core.api.model.dto.ApiCertificationDTO;
-import org.yamj.core.api.model.dto.ApiCountryDTO;
-import org.yamj.core.api.model.dto.ApiGenreDTO;
-import org.yamj.core.api.model.dto.ApiNameDTO;
-import org.yamj.core.api.model.dto.ApiRatingDTO;
-import org.yamj.core.api.options.OptionsBoxedSet;
-import org.yamj.core.api.options.OptionsId;
-import org.yamj.core.api.options.OptionsMultiType;
-import org.yamj.core.api.options.OptionsRating;
-import org.yamj.core.api.options.OptionsSingleType;
+import org.yamj.core.api.model.dto.*;
+import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Genre;
@@ -85,10 +69,13 @@ public class CommonController {
     //<editor-fold defaultstate="collapsed" desc="Watched Methods">
     @RequestMapping(value = "/watched/{type}/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus markWatched(@PathVariable("type") String type, @PathVariable("id") Long id) {
-        
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+
         final MetaDataType metaDataType = MetaDataType.fromString(type);
         if (!metaDataType.isWithVideos()) {
-            return new ApiStatus(HttpStatus.SC_BAD_REQUEST, INVALID_META_DATA_TYPE + type + "' for watching videos");
+            return ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for watching videos");
         }
 
         return jsonApiStorageService.updateWatchedSingle(metaDataType, id, true);
@@ -96,10 +83,13 @@ public class CommonController {
 
     @RequestMapping(value = "/unwatched/{type}/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus markUnwatched(@PathVariable("type") String type, @PathVariable("id") Long id) {
-
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+        
         final MetaDataType metaDataType = MetaDataType.fromString(type);
         if (!metaDataType.isWithVideos()) {
-            return new ApiStatus(HttpStatus.SC_BAD_REQUEST, INVALID_META_DATA_TYPE + type + "' for unwatching videos");
+            return ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for unwatching videos");
         }
 
         return jsonApiStorageService.updateWatchedSingle(metaDataType, id, false);
@@ -109,10 +99,13 @@ public class CommonController {
     //<editor-fold defaultstate="collapsed" desc="Rescan Methods">
     @RequestMapping(value = "/rescan/{type}/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus rescanMetaData(@PathVariable("type") String type, @PathVariable("id") Long id) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
 
         final MetaDataType metaDataType = MetaDataType.fromString(type);
         if (!metaDataType.isRescanMetaData()) {
-            return new ApiStatus(HttpStatus.SC_BAD_REQUEST, INVALID_META_DATA_TYPE + type + "' for rescan");
+            return ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for rescan");
         }
 
         ApiStatus apiStatus = jsonApiStorageService.rescanMetaData(metaDataType, id);
@@ -124,10 +117,13 @@ public class CommonController {
 
     @RequestMapping(value = "/rescan/{type}/artwork/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus rescanArtwork(@PathVariable("type") String type, @PathVariable("id") Long id) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
 
         final MetaDataType metaDataType = MetaDataType.fromString(type);
         if (!metaDataType.isWithArtwork()) {
-            return new ApiStatus(HttpStatus.SC_BAD_REQUEST, INVALID_META_DATA_TYPE + type + "' for artwork rescan");
+            return ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for artwork rescan");
         }
 
         ApiStatus apiStatus = jsonApiStorageService.rescanArtwork(metaDataType, id);
@@ -142,7 +138,7 @@ public class CommonController {
 
         final MetaDataType metaDataType = MetaDataType.fromString(type);
         if (!metaDataType.isWithTrailer()) {
-            return new ApiStatus(HttpStatus.SC_BAD_REQUEST, INVALID_META_DATA_TYPE + type + "' for trailer rescan");
+            return ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for trailer rescan");
         }
 
         ApiStatus apiStatus = jsonApiStorageService.rescanTrailer(metaDataType, id);
@@ -165,16 +161,28 @@ public class CommonController {
     //<editor-fold defaultstate="collapsed" desc="Trailer Methods">
     @RequestMapping(value = "/trailer/delete/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus trailerDelete(@PathVariable("id") Long id) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+
         return jsonApiStorageService.setTrailerStatus(id, StatusType.DELETED);
     }
 
     @RequestMapping(value = "/trailer/ignore/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus trailerIgnore( @PathVariable("id") Long id) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+
         return jsonApiStorageService.setTrailerStatus(id, StatusType.IGNORE);
     }
 
     @RequestMapping(value = "/trailer/download/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus trailerDownload( @PathVariable("id") Long id) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+
         ApiStatus apiStatus = jsonApiStorageService.setTrailerStatus(id, StatusType.UPDATED);
         if (apiStatus.isSuccessful()) {
             trailerProcessScheduler.triggerProcess();
@@ -227,16 +235,16 @@ public class CommonController {
             @RequestParam(required = true, defaultValue = "") String target) {
 
         if (StringUtils.isBlank(name) || StringUtils.isBlank(target)) {
-            return new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Invalid name/target specified, genre not added");
+            return ApiStatus.badRequest("Invalid name/target specified, genre not added");
         }
 
         LOG.info("Adding genre '{}' with target '{}'", name, target);
 
         ApiStatus status;
         if (this.jsonApiStorageService.addGenre(name, target)) {
-            status = new ApiStatus("Successfully added genre '" + name + "' with target '" + target + "'");
+            status = ApiStatus.ok("Successfully added genre '" + name + "' with target '" + target + "'");
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Genre '" + name + "' already exists");
+            status = ApiStatus.conflict("Genre '" + name + "' already exists");
         }
         return status;
     }
@@ -247,7 +255,7 @@ public class CommonController {
             @RequestParam(required = false, defaultValue = "") String target) {
 
         if (StringUtils.isBlank(name)) {
-            return new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Invalid name specified, genre not updated");
+            return ApiStatus.badRequest("Invalid name specified, genre not updated");
         }
         
         LOG.info("Updating genre '{}' with target '{}'", name, target);
@@ -261,9 +269,9 @@ public class CommonController {
 
         ApiStatus status;
         if (result) {
-            status = new ApiStatus("Successfully updated genre '" + name + "' with target '" + target + "'");
+            status = ApiStatus.ok("Successfully updated genre '" + name + "' with target '" + target + "'");
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Genre '" + name + "' does not exist");
+            status = ApiStatus.notFound("Genre '" + name + "' does not exist");
         }
         return status;
     }

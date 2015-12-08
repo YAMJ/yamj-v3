@@ -22,7 +22,6 @@
  */
 package org.yamj.core.api.json;
 
-import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +49,7 @@ public class FileController {
      */
     @RequestMapping(value = "/delete/{id}", method = {RequestMethod.GET, RequestMethod.DELETE})
     public ApiStatus deleteFile(@PathVariable("id") Long id) {
-        if (id == null || id.longValue() <= 0) {
+        if (id <= 0L) {
             return ApiStatus.INVALID_ID;
         }
         
@@ -73,7 +72,7 @@ public class FileController {
      */
     @RequestMapping(value = "/update/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus updateFile(@PathVariable("id") Long id) {
-        if (id == null || id.longValue() <= 0) {
+        if (id <= 0L) {
             return ApiStatus.INVALID_ID;
         }
 
@@ -96,7 +95,7 @@ public class FileController {
      */
     @RequestMapping(value = "/watched/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus watchedFile(@PathVariable("id") Long id) {
-        if (id == null || id.longValue() <= 0) {
+        if (id <= 0L) {
             return ApiStatus.INVALID_ID;
         }
 
@@ -119,7 +118,7 @@ public class FileController {
      */
     @RequestMapping(value = "/unwatched/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus unwatchedFile(@PathVariable("id") Long id) {
-        if (id == null || id.longValue() <= 0) {
+        if (id <= 0L) {
             return ApiStatus.INVALID_ID;
         }
 
@@ -135,10 +134,10 @@ public class FileController {
     }
     
     private static ApiStatus statusOK(Long id, String status) {
-        return new ApiStatus("Sucessfully marked file " + id + " as " + status);
+        return ApiStatus.ok("Sucessfully marked file " + id + " as " + status);
     }
 
     private static ApiStatus statusNotFound(Long id) {
-        return new ApiStatus(HttpStatus.SC_BAD_REQUEST, "File " + id + " not found");
+        return ApiStatus.badRequest("File " + id + " not found");
     }
 }

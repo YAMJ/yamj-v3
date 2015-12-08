@@ -23,15 +23,10 @@
 package org.yamj.core.api.json;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.options.OptionsConfig;
 import org.yamj.core.api.wrapper.ApiWrapperList;
@@ -75,9 +70,9 @@ public class ConfigController {
         if (StringUtils.isNotBlank(key) && StringUtils.isNotBlank(value)) {
             LOG.info("Storing config '{}' with value '{}'", key, value);
             configService.setProperty(key, value);
-            status = new ApiStatus("Successfully added '" + key + "' with value '" + value + "'");
+            status = ApiStatus.ok("Successfully added '" + key + "' with value '" + value + "'");
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Invalid key/value specified, configuration not added");
+            status = ApiStatus.badRequest("Invalid key/value specified, configuration not added");
         }
         return status;
     }
@@ -90,9 +85,9 @@ public class ConfigController {
         if (StringUtils.isNotBlank(key)) {
             LOG.info("Deleting config '{}'", key);
             configService.deleteProperty(key);
-            status = new ApiStatus("Successfully deleted '" + key + "'");
+            status = ApiStatus.ok("Successfully deleted '" + key + "'");
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Invalid key specified, configuration not deleted");
+            status = ApiStatus.badRequest("Invalid key specified, configuration not deleted");
         }
         return status;
     }
@@ -106,9 +101,9 @@ public class ConfigController {
         if (StringUtils.isNotBlank(key) && StringUtils.isNotBlank(value)) {
             LOG.info("Updating config '{}' with value '{}'", key, value);
             configService.setProperty(key, value);
-            status = new ApiStatus("Successfully updated '" + key + "' to value '" + value + "'");
+            status = ApiStatus.ok("Successfully updated '" + key + "' to value '" + value + "'");
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Invalid key/value specified, configuration not updated");
+            status = ApiStatus.badRequest("Invalid key/value specified, configuration not updated");
         }
         return status;
     }

@@ -22,25 +22,19 @@
  */
 package org.yamj.core.api.model;
 
-import org.apache.http.HttpStatus;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.http.HttpStatus;
 
 public class ApiStatus {
 
-    public static final ApiStatus OK = new ApiStatus("OK");
-    public static final ApiStatus NO_RECORD = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "No record found");
-    public static final ApiStatus INVALID_ID = new ApiStatus(HttpStatus.SC_GONE, "Not a valid ID");
+    public static final ApiStatus OK = ApiStatus.ok("OK");
+    public static final ApiStatus NO_RECORD = ApiStatus.notFound("No record found");
+    public static final ApiStatus INVALID_ID = ApiStatus.badRequest("Not a valid ID");
     
     private final int status;
     private final String message;
 
-    public ApiStatus(String message) {
-        this.status = HttpStatus.SC_OK;
-        this.message = message;
-    }
-
-    public ApiStatus(int status, String message) {
+    private ApiStatus(int status, String message) {
         this.status = status;
         this.message = message;
     }
@@ -56,5 +50,29 @@ public class ApiStatus {
     @JsonIgnore
     public boolean isSuccessful() {
         return (status == HttpStatus.SC_OK);
+    }
+
+    public static ApiStatus ok(String message) {
+        return new ApiStatus(HttpStatus.SC_OK, message);
+    }
+
+    public static ApiStatus badRequest(String message) {
+        return new ApiStatus(HttpStatus.SC_BAD_REQUEST, message);
+    }
+
+    public static ApiStatus notFound(String message) {
+        return new ApiStatus(HttpStatus.SC_NOT_FOUND, message);
+    }
+
+    public static ApiStatus conflict(String message) {
+        return new ApiStatus(HttpStatus.SC_CONFLICT, message);
+    }
+
+    public static ApiStatus unsupportedMediaType(String message) {
+        return new ApiStatus(HttpStatus.SC_UNSUPPORTED_MEDIA_TYPE, message);
+    }
+
+    public static ApiStatus internalError(String message) {
+        return new ApiStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR, message);
     }
 }

@@ -23,17 +23,10 @@
 package org.yamj.core.api.json;
 
 import java.util.Set;
-
-import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
@@ -91,7 +84,7 @@ public class ArtworkController {
      */
     @RequestMapping(value = "/located/ignore/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus ignoreLocatedArtwork(@PathVariable("id") Long id) {
-        if (id == null || id.longValue() <= 0) {
+        if (id <= 0L) {
             return ApiStatus.INVALID_ID;
         }
         
@@ -101,27 +94,27 @@ public class ArtworkController {
         Set<String> filesToDelete = this.commonStorageService.ignoreArtworkLocated(id);
         if (filesToDelete != null) {
             this.fileStorageService.deleteStorageFiles(filesToDelete);
-            status = new ApiStatus("Successfully marked located artwork " + id + " as ignored");
+            status = ApiStatus.ok("Successfully marked located artwork " + id + " as ignored");
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Located artwork not found " + id);
+            status = ApiStatus.notFound("Located artwork not found " + id);
         }
         return status;
     }
 
     @RequestMapping(value = "/add/{artwork}/{type}/{id}", method=RequestMethod.POST)
     public ApiStatus addImage(@PathVariable("artwork") String artwork, @PathVariable("type") String type, @PathVariable("id") Long id, @RequestParam MultipartFile image) {
+        if (id <= 0L) {
+            return ApiStatus.INVALID_ID;
+        }
+
         final ArtworkType artworkType = ArtworkType.fromString(artwork);
         if (ArtworkType.UNKNOWN == artworkType) {
-            return new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Invalid artwork type '" + artwork + "'");
+            return ApiStatus.badRequest("Invalid artwork type '" + artwork + "'");
         }
         
         final MetaDataType metaDataType = MetaDataType.fromString(type);
         if (!metaDataType.isWithArtwork()) {
-            return new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Invalid meta data type '" + type + "' for artwork");
-        }
-        
-        if (id == null || id.longValue() <= 0) {
-            return ApiStatus.INVALID_ID;
+            return ApiStatus.badRequest("Invalid meta data type '" + type + "' for artwork");
         }
         
         ApiStatus apiStatus = this.artworkProcessorService.addArtwork(artworkType, metaDataType, id, image);

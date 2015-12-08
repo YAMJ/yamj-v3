@@ -23,15 +23,10 @@
 package org.yamj.core.api.json;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
@@ -89,9 +84,9 @@ public class PlayerController {
             player.setDeviceType(deviceType);
             player.setIpAddress(ipAddress);
             jsonApiStorageService.storePlayer(player);
-            status = new ApiStatus("Successfully stored '" + name + "'");
+            status = ApiStatus.ok("Successfully stored '" + name + "'");
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Invalid player information specified; player not stored");
+            status = ApiStatus.badRequest("Invalid player information specified; player not stored");
         }
         return status;
     }
@@ -110,7 +105,7 @@ public class PlayerController {
 
         LOG.info("Deleting player {}", playerId);
         jsonApiStorageService.deletePlayer(playerId);
-        return new ApiStatus("Successfully deleted player " + playerId);
+        return ApiStatus.ok("Successfully deleted player " + playerId);
     }
 
     /**
@@ -131,10 +126,10 @@ public class PlayerController {
             return ApiStatus.INVALID_ID;
         }
         if (StringUtils.isBlank(sourcePath)) {
-            return new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Invalid source path; player path not stored");
+            return ApiStatus.badRequest("Invalid source path; player path not stored");
         }
         if (StringUtils.isBlank(targetPath)) {
-            return new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Invalid target path; player path not stored");
+            return ApiStatus.badRequest("Invalid target path; player path not stored");
         }
         
         PlayerPath playerPath = new PlayerPath();
@@ -143,9 +138,9 @@ public class PlayerController {
         
         ApiStatus status;
         if (jsonApiStorageService.storePlayerPath(playerId, playerPath)) {
-            status = new ApiStatus("Successfully stored player path for player " + playerId);
+            status = ApiStatus.ok("Successfully stored player path for player " + playerId);
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST,  "Player "+ playerId + " does not exist; player path not stored");
+            status = ApiStatus.badRequest("Player "+ playerId + " does not exist; player path not stored");
         }
         return status;
     }
@@ -163,17 +158,17 @@ public class PlayerController {
     {
         
         if (playerId == null || playerId <= 0) {
-            return new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Invalid player ID specified, player path not removed");
+            return ApiStatus.badRequest("Invalid player ID specified, player path not removed");
         } 
         if (pathId == null || pathId <= 0) {
-            return new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Invalid path ID specified, player path not removed");
+            return ApiStatus.badRequest("Invalid path ID specified, player path not removed");
         }
 
         ApiStatus status;
         if (jsonApiStorageService.deletePlayerPath(playerId, pathId)) {
-            status = new ApiStatus("Successfully removed player path " + pathId + " from player " + playerId);
+            status = ApiStatus.ok("Successfully removed player path " + pathId + " from player " + playerId);
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Given player id or path id does not exist; player path not deleted");
+            status = ApiStatus.badRequest("Given player id or path id does not exist; player path not deleted");
         }
         return status;
     }

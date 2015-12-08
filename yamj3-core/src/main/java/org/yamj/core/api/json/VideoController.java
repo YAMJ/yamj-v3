@@ -23,29 +23,15 @@
 package org.yamj.core.api.json;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.builder.DataItem;
-import org.yamj.core.api.model.dto.ApiEpisodeDTO;
-import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
-import org.yamj.core.api.model.dto.ApiVideoDTO;
-import org.yamj.core.api.model.dto.ApiYearDecadeDTO;
-import org.yamj.core.api.options.OptionsEpisode;
-import org.yamj.core.api.options.OptionsIdArtwork;
-import org.yamj.core.api.options.OptionsIndexVideo;
-import org.yamj.core.api.options.OptionsMultiType;
-import org.yamj.core.api.options.UpdateVideo;
+import org.yamj.core.api.model.dto.*;
+import org.yamj.core.api.options.*;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -88,7 +74,7 @@ public class VideoController {
                 wrapper.setStatusInvalidId();
             }
         } else {
-            wrapper.setStatusCheck(new ApiStatus(HttpStatus.SC_BAD_REQUEST, INVALID_META_DATA_TYPE + type + "' for single video"));
+            wrapper.setStatusCheck(ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for single video"));
         }
         
         return wrapper;
@@ -104,25 +90,22 @@ public class VideoController {
      */
     @RequestMapping(value = "/{type}/{id}", method = RequestMethod.PUT)
     public ApiStatus updateVideo(@PathVariable("type") String type, @PathVariable("id") Long id, @RequestBody UpdateVideo update) {
-        final MetaDataType metaDataType = MetaDataType.fromString(type);
-
         if (id <= 0L) {
             return ApiStatus.INVALID_ID;
         }
 
+        final MetaDataType metaDataType = MetaDataType.fromString(type);
         if (MetaDataType.SERIES == metaDataType) {
             return jsonApiStorageService.updateSeries(id, update);
         }
-
         if (MetaDataType.SEASON == metaDataType) {
             return jsonApiStorageService.updateSeason(id, update);
         }
-
         if (MetaDataType.MOVIE == metaDataType || MetaDataType.EPISODE == metaDataType) {
             return jsonApiStorageService.updateVideoData(id, update);
         }
 
-        return new ApiStatus(HttpStatus.SC_BAD_REQUEST, INVALID_META_DATA_TYPE + type + "' for video update");
+        return ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for video update");
     }
 
     /**
@@ -148,7 +131,7 @@ public class VideoController {
                 scanningScheduler.triggerScanMetaData();
             }
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, INVALID_META_DATA_TYPE + type + "' for enabling online scan");
+            status = ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for enabling online scan");
         }
         return status;
     }
@@ -176,7 +159,7 @@ public class VideoController {
                 scanningScheduler.triggerScanMetaData();
             }
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, INVALID_META_DATA_TYPE + type + "' for disabling online scan");
+            status = ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for disabling online scan");
         }
         return status;
     }
@@ -205,7 +188,7 @@ public class VideoController {
                 scanningScheduler.triggerScanMetaData();
             }
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, INVALID_META_DATA_TYPE + type + "' for updating external id");
+            status = ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for updating external id");
         }
         return status;
     }
@@ -233,7 +216,7 @@ public class VideoController {
                 scanningScheduler.triggerScanMetaData();
             }
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, INVALID_META_DATA_TYPE + type + "' for removing external id");
+            status = ApiStatus.badRequest(INVALID_META_DATA_TYPE + type + "' for removing external id");
         }
         return status;
     }
@@ -310,6 +293,5 @@ public class VideoController {
         wrapper.setOptions(options);
         wrapper.setResults(jsonApiStorageService.getDecades(wrapper));
         return wrapper;
-        
     }
 }
