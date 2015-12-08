@@ -2512,6 +2512,8 @@ Get information on a single country.
 __Example__: `http://localhost:8888/yamj3/api/country/US?language=en`
 
 GET /api/country/{countryCode}
+< 200
+< Content-Type: application/json
 {
     "count": 1,
     "totalCount": 1,
@@ -2559,11 +2561,9 @@ Get information on the countries associated with a filename.
 </table>
 __Example__: `http://localhost:8888/yamj3/api/country?filename=Avatar%20(2009).avi`
 
-GET /api/country
+GET /api/country/{countryCode}
 < 200
 < Content-Type: application/json
-
-GET /api/country/{countryCode}
 {
     "count": 1,
     "totalCount": 1,
