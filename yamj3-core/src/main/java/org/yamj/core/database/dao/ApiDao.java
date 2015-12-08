@@ -22,11 +22,26 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.type.*;
+import org.hibernate.type.BooleanType;
+import org.hibernate.type.DateType;
+import org.hibernate.type.FloatType;
+import org.hibernate.type.IntegerType;
+import org.hibernate.type.LongType;
+import org.hibernate.type.StringType;
+import org.hibernate.type.TimestampType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -34,13 +49,48 @@ import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
-import org.yamj.core.api.model.builder.*;
-import org.yamj.core.api.model.dto.*;
-import org.yamj.core.api.options.*;
+import org.yamj.core.api.model.builder.DataItem;
+import org.yamj.core.api.model.builder.DataItemTools;
+import org.yamj.core.api.model.builder.IndexParams;
+import org.yamj.core.api.model.builder.SqlScalars;
+import org.yamj.core.api.model.dto.AbstractApiIdentifiableDTO;
+import org.yamj.core.api.model.dto.ApiArtworkDTO;
+import org.yamj.core.api.model.dto.ApiAudioCodecDTO;
+import org.yamj.core.api.model.dto.ApiAwardDTO;
+import org.yamj.core.api.model.dto.ApiBoxedSetDTO;
+import org.yamj.core.api.model.dto.ApiBoxedSetMemberDTO;
+import org.yamj.core.api.model.dto.ApiCertificationDTO;
+import org.yamj.core.api.model.dto.ApiCountryDTO;
+import org.yamj.core.api.model.dto.ApiEpisodeDTO;
+import org.yamj.core.api.model.dto.ApiExternalIdDTO;
+import org.yamj.core.api.model.dto.ApiFileDTO;
+import org.yamj.core.api.model.dto.ApiFilmographyDTO;
+import org.yamj.core.api.model.dto.ApiGenreDTO;
+import org.yamj.core.api.model.dto.ApiListDTO;
+import org.yamj.core.api.model.dto.ApiNameDTO;
+import org.yamj.core.api.model.dto.ApiPersonDTO;
+import org.yamj.core.api.model.dto.ApiRatingDTO;
+import org.yamj.core.api.model.dto.ApiSeasonInfoDTO;
+import org.yamj.core.api.model.dto.ApiSeriesInfoDTO;
+import org.yamj.core.api.model.dto.ApiSubtitleDTO;
+import org.yamj.core.api.model.dto.ApiTrailerDTO;
+import org.yamj.core.api.model.dto.ApiVideoDTO;
+import org.yamj.core.api.model.dto.ApiYearDecadeDTO;
+import org.yamj.core.api.options.OptionsBoxedSet;
+import org.yamj.core.api.options.OptionsEpisode;
+import org.yamj.core.api.options.OptionsId;
+import org.yamj.core.api.options.OptionsIdArtwork;
+import org.yamj.core.api.options.OptionsIndexArtwork;
+import org.yamj.core.api.options.OptionsIndexVideo;
+import org.yamj.core.api.options.OptionsMultiType;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.type.*;
+import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.database.model.type.FileType;
+import org.yamj.core.database.model.type.JobType;
+import org.yamj.core.database.model.type.ParticipationType;
+import org.yamj.core.database.model.type.ResolutionType;
 import org.yamj.core.hibernate.HibernateDao;
 
 @Repository("apiDao")
@@ -55,7 +105,6 @@ public class ApiDao extends HibernateDao {
     private static final String SEASON = "season";
     private static final String SEASON_ID = "seasonId";
     private static final String SERIES_ID = "seriesId";
-    private static final String SERIES_YEAR = "seriesYear";
     private static final String VIDEO_YEAR = "videoYear";
     private static final String ORIGINAL_TITLE = "originalTitle";
     private static final String SORT_TITLE = "sortTitle";
@@ -2652,7 +2701,7 @@ public class ApiDao extends HibernateDao {
         LOG.info("Getting series information for series ID {}", id);
 
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT s.id AS seriesId, s.title, s.title_original AS originalTitle, s.start_year AS seriesYear, ");
+        sqlScalars.addToSql("SELECT s.id AS seriesId, s.title, s.title_original AS originalTitle, s.start_year AS year, ");
         if (options.hasDataItem(DataItem.PLOT)) {
             sqlScalars.addToSql("s.plot, ");
             sqlScalars.addScalar("plot", StringType.INSTANCE);
@@ -2670,7 +2719,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(TITLE, StringType.INSTANCE);
         sqlScalars.addScalar(ORIGINAL_TITLE, StringType.INSTANCE);
-        sqlScalars.addScalar(SERIES_YEAR, IntegerType.INSTANCE);
+        sqlScalars.addScalar(YEAR, IntegerType.INSTANCE);
         sqlScalars.addScalar(WATCHED, BooleanType.INSTANCE);
 
         List<ApiSeriesInfoDTO> seriesResults = executeQueryWithTransform(ApiSeriesInfoDTO.class, sqlScalars, wrapper);
@@ -2839,12 +2888,12 @@ public class ApiDao extends HibernateDao {
 
     public void statSeriesCount() {
         SqlScalars sqlScalars = new SqlScalars();
-        sqlScalars.addToSql("SELECT s.id AS seriesId, title, start_year AS seriesYear");
+        sqlScalars.addToSql("SELECT s.id AS seriesId, title, start_year AS year");
         sqlScalars.addToSql("FROM series s");
 
         sqlScalars.addScalar(SERIES_ID, LongType.INSTANCE);
         sqlScalars.addScalar(TITLE, StringType.INSTANCE);
-        sqlScalars.addScalar(SERIES_YEAR, IntegerType.INSTANCE);
+        sqlScalars.addScalar(YEAR, IntegerType.INSTANCE);
 
         // Get the results
         List<ApiSeriesInfoDTO> seriesResults = executeQueryWithTransform(ApiSeriesInfoDTO.class, sqlScalars, null);

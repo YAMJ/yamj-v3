@@ -22,9 +22,17 @@
  */
 package org.yamj.core.api.model.dto;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+
 import org.yamj.core.database.model.type.ArtworkType;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_DEFAULT) 
 public class ApiSeasonInfoDTO extends AbstractApiDTO {
 
     private Long seriesId;
@@ -32,6 +40,7 @@ public class ApiSeasonInfoDTO extends AbstractApiDTO {
     private Integer season;
     private String title;
     private String originalTitle;
+    private Integer year = -1;
     private String plot;
     private String outline;
     private Boolean watched;
@@ -75,6 +84,14 @@ public class ApiSeasonInfoDTO extends AbstractApiDTO {
 
     public void setOriginalTitle(String originalTitle) {
         this.originalTitle = originalTitle;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
     }
 
     public String getPlot() {

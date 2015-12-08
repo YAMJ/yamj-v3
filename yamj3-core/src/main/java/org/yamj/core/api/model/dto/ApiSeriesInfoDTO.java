@@ -22,11 +22,16 @@
  */
 package org.yamj.core.api.model.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.model.type.ArtworkType;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_DEFAULT) 
 public class ApiSeriesInfoDTO extends AbstractApiDTO {
@@ -34,9 +39,9 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
     private Long seriesId;
     private String title;
     private String originalTitle;
+    private Integer year = -1;
     private String plot;
     private String outline;
-    private Integer year;
     private Boolean watched;
     private List<ApiGenreDTO> genres = new ArrayList<>(0);
     private List<Studio> studios = new ArrayList<>(0);
@@ -72,6 +77,14 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
         this.originalTitle = originalTitle;
     }
 
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
+
     public String getPlot() {
         return plot;
     }
@@ -88,18 +101,6 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
         this.outline = outline;
     }
 
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
-    public void setSeriesYear(Integer seriesYear) {
-        this.year = seriesYear;
-    }
-    
     public Boolean getWatched() {
         return watched;
     }
