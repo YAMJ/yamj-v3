@@ -1577,10 +1577,10 @@ POST /add/{artwork}/{type}/{id}
     "message": "Cached image as '/a/av/Avatar.movie.13819.poster.jpg'"
 }
 
+--
+Person
+--
 
-# Person
-
-## GET Person [GET /api/person/{id}]
 Get information on the person.
 ***
 **Required Parameters**
@@ -1640,7 +1640,6 @@ GET /api/person/{id}
    }
 }
 
-## Update Person [PUT /api/person/{id}]
 Update information on the person.
 ***
 **Required Parameters**
@@ -1654,8 +1653,7 @@ Update information on the person.
     </tr>
 </table>
 
-**Request body**
-The request body is a JSON object with following optional data in it.
+**Request Body as JSON document**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1696,39 +1694,16 @@ The request body is a JSON object with following optional data in it.
         <td>The biography of the person.</td>
     </tr>
 </table>
-__Example__: `http://localhost:8888/yamj3/api/person/1`
+__Example__: `http://localhost:8888/yamj3/api/person/59`
 
 PUT /api/person/{id}
+> Content-Type: application/json
+> Content-Body: {"firstName":"Alan Maria", "lastName":"Zimmermann"}
 < 200
 < Content-Type: application/json
 {
-   "count":1,
-   "totalCount":1,
-   "queryDuration":"15ms",
-   "queryTime":"2013-08-01 11:08:58",
-   "status":{
-      "status":200,
-      "message":"OK"
-   },
-   "parameters":null,
-   "options":{
-      "start":-1,
-      "max":-1,
-      "sortby":"",
-      "sortdir":"ASC",
-      "id":1
-   },
-   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
-   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
-   "result":{
-      "id":1,
-      "name":"Zachary Levi",
-      "biography":"Zachary Levi Pugh (born September 29, 1980), better known by his stage name Zachary Levi ...",
-      "birthDay":"1980-09-29",
-      "birthPlace":"Lake Charles, Louisiana, USA",
-      "birthName":null,
-      "deathDay":null
-   }
+    "status": 200,
+    "message": "Updated person with ID 59"
 }
 
 
