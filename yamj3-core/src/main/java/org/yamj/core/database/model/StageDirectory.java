@@ -63,6 +63,7 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
     private Set<StageFile> stageFiles = new HashSet<>(0);
 
     // GETTER and SETTER
+    
     public String getDirectoryPath() {
         return directoryPath;
     }
@@ -111,6 +112,7 @@ public class StageDirectory extends AbstractAuditable implements Serializable {
         this.stageFiles = stageFiles;
     }
 
+    
     // EQUALITY CHECKS
     @Override
     public int hashCode() {

@@ -87,8 +87,9 @@ public class ArtworkGenerated extends AbstractAuditable implements Serializable 
     }
 
     // TRANSIENT METHODS
+    
     public boolean isCached() {
-        return StringUtils.isNotBlank(cacheFilename) && StringUtils.isNotBlank(cacheDirectory);
+        return !isNotCached();
     }
 
     public boolean isNotCached() {

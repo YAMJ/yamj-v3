@@ -23,10 +23,7 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -44,7 +41,9 @@ public class NfoRelation implements Serializable {
 
     // GETTER and SETTER
 
-    public NfoRelation() {}
+    public NfoRelation() {
+        // empty constructor
+    }
 
     public NfoRelation(StageFile stageFile, VideoData videoData) {
         setNfoRelationPK(new NfoRelationPK(stageFile, videoData));

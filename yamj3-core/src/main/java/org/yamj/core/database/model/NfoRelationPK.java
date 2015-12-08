@@ -47,6 +47,7 @@ public class NfoRelationPK implements Serializable {
     private VideoData videoData;
 
     public NfoRelationPK() {
+        // empty constructor
     }
 
     public NfoRelationPK(StageFile stageFile, VideoData videoData) {
@@ -55,6 +56,7 @@ public class NfoRelationPK implements Serializable {
     }
 
     // GETTER AND SETTER
+    
     public StageFile getStageFile() {
         return stageFile;
     }
@@ -72,6 +74,7 @@ public class NfoRelationPK implements Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()

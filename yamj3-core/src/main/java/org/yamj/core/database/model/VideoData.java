@@ -22,47 +22,20 @@
  */
 package org.yamj.core.database.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-
+import javax.persistence.*;
 import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.MapKeyType;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.award.MovieAward;
 import org.yamj.core.database.model.dto.AwardDTO;
@@ -556,20 +529,31 @@ public class VideoData extends AbstractMetadata {
     }
 
     public boolean isAllScansSkipped() {
-        if ("all".equalsIgnoreCase(getSkipScanNfo())) return true;
-        if ("all".equalsIgnoreCase(getSkipScanApi())) return true;
-        return false;
+        if (SKIP_ALL.equalsIgnoreCase(getSkipScanNfo())) {
+            return true;
+        }
+        return SKIP_ALL.equalsIgnoreCase(getSkipScanApi());
     }
 
     @Override
     public boolean isSkippedScan(String sourceDb) {
         if (isMovie()) {
             // skip movie
-            if (getSkipScanNfo() == null && getSkipScanApi() == null) return false;
-            if ("all".equalsIgnoreCase(getSkipScanNfo())) return true;
-            if ("all".equalsIgnoreCase(getSkipScanApi())) return true;
-            if (StringUtils.containsIgnoreCase(getSkipScanNfo(), sourceDb)) return true;
-            if (StringUtils.containsIgnoreCase(getSkipScanApi(), sourceDb)) return true;
+            if (getSkipScanNfo() == null && getSkipScanApi() == null) {
+                return false;
+            }
+            if (SKIP_ALL.equalsIgnoreCase(getSkipScanNfo())) {
+                return true;
+            }
+            if (SKIP_ALL.equalsIgnoreCase(getSkipScanApi())) {
+                return true;
+            }
+            if (StringUtils.containsIgnoreCase(getSkipScanNfo(), sourceDb)) {
+                return true;
+            }
+            if (StringUtils.containsIgnoreCase(getSkipScanApi(), sourceDb)) {
+                return true;
+            }
             return false;
         }
         // skip episode

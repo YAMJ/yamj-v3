@@ -47,6 +47,7 @@ public class Genre extends AbstractIdentifiable implements Serializable {
     private String targetXml;
 
     public Genre() {
+        // empty constructor
     }
 
     public Genre(String name) {
@@ -54,6 +55,7 @@ public class Genre extends AbstractIdentifiable implements Serializable {
     }
 
     // GETTER and SETTER
+    
     public String getName() {
         return name;
     }
@@ -79,6 +81,7 @@ public class Genre extends AbstractIdentifiable implements Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()

@@ -325,9 +325,10 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     }
 
     public void setWatchedApi(boolean watchedApi, Date watchedApiLastDate) {
-        if (watchedApiLastDate == null) return;
-        setWatchedApi(watchedApi);
-        setWatchedApiLastDate(watchedApiLastDate);
+        if (watchedApiLastDate != null) {
+            setWatchedApi(watchedApi);
+            setWatchedApiLastDate(watchedApiLastDate);
+        }
     }
 
     public StatusType getStatus() {

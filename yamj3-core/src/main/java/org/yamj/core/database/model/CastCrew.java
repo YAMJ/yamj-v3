@@ -47,6 +47,7 @@ public class CastCrew implements Serializable {
     private int ordering;
 
     public CastCrew() {
+        // empty constructor
     }
 
     public CastCrew(Person person, VideoData videoData, JobType jobType) {

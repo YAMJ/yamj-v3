@@ -41,6 +41,7 @@ public class Studio extends AbstractIdentifiable implements Serializable {
     private String name;
 
     // GETTER and SETTER
+    
     public String getName() {
         return name;
     }
@@ -50,6 +51,7 @@ public class Studio extends AbstractIdentifiable implements Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()

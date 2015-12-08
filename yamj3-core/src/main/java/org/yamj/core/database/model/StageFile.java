@@ -102,6 +102,7 @@ public class StageFile extends AbstractAuditable implements Serializable {
     private MediaFile mediaFile;
 
     // GETTER and SETTER
+    
     public StageDirectory getStageDirectory() {
         return stageDirectory;
     }

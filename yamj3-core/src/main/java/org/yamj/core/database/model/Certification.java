@@ -45,6 +45,7 @@ public class Certification extends AbstractIdentifiable implements Serializable 
     private String certificate;
 
     // GETTER and SETTER
+    
     public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
     }
@@ -62,6 +63,7 @@ public class Certification extends AbstractIdentifiable implements Serializable 
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()

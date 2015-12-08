@@ -94,6 +94,7 @@ public class Trailer extends AbstractAuditable implements Serializable {
     private String title;
 
     // GETTER and SETTER
+    
     public VideoData getVideoData() {
         return videoData;
     }
@@ -196,11 +197,13 @@ public class Trailer extends AbstractAuditable implements Serializable {
     }
 
     // TRANSIENT METHODS
+    
     public boolean isCached() {
         return StringUtils.isNotBlank(getCacheFilename());
     }
     
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()

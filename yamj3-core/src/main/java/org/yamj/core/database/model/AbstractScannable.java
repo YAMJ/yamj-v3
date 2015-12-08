@@ -41,7 +41,8 @@ public abstract class AbstractScannable extends AbstractAuditable
         implements IScannable, Serializable {
 
     private static final long serialVersionUID = -8036305537317711196L;
-
+    protected static final String SKIP_ALL = "all";
+    
     /**
      * This will be generated from a scanned file name.
      */
@@ -115,14 +116,18 @@ public abstract class AbstractScannable extends AbstractAuditable
     
     public final void addModifiedSource(String source) {
         if (!"all".equalsIgnoreCase(source)) {
-            if (modifiedSources == null) modifiedSources = new HashSet<>(1);
+            if (modifiedSources == null) {
+                modifiedSources = new HashSet<>(1);
+            }
             modifiedSources.add(source);
         }
     }
 
     public final void addModifiedSources(Set<String> sources) {
         if (CollectionUtils.isNotEmpty(sources)) {
-            if (modifiedSources == null) modifiedSources = new HashSet<>(sources.size());
+            if (modifiedSources == null) {
+                modifiedSources = new HashSet<>(sources.size());
+            }
             modifiedSources.addAll(sources);
         }
     }
@@ -149,6 +154,7 @@ public abstract class AbstractScannable extends AbstractAuditable
         if (StringUtils.isBlank(sourceDb) || StringUtils.isBlank(id)) {
             return false;
         }
+        
         String newId = id.trim();
         String oldId = getSourceDbIdMap().put(sourceDb, newId);
         final boolean changed = !StringUtils.equals(oldId, newId);
@@ -160,8 +166,7 @@ public abstract class AbstractScannable extends AbstractAuditable
 
     @Override
     public final boolean removeSourceDbId(String sourceDb) {
-        String removedId = getSourceDbIdMap().remove(sourceDb);
-        if (removedId != null) {
+        if (getSourceDbIdMap().remove(sourceDb) != null) {
             addModifiedSource(sourceDb);
             return true;
         }
@@ -173,53 +178,64 @@ public abstract class AbstractScannable extends AbstractAuditable
     abstract void setSkipScanApi(String skipScanApi);
     
     public final boolean enableApiScan(String sourceDb) {
-        if (sourceDb == null) return false;
-        if (getSkipScanApi() == null) return false;
-
         // store the actual setting
-        String oldSkipApi = getSkipScanApi();
+        final String oldSkipScanApi = getSkipScanApi();
+        
+        // check if something has to be done
+        if (sourceDb == null || oldSkipScanApi == null) {
+            return false;
+        }
 
-        if ("all".equalsIgnoreCase(sourceDb)) {
-            setSkipScanApi(null);
+
+        final String newSkipScanApi;
+        if (SKIP_ALL.equalsIgnoreCase(sourceDb)) {
+            newSkipScanApi = null;
         } else {
             HashSet<String> skipScans = new HashSet<>();
-            for (String skipped : getSkipScanApi().split(";")) {
+            for (String skipped : oldSkipScanApi.split(";")) {
                 if (!skipped.equalsIgnoreCase(sourceDb)) {
                     // add skipped scan if not enabled
                     skipScans.add(skipped);
                 }
             }
-            if (CollectionUtils.isEmpty(skipScans)) {
-                setSkipScanApi(null);
+            
+            if (skipScans.isEmpty()) {
+                newSkipScanApi = null;
             } else {
-                setSkipScanApi(StringUtils.join(skipScans, ';'));
+                newSkipScanApi = StringUtils.join(skipScans, ';');
             }
         }
+        setSkipScanApi(newSkipScanApi);
 
         // return true if something has changed 
-        return !StringUtils.equalsIgnoreCase(oldSkipApi, getSkipScanApi());
+        return !StringUtils.equalsIgnoreCase(oldSkipScanApi, newSkipScanApi);
     }
 
     public final boolean disableApiScan(String sourceDb) {
-        if (sourceDb == null) return false;
+        if (sourceDb == null) {
+            return false;
+        }
         
         // store the actual setting
-        String oldSkipApi = getSkipScanApi();
+        final String oldSkipScanApi = getSkipScanApi();
         
-        if ("all".equalsIgnoreCase(sourceDb)) {
-            setSkipScanApi("all");
+        final String newSkipScanApi;
+        if (SKIP_ALL.equalsIgnoreCase(sourceDb)) {
+            newSkipScanApi = SKIP_ALL;
         } else if (getSkipScanApi() == null) {
-            setSkipScanApi(sourceDb);
-        } else if ("all".equalsIgnoreCase(getSkipScanApi())) {
+            newSkipScanApi = sourceDb;
+        } else if (SKIP_ALL.equalsIgnoreCase(oldSkipScanApi)) {
             // nothing to do if already all scans are skipped
+            newSkipScanApi = SKIP_ALL;
         } else {
             final HashSet<String> skipScans = new HashSet<>(Arrays.asList(getSkipScanApi().split(";")));
             skipScans.add(sourceDb);
-            setSkipScanApi(StringUtils.join(skipScans, ';'));
+            newSkipScanApi = StringUtils.join(skipScans, ';');
         }
+        setSkipScanApi(newSkipScanApi);
 
         // return true if something has changed 
-        return !StringUtils.equalsIgnoreCase(oldSkipApi, getSkipScanApi());
+        return !StringUtils.equalsIgnoreCase(oldSkipScanApi, newSkipScanApi);
     }
 
     // OVERRIDE METHODS
@@ -248,7 +264,7 @@ public abstract class AbstractScannable extends AbstractAuditable
         boolean removed = false;
         for (Iterator<Entry<OverrideFlag, String>> it = getOverrideFlags().entrySet().iterator(); it.hasNext();) {
             Entry<OverrideFlag, String> e = it.next();
-            if (StringUtils.endsWithIgnoreCase(e.getValue(), sourceDb)) {
+            if (StringUtils.equalsIgnoreCase(e.getValue(), sourceDb)) {
                 it.remove();
                 removed = true;
             }

@@ -22,39 +22,17 @@
  */
 package org.yamj.core.database.model;
 
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import java.util.*;
+import javax.persistence.*;
 import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.MapKeyType;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.*;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 import org.yamj.core.tools.MetadataTools;
@@ -378,9 +356,7 @@ public class Person extends AbstractScannable {
     
     @Override
     public boolean isSkippedScan(String sourceDb) {
-        if ("all".equalsIgnoreCase(getSkipScanApi())) return true;
-        if (StringUtils.containsIgnoreCase(getSkipScanApi(), sourceDb)) return true;
-        return false;
+        return SKIP_ALL.equalsIgnoreCase(getSkipScanApi());
     }
     
     public StatusType getFilmographyStatus() {

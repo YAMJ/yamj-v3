@@ -107,6 +107,7 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     private Set<ArtworkGenerated> generatedArtworks = new HashSet<>(0);
 
     // GETTER and SETTER
+    
     public Artwork getArtwork() {
         return artwork;
     }
@@ -241,6 +242,7 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     }
 
     // TRANSIENT METHODS
+    
     public boolean isValidStatus() {
         if (status == null) {
             return false;
@@ -257,6 +259,7 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()

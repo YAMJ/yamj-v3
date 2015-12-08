@@ -52,6 +52,7 @@ public class Configuration implements Auditable, Serializable {
     private Date updateTimestamp;
 
     // GETTER and SETTER
+    
     public String getKey() {
         return key;
     }
@@ -87,6 +88,7 @@ public class Configuration implements Auditable, Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()

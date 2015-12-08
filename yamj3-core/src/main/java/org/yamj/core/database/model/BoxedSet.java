@@ -63,7 +63,9 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
 
     // CONSTRUCTORS
     
-    public BoxedSet() {}
+    public BoxedSet() {
+        // empty constructor
+    }
 
     public BoxedSet(String identifier) {
         setIdentifier(identifier);
@@ -117,8 +119,7 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
     }
 
     public final boolean removeSourceDbId(String sourceDb) {
-        String removedId = getSourceDbIdMap().remove(sourceDb);
-        return (removedId != null);
+        return getSourceDbIdMap().remove(sourceDb) != null;
     }
     
     // EQUALITY CHECKS
