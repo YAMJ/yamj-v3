@@ -59,6 +59,7 @@ import org.yamj.core.api.model.dto.ApiVideoDTO;
 import org.yamj.core.api.model.dto.ApiYearDecadeDTO;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.options.UpdatePerson;
+import org.yamj.core.api.options.UpdateVideo;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.config.LocaleService;
@@ -160,7 +161,7 @@ public class JsonApiStorageService {
     @Transactional
     public ApiStatus updatePerson(Long id, UpdatePerson update) {
         Person person = metadataDao.getPerson(id);
-        if (person == null || person.getStatus() == StatusType.DELETED) {
+        if (person == null) {
             return new ApiStatus(410, "ID " + id + " does not determine a valid person entry");
         }
         
@@ -495,6 +496,112 @@ public class JsonApiStorageService {
             localizeCountries(wrapper.getResult().getCountries(), wrapper.getOptions().getLanguage());
             localizeFiles(wrapper.getResult().getFiles(), wrapper.getOptions().getLanguage());
         }
+    }
+
+    @Transactional
+    public ApiStatus updateVideoData(Long id, UpdateVideo update) {
+        VideoData videoData = metadataDao.getById(VideoData.class, id);
+        if (videoData == null) {
+            return new ApiStatus(410, "ID " + id + " does not determine a valid video");
+        }
+
+        if (OverrideTools.checkOverwriteTitle(videoData, API_SOURCE)) {
+            videoData.setTitle(update.getTitle(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteOriginalTitle(videoData, API_SOURCE)) {
+            videoData.setTitleOriginal(update.getTitleOriginal(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwritePlot(videoData, API_SOURCE)) {
+            videoData.setPlot(update.getPlot(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteOutline(videoData, API_SOURCE)) {
+            videoData.setOutline(update.getOutline(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteQuote(videoData, API_SOURCE)) {
+            videoData.setQuote(update.getQuote(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteTagline(videoData, API_SOURCE)) {
+            videoData.setTagline(update.getTagline(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteYear(videoData, API_SOURCE)) {
+            videoData.setPublicationYear(update.getPublicationYear(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteReleaseDate(videoData, API_SOURCE)) {
+            videoData.setRelease(update.getReleaseDate(), API_SOURCE);
+        }
+
+        metadataDao.updateEntity(videoData);
+        return new ApiStatus(200, "Updated video with ID "+id);
+    }
+
+    @Transactional
+    public ApiStatus updateSeries(Long id, UpdateVideo update) {
+        Series series = metadataDao.getById(Series.class, id);
+        if (series == null) {
+            return new ApiStatus(410, "ID " + id + " does not determine a valid series");
+        }
+
+        if (OverrideTools.checkOverwriteTitle(series, API_SOURCE)) {
+            series.setTitle(update.getTitle(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteOriginalTitle(series, API_SOURCE)) {
+            series.setTitleOriginal(update.getTitleOriginal(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwritePlot(series, API_SOURCE)) {
+            series.setPlot(update.getPlot(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteOutline(series, API_SOURCE)) {
+            series.setOutline(update.getOutline(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteYear(series, API_SOURCE)) {
+            series.setStartYear(update.getStartYear(), API_SOURCE);
+            series.setEndYear(update.getEndYear(), API_SOURCE);
+        }
+        
+        metadataDao.updateEntity(series);
+        return new ApiStatus(200, "Updated series with ID "+id);
+    }
+    
+    @Transactional
+    public ApiStatus updateSeason(Long id, UpdateVideo update) {
+        Season season = metadataDao.getById(Season.class, id);
+        if (season == null) {
+            return new ApiStatus(410, "ID " + id + " does not determine a valid season");
+        }
+        
+        if (OverrideTools.checkOverwriteTitle(season, API_SOURCE)) {
+            season.setTitle(update.getTitle(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteOriginalTitle(season, API_SOURCE)) {
+            season.setTitleOriginal(update.getTitleOriginal(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwritePlot(season, API_SOURCE)) {
+            season.setPlot(update.getPlot(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteOutline(season, API_SOURCE)) {
+            season.setOutline(update.getOutline(), API_SOURCE);
+        }
+
+        if (OverrideTools.checkOverwriteYear(season, API_SOURCE)) {
+            season.setPublicationYear(update.getPublicationYear(), API_SOURCE);
+        }
+        
+        metadataDao.updateEntity(season);
+        return new ApiStatus(200, "Updated season with ID "+id);
     }
 
     private void localizeFiles(List<ApiFileDTO> files, String inLanguage) {

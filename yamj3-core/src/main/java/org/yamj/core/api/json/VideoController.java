@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,6 +44,7 @@ import org.yamj.core.api.options.OptionsEpisode;
 import org.yamj.core.api.options.OptionsIdArtwork;
 import org.yamj.core.api.options.OptionsIndexVideo;
 import org.yamj.core.api.options.OptionsMultiType;
+import org.yamj.core.api.options.UpdateVideo;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -67,7 +69,7 @@ public class VideoController {
      * @return
      */
     @RequestMapping(value = "/{type}/{id}", method = RequestMethod.GET)
-    public ApiWrapperSingle<ApiVideoDTO> getVideoById(@PathVariable("type") String type, @ModelAttribute("options") OptionsIndexVideo options) {
+    public ApiWrapperSingle<ApiVideoDTO> getVideo(@PathVariable("type") String type, @ModelAttribute("options") OptionsIndexVideo options) {
         ApiWrapperSingle<ApiVideoDTO> wrapper = new ApiWrapperSingle<>();
         wrapper.setOptions(options);
 
@@ -88,6 +90,33 @@ public class VideoController {
         }
         
         return wrapper;
+    }
+
+    /**
+     * Update information on a video.
+     *
+     * @param type
+     * @param id
+     * @param update
+     * @return
+     */
+    @RequestMapping(value = "/{type}/{id}", method = RequestMethod.PUT)
+    public ApiStatus updateVideo(@PathVariable("type") String type, @PathVariable("id") Long id, @RequestBody UpdateVideo update) {
+        final MetaDataType metaDataType = MetaDataType.fromString(type);
+        
+        if (MetaDataType.SERIES == metaDataType) {
+            return jsonApiStorageService.updateSeries(id, update);
+        }
+
+        if (MetaDataType.SEASON == metaDataType) {
+            return jsonApiStorageService.updateSeason(id, update);
+        }
+
+        if (MetaDataType.MOVIE == metaDataType || MetaDataType.EPISODE == metaDataType) {
+            return jsonApiStorageService.updateVideoData(id, update);
+        }
+
+        return new ApiStatus(415, "Invalid meta data type '" + type + "' for video update");
     }
 
     /**
