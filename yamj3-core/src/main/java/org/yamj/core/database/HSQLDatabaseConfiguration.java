@@ -29,11 +29,9 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp.BasicDataSource;
-import org.hibernate.SessionFactory;
 import org.hsqldb.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
@@ -42,9 +40,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.yamj.core.hibernate.AuditInterceptor;
 
 @Configuration
 @EnableTransactionManagement
@@ -115,13 +111,7 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
     }
     
     @Override
-    @Bean(destroyMethod="destroy")
-    public FactoryBean<SessionFactory> sessionFactory() {
-        LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
-        sessionFactoryBean.setDataSource(dataSource());
-        sessionFactoryBean.setEntityInterceptor(new AuditInterceptor());
-        sessionFactoryBean.setPackagesToScan("org.yamj.core.database.model");
-        
+    protected Properties hibernateProperties() {
         Properties props = new Properties();
         props.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
         props.put("hibernate.show_sql", showSql);
@@ -134,9 +124,7 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
         props.put("hibernate.connection.CharSet", "utf8");
         props.put("hibernate.connection.characterEncoding", "utf8");
         props.put("hibernate.connection.useUnicode", false);
-        sessionFactoryBean.setHibernateProperties(props);
-        
-        return sessionFactoryBean;
+        return props;
     }    
 }
 

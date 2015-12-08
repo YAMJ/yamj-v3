@@ -22,10 +22,16 @@
  */
 package org.yamj.core.database;
 
+import java.util.Properties;
+
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.yamj.core.hibernate.AuditInterceptor;
 
 public abstract class AbstractDatabaseConfiguration implements DatabaseConfiguration {
     
@@ -78,5 +84,18 @@ public abstract class AbstractDatabaseConfiguration implements DatabaseConfigura
         transactionManager.setDefaultTimeout(30);
         return transactionManager;
     }
+    
+    @Override
+    @Bean(destroyMethod="destroy")
+    public FactoryBean<SessionFactory> sessionFactory() {
+        LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
+        sessionFactoryBean.setDataSource(dataSource());
+        sessionFactoryBean.setEntityInterceptor(new AuditInterceptor());
+        sessionFactoryBean.setPackagesToScan("org.yamj.core.database.model");
+        sessionFactoryBean.setHibernateProperties(hibernateProperties());
+        return sessionFactoryBean;
+    }
+        
+    protected abstract Properties hibernateProperties();
 }
 
