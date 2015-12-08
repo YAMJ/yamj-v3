@@ -60,8 +60,7 @@ public class MediaDao extends HibernateDao {
         
         List<Object[]> objects = query.list();
         for (Object[] object : objects) {
-            QueueDTO queueElement = new QueueDTO();
-            queueElement.setId(convertRowElementToLong(object[0]));
+            QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
             queueElement.setDate(convertRowElementToDate(object[2]));
             if (queueElement.getDate() == null) {
                 queueElement.setDate(convertRowElementToDate(object[1]));

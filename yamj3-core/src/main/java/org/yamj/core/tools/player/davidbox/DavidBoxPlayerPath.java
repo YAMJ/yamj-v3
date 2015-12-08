@@ -43,9 +43,6 @@ public class DavidBoxPlayerPath {
     @JsonProperty("size")
     private int size;
 
-    public DavidBoxPlayerPath() {
-    }
-
     public String getDeviceType() {
         return deviceType;
     }

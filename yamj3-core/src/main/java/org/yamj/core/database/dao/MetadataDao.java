@@ -22,13 +22,7 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.CacheMode;
 import org.hibernate.Query;
@@ -40,13 +34,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.CachingNames;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.CastCrew;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -73,8 +61,7 @@ public class MetadataDao extends HibernateDao {
         
         List<Object[]> objects = query.list();
         for (Object[] object : objects) {
-            QueueDTO queueElement = new QueueDTO();
-            queueElement.setId(convertRowElementToLong(object[0]));
+            QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
             queueElement.setMetadataType(convertRowElementToString(object[1]));
             queueElement.setDate(convertRowElementToDate(object[3]));
             if (queueElement.getDate() == null) {

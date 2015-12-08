@@ -33,7 +33,6 @@ import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.tools.MetadataTools;
 
 /**
- *
  * @author stuart.boston
  */
 @JsonInclude(Include.NON_DEFAULT)
@@ -368,14 +367,14 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     }
 
     public String getStatus() {
-		return status;
-	}
+        return status;
+    }
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-	public void addCast(ApiPersonDTO newCast) {
+    public void addCast(ApiPersonDTO newCast) {
         // Add a blank list if it doesn't already exist
         if (!cast.containsKey(newCast.getJob())) {
             cast.put(newCast.getJob(), new ArrayList<ApiPersonDTO>(1));

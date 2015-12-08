@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.StringTokenizer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,7 +43,7 @@ import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.StageDirectory;
 import org.yamj.core.database.model.StageFile;
 
-public class FileTools {
+public final class FileTools {
 
     public static final String DEFAULT_CHARSET = "UTF-8";
 

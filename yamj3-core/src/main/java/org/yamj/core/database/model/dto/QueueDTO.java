@@ -23,6 +23,7 @@
 package org.yamj.core.database.model.dto;
 
 import java.util.Date;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.common.type.MetaDataType;
@@ -30,19 +31,19 @@ import org.yamj.core.database.model.type.ArtworkType;
 
 public final class QueueDTO implements Comparable<QueueDTO> {
 
-    private Long id;
+    private final Long id;
     private Date date;
     private MetaDataType metadataType;
     private ArtworkType artworkType;
 
     // GETTER and SETTER
 
-    public Long getId() {
-        return id;
+    public QueueDTO(Long id) {
+        this.id = id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Long getId() {
+        return id;
     }
 
     public Date getDate() {
@@ -86,6 +87,27 @@ public final class QueueDTO implements Comparable<QueueDTO> {
     }
 
     @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+                .append(id)
+                .toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof QueueDTO)) {
+            return false;
+        }
+        return (id == ((QueueDTO) obj).id);
+    }
+
+    @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SIMPLE_STYLE);
     }
@@ -99,7 +121,7 @@ public final class QueueDTO implements Comparable<QueueDTO> {
             return 1;
         }
         if (getDate() == null && obj.getDate() != null) {
-            return -11;
+            return -1;
         }
         return getDate().compareTo(obj.getDate());
     }

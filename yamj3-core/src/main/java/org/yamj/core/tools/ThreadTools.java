@@ -27,6 +27,10 @@ import java.util.concurrent.TimeUnit;
 
 public final class ThreadTools {
 
+    private ThreadTools() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
+
     public static void waitForTermination(ExecutorService executor) {
         executor.shutdown();
 

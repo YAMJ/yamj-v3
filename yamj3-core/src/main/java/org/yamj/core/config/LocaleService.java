@@ -236,6 +236,7 @@ public class LocaleService  {
         } catch (Exception e) {
             props.clear();
             LOG.error("Failed to load '{}' properties: {}", resourceName, e.getMessage());
+            LOG.trace("Property load error", e);
         }
         return props;
     }
@@ -246,7 +247,9 @@ public class LocaleService  {
         }
         
         String languageCode = languageLookupMap.get(language);
-        if (languageCode != null) return languageCode;
+        if (languageCode != null) {
+            return languageCode;
+        }
         
         // check case insensitive
         for (Entry<String,String> entry : languageLookupMap.entrySet()) {
@@ -265,7 +268,9 @@ public class LocaleService  {
         }
         
         String countryCode = countryLookupMap.get(country);
-        if (countryCode != null) return countryCode;
+        if (countryCode != null) {
+            return countryCode;
+        }
         
         // check case insensitive
         for (Entry<String,String> entry : countryLookupMap.entrySet()) {
@@ -312,17 +317,23 @@ public class LocaleService  {
         
         // fast way
         String display = this.languageDisplayMap.get(inLangCode + "_" + langCode);
-        if (display != null) return display;
+        if (display != null) {
+            return display;
+        }
         
         // slower way
         inLangCode = findLanguageCode(inLanguage);
         if (inLangCode == null) inLangCode = yamjLocale.getLanguage();
         display = this.languageDisplayMap.get(inLangCode + "_" + langCode);
-        if (display != null) return display;
+        if (display != null) {
+            return display;
+        }
 
         // search for language code only
         display = this.languageDisplayMap.get(langCode);
-        if (display != null) return display;
+        if (display != null) {
+            return display;
+        }
 
         // just return language code
         return languageCode;
@@ -335,17 +346,23 @@ public class LocaleService  {
         
         // fast way
         String display = this.countryDisplayMap.get(inLangCode + "_" + cCode);
-        if (display != null) return display;
+        if (display != null) {
+            return display;
+        }
             
         // slower way
         inLangCode = findLanguageCode(inLanguage);
         if (inLangCode == null) inLangCode = yamjLocale.getLanguage();
         display = this.countryDisplayMap.get(inLangCode + "_" + cCode);
-        if (display != null) return display;
+        if (display != null) {
+            return display;
+        }
 
         // search for country code only
         display = this.countryDisplayMap.get(cCode);
-        if (display != null) return display;
+        if (display != null) {
+            return display;
+        }
 
         // just return country code
         return cCode;
@@ -360,7 +377,9 @@ public class LocaleService  {
         List<String> countries = this.configService.getPropertyAsList("yamj3.certification.countries", locale.getCountry());
         for (String country : countries) {
             String countryCode = this.findCountryCode(country);
-            if (countryCode != null) result.add(countryCode);
+            if (countryCode != null) {
+                result.add(countryCode);
+            }
         }
         return result;
     }
@@ -377,4 +396,3 @@ public class LocaleService  {
         return result;
     }
 }
-

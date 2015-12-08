@@ -26,8 +26,9 @@ import java.net.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -74,6 +75,34 @@ public class YouTubeDownloadParser  {
         public VideoDownload(StreamInfo streamInfo, URL url) {
             this.streamInfo = streamInfo;
             this.url = url;
+        }
+
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder()
+                    .append(streamInfo.container)
+                    .append(streamInfo.quality)
+                    .append(url)
+                    .toHashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (!(obj instanceof VideoDownload)) {
+                return false;
+            }
+            final VideoDownload other = (VideoDownload) obj;
+            return new EqualsBuilder()
+                    .append(streamInfo.container, other.streamInfo.container)
+                    .append(streamInfo.quality, other.streamInfo.quality)
+                    .append(url, other.url)
+                    .isEquals();
         }
 
         @Override

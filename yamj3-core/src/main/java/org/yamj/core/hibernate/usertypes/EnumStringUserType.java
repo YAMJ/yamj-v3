@@ -25,6 +25,8 @@ package org.yamj.core.hibernate.usertypes;
 import java.io.Serializable;
 import java.sql.*;
 import java.util.Properties;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.usertype.ParameterizedType;
@@ -55,7 +57,7 @@ import org.hibernate.usertype.UserType;
  *
  * @param <E>
  */
-public class EnumStringUserType<E extends Enum<E>> implements UserType, ParameterizedType {
+public class EnumStringUserType implements UserType, ParameterizedType {
 
     /**
      * Holds the SQL types
@@ -152,11 +154,6 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
         if (null == x || null == y) {
             return false;
         }
-
-        if (x.equals(y)) {
-            return true;
-        }
-
         return x.equals(y);
     }
 
@@ -217,5 +214,29 @@ public class EnumStringUserType<E extends Enum<E>> implements UserType, Paramete
         } else {
             st.setString(index, ((Enum) value).name());
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+                .append(enumClass)
+                .toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof EnumStringUserType)) {
+            return false;
+        }
+        final EnumStringUserType other = (EnumStringUserType) obj;
+        return new EqualsBuilder()
+                .append(enumClass, other.enumClass)
+                .isEquals();
     }
 }

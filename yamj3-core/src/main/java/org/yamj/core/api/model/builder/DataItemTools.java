@@ -31,10 +31,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author Stuart
  */
-public class DataItemTools {
+public final class DataItemTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(DataItemTools.class);
 

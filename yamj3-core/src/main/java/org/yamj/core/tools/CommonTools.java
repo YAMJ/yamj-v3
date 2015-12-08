@@ -26,6 +26,10 @@ import org.apache.commons.lang3.StringUtils;
 
 public final class CommonTools {
 
+    private CommonTools() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
+
     /**
      * Get the hash code of an URL.
      * 

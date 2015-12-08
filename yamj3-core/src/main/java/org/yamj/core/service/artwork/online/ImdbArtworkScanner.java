@@ -27,6 +27,8 @@ import com.omertron.imdbapi.model.ImdbPerson;
 import java.util.*;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,6 +170,34 @@ public class ImdbArtworkScanner implements IMoviePosterScanner, IMovieFanartScan
             return hashCode;
         }
 
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder()
+                    .append(url)
+                    .append(hashCode)
+                    .append(size)
+                    .toHashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (!(obj instanceof ImdbArtwork)) {
+                return false;
+            }
+            final ImdbArtwork other = (ImdbArtwork) obj;
+            return new EqualsBuilder()
+                    .append(url, other.url)
+                    .append(hashCode, other.hashCode)
+                    .append(size, other.size)
+                    .isEquals();
+        }
+        
         @Override
         public int compareTo(ImdbArtwork obj) {
             if (size > obj.size) return -1;

@@ -34,9 +34,6 @@ public class DavidBoxResponse {
     private String name;
     private int totalFile;
 
-    public DavidBoxResponse() {
-    }
-
     public String getName() {
         return name;
     }
@@ -81,5 +78,4 @@ public class DavidBoxResponse {
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
-
 }

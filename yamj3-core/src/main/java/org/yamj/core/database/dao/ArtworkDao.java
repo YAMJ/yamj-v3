@@ -25,7 +25,6 @@ package org.yamj.core.database.dao;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
 import org.hibernate.criterion.Order;
@@ -35,10 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.ArtworkGenerated;
-import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.ArtworkProfile;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.hibernate.HibernateDao;
@@ -87,8 +83,7 @@ public class ArtworkDao extends HibernateDao {
         
         List<Object[]> objects = query.list();
         for (Object[] object : objects) {
-            QueueDTO queueElement = new QueueDTO();
-            queueElement.setId(convertRowElementToLong(object[0]));
+            QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
             queueElement.setArtworkType(convertRowElementToString(object[1]));
             queueElement.setDate(convertRowElementToDate(object[3]));
             if (queueElement.getDate() == null) {
@@ -138,8 +133,7 @@ public class ArtworkDao extends HibernateDao {
         List<QueueDTO> queueElements = new ArrayList<>();
         List<Object[]> objects = query.list();
         for (Object[] object : objects) {
-            QueueDTO queueElement = new QueueDTO();
-            queueElement.setId(convertRowElementToLong(object[0]));
+            QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
             queueElement.setDate(convertRowElementToDate(object[2]));
             if (queueElement.getDate() == null) {
                 queueElement.setDate(convertRowElementToDate(object[1]));

@@ -42,7 +42,7 @@ public final class GraphicTools {
     private static final Logger LOG = LoggerFactory.getLogger(GraphicTools.class);
 
     private GraphicTools() {
-        throw new UnsupportedOperationException("Utility class");
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     public static Dimension getDimension(String url) throws IOException {

@@ -23,7 +23,6 @@
 package org.yamj.core.database;
 
 import java.util.Properties;
-
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;

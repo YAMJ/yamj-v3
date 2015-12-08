@@ -18,10 +18,10 @@ public class ApiExceptionHandler {
     @ExceptionHandler(Exception.class)
     @SuppressWarnings("unused")
     public ResponseEntity<Object> defaultException(Exception ex, WebRequest request) {
-    	LOG.error("Handle api exception", ex);
-    	
-    	final Throwable rootCause = ExceptionUtils.getRootCause(ex);
-    	final ApiStatus apiStatus = new ApiStatus(HttpStatus.INTERNAL_SERVER_ERROR.value(), rootCause.getMessage());
+        LOG.error("Handle api exception", ex);
+        
+        final Throwable rootCause = ExceptionUtils.getRootCause(ex);
+        final ApiStatus apiStatus = new ApiStatus(HttpStatus.INTERNAL_SERVER_ERROR.value(), rootCause.getMessage());
         return new ResponseEntity<Object>(apiStatus, HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+    }
 }

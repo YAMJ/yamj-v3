@@ -45,7 +45,7 @@ public final class DateTimeTools {
     public static final String BUILD_FORMAT = "yyyy-MM-dd HH:mm:ss Z";
 
     private DateTimeTools() {
-        throw new UnsupportedOperationException("Utility class");
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     /**

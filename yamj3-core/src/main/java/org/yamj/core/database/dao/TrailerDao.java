@@ -64,8 +64,7 @@ public class TrailerDao extends HibernateDao {
         
         List<Object[]> objects = query.list();
         for (Object[] object : objects) {
-            QueueDTO queueElement = new QueueDTO();
-            queueElement.setId(convertRowElementToLong(object[0]));
+            QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
             queueElement.setMetadataType(convertRowElementToString(object[1]));
             queueElement.setDate(convertRowElementToDate(object[3]));
             if (queueElement.getDate() == null) {
@@ -90,12 +89,10 @@ public class TrailerDao extends HibernateDao {
         if (maxResults > 0) {
             query.setMaxResults(maxResults);
         }
-
         List<QueueDTO> queueElements = new ArrayList<>();
         List<Object[]> objects = query.list();
         for (Object[] object : objects) {
-            QueueDTO queueElement = new QueueDTO();
-            queueElement.setId(convertRowElementToLong(object[0]));
+            QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
             queueElement.setDate(convertRowElementToDate(object[2]));
             if (queueElement.getDate() == null) {
                 queueElement.setDate(convertRowElementToDate(object[1]));

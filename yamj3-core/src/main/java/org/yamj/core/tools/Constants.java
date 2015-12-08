@@ -25,7 +25,7 @@ package org.yamj.core.tools;
 public final class Constants {
 
     private Constants() {
-        // do not instantiate this class
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
     
     public static final String SPACE_SLASH_SPACE = " / ";

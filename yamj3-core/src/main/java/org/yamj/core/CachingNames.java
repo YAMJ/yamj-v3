@@ -24,10 +24,6 @@ package org.yamj.core;
 
 public final class CachingNames {
 
-    private CachingNames() {
-        // prevent initialization
-    }
-    
     public static final String API_TVDB = "api_tvdb";
     public static final String API_ALLOCINE = "api_allocine";
     public static final String API_IMDB = "api_imdb";
@@ -41,4 +37,8 @@ public final class CachingNames {
     public static final String DB_BOXEDSET = "db_boxedSet";
     public static final String DB_AWARD = "db_award";
     public static final String DB_STAGEFILE = "db_stageFile";
+
+    private CachingNames() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
 }

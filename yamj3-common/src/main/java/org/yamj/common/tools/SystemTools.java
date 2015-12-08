@@ -32,14 +32,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Stuart
  */
-public class SystemTools {
+public final class SystemTools {
 
     private static final Logger LOG = LoggerFactory.getLogger(SystemTools.class);
     private static String ipv4 = null;
     private static String ipv6 = null;
 
     private SystemTools() {
-        throw new UnsupportedOperationException("Utility class");
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     /**
@@ -76,7 +76,7 @@ public class SystemTools {
                     continue;
                 }
 
-                LOG.trace("Current Inteface: {}", currentInterface.toString());
+                LOG.trace("Current Interface: {}", currentInterface.toString());
                 Enumeration<InetAddress> addresses = currentInterface.getInetAddresses();
                 while (!found && addresses.hasMoreElements()) {
                     InetAddress currentAddress = addresses.nextElement();
@@ -98,12 +98,10 @@ public class SystemTools {
                 }
             }
         } catch (SocketException ex) {
-            LOG.error("Failed to get IP Address, error: {}", ex.getMessage());
+            LOG.error("Failed to get IP Address: {}", ex.getMessage());
+            LOG.trace("Socket error", ex);
         }
 
-        if (getIpv4) {
-            return ipv4;
-        }
-        return ipv6;
+        return (getIpv4 ? ipv4 : ipv6);
     }
 }

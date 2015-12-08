@@ -26,10 +26,7 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.service.staging.StagingService;
@@ -39,6 +36,7 @@ import org.yamj.core.service.staging.StagingService;
 public class FileController {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileController.class);
+    
     @Autowired
     private StagingService stagingService;
     @Autowired
@@ -58,11 +56,11 @@ public class FileController {
         
         LOG.info("Deleting file {}", id);
         
-        ApiStatus status;
+        final ApiStatus status;
         if (this.stagingService.deleteStageFile(id)) {
-            status = new ApiStatus("Successfully marked file " + id + " as deleted");
+            status = statusOK(id, "deleted");
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "File " + id + " not found");
+            status = statusNotFound(id);
         }
         return status;
     }
@@ -81,11 +79,11 @@ public class FileController {
 
         LOG.info("Updating file {}", id);
 
-        ApiStatus status;
+        final ApiStatus status;
         if (this.stagingService.updateStageFile(id)) {
-            status = new ApiStatus("Successfully marked file " + id + " as updated");
+            status = statusOK(id, "updated");
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "File " + id + " not found");
+            status = statusNotFound(id);
         }
         return status;
     }
@@ -104,11 +102,11 @@ public class FileController {
 
         LOG.info("Watched file {}", id);
 
-        ApiStatus status;
+        final ApiStatus status;
         if (this.commonStorageService.toogleWatchedStatus(id, true, true)) {
-            status = new ApiStatus("Successfully marked file " + id + " as watched");
+            status = statusOK(id, "watched");
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "File " + id + " not found");
+            status = statusNotFound(id);
         }
         return status;
     }
@@ -127,12 +125,20 @@ public class FileController {
 
         LOG.info("Unwatched file {}", id);
 
-        ApiStatus status;
+        final ApiStatus status;
         if (this.commonStorageService.toogleWatchedStatus(id, false, true)) {
-            status = new ApiStatus("Successfully marked file " + id + " as watched");
+            status = statusOK(id, "unwatched");
         } else {
-            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "File " + id + " not found");
+            status = statusNotFound(id);
         }
         return status;
+    }
+    
+    private static ApiStatus statusOK(Long id, String status) {
+        return new ApiStatus("Sucessfully marked file " + id + " as " + status);
+    }
+
+    private static ApiStatus statusNotFound(Long id) {
+        return new ApiStatus(HttpStatus.SC_BAD_REQUEST, "File " + id + " not found");
     }
 }

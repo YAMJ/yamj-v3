@@ -44,7 +44,6 @@ public class AspectRatioTools {
     @Autowired
     private ConfigService configService;
 
-
     @PostConstruct
     public void init() {
         LOG.info("Initialize aspect ratio tools");

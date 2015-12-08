@@ -38,8 +38,10 @@ import org.yamj.common.util.KeywordMap;
 public final class PropertyTools extends PropertyPlaceholderConfigurer {
 
     private static final Logger LOG = LoggerFactory.getLogger(PropertyTools.class);
+    private static final String DEPRECATED_PROP_LOG_MESSAGE = "Property '{}' has been deprecated and will be removed; please use '{}' instead";
     private static final Properties PROPERTIES = new Properties();
-    // Default as in PropertyPlaceholderConfigurer
+
+    // default as in PropertyPlaceholderConfigurer
     private int springSystemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
 
     @Override
@@ -138,7 +140,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
         if (StringUtils.isBlank(property)) {
             property = PROPERTIES.getProperty(newKey, defaultValue);
         } else {
-            LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
+            LOG.warn(DEPRECATED_PROP_LOG_MESSAGE, oldKey, newKey);
         }
         return property;
     }
@@ -148,7 +150,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
         if (StringUtils.isBlank(property)) {
             property = StringUtils.trimToEmpty(PROPERTIES.getProperty(newKey));
         } else {
-            LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
+            LOG.warn(DEPRECATED_PROP_LOG_MESSAGE, oldKey, newKey);
         }
 
         if (StringUtils.isNotBlank(property)) {
@@ -162,7 +164,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
         if (StringUtils.isBlank(property)) {
             property = PROPERTIES.getProperty(newKey);
         } else {
-            LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
+            LOG.warn(DEPRECATED_PROP_LOG_MESSAGE, oldKey, newKey);
         }
 
         return NumberUtils.toInt(PROPERTIES.getProperty(property), defaultValue);
@@ -173,7 +175,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
         if (StringUtils.isBlank(property)) {
             property = PROPERTIES.getProperty(newKey);
         } else {
-            LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
+            LOG.warn(DEPRECATED_PROP_LOG_MESSAGE, oldKey, newKey);
         }
 
         return NumberUtils.toLong(PROPERTIES.getProperty(property), defaultValue);
@@ -184,7 +186,7 @@ public final class PropertyTools extends PropertyPlaceholderConfigurer {
         if (StringUtils.isBlank(property)) {
             property = PROPERTIES.getProperty(newKey);
         } else {
-            LOG.warn("Property '{}' has been deprecated and will be removed; please use '{}' instead", oldKey, newKey);
+            LOG.warn(DEPRECATED_PROP_LOG_MESSAGE, oldKey, newKey);
         }
 
         return NumberUtils.toFloat(PROPERTIES.getProperty(property), defaultValue);

@@ -316,7 +316,7 @@ public final class HTMLTools {
     }
 
     private HTMLTools() {
-        throw new UnsupportedOperationException("Utility class");
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     public static String decodeHtml(String src) {
