@@ -1581,7 +1581,7 @@ POST /add/{artwork}/{type}/{id}
 Person
 --
 
-Get information on the person.
+Get or update information on the person.
 ***
 **Required Parameters**
 
@@ -1590,11 +1590,11 @@ Get information on the person.
     <col width="80%">
     <tr>
         <td>id</td>
-        <td>This is the ID of the person to fetch.</td>
+        <td>This is the ID of the person.</td>
     </tr>
 </table>
 
-**Optional Parameters**
+**GET: Optional Parameters**
 
 <table width="100%">
     <col width="20%">
@@ -1605,55 +1605,9 @@ Get information on the person.
         Valid options are: artwork, biography, externalid, filmography_inside, filmography_scanned</td>
     </tr>
 </table>
-__Example__: `http://localhost:8888/yamj3/api/person/1`
 
-GET /api/person/{id}
-< 200
-< Content-Type: application/json
-{
-   "count":1,
-   "totalCount":1,
-   "queryDuration":"15ms",
-   "queryTime":"2013-08-01 11:08:58",
-   "status":{
-      "status":200,
-      "message":"OK"
-   },
-   "parameters":null,
-   "options":{
-      "start":-1,
-      "max":-1,
-      "sortby":"",
-      "sortdir":"ASC",
-      "id":1
-   },
-   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
-   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
-   "result":{
-      "id":1,
-      "name":"Zachary Levi",
-      "biography":"Zachary Levi Pugh (born September 29, 1980), better known by his stage name Zachary Levi ...",
-      "birthDay":"1980-09-29",
-      "birthPlace":"Lake Charles, Louisiana, USA",
-      "birthName":null,
-      "deathDay":null
-   }
-}
-
-Update information on the person.
-***
-**Required Parameters**
-
-<table width="100%">
-    <col width="20%">
-    <col width="80%">
-    <tr>
-        <td>id</td>
-        <td>This is the ID of the person to update.</td>
-    </tr>
-</table>
-
-**Request Body as JSON document**
+**PUT: JSON document in Request Body**
+The json elements are optional.
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1694,7 +1648,41 @@ Update information on the person.
         <td>The biography of the person.</td>
     </tr>
 </table>
-__Example__: `http://localhost:8888/yamj3/api/person/59`
+
+__Example__: `http://localhost:8888/yamj3/api/person/1`
+
+GET /api/person/{id}
+< 200
+< Content-Type: application/json
+{
+   "count":1,
+   "totalCount":1,
+   "queryDuration":"15ms",
+   "queryTime":"2013-08-01 11:08:58",
+   "status":{
+      "status":200,
+      "message":"OK"
+   },
+   "parameters":null,
+   "options":{
+      "start":-1,
+      "max":-1,
+      "sortby":"",
+      "sortdir":"ASC",
+      "id":1
+   },
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "result":{
+      "id":1,
+      "name":"Zachary Levi",
+      "biography":"Zachary Levi Pugh (born September 29, 1980), better known by his stage name Zachary Levi ...",
+      "birthDay":"1980-09-29",
+      "birthPlace":"Lake Charles, Louisiana, USA",
+      "birthName":null,
+      "deathDay":null
+   }
+}
 
 PUT /api/person/{id}
 > Content-Type: application/json
