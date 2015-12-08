@@ -1578,10 +1578,9 @@ POST /add/{artwork}/{type}/{id}
 }
 
 
---
-Person
---
+# Person
 
+## GET Person [GET /api/person/{id}]
 Get information on the person.
 ***
 **Required Parameters**
@@ -1609,6 +1608,97 @@ Get information on the person.
 __Example__: `http://localhost:8888/yamj3/api/person/1`
 
 GET /api/person/{id}
+< 200
+< Content-Type: application/json
+{
+   "count":1,
+   "totalCount":1,
+   "queryDuration":"15ms",
+   "queryTime":"2013-08-01 11:08:58",
+   "status":{
+      "status":200,
+      "message":"OK"
+   },
+   "parameters":null,
+   "options":{
+      "start":-1,
+      "max":-1,
+      "sortby":"",
+      "sortdir":"ASC",
+      "id":1
+   },
+   "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
+   "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "result":{
+      "id":1,
+      "name":"Zachary Levi",
+      "biography":"Zachary Levi Pugh (born September 29, 1980), better known by his stage name Zachary Levi ...",
+      "birthDay":"1980-09-29",
+      "birthPlace":"Lake Charles, Louisiana, USA",
+      "birthName":null,
+      "deathDay":null
+   }
+}
+
+## Update Person [PUT /api/person/{id}]
+Update information on the person.
+***
+**Required Parameters**
+
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>id</td>
+        <td>This is the ID of the person to update.</td>
+    </tr>
+</table>
+
+**Request body**
+The request body is a JSON object with following optional data in it.
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>name</td>
+        <td>The full name of the person.</td
+    </tr>
+    <tr>
+        <td>firstName</td>
+        <td>The first name of the person.</td
+    </tr>
+    <tr>
+        <td>lastName</td>
+        <td>The last name of the person.</td
+    </tr>
+    <tr>
+        <td>birthName</td>
+        <td>The birth name of the person.</td
+    </tr>
+    <tr>
+        <td>birthDay</td>
+        <td>The birth day of the person.</td
+    </tr>
+    <tr>
+        <td>birthPlace</td>
+        <td>The birth place of the person.</td
+    </tr>
+    <tr>
+        <td>deathDay</td>
+        <td>The death day of the person.</td
+    </tr>
+    <tr>
+        <td>deathPlace</td>
+        <td>The death place of the person.</td
+    </tr>
+    <tr>
+        <td>biography</td>
+        <td>The biography of the person.</td>
+    </tr>
+</table>
+__Example__: `http://localhost:8888/yamj3/api/person/1`
+
+PUT /api/person/{id}
 < 200
 < Content-Type: application/json
 {
