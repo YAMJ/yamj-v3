@@ -536,6 +536,8 @@ public class JsonApiStorageService {
         if (OverrideTools.checkOverwriteReleaseDate(videoData, API_SOURCE)) {
             videoData.setRelease(update.getReleaseDate(), API_SOURCE);
         }
+        
+        videoData.setTopRank(update.getTopRank());
 
         metadataDao.updateEntity(videoData);
         return new ApiStatus(200, "Updated video with ID "+id);

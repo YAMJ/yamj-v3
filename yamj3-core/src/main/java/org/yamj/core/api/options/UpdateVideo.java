@@ -10,7 +10,7 @@ public class UpdateVideo {
     private String outline;
 
     // just for movie and season
-    private int publicationYear;
+    private int publicationYear = -1;
 
     // just for movies
     private Date releaseDate;
@@ -19,8 +19,8 @@ public class UpdateVideo {
     private String quote;
 
     // just for series
-    private int startYear;
-    private int endYear;
+    private int startYear = -1;
+    private int endYear = -1;
 
     public String getTitle() {
         return title;
