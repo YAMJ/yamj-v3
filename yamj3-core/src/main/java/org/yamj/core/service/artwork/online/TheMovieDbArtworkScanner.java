@@ -154,7 +154,6 @@ public class TheMovieDbArtworkScanner implements
         Collection collection = findCollection(boxedSet, defaultLanguage);
         if (collection != null) {
             boxedSet.setSourceDbId(getScannerName(), Integer.toString(collection.getId()));
-            // TODO rename collection?
             return this.getFilteredArtwork(collection.getId(), defaultLanguage, MetaDataType.BOXSET, ArtworkType.POSTER, DEFAULT_SIZE);
         }
         
@@ -173,7 +172,6 @@ public class TheMovieDbArtworkScanner implements
         Collection collection = findCollection(boxedSet, defaultLanguage);
         if (collection != null) {
             boxedSet.setSourceDbId(getScannerName(), Integer.toString(collection.getId()));
-            // TODO rename collection?
             return this.getFilteredArtwork(collection.getId(), defaultLanguage, MetaDataType.BOXSET, ArtworkType.BACKDROP, DEFAULT_SIZE);
         }
         
@@ -183,8 +181,8 @@ public class TheMovieDbArtworkScanner implements
     public Collection findCollection(BoxedSet boxedSet, String language) {
         try {
             ResultList<Collection> resultList = tmdbApi.searchCollection(boxedSet.getName(), 0, language);
-            if (resultList.isEmpty() && !StringUtils.equalsIgnoreCase(language, "en")) {
-                resultList = tmdbApi.searchCollection(boxedSet.getName(), 0, "en");
+            if (resultList.isEmpty() && !StringUtils.equalsIgnoreCase(language, LANGUAGE_EN)) {
+                resultList = tmdbApi.searchCollection(boxedSet.getName(), 0, LANGUAGE_EN);
             }
 
             for (Collection collection : resultList.getResults()) {

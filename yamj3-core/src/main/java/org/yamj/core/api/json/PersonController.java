@@ -26,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,6 +36,7 @@ import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.model.dto.ApiPersonDTO;
 import org.yamj.core.api.options.OptionsId;
+import org.yamj.core.api.options.UpdatePerson;
 import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.api.wrapper.ApiWrapperSingle;
 import org.yamj.core.database.service.JsonApiStorageService;
@@ -50,10 +53,10 @@ public class PersonController {
     private ScanningScheduler scanningScheduler;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public ApiWrapperSingle<ApiPersonDTO> getPersonById(@ModelAttribute("options") OptionsId options) {
+    public ApiWrapperSingle<ApiPersonDTO> getPerson(@ModelAttribute("options") OptionsId options) {
         ApiWrapperSingle<ApiPersonDTO> wrapper = new ApiWrapperSingle<>();
         if (options.getId() > 0) {
-            LOG.info("Getting person with ID '{}'", options.getId());
+            LOG.trace("Getting person with ID '{}'", options.getId());
             wrapper.setOptions(options);
             jsonApiStorageService.getPerson(wrapper);
             wrapper.setStatusCheck();
@@ -62,6 +65,11 @@ public class PersonController {
             wrapper.setStatusInvalidId();
         }
         return wrapper;
+    }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    public ApiStatus updatePerson(@PathVariable("id") Long id, @RequestBody UpdatePerson update) {
+        return jsonApiStorageService.updatePerson(id, update);
     }
 
     @RequestMapping(value = "/movie", method = RequestMethod.GET)
