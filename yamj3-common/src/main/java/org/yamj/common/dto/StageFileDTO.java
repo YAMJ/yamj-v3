@@ -24,6 +24,7 @@ package org.yamj.common.dto;
 
 import java.io.File;
 import java.io.Serializable;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.joda.time.DateTime;
@@ -46,6 +47,7 @@ public final class StageFileDTO implements Serializable {
     private String content;
     
     public StageFileDTO() {
+        // empty constructor
     }
 
     public StageFileDTO(File stageFile) {

@@ -133,7 +133,7 @@ public class ApiDao extends HibernateDao {
      * @param wrapper
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public void getVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
+    public List<ApiVideoDTO> getVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
         OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getOptions();
         IndexParams params = new IndexParams(options);
 
@@ -162,8 +162,6 @@ public class ApiDao extends HibernateDao {
         DataItemTools.addDataItemScalars(sqlScalars, params.getDataItems());
 
         List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
-        wrapper.setResults(queryResults);
-
         if (CollectionUtils.isNotEmpty(queryResults)) {
             
             if (params.hasDataItem(DataItem.GENRE)) {
@@ -268,6 +266,8 @@ public class ApiDao extends HibernateDao {
         } else {
             LOG.debug("No results found to process.");
         }
+        
+        return queryResults;
     }
 
     /**
@@ -1424,10 +1424,11 @@ public class ApiDao extends HibernateDao {
      *
      * @param wrapper
      */
-    public void getPersonList(ApiWrapperList<ApiPersonDTO> wrapper) {
+    public List<ApiPersonDTO> getPersonList(ApiWrapperList<ApiPersonDTO> wrapper) {
         OptionsId options = (OptionsId) wrapper.getOptions();
         SqlScalars sqlScalars = generateSqlForPerson(options);
         List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
+        
         if (CollectionUtils.isNotEmpty(results)) {
             if (options.hasDataItem(DataItem.ARTWORK)) {
                 LOG.trace("Adding photos");
@@ -1441,8 +1442,8 @@ public class ApiDao extends HibernateDao {
                 }
             }
         }
-
-        wrapper.setResults(results);
+        
+        return results;
     }
 
     /**
@@ -1450,12 +1451,14 @@ public class ApiDao extends HibernateDao {
      *
      * @param wrapper
      */
-    public void getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
+    public ApiPersonDTO getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
         OptionsId options = (OptionsId) wrapper.getOptions();
         SqlScalars sqlScalars = generateSqlForPerson(options);
         List<ApiPersonDTO> results = executeQueryWithTransform(ApiPersonDTO.class, sqlScalars, wrapper);
+        
+        ApiPersonDTO person = null;
         if (CollectionUtils.isNotEmpty(results)) {
-            ApiPersonDTO person = results.get(0);
+            person = results.get(0);
             if (options.hasDataItem(DataItem.ARTWORK)) {
                 LOG.info("Adding photo for '{}'", person.getName());
                 // Add the artwork
@@ -1481,11 +1484,8 @@ public class ApiDao extends HibernateDao {
                 LOG.info("Adding filmograpghy scanned for '{}'", person.getName());
                 person.setFilmography(getPersonFilmographyScanned(person.getId(), options));
             }
-
-            wrapper.setResult(person);
-        } else {
-            wrapper.setResult(null);
         }
+        return person;
     }
 
     private List<ApiFilmographyDTO> getPersonFilmographyInside(long id, OptionsId options) {
@@ -1625,7 +1625,7 @@ public class ApiDao extends HibernateDao {
         return executeQueryWithTransform(ApiFilmographyDTO.class, sqlScalars, null);
     }
 
-    public void getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {
+    public  List<ApiPersonDTO> getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {
         OptionsId options = (OptionsId) wrapper.getOptions();
         LOG.info("Getting person list for {} with ID {}", metaDataType, options.getId());
 
@@ -1647,7 +1647,7 @@ public class ApiDao extends HibernateDao {
             LOG.info("No artwork found/requested for {} with ID {}", metaDataType, options.getId());
         }
 
-        wrapper.setResults(results);
+        return results;
     }
 
     /**
@@ -1868,7 +1868,7 @@ public class ApiDao extends HibernateDao {
     }
     //</editor-fold>
 
-    public void getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
+    public List<ApiEpisodeDTO> getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
         OptionsEpisode options = (OptionsEpisode) wrapper.getOptions();
         SqlScalars sqlScalars = new SqlScalars();
 
@@ -1927,11 +1927,13 @@ public class ApiDao extends HibernateDao {
 
         List<ApiEpisodeDTO> results = executeQueryWithTransform(ApiEpisodeDTO.class, sqlScalars, wrapper);
         if (CollectionUtils.isNotEmpty(results)) {
+            
             if (options.hasDataItem(DataItem.FILES)) {
                 for (ApiEpisodeDTO episode : results) {
                     episode.setFiles(getFilesForId(MetaDataType.EPISODE, episode.getId()));
                 }
             }
+            
             if (options.hasDataItem(DataItem.GENRE)) {
                 // use series genres
                 Map<Long, List<ApiGenreDTO>> map = new HashMap<>();
@@ -1944,6 +1946,7 @@ public class ApiDao extends HibernateDao {
                     episode.setGenres(genres);
                 }
             }
+            
             if (options.hasDataItem(DataItem.COUNTRY)) {
                 // use series countries
                 Map<Long, List<ApiCountryDTO>> map = new HashMap<>();
@@ -1956,6 +1959,7 @@ public class ApiDao extends HibernateDao {
                     episode.setCountries(countries);
                 }
             }
+            
             if (options.hasDataItem(DataItem.STUDIO)) {
                 // use series studios
                 Map<Long, List<Studio>> map = new HashMap<>();
@@ -1968,6 +1972,7 @@ public class ApiDao extends HibernateDao {
                     episode.setStudios(studios);
                 }
             }
+            
             if (options.hasDataItem(DataItem.CERTIFICATION)) {
                 // use series certifications
                 Map<Long, List<ApiCertificationDTO>> map = new HashMap<>();
@@ -1980,6 +1985,7 @@ public class ApiDao extends HibernateDao {
                     episode.setCertifications(certifications);
                 }
             }
+            
             if (options.hasDataItem(DataItem.AWARD)) {
                 // use series awards
                 Map<Long, List<ApiAwardDTO>> map = new HashMap<>();
@@ -1992,6 +1998,7 @@ public class ApiDao extends HibernateDao {
                     episode.setAwards(awards);
                 }
             }
+            
             if (options.hasDataItem(DataItem.RATING)) {
                 // use episode certifications
                 for (ApiEpisodeDTO episode : results) {
@@ -2024,10 +2031,11 @@ public class ApiDao extends HibernateDao {
                 }
             }
         }
-        wrapper.setResults(results);
+        
+        return results;
     }
 
-    public void getSingleVideo(ApiWrapperSingle<ApiVideoDTO> wrapper) {
+    public ApiVideoDTO getSingleVideo(ApiWrapperSingle<ApiVideoDTO> wrapper) {
         OptionsIndexVideo options = (OptionsIndexVideo) wrapper.getOptions();
         IndexParams params = new IndexParams(options);
         MetaDataType type = MetaDataType.fromString(options.getType());
@@ -2068,8 +2076,10 @@ public class ApiDao extends HibernateDao {
 
         List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
         LOG.trace("Found {} results for ID {}", queryResults.size(), params.getId());
+        
+        ApiVideoDTO video = null;
         if (CollectionUtils.isNotEmpty(queryResults)) {
-            ApiVideoDTO video = queryResults.get(0);
+            video = queryResults.get(0);
 
             if (params.hasDataItem(DataItem.GENRE)) {
                 LOG.trace("Adding genres for ID {}", options.getId());
@@ -2157,12 +2167,9 @@ public class ApiDao extends HibernateDao {
                 LOG.trace("Adding all jobs for ID {}", options.getId());
                 video.setCast(getCastForId(type, options.getId(), params.getDataItems(), null));
             }
-
-            wrapper.setResult(video);
-        } else {
-            wrapper.setResult(null);
         }
-        wrapper.setStatusCheck();
+        
+        return video;
     }
 
     /**
@@ -2695,10 +2702,9 @@ public class ApiDao extends HibernateDao {
         return generateIdMapList(results);
     }
 
-    public void getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper) {
+    public List<ApiSeriesInfoDTO> getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper) {
         OptionsIdArtwork options = (OptionsIdArtwork) wrapper.getOptions();
         Long id = options.getId();
-        LOG.info("Getting series information for series ID {}", id);
 
         SqlScalars sqlScalars = new SqlScalars();
         sqlScalars.addToSql("SELECT s.id AS seriesId, s.title, s.title_original AS originalTitle, s.start_year AS year, ");
@@ -2762,7 +2768,8 @@ public class ApiDao extends HibernateDao {
             }
             series.setSeasonList(getSeasonInfo(options));
         }
-        wrapper.setResults(seriesResults);
+        
+        return seriesResults;
     }
 
     private List<ApiSeasonInfoDTO> getSeasonInfo(OptionsIdArtwork options) {

@@ -194,7 +194,7 @@ public final class CmdLineOption {
      *
      * @param excludedOptions the excluded options
      */
-    public void addExcludedOptions(final CmdLineOption excludedOptions[]) {
+    public void addExcludedOptions(final CmdLineOption[] excludedOptions) {
         for (int i = 0; excludedOptions != null && i < excludedOptions.length; i++) {
             this.addExcludedOption(excludedOptions[i]);
         }
@@ -274,7 +274,7 @@ public final class CmdLineOption {
      *
      * @param requiredOptions the required option
      */
-    public void addRequiredOptions(final CmdLineOption requiredOptions[]) {
+    public void addRequiredOptions(final CmdLineOption[] requiredOptions) {
         for (int i = 0; requiredOptions != null && i < requiredOptions.length; i++) {
             this.addRequiredOption(requiredOptions[i]);
         }

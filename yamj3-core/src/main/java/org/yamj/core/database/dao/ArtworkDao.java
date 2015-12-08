@@ -28,7 +28,6 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
-import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
@@ -56,10 +55,8 @@ public class ArtworkDao extends HibernateDao {
                 .load();
     }
 
-    @SuppressWarnings("resource")
     public List<ArtworkProfile> getPreProcessArtworkProfiles(ArtworkType artworkType, MetaDataType metaDataType) {
-        Session session = currentSession();
-        Criteria criteria = session.createCriteria(ArtworkProfile.class);
+        Criteria criteria = currentSession().createCriteria(ArtworkProfile.class);
         criteria.add(Restrictions.eq("artworkType", artworkType));
         criteria.add(Restrictions.eq("preProcess", Boolean.TRUE));
         if (MetaDataType.MOVIE == metaDataType) {

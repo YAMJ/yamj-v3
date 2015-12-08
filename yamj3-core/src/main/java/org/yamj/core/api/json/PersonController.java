@@ -55,13 +55,11 @@ public class PersonController {
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ApiWrapperSingle<ApiPersonDTO> getPerson(@ModelAttribute("options") OptionsId options) {
         ApiWrapperSingle<ApiPersonDTO> wrapper = new ApiWrapperSingle<>();
-        if (options.getId() > 0) {
-            LOG.trace("Getting person with ID '{}'", options.getId());
+        if (options.getId() > 0L) {
+            LOG.trace("Getting person with ID {}", options.getId());
             wrapper.setOptions(options);
-            jsonApiStorageService.getPerson(wrapper);
-            wrapper.setStatusCheck();
+            wrapper.setResult(jsonApiStorageService.getPerson(wrapper));
         } else {
-            wrapper.setResult(null);
             wrapper.setStatusInvalidId();
         }
         return wrapper;
@@ -94,14 +92,11 @@ public class PersonController {
 
     private ApiWrapperList<ApiPersonDTO> getPersonListByVideo(MetaDataType metaDataType, OptionsId options) {
         ApiWrapperList<ApiPersonDTO> wrapper = new ApiWrapperList<>();
-
         if (options.getId() > 0L) {
-            LOG.info("Getting person list for {} with ID '{}'", metaDataType, options.getId());
+            LOG.info("Getting person list for {} with ID {}", metaDataType, options.getId());
             wrapper.setOptions(options);
-            jsonApiStorageService.getPersonListByVideoType(metaDataType, wrapper);
-            wrapper.setStatusCheck();
+            wrapper.setResults(jsonApiStorageService.getPersonListByVideoType(metaDataType, wrapper));
         } else {
-            wrapper.setResults(null);
             wrapper.setStatusInvalidId();
         }
         return wrapper;
@@ -116,9 +111,11 @@ public class PersonController {
             @RequestParam(required = true) String sourcedb,
             @RequestParam(required = true) String externalid
     ) {
-        LOG.info("Set {} external ID '{}' for person ID {}", sourcedb, externalid, id);
+        LOG.info("Set {} external id '{}' for person ID {}", sourcedb, externalid, id);
         ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.PERSON, id, sourcedb, externalid);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanPeopleData();
+        if (apiStatus.isSuccessful()) {
+            scanningScheduler.triggerScanPeopleData();
+        }
         return apiStatus;
         
     }
@@ -131,9 +128,11 @@ public class PersonController {
             @RequestParam(required = true) Long id,
             @RequestParam(required = true) String sourcedb
     ) {
-        LOG.info("Remove {} external ID from person ID {}", sourcedb, id);
+        LOG.info("Remove {} external id from person ID {}", sourcedb, id);
         ApiStatus apiStatus = this.jsonApiStorageService.updateExternalId(MetaDataType.PERSON, id, sourcedb, null);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanPeopleData();
+        if (apiStatus.isSuccessful()) {
+            scanningScheduler.triggerScanPeopleData();
+        }
         return apiStatus;
     }
 
@@ -146,12 +145,14 @@ public class PersonController {
             @RequestParam(required = true) String sourcedb) 
     {
         if (id <= 0L) {
-            return new ApiStatus(410, "Not a valid ID");            
+            return ApiStatus.INVALID_ID;
         }
         
-        LOG.info("Enable {} online scan for person with ID '{}'", sourcedb, id);
+        LOG.info("Enable {} online scan for person with ID {}", sourcedb, id);
         ApiStatus apiStatus = jsonApiStorageService.updateOnlineScan(MetaDataType.PERSON, id, sourcedb, false);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanPeopleData();
+        if (apiStatus.isSuccessful()) {
+            scanningScheduler.triggerScanPeopleData();
+        }
         return apiStatus;
     }
 
@@ -164,12 +165,14 @@ public class PersonController {
             @RequestParam(required = true) String sourcedb) 
     {
         if (id <= 0L) {
-            return new ApiStatus(410, "Not a valid ID");            
+            return ApiStatus.INVALID_ID;
         }
         
-        LOG.info("Disable {} online scan for person with ID '{}'", sourcedb, id);
+        LOG.info("Disable {} online scan for person with ID {}", sourcedb, id);
         ApiStatus apiStatus =  jsonApiStorageService.updateOnlineScan(MetaDataType.PERSON, id, sourcedb, true);
-        if (apiStatus.isSuccessful()) scanningScheduler.triggerScanPeopleData();
+        if (apiStatus.isSuccessful()) {
+            scanningScheduler.triggerScanPeopleData();
+        }
         return apiStatus;
     }
 
@@ -182,7 +185,7 @@ public class PersonController {
             @RequestParam(required = true) Long doublet) 
     {
         if (id <= 0L || doublet <= 0L) {
-            return new ApiStatus(410, "Not a valid ID");            
+            return ApiStatus.INVALID_ID;
         }
         
         LOG.info("Handle {} as doublet of {}", doublet, id);

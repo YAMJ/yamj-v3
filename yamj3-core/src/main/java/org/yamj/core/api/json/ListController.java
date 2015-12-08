@@ -41,7 +41,6 @@ public class ListController {
     public ApiWrapperList<ApiListDTO> getMovieList() {
         ApiWrapperList<ApiListDTO> wrapper = new ApiWrapperList<>();
         wrapper.setResults(jsonApiStorageService.getMovieList(wrapper));
-        wrapper.setStatusCheck();
         return wrapper;
     }
 
@@ -49,7 +48,6 @@ public class ListController {
     public ApiWrapperList<ApiListDTO> getSeriesList() {
         ApiWrapperList<ApiListDTO> wrapper = new ApiWrapperList<>();
         wrapper.setResults(jsonApiStorageService.getSeriesList(wrapper));
-        wrapper.setStatusCheck();
         return wrapper;
     }
 }

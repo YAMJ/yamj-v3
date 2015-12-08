@@ -22,6 +22,7 @@
  */
 package org.yamj.core.api.json;
 
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,25 +47,22 @@ public class FileController {
     /**
      * Mark a stage file as deleted.
      *
-     * @param options
+     * @param id
      * @return
      */
     @RequestMapping(value = "/delete/{id}", method = {RequestMethod.GET, RequestMethod.DELETE})
-    public ApiStatus deleteFileById(@PathVariable("id") Long id) {
-        ApiStatus status = new ApiStatus();
-        if (id != null && id > 0L) {
-            LOG.info("Deleting file '{}'", id);
-            boolean result = this.stagingService.deleteStageFile(id);
-            if (result) {
-                status.setStatus(200);
-                status.setMessage("Successfully marked file '" + id + "' as deleted");
-            } else {
-                status.setStatus(400);
-                status.setMessage("File not found: " + id);
-            }
+    public ApiStatus deleteFile(@PathVariable("id") Long id) {
+        if (id == null || id.longValue() <= 0) {
+            return ApiStatus.INVALID_ID;
+        }
+        
+        LOG.info("Deleting file {}", id);
+        
+        ApiStatus status;
+        if (this.stagingService.deleteStageFile(id)) {
+            status = new ApiStatus("Successfully marked file " + id + " as deleted");
         } else {
-            status.setStatus(400);
-            status.setMessage("Invalid file id specified");
+            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "File " + id + " not found");
         }
         return status;
     }
@@ -72,25 +70,22 @@ public class FileController {
     /**
      * Mark a stage file as updated.
      *
-     * @param options
+     * @param id
      * @return
      */
     @RequestMapping(value = "/update/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
-    public ApiStatus updateFileById(@PathVariable("id") Long id) {
-        ApiStatus status = new ApiStatus();
-        if (id != null && id > 0L) {
-            LOG.info("Updating file '{}'", id);
-            boolean result = this.stagingService.updateStageFile(id);
-            if (result) {
-                status.setStatus(200);
-                status.setMessage("Successfully marked file '" + id + "' as updated");
-            } else {
-                status.setStatus(400);
-                status.setMessage("File not found: " + id);
-            }
+    public ApiStatus updateFile(@PathVariable("id") Long id) {
+        if (id == null || id.longValue() <= 0) {
+            return ApiStatus.INVALID_ID;
+        }
+
+        LOG.info("Updating file {}", id);
+
+        ApiStatus status;
+        if (this.stagingService.updateStageFile(id)) {
+            status = new ApiStatus("Successfully marked file " + id + " as updated");
         } else {
-            status.setStatus(400);
-            status.setMessage("Invalid file id specified");
+            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "File " + id + " not found");
         }
         return status;
     }
@@ -98,51 +93,45 @@ public class FileController {
     /**
      * Mark a stage file as watched.
      *
-     * @param options
+     * @param id
      * @return
      */
     @RequestMapping(value = "/watched/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
-    public ApiStatus watchedFileById(@PathVariable("id") Long id) {
-        ApiStatus status = new ApiStatus();
-        if (id != null && id > 0L) {
-            LOG.info("Watched file '{}'", id);
-            boolean result = commonStorageService.toogleWatchedStatus(id, true, true);
-            if (result) {
-                status.setStatus(200);
-                status.setMessage("Successfully marked file '" + id + "' as watched");
-            } else {
-                status.setStatus(400);
-                status.setMessage("File not found or invalid: " + id);
-            }
+    public ApiStatus watchedFile(@PathVariable("id") Long id) {
+        if (id == null || id.longValue() <= 0) {
+            return ApiStatus.INVALID_ID;
+        }
+
+        LOG.info("Watched file {}", id);
+
+        ApiStatus status;
+        if (this.commonStorageService.toogleWatchedStatus(id, true, true)) {
+            status = new ApiStatus("Successfully marked file " + id + " as watched");
         } else {
-            status.setStatus(400);
-            status.setMessage("Invalid file id specified");
+            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "File " + id + " not found");
         }
         return status;
     }
 
     /**
-     * Mark a stage file as watched.
+     * Mark a stage file as unwatched.
      *
-     * @param options
+     * @param id
      * @return
      */
     @RequestMapping(value = "/unwatched/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
-    public ApiStatus unwatchedFileById(@PathVariable("id") Long id) {
-        ApiStatus status = new ApiStatus();
-        if (id != null && id > 0L) {
-            LOG.info("Unwatched file '{}'", id);
-            boolean result = this.commonStorageService.toogleWatchedStatus(id, false, true);
-            if (result) {
-                status.setStatus(200);
-                status.setMessage("Successfully marked file '" + id + "' as unwatched");
-            } else {
-                status.setStatus(400);
-                status.setMessage("File not found or invalid: " + id);
-            }
+    public ApiStatus unwatchedFile(@PathVariable("id") Long id) {
+        if (id == null || id.longValue() <= 0) {
+            return ApiStatus.INVALID_ID;
+        }
+
+        LOG.info("Unwatched file {}", id);
+
+        ApiStatus status;
+        if (this.commonStorageService.toogleWatchedStatus(id, false, true)) {
+            status = new ApiStatus("Successfully marked file " + id + " as watched");
         } else {
-            status.setStatus(400);
-            status.setMessage("Invalid file id specified");
+            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "File " + id + " not found");
         }
         return status;
     }

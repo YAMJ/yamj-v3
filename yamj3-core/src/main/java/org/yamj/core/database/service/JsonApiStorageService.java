@@ -108,17 +108,19 @@ public class JsonApiStorageService {
 
     
     //<editor-fold defaultstate="collapsed" desc="Index Methods">
-    public void getVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
-        apiDao.getVideoList(wrapper);
+    public List<ApiVideoDTO> getVideoList(ApiWrapperList<ApiVideoDTO> wrapper) {
+        List<ApiVideoDTO> results = apiDao.getVideoList(wrapper);
         
         // localization
-        if (CollectionUtils.isNotEmpty(wrapper.getResults())) {
-            for (ApiVideoDTO video : wrapper.getResults()) {
+        if (CollectionUtils.isNotEmpty(results)) {
+            for (ApiVideoDTO video : results) {
                 localizeCertifications(video.getCertifications(), wrapper.getOptions().getLanguage());
                 localizeCountries(video.getCountries(), wrapper.getOptions().getLanguage());
                 localizeFiles(video.getFiles(), wrapper.getOptions().getLanguage());
             }
         }
+        
+        return results;
     }
 
     public CountTimestamp getCountTimestamp(MetaDataType type) {
@@ -139,23 +141,25 @@ public class JsonApiStorageService {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Person Methods">
-    public void getPersonList(ApiWrapperList<ApiPersonDTO> wrapper) {
-        apiDao.getPersonList(wrapper);
+    public List<ApiPersonDTO> getPersonList(ApiWrapperList<ApiPersonDTO> wrapper) {
+        return apiDao.getPersonList(wrapper);
     }
 
-    public void getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
-        apiDao.getPerson(wrapper);
+    public ApiPersonDTO getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
+        ApiPersonDTO person = apiDao.getPerson(wrapper);
         
-        if (wrapper.getResult() != null && CollectionUtils.isNotEmpty(wrapper.getResult().getFilmography())) {
-            for (ApiFilmographyDTO filmo : wrapper.getResult().getFilmography()) {
+        if (person != null && CollectionUtils.isNotEmpty(person.getFilmography())) {
+            for (ApiFilmographyDTO filmo : person.getFilmography()) {
                 String releaseCountry = localeService.getDisplayCountry(wrapper.getOptions().getLanguage(), filmo.getReleaseCountryCode());
                 filmo.setReleaseCountry(releaseCountry);
             }
         }
+        
+        return person;
     }
 
-    public void getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {
-        apiDao.getPersonListByVideoType(metaDataType, wrapper);
+    public  List<ApiPersonDTO> getPersonListByVideoType(MetaDataType metaDataType, ApiWrapperList<ApiPersonDTO> wrapper) {
+        return apiDao.getPersonListByVideoType(metaDataType, wrapper);
     }
     
     @Transactional
@@ -474,28 +478,30 @@ public class JsonApiStorageService {
     }
     //</editor-fold>
 
-    public void getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
-        apiDao.getEpisodeList(wrapper);
+    public  List<ApiEpisodeDTO> getEpisodeList(ApiWrapperList<ApiEpisodeDTO> wrapper) {
+        List<ApiEpisodeDTO> results = apiDao.getEpisodeList(wrapper);
         
         // localization
-        if (CollectionUtils.isNotEmpty(wrapper.getResults())) {
-            for (ApiEpisodeDTO episode : wrapper.getResults()) {
-                localizeCertifications(episode.getCertifications(), wrapper.getOptions().getLanguage());
-                localizeCountries(episode.getCountries(), wrapper.getOptions().getLanguage());
-                localizeFiles(episode.getFiles(), wrapper.getOptions().getLanguage());
-            }
+        for (ApiEpisodeDTO episode : results) {
+            localizeCertifications(episode.getCertifications(), wrapper.getOptions().getLanguage());
+            localizeCountries(episode.getCountries(), wrapper.getOptions().getLanguage());
+            localizeFiles(episode.getFiles(), wrapper.getOptions().getLanguage());
         }
+        
+        return results;
     }
 
-    public void getSingleVideo(ApiWrapperSingle<ApiVideoDTO> wrapper) {
-        apiDao.getSingleVideo(wrapper);
+    public ApiVideoDTO getSingleVideo(ApiWrapperSingle<ApiVideoDTO> wrapper) {
+        ApiVideoDTO video = apiDao.getSingleVideo(wrapper);
         
-        if (wrapper.getResult() != null) {
+        if (video != null) {
             // localization
-            localizeCertifications(wrapper.getResult().getCertifications(), wrapper.getOptions().getLanguage());
-            localizeCountries(wrapper.getResult().getCountries(), wrapper.getOptions().getLanguage());
-            localizeFiles(wrapper.getResult().getFiles(), wrapper.getOptions().getLanguage());
+            localizeCertifications(video.getCertifications(), wrapper.getOptions().getLanguage());
+            localizeCountries(video.getCountries(), wrapper.getOptions().getLanguage());
+            localizeFiles(video.getFiles(), wrapper.getOptions().getLanguage());
         }
+
+        return video;
     }
 
     @Transactional
@@ -624,16 +630,16 @@ public class JsonApiStorageService {
         return apiDao.getJobCount(requiredJobs);
     }
 
-    public void getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper) {
-        apiDao.getSeriesInfo(wrapper);
+    public List<ApiSeriesInfoDTO> getSeriesInfo(ApiWrapperList<ApiSeriesInfoDTO> wrapper) {
+        List<ApiSeriesInfoDTO> results = apiDao.getSeriesInfo(wrapper);
         
         // localization
-        if (CollectionUtils.isNotEmpty(wrapper.getResults())) {
-            for (ApiSeriesInfoDTO series : wrapper.getResults()) {
-                localizeCertifications(series.getCertifications(), wrapper.getOptions().getLanguage());
-                localizeCountries(series.getCountries(), wrapper.getOptions().getLanguage());
-            }
+        for (ApiSeriesInfoDTO series : results) {
+            localizeCertifications(series.getCertifications(), wrapper.getOptions().getLanguage());
+            localizeCountries(series.getCountries(), wrapper.getOptions().getLanguage());
         }
+        
+        return results;
     }
 
     public List<Long> getSeasonVideoIds(Long id) {

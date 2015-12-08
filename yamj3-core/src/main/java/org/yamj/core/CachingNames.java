@@ -22,8 +22,12 @@
  */
 package org.yamj.core;
 
-public class CachingNames {
+public final class CachingNames {
 
+    private CachingNames() {
+        // prevent initialization
+    }
+    
     public static final String API_TVDB = "api_tvdb";
     public static final String API_ALLOCINE = "api_allocine";
     public static final String API_IMDB = "api_imdb";

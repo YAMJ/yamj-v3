@@ -24,6 +24,7 @@ package org.yamj.core.api.json;
 
 import java.util.Set;
 
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,27 +66,20 @@ public class ArtworkController {
     
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ApiWrapperSingle<ApiArtworkDTO> getArtwork(@PathVariable("id") Long id) {
+        LOG.debug("Attempting to retrieve artwork with ID {}", id);
+
         ApiWrapperSingle<ApiArtworkDTO> wrapper = new ApiWrapperSingle<>();
-
-        LOG.info("Attempting to retrieve artwork with id '{}'", id);
-        ApiArtworkDTO artwork = jsonApiStorageService.getArtworkById(id);
-        LOG.info("Artwork: {}", artwork);
-
-        // Add the result to the wrapper
-        wrapper.setResult(artwork);
-        wrapper.setStatusCheck();
-
+        wrapper.setResult(jsonApiStorageService.getArtworkById(id));
         return wrapper;
     }
 
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     public ApiWrapperList<ApiArtworkDTO> getArtworkList(@ModelAttribute("options") OptionsIndexArtwork options) {
-        LOG.info("INDEX: Artwork list - Options: {}", options.toString());
+        LOG.debug("Artwork list - Options: {}", options);
+        
         ApiWrapperList<ApiArtworkDTO> wrapper = new ApiWrapperList<>();
         wrapper.setOptions(options);
         wrapper.setResults(jsonApiStorageService.getArtworkList(wrapper));
-        wrapper.setStatusCheck();
-
         return wrapper;
     }
 
@@ -97,21 +91,19 @@ public class ArtworkController {
      */
     @RequestMapping(value = "/located/ignore/{id}", method = {RequestMethod.GET, RequestMethod.PUT})
     public ApiStatus ignoreLocatedArtwork(@PathVariable("id") Long id) {
-        ApiStatus status = new ApiStatus();
-        if (id != null && id > 0L) {
-            LOG.info("Ignore located artwork '{}'", id);
-            Set<String> filesToDelete = this.commonStorageService.ignoreArtworkLocated(id);
-            if (filesToDelete != null) {
-                this.fileStorageService.deleteStorageFiles(filesToDelete);
-                status.setStatus(200);
-                status.setMessage("Successfully marked located artwork '" + id + "' as ignored");
-            } else {
-                status.setStatus(400);
-                status.setMessage("Located artwork not found '" + id + "'");
-            }
+        if (id == null || id.longValue() <= 0) {
+            return ApiStatus.INVALID_ID;
+        }
+        
+        LOG.info("Ignore located artwork with ID {}", id);
+
+        ApiStatus status;
+        Set<String> filesToDelete = this.commonStorageService.ignoreArtworkLocated(id);
+        if (filesToDelete != null) {
+            this.fileStorageService.deleteStorageFiles(filesToDelete);
+            status = new ApiStatus("Successfully marked located artwork " + id + " as ignored");
         } else {
-            status.setStatus(400);
-            status.setMessage("Invalid located artwork id specified");
+            status = new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Located artwork not found " + id);
         }
         return status;
     }
@@ -120,20 +112,22 @@ public class ArtworkController {
     public ApiStatus addImage(@PathVariable("artwork") String artwork, @PathVariable("type") String type, @PathVariable("id") Long id, @RequestParam MultipartFile image) {
         final ArtworkType artworkType = ArtworkType.fromString(artwork);
         if (ArtworkType.UNKNOWN == artworkType) {
-            return new ApiStatus(415, "Invalid artwork type '" + artwork + "'");
+            return new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Invalid artwork type '" + artwork + "'");
         }
         
         final MetaDataType metaDataType = MetaDataType.fromString(type);
         if (!metaDataType.isWithArtwork()) {
-            return new ApiStatus(415, "Invalid meta data type '" + type + "' for artwork");
+            return new ApiStatus(HttpStatus.SC_BAD_REQUEST, "Invalid meta data type '" + type + "' for artwork");
         }
         
         if (id == null || id.longValue() <= 0) {
-            return new ApiStatus(415, "Invalid id '" + id + "'");
+            return ApiStatus.INVALID_ID;
         }
         
         ApiStatus apiStatus = this.artworkProcessorService.addArtwork(artworkType, metaDataType, id, image);
-        if (apiStatus.isSuccessful()) this.artworkProcessScheduler.triggerProcess();
+        if (apiStatus.isSuccessful())  {
+            this.artworkProcessScheduler.triggerProcess();
+        }
         return apiStatus;
     }
 }
