@@ -593,7 +593,7 @@ Video Methods
 These methods get information on the videos in the database.
 --
 
-Retrieve information for a video (movie/series/season).
+Get or update information for a video (movie/series/season).
 ***
 
 **Required Parameters**
@@ -603,18 +603,18 @@ Retrieve information for a video (movie/series/season).
     <tr>
         <td>type</td>
         <td>The type of the video.<br/>
-            Valid types are: movie, season, series
+            Valid types are: movie, season, series, episode (just update)
         </td>
     </tr>
     <tr>
         <td>id</td>
-        <td>The id of the movie to get.<br/>
+        <td>The id of the movie to get or update.<br/>
             Note: This is specific to the video type, so Movie ID 1 is not the same as Season ID 1.
         </td>
     </tr>
 </table>
 
-**Optional Parameters**
+**GET request - Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -630,6 +630,48 @@ Retrieve information for a video (movie/series/season).
             Can be one or more of: 'ALL', 'POSTER', 'FANART', 'BANNER', 'VIDEOIMAGE', etc.<br/>
             Leave this option blank to return no artwork
         </td>
+    </tr>
+</table>
+
+**PUT request - JSON document in Request Body**
+<table width="100%">
+    <col width="20%">
+    <col width="80%">
+    <tr>
+        <td>title</td>
+        <td>The title of the video; optional</td>
+    </tr>
+    <tr>
+        <td>titleOriginal</td>
+        <td>The original title of the video; optional</td>
+    </tr>
+    <tr>
+        <td>plot</td>
+        <td>The plot of the video; optional</td>
+    </tr>
+    <tr>
+        <td>outline</td>
+        <td>The outline of the video; optional</td>
+    </tr>
+    <tr>
+        <td>tagline</td>
+        <td>The tagline of the video; optional; just movie/episode</td>
+    </tr>
+    <tr>
+        <td>quote</td>
+        <td>The quote of the video; optional; just movie/episode</td>
+    </tr>
+    <tr>
+        <td>publicationYear</td>
+        <td>The publication year of the video; optional; just movie/season</td>
+    </tr>
+    <tr>
+        <td>startYear</td>
+        <td>The start year of the video; optional; just series</td>
+    </tr>
+    <tr>
+        <td>endYear</td>
+        <td>The end year of the video; optional; just series</td>
     </tr>
 </table>
 
@@ -740,6 +782,19 @@ GET /api/video/{type}/{id}
       "genreCount":4
    }
 }
+
+PUT /api/video/{type}/{id}
+> Content-Type: application/json
+{
+    "title":"Avatar - Aufbruch nach Pandora",
+}
+< 200
+< Content-Type: application/json
+{
+    "status": 200,
+    "message": "Updated video with ID 2"
+}
+
 
 Retrieve information on a specific series.
 
