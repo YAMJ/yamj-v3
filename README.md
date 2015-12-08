@@ -20,6 +20,10 @@ This is a real webapp; can be started with a jetty server or deployed to an exis
 ### yamj3-filescanner:
 > The file scanner for processing the media directories and sending the file information to the core processor.
 
-Running YAMJv3 Alpha
---------------------
+Running YAMJv3
+--------------
 Please see [this wiki page](https://github.com/YAMJ/yamj-v3/wiki/Getting-Started-with-the-Alpha-Test) for instructions on how to run YAMJv3
+
+Using the API
+-------------
+Documentation on teh API can be found at [Apiary.io](http://docs.yamj.apiary.io/#)
