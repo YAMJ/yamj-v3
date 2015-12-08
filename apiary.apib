@@ -182,8 +182,8 @@ This section is for the index API methods
 
 Get an index of videos.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -198,7 +198,6 @@ Get an index of videos.
 </table>
 
 **Optional Parameters**
-
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -250,6 +249,8 @@ Get an index of videos.
         <td>See above for the explanation on sorting parameters.</td>
     </tr>
 </table>
+
+__Example__: `http://localhost:8888/yamj3/api/index/video?max=2`
 
 GET /api/index/video
 < 200
@@ -310,8 +311,8 @@ GET /api/index/video
 
 Get an index of people.
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -340,6 +341,7 @@ Get an index of people.
         <td>See above for the explanation on paging parameters.</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/index/person?max=3`
 
 GET /api/index/person
@@ -393,8 +395,8 @@ Get counts for various main objects in the database.
 Note: These are currently fixed and are intended for system wide statistics.
 For specific indexes, there will be an option to get the count for that index.
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -407,6 +409,7 @@ For specific indexes, there will be an option to get the count for that index.
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/index/count?type=all`
 
 GET /api/index/count
@@ -455,8 +458,8 @@ GET /api/index/count
 
 Get a list of jobs and their associated counts.
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -467,6 +470,7 @@ Get a list of jobs and their associated counts.
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/index/jobs?job=actor,writer,director`
 
 GET /api/index/jobs
@@ -532,8 +536,8 @@ GET /api/index/jobs
 
 Get an alphabetical list of the first characters in a type list.
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -546,6 +550,7 @@ Get an alphabetical list of the first characters in a type list.
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/alphabetical/list?type=movie`
 
 GET /api/alphabetical/list
@@ -590,8 +595,8 @@ These methods get information on the videos in the database.
 
 Retrieve information for a video (movie/series/season).
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -610,7 +615,6 @@ Retrieve information for a video (movie/series/season).
 </table>
 
 **Optional Parameters**
-
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -628,6 +632,7 @@ Retrieve information for a video (movie/series/season).
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/video/movie/2?dataitems=plot,artwork,files,genre&artwork=all`
 
 GET /api/video/{type}/{id}
@@ -739,10 +744,9 @@ GET /api/video/{type}/{id}
 Retrieve information on a specific series.
 
 Will get all the seasons associated with the series.
-
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -753,7 +757,6 @@ Will get all the seasons associated with the series.
 </table>
 
 **Optional Parameters**
-
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -770,7 +773,9 @@ Will get all the seasons associated with the series.
     </tr>
 </table>
 
-GET /api/video/seriesinfo
+__Example__: `http://localhost:8888/yamj3/api/video/seriesinfo?id=1`
+
+GET /api/video/seriesinfo?id={id}
 < 200
 < Content-Type: application/json
 {
@@ -974,8 +979,8 @@ GET /api/video/seriesinfo
 
 Retrieve information on the TV episodes.
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1013,6 +1018,7 @@ Retrieve information on the TV episodes.
         <td>See above for the explanation on sorting parameters</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/video/episodes?dataitems=files,plot,outline&seriesid=3`
 
 GET /api/video/episodes
@@ -1128,8 +1134,8 @@ GET /api/video/episodes
 
 Add or Update an external ID for a video ID.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1156,6 +1162,7 @@ Add or Update an external ID for a video ID.
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/video/movie/updateexternalid?id=81&sourcedb=imdb&externalid=tt123456`
 
 PUT /api/video/{type}/updateexternalid?id={}&sourcedb={}&externalid={}
@@ -1169,8 +1176,8 @@ PUT /api/video/{type}/updateexternalid?id={}&sourcedb={}&externalid={}
 
 Remove an external ID for a video ID.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1191,6 +1198,7 @@ Remove an external ID for a video ID.
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/video/movie/removeexternalid?id=81&sourcedb=imdb`
 
 PUT /api/video/{type}/removeexternalid?id={}&sourcedb={}
@@ -1204,8 +1212,8 @@ PUT /api/video/{type}/removeexternalid?id={}&sourcedb={}
 
 Enabled online scan for a video ID.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1226,6 +1234,7 @@ Enabled online scan for a video ID.
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/video/movie/enableonlinescan?id=81&sourcedb=tmdb`
 
 PUT /api/video/{type}/enableonlinescan?id={}&sourcedb={}
@@ -1239,8 +1248,8 @@ PUT /api/video/{type}/enableonlinescan?id={}&sourcedb={}
 
 Disable online scan for a video ID.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1261,6 +1270,7 @@ Disable online scan for a video ID.
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/video/movie/disableonlinescan?id=81&sourcedb=tmdb`
 
 PUT /api/video/{type}/disableonlinescan?id={}&sourcedb={}
@@ -1274,8 +1284,8 @@ PUT /api/video/{type}/disableonlinescan?id={}&sourcedb={}
 
 Get a list of present years.
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1288,6 +1298,7 @@ Get a list of present years.
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/video/years/list?type=movie`
 
 GET /api/video/years/list
@@ -1328,8 +1339,8 @@ GET /api/video/years/list
 
 Get a list of present decades.
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1342,6 +1353,7 @@ Get a list of present decades.
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/video/decades/list?type=movie`
 
 GET /api/video/decades/list
@@ -1383,8 +1395,8 @@ Artwork
 
 Get information on the artwork.
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1394,6 +1406,8 @@ Get information on the artwork.
         It will retrieve all the artwork generated for that ID</td>
     </tr>
 </table>
+
+__Example__: `http://localhost:8888/yamj3/api/artwork/1`
 
 GET /api/artwork/{id}
 < 200
@@ -1423,8 +1437,8 @@ GET /api/artwork/{id}
 
 Get a list of artwork.
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1450,6 +1464,8 @@ Get a list of artwork.
         <td>The maximum number of records to return. Default is 0 (all)</td>
     </tr>
 </table>
+
+__Example__: `http://localhost:8888/yamj3/api/artwork/list`
 
 GET /api/artwork/list
 < 200
@@ -1524,8 +1540,8 @@ GET /api/artwork/list
 
 Ignore a located artwork.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1534,6 +1550,8 @@ Ignore a located artwork.
         <td>This is the ID of the located artwork.</td>
     </tr>
 </table>
+
+__Example__: `http://localhost:8888/yamj3/api/artwork/ignore/15`
 
 PUT /api/artwork/located/ignore/{id}
 < 200
@@ -1546,8 +1564,8 @@ PUT /api/artwork/located/ignore/{id}
 
 Add an image to a defined artwork for a choosen video type.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1581,10 +1599,11 @@ POST /add/{artwork}/{type}/{id}
 Person
 --
 
+
 Get or update information on the person.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1594,8 +1613,7 @@ Get or update information on the person.
     </tr>
 </table>
 
-**GET: Optional Parameters**
-
+**GET request - Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1606,50 +1624,49 @@ Get or update information on the person.
     </tr>
 </table>
 
-**PUT: JSON document in Request Body**
-The json elements are optional.
+**PUT request - JSON document in Request Body**
 <table width="100%">
     <col width="20%">
     <col width="80%">
     <tr>
         <td>name</td>
-        <td>The full name of the person.</td
+        <td>The full name of the person; optional</td
     </tr>
     <tr>
         <td>firstName</td>
-        <td>The first name of the person.</td
+        <td>The first name of the person; optional</td
     </tr>
     <tr>
         <td>lastName</td>
-        <td>The last name of the person.</td
+        <td>The last name of the person; optional</td
     </tr>
     <tr>
         <td>birthName</td>
-        <td>The birth name of the person.</td
+        <td>The birth name of the person; optional</td
     </tr>
     <tr>
         <td>birthDay</td>
-        <td>The birth day of the person.</td
+        <td>The birth day of the person; optional</td
     </tr>
     <tr>
         <td>birthPlace</td>
-        <td>The birth place of the person.</td
+        <td>The birth place of the person; optional</td
     </tr>
     <tr>
         <td>deathDay</td>
-        <td>The death day of the person.</td
+        <td>The death day of the person; optional</td
     </tr>
     <tr>
         <td>deathPlace</td>
-        <td>The death place of the person.</td
+        <td>The death place of the person; optional</td
     </tr>
     <tr>
         <td>biography</td>
-        <td>The biography of the person.</td>
+        <td>The biography of the person; optional</td>
     </tr>
 </table>
 
-__Example__: `http://localhost:8888/yamj3/api/person/1`
+__Example__: `http://localhost:8888/yamj3/api/person/59`
 
 GET /api/person/{id}
 < 200
@@ -1673,8 +1690,9 @@ GET /api/person/{id}
    },
    "baseArtworkUrl":"http://192.168.1.34:8888/artwork/",
    "baseMediainfoUrl":"http://192.168.1.34:8888/mediainfo/",
+   "basePhotoUrl":"http://192.168.1.34:8888/photo/",
    "result":{
-      "id":1,
+      "id":59,
       "name":"Zachary Levi",
       "biography":"Zachary Levi Pugh (born September 29, 1980), better known by his stage name Zachary Levi ...",
       "birthDay":"1980-09-29",
@@ -1687,8 +1705,8 @@ GET /api/person/{id}
 PUT /api/person/{id}
 > Content-Type: application/json
 {
-    "firstName":"Alan Maria",
-    "lastName":"Zimmermann"
+    "firstName":"Zachary Levi",
+    "lastName":"Pugh"
 }
 < 200
 < Content-Type: application/json
@@ -1716,7 +1734,6 @@ Get a list of cast and crew for a video.
 </table>
 
 **Optional Parameters**
-
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1743,6 +1760,7 @@ Get a list of cast and crew for a video.
         <td>See above for the explanation on sorting parameters</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/person/movie?id=1&job=actor&max=2`
 
 GET /api/person/{type}?id={}
@@ -1805,8 +1823,8 @@ GET /api/person/{type}?id={}
 
 Add or update an external ID for a person ID.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1827,6 +1845,7 @@ Add or update an external ID for a person ID.
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/person/updateexternalid?id=12&sourcedb=imdb&externalid=nm123456`
 
 PUT /api/person/updateexternalid?id={}&sourcedb={}&externalid={}
@@ -1840,8 +1859,8 @@ PUT /api/person/updateexternalid?id={}&sourcedb={}&externalid={}
 
 Remove an external ID for a person ID.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1856,6 +1875,7 @@ Remove an external ID for a person ID.
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/person/removeexternalid?id=12&sourcedb=imdb`
 
 PUT /api/person/removeexternalid?id={}&sourcedb={}
@@ -1869,8 +1889,8 @@ PUT /api/person/removeexternalid?id={}&sourcedb={}
 
 Enable online scan for a person ID.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1885,6 +1905,7 @@ Enable online scan for a person ID.
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/person/enableonlinescan?id=12&sourcedb=tmdb`
 
 PUT /api/person/enableonlinescan?id={}&sourcedb={}
@@ -1898,8 +1919,8 @@ PUT /api/person/enableonlinescan?id={}&sourcedb={}
 
 Disable online scan for a person ID.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1914,6 +1935,7 @@ Disable online scan for a person ID.
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/person/disableonlinescan?id=12&sourcedb=tmdb`
 
 PUT /api/person/disableonlinescan?id={}&sourcedb={}
@@ -1927,8 +1949,8 @@ PUT /api/person/disableonlinescan?id={}&sourcedb={}
 
 Mark a person as duplicate of another person.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1941,6 +1963,7 @@ Mark a person as duplicate of another person.
         <td>The ID of the duplicate person.</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/person/duplicate?id=1&doublet=2`
 
 PUT /api/person/duplicate?id={}&doublet={}
@@ -1951,16 +1974,16 @@ PUT /api/person/duplicate?id={}&doublet={}
     "message": "Marked 2 as duplicate of 1"
 }
 
-
 --
 Watched
 Commands to mark videos as watched and unwatched
 --
 
+
 Mark a video as watched.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -1975,6 +1998,7 @@ Mark a video as watched.
         <td>The ID of the video to mark as watched</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/watched/movie/7`
 
 PUT /api/watched/{type}/{id}
@@ -1987,8 +2011,8 @@ PUT /api/watched/{type}/{id}
 
 Mark a video as unwatched.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2003,6 +2027,7 @@ Mark a video as unwatched.
         <td>The ID of the movie to mark as unwatched</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/unwatched/movie/7`
 
 PUT /api/unwatched/{type}/{id}
@@ -2020,8 +2045,8 @@ Rescan
 
 Rescan a meta dataobject.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2034,6 +2059,7 @@ Rescan a meta dataobject.
         <td>The ID of the metadata to rescan.</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/rescan/episode/12`
 
 PUT /api/rescan/{type}/{id}
@@ -2047,8 +2073,8 @@ PUT /api/rescan/{type}/{id}
 
 Rescan artwork of a metadata object.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2061,6 +2087,7 @@ Rescan artwork of a metadata object.
         <td>The ID of the metadata to rescan artwork for.</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/rescan/episode/artwork/12`
 
 PUT /api/rescan/{type}/artwork/{id}
@@ -2074,8 +2101,8 @@ PUT /api/rescan/{type}/artwork/{id}
 
 Rescan trailer of a metadata object.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2088,6 +2115,7 @@ Rescan trailer of a metadata object.
         <td>The ID of the metadata to rescan trailer for.</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/rescan/series/trailer/19`
 
 PUT /api/rescan/{type}/trailer/{id}
@@ -2101,6 +2129,7 @@ PUT /api/rescan/{type}/trailer/{id}
 
 Rescan all metadata and artworks.
 ***
+
 __Example__: `http://localhost:8888/yamj3/api/rescan/all`
 
 PUT /api/rescan/all
@@ -2118,8 +2147,8 @@ Trailer
 
 Delete a trailer.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2128,6 +2157,7 @@ Delete a trailer.
         <td>The ID of the trailer.</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/trailer/delete/{87}`
 
 PUT /api/trailer/delete/{id}
@@ -2140,8 +2170,8 @@ PUT /api/trailer/delete/{id}
 
 Ignore a trailer.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2150,6 +2180,7 @@ Ignore a trailer.
         <td>The ID of the trailer.</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/trailer/ignore/{87}`
 
 PUT /api/trailer/ignore/{id}
@@ -2162,8 +2193,8 @@ PUT /api/trailer/ignore/{id}
 
 Download a trailer.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2172,6 +2203,7 @@ Download a trailer.
         <td>The ID of the trailer.</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/trailer/download/{87}`
 
 PUT /api/trailer/download/{id}
@@ -2190,8 +2222,8 @@ Genres
 
 Get information on a single genre.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2200,6 +2232,7 @@ Get information on a single genre.
         <td>The ID or name of the genre to get</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/genre/1`
 
 GET /api/genre/{id_or_name}
@@ -2224,8 +2257,8 @@ GET /api/genre/{id_or_name}
 
 Get information on the genres associated with a filename.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2234,6 +2267,7 @@ Get information on the genres associated with a filename.
         <td>The filename to get the list of genres for</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/genre?filename=Avatar%20(2009).avi`
 
 GET /api/genre
@@ -2249,8 +2283,10 @@ GET /api/genre
       "message":"OK"
    },
    "parameters":null,
-   "baseArtworkUrl":"",
-   "baseMediainfoUrl":"",
+   "baseArtworkUrl": "http://192.168.0.20:8888/artwork/",
+   "baseMediainfoUrl": "http://192.168.0.20:8888/mediainfo/",
+   "basePhotoUrl": "http://192.168.0.20:8888/photo/",
+   "baseTrailerUrl": "http://192.168.0.20:8888/trailer/",
    "results":[
       {
          "id":1,
@@ -2274,6 +2310,7 @@ GET /api/genre
 
 Get information genres.
 ***
+
 **Optional Parameters**
 <table width="100%">
     <col width="20%">
@@ -2305,6 +2342,7 @@ Get information genres.
         <td>See above for the explanation on sorting parameters</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/genres/list`
 
 GET /api/genres/list
@@ -2348,6 +2386,7 @@ GET /api/genres/list
 
 Add a genre withe a defined genre target.
 ***
+
 **Optional Parameters**
 <table width="100%">
     <col width="20%">
@@ -2361,6 +2400,7 @@ Add a genre withe a defined genre target.
         <td>The target of the genre; how it's displayed in the genres list of videos.</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/genres/add?name=Sci-Fi&target=Science-Fiction`
 
 POST /api/genres/add?name={}&target={}
@@ -2374,6 +2414,7 @@ POST /api/genres/add?name={}&target={}
 
 Update a genre withe a defined genre target.
 ***
+
 **Optional Parameters**
 <table width="100%">
     <col width="20%">
@@ -2387,6 +2428,7 @@ Update a genre withe a defined genre target.
         <td>The target of the genre.</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/genres/add?name=Sci-Fi&target=Science+Fiction`
 
 POST /api/genres/update?id_or_name={}&target={}
@@ -2405,8 +2447,8 @@ Studios
 
 Get information on a single studio.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2415,6 +2457,7 @@ Get information on a single studio.
         <td>The ID or name of the studio to get</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/studio/163`
 
 GET /api/studio/{id_or_name}
@@ -2443,8 +2486,8 @@ GET /api/studio/{id_or_name}
 
 Get information studios.
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2469,6 +2512,7 @@ Get information studios.
         <td>See above for the explanation on sorting parameters</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/studios/list?type=movie`
 
 GET /api/studios/list
@@ -2544,8 +2588,8 @@ Countries
 
 Get information on a single country.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2556,7 +2600,6 @@ Get information on a single country.
 </table>
 
 **Optional Parameters**
-
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2565,6 +2608,7 @@ Get information on a single country.
         <td>the language code to use for translating the country name.</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/country/US?language=en`
 
 GET /api/country/{countryCode}
@@ -2617,7 +2661,7 @@ Get information on the countries associated with a filename.
 </table>
 __Example__: `http://localhost:8888/yamj3/api/country?filename=Avatar%20(2009).avi`
 
-GET /api/country/{countryCode}
+GET /api/country?filename={}
 < 200
 < Content-Type: application/json
 {
@@ -2651,6 +2695,7 @@ GET /api/country/{countryCode}
 
 Get information countries.
 ***
+
 **Optional Parameters**
 <table width="100%">
     <col width="20%">
@@ -2666,6 +2711,7 @@ Get information countries.
         <td>See above for the explanation on sorting parameters</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/countries/list?type=movie`
 
 GET /api/countries/list
@@ -2710,8 +2756,8 @@ Other
 
 Get information certifications.
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2730,6 +2776,7 @@ Get information certifications.
         <td>See above for the explanation on sorting parameters</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/certifications/list?type=movie`
 
 GET /api/certifications/list
@@ -2800,8 +2847,8 @@ GET /api/certifications/list
 
 Get information awards.
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2820,6 +2867,7 @@ Get information awards.
         <td>See above for the explanation on sorting parameters</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/awards/list`
 
 GET /api/awards/list
@@ -2845,8 +2893,8 @@ GET /api/awards/list
 
 Get information video sources.
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2857,6 +2905,7 @@ Get information video sources.
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/videosources/list`
 
 GET /api/videosources/list
@@ -2889,8 +2938,8 @@ GET /api/videosources/list
 
 Get information ratings.
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2905,6 +2954,7 @@ Get information ratings.
         <td>See above for the explanation on sorting parameters</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/ratings/list`
 
 GET /api/ratings/list
@@ -2980,8 +3030,8 @@ GET /api/ratings/list
 
 Get information on a single boxed set
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -2992,7 +3042,6 @@ Get information on a single boxed set
 </table>
 
 **Optional Parameters**
-
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -3009,6 +3058,7 @@ Get information on a single boxed set
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/boxset/12?dataitems=member`
 
 GET /api/boxset/{id}
@@ -3056,8 +3106,8 @@ GET /api/boxset/{id}
 
 Get information boxed sets.
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -3081,6 +3131,7 @@ Get information boxed sets.
         </td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/boxset/list`
 
 GET /api/boxset/list
@@ -3128,8 +3179,8 @@ Staging
 
 Mark a stage file as deleted.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -3138,6 +3189,7 @@ Mark a stage file as deleted.
         <td>The ID of the stage file.</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/file/delete/1`
 
 GET /api/file/delete/{id}
@@ -3151,8 +3203,8 @@ GET /api/file/delete/{id}
 
 Mark a stage file as updated.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -3161,6 +3213,7 @@ Mark a stage file as updated.
         <td>The ID of the stage file.</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/file/update/1`
 
 GET /api/file/update/{id}
@@ -3184,6 +3237,7 @@ Mark a stage file as watched.
         <td>The ID of the stage file.</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/file/watched/2`
 
 GET /api/file/watched/{id}
@@ -3197,8 +3251,8 @@ GET /api/file/watched/{id}
 
 Mark a stage file as unwatched.
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -3225,8 +3279,8 @@ This API is for the retrieval and update of the configuration entries.
 
 Get information on the configuration settings
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -3246,6 +3300,7 @@ Get information on the configuration settings
         <td>See above for the explanation on sorting parameters</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/config/list?config=language&mode=any`
 
 GET /api/config/list
@@ -3299,8 +3354,8 @@ GET /api/config/list
 
 Add a new configuration entry
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -3314,6 +3369,7 @@ Add a new configuration entry
         <td>The value of the property to set.</td>
     </tr>
 </table>
+
 __Example__: `http://localhost:8888/yamj3/api/config/add?key=skin.language&value=en`
 
 POST /api/config/add
@@ -3327,8 +3383,8 @@ POST /api/config/add
 
 Update a configuration entry
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -3355,8 +3411,8 @@ PUT /api/config/update
 
 Delete a configuration entry
 ***
-**Required Parameters**
 
+**Required Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
@@ -3393,8 +3449,8 @@ GET /system
 
 Get information on the system
 ***
-**Optional Parameters**
 
+**Optional Parameters**
 <table width="100%">
     <col width="20%">
     <col width="80%">
