@@ -1698,7 +1698,10 @@ __Example__: `http://localhost:8888/yamj3/api/person/59`
 
 PUT /api/person/{id}
 > Content-Type: application/json
-> Content-Body: {"firstName":"Alan Maria", "lastName":"Zimmermann"}
+{
+    "firstName":"Alan Maria",
+    "lastName":"Zimmermann"
+}
 < 200
 < Content-Type: application/json
 {
