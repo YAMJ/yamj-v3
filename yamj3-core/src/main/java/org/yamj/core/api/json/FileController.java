@@ -25,13 +25,16 @@ package org.yamj.core.api.json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.service.staging.StagingService;
 
 @RestController
-@RequestMapping(value = "/api/file/**", produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api/file", produces = "application/json; charset=utf-8")
 public class FileController {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileController.class);

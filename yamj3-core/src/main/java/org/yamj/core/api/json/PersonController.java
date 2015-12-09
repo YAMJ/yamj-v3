@@ -43,7 +43,7 @@ import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.scheduling.ScanningScheduler;
 
 @RestController
-@RequestMapping(value = "/api/person/**", produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api/person", produces = "application/json; charset=utf-8")
 public class PersonController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PersonController.class);

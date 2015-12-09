@@ -23,10 +23,16 @@
 package org.yamj.core.api.json;
 
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.ApiStatus;
@@ -42,7 +48,7 @@ import org.yamj.core.service.artwork.ArtworkProcessorService;
 import org.yamj.core.service.file.FileStorageService;
 
 @RestController
-@RequestMapping(value = "/api/artwork/**", produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api/artwork", produces = "application/json; charset=utf-8")
 public class ArtworkController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkController.class);

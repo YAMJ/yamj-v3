@@ -26,7 +26,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.yamj.core.api.model.ApiStatus;
 import org.yamj.core.api.options.OptionsPlayer;
 import org.yamj.core.api.wrapper.ApiWrapperList;
@@ -35,7 +39,7 @@ import org.yamj.core.database.model.player.PlayerPath;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @RestController
-@RequestMapping(value = "/api/player/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api/player", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class PlayerController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlayerController.class);

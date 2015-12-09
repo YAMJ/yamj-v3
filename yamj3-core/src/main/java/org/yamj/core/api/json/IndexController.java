@@ -46,7 +46,7 @@ import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @RestController
-@RequestMapping(value = "/api/index/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api/index", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class IndexController {
 
     private static final Logger LOG = LoggerFactory.getLogger(IndexController.class);

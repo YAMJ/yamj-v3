@@ -31,7 +31,7 @@ import org.yamj.core.api.wrapper.ApiWrapperList;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @RestController
-@RequestMapping(value = "/api/list/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api/list", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class ListController {
 
     @Autowired

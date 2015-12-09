@@ -26,7 +26,10 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.yamj.common.model.YamjInfo;
 import org.yamj.common.model.YamjInfoBuild;
 import org.yamj.common.type.MetaDataType;
@@ -34,7 +37,7 @@ import org.yamj.core.api.model.CountTimestamp;
 import org.yamj.core.database.service.JsonApiStorageService;
 
 @RestController
-@RequestMapping(value = "/system/**", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/system", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 public class SystemInfoController {
 
     private static final Logger LOG = LoggerFactory.getLogger(SystemInfoController.class);
