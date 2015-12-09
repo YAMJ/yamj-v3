@@ -25,7 +25,6 @@ package org.yamj.common.tools;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.*;
 import org.joda.time.format.DateTimeFormat;
@@ -138,7 +137,7 @@ public final class DateTimeTools {
      */
     public static long getDuration(DateTime start, DateTime end) {
         if (start.isBefore(end)) {
-            new Interval(start, end).toDurationMillis();
+            return new Interval(start, end).toDurationMillis();
         }
         return -1L;
     }
