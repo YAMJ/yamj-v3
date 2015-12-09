@@ -22,10 +22,23 @@
  */
 package org.yamj.core.database.model;
 
+import static org.yamj.core.tools.Constants.ALL;
+
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
-import javax.persistence.*;
+import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NaturalId;
@@ -41,7 +54,6 @@ public abstract class AbstractScannable extends AbstractAuditable
         implements IScannable, Serializable {
 
     private static final long serialVersionUID = -8036305537317711196L;
-    protected static final String SKIP_ALL = "all";
     
     /**
      * This will be generated from a scanned file name.
@@ -188,7 +200,7 @@ public abstract class AbstractScannable extends AbstractAuditable
 
 
         final String newSkipScanApi;
-        if (SKIP_ALL.equalsIgnoreCase(sourceDb)) {
+        if (ALL.equalsIgnoreCase(sourceDb)) {
             newSkipScanApi = null;
         } else {
             HashSet<String> skipScans = new HashSet<>();
@@ -220,13 +232,13 @@ public abstract class AbstractScannable extends AbstractAuditable
         final String oldSkipScanApi = getSkipScanApi();
         
         final String newSkipScanApi;
-        if (SKIP_ALL.equalsIgnoreCase(sourceDb)) {
-            newSkipScanApi = SKIP_ALL;
+        if (ALL.equalsIgnoreCase(sourceDb)) {
+            newSkipScanApi = ALL;
         } else if (getSkipScanApi() == null) {
             newSkipScanApi = sourceDb;
-        } else if (SKIP_ALL.equalsIgnoreCase(oldSkipScanApi)) {
+        } else if (ALL.equalsIgnoreCase(oldSkipScanApi)) {
             // nothing to do if already all scans are skipped
-            newSkipScanApi = SKIP_ALL;
+            newSkipScanApi = ALL;
         } else {
             final HashSet<String> skipScans = new HashSet<>(Arrays.asList(getSkipScanApi().split(";")));
             skipScans.add(sourceDb);

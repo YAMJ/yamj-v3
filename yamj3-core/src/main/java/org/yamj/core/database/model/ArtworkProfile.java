@@ -23,7 +23,9 @@
 package org.yamj.core.database.model;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
 import org.yamj.core.database.model.type.ArtworkType;
@@ -225,7 +227,7 @@ public class ArtworkProfile extends AbstractAuditable implements Serializable {
     // COMMON METHODS
 
     public float getRatio() {
-        return ((float) getWidth() / (float) getHeight());
+        return (float) getWidth() / (float) getHeight();
     }
 
     public float getRounderCornerQuality() {

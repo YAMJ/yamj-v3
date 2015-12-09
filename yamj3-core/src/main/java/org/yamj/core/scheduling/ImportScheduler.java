@@ -72,6 +72,7 @@ public class ImportScheduler {
 
         // PROCESS VIDEOS
         do {
+            id = null;
             try {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.VIDEO, StatusType.NEW, StatusType.UPDATED);
@@ -87,6 +88,8 @@ public class ImportScheduler {
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
                     LOG.warn("Locking error during import of video stage file {}", id);
+                } else if (id == null) {
+                    LOG.error("Failed to get next video stage file", error);
                 } else {
                     LOG.error("Failed to process video stage file {}", id);
                     LOG.error("Staging error", error);
@@ -101,6 +104,7 @@ public class ImportScheduler {
 
         // PROCESS NFOS
         do {
+            id = null;
             try {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.NFO, StatusType.NEW, StatusType.UPDATED);
@@ -115,6 +119,8 @@ public class ImportScheduler {
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
                     LOG.warn("Locking error during import of nfo stage file {}", id);
+                } else if (id == null) {
+                    LOG.error("Failed to get next nfo stage file", error);
                 } else {
                     LOG.error("Failed to process nfo stage file {}", id);
                     LOG.warn("Staging error", error);
@@ -129,6 +135,7 @@ public class ImportScheduler {
 
         // PROCESS IMAGES
         do {
+            id = null;
             try {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.IMAGE, StatusType.NEW, StatusType.UPDATED);
@@ -143,6 +150,8 @@ public class ImportScheduler {
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
                     LOG.warn("Locking error during import of image stage file {}", id);
+                } else if (id == null) {
+                    LOG.error("Failed to get next image stage file", error);
                 } else {
                     LOG.error("Failed to process image stage file {}", id);
                     LOG.warn("Staging error", error);
@@ -157,6 +166,7 @@ public class ImportScheduler {
 
         // PROCESS WATCHED
         do {
+            id = null;
             try {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.WATCHED, StatusType.NEW, StatusType.UPDATED);
@@ -168,6 +178,8 @@ public class ImportScheduler {
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
                     LOG.warn("Locking error during import of watched stage file {}", id);
+                } else if (id == null) {
+                    LOG.error("Failed to get next watched stage file", error);
                 } else {
                     LOG.error("Failed to process watched stage file {}", id);
                     LOG.warn("Staging error", error);
@@ -182,6 +194,7 @@ public class ImportScheduler {
 
         // PROCESS SUBTITLE
         do {
+            id = null;
             try {
                 // find next stage file to process
                 id = mediaImportService.getNextStageFileId(FileType.SUBTITLE, StatusType.NEW, StatusType.UPDATED);
@@ -193,6 +206,8 @@ public class ImportScheduler {
             } catch (Exception error) {
                 if (ExceptionTools.isLockingError(error)) {
                     LOG.warn("Locking error during import of subtitle stage file {}", id);
+                } else if (id == null) {
+                    LOG.error("Failed to get next subtitle stage file", error);
                 } else {
                     LOG.error("Failed to process subtitle stage file {}", id);
                     LOG.warn("Staging error", error);

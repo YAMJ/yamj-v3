@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sanselan.ImageReadException;
@@ -358,7 +359,7 @@ public class ArtworkProcessorService {
         long newLastId = -1;
         
         for (ArtworkLocated located : this.artworkStorageService.getArtworkLocatedWithCacheFilename(lastId)) {
-            if (newLastId < located.getId()) newLastId = located.getId();
+            newLastId = Math.max(newLastId, located.getId());
 
             // if original file does not exists, then also all generated artwork can be deleted
             final StorageType storageType = located.getArtwork().getStorageType();
@@ -393,7 +394,9 @@ public class ArtworkProcessorService {
     
     public ApiStatus addArtwork(ArtworkType artworkType, MetaDataType metaDataType, long id, MultipartFile image) {
         String filename = image.getOriginalFilename();
-        if (StringUtils.isBlank(filename)) filename = image.getName();
+        if (StringUtils.isBlank(filename)) {
+            filename = image.getName();
+        }
         
         final String extension = FilenameUtils.getExtension(filename);
         if (filenameScanner.determineFileType(extension) != FileType.IMAGE) {
@@ -407,8 +410,7 @@ public class ArtworkProcessorService {
         }
         
         // get or create located artwork
-        final int hash = filename.hashCode();
-        final String hashCode = String.valueOf(hash < 0 ? 0 - hash : hash);
+        final String hashCode = Integer.toString(Math.abs(filename.hashCode()));
         ArtworkLocated located = this.artworkStorageService.getArtworkLocated(artwork, SOURCE_UPLOAD, hashCode);
         
         if (located == null) {

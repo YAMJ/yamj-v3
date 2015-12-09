@@ -22,9 +22,13 @@
  */
 package org.yamj.core.service.attachment;
 
+import static org.yamj.core.tools.Constants.LANGUAGE_EN;
+
 import java.io.*;
 import java.util.*;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -108,7 +112,7 @@ public class AttachmentScannerService {
                 MT_INFO_EXE.add("/C");
                 MT_INFO_EXE.add(mkvInfoFile.getName());
                 MT_INFO_EXE.add("--ui-language");
-                MT_INFO_EXE.add("en");
+                MT_INFO_EXE.add(LANGUAGE_EN);
                 
                 MT_EXTRACT_EXE.clear();
                 MT_EXTRACT_EXE.add("cmd.exe");
@@ -213,7 +217,7 @@ public class AttachmentScannerService {
     private List<Attachment> scanAttachments(StageFile stageFile) {
         if (!isFileScanable(stageFile)) return null;
         
-        final String cacheKey = String.valueOf(stageFile.getId());
+        final String cacheKey = Long.toString(stageFile.getId());
         List<Attachment> attachments = attachmentCache.get(cacheKey, List.class);
         if (attachments != null) {
             // attachments stored so just return them

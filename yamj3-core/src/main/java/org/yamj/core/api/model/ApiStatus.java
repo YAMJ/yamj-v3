@@ -22,8 +22,9 @@
  */
 package org.yamj.core.api.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.http.HttpStatus;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class ApiStatus {
 
@@ -49,7 +50,7 @@ public class ApiStatus {
 
     @JsonIgnore
     public boolean isSuccessful() {
-        return (status == HttpStatus.SC_OK);
+        return HttpStatus.SC_OK == status;
     }
 
     public static ApiStatus ok(String message) {

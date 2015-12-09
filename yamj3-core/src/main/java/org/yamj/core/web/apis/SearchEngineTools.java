@@ -22,6 +22,8 @@
  */
 package org.yamj.core.web.apis;
 
+import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
+
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -78,7 +80,7 @@ public class SearchEngineTools {
         
         // sites to search for URLs
         searchSites = new LinkedList<>();
-        searchSites.addAll(Arrays.asList(PropertyTools.getProperty("yamj3.searchengine.sites", "google,yahoo,bing,blekko").split(",")));
+        searchSites.addAll(Arrays.asList(PropertyTools.getProperty("yamj3.searchengine.sites", "google,yahoo,bing,blekko").split(DEFAULT_SPLITTER)));
         
         // country specific presets
         if (Locale.GERMANY.getCountry().equalsIgnoreCase(locale.getCountry())) {
@@ -124,7 +126,7 @@ public class SearchEngineTools {
 
     public void setSearchSites(String searchSites) {
         this.searchSites.clear();
-        this.searchSites.addAll(Arrays.asList(searchSites.split(",")));
+        this.searchSites.addAll(Arrays.asList(searchSites.split(DEFAULT_SPLITTER)));
     }
 
     public void setSearchSuffix(String searchSuffix) {

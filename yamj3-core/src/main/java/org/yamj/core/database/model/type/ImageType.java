@@ -29,10 +29,10 @@ public enum ImageType {
     BMP,
     GIF;
     
-    public static ImageType fromString(String imageType) {
+    public static ImageType fromString(final String imageType) {
         try {
             return ImageType.valueOf(imageType.trim().toUpperCase());
-        } catch (NullPointerException | IllegalArgumentException ex) {
+        } catch (Exception ex) {
             return JPG;
         }
     }

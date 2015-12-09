@@ -23,6 +23,7 @@
 package org.yamj.core.database.service;
 
 import java.util.*;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -53,49 +54,52 @@ public class ArtworkLocatorService {
         Set<String> artworkNames = new HashSet<>();
 
         // generic names (placed in folder)
-        if (ArtworkType.POSTER == artworkType) {
+        switch (artworkType) {
+        case POSTER:
             artworkNames.add("poster");
             artworkNames.add("cover");
             artworkNames.add("folder");
-        } else if (ArtworkType.FANART == artworkType) {
+            break;
+        case FANART:
             artworkNames.add("fanart");
             artworkNames.add("backdrop");
             artworkNames.add("background");
-        } else if (ArtworkType.BANNER == artworkType) {
+            break;
+        case BANNER:
             artworkNames.add("banner");
-        } else {
+            break;
+        default:
             // no artwork names for this type
             return artworkNames;
         }
         
         for (StageFile videoFile : videoFiles) {
             directories.add(videoFile.getStageDirectory());
+            final String directoryName = StringEscapeUtils.escapeSql(videoFile.getStageDirectory().getDirectoryName().toLowerCase());
             
-            // same name than video file
-            if (ArtworkType.POSTER == artworkType) {
+            switch (artworkType) {
+            case POSTER:
                 artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName()).toLowerCase());
                 artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".poster"));
                 artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-poster"));
-            } else if (ArtworkType.FANART == artworkType) {
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".fanart"));
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-fanart"));
-            } else if (ArtworkType.BANNER == artworkType) {
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".banner"));
-                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-banner"));
-            }
-            
-            // same name as directory
-            String directoryName = StringEscapeUtils.escapeSql(videoFile.getStageDirectory().getDirectoryName().toLowerCase());
-            if (ArtworkType.POSTER == artworkType) {
                 artworkNames.add(directoryName);
                 artworkNames.add(directoryName + ".poster");
                 artworkNames.add(directoryName + "-poster");
-            } else if (ArtworkType.FANART == artworkType) {
+                break;
+            case FANART:
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".fanart"));
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-fanart"));
                 artworkNames.add(directoryName + ".fanart");
                 artworkNames.add(directoryName + "-fanart");
-            } else if (ArtworkType.BANNER == artworkType) {
+                break;
+            case BANNER:
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".banner"));
+                artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-banner"));
                 artworkNames.add(directoryName + ".banner");
                 artworkNames.add(directoryName + "-banner");
+                break;
+            default:
+                break;
             }
         }
         return artworkNames;
@@ -104,16 +108,22 @@ public class ArtworkLocatorService {
     private static Set<String> buildSpecialMap(ArtworkType artworkType, List<StageFile> videoFiles) {
         Set<String> artworkNames = new HashSet<>();
         for (StageFile videoFile : videoFiles) {
-            if (ArtworkType.POSTER == artworkType) {
+            switch (artworkType) {
+            case POSTER:
                 artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase()));
                 artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".poster"));
                 artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-poster"));
-            } else if (ArtworkType.FANART == artworkType) {
+                break;
+            case FANART:
                 artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".fanart"));
                 artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-fanart"));
-            } else if (ArtworkType.BANNER == artworkType) {
+                break;
+            case BANNER:
                 artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + ".banner"));
                 artworkNames.add(StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase() + "-banner"));
+                break;
+            default:
+                break;
             }
         }
         return artworkNames;

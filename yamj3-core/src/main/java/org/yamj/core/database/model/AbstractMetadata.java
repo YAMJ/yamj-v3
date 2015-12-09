@@ -117,7 +117,9 @@ public abstract class AbstractMetadata extends AbstractScannable
     }
 
     public boolean isTitleOriginalScannable() {
-        if (StringUtils.isBlank(this.titleOriginal)) return false;
+        if (StringUtils.isBlank(this.titleOriginal)) {
+            return false;
+        }
         return !StringUtils.equalsIgnoreCase(this.title, this.titleOriginal);
     }
     

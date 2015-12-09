@@ -26,11 +26,13 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Table;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
@@ -303,9 +305,10 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     }
     
     public void setWatchedFile(boolean watchedFile, Date watchedFileLastDate) {
-        if (watchedFileLastDate == null) return;
-        setWatchedFile(watchedFile);
-        setWatchedFileLastDate(watchedFileLastDate);
+        if (watchedFileLastDate != null) {
+            setWatchedFile(watchedFile);
+            setWatchedFileLastDate(watchedFileLastDate);
+        }
     }
     
     public boolean isWatchedApi() {

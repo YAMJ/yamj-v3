@@ -22,8 +22,11 @@
  */
 package org.yamj.core.service.metadata.nfo;
 
+import static org.yamj.core.tools.Constants.ALL;
+
 import java.util.*;
 import java.util.Map.Entry;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -86,7 +89,7 @@ public class NfoScannerService {
             // add skipped scans to modified sources if they are not skipped before NFO reading
             if (!videoData.isAllScansSkipped()) {
                 for (String skippedSourceDb : infoDTO.getSkippedScans()) {
-                    if (!"all".equalsIgnoreCase(skippedSourceDb) && !videoData.isSkippedScan(skippedSourceDb)) {
+                    if (!ALL.equalsIgnoreCase(skippedSourceDb) && !videoData.isSkippedScan(skippedSourceDb)) {
                         videoData.addModifiedSource(skippedSourceDb);
                     }
                 }
@@ -234,7 +237,7 @@ public class NfoScannerService {
             // add skipped scans to modified sources if they are not skipped before NFO reading
             if (!series.isAllScansSkipped()) {
                 for (String skippedSourceDb : infoDTO.getSkippedScans()) {
-                    if (!"all".equalsIgnoreCase(skippedSourceDb) && !series.isSkippedScan(skippedSourceDb)) {
+                    if (!ALL.equalsIgnoreCase(skippedSourceDb) && !series.isSkippedScan(skippedSourceDb)) {
                         series.addModifiedSource(skippedSourceDb);
                         for (Season season : series.getSeasons()) {
                             season.addModifiedSource(skippedSourceDb);

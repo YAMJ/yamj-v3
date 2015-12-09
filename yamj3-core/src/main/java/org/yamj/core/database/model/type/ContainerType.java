@@ -29,10 +29,10 @@ public enum ContainerType {
     GP3,
     WEBM;
     
-    public static ContainerType fromString(String containerType) {
+    public static ContainerType fromString(final String containerType) {
         try {
             return ContainerType.valueOf(containerType.trim().toUpperCase());
-        } catch (NullPointerException | IllegalArgumentException ex) {
+        } catch (Exception ex) {
             return MP4;
         }
     }

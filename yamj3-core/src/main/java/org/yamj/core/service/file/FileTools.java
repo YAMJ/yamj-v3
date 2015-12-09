@@ -22,18 +22,16 @@
  */
 package org.yamj.core.service.file;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
+
+import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.StringTokenizer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.StageDirectory;
 import org.yamj.core.database.model.StageFile;
-
 public final class FileTools {
 
     public static final String DEFAULT_CHARSET = "UTF-8";
@@ -74,7 +71,7 @@ public final class FileTools {
         }
 
         // parse transliteration map: (source_character [-] transliteration_sequence [,])+
-        StringTokenizer st = new StringTokenizer(PropertyTools.getProperty("yamj3.file.filename.translateChars", ""), ",");
+        StringTokenizer st = new StringTokenizer(PropertyTools.getProperty("yamj3.file.filename.translateChars", ""), DEFAULT_SPLITTER);
         while (st.hasMoreElements()) {
             final String token = st.nextToken();
             String beforeStr = StringUtils.substringBefore(token, "-");

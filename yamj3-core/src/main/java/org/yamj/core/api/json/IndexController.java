@@ -22,6 +22,9 @@
  */
 package org.yamj.core.api.json;
 
+import static org.yamj.core.tools.Constants.ALL;
+import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,11 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.CountGeneric;
 import org.yamj.core.api.model.CountTimestamp;
@@ -74,12 +73,12 @@ public class IndexController {
     }
 
     @RequestMapping("/count")
-    public List<CountTimestamp> getCount(@RequestParam(required = false, defaultValue = "all") String type) {
+    public List<CountTimestamp> getCount(@RequestParam(required = false, defaultValue = ALL) String type) {
         List<CountTimestamp> results = new ArrayList<>();
         List<MetaDataType> requiredTypes = new ArrayList<>();
 
-        if (!type.toLowerCase().contains("all")) {
-            for (String stringType : StringUtils.split(type, ",")) {
+        if (!type.toLowerCase().contains(ALL)) {
+            for (String stringType : StringUtils.split(type, DEFAULT_SPLITTER)) {
                 requiredTypes.add(MetaDataType.fromString(stringType));
             }
         } else {
@@ -101,11 +100,11 @@ public class IndexController {
     }
 
     @RequestMapping("/jobs")
-    public List<CountGeneric> getJobs(@RequestParam(required = false, defaultValue = "all") String job) {
+    public List<CountGeneric> getJobs(@RequestParam(required = false, defaultValue = ALL) String job) {
         List<CountGeneric> results;
 
-        if (StringUtils.isNotBlank(job) && !job.toLowerCase().contains("all")) {
-            List<String> requiredJobs = Arrays.asList(StringUtils.split(job, ","));
+        if (StringUtils.isNotBlank(job) && !job.toLowerCase().contains(ALL)) {
+            List<String> requiredJobs = Arrays.asList(StringUtils.split(job, DEFAULT_SPLITTER));
             results = jsonApiStorageService.getJobCount(requiredJobs);
         } else {
             results = jsonApiStorageService.getJobCount(null);

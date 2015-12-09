@@ -22,8 +22,13 @@
  */
 package org.yamj.filescanner;
 
+import static org.yamj.common.type.ExitType.CMDLINE_ERROR;
+import static org.yamj.common.type.ExitType.CONFIG_ERROR;
+import static org.yamj.common.type.ExitType.SUCCESS;
+
 import java.io.File;
 import java.io.IOException;
+
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +39,8 @@ import org.yamj.common.cmdline.CmdLineOption;
 import org.yamj.common.cmdline.CmdLineParser;
 import org.yamj.common.model.YamjInfo;
 import org.yamj.common.model.YamjInfoBuild;
-import org.yamj.common.tools.ClassTools;
+import org.yamj.common.tools.SystemTools;
 import org.yamj.common.type.ExitType;
-import static org.yamj.common.type.ExitType.CMDLINE_ERROR;
-import static org.yamj.common.type.ExitType.CONFIG_ERROR;
-import static org.yamj.common.type.ExitType.SUCCESS;
 
 public final class FileScanner {
 
@@ -49,13 +51,13 @@ public final class FileScanner {
         PropertyConfigurator.configure("config/log4j-filescanner.properties");
 
         // Get the current directory
-        String yamjHome = ClassTools.checkSystemProperty(YAMJ3_HOME, (new File(".")).getCanonicalPath());
+        String yamjHome = SystemTools.checkSystemProperty(YAMJ3_HOME, new File(".").getCanonicalPath());
 
         try {
             // This is a temporary fix until the yamj3.home can be read from the servlet
-            ClassTools.checkSystemProperty(YAMJ3_HOME, (new File(yamjHome)).getCanonicalPath());
+            SystemTools.checkSystemProperty(YAMJ3_HOME, new File(yamjHome).getCanonicalPath());
         } catch (IOException ex) {
-            ClassTools.checkSystemProperty(YAMJ3_HOME, yamjHome);
+            SystemTools.checkSystemProperty(YAMJ3_HOME, yamjHome);
             LOG.trace("Exception:", ex);
         }
 

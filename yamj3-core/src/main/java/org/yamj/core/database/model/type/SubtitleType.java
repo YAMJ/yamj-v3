@@ -28,10 +28,10 @@ public enum SubtitleType {
     INFILE,
     EXTERNAL;
 
-    public static SubtitleType fromString(String type) {
+    public static SubtitleType fromString(final String type) {
         try {
             return SubtitleType.valueOf(type.trim().toUpperCase());
-        } catch (IllegalArgumentException ex) {
+        } catch (Exception ex) {
             return UNKNOWN;
         }
     }

@@ -22,13 +22,17 @@
  */
 package org.yamj.core.database.model;
 
+import static org.yamj.core.tools.Constants.ALL;
+
 import java.util.*;
+
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.Table;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -356,7 +360,7 @@ public class Person extends AbstractScannable {
     
     @Override
     public boolean isSkippedScan(String sourceDb) {
-        return SKIP_ALL.equalsIgnoreCase(getSkipScanApi());
+        return ALL.equalsIgnoreCase(getSkipScanApi());
     }
     
     public StatusType getFilmographyStatus() {

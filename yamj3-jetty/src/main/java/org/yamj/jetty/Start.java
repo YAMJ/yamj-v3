@@ -47,7 +47,7 @@ import org.yamj.common.cmdline.CmdLineOption;
 import org.yamj.common.cmdline.CmdLineParser;
 import org.yamj.common.model.YamjInfo;
 import org.yamj.common.model.YamjInfoBuild;
-import org.yamj.common.tools.ClassTools;
+import org.yamj.common.tools.SystemTools;
 import org.yamj.common.type.ExitType;
 
 public class Start {
@@ -110,9 +110,9 @@ public class Start {
         if (warFile.exists()) {
             try {
                 // This is a temporary fix until the yamj3.home can be read from the servlet
-                ClassTools.checkSystemProperty("yamj3.home", (new File(yamjHome)).getCanonicalPath());
+                SystemTools.checkSystemProperty("yamj3.home", new File(yamjHome).getCanonicalPath());
             } catch (IOException ex) {
-                ClassTools.checkSystemProperty("yamj3.home", yamjHome);
+                SystemTools.checkSystemProperty("yamj3.home", yamjHome);
             }
             
             LOG.info("YAMJ Home: '{}'", yamjHome);

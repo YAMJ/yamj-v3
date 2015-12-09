@@ -23,6 +23,7 @@
 package org.yamj.core.database.service;
 
 import java.util.*;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -216,7 +217,9 @@ public class JsonApiStorageService {
     //<editor-fold defaultstate="collapsed" desc="Country Methods">
     public ApiCountryDTO getCountry(Long id, String language) {
         Country country = commonDao.getCountry(id);
-        if (country == null) return null;
+        if (country == null) {
+            return null;
+        }
 
         ApiCountryDTO dto = new ApiCountryDTO();
         dto.setId(country.getId());
@@ -227,7 +230,9 @@ public class JsonApiStorageService {
 
     public ApiCountryDTO getCountry(String countryCode, String language) {
         Country country =  commonDao.getCountry(countryCode);
-        if (country == null) return null;
+        if (country == null) {
+            return null;
+        }
         
         ApiCountryDTO dto = new ApiCountryDTO();
         dto.setId(country.getId());
@@ -249,9 +254,10 @@ public class JsonApiStorageService {
     }
 
     private void localizeCountries(List<ApiCountryDTO> countries, String inLanguage) {
-        if (CollectionUtils.isEmpty(countries)) return;
-        for (ApiCountryDTO dto : countries) {
-            localize(dto, inLanguage);
+        if (CollectionUtils.isNotEmpty(countries)) {
+            for (ApiCountryDTO dto : countries) {
+                localize(dto, inLanguage);
+            }
         }
     }
 
@@ -275,9 +281,10 @@ public class JsonApiStorageService {
     }
     
     private void localizeCertifications(List<ApiCertificationDTO> certifications, String inLanguage) {
-        if (CollectionUtils.isEmpty(certifications)) return;
-        for (ApiCertificationDTO cert : certifications) {
-            localize(cert, inLanguage);
+        if (CollectionUtils.isNotEmpty(certifications)) {
+            for (ApiCertificationDTO cert : certifications) {
+                localize(cert, inLanguage);
+            }
         }
     }
     //</editor-fold>
@@ -336,8 +343,9 @@ public class JsonApiStorageService {
     @Transactional
     public void deletePlayer(Long playerId) {
         PlayerInfo playerInfo = this.getPlayerInfo(playerId);
-        if (playerInfo == null) return;
-        playerDao.deleteEntity(playerInfo);
+        if (playerInfo != null) {
+            playerDao.deleteEntity(playerInfo);
+        }
     }
 
     @Transactional
@@ -355,7 +363,9 @@ public class JsonApiStorageService {
     @Transactional
     public boolean storePlayerPath(Long playerId, PlayerPath playerPath) {
         PlayerInfo playerInfo = this.getPlayerInfo(playerId);
-        if (playerInfo == null) return false;
+        if (playerInfo == null) { 
+            return false;
+        }
         
         for (PlayerPath stored : playerInfo.getPaths()) {
             if (stored.getSourcePath().equals(playerPath.getSourcePath())) {
@@ -374,32 +384,31 @@ public class JsonApiStorageService {
     @Transactional
     public boolean storePlayerPath(Long playerId, Long pathId, PlayerPath playerPath) {
         PlayerInfo playerInfo = this.getPlayerInfo(playerId);
-        if (playerInfo == null) return false;
-        
-        for (PlayerPath stored : playerInfo.getPaths()) {
-            if (stored.getId() == pathId) {
-                stored.setSourcePath(playerPath.getSourcePath());
-                stored.setTargetPath(playerPath.getTargetPath());
-                playerDao.updateEntity(stored);
-                return true;
+        if (playerInfo != null) {
+            for (PlayerPath stored : playerInfo.getPaths()) {
+                if (stored.getId() == pathId) {
+                    stored.setSourcePath(playerPath.getSourcePath());
+                    stored.setTargetPath(playerPath.getTargetPath());
+                    playerDao.updateEntity(stored);
+                    return true;
+                }
             }
         }
-        
         return false;
     }
 
     @Transactional
     public boolean deletePlayerPath(Long playerId, Long pathId) {
         PlayerInfo playerInfo = this.getPlayerInfo(playerId);
-        if (playerInfo == null) return false;
-
-        Iterator<PlayerPath> iter = playerInfo.getPaths().iterator();
-        while (iter.hasNext()) {
-            PlayerPath path = iter.next();
-            if (path.getId() == pathId) {
-                iter.remove();
-                playerDao.updateEntity(playerInfo);
-                return true;
+        if (playerInfo != null) {
+            Iterator<PlayerPath> iter = playerInfo.getPaths().iterator();
+            while (iter.hasNext()) {
+                PlayerPath path = iter.next();
+                if (path.getId() == pathId) {
+                    iter.remove();
+                    playerDao.updateEntity(playerInfo);
+                    return true;
+                }
             }
         }
         return false;

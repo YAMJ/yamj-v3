@@ -25,13 +25,10 @@ package org.yamj.common.tools;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
-import org.joda.time.Period;
-import org.joda.time.PeriodType;
+import org.joda.time.*;
 import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
@@ -86,8 +83,7 @@ public final class DateTimeTools {
      * @return
      */
     public static String convertDateToString(Date convertDate, final String dateFormat) {
-        DateTime dt = new DateTime(convertDate);
-        return convertDateToString(dt, dateFormat);
+        return convertDateToString(new DateTime(convertDate), dateFormat);
     }
 
     /**
@@ -108,8 +104,7 @@ public final class DateTimeTools {
      * @return
      */
     public static String convertDateToString(DateTime convertDate, final String dateFormat) {
-        DateTimeFormatter fmt = DateTimeFormat.forPattern(dateFormat);
-        return fmt.print(convertDate);
+        return DateTimeFormat.forPattern(dateFormat).print(convertDate);
     }
 
     /**
@@ -143,8 +138,7 @@ public final class DateTimeTools {
      */
     public static long getDuration(DateTime start, DateTime end) {
         if (start.isBefore(end)) {
-            Interval interval = new Interval(start, end);
-            return interval.toDurationMillis();
+            new Interval(start, end).toDurationMillis();
         }
         return -1L;
     }
@@ -177,9 +171,7 @@ public final class DateTimeTools {
      * @return
      */
     public static String formatDuration(long milliseconds, PeriodFormatter format) {
-        Period period = new Period(milliseconds, PeriodType.time());
-        period = period.normalizedStandard();
-        return format.print(period);
+        return format.print(new Period(milliseconds, PeriodType.time()).normalizedStandard());
     }
 
     /**
@@ -189,13 +181,11 @@ public final class DateTimeTools {
      * @return
      */
     public static int processRuntime(String runtime) {
-        int returnValue;
         // See if we can convert this to a number and assume it's correct if we can
         try {
-            returnValue = Integer.parseInt(runtime);
-            return returnValue;
+            return Integer.parseInt(runtime);
         } catch (Exception ignore) {
-            returnValue = -1;
+            // exception can be ignored
         }
 
         // This is for the format xx(hour/hr/min)yy(min), e.g. 1h30, 90mins, 1h30m
@@ -209,18 +199,17 @@ public final class DateTimeTools {
 
             if (StringUtils.isNotBlank(second)) {
                 // Assume that this is HH(text)MM
-                returnValue = (Integer.parseInt(first) * 60) + Integer.parseInt(second);
-                return returnValue;
+                return (Integer.parseInt(first) * 60) + Integer.parseInt(second);
             }
 
             if (StringUtils.isBlank(divide)) {
                 // No divider value, so assume this is a straight minute value
-                returnValue = Integer.parseInt(first);
-                return returnValue;
+                return Integer.parseInt(first);
             }
 
             if (StringUtils.isBlank(second) && StringUtils.isNotBlank(divide)) {
                 // this is xx(text) so we need to work out what the (text) is
+                int returnValue;
                 if (divide.toLowerCase().contains("h")) {
                     // Assume it is a form of "hours", so convert to minutes
                     returnValue = Integer.parseInt(first) * 60;
@@ -232,7 +221,7 @@ public final class DateTimeTools {
             }
         }
 
-        return returnValue;
+        return -1;
     }
 
     /**
@@ -243,7 +232,6 @@ public final class DateTimeTools {
      * @return
      */
     public static DateTime parseDate(String stringDate, String datePattern) {
-        DateTimeFormatter formatter = DateTimeFormat.forPattern(datePattern);
-        return formatter.parseDateTime(stringDate);
+        return DateTimeFormat.forPattern(datePattern).parseDateTime(stringDate);
     }
 }

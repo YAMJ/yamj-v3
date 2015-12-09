@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.artwork.online;
 
+import static org.yamj.core.tools.Constants.LANGUAGE_EN;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,7 +66,6 @@ public class TheMovieDbArtworkScanner implements
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbArtworkScanner.class);
     private static final String DEFAULT_SIZE = "original";
     private static final String NO_LANGUAGE = StringUtils.EMPTY;
-    private static final String LANGUAGE_EN = "en";
     
     @Autowired
     private LocaleService localeService;

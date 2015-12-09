@@ -72,12 +72,17 @@ public class RottenTomatoesRatingScanner implements IExtraMovieScanner {
     @Override
     public void scanMovie(VideoData videoData) {
         RTMovie rtMovie = null;
-        int rtId = NumberUtils.toInt(videoData.getSourceDbId(SCANNER_ID), 0);
+        int rtId = NumberUtils.toInt(videoData.getSourceDbId(SCANNER_ID));
 
-        if (rtId == 0) {
-            List<RTMovie> rtMovies;
+        if (rtId > 0) {
             try {
-                rtMovies = rottenTomatoesApi.getMoviesSearch(videoData.getTitle());
+                rtMovie = rottenTomatoesApi.getDetailedInfo(rtId);
+            } catch (RottenTomatoesException ex) {
+                LOG.warn("Failed to get RottenTomatoes information: {}", ex.getMessage());
+            }
+        } else {
+            try {
+                List<RTMovie> rtMovies = rottenTomatoesApi.getMoviesSearch(videoData.getTitle());
                 for (RTMovie tmpMovie : rtMovies) {
                     if (videoData.getTitle().equalsIgnoreCase(tmpMovie.getTitle()) && (videoData.getPublicationYear() == tmpMovie.getYear())) {
                         rtId = tmpMovie.getId();
@@ -89,17 +94,11 @@ public class RottenTomatoesRatingScanner implements IExtraMovieScanner {
             } catch (RottenTomatoesException ex) {
                 LOG.warn("Failed to get RottenTomatoes information: {}", ex.getMessage());
             }
-        } else {
-            try {
-                rtMovie = rottenTomatoesApi.getDetailedInfo(rtId);
-            } catch (RottenTomatoesException ex) {
-                LOG.warn("Failed to get RottenTomatoes information: {}", ex.getMessage());
-            }
         }
 
         if (rtMovie != null) {
             for (String type : configService.getPropertyAsList("rottentomatoes.rating.priority", "critics_score,audience_score,critics_rating,audience_rating")) {
-                int rating = NumberUtils.toInt(rtMovie.getRatings().get(type), 0);
+                int rating = NumberUtils.toInt(rtMovie.getRatings().get(type));
                 if (rating > 0) {
                     LOG.debug("{} - {} found: {}", videoData.getTitle(), type, rating);
                     videoData.addRating(SCANNER_ID, rating);

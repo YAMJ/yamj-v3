@@ -90,10 +90,10 @@ public enum JobType {
      * @param type
      * @return
      */
-    public static JobType fromString(String type) {
+    public static JobType fromString(final String type) {
         try {
             return JobType.valueOf(type.trim().toUpperCase());
-        } catch (IllegalArgumentException ex) {
+        } catch (Exception ex) {
             return UNKNOWN;
         }
     }

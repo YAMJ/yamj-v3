@@ -24,12 +24,14 @@ package org.yamj.core.database.model;
 
 import java.io.Serializable;
 import java.util.*;
+
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.Table;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
@@ -222,19 +224,15 @@ public class StageFile extends AbstractAuditable implements Serializable {
     // TRANSIENT METHODS
     
     public String getFileName() {
-        return this.getBaseName() + "." + this.getExtension();
+        return this.getBaseName().concat(".").concat(this.getExtension());
     }
 
     public String getHashCode() {
-        int hash = this.getFullPath().hashCode();
-        return String.valueOf((hash < 0 ? 0 - hash : hash));
+        return getHashCode(0);
     }
 
-    public String getHashCode(int increase) {
-        int hash = this.getFullPath().hashCode();
-        if (hash < 0 ) hash=(0-hash);
-        hash = hash + increase;
-        return String.valueOf(hash);
+    public String getHashCode(final int increase) {
+        return Integer.toString(Math.abs(this.getFullPath().hashCode()) + increase);
     }
 
     // EQUALITY CHECKS

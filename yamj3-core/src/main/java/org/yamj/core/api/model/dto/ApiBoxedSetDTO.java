@@ -82,9 +82,10 @@ public class ApiBoxedSetDTO extends AbstractApiIdentifiableDTO {
     }
 
     public void setArtwork(List<ApiArtworkDTO> artworkList) {
-        if (CollectionUtils.isEmpty(artworkList)) return;
-        for (ApiArtworkDTO aadto : artworkList) {
-            addArtwork(aadto);
+        if (CollectionUtils.isNotEmpty(artworkList)) {
+            for (ApiArtworkDTO aadto : artworkList) {
+                addArtwork(aadto);
+            }
         }
     }
     

@@ -22,14 +22,18 @@
  */
 package org.yamj.core.database.model;
 
+import static org.yamj.core.tools.Constants.ALL;
+
 import java.util.*;
 import java.util.Map.Entry;
+
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.Table;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -412,14 +416,14 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void setWatchedNfo(boolean watchedNfo, Date watchedNfoLastDate) {
-        if (watchedNfoLastDate == null) return;
-        
-        setWatchedNfo(watchedNfo);
-        setWatchedNfoLastDate(watchedNfoLastDate);
-
-        if (getWatchedDate() == null || getWatchedDate().before(watchedNfoLastDate)) {
-            setWatched(watchedNfo);
-            setWatchedDate(watchedNfoLastDate);
+        if (watchedNfoLastDate != null) {
+            setWatchedNfo(watchedNfo);
+            setWatchedNfoLastDate(watchedNfoLastDate);
+    
+            if (getWatchedDate() == null || getWatchedDate().before(watchedNfoLastDate)) {
+                setWatched(watchedNfo);
+                setWatchedDate(watchedNfoLastDate);
+            }
         }
     }
     
@@ -440,14 +444,14 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void setWatchedApi(boolean watchedApi, Date watchedApiLastDate) {
-        if (watchedApiLastDate == null) return;
-        
-        setWatchedApi(watchedApi);
-        setWatchedApiLastDate(watchedApiLastDate);
-
-        if (getWatchedDate() == null || getWatchedDate().before(watchedApiLastDate)) {
-            setWatched(watchedApi);
-            setWatchedDate(watchedApiLastDate);
+        if (watchedApiLastDate != null) {
+            setWatchedApi(watchedApi);
+            setWatchedApiLastDate(watchedApiLastDate);
+    
+            if (getWatchedDate() == null || getWatchedDate().before(watchedApiLastDate)) {
+                setWatched(watchedApi);
+                setWatchedDate(watchedApiLastDate);
+            }
         }
     }
     
@@ -468,10 +472,10 @@ public class VideoData extends AbstractMetadata {
     }
 
     public void setWatched(boolean watched, Date watchedDate) {
-        if (watchedDate == null) return;
-
-        setWatched(watched);
-        setWatchedDate(watchedDate);
+        if (watchedDate != null) {
+            setWatched(watched);
+            setWatchedDate(watchedDate);
+        }
     }
     
     private String getSkipScanNfo() {
@@ -529,10 +533,7 @@ public class VideoData extends AbstractMetadata {
     }
 
     public boolean isAllScansSkipped() {
-        if (SKIP_ALL.equalsIgnoreCase(getSkipScanNfo())) {
-            return true;
-        }
-        return SKIP_ALL.equalsIgnoreCase(getSkipScanApi());
+        return ALL.equalsIgnoreCase(getSkipScanNfo()) || ALL.equalsIgnoreCase(getSkipScanApi());
     }
 
     @Override
@@ -542,20 +543,12 @@ public class VideoData extends AbstractMetadata {
             if (getSkipScanNfo() == null && getSkipScanApi() == null) {
                 return false;
             }
-            if (SKIP_ALL.equalsIgnoreCase(getSkipScanNfo())) {
-                return true;
-            }
-            if (SKIP_ALL.equalsIgnoreCase(getSkipScanApi())) {
-                return true;
-            }
-            if (StringUtils.containsIgnoreCase(getSkipScanNfo(), sourceDb)) {
-                return true;
-            }
-            if (StringUtils.containsIgnoreCase(getSkipScanApi(), sourceDb)) {
-                return true;
-            }
-            return false;
+            
+            return isAllScansSkipped() ||
+                   StringUtils.containsIgnoreCase(getSkipScanNfo(), sourceDb) ||
+                   StringUtils.containsIgnoreCase(getSkipScanApi(), sourceDb);
         }
+        
         // skip episode
         return getSeason().isSkippedScan(sourceDb);
     }
@@ -841,7 +834,7 @@ public class VideoData extends AbstractMetadata {
             // not done if episode ID not set
             return false;
         }
-        return (StatusType.DONE.equals(this.getStatus()));
+        return StatusType.DONE.equals(this.getStatus());
     }
 
     public void setTvEpisodeDone() {
@@ -865,7 +858,7 @@ public class VideoData extends AbstractMetadata {
 
     @Override
     public boolean isMovie() {
-        return (episode < 0);
+        return episode < 0;
     }
 
     // EQUALITY CHECKS

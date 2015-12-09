@@ -22,7 +22,10 @@
  */
 package org.yamj.core.pages;
 
+import static org.yamj.core.tools.Constants.ALL;
+
 import java.util.*;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,7 +101,7 @@ public class PagesController {
         YamjInfo yi = sic.getYamjInfo("false");
         view.addObject("yi", yi);
 
-        List<CountGeneric> jobList = index.getJobs("all");
+        List<CountGeneric> jobList = index.getJobs(ALL);
         // Add some wording if there is an empty list
         if (jobList.isEmpty()) {
             CountGeneric noJobs = new CountGeneric();

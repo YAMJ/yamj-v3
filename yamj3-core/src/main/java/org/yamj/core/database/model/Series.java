@@ -22,14 +22,18 @@
  */
 package org.yamj.core.database.model;
 
+import static org.yamj.core.tools.Constants.ALL;
+
 import java.util.*;
 import java.util.Map.Entry;
+
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.Table;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -288,10 +292,7 @@ public class Series extends AbstractMetadata {
     }
 
     public boolean isAllScansSkipped() {
-        if (SKIP_ALL.equalsIgnoreCase(getSkipScanNfo())) {
-            return true;
-        }
-        return SKIP_ALL.equalsIgnoreCase(getSkipScanApi());
+        return ALL.equalsIgnoreCase(getSkipScanNfo()) || ALL.equalsIgnoreCase(getSkipScanApi());
     }
 
     @Override
@@ -299,19 +300,10 @@ public class Series extends AbstractMetadata {
         if (getSkipScanNfo() == null && getSkipScanApi() == null) {
             return false;
         }
-        if (SKIP_ALL.equalsIgnoreCase(getSkipScanNfo())) {
-            return true;
-        }
-        if (SKIP_ALL.equalsIgnoreCase(getSkipScanApi())) {
-            return true;
-        }
-        if (StringUtils.containsIgnoreCase(getSkipScanNfo(), sourceDb)) {
-            return true;
-        }
-        if (StringUtils.containsIgnoreCase(getSkipScanApi(), sourceDb)) {
-            return true;
-        }
-        return false;
+        
+        return isAllScansSkipped() ||
+               StringUtils.containsIgnoreCase(getSkipScanNfo(), sourceDb) ||
+               StringUtils.containsIgnoreCase(getSkipScanApi(), sourceDb);
     }
 
     public void setSkippendScansNfo(Set<String> skippedScans) {
@@ -352,7 +344,7 @@ public class Series extends AbstractMetadata {
 
     public Artwork getArtwork(ArtworkType artworkType) {
         for (Artwork artwork : getArtworks()) {
-            if (artworkType.equals(artwork.getArtworkType())) {
+            if (artworkType == artwork.getArtworkType()) {
                 return artwork;
             }
         }

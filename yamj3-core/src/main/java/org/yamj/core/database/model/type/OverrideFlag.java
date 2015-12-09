@@ -50,10 +50,10 @@ public enum OverrideFlag {
     DEATHPLACE,
     BIOGRAPHY;
 
-    public static OverrideFlag fromString(String overrideFlag) {
+    public static OverrideFlag fromString(final String overrideFlag) {
         try {
             return OverrideFlag.valueOf(overrideFlag.trim().toUpperCase());
-        } catch (IllegalArgumentException ex) {
+        } catch (Exception ex) {
             return UNKNOWN;
         }
     }

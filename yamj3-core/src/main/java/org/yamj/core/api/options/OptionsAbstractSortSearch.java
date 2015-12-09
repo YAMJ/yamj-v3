@@ -22,17 +22,22 @@
  */
 package org.yamj.core.api.options;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import static org.yamj.core.tools.Constants.ALL;
+import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
+
 import java.util.*;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.builder.DataItem;
 import org.yamj.core.database.model.type.JobType;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 /**
  * Abstract class for the query options
  *
@@ -275,14 +280,11 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     }
 
     public Map<JobType, Integer> splitJobs() {
-        if (jobTypes == null) {
+        if (jobTypes != null) {
             jobTypes = new EnumMap<>(JobType.class);
-            if (CollectionUtils.isEmpty(jobs)) {
-                jobTypes = Collections.emptyMap();
-            } else {
-                jobTypes = new HashMap<>();
+            if (CollectionUtils.isNotEmpty(jobs)) {
                 for (String job : jobs) {
-                    if ("ALL".equalsIgnoreCase(job)) {
+                    if (ALL.equalsIgnoreCase(job)) {
                         allJobTypes = true;
                         jobTypes.clear();
                         break;
@@ -293,21 +295,13 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
                     JobType jobType = null;
                     Integer amount = null;
                     if (vals.length > 0) {
-                        try {
-                            jobType = JobType.valueOf(vals[0].trim().toUpperCase());
-                            if (vals.length > 1) {
-                                try {
-                                    amount = Integer.parseInt(vals[1]);
-                                    if (amount <= 0) {
-                                        // ignore jobs <= 0
-                                        jobType = null;
-                                    }
-                                } catch (Exception ignore) {
-                                    // ignore error if job amount is not present
-                                }
-                            }
-                        } catch (Exception ignore) {
-                            // ignore any error
+                        jobType = JobType.fromString(vals[0]);
+                    }
+                    if (vals.length > 1) {
+                        amount = NumberUtils.toInt(vals[1], -1);
+                        if (amount <= 0) {
+                            // ignore jobs <= 0
+                            jobType = null;
                         }
                     }
                     if (jobType != null) {
@@ -331,12 +325,14 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
 
     protected Set<MetaDataType> getMetaDataTypes(String type) {
         HashSet<MetaDataType> types = new  HashSet<>();
-        if (StringUtils.isEmpty(type) || StringUtils.containsIgnoreCase(type, "ALL")) {
+        if (StringUtils.isEmpty(type) || StringUtils.containsIgnoreCase(type, ALL)) {
             types.addAll(Arrays.asList(MetaDataType.values()));
         } else {
-            for (String param : StringUtils.split(type, ",")) {
+            for (String param : StringUtils.split(type, DEFAULT_SPLITTER)) {
                 MetaDataType mdt = MetaDataType.fromString(param);
-                if (mdt.isRealMetaData()) types.add(mdt);
+                if (mdt.isRealMetaData()) {
+                    types.add(mdt);
+                }
             }
         }
 
@@ -354,15 +350,17 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
     protected Set<MetaDataType> splitTypes(String type) {
         if (CollectionUtils.isEmpty(metaDataTypes)) {
             metaDataTypes = new HashSet<>();
-            if (StringUtils.isEmpty(type) || StringUtils.containsIgnoreCase(type, "ALL")) {
+            if (StringUtils.isEmpty(type) || StringUtils.containsIgnoreCase(type, ALL)) {
                 metaDataTypes.add(MetaDataType.MOVIE);
                 metaDataTypes.add(MetaDataType.SERIES);
                 metaDataTypes.add(MetaDataType.SEASON);
             } else {
-                for (String param : StringUtils.split(type, ",")) {
+                for (String param : StringUtils.split(type, DEFAULT_SPLITTER)) {
                     // validate that the string passed is a correct type
                     MetaDataType mdt = MetaDataType.fromString(param);
-                    if (mdt.isRealMetaData()) metaDataTypes.add(mdt);
+                    if (mdt.isRealMetaData()) {
+                        metaDataTypes.add(mdt);
+                    }
                 }
             }
         }

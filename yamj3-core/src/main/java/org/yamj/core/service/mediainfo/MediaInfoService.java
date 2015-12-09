@@ -22,11 +22,15 @@
  */
 package org.yamj.core.service.mediainfo;
 
+import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
+
 import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -44,7 +48,6 @@ import org.yamj.core.database.service.MediaStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.tools.AspectRatioTools;
 import org.yamj.core.tools.Constants;
-
 @Service("mediaInfoService")
 public class MediaInfoService {
 
@@ -125,7 +128,7 @@ public class MediaInfoService {
         }
 
         // Add a list of supported extensions
-        for (String ext : PropertyTools.getProperty("mediainfo.rar.diskExtensions", "iso,img,rar,001").split(",")) {
+        for (String ext : PropertyTools.getProperty("mediainfo.rar.diskExtensions", "iso,img,rar,001").split(DEFAULT_SPLITTER)) {
             RAR_DISK_IMAGES.add(ext.toLowerCase());
         }
     }

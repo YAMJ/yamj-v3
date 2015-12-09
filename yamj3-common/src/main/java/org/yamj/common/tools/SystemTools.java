@@ -24,6 +24,8 @@ package org.yamj.common.tools;
 
 import java.net.*;
 import java.util.Enumeration;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +44,23 @@ public final class SystemTools {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
+    /**
+     * Check to see if a system property has been set, and set it if not.
+     *
+     * @param property
+     * @param defaultValue
+     * @return
+     */
+    public static String checkSystemProperty(String property, String defaultValue) {
+        String systemProperty = System.getProperty(property, "");
+        if (StringUtils.isBlank(systemProperty)) {
+            LOG.debug("System property '{}' not found. Setting to '{}'", property, defaultValue);
+            System.setProperty(property, defaultValue);
+            return defaultValue;
+        }
+        return systemProperty;
+    }
+    
     /**
      * Search through the the network adapters and get the IPv4 address of the
      * server.

@@ -22,8 +22,12 @@
  */
 package org.yamj.core.service.tasks;
 
+import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
+
 import java.util.Date;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +53,7 @@ public class ExecutionTaskInitialization {
     public void init() throws Exception {
         LOG.debug("Initialize execution tasks");
         
-        String[] tasks = PropertyTools.getProperty("execution.task.init.tasks", "").split(",");
+        String[] tasks = PropertyTools.getProperty("execution.task.init.tasks", "").split(DEFAULT_SPLITTER);
         if (tasks.length > 0) {
             for (String task : tasks) {
                 boolean valid = true;

@@ -38,7 +38,6 @@ import org.yamj.api.common.http.DigestedResponse;
 import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.common.remote.service.GitHubService;
-import org.yamj.common.tools.ClassTools;
 import org.yamj.common.tools.DateTimeTools;
 
 /**
@@ -102,7 +101,7 @@ public class GitHubServiceImpl implements GitHubService {
             LOG.info("Date: '{}'", returnDate);
         } catch (IOException | RuntimeException | URISyntaxException ex) {
             LOG.error("Unable to get GitHub information, error: {}", ex.getMessage());
-            LOG.warn(ClassTools.getStackTrace(ex));
+            LOG.warn("Service error", ex);
             return returnDate;
         }
         return returnDate;

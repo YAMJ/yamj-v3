@@ -24,6 +24,7 @@ package org.yamj.core.service.mediaimport;
 
 import java.util.*;
 import java.util.Map.Entry;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -571,10 +572,6 @@ public class MediaImportService {
 
     @Transactional
     public void processingError(Long id) {
-        if (id == null) {
-            return;
-        }
-
         StageFile stageFile = stagingDao.getById(StageFile.class, id);
         if (stageFile != null) {
             stageFile.setStatus(StatusType.ERROR);

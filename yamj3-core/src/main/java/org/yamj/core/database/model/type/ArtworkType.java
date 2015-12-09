@@ -31,10 +31,10 @@ public enum ArtworkType {
     VIDEOIMAGE,
     PHOTO;
 
-    public static ArtworkType fromString(String type) {
+    public static ArtworkType fromString(final String type) {
         try {
             return ArtworkType.valueOf(type.trim().toUpperCase());
-        } catch (IllegalArgumentException ex) {
+        } catch (Exception ex) {
             return UNKNOWN;
         }
     }

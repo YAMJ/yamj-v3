@@ -35,12 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.*;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
@@ -76,7 +71,7 @@ public class H2DatabaseConfiguration extends AbstractDatabaseConfiguration {
         LOG.trace("Create new data source");
         
         JdbcDataSource dataSource = new JdbcDataSource();
-        StringBuffer url = new StringBuffer().append("jdbc:h2:");
+        StringBuilder url = new StringBuilder().append("jdbc:h2:");
         url.append(System.getProperty("yamj3.home", ".")).append("/database/yamj3;AUTO_SERVER=TRUE");
         dataSource.setUrl(url.toString());
         

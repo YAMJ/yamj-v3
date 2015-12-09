@@ -24,11 +24,16 @@ package org.yamj.core.tools;
 
 public final class Constants {
 
+    public static final String SPACE_SLASH_SPACE = " / ";
+    public static final String DEFAULT_SPLITTER = ",";
+
+    public static final String UNDEFINED = "Undefined";
+    public static final String ALL = "all";
+    
+    public static final String LANGUAGE_EN = "en";
+    public static final String LANGUAGE_UNTERTERMINED = "und";
+
     private Constants() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
-    
-    public static final String SPACE_SLASH_SPACE = " / ";
-    public static final String UNDEFINED = "Undefined";
-    public static final String LANGUAGE_UNTERTERMINED = "und";
 }

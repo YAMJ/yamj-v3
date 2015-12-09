@@ -23,7 +23,9 @@
 package org.yamj.core.database.model;
 
 import java.util.Date;
+
 import javax.persistence.*;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.core.hibernate.Auditable;
@@ -48,10 +50,7 @@ public abstract class AbstractAuditable extends AbstractIdentifiable implements 
     private Date updateTimestamp;
 
     // GETTER AND SETTER
-    public boolean isNewlyCreated() {
-        return (this.getId() <= 0);
-    }
-
+    
     public Date getCreateTimestamp() {
         return this.createTimestamp;
     }

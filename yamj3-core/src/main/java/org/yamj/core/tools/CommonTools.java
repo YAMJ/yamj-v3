@@ -38,8 +38,7 @@ public final class CommonTools {
      */
     public static String getSimpleHashCode(String string) {
         // hash code of string
-        int hash = string.hashCode();
-        return String.valueOf((hash < 0 ? 0 - hash : hash));
+        return Integer.toString(Math.abs(string.hashCode()));
     }
     
     /**

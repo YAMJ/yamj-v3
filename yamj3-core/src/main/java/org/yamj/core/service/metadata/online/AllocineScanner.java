@@ -22,12 +22,7 @@
  */
 package org.yamj.core.service.metadata.online;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -42,11 +37,9 @@ import org.springframework.stereotype.Service;
 import org.yamj.api.common.http.PoolingHttpClient;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
-import org.yamj.core.database.model.FilmParticipation;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.database.model.type.ParticipationType;
@@ -58,17 +51,7 @@ import org.yamj.core.web.apis.AllocineApiWrapper;
 import org.yamj.core.web.apis.ImdbSearchEngine;
 import org.yamj.core.web.apis.SearchEngineTools;
 
-import com.moviejukebox.allocine.model.CastMember;
-import com.moviejukebox.allocine.model.Episode;
-import com.moviejukebox.allocine.model.EpisodeInfos;
-import com.moviejukebox.allocine.model.FestivalAward;
-import com.moviejukebox.allocine.model.FilmographyInfos;
-import com.moviejukebox.allocine.model.MovieInfos;
-import com.moviejukebox.allocine.model.MoviePerson;
-import com.moviejukebox.allocine.model.Participance;
-import com.moviejukebox.allocine.model.PersonInfos;
-import com.moviejukebox.allocine.model.TvSeasonInfos;
-import com.moviejukebox.allocine.model.TvSeriesInfos;
+import com.moviejukebox.allocine.model.*;
 
 @Service("allocineScanner")
 public class AllocineScanner implements IMovieScanner, ISeriesScanner, IPersonScanner, IFilmographyScanner {

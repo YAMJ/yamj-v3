@@ -22,6 +22,8 @@
  */
 package org.yamj.core.web.apis;
 
+import static org.yamj.core.tools.Constants.ALL;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -53,7 +55,6 @@ public class ImdbSearchEngine {
     private static final String OBJECT_PERSON = "person";
     private static final String CATEGORY_MOVIE = "movie";
     private static final String CATEGORY_TV = "tv";
-    private static final String CATEGORY_ALL = "all";
     private static final String SEARCH_FIRST = "first";
     private static final String SEARCH_EXACT = "exact";
     private static final String HTML_SLASH_QUOTE = "/\"";
@@ -164,7 +165,7 @@ public class ImdbSearchEngine {
      * @return
      */
     public String getImdbPersonId(String personName, boolean throwTempError) {
-        String imdbId = getImdbIdFromImdb(personName.toLowerCase(), -1, OBJECT_PERSON, CATEGORY_ALL, throwTempError);
+        String imdbId = getImdbIdFromImdb(personName.toLowerCase(), -1, OBJECT_PERSON, ALL, throwTempError);
         if (StringUtils.isBlank(imdbId)) {
             String imdbUrl = searchEngineTools.searchURL(personName, -1, "www.imdb.com/name", throwTempError);
             imdbId = getImdbIdFromURL(imdbUrl, OBJECT_PERSON);

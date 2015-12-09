@@ -22,10 +22,11 @@
  */
 package org.yamj.core.api.options;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
  * List of the options available for the indexes
@@ -37,9 +38,10 @@ public class OptionsIndexArtwork extends OptionsAbstract {
 
     private List<String> artwork = new ArrayList<>();
     private List<String> video = new ArrayList<>();
-    private Long id = -1L;
+    private Long id;
 
     public OptionsIndexArtwork() {
+        this(-1L);
     }
 
     public OptionsIndexArtwork(Long id) {

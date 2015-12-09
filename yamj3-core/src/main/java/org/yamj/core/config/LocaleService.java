@@ -26,7 +26,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.Map.Entry;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.slf4j.Logger;
@@ -65,12 +67,12 @@ public class LocaleService  {
             countryCode = StringUtils.trimToNull(locale.getCountry());
             try {
                 langISO3 = StringUtils.trimToNull(locale.getISO3Language());
-            } catch (Exception e) {
+            } catch (MissingResourceException mre) {
                langISO3 = null; 
             }
             try {
                 countryISO3 = StringUtils.trimToNull(locale.getISO3Country());
-            } catch (Exception e) {
+            } catch (MissingResourceException mre) {
                 countryISO3 = null; 
             }
             displayLanguage = StringUtils.trimToNull(locale.getDisplayLanguage());
@@ -207,6 +209,7 @@ public class LocaleService  {
                 language = Locale.getDefault().getLanguage();
             }
         }
+        
         String country = PropertyTools.getProperty("yamj3.country");
         if (StringUtils.isEmpty(country)) {
             country = Locale.getDefault().getCountry();
@@ -233,10 +236,10 @@ public class LocaleService  {
              InputStreamReader reader = new InputStreamReader(inStream, "UTF-8"))
         {
             props.load(reader);
-        } catch (Exception e) {
+        } catch (Exception ex) {
             props.clear();
-            LOG.error("Failed to load '{}' properties: {}", resourceName, e.getMessage());
-            LOG.trace("Property load error", e);
+            LOG.error("Failed to load '{}' properties: {}", resourceName, ex.getMessage());
+            LOG.trace("Property load error", ex);
         }
         return props;
     }
@@ -297,6 +300,7 @@ public class LocaleService  {
                 language = yamjLocale.getLanguage();
             }
         }
+        
         String country = configService.getProperty(config+".country");
         if (StringUtils.isBlank(country)) {
             country = yamjLocale.getCountry();
@@ -306,14 +310,18 @@ public class LocaleService  {
                 country = yamjLocale.getCountry();
             }
         }
+        
         LOG.trace("Locale for {}: language={}, country={}", config, language, country);
         return new Locale(language, country);            
     }
 
     public String getDisplayLanguage(final String inLanguage, final String languageCode) {
-        if (languageCode == null) return null;
+        if (languageCode == null) {
+            return null;
+        }
+        
         final String langCode = languageCode.toLowerCase();
-        String inLangCode = (inLanguage == null ? yamjLocale.getLanguage() : inLanguage.toLowerCase());
+        String inLangCode = (inLanguage == null) ? yamjLocale.getLanguage() : inLanguage.toLowerCase();
         
         // fast way
         String display = this.languageDisplayMap.get(inLangCode + "_" + langCode);
@@ -323,7 +331,9 @@ public class LocaleService  {
         
         // slower way
         inLangCode = findLanguageCode(inLanguage);
-        if (inLangCode == null) inLangCode = yamjLocale.getLanguage();
+        if (inLangCode == null) {
+            inLangCode = yamjLocale.getLanguage();
+        }
         display = this.languageDisplayMap.get(inLangCode + "_" + langCode);
         if (display != null) {
             return display;
@@ -340,9 +350,12 @@ public class LocaleService  {
     }
 
     public String getDisplayCountry(final String inLanguage, final String countryCode) {
-        if (countryCode == null) return null;
+        if (countryCode == null) {
+            return null;
+        }
+        
         final String cCode = countryCode.toUpperCase();
-        String inLangCode = (inLanguage == null ? yamjLocale.getLanguage() : inLanguage.toLowerCase());
+        String inLangCode = (inLanguage == null) ? yamjLocale.getLanguage() : inLanguage.toLowerCase();
         
         // fast way
         String display = this.countryDisplayMap.get(inLangCode + "_" + cCode);
@@ -352,7 +365,9 @@ public class LocaleService  {
             
         // slower way
         inLangCode = findLanguageCode(inLanguage);
-        if (inLangCode == null) inLangCode = yamjLocale.getLanguage();
+        if (inLangCode == null) {
+            inLangCode = yamjLocale.getLanguage();
+        }
         display = this.countryDisplayMap.get(inLangCode + "_" + cCode);
         if (display != null) {
             return display;
@@ -385,12 +400,14 @@ public class LocaleService  {
     }
     
     public Set<String> getCountryNames(String countryCode) {
+        if (StringUtils.isBlank(countryCode)) {
+            return Collections.emptySet();
+        }
+        
         Set<String> result = new HashSet<>();
-        if (StringUtils.isNotBlank(countryCode)) {
-            for (Entry<String,String> entry : countryLookupMap.entrySet()) {
-                if (entry.getValue().equals(countryCode)) {
-                    result.add(entry.getKey());
-                }
+        for (Entry<String,String> entry : countryLookupMap.entrySet()) {
+            if (entry.getValue().equals(countryCode)) {
+                result.add(entry.getKey());
             }
         }
         return result;

@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.artwork.online;
 
+import static org.yamj.core.tools.Constants.LANGUAGE_EN;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +56,6 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
 
     private static final Logger LOG = LoggerFactory.getLogger(FanartTvScanner.class);
     private static final String SCANNER_ID = "fanarttv";
-    private static final String LANGUAGE_EN = "en";
     private static final String LANGUAGE_NONE = "00";
     
     @Autowired
