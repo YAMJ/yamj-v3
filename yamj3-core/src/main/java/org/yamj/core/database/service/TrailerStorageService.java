@@ -128,18 +128,15 @@ public class TrailerStorageService {
             this.trailerDao.storeAll(trailers);
         } else if (CollectionUtils.isNotEmpty(trailers)) {
             for (Trailer trailer : trailers) {
-                if (!videoData.getTrailers().contains(trailer)) {
+                final int index = videoData.getTrailers().indexOf(trailer);
+                if (index < 0) {
                     // just store if not contained before
                     videoData.getTrailers().add(trailer);
                     trailerDao.saveEntity(trailer);
                 } else {
-                    // find matching stored trailer and reset deleted status
-                    for (Trailer stored : videoData.getTrailers()) {
-                        if (stored.equals(trailer)) {
-                            trailerDao.resetDeletionStatus(stored);
-                            break;
-                        }
-                    }
+                    // reset deletion status
+                    Trailer stored = videoData.getTrailers().get(index);
+                    trailerDao.resetDeletionStatus(stored);
                 }
             }
         }
@@ -172,18 +169,15 @@ public class TrailerStorageService {
             this.trailerDao.storeAll(trailers);
         } else if (CollectionUtils.isNotEmpty(trailers)) {
             for (Trailer trailer : trailers) {
-                if (!series.getTrailers().contains(trailer)) {
+                final int index = series.getTrailers().indexOf(trailer);
+                if (index < 0) {
                     // just store if not contained before
                     series.getTrailers().add(trailer);
                     trailerDao.saveEntity(trailer);
                 } else {
-                    // find matching stored trailer and reset deleted status
-                    loop: for (Trailer stored : series.getTrailers()) {
-                        if (stored.equals(trailer)) {
-                            trailerDao.resetDeletionStatus(stored);
-                            break loop;
-                        }
-                    }
+                    // reset deletion status
+                    Trailer stored = series.getTrailers().get(index);
+                    trailerDao.resetDeletionStatus(stored);
                 }
             }
         }

@@ -22,31 +22,18 @@
  */
 package org.yamj.core.database.model;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
-
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.*;
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.Type;
-import org.yamj.common.type.StatusType;
+import org.hibernate.annotations.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.file.StorageType;
 
@@ -57,7 +44,7 @@ import org.yamj.core.service.file.StorageType;
                   @Index(name = "IX_ARTWORK_STATUS", columnList = "status")}
 )
 @SuppressWarnings("unused")
-public class Artwork extends AbstractAuditable implements Serializable {
+public class Artwork extends AbstractStateful {
 
     private static final long serialVersionUID = -981494909436217076L;
 
@@ -96,12 +83,8 @@ public class Artwork extends AbstractAuditable implements Serializable {
     @JoinColumn(name = "boxedset_id", foreignKey = @ForeignKey(name = "FK_ARTWORK_BOXEDSET"))
     private BoxedSet boxedSet;
 
-    @Type(type = "statusType")
-    @Column(name = "status", nullable = false, length = 30)
-    private StatusType status;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "artwork")
-    private Set<ArtworkLocated> artworkLocated = new HashSet<>(0);
+    private List<ArtworkLocated> artworkLocated = new ArrayList<>(0);
 
     // GETTER and SETTER
     public ArtworkType getArtworkType() {
@@ -152,20 +135,12 @@ public class Artwork extends AbstractAuditable implements Serializable {
         this.boxedSet = boxedSet;
     }
 
-    private void setArtworkLocated(Set<ArtworkLocated> artworkLocated) {
+    private void setArtworkLocated(List<ArtworkLocated> artworkLocated) {
         this.artworkLocated = artworkLocated;
     }
 
-    public Set<ArtworkLocated> getArtworkLocated() {
+    public List<ArtworkLocated> getArtworkLocated() {
         return artworkLocated;
-    }
-
-    public StatusType getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusType status) {
-        this.status = status;
     }
 
     // TRANSIENT METHODS

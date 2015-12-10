@@ -26,9 +26,7 @@ import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 
 import java.sql.SQLException;
 import java.util.Properties;
-
 import javax.sql.DataSource;
-
 import org.h2.jdbcx.JdbcDataSource;
 import org.h2.tools.Server;
 import org.slf4j.Logger;
@@ -71,8 +69,10 @@ public class H2DatabaseConfiguration extends AbstractDatabaseConfiguration {
         LOG.trace("Create new data source");
         
         JdbcDataSource dataSource = new JdbcDataSource();
-        StringBuilder url = new StringBuilder().append("jdbc:h2:");
-        url.append(System.getProperty("yamj3.home", ".")).append("/database/yamj3;AUTO_SERVER=TRUE");
+        StringBuilder url = new StringBuilder()
+            .append("jdbc:h2:")
+            .append(System.getProperty("yamj3.home", "."))
+            .append("/database/yamj3;AUTO_SERVER=TRUE");
         dataSource.setUrl(url.toString());
         
         dataSource.setUser("yamj3");

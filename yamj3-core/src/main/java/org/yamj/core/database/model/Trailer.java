@@ -22,7 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import java.io.Serializable;
 import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
@@ -32,7 +31,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.*;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.ContainerType;
 
 @Entity
@@ -40,7 +38,7 @@ import org.yamj.core.database.model.type.ContainerType;
        uniqueConstraints = @UniqueConstraint(name = "UIX_TRAILER_NATURALID", columnNames = {"videodata_id", "series_id", "source", "hash_code"}),
        indexes = {@Index(name = "IX_TRAILER_STATUS", columnList = "status")}
 )
-public class Trailer extends AbstractAuditable implements Serializable {
+public class Trailer extends AbstractStatefulPrev {
 
     private static final long serialVersionUID = -7853145730427742811L;
 
@@ -81,14 +79,6 @@ public class Trailer extends AbstractAuditable implements Serializable {
 
     @Column(name = "cache_dir", length = 50)
     private String cacheDirectory;
-
-    @Type(type = "statusType")
-    @Column(name = "status", nullable = false, length = 30)
-    private StatusType status;
-
-    @Type(type = "statusType")
-    @Column(name = "previous_status", length = 30)
-    private StatusType previousStatus;
 
     @Column(name = "title", length = 255)
     private String title;
@@ -165,27 +155,6 @@ public class Trailer extends AbstractAuditable implements Serializable {
 
     public void setCacheDirectory(String cacheDirectory) {
         this.cacheDirectory = cacheDirectory;
-    }
-
-    public StatusType getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusType status) {
-        if (StatusType.DELETED.equals(status)) {
-            setPreviousStatus(this.status);
-        } else {
-            setPreviousStatus(null);
-        }
-        this.status = status;
-    }
-
-    public StatusType getPreviousStatus() {
-        return previousStatus;
-    }
-
-    private void setPreviousStatus(StatusType previousStatus) {
-        this.previousStatus = previousStatus;
     }
 
     public String getTitle() {

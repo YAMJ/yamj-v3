@@ -22,7 +22,6 @@
  */
 package org.yamj.core.database.model;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
@@ -36,7 +35,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.ImageType;
 
 @Entity
@@ -44,7 +42,7 @@ import org.yamj.core.database.model.type.ImageType;
        uniqueConstraints = @UniqueConstraint(name = "UIX_ARTWORKLOCATED_NATURALID", columnNames = {"artwork_id", "source", "hash_code"}),
        indexes = @Index(name = "IX_ARTWORKLOCATED_STATUS", columnList = "status")
 )
-public class ArtworkLocated extends AbstractAuditable implements Serializable {
+public class ArtworkLocated extends AbstractStatefulPrev {
 
     private static final long serialVersionUID = -981494909436217076L;
 
@@ -69,14 +67,6 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     @Column(name = "url", length = 1000)
     private String url;
-
-    @Type(type = "statusType")
-    @Column(name = "status", nullable = false, length = 30)
-    private StatusType status;
-
-    @Type(type = "statusType")
-    @Column(name = "previous_status", length = 30)
-    private StatusType previousStatus;
 
     @Column(name = "priority", nullable = false)
     private int priority = -1;
@@ -146,27 +136,6 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public StatusType getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusType status) {
-        if (StatusType.DELETED.equals(status)) {
-            setPreviousStatus(this.status);
-        } else {
-            setPreviousStatus(null);
-        }
-        this.status = status;
-    }
-
-    public StatusType getPreviousStatus() {
-        return previousStatus;
-    }
-
-    private void setPreviousStatus(StatusType previousStatus) {
-        this.previousStatus = previousStatus;
     }
 
     public int getPriority() {
@@ -243,13 +212,6 @@ public class ArtworkLocated extends AbstractAuditable implements Serializable {
 
     // TRANSIENT METHODS
     
-    public boolean isValidStatus() {
-        if (status == null) {
-            return false;
-        }
-        return StatusType.DONE.equals(status) || StatusType.NEW.equals(status) || StatusType.UPDATED.equals(status);
-    }
-
     public boolean isCached() {
         return StringUtils.isNotBlank(cacheFilename) && StringUtils.isNotBlank(cacheDirectory);
     }

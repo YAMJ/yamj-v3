@@ -171,7 +171,7 @@ public class MetadataStorageService {
                     this.metadataDao.storeMovieCredit(creditDTO);
                 } catch (Exception ex) {
                     LOG.error("Failed to store person '{}', error: {}", creditDTO.getName(), ex.getMessage());
-                    LOG.warn("Storage error", ex);
+                    LOG.trace("Storage error", ex);
                 } finally {
                     PERSON_STORAGE_LOCK.unlock();
                 }
@@ -200,7 +200,9 @@ public class MetadataStorageService {
     }
 
     private void storeCountries(Collection<String> countryCodes) {
-        if (CollectionUtils.isEmpty(countryCodes)) return;
+        if (CollectionUtils.isEmpty(countryCodes)) {
+            return;
+        }
 
         // store countries
         for (String countryCode: countryCodes) {
@@ -219,7 +221,9 @@ public class MetadataStorageService {
     }
 
     private void storeStudios(Collection<String> studioNames) {
-        if (CollectionUtils.isEmpty(studioNames)) return;
+        if (CollectionUtils.isEmpty(studioNames)) {
+            return;
+        }
         
         // store studios
         for (String studioName : studioNames) {
@@ -239,7 +243,9 @@ public class MetadataStorageService {
     }
     
     private void storeCertifications(Map<String,String> certificationInfos) {
-        if (MapUtils.isEmpty(certificationInfos)) return;
+        if (MapUtils.isEmpty(certificationInfos)) {
+            return;
+        }
         
         // store certifications
         for (Entry<String,String> entry : certificationInfos.entrySet()) {
@@ -258,7 +264,9 @@ public class MetadataStorageService {
     }
 
     private void storeAwards(Collection<AwardDTO> awards) {
-        if (CollectionUtils.isEmpty(awards)) return;
+        if (CollectionUtils.isEmpty(awards)) {
+            return;
+        }
         
         // store awards
         for (AwardDTO award : awards) {
@@ -277,7 +285,9 @@ public class MetadataStorageService {
     }
 
     private void storeBoxedSets(Collection<BoxedSetDTO> boxedSets) {
-        if (CollectionUtils.isEmpty(boxedSets)) return;
+        if (CollectionUtils.isEmpty(boxedSets)) {
+            return;
+        }
         
         // store boxed sets
         for (BoxedSetDTO boxedSet : boxedSets) {
@@ -294,7 +304,9 @@ public class MetadataStorageService {
     }
 
     private void storeGenres(Collection<String> genreNames) {
-        if (CollectionUtils.isEmpty(genreNames)) return;
+        if (CollectionUtils.isEmpty(genreNames)) {
+            return;
+        }
 
         // store new genres
         for (String genreName : genreNames) {

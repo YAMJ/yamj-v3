@@ -29,8 +29,6 @@ import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
@@ -41,8 +39,6 @@ import org.yamj.core.hibernate.HibernateDao;
 
 @Repository("artworkDao")
 public class ArtworkDao extends HibernateDao {
-
-    private static final Logger LOG = LoggerFactory.getLogger(HibernateDao.class);
 
     public ArtworkProfile getArtworkProfile(String profileName, ArtworkType artworkType) {
         return currentSession().byNaturalId(ArtworkProfile.class)
@@ -154,29 +150,17 @@ public class ArtworkDao extends HibernateDao {
     }
 
     public void saveArtworkLocated(Artwork artwork, ArtworkLocated scannedLocated) {
-        if (!artwork.getArtworkLocated().contains(scannedLocated)) {
+        final int index = artwork.getArtworkLocated().indexOf(scannedLocated);
+        if (index < 0) {
             // just store if not contained before
             artwork.getArtworkLocated().add(scannedLocated);
             this.saveEntity(scannedLocated);
         } else {
-            // find matching stored located artwork and reset deletion status
-            for (ArtworkLocated stored : artwork.getArtworkLocated()) {
-                if (stored.equals(scannedLocated)) {
-                    switch (stored.getStatus()) {
-                        case DELETED:
-                            stored.setStatus(stored.getPreviousStatus());
-                            this.updateEntity(stored);
-                            break;
-                        case ERROR:
-                        case INVALID:
-                        case NOTFOUND:
-                        case IGNORE:
-                            LOG.debug("Leave status {} for located artwork {}", stored.getStatus(), stored);
-                            break;
-                        default:
-                            break;
-                    }
-                }
+            // reset deletion status
+            ArtworkLocated stored = artwork.getArtworkLocated().get(index);
+            if (stored.getStatus() == StatusType.DELETED) {
+                stored.setStatus(stored.getPreviousStatus());
+                this.updateEntity(stored);
             }
         }
     }

@@ -25,21 +25,14 @@ package org.yamj.core.database;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 
 import java.util.Properties;
-
 import javax.sql.DataSource;
-
 import org.apache.commons.dbcp.BasicDataSource;
 import org.hsqldb.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.*;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
@@ -60,12 +53,13 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
         
         Server hsqlServer = new Server();
         hsqlServer.setLogWriter(null);
-        //hsqlServer.setLogWriter(new PrintWriter(System.err));
         hsqlServer.setSilent(true);
         hsqlServer.setNoSystemExit(true);
 
-        StringBuffer path = new StringBuffer().append("file:");
-        path.append(System.getProperty("yamj3.home", ".")).append("/database/yamj3;user=yamj3;password=yamj3");
+        StringBuilder path = new StringBuilder()
+            .append("file:")
+            .append(System.getProperty("yamj3.home", "."))
+            .append("/database/yamj3;user=yamj3;password=yamj3");
         hsqlServer.setDatabaseName(0, "yamj3");
         hsqlServer.setDatabasePath(0, path.toString());
         

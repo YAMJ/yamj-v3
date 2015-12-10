@@ -24,34 +24,19 @@ package org.yamj.core.database.model;
 
 import static org.yamj.core.tools.Constants.ALL;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-
+import javax.persistence.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.Type;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.OverrideFlag;
 
 /**
  * Abstract implementation of a scannable object.
  */
 @MappedSuperclass
-public abstract class AbstractScannable extends AbstractAuditable
-        implements IScannable, Serializable {
+public abstract class AbstractScannable extends AbstractStateful implements IScannable {
 
     private static final long serialVersionUID = -8036305537317711196L;
     
@@ -61,10 +46,6 @@ public abstract class AbstractScannable extends AbstractAuditable
     @NaturalId
     @Column(name = "identifier", length = 200, nullable = false)
     private String identifier;
-    
-    @Type(type = "statusType")
-    @Column(name = "status", nullable = false, length = 30)
-    private StatusType status;
     
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_scanned")
@@ -96,14 +77,6 @@ public abstract class AbstractScannable extends AbstractAuditable
     @SuppressWarnings("unused")
     private final void setIdentifier(String identifier) {
         this.identifier = identifier;
-    }
-
-    public final StatusType getStatus() {
-        return status;
-    }
-    
-    public final void setStatus(StatusType status) {
-        this.status = status;
     }
 
     @Override

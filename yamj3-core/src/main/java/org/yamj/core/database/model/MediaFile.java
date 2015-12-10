@@ -22,20 +22,15 @@
  */
 package org.yamj.core.database.model;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.Table;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
 
@@ -44,7 +39,7 @@ import org.yamj.core.database.model.type.FileType;
         uniqueConstraints = @UniqueConstraint(name = "UIX_MEDIAFILE_NATURALID", columnNames = {"file_name"})
 )
 @SuppressWarnings("unused")
-public class MediaFile extends AbstractAuditable implements Serializable {
+public class MediaFile extends AbstractStateful {
 
     private static final long serialVersionUID = 8411423609119475972L;
 
@@ -116,10 +111,6 @@ public class MediaFile extends AbstractAuditable implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "watched_api_last_date")
     private Date watchedApiLastDate;
-
-    @Type(type = "statusType")
-    @Column(name = "status", nullable = false, length = 30)
-    private StatusType status;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "mediafile_videodata",
@@ -332,14 +323,6 @@ public class MediaFile extends AbstractAuditable implements Serializable {
             setWatchedApi(watchedApi);
             setWatchedApiLastDate(watchedApiLastDate);
         }
-    }
-
-    public StatusType getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusType status) {
-        this.status = status;
     }
 
     public Set<VideoData> getVideoDatas() {

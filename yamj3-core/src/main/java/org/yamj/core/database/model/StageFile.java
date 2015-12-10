@@ -22,21 +22,17 @@
  */
 package org.yamj.core.database.model;
 
-import java.io.Serializable;
 import java.util.*;
-
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.Table;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
-import org.yamj.common.type.StatusType;
 import org.yamj.core.database.model.type.FileType;
 
 @Entity
@@ -46,7 +42,7 @@ import org.yamj.core.database.model.type.FileType;
                   @Index(name = "IX_STAGEFILE_STATUS", columnList = "status")}
 )
 @SuppressWarnings("unused")
-public class StageFile extends AbstractAuditable implements Serializable {
+public class StageFile extends AbstractStateful {
 
     private static final long serialVersionUID = -6247352843375054146L;
 
@@ -77,10 +73,6 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     @Column(name = "full_path", nullable = false, length = 1000)
     private String fullPath;
-
-    @Type(type = "statusType")
-    @Column(name = "status", nullable = false, length = 30)
-    private StatusType status;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "nfoRelationPK.stageFile")
     private List<NfoRelation> nfoRelations = new ArrayList<>(0);
@@ -159,14 +151,6 @@ public class StageFile extends AbstractAuditable implements Serializable {
 
     public void setFullPath(String fullPath) {
         this.fullPath = fullPath;
-    }
-
-    public StatusType getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusType status) {
-        this.status = status;
     }
 
     public String getContent() {

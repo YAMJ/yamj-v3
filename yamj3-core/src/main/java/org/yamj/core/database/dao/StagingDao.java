@@ -22,15 +22,7 @@
  */
 package org.yamj.core.database.dao;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import java.util.*;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.CacheMode;
@@ -44,11 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.CachingNames;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.Library;
-import org.yamj.core.database.model.StageDirectory;
-import org.yamj.core.database.model.StageFile;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.hibernate.HibernateDao;
@@ -320,8 +308,7 @@ public class StagingDao extends HibernateDao {
             sb.append("AND lower(sf.baseName)=:baseName ");
         }
         sb.append("AND sf.stageDirectory=:stageDirectory ");
-        List<Artwork> artworks = this.findByNamedParameters(sb, params);
-        result.addAll(artworks);
+        result.addAll(this.findByNamedParameters(sb, params));
 
         // for season
         sb.setLength(0);
@@ -340,8 +327,7 @@ public class StagingDao extends HibernateDao {
             sb.append("AND lower(sf.baseName)=:baseName ");
         }
         sb.append("AND sf.stageDirectory=:stageDirectory ");
-        artworks = this.findByNamedParameters(sb, params);
-        result.addAll(artworks);
+        result.addAll(this.findByNamedParameters(sb, params));
 
         return result;
     }
@@ -385,8 +371,7 @@ public class StagingDao extends HibernateDao {
         if (library != null) {
             sb.append("AND sd.library=:library ");
         }
-        List<Artwork> artworks = this.findByNamedParameters(sb, params);
-        result.addAll(artworks);
+        result.addAll(this.findByNamedParameters(sb, params));
 
         sb.setLength(0);
         sb.append("SELECT a ");
@@ -407,8 +392,7 @@ public class StagingDao extends HibernateDao {
         if (library != null) {
             sb.append("AND sd.library=:library ");
         }
-        artworks = this.findByNamedParameters(sb, params);
-        result.addAll(artworks);
+        result.addAll(this.findByNamedParameters(sb, params));
 
         return result;
     }
