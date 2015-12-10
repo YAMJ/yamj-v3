@@ -71,7 +71,7 @@ public final class CommonTools {
         return hashCode;
     }
     
-    public static <T extends Object> T getObject(Collection<T> coll, T object) {
+    public static <T extends Object> T getEqualObject(Collection<T> coll, T object) {
         if (CollectionUtils.isEmpty(coll)) {
             return null;
         }

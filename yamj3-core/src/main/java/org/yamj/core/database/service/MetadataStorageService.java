@@ -352,7 +352,7 @@ public class MetadataStorageService {
         Set<FilmParticipation> deletions = new HashSet<>();
 
         for (FilmParticipation filmo : person.getFilmography()) {
-            FilmParticipation newFilmo = CommonTools.getObject(person.getNewFilmography(), filmo);
+            FilmParticipation newFilmo = CommonTools.getEqualObject(person.getNewFilmography(), filmo);
             if (newFilmo == null) {
                 // actual participation should be deleted
                 deletions.add(filmo);
