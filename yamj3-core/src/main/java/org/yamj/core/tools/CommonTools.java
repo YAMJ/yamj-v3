@@ -22,7 +22,9 @@
  */
 package org.yamj.core.tools;
 
+import java.util.Collection;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 public final class CommonTools {
 
@@ -68,4 +70,16 @@ public final class CommonTools {
         
         return hashCode;
     }
+    
+    public static <T extends Object> T getObject(Collection<T> coll, T object) {
+        if (CollectionUtils.isEmpty(coll)) {
+            return null;
+        }
+        for (T col : coll) {
+            if (col.equals(object)) {
+                return col;
+            }
+        }
+        return null;
+   }
 }

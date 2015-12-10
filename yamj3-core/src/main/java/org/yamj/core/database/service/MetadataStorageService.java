@@ -50,6 +50,7 @@ import org.yamj.core.database.model.award.SeriesAward;
 import org.yamj.core.database.model.dto.*;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.OverrideFlag;
+import org.yamj.core.tools.CommonTools;
 import org.yamj.core.tools.GenreXmlTools;
 
 @Service("metadataStorageService")
@@ -351,15 +352,7 @@ public class MetadataStorageService {
         Set<FilmParticipation> deletions = new HashSet<>();
 
         for (FilmParticipation filmo : person.getFilmography()) {
-
-            FilmParticipation newFilmo = null;
-            for (FilmParticipation fp : person.getNewFilmography()) {
-                if (filmo.equals(fp)) {
-                    newFilmo = fp;
-                    break;
-                }
-            }
-
+            FilmParticipation newFilmo = CommonTools.getObject(person.getNewFilmography(), filmo);
             if (newFilmo == null) {
                 // actual participation should be deleted
                 deletions.add(filmo);
