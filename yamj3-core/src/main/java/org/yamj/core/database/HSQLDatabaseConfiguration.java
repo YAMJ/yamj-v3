@@ -59,7 +59,7 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
         StringBuilder path = new StringBuilder()
             .append("file:")
             .append(System.getProperty("yamj3.home", "."))
-            .append("/database/yamj3;user=yamj3;password=yamj3");
+            .append("/database/yamj3;user=yamj3;password=yamj3"); //NOSONAR
         hsqlServer.setDatabaseName(0, "yamj3");
         hsqlServer.setDatabasePath(0, path.toString());
         

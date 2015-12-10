@@ -74,10 +74,9 @@ public class ArtworkDao extends HibernateDao {
         if (maxResults > 0) {
             query.setMaxResults(maxResults);
         }
-
-        List<QueueDTO> queueElements = new ArrayList<>();
-        
         List<Object[]> objects = query.list();
+
+        List<QueueDTO> queueElements = new ArrayList<>(objects.size());
         for (Object[] object : objects) {
             QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
             queueElement.setArtworkType(convertRowElementToString(object[1]));
@@ -125,9 +124,9 @@ public class ArtworkDao extends HibernateDao {
         if (maxResults > 0) {
             query.setMaxResults(maxResults);
         }
-
-        List<QueueDTO> queueElements = new ArrayList<>();
         List<Object[]> objects = query.list();
+
+        List<QueueDTO> queueElements = new ArrayList<>(objects.size());
         for (Object[] object : objects) {
             QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
             queueElement.setDate(convertRowElementToDate(object[2]));

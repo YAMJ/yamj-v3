@@ -25,7 +25,6 @@ package org.yamj.core.database.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
@@ -37,11 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
 import org.yamj.core.database.dao.ArtworkDao;
-import org.yamj.core.database.model.Artwork;
-import org.yamj.core.database.model.ArtworkGenerated;
-import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.ArtworkProfile;
-import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
 
@@ -84,12 +79,15 @@ public class ArtworkStorageService {
     public List<ArtworkProfile> getPreProcessArtworkProfiles(ArtworkLocated located) {
         MetaDataType metaDataType = null;
 
-        ArtworkType artworkType = located.getArtwork().getArtworkType();
-        if (ArtworkType.PHOTO == artworkType) {
+        final ArtworkType artworkType = located.getArtwork().getArtworkType(); 
+        switch(artworkType) {
+        case PHOTO:
             metaDataType = MetaDataType.PERSON;
-        } else if (ArtworkType.VIDEOIMAGE == artworkType) {
+            break;
+        case VIDEOIMAGE:
             metaDataType = MetaDataType.EPISODE;
-        } else if (ArtworkType.BANNER == artworkType) {
+            break;
+        case BANNER:
             if (located.getArtwork().getBoxedSet() != null) {
                 metaDataType = MetaDataType.BOXSET;
             } else if (located.getArtwork().getSeries() != null) {
@@ -97,7 +95,9 @@ public class ArtworkStorageService {
             } else {
                 metaDataType = MetaDataType.SEASON;
             }
-        } else if (ArtworkType.POSTER == artworkType || (ArtworkType.FANART == artworkType)) {
+            break;
+        case POSTER:
+        case FANART:
             if (located.getArtwork().getBoxedSet() != null) {
                 metaDataType = MetaDataType.BOXSET;
             } else if (located.getArtwork().getSeries() != null) {
@@ -107,6 +107,9 @@ public class ArtworkStorageService {
             } else {
                 metaDataType = MetaDataType.MOVIE;
             }
+            break;
+        default:
+            break;
         }
 
         return this.artworkDao.getPreProcessArtworkProfiles(artworkType, metaDataType);
@@ -114,7 +117,7 @@ public class ArtworkStorageService {
 
     @Transactional
     public void updateArtwork(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
-        if (CollectionUtils.isEmpty(artwork.getArtworkLocated())) {
+        if (artwork.getArtworkLocated().isEmpty()) {
             // no located artwork presents; just store all
             this.artworkDao.storeAll(locatedArtworks);
         } else if (CollectionUtils.isNotEmpty(locatedArtworks)) {

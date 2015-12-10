@@ -101,8 +101,8 @@ public final class BoxedSetDTO {
             return false;
         }
         BoxedSetDTO other = (BoxedSetDTO) obj;
-        if (!StringUtils.equalsIgnoreCase(this.source, other.source)) return false;
-        return StringUtils.equalsIgnoreCase(this.identifier, other.identifier);
+        return StringUtils.equalsIgnoreCase(this.source, other.source) &&
+               StringUtils.equalsIgnoreCase(this.identifier, other.identifier);
     }
 
     @Override

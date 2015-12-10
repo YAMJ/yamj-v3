@@ -24,7 +24,6 @@ package org.yamj.common.tools;
 
 import java.net.*;
 import java.util.Enumeration;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +76,7 @@ public final class SystemTools {
      * @param getIpv4 return the IPv4 address, otherwise IPv6
      * @return
      */
-    public static String getIpAddress(boolean getIpv4) {
+    public static String getIpAddress(final boolean getIpv4) {
         if (getIpv4 && ipv4 != null) {
             return ipv4;
         }
@@ -88,8 +87,7 @@ public final class SystemTools {
 
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            boolean found = Boolean.FALSE;
-            while (!found && interfaces.hasMoreElements()) {
+            outerLoop: while (interfaces.hasMoreElements()) {
                 NetworkInterface currentInterface = interfaces.nextElement();
                 if (!currentInterface.isUp() || currentInterface.isLoopback() || currentInterface.isVirtual()) {
                     continue;
@@ -97,7 +95,7 @@ public final class SystemTools {
 
                 LOG.trace("Current Interface: {}", currentInterface.toString());
                 Enumeration<InetAddress> addresses = currentInterface.getInetAddresses();
-                while (!found && addresses.hasMoreElements()) {
+                while (addresses.hasMoreElements()) {
                     InetAddress currentAddress = addresses.nextElement();
                     if (currentAddress.isLoopbackAddress()) {
                         continue;
@@ -105,22 +103,22 @@ public final class SystemTools {
 
                     if (currentAddress instanceof Inet4Address) {
                         ipv4 = currentAddress.getHostAddress();
-                        LOG.trace("IPv4 Address: {}", currentAddress.getHostAddress());
+                        LOG.debug("IPv4 Address: {}", currentAddress.getHostAddress());
                     } else if (currentAddress instanceof Inet6Address) {
                         ipv6 = currentAddress.getHostAddress();
-                        LOG.trace("IPv6 Address: {}", currentAddress.getHostAddress());
+                        LOG.debug("IPv6 Address: {}", currentAddress.getHostAddress());
                     }
 
                     if (ipv4 != null && ipv6 != null) {
-                        found = Boolean.TRUE;
+                        break outerLoop;
                     }
                 }
             }
         } catch (SocketException ex) {
-            LOG.error("Failed to get IP Address: {}", ex.getMessage());
+            LOG.warn("Failed to get IP Address: {}", ex.getMessage());
             LOG.trace("Socket error", ex);
         }
 
-        return (getIpv4 ? ipv4 : ipv6);
+        return getIpv4 ? ipv4 : ipv6;
     }
 }

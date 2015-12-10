@@ -21,7 +21,7 @@ public class ApiExceptionHandler {
         LOG.error("Handle api exception", ex);
         
         final Throwable rootCause = ExceptionUtils.getRootCause(ex);
-        final ApiStatus apiStatus = ApiStatus.internalError(rootCause.getMessage());
+        final ApiStatus apiStatus = ApiStatus.internalError(rootCause == null ? ex.getMessage() : rootCause.getMessage());
         return new ResponseEntity<Object>(apiStatus, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

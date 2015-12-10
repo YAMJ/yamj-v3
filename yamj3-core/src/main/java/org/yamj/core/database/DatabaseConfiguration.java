@@ -37,5 +37,5 @@ public interface DatabaseConfiguration  {
     public FactoryBean<SessionFactory> sessionFactory();
 
     @Bean
-    public PlatformTransactionManager transactionManager() throws Exception;
+    public PlatformTransactionManager transactionManager();
 }

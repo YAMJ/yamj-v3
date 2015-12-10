@@ -159,23 +159,21 @@ public class MetadataStorageService {
     public void storeAssociatedEntities(VideoData videoData) {
         this.storeCountries(videoData.getCountryCodes());
         this.storeStudios(videoData.getStudioNames());
+        this.storeGenres(videoData.getGenreNames());
         this.storeCertifications(videoData.getCertificationInfos());
         this.storeAwards(videoData.getAwardDTOS());
         this.storeBoxedSets(videoData.getBoxedSetDTOS());
-        this.storeGenres(videoData.getGenreNames());
         
-        if (CollectionUtils.isNotEmpty(videoData.getCreditDTOS())) {
-            // store persons
-            for (CreditDTO creditDTO : videoData.getCreditDTOS()) {
-                PERSON_STORAGE_LOCK.lock();
-                try {
-                    this.metadataDao.storeMovieCredit(creditDTO);
-                } catch (Exception ex) {
-                    LOG.error("Failed to store person '{}', error: {}", creditDTO.getName(), ex.getMessage());
-                    LOG.trace("Storage error", ex);
-                } finally {
-                    PERSON_STORAGE_LOCK.unlock();
-                }
+        // store persons
+        for (CreditDTO creditDTO : videoData.getCreditDTOS()) {
+            PERSON_STORAGE_LOCK.lock();
+            try {
+                this.metadataDao.storeMovieCredit(creditDTO);
+            } catch (Exception ex) {
+                LOG.error("Failed to store person '{}', error: {}", creditDTO.getName(), ex.getMessage());
+                LOG.trace("Storage error", ex);
+            } finally {
+                PERSON_STORAGE_LOCK.unlock();
             }
         }
     }
@@ -188,10 +186,10 @@ public class MetadataStorageService {
     public void storeAssociatedEntities(Series series) {
         this.storeCountries(series.getCountryCodes());
         this.storeStudios(series.getStudioNames());
+        this.storeGenres(series.getGenreNames());
         this.storeCertifications(series.getCertificationInfos());
         this.storeAwards(series.getAwardDTOS());
         this.storeBoxedSets(series.getBoxedSetDTOS());
-        this.storeGenres(series.getGenreNames());
 
         for (Season season : series.getSeasons()) {
             for (VideoData videoData : season.getVideoDatas()) {
@@ -205,7 +203,7 @@ public class MetadataStorageService {
             return;
         }
 
-        // store countries
+        // store new countries
         for (String countryCode: countryCodes) {
             COUNTRY_STORAGE_LOCK.lock();
             try {
@@ -226,9 +224,8 @@ public class MetadataStorageService {
             return;
         }
         
-        // store studios
+        // store new studios
         for (String studioName : studioNames) {
-            // double check with lock
             STUDIO_STORAGE_LOCK.lock();
             try {
                 if (this.commonDao.getStudio(studioName) == null) {
@@ -239,67 +236,6 @@ public class MetadataStorageService {
                 LOG.trace("Storage error", ex);
             } finally {
                 STUDIO_STORAGE_LOCK.unlock();
-            }
-        }
-    }
-    
-    private void storeCertifications(Map<String,String> certificationInfos) {
-        if (MapUtils.isEmpty(certificationInfos)) {
-            return;
-        }
-        
-        // store certifications
-        for (Entry<String,String> entry : certificationInfos.entrySet()) {
-            CERTIFICATION_STORAGE_LOCK.lock();
-            try {
-                if (this.commonDao.getCertification(entry.getKey(), entry.getValue()) == null) {
-                    this.commonDao.saveCertification(entry.getKey(), entry.getValue());
-                }
-            } catch (Exception ex) {
-                LOG.error("Failed to store certification '{}'-'{}', error: {}", entry.getKey(), entry.getValue(), ex.getMessage());
-                LOG.trace("Storage error", ex);
-            } finally {
-                CERTIFICATION_STORAGE_LOCK.unlock();
-            }
-        }
-    }
-
-    private void storeAwards(Collection<AwardDTO> awards) {
-        if (CollectionUtils.isEmpty(awards)) {
-            return;
-        }
-        
-        // store awards
-        for (AwardDTO award : awards) {
-            AWARD_STORAGE_LOCK.lock();
-            try {
-                if (this.commonDao.getAward(award.getEvent(), award.getCategory(), award.getSource()) == null) {
-                    this.commonDao.saveAward(award.getEvent(), award.getCategory(), award.getSource());
-                }
-            } catch (Exception ex) {
-                LOG.error("Failed to store award '{}'-'{}', error: {}", award.getEvent(), award.getCategory(), ex.getMessage());
-                LOG.trace("Storage error", ex);
-            } finally {
-                AWARD_STORAGE_LOCK.unlock();
-            }
-        }
-    }
-
-    private void storeBoxedSets(Collection<BoxedSetDTO> boxedSets) {
-        if (CollectionUtils.isEmpty(boxedSets)) {
-            return;
-        }
-        
-        // store boxed sets
-        for (BoxedSetDTO boxedSet : boxedSets) {
-            BOXSET_STORAGE_LOCK.lock();
-            try {
-                this.commonDao.storeNewBoxedSet(boxedSet);
-            } catch (Exception ex) {
-                LOG.error("Failed to store boxed set '{}', error: {}", boxedSet.getName(), ex.getMessage());
-                LOG.trace("Storage error", ex);
-            } finally {
-                BOXSET_STORAGE_LOCK.unlock();
             }
         }
     }
@@ -322,6 +258,52 @@ public class MetadataStorageService {
                 LOG.trace("Storage error", ex);
             } finally {
                 GENRE_STORAGE_LOCK.unlock();
+            }
+        }
+    }
+
+    private void storeCertifications(Map<String,String> certificationInfos) {
+        for (Entry<String,String> entry : certificationInfos.entrySet()) {
+            CERTIFICATION_STORAGE_LOCK.lock();
+            try {
+                if (this.commonDao.getCertification(entry.getKey(), entry.getValue()) == null) {
+                    this.commonDao.saveCertification(entry.getKey(), entry.getValue());
+                }
+            } catch (Exception ex) {
+                LOG.error("Failed to store certification '{}'-'{}', error: {}", entry.getKey(), entry.getValue(), ex.getMessage());
+                LOG.trace("Storage error", ex);
+            } finally {
+                CERTIFICATION_STORAGE_LOCK.unlock();
+            }
+        }
+    }
+
+    private void storeAwards(Collection<AwardDTO> awards) {
+        for (AwardDTO award : awards) {
+            AWARD_STORAGE_LOCK.lock();
+            try {
+                if (this.commonDao.getAward(award.getEvent(), award.getCategory(), award.getSource()) == null) {
+                    this.commonDao.saveAward(award.getEvent(), award.getCategory(), award.getSource());
+                }
+            } catch (Exception ex) {
+                LOG.error("Failed to store award '{}'-'{}', error: {}", award.getEvent(), award.getCategory(), ex.getMessage());
+                LOG.trace("Storage error", ex);
+            } finally {
+                AWARD_STORAGE_LOCK.unlock();
+            }
+        }
+    }
+
+    private void storeBoxedSets(Collection<BoxedSetDTO> boxedSets) {
+        for (BoxedSetDTO boxedSet : boxedSets) {
+            BOXSET_STORAGE_LOCK.lock();
+            try {
+                this.commonDao.storeNewBoxedSet(boxedSet);
+            } catch (Exception ex) {
+                LOG.error("Failed to store boxed set '{}', error: {}", boxedSet.getName(), ex.getMessage());
+                LOG.trace("Storage error", ex);
+            } finally {
+                BOXSET_STORAGE_LOCK.unlock();
             }
         }
     }
@@ -618,28 +600,33 @@ public class MetadataStorageService {
             return;
         }
 
-        List<MovieAward> deleteAwards = new ArrayList<>(videoData.getMovieAwards());
+        List<MovieAward> orphanAwards = new ArrayList<>(videoData.getMovieAwards());
 
         for (AwardDTO dto : videoData.getAwardDTOS()) {
             Award award = this.commonDao.getAward(dto.getEvent(), dto.getCategory(), dto.getSource());
             if (award != null) {
                 MovieAward movieAward = new MovieAward(videoData, award, dto.getYear());
-                movieAward.setWon(dto.isWon());
-                movieAward.setNominated(dto.isNominated());
-                int index = videoData.getMovieAwards().indexOf(movieAward);
 
+                int index = videoData.getMovieAwards().indexOf(movieAward);
                 if (index < 0) {
                     // new award
+                    movieAward.setWon(dto.isWon());
+                    movieAward.setNominated(dto.isNominated());
                     videoData.getMovieAwards().add(movieAward);
                 } else {
-                    // remove from deletion awards
+                    // get existing award
                     movieAward = videoData.getMovieAwards().get(index);
-                    deleteAwards.remove(movieAward);
+                    movieAward.setWon(dto.isWon());
+                    movieAward.setNominated(dto.isNominated());
+                    
+                    // remove from orphans
+                    orphanAwards.remove(movieAward);
                 }
             }
         }
+        
         // delete orphans
-        videoData.getMovieAwards().removeAll(deleteAwards);
+        videoData.getMovieAwards().removeAll(orphanAwards);
     }
 
     /**
@@ -652,28 +639,33 @@ public class MetadataStorageService {
             return;
         }
 
-        List<SeriesAward> deleteAwards = new ArrayList<>(series.getSeriesAwards());
+        List<SeriesAward> orphanAwards = new ArrayList<>(series.getSeriesAwards());
 
         for (AwardDTO dto : series.getAwardDTOS()) {
             Award award = this.commonDao.getAward(dto.getEvent(), dto.getCategory(), dto.getSource());
             if (award != null) {
                 SeriesAward seriesAward = new SeriesAward(series, award, dto.getYear());
-                seriesAward.setWon(dto.isWon());
-                seriesAward.setNominated(dto.isNominated());
+                
                 int index = series.getSeriesAwards().indexOf(seriesAward);
-
                 if (index < 0) {
                     // new award
+                    seriesAward.setWon(dto.isWon());
+                    seriesAward.setNominated(dto.isNominated());
                     series.getSeriesAwards().add(seriesAward);
                 } else {
-                    // remove from deletion awards
+                    // get existing award
                     seriesAward = series.getSeriesAwards().get(index);
-                    deleteAwards.remove(seriesAward);
+                    seriesAward.setWon(dto.isWon());
+                    seriesAward.setNominated(dto.isNominated());
+                    
+                    // remove from orphans
+                    orphanAwards.remove(seriesAward);
                 }
             }
         }
+        
         // delete orphans
-        series.getSeriesAwards().removeAll(deleteAwards);
+        series.getSeriesAwards().removeAll(orphanAwards);
     }
 
     /**
@@ -686,46 +678,37 @@ public class MetadataStorageService {
             return;
         }
 
-        for (BoxedSetDTO boxedSetDTO : videoData.getBoxedSetDTOS()) {
+        for (BoxedSetDTO dto : videoData.getBoxedSetDTOS()) {
 
             BoxedSetOrder boxedSetOrder = null;
-            loop: for (BoxedSetOrder storedOrder : videoData.getBoxedSets()) {
-                if (boxedSetDTO.getBoxedSetId() != null) {
-                    if (boxedSetDTO.getBoxedSetId().longValue() == storedOrder.getBoxedSet().getId()) {
-                        boxedSetOrder = storedOrder;
-                        break loop;
-                    }
-                } else if (StringUtils.equalsIgnoreCase(boxedSetDTO.getIdentifier(), storedOrder.getBoxedSet().getIdentifier())) {
-                    boxedSetOrder = storedOrder;
+            loop: for (BoxedSetOrder stored : videoData.getBoxedSets()) {
+                if (stored.isMatching(dto)) {
+                    boxedSetOrder = stored;
                     break loop;
                 }
             }
 
             if (boxedSetOrder == null) {
                 BoxedSet boxedSet;
-                if (boxedSetDTO.getBoxedSetId() == null) {
-                    boxedSet = commonDao.getByNaturalIdCaseInsensitive(BoxedSet.class, IDENTIFIER, boxedSetDTO.getIdentifier());
+                if (dto.getBoxedSetId() == null) {
+                    boxedSet = commonDao.getByNaturalIdCaseInsensitive(BoxedSet.class, IDENTIFIER, dto.getIdentifier());
                 } else {
-                    boxedSet = commonDao.getBoxedSet(boxedSetDTO.getBoxedSetId());
+                    boxedSet = commonDao.getBoxedSet(dto.getBoxedSetId());
                 }
                 
                 if (boxedSet != null) {
                     boxedSetOrder = new BoxedSetOrder();
                     boxedSetOrder.setVideoData(videoData);
                     boxedSetOrder.setBoxedSet(boxedSet);
-                    if (boxedSetDTO.getOrdering() != null) {
-                        boxedSetOrder.setOrdering(boxedSetDTO.getOrdering());
+                    if (dto.getOrdering() != null) {
+                        boxedSetOrder.setOrdering(dto.getOrdering());
                     }
                     
                     videoData.addBoxedSet(boxedSetOrder);
                     this.commonDao.saveEntity(boxedSetOrder);
                 }
             } else {
-                if (boxedSetDTO.getOrdering() == null) {
-                    boxedSetOrder.setOrdering(-1);
-                } else {
-                    boxedSetOrder.setOrdering(boxedSetDTO.getOrdering());
-                }
+                boxedSetOrder.update(dto);
                 this.commonDao.updateEntity(boxedSetOrder);
             }
         }
@@ -741,16 +724,11 @@ public class MetadataStorageService {
             return;
         }
 
-        for (BoxedSetDTO boxedSetDTO : series.getBoxedSetDTOS()) {
+        for (BoxedSetDTO dto : series.getBoxedSetDTOS()) {
 
             BoxedSetOrder boxedSetOrder = null;
             loop: for (BoxedSetOrder stored : series.getBoxedSets()) {
-                if (boxedSetDTO.getBoxedSetId() != null) {
-                    if (boxedSetDTO.getBoxedSetId().longValue() == stored.getId()) {
-                        boxedSetOrder = stored;
-                        break loop;
-                    }
-                } else if (StringUtils.equalsIgnoreCase(stored.getBoxedSet().getIdentifier(), boxedSetDTO.getIdentifier())) {
+                if (stored.isMatching(dto)) {
                     boxedSetOrder = stored;
                     break loop;
                 }
@@ -758,29 +736,25 @@ public class MetadataStorageService {
 
             if (boxedSetOrder == null) {
                 BoxedSet boxedSet;
-                if (boxedSetDTO.getBoxedSetId() == null) {
-                    boxedSet = commonDao.getByNaturalIdCaseInsensitive(BoxedSet.class, IDENTIFIER, boxedSetDTO.getIdentifier());
+                if (dto.getBoxedSetId() == null) {
+                    boxedSet = commonDao.getByNaturalIdCaseInsensitive(BoxedSet.class, IDENTIFIER, dto.getIdentifier());
                 } else {
-                    boxedSet = commonDao.getBoxedSet(boxedSetDTO.getBoxedSetId());
+                    boxedSet = commonDao.getBoxedSet(dto.getBoxedSetId());
                 }
                 
                 if (boxedSet != null) {
                     boxedSetOrder = new BoxedSetOrder();
                     boxedSetOrder.setSeries(series);
                     boxedSetOrder.setBoxedSet(boxedSet);
-                    if (boxedSetDTO.getOrdering() != null) {
-                        boxedSetOrder.setOrdering(boxedSetDTO.getOrdering());
+                    if (dto.getOrdering() != null) {
+                        boxedSetOrder.setOrdering(dto.getOrdering());
                     }
                     
                     series.addBoxedSet(boxedSetOrder);
                     this.commonDao.saveEntity(boxedSetOrder);
                 }
             } else {
-                if (boxedSetDTO.getOrdering() == null) {
-                    boxedSetOrder.setOrdering(-1);
-                } else {
-                    boxedSetOrder.setOrdering(boxedSetDTO.getOrdering());
-                }
+                boxedSetOrder.update(dto);
                 this.commonDao.updateEntity(boxedSetOrder);
             }
         }
@@ -796,24 +770,17 @@ public class MetadataStorageService {
             return;
         }
 
-        List<CastCrew> deleteCredits = new ArrayList<>(videoData.getCredits());
+        List<CastCrew> orphanCredits = new ArrayList<>(videoData.getCredits());
         int ordering = 0; // ordering counter
 
         for (CreditDTO dto : videoData.getCreditDTOS()) {
             
             // find matching cast/crew
             CastCrew castCrew = null;
-            loop: for (CastCrew credit : videoData.getCredits()) {
-                if (credit.getCastCrewPK().getJobType() == dto.getJobType()) {
-                    if (dto.getPersonId() != null) {
-                        if (credit.getCastCrewPK().getPerson().getId() == dto.getPersonId().longValue()) {
-                            castCrew = credit;
-                            break loop;
-                        }
-                    } else if (credit.getCastCrewPK().getPerson().getIdentifier().equalsIgnoreCase(dto.getIdentifier())) {
-                        castCrew = credit;
-                        break loop;
-                    }
+            loop: for (CastCrew stored : videoData.getCredits()) {
+                if (dto.isMatchingCredit(stored)) {
+                    castCrew = stored;
+                    break loop;
                 }
             }
             
@@ -839,13 +806,13 @@ public class MetadataStorageService {
                 castCrew.setVoiceRole(dto.isVoice());
                 castCrew.setOrdering(ordering++);
                 videoData.getCredits().add(castCrew);
-            } else if (deleteCredits.contains(castCrew)) {
+            } else if (orphanCredits.contains(castCrew)) {
                 // updated cast entry if not processed before
                 castCrew.setRole(StringUtils.abbreviate(dto.getRole(), 255));
                 castCrew.setVoiceRole(dto.isVoice());
                 castCrew.setOrdering(ordering++);
-                // remove from credits to delete
-                deleteCredits.remove(castCrew);
+                // remove from orphan credits
+                orphanCredits.remove(castCrew);
             } else if (dto.getRole() != null && StringUtils.isBlank(castCrew.getRole())) {
                 // just update the role when cast member already processed
                 castCrew.setRole(StringUtils.abbreviate(dto.getRole(), 255));
@@ -855,8 +822,9 @@ public class MetadataStorageService {
                 castCrew.setVoiceRole(true);
             }
         }
+        
         // delete orphans
-        videoData.getCredits().removeAll(deleteCredits);
+        videoData.getCredits().removeAll(orphanCredits);
     }
 
     private void updateLocatedArtwork(VideoData videoData) {
@@ -939,8 +907,7 @@ public class MetadataStorageService {
         sql.append("and vd.episode<0 ");
 
         Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
-        int updated = this.commonDao.executeUpdate(sql, params);
-        return (updated > 0);
+        return this.commonDao.executeUpdate(sql, params) > 0;
     }
 
     @Transactional
@@ -967,7 +934,7 @@ public class MetadataStorageService {
         sql.append("and vd.episode>=0 ");
         updated += this.commonDao.executeUpdate(sql, params);
         
-        return (updated > 0);
+        return updated > 0;
     }
 
     @Transactional
@@ -978,8 +945,7 @@ public class MetadataStorageService {
         sql.append("and (p.lastScanned is null or p.lastScanned<=:compareDate) ");
 
         Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
-        int updated = this.commonDao.executeUpdate(sql, params);
-        return (updated > 0);
+        return this.commonDao.executeUpdate(sql, params) > 0;
     }
 
     public void handleModifiedSources(VideoData videoData) {

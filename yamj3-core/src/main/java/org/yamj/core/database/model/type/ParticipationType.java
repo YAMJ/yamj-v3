@@ -40,7 +40,7 @@ public enum ParticipationType {
     public static ParticipationType fromString(final String type) {
         try {
             return ParticipationType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ex) {
+        } catch (Exception ex) { //NOSONAR
             return UNKNOWN;
         }
     }

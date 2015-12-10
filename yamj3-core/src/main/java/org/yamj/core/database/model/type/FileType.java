@@ -34,7 +34,7 @@ public enum FileType {
     public static FileType fromString(final String type) {
         try {
             return FileType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ex) {
+        } catch (Exception ex) { //NOSONAR
             return UNKNOWN;
         }
     }

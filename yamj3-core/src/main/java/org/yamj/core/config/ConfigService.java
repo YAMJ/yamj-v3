@@ -25,9 +25,7 @@ package org.yamj.core.config;
 import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
 
 import java.util.*;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +81,7 @@ public class ConfigService {
 
     public String getProperty(final String key, final String defaultValue) {
         final String value = cachedProperties.get(key);
-        return (value == null ? defaultValue : value);
+        return (value == null) ? defaultValue : value;
     }
 
     public List<String> getPropertyAsList(final String key, final String defaultValue) {

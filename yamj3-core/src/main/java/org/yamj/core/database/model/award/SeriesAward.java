@@ -44,6 +44,7 @@ public class SeriesAward implements Serializable {
     private boolean nominated = false;
     
     public SeriesAward() {
+        // empty constructor
     }
 
     public SeriesAward(Series series, Award award, int year) {

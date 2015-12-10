@@ -54,7 +54,9 @@ public enum ResolutionType {
     public static ResolutionType fromString(final String synonym) {
         for (ResolutionType value : ResolutionType.values()) {
             for (String syn : value.synonym) {
-                if (StringUtils.equalsIgnoreCase(syn, synonym)) return value;
+                if (StringUtils.equalsIgnoreCase(syn, synonym)) {
+                    return value;
+                }
             }
         }
         return ALL;

@@ -25,8 +25,6 @@ package org.yamj.core.hibernate.usertypes;
 import java.io.Serializable;
 import java.sql.*;
 import java.util.Properties;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.usertype.ParameterizedType;
@@ -150,7 +148,7 @@ public class EnumStringUserType implements UserType, ParameterizedType {
      * @see UserType#equals(Object, Object)
      */
     @Override
-    public boolean equals(final Object x, final Object y) throws HibernateException {
+    public boolean equals(final Object x, final Object y) throws HibernateException { //NOSONAR
         if (null == x || null == y) {
             return false;
         }
@@ -214,29 +212,5 @@ public class EnumStringUserType implements UserType, ParameterizedType {
         } else {
             st.setString(index, ((Enum) value).name());
         }
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder()
-                .append(enumClass)
-                .toHashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof EnumStringUserType)) {
-            return false;
-        }
-        final EnumStringUserType other = (EnumStringUserType) obj;
-        return new EqualsBuilder()
-                .append(enumClass, other.enumClass)
-                .isEquals();
     }
 }

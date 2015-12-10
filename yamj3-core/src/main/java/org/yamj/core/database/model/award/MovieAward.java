@@ -44,6 +44,7 @@ public class MovieAward implements Serializable {
     private boolean nominated = false;
 
     public MovieAward() {
+        // empty constructor
     }
 
     public MovieAward(VideoData videoData, Award award, int year) {

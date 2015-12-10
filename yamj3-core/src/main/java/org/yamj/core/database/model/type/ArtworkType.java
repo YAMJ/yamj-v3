@@ -34,7 +34,7 @@ public enum ArtworkType {
     public static ArtworkType fromString(final String type) {
         try {
             return ArtworkType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ex) {
+        } catch (Exception ex) { //NOSONAR
             return UNKNOWN;
         }
     }

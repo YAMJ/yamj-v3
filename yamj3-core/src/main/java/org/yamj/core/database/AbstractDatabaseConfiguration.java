@@ -78,10 +78,14 @@ public abstract class AbstractDatabaseConfiguration implements DatabaseConfigura
 
     @Bean
     @Override
-    public PlatformTransactionManager transactionManager() throws Exception {
-        HibernateTransactionManager transactionManager = new HibernateTransactionManager(sessionFactory().getObject());
-        transactionManager.setDefaultTimeout(30);
-        return transactionManager;
+    public PlatformTransactionManager transactionManager() {
+        try {
+            HibernateTransactionManager transactionManager = new HibernateTransactionManager(sessionFactory().getObject());
+            transactionManager.setDefaultTimeout(30);
+            return transactionManager;
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to retrieve session factory", ex);
+        }
     }
     
     @Override

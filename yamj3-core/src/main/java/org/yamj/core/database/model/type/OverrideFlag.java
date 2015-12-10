@@ -53,7 +53,7 @@ public enum OverrideFlag {
     public static OverrideFlag fromString(final String overrideFlag) {
         try {
             return OverrideFlag.valueOf(overrideFlag.trim().toUpperCase());
-        } catch (Exception ex) {
+        } catch (Exception ex) { //NOSONAR
             return UNKNOWN;
         }
     }

@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.yamj.core.database.model.CastCrew;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.tools.MetadataTools;
@@ -147,9 +148,27 @@ public final class CreditDTO {
 
     public void addPhoto(String source, String url) {
         if (StringUtils.isNotBlank(source) && StringUtils.isNotBlank(url)) {
-            if (photoDTOS == null) photoDTOS = new HashSet<>(1);
+            if (photoDTOS == null) {
+                photoDTOS = new HashSet<>(1);
+            }
             this.photoDTOS.add(new ArtworkDetailDTO(source, url));
         }
+    }
+
+    public boolean isMatchingCredit(CastCrew credit) {
+        if (credit.getCastCrewPK().getJobType() != this.jobType) {
+            return false;
+        }
+        
+        if (this.personId != null && this.personId.longValue() == credit.getCastCrewPK().getPerson().getId()) {
+            return true;
+        }
+        
+        if (this.identifier.equalsIgnoreCase(credit.getCastCrewPK().getPerson().getIdentifier())) {
+            return true;
+        }
+        
+        return false;
     }
 
     @Override
@@ -173,9 +192,9 @@ public final class CreditDTO {
             return false;
         }
         CreditDTO other = (CreditDTO) obj;
-        if (this.jobType != other.jobType) return false;
-        if (!StringUtils.equals(this.source, other.source)) return false;
-        return StringUtils.equalsIgnoreCase(this.identifier, other.identifier);
+        return (this.jobType == other.jobType) &&
+               StringUtils.equals(this.source, other.source) && 
+               StringUtils.equalsIgnoreCase(this.identifier, other.identifier);
     }
 
     @Override

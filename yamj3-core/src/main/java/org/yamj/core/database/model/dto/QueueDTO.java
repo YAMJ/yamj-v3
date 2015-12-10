@@ -23,9 +23,7 @@
 package org.yamj.core.database.model.dto;
 
 import java.util.Date;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.builder.*;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
 
@@ -59,7 +57,7 @@ public final class QueueDTO implements Comparable<QueueDTO> {
     }
 
     public void setMetadataType(String metadataType) {
-        this.metadataType = MetaDataType.fromString(metadataType);
+        setMetadataType(MetaDataType.fromString(metadataType));
     }
 
     public void setMetadataType(MetaDataType metadataType) {
@@ -75,7 +73,7 @@ public final class QueueDTO implements Comparable<QueueDTO> {
     }
 
     public void setArtworkType(String artworkType) {
-        this.artworkType = ArtworkType.fromString(artworkType);
+        setArtworkType(ArtworkType.fromString(artworkType));
     }
 
     public void setArtworkType(ArtworkType artworkType) {
@@ -104,7 +102,7 @@ public final class QueueDTO implements Comparable<QueueDTO> {
         if (!(obj instanceof QueueDTO)) {
             return false;
         }
-        return (id == ((QueueDTO) obj).id);
+        return new EqualsBuilder().append(getId(), ((QueueDTO)obj).getId()).isEquals();
     }
 
     @Override

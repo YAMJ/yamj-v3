@@ -308,7 +308,7 @@ public class StagingDao extends HibernateDao {
             sb.append("AND lower(sf.baseName)=:baseName ");
         }
         sb.append("AND sf.stageDirectory=:stageDirectory ");
-        result.addAll(this.findByNamedParameters(sb, params));
+        result.addAll(this.findByNamedParameters(Artwork.class, sb, params));
 
         // for season
         sb.setLength(0);
@@ -327,7 +327,7 @@ public class StagingDao extends HibernateDao {
             sb.append("AND lower(sf.baseName)=:baseName ");
         }
         sb.append("AND sf.stageDirectory=:stageDirectory ");
-        result.addAll(this.findByNamedParameters(sb, params));
+        result.addAll(this.findByNamedParameters(Artwork.class, sb, params));
 
         return result;
     }
@@ -371,7 +371,7 @@ public class StagingDao extends HibernateDao {
         if (library != null) {
             sb.append("AND sd.library=:library ");
         }
-        result.addAll(this.findByNamedParameters(sb, params));
+        result.addAll(this.findByNamedParameters(Artwork.class, sb, params));
 
         sb.setLength(0);
         sb.append("SELECT a ");
@@ -392,7 +392,7 @@ public class StagingDao extends HibernateDao {
         if (library != null) {
             sb.append("AND sd.library=:library ");
         }
-        result.addAll(this.findByNamedParameters(sb, params));
+        result.addAll(this.findByNamedParameters(Artwork.class, sb, params));
 
         return result;
     }
@@ -473,7 +473,7 @@ public class StagingDao extends HibernateDao {
         params.put("duplicate", StatusType.DUPLICATE);
         params.put("deleted", StatusType.DELETED);
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("SELECT distinct sf ");
         sb.append("FROM StageFile sf ");
         sb.append("JOIN sf.stageDirectory sd ");
@@ -488,7 +488,7 @@ public class StagingDao extends HibernateDao {
         String dirFragment = StringEscapeUtils.escapeSql(FileTools.getPathFragment(folderName).toLowerCase());
         sb.append("AND (lower(sd.directoryName)=:folderName or lower(sd.directoryPath) like '%").append(dirFragment).append("%') ");
 
-        return this.findByNamedParameters(sb, params);
+        return this.findByNamedParameters(StageFile.class, sb, params);
     }
 
     public Date maxWatchedFileDate(StageFile videoFile, String folderName, boolean checkLibrary) {

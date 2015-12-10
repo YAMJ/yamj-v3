@@ -25,6 +25,7 @@ package org.yamj.core.database.model;
 import java.io.Serializable;
 import javax.persistence.*;
 import org.hibernate.annotations.NaturalId;
+import org.yamj.core.database.model.dto.BoxedSetDTO;
 
 @Entity
 @Table(name = "boxed_set_order",
@@ -86,5 +87,21 @@ public class BoxedSetOrder extends AbstractIdentifiable implements Serializable 
 
     public void setOrdering(int ordering) {
         this.ordering = ordering;
+    }
+    
+    public boolean isMatching(BoxedSetDTO dto) {
+        if (dto.getBoxedSetId() != null && dto.getBoxedSetId().longValue() == getBoxedSet().getId()) {
+            return true;
+        }
+        
+        if (dto.getIdentifier().equalsIgnoreCase(getBoxedSet().getIdentifier())) {
+            return true;
+        }
+
+        return false;
+    }
+    
+    public void update(BoxedSetDTO dto) {
+        this.ordering = (dto.getOrdering() == null) ? -1 : dto.getOrdering().intValue();
     }
 }

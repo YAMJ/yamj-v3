@@ -32,7 +32,7 @@ public enum ContainerType {
     public static ContainerType fromString(final String containerType) {
         try {
             return ContainerType.valueOf(containerType.trim().toUpperCase());
-        } catch (Exception ex) {
+        } catch (Exception ex) { //NOSONAR
             return MP4;
         }
     }

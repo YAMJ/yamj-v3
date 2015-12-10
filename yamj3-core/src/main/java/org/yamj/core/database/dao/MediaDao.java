@@ -55,10 +55,9 @@ public class MediaDao extends HibernateDao {
         if (maxResults > 0) {
             query.setMaxResults(maxResults);
         }
-
-        List<QueueDTO> queueElements = new ArrayList<>();
-        
         List<Object[]> objects = query.list();
+
+        List<QueueDTO> queueElements = new ArrayList<>(objects.size());
         for (Object[] object : objects) {
             QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
             queueElement.setDate(convertRowElementToDate(object[2]));

@@ -32,7 +32,7 @@ public enum ImageType {
     public static ImageType fromString(final String imageType) {
         try {
             return ImageType.valueOf(imageType.trim().toUpperCase());
-        } catch (Exception ex) {
+        } catch (Exception ex) { //NOSONAR
             return JPG;
         }
     }

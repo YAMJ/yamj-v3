@@ -56,10 +56,9 @@ public class MetadataDao extends HibernateDao {
         if (maxResults > 0) {
             query.setMaxResults(maxResults);
         }
-
-        List<QueueDTO> queueElements = new ArrayList<>();
-        
         List<Object[]> objects = query.list();
+       
+        List<QueueDTO> queueElements = new ArrayList<>(objects.size());
         for (Object[] object : objects) {
             QueueDTO queueElement = new QueueDTO(convertRowElementToLong(object[0]));
             queueElement.setMetadataType(convertRowElementToString(object[1]));
@@ -218,6 +217,6 @@ public class MetadataDao extends HibernateDao {
         params.put("artworkType", ArtworkType.PHOTO);
         params.put(IDENTIFIER, identifier.toLowerCase());
 
-        return this.findByNamedParameters(sb, params);
+        return this.findByNamedParameters(Artwork.class, sb, params);
     }
 }
