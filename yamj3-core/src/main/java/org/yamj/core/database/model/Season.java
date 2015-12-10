@@ -23,14 +23,12 @@
 package org.yamj.core.database.model;
 
 import java.util.*;
-
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.Table;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -52,7 +50,7 @@ public class Season extends AbstractMetadata {
     private static final long serialVersionUID = 1858640563119637343L;
 
     @Column(name = "season", nullable = false)
-    private int season;
+    private int season; //NOSONAR
 
     @Column(name = "publication_year", nullable = false)
     private int publicationYear = -1;

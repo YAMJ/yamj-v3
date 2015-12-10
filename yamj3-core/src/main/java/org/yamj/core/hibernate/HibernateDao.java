@@ -454,18 +454,16 @@ public abstract class HibernateDao {
 
             // If there is a start or max set, we will need to re-run the query after setting the options
             IOptions options = wrapper.getOptions();
-            if (options != null) {
-                if (options.getStart() > 0 || options.getMax() > 0) {
-                    if (options.getStart() > 0) {
-                        query.setFirstResult(options.getStart());
-                    }
-
-                    if (options.getMax() > 0) {
-                        query.setMaxResults(options.getMax());
-                    }
-                    // This will get the trimmed list
-                    queryResults = query.list();
+            if (options != null && (options.getStart() > 0 || options.getMax() > 0)) {
+                if (options.getStart() > 0) {
+                    query.setFirstResult(options.getStart());
                 }
+
+                if (options.getMax() > 0) {
+                    query.setMaxResults(options.getMax());
+                }
+                // This will get the trimmed list
+                queryResults = query.list();
             }
         }
 

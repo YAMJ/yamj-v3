@@ -30,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
-import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.JobType;
 
 @Service("configServiceWrapper")
@@ -73,33 +72,35 @@ public class ConfigServiceWrapper {
         return this.configService.getBooleanProperty(sb.toString(), Boolean.FALSE);
     }
 
-    public boolean isOnlineArtworkScanEnabled(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
+    public boolean isOnlineArtworkScanEnabled(Artwork artwork, List<ArtworkLocated> locatedArtwork) {
         StringBuilder sb = new StringBuilder();
         sb.append("yamj3.artwork.scan.online.");
         addScanArtworkType(artwork, sb);
 
         String value = this.configService.getProperty(sb.toString());
         if (StringUtils.isBlank(value)) {
-            // default: true
+            // defaults to TRUE if nothing present in properties
             return true;
         }
-        if ("true".equalsIgnoreCase(value.trim())) {
+        
+        if ("true".equalsIgnoreCase(value)) {
             return true;
         }
-        if ("false".equalsIgnoreCase(value.trim())) {
+        if ("false".equalsIgnoreCase(value)) {
             return false;
         }
 
         // any other case: check if valid artwork is present
 
-        // check present artworks
+        // check present artwork
         for (ArtworkLocated located : artwork.getArtworkLocated()) {
             if (located.isValidStatus()) {
                 return false;
             }
         }
-        // check newly scanned artworks (from file: may be new or invalid)
-        for (ArtworkLocated located : locatedArtworks) {
+        
+        // check newly scanned artwork (from file: may be new or invalid)
+        for (ArtworkLocated located : locatedArtwork) {
             if (located.isValidStatus()) {
                 return false;
             }
@@ -112,7 +113,17 @@ public class ConfigServiceWrapper {
     private static void addScanArtworkType(Artwork artwork, StringBuilder sb) {
         sb.append(artwork.getArtworkType().name().toLowerCase());
 
-        if (ArtworkType.POSTER == artwork.getArtworkType() || ArtworkType.FANART == artwork.getArtworkType()) {
+        switch(artwork.getArtworkType()) {
+        case BANNER:
+            sb.append(".");
+            if (artwork.getSeason() != null) {
+                sb.append("tvshow.season");
+            } else {
+                sb.append("tvshow.series");
+            }
+            break;
+        case POSTER:
+        case FANART:
             sb.append(".");
             if (artwork.getBoxedSet() != null) {
                 sb.append("boxset");
@@ -123,32 +134,16 @@ public class ConfigServiceWrapper {
             } else {
                 sb.append("tvshow.series");
             }
-        } else if (ArtworkType.BANNER == artwork.getArtworkType()) {
-            sb.append(".");
-            if (artwork.getSeason() != null) {
-                sb.append("tvshow.season");
-            } else {
-                sb.append("tvshow.series");
-            }
+            break;
+        default:
+             break;
         }
     }
 
-    public boolean isCastScanEnabled(JobType jobType) {
-        if (jobType == null) {
-            return false;
-        }
-
+    public boolean isCastScanEnabled(final JobType jobType) {
         String key = "yamj3.scan.castcrew." + jobType.name().toLowerCase();
         boolean value = this.configService.getBooleanProperty(key, Boolean.FALSE);
-
-        if (LOG.isTraceEnabled()) {
-            if (value) {
-                LOG.trace("CastCrew scanning for job '{}' is enabled", jobType);
-            } else {
-                LOG.trace("CastCrew scanning for job '{}' is disabled", jobType);
-            }
-        }
-
+        LOG.trace("CastCrew scanning for job '{}' is {}", jobType, value?"enabled":"disabled");
         return value;
     }
 

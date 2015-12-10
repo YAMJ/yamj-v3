@@ -23,7 +23,6 @@
 package org.yamj.core.scheduling;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +49,8 @@ public class DeletionScheduler {
     @Async
     @Scheduled(initialDelay = 2000, fixedDelay = 1000)
     public void runProcess() {
-        if (watchProcess.getAndSet(false)) deletionService.executeAllDeletions();
+        if (watchProcess.getAndSet(false)) {
+            deletionService.executeAllDeletions();
+        }
     }
 }

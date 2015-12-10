@@ -69,9 +69,8 @@ public enum DataItem {
 
     public static DataItem fromString(String item) {
         try {
-            String cleanItem = item.trim().toUpperCase();
-            return DataItem.valueOf(cleanItem);
-        } catch (Exception ex) {
+            return DataItem.valueOf(item.trim().toUpperCase());
+        } catch (Exception ex) { //NOSONAR
             return UNKNOWN;
         }
     }

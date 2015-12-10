@@ -44,7 +44,7 @@ public class ArtworkInitialization {
     private ArtworkStorageService artworkStorageService;
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         LOG.debug("Initialize artwork profiles");
         
         String[] defaultProfiles = PropertyTools.getProperty("artwork.profile.init.profiles", "").split(",");

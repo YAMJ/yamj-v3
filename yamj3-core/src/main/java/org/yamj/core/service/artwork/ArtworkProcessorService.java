@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sanselan.ImageReadException;
@@ -105,14 +104,7 @@ public class ArtworkProcessorService {
                 if (located.getStageFile() != null) {
                     if (StringUtils.startsWith(located.getSource(), "attachment")) {
                         // file contains attached artwork
-                        int attachmentId = -1;
-                        try {
-                            attachmentId = Integer.parseInt(located.getSource().split("#")[1]);
-                            stored = fileStorageService.store(storageType, cacheFilename, located.getStageFile(), attachmentId);
-                        } catch (Exception e) {
-                           LOG.warn("Failed to determine attachment id from source {}", located.getSource());
-                           stored = false;
-                        }
+                        stored = this.storedAttachedArwork(storageType, located, cacheFilename);
                     } else {
                         // file is an artwork
                         stored = fileStorageService.store(storageType, cacheFilename, located.getStageFile());
@@ -186,6 +178,19 @@ public class ArtworkProcessorService {
         artworkStorageService.updateArtworkLocated(located);
     }
 
+    private boolean storedAttachedArwork(StorageType storageType, ArtworkLocated located, String cacheFilename) {
+        // file contains attached artwork
+        int attachmentId = 1;
+        try {
+            attachmentId = Integer.parseInt(located.getSource().split("#")[1]);
+        } catch (Exception ex) { //NOSONAR
+           LOG.warn("Failed to determine attachment id from source {}", located.getSource());
+           return false;
+        }
+        
+        return fileStorageService.store(storageType, cacheFilename, located.getStageFile(), attachmentId);
+    }
+    
     private void generateImage(ArtworkLocated located, ArtworkProfile profile) throws Exception {
         final StorageType storageType = located.getArtwork().getStorageType();
 
@@ -344,15 +349,14 @@ public class ArtworkProcessorService {
                 }
             }
 
-            // TODO: check quality of artwork?
+            // TODO check quality of artwork?
         } else {
-            // TODO: stage file needs no validation??
-            LOG.trace("Located URL was blank for {}", located.toString());
+            // TODO stage file needs no image validation??
+            LOG.trace("Located URL was blank for {}", located);
         }
 
         return Boolean.TRUE;
-    }
-    
+    }    
     
     @Transactional
     public long checkArtworkSanity(long lastId) {
@@ -375,7 +379,7 @@ public class ArtworkProcessorService {
                 this.artworkStorageService.updateArtworkLocated(located);
             } else {
                 // check if one of the generated images is missing
-                loopGenerated: for (ArtworkGenerated generated : located.getGeneratedArtworks()) {
+                for (ArtworkGenerated generated : located.getGeneratedArtworks()) {
                     filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
                     if (!fileStorageService.existsFile(storageType, filename)) {
                         LOG.trace("Mark located artwork {} for UPDATE due missing generated image", located.getId());
@@ -383,7 +387,7 @@ public class ArtworkProcessorService {
                         // just set status of located to UPDATED
                         located.setStatus(StatusType.UPDATED);
                         this.artworkStorageService.updateArtworkLocated(located);
-                        break loopGenerated;
+                        break;
                     }
                 }
             }

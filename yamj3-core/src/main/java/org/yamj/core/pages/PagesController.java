@@ -25,7 +25,6 @@ package org.yamj.core.pages;
 import static org.yamj.core.tools.Constants.ALL;
 
 import java.util.*;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,12 +125,10 @@ public class PagesController {
 
     @RequestMapping("/config/add/process")
     public ModelAndView configAdd(@ModelAttribute Configuration config) {
-
         ModelAndView view = new ModelAndView("redirect:/config/list");
         LOG.info("Adding config: {}", config.toString());
         configService.setProperty(config.getKey(), config.getValue());
         LOG.info("Configuration was successfully added.");
-
         return view;
     }
 
@@ -158,7 +155,9 @@ public class PagesController {
         ModelAndView view = new ModelAndView("config-edit");
         if (StringUtils.isNotBlank(key)) {
             Configuration config = configService.getConfiguration(key);
-            if (config != null) view.addObject("config", config);
+            if (config != null) {
+                view.addObject("config", config);
+            }
         }
         YamjInfo yi = sic.getYamjInfo("true");
         view.addObject("yi", yi);

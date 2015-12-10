@@ -23,13 +23,9 @@
 package org.yamj.core.scheduling;
 
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,10 +34,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.service.ArtworkStorageService;
-import org.yamj.core.database.service.MediaStorageService;
-import org.yamj.core.database.service.MetadataStorageService;
-import org.yamj.core.database.service.TrailerStorageService;
+import org.yamj.core.database.service.*;
 import org.yamj.core.service.artwork.ArtworkScannerRunner;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.mediainfo.MediaInfoRunner;
@@ -140,12 +133,24 @@ public class ScanningScheduler {
     public void runAllScans() {
         if (SCANNING_LOCK.tryLock()) {
             try {
-                if (watchScanMediaFiles.get()) scanMediaFiles();
-                if (watchScanMetaData.get()) scanMetaData();
-                if (watchScanPeopleData.get()) scanPeopleData();
-                if (watchScanFilmography.get()) scanFilmography();
-                if (watchScanArtwork.get()) scanArtwork();
-                if (watchScanTrailer.get()) scanTrailer();
+                if (watchScanMediaFiles.get()) {
+                    scanMediaFiles();
+                }
+                if (watchScanMetaData.get()) {
+                    scanMetaData();
+                }
+                if (watchScanPeopleData.get()) {
+                    scanPeopleData();
+                }
+                if (watchScanFilmography.get()) {
+                    scanFilmography();
+                }
+                if (watchScanArtwork.get()) {
+                    scanArtwork();
+                }
+                if (watchScanTrailer.get()) {
+                    scanTrailer();
+                }
             } finally {
                 SCANNING_LOCK.unlock();
             }

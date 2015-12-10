@@ -48,7 +48,7 @@ public class ArtworkProcessRunner implements Runnable {
                 LOG.error("Failed to process artwork", error);
                 try {
                     service.processingError(queueElement);
-                } catch (Exception ignore) {
+                } catch (Exception ignore) { //NOSONAR
                     // ignore this error
                 }
             }

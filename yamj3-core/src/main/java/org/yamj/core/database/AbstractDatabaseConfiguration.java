@@ -34,6 +34,8 @@ import org.yamj.core.hibernate.AuditInterceptor;
 
 public abstract class AbstractDatabaseConfiguration implements DatabaseConfiguration {
     
+    protected static final String YAMJ3 = "yamj3";
+    
     @Value("${yamj3.database.showSql:false}")
     protected boolean showSql;
 
@@ -78,19 +80,15 @@ public abstract class AbstractDatabaseConfiguration implements DatabaseConfigura
 
     @Bean
     @Override
-    public PlatformTransactionManager transactionManager() {
-        try {
-            HibernateTransactionManager transactionManager = new HibernateTransactionManager(sessionFactory().getObject());
-            transactionManager.setDefaultTimeout(30);
-            return transactionManager;
-        } catch (Exception ex) {
-            throw new RuntimeException("Failed to retrieve session factory", ex);
-        }
+    public final PlatformTransactionManager transactionManager() throws Exception {
+        HibernateTransactionManager transactionManager = new HibernateTransactionManager(sessionFactory().getObject());
+        transactionManager.setDefaultTimeout(30);
+        return transactionManager;
     }
     
     @Override
     @Bean(destroyMethod="destroy")
-    public FactoryBean<SessionFactory> sessionFactory() {
+    public final FactoryBean<SessionFactory> sessionFactory() {
         LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
         sessionFactoryBean.setDataSource(dataSource());
         sessionFactoryBean.setEntityInterceptor(new AuditInterceptor());

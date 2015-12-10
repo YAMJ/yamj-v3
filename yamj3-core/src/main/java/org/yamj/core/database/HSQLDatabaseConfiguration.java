@@ -60,7 +60,7 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
             .append("file:")
             .append(System.getProperty("yamj3.home", "."))
             .append("/database/yamj3;user=yamj3;password=yamj3"); //NOSONAR
-        hsqlServer.setDatabaseName(0, "yamj3");
+        hsqlServer.setDatabaseName(0, YAMJ3);
         hsqlServer.setDatabasePath(0, path.toString());
         
         hsqlServer.setPort(port);
@@ -80,8 +80,8 @@ public class HSQLDatabaseConfiguration extends AbstractDatabaseConfiguration {
         BasicDataSource basicDataSource = new BasicDataSource();
         basicDataSource.setDriverClassName("org.hsqldb.jdbc.JDBCDriver");
         basicDataSource.setUrl("jdbc:hsqldb:hsql://localhost:"+port+"/yamj3");
-        basicDataSource.setUsername("yamj3");
-        basicDataSource.setPassword("yamj3");
+        basicDataSource.setUsername(YAMJ3);
+        basicDataSource.setPassword(YAMJ3);
         basicDataSource.setValidationQuery("SELECT 1 FROM INFORMATION_SCHEMA.SYSTEM_USERS");
         basicDataSource.setPoolPreparedStatements(poolPreparedStatements);
         

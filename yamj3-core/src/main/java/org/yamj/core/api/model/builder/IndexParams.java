@@ -22,14 +22,8 @@
  */
 package org.yamj.core.api.model.builder;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
@@ -116,14 +110,14 @@ public class IndexParams {
     }
 
     public int getYearStart() {
-        return (options.getYearStart() == null ? -1 : options.getYearStart().intValue());
+        return (options.getYearStart() == null) ? -1 : options.getYearStart().intValue();
     }
 
     public int getYearEnd() {
         if (options.getYearEnd() != null && options.getYearEnd().intValue() < getYearStart()) {
             return getYearStart();
         }
-        return (options.getYearEnd() == null ? -1 : options.getYearEnd().intValue());
+        return (options.getYearEnd() == null) ? -1 : options.getYearEnd().intValue();
     }
 
     // genre check

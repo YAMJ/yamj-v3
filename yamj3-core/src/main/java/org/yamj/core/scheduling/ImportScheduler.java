@@ -24,7 +24,6 @@ package org.yamj.core.scheduling;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,12 +57,13 @@ public class ImportScheduler {
     @Async
     @Scheduled(initialDelay = 2000, fixedDelay = 1000)
     public void runProcess() {
-        if (IMPORT_LOCK.tryLock()) {
+        if (watchProcess.get() && IMPORT_LOCK.tryLock()) {
             try {
-                if (watchProcess.getAndSet(false)) processStageFiles();
+                processStageFiles();
             } finally {
                 IMPORT_LOCK.unlock();
             }
+            watchProcess.set(false);
         }
     }
 
@@ -95,7 +95,7 @@ public class ImportScheduler {
                     LOG.error("Staging error", error);
                     try {
                         mediaImportService.processingError(id);
-                    } catch (Exception ignore) {
+                    } catch (Exception ignore) { //NOSONAR
                         // leave status as it is in any error case
                     }
                 }
@@ -126,7 +126,7 @@ public class ImportScheduler {
                     LOG.warn("Staging error", error);
                     try {
                         mediaImportService.processingError(id);
-                    } catch (Exception ignore) {
+                    } catch (Exception ignore) { //NOSONAR
                         // leave status as it is in any error case
                     }
                 }
@@ -157,7 +157,7 @@ public class ImportScheduler {
                     LOG.warn("Staging error", error);
                     try {
                         mediaImportService.processingError(id);
-                    } catch (Exception ignore) {
+                    } catch (Exception ignore) { //NOSONAR
                         // leave status as it is in any error case
                     }
                 }
@@ -185,7 +185,7 @@ public class ImportScheduler {
                     LOG.warn("Staging error", error);
                     try {
                         mediaImportService.processingError(id);
-                    } catch (Exception ignore) {
+                    } catch (Exception ignore) { //NOSONAR
                         // leave status as it is in any error case
                     }
                 }
@@ -213,7 +213,7 @@ public class ImportScheduler {
                     LOG.warn("Staging error", error);
                     try {
                         mediaImportService.processingError(id);
-                    } catch (Exception ignore) {
+                    } catch (Exception ignore) { //NOSONAR
                         // leave status as it is in any error case
                     }
                 }

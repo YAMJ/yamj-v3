@@ -26,9 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.Map.Entry;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.slf4j.Logger;
@@ -52,7 +50,7 @@ public class LocaleService  {
     private ConfigService configService;
 
     @PostConstruct
-    public void init() {
+    public void init() { //NOSONAR
         String langCode;
         String countryCode;
         String langISO3;
@@ -67,12 +65,12 @@ public class LocaleService  {
             countryCode = StringUtils.trimToNull(locale.getCountry());
             try {
                 langISO3 = StringUtils.trimToNull(locale.getISO3Language());
-            } catch (MissingResourceException mre) {
+            } catch (MissingResourceException mre) { //NOSONAR
                langISO3 = null; 
             }
             try {
                 countryISO3 = StringUtils.trimToNull(locale.getISO3Country());
-            } catch (MissingResourceException mre) {
+            } catch (MissingResourceException mre) { //NOSONAR
                 countryISO3 = null; 
             }
             displayLanguage = StringUtils.trimToNull(locale.getDisplayLanguage());
@@ -315,7 +313,7 @@ public class LocaleService  {
         return new Locale(language, country);            
     }
 
-    public String getDisplayLanguage(final String inLanguage, final String languageCode) {
+    public String getDisplayLanguage(final String inLanguage, final String languageCode) { //NOSONAR
         if (languageCode == null) {
             return null;
         }
@@ -349,7 +347,7 @@ public class LocaleService  {
         return languageCode;
     }
 
-    public String getDisplayCountry(final String inLanguage, final String countryCode) {
+    public String getDisplayCountry(final String inLanguage, final String countryCode) { //NOSONAR
         if (countryCode == null) {
             return null;
         }

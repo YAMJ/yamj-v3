@@ -22,19 +22,13 @@
  */
 package org.yamj.core.api.model.dto;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.tools.MetadataTools;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
  * @author modmax
@@ -130,9 +124,10 @@ public class ApiBoxedSetMemberDTO extends AbstractApiIdentifiableDTO {
     }
 
     public void setArtwork(List<ApiArtworkDTO> artworkList) {
-        if (CollectionUtils.isEmpty(artworkList)) return;
-        for (ApiArtworkDTO aadto : artworkList) {
-            addArtwork(aadto);
+        if (CollectionUtils.isNotEmpty(artworkList)) {
+            for (ApiArtworkDTO aadto : artworkList) {
+                addArtwork(aadto);
+            }
         }
     }
     

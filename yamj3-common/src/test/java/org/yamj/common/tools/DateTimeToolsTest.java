@@ -26,7 +26,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Calendar;
 import java.util.Date;
-
 import org.joda.time.DateTime;
 import org.junit.Test;
 
@@ -116,7 +115,7 @@ public class DateTimeToolsTest {
     public void testGetDurationWithDateTimeValue() {
         DateTime start = dateTime;
         DateTime end = dateTime.plusHours(1).plusMinutes(1).plusSeconds(1);
-        long expResult = (3600 + 60 + 1) * 1000;
+        long expResult = end.getMillis() - start.getMillis();
         long result = DateTimeTools.getDuration(start, end);
         assertEquals(expResult, result);
     }

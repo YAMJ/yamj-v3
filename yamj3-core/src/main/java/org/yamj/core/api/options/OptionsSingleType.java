@@ -61,7 +61,7 @@ public class OptionsSingleType extends OptionsAbstractSortSearch {
     public void setType(String type) {
         try {
             this.type = MetaDataType.valueOf(type.trim().toUpperCase());
-        } catch (Exception ignore) {
+        } catch (Exception ignore) { //NOSONAR
             // ignore error if type is null
         }
     }

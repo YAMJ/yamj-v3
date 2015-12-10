@@ -22,21 +22,10 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import com.omertron.imdbapi.model.*;
 import java.io.IOException;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
-
+import java.util.*;
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -47,11 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.config.LocaleService;
-import org.yamj.core.database.model.AbstractMetadata;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.CreditDTO;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.service.metadata.nfo.InfoDTO;
@@ -62,11 +47,6 @@ import org.yamj.core.web.HTMLTools;
 import org.yamj.core.web.apis.ImdbApiWrapper;
 import org.yamj.core.web.apis.ImdbEpisodeDTO;
 import org.yamj.core.web.apis.ImdbSearchEngine;
-
-import com.omertron.imdbapi.model.ImdbCast;
-import com.omertron.imdbapi.model.ImdbCredit;
-import com.omertron.imdbapi.model.ImdbMovieDetails;
-import com.omertron.imdbapi.model.ImdbPerson;
 
 @Service("imdbScanner")
 public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanner {
@@ -727,23 +707,27 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
     
     private void addCredits(VideoData videoData, JobType jobType, EnumMap<JobType,List<ImdbCast>> jobs, boolean skipUncredited, boolean skipFaceless) {
-        if (CollectionUtils.isEmpty(jobs.get(jobType))) return;
-        if (!this.configServiceWrapper.isCastScanEnabled(jobType)) return;
+        if (CollectionUtils.isEmpty(jobs.get(jobType))) {
+            return;
+        }
+        if (!this.configServiceWrapper.isCastScanEnabled(jobType)) {
+            return;
+        }
             
         for (ImdbCast cast : jobs.get(jobType)) {
             final ImdbPerson person = cast.getPerson();
             if (person == null || StringUtils.isBlank(person.getName())) {
-                continue;
+                continue; //NOSONAR
             }
             
             if (skipUncredited && StringUtils.contains(cast.getAttr(), "(uncredited")) {
-                continue;
+                continue; //NOSONAR
             }
 
             final String photoURL = (person.getImage() == null ? null : person.getImage().getUrl());
             if (skipFaceless && JobType.ACTOR.equals(jobType) && StringUtils.isEmpty(photoURL)) {
                 // skip faceless actors only
-                continue;
+                continue; //NOSONAR
             }
             
             CreditDTO creditDTO = new CreditDTO(SCANNER_ID, person.getActorId(), jobType, person.getName());

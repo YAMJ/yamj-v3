@@ -75,8 +75,8 @@ public class H2DatabaseConfiguration extends AbstractDatabaseConfiguration {
             .append("/database/yamj3;AUTO_SERVER=TRUE");
         dataSource.setUrl(url.toString());
         
-        dataSource.setUser("yamj3");
-        dataSource.setPassword("yamj3");
+        dataSource.setUser(YAMJ3);
+        dataSource.setPassword(YAMJ3);
         return dataSource;
     }
     

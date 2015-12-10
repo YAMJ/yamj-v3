@@ -370,8 +370,8 @@ public class CommonDao extends HibernateDao {
     public List<ApiRatingDTO> getRatings(ApiWrapperList<ApiRatingDTO> wrapper) {
         OptionsRating options = (OptionsRating) wrapper.getOptions();
 
-        boolean justMovie = (MetaDataType.MOVIE == options.getType());
-        boolean justSeries = (MetaDataType.SERIES == options.getType());
+        boolean justMovie = (MetaDataType.MOVIE == options.getType()); //NOSONAR
+        boolean justSeries = (MetaDataType.SERIES == options.getType()); //NOSONAR
 
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT DISTINCT ");
