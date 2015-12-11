@@ -28,15 +28,10 @@ import static org.junit.Assert.assertTrue;
 
 import javax.annotation.Resource;
 import org.junit.Test;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.*;
-import org.yamj.core.database.model.dto.AwardDTO;
-import org.yamj.core.database.model.dto.CreditDTO;
 
-@ContextConfiguration(locations = {"classpath:spring-test.xml"})
-public class ImdbScannerTest extends AbstractJUnit4SpringContextTests {
-
+public class ImdbScannerTest extends AbstractTest {
 
     @Resource(name = "imdbScanner")
     private ImdbScanner imdbScanner;
@@ -58,15 +53,9 @@ public class ImdbScannerTest extends AbstractJUnit4SpringContextTests {
         assertTrue(videoData.getGenreNames().contains("Fantasy"));
         assertTrue(videoData.getStudioNames().contains("Twentieth Century Fox Film Corporation"));
         assertTrue(videoData.getStudioNames().contains("Lightstorm Entertainment"));
-        
-        for (CreditDTO credit : videoData.getCreditDTOS()) {
-            String role = credit.getRole() == null ? "" : " (" + credit.getRole() + ")";
-            System.err.println(credit.getJobType() +": " + credit.getName() + role);
-        }
 
-        for (AwardDTO award : videoData.getAwardDTOS()) {
-            System.err.println(award.getEvent() + " - " + award.getCategory() + ": " + award.getYear() + " (won:" + award.isWon() + ")");
-        }
+        logCredits(videoData, getClass());
+        logAwards(videoData, getClass());
     }
 
     @Test
@@ -100,12 +89,9 @@ public class ImdbScannerTest extends AbstractJUnit4SpringContextTests {
             assertNotNull(videoData.getTitle());
             assertNotNull(videoData.getReleaseDate());
             assertNotNull(videoData.getPlot());
-            
-            for (CreditDTO credit : videoData.getCreditDTOS()) {
-                String role = credit.getRole() == null ? "" : " (" + credit.getRole() + ")";
-                System.err.println(credit.getJobType() +": " + credit.getName() + role);
-            }
         }
+        
+        logCredits(season, getClass());
     }
 
     @Test

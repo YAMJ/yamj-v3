@@ -110,7 +110,7 @@ public class TheTVDbScanner implements ISeriesScanner {
             }
         }
         
-        if (StringUtils.isBlank(tvdbSeries.getId())) {
+        if (tvdbSeries == null || StringUtils.isBlank(tvdbSeries.getId())) {
             LOG.error("Can't find informations for series '{}'", series.getIdentifier());
             return ScanResult.NO_RESULT;
         }

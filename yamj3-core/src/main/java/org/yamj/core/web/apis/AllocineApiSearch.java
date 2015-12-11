@@ -22,6 +22,9 @@
  */
 package org.yamj.core.web.apis;
 
+import com.moviejukebox.allocine.AllocineApi;
+import com.moviejukebox.allocine.AllocineException;
+import com.moviejukebox.allocine.model.Search;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,15 +34,12 @@ import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.CachingNames;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 
-import com.moviejukebox.allocine.AllocineApi;
-import com.moviejukebox.allocine.AllocineException;
-import com.moviejukebox.allocine.model.Search;
-
 @Service
 public class AllocineApiSearch {
 
     private static final Logger LOG = LoggerFactory.getLogger(AllocineApiSearch.class);
-    
+    protected static final String API_ERROR = "Allocine error";
+
     @Autowired
     private AllocineApi allocineApi;
 
@@ -49,11 +49,9 @@ public class AllocineApiSearch {
         try {
             search = allocineApi.searchMovies(name);
         } catch (AllocineException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
-            }
+            checkTempError(throwTempError, ex);
             LOG.error("Failed retrieving Allocine id for movie '{}': {}", name, ex.getMessage());
-            LOG.trace("Allocine error" , ex);
+            LOG.trace(API_ERROR, ex);
         }
         return search;
     }
@@ -64,11 +62,9 @@ public class AllocineApiSearch {
         try {
             search = allocineApi.searchTvSeries(name);
         } catch (AllocineException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
-            }
+            checkTempError(throwTempError, ex);
             LOG.error("Failed retrieving Allocine id for series '{}': {}", name, ex.getMessage());
-            LOG.trace("Allocine error" , ex);
+            LOG.trace(API_ERROR, ex);
         }
         return search;
     }
@@ -79,12 +75,17 @@ public class AllocineApiSearch {
         try {
             search = allocineApi.searchPersons(name);
         } catch (AllocineException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
-            }
+            checkTempError(throwTempError, ex);
             LOG.error("Failed retrieving Allocine id for person '{}': {}", name, ex.getMessage());
-            LOG.trace("Allocine error" , ex);
+            LOG.trace(API_ERROR, ex);
         }
         return search;
     }
+
+    protected static void checkTempError(boolean throwTempError, AllocineException ex) {
+        if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+            throw new TemporaryUnavailableException("Allocine service temporary not available: " + ex.getResponseCode(), ex);
+        }
+    }
 }   
+

@@ -22,20 +22,21 @@
  */
 package org.yamj.core.service.mediaimport;
 
-import junit.framework.TestCase;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.StageDirectory;
 import org.yamj.core.database.model.StageFile;
 
-public class FilenameScannerTest extends TestCase {
+public class FilenameScannerTest extends AbstractTest {
 
-    private FilenameScanner scanner;
+    private static final Logger LOG = LoggerFactory.getLogger(FilenameScannerTest.class);
     
-    @Override
-    protected void setUp() throws Exception {
-        scanner = new FilenameScanner();
-    }
+    @Autowired
+    private FilenameScanner scanner;
 
     private static StageFile createStageFile(String fileName) {
         StageDirectory dir = new StageDirectory();
@@ -52,7 +53,7 @@ public class FilenameScannerTest extends TestCase {
         String fileName = "Shrek (Director's Cut).bdrip.mkv";
         FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
         scanner.scan(dto);
-        System.err.println(dto);
+        LOG.info("testFilenameMovieVersion_1: {}", dto);
     }
 
     @Test
@@ -60,7 +61,7 @@ public class FilenameScannerTest extends TestCase {
         String fileName = "Avatar (2009) (Extended).sdtv.mkv";
         FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
         scanner.scan(dto);
-        System.err.println(dto);
+        LOG.info("testFilenameMovieVersion_2: {}", dto);
     }
     
     @Test
@@ -68,7 +69,7 @@ public class FilenameScannerTest extends TestCase {
         String fileName = "Skrek 2 [EXTRA Shrek 2 3D].bdrip.mkv";
         FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
         scanner.scan(dto);
-        System.err.println(dto);
+        LOG.info("testFilenameExtra: {}", dto);
     }
 
     @Test
@@ -76,7 +77,7 @@ public class FilenameScannerTest extends TestCase {
         String fileName = "Skrek 2 [TRAILER Shrek 2].bdrip.mkv";
         FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
         scanner.scan(dto);
-        System.err.println(dto);
+        LOG.info("testFilenameTrailer: {}", dto);
     }
 
     @Test
@@ -84,6 +85,6 @@ public class FilenameScannerTest extends TestCase {
         String fileName = "Skrek 2 (Extended Cut) [Part1 - Der Erste Teil].bdrip.mkv";
         FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
         scanner.scan(dto);
-        System.err.println(dto);
+        LOG.info("testFilenamePart: {}", dto);
     }
 }

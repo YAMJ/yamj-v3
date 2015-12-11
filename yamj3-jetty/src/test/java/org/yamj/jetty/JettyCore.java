@@ -26,8 +26,12 @@ import org.apache.log4j.BasicConfigurator;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 
-public class JettyCore {
+public final class JettyCore {
 
+    private JettyCore() {
+        // empty private constructor
+    }
+    
     public static void main(final String[] aArgs) throws Exception {
         BasicConfigurator.configure();
         final Server server = new Server(8888);

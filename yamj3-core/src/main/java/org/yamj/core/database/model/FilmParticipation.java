@@ -24,12 +24,10 @@ package org.yamj.core.database.model;
 
 import java.io.Serializable;
 import java.util.Date;
-
 import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Table;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -136,8 +134,12 @@ public class FilmParticipation extends AbstractAuditable implements Serializable
     }
 
     public void setRole(String role) {
-        // Truncate the role to 255 characters
-        this.role = StringUtils.substring(role, 0, Math.min(role.length(), 254));
+        if (role != null) {
+            // Truncate the role to 255 characters
+            this.role = StringUtils.substring(role, 0, Math.min(role.length(), 254));
+        } else {
+            this.role = null;
+        }
     }
 
     public boolean isVoiceRole() {

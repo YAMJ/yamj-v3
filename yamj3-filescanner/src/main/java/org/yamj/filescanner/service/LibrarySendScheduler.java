@@ -81,7 +81,7 @@ public class LibrarySendScheduler {
 
     @Async
     @Scheduled(initialDelay = 10000, fixedDelay = 15000)
-    public void sendLibraries() {
+    public void sendLibraries() { //NOSONAR
         if (retryCount.get() > RETRY_MAX) {
             LOG.info("Maximum number of retries ({}) exceeded. No further processing attempted.", RETRY_MAX);
             for (Library library : libraryCollection.getLibraries()) {
@@ -128,10 +128,10 @@ public class LibrarySendScheduler {
                 } else {
                     LOG.info("  {}: Scanning and/or sending ({} left) is not complete. Waiting for more files to send.", library.getImportDTO().getBaseDirectory(), runningCount.get());
                 }
-            } catch (InterruptedException ex) {
-                LOG.info("InterruptedException: {}", ex.getMessage());
+            } catch (InterruptedException ex) { //NOSONAR
+                LOG.info("Interrupted error: {}", ex.getMessage());
             } catch (ExecutionException ex) {
-                LOG.warn("ExecutionException:", ex);
+                LOG.warn("Execution error", ex);
             }
         }
     }

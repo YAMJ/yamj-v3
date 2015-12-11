@@ -80,7 +80,7 @@ public abstract class AbstractDatabaseConfiguration implements DatabaseConfigura
 
     @Bean
     @Override
-    public final PlatformTransactionManager transactionManager() throws Exception {
+    public PlatformTransactionManager transactionManager() throws Exception {
         HibernateTransactionManager transactionManager = new HibernateTransactionManager(sessionFactory().getObject());
         transactionManager.setDefaultTimeout(30);
         return transactionManager;
@@ -88,7 +88,7 @@ public abstract class AbstractDatabaseConfiguration implements DatabaseConfigura
     
     @Override
     @Bean(destroyMethod="destroy")
-    public final FactoryBean<SessionFactory> sessionFactory() {
+    public FactoryBean<SessionFactory> sessionFactory() {
         LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
         sessionFactoryBean.setDataSource(dataSource());
         sessionFactoryBean.setEntityInterceptor(new AuditInterceptor());

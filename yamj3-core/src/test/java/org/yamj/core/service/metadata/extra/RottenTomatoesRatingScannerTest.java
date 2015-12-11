@@ -25,14 +25,11 @@ package org.yamj.core.service.metadata.extra;
 import static org.junit.Assert.assertEquals;
 
 import javax.annotation.Resource;
-
 import org.junit.Test;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.VideoData;
 
-@ContextConfiguration(locations = {"classpath:spring-test.xml"})
-public class RottenTomatoesRatingScannerTest extends AbstractJUnit4SpringContextTests {
+public class RottenTomatoesRatingScannerTest extends AbstractTest {
 
     @Resource(name = "rottenTomatoesRatingScanner")
     private RottenTomatoesRatingScanner rottenTomatoesRatingScanner;

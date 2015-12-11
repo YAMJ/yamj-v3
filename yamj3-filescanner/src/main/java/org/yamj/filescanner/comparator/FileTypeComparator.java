@@ -44,7 +44,7 @@ public class FileTypeComparator implements Comparator<File>, Serializable {
      * Default is to sort with directories first
      */
     public FileTypeComparator() {
-        directoriesFirst = Boolean.TRUE;
+        this(true);
     }
 
     /**
@@ -56,20 +56,13 @@ public class FileTypeComparator implements Comparator<File>, Serializable {
         this.directoriesFirst = directoriesFirst;
     }
 
-    public boolean isDirectoriesFirst() {
-        return directoriesFirst;
-    }
-
     public void setDirectoriesFirst(boolean directoriesFirst) {
         this.directoriesFirst = directoriesFirst;
     }
 
     @Override
     public int compare(File file1, File file2) {
-        if (file1.isDirectory() && file2.isDirectory()) {
-            return 0;
-        }
-        if (!file1.isDirectory() && !file2.isDirectory()) {
+        if (file1.isDirectory() == file2.isDirectory()) {
             return 0;
         }
         if (file1.isDirectory() && !file2.isDirectory()) {

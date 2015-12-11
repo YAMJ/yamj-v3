@@ -59,7 +59,7 @@ public final class GraphicTools {
                 } finally {
                     try {
                         reader.dispose();
-                    } catch (Exception ignore) {
+                    } catch (Exception ignore) { //NOSONAR
                         // ignore any error on dispose
                     }
                 }
@@ -74,9 +74,9 @@ public final class GraphicTools {
      * @param fileImage
      * @return
      * @throws IOException
-     * @throws org.apache.sanselan.ImageReadException
+     * @throws ImageReadException
      */
-    public static BufferedImage loadJPEGImage(File fileImage) throws IOException, ImageReadException {
+    public static BufferedImage loadJPEGImage(File fileImage) throws IOException, ImageReadException { //NOSONAR
         if (!fileImage.exists()) {
             throw new FileNotFoundException("Image file '" + fileImage.getName() + "' does not exist");
         }
@@ -99,7 +99,8 @@ public final class GraphicTools {
         try {
             return ImageIO.read(url);
         } catch (IOException ex) {
-            LOG.error("Error reading image file. Possibly corrupt image.");
+            LOG.error("Error reading image file: {}", url);
+            LOG.trace("Load image error", ex);
             return null;
         }
     }
@@ -225,21 +226,17 @@ public final class GraphicTools {
     /**
      * Creates the reflection effect
      *
-     * graphicType should be "posters", "thumbnails" or "videoimage" and is used to determine the settings that are extracted from
-     * the skin.properties file.
-     *
      * @param avatar
-     * @param graphicType
      * @return
      */
-    public static BufferedImage createReflectedPicture(BufferedImage avatar, String graphicType) {
+    public static BufferedImage createReflectedPicture(BufferedImage avatar) {
         int avatarWidth = avatar.getWidth();
         int avatarHeight = avatar.getHeight();
 
         // TODO: read from artwork profile
         float reflectionHeight = 12.5f;
 
-        BufferedImage gradient = createGradientMask(avatarWidth, avatarHeight, reflectionHeight, graphicType);
+        BufferedImage gradient = createGradientMask(avatarWidth, avatarHeight, reflectionHeight);
         BufferedImage buffer = createReflection(avatar, avatarWidth, avatarHeight, reflectionHeight);
 
         applyAlphaMask(gradient, buffer, avatarHeight);
@@ -253,10 +250,9 @@ public final class GraphicTools {
      * @param avatarWidth
      * @param avatarHeight
      * @param reflectionHeight
-     * @param graphicType
      * @return
      */
-    public static BufferedImage createGradientMask(int avatarWidth, int avatarHeight, float reflectionHeight, String graphicType) {
+    public static BufferedImage createGradientMask(int avatarWidth, int avatarHeight, float reflectionHeight) {
         BufferedImage gradient = new BufferedImage(avatarWidth, avatarHeight, BufferedImage.TYPE_4BYTE_ABGR_PRE);
         Graphics2D g = gradient.createGraphics();
 

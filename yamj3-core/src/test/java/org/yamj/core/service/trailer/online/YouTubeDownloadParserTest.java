@@ -23,14 +23,16 @@
 package org.yamj.core.service.trailer.online;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.core.AbstractTest;
 import org.yamj.core.service.trailer.TrailerDownloadDTO;
 
-@ContextConfiguration(locations = {"classpath:spring-test.xml"})
-public class YouTubeDownloadParserTest extends AbstractJUnit4SpringContextTests {
+public class YouTubeDownloadParserTest extends AbstractTest {
 
+    private static final Logger LOG = LoggerFactory.getLogger(YouTubeDownloadParserTest.class);
+    
     @Autowired
     private YouTubeDownloadParser youTubeDownloadParser;
 
@@ -38,6 +40,6 @@ public class YouTubeDownloadParserTest extends AbstractJUnit4SpringContextTests 
     public void testMovieTrailers() {
         String videoId = "d1_JBMrrYw8";
         TrailerDownloadDTO dto = youTubeDownloadParser.extract(videoId);
-        System.err.println(dto);
+        LOG.info("YouTube trailer download: {}", dto);
     }
 }

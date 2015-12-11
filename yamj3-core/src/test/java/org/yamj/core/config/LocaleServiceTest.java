@@ -27,11 +27,9 @@ import java.util.TreeSet;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.core.AbstractTest;
 
-@ContextConfiguration(locations = {"classpath:spring-test.xml"})
-public class LocaleServiceTest extends AbstractJUnit4SpringContextTests {
+public class LocaleServiceTest extends AbstractTest {
 
     @Autowired
     private LocaleService localeService;

@@ -24,15 +24,16 @@ package org.yamj.core.service.trailer.online;
 
 import java.util.List;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.TrailerDTO;
-import org.yamj.core.service.trailer.online.YouTubeTrailerScanner;
 
-@ContextConfiguration(locations = {"classpath:spring-test.xml"})
-public class YouTubeTrailerScannerTest extends AbstractJUnit4SpringContextTests {
+public class YouTubeTrailerScannerTest extends AbstractTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(YouTubeTrailerScannerTest.class);
 
     @Autowired
     private YouTubeTrailerScanner youTubeTrailerScanner;
@@ -45,7 +46,7 @@ public class YouTubeTrailerScannerTest extends AbstractJUnit4SpringContextTests 
         List<TrailerDTO> dtos = youTubeTrailerScanner.getTrailers(videoData);
         if (dtos != null) {
             for (TrailerDTO dto : dtos) {
-                System.err.println(dto);
+                LOG.info("YouTube scanned trailer: {}", dto);
             }
         }
     }

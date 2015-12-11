@@ -22,6 +22,10 @@
  */
 package org.yamj.core.web.apis;
 
+import com.omertron.fanarttvapi.FanartTvApi;
+import com.omertron.fanarttvapi.FanartTvException;
+import com.omertron.fanarttvapi.model.FTMovie;
+import com.omertron.fanarttvapi.model.FTSeries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,15 +33,11 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.yamj.core.CachingNames;
 
-import com.omertron.fanarttvapi.FanartTvApi;
-import com.omertron.fanarttvapi.FanartTvException;
-import com.omertron.fanarttvapi.model.FTMovie;
-import com.omertron.fanarttvapi.model.FTSeries;
-
 @Service("fanartTvApiWrapper")
 public class FanartTvApiWrapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(FanartTvApiWrapper.class);
+    private static final String API_ERROR = "FanartTV scanner error";
 
     @Autowired
     private FanartTvApi fanarttvApi;
@@ -48,8 +48,8 @@ public class FanartTvApiWrapper {
         try {
             ftMovie = fanarttvApi.getMovieArtwork(id);
         } catch (FanartTvException ex) {
-            LOG.error("Failed to get artwork from FanartTV for id {}: {}", id, ex.getMessage());
-            LOG.trace("FanartTV scanner error", ex);
+            LOG.error("Failed to get movie artwork from FanartTV for id {}: {}", id, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
         }
         return ftMovie;
     }
@@ -61,8 +61,8 @@ public class FanartTvApiWrapper {
         try {
             ftSeries = fanarttvApi.getTvArtwork(id);
         } catch (FanartTvException ex) {
-            LOG.error("Failed to get artwork from FanartTV for id {}: {}", id, ex.getMessage());
-            LOG.trace("FanartTV scanner error", ex);
+            LOG.error("Failed to get series artwork from FanartTV for id {}: {}", id, ex.getMessage());
+            LOG.trace(API_ERROR, ex);
         }
         return ftSeries;
     }

@@ -22,20 +22,13 @@
  */
 package org.yamj.core.web.apis;
 
+import com.omertron.imdbapi.ImdbApi;
+import com.omertron.imdbapi.model.*;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -54,15 +47,6 @@ import org.yamj.core.service.metadata.online.OnlineScannerException;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 import org.yamj.core.tools.MetadataTools;
 import org.yamj.core.web.HTMLTools;
-
-import com.omertron.imdbapi.ImdbApi;
-import com.omertron.imdbapi.model.ImdbCredit;
-import com.omertron.imdbapi.model.ImdbImage;
-import com.omertron.imdbapi.model.ImdbList;
-import com.omertron.imdbapi.model.ImdbMovie;
-import com.omertron.imdbapi.model.ImdbMovieDetails;
-import com.omertron.imdbapi.model.ImdbPerson;
-import com.omertron.imdbapi.model.ImdbSeason;
 
 @Service
 public class ImdbApiWrapper {
@@ -127,11 +111,7 @@ public class ImdbApiWrapper {
             throw new OnlineScannerException("IMDb request failed", ex);
         }
 
-        if (throwTempError && ResponseTools.isTemporaryError(response)) {
-            throw new TemporaryUnavailableException("IMDb service is temporary not available: " + response.getStatusCode());
-        } else if (ResponseTools.isNotOK(response)) {
-            throw new OnlineScannerException("IMDb request failed: " + response.getStatusCode());
-        }
+        checkTempError(throwTempError, response);
         return response.getContent();
     }
     
@@ -239,11 +219,7 @@ public class ImdbApiWrapper {
             throw new OnlineScannerException("IMDb request failed", ex);
         }
 
-        if (throwTempError && ResponseTools.isTemporaryError(response)) {
-            throw new TemporaryUnavailableException("IMDb service is temporary not available: " + response.getStatusCode());
-        } else if (ResponseTools.isNotOK(response)) {
-            throw new OnlineScannerException("IMDb request failed: " + response.getStatusCode());
-        }
+        checkTempError(throwTempError, response);
         return response.getContent();
     }
 
@@ -389,6 +365,14 @@ public class ImdbApiWrapper {
             LOG.error("Failed to retrieve awards: " + imdbId, ex);
         }
         return awards;
+    }
+
+    private static void checkTempError(boolean throwTempError, DigestedResponse response) throws OnlineScannerException {
+        if (throwTempError && ResponseTools.isTemporaryError(response)) {
+            throw new TemporaryUnavailableException("IMDb service is temporary not available: " + response.getStatusCode());
+        } else if (ResponseTools.isNotOK(response)) {
+            throw new OnlineScannerException("IMDb request failed: " + response.getStatusCode());
+        }
     }
 
 }   

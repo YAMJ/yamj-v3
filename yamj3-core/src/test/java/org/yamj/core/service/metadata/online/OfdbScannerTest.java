@@ -27,14 +27,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import javax.annotation.Resource;
-
 import org.junit.Test;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.VideoData;
 
-@ContextConfiguration(locations = {"classpath:spring-test.xml"})
-public class OfdbScannerTest extends AbstractJUnit4SpringContextTests {
+public class OfdbScannerTest extends AbstractTest {
 
     @Resource(name = "ofdbScanner")
     private OfdbScanner ofdbScanner;

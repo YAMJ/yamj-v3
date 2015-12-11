@@ -22,17 +22,6 @@
  */
 package org.yamj.core.web.apis;
 
-import java.util.Locale;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.yamj.api.common.tools.ResponseTools;
-import org.yamj.core.config.ConfigService;
-import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
-
 import com.omertron.themoviedbapi.Compare;
 import com.omertron.themoviedbapi.MovieDbException;
 import com.omertron.themoviedbapi.TheMovieDbApi;
@@ -42,24 +31,31 @@ import com.omertron.themoviedbapi.model.movie.MovieInfo;
 import com.omertron.themoviedbapi.model.person.PersonCreditList;
 import com.omertron.themoviedbapi.model.person.PersonFind;
 import com.omertron.themoviedbapi.model.person.PersonInfo;
-import com.omertron.themoviedbapi.model.tv.TVBasic;
-import com.omertron.themoviedbapi.model.tv.TVEpisodeInfo;
-import com.omertron.themoviedbapi.model.tv.TVInfo;
-import com.omertron.themoviedbapi.model.tv.TVSeasonInfo;
+import com.omertron.themoviedbapi.model.tv.*;
 import com.omertron.themoviedbapi.results.ResultList;
 import com.omertron.themoviedbapi.tools.MethodSub;
+import java.util.Locale;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.yamj.api.common.tools.ResponseTools;
+import org.yamj.core.config.ConfigService;
+import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
 
 @Service("tmdbApiWrapper")
 public class TheMovieDbApiWrapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheMovieDbApiWrapper.class);
-
+    private static final String API_ERROR = "TheMovieDb error";
+                    
     @Autowired
     private ConfigService configService;
     @Autowired
     private TheMovieDbApi tmdbApi;
     
-    public String getMovieId(String title, int year, Locale locale, boolean throwTempError) {
+    public String getMovieId(String title, int year, Locale locale, boolean throwTempError) { //NOSONAR
         boolean includeAdult = configService.getBooleanProperty("themoviedb.include.adult", Boolean.FALSE);
         int searchMatch = configService.getIntProperty("themoviedb.searchMatch", 3);
         
@@ -76,6 +72,7 @@ public class TheMovieDbApiWrapper {
                 } else {
                     relDate = "";
                 }
+                
                 LOG.debug("Checking {} ({})", m.getTitle(), relDate);
                 if (Compare.movies(m, title, String.valueOf(year), searchMatch)) {
                     movie = m;
@@ -83,11 +80,9 @@ public class TheMovieDbApiWrapper {
                 }
             }
         } catch (MovieDbException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
-            }
+            checkTempError(throwTempError, ex);
             LOG.error("Failed retrieving TMDb id for movie '{}': {}", title, ex.getMessage());
-            LOG.trace("TheMovieDb error", ex);
+            LOG.trace(API_ERROR, ex);
         }
 
         if (movie != null && movie.getId() != 0) {
@@ -97,7 +92,7 @@ public class TheMovieDbApiWrapper {
         return null;
     }
 
-    public String getSeriesId(String title, int year, Locale locale, boolean throwTempError) {
+    public String getSeriesId(String title, int year, Locale locale, boolean throwTempError) { //NOSONAR
         String id = null;
         TVBasic closestTV = null;
         int closestMatch = Integer.MAX_VALUE;
@@ -134,17 +129,15 @@ public class TheMovieDbApiWrapper {
                 LOG.debug("{}: No match found", title);
             }
         } catch (MovieDbException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
-            }
+            checkTempError(throwTempError, ex);
             LOG.error("Failed retrieving TMDb id for series '{}': {}", title, ex.getMessage());
-            LOG.trace("TheMovieDb error", ex);
+            LOG.trace(API_ERROR, ex);
         }
         
         return id;
     }
     
-    public String getPersonId(String name, boolean throwTempError) {
+    public String getPersonId(String name, boolean throwTempError) { //NOSONAR
         boolean includeAdult = configService.getBooleanProperty("themoviedb.includeAdult", Boolean.FALSE);
 
         String id = null;
@@ -161,6 +154,7 @@ public class TheMovieDbApiWrapper {
                     foundPerson = Boolean.TRUE;
                     break;
                 }
+                
                 LOG.trace("{}: Checking against '{}'", name, person.getName());
                 int lhDistance = StringUtils.getLevenshteinDistance(name, person.getName());
                 LOG.trace("{}: Current closest match is {}, this match is {}", name, closestMatch, lhDistance);
@@ -180,11 +174,9 @@ public class TheMovieDbApiWrapper {
                 LOG.debug("{}: No match found", name);
             }
         } catch (MovieDbException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
-            }
+            checkTempError(throwTempError, ex);
             LOG.error("Failed retrieving TMDb id for person '{}': {}", name, ex.getMessage());
-            LOG.trace("TheMovieDb error", ex);
+            LOG.trace(API_ERROR, ex);
         }
         
         return id;
@@ -194,15 +186,11 @@ public class TheMovieDbApiWrapper {
         PersonInfo personInfo = null;
         try {
             personInfo = tmdbApi.getPersonInfo(tmdbId, MethodSub.COMBINED_CREDITS.getValue());
-            if (personInfo != null && personInfo.getId() <= 0) personInfo = null; 
         } catch (MovieDbException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
-            }
+            checkTempError(throwTempError, ex);
             LOG.error("Failed to get person info using TMDb ID {}: {}", tmdbId, ex.getMessage());
-            LOG.trace("TheMovieDb error", ex);
+            LOG.trace(API_ERROR, ex);
         }
-        
         return personInfo;
     }
 
@@ -210,13 +198,10 @@ public class TheMovieDbApiWrapper {
         MovieInfo movieInfo = null;
         try {
             movieInfo = tmdbApi.getMovieInfo(tmdbId, locale.getLanguage(), MethodSub.RELEASES.getValue(), MethodSub.CREDITS.getValue());
-            if (movieInfo != null && movieInfo.getId() <= 0) movieInfo = null; 
         } catch (MovieDbException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
-            }
+            checkTempError(throwTempError, ex);
             LOG.error("Failed to get movie info using TMDb ID {}: {}", tmdbId, ex.getMessage());
-            LOG.trace("TheMovieDb error", ex);
+            LOG.trace(API_ERROR, ex);
         }
         return movieInfo;
     }
@@ -225,13 +210,10 @@ public class TheMovieDbApiWrapper {
         TVInfo tvInfo = null;
         try {
             tvInfo = tmdbApi.getTVInfo(tmdbId, locale.getLanguage(), MethodSub.EXTERNAL_IDS.getValue());
-            if (tvInfo != null && tvInfo.getId() <= 0) tvInfo = null; 
         } catch (MovieDbException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
-            }
+            checkTempError(throwTempError, ex);
             LOG.error("Failed to get series info using TMDb ID {}: {}", tmdbId, ex.getMessage());
-            LOG.trace("TheMovieDb error", ex);
+            LOG.trace(API_ERROR, ex);
         }
         return tvInfo;
     }
@@ -241,10 +223,9 @@ public class TheMovieDbApiWrapper {
         if (StringUtils.isNumeric(tmdbId)) {
             try {
                 tvSeasonInfo = tmdbApi.getSeasonInfo(Integer.parseInt(tmdbId), season, locale.getLanguage());
-                if (tvSeasonInfo != null && tvSeasonInfo.getId() <= 0) tvSeasonInfo = null; 
             } catch (MovieDbException ex) {
                 LOG.error("Failed to get episodes using TMDb ID {} and season {}: {}", tmdbId, season, ex.getMessage());
-                LOG.trace("TheMovieDb error", ex);
+                LOG.trace(API_ERROR, ex);
             }
         }
         return tvSeasonInfo;
@@ -255,7 +236,6 @@ public class TheMovieDbApiWrapper {
         if (StringUtils.isNumeric(tmdbId)) {
             try {
                 tvEpisodeInfo = tmdbApi.getEpisodeInfo(Integer.parseInt(tmdbId), season, episode, locale.getLanguage(), MethodSub.CREDITS.getValue(), MethodSub.EXTERNAL_IDS.getValue());
-                if (tvEpisodeInfo != null && tvEpisodeInfo.getId() <= 0) tvEpisodeInfo = null; 
             } catch (MovieDbException ex) {
                 LOG.error("Failed to get episodes using TMDb ID {} and season {}: {}", tmdbId, season, ex.getMessage());
                 LOG.trace("TheMovieDb error", ex);
@@ -268,11 +248,8 @@ public class TheMovieDbApiWrapper {
         MovieInfo movieInfo = null;
         try {
             movieInfo = tmdbApi.getMovieInfoImdb(imdbId, locale.getLanguage(), MethodSub.RELEASES.getValue(), MethodSub.CREDITS.getValue());
-            if (movieInfo != null && movieInfo.getId() <= 0) movieInfo = null; 
         } catch (MovieDbException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
-            }
+            checkTempError(throwTempError, ex);
             LOG.error("Failed to get movie info using IMDb ID {}: {}", imdbId, ex.getMessage());
             LOG.trace("TheMovieDb error", ex);
         }
@@ -283,12 +260,16 @@ public class TheMovieDbApiWrapper {
         try {
             return tmdbApi.getPersonCombinedCredits(tmdbId, locale.getLanguage());
         } catch (MovieDbException ex) {
-            if (throwTempError && ResponseTools.isTemporaryError(ex)) {
-                throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
-            }
+            checkTempError(throwTempError, ex);
             LOG.error("Failed to get filmography for TMDb ID {}: {}", tmdbId, ex.getMessage());
             LOG.trace("TheMovieDb error", ex);
         }
         return null;
+    }
+    
+    private static void checkTempError(boolean throwTempError, MovieDbException ex) {
+        if (throwTempError && ResponseTools.isTemporaryError(ex)) {
+            throw new TemporaryUnavailableException("TheMovieDb service temporary not available: " + ex.getResponseCode(), ex);
+        }
     }
 }

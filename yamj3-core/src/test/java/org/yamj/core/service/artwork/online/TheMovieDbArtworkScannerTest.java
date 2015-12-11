@@ -25,15 +25,14 @@ package org.yamj.core.service.artwork.online;
 import java.util.List;
 import javax.annotation.Resource;
 import org.junit.Test;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.yamj.core.AbstractTest;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 
-@ContextConfiguration(locations = {"classpath:spring-test.xml"})
-public class TheMovieDbArtworkScannerTest extends AbstractJUnit4SpringContextTests {
+public class TheMovieDbArtworkScannerTest extends AbstractTest {
 
     @Resource(name = "tmdbArtworkScanner")
     private TheMovieDbArtworkScanner tmdbArtworkScanner;
@@ -44,11 +43,7 @@ public class TheMovieDbArtworkScannerTest extends AbstractJUnit4SpringContextTes
         series.setSourceDbId(tmdbArtworkScanner.getScannerName(), "1399");
         
         List<ArtworkDetailDTO> dtos = tmdbArtworkScanner.getPosters(series);
-        if (dtos != null) {
-            for (ArtworkDetailDTO dto : dtos) {
-                System.err.println(dto);
-            }
-        }
+        logArtworks(ArtworkType.POSTER, dtos, getClass());
     }
 
     @Test
@@ -57,11 +52,7 @@ public class TheMovieDbArtworkScannerTest extends AbstractJUnit4SpringContextTes
         series.setSourceDbId(tmdbArtworkScanner.getScannerName(), "1399");
         
         List<ArtworkDetailDTO> dtos = tmdbArtworkScanner.getFanarts(series);
-        if (dtos != null) {
-            for (ArtworkDetailDTO dto : dtos) {
-                System.err.println(dto);
-            }
-        }
+        logArtworks(ArtworkType.FANART, dtos, getClass());
     }
 
     @Test
@@ -74,11 +65,7 @@ public class TheMovieDbArtworkScannerTest extends AbstractJUnit4SpringContextTes
         series.getSeasons().add(season);
         
         List<ArtworkDetailDTO> dtos = tmdbArtworkScanner.getPosters(season);
-        if (dtos != null) {
-            for (ArtworkDetailDTO dto : dtos) {
-                System.err.println(dto);
-            }
-        }
+        logArtworks(ArtworkType.POSTER, dtos, getClass());
     }
 
     @Test
@@ -91,11 +78,7 @@ public class TheMovieDbArtworkScannerTest extends AbstractJUnit4SpringContextTes
         series.getSeasons().add(season);
         
         List<ArtworkDetailDTO> dtos = tmdbArtworkScanner.getFanarts(season);
-        if (dtos != null) {
-            for (ArtworkDetailDTO dto : dtos) {
-                System.err.println(dto);
-            }
-        }
+        logArtworks(ArtworkType.FANART, dtos, getClass());
     }
 
     @Test
@@ -112,10 +95,6 @@ public class TheMovieDbArtworkScannerTest extends AbstractJUnit4SpringContextTes
         season.getVideoDatas().add(episode);
         
         List<ArtworkDetailDTO> dtos = tmdbArtworkScanner.getVideoImages(episode);
-        if (dtos != null) {
-            for (ArtworkDetailDTO dto : dtos) {
-                System.err.println(dto);
-            }
-        }
+        logArtworks(ArtworkType.VIDEOIMAGE, dtos, getClass());
     }
 }

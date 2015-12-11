@@ -26,18 +26,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import javax.annotation.Resource;
+import org.yamj.core.AbstractTest;
 
+import javax.annotation.Resource;
 import org.junit.Test;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.yamj.core.database.model.Season;
 import org.yamj.core.database.model.Series;
 import org.yamj.core.database.model.VideoData;
-import org.yamj.core.database.model.dto.CreditDTO;
 
-@ContextConfiguration(locations = {"classpath:spring-test.xml"})
-public class ComingSoonScannerTest extends AbstractJUnit4SpringContextTests {
+public class ComingSoonScannerTest extends AbstractTest {
 
     @Resource(name = "comingSoonScanner")
     private ComingSoonScanner comingSoonScanner;
@@ -102,16 +99,6 @@ public class ComingSoonScannerTest extends AbstractJUnit4SpringContextTests {
         assertEquals("Due Uomini E Mezzo", series.getTitle());
         assertEquals("Two and a Half Men", series.getTitleOriginal());
         assertNotNull(series.getPlot());
-        
-        for (VideoData videoData : season.getVideoDatas()) {
-            assertNotNull(videoData.getTitle());
-            assertNotNull(videoData.getTitleOriginal());
-            
-            for (CreditDTO credit : videoData.getCreditDTOS()) {
-                String role = credit.getRole() == null ? "" : " (" + credit.getRole() + ")";
-                System.err.println(credit.getJobType() +": " + credit.getName() + role);
-            }
-        }
+        logCredits(season, getClass());
     }
-
 }

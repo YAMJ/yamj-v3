@@ -118,7 +118,7 @@ public class Statistics {
         if (stats.containsKey(stat)) {
             current = stats.get(stat);
         } else {
-            // The end result will be zero;
+            // The end result will be zero
             current = amount;
         }
         stats.put(stat, current - amount);

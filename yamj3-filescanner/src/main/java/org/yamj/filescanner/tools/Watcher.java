@@ -121,10 +121,8 @@ public class Watcher {
                 Path prev = keys.get(key);
                 if (prev == null) {
                     LOG.info("Register: {}", dir);
-                } else {
-                    if (!dir.equals(prev)) {
-                        LOG.info("Update: {} -> {}", prev, dir);
-                    }
+                } else if (!dir.equals(prev)) {
+                    LOG.info("Update: {} -> {}", prev, dir);
                 }
             }
             keys.put(key, dir);

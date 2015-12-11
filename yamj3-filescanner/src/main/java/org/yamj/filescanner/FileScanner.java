@@ -28,7 +28,6 @@ import static org.yamj.common.type.ExitType.SUCCESS;
 
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +46,10 @@ public final class FileScanner {
     private static final Logger LOG = LoggerFactory.getLogger(FileScanner.class);
     private static final String YAMJ3_HOME = "yamj3.home";
 
+    private FileScanner() {
+        // empty private constructor
+    }
+    
     public static void main(String[] args) throws IOException {
         PropertyConfigurator.configure("config/log4j-filescanner.properties");
 
@@ -56,9 +59,8 @@ public final class FileScanner {
         try {
             // This is a temporary fix until the yamj3.home can be read from the servlet
             SystemTools.checkSystemProperty(YAMJ3_HOME, new File(yamjHome).getCanonicalPath());
-        } catch (IOException ex) {
+        } catch (IOException ex) { //NOSONAR
             SystemTools.checkSystemProperty(YAMJ3_HOME, yamjHome);
-            LOG.trace("Exception:", ex);
         }
 
         YamjInfo yi = new YamjInfo(YamjInfoBuild.FILESCANNER);
@@ -77,11 +79,11 @@ public final class FileScanner {
             }
         } catch (CmdLineException ex) {
             LOG.error("Failed to parse command line options: {}", ex.getMessage());
-            LOG.trace("Exception:", ex);
+            LOG.trace("Command line parser error", ex);
             help(parser);
             status = CMDLINE_ERROR;
         }
-        System.exit(status.getReturn());    //NOSONAR
+        System.exit(status.getReturn()); //NOSONAR
     }
 
     /**
@@ -115,6 +117,7 @@ public final class FileScanner {
             LOG.error("Failed to load scanner configuration", ex);
             status = CONFIG_ERROR;
         }
+        
         return status;
     }
 }
