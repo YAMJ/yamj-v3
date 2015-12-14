@@ -51,7 +51,7 @@ public class MediaInfoRunner implements Runnable {
                 
                 try {
                     service.processingError(queueElement);
-                } catch (Exception ignore) {
+                } catch (Exception ignore) { //NOSONAR
                     // ignore this error
                 }
             }

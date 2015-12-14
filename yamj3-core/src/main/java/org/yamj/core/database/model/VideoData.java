@@ -280,7 +280,7 @@ public class VideoData extends AbstractMetadata {
             if (isMovie()) { // just for movies
                 String[] splitted = this.getIdentifier().split("_");
                 int splitYear = Integer.parseInt(splitted[1]);
-                this.publicationYear = (splitYear > 0 ? splitYear : -1); 
+                this.publicationYear = (splitYear > 0) ? splitYear : -1; 
             }
             removeOverrideFlag(OverrideFlag.YEAR);
         }

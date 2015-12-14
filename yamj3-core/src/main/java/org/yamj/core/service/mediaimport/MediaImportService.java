@@ -24,7 +24,6 @@ package org.yamj.core.service.mediaimport;
 
 import java.util.*;
 import java.util.Map.Entry;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -477,7 +476,7 @@ public class MediaImportService {
         // case 10-n: apply "nfoName = dirName" to all video data
         // NOTE: 11-n are only applied if recursive scan is enabled
         boolean recurse = this.configServiceWrapper.getBooleanProperty("yamj3.scan.nfo.recursiveDirectories", false);
-        LOG.trace("Recursive scan of directories is {}", (recurse ? "enabled" : "disabled"));
+        LOG.trace("Recursive scan of directories is {}", recurse ? "enabled" : "disabled");
         this.findNfoWithDirectoryName(nfoFiles, stageFile.getStageDirectory(), 10, recurse);
 
         if (MapUtils.isEmpty(nfoFiles)) {
@@ -519,7 +518,7 @@ public class MediaImportService {
 
         if (recurse) {
             // recurse until parent is null
-            this.findNfoWithDirectoryName(nfoFiles, directory.getParentDirectory(), (counter + 1), recurse);
+            this.findNfoWithDirectoryName(nfoFiles, directory.getParentDirectory(), counter+1, recurse);
         }
     }
 
@@ -708,7 +707,7 @@ public class MediaImportService {
 
             if (CollectionUtils.isNotEmpty(childDirectories)) {
                 boolean recurse = this.configServiceWrapper.getBooleanProperty("yamj3.scan.nfo.recursiveDirectories", false);
-                LOG.trace("Recursive scan of directories is {}", (recurse ? "enabled" : "disabled"));
+                LOG.trace("Recursive scan of directories is {}", recurse ? "enabled" : "disabled");
 
                 if (recurse) {
                     // TODO case 11-n: recursive scanning
@@ -781,25 +780,22 @@ public class MediaImportService {
     private boolean processImageFile(StageFile stageFile) {
         Collection<Artwork> artworks;
         int priority = 1;
-        if (stageFile.getBaseName().equalsIgnoreCase("poster")
-                || stageFile.getBaseName().equalsIgnoreCase("cover")
-                || stageFile.getBaseName().equalsIgnoreCase("folder")) {
+        final String fileBaseName = stageFile.getBaseName().toLowerCase();
+        
+        if ("poster".equals(fileBaseName) || "cover".equals(fileBaseName) || "folder".equals(fileBaseName)) {
             LOG.debug("Generic poster found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
             artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stageFile.getStageDirectory());
-        } else if (stageFile.getBaseName().equalsIgnoreCase("fanart")
-                || stageFile.getBaseName().equalsIgnoreCase("backdrop")
-                || stageFile.getBaseName().equalsIgnoreCase("background")) {
+        } else if ("fanart".equals(fileBaseName) || "backdrop".equals(fileBaseName) || "background".equals(fileBaseName)) {
             LOG.debug("Generic fanart found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
             artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stageFile.getStageDirectory());
-        } else if (stageFile.getBaseName().equalsIgnoreCase("banner")) {
+        } else if ("banner".equals(fileBaseName)) {
             LOG.debug("Generic banner found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
             artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stageFile.getStageDirectory());
         } else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".fanart")
                 || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-fanart")) {
             LOG.debug("Fanart found: {}", stageFile.getBaseName());
 
-            String stripped = stageFile.getBaseName().toLowerCase();
-            stripped = StringUtils.substring(stripped, 0, stripped.length() - 7);
+            final String stripped = StringUtils.substring(fileBaseName, 0, fileBaseName.length() - 7);
 
             if (StringUtils.startsWithIgnoreCase(stripped, "Set_")) {
                 // boxed set fanart

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,8 +91,8 @@ public final class InfoReader {
                 try {
                     stageFile.setStatus(StatusType.INVALID);
                     this.stagingService.updateStageFile(stageFile);
-                } catch (Exception ignore) {
-                    // error can be ignored
+                } catch (Exception ignore) { //NOSONAR
+                    // any error can be ignored
                 }
                 
                 // nothing to do for this stage file
@@ -171,8 +172,8 @@ public final class InfoReader {
      * @return
      */
     private static int findPosition(final String nfoText, final String xmlType) {
-        int pos = StringUtils.indexOf(nfoText, XML_START + xmlType);
-        return (pos == -1 ? Integer.MAX_VALUE : pos);
+        final int pos = StringUtils.indexOf(nfoText, XML_START + xmlType);
+        return (pos == -1) ? Integer.MAX_VALUE : pos;
     }
 
     /**
@@ -303,22 +304,9 @@ public final class InfoReader {
         // premiered / release date
         movieDate(DOMHelper.getValueFromElement(eCommon, "premiered", "releasedate"), dto);
 
-
-        /* TODO
-        if (OverrideTools.checkOverwriteCountry(movie, NFO_PLUGIN_ID)) {
-            movie.setCountries(DOMHelper.getValueFromElement(eCommon, "country"), NFO_PLUGIN_ID);
-        }
-        */
-        
         // parse Top250
         value = DOMHelper.getValueFromElement(eCommon, "top250");
-        if (StringUtils.isNumeric(value)) {
-            try {
-                dto.setTop250(Integer.parseInt(value));
-            } catch (Exception e) {
-                // ignore this error
-            }
-        }
+        dto.setTop250(NumberUtils.toInt(value, -1));
         
         // director and writers
         if (!this.configServiceWrapper.getBooleanProperty("nfo.skip.crew", false)) {

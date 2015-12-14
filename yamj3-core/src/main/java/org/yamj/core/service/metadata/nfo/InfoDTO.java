@@ -215,7 +215,7 @@ public final class InfoDTO {
     }
 
     public void addCertificatioInfo(String countryCode, String certification) {
-        if (StringUtils.isNotBlank(certification) && StringUtils.isNotBlank(certification)) {
+        if (StringUtils.isNotBlank(countryCode) && StringUtils.isNotBlank(certification)) {
             this.certificationInfos.put(countryCode, certification.trim());
             this.changed = true;
         }

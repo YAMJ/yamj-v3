@@ -49,30 +49,39 @@ public class MediaInfoStream implements AutoCloseable {
         if (process != null) {
             try {
                 process.waitFor();
-            } catch (Exception ignore)  {/*ignore*/}
+            } catch (Exception ignore)  { //NOSONAR
+                // ignore exception
+            }
         }
             
         if (inputStream != null) {
             try {
                 inputStream.close();
-            } catch (Exception ignore)  {/*ignore*/}
+            } catch (Exception ignore)  { //NOSONAR
+                // ignore exception
+            }
         }
         
         if (process != null) {
-            try {
-                if (process.getErrorStream() != null) {
+            if (process.getErrorStream() != null) {
+                try {
                     process.getErrorStream().close();  
+                } catch (Exception ignore)  { //NOSONAR
+                    // ignore exception
                 }
-            } catch (Exception ignore)  {/*ignore*/}
-            try {
-                if (process.getOutputStream() != null) {
+            }
+            if (process.getOutputStream() != null) {
+                try {
                     process.getOutputStream().close();
+                } catch (Exception ignore)  { //NOSONAR
+                    // ignore exception
                 }
-            } catch (Exception ignore) {/*ignore*/}
-
+            }
             try {
                 process.destroy();
-            } catch (Exception ignore)  {/*ignore*/}
+            } catch (Exception ignore)  { //NOSONAR
+                // ignore exception
+            }
         }
     }
 }

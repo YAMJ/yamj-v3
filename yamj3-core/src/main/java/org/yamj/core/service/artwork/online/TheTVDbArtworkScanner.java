@@ -502,7 +502,7 @@ public class TheTVDbArtworkScanner implements ITvShowPosterScanner,
         if (banner.getRating() != null) {
             try {
                 dto.setRating((int) (banner.getRating() * 10));
-            } catch (Exception ignore) {
+            } catch (Exception ignore) { //NOSONAR
                 // ignore a possible number violation
             }
         }

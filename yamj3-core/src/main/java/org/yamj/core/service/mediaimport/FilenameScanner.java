@@ -285,32 +285,32 @@ public class FilenameScanner {
     }
 
     public FileType determineFileType(final String extension) {
-        String ext = extension.toLowerCase();
-
-        try {
-            if ("nfo".equals(ext)) {
-                return FileType.NFO;
-            }
-
-            if ("watched".equals(extension)) {
-                return FileType.WATCHED;
-            }
-
-            if (videoExtensions.contains(ext)) {
-                return FileType.VIDEO;
-            }
-
-            if (subtitleExtensions.contains(ext)) {
-                return FileType.SUBTITLE;
-            }
-
-            if (imageExtensions.contains(ext)) {
-                return FileType.IMAGE;
-            }
-        } catch (Exception error) {
-            LOG.error("Failed to determine file type for extension {}", extension);
-            LOG.warn("File type detection error", error);
+        if (extension == null) {
+            return FileType.UNKNOWN;
         }
+
+        final String ext = extension.toLowerCase();
+
+        if ("nfo".equals(ext)) {
+            return FileType.NFO;
+        }
+
+        if ("watched".equals(extension)) {
+            return FileType.WATCHED;
+        }
+
+        if (videoExtensions.contains(ext)) {
+            return FileType.VIDEO;
+        }
+
+        if (subtitleExtensions.contains(ext)) {
+            return FileType.SUBTITLE;
+        }
+
+        if (imageExtensions.contains(ext)) {
+            return FileType.IMAGE;
+        }
+
         return FileType.UNKNOWN;
     }
 
@@ -344,10 +344,9 @@ public class FilenameScanner {
             final Matcher matcher = pattern.matcher(dto.getRest());
             if (matcher.find()) {
                 final String parentName = dto.getParentName();
-                if (parentName == null) {
-                    break;
+                if (parentName != null) {
+                    dto.setRest(cleanUp(parentName) + "./." + dto.getRest());
                 }
-                dto.setRest(cleanUp(parentName) + "./." + dto.getRest());
                 break;
             }
         }
@@ -483,7 +482,7 @@ public class FilenameScanner {
         if (matcher.find()) {
             dto.setRest(cutMatch(dto.getRest(), matcher, " /ID/ "));
 
-            String idString[] = matcher.group(1).split("[-\\s+]");
+            String[] idString = matcher.group(1).split("[-\\s+]");
             if (idString.length == 2) {
                 dto.setId(idString[0].toLowerCase(), idString[1]);
             } else {
@@ -542,23 +541,17 @@ public class FilenameScanner {
             }
         }
 
-        boolean first = Boolean.TRUE;
+        boolean first = true;
         while (t.hasMoreElements()) {
             String token = t.nextToken();
             token = cleanUpTitle(token);
             // Search year (must be next to a non-empty token)
             if (first) {
-                if (token.length() > 0) {
-                    try {
-                        int year = Integer.parseInt(token);
-                        if (year >= 1800 && year <= 3000) {
-                            dto.setYear(year);
-                        }
-                    } catch (NumberFormatException ignore) {
-                        // ignore error if year is invalid
-                    }
+                int year = NumberUtils.toInt(token, -1);
+                if (year >= 1800 && year <= 3000) {
+                    dto.setYear(year);
                 }
-                first = Boolean.FALSE;
+                first = false;
             }
 
             if (!languageDetection) {
@@ -580,8 +573,8 @@ public class FilenameScanner {
         if (dto.getYear() < 0) {
             Matcher ymatcher = MOVIE_YEAR_PATTERN.matcher(title);
             if (ymatcher.find()) {
-                int year = Integer.parseInt(ymatcher.group(1));
-                if (year >= 1919 && year <= 2099) {
+                int year = NumberUtils.toInt(ymatcher.group(1), -1);
+                if (year >= 1800 && year <= 3000) {
                     dto.setYear(year);
                     title = cutMatch(title, ymatcher);
                 }

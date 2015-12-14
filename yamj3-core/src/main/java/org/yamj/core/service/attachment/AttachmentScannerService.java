@@ -28,7 +28,6 @@ import java.io.*;
 import java.util.*;
 import javax.annotation.PostConstruct;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,12 +78,12 @@ public class AttachmentScannerService {
     public void init() {
         LOG.info("Initialize attachment scanner service");
 
-        String OS_NAME = System.getProperty("os.name");
+        boolean isWindows = System.getProperty("os.name").contains("Windows");
         LOG.debug("MKV Toolnix Path : {}", MT_PATH);
 
         File mkvInfoFile;
         File mkvExtractFile;
-        if (OS_NAME.contains("Windows")) {
+        if (isWindows) {
             mkvInfoFile = new File(MT_PATH.getAbsolutePath() + File.separator + MT_INFO_FILENAME_WINDOWS);
             mkvExtractFile = new File(MT_PATH.getAbsolutePath() + File.separator + MT_EXTRACT_FILENAME_WINDOWS);
         } else {
@@ -102,7 +101,7 @@ public class AttachmentScannerService {
             isActivated = Boolean.TRUE;
             
             // activate tools
-            if (OS_NAME.contains("Windows")) {
+            if (isWindows) {
                 MT_INFO_EXE.clear();
                 MT_INFO_EXE.add("cmd.exe");
                 MT_INFO_EXE.add("/E:1900");
@@ -227,15 +226,15 @@ public class AttachmentScannerService {
             Process p = pb.start();
             BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
-            String line = localInputReadLine(input);
+            String line = FileTools.readLine(input);
             while (line != null) {
                 if (line.contains("+ Attached")) {
                     // increase the attachment id
                     attachmentId++;
                     // next line contains file name
-                    String fileNameLine = localInputReadLine(input);
+                    String fileNameLine = FileTools.readLine(input);
                     // next line contains MIME type
-                    String mimeTypeLine = localInputReadLine(input);
+                    String mimeTypeLine = FileTools.readLine(input);
 
                     Attachment attachment = createAttachment(attachmentId, fileNameLine, mimeTypeLine);
                     if (attachment != null) {
@@ -244,7 +243,7 @@ public class AttachmentScannerService {
                     }
                 }
 
-                line = localInputReadLine(input);
+                line = FileTools.readLine(input);
             }
 
             if (p.waitFor() != 0) {
@@ -257,19 +256,6 @@ public class AttachmentScannerService {
         // put into cache
         this.attachmentCache.put(cacheKey, attachments);
         return attachments;
-    }
-
-    private static String localInputReadLine(BufferedReader input) {
-        String line = null;
-        try {
-            line = input.readLine();
-            while ((line != null) && StringUtils.isBlank(line)) {
-                line = input.readLine();
-            }
-        } catch (IOException ignore) {
-            // ignore this error
-        }
-        return line;
     }
 
     /**
@@ -294,7 +280,7 @@ public class AttachmentScannerService {
 
         Attachment attachment = null;
         if (content == null) {
-            LOG.debug("Failed to dertermine attachment type for '{}' ({})", fixedFileName,  fixedMimeType );
+            LOG.debug("Failed to dertermine attachment type for '{}' ({})", fixedFileName,  fixedMimeType);
         } else {
             attachment = new Attachment();
             attachment.setType(AttachmentType.MATROSKA); // one and only type at the moment
@@ -334,41 +320,33 @@ public class AttachmentScannerService {
             
             String check = FilenameUtils.removeExtension(fileName);
             // check for SET image
-            boolean isSetImage = Boolean.FALSE;
+            boolean isSetImage = false;
             if (check.endsWith(".set")) {
-                isSetImage = Boolean.TRUE;
+                isSetImage = true;
                 // fix check to look for image type
                 // just removing extension which is ".set" in this moment
                 check = FilenameUtils.removeExtension(check);
             }
+            
             for (String posterToken : POSTER_TOKEN) {
                 if (check.endsWith("."+posterToken) || check.equals(posterToken)) {
-                    if (isSetImage) {
-                        // fileName = <any>.<posterToken>.set.<extension>
-                        return new AttachmentContent(ContentType.SET_POSTER, imageType);
-                    }
-                    // fileName = <any>.<posterToken>.<extension>
-                    return new AttachmentContent(ContentType.POSTER, imageType);
+                    final ContentType contentType = isSetImage ? ContentType.SET_POSTER : ContentType.POSTER;
+                    // fileName = <any>.<posterToken>[.set].<extension>
+                    return new AttachmentContent(contentType, imageType);
                 }
             }
             for (String fanartToken : FANART_TOKEN) {
                 if (check.endsWith("."+fanartToken) || check.equals(fanartToken)) {
-                    if (isSetImage) {
-                        // fileName = <any>.<fanartToken>.set.<extension>
-                        return new AttachmentContent(ContentType.SET_FANART, imageType);
-                    }
-                    // fileName = <any>.<fanartToken>.<extension>
-                    return new AttachmentContent(ContentType.FANART, imageType);
+                    final ContentType contentType = isSetImage ? ContentType.SET_FANART : ContentType.FANART;
+                    // fileName = <any>.<fanartToken>[.set].<extension>
+                    return new AttachmentContent(contentType, imageType);
                 }
             }
             for (String bannerToken : BANNER_TOKEN) {
                 if (check.endsWith("."+bannerToken) || check.equals(bannerToken)) {
-                    if (isSetImage) {
-                        // fileName = <any>.<bannerToken>.set.<extension>
-                        return new AttachmentContent(ContentType.SET_BANNER, imageType);
-                    }
-                    // fileName = <any>.<bannerToken>.<extension>
-                    return new AttachmentContent(ContentType.BANNER, imageType);
+                    final ContentType contentType = isSetImage ? ContentType.SET_BANNER : ContentType.BANNER;
+                    // fileName = <any>.<bannerToken>[.set].<extension>
+                    return new AttachmentContent(contentType, imageType);
                 }
             }
             for (String videoimageToken : VIDEOIMAGE_TOKEN) {
@@ -385,7 +363,9 @@ public class AttachmentScannerService {
     }
 
     public boolean extractArtwort(File dst, StageFile stageFile, int attachmentId) {
-        if (!FileTools.isFileReadable(stageFile)) return false;
+        if (!FileTools.isFileReadable(stageFile)) {
+            return false;
+        }
 
         LOG.trace("Extract attachement {} from stage file {}",  attachmentId, stageFile.getFullPath());
         
@@ -414,8 +394,8 @@ public class AttachmentScannerService {
             // delete destination file in error case
             try {
                 dst.delete();
-            } catch (Exception e) {
-                // ignore any error;
+            } catch (Exception e) { //NOSONAR
+                // ignore any error
             }
         }
         

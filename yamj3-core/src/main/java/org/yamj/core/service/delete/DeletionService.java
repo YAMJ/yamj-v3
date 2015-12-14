@@ -26,8 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,16 +71,12 @@ public class DeletionService {
 
         try {
             List<Long> ids = this.commonStorageService.getStageFilesToDelete();
-            if (CollectionUtils.isEmpty(ids)) {
-                LOG.trace("No stage files found to delete");
-            } else {
-                // delete stage files
-                for (Long id : ids) {
-                    try {
-                        filesToDelete.addAll(this.commonStorageService.deleteStageFile(id));
-                    } catch (Exception ex) {
-                        LOG.error("Failed to delete stage file ID: "+id, ex);
-                    }
+            // delete stage files
+            for (Long id : ids) {
+                try {
+                    filesToDelete.addAll(this.commonStorageService.deleteStageFile(id));
+                } catch (Exception ex) {
+                    LOG.error("Failed to delete stage file ID: "+id, ex);
                 }
             }
         } catch (Exception ex) {
@@ -91,26 +85,22 @@ public class DeletionService {
 
         try {
             List<Long> ids = this.commonStorageService.getArtworkLocatedToDelete();
-            if (CollectionUtils.isEmpty(ids)) {
-                LOG.trace("No located artwork found to delete");
-            } else {
-                boolean updateTrigger = false;
+            boolean updateTrigger = false;
                 
-                // delete stage files
-                for (Long id : ids) {
-                    try {
-                        DeletionDTO dto = this.commonStorageService.deleteArtworkLocated(id);
-                        if (CollectionUtils.isNotEmpty(dto.getFilesToDelete())) {
-                            filesToDelete.addAll(dto.getFilesToDelete());
-                        }
-                        updateTrigger = (updateTrigger || dto.isUpdateTrigger());
-                    } catch (Exception ex) {
-                        LOG.error("Failed to delete located artwork ID: "+id, ex);
-                    }
+            // delete stage files
+            for (Long id : ids) {
+                try {
+                    DeletionDTO dto = this.commonStorageService.deleteArtworkLocated(id);
+                    filesToDelete.addAll(dto.getFilesToDelete());
+                    updateTrigger = updateTrigger || dto.isUpdateTrigger();
+                } catch (Exception ex) {
+                    LOG.error("Failed to delete located artwork ID: "+id, ex);
                 }
-                
-                // trigger artwork scan
-                if (updateTrigger) scanningScheduler.triggerScanArtwork();
+            }
+            
+            // trigger artwork scan
+            if (updateTrigger) {
+                scanningScheduler.triggerScanArtwork();
             }
         } catch (Exception ex) {
             LOG.warn("Failed to retrieve located artworks to delete", ex);
@@ -118,19 +108,16 @@ public class DeletionService {
 
         try {
             List<Long> ids = this.commonStorageService.getTrailersToDelete();
-            if (CollectionUtils.isEmpty(ids)) {
-                LOG.trace("No trailers found to delete");
-            } else {
-                // delete trailers
-                for (Long id : ids) {
-                    try {
-                        String fileToDelete  = this.commonStorageService.deleteTrailer(id);
-                        if (fileToDelete != null) {
-                           filesToDelete.add(fileToDelete);
-                        }
-                    } catch (Exception ex) {
-                        LOG.error("Failed to delete trailer ID: "+id, ex);
+
+            // delete trailers
+            for (Long id : ids) {
+                try {
+                    String fileToDelete  = this.commonStorageService.deleteTrailer(id);
+                    if (fileToDelete != null) {
+                       filesToDelete.add(fileToDelete);
                     }
+                } catch (Exception ex) {
+                    LOG.error("Failed to delete trailer ID: "+id, ex);
                 }
             }
         } catch (Exception ex) {

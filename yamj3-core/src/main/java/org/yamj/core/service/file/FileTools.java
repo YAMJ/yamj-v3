@@ -22,142 +22,27 @@
  */
 package org.yamj.core.service.file;
 
-import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
-
 import java.io.*;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.StringTokenizer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.database.model.StageDirectory;
 import org.yamj.core.database.model.StageFile;
+
 public final class FileTools {
 
     public static final String DEFAULT_CHARSET = "UTF-8";
 
     private static final Logger LOG = LoggerFactory.getLogger(FileTools.class);
-    private static final int BUFF_SIZE = 16 * 1024;
-    private static final Collection<ReplaceEntry> UNSAFE_CHARS = new ArrayList<>();
     private static final Lock MKDIRS_LOCK = new ReentrantLock();
-
-    static {
-        // What to do if the user specifies a blank encodeEscapeChar? Disable encoding!
-        String encodeEscapeCharString = PropertyTools.getProperty("yamj3.file.filename.encodingEscapeChar", "$");
-        if (encodeEscapeCharString.length() > 0) {
-            // What to do if the user specifies a >1 character long string? I guess just use the first char.
-            final Character ENCODE_ESCAPE_CHAR = encodeEscapeCharString.charAt(0);
-
-            String repChars = PropertyTools.getProperty("yamj3.file.filename.unsafeChars", "<>:\"/\\|?*");
-            for (String repChar : repChars.split("")) {
-                if (repChar.length() > 0) {
-                    char ch = repChar.charAt(0);
-                    // Don't encode characters that are hex digits
-                    // Also, don't encode the escape char -- it is safe by definition!
-                    if (!Character.isDigit(ch) && -1 == "AaBbCcDdEeFf".indexOf(ch) && !ENCODE_ESCAPE_CHAR.equals(ch)) {
-                        String hex = Integer.toHexString(ch).toUpperCase();
-                        UNSAFE_CHARS.add(new ReplaceEntry(repChar, ENCODE_ESCAPE_CHAR + hex));
-                    }
-                }
-            }
-        }
-
-        // parse transliteration map: (source_character [-] transliteration_sequence [,])+
-        StringTokenizer st = new StringTokenizer(PropertyTools.getProperty("yamj3.file.filename.translateChars", ""), DEFAULT_SPLITTER);
-        while (st.hasMoreElements()) {
-            final String token = st.nextToken();
-            String beforeStr = StringUtils.substringBefore(token, "-");
-            final String character = beforeStr.length() == 1 && (beforeStr.equals("\t") || beforeStr.equals(" ")) ? beforeStr : StringUtils.trimToNull(beforeStr);
-            if (character == null) {
-                // TODO Error message?
-                continue;
-            }
-            String afterStr = StringUtils.substringAfter(token, "-");
-            final String translation = afterStr.length() == 1 && (afterStr.equals("\t") || afterStr.equals(" ")) ? afterStr : StringUtils.trimToNull(afterStr);
-            if (translation == null) {
-                // TODO Error message?
-                // TODO Allow empty transliteration?
-                continue;
-            }
-            UNSAFE_CHARS.add(new ReplaceEntry(character.toUpperCase(), translation.toUpperCase()));
-            UNSAFE_CHARS.add(new ReplaceEntry(character.toLowerCase(), translation.toLowerCase()));
-        }
-    }
 
     private FileTools() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
-    }
-
-    private static class ReplaceEntry {
-
-        private final String oldText;
-        private final String newText;
-        private final int oldLength;
-
-        public ReplaceEntry(String oldtext, String newtext) {
-            this.oldText = oldtext;
-            this.newText = newtext;
-            oldLength = oldtext.length();
-        }
-
-        public String check(String filename) {
-            String newFilename = filename;
-            int pos = newFilename.indexOf(oldText, 0);
-            while (pos >= 0) {
-                newFilename = newFilename.substring(0, pos) + newText + newFilename.substring(pos + oldLength);
-                pos = newFilename.indexOf(oldText, pos + oldLength);
-            }
-            return newFilename;
-        }
-    }
-
-    /**
-     * One buffer for each thread to allow threaded copies
-     */
-    private static final ThreadLocal<byte[]> THREAD_BUFFER = new ThreadLocal<byte[]>() {
-        @Override
-        protected byte[] initialValue() {
-            return new byte[BUFF_SIZE];
-        }
-    };
-
-    public static int copy(InputStream is, OutputStream os) throws IOException {
-        int bytesCopied = 0;
-        byte[] buffer = THREAD_BUFFER.get();
-        try {
-            while (Boolean.TRUE) {
-                int amountRead = is.read(buffer);
-                if (amountRead == -1) {
-                    break;
-                }
-                bytesCopied += amountRead;
-                os.write(buffer, 0, amountRead);
-            }
-        } finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-            } catch (IOException error) {
-                // ignore
-            }
-            try {
-                if (os != null) {
-                    os.close();
-                }
-            } catch (IOException error) {
-                // ignore
-            }
-        }
-        return bytesCopied;
     }
 
     /**
@@ -216,8 +101,8 @@ public final class FileTools {
                 if (deleteSource) {
                     try  {
                         src.delete();
-                    } catch (Exception ignore)  {
-                        // ignore any error
+                    } catch (Exception ex)  {
+                        LOG.warn("Source file could not be deleted", ex);
                     }
                 }
                 
@@ -362,7 +247,7 @@ public final class FileTools {
             try {
                 data = FileUtils.readFileToString(file, encoding);
             } catch (Exception ex) {
-                LOG.error("Failed reading file {}", file.getName());
+                LOG.error("Failed reading file: {}", file.getName());
                 LOG.error("Error", ex);
             }
         }
@@ -409,20 +294,6 @@ public final class FileTools {
         return readable;
     }
 
-    public static String makeSafeFilename(String filename) {
-        String newFilename = filename;
-
-        for (ReplaceEntry rep : UNSAFE_CHARS) {
-            newFilename = rep.check(newFilename);
-        }
-
-        if (!newFilename.equals(filename)) {
-            LOG.debug("Encoded filename string '{}' to '{}'", filename, newFilename);
-        }
-
-        return newFilename;
-    }
-
     public static boolean isWithinSpecialFolder(StageFile stageFile, String folderName) {
         if (StringUtils.isBlank(folderName) || stageFile == null) {
             return false;
@@ -439,5 +310,25 @@ public final class FileTools {
 
     public static String getPathFragment(String folderName) {
         return FilenameUtils.separatorsToUnix("/" + folderName + "/");
+    }
+    
+    /**
+     * Read the input skipping any blank lines
+     *
+     * @param input
+     * @return
+     * @throws IOException
+     */
+    public static String readLine(BufferedReader input) {
+        String line = null;
+        try {
+            line = input.readLine();
+            while (StringUtils.EMPTY.equals(line)) {
+                line = input.readLine();
+            }
+        } catch (IOException ignore) { //NOSONAR
+            // ignore this error
+        }
+        return line;
     }
 }

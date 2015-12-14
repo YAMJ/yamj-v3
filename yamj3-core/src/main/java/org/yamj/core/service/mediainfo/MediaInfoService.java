@@ -28,9 +28,7 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -230,27 +228,9 @@ public class MediaInfoService {
             mediaFile.setCodecFormat(infosMainVideo.get("Format"));
             mediaFile.setCodecProfile(infosMainVideo.get("Format profile"));
 
-            // width
-            mediaFile.setWidth(-1);
-            try {
-                infoValue = infosMainVideo.get("Width");
-                if (StringUtils.isNumeric(infoValue)) {
-                    mediaFile.setWidth(Integer.parseInt(infoValue));
-                }
-            } catch (NumberFormatException error) {
-                LOG.trace("Failed to parse width: {}", infoValue, error);
-            }
-
-            // height
-            mediaFile.setHeight(-1);
-            try {
-                infoValue = infosMainVideo.get("Height");
-                if (StringUtils.isNumeric(infoValue)) {
-                    mediaFile.setHeight(Integer.parseInt(infoValue));
-                }
-            } catch (NumberFormatException ex) {
-                LOG.trace("Failed to parse height: {}", infoValue, ex);
-            }
+            // width & height
+            mediaFile.setWidth(NumberUtils.toInt(infosMainVideo.get("Width"), -1));
+            mediaFile.setHeight(NumberUtils.toInt(infosMainVideo.get("Height"), -1));
 
             // frame rate
             infoValue = infosMainVideo.get("Frame rate");
@@ -259,15 +239,11 @@ public class MediaInfoService {
                 infoValue = infosMainVideo.get("Original frame rate");
             }
             if (StringUtils.isNotBlank(infoValue)) {
-                try {
-                    int inxDiv = infoValue.indexOf(Constants.SPACE_SLASH_SPACE);
-                    if (inxDiv > -1) {
-                        infoValue = infoValue.substring(0, inxDiv);
-                    }
-                    mediaFile.setFps(Float.parseFloat(infoValue));
-                } catch (NumberFormatException error) {
-                    LOG.debug("Failed to parse frame rate: {}", infoValue, error);
+                int inxDiv = infoValue.indexOf(Constants.SPACE_SLASH_SPACE);
+                if (inxDiv > -1) {
+                    infoValue = infoValue.substring(0, inxDiv);
                 }
+                mediaFile.setFps(NumberUtils.toFloat(infoValue, -1));
             }
 
             // aspect ratio
@@ -362,13 +338,9 @@ public class MediaInfoService {
             if (infoValue.contains("/")) {
                 infoValue = infoValue.substring(0, infoValue.indexOf('/'));
             }
-            try {
-                Matcher codecMatch = PATTERN_CHANNELS.matcher(infoValue);
-                if (codecMatch.matches()) {
-                    audioCodec.setChannels(Integer.parseInt(codecMatch.group(1)));
-                }
-            } catch (NumberFormatException ex) {
-                LOG.trace("Failed to parse channels: {}", infoValue, ex);
+            Matcher codecMatch = PATTERN_CHANNELS.matcher(infoValue);
+            if (codecMatch.matches()) {
+                audioCodec.setChannels(NumberUtils.toInt(codecMatch.group(1), -1));
             }
         }
 
@@ -483,25 +455,10 @@ public class MediaInfoService {
 
         ProcessBuilder pb = new ProcessBuilder(commandMedia);
 
-        // set up the working directory.
+        // set up the working directory
         pb.directory(MEDIAINFO_PATH);
 
         return new MediaInfoStream(pb.start());
-    }
-
-    /**
-     * Read the input skipping any blank lines
-     *
-     * @param input
-     * @return
-     * @throws IOException
-     */
-    private static String localInputReadLine(BufferedReader input) throws IOException {
-        String line = input.readLine();
-        while ((line != null) && (line.equals(""))) {
-            line = input.readLine();
-        }
-        return line;
     }
 
     public static void parseMediaInfo(MediaInfoStream stream,
@@ -513,10 +470,10 @@ public class MediaInfoService {
         try (InputStreamReader isr = new InputStreamReader(stream.getInputStream());
              BufferedReader bufReader = new BufferedReader(isr))
         {
-            // Improvement, less code line, each cat have same code, so use the same for all.
+            // Improvement, less code line, each cat have same code, so use the same for all
             Map<String, List<Map<String, String>>> matches = new HashMap<>();
 
-            // Create a fake one for General, we got only one, but to use the same algo we must create this one.
+            // Create a fake one for General, we got only one, but to use the same algo we must create this one
             String generalKey[] = {"General", "Géneral", "* Général"};
             matches.put(generalKey[0], new ArrayList<Map<String, String>>());
             matches.put(generalKey[1], matches.get(generalKey[0]));
@@ -526,7 +483,7 @@ public class MediaInfoService {
             matches.put("Audio", infosAudio);
             matches.put("Text", infosText);
 
-            String line = localInputReadLine(bufReader);
+            String line = FileTools.readLine(bufReader);
             String label;
 
             while (line != null) {
@@ -541,7 +498,7 @@ public class MediaInfoService {
                 if (currentCat != null) {
                     HashMap<String, String> currentData = new HashMap<>();
                     int indexSeparator = -1;
-                    while (((line = localInputReadLine(bufReader)) != null) && ((indexSeparator = line.indexOf(" : ")) != -1)) {
+                    while (((line = FileTools.readLine(bufReader)) != null) && ((indexSeparator = line.indexOf(" : ")) != -1)) {
                         label = line.substring(0, indexSeparator).trim();
                         if (currentData.get(label) == null) {
                             currentData.put(label, line.substring(indexSeparator + 3));
@@ -549,7 +506,7 @@ public class MediaInfoService {
                     }
                     currentCat.add(currentData);
                 } else {
-                    line = localInputReadLine(bufReader);
+                    line = FileTools.readLine(bufReader);
                 }
             }
 
@@ -565,7 +522,7 @@ public class MediaInfoService {
                         }
                     }
                 }
-            } catch (Exception ignore) {
+            } catch (Exception ignore) { //NOSONAR
                 // We don't care about this exception
             }
         }
