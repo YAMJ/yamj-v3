@@ -23,7 +23,6 @@
 package org.yamj.core.database.service;
 
 import java.util.*;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -131,8 +130,8 @@ public class ArtworkLocatorService {
     @Transactional(readOnly = true)
     public List<StageFile> getMatchingArtwork(ArtworkType artworkType, VideoData videoData) {
         List<StageFile> videoFiles = findVideoFiles(videoData);
-        if (CollectionUtils.isEmpty(videoFiles)) {
-            return null; //NOSONAR
+        if (videoFiles.isEmpty()) {
+            return Collections.emptyList();
         }
 
         // search in same directory than video files
@@ -161,8 +160,8 @@ public class ArtworkLocatorService {
     @Transactional(readOnly = true)
     public List<StageFile> getMatchingArtwork(ArtworkType artworkType, Season season) {
         List<StageFile> videoFiles = findVideoFiles(season);
-        if (CollectionUtils.isEmpty(videoFiles)) {
-            return null; //NOSONAR
+        if (videoFiles.isEmpty()) {
+            return Collections.emptyList();
         }
 
         // search in same directory than video files
@@ -269,8 +268,6 @@ public class ArtworkLocatorService {
     }
 
     public List<StageFile> getPhotos(Person person) {
-        List<StageFile> artworks;
-
         Set<String> artworkNames = new HashSet<>();
         artworkNames.add(StringEscapeUtils.escapeSql(person.getName().toLowerCase()));
         artworkNames.add(StringEscapeUtils.escapeSql(person.getName().toLowerCase() + ".photo"));
@@ -281,6 +278,8 @@ public class ArtworkLocatorService {
 
         
         String photoFolderName = PropertyTools.getProperty("yamj3.folder.name.photo");
+        
+        List<StageFile> artworks;
         if (StringUtils.isNotBlank(photoFolderName)) {
             artworks = this.stagingDao.findStageFilesInSpecialFolder(FileType.IMAGE, photoFolderName, null, artworkNames);
         } else {

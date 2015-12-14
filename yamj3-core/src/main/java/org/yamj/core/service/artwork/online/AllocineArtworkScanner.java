@@ -22,34 +22,24 @@
  */
 package org.yamj.core.service.artwork.online;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import com.moviejukebox.allocine.model.*;
+import java.util.*;
 import java.util.Map.Entry;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.Person;
 import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
 import org.yamj.core.service.artwork.ArtworkDetailDTO;
 import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.AllocineScanner;
 import org.yamj.core.tools.CommonTools;
 import org.yamj.core.web.apis.AllocineApiWrapper;
-
-import com.moviejukebox.allocine.model.MovieInfos;
-import com.moviejukebox.allocine.model.PersonInfos;
-import com.moviejukebox.allocine.model.TvSeasonInfos;
-import com.moviejukebox.allocine.model.TvSeriesInfos;
 
 @Service("allocineArtworkScanner")
 public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPosterScanner, IPhotoScanner {
@@ -80,12 +70,12 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
     public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
         String allocineId = allocineScanner.getMovieId(videoData);
         if (StringUtils.isBlank(allocineId)) {
-            return null;
+            return Collections.emptyList();
         }
 
         MovieInfos movieInfos = allocineApiWrapper.getMovieInfos(allocineId, false);
         if (movieInfos == null || movieInfos.isNotValid() || MapUtils.isEmpty(movieInfos.getPosters())) {
-            return null;
+            return Collections.emptyList();
         }
         return buildArtworkDetails(movieInfos.getPosters());
     }
@@ -94,12 +84,12 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
     public List<ArtworkDetailDTO> getPosters(Series series) {
         String allocineId = allocineScanner.getSeriesId(series);
         if (StringUtils.isBlank(allocineId)) {
-            return null;
+            return Collections.emptyList();
         }
 
         TvSeriesInfos tvSeriesInfos = allocineApiWrapper.getTvSeriesInfos(allocineId, false);
         if (tvSeriesInfos == null || tvSeriesInfos.isNotValid() || MapUtils.isEmpty(tvSeriesInfos.getPosters())) {
-            return null;
+            return Collections.emptyList();
         }
         return buildArtworkDetails(tvSeriesInfos.getPosters());
     }
@@ -108,12 +98,12 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
     public List<ArtworkDetailDTO> getPosters(Season season) {
         String allocineId = season.getSourceDbId(getScannerName());
         if (StringUtils.isBlank(allocineId)) {
-            return null;
+            return Collections.emptyList();
         }
 
         TvSeasonInfos tvSeasonInfos = allocineApiWrapper.getTvSeasonInfos(allocineId);
         if (tvSeasonInfos == null || tvSeasonInfos.isNotValid() || MapUtils.isEmpty(tvSeasonInfos.getPosters())) {
-            return null;
+            return Collections.emptyList();
         }
         return buildArtworkDetails(tvSeasonInfos.getPosters());
     }
@@ -137,12 +127,12 @@ public class AllocineArtworkScanner implements IMoviePosterScanner, ITvShowPoste
     public List<ArtworkDetailDTO> getPhotos(Person person) {
         String allocineId = allocineScanner.getPersonId(person);
         if (StringUtils.isBlank(allocineId)) {
-            return null;
+            return Collections.emptyList();
         }
         
         PersonInfos personInfos = allocineApiWrapper.getPersonInfos(allocineId, false);
         if (personInfos == null || personInfos.isNotValid() || StringUtils.isBlank(personInfos.getPhotoURL())) {
-            return null;
+            return Collections.emptyList();
         }
 
         ArtworkDetailDTO dto = new ArtworkDetailDTO(getScannerName(), personInfos.getPhotoURL(), allocineId);

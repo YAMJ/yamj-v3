@@ -24,11 +24,14 @@ package org.yamj.core.service.artwork.online;
 
 import static org.yamj.core.tools.Constants.LANGUAGE_EN;
 
+import com.omertron.fanarttvapi.enumeration.FTArtworkType;
+import com.omertron.fanarttvapi.model.FTArtwork;
+import com.omertron.fanarttvapi.model.FTMovie;
+import com.omertron.fanarttvapi.model.FTSeries;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,11 +46,6 @@ import org.yamj.core.service.artwork.ArtworkScannerService;
 import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.service.metadata.online.TheTVDbScanner;
 import org.yamj.core.web.apis.FanartTvApiWrapper;
-
-import com.omertron.fanarttvapi.enumeration.FTArtworkType;
-import com.omertron.fanarttvapi.model.FTArtwork;
-import com.omertron.fanarttvapi.model.FTMovie;
-import com.omertron.fanarttvapi.model.FTSeries;
 
 @Service("fanartTvScanner")
 public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner,
@@ -139,16 +137,16 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
      */
     private List<ArtworkDetailDTO> getMovieArtworkType(String id, FTArtworkType artworkType) {
         if (StringUtils.isBlank(id)) {
-            return null;
+            return Collections.emptyList();
         }
         
         FTMovie ftMovie = fanartTvApiWrapper.getFanartMovie(id);
         if (ftMovie == null) {
-            return null;
+            return Collections.emptyList();
         }
         
-        final String defaultLanguage = localeService.getLocaleForConfig("fanarttv").getLanguage();
-        return getArtworkList(ftMovie.getArtwork(artworkType), defaultLanguage, -1);
+        final String language = localeService.getLocaleForConfig("fanarttv").getLanguage();
+        return getArtworkList(ftMovie.getArtwork(artworkType), language, -1);
     }
 
     /**
@@ -160,39 +158,39 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
      */
     private List<ArtworkDetailDTO> getSeriesArtworkType(String id, FTArtworkType artworkType, int seasonNumber) {
         if (StringUtils.isBlank(id)) {
-            return null;
+            return Collections.emptyList();
         }
         
         FTSeries ftSeries = fanartTvApiWrapper.getFanartSeries(id);
         if (ftSeries == null) {
-            return null;
+            return Collections.emptyList();
         }
-        
-        final String defaultLanguage = localeService.getLocaleForConfig("fanarttv").getLanguage();
-        return getArtworkList(ftSeries.getArtwork(artworkType), defaultLanguage, seasonNumber);
+
+        final String language = localeService.getLocaleForConfig("fanarttv").getLanguage();
+        return getArtworkList(ftSeries.getArtwork(artworkType), language, seasonNumber);
     }
     
-    private static List<ArtworkDetailDTO> getArtworkList(List<FTArtwork> ftArtwork, String defaultLanguage, int seasonNumber) {
+    private static List<ArtworkDetailDTO> getArtworkList(List<FTArtwork> ftArtwork, String language, int seasonNumber) {
         List<ArtworkDetailDTO> artworkList = new ArrayList<>();
-        String season = (seasonNumber < 0 ? null : Integer.toString(seasonNumber));
+        final String season = Integer.toString(seasonNumber);
         
         // first try for default language
         for (FTArtwork artwork : ftArtwork) {
-            if (season != null && !StringUtils.equals(season, artwork.getSeason())) {
+            if (!season.equals(artwork.getSeason())) {
                 continue;
             }
             
-            if (defaultLanguage.equalsIgnoreCase(artwork.getLanguage())) {
+            if (language.equalsIgnoreCase(artwork.getLanguage())) {
                 ArtworkDetailDTO aDto = new ArtworkDetailDTO(SCANNER_ID, artwork.getUrl());
                 aDto.setLanguageCode(artwork.getLanguage());
                 artworkList.add(aDto);
-            }
+            } 
         }
 
         // try with English if nothing found with default language
-        if (artworkList.isEmpty() && !LANGUAGE_EN.equalsIgnoreCase(defaultLanguage)) {
+        if (artworkList.isEmpty() && !LANGUAGE_EN.equalsIgnoreCase(language)) {
             for (FTArtwork artwork : ftArtwork) {
-                if (season != null && !StringUtils.equals(season, artwork.getSeason())) {
+                if (!season.equals(artwork.getSeason())) {
                     continue;
                 }
 
@@ -206,7 +204,7 @@ public class FanartTvScanner implements IMoviePosterScanner, IMovieFanartScanner
 
         // add artwork without language
         for (FTArtwork artwork : ftArtwork) {
-            if (season != null && !StringUtils.equals(season, artwork.getSeason())) {
+            if (!season.equals(artwork.getSeason())) {
                 continue;
             }
 

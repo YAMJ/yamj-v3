@@ -195,7 +195,7 @@ public class Artwork extends AbstractStateful {
     }
 
     @Override
-    public String toString() {
+    public String toString() { //NOSONAR
         StringBuilder sb = new StringBuilder();
         sb.append("Artwork [ID=");
         sb.append(getId());

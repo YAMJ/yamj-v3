@@ -49,7 +49,7 @@ public class ArtworkScannerRunner implements Runnable {
                 
                 try {
                     service.processingError(queueElement);
-                } catch (Exception ignore) {
+                } catch (Exception ignore) { //NOSONAR
                     // leave status as it is in any error case
                 }
             }

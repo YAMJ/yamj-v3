@@ -112,8 +112,10 @@ public class ArtworkProcessorService {
                 } else {
                     stored = fileStorageService.store(storageType, cacheFilename, new URL(located.getUrl()));
                 }
-            } catch (IOException error) {
-                LOG.warn("Storage error: {}", error.getMessage(), error);
+            } catch (IOException ex) {
+                LOG.warn("Storage error: {}", ex.getMessage());
+                LOG.trace("Storage error", ex);
+                
                 return;
             }
 
@@ -153,6 +155,7 @@ public class ArtworkProcessorService {
                 break;
             } catch (OutOfMemoryError ex) {
                 LOG.error("Failed to load/transform image due to memory constraints: {}", located);
+                LOG.trace("Out of memory", ex);
 
                 // mark located artwork as error
                 located.setStatus(StatusType.ERROR);

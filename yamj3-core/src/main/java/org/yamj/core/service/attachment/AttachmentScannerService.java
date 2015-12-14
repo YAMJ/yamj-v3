@@ -26,10 +26,7 @@ import static org.yamj.core.tools.Constants.LANGUAGE_EN;
 
 import java.io.*;
 import java.util.*;
-
 import javax.annotation.PostConstruct;
-
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -165,33 +162,21 @@ public class AttachmentScannerService {
      */
     public List<Attachment> scan(Artwork artwork) {
         if (!isActivated) {
-            return null;
+            return Collections.emptyList();
         }
 
         if (artwork.getPerson() != null || artwork.getBoxedSet() != null) {
             // no attachments for persons or boxed sets
-            return null;
+            return Collections.emptyList();
         }
         
         // find video stage files
         List<StageFile> stageFiles = stagingService.findVideoStageFiles(artwork);
-        if (CollectionUtils.isEmpty(stageFiles)) {
-            // nothing to do anymore cause no video stage files found
-            return null;
-        }
         
         // create attachments
-        List<Attachment> artworkAttachments = new ArrayList<>();
+        List<Attachment> artworkAttachments = new ArrayList<>(stageFiles.size());
         for (StageFile stageFile : stageFiles) {
-            List<Attachment> attachments = scanAttachments(stageFile);
-            if (CollectionUtils.isNotEmpty(attachments)) {
-                artworkAttachments.addAll(attachments);
-            }
-        }
-        
-        if (CollectionUtils.isEmpty(artworkAttachments)) {
-            // nothing to do anymore cause no attachments found
-            return null;
+            artworkAttachments.addAll(scanAttachments(stageFile));
         }
         
         // filter attachments
@@ -215,7 +200,9 @@ public class AttachmentScannerService {
      * @param movieFile the movie file to scan
      */
     private List<Attachment> scanAttachments(StageFile stageFile) {
-        if (!isFileScanable(stageFile)) return null;
+        if (!isFileScanable(stageFile)) {
+            Collections.emptyList();
+        }
         
         final String cacheKey = Long.toString(stageFile.getId());
         List<Attachment> attachments = attachmentCache.get(cacheKey, List.class);

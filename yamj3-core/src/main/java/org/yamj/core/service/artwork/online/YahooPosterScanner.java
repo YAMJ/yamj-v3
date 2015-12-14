@@ -26,9 +26,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +62,7 @@ public class YahooPosterScanner implements IMoviePosterScanner {
 
     @Override
     public List<ArtworkDetailDTO> getPosters(VideoData videoData) {
-        List<ArtworkDetailDTO> dtos = new ArrayList<>();
+        List<ArtworkDetailDTO> dtos = new ArrayList<>(1);
 
         try {
             StringBuilder sb = new StringBuilder("http://fr.images.search.yahoo.com/search/images?p=");

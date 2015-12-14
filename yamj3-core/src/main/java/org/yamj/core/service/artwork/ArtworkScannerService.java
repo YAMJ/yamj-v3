@@ -23,7 +23,6 @@
 package org.yamj.core.service.artwork;
 
 import java.util.*;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,45 +67,47 @@ public class ArtworkScannerService {
     private AttachmentScannerService attachmentScannerService;
     
     public void registerArtworkScanner(IArtworkScanner artworkScanner) {
+        final String scannerName = artworkScanner.getScannerName().toLowerCase();
+        
         if (artworkScanner instanceof IMoviePosterScanner) {
-            LOG.trace("Registered movie poster scanner: {}", artworkScanner.getScannerName().toLowerCase());
-            registeredMoviePosterScanner.put(artworkScanner.getScannerName().toLowerCase(), (IMoviePosterScanner)artworkScanner);
+            LOG.trace("Registered movie poster scanner: {}", scannerName);
+            registeredMoviePosterScanner.put(scannerName, (IMoviePosterScanner)artworkScanner);
         }
         if (artworkScanner instanceof ITvShowPosterScanner) {
-            LOG.trace("Registered TV show poster scanner: {}", artworkScanner.getScannerName().toLowerCase());
-            registeredTvShowPosterScanner.put(artworkScanner.getScannerName().toLowerCase(), (ITvShowPosterScanner)artworkScanner);
+            LOG.trace("Registered TV show poster scanner: {}", scannerName);
+            registeredTvShowPosterScanner.put(scannerName, (ITvShowPosterScanner)artworkScanner);
         }
         if (artworkScanner instanceof IMovieFanartScanner) {
-            LOG.trace("Registered movie fanart scanner: {}", artworkScanner.getScannerName().toLowerCase());
-            registeredMovieFanartScanner.put(artworkScanner.getScannerName().toLowerCase(), (IMovieFanartScanner)artworkScanner);
+            LOG.trace("Registered movie fanart scanner: {}", scannerName);
+            registeredMovieFanartScanner.put(scannerName, (IMovieFanartScanner)artworkScanner);
         }
         if (artworkScanner instanceof ITvShowFanartScanner) {
-            LOG.trace("Registered TV show fanart scanner: {}", artworkScanner.getScannerName().toLowerCase());
-            registeredTvShowFanartScanner.put(artworkScanner.getScannerName().toLowerCase(), (ITvShowFanartScanner)artworkScanner);
+            LOG.trace("Registered TV show fanart scanner: {}", scannerName);
+            registeredTvShowFanartScanner.put(scannerName, (ITvShowFanartScanner)artworkScanner);
         }
         if (artworkScanner instanceof ITvShowBannerScanner) {
-            LOG.trace("Registered TV show banner scanner: {}", artworkScanner.getScannerName().toLowerCase());
-            registeredTvShowBannerScanner.put(artworkScanner.getScannerName().toLowerCase(), (ITvShowBannerScanner)artworkScanner);
+            LOG.trace("Registered TV show banner scanner: {}", scannerName);
+            registeredTvShowBannerScanner.put(scannerName, (ITvShowBannerScanner)artworkScanner);
         }
         if (artworkScanner instanceof ITvShowVideoImageScanner) {
-            LOG.trace("Registered TV show episode image scanner: {}", artworkScanner.getScannerName().toLowerCase());
-            registeredTvShowVideoImageScanner.put(artworkScanner.getScannerName().toLowerCase(), (ITvShowVideoImageScanner)artworkScanner);
+            LOG.trace("Registered TV show episode image scanner: {}", scannerName);
+            registeredTvShowVideoImageScanner.put(scannerName, (ITvShowVideoImageScanner)artworkScanner);
         }
         if (artworkScanner instanceof IPhotoScanner) {
-            LOG.trace("Registered photo scanner: {}", artworkScanner.getScannerName().toLowerCase());
-            registeredPhotoScanner.put(artworkScanner.getScannerName().toLowerCase(), (IPhotoScanner)artworkScanner);
+            LOG.trace("Registered photo scanner: {}", scannerName);
+            registeredPhotoScanner.put(scannerName, (IPhotoScanner)artworkScanner);
         }
         if (artworkScanner instanceof IBoxedSetPosterScanner) {
-            LOG.trace("Registered boxed set poster scanner: {}", artworkScanner.getScannerName().toLowerCase());
-            registeredBoxedSetPosterScanner.put(artworkScanner.getScannerName().toLowerCase(), (IBoxedSetPosterScanner)artworkScanner);
+            LOG.trace("Registered boxed set poster scanner: {}", scannerName);
+            registeredBoxedSetPosterScanner.put(scannerName, (IBoxedSetPosterScanner)artworkScanner);
         }
         if (artworkScanner instanceof IBoxedSetFanartScanner) {
-            LOG.trace("Registered boxed set fanart scanner: {}", artworkScanner.getScannerName().toLowerCase());
-            registeredBoxedSetFanartScanner.put(artworkScanner.getScannerName().toLowerCase(), (IBoxedSetFanartScanner)artworkScanner);
+            LOG.trace("Registered boxed set fanart scanner: {}", scannerName);
+            registeredBoxedSetFanartScanner.put(scannerName, (IBoxedSetFanartScanner)artworkScanner);
         }
         if (artworkScanner instanceof IBoxedSetBannerScanner) {
-            LOG.trace("Registered boxed set banner scanner: {}", artworkScanner.getScannerName().toLowerCase());
-            registeredBoxedSetBannerScanner.put(artworkScanner.getScannerName().toLowerCase(), (IBoxedSetBannerScanner)artworkScanner);
+            LOG.trace("Registered boxed set banner scanner: {}", scannerName);
+            registeredBoxedSetBannerScanner.put(scannerName, (IBoxedSetBannerScanner)artworkScanner);
         }
     }
 
@@ -167,7 +168,7 @@ public class ArtworkScannerService {
         }
 
         LOG.trace("Scan local for poster: {}", artwork);
-        List<StageFile> posters = null;
+        List<StageFile> posters = Collections.emptyList();
 
         if (artwork.getVideoData() != null) {
             // scan movie poster
@@ -203,53 +204,37 @@ public class ArtworkScannerService {
         }
         
         LOG.debug("Scan online for poster: {}", artwork);
-
-        List<ArtworkDetailDTO> posters = null;
-
+        List<ArtworkDetailDTO> posters = Collections.emptyList();
+        int maxResults = 0;
+        
         if (artwork.getBoxedSet() != null) {
-            // CASE: boxed set fanart
+            // CASE: boxed set poster
+            maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.poster.boxset.maxResults", 5);
+
             for (String prio : determinePriorities("yamj3.artwork.scanner.poster.boxset.priorities", registeredBoxedSetPosterScanner.keySet())) {
                 IBoxedSetPosterScanner scanner = registeredBoxedSetPosterScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                 posters = scanner.getPosters(artwork.getBoxedSet());
-                if (CollectionUtils.isNotEmpty(posters)) {
+                if (!posters.isEmpty()) {
                     break;
                 }
             }
-
-            if (CollectionUtils.isEmpty(posters)) {
-                LOG.info("No boxset poster found for: {}", artwork);
-                return;
-            }
-
-            int maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.poster.boxset.maxResults", 5);
-            if (maxResults > 0 && posters.size() > maxResults) {
-                LOG.info("Limited boxset posters to {}, actually retrieved {} for {}", maxResults, posters.size(), artwork);
-                posters = posters.subList(0, maxResults);
-            }
         } else if (artwork.getVideoData() != null && artwork.getVideoData().isMovie()) {
-            // CASE: movie poster scan
+            // CASE: movie poster
+            maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.poster.movie.maxResults", 5);
+
             for (String prio : determinePriorities("yamj3.artwork.scanner.poster.movie.priorities", registeredMoviePosterScanner.keySet())) {
                 IMoviePosterScanner scanner = registeredMoviePosterScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                 posters = scanner.getPosters(artwork.getVideoData());
-                if (CollectionUtils.isNotEmpty(posters)) {
+                if (!posters.isEmpty()) {
                     break;
                 }
             }
-
-            if (CollectionUtils.isEmpty(posters)) {
-                LOG.info("No movie poster found for: {}", artwork);
-                return;
-            }
-
-            int maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.poster.movie.maxResults", 5);
-            if (maxResults > 0 && posters.size() > maxResults) {
-                LOG.info("Limited movie posters to {}, actually retrieved {} for {}", maxResults, posters.size(), artwork);
-                posters = posters.subList(0, maxResults);
-            }
         } else if (artwork.getSeason() != null || artwork.getSeries() != null) {
             // CASE: TV show poster scan
+            maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.poster.tvshow.maxResults", 5);
+
             for (String prio : determinePriorities("yamj3.artwork.scanner.poster.tvshow.priorities", registeredTvShowPosterScanner.keySet())) {
                 ITvShowPosterScanner scanner = registeredTvShowPosterScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
@@ -258,21 +243,20 @@ public class ArtworkScannerService {
                 } else {
                     posters = scanner.getPosters(artwork.getSeason());
                 }
-                if (CollectionUtils.isNotEmpty(posters)) {
+                if (!posters.isEmpty()) {
                     break;
                 }
             }
+        }
 
-            if (CollectionUtils.isEmpty(posters)) {
-                LOG.info("No TV show poster found for: {}", artwork);
-                return;
-            }
+        if (posters.isEmpty()) {
+            LOG.info("No poster found for: {}", artwork);
+            return;
+        }
 
-            int maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.poster.tvshow.maxResults", 5);
-            if (maxResults > 0 && posters.size() > maxResults) {
-                LOG.info("Limited TV show posters to {}, actually retrieved {} for {}", maxResults, posters.size(), artwork);
-                posters = posters.subList(0, maxResults);
-            }
+        if (maxResults > 0 && posters.size() > maxResults) {
+            LOG.info("Limited posters to {}, actually retrieved {} for {}", maxResults, posters.size(), artwork);
+            posters = posters.subList(0, maxResults);
         }
 
         createLocatedArtworksOnline(artwork, posters, locatedArtworks);
@@ -285,7 +269,7 @@ public class ArtworkScannerService {
         }
 
         LOG.trace("Scan local for fanart: {}", artwork);
-        List<StageFile> fanarts = null;
+        List<StageFile> fanarts  = Collections.emptyList();
 
         if (artwork.getVideoData() != null) {
             // scan movie fanart
@@ -321,52 +305,37 @@ public class ArtworkScannerService {
         }
 
         LOG.debug("Scan online for fanart: {}", artwork);
-        List<ArtworkDetailDTO> fanarts = null;
-
+        List<ArtworkDetailDTO> fanarts = Collections.emptyList();
+        int maxResults = 0;
+        
         if (artwork.getBoxedSet() != null) {
             // CASE: boxed set fanart
+            maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.fanart.boxset.maxResults", 5);
+            
             for (String prio : determinePriorities("yamj3.artwork.scanner.fanart.boxset.priorities", registeredBoxedSetFanartScanner.keySet())) {
                 IBoxedSetFanartScanner scanner = registeredBoxedSetFanartScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                 fanarts = scanner.getFanarts(artwork.getBoxedSet());
-                if (CollectionUtils.isNotEmpty(fanarts)) {
+                if (!fanarts.isEmpty()) {
                     break;
                 }
             }
-
-            if (CollectionUtils.isEmpty(fanarts)) {
-                LOG.info("No boxset fanart found for: {}", artwork);
-                return;
-            }
-
-            int maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.fanart.boxset.maxResults", 5);
-            if (maxResults > 0 && fanarts.size() > maxResults) {
-                LOG.info("Limited boxset fanarts to {}, actually retrieved {} for {}", maxResults, fanarts.size(), artwork);
-                fanarts = fanarts.subList(0, maxResults);
-            }
         } else if (artwork.getVideoData() != null && artwork.getVideoData().isMovie()) {
             // CASE: movie fanart
+            maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.fanart.movie.maxResults", 5);
+
             for (String prio : determinePriorities("yamj3.artwork.scanner.fanart.movie.priorities", registeredMovieFanartScanner.keySet())) {
                 IMovieFanartScanner scanner = registeredMovieFanartScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                 fanarts = scanner.getFanarts(artwork.getVideoData());
-                if (CollectionUtils.isNotEmpty(fanarts)) {
+                if (!fanarts.isEmpty()) {
                     break;
                 }
             }
-
-            if (CollectionUtils.isEmpty(fanarts)) {
-                LOG.info("No movie fanart found for: {}", artwork);
-                return;
-            }
-
-            int maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.fanart.movie.maxResults", 5);
-            if (maxResults > 0 && fanarts.size() > maxResults) {
-                LOG.info("Limited movie fanarts to {}, actually retrieved {} for {}", maxResults, fanarts.size(), artwork);
-                fanarts = fanarts.subList(0, maxResults);
-            }
         } else if (artwork.getSeason() != null || artwork.getSeries() != null) {
-            // CASE: TV show poster scan
+            // CASE: TV show fanart
+            maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.fanart.tvshow.maxResults", 5);
+
             for (String prio : determinePriorities("yamj3.artwork.scanner.fanart.tvshow.priorities", registeredTvShowFanartScanner.keySet())) {
                 ITvShowFanartScanner scanner = registeredTvShowFanartScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
@@ -375,18 +344,21 @@ public class ArtworkScannerService {
                 } else {
                     fanarts = scanner.getFanarts(artwork.getSeason());
                 }
+                if (!fanarts.isEmpty()) {
+                    break;
+                }
             }
+        }
 
-            if (CollectionUtils.isEmpty(fanarts)) {
-                LOG.info("No TV show fanarts found for: {}", artwork);
-                return;
-            }
 
-            int maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.fanart.tvshow.maxResults", 5);
-            if (maxResults > 0 && fanarts.size() > maxResults) {
-                LOG.info("Limited TV show fanart to {}, actually retrieved {} for {}", maxResults, fanarts.size(), artwork);
-                fanarts = fanarts.subList(0, maxResults);
-            }
+        if (fanarts.isEmpty()) {
+            LOG.info("No fanart found for: {}", artwork);
+            return;
+        }
+
+        if (maxResults > 0 && fanarts.size() > maxResults) {
+            LOG.info("Limited fanarts to {}, actually retrieved {} for {}", maxResults, fanarts.size(), artwork);
+            fanarts = fanarts.subList(0, maxResults);
         }
 
         createLocatedArtworksOnline(artwork, fanarts, locatedArtworks);
@@ -399,7 +371,7 @@ public class ArtworkScannerService {
         }
 
         LOG.trace("Scan local for TV show banner: {}", artwork);
-        List<StageFile> banners = null;
+        List<StageFile> banners = Collections.emptyList();
 
         if (artwork.getSeason() != null) {
             // scan season banner
@@ -432,30 +404,25 @@ public class ArtworkScannerService {
         }
 
         LOG.debug("Scan online for banner: {}", artwork);
-        List<ArtworkDetailDTO> banners = null;
-
+        List<ArtworkDetailDTO> banners = Collections.emptyList();
+        int maxResults = 0;
+        
         if (artwork.getBoxedSet() != null) {
-            // CASE: boxed set fanart
+            // CASE: boxed set banner
+            maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.banner.boxset.maxResults", 5);
+
             for (String prio : determinePriorities("yamj3.artwork.scanner.banner.boxset.priorities", registeredBoxedSetBannerScanner.keySet())) {
                 IBoxedSetBannerScanner scanner = registeredBoxedSetBannerScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
                 banners = scanner.getBanners(artwork.getBoxedSet());
-                if (CollectionUtils.isNotEmpty(banners)) {
+                if (!banners.isEmpty()) {
                     break;
                 }
             }
-
-            if (CollectionUtils.isEmpty(banners)) {
-                LOG.info("No boxset banner found for: {}", artwork);
-                return;
-            }
-
-            int maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.banner.boxset.maxResults", 5);
-            if (maxResults > 0 && banners.size() > maxResults) {
-                LOG.info("Limited boxset banner to {}, actually retrieved {} for {}", maxResults, banners.size(), artwork);
-                banners = banners.subList(0, maxResults);
-            }
         } else if (artwork.getSeason() != null || artwork.getSeries() != null) {
+            // CASE: TV show banner
+            maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.banner.tvshow.maxResults", 5);
+
             for (String prio : determinePriorities("yamj3.artwork.scanner.banner.tvshow.priorities", registeredTvShowBannerScanner.keySet())) {
                 ITvShowBannerScanner scanner = registeredTvShowBannerScanner.get(prio);
                 LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
@@ -464,23 +431,22 @@ public class ArtworkScannerService {
                 } else {
                     banners = scanner.getBanners(artwork.getSeason());
                 }
-                if (CollectionUtils.isNotEmpty(banners)) {
+                if (!banners.isEmpty()) {
                     break;
                 }
             }
-
-            if (CollectionUtils.isEmpty(banners)) {
-                LOG.info("No TV show banner found for: {}", artwork);
-                return;
-            }
-
-            int maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.banner.tvshow.maxResults", 5);
-            if (maxResults > 0 && banners.size() > maxResults) {
-                LOG.info("Limited TV show banners to {}, actually retrieved {} for {}", maxResults, banners.size(), artwork);
-                banners = banners.subList(0, maxResults);
-            }
         }
-        
+
+        if (banners.isEmpty()) {
+            LOG.info("No banner found for: {}", artwork);
+            return;
+        }
+
+        if (maxResults > 0 && banners.size() > maxResults) {
+            LOG.info("Limited banner to {}, actually retrieved {} for {}", maxResults, banners.size(), artwork);
+            banners = banners.subList(0, maxResults);
+        }
+
         createLocatedArtworksOnline(artwork, banners, locatedArtworks);
     }
 
@@ -492,7 +458,8 @@ public class ArtworkScannerService {
 
         LOG.trace("Scan local for TV show episode image: {}", artwork);
 
-        List<StageFile> videoimages = null;
+        List<StageFile> videoimages = Collections.emptyList();
+        
         if (artwork.getVideoData() != null) {
             // TODO local scan for video images
         }
@@ -524,25 +491,25 @@ public class ArtworkScannerService {
         }
 
         LOG.debug("Scan online for TV show episode image: {}", artwork);
-        List<ArtworkDetailDTO> videoimages = null;
+        List<ArtworkDetailDTO> videoimages = Collections.emptyList();
         
         for (String prio : determinePriorities("yamj3.artwork.scanner.videoimage.priorities", registeredTvShowVideoImageScanner.keySet())) {
             ITvShowVideoImageScanner scanner = registeredTvShowVideoImageScanner.get(prio);
             LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), artwork);
             videoimages = scanner.getVideoImages(videoData);
-            if (CollectionUtils.isNotEmpty(videoimages)) {
+            if (!videoimages.isEmpty()) {
                 break;
             }
         }
 
-        if (CollectionUtils.isEmpty(videoimages)) {
+        if (videoimages.isEmpty()) {
             LOG.info("No TV show episode image found for: {}", artwork);
             return;
         }
 
         int maxResults = this.configServiceWrapper.getIntProperty("yamj3.artwork.scanner.videoimage.maxResults", 2);
         if (maxResults > 0 && videoimages.size() > maxResults) {
-            LOG.info("Limited Video Images to {}, actually retrieved {} for {}", maxResults, videoimages.size(), artwork);
+            LOG.info("Limited TV show episode images to {}, actually retrieved {} for {}", maxResults, videoimages.size(), artwork);
             videoimages = videoimages.subList(0, maxResults);
         }
 
@@ -556,7 +523,7 @@ public class ArtworkScannerService {
         }
 
         LOG.trace("Scan local for photo: {}", artwork);
-        List<StageFile> photos = null;
+        List<StageFile> photos = Collections.emptyList();
 
         if (artwork.getPerson() != null) {
             // scan person photo
@@ -579,18 +546,18 @@ public class ArtworkScannerService {
         }
 
         LOG.debug("Scan online for photo: {}", artwork);
-        List<ArtworkDetailDTO> photos = null;
+        List<ArtworkDetailDTO> photos = Collections.emptyList();
 
         for (String prio : determinePriorities("yamj3.artwork.scanner.photo.priorities", registeredPhotoScanner.keySet())) {
             IPhotoScanner scanner = registeredPhotoScanner.get(prio);
             LOG.debug(USE_SCANNER_FOR, scanner.getScannerName(), person);
             photos = scanner.getPhotos(person);
-            if (CollectionUtils.isNotEmpty(photos)) {
+            if (!photos.isEmpty()) {
                 break;
             }
         }
 
-        if (CollectionUtils.isEmpty(photos)) {
+        if (photos.isEmpty()) {
             LOG.info("No photos found for: {}", artwork);
             return;
         }
@@ -605,10 +572,6 @@ public class ArtworkScannerService {
     }
 
     private static void createLocatedArtworksOnline(Artwork artwork, List<ArtworkDetailDTO> dtos, List<ArtworkLocated> locatedArtworks) {
-        if (CollectionUtils.isEmpty(dtos)) {
-            return;
-        }
-
         for (ArtworkDetailDTO dto : dtos) {
             ArtworkLocated located = new ArtworkLocated();
             located.setArtwork(artwork);
@@ -625,10 +588,6 @@ public class ArtworkScannerService {
     }
 
     private static void createLocatedArtworksLocal(Artwork artwork, List<StageFile> stageFiles, List<ArtworkLocated> locatedArtworks) {
-        if (CollectionUtils.isEmpty(stageFiles)) {
-            return;
-        }
-        
         for (StageFile stageFile : stageFiles) {
             ArtworkLocated located = new ArtworkLocated();
             located.setArtwork(artwork);
@@ -649,10 +608,6 @@ public class ArtworkScannerService {
     }
 
     private static void createLocatedArtworksAttached(Artwork artwork, List<Attachment> attachments, List<ArtworkLocated> locatedArtworks) {
-        if (CollectionUtils.isEmpty(attachments)) {
-            return;
-        }
-        
         for (Attachment attachment : attachments) {
             ArtworkLocated located = new ArtworkLocated();
             located.setArtwork(artwork);

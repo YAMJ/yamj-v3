@@ -28,12 +28,16 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 
-public class ArtworkTools {
+public final class ArtworkTools {
 
     private static final String TYPE_MOVIE_SCANNER = "movie_scanner";
     private static final String TYPE_SERIES_SCANNER = "series_scanner";
     private static final String TYPE_PERSON_SCANNER = "person_scanner";
 
+    private ArtworkTools() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
+    
     public static Set<String> determinePriorities(final String configValue, Set<String> allowedForScan) {
         final Set<String> result;
         if (StringUtils.isBlank(configValue)) {
