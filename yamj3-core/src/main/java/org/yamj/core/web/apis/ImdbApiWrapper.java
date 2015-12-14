@@ -97,7 +97,7 @@ public class ImdbApiWrapper {
         } finally {
             imdbApiLock.unlock();
         }
-        return (imdbMovieDetails == null ? new ImdbMovieDetails() : imdbMovieDetails);
+        return imdbMovieDetails;
     }
         
     @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId}")

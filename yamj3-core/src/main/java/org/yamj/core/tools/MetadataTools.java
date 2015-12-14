@@ -429,7 +429,7 @@ public final class MetadataTools {
         int year = -1;
         Matcher m = YEAR_PATTERN.matcher(date);
         if (m.find()) {
-            year = NumberUtils.toInt(m.group(1));
+            year = NumberUtils.toInt(m.group(1), -1);
         }
 
         return year;
@@ -571,7 +571,9 @@ public final class MetadataTools {
     }
 
     public static String getExternalSubtitleFormat(String extension) {
-        if (extension == null) return null;
+        if (extension == null) {
+            return null;
+        }
         
         String format;
         switch (extension.toLowerCase()) {
@@ -668,10 +670,14 @@ public final class MetadataTools {
         newBio = newBio.replaceAll("\\u00A0", " ").replaceAll("\\s+", " ").replaceAll("\"", "'");
         
         int pos = StringUtils.indexOfIgnoreCase(newBio, FROM_WIKIPEDIA);
-        if (pos >= 0) newBio = newBio.substring(pos + FROM_WIKIPEDIA.length() + 1);
+        if (pos >= 0) {
+            newBio = newBio.substring(pos + FROM_WIKIPEDIA.length() + 1);
+        }
 
         pos = StringUtils.indexOfIgnoreCase(newBio, WIKIPEDIA_DESCRIPTION_ABOVE);
-        if (pos >= 0) newBio = newBio.substring(0, pos);
+        if (pos >= 0) {
+            newBio = newBio.substring(0, pos);
+        }
         
         return newBio;
     }
@@ -683,8 +689,7 @@ public final class MetadataTools {
      * @return
      */
     public static boolean isVoiceRole(final String role) {
-        int idx = StringUtils.indexOfIgnoreCase(role, "(voice");
-        return (idx != -1);
+        return StringUtils.indexOfIgnoreCase(role, "(voice") != -1;
     }
 
     /**
@@ -704,16 +709,19 @@ public final class MetadataTools {
         if (idx > 0) {
             newRole = newRole.substring(0, idx);
         }
+        
         // (as ... = alternate name
-         idx = StringUtils.indexOfIgnoreCase(newRole, "(as ");
+        idx = StringUtils.indexOfIgnoreCase(newRole, "(as ");
         if (idx > 0) {
             newRole = newRole.substring(0, idx);
         }
+        
         // uncredited cast member
         idx = StringUtils.indexOfIgnoreCase(newRole, "(uncredit");
         if (idx > 0) {
             newRole = newRole.substring(0, idx);
         }
+        
         // season marker
         idx = StringUtils.indexOfIgnoreCase(newRole, "(Season");
         if (idx > 0) {

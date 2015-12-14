@@ -30,7 +30,6 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Locale;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.protocol.HTTP;
@@ -57,14 +56,14 @@ public class SearchEngineTools {
     private final CommonHttpClient httpClient;
     private final Charset charset;
     private final LinkedList<String> searchSites;
+    private final String country;
+    private final String language;
 
-    private String searchSuffix = "";
-    private String country = Locale.US.getCountry();
-    private String language = Locale.US.getLanguage();
     private String googleHost = "www.google.com";
     private String yahooHost = "search.yahoo.com";
     private String bingHost = "www.bing.com";
     private String blekkoHost = "www.blekko.com";
+    private String searchSuffix = "";
 
     public SearchEngineTools(CommonHttpClient httpClient) {
         this(httpClient, Locale.US);
@@ -110,7 +109,7 @@ public class SearchEngineTools {
             googleHost = "www.google.ru";
             yahooHost = "ru.search.yahoo.com";
         } else if ("IL".equalsIgnoreCase(locale.getCountry())) {
-            this.country = "il";
+            country = "IL";
             language = "il";
             googleHost = "www.google.co.il";
         } else if (Locale.FRANCE.getCountry().equalsIgnoreCase(locale.getCountry())) {
@@ -118,9 +117,12 @@ public class SearchEngineTools {
             language = Locale.FRANCE.getLanguage();
             googleHost = "www.google.fr";
         } else if ("NL".equalsIgnoreCase(locale.getCountry())) {
-            this.country = "NL";
+            country = "NL";
             language = "nl";
             googleHost = "www.google.nl";
+        } else {
+            country = Locale.US.getCountry();
+            language = Locale.US.getLanguage();
         }
     }
 
@@ -187,7 +189,7 @@ public class SearchEngineTools {
                 sb.append("&");
             }
             sb.append("as_q=");
-            sb.append(URLEncoder.encode(title, "UTF-8"));
+            sb.append(URLEncoder.encode(title, UTF8));
             if (year > 0) {
                 sb.append(PAREN_LEFT);
                 sb.append(year);
@@ -195,7 +197,7 @@ public class SearchEngineTools {
             }
             if (StringUtils.isNotBlank(additional)) {
                 sb.append("+");
-                sb.append(URLEncoder.encode(additional, "UTF-8"));
+                sb.append(URLEncoder.encode(additional, UTF8));
             }
             sb.append("&as_sitesearch=");
             sb.append(site);

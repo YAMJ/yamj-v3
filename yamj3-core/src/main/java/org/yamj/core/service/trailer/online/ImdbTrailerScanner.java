@@ -22,11 +22,11 @@
  */
 package org.yamj.core.service.trailer.online;
 
+import com.omertron.imdbapi.model.ImdbEncodingFormat;
+import com.omertron.imdbapi.model.ImdbMovieDetails;
 import java.util.Collections;
 import java.util.List;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,9 +40,6 @@ import org.yamj.core.database.model.type.ContainerType;
 import org.yamj.core.service.metadata.online.ImdbScanner;
 import org.yamj.core.service.trailer.TrailerScannerService;
 import org.yamj.core.web.apis.ImdbApiWrapper;
-
-import com.omertron.imdbapi.model.ImdbEncodingFormat;
-import com.omertron.imdbapi.model.ImdbTrailer;
 
 @Service("imdbTrailerScanner")
 public class ImdbTrailerScanner implements IMovieTrailerScanner, ISeriesTrailerScanner {
@@ -86,15 +83,15 @@ public class ImdbTrailerScanner implements IMovieTrailerScanner, ISeriesTrailerS
             return null;
         }
         
-        ImdbTrailer imdbTrailer = imdbApiWrapper.getMovieDetails(imdbId).getTrailer();
-        if (imdbTrailer == null || MapUtils.isEmpty(imdbTrailer.getEncodings())) {
+        ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId);
+        if (movieDetails == null || movieDetails.getTrailer() == null || MapUtils.isEmpty(movieDetails.getTrailer().getEncodings())) {
             return null;
         }
         
         String url = null;
         int prio = 1000;
         
-        for (ImdbEncodingFormat format : imdbTrailer.getEncodings().values()) {
+        for (ImdbEncodingFormat format : movieDetails.getTrailer().getEncodings().values()) {
             switch(format.getFormat()) {
                 case "HD 720":
                    if (prio > 10) {
@@ -124,7 +121,7 @@ public class ImdbTrailerScanner implements IMovieTrailerScanner, ISeriesTrailerS
         }
 
         if (url == null) return null;
-        TrailerDTO dto = new TrailerDTO(ImdbScanner.SCANNER_ID, ContainerType.MP4, url, imdbTrailer.getTitle(), imdbId); 
+        TrailerDTO dto = new TrailerDTO(ImdbScanner.SCANNER_ID, ContainerType.MP4, url, movieDetails.getTrailer().getTitle(), imdbId); 
         return Collections.singletonList(dto);
     }
 }
