@@ -23,9 +23,9 @@
 package org.yamj.core.web.apis;
 
 import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
+import static org.yamj.core.tools.Constants.UTF8;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -48,7 +48,6 @@ public class SearchEngineTools {
     // Literals
     private static final String HTTP_LITERAL = "http://";
     private static final String HTTPS_LITERAL = "https://";
-    private static final String UTF8 = "UTF-8";
     private static final String SITE = "+site%3A";
     private static final String PAREN_RIGHT = "%29";
     private static final String PAREN_LEFT = "+%28";
@@ -70,7 +69,7 @@ public class SearchEngineTools {
     }
 
     public SearchEngineTools(CommonHttpClient httpClient, Locale locale) {
-        this(httpClient, locale, Charset.forName(UTF8));
+        this(httpClient, locale, UTF8);
     }
 
     public SearchEngineTools(CommonHttpClient httpClient, Locale locale, Charset charset) {
@@ -189,7 +188,7 @@ public class SearchEngineTools {
                 sb.append("&");
             }
             sb.append("as_q=");
-            sb.append(URLEncoder.encode(title, UTF8));
+            sb.append(HTMLTools.encodeUrl(title));
             if (year > 0) {
                 sb.append(PAREN_LEFT);
                 sb.append(year);
@@ -197,7 +196,7 @@ public class SearchEngineTools {
             }
             if (StringUtils.isNotBlank(additional)) {
                 sb.append("+");
-                sb.append(URLEncoder.encode(additional, UTF8));
+                sb.append(HTMLTools.encodeUrl(additional));
             }
             sb.append("&as_sitesearch=");
             sb.append(site);
@@ -235,7 +234,7 @@ public class SearchEngineTools {
                 sb.append("&rd=r2");
             }
             sb.append("&ei=UTF-8&p=");
-            sb.append(URLEncoder.encode(title, UTF8));
+            sb.append(HTMLTools.encodeUrl(title));
             if (year > 0) {
                 sb.append(PAREN_LEFT);
                 sb.append(year);
@@ -245,7 +244,7 @@ public class SearchEngineTools {
             sb.append(site);
             if (additional != null) {
                 sb.append("+");
-                sb.append(URLEncoder.encode(additional, UTF8));
+                sb.append(HTMLTools.encodeUrl(additional));
             }
             LOG.trace("Yahoo search: {}", sb);
 
@@ -283,7 +282,7 @@ public class SearchEngineTools {
             StringBuilder sb = new StringBuilder(HTTP_LITERAL);
             sb.append(bingHost);
             sb.append("/search?q=");
-            sb.append(URLEncoder.encode(title, UTF8));
+            sb.append(HTMLTools.encodeUrl(title));
             if (year > 0) {
                 sb.append(PAREN_LEFT);
                 sb.append(year);
@@ -293,7 +292,7 @@ public class SearchEngineTools {
             sb.append(site);
             if (additional != null) {
                 sb.append("+");
-                sb.append(URLEncoder.encode(additional, UTF8));
+                sb.append(HTMLTools.encodeUrl(additional));
             }
             if (country != null) {
                 sb.append("&cc=");
@@ -329,7 +328,7 @@ public class SearchEngineTools {
             StringBuilder sb = new StringBuilder(HTTP_LITERAL);
             sb.append(blekkoHost);
             sb.append("/ws/?q=");
-            sb.append(URLEncoder.encode(title, UTF8));
+            sb.append(HTMLTools.encodeUrl(title));
             if (year > 0) {
                 sb.append(PAREN_LEFT);
                 sb.append(year);
@@ -339,7 +338,7 @@ public class SearchEngineTools {
             sb.append(site);
             if (additional != null) {
                 sb.append("+");
-                sb.append(URLEncoder.encode(additional, UTF8));
+                sb.append(HTMLTools.encodeUrl(additional));
             }
             LOG.trace("Blekko search: {}", sb);
 

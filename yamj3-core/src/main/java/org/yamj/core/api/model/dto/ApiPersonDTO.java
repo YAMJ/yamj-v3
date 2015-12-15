@@ -24,7 +24,7 @@ package org.yamj.core.api.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.yamj.core.database.model.type.JobType;
@@ -50,9 +50,9 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     private JobType job;
     private String status;
     private String filmography_status; //NOSONAR
-    private List<ApiArtworkDTO> artwork = new ArrayList<>(0);
-    private List<ApiFilmographyDTO> filmography = new ArrayList<>(0);
-    private List<ApiExternalIdDTO> externalIds = new ArrayList<>(0);
+    private List<ApiArtworkDTO> artwork = Collections.emptyList();
+    private List<ApiFilmographyDTO> filmography = Collections.emptyList();
+    private List<ApiExternalIdDTO> externalIds = Collections.emptyList();
 
     public String getBiography() {
         return biography;
@@ -186,7 +186,6 @@ public class ApiPersonDTO extends AbstractApiIdentifiableDTO {
     public void setFilmography(List<ApiFilmographyDTO> filmography) {
         this.filmography = filmography;
     }
-
     
     public List<ApiExternalIdDTO> getExternalIds() {
         return externalIds;

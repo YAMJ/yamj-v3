@@ -1,14 +1,14 @@
 package org.yamj.core.api.json;
 
-import org.junit.Test;
+import static org.yamj.core.tools.Constants.UTF8;
 
 import java.io.File;
-import java.nio.charset.Charset;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.api.common.http.DigestedResponse;
@@ -36,7 +36,7 @@ public class ArtworkControllerTest extends AbstractTest {
         httpPost.setEntity(reqEntity);
 
         LOG.info("Executing request {}", httpPost.getRequestLine());
-        DigestedResponse response = DigestedResponseReader.postContent(new SimpleHttpClientBuilder().build(), httpPost, Charset.forName("UTF-8"));
+        DigestedResponse response = DigestedResponseReader.postContent(new SimpleHttpClientBuilder().build(), httpPost, UTF8);
         LOG.info("Response code:    {}", response.getStatusCode());
         LOG.info("Response content: {}", response.getContent());
     }

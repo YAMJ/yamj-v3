@@ -22,17 +22,11 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import static org.yamj.core.tools.Constants.UTF8;
+
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.StringTokenizer;
-
+import java.util.*;
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +58,6 @@ public class OfdbScanner implements IMovieScanner {
     private static final String HTML_TR_START = "<tr";
     private static final String HTML_TR_END = "</tr>";
 
-    private Charset charset;
     private SearchEngineTools searchEngineTools;
 
     @Autowired
@@ -86,8 +79,6 @@ public class OfdbScanner implements IMovieScanner {
     @PostConstruct
     public void init() {
         LOG.info("Initialize OFDb scanner");
-
-        charset = Charset.forName("UTF-8");
 
         searchEngineTools = new SearchEngineTools(httpClient, Locale.GERMANY);
         searchEngineTools.setSearchSites("google");
@@ -147,7 +138,7 @@ public class OfdbScanner implements IMovieScanner {
 
     private String getOfdbIdByImdbId(String imdbId, boolean throwTempError) {
         try {
-            DigestedResponse response = httpClient.requestContent("http://www.ofdb.de/view.php?page=suchergebnis&SText=" + imdbId + "&Kat=IMDb", charset);
+            DigestedResponse response = httpClient.requestContent("http://www.ofdb.de/view.php?page=suchergebnis&SText=" + imdbId + "&Kat=IMDb", UTF8);
             if (throwTempError && ResponseTools.isTemporaryError(response)) {
                 throw new TemporaryUnavailableException("OFDb service is temporary not available: " + response.getStatusCode());
             } else if (ResponseTools.isNotOK(response)) {
@@ -186,13 +177,13 @@ public class OfdbScanner implements IMovieScanner {
 
         try {
             StringBuilder sb = new StringBuilder("http://www.ofdb.de/view.php?page=fsuche&Typ=N&AB=-&Titel=");
-            sb.append(URLEncoder.encode(title, "UTF-8"));
+            sb.append(HTMLTools.encodePlain(title));
             sb.append("&Genre=-&HLand=-&Jahr=");
             sb.append(year);
             sb.append("&Wo=-&Land=-&Freigabe=-&Cut=A&Indiziert=A&Submit2=Suche+ausf%C3%BChren");
 
             
-            DigestedResponse response = httpClient.requestContent(sb.toString(), charset);
+            DigestedResponse response = httpClient.requestContent(sb.toString(), UTF8);
             if (throwTempError && ResponseTools.isTemporaryError(response)) {
                 throw new TemporaryUnavailableException("OFDb service is temporary not available: " + response.getStatusCode());
             } else if (ResponseTools.isNotOK(response)) {
@@ -256,7 +247,7 @@ public class OfdbScanner implements IMovieScanner {
     }
 
     private ScanResult updateMovie(VideoData videoData, String ofdbUrl, boolean throwTempError) throws IOException {
-        DigestedResponse response = httpClient.requestContent(ofdbUrl, charset);
+        DigestedResponse response = httpClient.requestContent(ofdbUrl, UTF8);
         if (throwTempError && ResponseTools.isTemporaryError(response)) {
             throw new TemporaryUnavailableException("OFDb service is temporary not available: " + response.getStatusCode());
         } else if (ResponseTools.isNotOK(response)) {
@@ -290,7 +281,7 @@ public class OfdbScanner implements IMovieScanner {
         // scrape plot and outline
         String plotMarker = HTMLTools.extractTag(xml, "<a href=\"plot/", 0, "\"");
         if (StringUtils.isNotBlank(plotMarker) && OverrideTools.checkOneOverwrite(videoData, SCANNER_ID, OverrideFlag.PLOT, OverrideFlag.OUTLINE)) {
-            response = httpClient.requestContent("http://www.ofdb.de/plot/" + plotMarker, charset);
+            response = httpClient.requestContent("http://www.ofdb.de/plot/" + plotMarker, UTF8);
             if (throwTempError && ResponseTools.isTemporaryError(response)) {
                 throw new TemporaryUnavailableException("OFDb service failed to get plot: " + response.getStatusCode());
             } else if (ResponseTools.isNotOK(response)) {
@@ -321,7 +312,7 @@ public class OfdbScanner implements IMovieScanner {
         }
         
         String detailUrl = "http://www.ofdb.de/" + xml.substring(beginIndex, xml.indexOf('\"', beginIndex));
-        response = httpClient.requestContent(detailUrl, charset);
+        response = httpClient.requestContent(detailUrl, UTF8);
         if (throwTempError && ResponseTools.isTemporaryError(response)) {
             throw new TemporaryUnavailableException("OFDb service failed to get details: " + response.getStatusCode());
         } else if (ResponseTools.isNotOK(response)) {

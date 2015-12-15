@@ -25,15 +25,11 @@ package org.yamj.core.web.apis;
 import static org.yamj.core.tools.Constants.ALL;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,7 +122,7 @@ public class ImdbSearchEngine {
             if (StringUtils.isNotBlank(movieId)) {
                 StringBuilder sb = new StringBuilder("http://www.imdb.com/")
                     .append("search/name?name=")
-                    .append(URLEncoder.encode(personName, "UTF-8"))
+                    .append(HTMLTools.encodeUrl(personName))
                     .append("&role=")
                     .append(movieId);
 
@@ -207,12 +203,7 @@ public class ImdbSearchEngine {
 
         StringBuilder sb = new StringBuilder("http://www.imdb.com/");
         sb.append("find?q=");
-        try {
-            sb.append(URLEncoder.encode(title, "UTF-8"));
-        } catch (UnsupportedEncodingException ex) {
-            LOG.debug("Failed to encode title '{}'", title);
-            sb.append(title);
-        }
+        sb.append(HTMLTools.encodeUrl(title));
 
         if (year > 0) {
             sb.append("+%28").append(year).append("%29");
@@ -285,14 +276,7 @@ public class ImdbSearchEngine {
                 formattedExact = formattedName + formattedYear;
             }
         } else {
-            sb = new StringBuilder();
-            try {
-                sb.append(URLEncoder.encode(title, "UTF-8").replace("+", " "));
-            } catch (UnsupportedEncodingException ex) {
-                LOG.debug("Failed to encode title '{}'", title);
-                sb.append(title);
-            }
-            formattedName = sb.toString().toLowerCase();
+            formattedName = HTMLTools.encodePlain(title).replace("+", " ").toLowerCase();
             if (year > 0) {
                 formattedYear = "(" + year + ")";
                 formattedExact = formattedName + "</a> " + formattedYear;

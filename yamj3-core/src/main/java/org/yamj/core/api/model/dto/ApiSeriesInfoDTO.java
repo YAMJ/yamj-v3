@@ -22,16 +22,11 @@
  */
 package org.yamj.core.api.model.dto;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-
-import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.type.ArtworkType;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.*;
+import org.yamj.core.database.model.Studio;
+import org.yamj.core.database.model.type.ArtworkType;
 
 @JsonInclude(Include.NON_DEFAULT) 
 public class ApiSeriesInfoDTO extends AbstractApiDTO {
@@ -43,13 +38,13 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
     private String plot;
     private String outline;
     private Boolean watched;
-    private List<ApiGenreDTO> genres = new ArrayList<>(0);
-    private List<Studio> studios = new ArrayList<>(0);
-    private List<ApiCountryDTO> countries = new ArrayList<>(0);
-    private List<ApiCertificationDTO> certifications = new ArrayList<>(0);
-    private List<ApiAwardDTO> awards = new ArrayList<>(0);
-    private List<ApiRatingDTO> ratings = new ArrayList<>(0);
-    private List<ApiSeasonInfoDTO> seasonList = new ArrayList<>(0);
+    private List<ApiGenreDTO> genres = Collections.emptyList();
+    private List<Studio> studios = Collections.emptyList();
+    private List<ApiCountryDTO> countries = Collections.emptyList();
+    private List<ApiCertificationDTO> certifications = Collections.emptyList();
+    private List<ApiAwardDTO> awards = Collections.emptyList();
+    private List<ApiRatingDTO> ratings = Collections.emptyList();
+    private List<ApiSeasonInfoDTO> seasonList = Collections.emptyList();;
     
     private Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<>(ArtworkType.class);
 

@@ -22,10 +22,11 @@
  */
 package org.yamj.core.web.apis;
 
+import static org.yamj.core.tools.Constants.UTF8;
+
 import com.omertron.imdbapi.ImdbApi;
 import com.omertron.imdbapi.model.*;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -52,7 +53,6 @@ import org.yamj.core.web.HTMLTools;
 public class ImdbApiWrapper {
     
     private static final Logger LOG = LoggerFactory.getLogger(ImdbApiWrapper.class);
-    private static final Charset CHARSET = Charset.forName("UTF-8");
     private static final String HTML_SITE_FULL = "http://www.imdb.com/";
     private static final String HTML_TITLE = "title/";
     private static final String HTML_A_END = "</a>";
@@ -104,7 +104,7 @@ public class ImdbApiWrapper {
     public String getMovieDetailsXML(final String imdbId, boolean throwTempError) throws IOException {
         DigestedResponse response;
         try {
-            response = httpClient.requestContent(getImdbUrl(imdbId), CHARSET);
+            response = httpClient.requestContent(getImdbUrl(imdbId), UTF8);
         } catch (IOException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -193,11 +193,10 @@ public class ImdbApiWrapper {
         return result;
     }
 
-    @Cacheable(value=CachingNames.API_IMDB, key="{#root.methodName, #imdbId}", unless="#result==null")
     public String getReleasInfoXML(final String imdbId) {
         String webpage = null;
         try {
-            final DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "releaseinfo"), CHARSET);
+            final DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "releaseinfo"), UTF8);
             if (ResponseTools.isOK(response)) {
                 webpage = response.getContent();
             } else {
@@ -212,7 +211,7 @@ public class ImdbApiWrapper {
     public String getPersonBioXML(final String imdbId, boolean throwTempError) throws IOException {
         DigestedResponse response;
         try {
-            response = httpClient.requestContent(HTML_SITE_FULL + "name/" + imdbId + "/bio", CHARSET);
+            response = httpClient.requestContent(HTML_SITE_FULL + "name/" + imdbId + "/bio", UTF8);
         } catch (IOException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -226,7 +225,7 @@ public class ImdbApiWrapper {
     public Set<String> getProductionStudios(String imdbId) {
         Set<String> studios = new LinkedHashSet<>();
         try {
-            DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "companycredits"), CHARSET);
+            DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "companycredits"), UTF8);
             if (ResponseTools.isNotOK(response)) {
                 LOG.warn("Requesting studios failed with status {}: {}", response.getStatusCode(), imdbId);
             } else {
@@ -254,7 +253,7 @@ public class ImdbApiWrapper {
         }
         
         try {
-            DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "parentalguide#certification"), CHARSET);
+            DigestedResponse response = httpClient.requestContent(getImdbUrl(imdbId, "parentalguide#certification"), UTF8);
             if (ResponseTools.isNotOK(response)) {
                 LOG.warn("Requesting certifications failed with status {}: {}", response.getStatusCode(), imdbId);
             } else {
@@ -329,7 +328,7 @@ public class ImdbApiWrapper {
         HashSet<AwardDTO> awards = new HashSet<>();
         
         try {
-            DigestedResponse response = httpClient.requestContent(ImdbApiWrapper.getImdbUrl(imdbId, "awards"), CHARSET);
+            DigestedResponse response = httpClient.requestContent(ImdbApiWrapper.getImdbUrl(imdbId, "awards"), UTF8);
             if (ResponseTools.isNotOK(response)) {
                 LOG.warn("Requesting certifications failed with status {}: {}", response.getStatusCode(), imdbId);
             } else if (response.getContent().contains("<h1 class=\"header\">Awards</h1>")) {

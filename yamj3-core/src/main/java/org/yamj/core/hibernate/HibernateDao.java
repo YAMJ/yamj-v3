@@ -321,7 +321,7 @@ public abstract class HibernateDao {
      * @param params the named parameters
      * @return list of entities
      */
-    public <T> List<T> findByNamedParameters(Class<T> entityClass, CharSequence queryCharSequence, Map<String, Object> params) {
+    public <T> List<T> findByNamedParameters(Class<T> entityClass, CharSequence queryCharSequence, Map<String, Object> params) { //NOSONAR
         Query query = currentSession().createQuery(queryCharSequence.toString());
         query.setCacheable(true);
         for (Entry<String, Object> param : params.entrySet()) {
@@ -339,7 +339,7 @@ public abstract class HibernateDao {
      * @return list of entities
      */
     @SuppressWarnings("unchecked")
-    public <T> T findUniqueByNamedParameters(Class<T> entityClass, CharSequence queryCharSequence, Map<String, Object> params) {
+    public <T> T findUniqueByNamedParameters(Class<T> entityClass, CharSequence queryCharSequence, Map<String, Object> params) { //NOSONAR
         Query query = currentSession().createQuery(queryCharSequence.toString());
         query.setCacheable(true);
         for (Entry<String, Object> param : params.entrySet()) {
@@ -430,7 +430,7 @@ public abstract class HibernateDao {
      * @param wrapper
      * @return
      */
-    public <T> List<T> executeQueryWithTransform(Class<T> entityClass, SqlScalars sqlScalars, IApiWrapper wrapper) {
+    public <T> List<T> executeQueryWithTransform(Class<T> entityClass, SqlScalars sqlScalars, IApiWrapper wrapper) { //NOSONAR
         SQLQuery query = sqlScalars.createSqlQuery(currentSession());
         query.setReadOnly(true);
         query.setCacheable(true);

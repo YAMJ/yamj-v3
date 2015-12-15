@@ -76,7 +76,7 @@ public final class SystemTools {
      * @param getIpv4 return the IPv4 address, otherwise IPv6
      * @return
      */
-    public static String getIpAddress(final boolean getIpv4) {
+    public static String getIpAddress(final boolean getIpv4) { //NOSONAR
         if (getIpv4 && ipv4 != null) {
             return ipv4;
         }

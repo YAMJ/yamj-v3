@@ -23,7 +23,6 @@
 package org.yamj.core.database.service;
 
 import java.util.*;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,12 +76,9 @@ public class JsonApiStorageService {
         List<ApiVideoDTO> results = apiDao.getVideoList(wrapper);
         
         // localization
-        if (CollectionUtils.isNotEmpty(results)) {
-            for (ApiVideoDTO video : results) {
-                localizeCertifications(video.getCertifications(), wrapper.getOptions().getLanguage());
-                localizeCountries(video.getCountries(), wrapper.getOptions().getLanguage());
-                localizeFiles(video.getFiles(), wrapper.getOptions().getLanguage());
-            }
+        for (ApiVideoDTO video : results) {
+            localizeCertifications(video.getCertifications(), wrapper.getOptions().getLanguage());
+            localizeCountries(video.getCountries(), wrapper.getOptions().getLanguage());
         }
         
         return results;
@@ -113,7 +109,7 @@ public class JsonApiStorageService {
     public ApiPersonDTO getPerson(ApiWrapperSingle<ApiPersonDTO> wrapper) {
         ApiPersonDTO person = apiDao.getPerson(wrapper);
         
-        if (person != null && CollectionUtils.isNotEmpty(person.getFilmography())) {
+        if (person != null) {
             for (ApiFilmographyDTO filmo : person.getFilmography()) {
                 String releaseCountry = localeService.getDisplayCountry(wrapper.getOptions().getLanguage(), filmo.getReleaseCountryCode());
                 filmo.setReleaseCountry(releaseCountry);
@@ -254,10 +250,8 @@ public class JsonApiStorageService {
     }
 
     private void localizeCountries(List<ApiCountryDTO> countries, String inLanguage) {
-        if (CollectionUtils.isNotEmpty(countries)) {
-            for (ApiCountryDTO dto : countries) {
-                localize(dto, inLanguage);
-            }
+        for (ApiCountryDTO dto : countries) {
+            localize(dto, inLanguage);
         }
     }
 
@@ -281,10 +275,8 @@ public class JsonApiStorageService {
     }
     
     private void localizeCertifications(List<ApiCertificationDTO> certifications, String inLanguage) {
-        if (CollectionUtils.isNotEmpty(certifications)) {
-            for (ApiCertificationDTO cert : certifications) {
-                localize(cert, inLanguage);
-            }
+        for (ApiCertificationDTO cert : certifications) {
+            localize(cert, inLanguage);
         }
     }
     //</editor-fold>
@@ -586,7 +578,6 @@ public class JsonApiStorageService {
     }
 
     private void localizeFiles(List<ApiFileDTO> files, String inLanguage) {
-        if (CollectionUtils.isEmpty(files)) return;
         for (ApiFileDTO file : files) {
             for (ApiAudioCodecDTO codec : file.getAudioCodecs()) {
                 final String language = localeService.getDisplayLanguage(inLanguage, codec.getLanguageCode());

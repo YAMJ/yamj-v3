@@ -22,9 +22,9 @@
  */
 package org.yamj.core.service.metadata.online;
 
+import static org.yamj.core.tools.Constants.UTF8;
+
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.*;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
@@ -71,7 +71,6 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
     private static final int COMINGSOON_MAX_DIFF = 1000;
     private static final int COMINGSOON_MAX_SEARCH_PAGES = 5;
         
-    private Charset charset;
     private SearchEngineTools searchEngineTools;
 
     @Autowired
@@ -91,8 +90,6 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
     @PostConstruct
     public void init() {
         LOG.info("Initialize ComingSoon scanner");
-
-        charset = Charset.forName("UTF-8");
 
         searchEngineTools = new SearchEngineTools(httpClient, Locale.ITALY);
         
@@ -177,7 +174,7 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
         
     private ScanResult updateMovie(VideoData videoData, String comingSoonId, boolean throwTempError) throws IOException {
         final String url = COMINGSOON_BASE_URL + COMINGSOON_MOVIE_URL + COMINGSOON_KEY_PARAM + comingSoonId;
-        DigestedResponse response = httpClient.requestContent(url, charset);
+        DigestedResponse response = httpClient.requestContent(url, UTF8);
         if (throwTempError && ResponseTools.isTemporaryError(response)) {
             throw new TemporaryUnavailableException("ComingSoon service is temporary not available: " + response.getStatusCode());
         } else if (ResponseTools.isNotOK(response)) {
@@ -362,7 +359,7 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
         
     private ScanResult updateSeries(Series series, String comingSoonId, boolean throwTempError) throws IOException {
         final String url = COMINGSOON_BASE_URL + COMINGSOON_SERIES_URL + COMINGSOON_KEY_PARAM + comingSoonId;
-        DigestedResponse response = httpClient.requestContent(url, charset);
+        DigestedResponse response = httpClient.requestContent(url, UTF8);
         if (throwTempError && ResponseTools.isTemporaryError(response)) {
             throw new TemporaryUnavailableException("ComingSoon service is temporary not available: " + response.getStatusCode());
         } else if (ResponseTools.isNotOK(response)) {
@@ -522,7 +519,7 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
 
         String xml = null; 
         try {
-            DigestedResponse response = httpClient.requestContent(url, charset);
+            DigestedResponse response = httpClient.requestContent(url, UTF8);
             if (ResponseTools.isNotOK(response)) {
                 LOG.error("ComingSoon request failed for episodes of season {}-{}: {}", comingSoonId, season, response.getStatusCode());
             } else {
@@ -679,7 +676,7 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
                 urlBase.append(COMINGSOON_SEARCH_MOVIE);
             }
             urlBase.append(COMONGSOON_TITLE_PARAM);
-            urlBase.append(URLEncoder.encode(title.toLowerCase(), "UTF-8"));
+            urlBase.append(HTMLTools.encodeUrl(title.toLowerCase()));
 
             urlBase.append("&").append(COMINGSOON_YEAR_PARAM);
             if (year > 0 ) {
@@ -701,7 +698,7 @@ public class ComingSoonScanner implements IMovieScanner, ISeriesScanner {
                 }
 
                 LOG.debug("Fetching ComingSoon search page {}/{} - URL: {}", searchPage, COMINGSOON_MAX_SEARCH_PAGES, urlPage.toString());
-                DigestedResponse response = httpClient.requestContent(urlPage.toString(), charset);
+                DigestedResponse response = httpClient.requestContent(urlPage.toString(), UTF8);
                 if (throwTempError && ResponseTools.isTemporaryError(response)) {
                     throw new TemporaryUnavailableException("ComingSoon service is temporary not available: " + response.getStatusCode());
                 } else if (ResponseTools.isNotOK(response)) {

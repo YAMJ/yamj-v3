@@ -514,10 +514,10 @@ public class StagingDao extends HibernateDao {
         if (checkLibrary) {
             query.setLong("libraryId", videoFile.getStageDirectory().getLibrary().getId());
         }
-        query.setString("watched", FileType.WATCHED.toString());
+        query.setString("watched", FileType.WATCHED.name());
         query.setString("check1", StringEscapeUtils.escapeSql(videoFile.getBaseName().toLowerCase()));
         query.setString("check2", StringEscapeUtils.escapeSql(videoFile.getFileName().toLowerCase()));
-        query.setString("deleted", StatusType.DELETED.toString());
+        query.setString("deleted", StatusType.DELETED.name());
         if (StringUtils.isNotBlank(folderName)) {
             query.setString("dirName", StringEscapeUtils.escapeSql(folderName.toLowerCase()));
         }

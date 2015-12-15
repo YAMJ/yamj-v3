@@ -80,12 +80,12 @@ public class ImdbTrailerScanner implements IMovieTrailerScanner, ISeriesTrailerS
     
     private List<TrailerDTO> getTrailerDTOS(String imdbId) {
         if (StringUtils.isBlank(imdbId)) { 
-            return null;
+            return Collections.emptyList();
         }
         
         ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId);
         if (movieDetails == null || movieDetails.getTrailer() == null || MapUtils.isEmpty(movieDetails.getTrailer().getEncodings())) {
-            return null;
+            return Collections.emptyList();
         }
         
         String url = null;
@@ -120,7 +120,10 @@ public class ImdbTrailerScanner implements IMovieTrailerScanner, ISeriesTrailerS
             }
         }
 
-        if (url == null) return null;
+        if (url == null) {
+            return Collections.emptyList();
+        }
+        
         TrailerDTO dto = new TrailerDTO(ImdbScanner.SCANNER_ID, ContainerType.MP4, url, movieDetails.getTrailer().getTitle(), imdbId); 
         return Collections.singletonList(dto);
     }

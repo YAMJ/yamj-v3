@@ -51,7 +51,7 @@ public class FileImportServiceImpl implements FileImportService {
             importScheduler.triggerProcess();
         } catch (Exception error) {
             LOG.error("Failed to import scanned directory: {}", importDTO.getStageDirectory().getPath(), error);
-            throw new RuntimeException("Failed to import scanned directory: "+importDTO.getStageDirectory().getPath());
+            throw new RuntimeException("Failed to import scanned directory: "+importDTO.getStageDirectory().getPath()); //NOSONAR
         }
     }
 }

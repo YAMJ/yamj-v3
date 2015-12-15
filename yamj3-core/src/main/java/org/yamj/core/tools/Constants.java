@@ -22,7 +22,11 @@
  */
 package org.yamj.core.tools;
 
+import java.nio.charset.Charset;
+
 public final class Constants {
+
+    public static final Charset UTF8 = Charset.forName("UTF-8");
 
     public static final String SPACE_SLASH_SPACE = " / ";
     public static final String DEFAULT_SPLITTER = ",";

@@ -22,21 +22,15 @@
  */
 package org.yamj.core.api.model.dto;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.database.model.Studio;
 import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.JobType;
 import org.yamj.core.tools.MetadataTools;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
  * @author stuart.boston
@@ -61,18 +55,18 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     private Boolean watched;
     private Date newest;
     private String status;
-    private List<ApiGenreDTO> genres = new ArrayList<>(0);
-    private List<Studio> studios = new ArrayList<>(0);
-    private List<ApiCountryDTO> countries = new ArrayList<>(0);
-    private List<ApiCertificationDTO> certifications = new ArrayList<>(0);
-    private List<ApiRatingDTO> ratings = new ArrayList<>();
-    private List<ApiAwardDTO> awards = new ArrayList<>(0);
+    private List<ApiGenreDTO> genres = Collections.emptyList();
+    private List<Studio> studios = Collections.emptyList();
+    private List<ApiCountryDTO> countries = Collections.emptyList();
+    private List<ApiCertificationDTO> certifications = Collections.emptyList();
+    private List<ApiRatingDTO> ratings = Collections.emptyList();
+    private List<ApiAwardDTO> awards = Collections.emptyList();
     private final Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<>(ArtworkType.class);
-    private List<ApiFileDTO> files = new ArrayList<>(0);
+    private List<ApiFileDTO> files = Collections.emptyList();
     private final Map<JobType,List<ApiPersonDTO>> cast = new EnumMap<>(JobType.class);
-    private List<ApiExternalIdDTO> externalIds = new ArrayList<>(0);
-    private List<ApiBoxedSetDTO> boxedSets = new ArrayList<>(0);
-    private List<ApiTrailerDTO> trailers = new ArrayList<>(0);
+    private List<ApiExternalIdDTO> externalIds = Collections.emptyList();
+    private List<ApiBoxedSetDTO> boxedSets = Collections.emptyList();
+    private List<ApiTrailerDTO> trailers = Collections.emptyList();
 
     //<editor-fold defaultstate="collapsed" desc="Getter Methods">
     public MetaDataType getVideoType() {
@@ -259,14 +253,14 @@ public class ApiVideoDTO extends AbstractApiIdentifiableDTO {
     }
 
     public void setArtwork(List<ApiArtworkDTO> artworkList) {
-        for (ApiArtworkDTO aadto : artworkList) {
-            addArtwork(aadto);
+        for (ApiArtworkDTO dto : artworkList) {
+            addArtwork(dto);
         }
     }
 
     public void setCast(List<ApiPersonDTO> castList) {
-        for (ApiPersonDTO acdto : castList) {
-            addCast(acdto);
+        for (ApiPersonDTO dto : castList) {
+            addCast(dto);
         }
     }
 

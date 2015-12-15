@@ -78,6 +78,7 @@ public class ApiDao extends HibernateDao {
     private static final String ARTWORK_ID = "artworkId";
     private static final String LOCATED_ID = "locatedId";
     private static final String GENERATED_ID = "generatedId";
+    private static final String COUNTRY_CODE = "countryCode";
     
     // SQL
     private static final String SQL_UNION = " UNION ";
@@ -125,109 +126,109 @@ public class ApiDao extends HibernateDao {
         DataItemTools.addDataItemScalars(sqlScalars, params.getDataItems());
 
         List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
-        if (CollectionUtils.isNotEmpty(queryResults)) {
+        if (queryResults.isEmpty()) {
+            LOG.debug("No results found to process.");
+            return queryResults;
+        }
             
-            if (params.hasDataItem(DataItem.GENRE)) {
-                LOG.trace("Adding genres to index videos");
-                for (ApiVideoDTO video : queryResults) {
-                    video.setGenres(this.getGenresForId(video.getVideoType(), video.getId()));
-                }
+        if (params.hasDataItem(DataItem.GENRE)) {
+            LOG.trace("Adding genres to index videos");
+            for (ApiVideoDTO video : queryResults) {
+                video.setGenres(this.getGenresForId(video.getVideoType(), video.getId()));
+            }
+        }
+
+        if (params.hasDataItem(DataItem.STUDIO)) {
+            LOG.trace("Adding studios to index videos");
+            for (ApiVideoDTO video : queryResults) {
+                video.setStudios(this.getStudiosForId(video.getVideoType(), video.getId()));
+            }
+        }
+
+        if (params.hasDataItem(DataItem.COUNTRY)) {
+            LOG.trace("Adding countries to index videos");
+            for (ApiVideoDTO video : queryResults) {
+                video.setCountries(this.getCountriesForId(video.getVideoType(), video.getId()));
+            }
+        }
+
+        if (params.hasDataItem(DataItem.CERTIFICATION)) {
+            LOG.trace("Adding certifications to index videos");
+            for (ApiVideoDTO video : queryResults) {
+                video.setCertifications(this.getCertificationsForId(video.getVideoType(), video.getId()));
+            }
+        }
+
+        if (params.hasDataItem(DataItem.RATING)) {
+            LOG.trace("Adding ratings to index videos");
+            for (ApiVideoDTO video : queryResults) {
+                video.setRatings(this.getRatingsForId(video.getVideoType(), video.getId()));
+            }
+        }
+
+        if (params.hasDataItem(DataItem.AWARD)) {
+            LOG.trace("Adding awards to index videos");
+            for (ApiVideoDTO video : queryResults) {
+                video.setAwards(this.getAwardsForId(video.getVideoType(), video.getId()));
+            }
+        }
+
+        if (params.hasDataItem(DataItem.EXTERNALID)) {
+            LOG.trace("Adding external IDs to index videos");
+            for (ApiVideoDTO video : queryResults) {
+                video.setExternalIds(this.getExternalIdsForId(video.getVideoType(), video.getId()));
+            }
+        }
+
+        if (params.hasDataItem(DataItem.BOXSET)) {
+            LOG.trace("Adding boxed sets to index videos");
+            for (ApiVideoDTO video : queryResults) {
+                video.setBoxedSets(this.getBoxedSetsForId(video.getVideoType(), video.getId()));
+            }
+        }
+
+        if (params.hasDataItem(DataItem.TRAILER)) {
+            LOG.trace("Adding trailers to index videos");
+            for (ApiVideoDTO video : queryResults) {
+                video.setTrailers(this.getTrailersForId(video.getVideoType(), video.getId()));
+            }
+        }
+        
+        if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
+            // Create and populate the ID list
+            Map<MetaDataType, List<Long>> ids = new EnumMap<>(MetaDataType.class);
+            for (MetaDataType mdt : MetaDataType.values()) {
+                ids.put(mdt, new ArrayList());
             }
 
-            if (params.hasDataItem(DataItem.STUDIO)) {
-                LOG.trace("Adding studios to index videos");
-                for (ApiVideoDTO video : queryResults) {
-                    video.setStudios(this.getStudiosForId(video.getVideoType(), video.getId()));
-                }
+            Map<String, ApiVideoDTO> results = new HashMap<>();
+
+            for (ApiVideoDTO video : queryResults) {
+                // Add the item to the map for further processing
+                results.put(ApiArtworkDTO.makeKey(video), video);
+                // Add the ID to the list
+                ids.get(video.getVideoType()).add(video.getId());
             }
 
-            if (params.hasDataItem(DataItem.COUNTRY)) {
-                LOG.trace("Adding countries to index videos");
-                for (ApiVideoDTO video : queryResults) {
-                    video.setCountries(this.getCountriesForId(video.getVideoType(), video.getId()));
-                }
-            }
-
-            if (params.hasDataItem(DataItem.CERTIFICATION)) {
-                LOG.trace("Adding certifications to index videos");
-                for (ApiVideoDTO video : queryResults) {
-                    video.setCertifications(this.getCertificationsForId(video.getVideoType(), video.getId()));
-                }
-            }
-
-            if (params.hasDataItem(DataItem.RATING)) {
-                LOG.trace("Adding ratings to index videos");
-                for (ApiVideoDTO video : queryResults) {
-                    video.setRatings(this.getRatingsForId(video.getVideoType(), video.getId()));
-                }
-            }
-
-            if (params.hasDataItem(DataItem.AWARD)) {
-                LOG.trace("Adding awards to index videos");
-                for (ApiVideoDTO video : queryResults) {
-                    video.setAwards(this.getAwardsForId(video.getVideoType(), video.getId()));
-                }
-            }
-
-            if (params.hasDataItem(DataItem.EXTERNALID)) {
-                LOG.trace("Adding external IDs to index videos");
-                for (ApiVideoDTO video : queryResults) {
-                    video.setExternalIds(this.getExternalIdsForId(video.getVideoType(), video.getId()));
-                }
-            }
-
-            if (params.hasDataItem(DataItem.BOXSET)) {
-                LOG.trace("Adding boxed sets to index videos");
-                for (ApiVideoDTO video : queryResults) {
-                    video.setBoxedSets(this.getBoxedSetsForId(video.getVideoType(), video.getId()));
-                }
-            }
-
-            if (params.hasDataItem(DataItem.TRAILER)) {
-                LOG.trace("Adding trailers to index videos");
-                for (ApiVideoDTO video : queryResults) {
-                    video.setTrailers(this.getTrailersForId(video.getVideoType(), video.getId()));
-                }
-            }
-            
-            if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
-                // Create and populate the ID list
-                Map<MetaDataType, List<Long>> ids = new EnumMap<>(MetaDataType.class);
-                for (MetaDataType mdt : MetaDataType.values()) {
-                    ids.put(mdt, new ArrayList());
-                }
-
-                Map<String, ApiVideoDTO> results = new HashMap<>();
-
-                for (ApiVideoDTO video : queryResults) {
-                    // Add the item to the map for further processing
-                    results.put(ApiArtworkDTO.makeKey(video), video);
-                    // Add the ID to the list
-                    ids.get(video.getVideoType()).add(video.getId());
-                }
-
-                boolean foundArtworkIds = Boolean.FALSE;    // Check to see that we have artwork to find
-                // Remove any blank entries
-                for (MetaDataType mdt : MetaDataType.values()) {
-                    if (CollectionUtils.isEmpty(ids.get(mdt))) {
-                        ids.remove(mdt);
-                    } else {
-                        // We've found an artwork, so we can continue
-                        foundArtworkIds = Boolean.TRUE;
-                    }
-                }
-
-                if (foundArtworkIds) {
-                    LOG.trace("Found artwork to process, IDs: {}", ids);
-                    addArtworks(ids, results, options);
+            boolean foundArtworkIds = Boolean.FALSE;    // Check to see that we have artwork to find
+            // Remove any blank entries
+            for (MetaDataType mdt : MetaDataType.values()) {
+                if (CollectionUtils.isEmpty(ids.get(mdt))) {
+                    ids.remove(mdt);
                 } else {
-                    LOG.trace("No artwork found to process, skipping.");
+                    // We've found an artwork, so we can continue
+                    foundArtworkIds = Boolean.TRUE;
                 }
+            }
+
+            if (foundArtworkIds) {
+                LOG.trace("Found artwork to process, IDs: {}", ids);
+                addArtworks(ids, results, options);
             } else {
-                LOG.trace("Artwork not required, skipping.");
+                LOG.trace("No artwork found to process, skipping.");
             }
         } else {
-            LOG.debug("No results found to process.");
+            LOG.trace("Artwork not required, skipping.");
         }
         
         return queryResults;
@@ -2063,11 +2064,9 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addParameter(ID, id);
 
         List<ApiFileDTO> results = executeQueryWithTransform(ApiFileDTO.class, sqlScalars, null);
-        if (CollectionUtils.isNotEmpty(results)) {
-            for (ApiFileDTO file : results) {
-                file.setAudioCodecs(this.getAudioCodecs(file.getId()));
-                file.setSubtitles(this.getSubtitles(file.getId()));
-            }
+        for (ApiFileDTO file : results) {
+            file.setAudioCodecs(this.getAudioCodecs(file.getId()));
+            file.setSubtitles(this.getSubtitles(file.getId()));
         }
         return results;
     }
@@ -2244,7 +2243,7 @@ public class ApiDao extends HibernateDao {
         }
 
         sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar("countryCode", StringType.INSTANCE);
+        sqlScalars.addScalar(COUNTRY_CODE, StringType.INSTANCE);
         sqlScalars.addParameter(ID, id);
 
         return executeQueryWithTransform(ApiCountryDTO.class, sqlScalars, null);
@@ -2273,7 +2272,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("ORDER BY country_code, certificate");
 
         sqlScalars.addScalar(ID, LongType.INSTANCE);
-        sqlScalars.addScalar("countryCode", StringType.INSTANCE);
+        sqlScalars.addScalar(COUNTRY_CODE, StringType.INSTANCE);
         sqlScalars.addScalar("certificate", StringType.INSTANCE);
         sqlScalars.addParameter(ID, id);
 

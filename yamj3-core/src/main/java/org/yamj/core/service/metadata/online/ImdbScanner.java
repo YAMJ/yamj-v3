@@ -165,7 +165,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
 
     private ScanResult updateMovie(VideoData videoData, String imdbId, boolean throwTempError) throws IOException {
-        Locale imdbLocale = localeService.getLocaleForConfig("imdb");
+        Locale imdbLocale = localeService.getLocaleForConfig(SCANNER_ID);
         ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId, imdbLocale);
         if (movieDetails == null || StringUtils.isBlank(movieDetails.getImdbId())) {
             return ScanResult.NO_RESULT;
@@ -303,7 +303,7 @@ public class ImdbScanner implements IMovieScanner, ISeriesScanner, IPersonScanne
     }
 
     private ScanResult updateSeries(Series series, String imdbId, boolean throwTempError) throws IOException {
-        Locale imdbLocale = localeService.getLocaleForConfig("imdb");
+        Locale imdbLocale = localeService.getLocaleForConfig(SCANNER_ID);
         ImdbMovieDetails movieDetails = imdbApiWrapper.getMovieDetails(imdbId, imdbLocale);
         if (movieDetails == null || StringUtils.isBlank(movieDetails.getImdbId())) {
             return ScanResult.NO_RESULT;

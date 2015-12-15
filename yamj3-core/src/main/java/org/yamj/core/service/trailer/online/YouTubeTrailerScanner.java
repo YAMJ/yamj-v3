@@ -22,12 +22,19 @@
  */
 package org.yamj.core.service.trailer.online;
 
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.model.ResourceId;
+import com.google.api.services.youtube.model.SearchListResponse;
+import com.google.api.services.youtube.model.SearchResult;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -41,21 +48,13 @@ import org.yamj.core.database.model.dto.TrailerDTO;
 import org.yamj.core.database.model.type.ContainerType;
 import org.yamj.core.service.trailer.TrailerScannerService;
 
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.ResourceId;
-import com.google.api.services.youtube.model.SearchListResponse;
-import com.google.api.services.youtube.model.SearchResult;
-
 @Service("youTubeTrailerScanner")
 public class YouTubeTrailerScanner implements IMovieTrailerScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(YouTubeTrailerScanner.class);
     public static final String SCANNER_ID = "youtube";
-
+    private static final String YOUTUBE_VIDEO = "youtube#video";
+    
     @Value("${APIKEY.youtube:null}")
     private String youtubeApiKey;
 
@@ -121,12 +120,12 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
                 search.setVideoDefinition("high");
             }
             
-            String regionCode = configService.getProperty("youtube.trailer.regionCode");
+            final String regionCode = configService.getProperty("youtube.trailer.regionCode");
             if (StringUtils.isNotBlank(regionCode)) {
                 search.setRegionCode(regionCode);
             }
 
-            String relevanceLanguage = configService.getProperty("youtube.trailer.relevanceLanguage");
+            final String relevanceLanguage = configService.getProperty("youtube.trailer.relevanceLanguage");
             if (StringUtils.isNotBlank(relevanceLanguage)) {
                 search.setRelevanceLanguage(relevanceLanguage);
             }
@@ -140,7 +139,7 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
                 List<TrailerDTO> trailers = new ArrayList<>(searchResponse.getItems().size());
                 for (SearchResult item : searchResponse.getItems()) {
                     ResourceId resourceId = item.getId();
-                    if (resourceId.getKind().equals("youtube#video")) {
+                    if (YOUTUBE_VIDEO.equals(resourceId.getKind())) {
                         trailers.add(new TrailerDTO(SCANNER_ID, ContainerType.MP4,
                                         YouTubeDownloadParser.TRAILER_BASE_URL + resourceId.getVideoId(),
                                         item.getSnippet().getTitle(),
@@ -152,6 +151,7 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
         } catch (Exception e) {
             LOG.error("YouTube trailer scanner error: '" + videoData.getTitle() + "'", e);
         }
-        return null;
+        
+        return Collections.emptyList();
     }
 }

@@ -674,17 +674,13 @@ public class MetadataStorageService {
      * @param videoData
      */
     public void updateBoxedSets(VideoData videoData) {
-        if (CollectionUtils.isEmpty(videoData.getBoxedSetDTOS())) {
-            return;
-        }
-
         for (BoxedSetDTO dto : videoData.getBoxedSetDTOS()) {
 
             BoxedSetOrder boxedSetOrder = null;
-            loop: for (BoxedSetOrder stored : videoData.getBoxedSets()) {
+            for (BoxedSetOrder stored : videoData.getBoxedSets()) {
                 if (stored.isMatching(dto)) {
                     boxedSetOrder = stored;
-                    break loop;
+                    break;
                 }
             }
 
@@ -720,17 +716,13 @@ public class MetadataStorageService {
      * @param series
      */
     public void updateBoxedSets(Series series) {
-        if (CollectionUtils.isEmpty(series.getBoxedSetDTOS())) {
-            return;
-        }
-
         for (BoxedSetDTO dto : series.getBoxedSetDTOS()) {
 
             BoxedSetOrder boxedSetOrder = null;
-            loop: for (BoxedSetOrder stored : series.getBoxedSets()) {
+            for (BoxedSetOrder stored : series.getBoxedSets()) {
                 if (stored.isMatching(dto)) {
                     boxedSetOrder = stored;
-                    break loop;
+                    break;
                 }
             }
 

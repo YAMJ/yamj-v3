@@ -67,7 +67,7 @@ public class ImportScheduler {
         }
     }
 
-    private void processStageFiles() {
+    private void processStageFiles() { //NOSONAR
         Long id = null;
 
         // PROCESS VIDEOS

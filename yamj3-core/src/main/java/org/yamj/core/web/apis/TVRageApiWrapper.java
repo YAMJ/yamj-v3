@@ -22,10 +22,11 @@
  */
 package org.yamj.core.web.apis;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import com.omertron.tvrageapi.TVRageApi;
+import com.omertron.tvrageapi.TVRageException;
+import com.omertron.tvrageapi.model.EpisodeList;
+import com.omertron.tvrageapi.model.ShowInfo;
 import java.util.List;
-
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.yamj.api.common.tools.ResponseTools;
 import org.yamj.core.service.metadata.online.TemporaryUnavailableException;
-
-import com.omertron.tvrageapi.TVRageApi;
-import com.omertron.tvrageapi.TVRageException;
-import com.omertron.tvrageapi.model.EpisodeList;
-import com.omertron.tvrageapi.model.ShowInfo;
+import org.yamj.core.web.HTMLTools;
 
 @Service
 public class TVRageApiWrapper {
@@ -50,7 +47,7 @@ public class TVRageApiWrapper {
 
     public ShowInfo getShowInfoByTitle(String title, boolean throwTempError) {
         try {
-            List<ShowInfo> showList = tvRageApi.searchShow(URLEncoder.encode(title, "UTF-8"));
+            List<ShowInfo> showList = tvRageApi.searchShow(HTMLTools.encodePlain(title));
 
             if (CollectionUtils.isEmpty(showList)) {
                 // failed retrieving any results
@@ -62,9 +59,6 @@ public class TVRageApiWrapper {
                     return si;
                 }
             }
-        } catch (UnsupportedEncodingException ex) {
-            LOG.error("Failed to get TVRage ID by title '{}': {}", title, ex.getMessage());
-            LOG.trace("TVRage error" , ex);
         } catch (TVRageException ex) {
             if (throwTempError && ResponseTools.isTemporaryError(ex)) {
                 throw new TemporaryUnavailableException("TVRage service temporary not available: " + ex.getResponseCode(), ex);

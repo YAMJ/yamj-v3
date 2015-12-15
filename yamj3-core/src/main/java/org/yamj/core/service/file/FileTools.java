@@ -22,8 +22,11 @@
  */
 package org.yamj.core.service.file;
 
+import static org.yamj.core.tools.Constants.UTF8;
+
 import java.io.*;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.io.FileUtils;
@@ -35,8 +38,6 @@ import org.yamj.core.database.model.StageDirectory;
 import org.yamj.core.database.model.StageFile;
 
 public final class FileTools {
-
-    public static final String DEFAULT_CHARSET = "UTF-8";
 
     private static final Logger LOG = LoggerFactory.getLogger(FileTools.class);
     private static final Lock MKDIRS_LOCK = new ReentrantLock();
@@ -229,7 +230,7 @@ public final class FileTools {
      * @return the file content
      */
     public static String readFileToString(File file) {
-        return readFileToString(file, DEFAULT_CHARSET);
+        return readFileToString(file, UTF8);
     }
 
     /**
@@ -239,13 +240,13 @@ public final class FileTools {
      * @param encoding
      * @return the file content
      */
-    public static String readFileToString(File file, String encoding) {
+    public static String readFileToString(File file, Charset charset) {
         String data = "";
         if (file == null) {
             LOG.error("Failed reading file, file is null");
         } else {
             try {
-                data = FileUtils.readFileToString(file, encoding);
+                data = FileUtils.readFileToString(file, charset);
             } catch (Exception ex) {
                 LOG.error("Failed reading file: {}", file.getName());
                 LOG.error("Error", ex);
