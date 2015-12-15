@@ -1887,96 +1887,99 @@ public class ApiDao extends HibernateDao {
         List<ApiVideoDTO> queryResults = executeQueryWithTransform(ApiVideoDTO.class, sqlScalars, wrapper);
         LOG.trace("Found {} results for ID {}", queryResults.size(), params.getId());
         
-        ApiVideoDTO video = null;
-        if (CollectionUtils.isNotEmpty(queryResults)) {
-            video = queryResults.get(0);
+        if (queryResults.isEmpty()) {
+            // nothing found
+            return null;
+        }
+        
+        // get single video
+        ApiVideoDTO video = queryResults.get(0);
 
-            if (params.hasDataItem(DataItem.GENRE)) {
-                LOG.trace("Adding genres for ID {}", options.getId());
-                video.setGenres(getGenresForId(type, options.getId()));
+        if (params.hasDataItem(DataItem.GENRE)) {
+            LOG.trace("Adding genres for ID {}", options.getId());
+            video.setGenres(getGenresForId(type, options.getId()));
+        }
+
+        if (params.hasDataItem(DataItem.STUDIO)) {
+            LOG.trace("Adding studios for ID {}", options.getId());
+            video.setStudios(getStudiosForId(type, options.getId()));
+        }
+
+        if (options.hasDataItem(DataItem.COUNTRY)) {
+            LOG.trace("Adding countries for ID {}", options.getId());
+            video.setCountries(getCountriesForId(type, options.getId()));
+        }
+
+        if (params.hasDataItem(DataItem.CERTIFICATION)) {
+            LOG.trace("Adding certifications for ID {}", options.getId());
+            video.setCertifications(getCertificationsForId(type, options.getId()));
+        }
+
+        if (params.hasDataItem(DataItem.RATING)) {
+            LOG.trace("Adding ratings for ID {}", options.getId());
+            video.setRatings(getRatingsForId(type, options.getId()));
+        }
+
+        if (options.hasDataItem(DataItem.AWARD)) {
+            LOG.trace("Adding awards for ID {}", options.getId());
+            video.setAwards(getAwardsForId(type, options.getId()));
+        }
+
+        if (options.hasDataItem(DataItem.EXTERNALID)) {
+            LOG.trace("Adding external IDs for ID {}", options.getId());
+            video.setExternalIds(getExternalIdsForId(type, options.getId()));
+        }
+
+        if (options.hasDataItem(DataItem.BOXSET)) {
+            LOG.trace("Adding boxed sets for ID {}", options.getId());
+            video.setBoxedSets(getBoxedSetsForId(type, options.getId()));
+        }
+        
+        if (params.hasDataItem(DataItem.ARTWORK)) {
+            LOG.trace("Adding artwork for ID {}", options.getId());
+            Map<Long, List<ApiArtworkDTO>> artworkList;
+            if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
+                artworkList = getArtworkForId(type, options.getId(), options.getArtworkTypes());
+            } else {
+                artworkList = getArtworkForId(type, options.getId());
             }
 
-            if (params.hasDataItem(DataItem.STUDIO)) {
-                LOG.trace("Adding studios for ID {}", options.getId());
-                video.setStudios(getStudiosForId(type, options.getId()));
+            if (artworkList.containsKey(options.getId())) {
+                video.setArtwork(artworkList.get(options.getId()));
             }
+        }
 
-            if (options.hasDataItem(DataItem.COUNTRY)) {
-                LOG.trace("Adding countries for ID {}", options.getId());
-                video.setCountries(getCountriesForId(type, options.getId()));
-            }
+        if (params.hasDataItem(DataItem.FILES)) {
+            LOG.trace("Adding files for ID {}", options.getId());
+            video.setFiles(getFilesForId(type, options.getId()));
+        }
 
-            if (params.hasDataItem(DataItem.CERTIFICATION)) {
-                LOG.trace("Adding certifications for ID {}", options.getId());
-                video.setCertifications(getCertificationsForId(type, options.getId()));
-            }
+        if (params.hasDataItem(DataItem.TRAILER)) {
+            LOG.trace("Adding trailers for ID {}", options.getId());
+            video.setTrailers(getTrailersForId(type, options.getId()));
+        }
 
-            if (params.hasDataItem(DataItem.RATING)) {
-                LOG.trace("Adding ratings for ID {}", options.getId());
-                video.setRatings(getRatingsForId(type, options.getId()));
-            }
+        if (MapUtils.isNotEmpty(options.splitJobs())) {
+            Set<String> jobs = options.getJobTypes();
+            LOG.trace("Adding jobs for ID {}: {}", options.getId(), jobs);
 
-            if (options.hasDataItem(DataItem.AWARD)) {
-                LOG.trace("Adding awards for ID {}", options.getId());
-                video.setAwards(getAwardsForId(type, options.getId()));
-            }
+            List<ApiPersonDTO> cast = getCastForId(type, options.getId(), options.splitDataItems(), jobs);
 
-            if (options.hasDataItem(DataItem.EXTERNALID)) {
-                LOG.trace("Adding external IDs for ID {}", options.getId());
-                video.setExternalIds(getExternalIdsForId(type, options.getId()));
-            }
-
-            if (options.hasDataItem(DataItem.BOXSET)) {
-                LOG.trace("Adding boxed sets for ID {}", options.getId());
-                video.setBoxedSets(getBoxedSetsForId(type, options.getId()));
-            }
-            
-            if (params.hasDataItem(DataItem.ARTWORK)) {
-                LOG.trace("Adding artwork for ID {}", options.getId());
-                Map<Long, List<ApiArtworkDTO>> artworkList;
-                if (CollectionUtils.isNotEmpty(options.getArtworkTypes())) {
-                    artworkList = getArtworkForId(type, options.getId(), options.getArtworkTypes());
-                } else {
-                    artworkList = getArtworkForId(type, options.getId());
+            // just add given amount for jobs to cast
+            Map<JobType, Integer> jobMap = new HashMap<>(options.splitJobs());
+            for (ApiPersonDTO entry : cast) {
+                Integer amount = jobMap.get(entry.getJob());
+                if (amount == null) {
+                    video.addCast(entry);
+                } else if (amount > 0) {
+                    video.addCast(entry);
+                    amount--;
+                    jobMap.put(entry.getJob(), amount);
                 }
-
-                if (artworkList.containsKey(options.getId())) {
-                    video.setArtwork(artworkList.get(options.getId()));
-                }
             }
-
-            if (params.hasDataItem(DataItem.FILES)) {
-                LOG.trace("Adding files for ID {}", options.getId());
-                video.setFiles(getFilesForId(type, options.getId()));
-            }
-
-            if (params.hasDataItem(DataItem.TRAILER)) {
-                LOG.trace("Adding trailers for ID {}", options.getId());
-                video.setTrailers(getTrailersForId(type, options.getId()));
-            }
-
-            if (MapUtils.isNotEmpty(options.splitJobs())) {
-                Set<String> jobs = options.getJobTypes();
-                LOG.trace("Adding jobs for ID {}: {}", options.getId(), jobs);
-
-                List<ApiPersonDTO> cast = getCastForId(type, options.getId(), options.splitDataItems(), jobs);
-
-                // just add given amount for jobs to cast
-                Map<JobType, Integer> jobMap = new HashMap<>(options.splitJobs());
-                for (ApiPersonDTO entry : cast) {
-                    Integer amount = jobMap.get(entry.getJob());
-                    if (amount == null) {
-                        video.addCast(entry);
-                    } else if (amount > 0) {
-                        video.addCast(entry);
-                        amount--;
-                        jobMap.put(entry.getJob(), amount);
-                    }
-                }
-            } else if (options.isAllJobTypes()) {
-                LOG.trace("Adding all jobs for ID {}", options.getId());
-                video.setCast(getCastForId(type, options.getId(), params.getDataItems(), null));
-            }
+        } else if (options.isAllJobTypes()) {
+            LOG.trace("Adding all jobs for ID {}", options.getId());
+            video.setCast(getCastForId(type, options.getId(), params.getDataItems(), null));
         }
         
         return video;
@@ -2494,7 +2497,7 @@ public class ApiDao extends HibernateDao {
         sbSQL.append(SQL_ARTWORK_TYPE_IN_ARTWORKLIST);
 
         SqlScalars sqlScalars = new SqlScalars(sbSQL);
-        LOG.info("Artwork SQL: {}", sqlScalars.getSql());
+        LOG.trace("Artwork SQL: {}", sqlScalars.getSql());
 
         sqlScalars.addScalar(ID, LongType.INSTANCE);
         sqlScalars.addScalar(SOURCE, StringType.INSTANCE);

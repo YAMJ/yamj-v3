@@ -25,8 +25,10 @@ package org.yamj.core.api.options;
 import static org.yamj.core.tools.Constants.ALL;
 import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.*;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -34,10 +36,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.api.model.builder.DataItem;
 import org.yamj.core.database.model.type.JobType;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 /**
  * Abstract class for the query options
  *
@@ -281,30 +279,33 @@ public abstract class OptionsAbstractSortSearch extends OptionsAbstract implemen
 
     public Map<JobType, Integer> splitJobs() {
         if (jobTypes != null) {
-            jobTypes = new EnumMap<>(JobType.class);
-            if (CollectionUtils.isNotEmpty(jobs)) {
-                for (String job : jobs) {
-                    if (ALL.equalsIgnoreCase(job)) {
-                        allJobTypes = true;
-                        jobTypes.clear();
-                        break;
-                    }
+            return jobTypes;
+        }
+        
+        jobTypes = new EnumMap<>(JobType.class);
+        if (CollectionUtils.isNotEmpty(jobs)) {
+            for (String job : jobs) {
+                if (ALL.equalsIgnoreCase(job)) {
+                    allJobTypes = true;
+                    jobTypes.clear();
+                    break;
+                }
 
-                    String[] vals = StringUtils.split(job, "-");
+                String[] vals = StringUtils.split(job, "-");
 
-                    JobType jobType = null;
+                if (vals.length > 0) {
+                    JobType jobType = JobType.fromString(vals[0]);
                     Integer amount = null;
-                    if (vals.length > 0) {
-                        jobType = JobType.fromString(vals[0]);
-                    }
+                    
                     if (vals.length > 1) {
                         amount = NumberUtils.toInt(vals[1], -1);
                         if (amount <= 0) {
-                            // ignore jobs <= 0
-                            jobType = null;
+                            // ignore jobs with a given amount <= 0
+                            jobType = JobType.UNKNOWN;
                         }
                     }
-                    if (jobType != null) {
+                    
+                    if (jobType != JobType.UNKNOWN) {
                         jobTypes.put(jobType, amount);
                     }
                 }

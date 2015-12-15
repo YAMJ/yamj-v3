@@ -70,8 +70,7 @@ public class VideoController {
 
             if (options.getId() > 0L) {
                 LOG.debug("Getting {} with ID {}", options.getType(), options.getId());
-                ApiVideoDTO video = jsonApiStorageService.getSingleVideo(wrapper);
-                wrapper.setResult(video);
+                wrapper.setResult(jsonApiStorageService.getSingleVideo(wrapper));
             } else {
                 wrapper.setStatusInvalidId();
             }
