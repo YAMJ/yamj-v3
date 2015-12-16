@@ -65,6 +65,7 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
     private String languageCode;
 
     // GETTER AND SETTER
+    
     public MediaFile getMediaFile() {
         return mediaFile;
     }
@@ -122,6 +123,7 @@ public class AudioCodec extends AbstractIdentifiable implements Serializable {
     }
 
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()

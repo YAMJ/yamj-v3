@@ -87,6 +87,7 @@ public class Artwork extends AbstractStateful {
     private List<ArtworkLocated> artworkLocated = new ArrayList<>(0);
 
     // GETTER and SETTER
+    
     public ArtworkType getArtworkType() {
         return artworkType;
     }

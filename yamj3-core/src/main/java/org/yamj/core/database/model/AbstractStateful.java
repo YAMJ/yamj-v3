@@ -56,10 +56,7 @@ public abstract class AbstractStateful extends AbstractAuditable implements Seri
         this.status = status;
     }
     
-    // TRANSIENT METHODS
-    
     public final boolean isValidStatus() {
         return StatusType.DONE.equals(status) || StatusType.NEW.equals(status) || StatusType.UPDATED.equals(status);
     }
-
 }

@@ -23,11 +23,7 @@
 package org.yamj.core.database.model;
 
 import java.util.Date;
-
 import javax.persistence.*;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.core.hibernate.Auditable;
 
 /**
@@ -51,32 +47,27 @@ public abstract class AbstractAuditable extends AbstractIdentifiable implements 
 
     // GETTER AND SETTER
     
-    public Date getCreateTimestamp() {
+    public final Date getCreateTimestamp() {
         return this.createTimestamp;
     }
 
-    private void setCreateTimestamp(final Date createTimestamp) {
+    private final void setCreateTimestamp(final Date createTimestamp) {
         this.createTimestamp = createTimestamp;
     }
 
-    public Date getUpdateTimestamp() {
+    public final Date getUpdateTimestamp() {
         return this.updateTimestamp;
     }
 
-    private void setUpdateTimestamp(final Date updateTimestamp) {
+    private final void setUpdateTimestamp(final Date updateTimestamp) {
         this.updateTimestamp = updateTimestamp;
     }
 
-    private int getLockNo() {
+    private final int getLockNo() {
         return lockNo;
     }
 
-    private void setLockNo(int lockNo) {
+    private final void setLockNo(int lockNo) {
         this.lockNo = lockNo;
-    }
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }
