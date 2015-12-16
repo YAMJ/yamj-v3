@@ -28,5 +28,5 @@ public interface IQueueProcessService {
 
     void processQueueElement(QueueDTO queueElement);
     
-    void processErrorOccurred(QueueDTO queueElement);
+    void processErrorOccurred(QueueDTO queueElement, Exception error);
 }

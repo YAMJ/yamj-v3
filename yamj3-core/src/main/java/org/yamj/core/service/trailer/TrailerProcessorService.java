@@ -162,7 +162,9 @@ public class TrailerProcessorService implements IQueueProcessService {
     }
 
     @Override
-    public void processErrorOccurred(QueueDTO queueElement) {
+    public void processErrorOccurred(QueueDTO queueElement, Exception error) {
+        LOG.error("Failed processing of trailer "+queueElement.getId(), error);
+        
         trailerStorageService.errorTrailer(queueElement.getId());
     }
 }

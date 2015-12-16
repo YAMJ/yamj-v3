@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,8 @@ import org.yamj.core.database.dao.ArtworkDao;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.type.ArtworkType;
+import org.yamj.core.service.file.FileStorageService;
+import org.yamj.core.service.file.StorageType;
 
 @Service("artworkStorageService")
 public class ArtworkStorageService {
@@ -46,6 +49,8 @@ public class ArtworkStorageService {
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkStorageService.class);
     @Autowired
     private ArtworkDao artworkDao;
+    @Autowired
+    private FileStorageService fileStorageService;
     
     @Transactional
     public void storeArtworkProfile(ArtworkProfile newProfile) {
@@ -262,10 +267,6 @@ public class ArtworkStorageService {
     public ArtworkLocated getArtworkLocated(Artwork artwork, String source, String hashCode) {
         return this.artworkDao.getArtworkLocated(artwork, source, hashCode);
     }
-
-    public List<ArtworkLocated> getArtworkLocatedWithCacheFilename(long lastId) {
-        return this.artworkDao.getArtworkLocatedWithCacheFilename(lastId);
-    }
     
     @Transactional(readOnly=true)
     public Artwork getArtwork(ArtworkType artworkType, MetaDataType metaDataType, long id) {
@@ -297,5 +298,43 @@ public class ArtworkStorageService {
         params.put("id", id);
         params.put("artworkType", artworkType);
         return this.artworkDao.findUniqueByNamedParameters(Artwork.class, sb, params);
+    }
+
+    @Transactional
+    public long checkArtworkSanity(long lastId) {
+        long newLastId = -1;
+        
+        for (ArtworkLocated located : this.artworkDao.getArtworkLocatedWithCacheFilename(lastId)) {
+            newLastId = Math.max(newLastId, located.getId());
+
+            // if original file does not exists, then also all generated artwork can be deleted
+            final StorageType storageType = located.getArtwork().getStorageType();
+            String filename = FilenameUtils.concat(located.getCacheDirectory(), located.getCacheFilename());
+            
+            if (!fileStorageService.existsFile(storageType, filename)) {
+                LOG.trace("Mark located artwork {} for UPDATE due missing original image", located.getId());
+                
+                // reset status and cache file name
+                located.setStatus(StatusType.UPDATED);
+                located.setCacheDirectory(null);
+                located.setCacheFilename(null);
+                this.updateArtworkLocated(located);
+            } else {
+                // check if one of the generated images is missing
+                for (ArtworkGenerated generated : located.getGeneratedArtworks()) {
+                    filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
+                    if (!fileStorageService.existsFile(storageType, filename)) {
+                        LOG.trace("Mark located artwork {} for UPDATE due missing generated image", located.getId());
+
+                        // just set status of located to UPDATED
+                        located.setStatus(StatusType.UPDATED);
+                        this.updateArtworkLocated(located);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        return newLastId;
     }
 }

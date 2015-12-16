@@ -45,15 +45,11 @@ public class QueueProcessRunner implements Runnable {
             try {
                 service.processQueueElement(queueElement);
             } catch (Exception error) {
-                LOG.error("Failed to process queue element", error);
-                
-                if (queueElement.getId() != null) {
-                    try {
-                        service.processErrorOccurred(queueElement);
-                    } catch (Exception ex) {
-                        // leave status as it is in any error case
-                        LOG.trace("Database error", ex);
-                    }
+                try {
+                    service.processErrorOccurred(queueElement, error);
+                } catch (Exception ex) {
+                    // leave status as it is in any error case
+                    LOG.trace("Database error", ex);
                 }
             }
         }

@@ -23,7 +23,6 @@
 package org.yamj.core.api.json;
 
 import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +38,7 @@ import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.service.CommonStorageService;
 import org.yamj.core.database.service.JsonApiStorageService;
 import org.yamj.core.scheduling.ArtworkProcessScheduler;
-import org.yamj.core.service.artwork.ArtworkProcessorService;
+import org.yamj.core.service.artwork.ArtworkUploadService;
 import org.yamj.core.service.file.FileStorageService;
 
 @RestController
@@ -54,9 +53,9 @@ public class ArtworkController {
     @Autowired
     private FileStorageService fileStorageService;
     @Autowired
-    private ArtworkProcessorService artworkProcessorService;
-    @Autowired
     private ArtworkProcessScheduler artworkProcessScheduler; 
+    @Autowired
+    private ArtworkUploadService artworkUploadService;
     
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ApiWrapperSingle<ApiArtworkDTO> getArtwork(@PathVariable("id") Long id) {
@@ -118,7 +117,7 @@ public class ArtworkController {
             return ApiStatus.badRequest("Invalid meta data type '" + type + "' for artwork");
         }
         
-        ApiStatus apiStatus = this.artworkProcessorService.addArtwork(artworkType, metaDataType, id, image);
+        ApiStatus apiStatus = this.artworkUploadService.uploadArtwork(artworkType, metaDataType, id, image);
         if (apiStatus.isSuccessful())  {
             this.artworkProcessScheduler.triggerProcess();
         }

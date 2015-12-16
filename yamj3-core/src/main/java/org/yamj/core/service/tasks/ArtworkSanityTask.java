@@ -23,13 +23,12 @@
 package org.yamj.core.service.tasks;
 
 import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.scheduling.ArtworkProcessScheduler;
-import org.yamj.core.service.artwork.ArtworkProcessorService;
 
 /**
  * Task for checking artwork sanity.
@@ -42,7 +41,7 @@ public class ArtworkSanityTask implements ITask {
     @Autowired
     private ExecutionTaskService executionTaskService;
     @Autowired
-    private ArtworkProcessorService artworkProcessorService;
+    private ArtworkStorageService artworkStorageService;
     @Autowired
     private ArtworkProcessScheduler artworkProcessScheduler;
     
@@ -62,7 +61,7 @@ public class ArtworkSanityTask implements ITask {
         
         long lastId = -1;
         do {
-            lastId = this.artworkProcessorService.checkArtworkSanity(lastId);
+            lastId = this.artworkStorageService.checkArtworkSanity(lastId);
         } while (lastId > 0);
 
         // trigger artwork processing in any case

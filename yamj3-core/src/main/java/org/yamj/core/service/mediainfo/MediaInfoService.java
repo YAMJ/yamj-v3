@@ -191,7 +191,9 @@ public class MediaInfoService implements IQueueProcessService {
     }
 
     @Override
-    public void processErrorOccurred(QueueDTO queueElement) {
+    public void processErrorOccurred(QueueDTO queueElement, Exception error) {
+        LOG.error("Failed MediaInfo scan for media file "+queueElement.getId(), error);
+        
         mediaStorageService.errorMediaFile(queueElement.getId());
     }
 

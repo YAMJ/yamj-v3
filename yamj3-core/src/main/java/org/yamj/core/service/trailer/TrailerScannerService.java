@@ -99,12 +99,14 @@ public class TrailerScannerService implements IQueueProcessService {
     }
 
     @Override
-    public void processErrorOccurred(QueueDTO queueElement) {
+    public void processErrorOccurred(QueueDTO queueElement, Exception error) {
         if (queueElement.getId() == null) {
             // nothing to do
         } else if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
+            LOG.error("Failed trailer scan for movie "+queueElement.getId(), error);
             trailerStorageService.errorTrailerVideoData(queueElement.getId());
         } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
+            LOG.error("Failed trailer scan for series "+queueElement.getId(), error);
             trailerStorageService.errorTrailerSeries(queueElement.getId());
         }
     }

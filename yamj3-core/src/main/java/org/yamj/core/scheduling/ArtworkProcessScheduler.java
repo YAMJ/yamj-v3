@@ -52,7 +52,7 @@ public class ArtworkProcessScheduler extends AbstractQueueScheduler {
 
     private boolean messageDisabled = Boolean.FALSE;    // Have we already printed the disabled message
     private final AtomicBoolean watchProcess = new AtomicBoolean(false);
-
+    
     @Scheduled(initialDelay = 5000, fixedDelay = 300000)
     public void triggerProcess() {
         LOG.trace("Trigger process");

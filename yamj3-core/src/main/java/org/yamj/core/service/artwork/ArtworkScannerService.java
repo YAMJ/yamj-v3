@@ -159,7 +159,9 @@ public class ArtworkScannerService implements IQueueProcessService {
     }
 
     @Override
-    public void processErrorOccurred(QueueDTO queueElement) {
+    public void processErrorOccurred(QueueDTO queueElement, Exception error) {
+        LOG.error("Failed scan for artwork "+queueElement.getId(), error);
+
         artworkStorageService.errorArtwork(queueElement.getId());
     }
     

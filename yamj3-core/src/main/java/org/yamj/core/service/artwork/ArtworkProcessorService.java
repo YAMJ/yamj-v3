@@ -22,49 +22,41 @@
  */
 package org.yamj.core.service.artwork;
 
+import static org.yamj.core.service.artwork.ArtworkTools.SOURCE_UPLOAD;
+
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sanselan.ImageReadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-import org.yamj.common.type.MetaDataType;
 import org.yamj.common.type.StatusType;
-import org.yamj.core.api.model.ApiStatus;
-import org.yamj.core.database.model.*;
+import org.yamj.core.database.model.ArtworkGenerated;
+import org.yamj.core.database.model.ArtworkLocated;
+import org.yamj.core.database.model.ArtworkProfile;
 import org.yamj.core.database.model.dto.QueueDTO;
-import org.yamj.core.database.model.type.ArtworkType;
-import org.yamj.core.database.model.type.FileType;
-import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.database.service.ArtworkStorageService;
 import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.file.StorageType;
-import org.yamj.core.service.mediaimport.FilenameScanner;
 import org.yamj.core.tools.image.GraphicTools;
 
 @Service("artworkProcessorService")
 public class ArtworkProcessorService implements IQueueProcessService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkProcessorService.class);
-    private static final String SOURCE_UPLOAD = "upload";
     
     @Autowired
     private ArtworkStorageService artworkStorageService;
     @Autowired
     private FileStorageService fileStorageService;
-    @Autowired
-    private FilenameScanner filenameScanner;
     
     @Override
     public void processQueueElement(QueueDTO queueElement) {
@@ -94,7 +86,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
             }
 
             // store original in file cache
-            String cacheFilename = buildCacheFilename(located);
+            String cacheFilename = ArtworkTools.buildCacheFilename(located);
             LOG.trace("Cache artwork with file name: {}", cacheFilename);
     
             boolean stored;
@@ -180,7 +172,9 @@ public class ArtworkProcessorService implements IQueueProcessService {
     }
 
     @Override
-    public void processErrorOccurred(QueueDTO queueElement) {
+    public void processErrorOccurred(QueueDTO queueElement, Exception error) {
+        LOG.error("Failed processing of located artwork "+queueElement.getId(), error);
+       
         artworkStorageService.errorArtworkLocated(queueElement.getId());
     }
 
@@ -213,7 +207,7 @@ public class ArtworkProcessorService implements IQueueProcessService {
         BufferedImage image = drawImage(imageGraphic, profile);
 
         // store image on stage system
-        String cacheFilename = buildCacheFilename(located, profile);
+        String cacheFilename = ArtworkTools.buildCacheFilename(located, profile);
         fileStorageService.storeImage(cacheFilename, storageType, image, profile.getImageType(), profile.getQuality());
 
         try {
@@ -262,66 +256,6 @@ public class ArtworkProcessorService implements IQueueProcessService {
         return bi;
     }
 
-    private static String buildCacheFilename(ArtworkLocated located) {
-        return buildCacheFilename(located, null);
-    }
-
-    private static String buildCacheFilename(ArtworkLocated located, ArtworkProfile artworkProfile) {
-        StringBuilder sb = new StringBuilder();
-        
-        // 1. video name
-        if (located.getArtwork().getVideoData() != null) {
-            sb.append(located.getArtwork().getVideoData().getIdentifier());
-            if (located.getArtwork().getVideoData().isMovie()) {
-                sb.append(".movie.");
-            } else {
-                sb.append(".episode.");
-            }
-        } else if (located.getArtwork().getSeason() != null) {
-            sb.append(located.getArtwork().getSeason().getIdentifier());
-            sb.append(".season.");
-        } else if (located.getArtwork().getSeries() != null) {
-            sb.append(located.getArtwork().getSeries().getIdentifier());
-            sb.append(".series.");
-        } else if (located.getArtwork().getPerson() != null) {
-        	sb.append(located.getArtwork().getPerson().getIdentifier());
-            sb.append(".person.");
-        } else if (located.getArtwork().getBoxedSet() != null) {
-            sb.append(located.getArtwork().getBoxedSet().getIdentifier());
-            sb.append(".boxset.");
-        } else {
-            // should never happen
-            sb.append("unknown_");
-            sb.append(located.getArtwork().getId());
-            sb.append(".");
-        }
-        
-        // 2. artwork type
-        sb.append(located.getArtwork().getArtworkType().toString().toLowerCase());
-        sb.append(".");
-        
-        // 3. hash code
-        if (StringUtils.isBlank(located.getHashCode())) {
-            sb.append(located.getId());
-        } else {
-            sb.append(located.getHashCode());
-        }
-        sb.append(".");
-
-        // 4. profile and suffix
-        if (artworkProfile == null) {
-            // it's the original image
-            sb.append("original.");
-            sb.append(located.getImageType().name().toLowerCase());
-        } else {
-            // it's a generated image
-            sb.append(artworkProfile.getProfileName().toLowerCase());
-            sb.append(".");
-            sb.append(artworkProfile.getImageType().name().toLowerCase());
-        }
-        
-        return sb.toString();
-    }
 
     private static boolean checkArtworkQuality(ArtworkLocated located) {
         if (StringUtils.isNotBlank(located.getUrl())) {
@@ -354,98 +288,4 @@ public class ArtworkProcessorService implements IQueueProcessService {
 
         return Boolean.TRUE;
     }    
-    
-    @Transactional
-    public long checkArtworkSanity(long lastId) {
-        long newLastId = -1;
-        
-        for (ArtworkLocated located : this.artworkStorageService.getArtworkLocatedWithCacheFilename(lastId)) {
-            newLastId = Math.max(newLastId, located.getId());
-
-            // if original file does not exists, then also all generated artwork can be deleted
-            final StorageType storageType = located.getArtwork().getStorageType();
-            String filename = FilenameUtils.concat(located.getCacheDirectory(), located.getCacheFilename());
-            
-            if (!fileStorageService.existsFile(storageType, filename)) {
-                LOG.trace("Mark located artwork {} for UPDATE due missing original image", located.getId());
-                
-                // reset status and cache file name
-                located.setStatus(StatusType.UPDATED);
-                located.setCacheDirectory(null);
-                located.setCacheFilename(null);
-                this.artworkStorageService.updateArtworkLocated(located);
-            } else {
-                // check if one of the generated images is missing
-                for (ArtworkGenerated generated : located.getGeneratedArtworks()) {
-                    filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
-                    if (!fileStorageService.existsFile(storageType, filename)) {
-                        LOG.trace("Mark located artwork {} for UPDATE due missing generated image", located.getId());
-
-                        // just set status of located to UPDATED
-                        located.setStatus(StatusType.UPDATED);
-                        this.artworkStorageService.updateArtworkLocated(located);
-                        break;
-                    }
-                }
-            }
-        }
-        
-        return newLastId;
-    }
-    
-    public ApiStatus addArtwork(ArtworkType artworkType, MetaDataType metaDataType, long id, MultipartFile image) {
-        String filename = image.getOriginalFilename();
-        if (StringUtils.isBlank(filename)) {
-            filename = image.getName();
-        }
-        
-        final String extension = FilenameUtils.getExtension(filename);
-        if (filenameScanner.determineFileType(extension) != FileType.IMAGE) {
-            return ApiStatus.unsupportedMediaType("Uploaded file '" + filename + "' is no valid image");
-        }
-        
-        // find matching artwork
-        Artwork artwork = this.artworkStorageService.getArtwork(artworkType, metaDataType, id);
-        if (artwork == null) {
-            return ApiStatus.notFound("No matching artwork found");
-        }
-        
-        // get or create located artwork
-        final String hashCode = Integer.toString(Math.abs(filename.hashCode()));
-        ArtworkLocated located = this.artworkStorageService.getArtworkLocated(artwork, SOURCE_UPLOAD, hashCode);
-        
-        if (located == null) {
-            located = new ArtworkLocated();
-            located.setArtwork(artwork);
-            located.setSource(SOURCE_UPLOAD);
-            located.setHashCode(hashCode);
-            located.setPriority(5);
-            located.setImageType(ImageType.fromString(extension));
-            located.setStatus(StatusType.NEW);
-        } else {
-            located.setArtwork(artwork);
-            located.setPriority(5);
-            located.setImageType(ImageType.fromString(extension));
-            located.setStatus(StatusType.UPDATED);
-        }
-
-        final String cacheFilename = buildCacheFilename(located);
-        LOG.trace("Cache uploaded image with file name: {}", cacheFilename);
-
-        // save file to cache
-        try {
-            fileStorageService.store(artwork.getStorageType(), cacheFilename, image.getBytes());
-        } catch (Exception e) {
-            LOG.warn("Failed to store uploaded file: " + cacheFilename, e);
-            return ApiStatus.internalError("Failed to store uploaded file into cache");
-        }
-        
-        // store located artwork
-        String cacheDirectory = FileTools.createDirHash(cacheFilename);
-        located.setCacheFilename(cacheFilename);
-        located.setCacheDirectory(StringUtils.removeEnd(cacheDirectory, File.separator + cacheFilename));
-        this.artworkStorageService.storeArtworkLocated(located);
-        
-        return ApiStatus.ok("Cached image as '" + cacheFilename + "'");
-    }
 }

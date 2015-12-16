@@ -221,16 +221,20 @@ public class MetadataScannerService implements IQueueProcessService {
     }
 
     @Override
-    public void processErrorOccurred(QueueDTO queueElement) {
+    public void processErrorOccurred(QueueDTO queueElement, Exception error) {
         if (queueElement.getId() == null) {
             // nothing to do
         } else if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
+            LOG.error("Failed scan for movie "+queueElement.getId(), error);
             metadataStorageService.errorVideoData(queueElement.getId());
         } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
+            LOG.error("Failed scan for series "+queueElement.getId(), error);
             metadataStorageService.errorSeries(queueElement.getId());
         } else if (queueElement.isMetadataType(MetaDataType.PERSON)) {
+            LOG.error("Failed scan for person "+queueElement.getId(), error);
             metadataStorageService.errorPerson(queueElement.getId());
         } else if (queueElement.isMetadataType(MetaDataType.FILMOGRAPHY)) {
+            LOG.error("Failed scan for filmography of person "+queueElement.getId(), error);
             metadataStorageService.errorFilmography(queueElement.getId());
         }
     }
