@@ -23,7 +23,6 @@
 package org.yamj.core.scheduling;
 
 import java.util.List;
-import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.collections.CollectionUtils;
@@ -35,18 +34,13 @@ import org.springframework.stereotype.Component;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.*;
-import org.yamj.core.service.artwork.ArtworkScannerRunner;
 import org.yamj.core.service.artwork.ArtworkScannerService;
-import org.yamj.core.service.mediainfo.MediaInfoRunner;
 import org.yamj.core.service.mediainfo.MediaInfoService;
-import org.yamj.core.service.metadata.MetadataScannerRunner;
 import org.yamj.core.service.metadata.MetadataScannerService;
-import org.yamj.core.service.trailer.TrailerScannerRunner;
 import org.yamj.core.service.trailer.TrailerScannerService;
-import org.yamj.core.tools.ThreadTools;
 
 @Component
-public class ScanningScheduler {
+public class ScanningScheduler extends AbstractQueueScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ScanningScheduler.class);
     private static final ReentrantLock SCANNING_LOCK = new ReentrantLock();
@@ -182,13 +176,7 @@ public class ScanningScheduler {
         }
 
         LOG.info("Found {} media files to process; scan with {} threads", queueElements.size(), maxThreads);
-        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
-
-        ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
-        for (int i = 0; i < maxThreads; i++) {
-            executor.execute(new MediaInfoRunner(queue, mediaInfoService));
-        }
-        ThreadTools.waitForTermination(executor);
+        threadedProcessing(queueElements, maxThreads, mediaInfoService);
 
         LOG.debug("Finished media file scanning");
     }
@@ -222,13 +210,7 @@ public class ScanningScheduler {
         }
 
         LOG.info("Found {} metadata objects to process; scan with {} threads", queueElements.size(), maxThreads);
-        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
-
-        ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
-        for (int i = 0; i < maxThreads; i++) {
-            executor.execute(new MetadataScannerRunner(queue, metadataScannerService));
-        }
-        ThreadTools.waitForTermination(executor);
+        threadedProcessing(queueElements, maxThreads, metadataScannerService);
 
         // trigger scan for people data and trailer
         watchScanPeopleData.set(true);
@@ -264,13 +246,7 @@ public class ScanningScheduler {
         }
 
         LOG.info("Found {} people objects to process; scan with {} threads", queueElements.size(), maxThreads);
-        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
-
-        ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
-        for (int i = 0; i < maxThreads; i++) {
-            executor.execute(new MetadataScannerRunner(queue, metadataScannerService));
-        }
-        ThreadTools.waitForTermination(executor);
+        threadedProcessing(queueElements, maxThreads, metadataScannerService);
 
         // trigger scan for filmography
         watchScanFilmography.set(true);
@@ -305,13 +281,7 @@ public class ScanningScheduler {
         }
 
         LOG.info("Found {} filmography objects to process; scan with {} threads", queueElements.size(), maxThreads);
-        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
-
-        ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
-        for (int i = 0; i < maxThreads; i++) {
-            executor.execute(new MetadataScannerRunner(queue, metadataScannerService));
-        }
-        ThreadTools.waitForTermination(executor);
+        threadedProcessing(queueElements, maxThreads, metadataScannerService);
 
         // trigger scan for artwork
         watchScanArtwork.set(true);
@@ -344,13 +314,7 @@ public class ScanningScheduler {
         }
 
         LOG.info("Found {} artwork objects to process; scan with {} threads", queueElements.size(), maxThreads);
-        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
-
-        ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
-        for (int i = 0; i < maxThreads; i++) {
-            executor.execute(new ArtworkScannerRunner(queue, artworkScannerService));
-        }
-        ThreadTools.waitForTermination(executor);
+        threadedProcessing(queueElements, maxThreads, artworkScannerService);
 
         // trigger artwork processing
         this.artworkProcessScheduler.triggerProcess();
@@ -383,13 +347,7 @@ public class ScanningScheduler {
         }
 
         LOG.info("Found {} trailer objects to process; scan with {} threads", queueElements.size(), maxThreads);
-        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
-
-        ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
-        for (int i = 0; i < maxThreads; i++) {
-            executor.execute(new TrailerScannerRunner(queue, trailerScannerService));
-        }
-        ThreadTools.waitForTermination(executor);
+        threadedProcessing(queueElements, maxThreads, trailerScannerService);
 
         // trigger trailer processing
         this.trailerProcessScheduler.triggerProcess();

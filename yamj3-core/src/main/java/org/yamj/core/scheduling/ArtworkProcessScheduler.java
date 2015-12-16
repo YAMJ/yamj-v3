@@ -23,13 +23,8 @@
 package org.yamj.core.scheduling;
 
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,12 +35,10 @@ import org.springframework.stereotype.Component;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.ArtworkStorageService;
-import org.yamj.core.service.artwork.ArtworkProcessRunner;
 import org.yamj.core.service.artwork.ArtworkProcessorService;
-import org.yamj.core.tools.ThreadTools;
 
 @Component
-public class ArtworkProcessScheduler {
+public class ArtworkProcessScheduler extends AbstractQueueScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkProcessScheduler.class);
     private static final ReentrantLock ARTWORK_PROCESS_LOCK = new ReentrantLock();
@@ -103,13 +96,7 @@ public class ArtworkProcessScheduler {
         }
 
         LOG.info("Found {} artwork objects to process; process with {} threads", queueElements.size(), maxThreads);
-        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
-
-        ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
-        for (int i = 0; i < maxThreads; i++) {
-            executor.execute(new ArtworkProcessRunner(queue, artworkProcessorService));
-        }
-        ThreadTools.waitForTermination(executor);
+        threadedProcessing(queueElements, maxThreads, artworkProcessorService);
 
         LOG.debug("Finished artwork processing");
     }

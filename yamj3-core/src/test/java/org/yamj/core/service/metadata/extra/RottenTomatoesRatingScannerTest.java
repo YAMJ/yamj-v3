@@ -24,6 +24,8 @@ package org.yamj.core.service.metadata.extra;
 
 import static org.junit.Assert.assertEquals;
 
+import org.yamj.core.service.metadata.RottenTomatoesRatingScanner;
+
 import javax.annotation.Resource;
 import org.junit.Test;
 import org.yamj.core.AbstractTest;

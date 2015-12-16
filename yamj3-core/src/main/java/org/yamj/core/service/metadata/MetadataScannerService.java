@@ -23,27 +23,23 @@
 package org.yamj.core.service.metadata;
 
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.common.type.MetaDataType;
 import org.yamj.core.config.ConfigServiceWrapper;
-import org.yamj.core.database.model.Person;
-import org.yamj.core.database.model.Season;
-import org.yamj.core.database.model.Series;
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.MetadataStorageService;
-import org.yamj.core.service.metadata.extra.ExtraScannerService;
+import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.metadata.nfo.NfoScannerService;
 import org.yamj.core.service.metadata.online.OnlineScannerService;
 import org.yamj.core.tools.ExceptionTools;
 import org.yamj.core.tools.MetadataTools;
 
 @Service("metadataScannerService")
-public class MetadataScannerService {
+public class MetadataScannerService implements IQueueProcessService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MetadataScannerService.class);
 
@@ -58,12 +54,27 @@ public class MetadataScannerService {
     @Autowired
     private ConfigServiceWrapper configServiceWrapper;
 
+    @Override
+    public void processQueueElement(QueueDTO queueElement) {
+        if (queueElement.getId() == null) {
+            // nothing to do
+        } else if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
+            scanMovie(queueElement.getId());
+        } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
+            scanSeries(queueElement.getId());
+        } else if (queueElement.isMetadataType(MetaDataType.PERSON)) {
+            scanPerson(queueElement.getId());
+        } else if (queueElement.isMetadataType(MetaDataType.FILMOGRAPHY)) {
+            scanFilmography(queueElement.getId());
+        }
+    }
+    
     /**
      * Scan a movie
      *
      * @param id
      */
-    public void scanMovie(Long id) {
+    private void scanMovie(Long id) {
         VideoData videoData = this.metadataStorageService.getRequiredVideoData(id);
 
         // empty sort title; will be reset after scan
@@ -105,7 +116,7 @@ public class MetadataScannerService {
      *
      * @param id
      */
-    public void scanSeries(Long id) {
+    private void scanSeries(Long id) {
         Series series = this.metadataStorageService.getRequiredSeries(id);
 
         // empty sort title; will be reset after scan
@@ -160,7 +171,7 @@ public class MetadataScannerService {
      *
      * @param id
      */
-    public void scanPerson(Long id) {
+    private void scanPerson(Long id) {
         Person person = metadataStorageService.getRequiredPerson(id);
 
         // online scanning (only)
@@ -187,7 +198,7 @@ public class MetadataScannerService {
      *
      * @param id
      */
-    public void scanFilmography(Long id) {
+    private void scanFilmography(Long id) {
         Person person = metadataStorageService.getRequiredPerson(id);
 
         // online scanning (only)
@@ -209,13 +220,11 @@ public class MetadataScannerService {
         }
     }
 
-    public void processingError(QueueDTO queueElement) {
-        if (queueElement == null) {
-            // nothing to
-            return;
-        }
-
-        if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
+    @Override
+    public void processErrorOccurred(QueueDTO queueElement) {
+        if (queueElement.getId() == null) {
+            // nothing to do
+        } else if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
             metadataStorageService.errorVideoData(queueElement.getId());
         } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
             metadataStorageService.errorSeries(queueElement.getId());

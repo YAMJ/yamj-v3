@@ -20,11 +20,13 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.extra;
+package org.yamj.core.scheduling;
 
-import org.yamj.core.database.model.VideoData;
+import org.yamj.core.database.model.dto.QueueDTO;
 
-public interface IExtraMovieScanner extends IExtraScanner {
+public interface IQueueProcessService {
 
-    void scanMovie(VideoData videoData);
+    void processQueueElement(QueueDTO queueElement);
+    
+    void processErrorOccurred(QueueDTO queueElement);
 }

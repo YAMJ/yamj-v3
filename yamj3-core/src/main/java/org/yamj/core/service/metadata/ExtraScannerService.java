@@ -20,7 +20,7 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.metadata.extra;
+package org.yamj.core.service.metadata;
 
 import java.util.HashSet;
 import java.util.Set;

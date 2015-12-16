@@ -93,10 +93,12 @@ public class ImportScheduler {
                 } else {
                     LOG.error("Failed to process video stage file {}", id);
                     LOG.error("Staging error", error);
+                    
                     try {
                         mediaImportService.processingError(id);
-                    } catch (Exception ignore) { //NOSONAR
+                    } catch (Exception ex) {
                         // leave status as it is in any error case
+                        LOG.trace("Database error", ex);
                     }
                 }
             }
@@ -124,10 +126,12 @@ public class ImportScheduler {
                 } else {
                     LOG.error("Failed to process nfo stage file {}", id);
                     LOG.warn("Staging error", error);
+                    
                     try {
                         mediaImportService.processingError(id);
-                    } catch (Exception ignore) { //NOSONAR
+                    } catch (Exception ex) {
                         // leave status as it is in any error case
+                        LOG.trace("Database error", ex);
                     }
                 }
             }
@@ -155,10 +159,12 @@ public class ImportScheduler {
                 } else {
                     LOG.error("Failed to process image stage file {}", id);
                     LOG.warn("Staging error", error);
+                    
                     try {
                         mediaImportService.processingError(id);
-                    } catch (Exception ignore) { //NOSONAR
+                    } catch (Exception ex) {
                         // leave status as it is in any error case
+                        LOG.trace("Database error", ex);
                     }
                 }
             }
@@ -183,10 +189,12 @@ public class ImportScheduler {
                 } else {
                     LOG.error("Failed to process watched stage file {}", id);
                     LOG.warn("Staging error", error);
+                    
                     try {
                         mediaImportService.processingError(id);
-                    } catch (Exception ignore) { //NOSONAR
+                    } catch (Exception ex) {
                         // leave status as it is in any error case
+                        LOG.trace("Database error", ex);
                     }
                 }
             }
@@ -211,10 +219,12 @@ public class ImportScheduler {
                 } else {
                     LOG.error("Failed to process subtitle stage file {}", id);
                     LOG.warn("Staging error", error);
+                    
                     try {
                         mediaImportService.processingError(id);
-                    } catch (Exception ignore) { //NOSONAR
+                    } catch (Exception ex) {
                         // leave status as it is in any error case
+                        LOG.trace("Database error", ex);
                     }
                 }
             }

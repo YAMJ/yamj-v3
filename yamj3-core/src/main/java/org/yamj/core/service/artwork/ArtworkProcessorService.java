@@ -46,6 +46,7 @@ import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.FileType;
 import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.database.service.ArtworkStorageService;
+import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.file.FileStorageService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.file.StorageType;
@@ -53,7 +54,7 @@ import org.yamj.core.service.mediaimport.FilenameScanner;
 import org.yamj.core.tools.image.GraphicTools;
 
 @Service("artworkProcessorService")
-public class ArtworkProcessorService {
+public class ArtworkProcessorService implements IQueueProcessService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkProcessorService.class);
     private static final String SOURCE_UPLOAD = "upload";
@@ -65,12 +66,9 @@ public class ArtworkProcessorService {
     @Autowired
     private FilenameScanner filenameScanner;
     
-    public void processArtwork(QueueDTO queueElement) {
-        if (queueElement == null) {
-            // nothing to do
-            return;
-        }
-
+    @Override
+    public void processQueueElement(QueueDTO queueElement) {
+        // get required located artwork
         ArtworkLocated located = artworkStorageService.getRequiredArtworkLocated(queueElement.getId());
         final StorageType storageType = located.getArtwork().getStorageType();
         LOG.debug("Process located artwork: {}", located);
@@ -179,6 +177,11 @@ public class ArtworkProcessorService {
 
         // update located artwork in database
         artworkStorageService.updateArtworkLocated(located);
+    }
+
+    @Override
+    public void processErrorOccurred(QueueDTO queueElement) {
+        artworkStorageService.errorArtworkLocated(queueElement.getId());
     }
 
     private boolean storedAttachedArwork(StorageType storageType, ArtworkLocated located, String cacheFilename) {
@@ -318,15 +321,6 @@ public class ArtworkProcessorService {
         }
         
         return sb.toString();
-    }
-
-    public void processingError(QueueDTO queueElement) {
-        if (queueElement == null) {
-            // nothing to
-            return;
-        }
-
-        artworkStorageService.errorArtworkLocated(queueElement.getId());
     }
 
     private static boolean checkArtworkQuality(ArtworkLocated located) {

@@ -20,40 +20,42 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.service.artwork;
+package org.yamj.core.scheduling;
 
 import java.util.concurrent.BlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamj.core.database.model.dto.QueueDTO;
 
-public class ArtworkScannerRunner implements Runnable {
+public class QueueProcessRunner implements Runnable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ArtworkScannerRunner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(QueueProcessRunner.class);
     private final BlockingQueue<QueueDTO> queue;
-    private final ArtworkScannerService service;
+    private final IQueueProcessService service;
 
-    public ArtworkScannerRunner(BlockingQueue<QueueDTO> queue, ArtworkScannerService service) {
+    public QueueProcessRunner(BlockingQueue<QueueDTO> queue, IQueueProcessService service) {
         this.queue = queue;
         this.service = service;
     }
 
     @Override
     public void run() {
-        QueueDTO queueElement = queue.poll();
-        while (queueElement != null) {
+        QueueDTO queueElement;
+        while ((queueElement = queue.poll()) != null) {
             try {
-                service.scanArtwork(queueElement);
+                service.processQueueElement(queueElement);
             } catch (Exception error) {
-                LOG.error("Failed to process artwork", error);
+                LOG.error("Failed to process queue element", error);
                 
-                try {
-                    service.processingError(queueElement);
-                } catch (Exception ignore) { //NOSONAR
-                    // leave status as it is in any error case
+                if (queueElement.getId() != null) {
+                    try {
+                        service.processErrorOccurred(queueElement);
+                    } catch (Exception ex) {
+                        // leave status as it is in any error case
+                        LOG.trace("Database error", ex);
+                    }
                 }
             }
-            queueElement = queue.poll();
         }
     }
 }

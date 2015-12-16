@@ -36,10 +36,11 @@ import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.model.dto.TrailerDTO;
 import org.yamj.core.database.service.TrailerStorageService;
+import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.trailer.online.*;
 
 @Service("trailerScannerService")
-public class TrailerScannerService {
+public class TrailerScannerService implements IQueueProcessService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrailerScannerService.class);
     
@@ -62,12 +63,18 @@ public class TrailerScannerService {
         }
     }
 
-    public void scanMovieTrailer(Long id) {
-        if (id == null) {
-            // nothing to
-            return;
+    @Override
+    public void processQueueElement(QueueDTO queueElement) {
+        if (queueElement.getId() == null) {
+            // nothing to do
+        } else if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
+            scanMovieTrailer(queueElement.getId());
+        } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
+            scanSeriesTrailer(queueElement.getId());
         }
+    }
 
+    private void scanMovieTrailer(Long id) {
         // get required movie
         VideoData videoData = trailerStorageService.getRequiredVideoData(id);
         
@@ -79,12 +86,7 @@ public class TrailerScannerService {
         this.trailerStorageService.updateTrailer(videoData, trailers);
     }
 
-    public void scanSeriesTrailer(Long id) {
-        if (id == null) {
-            // nothing to
-            return;
-        }
-
+    private void scanSeriesTrailer(Long id) {
         // get required series
         Series series = trailerStorageService.getRequiredSeries(id);
         
@@ -94,6 +96,17 @@ public class TrailerScannerService {
         this.scanTrailerOnline(series, trailers);
         // store trailers
         this.trailerStorageService.updateTrailer(series, trailers);
+    }
+
+    @Override
+    public void processErrorOccurred(QueueDTO queueElement) {
+        if (queueElement.getId() == null) {
+            // nothing to do
+        } else if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
+            trailerStorageService.errorTrailerVideoData(queueElement.getId());
+        } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
+            trailerStorageService.errorTrailerSeries(queueElement.getId());
+        }
     }
 
     @SuppressWarnings("unused")
@@ -216,19 +229,6 @@ public class TrailerScannerService {
             trailer.setHashCode(dto.getHashCode());
             trailer.setStatus(downloadEnabled ? StatusType.NEW : StatusType.DONE);
             trailers.add(trailer);
-        }
-    }
-
-    public void processingError(QueueDTO queueElement) {
-        if (queueElement == null) {
-            // nothing to
-            return;
-        }
-
-        if (queueElement.isMetadataType(MetaDataType.MOVIE)) {
-            trailerStorageService.errorTrailerVideoData(queueElement.getId());
-        } else if (queueElement.isMetadataType(MetaDataType.SERIES)) {
-            trailerStorageService.errorTrailerSeries(queueElement.getId());
         }
     }
 }

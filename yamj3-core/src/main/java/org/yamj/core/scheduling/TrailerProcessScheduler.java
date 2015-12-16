@@ -23,13 +23,8 @@
 package org.yamj.core.scheduling;
 
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,12 +35,10 @@ import org.springframework.stereotype.Component;
 import org.yamj.core.config.ConfigService;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.TrailerStorageService;
-import org.yamj.core.service.trailer.TrailerProcessRunner;
 import org.yamj.core.service.trailer.TrailerProcessorService;
-import org.yamj.core.tools.ThreadTools;
 
 @Component
-public class TrailerProcessScheduler {
+public class TrailerProcessScheduler extends AbstractQueueScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrailerProcessScheduler.class);
     private static final ReentrantLock TRAILER_PROCESS_LOCK = new ReentrantLock();
@@ -104,13 +97,7 @@ public class TrailerProcessScheduler {
         }
 
         LOG.info("Found {} trailer objects to process; process with {} threads", queueElements.size(), maxThreads);
-        BlockingQueue<QueueDTO> queue = new LinkedBlockingQueue<>(queueElements);
-
-        ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
-        for (int i = 0; i < maxThreads; i++) {
-            executor.execute(new TrailerProcessRunner(queue, trailerProcessorService));
-        }
-        ThreadTools.waitForTermination(executor);
+        this.threadedProcessing(queueElements, maxThreads, trailerProcessorService);
         
         LOG.debug("Finished trailer processing");
     }

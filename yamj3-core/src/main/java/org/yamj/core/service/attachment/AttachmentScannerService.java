@@ -149,7 +149,7 @@ public class AttachmentScannerService {
     private static boolean isFileScanable(StageFile stageFile) {
         if (!"mkv".equalsIgnoreCase(stageFile.getExtension())) {
             // no MATROSKA file
-            return Boolean.FALSE;
+            return false;
         }
         return FileTools.isFileReadable(stageFile);
     }
@@ -307,11 +307,11 @@ public class AttachmentScannerService {
         if (inMimeType == null) {
             return null;
         }
-        String fileName = inFileName.toLowerCase();
-        String mimeType = inMimeType.toLowerCase();
+        final String fileName = inFileName.toLowerCase();
+        final String mimeType = inMimeType.toLowerCase();
 
         if (validMimeTypesText.contains(mimeType)) {
-            // NFO
+            // NFO text file
             if ("nfo".equalsIgnoreCase(FilenameUtils.getExtension(fileName))) {
                 return new AttachmentContent(ContentType.NFO, null);
             }
@@ -329,28 +329,28 @@ public class AttachmentScannerService {
             }
             
             for (String posterToken : POSTER_TOKEN) {
-                if (check.endsWith("."+posterToken) || check.equals(posterToken)) {
+                if (isMatching(check, posterToken)) {
                     final ContentType contentType = isSetImage ? ContentType.SET_POSTER : ContentType.POSTER;
                     // fileName = <any>.<posterToken>[.set].<extension>
                     return new AttachmentContent(contentType, imageType);
                 }
             }
             for (String fanartToken : FANART_TOKEN) {
-                if (check.endsWith("."+fanartToken) || check.equals(fanartToken)) {
+                if (isMatching(check, fanartToken)) {
                     final ContentType contentType = isSetImage ? ContentType.SET_FANART : ContentType.FANART;
                     // fileName = <any>.<fanartToken>[.set].<extension>
                     return new AttachmentContent(contentType, imageType);
                 }
             }
             for (String bannerToken : BANNER_TOKEN) {
-                if (check.endsWith("."+bannerToken) || check.equals(bannerToken)) {
+                if (isMatching(check, bannerToken)) {
                     final ContentType contentType = isSetImage ? ContentType.SET_BANNER : ContentType.BANNER;
                     // fileName = <any>.<bannerToken>[.set].<extension>
                     return new AttachmentContent(contentType, imageType);
                 }
             }
             for (String videoimageToken : VIDEOIMAGE_TOKEN) {
-                if (check.endsWith("."+videoimageToken) || check.equals(videoimageToken)) {
+                if (isMatching(check, videoimageToken)) {
                     // fileName = <any>.<videoimageToken>.<extension>
                     return new AttachmentContent(ContentType.VIDEOIMAGE, imageType);
                 }
@@ -362,6 +362,16 @@ public class AttachmentScannerService {
         return null;
     }
 
+    private static boolean isMatching(final String check, final String token) {
+        if (check.equals(token)) {
+            return true;
+        }
+        if (check.endsWith("."+token) || check.endsWith("-"+token)) {
+            return true;
+        }
+        return false;
+    }
+    
     public boolean extractArtwort(File dst, StageFile stageFile, int attachmentId) {
         if (!FileTools.isFileReadable(stageFile)) {
             return false;

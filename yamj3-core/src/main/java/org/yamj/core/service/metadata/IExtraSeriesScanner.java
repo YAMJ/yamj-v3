@@ -20,27 +20,11 @@
  *      Web: https://github.com/YAMJ/yamj-v3
  *
  */
-package org.yamj.core.tools;
+package org.yamj.core.service.metadata;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
+import org.yamj.core.database.model.Series;
 
-public final class ThreadTools {
+public interface IExtraSeriesScanner extends IExtraScanner {
 
-    private ThreadTools() {
-        throw new UnsupportedOperationException("Utility class cannot be instantiated");
-    }
-
-    public static void waitForTermination(ExecutorService executor) {
-        executor.shutdown();
-
-        // run until all workers have finished
-        while (!executor.isTerminated()) {
-            try {
-                TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException ignore) {
-                // interrupt in sleep can be ignored
-            }
-        }
-    }
+    void scanSeries(Series series);
 }

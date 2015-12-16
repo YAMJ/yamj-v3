@@ -29,7 +29,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -43,20 +42,24 @@ import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.*;
 import org.yamj.core.database.model.dto.QueueDTO;
 import org.yamj.core.database.service.MediaStorageService;
+import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.tools.AspectRatioTools;
 import org.yamj.core.tools.Constants;
+
 @Service("mediaInfoService")
-public class MediaInfoService {
+public class MediaInfoService implements IQueueProcessService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MediaInfoService.class);
-
     private static final Pattern PATTERN_CHANNELS = Pattern.compile(".*(\\d{1,2}).*");
+    private static final String FORMAT = "Format";
+    
     // mediaInfo command line, depend on OS
     private static final String MI_FILENAME_WINDOWS = "MediaInfo.exe";
     private static final String MI_RAR_FILENAME_WINDOWS = "MediaInfo-rar.exe";
     private static final String MI_FILENAME_LINUX = "mediainfo";
     private static final String MI_RAR_FILENAME_LINUX = "mediainfo-rar";
+
     // media info settings
     private static final File MEDIAINFO_PATH = new File(PropertyTools.getProperty("mediainfo.home", "./mediaInfo/"));
     private final List<String> execMediaInfo = new ArrayList<>();
@@ -75,14 +78,14 @@ public class MediaInfoService {
     public void init() {
         LOG.info("Initialize MediaInfo service");
 
-        String OS_NAME = System.getProperty("os.name");
-        LOG.debug("Operating System Name   : {}", OS_NAME);
+        final String osName = System.getProperty("os.name");
+        LOG.debug("Operating System Name   : {}", osName);
         LOG.debug("Operating System Version: {}", System.getProperty("os.version"));
         LOG.debug("Operating System Type   : {}", System.getProperty("os.arch"));
         LOG.debug("Media Info Path         : {}", MEDIAINFO_PATH);
 
         File mediaInfoFile;
-        if (OS_NAME.contains("Windows")) {
+        if (osName.contains("Windows")) {
             mediaInfoFile = new File(MEDIAINFO_PATH.getAbsolutePath() + File.separator + MI_RAR_FILENAME_WINDOWS);
             if (!mediaInfoFile.exists()) {
                 //  fall back to the normal filename
@@ -106,7 +109,7 @@ public class MediaInfoService {
             LOG.info("Couldn't find CLI mediaInfo executable tool: Media file data won't be extracted");
             isActivated = Boolean.FALSE;
         } else {
-            if (OS_NAME.contains("Windows")) {
+            if (osName.contains("Windows")) {
                 execMediaInfo.add("cmd.exe");
                 execMediaInfo.add("/E:1900");
                 execMediaInfo.add("/C");
@@ -131,17 +134,9 @@ public class MediaInfoService {
         }
     }
 
-    public void processingError(QueueDTO queueElement) {
-        if (queueElement == null) {
-            // nothing to
-            return;
-        }
-
-        mediaStorageService.errorMediaFile(queueElement.getId());
-    }
-
-    public void scanMediaInfo(Long id) {
-        MediaFile mediaFile = mediaStorageService.getRequiredMediaFile(id);
+    @Override
+    public void processQueueElement(QueueDTO queueElement) {
+        MediaFile mediaFile = mediaStorageService.getRequiredMediaFile(queueElement.getId());
 
         StageFile stageFile = mediaFile.getVideoFile();
         if (stageFile == null) {
@@ -170,7 +165,7 @@ public class MediaInfoService {
         LOG.debug("Scanning media file {}", stageFile.getFullPath());
 
         boolean scanned = false;
-        try (MediaInfoStream stream = (stageFile.getContent() == null ? createStream(stageFile.getFullPath()) : new MediaInfoStream(stageFile.getContent()))) {
+        try (MediaInfoStream stream = (stageFile.getContent() == null) ? createStream(stageFile.getFullPath()) : new MediaInfoStream(stageFile.getContent())) {
             Map<String, String> infosGeneral = new HashMap<>();
             List<Map<String, String>> infosVideo = new ArrayList<>();
             List<Map<String, String>> infosAudio = new ArrayList<>();
@@ -195,13 +190,18 @@ public class MediaInfoService {
         mediaStorageService.updateMediaFile(mediaFile);
     }
 
+    @Override
+    public void processErrorOccurred(QueueDTO queueElement) {
+        mediaStorageService.errorMediaFile(queueElement.getId());
+    }
+
     private void updateMediaFile(MediaFile mediaFile, Map<String, String> infosGeneral, List<Map<String, String>> infosVideo,
             List<Map<String, String>> infosAudio, List<Map<String, String>> infosText) {
 
         String infoValue;
 
         // get container format from general section
-        infoValue = infosGeneral.get("Format");
+        infoValue = infosGeneral.get(FORMAT);
         if (StringUtils.isNotBlank(infoValue)) {
             mediaFile.setContainer(infoValue);
         }
@@ -225,7 +225,7 @@ public class MediaInfoService {
 
             // codec
             mediaFile.setCodec(infosMainVideo.get("Codec ID"));
-            mediaFile.setCodecFormat(infosMainVideo.get("Format"));
+            mediaFile.setCodecFormat(infosMainVideo.get(FORMAT));
             mediaFile.setCodecProfile(infosMainVideo.get("Format profile"));
 
             // width & height
@@ -321,7 +321,7 @@ public class MediaInfoService {
         }
 
         // codec format
-        infoValue = infosAudio.get("Format");
+        infoValue = infosAudio.get(FORMAT);
         if (StringUtils.isBlank(infoValue)) {
             audioCodec.setCodecFormat(Constants.UNDEFINED);
         } else {
@@ -361,7 +361,7 @@ public class MediaInfoService {
 
     private boolean parseSubtitle(Subtitle subtitle, Map<String, String> infosText) {
         // format
-        String infoFormat = infosText.get("Format");
+        String infoFormat = infosText.get(FORMAT);
         if (StringUtils.isBlank(infoFormat)) {
             // use codec instead format
             infoFormat = infosText.get("Codec");
@@ -369,10 +369,9 @@ public class MediaInfoService {
 
         // language
         String infoLanguage = infosText.get("Language");
-        if (StringUtils.isNotBlank(infoLanguage)) {
-            if (infoLanguage.contains("/")) {
-                infoLanguage = infoLanguage.substring(0, infoLanguage.indexOf('/')).trim(); // In this case, language are "doubled", just take the first one.
-            }
+        if (StringUtils.isNotBlank(infoLanguage) && infoLanguage.contains("/")) {
+            // In this case, language are "doubled", just take the first one            
+            infoLanguage = infoLanguage.substring(0, infoLanguage.indexOf('/')).trim();
         }
 
         // just use defined formats
@@ -401,13 +400,6 @@ public class MediaInfoService {
         return Boolean.FALSE;
     }
 
-    public boolean isRarDiskImage(String filename) {
-        if (isMediaInfoRar && (RAR_DISK_IMAGES.contains(FilenameUtils.getExtension(filename).toLowerCase()))) {
-            return Boolean.TRUE;
-        }
-        return Boolean.FALSE;
-    }
-
     private static String getRuntime(Map<String, String> infosGeneral, List<Map<String, String>> infosVideo) {
         String runtimeValue = infosGeneral.get("PlayTime");
         if (runtimeValue == null && !infosVideo.isEmpty()) {
@@ -417,15 +409,13 @@ public class MediaInfoService {
         if (runtimeValue == null) {
             runtimeValue = infosGeneral.get("Duration");
         }
-        if (runtimeValue != null) {
-            if (runtimeValue.indexOf('.') >= 0) {
-                runtimeValue = runtimeValue.substring(0, runtimeValue.indexOf('.'));
-            }
+        if (runtimeValue != null && runtimeValue.indexOf('.') >= 0) {
+            runtimeValue = runtimeValue.substring(0, runtimeValue.indexOf('.'));
         }
         return runtimeValue;
     }
 
-    public static int getBitRate(Map<String, String> infos) {
+    private static int getBitRate(Map<String, String> infos) {
         String bitRateValue = infos.get("Bit rate");
         if (StringUtils.isBlank(bitRateValue)) {
             bitRateValue = infos.get("Nominal bit rate");
@@ -461,27 +451,28 @@ public class MediaInfoService {
         return new MediaInfoStream(pb.start());
     }
 
-    public static void parseMediaInfo(MediaInfoStream stream,
+    private static void parseMediaInfo(MediaInfoStream stream,
             Map<String, String> infosGeneral,
             List<Map<String, String>> infosVideo,
             List<Map<String, String>> infosAudio,
-            List<Map<String, String>> infosText) throws Exception {
+            List<Map<String, String>> infosText) throws IOException {
+
+        // Improvement, less code line, each cat have same code, so use the same for all
+        Map<String, List<Map<String, String>>> matches = new HashMap<>();
+
+        // Create a fake one for General, we got only one, but to use the same algorithm we must create this one
+        String[] generalKey = {"General", "Géneral", "* Général"};
+        matches.put(generalKey[0], new ArrayList<Map<String, String>>());
+        matches.put(generalKey[1], matches.get(generalKey[0]));
+        matches.put(generalKey[2], matches.get(generalKey[0]));
+        matches.put("Video", infosVideo);
+        matches.put("Vidéo", matches.get("Video"));
+        matches.put("Audio", infosAudio);
+        matches.put("Text", infosText);
 
         try (InputStreamReader isr = new InputStreamReader(stream.getInputStream());
              BufferedReader bufReader = new BufferedReader(isr))
         {
-            // Improvement, less code line, each cat have same code, so use the same for all
-            Map<String, List<Map<String, String>>> matches = new HashMap<>();
-
-            // Create a fake one for General, we got only one, but to use the same algo we must create this one
-            String generalKey[] = {"General", "Géneral", "* Général"};
-            matches.put(generalKey[0], new ArrayList<Map<String, String>>());
-            matches.put(generalKey[1], matches.get(generalKey[0]));
-            matches.put(generalKey[2], matches.get(generalKey[0]));
-            matches.put("Video", infosVideo);
-            matches.put("Vidéo", matches.get("Video"));
-            matches.put("Audio", infosAudio);
-            matches.put("Text", infosText);
 
             String line = FileTools.readLine(bufReader);
             String label;
@@ -495,36 +486,39 @@ public class MediaInfoService {
                 // Get cat ArrayList from cat name.
                 List<Map<String, String>> currentCat = matches.get(line);
 
-                if (currentCat != null) {
-                    HashMap<String, String> currentData = new HashMap<>();
-                    int indexSeparator = -1;
-                    while (((line = FileTools.readLine(bufReader)) != null) && ((indexSeparator = line.indexOf(" : ")) != -1)) {
-                        label = line.substring(0, indexSeparator).trim();
-                        if (currentData.get(label) == null) {
-                            currentData.put(label, line.substring(indexSeparator + 3));
-                        }
-                    }
-                    currentCat.add(currentData);
-                } else {
+                if (currentCat == null) {
                     line = FileTools.readLine(bufReader);
+                    continue;
                 }
-            }
-
-            // Setting General Info - Beware of lose data if infosGeneral already have some ...
-            try {
-                for (String generalKey1 : generalKey) {
-                    List<Map<String, String>> arrayList = matches.get(generalKey1);
-                    if (!arrayList.isEmpty()) {
-                        Map<String, String> datas = arrayList.get(0);
-                        if (!datas.isEmpty()) {
-                            infosGeneral.putAll(datas);
-                            break;
-                        }
+                
+                HashMap<String, String> currentData = new HashMap<>();
+                int indexSeparator = -1;
+                while (((line = FileTools.readLine(bufReader)) != null) && ((indexSeparator = line.indexOf(" : ")) != -1)) {
+                    label = line.substring(0, indexSeparator).trim();
+                    if (currentData.get(label) == null) {
+                        currentData.put(label, line.substring(indexSeparator + 3));
                     }
                 }
-            } catch (Exception ignore) { //NOSONAR
-                // We don't care about this exception
+                currentCat.add(currentData);
             }
+        }
+
+        // Setting General Info - Beware of lose data if infosGeneral already have some ...
+        try {
+            for (String generalKey1 : generalKey) {
+                List<Map<String, String>> arrayList = matches.get(generalKey1);
+                if (arrayList.isEmpty()) {
+                    continue;
+                }
+                    
+                Map<String, String> datas = arrayList.get(0);
+                if (!datas.isEmpty()) {
+                    infosGeneral.putAll(datas);
+                    break;
+                }
+            }
+        } catch (Exception ignore) { //NOSONAR
+            // We don't care about this exception
         }
     }
 }

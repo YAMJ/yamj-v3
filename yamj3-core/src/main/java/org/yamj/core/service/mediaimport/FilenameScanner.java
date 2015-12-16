@@ -69,6 +69,74 @@ public class FilenameScanner {
     private static final Pattern SECOND_TITLE_PATTERN = PatternUtils.patt("(?<!/TVSHOW/|/PART/)-([^/]+)");
     
     /**
+     * Parts/disks markers.
+     *
+     * CAUTION: Grouping is used for part number detection/parsing.
+     */
+    private static final List<Pattern> PART_PATTERNS = new ArrayList<Pattern>() {
+        private static final long serialVersionUID = 2534565160759765860L;
+        { //NOSONAR
+            add(PatternUtils.iwpatt("CD ([0-9]+)"));
+            add(PatternUtils.iwpatt("(?:(?:CD)|(?:DISC)|(?:DISK)|(?:PART))([0-9]+)"));
+            add(PatternUtils.tpatt("([0-9]{1,2})[ \\.]{0,1}DVD"));
+        }
+    };
+    
+    /**
+     * Detect if the file/folder name is incomplete and additional info must be
+     * taken from parent folder.
+     *
+     * CAUTION: Grouping is used for part number detection/parsing.
+     */
+    @SuppressWarnings("synthetic-access")
+    private static final List<Pattern> PARENT_FOLDER_PART_PATTERNS = new ArrayList<Pattern>() {
+        private static final long serialVersionUID = 6125546333783004357L;
+        { //NOSONAR
+            for (Pattern p : PART_PATTERNS) {
+                add(Pattern.compile("^" + p, CASE_INSENSITIVE));
+            }
+            add(Pattern.compile("^" + TV_PATTERN, CASE_INSENSITIVE));
+        }
+    };
+    
+    private static final Map<Integer, Pattern> FPS_MAP = new HashMap<Integer, Pattern>() {
+        private static final long serialVersionUID = -514057952318403685L;
+        { //NOSONAR
+            for (int i : new int[]{23, 24, 25, 29, 30, 50, 59, 60}) {
+                put(i, PatternUtils.iwpatt("p" + i + "|" + i + "p"));
+            }
+        }
+    };
+    
+    private static final Map<String, Pattern> AUDIO_CODEC_MAP = new HashMap<String, Pattern>() {
+        private static final long serialVersionUID = 8916278631320047158L;
+        { //NOSONAR
+            for (String s : new String[]{"AC3", "DTS", "DD", "AAC", "FLAC"}) {
+                put(s, PatternUtils.iwpatt(s));
+            }
+        }
+    };
+    
+    private static final Map<String, Pattern> VIDEO_CODEC_MAP = new HashMap<String, Pattern>() {
+        private static final long serialVersionUID = 7370884465939448891L;
+        { //NOSONAR
+            put("XviD", PatternUtils.iwpatt("XVID(?:-[^"+Pattern.quote(PatternUtils.WORD_DELIMITERS_STRING)+"]*)?"));
+            // add DIVX-lpdm support
+            put("DivX", PatternUtils.iwpatt("(?:DIVX|DIVX6)(?:-[^"+Pattern.quote(PatternUtils.WORD_DELIMITERS_STRING)+"]*)?"));
+            put("H.264", PatternUtils.iwpatt("H264|H\\.264|X264"));
+        }
+    };
+    
+    private static final Map<String, Pattern> HD_RESOLUTION_MAP = new HashMap<String, Pattern>() {
+        private static final long serialVersionUID = 3476960701738952741L;
+        { //NOSONAR
+            for (String s : new String[]{"720p", "1080i", "1080p", "HD", "1280x720", "1920x1080"}) {
+                put(s, PatternUtils.iwpatt(s));
+            }
+        }
+    };
+
+    /**
      * Mapping exact tokens to language.
      *
      * Strict mapping is case sensitive and must be obvious, it must avoid confusing movie name words and language markers.
@@ -81,7 +149,7 @@ public class FilenameScanner {
      *
      * Language markers, found with this pattern are counted as token delimiters (they will cut movie title)
      */
-    private final static TokensPatternMap STRICT_LANGUAGE_MAP = new TokensPatternMap() {
+    private final TokensPatternMap strictLanguageMap = new TokensPatternMap() {
         private static final long serialVersionUID = 3630995345545037071L;
 
         @Override
@@ -105,7 +173,7 @@ public class FilenameScanner {
      *
      * Markers in this map are case insensitive.
      */
-    private final  static TokensPatternMap LOOSE_LANGUAGE_MAP = new TokensPatternMap() {
+    private final TokensPatternMap looseLanguageMap = new TokensPatternMap() {
         private static final long serialVersionUID = 1383819843117148442L;
 
         @Override
@@ -124,76 +192,7 @@ public class FilenameScanner {
             put(key, PatternUtils.iwpatt(tokenBuilder.toString()));
         }
     };
-    
-    /**
-     * Parts/disks markers.
-     *
-     * CAUTION: Grouping is used for part number detection/parsing.
-     */
-    private static final List<Pattern> PART_PATTERNS = new ArrayList<Pattern>() {
-        private static final long serialVersionUID = 2534565160759765860L;
 
-        {
-            add(PatternUtils.iwpatt("CD ([0-9]+)"));
-            add(PatternUtils.iwpatt("(?:(?:CD)|(?:DISC)|(?:DISK)|(?:PART))([0-9]+)"));
-            add(PatternUtils.tpatt("([0-9]{1,2})[ \\.]{0,1}DVD"));
-        }
-    };
-    
-    /**
-     * Detect if the file/folder name is incomplete and additional info must be
-     * taken from parent folder.
-     *
-     * CAUTION: Grouping is used for part number detection/parsing.
-     */
-    @SuppressWarnings("synthetic-access")
-    private static final List<Pattern> PARENT_FOLDER_PART_PATTERNS = new ArrayList<Pattern>() {
-        private static final long serialVersionUID = 6125546333783004357L;
-
-        {
-            for (Pattern p : PART_PATTERNS) {
-                add(Pattern.compile("^" + p, CASE_INSENSITIVE));
-            }
-            add(Pattern.compile("^" + TV_PATTERN, CASE_INSENSITIVE));
-        }
-    };
-    private static final Map<Integer, Pattern> FPS_MAP = new HashMap<Integer, Pattern>() {
-        private static final long serialVersionUID = -514057952318403685L;
-
-        {
-            for (int i : new int[]{23, 24, 25, 29, 30, 50, 59, 60}) {
-                put(i, PatternUtils.iwpatt("p" + i + "|" + i + "p"));
-            }
-        }
-    };
-    private static final Map<String, Pattern> AUDIO_CODEC_MAP = new HashMap<String, Pattern>() {
-        private static final long serialVersionUID = 8916278631320047158L;
-
-        {
-            for (String s : new String[]{"AC3", "DTS", "DD", "AAC", "FLAC"}) {
-                put(s, PatternUtils.iwpatt(s));
-            }
-        }
-    };
-    private static final Map<String, Pattern> VIDEO_CODEC_MAP = new HashMap<String, Pattern>() {
-        private static final long serialVersionUID = 7370884465939448891L;
-
-        {
-            put("XviD", PatternUtils.iwpatt("XVID(?:-[^"+Pattern.quote(PatternUtils.WORD_DELIMITERS_STRING)+"]*)?"));
-            // add DIVX-lpdm support
-            put("DivX", PatternUtils.iwpatt("(?:DIVX|DIVX6)(?:-[^"+Pattern.quote(PatternUtils.WORD_DELIMITERS_STRING)+"]*)?"));
-            put("H.264", PatternUtils.iwpatt("H264|H\\.264|X264"));
-        }
-    };
-    private static final Map<String, Pattern> HD_RESOLUTION_MAP = new HashMap<String, Pattern>() {
-        private static final long serialVersionUID = 3476960701738952741L;
-
-        {
-            for (String s : new String[]{"720p", "1080i", "1080p", "HD", "1280x720", "1920x1080"}) {
-                put(s, PatternUtils.iwpatt(s));
-            }
-        }
-    };
     private final TokensPatternMap videoSourceMap = new TokensPatternMap() {
         private static final long serialVersionUID = 4166458100829813911L;
 
@@ -207,6 +206,7 @@ public class FilenameScanner {
             put(key, PatternUtils.iwpatt(patt.toString()));
         }
     };
+    
     private Collection<String> videoExtensions = new HashSet<>();
     private Collection<String> subtitleExtensions = new HashSet<>();
     private Collection<String> imageExtensions = new HashSet<>();
@@ -219,7 +219,7 @@ public class FilenameScanner {
     private Pattern useParentPattern;
 
     @PostConstruct
-    public void init() {    
+    public void init() { //NOSONAR
         // resolve extensions
         videoExtensions = StringTools.tokenize(PropertyTools.getProperty("filename.scanner.video.extensions", "avi,divx,xvid,mkv,wmv,m2ts,ts,rm,qt,iso,vob,mpg,mov,mp4,m1v,m2v,m4v,m2p,top,trp,m2t,mts,asf,rmp4,img,mk3d,rar,001"), ",;|");
         subtitleExtensions = StringTools.tokenize(PropertyTools.getProperty("filename.scanner.subtitle.extensions", "srt,sub,ssa,smi,pgs"), ",;|");
@@ -275,8 +275,8 @@ public class FilenameScanner {
             for (String lang : languages.getKeywords()) {
                 String values = languages.get(lang);
                 if (values != null) {
-                    STRICT_LANGUAGE_MAP.put(lang, values);
-                    LOOSE_LANGUAGE_MAP.put(lang, values);
+                    strictLanguageMap.put(lang, values);
+                    looseLanguageMap.put(lang, values);
                 } else {
                     LOG.info("No values found for language code '{}'", lang);
                 }
@@ -507,10 +507,10 @@ public class FilenameScanner {
             return;
         }
 
-        String language = seekPatternAndUpdateRest(STRICT_LANGUAGE_MAP, null, dto);
+        String language = seekPatternAndUpdateRest(strictLanguageMap, null, dto);
         while (StringUtils.isNotBlank(language)) {
             dto.getLanguages().add(StringUtils.trim(language));
-            language = seekPatternAndUpdateRest(STRICT_LANGUAGE_MAP, null, dto);
+            language = seekPatternAndUpdateRest(strictLanguageMap, null, dto);
         }
     }
 
@@ -560,7 +560,7 @@ public class FilenameScanner {
 
             // Loose language search
             if (token.length() >= 2 && token.indexOf('-') < 0) {
-                for (Map.Entry<String, Pattern> e : LOOSE_LANGUAGE_MAP.entrySet()) {
+                for (Map.Entry<String, Pattern> e : looseLanguageMap.entrySet()) {
                     Matcher matcher = e.getValue().matcher(token);
                     if (matcher.find()) {
                         dto.getLanguages().add(e.getKey());

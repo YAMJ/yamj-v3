@@ -35,13 +35,14 @@ import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.database.service.ArtworkLocatorService;
 import org.yamj.core.database.service.ArtworkStorageService;
+import org.yamj.core.scheduling.IQueueProcessService;
 import org.yamj.core.service.artwork.online.*;
 import org.yamj.core.service.attachment.Attachment;
 import org.yamj.core.service.attachment.AttachmentScannerService;
 import org.yamj.core.service.file.FileTools;
 
 @Service("artworkScannerService")
-public class ArtworkScannerService {
+public class ArtworkScannerService implements IQueueProcessService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtworkScannerService.class);
     private static final String USE_SCANNER_FOR = "Use {} scanner for {}";
@@ -111,12 +112,8 @@ public class ArtworkScannerService {
         }
     }
 
-    public void scanArtwork(QueueDTO queueElement) {
-        if (queueElement == null) {
-            // nothing to
-            return;
-        }
-
+    @Override
+    public void processQueueElement(QueueDTO queueElement) {
         // get unique required artwork
         Artwork artwork = artworkStorageService.getRequiredArtwork(queueElement.getId());
 
@@ -161,6 +158,11 @@ public class ArtworkScannerService {
         }
     }
 
+    @Override
+    public void processErrorOccurred(QueueDTO queueElement) {
+        artworkStorageService.errorArtwork(queueElement.getId());
+    }
+    
     private void scanPosterLocal(Artwork artwork, List<ArtworkLocated> locatedArtworks) {
         if (!configServiceWrapper.isLocalArtworkScanEnabled(artwork)) {
             LOG.trace("Local poster scan disabled: {}", artwork);
@@ -627,15 +629,6 @@ public class ArtworkScannerService {
         }
     }
 
-    public void processingError(QueueDTO queueElement) {
-        if (queueElement == null) {
-            // nothing to
-            return;
-        }
-
-        artworkStorageService.errorArtwork(queueElement.getId());
-    }
-    
     private Set<String> determinePriorities(String configkey, Set<String> possibleScanners) {
         final String configValue = this.configServiceWrapper.getProperty(configkey, "");
         Set<String> result = ArtworkTools.determinePriorities(configValue, possibleScanners);
