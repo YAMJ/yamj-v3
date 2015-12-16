@@ -23,18 +23,17 @@
 package org.yamj.core.api.model.dto;
 
 /**
- *
  * @author stuart.boston
  */
 public class AbstractApiIdentifiableDTO extends AbstractApiDTO {
 
     private Long id;
 
-    public Long getId() {
+    public final Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public final void setId(Long id) {
         this.id = id;
     }
 }

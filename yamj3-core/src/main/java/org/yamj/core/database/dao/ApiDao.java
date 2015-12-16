@@ -2889,10 +2889,7 @@ public class ApiDao extends HibernateDao {
                 } else {
                     artworkList = getArtworkForId(MetaDataType.BOXSET, boxedSet.getId());
                 }
-    
-                if (artworkList.containsKey(boxedSet.getId())) {
-                    boxedSet.setArtwork(artworkList.get(boxedSet.getId()));
-                }
+                boxedSet.addArtwork(artworkList.get(boxedSet.getId()));
             }
         }
         
@@ -2953,7 +2950,7 @@ public class ApiDao extends HibernateDao {
                     } else {
                         artworkList = getArtworkForId(member.getVideoType(), member.getId());
                     }
-                    member.setArtwork(artworkList.get(member.getId()));
+                    member.addArtwork(artworkList.get(member.getId()));
                 }
             }
         }
@@ -2966,7 +2963,7 @@ public class ApiDao extends HibernateDao {
             } else {
                 artworkList = getArtworkForId(MetaDataType.BOXSET, options.getId());
             }
-            boxedSet.setArtwork(artworkList.get(options.getId()));
+            boxedSet.addArtwork(artworkList.get(options.getId()));
         }
 
         return boxedSet;

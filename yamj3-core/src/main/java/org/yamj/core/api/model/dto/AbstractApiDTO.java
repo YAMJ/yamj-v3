@@ -26,10 +26,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
- *
  * @author stuart.boston
  */
-public class AbstractApiDTO {
+public abstract class AbstractApiDTO {
 
     @Override
     public String toString() {

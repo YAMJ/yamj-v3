@@ -24,29 +24,21 @@ package org.yamj.core.api.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 import org.yamj.core.database.model.Studio;
-import org.yamj.core.database.model.type.ArtworkType;
 
 @JsonInclude(Include.NON_DEFAULT) 
-public class ApiSeriesInfoDTO extends AbstractApiDTO {
+public class ApiSeriesInfoDTO extends AbstractMetaDataDTO {
 
     private Long seriesId;
-    private String title;
-    private String originalTitle;
-    private Integer year = -1;
-    private String plot;
-    private String outline;
-    private Boolean watched;
     private List<ApiGenreDTO> genres = Collections.emptyList();
     private List<Studio> studios = Collections.emptyList();
     private List<ApiCountryDTO> countries = Collections.emptyList();
     private List<ApiCertificationDTO> certifications = Collections.emptyList();
     private List<ApiAwardDTO> awards = Collections.emptyList();
     private List<ApiRatingDTO> ratings = Collections.emptyList();
-    private List<ApiSeasonInfoDTO> seasonList = Collections.emptyList();;
-    
-    private Map<ArtworkType, List<ApiArtworkDTO>> artwork = new EnumMap<>(ArtworkType.class);
+    private List<ApiSeasonInfoDTO> seasonList = Collections.emptyList();
 
     public Long getSeriesId() {
         return seriesId;
@@ -54,54 +46,6 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
 
     public void setSeriesId(Long seriesId) {
         this.seriesId = seriesId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-    
-    public String getOriginalTitle() {
-        return originalTitle;
-    }
-
-    public void setOriginalTitle(String originalTitle) {
-        this.originalTitle = originalTitle;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
-    public String getPlot() {
-        return plot;
-    }
-
-    public void setPlot(String plot) {
-        this.plot = plot;
-    }
-
-    public String getOutline() {
-        return outline;
-    }
-
-    public void setOutline(String outline) {
-        this.outline = outline;
-    }
-
-    public Boolean getWatched() {
-        return watched;
-    }
-
-    public void setWatched(Boolean watched) {
-        this.watched = watched;
     }
 
     public List<ApiGenreDTO> getGenres() {
@@ -182,29 +126,5 @@ public class ApiSeriesInfoDTO extends AbstractApiDTO {
 
     public void setSeasonList(List<ApiSeasonInfoDTO> seasonList) {
         this.seasonList = seasonList;
-    }
-
-    public Map<ArtworkType, List<ApiArtworkDTO>> getArtwork() {
-        return artwork;
-    }
-
-    public void setArtwork(Map<ArtworkType, List<ApiArtworkDTO>> artwork) {
-        this.artwork = artwork;
-    }
-
-    public void addArtwork(ApiArtworkDTO newArtwork) {
-        // Add a blank list if it doesn't already exist
-        if (!artwork.containsKey(newArtwork.getArtworkType())) {
-            artwork.put(newArtwork.getArtworkType(), new ArrayList<ApiArtworkDTO>(1));
-        }
-        this.artwork.get(newArtwork.getArtworkType()).add(newArtwork);
-    }
-
-    public int getArtworkCount() {
-        int count = 0;
-        for (Map.Entry<ArtworkType, List<ApiArtworkDTO>> entry : artwork.entrySet()) {
-            count += entry.getValue().size();
-        }
-        return count;
     }
 }
