@@ -72,7 +72,7 @@ public class ConfigServiceWrapper {
         return this.configService.getBooleanProperty(sb.toString(), Boolean.FALSE);
     }
 
-    public boolean isOnlineArtworkScanEnabled(Artwork artwork, List<ArtworkLocated> locatedArtwork) {
+    public boolean isOnlineArtworkScanEnabled(Artwork artwork, List<ArtworkLocated> locatedArtwork) { //NOSONAR
         StringBuilder sb = new StringBuilder();
         sb.append("yamj3.artwork.scan.online.");
         addScanArtworkType(artwork, sb);

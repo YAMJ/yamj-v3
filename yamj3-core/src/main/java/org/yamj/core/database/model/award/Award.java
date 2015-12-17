@@ -50,6 +50,7 @@ public class Award extends AbstractIdentifiable implements Serializable {
     private String sourceDb;
     
     public Award() {
+        // empty constructor
     }
 
     public Award(String event, String category, String sourceDb) {

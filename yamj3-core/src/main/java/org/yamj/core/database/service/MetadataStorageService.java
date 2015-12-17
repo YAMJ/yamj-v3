@@ -64,7 +64,8 @@ public class MetadataStorageService {
     private static final ReentrantLock GENRE_STORAGE_LOCK = new ReentrantLock(true);
     private static final ReentrantLock PERSON_STORAGE_LOCK = new ReentrantLock(true);
     private static final ReentrantLock BOXSET_STORAGE_LOCK = new ReentrantLock(true);
-  
+    private static final String COMPARE_DATE = "compareDate";
+    
     @Autowired
     private CommonDao commonDao;
     @Autowired
@@ -420,10 +421,7 @@ public class MetadataStorageService {
 
             for (VideoData videoData : season.getVideoDatas()) {
                 if (!StatusType.DONE.equals(videoData.getStatus())) {
-                    // replace temporary done
-                    if (StatusType.TEMP_DONE.equals(videoData.getStatus())) {
-                        videoData.setStatus(StatusType.DONE);
-                    }
+                    videoData.setTvEpisodeFinished();
                     updateScannedMetaData(videoData);
                 }
             }
@@ -696,9 +694,7 @@ public class MetadataStorageService {
                     boxedSetOrder = new BoxedSetOrder();
                     boxedSetOrder.setVideoData(videoData);
                     boxedSetOrder.setBoxedSet(boxedSet);
-                    if (dto.getOrdering() != null) {
-                        boxedSetOrder.setOrdering(dto.getOrdering());
-                    }
+                    boxedSetOrder.setOrdering(dto.getOrdering()==null ? -1 : dto.getOrdering().intValue());
                     
                     videoData.addBoxedSet(boxedSetOrder);
                     this.commonDao.saveEntity(boxedSetOrder);
@@ -738,9 +734,7 @@ public class MetadataStorageService {
                     boxedSetOrder = new BoxedSetOrder();
                     boxedSetOrder.setSeries(series);
                     boxedSetOrder.setBoxedSet(boxedSet);
-                    if (dto.getOrdering() != null) {
-                        boxedSetOrder.setOrdering(dto.getOrdering());
-                    }
+                    boxedSetOrder.setOrdering(dto.getOrdering()==null ? -1 : dto.getOrdering().intValue());
                     
                     series.addBoxedSet(boxedSetOrder);
                     this.commonDao.saveEntity(boxedSetOrder);
@@ -769,10 +763,10 @@ public class MetadataStorageService {
             
             // find matching cast/crew
             CastCrew castCrew = null;
-            loop: for (CastCrew stored : videoData.getCredits()) {
+            for (CastCrew stored : videoData.getCredits()) {
                 if (dto.isMatchingCredit(stored)) {
                     castCrew = stored;
-                    break loop;
+                    break;
                 }
             }
             
@@ -898,13 +892,13 @@ public class MetadataStorageService {
         sql.append("and (vd.lastScanned is null or vd.lastScanned<=:compareDate) ");
         sql.append("and vd.episode<0 ");
 
-        Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
+        Map<String,Object> params = Collections.singletonMap(COMPARE_DATE, (Object)compareDate);
         return this.commonDao.executeUpdate(sql, params) > 0;
     }
 
     @Transactional
     public boolean recheckTvShow(Date compareDate) {
-        Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
+        Map<String,Object> params = Collections.singletonMap(COMPARE_DATE, (Object)compareDate);
         int updated = 0;
         
         StringBuilder sql = new StringBuilder();
@@ -936,7 +930,7 @@ public class MetadataStorageService {
         sql.append("where p.status not in ('NEW','UPDATED') ");
         sql.append("and (p.lastScanned is null or p.lastScanned<=:compareDate) ");
 
-        Map<String,Object> params = Collections.singletonMap("compareDate", (Object)compareDate);
+        Map<String,Object> params = Collections.singletonMap(COMPARE_DATE, (Object)compareDate);
         return this.commonDao.executeUpdate(sql, params) > 0;
     }
 
@@ -984,7 +978,6 @@ public class MetadataStorageService {
                 videoData.removeTagline(source);
                 videoData.removeQuote(source);
                 videoData.removeRating(source);
-                videoData.removeTopRank();
 
                 // remove override source at all
                 videoData.removeOverrideSource(source);

@@ -438,7 +438,7 @@ public class CommonStorageService {
             stagingDao.updateEntity(located);
             return filesToDelete;
         }
-        return null;
+        return null; // NOSONAR
     }
 
     @Transactional
@@ -481,7 +481,7 @@ public class CommonStorageService {
             marked = mediaFile.isWatchedFile();
         }
         
-        LOG.debug("Mark media file as {} {}: {}", (apiCall ? "api" : "file"), (marked ? "watched" : "unwatched"), mediaFile);
+        LOG.debug("Mark media file as {} {}: {}", apiCall?"api":"file", marked?"watched":"unwatched", mediaFile);
         this.stagingDao.updateEntity(mediaFile);
 
         if (mediaFile.isExtra()) {

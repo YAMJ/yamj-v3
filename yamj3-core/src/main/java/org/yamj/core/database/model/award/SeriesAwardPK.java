@@ -51,6 +51,7 @@ public class SeriesAwardPK implements Serializable {
     private int year = -1;
 
     public SeriesAwardPK() {
+        // empty constructor
     }
 
     public SeriesAwardPK(Series series, Award award, int year) {

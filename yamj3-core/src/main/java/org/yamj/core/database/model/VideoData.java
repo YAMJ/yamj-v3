@@ -339,10 +339,6 @@ public class VideoData extends AbstractMetadata {
             this.topRank = topRank;
         }
     }
-
-    public void removeTopRank() {
-        this.topRank = -1;
-    }
     
     public String getTagline() {
         return tagline;
@@ -847,6 +843,12 @@ public class VideoData extends AbstractMetadata {
             // do not reset temporary done
             this.setStatus(StatusType.NOTFOUND);
         }
+    }
+    
+    public void setTvEpisodeFinished() {
+        if (StatusType.TEMP_DONE.equals(this.getStatus())) {
+            this.setStatus(StatusType.DONE);
+        }        
     }
 
     @Override
