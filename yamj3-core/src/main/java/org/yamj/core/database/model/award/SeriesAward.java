@@ -22,29 +22,24 @@
  */
 package org.yamj.core.database.model.award;
 
-import java.io.Serializable;
-import javax.persistence.*;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.yamj.core.database.model.Series;
 
 @Entity
 @Table(name = "series_awards")
-public class SeriesAward implements Serializable {
+public class SeriesAward extends AbstractAward {
 
     private static final long serialVersionUID = 3672505190965714376L;
 
     @EmbeddedId
     private SeriesAwardPK seriesAwardPK;
     
-    @Column(name =  "won", nullable = false)
-    private boolean won = false;
-
-    @Column(name =  "nominated", nullable = false)
-    private boolean nominated = false;
-    
     public SeriesAward() {
-        // empty constructor
+        super();
     }
 
     public SeriesAward(Series series, Award award, int year) {
@@ -52,6 +47,7 @@ public class SeriesAward implements Serializable {
     }
 
     // GETTER and SETTER
+    
     public SeriesAwardPK getSeriesAwardPK() {
         return seriesAwardPK;
     }
@@ -60,23 +56,8 @@ public class SeriesAward implements Serializable {
         this.seriesAwardPK = seriesAwardPK;
     }
 
-    public boolean isWon() {
-        return won;
-    }
-
-    public void setWon(boolean won) {
-        this.won = won;
-    }
-
-    public boolean isNominated() {
-        return nominated;
-    }
-
-    public void setNominated(boolean nominated) {
-        this.nominated = nominated;
-    }
-
     // EQUALITY CHECKS
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
