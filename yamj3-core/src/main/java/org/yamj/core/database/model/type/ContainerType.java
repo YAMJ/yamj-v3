@@ -24,10 +24,15 @@ package org.yamj.core.database.model.type;
 
 public enum ContainerType {
     
-    MP4,
+    AVI,
     FLV,
     GP3,
-    WEBM;
+    MKV,
+    MOV,
+    MP4,
+    MPG,
+    WEBM,
+    WMV;
     
     public static ContainerType fromString(final String containerType) {
         try {

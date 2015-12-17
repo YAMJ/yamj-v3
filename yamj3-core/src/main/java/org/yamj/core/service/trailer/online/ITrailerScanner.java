@@ -26,5 +26,7 @@ import org.yamj.core.service.metadata.online.IOnlineScanner;
 
 public interface ITrailerScanner extends IOnlineScanner {
     
-    // just a marker
+    public static String RESOLUTION_1080P = "1080p";
+    public static String RESOLUTION_720P = "720p";
+    public static String RESOLUTION_SD = "sd";
 }
