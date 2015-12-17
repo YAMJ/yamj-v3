@@ -144,17 +144,11 @@ public class TrailerProcessorService implements IQueueProcessService {
         
         // 3. extension
         switch (container) {
-        case FLV:
-            sb.append("flv");
-            break;
-        case WEBM:
-            sb.append("webm");
-            break;
         case GP3:
             sb.append("3gp");
             break;
         default:
-            sb.append("mp4");
+            sb.append(container.name().toLowerCase());
             break;
         }
         

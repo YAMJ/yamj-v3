@@ -31,9 +31,7 @@ import com.google.api.services.youtube.model.ResourceId;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -43,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.yamj.core.config.ConfigService;
+import org.yamj.core.config.LocaleService;
 import org.yamj.core.database.model.VideoData;
 import org.yamj.core.database.model.dto.TrailerDTO;
 import org.yamj.core.database.model.type.ContainerType;
@@ -62,6 +61,8 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
     private TrailerScannerService trailerScannerService;
     @Autowired
     private ConfigService configService;
+    @Autowired
+    private LocaleService localeService;
     
     private YouTube youtube;
     
@@ -96,6 +97,8 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
 
     @Override
     public List<TrailerDTO> getTrailers(VideoData videoData) {
+        Locale yamjLocale = localeService.getLocaleForConfig(null);
+
         try {
             StringBuilder query = new StringBuilder();
             query.append(videoData.getTitle());
@@ -107,6 +110,8 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
             String additionalSearch = configService.getProperty("youtube.trailer.additionalSearch");
             if (StringUtils.isNotBlank(additionalSearch)) {
                 query.append(" ").append(additionalSearch);
+            } else {
+                query.append(" ").append(localeService.getDisplayLanguage(yamjLocale.getLanguage(), yamjLocale.getLanguage()));
             }
 
             // define the API request for retrieving search results
@@ -114,7 +119,7 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
             search.setKey(youtubeApiKey);
             search.setQ(query.toString());
             search.setType("video");
-            search.setMaxResults(configService.getLongProperty("youtube.trailer.maxResults", 5));
+            search.setMaxResults(configService.getLongProperty("yamj3.trailer.scanner.movie.maxResults", 5));
             
             if (configService.getBooleanProperty("youtube.trailer.hdwanted", Boolean.TRUE)) {
                 search.setVideoDefinition("high");
@@ -123,11 +128,15 @@ public class YouTubeTrailerScanner implements IMovieTrailerScanner {
             final String regionCode = configService.getProperty("youtube.trailer.regionCode");
             if (StringUtils.isNotBlank(regionCode)) {
                 search.setRegionCode(regionCode);
+            } else {
+                search.setRegionCode(yamjLocale.getCountry());
             }
 
             final String relevanceLanguage = configService.getProperty("youtube.trailer.relevanceLanguage");
             if (StringUtils.isNotBlank(relevanceLanguage)) {
                 search.setRelevanceLanguage(relevanceLanguage);
+            } else {
+                search.setRelevanceLanguage(yamjLocale.getLanguage());
             }
             
             SearchListResponse searchResponse = search.execute();
