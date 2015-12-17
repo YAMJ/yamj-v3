@@ -25,9 +25,7 @@ package org.yamj.core.database;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 
 import java.util.Properties;
-
 import javax.sql.DataSource;
-
 import org.apache.commons.dbcp.BasicDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,6 +94,8 @@ public class DefaultDatabaseConfiguration extends AbstractDatabaseConfiguration 
         basicDataSource.setTestOnReturn(testOnReturn);
         
         basicDataSource.setDefaultTransactionIsolation(TRANSACTION_READ_COMMITTED);
+
+        populateDatabase(basicDataSource, "update_mysql.sql");
 
         return basicDataSource;
     }

@@ -158,7 +158,9 @@ public class JsonApiStorageService {
             person.setBiography(update.getBiography(), API_SOURCE);
         }
         
+        person.setLastScanned(new Date(System.currentTimeMillis()));
         metadataDao.updateEntity(person);
+        
         return ApiStatus.ok("Updated person with ID "+id);
     }
     
