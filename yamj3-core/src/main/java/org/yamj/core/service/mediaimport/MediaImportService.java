@@ -782,20 +782,28 @@ public class MediaImportService {
         int priority = 1;
         final String fileBaseName = stageFile.getBaseName().toLowerCase();
         
-        if ("poster".equals(fileBaseName) || "cover".equals(fileBaseName) || "folder".equals(fileBaseName)) {
+        final List<String> tokensPoster = this.configServiceWrapper.getArtworkTokens(ArtworkType.POSTER);
+        final List<String> tokensFanart = this.configServiceWrapper.getArtworkTokens(ArtworkType.FANART);
+        final List<String> tokensBanner = this.configServiceWrapper.getArtworkTokens(ArtworkType.BANNER);
+        final int suffixFanartLength = isSuffixToken(fileBaseName, tokensFanart);
+        final int suffixBannerLength = isSuffixToken(fileBaseName, tokensBanner);
+            
+        if (tokensPoster.contains(fileBaseName)) {
             LOG.debug("Generic poster found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
             artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.POSTER, stageFile.getStageDirectory());
-        } else if ("fanart".equals(fileBaseName) || "backdrop".equals(fileBaseName) || "background".equals(fileBaseName)) {
+            
+        } else if (tokensFanart.contains(fileBaseName)) {
             LOG.debug("Generic fanart found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
             artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stageFile.getStageDirectory());
-        } else if ("banner".equals(fileBaseName)) {
+            
+        } else if (tokensBanner.contains(fileBaseName)) {
             LOG.debug("Generic banner found: {} in {}", stageFile.getBaseName(), stageFile.getStageDirectory().getDirectoryName());
             artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.BANNER, stageFile.getStageDirectory());
-        } else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".fanart")
-                || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-fanart")) {
+            
+        } else if (suffixFanartLength > 0) { 
             LOG.debug("Fanart found: {}", stageFile.getBaseName());
 
-            final String stripped = StringUtils.substring(fileBaseName, 0, fileBaseName.length() - 7);
+            final String stripped = StringUtils.substring(fileBaseName, 0, fileBaseName.length() - suffixFanartLength);
 
             if (StringUtils.startsWithIgnoreCase(stripped, "Set_")) {
                 // boxed set fanart
@@ -819,12 +827,11 @@ public class MediaImportService {
                     artworks = this.stagingDao.findMatchingArtworksForVideo(ArtworkType.FANART, stripped, stageFile.getStageDirectory());
                 }
             }
-        } else if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".banner")
-                || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-banner")) {
+            
+        } else if (suffixBannerLength > 0) {
             LOG.debug("Banner found: {}", stageFile.getBaseName());
 
-            String stripped = stageFile.getBaseName().toLowerCase();
-            stripped = StringUtils.substring(stripped, 0, stripped.length() - 7);
+            final String stripped = StringUtils.substring(fileBaseName, 0, fileBaseName.length() - suffixBannerLength);
 
             if (StringUtils.startsWithIgnoreCase(stripped, "Set_")) {
                 // boxed set image
@@ -858,14 +865,15 @@ public class MediaImportService {
             String photoFolderName = PropertyTools.getProperty("yamj3.folder.name.photo");
             boolean inPhotoFolder = FileTools.isWithinSpecialFolder(stageFile, photoFolderName);
 
-            if (inPhotoFolder
-                    || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), ".photo")
-                    || StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "-photo")) {
+            final List<String> tokensPhoto = this.configServiceWrapper.getArtworkTokens(ArtworkType.PHOTO);
+            final int suffixPhotoLength = isSuffixToken(fileBaseName, tokensPhoto);
+
+            if (inPhotoFolder || suffixPhotoLength > 0) {
                 LOG.debug("Photo found: {}", stageFile.getBaseName());
 
-                String stripped = stageFile.getBaseName().toLowerCase();
-                if (StringUtils.endsWithIgnoreCase(stageFile.getBaseName(), "photo")) {
-                    stripped = StringUtils.substring(stripped, 0, stripped.length() - 6);
+                String stripped = fileBaseName;
+                if (suffixPhotoLength > 0) {
+                    stripped = StringUtils.substring(stripped, 0, stripped.length() - suffixPhotoLength);
                 }
 
                 // find person artwork
@@ -874,10 +882,10 @@ public class MediaImportService {
             } else {
                 LOG.debug("Poster found: {}", stageFile.getBaseName());
 
-                String stripped = stageFile.getBaseName().toLowerCase();
-                if (StringUtils.endsWith(stripped, ".poster")
-                        || StringUtils.endsWith(stripped, "-poster")) {
-                    stripped = StringUtils.substring(stripped, 0, stripped.length() - 7);
+                final int suffixPosterLength = isSuffixToken(fileBaseName, tokensPoster);
+                String stripped = fileBaseName;
+                if (suffixPosterLength > 0) {
+                    stripped = StringUtils.substring(stripped, 0, stripped.length() - suffixPosterLength);
                 }
 
                 if (StringUtils.startsWithIgnoreCase(stripped, "Set_")) {
@@ -943,6 +951,15 @@ public class MediaImportService {
         return true;
     }
 
+    private static int isSuffixToken(String name, List<String> tokens) {
+        for (String token : tokens) {
+            if (name.endsWith(".".concat(token)) || name.endsWith("-".concat(token))) {
+                return token.length()+1;
+            }
+        }
+        return -1;
+    }
+    
     private static String getBoxedSetName(final String stripped) {
         String boxedSetName = stripped.substring(4);
         int index = boxedSetName.lastIndexOf("_");
