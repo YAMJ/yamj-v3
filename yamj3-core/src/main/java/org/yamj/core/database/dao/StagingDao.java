@@ -329,6 +329,26 @@ public class StagingDao extends HibernateDao {
         sb.append("AND sf.stageDirectory=:stageDirectory ");
         result.addAll(this.findByNamedParameters(Artwork.class, sb, params));
 
+        // for series
+        sb.setLength(0);
+        sb.append("SELECT a ");
+        sb.append("FROM Artwork a ");
+        sb.append("JOIN a.series ser ");
+        sb.append("JOIN ser.seasons sea ");
+        sb.append("JOIN sea.videoDatas vd ");
+        sb.append("JOIN vd.mediaFiles mf ");
+        sb.append("JOIN mf.stageFiles sf ");
+        sb.append("WHERE a.artworkType=:artworkType ");
+        sb.append("AND sf.fileType=:fileType ");
+        sb.append("AND sf.status in (:statusSet) ");
+        sb.append("AND mf.extra=:extra ");
+        sb.append("AND vd.episode >= 0 ");
+        if (baseName != null) {
+            sb.append("AND lower(sf.baseName)=:baseName ");
+        }
+        sb.append("AND sf.stageDirectory=:stageDirectory ");
+        result.addAll(this.findByNamedParameters(Artwork.class, sb, params));
+
         return result;
     }
 
