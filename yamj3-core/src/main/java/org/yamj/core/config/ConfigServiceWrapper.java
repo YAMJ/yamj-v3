@@ -22,6 +22,9 @@
  */
 package org.yamj.core.config;
 
+import static org.yamj.core.tools.Constants.DEFAULT_SPLITTER;
+
+import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.ArtworkLocated;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.JobType;
 
 @Service("configServiceWrapper")
@@ -140,6 +144,34 @@ public class ConfigServiceWrapper {
         }
     }
 
+    public List<String> getArtworkTokens(ArtworkType artworkType) {
+        final String configKey = "artwork.tokens." + artworkType.name().toLowerCase();
+        final String defaultValue;
+        
+        switch (artworkType) {
+        case POSTER:
+            defaultValue = "poster,cover,folder";
+            break;
+        case FANART:
+            defaultValue = "fanart,backdrop,background";
+            break;
+        case BANNER:
+            defaultValue = "banner";
+            break;
+        case VIDEOIMAGE:
+            defaultValue = "videoimage";
+            break;
+        case PHOTO:
+            defaultValue = "photo";
+            break;
+        default:
+            defaultValue = "";
+            break;
+        }
+        
+        return Arrays.asList(this.configService.getProperty(configKey, defaultValue).toLowerCase().split(DEFAULT_SPLITTER));
+    }
+    
     public boolean isCastScanEnabled(final JobType jobType) {
         String key = "yamj3.scan.castcrew." + jobType.name().toLowerCase();
         boolean value = this.configService.getBooleanProperty(key, Boolean.FALSE);

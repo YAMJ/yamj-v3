@@ -34,8 +34,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.stereotype.Service;
 import org.yamj.common.tools.PropertyTools;
+import org.yamj.core.config.ConfigServiceWrapper;
 import org.yamj.core.database.model.Artwork;
 import org.yamj.core.database.model.StageFile;
+import org.yamj.core.database.model.type.ArtworkType;
 import org.yamj.core.database.model.type.ImageType;
 import org.yamj.core.service.file.FileTools;
 import org.yamj.core.service.staging.StagingService;
@@ -56,13 +58,6 @@ public class AttachmentScannerService {
     private static final String MT_INFO_FILENAME_LINUX = "mkvinfo";
     private static final String MT_EXTRACT_FILENAME_WINDOWS = "mkvextract.exe";
     private static final String MT_EXTRACT_FILENAME_LINUX = "mkvextract";
-
-    // tokens
-    private static final String[] POSTER_TOKEN = new String[]{"poster", "cover"};
-    private static final String[] FANART_TOKEN = new String[]{"fanart", "backdrop", "background"};
-    private static final String[] BANNER_TOKEN = new String[]{"banner"};
-    private static final String[] VIDEOIMAGE_TOKEN = new String[]{"videoimage"};
-
     // flag to indicate if scanner is activated
     private boolean isActivated = Boolean.FALSE;
     // valid MIME types
@@ -73,7 +68,9 @@ public class AttachmentScannerService {
     private Cache attachmentCache;
     @Autowired
     private StagingService stagingService;
-    
+    @Autowired
+    private ConfigServiceWrapper configServiceWrapper;
+   
     @PostConstruct
     public void init() {
         LOG.info("Initialize attachment scanner service");
@@ -328,28 +325,28 @@ public class AttachmentScannerService {
                 check = FilenameUtils.removeExtension(check);
             }
             
-            for (String posterToken : POSTER_TOKEN) {
+            for (String posterToken : this.configServiceWrapper.getArtworkTokens(ArtworkType.POSTER)) {
                 if (isMatching(check, posterToken)) {
                     final ContentType contentType = isSetImage ? ContentType.SET_POSTER : ContentType.POSTER;
                     // fileName = <any>.<posterToken>[.set].<extension>
                     return new AttachmentContent(contentType, imageType);
                 }
             }
-            for (String fanartToken : FANART_TOKEN) {
+            for (String fanartToken : this.configServiceWrapper.getArtworkTokens(ArtworkType.FANART)) {
                 if (isMatching(check, fanartToken)) {
                     final ContentType contentType = isSetImage ? ContentType.SET_FANART : ContentType.FANART;
                     // fileName = <any>.<fanartToken>[.set].<extension>
                     return new AttachmentContent(contentType, imageType);
                 }
             }
-            for (String bannerToken : BANNER_TOKEN) {
+            for (String bannerToken : this.configServiceWrapper.getArtworkTokens(ArtworkType.BANNER)) {
                 if (isMatching(check, bannerToken)) {
                     final ContentType contentType = isSetImage ? ContentType.SET_BANNER : ContentType.BANNER;
                     // fileName = <any>.<bannerToken>[.set].<extension>
                     return new AttachmentContent(contentType, imageType);
                 }
             }
-            for (String videoimageToken : VIDEOIMAGE_TOKEN) {
+            for (String videoimageToken : this.configServiceWrapper.getArtworkTokens(ArtworkType.VIDEOIMAGE)) {
                 if (isMatching(check, videoimageToken)) {
                     // fileName = <any>.<videoimageToken>.<extension>
                     return new AttachmentContent(ContentType.VIDEOIMAGE, imageType);
