@@ -460,13 +460,13 @@ public class MediaImportService {
         }
 
         if (isTvShow) {
-            // case 2: tvshow.nfo in same directory as video
+            // case 3: tvshow.nfo in same directory as video
             foundNfoFile = this.stagingDao.findNfoFile(TVSHOW_NFO_NAME, directory);
             if (foundNfoFile != null && !nfoFiles.containsKey(foundNfoFile)) {
                 nfoFiles.put(foundNfoFile, Integer.valueOf(3));
             }
 
-            // case 3: tvshow.nfo in parent directory
+            // case 4: tvshow.nfo in parent directory
             foundNfoFile = this.stagingDao.findNfoFile(TVSHOW_NFO_NAME, directory.getParentDirectory());
             if (foundNfoFile != null && !nfoFiles.containsKey(foundNfoFile)) {
                 nfoFiles.put(foundNfoFile, Integer.valueOf(4));
