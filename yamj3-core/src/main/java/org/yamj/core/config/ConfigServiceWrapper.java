@@ -145,7 +145,7 @@ public class ConfigServiceWrapper {
     }
 
     public List<String> getArtworkTokens(ArtworkType artworkType) {
-        final String configKey = "artwork.tokens." + artworkType.name().toLowerCase();
+        final String configKey = "yamj3.artwork.token." + artworkType.name().toLowerCase();
         final String defaultValue;
         
         switch (artworkType) {
