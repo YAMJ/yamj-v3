@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -309,9 +308,8 @@ public class ArtworkStorageService {
 
             // if original file does not exists, then also all generated artwork can be deleted
             final StorageType storageType = located.getArtwork().getStorageType();
-            String filename = FilenameUtils.concat(located.getCacheDirectory(), located.getCacheFilename());
             
-            if (!fileStorageService.existsFile(storageType, filename)) {
+            if (!fileStorageService.existsFile(storageType, located.getCacheDirectory(), located.getCacheFilename())) {
                 LOG.trace("Mark located artwork {} for UPDATE due missing original image", located.getId());
                 
                 // reset status and cache file name
@@ -322,8 +320,7 @@ public class ArtworkStorageService {
             } else {
                 // check if one of the generated images is missing
                 for (ArtworkGenerated generated : located.getGeneratedArtworks()) {
-                    filename = FilenameUtils.concat(generated.getCacheDirectory(), generated.getCacheFilename());
-                    if (!fileStorageService.existsFile(storageType, filename)) {
+                    if (!fileStorageService.existsFile(storageType, generated.getCacheDirectory(), generated.getCacheFilename())) {
                         LOG.trace("Mark located artwork {} for UPDATE due missing generated image", located.getId());
 
                         // just set status of located to UPDATED

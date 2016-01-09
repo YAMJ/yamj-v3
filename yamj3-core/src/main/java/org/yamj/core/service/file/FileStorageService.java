@@ -356,14 +356,22 @@ public class FileStorageService {
         return hashFilename;
     }
 
-    public boolean existsFile(StorageType type, String path) {
+    public boolean existsFile(StorageType type, String cacheDir, String cacheFile) {
         try {
-            File file = new File(this.getStorageDir(type, path));
-            return file.exists();
+            final String filename = FilenameUtils.concat(cacheDir, cacheFile);
+            File file = new File(this.getStorageDir(type, filename));
+            if (!file.exists()) {
+                return false;
+            }
+            if (file.getCanonicalPath().endsWith(filename)) {
+                return true;
+            }
+            // delete file; false will be returned in any case
+            file.delete();
         } catch (Exception any) { //NOSONAR
-            // assume not existent on any error
-            return false;
+            // ignore any error
         }
+        return false;
     }
     
     public void deleteStorageFiles(Set<String> filesToDelete) {
