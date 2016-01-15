@@ -237,6 +237,7 @@ public class MediaImportService {
             if (MapUtils.isNotEmpty(dto.getSetMap())) {
                 for (Entry<String, Integer> entry : dto.getSetMap().entrySet()) {
                     // add boxed set to video data
+                    LOG.debug("Add filename boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
                     videoData.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue());
                 }
 

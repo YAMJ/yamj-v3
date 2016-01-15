@@ -944,8 +944,30 @@ public class MetadataStorageService {
 
             // clear dependencies
             videoData.getCredits().clear();
-            videoData.getBoxedSets().clear();
             videoData.getCertifications().clear();
+
+            // remove boxed set for modified sources
+            Iterator<BoxedSetOrder> iter = videoData.getBoxedSets().iterator();
+            while (iter.hasNext()) {
+                BoxedSetOrder boxedSetOrder = iter.next();
+                BoxedSet boxedSet = boxedSetOrder.getBoxedSet();
+                
+                // remove modified sources
+                boolean removed = false;
+                for (String source : videoData.getModifiedSources()) {
+                    removed = removed && boxedSet.removeSourceDbId(source);
+                }
+                
+                if (removed) {
+                    // update boxed set
+                    this.commonDao.updateEntity(boxedSet);
+                    
+                    // if no sources then remove boxed set order from video data
+                    if (!boxedSet.hasSources()) {
+                        iter.remove();
+                    }
+                }
+            }
             
             // clear source based values
             for (String source : videoData.getModifiedSources()) {
