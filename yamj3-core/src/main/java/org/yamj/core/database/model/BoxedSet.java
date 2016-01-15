@@ -97,7 +97,7 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
         this.artworks = artworks;
     }
 
-    private Map<String, String> getSourceDbIdMap() {
+    public Map<String, String> getSourceDbIdMap() {
         return sourceDbIdMap;
     }
 
@@ -110,20 +110,12 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
     }
     
     public boolean setSourceDbId(String sourceDb, String id) {
-        if (StringUtils.isBlank(sourceDb)) {
+        if (StringUtils.isBlank(id) || StringUtils.isBlank(sourceDb)) {
             return false;
         }
-        String newId = id==null?"unknown":id.trim();
+        String newId = id.trim();
         String oldId = getSourceDbIdMap().put(sourceDb, newId);
         return !StringUtils.equals(oldId, newId);
-    }
-
-    public boolean removeSourceDbId(String sourceDb) {
-        return getSourceDbIdMap().remove(sourceDb) != null;
-    }
-    
-    public boolean hasSources() {
-        return this.sourceDbIdMap.size() > 0;
     }
     
     // EQUALITY CHECKS

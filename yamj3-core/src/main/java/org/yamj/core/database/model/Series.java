@@ -477,10 +477,6 @@ public class Series extends AbstractMetadata {
         return boxedSetDTOS;
     }
 
-    public void addBoxedSetDTO(String source, String name) {
-        this.addBoxedSetDTO(source, name, null, null);
-    }
-
     public void addBoxedSetDTO(String source, String name, Integer ordering) {
         this.addBoxedSetDTO(source, name, ordering, null);
     }

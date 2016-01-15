@@ -65,7 +65,8 @@ public class MediaImportService {
     private static final String TVSHOW_NFO_NAME = "tvshow";
     private static final String BDMV_FOLDER = "BDMV";
     private static final String DVD_FOLDER = "VIDEO_TS";
-
+    private static final String UNKNOWN = "unknown";
+    
     @Autowired
     private StagingDao stagingDao;
     @Autowired
@@ -237,8 +238,8 @@ public class MediaImportService {
             if (MapUtils.isNotEmpty(dto.getSetMap())) {
                 for (Entry<String, Integer> entry : dto.getSetMap().entrySet()) {
                     // add boxed set to video data
-                    LOG.debug("Add filename boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
-                    videoData.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue());
+                    LOG.debug("Add movie filename boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
+                    videoData.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue(), UNKNOWN);
                 }
 
                 // store associated entities (only sets right now)
@@ -305,7 +306,8 @@ public class MediaImportService {
                         if (MapUtils.isNotEmpty(dto.getSetMap())) {
                             for (Entry<String, Integer> entry : dto.getSetMap().entrySet()) {
                                 // add boxed set to video data
-                                series.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue());
+                                LOG.debug("Add series filename boxed set: {} (Order={})", entry.getKey(), entry.getValue()==null?"-1":entry.getValue());
+                                series.addBoxedSetDTO(SCANNER_ID, entry.getKey(), entry.getValue(), UNKNOWN);
                             }
 
                             // store associated entities (only sets right now)

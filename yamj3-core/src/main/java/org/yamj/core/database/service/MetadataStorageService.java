@@ -946,26 +946,21 @@ public class MetadataStorageService {
             videoData.getCredits().clear();
             videoData.getCertifications().clear();
 
-            // remove boxed set for modified sources
+            // remove boxed set orders for modified sources
             Iterator<BoxedSetOrder> iter = videoData.getBoxedSets().iterator();
             while (iter.hasNext()) {
                 BoxedSetOrder boxedSetOrder = iter.next();
                 BoxedSet boxedSet = boxedSetOrder.getBoxedSet();
                 
-                // remove modified sources
-                boolean removed = false;
+                // remove modified sources for idMap clone
+                Map<String,String> boxedSetSources = new HashMap<>(boxedSet.getSourceDbIdMap());
                 for (String source : videoData.getModifiedSources()) {
-                    removed = removed && boxedSet.removeSourceDbId(source);
+                    boxedSetSources.remove(source);
                 }
                 
-                if (removed) {
-                    // update boxed set
-                    this.commonDao.updateEntity(boxedSet);
-                    
-                    // if no sources then remove boxed set order from video data
-                    if (!boxedSet.hasSources()) {
-                        iter.remove();
-                    }
+                if (boxedSetSources.isEmpty()) {
+                    // if no sources left then remove boxed set order from video data
+                    iter.remove();
                 }
             }
             
@@ -1054,9 +1049,26 @@ public class MetadataStorageService {
             this.commonDao.markAsDeleted(series.getTrailers());
 
             // clear dependencies
-            series.getBoxedSets().clear();
             series.getCertifications().clear();
             
+            // remove boxed set orders for modified sources
+            Iterator<BoxedSetOrder> iter = series.getBoxedSets().iterator();
+            while (iter.hasNext()) {
+                BoxedSetOrder boxedSetOrder = iter.next();
+                BoxedSet boxedSet = boxedSetOrder.getBoxedSet();
+                
+                // remove modified sources for idMap clone
+                Map<String,String> boxedSetSources = new HashMap<>(boxedSet.getSourceDbIdMap());
+                for (String source : series.getModifiedSources()) {
+                    boxedSetSources.remove(source);
+                }
+                
+                if (boxedSetSources.isEmpty()) {
+                    // if no sources left then remove boxed set order from video data
+                    iter.remove();
+                }
+            }
+
             // clear source based values
             for (String source : series.getModifiedSources()) {
                 
