@@ -87,4 +87,13 @@ public class FilenameScannerTest extends AbstractTest {
         scanner.scan(dto);
         LOG.info("testFilenamePart: {}", dto);
     }
+
+    @Test
+    public void testFilenameSet() {
+        //String fileName = "Star Wars I [SET Star Wars].bdrip.mk";
+        String fileName = "Le Seigneur des anneaux le retour du roi [SET Le seigneur des anneaux-3] - 720p.bluray.x264.mkv";
+        FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
+        scanner.scan(dto);
+        LOG.info("testFilenameSet: {}", dto);
+    }
 }

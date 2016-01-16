@@ -57,7 +57,6 @@ public class FilenameScanner {
     private static final Pattern TV_PATTERN = PatternUtils.ipatt("(?<![0-9])((s[0-9]{1,4})|[0-9]{1,2})(?:(\\s|\\.|x))??((?:(e|x)\\s??[0-9]+)+)|\\s+((?:e[0-9]+)+)");
     private static final Pattern SEASON_PATTERN = PatternUtils.ipatt("s{0,1}([0-9]+)(\\s|\\.)??[ex-]");
     private static final Pattern EPISODE_PATTERN = PatternUtils.ipatt("[ex]\\s??([0-9]+)");
-	private static final Pattern SITE_INFO_PATTERN = PatternUtils.ipatt("\\[[^\\]]*\\]\\s");
 	
     // Last 4 digits or last 4 digits in parenthesis
     private static final Pattern MOVIE_YEAR_PATTERN = PatternUtils.patt("\\({0,1}(\\d{4})(?:/|\\\\|\\||-){0,1}(I*)\\){0,1}$");
@@ -378,7 +377,6 @@ public class FilenameScanner {
         dto.setVideoSource(seekPatternAndUpdateRest(videoSourceMap, dto.getVideoSource(), dto, PART_PATTERNS));
 
         // SEASON + EPISODES
-        processSiteInfo(dto);
         processSeasonEpisode(dto);
         processPart(dto);
         processSets(dto);
@@ -386,17 +384,6 @@ public class FilenameScanner {
         processLanguages(dto);
         processTitle(dto);
     }
-
-    /**
-     * process the site show like [www.cpabien.com] video
-     * @param dto
-     */
-    private static void processSiteInfo(FilenameDTO dto) {
-    	Matcher matcher = SITE_INFO_PATTERN.matcher(dto.getRest());
-        if (matcher.find()) {
-            dto.setRest(cutMatch(dto.getRest(), matcher));
-        }
-	}
 
 	/**
      * Process the Season and Episodes

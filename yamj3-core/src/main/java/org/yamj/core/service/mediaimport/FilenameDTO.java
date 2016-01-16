@@ -24,6 +24,7 @@ package org.yamj.core.service.mediaimport;
 
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.Map.Entry;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.yamj.core.database.model.StageDirectory;
@@ -283,6 +284,9 @@ public class FilenameDTO {
         sb.append("],[FPS=").append(fps);
         sb.append("],[HDResolution=").append(hdResolution);
         sb.append("],[VideoSource=").append(videoSource);
+        for (Entry<String,Integer> entry : this.setMap.entrySet()) {
+            sb.append("],[Set=").append(entry.getKey()+","+entry.getValue());
+        }
         sb.append("]");
         return sb.toString();
     }
