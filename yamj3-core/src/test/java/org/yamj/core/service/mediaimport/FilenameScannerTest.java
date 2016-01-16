@@ -22,6 +22,8 @@
  */
 package org.yamj.core.service.mediaimport;
 
+import static org.junit.Assert.assertEquals;
+
 import org.apache.commons.io.FilenameUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -54,14 +56,21 @@ public class FilenameScannerTest extends AbstractTest {
         FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
         scanner.scan(dto);
         LOG.info("testFilenameMovieVersion_1: {}", dto);
+        assertEquals("Shrek", dto.getTitle());
+        assertEquals("Director's Cut", dto.getMovieVersion());
+        assertEquals("BluRay", dto.getVideoSource());
     }
 
     @Test
     public void testFilenameMovieVersion_2() {
-        String fileName = "Avatar (2009) (Extended).sdtv.mkv";
+        String fileName = "Avatar (2009) (Extended Version).sdtv.mkv";
         FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
         scanner.scan(dto);
         LOG.info("testFilenameMovieVersion_2: {}", dto);
+        assertEquals("Avatar", dto.getTitle());
+        assertEquals(2009, dto.getYear());
+        assertEquals("Extended Version", dto.getMovieVersion());
+        assertEquals("SDTV", dto.getVideoSource());
     }
     
     @Test
@@ -70,6 +79,10 @@ public class FilenameScannerTest extends AbstractTest {
         FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
         scanner.scan(dto);
         LOG.info("testFilenameExtra: {}", dto);
+        assertEquals("Skrek 2", dto.getTitle());
+        assertEquals("EXTRA Shrek 2 3D", dto.getPartTitle());
+        assertEquals(true, dto.isExtra());
+        assertEquals("BluRay", dto.getVideoSource());
     }
 
     @Test
@@ -78,6 +91,10 @@ public class FilenameScannerTest extends AbstractTest {
         FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
         scanner.scan(dto);
         LOG.info("testFilenameTrailer: {}", dto);
+        assertEquals("Skrek 2", dto.getTitle());
+        assertEquals("TRAILER Shrek 2", dto.getPartTitle());
+        assertEquals(true, dto.isExtra());
+        assertEquals("BluRay", dto.getVideoSource());
     }
 
     @Test
@@ -86,6 +103,11 @@ public class FilenameScannerTest extends AbstractTest {
         FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
         scanner.scan(dto);
         LOG.info("testFilenamePart: {}", dto);
+        assertEquals("Skrek 2", dto.getTitle());
+        assertEquals("Extended Cut", dto.getMovieVersion());
+        assertEquals(1, dto.getPart());
+        assertEquals("Der Erste Teil", dto.getPartTitle());
+        assertEquals("BluRay", dto.getVideoSource());
     }
 
     @Test
@@ -95,5 +117,12 @@ public class FilenameScannerTest extends AbstractTest {
         FilenameDTO dto = new FilenameDTO(createStageFile(fileName));
         scanner.scan(dto);
         LOG.info("testFilenameSet: {}", dto);
+        assertEquals("Le Seigneur des anneaux le retour du roi", dto.getTitle());
+        assertEquals("BluRay", dto.getVideoSource());
+        assertEquals("720p", dto.getHdResolution());
+        assertEquals("H.264", dto.getVideoCodec());
+        assertEquals(1, dto.getSetMap().size());
+        assertEquals("Le seigneur des anneaux", dto.getSetMap().keySet().iterator().next());
+        assertEquals(Integer.valueOf(3), dto.getSetMap().values().iterator().next());
     }
 }

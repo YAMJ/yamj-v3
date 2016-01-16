@@ -39,9 +39,6 @@ public class BoxedSet extends AbstractIdentifiable implements Serializable {
 
     private static final long serialVersionUID = 3074855702659953694L;
 
-    /**
-     * This will be generated from a scanned file name.
-     */
     @NaturalId
     @Column(name = "identifier", length = 100, nullable = false)
     private String identifier;
