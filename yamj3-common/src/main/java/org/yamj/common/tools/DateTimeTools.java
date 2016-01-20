@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.*;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.PeriodFormatter;
@@ -184,12 +185,11 @@ public final class DateTimeTools {
      */
     public static int processRuntime(final String runtime) {
         // see if we can convert this to a number and assume it's correct if we can
-        try {
-            return Integer.parseInt(runtime);
-        } catch (Exception ex) {
-            LOG.trace("Failed to parse runtime: " + runtime, ex);
+        int returnValue = (int)NumberUtils.toFloat(runtime, -1f);
+        if (returnValue > 0) {
+            return returnValue;
         }
-
+        
         // this is for the format xx(hour/hr/min)yy(min), e.g. 1h30, 90mins, 1h30m
         Pattern hrmnPattern = Pattern.compile("(?i)(\\d+)(\\D*)(\\d*)(.*?)");
 
