@@ -20,7 +20,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!--  database versions -->
-        <mysql.version>5.1.36</mysql.version>
+        <mysql.version>5.1.38</mysql.version>
         <hsqldb.version>2.3.3</hsqldb.version>
         <h2.version>1.4.189</h2.version>
         <!-- other stuff -->
@@ -177,11 +177,6 @@
             <scope>test</scope>
         </dependency>
         <!-- APIs -->
-        <dependency>
-            <groupId>org.yamj</groupId>
-            <artifactId>api-common</artifactId>
-            <version>2.0</version>
-        </dependency>
         <dependency>
             <groupId>com.omertron</groupId>
             <artifactId>themoviedbapi</artifactId>
