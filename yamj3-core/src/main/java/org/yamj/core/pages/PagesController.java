@@ -105,7 +105,7 @@ public class PagesController {
         if (jobList.isEmpty()) {
             CountGeneric noJobs = new CountGeneric();
             noJobs.setItem("No jobs found!");
-            noJobs.setCount(0L);
+            noJobs.setCounter(0L);
             jobList.add(noJobs);
         }
 

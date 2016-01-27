@@ -26,10 +26,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.yamj.common.model.YamjInfo;
 import org.yamj.common.model.YamjInfoBuild;
 import org.yamj.common.type.MetaDataType;
@@ -65,7 +62,7 @@ public class SystemInfoController {
                     if (result == null) {
                         LOG.warn("There was an error getting the count for {}", singleType.toString());
                     } else {
-                        YAMJ_INFO.addCount(result.getType(), result.getCount());
+                        YAMJ_INFO.addCount(result.getType(), result.getCounter());
                     }
                 }
             }

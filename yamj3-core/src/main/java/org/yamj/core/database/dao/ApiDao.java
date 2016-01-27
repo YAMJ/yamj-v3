@@ -2656,7 +2656,7 @@ public class ApiDao extends HibernateDao {
         }
 
         StringBuilder sql = new StringBuilder("SELECT '").append(type).append("' as type, ");
-        sql.append("count(*) as count, ");
+        sql.append("count(*) as counter, ");
         sql.append("MAX(create_timestamp) as createTimestamp, ");
         sql.append("MAX(update_timestamp) as updateTimestamp, ");
         sql.append("MAX(id) as lastId ");
@@ -2668,7 +2668,7 @@ public class ApiDao extends HibernateDao {
         SqlScalars sqlScalars = new SqlScalars(sql);
 
         sqlScalars.addScalar(TYPE, StringType.INSTANCE);
-        sqlScalars.addScalar("count", LongType.INSTANCE);
+        sqlScalars.addScalar("counter", LongType.INSTANCE);
         sqlScalars.addScalar("createTimestamp", TimestampType.INSTANCE);
         sqlScalars.addScalar("updateTimestamp", TimestampType.INSTANCE);
         sqlScalars.addScalar("lastId", LongType.INSTANCE);
@@ -2691,7 +2691,7 @@ public class ApiDao extends HibernateDao {
         LOG.info("getJobCount: Required Jobs: {}", (requiredJobs == null) ? "all" : requiredJobs);
         SqlScalars sqlScalars = new SqlScalars();
 
-        sqlScalars.addToSql("SELECT job AS item, COUNT(*) AS count");
+        sqlScalars.addToSql("SELECT job AS item, COUNT(*) AS counter");
         sqlScalars.addToSql("FROM cast_crew");
         if (CollectionUtils.isNotEmpty(requiredJobs)) {
             sqlScalars.addToSql("WHERE job IN (:joblist)");
@@ -2700,7 +2700,7 @@ public class ApiDao extends HibernateDao {
         sqlScalars.addToSql("GROUP BY job");
 
         sqlScalars.addScalar("item", StringType.INSTANCE);
-        sqlScalars.addScalar("count", LongType.INSTANCE);
+        sqlScalars.addScalar("counter", LongType.INSTANCE);
 
         return executeQueryWithTransform(CountGeneric.class, sqlScalars, null);
     }

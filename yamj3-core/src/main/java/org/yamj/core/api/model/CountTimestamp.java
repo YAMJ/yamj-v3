@@ -23,7 +23,6 @@
 package org.yamj.core.api.model;
 
 import java.util.Date;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.yamj.common.tools.DateTimeTools;
@@ -37,7 +36,7 @@ import org.yamj.common.type.MetaDataType;
 public class CountTimestamp {
 
     private MetaDataType type;
-    private Long count = 0L;
+    private Long counter = 0L;
     private Date createTimestamp = new Date(0);
     private String createTimestampString = "";
     private Date updateTimestamp = new Date(0);
@@ -60,15 +59,15 @@ public class CountTimestamp {
         this.type = MetaDataType.fromString(type);
     }
 
-    public Long getCount() {
-        return count;
+    public Long getCounter() {
+        return counter;
     }
 
-    public void setCount(Long count) {
-        if (count == null) {
-            this.count = 0L;
+    public void setCounter(Long counter) {
+        if (counter == null) {
+            this.counter = 0L;
         } else {
-            this.count = count;
+            this.counter = counter;
         }
     }
 
