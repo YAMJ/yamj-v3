@@ -50,6 +50,10 @@
                 <th style="width: 10%"><i class="fa fa-list-ul fa-lg"></i>&nbsp;<a href="${pageContext.request.contextPath}/count/job.html">Job List</a></th>
                 <td style="width: 30%">List of jobs in the database.</td>
             </tr>
+            <tr>
+                <th style="width: 10%"><i class="fa fa-info-circle fa-lg"></i>&nbsp;<a href="${pageContext.request.contextPath}/trakttv/info.html">Trakt.TV Settings</a></th>
+                <td style="width: 30%">Trakt.TV authorization.</td>
+            </tr>
         </table>
 
         <!-- Import the footer -->

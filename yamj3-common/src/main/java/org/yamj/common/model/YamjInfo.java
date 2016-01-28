@@ -102,10 +102,11 @@ public class YamjInfo {
         this.counts = new EnumMap<>(MetaDataType.class);
 
         // IP Address
-        if (StringUtils.isBlank(PropertyTools.getProperty("yamj3.core.url", ""))) {
+        final String coreUrl = PropertyTools.getProperty("yamj3.core.url", "");
+        if (StringUtils.isBlank(coreUrl)) {
             this.coreIp = SystemTools.getIpAddress(Boolean.TRUE);
         } else {
-            this.coreIp = PropertyTools.getProperty("yamj3.core.url", "");
+            this.coreIp = coreUrl;
         }
 
         // Core Port
@@ -305,14 +306,20 @@ public class YamjInfo {
      */
     private void findDatabaseInfo() {
         String dbUrl = PropertyTools.getProperty("yamj3.database.url", "");
-        if (StringUtils.containsIgnoreCase(dbUrl, "derby")) {
-            this.databaseName = "Derby Embedded";
+        if ("mysql".equals(System.getProperty("spring.profiles.active"))) {
+            this.databaseName = "MySQL: " + dbUrl.substring(dbUrl.lastIndexOf('/') + 1);
+            this.databaseIp = dbUrl.substring(dbUrl.indexOf("//") + 2, dbUrl.lastIndexOf('/'));
+        } else if ("hsql".equals(System.getProperty("spring.profiles.active"))) {
+            this.databaseName = "HSQL: yamj3"; 
+            this.databaseIp = "localhost:9001";
+        } else if (StringUtils.containsIgnoreCase(dbUrl, "derby")) {
+            this.databaseName = "Derby: embedded";
             this.databaseIp = "localhost";
         } else if (dbUrl.contains("/") && StringUtils.containsIgnoreCase(dbUrl, "mysql")) {
-            this.databaseName = dbUrl.substring(dbUrl.lastIndexOf('/') + 1);
+            this.databaseName = "MySQL: " + dbUrl.substring(dbUrl.lastIndexOf('/') + 1);
             this.databaseIp = dbUrl.substring(dbUrl.indexOf("//") + 2, dbUrl.lastIndexOf('/'));
         } else if (StringUtils.containsIgnoreCase(dbUrl, "hsql")) {
-            this.databaseName = "HSQL InProc Server";
+            this.databaseName = "HSQL: InProc Server";
             this.databaseIp = "localhost";
         } else {
             this.databaseName = "UNKNOWN";

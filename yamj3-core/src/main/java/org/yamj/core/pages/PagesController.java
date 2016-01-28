@@ -33,6 +33,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.yamj.common.model.YamjInfo;
+import org.yamj.common.tools.PropertyTools;
 import org.yamj.core.api.json.IndexController;
 import org.yamj.core.api.json.SystemInfoController;
 import org.yamj.core.api.model.CountGeneric;
@@ -381,6 +382,16 @@ public class PagesController {
         skin.setSkinDir(fileStorageService.getStoragePathSkin());
         String message = fileStorageService.storeSkin(skin);
         LOG.info(message);
+        return view;
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="TraktTV">
+    @RequestMapping("/trakttv/info")
+    public ModelAndView trakttvInfo() {
+        ModelAndView view = new ModelAndView("trakttv-info");
+        view.addObject("yi", sic.getYamjInfo("true"));
+        view.addObject("trakttv-scrobble", String.valueOf(PropertyTools.getBooleanProperty("trakttv.scrobble", Boolean.FALSE)));
         return view;
     }
     //</editor-fold>
